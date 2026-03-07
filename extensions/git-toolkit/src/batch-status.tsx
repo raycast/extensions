@@ -1,4 +1,14 @@
-import { ActionPanel, Action, Icon, List, Color, Toast, showToast, getPreferenceValues, useNavigation } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  Color,
+  Toast,
+  showToast,
+  getPreferenceValues,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Preferences, ProjectGroup } from "./shared/types";
 import { getProjectGroups, countRepos, scanRepos, isDirty, getAheadBehind, pullRepo } from "./shared/git";

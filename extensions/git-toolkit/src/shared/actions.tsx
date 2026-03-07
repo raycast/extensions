@@ -1,4 +1,4 @@
-import { ActionPanel, Action, getPreferenceValues } from "@raycast/api";
+import { Action, getPreferenceValues } from "@raycast/api";
 import { Preferences } from "./types";
 import { openInApp } from "./ui";
 
@@ -46,4 +46,3 @@ export function CopyBranchName({ branch }: { branch: string }) {
     />
   );
 }
-
