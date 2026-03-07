@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-03-07
 
 - Update endpoint badge base URL
 - Bump all dependencies to the latest
