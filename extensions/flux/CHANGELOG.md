@@ -1,6 +1,6 @@
 # Flux Changelog
 
-## [Fixed Open F.lux Preferences] - {PR_MERGE_DATE}
+## [Fixed Open F.lux Preferences] - 2026-03-07
 
 - Fixed "Open F.lux Preferences" command breaking after a f.lux update that replaced the named "Preferences..." menu item with custom-drawn items that have no accessible name. The command now targets menu item 4 by index and uses `AXPress` instead of a named click.
 
