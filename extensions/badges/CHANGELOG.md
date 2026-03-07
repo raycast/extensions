@@ -1,5 +1,10 @@
 # Badges Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update endpoint badge base URL
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2026-02-13
 
 - Expose color picker ability to Windows
