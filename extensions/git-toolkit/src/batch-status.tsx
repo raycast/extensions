@@ -1,6 +1,6 @@
-import { ActionPanel, Action, Icon, List, Color, Toast, showToast, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, Color, Toast, showToast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { ProjectGroup } from "./shared/types";
+import { Preferences, ProjectGroup } from "./shared/types";
 import { getProjectGroups, countRepos, scanRepos, isDirty, getAheadBehind, pullRepo } from "./shared/git";
 import { EditorActions, OpenInTerminal, CopyBranchName } from "./shared/actions";
 
@@ -50,21 +50,28 @@ function StatusList({ group }: { group: ProjectGroup }) {
 
     async function load() {
       const scanned = await scanRepos(group.path);
+      const prefs = getPreferenceValues<Preferences>();
+      const maxParallel = parseInt(prefs.maxParallelProcesses) || 10;
 
-      const results = await Promise.all(
-        scanned.map(async (repo) => {
-          const [dirtyResult, abResult] = await Promise.all([isDirty(repo.path), getAheadBehind(repo.path)]);
-          return {
-            name: repo.name,
-            path: repo.path,
-            branch: repo.branch,
-            dirty: dirtyResult,
-            ahead: abResult.ahead,
-            behind: abResult.behind,
-            category: categorize(dirtyResult, abResult.ahead, abResult.behind),
-          } as StatusRepo;
-        }),
-      );
+      const results: StatusRepo[] = [];
+      for (let i = 0; i < scanned.length; i += maxParallel) {
+        const batch = scanned.slice(i, i + maxParallel);
+        const batchResults = await Promise.all(
+          batch.map(async (repo) => {
+            const [dirtyResult, abResult] = await Promise.all([isDirty(repo.path), getAheadBehind(repo.path)]);
+            return {
+              name: repo.name,
+              path: repo.path,
+              branch: repo.branch,
+              dirty: dirtyResult,
+              ahead: abResult.ahead,
+              behind: abResult.behind,
+              category: categorize(dirtyResult, abResult.ahead, abResult.behind),
+            } as StatusRepo;
+          }),
+        );
+        results.push(...batchResults);
+      }
 
       setRepos(results);
       setIsLoading(false);

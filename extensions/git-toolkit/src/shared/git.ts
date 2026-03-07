@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { readdirSync, existsSync, statSync } from "fs";
 import { join, basename } from "path";
@@ -6,7 +6,11 @@ import { homedir } from "os";
 import { getPreferenceValues } from "@raycast/api";
 import { Preferences, ProjectGroup, Repo, RepoStatus } from "./types";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+function git(repoPath: string, ...args: string[]) {
+  return execFileAsync("git", ["-C", repoPath, ...args]);
+}
 
 export function resolvePath(p: string): string {
   return p.startsWith("~") ? p.replace("~", homedir()) : p;
@@ -42,7 +46,7 @@ export function countRepos(groupPath: string): number {
 
 export async function getBranch(repoPath: string): Promise<string> {
   try {
-    const { stdout } = await execAsync(`git -C "${repoPath}" rev-parse --abbrev-ref HEAD`);
+    const { stdout } = await git(repoPath, "rev-parse", "--abbrev-ref", "HEAD");
     return stdout.trim();
   } catch {
     return "unknown";
@@ -72,9 +76,8 @@ export async function scanRepos(groupPath: string): Promise<Repo[]> {
 
 export async function isDirty(repoPath: string): Promise<boolean> {
   try {
-    await execAsync(`git -C "${repoPath}" diff --quiet`);
-    await execAsync(`git -C "${repoPath}" diff --cached --quiet`);
-    return false;
+    const { stdout } = await git(repoPath, "status", "--porcelain");
+    return stdout.trim().length > 0;
   } catch {
     return true;
   }
@@ -82,9 +85,7 @@ export async function isDirty(repoPath: string): Promise<boolean> {
 
 export async function getAheadBehind(repoPath: string): Promise<{ ahead: number; behind: number }> {
   try {
-    const { stdout } = await execAsync(
-      `git -C "${repoPath}" rev-list --left-right --count HEAD...@{upstream}`,
-    );
+    const { stdout } = await git(repoPath, "rev-list", "--left-right", "--count", "HEAD...@{upstream}");
     const [ahead, behind] = stdout.trim().split(/\s+/).map(Number);
     return { ahead: ahead || 0, behind: behind || 0 };
   } catch {
@@ -99,7 +100,7 @@ export async function pullRepo(repoPath: string): Promise<{ status: RepoStatus; 
 
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
-      const { stdout, stderr } = await execAsync(`git -C "${repoPath}" pull --ff-only`);
+      const { stdout, stderr } = await git(repoPath, "pull", "--ff-only");
       const output = stdout + stderr;
       if (output.includes("Already up to date") || output.includes("Already up-to-date")) {
         return { status: "up-to-date" };
@@ -113,7 +114,7 @@ export async function pullRepo(repoPath: string): Promise<{ status: RepoStatus; 
   }
 
   try {
-    const { stdout, stderr } = await execAsync(`git -C "${repoPath}" pull`);
+    const { stdout, stderr } = await git(repoPath, "pull");
     const output = stdout + stderr;
     if (output.includes("Already up to date") || output.includes("Already up-to-date")) {
       return { status: "up-to-date" };

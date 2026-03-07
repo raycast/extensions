@@ -37,6 +37,10 @@ export function getStatusTag(status: RepoStatus): { value: string; color: Color 
 }
 
 export function openInApp(appPath: string, projectPath: string) {
-  spawn("open", ["-a", appPath, projectPath], { env: {} });
+  if (process.platform === "win32") {
+    spawn("cmd", ["/c", "start", "", appPath, projectPath], { detached: true });
+  } else {
+    spawn("open", ["-a", appPath, projectPath]);
+  }
   closeMainWindow();
 }
