@@ -336,8 +336,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "sanity",
     title: "Sanity",
-    description:
-      "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
     icon: "sanity.svg",
     homepage: "https://www.sanity.io/docs/ai/mcp-server",
     configuration: {
