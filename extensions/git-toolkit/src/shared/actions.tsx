@@ -6,12 +6,14 @@ export function EditorActions({ repoPath }: { repoPath: string }) {
   const { editorApp, editorAppAlt } = getPreferenceValues<Preferences>();
   return (
     <>
-      <Action
-        title={`Open in ${editorApp.name}`}
-        icon={{ fileIcon: editorApp.path }}
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
-        onAction={() => openInApp(editorApp.path, repoPath)}
-      />
+      {editorApp && (
+        <Action
+          title={`Open in ${editorApp.name}`}
+          icon={{ fileIcon: editorApp.path }}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          onAction={() => openInApp(editorApp.path, repoPath)}
+        />
+      )}
       {editorAppAlt && (
         <Action
           title={`Open in ${editorAppAlt.name}`}
