@@ -131,7 +131,9 @@ function mapDto(train: TrainDto) {
     destinationTime: train.Destinationtime,
     expDepart: train.Expdepart,
   };
-      if (stationsMatch(train.Destination, destination)) {
+}
+
+export async function getTrains(origin: string, destination?: string): Promise<Train[]> {
   const trains = await fetchTrainsFromStation(origin);
 
   if (!destination) {
