@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [Fix copy actions in AI Chat] - {PR_MERGE_DATE}
+## [Fix copy actions in AI Chat] - 2026-03-07
 
 - 🐛 Fix: enable “Copy Answer”, “Copy Prompt”, and “Copy Entire Chat (Transcript)” actions for the selected message.
 
