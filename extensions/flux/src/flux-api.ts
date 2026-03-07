@@ -174,17 +174,16 @@ export async function getMenuState(option: MenuSpec): Promise<number> {
 }
 
 export async function openPreferences(): Promise<boolean> {
-  // f.lux uses custom-drawn menu items with no accessible names, so we click by index.
+  // f.lux uses custom-drawn menu items with no accessible names, so we target by index.
   // Menu item 4 is the Preferences item; AXPress avoids wiping the location field.
   return (
-    (await runAppleScript(`
-    tell application "System Events"
-      tell application process "Flux"
+    (await runAppleScript(
+      scpt_fluxScope(`
         perform action "AXPress" of menu item 4 of menu 1 of menu bar item 1 of menu bar 2
-      end tell
-    end tell
-    return 0
-  `)) === "0"
+
+        return 0
+      `),
+    )) === "0"
   );
 }
 
