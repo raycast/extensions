@@ -1,7 +1,8 @@
 import { ConnectionsListResponse, ContactGroup, ContactGroupsListResponse, Person, SearchResponse } from "./types";
 
 const BASE_URL = "https://people.googleapis.com/v1";
-const PERSON_FIELDS = "names,emailAddresses,phoneNumbers,photos,organizations,addresses,biographies,memberships";
+const PERSON_FIELDS =
+  "names,emailAddresses,phoneNumbers,photos,organizations,addresses,biographies,birthdays,memberships";
 
 async function fetchApi<T>(url: string, token: string, options?: RequestInit): Promise<T> {
   const response = await fetch(url, {
@@ -89,6 +90,20 @@ export async function updateContact(
 export async function deleteContact(token: string, resourceName: string): Promise<void> {
   await fetchApi<void>(`${BASE_URL}/${resourceName}:deleteContact`, token, {
     method: "DELETE",
+  });
+}
+
+export async function starContact(token: string, resourceName: string): Promise<void> {
+  await fetchApi<void>(`${BASE_URL}/contactGroups/starred/members:modify`, token, {
+    method: "POST",
+    body: JSON.stringify({ resourceNamesToAdd: [resourceName] }),
+  });
+}
+
+export async function unstarContact(token: string, resourceName: string): Promise<void> {
+  await fetchApi<void>(`${BASE_URL}/contactGroups/starred/members:modify`, token, {
+    method: "POST",
+    body: JSON.stringify({ resourceNamesToRemove: [resourceName] }),
   });
 }
 

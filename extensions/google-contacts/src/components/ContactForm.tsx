@@ -35,6 +35,7 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
       address: defaults?.address ?? "",
       email2: defaults?.email2 ?? "",
       phone2: defaults?.phone2 ?? "",
+      birthday: defaults?.birthday ?? "",
       labels: defaults?.labels ?? [],
     },
     validation: {
@@ -50,11 +51,19 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
         const body = buildPersonBody(values);
 
         if (contact) {
+          // Preserve system group memberships (starred, myContacts) that aren't shown in the form
+          const systemMemberships =
+            contact.memberships?.filter((m) =>
+              m.contactGroupMembership?.contactGroupResourceName?.startsWith("contactGroups/"),
+            ) ?? [];
+          const mergedMemberships = [...(body.memberships ?? []), ...systemMemberships];
+          const mergedBody = { ...body, memberships: mergedMemberships.length > 0 ? mergedMemberships : undefined };
+
           await updateContact(
             token,
             contact.resourceName,
-            { ...body, etag: contact.etag },
-            "names,emailAddresses,phoneNumbers,organizations,addresses,biographies,memberships",
+            { ...mergedBody, etag: contact.etag },
+            "names,emailAddresses,phoneNumbers,organizations,addresses,biographies,birthdays,memberships",
           );
         } else {
           await createContact(token, body);
@@ -87,6 +96,7 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
       <Form.TextField {...itemProps.company} title="Company" placeholder="Acme Inc" />
       <Form.TextField {...itemProps.jobTitle} title="Job Title" placeholder="Software Engineer" />
       <Form.TextField {...itemProps.address} title="Address" placeholder="123 Main St, City, Country" />
+      <Form.TextField {...itemProps.birthday} title="Birthday" placeholder="YYYY-MM-DD or MM-DD" />
       <Form.TextArea {...itemProps.notes} title="Notes" placeholder="Notes about this contact" />
 
       <Form.Separator />

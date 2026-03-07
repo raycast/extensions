@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid, Icon, Image } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
-import { getDisplayName, getPhotoUrl, getPrimaryEmail, groupByLetter, SortField } from "../helpers";
+import { getDisplayName, getPhotoUrl, getPrimaryEmail, groupByLetter, isStarred, SortField } from "../helpers";
 import { ContactGroup, Person } from "../types";
 import { ViewMode } from "../search-contacts";
 import ContactActions from "./ContactActions";
@@ -12,11 +12,13 @@ interface ContactGridProps {
   isLoading: boolean;
   viewMode: ViewMode;
   sortField: SortField;
+  selectedGroup: string;
   onViewModeChange: (value: string) => void;
   onSortFieldChange: (value: string) => void;
   onContactDeleted: () => void;
   onContactUpdated: () => void;
   onRefresh: () => void;
+  onFilterByGroup: (groupResourceName: string) => void;
 }
 
 function ViewModeDropdown({ value, onChange }: { value: ViewMode; onChange: (value: string) => void }) {
@@ -31,14 +33,17 @@ function ViewModeDropdown({ value, onChange }: { value: ViewMode; onChange: (val
 
 export default function ContactGrid({
   contacts,
+  groups,
   isLoading,
   viewMode,
   sortField,
+  selectedGroup,
   onViewModeChange,
   onSortFieldChange,
   onContactDeleted,
   onContactUpdated,
   onRefresh,
+  onFilterByGroup,
 }: ContactGridProps) {
   const sections = groupByLetter(contacts, sortField);
 
@@ -67,12 +72,14 @@ export default function ContactGrid({
             const displayName = getDisplayName(contact);
             const photoUrl = getPhotoUrl(contact);
             const email = getPrimaryEmail(contact);
+            const starred = isStarred(contact);
 
             return (
               <Grid.Item
                 key={contact.resourceName}
                 content={photoUrl ? { source: photoUrl, mask: Image.Mask.Circle } : getAvatarIcon(displayName)}
                 title={displayName}
+                subtitle={starred ? "⭐" : undefined}
                 keywords={[
                   contact.names?.[0]?.givenName ?? "",
                   contact.names?.[0]?.familyName ?? "",
@@ -82,13 +89,16 @@ export default function ContactGrid({
                 actions={
                   <ContactActions
                     contact={contact}
+                    groups={groups}
                     viewMode={viewMode}
                     sortField={sortField}
+                    selectedGroup={selectedGroup}
                     onViewModeChange={onViewModeChange}
                     onSortFieldChange={onSortFieldChange}
                     onContactDeleted={onContactDeleted}
                     onContactUpdated={onContactUpdated}
                     onRefresh={onRefresh}
+                    onFilterByGroup={onFilterByGroup}
                   />
                 }
               />

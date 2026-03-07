@@ -31,6 +31,23 @@ export function getContactUrl(person: Person): string {
   return `https://contacts.google.com/person/${id}`;
 }
 
+export function isStarred(person: Person): boolean {
+  return (
+    person.memberships?.some((m) => m.contactGroupMembership?.contactGroupResourceName === "contactGroups/starred") ??
+    false
+  );
+}
+
+export function formatBirthday(person: Person): string | undefined {
+  const bday = person.birthdays?.[0];
+  if (!bday?.date) return undefined;
+  const { year, month, day } = bday.date;
+  if (!month || !day) return bday.text;
+  const monthStr = String(month).padStart(2, "0");
+  const dayStr = String(day).padStart(2, "0");
+  return year ? `${year}-${monthStr}-${dayStr}` : `${monthStr}-${dayStr}`;
+}
+
 export function contactToFormValues(person: Person): ContactFormValues {
   const name = person.names?.[0];
   const emails = person.emailAddresses ?? [];
@@ -50,8 +67,13 @@ export function contactToFormValues(person: Person): ContactFormValues {
     address: person.addresses?.[0]?.formattedValue ?? "",
     email2: emails[1]?.value ?? "",
     phone2: phones[1]?.value ?? "",
+    birthday: formatBirthday(person) ?? "",
     labels: memberships
-      .filter((m) => m.contactGroupMembership?.contactGroupResourceName)
+      .filter(
+        (m) =>
+          m.contactGroupMembership?.contactGroupResourceName &&
+          !m.contactGroupMembership.contactGroupResourceName.startsWith("contactGroups/"),
+      )
       .map((m) => m.contactGroupMembership!.contactGroupResourceName!),
   };
 }
@@ -83,6 +105,15 @@ export function buildPersonBody(values: ContactFormValues): Partial<Person> {
     person.biographies = [{ value: values.notes, contentType: "TEXT_PLAIN" }];
   }
 
+  if (values.birthday) {
+    const parts = values.birthday.split("-").map(Number);
+    if (parts.length === 3) {
+      person.birthdays = [{ date: { year: parts[0], month: parts[1], day: parts[2] } }];
+    } else if (parts.length === 2) {
+      person.birthdays = [{ date: { month: parts[0], day: parts[1] } }];
+    }
+  }
+
   if (values.labels?.length) {
     person.memberships = values.labels.map((groupResourceName) => ({
       contactGroupMembership: { contactGroupResourceName: groupResourceName },
@@ -90,18 +121,6 @@ export function buildPersonBody(values: ContactFormValues): Partial<Person> {
   }
 
   return person;
-}
-
-export function matchesSearch(person: Person, query: string): boolean {
-  if (!query) return true;
-  const q = query.toLowerCase();
-  const name = getDisplayName(person).toLowerCase();
-  const emails = person.emailAddresses?.map((e) => e.value?.toLowerCase() ?? "") ?? [];
-  const phones = person.phoneNumbers?.map((p) => p.value ?? "") ?? [];
-  const company = person.organizations?.[0]?.name?.toLowerCase() ?? "";
-  return (
-    name.includes(q) || emails.some((e) => e.includes(q)) || phones.some((p) => p.includes(q)) || company.includes(q)
-  );
 }
 
 export type SortField = "first" | "last";

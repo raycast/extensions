@@ -1,6 +1,15 @@
 import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
 import { getAvatarIcon } from "@raycast/utils";
-import { getDisplayName, getPhotoUrl, getPrimaryEmail, getPrimaryPhone, groupByLetter, SortField } from "../helpers";
+import {
+  formatBirthday,
+  getDisplayName,
+  getPhotoUrl,
+  getPrimaryEmail,
+  getPrimaryPhone,
+  groupByLetter,
+  isStarred,
+  SortField,
+} from "../helpers";
 import { ContactGroup, Person } from "../types";
 import { ViewMode } from "../search-contacts";
 import ContactActions from "./ContactActions";
@@ -12,11 +21,13 @@ interface ContactListProps {
   isLoading: boolean;
   viewMode: ViewMode;
   sortField: SortField;
+  selectedGroup: string;
   onViewModeChange: (value: string) => void;
   onSortFieldChange: (value: string) => void;
   onContactDeleted: () => void;
   onContactUpdated: () => void;
   onRefresh: () => void;
+  onFilterByGroup: (groupResourceName: string) => void;
 }
 
 function ViewModeDropdown({ value, onChange }: { value: ViewMode; onChange: (value: string) => void }) {
@@ -35,11 +46,13 @@ export default function ContactList({
   isLoading,
   viewMode,
   sortField,
+  selectedGroup,
   onViewModeChange,
   onSortFieldChange,
   onContactDeleted,
   onContactUpdated,
   onRefresh,
+  onFilterByGroup,
 }: ContactListProps) {
   const isDetail = viewMode === "detail";
   const sections = groupByLetter(contacts, sortField);
@@ -72,9 +85,11 @@ export default function ContactList({
             const company = contact.organizations?.[0]?.name;
             const jobTitle = contact.organizations?.[0]?.title;
             const bio = contact.biographies?.[0]?.value;
+            const birthday = formatBirthday(contact);
             const emails = contact.emailAddresses?.filter((e) => e.value) ?? [];
             const phones = contact.phoneNumbers?.filter((p) => p.value) ?? [];
             const addresses = contact.addresses?.filter((a) => a.formattedValue) ?? [];
+            const starred = isStarred(contact);
             const groupNames =
               contact.memberships
                 ?.filter((m) => m.contactGroupMembership?.contactGroupResourceName)
@@ -96,6 +111,7 @@ export default function ContactList({
                   isDetail
                     ? undefined
                     : [
+                        ...(starred ? [{ icon: Icon.Star }] : []),
                         ...(email ? [{ text: email, icon: Icon.Envelope }] : []),
                         ...(phone ? [{ text: phone, icon: Icon.Phone }] : []),
                       ]
@@ -111,7 +127,7 @@ export default function ContactList({
                   isDetail ? (
                     <List.Item.Detail
                       markdown={[
-                        `## ${displayName}`,
+                        `## ${starred ? "⭐ " : ""}${displayName}`,
                         ...(company ? [`**${company}**`] : []),
                         ...(jobTitle ? [`*${jobTitle}*`] : []),
                       ].join("\n\n")}
@@ -140,7 +156,8 @@ export default function ContactList({
                               text={a.formattedValue!}
                             />
                           ))}
-                          {(phones.length > 0 || emails.length > 0 || addresses.length > 0) && (
+                          {birthday && <List.Item.Detail.Metadata.Label title="Birthday" text={birthday} />}
+                          {(phones.length > 0 || emails.length > 0 || addresses.length > 0 || birthday) && (
                             <List.Item.Detail.Metadata.Separator />
                           )}
                           {bio && <List.Item.Detail.Metadata.Label title="Notes" text={bio} />}
@@ -159,13 +176,16 @@ export default function ContactList({
                 actions={
                   <ContactActions
                     contact={contact}
+                    groups={groups}
                     viewMode={viewMode}
                     sortField={sortField}
+                    selectedGroup={selectedGroup}
                     onViewModeChange={onViewModeChange}
                     onSortFieldChange={onSortFieldChange}
                     onContactDeleted={onContactDeleted}
                     onContactUpdated={onContactUpdated}
                     onRefresh={onRefresh}
+                    onFilterByGroup={onFilterByGroup}
                   />
                 }
               />

@@ -7,6 +7,7 @@ type Input = {
 
   /**
    * Search query string (for search operation).
+   * Search results include full contact details (phone, email, company, etc.) — a separate "get" call is usually unnecessary.
    * If a search returns no results, try a shorter or partial query (e.g. first 3-4 characters of the name)
    * to leverage prefix matching. For example, search "Fran" instead of "Fransisco".
    */
@@ -48,6 +49,9 @@ type Input = {
    * Defaults to "add". Use "replace" only when the user explicitly wants to change/update an existing address.
    */
   addressAction?: "add" | "replace";
+
+  /** Birthday in YYYY-MM-DD format, or MM-DD if year is unknown (for create, update) */
+  birthday?: string;
 };
 
 export const confirmation = async (input: Input) => {
@@ -65,6 +69,7 @@ export const confirmation = async (input: Input) => {
         { name: "Name", value: name },
         ...(input.email ? [{ name: "Email", value: input.email }] : []),
         ...(input.phone ? [{ name: "Phone", value: input.phone }] : []),
+        ...(input.birthday ? [{ name: "Birthday", value: input.birthday }] : []),
       ],
     };
   }
@@ -77,6 +82,7 @@ export const confirmation = async (input: Input) => {
         ...(input.lastName ? [{ name: "Last Name", value: input.lastName }] : []),
         ...(input.email ? [{ name: `Email (${input.emailAction ?? "add"})`, value: input.email }] : []),
         ...(input.phone ? [{ name: `Phone (${input.phoneAction ?? "add"})`, value: input.phone }] : []),
+        ...(input.birthday ? [{ name: "Birthday", value: input.birthday }] : []),
       ],
     };
   }
@@ -112,14 +118,22 @@ export default async function tool(input: Input) {
     }
 
     case "create": {
-      const person = {
-        names: [{ givenName: input.firstName, familyName: input.lastName }],
-        ...(input.email ? { emailAddresses: [{ value: input.email }] } : {}),
-        ...(input.phone ? { phoneNumbers: [{ value: input.phone }] } : {}),
-        ...(input.company || input.jobTitle ? { organizations: [{ name: input.company, title: input.jobTitle }] } : {}),
-        ...(input.address ? { addresses: [{ formattedValue: input.address }] } : {}),
-      };
-      return await createContact(token, person);
+      const fullName = [input.firstName, input.lastName].filter(Boolean).join(" ");
+      if (fullName) {
+        const existing = await searchContacts(token, fullName);
+        const isDuplicate = existing.some(
+          (p) =>
+            p.names?.[0]?.givenName?.toLowerCase() === input.firstName?.toLowerCase() &&
+            p.names?.[0]?.familyName?.toLowerCase() === input.lastName?.toLowerCase(),
+        );
+        if (isDuplicate) {
+          return {
+            warning: `A contact named "${fullName}" already exists. The contact was still created, but you may want to inform the user about the duplicate.`,
+            contact: await createContact(token, buildCreateBody(input)),
+          };
+        }
+      }
+      return await createContact(token, buildCreateBody(input));
     }
 
     case "update": {
@@ -142,7 +156,8 @@ export default async function tool(input: Input) {
         if (input.emailAction === "replace") {
           body.emailAddresses = [{ value: input.email }, ...existing.slice(1)];
         } else {
-          body.emailAddresses = [...existing, { value: input.email }];
+          const alreadyExists = existing.some((e) => e.value === input.email);
+          body.emailAddresses = alreadyExists ? existing : [...existing, { value: input.email }];
         }
         updates.push("emailAddresses");
       }
@@ -151,7 +166,8 @@ export default async function tool(input: Input) {
         if (input.phoneAction === "replace") {
           body.phoneNumbers = [{ value: input.phone }, ...existing.slice(1)];
         } else {
-          body.phoneNumbers = [...existing, { value: input.phone }];
+          const alreadyExists = existing.some((p) => p.value === input.phone);
+          body.phoneNumbers = alreadyExists ? existing : [...existing, { value: input.phone }];
         }
         updates.push("phoneNumbers");
       }
@@ -175,6 +191,15 @@ export default async function tool(input: Input) {
         }
         updates.push("addresses");
       }
+      if (input.birthday) {
+        const parts = input.birthday.split("-").map(Number);
+        if (parts.length === 3) {
+          body.birthdays = [{ date: { year: parts[0], month: parts[1], day: parts[2] } }];
+        } else if (parts.length === 2) {
+          body.birthdays = [{ date: { month: parts[0], day: parts[1] } }];
+        }
+        updates.push("birthdays");
+      }
 
       if (updates.length === 0) return { message: "No fields to update" };
       return await updateContact(token, input.resourceName, body, updates.join(","));
@@ -189,4 +214,22 @@ export default async function tool(input: Input) {
     default:
       throw new Error(`Unknown operation: ${input.operation}`);
   }
+}
+
+function buildCreateBody(input: Input) {
+  return {
+    names: [{ givenName: input.firstName, familyName: input.lastName }],
+    ...(input.email ? { emailAddresses: [{ value: input.email }] } : {}),
+    ...(input.phone ? { phoneNumbers: [{ value: input.phone }] } : {}),
+    ...(input.company || input.jobTitle ? { organizations: [{ name: input.company, title: input.jobTitle }] } : {}),
+    ...(input.address ? { addresses: [{ formattedValue: input.address }] } : {}),
+    ...(input.birthday
+      ? (() => {
+          const parts = input.birthday.split("-").map(Number);
+          if (parts.length === 3) return { birthdays: [{ date: { year: parts[0], month: parts[1], day: parts[2] } }] };
+          if (parts.length === 2) return { birthdays: [{ date: { month: parts[0], day: parts[1] } }] };
+          return {};
+        })()
+      : {}),
+  };
 }

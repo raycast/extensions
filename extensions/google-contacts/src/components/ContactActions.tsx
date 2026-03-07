@@ -1,32 +1,38 @@
 import { Action, ActionPanel, Alert, Icon, confirmAlert, showToast, Toast, useNavigation } from "@raycast/api";
 import { getAccessToken } from "@raycast/utils";
-import { deleteContact, getContact } from "../api";
-import { getContactUrl, getDisplayName, getPrimaryEmail, getPrimaryPhone } from "../helpers";
-import { Person } from "../types";
+import { deleteContact, getContact, starContact, unstarContact } from "../api";
+import { getContactUrl, getDisplayName, getPrimaryEmail, getPrimaryPhone, isStarred } from "../helpers";
 import { SortField } from "../helpers";
+import { ContactGroup, Person } from "../types";
 import { ViewMode } from "../search-contacts";
 import ContactForm from "./ContactForm";
 
 interface ContactActionsProps {
   contact: Person;
+  groups: ContactGroup[];
   viewMode: ViewMode;
   sortField: SortField;
+  selectedGroup: string;
   onViewModeChange: (value: string) => void;
   onSortFieldChange: (value: string) => void;
   onContactDeleted: () => void;
   onContactUpdated: () => void;
   onRefresh: () => void;
+  onFilterByGroup: (groupResourceName: string) => void;
 }
 
 export default function ContactActions({
   contact,
+  groups,
   viewMode,
   sortField,
+  selectedGroup,
   onViewModeChange,
   onSortFieldChange,
   onContactDeleted,
   onContactUpdated,
   onRefresh,
+  onFilterByGroup,
 }: ContactActionsProps) {
   const { push } = useNavigation();
   const displayName = getDisplayName(contact);
@@ -34,6 +40,7 @@ export default function ContactActions({
   const primaryPhone = getPrimaryPhone(contact);
   const emails = contact.emailAddresses?.filter((e) => e.value) ?? [];
   const phones = contact.phoneNumbers?.filter((p) => p.value) ?? [];
+  const starred = isStarred(contact);
 
   async function handleEdit() {
     try {
@@ -44,6 +51,26 @@ export default function ContactActions({
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to load contact",
+        message: String(error),
+      });
+    }
+  }
+
+  async function handleToggleStar() {
+    try {
+      const { token } = getAccessToken();
+      if (starred) {
+        await unstarContact(token, contact.resourceName);
+        await showToast({ style: Toast.Style.Success, title: "Removed from starred" });
+      } else {
+        await starContact(token, contact.resourceName);
+        await showToast({ style: Toast.Style.Success, title: "Added to starred" });
+      }
+      onRefresh();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: starred ? "Failed to unstar" : "Failed to star",
         message: String(error),
       });
     }
@@ -100,6 +127,12 @@ export default function ContactActions({
           url={getContactUrl(contact)}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
         />
+        <Action
+          title={starred ? "Unstar Contact" : "Star Contact"}
+          icon={starred ? Icon.StarDisabled : Icon.Star}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          onAction={handleToggleStar}
+        />
       </ActionPanel.Section>
 
       {(primaryEmail || primaryPhone) && (
@@ -142,6 +175,29 @@ export default function ContactActions({
               key={p.value}
               title={`Copy Phone${p.type ? ` (${p.type})` : ""}`}
               content={p.value!}
+            />
+          ))}
+        </ActionPanel.Section>
+      )}
+
+      {groups.length > 0 && (
+        <ActionPanel.Section title="Filter by Group">
+          <Action
+            title={selectedGroup === "all" ? "All Contacts (Active)" : "All Contacts"}
+            icon={Icon.TwoPeople}
+            onAction={() => onFilterByGroup("all")}
+          />
+          <Action
+            title={selectedGroup === "contactGroups/starred" ? "Starred (Active)" : "Starred"}
+            icon={Icon.Star}
+            onAction={() => onFilterByGroup("contactGroups/starred")}
+          />
+          {groups.map((g) => (
+            <Action
+              key={g.resourceName}
+              title={selectedGroup === g.resourceName ? `${g.name} (Active)` : g.name}
+              icon={Icon.Tag}
+              onAction={() => onFilterByGroup(g.resourceName)}
             />
           ))}
         </ActionPanel.Section>

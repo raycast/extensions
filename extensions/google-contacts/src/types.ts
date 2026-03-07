@@ -63,6 +63,12 @@ export interface Membership {
   metadata?: FieldMetadata;
 }
 
+export interface Birthday {
+  date?: { year?: number; month?: number; day?: number };
+  text?: string;
+  metadata?: FieldMetadata;
+}
+
 export interface Person {
   resourceName: string;
   etag: string;
@@ -73,6 +79,7 @@ export interface Person {
   organizations?: Organization[];
   addresses?: Address[];
   biographies?: Biography[];
+  birthdays?: Birthday[];
   memberships?: Membership[];
 }
 
@@ -112,5 +119,6 @@ export interface ContactFormValues {
   address: string;
   email2: string;
   phone2: string;
+  birthday: string;
   labels: string[];
 }
