@@ -7,7 +7,7 @@ export async function listCommands(
   filters?: { status?: string; command?: string },
   include?: string,
 ): Promise<PaginatedResponse<Command>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.status) params["filter[status]"] = filters.status;
   if (filters?.command) params["filter[command]"] = filters.command;

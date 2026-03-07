@@ -6,7 +6,7 @@ export async function listBuckets(
   filters?: { name?: string; status?: string },
   include?: string,
 ): Promise<PaginatedResponse<Bucket>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.status) params["filter[status]"] = filters.status;
@@ -23,7 +23,7 @@ export async function deleteBucket(id: string): Promise<void> {
 }
 
 export async function listBucketKeys(bucketId: string, include?: string): Promise<PaginatedResponse<BucketKey>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
 
   return apiGet<PaginatedResponse<BucketKey>>(`/buckets/${bucketId}/keys`, params);

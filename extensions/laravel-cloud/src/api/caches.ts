@@ -12,7 +12,7 @@ export async function listCaches(filters?: {
   status?: string;
   region?: string;
 }): Promise<PaginatedResponse<Cache>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.type) params["filter[type]"] = filters.type;
   if (filters?.status) params["filter[status]"] = filters.status;

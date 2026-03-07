@@ -6,7 +6,7 @@ export async function listBackgroundProcesses(
   instanceId: string,
   include?: string,
 ): Promise<PaginatedResponse<BackgroundProcess>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
 
   return apiGet<PaginatedResponse<BackgroundProcess>>(`/instances/${instanceId}/background-processes`, params);

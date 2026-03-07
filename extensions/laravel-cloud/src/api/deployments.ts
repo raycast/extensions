@@ -7,7 +7,7 @@ export async function listDeployments(
   filters?: { status?: string; branch_name?: string; commit_hash?: string },
   include?: string,
 ): Promise<PaginatedResponse<Deployment>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.status) params["filter[status]"] = filters.status;
   if (filters?.branch_name) params["filter[branch_name]"] = filters.branch_name;

@@ -7,7 +7,7 @@ export async function listDomains(
   filters?: { name?: string; hostname_status?: string; ssl_status?: string; origin_status?: string },
   include?: string,
 ): Promise<PaginatedResponse<Domain>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.hostname_status) params["filter[hostname_status]"] = filters.hostname_status;

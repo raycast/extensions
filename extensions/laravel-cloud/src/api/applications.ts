@@ -6,7 +6,7 @@ export async function listApplications(
   filters?: { name?: string; region?: string; slug?: string },
   include?: string,
 ): Promise<PaginatedResponse<Application>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.region) params["filter[region]"] = filters.region;

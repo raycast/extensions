@@ -7,7 +7,7 @@ export async function listInstances(
   filters?: { name?: string; type?: string; size?: string; scaling_type?: string },
   include?: string,
 ): Promise<PaginatedResponse<Instance>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.type) params["filter[type]"] = filters.type;

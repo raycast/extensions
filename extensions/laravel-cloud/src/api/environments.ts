@@ -8,7 +8,7 @@ export async function listEnvironments(
   filters?: { name?: string; status?: string; slug?: string },
   include?: string,
 ): Promise<PaginatedResponse<Environment>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.status) params["filter[status]"] = filters.status;

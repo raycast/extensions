@@ -2,6 +2,7 @@
 
 export interface PaginatedResponse<T> {
   data: T[];
+  included?: IncludedResource[];
   links: {
     first: string;
     last: string;
@@ -9,6 +10,12 @@ export interface PaginatedResponse<T> {
     next: string | null;
   };
   meta: PaginationMeta;
+}
+
+export interface IncludedResource {
+  id: string;
+  type: string;
+  attributes: Record<string, unknown>;
 }
 
 export interface SingleResponse<T> {

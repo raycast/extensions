@@ -10,7 +10,7 @@ export async function listDatabaseClusters(
   filters?: { name?: string; type?: string; status?: string; region?: string },
   include?: string,
 ): Promise<PaginatedResponse<DatabaseCluster>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
   if (filters?.name) params["filter[name]"] = filters.name;
   if (filters?.type) params["filter[type]"] = filters.type;
@@ -32,7 +32,7 @@ export async function listDatabaseSchemas(
   clusterId: string,
   include?: string,
 ): Promise<PaginatedResponse<DatabaseSchema>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
 
   return apiGet<PaginatedResponse<DatabaseSchema>>(`/databases/clusters/${clusterId}/databases`, params);
@@ -56,7 +56,7 @@ export async function listDatabaseSnapshots(
   clusterId: string,
   include?: string,
 ): Promise<PaginatedResponse<DatabaseSnapshot>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { per_page: "100" };
   if (include) params.include = include;
 
   return apiGet<PaginatedResponse<DatabaseSnapshot>>(`/databases/clusters/${clusterId}/snapshots`, params);
