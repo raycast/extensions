@@ -57,21 +57,23 @@ export async function scanRepos(groupPath: string): Promise<Repo[]> {
   if (!existsSync(groupPath)) return [];
 
   const entries = readdirSync(groupPath);
-  const repos: Repo[] = [];
 
-  for (const entry of entries) {
-    const fullPath = join(groupPath, entry);
-    try {
-      if (statSync(fullPath).isDirectory() && existsSync(join(fullPath, ".git"))) {
-        const branch = await getBranch(fullPath);
-        repos.push({ name: entry, path: fullPath, status: "idle", branch });
+  const results = await Promise.all(
+    entries.map(async (entry) => {
+      const fullPath = join(groupPath, entry);
+      try {
+        if (statSync(fullPath).isDirectory() && existsSync(join(fullPath, ".git"))) {
+          const branch = await getBranch(fullPath);
+          return { name: entry, path: fullPath, status: "idle" as const, branch };
+        }
+      } catch {
+        // skip invalid entries
       }
-    } catch {
-      continue;
-    }
-  }
+      return null;
+    }),
+  );
 
-  return repos;
+  return results.filter((r): r is Repo => r !== null);
 }
 
 export async function isDirty(repoPath: string): Promise<boolean> {

@@ -28,7 +28,11 @@ export function EditorActions({ repoPath }: { repoPath: string }) {
 
 export function OpenInTerminal({ repoPath }: { repoPath: string }) {
   const { terminalApp } = getPreferenceValues<Preferences>();
-  const app = terminalApp || { name: "Terminal", path: "/System/Applications/Utilities/Terminal.app" };
+  const defaultTerminal =
+    process.platform === "win32"
+      ? { name: "Command Prompt", path: "cmd.exe" }
+      : { name: "Terminal", path: "/System/Applications/Utilities/Terminal.app" };
+  const app = terminalApp || defaultTerminal;
   return (
     <Action
       title={`Open in ${app.name}`}

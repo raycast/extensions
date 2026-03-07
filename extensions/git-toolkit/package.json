@@ -43,8 +43,7 @@
       "title": "Editor",
       "description": "The editor app to use when opening a project",
       "type": "appPicker",
-      "required": true,
-      "default": "/Applications/Visual Studio Code.app"
+      "required": true
     },
     {
       "name": "editorAppAlt",
@@ -58,8 +57,7 @@
       "title": "Terminal App",
       "description": "The terminal app to use when opening a project",
       "type": "appPicker",
-      "required": false,
-      "default": "/System/Applications/Utilities/Terminal.app"
+      "required": false
     },
     {
       "name": "maxParallelProcesses",
