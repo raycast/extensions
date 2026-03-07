@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "demo-clipboard",
+  "title": "Demo Clipboard",
+  "description": "Queue clipboard items and paste them sequentially during software demos",
+  "icon": "command-icon.png",
+  "author": "npharris",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "manage-queue",
+      "title": "Manage Demo Queue",
+      "description": "Manage your demo clipboard queue with persistent items",
+      "mode": "view"
+    },
+    {
+      "name": "paste-next",
+      "title": "Paste Next Demo Item",
+      "description": "Paste the next item from your demo queue",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.19.1",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^18.19.130",
+    "@types/react": "^18.3.28",
+    "@types/uuid": "^9.0.8",
+    "@typescript-eslint/eslint-plugin": "^5.62.0",
+    "@typescript-eslint/parser": "^5.62.0",
+    "eslint": "^8.57.1",
+    "prettier": "^2.8.8",
+    "react": "^18.3.1",
+    "typescript": "^4.9.5"
+  }
+}
