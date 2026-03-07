@@ -67,7 +67,7 @@ function PullProgress({ group }: { group: ProjectGroup }) {
         const scanned = await scanRepos(group.path);
         setRepos(scanned);
         setIsLoading(false);
-        startPull(scanned);
+        await startPull(scanned);
       } catch (error) {
         setIsLoading(false);
         showToast({ style: Toast.Style.Failure, title: "Failed to scan repos", message: String(error) });

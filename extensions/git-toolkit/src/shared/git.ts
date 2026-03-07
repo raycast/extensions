@@ -145,15 +145,21 @@ export async function parallelPull(
         const repo = repos[nextIdx++];
         running++;
 
-        pullRepo(repo.path).then((result) => {
-          onUpdate(repo.index, result.status, result.error);
-          running--;
-          if (nextIdx < repos.length) {
-            startNext();
-          } else if (running === 0) {
-            resolve();
-          }
-        });
+        pullRepo(repo.path)
+          .then((result) => {
+            onUpdate(repo.index, result.status, result.error);
+          })
+          .catch(() => {
+            onUpdate(repo.index, "error", "Unexpected error");
+          })
+          .finally(() => {
+            running--;
+            if (nextIdx < repos.length) {
+              startNext();
+            } else if (running === 0) {
+              resolve();
+            }
+          });
       }
     }
 
