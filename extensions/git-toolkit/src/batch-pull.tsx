@@ -11,7 +11,7 @@ function PullProgress({ group }: { group: ProjectGroup }) {
   const [isPulling, setIsPulling] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 0 });
   const prefs = getPreferenceValues<Preferences>();
-  const maxParallel = parseInt(prefs.maxParallelProcesses) || 10;
+  const maxParallel = Math.max(1, parseInt(prefs.maxParallelProcesses) || 10);
 
   const updateRepo = useCallback((index: number, status: RepoStatus, error?: string) => {
     setRepos((prev) => {

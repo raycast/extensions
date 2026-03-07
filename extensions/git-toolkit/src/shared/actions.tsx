@@ -30,7 +30,7 @@ export function OpenInTerminal({ repoPath }: { repoPath: string }) {
   const { terminalApp } = getPreferenceValues<Preferences>();
   const defaultTerminal =
     process.platform === "win32"
-      ? { name: "Command Prompt", path: "cmd.exe" }
+      ? { name: "Command Prompt", path: process.env.COMSPEC ?? "C:\\Windows\\System32\\cmd.exe" }
       : { name: "Terminal", path: "/System/Applications/Utilities/Terminal.app" };
   const app = terminalApp || defaultTerminal;
   return (

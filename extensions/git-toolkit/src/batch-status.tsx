@@ -62,7 +62,7 @@ function StatusList({ group }: { group: ProjectGroup }) {
       try {
         const scanned = await scanRepos(group.path);
         const prefs = getPreferenceValues<Preferences>();
-        const maxParallel = parseInt(prefs.maxParallelProcesses) || 10;
+        const maxParallel = Math.max(1, parseInt(prefs.maxParallelProcesses) || 10);
 
         const results: StatusRepo[] = [];
         for (let i = 0; i < scanned.length; i += maxParallel) {
