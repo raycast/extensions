@@ -13,13 +13,28 @@
       "title": "Create Task",
       "subtitle": "Vikunja",
       "description": "Create a new task in Vikunja",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Task title",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "list-tasks",
       "title": "List Tasks",
       "subtitle": "Vikunja",
       "description": "Browse and manage tasks in your Vikunja projects",
+      "mode": "view"
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "subtitle": "Vikunja",
+      "description": "Browse and manage your Vikunja projects",
       "mode": "view"
     }
   ],

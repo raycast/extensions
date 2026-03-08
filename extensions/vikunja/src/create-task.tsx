@@ -8,6 +8,9 @@ import {
   getPreferenceValues,
   LaunchType,
   launchCommand,
+  getSelectedText,
+  LaunchProps,
+  popToRoot,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -19,6 +22,10 @@ import {
   Label,
 } from "./api";
 
+interface CreateTaskArguments {
+  title?: string;
+}
+
 const PRIORITIES = [
   { value: "0", title: "Unset" },
   { value: "1", title: "Low" },
@@ -28,10 +35,16 @@ const PRIORITIES = [
   { value: "5", title: "DO NOW" },
 ];
 
-export default function CreateTask() {
+export default function CreateTask(
+  props: LaunchProps<{ arguments: CreateTaskArguments }>,
+) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [labels, setLabels] = useState<Label[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [prefillTitle, setPrefillTitle] = useState(
+    props.arguments?.title ?? "",
+  );
+  const [prefillReady, setPrefillReady] = useState(!!props.arguments?.title);
 
   useEffect(() => {
     async function loadData() {
@@ -50,6 +63,17 @@ export default function CreateTask() {
       }
     }
     loadData();
+
+    if (!props.arguments?.title) {
+      getSelectedText()
+        .then((text) => {
+          if (text.trim()) setPrefillTitle(text.trim());
+        })
+        .catch(() => {
+          // No selected text available — leave title empty
+        })
+        .finally(() => setPrefillReady(true));
+    }
   }, []);
 
   async function handleSubmit(values: {
@@ -103,6 +127,7 @@ export default function CreateTask() {
           },
         },
       });
+      popToRoot();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -114,7 +139,7 @@ export default function CreateTask() {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || !prefillReady}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
@@ -138,51 +163,60 @@ export default function CreateTask() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Task title"
-        autoFocus
-      />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional description"
-      />
-      <Form.Dropdown id="projectId" title="Project">
-        {projects.map((project) => (
-          <Form.Dropdown.Item
-            key={project.id}
-            value={String(project.id)}
-            title={project.title}
+      {prefillReady && (
+        <>
+          <Form.TextField
+            id="title"
+            title="Title"
+            placeholder="Task title"
+            defaultValue={prefillTitle}
+            autoFocus
           />
-        ))}
-      </Form.Dropdown>
-      <Form.DatePicker
-        id="dueDate"
-        title="Due Date"
-        type={Form.DatePicker.Type.Date}
-      />
-      <Form.Dropdown id="priority" title="Priority" defaultValue="0">
-        {PRIORITIES.map((p) => (
-          <Form.Dropdown.Item key={p.value} value={p.value} title={p.title} />
-        ))}
-      </Form.Dropdown>
-      <Form.TagPicker id="labelIds" title="Labels">
-        {labels.map((label) => (
-          <Form.TagPicker.Item
-            key={label.id}
-            value={String(label.id)}
-            title={label.title}
+          <Form.TextArea
+            id="description"
+            title="Description"
+            placeholder="Optional description"
           />
-        ))}
-      </Form.TagPicker>
-      <Form.Checkbox
-        id="isFavorite"
-        title="Favorite"
-        label="Mark as favorite"
-        defaultValue={false}
-      />
+          <Form.Dropdown id="projectId" title="Project">
+            {projects.map((project) => (
+              <Form.Dropdown.Item
+                key={project.id}
+                value={String(project.id)}
+                title={project.title}
+              />
+            ))}
+          </Form.Dropdown>
+          <Form.DatePicker
+            id="dueDate"
+            title="Due Date"
+            type={Form.DatePicker.Type.Date}
+          />
+          <Form.Dropdown id="priority" title="Priority" defaultValue="0">
+            {PRIORITIES.map((p) => (
+              <Form.Dropdown.Item
+                key={p.value}
+                value={p.value}
+                title={p.title}
+              />
+            ))}
+          </Form.Dropdown>
+          <Form.TagPicker id="labelIds" title="Labels">
+            {labels.map((label) => (
+              <Form.TagPicker.Item
+                key={label.id}
+                value={String(label.id)}
+                title={label.title}
+              />
+            ))}
+          </Form.TagPicker>
+          <Form.Checkbox
+            id="isFavorite"
+            title="Favorite"
+            label="Mark as favorite"
+            defaultValue={false}
+          />
+        </>
+      )}
     </Form>
   );
 }

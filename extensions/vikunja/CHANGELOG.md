@@ -3,9 +3,15 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Create tasks with title, description, project, due date, priority, labels, and favorite
-- List and browse tasks by project (defaults to Inbox)
+- Pre-fill task title from selected text or quick argument
+- List and browse tasks across all projects or filtered by project
+- Edit tasks inline (title, description, project, due date, priority, favorite)
+- Quick actions: set priority, toggle favorite, move to project
+- Browse and manage projects with hierarchy (parent/sub-projects)
+- Create, edit, archive, and delete projects
 - Complete, reopen, and delete tasks
 - Copy task title or URL to clipboard
-- Open tasks in Vikunja browser UI
+- Open tasks and projects in Vikunja browser UI
 - Smart due date display with color-coded urgency
 - Priority and label tags in task list
+- Navigate from projects directly to their tasks

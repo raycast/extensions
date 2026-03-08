@@ -2,19 +2,24 @@ import {
   Action,
   ActionPanel,
   Color,
+  Form,
   Icon,
   List,
   showToast,
   Toast,
   confirmAlert,
   getPreferenceValues,
+  LaunchProps,
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import {
   getProjects,
   getProjectTasks,
+  getAllTasks,
   toggleTaskDone,
   deleteTask,
+  updateTask,
   Project,
   Task,
   PRIORITY_MAP,
@@ -59,9 +64,16 @@ function dueDateColor(dueDate: string | null): Color | undefined {
   return undefined;
 }
 
-export default function ListTasks() {
+interface ListTasksContext {
+  projectId?: number;
+}
+
+export default function ListTasks(
+  props: LaunchProps<{ launchContext: ListTasksContext }>,
+) {
+  const initialProjectId = props.launchContext?.projectId;
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedProject, setSelectedProject] = useState<string>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -70,10 +82,12 @@ export default function ListTasks() {
       try {
         const p = await getProjects();
         setProjects(p);
-        // Default to first project (usually Inbox)
-        if (p.length > 0) {
-          const inbox = p.find((proj) => proj.title.toLowerCase() === "inbox");
-          setSelectedProject(String(inbox?.id ?? p[0].id));
+        // Set project after dropdown items are available
+        if (
+          initialProjectId &&
+          p.some((proj) => proj.id === initialProjectId)
+        ) {
+          setSelectedProject(String(initialProjectId));
         }
       } catch (error) {
         showToast({
@@ -90,7 +104,10 @@ export default function ListTasks() {
     if (!projectId) return;
     setIsLoading(true);
     try {
-      const t = await getProjectTasks(parseInt(projectId));
+      const t =
+        projectId === "all"
+          ? await getAllTasks()
+          : await getProjectTasks(parseInt(projectId));
       setTasks(t);
     } catch (error) {
       showToast({
@@ -162,6 +179,7 @@ export default function ListTasks() {
           value={selectedProject}
           onChange={setSelectedProject}
         >
+          <List.Dropdown.Item key="all" value="all" title="All Projects" />
           {projects.map((project) => (
             <List.Dropdown.Item
               key={project.id}
@@ -178,6 +196,7 @@ export default function ListTasks() {
             key={task.id}
             task={task}
             baseUrl={baseUrl}
+            projects={projects}
             onToggleDone={handleToggleDone}
             onDelete={handleDelete}
             onRefresh={() => loadTasks(selectedProject)}
@@ -191,6 +210,7 @@ export default function ListTasks() {
               key={task.id}
               task={task}
               baseUrl={baseUrl}
+              projects={projects}
               onToggleDone={handleToggleDone}
               onDelete={handleDelete}
               onRefresh={() => loadTasks(selectedProject)}
@@ -205,12 +225,14 @@ export default function ListTasks() {
 function TaskListItem({
   task,
   baseUrl,
+  projects,
   onToggleDone,
   onDelete,
   onRefresh,
 }: {
   task: Task;
   baseUrl: string;
+  projects: Project[];
   onToggleDone: (task: Task) => void;
   onDelete: (task: Task) => void;
   onRefresh: () => void;
@@ -268,6 +290,106 @@ function TaskListItem({
               url={`${baseUrl}/tasks/${task.id}`}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
+            <EditTaskAction
+              task={task}
+              projects={projects}
+              onRefresh={onRefresh}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Quick Actions">
+            <ActionPanel.Submenu
+              title="Set Priority"
+              icon={Icon.Signal3}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            >
+              {Object.entries(PRIORITY_MAP).map(([value, label]) => (
+                <Action
+                  key={value}
+                  title={label}
+                  icon={
+                    task.priority === parseInt(value)
+                      ? Icon.CheckCircle
+                      : Icon.Circle
+                  }
+                  onAction={async () => {
+                    try {
+                      await updateTask(task.id, { priority: parseInt(value) });
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: `Priority set to ${label}`,
+                      });
+                      onRefresh();
+                    } catch (error) {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed to set priority",
+                        message:
+                          error instanceof Error
+                            ? error.message
+                            : "Unknown error",
+                      });
+                    }
+                  }}
+                />
+              ))}
+            </ActionPanel.Submenu>
+            <Action
+              title={task.is_favorite ? "Remove Favorite" : "Add Favorite"}
+              icon={task.is_favorite ? Icon.StarDisabled : Icon.Star}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={async () => {
+                try {
+                  await updateTask(task.id, { is_favorite: !task.is_favorite });
+                  showToast({
+                    style: Toast.Style.Success,
+                    title: task.is_favorite
+                      ? "Removed from favorites"
+                      : "Added to favorites",
+                  });
+                  onRefresh();
+                } catch (error) {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to toggle favorite",
+                    message:
+                      error instanceof Error ? error.message : "Unknown error",
+                  });
+                }
+              }}
+            />
+            <ActionPanel.Submenu
+              title="Move to Project"
+              icon={Icon.ArrowRight}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+            >
+              {projects
+                .filter((p) => p.id !== task.project_id)
+                .map((p) => (
+                  <Action
+                    key={p.id}
+                    title={p.title}
+                    onAction={async () => {
+                      try {
+                        await updateTask(task.id, { project_id: p.id });
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: `Moved to ${p.title}`,
+                        });
+                        onRefresh();
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to move task",
+                          message:
+                            error instanceof Error
+                              ? error.message
+                              : "Unknown error",
+                        });
+                      }
+                    }}
+                  />
+                ))}
+            </ActionPanel.Submenu>
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -299,5 +421,131 @@ function TaskListItem({
         </ActionPanel>
       }
     />
+  );
+}
+
+function EditTaskAction({
+  task,
+  projects,
+  onRefresh,
+}: {
+  task: Task;
+  projects: Project[];
+  onRefresh: () => void;
+}) {
+  const { push } = useNavigation();
+  return (
+    <Action
+      title="Edit Task"
+      icon={Icon.Pencil}
+      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      onAction={() =>
+        push(
+          <EditTaskForm
+            task={task}
+            projects={projects}
+            onRefresh={onRefresh}
+          />,
+        )
+      }
+    />
+  );
+}
+
+function EditTaskForm({
+  task,
+  projects,
+  onRefresh,
+}: {
+  task: Task;
+  projects: Project[];
+  onRefresh: () => void;
+}) {
+  const { pop } = useNavigation();
+
+  const dueDate =
+    task.due_date && new Date(task.due_date).getFullYear() > 1
+      ? new Date(task.due_date)
+      : null;
+
+  async function handleSubmit(values: {
+    title: string;
+    description: string;
+    projectId: string;
+    dueDate: Date | null;
+    priority: string;
+    isFavorite: boolean;
+  }) {
+    if (!values.title.trim()) {
+      showToast({ style: Toast.Style.Failure, title: "Title is required" });
+      return;
+    }
+
+    try {
+      await updateTask(task.id, {
+        title: values.title.trim(),
+        description: values.description?.trim() || "",
+        due_date: values.dueDate ? values.dueDate.toISOString() : null,
+        priority: parseInt(values.priority) || 0,
+        is_favorite: values.isFavorite,
+        project_id: parseInt(values.projectId),
+      });
+      showToast({ style: Toast.Style.Success, title: "Task updated" });
+      onRefresh();
+      pop();
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to update task",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Update Task" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="title" title="Title" defaultValue={task.title} />
+      <Form.TextArea
+        id="description"
+        title="Description"
+        defaultValue={task.description}
+      />
+      <Form.Dropdown
+        id="projectId"
+        title="Project"
+        defaultValue={String(task.project_id)}
+      >
+        {projects.map((p) => (
+          <Form.Dropdown.Item key={p.id} value={String(p.id)} title={p.title} />
+        ))}
+      </Form.Dropdown>
+      <Form.DatePicker
+        id="dueDate"
+        title="Due Date"
+        type={Form.DatePicker.Type.Date}
+        defaultValue={dueDate}
+      />
+      <Form.Dropdown
+        id="priority"
+        title="Priority"
+        defaultValue={String(task.priority)}
+      >
+        {Object.entries(PRIORITY_MAP).map(([value, label]) => (
+          <Form.Dropdown.Item key={value} value={value} title={label} />
+        ))}
+      </Form.Dropdown>
+      <Form.Checkbox
+        id="isFavorite"
+        title="Favorite"
+        label="Mark as favorite"
+        defaultValue={task.is_favorite}
+      />
+    </Form>
   );
 }

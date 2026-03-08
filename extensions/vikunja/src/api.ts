@@ -5,6 +5,17 @@ export interface Project {
   title: string;
   description: string;
   is_archived: boolean;
+  parent_project_id: number | null;
+  hex_color: string;
+  identifier: string;
+}
+
+export interface ProjectInput {
+  title: string;
+  description?: string;
+  parent_project_id?: number | null;
+  hex_color?: string;
+  identifier?: string;
 }
 
 export interface Label {
@@ -75,9 +86,30 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export async function getProjects(): Promise<Project[]> {
+export async function getProjects(includeArchived = false): Promise<Project[]> {
   const projects = await request<Project[]>("/projects");
-  return projects.filter((p) => !p.is_archived);
+  return includeArchived ? projects : projects.filter((p) => !p.is_archived);
+}
+
+export async function createProject(project: ProjectInput): Promise<Project> {
+  return request<Project>("/projects", {
+    method: "PUT",
+    body: JSON.stringify(project),
+  });
+}
+
+export async function updateProject(
+  projectId: number,
+  updates: Partial<ProjectInput & { is_archived: boolean }>,
+): Promise<Project> {
+  return request<Project>(`/projects/${projectId}`, {
+    method: "POST",
+    body: JSON.stringify(updates),
+  });
+}
+
+export async function deleteProject(projectId: number): Promise<void> {
+  await request(`/projects/${projectId}`, { method: "DELETE" });
 }
 
 export async function getLabels(): Promise<Label[]> {
@@ -121,6 +153,10 @@ export async function getProjectTasks(projectId: number): Promise<Task[]> {
   );
 }
 
+export async function getAllTasks(): Promise<Task[]> {
+  return request<Task[]>("/tasks?sort_by=done&order_by=asc");
+}
+
 export async function toggleTaskDone(task: Task): Promise<Task> {
   // Vikunja uses POST for updates
   return request<Task>(`/tasks/${task.id}`, {
@@ -135,7 +171,7 @@ export async function deleteTask(taskId: number): Promise<void> {
 
 export async function updateTask(
   taskId: number,
-  updates: Partial<TaskInput & { done: boolean }>,
+  updates: Partial<TaskInput & { done: boolean; project_id: number }>,
 ): Promise<Task> {
   return request<Task>(`/tasks/${taskId}`, {
     method: "POST",
