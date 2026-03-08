@@ -148,10 +148,15 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 }
 
 function open(app: string, path: string) {
+  const envWithoutRaycastVars = {};
   if (process.platform === "win32") {
-    spawn("cmd", ["/c", "start", "", app, path], { detached: true, stdio: "ignore" }).unref();
+    spawn("cmd", ["/c", "start", "", app, path], {
+      detached: true,
+      stdio: "ignore",
+      env: envWithoutRaycastVars,
+    }).unref();
   } else {
-    spawn("open", ["-a", app, path]);
+    spawn("open", ["-a", app, path], { env: envWithoutRaycastVars });
   }
 }
 
