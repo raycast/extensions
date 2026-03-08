@@ -112,7 +112,7 @@ async function openInTerminal(project: Project, preferences: Preferences, onSucc
 
     const options = { ghosttyOpenBehavior: preferences.ghosttyOpenBehavior as "window" | "tab" | undefined };
 
-    if (options.ghosttyOpenBehavior === "tab") {
+    if (preferences.terminalApp === "Ghostty" && options.ghosttyOpenBehavior === "tab") {
       await closeMainWindow();
     }
 
