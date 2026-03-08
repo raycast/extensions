@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "vikunja",
   "title": "Vikunja Task Manager",
-  "description": "Create tasks in your Vikunja instance directly from Raycast",
+  "description": "Create and manage tasks in your self-hosted Vikunja instance",
   "icon": "command-icon.png",
   "author": "flexorflex",
   "categories": ["Productivity"],
@@ -30,7 +30,7 @@
       "description": "Base URL of your Vikunja instance (e.g. https://tasks.rehmlab.cc)",
       "type": "textfield",
       "required": true,
-      "default": "https://tasks.rehmlab.cc"
+      "placeholder": "https://tasks.example.com"
     },
     {
       "name": "apiToken",
