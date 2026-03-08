@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "brightness",
+  "title": "Brightness",
+  "description": "Control the brightness of your Mac.",
+  "icon": "extension-icon.png",
+  "author": "BusyEquinox",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "set-brightness-to-0",
+      "title": "Set Brightness to 0%",
+      "description": "Set the brightness of your Mac to 0%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-brightness-to-25",
+      "title": "Set Brightness to 25%",
+      "description": "Set the brightness of your Mac to 25%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-brightness-to-50",
+      "title": "Set Brightness to 50%",
+      "description": "Set the brightness of your Mac to 50%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-brightness-to-75",
+      "title": "Set Brightness to 75%",
+      "description": "Set the brightness of your Mac to 75%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-brightness-to-100",
+      "title": "Set Brightness to 100%",
+      "description": "Set the brightness of your Mac to 100%.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-brightness-up",
+      "title": "Turn Brightness up",
+      "description": "Turn up the brightness of your Mac.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-brightness-down",
+      "title": "Turn Brightness Down",
+      "description": "Turn down the brightness of your Mac.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "sh ./scripts/build-helper.sh && ray build",
+    "build-helper": "./scripts/build-helper.sh",
+    "dev": "sh ./scripts/build-helper.sh && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "sh ./scripts/build-helper.sh && npx @raycast/api@latest publish"
+  }
+}

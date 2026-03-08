@@ -1,0 +1,273 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "betterdisplay",
+  "title": "BetterDisplay",
+  "description": "Manage displays using BetterDisplay",
+  "icon": "extension-icon.png",
+  "author": "pascal_burkhard",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-displays",
+      "title": "Manage Displays",
+      "subtitle": "BetterDisplay",
+      "description": "List all available displays",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-displays",
+      "title": "Get Displays",
+      "description": "Get a list of with information about all available displays"
+    },
+    {
+      "name": "get-main-display",
+      "title": "Get Main Display",
+      "description": "Get information about the main display"
+    },
+    {
+      "name": "get-display-status",
+      "title": "Get Display Status",
+      "description": "Get the status of a display using its tagID"
+    },
+    {
+      "name": "toggle-display-status",
+      "title": "Toggle Display Status",
+      "description": "Change the status of a display using its tagID"
+    },
+    {
+      "name": "increase-brightness",
+      "title": "Increase Brightness",
+      "description": "Increase the brightness of a display using its tagID"
+    },
+    {
+      "name": "decrease-brightness",
+      "title": "Decrease Brightness",
+      "description": "Decrease the brightness of a display using its tagID"
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set the brightness of a display using its tagID and a numeric value between 0 and 1"
+    },
+    {
+      "name": "increase-contrast",
+      "title": "Increase Contrast",
+      "description": "Increase the contrast of a display using its tagID"
+    },
+    {
+      "name": "decrease-contrast",
+      "title": "Decrease Contrast",
+      "description": "Decrease the contrast of a display using its tagID"
+    },
+    {
+      "name": "set-contrast",
+      "title": "Set Contrast",
+      "description": "Set the contrast of a display using its tagID and a numeric value between 0 and 1"
+    },
+    {
+      "name": "get-resolutions",
+      "title": "Get Resolutions",
+      "description": "Get a list of all resolutions supported by a display using its tagID"
+    },
+    {
+      "name": "set-resolution",
+      "title": "Set Resolution",
+      "description": "Set the resolution of a display using its tagID and resolution index"
+    },
+    {
+      "name": "get-pip-status",
+      "title": "Get PIP Status",
+      "description": "Get the PIP (Picture in Picture) status for a display using its tagID"
+    },
+    {
+      "name": "toggle-pip-status",
+      "title": "Toggle the PIP Status",
+      "description": "Change the PIP (Picture in Picture) status for a display using its tagID"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "betterdisplayApp",
+      "title": "BetterDisplay App",
+      "description": "Select the BetterDisplay app",
+      "type": "appPicker",
+      "required": false,
+      "default": "pro.betterdisplay.BetterDisplay"
+    },
+    {
+      "name": "brightnessIncrement",
+      "title": "Brightness Increment",
+      "type": "dropdown",
+      "required": false,
+      "description": "The brightness increment when changing the brightness of a display",
+      "default": "0.05",
+      "data": [
+        {
+          "value": "0.05",
+          "title": "5%"
+        },
+        {
+          "value": "0.1",
+          "title": "10%"
+        }
+      ]
+    },
+    {
+      "name": "contrastIncrement",
+      "title": "Contrast Increment",
+      "type": "dropdown",
+      "required": false,
+      "description": "The contrast increment when changing the contrast of a display",
+      "default": "0.05",
+      "data": [
+        {
+          "value": "0.05",
+          "title": "5%"
+        },
+        {
+          "value": "0.1",
+          "title": "10%"
+        }
+      ]
+    }
+  ],
+  "ai": {
+    "instructions": "Always execute the 'Get Displays' command first to get a list of all available displays. The 'Get Main Display' command will return information about the main display. Every command that requires a display tagID, first run the 'Get Displays' command to get the tagID of the display you want to interact with. When setting brightness or contrast, the value should always be rounded to 1 decimal place. When changing the resolution, never suggest a resolution that is marked unsafe unless specifically requested by the user. PIP stands for Picture in Picture.",
+    "evals": [
+      {
+        "input": "@betterdisplay List all my connected displays?",
+        "mocks": {
+          "get-displays": "{\n  \"UUID\" : \"37D8832A-2D66-02CA-B9F7-8F30A301B230\",\n  \"alphanumericSerial\" : \"\",\n  \"deviceType\" : \"Display\",\n  \"displayID\" : \"1\",\n  \"model\" : \"41042\",\n  \"name\" : \"Écran intégré\",\n  \"originalName\" : \"Color LCD\",\n  \"productName\" : \"Color LCD\",\n  \"registryLocation\" : \"IOService:\\/AppleARMPE\\/arm-io@10F00000\\/AppleT811xIO\\/disp0@30000000\\/AppleCLCD2\",\n  \"serial\" : \"4251086178\",\n  \"tagID\" : \"3\",\n  \"vendor\" : \"1552\",\n  \"weekOfManufacture\" : \"0\",\n  \"yearOfManufacture\" : \"0\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"18063\",\n  \"name\" : \"Virtuel 16:10\",\n  \"originalName\" : \"Virtuel 16:10\",\n  \"productName\" : \"Virtuel 16:10\",\n  \"serial\" : \"1821401327\",\n  \"tagID\" : \"64\",\n  \"vendor\" : \"2198\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"51448\",\n  \"name\" : \"Virtuel 16:9\",\n  \"originalName\" : \"Virtuel 16:9\",\n  \"productName\" : \"Virtuel 16:9\",\n  \"serial\" : \"461953693\",\n  \"tagID\" : \"29\",\n  \"vendor\" : \"2198\"\n}\n"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-displays"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@betterdisplay What is the current resolution of my display?",
+        "mocks": {
+          "get-displays": "{\n  \"UUID\" : \"37D8832A-2D66-02CA-B9F7-8F30A301B230\",\n  \"alphanumericSerial\" : \"\",\n  \"deviceType\" : \"Display\",\n  \"displayID\" : \"1\",\n  \"model\" : \"41042\",\n  \"name\" : \"Écran intégré\",\n  \"originalName\" : \"Color LCD\",\n  \"productName\" : \"Color LCD\",\n  \"registryLocation\" : \"IOService:\\/AppleARMPE\\/arm-io@10F00000\\/AppleT811xIO\\/disp0@30000000\\/AppleCLCD2\",\n  \"serial\" : \"4251086178\",\n  \"tagID\" : \"3\",\n  \"vendor\" : \"1552\",\n  \"weekOfManufacture\" : \"0\",\n  \"yearOfManufacture\" : \"0\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"51448\",\n  \"name\" : \"Virtuel 16:9\",\n  \"originalName\" : \"Virtuel 16:9\",\n  \"productName\" : \"Virtuel 16:9\",\n  \"serial\" : \"461953693\",\n  \"tagID\" : \"29\",\n  \"vendor\" : \"2198\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"18063\",\n  \"name\" : \"Virtuel 16:10\",\n  \"originalName\" : \"Virtuel 16:10\",\n  \"productName\" : \"Virtuel 16:10\",\n  \"serial\" : \"1821401327\",\n  \"tagID\" : \"64\",\n  \"vendor\" : \"2198\"\n}\n",
+          "get-display-status": "on",
+          "get-resolutions": "0 - 960x600 HiDPI 60Hz 10bpc \n1 - 1024x640 HiDPI 60Hz 10bpc \n2 - 1024x666 HiDPI 60Hz 10bpc \n3 - 1280x800 HiDPI 60Hz 10bpc \n4 - 1280x832 HiDPI 60Hz 10bpc Native \n5 - 1470x918 HiDPI 60Hz 10bpc \n6 - 1470x956 HiDPI 60Hz 10bpc Default \n7 - 1710x1068 HiDPI 60Hz 10bpc \n8 - 1710x1112 HiDPI 60Hz 10bpc Current \n9 - 1920x1200 60Hz 10bpc \n10 - 2048x1280 60Hz 10bpc \n11 - 2048x1332 60Hz 10bpc \n12 - 2560x1600 60Hz 10bpc \n13 - 2560x1664 60Hz 10bpc Native"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-displays"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "tagID": "3"
+              },
+              "name": "get-resolutions"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@betterdisplay What resolutions can I use with my display?",
+        "mocks": {
+          "get-displays": "{\n  \"UUID\" : \"37D8832A-2D66-02CA-B9F7-8F30A301B230\",\n  \"alphanumericSerial\" : \"\",\n  \"deviceType\" : \"Display\",\n  \"displayID\" : \"1\",\n  \"model\" : \"41042\",\n  \"name\" : \"Écran intégré\",\n  \"originalName\" : \"Color LCD\",\n  \"productName\" : \"Color LCD\",\n  \"registryLocation\" : \"IOService:\\/AppleARMPE\\/arm-io@10F00000\\/AppleT811xIO\\/disp0@30000000\\/AppleCLCD2\",\n  \"serial\" : \"4251086178\",\n  \"tagID\" : \"3\",\n  \"vendor\" : \"1552\",\n  \"weekOfManufacture\" : \"0\",\n  \"yearOfManufacture\" : \"0\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"51448\",\n  \"name\" : \"Virtuel 16:9\",\n  \"originalName\" : \"Virtuel 16:9\",\n  \"productName\" : \"Virtuel 16:9\",\n  \"serial\" : \"461953693\",\n  \"tagID\" : \"29\",\n  \"vendor\" : \"2198\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"18063\",\n  \"name\" : \"Virtuel 16:10\",\n  \"originalName\" : \"Virtuel 16:10\",\n  \"productName\" : \"Virtuel 16:10\",\n  \"serial\" : \"1821401327\",\n  \"tagID\" : \"64\",\n  \"vendor\" : \"2198\"\n}\n",
+          "get-resolutions": "0 - 960x600 HiDPI 60Hz 10bpc \n1 - 1024x640 HiDPI 60Hz 10bpc \n2 - 1024x666 HiDPI 60Hz 10bpc \n3 - 1280x800 HiDPI 60Hz 10bpc \n4 - 1280x832 HiDPI 60Hz 10bpc Native \n5 - 1470x918 HiDPI 60Hz 10bpc \n6 - 1470x956 HiDPI 60Hz 10bpc Default \n7 - 1710x1068 HiDPI 60Hz 10bpc \n8 - 1710x1112 HiDPI 60Hz 10bpc Current \n9 - 1920x1200 60Hz 10bpc \n10 - 2048x1280 60Hz 10bpc \n11 - 2048x1332 60Hz 10bpc \n12 - 2560x1600 60Hz 10bpc \n13 - 2560x1664 60Hz 10bpc Native"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-displays"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "tagID": "3"
+              },
+              "name": "get-resolutions"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@betterdisplay increase the brightness of my screen",
+        "mocks": {
+          "get-displays": "{\n  \"UUID\" : \"37D8832A-2D66-02CA-B9F7-8F30A301B230\",\n  \"alphanumericSerial\" : \"\",\n  \"deviceType\" : \"Display\",\n  \"displayID\" : \"1\",\n  \"model\" : \"41042\",\n  \"name\" : \"Écran intégré\",\n  \"originalName\" : \"Color LCD\",\n  \"productName\" : \"Color LCD\",\n  \"registryLocation\" : \"IOService:\\/AppleARMPE\\/arm-io@10F00000\\/AppleT811xIO\\/disp0@30000000\\/AppleCLCD2\",\n  \"serial\" : \"4251086178\",\n  \"tagID\" : \"3\",\n  \"vendor\" : \"1552\",\n  \"weekOfManufacture\" : \"0\",\n  \"yearOfManufacture\" : \"0\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"18063\",\n  \"name\" : \"Virtuel 16:10\",\n  \"originalName\" : \"Virtuel 16:10\",\n  \"productName\" : \"Virtuel 16:10\",\n  \"serial\" : \"1821401327\",\n  \"tagID\" : \"64\",\n  \"vendor\" : \"2198\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"51448\",\n  \"name\" : \"Virtuel 16:9\",\n  \"originalName\" : \"Virtuel 16:9\",\n  \"productName\" : \"Virtuel 16:9\",\n  \"serial\" : \"461953693\",\n  \"tagID\" : \"29\",\n  \"vendor\" : \"2198\"\n}\n",
+          "increase-brightness": " "
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-displays"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "tagID": "3"
+              },
+              "name": "increase-brightness"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@betterdisplay Turn the PIP of my virtual screen 16:9 on",
+        "mocks": {
+          "get-display-status": "on",
+          "get-displays": "{\n  \"UUID\" : \"03CB75C1-2ACA-41AA-8E1A-783D10E905D3\",\n  \"alphanumericSerial\" : \"FPSKTY2\",\n  \"deviceType\" : \"Display\",\n  \"displayID\" : \"2\",\n  \"model\" : \"41288\",\n  \"name\" : \"Dell AW3420DW\",\n  \"originalName\" : \"Dell AW3420DW\",\n  \"productName\" : \"Dell AW3420DW\",\n  \"registryLocation\" : \"IOService:\\/AppleARMPE\\/arm-io@10F00000\\/AppleT811xIO\\/dispext0@70000000\\/AppleCLCD2\",\n  \"serial\" : \"808736844\",\n  \"tagID\" : \"2\",\n  \"vendor\" : \"4268\",\n  \"weekOfManufacture\" : \"38\",\n  \"yearOfManufacture\" : \"2020\"\n},{\n  \"UUID\" : \"25C2C75F-BCDF-4B59-B109-AF91C7C46AA4\",\n  \"alphanumericSerial\" : \"\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"5\",\n  \"model\" : \"51448\",\n  \"name\" : \"Virtuel 16:9\",\n  \"originalName\" : \"Virtuel 16:9\",\n  \"productName\" : \"Virtuel 16:9\",\n  \"registryLocation\" : \"\",\n  \"serial\" : \"461953693\",\n  \"tagID\" : \"29\",\n  \"tagID (Display)\" : \"30\",\n  \"tagID (VirtualScreen)\" : \"29\",\n  \"vendor\" : \"2198\",\n  \"weekOfManufacture\" : \"0\",\n  \"yearOfManufacture\" : \"0\"\n},{\n  \"UUID\" : \"UNKNOWN\",\n  \"deviceType\" : \"VirtualScreen\",\n  \"displayID\" : \"0\",\n  \"model\" : \"18063\",\n  \"name\" : \"Virtuel 16:10\",\n  \"originalName\" : \"Virtuel 16:10\",\n  \"productName\" : \"Virtuel 16:10\",\n  \"serial\" : \"1821401327\",\n  \"tagID\" : \"64\",\n  \"vendor\" : \"2198\"\n}\n",
+          "get-pip-status": "off",
+          "toggle-pip-status": " "
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-displays"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "tagID": "29"
+              },
+              "name": "toggle-pip-status"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

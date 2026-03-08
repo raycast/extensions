@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>net.sabi.BrightnessAgent</string>
+	<key>LimitLoadToSessionType</key>
+	<string>LoginWindow</string>
+	<key>OnDemand</key>
+	<false/>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Library/PrivilegedHelperTools/brightness</string>
+                <string>0</string>
+	</array>
+        <key>KeepAlive</key>
+        <false/>
+	<key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>
