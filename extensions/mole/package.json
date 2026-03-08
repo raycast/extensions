@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mole",
+  "title": "Mole",
+  "description": "macOS system optimizer — deep cleaning, app uninstall, disk analysis, system monitoring, and more",
+  "icon": "extension-icon.png",
+  "author": "trinvhco",
+  "license": "MIT",
+  "version": "1.0.0",
+  "categories": ["System"],
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "clean",
+      "title": "Clean System",
+      "subtitle": "Mole",
+      "description": "Deep system cleanup — removes caches, browser data, logs, and temporary files",
+      "mode": "no-view",
+      "keywords": ["clean", "cache", "junk", "cleanup"]
+    },
+    {
+      "name": "clean-dry-run",
+      "title": "Clean System (Dry Run)",
+      "subtitle": "Mole",
+      "description": "Preview system cleanup without deleting anything",
+      "mode": "no-view",
+      "keywords": ["clean", "preview", "dry run"]
+    },
+    {
+      "name": "uninstall",
+      "title": "Uninstall Application",
+      "subtitle": "Mole",
+      "description": "Smart app removal with associated files cleanup",
+      "mode": "no-view",
+      "keywords": ["uninstall", "remove", "app", "application"]
+    },
+    {
+      "name": "optimize",
+      "title": "Optimize System",
+      "subtitle": "Mole",
+      "description": "Rebuild system databases, clear caches, reset services, and refresh Finder/Dock",
+      "mode": "no-view",
+      "keywords": ["optimize", "performance", "rebuild", "speed"]
+    },
+    {
+      "name": "optimize-dry-run",
+      "title": "Optimize System (Dry Run)",
+      "subtitle": "Mole",
+      "description": "Preview system optimization without making changes",
+      "mode": "no-view",
+      "keywords": ["optimize", "preview", "dry run"]
+    },
+    {
+      "name": "analyze",
+      "title": "Analyze Disk",
+      "subtitle": "Mole",
+      "description": "Interactive disk space visualization and exploration",
+      "mode": "no-view",
+      "keywords": ["disk", "analyze", "space", "storage", "usage"]
+    },
+    {
+      "name": "status",
+      "title": "System Status",
+      "subtitle": "Mole",
+      "description": "Real-time CPU, GPU, memory, disk, and network monitoring dashboard",
+      "mode": "no-view",
+      "keywords": ["status", "monitor", "cpu", "memory", "network"]
+    },
+    {
+      "name": "purge",
+      "title": "Purge Build Artifacts",
+      "subtitle": "Mole",
+      "description": "Remove node_modules, target, build, dist directories from projects",
+      "mode": "no-view",
+      "keywords": ["purge", "node_modules", "build", "artifacts"]
+    },
+    {
+      "name": "purge-dry-run",
+      "title": "Purge Build Artifacts (Dry Run)",
+      "subtitle": "Mole",
+      "description": "Preview build artifact cleanup without deleting anything",
+      "mode": "no-view",
+      "keywords": ["purge", "preview", "dry run"]
+    },
+    {
+      "name": "installer",
+      "title": "Find Installer Files",
+      "subtitle": "Mole",
+      "description": "Discover and remove large .dmg, .pkg, .zip installer files",
+      "mode": "no-view",
+      "keywords": ["installer", "dmg", "pkg", "downloads"]
+    },
+    {
+      "name": "touchid-enable",
+      "title": "Enable Touch ID for Sudo",
+      "subtitle": "Mole",
+      "description": "Configure Touch ID authentication for sudo commands",
+      "mode": "no-view",
+      "keywords": ["touchid", "sudo", "fingerprint"]
+    },
+    {
+      "name": "update",
+      "title": "Update Mole",
+      "subtitle": "Mole",
+      "description": "Update Mole to the latest stable version",
+      "mode": "no-view",
+      "keywords": ["update", "upgrade"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
