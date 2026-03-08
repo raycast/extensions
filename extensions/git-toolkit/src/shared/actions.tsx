@@ -2,8 +2,10 @@ import { Action, getPreferenceValues } from "@raycast/api";
 
 import { openInApp } from "./ui";
 
+const prefs = getPreferenceValues<Preferences>();
+
 export function EditorActions({ repoPath }: { repoPath: string }) {
-  const { editorApp, editorAppAlt } = getPreferenceValues<Preferences>();
+  const { editorApp, editorAppAlt } = prefs;
   return (
     <>
       {editorApp && (
@@ -27,7 +29,7 @@ export function EditorActions({ repoPath }: { repoPath: string }) {
 }
 
 export function OpenInTerminal({ repoPath }: { repoPath: string }) {
-  const { terminalApp } = getPreferenceValues<Preferences>();
+  const { terminalApp } = prefs;
   const defaultTerminal =
     process.platform === "win32"
       ? { name: "Command Prompt", path: process.env.COMSPEC ?? "C:\\Windows\\System32\\cmd.exe" }
