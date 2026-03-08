@@ -45,12 +45,12 @@ export interface TaskInput {
 }
 
 function getBaseUrl(): string {
-  const { apiUrl } = getPreferenceValues<ExtensionPreferences>();
+  const { apiUrl } = getPreferenceValues<Preferences>();
   return apiUrl.replace(/\/+$/, "");
 }
 
 function getHeaders(): Record<string, string> {
-  const { apiToken } = getPreferenceValues<ExtensionPreferences>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   return {
     Authorization: `Bearer ${apiToken}`,
     "Content-Type": "application/json",

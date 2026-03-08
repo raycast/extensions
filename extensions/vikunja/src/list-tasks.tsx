@@ -147,7 +147,7 @@ export default function ListTasks() {
     }
   }
 
-  const { apiUrl } = getPreferenceValues<Preferences.ListTasks>();
+  const { apiUrl } = getPreferenceValues<Preferences>();
   const baseUrl = apiUrl.replace(/\/+$/, "");
 
   const openTasks = tasks.filter((t) => !t.done);
