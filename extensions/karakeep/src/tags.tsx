@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, confirmAlert, Form, Icon, List, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateTag, fetchDeleteTag, fetchUpdateTag } from "./apis";
@@ -133,6 +133,15 @@ export default function Tags() {
   };
 
   const handleDeleteTag = async (tagId: string) => {
+    if (
+      !(await confirmAlert({
+        title: t("tags.actions.deleteTag"),
+        message: t("tags.deleteConfirm"),
+      }))
+    ) {
+      return;
+    }
+
     await runWithToast({
       loading: { title: t("tags.toast.delete.loading") },
       success: { title: t("tags.toast.delete.success") },

@@ -168,7 +168,9 @@ export default function Stats() {
           "",
           `| ${t("stats.totalAssetSize")} | **${formatBytes(stats.totalAssetSize)}** |`,
           `|---|---|`,
-          ...(stats.assetsByType || []).map((a) => `| ${a.type} | ${a.count} files · ${formatBytes(a.totalSize)} |`),
+          ...(stats.assetsByType || []).map(
+            (a) => `| ${a.type.replace(/\|/g, "\\|")} | ${a.count} files · ${formatBytes(a.totalSize)} |`,
+          ),
         ]
       : []),
   ].join("\n");

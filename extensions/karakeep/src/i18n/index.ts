@@ -257,6 +257,7 @@ export const translations = {
         createTag: "Create Tag",
         renameTag: "Rename Tag",
       },
+      deleteConfirm: "Are you sure you want to delete this tag?",
       toast: {
         create: {
           loading: "Creating tag...",
@@ -756,6 +757,7 @@ export const translations = {
         createTag: "创建标签",
         renameTag: "重命名标签",
       },
+      deleteConfirm: "确定要删除此标签吗？",
       toast: {
         create: {
           loading: "创建标签中...",
