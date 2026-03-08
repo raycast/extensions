@@ -34,6 +34,14 @@ interface ShellArguments {
   command: string;
 }
 
+interface Preferences {
+  arguments_terminal: boolean;
+  arguments_terminal_type: string;
+  cmux_run_mode: string;
+  cmux_socket_path: string;
+  cmux_socket_password: string;
+}
+
 let cachedEnv: null | EnvType = null;
 
 const escapePosixCommand = (command: string) => command.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
@@ -424,97 +432,32 @@ const runInWarp = async (command: string) => {
 };
 
 const runInGhostty = async (command: string) => {
-  const escapedCommand = escapeAppleScriptString(command);
-  const script = `
-      -- Set this property to true to always open in a new window
-      property open_in_new_window : true
+  // 1. Open/activate Ghostty
+  spawnSync("/usr/bin/open", ["-a", "Ghostty"], { encoding: "utf8" });
 
-      -- Set this property to true to always open in a new tab
-      property open_in_new_tab : false
+  // 2. Write osascript to a temp file to safely handle special characters in command
+  //    (avoids shell/AppleScript string escaping issues on the command line)
+  const asEscaped = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const typeScript = `tell application "System Events" to tell process "Ghostty" to keystroke "${asEscaped}"`;
+  spawnSync("bash", ["-c", "cat > /tmp/ghostty-type.scpt"], { input: typeScript, encoding: "utf8" });
 
-      -- Reset this property to false
-      property opened_new_window : false
+  // 3. Short synchronous wait — must stay within Raycast's ~2.3s process window.
+  //    Running inside the Raycast process ensures Accessibility is inherited.
+  spawnSync("sleep", ["0.8"]);
 
-      -- Handlers
-      on new_window()
-          tell application "System Events" to tell process "Ghostty"
-              click menu item "New Window" of menu "File" of menu bar 1
-              set frontmost to true
-          end tell
-      end new_window
+  // 4. Type the command into Ghostty
+  spawnSync("/usr/bin/osascript", ["/tmp/ghostty-type.scpt"], { encoding: "utf8" });
 
-      on new_tab()
-          tell application "System Events" to tell process "Ghostty"
-              click menu item "New Tab" of menu "File" of menu bar 1
-              set frontmost to true
-          end tell
-      end new_tab
+  // 5. Press enter
+  spawnSync("sleep", ["0.1"]);
+  spawnSync("/usr/bin/osascript", [
+    "-e",
+    'tell application "System Events" to tell process "Ghostty" to key code 36',
+  ], { encoding: "utf8" });
 
-      on call_forward()
-          tell application "Ghostty" to activate
-      end call_forward
-
-      on is_running()
-          application "Ghostty" is running
-      end is_running
-
-      on has_windows()
-          if not is_running() then return false
-          tell application "System Events"
-              if windows of process "Ghostty" is {} then return false
-          end tell
-          true
-      end has_windows
-
-      on send_text(custom_text)
-          tell application "System Events"
-              keystroke custom_text
-          end tell
-      end send_text
-
-      on press_enter()
-          tell application "System Events"
-              key code 36
-          end tell
-      end press_enter
-
-
-      -- Main
-      if not is_running() then
-          call_forward()
-          set opened_new_window to true
-      else
-          call_forward()
-          set opened_new_window to false
-      end if
-
-      if has_windows() then
-          if open_in_new_window and not opened_new_window then
-              new_window()
-          else if open_in_new_tab and not opened_new_window then
-              new_tab()
-          end if
-      else
-          new_window()
-      end if
-
-
-      -- Make sure a window exists before we continue, or the write may fail
-      repeat until has_windows()
-          delay 0.5
-      end repeat
-      delay 0.5
-
-      call_forward()
-      delay 0.1
-      send_text("${escapedCommand}")
-      delay 0.05
-      press_enter()
-      call_forward()
-  `;
-
-  return runAppleScriptSafe(script, "Ghostty");
+  return true;
 };
+
 
 const runInTerminal = async (command: string) => {
   const escapedCommand = escapeAppleScriptString(command);

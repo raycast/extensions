@@ -192,9 +192,6 @@
     {
       "name": "cmux_run_mode",
       "type": "dropdown",
-    {
-      "name": "cmux_run_mode",
-      "type": "dropdown",
       "required": false,
       "title": "Cmux Run Mode",
       "description": "Choose whether commands run in the active cmux workspace or in a newly created workspace.",
@@ -227,6 +224,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.89.1",
+    "ray": "^0.0.1",
     "raycast-toolkit": "^1.0.6",
     "run-applescript": "^6.0.0",
     "shell-env": "^4.0.1",
