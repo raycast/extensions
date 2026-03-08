@@ -13,18 +13,19 @@ import {
   environment,
   Icon,
   Color,
+  Clipboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
 interface Preferences {
   contentType: "toc" | "text" | "both";
   generateKlappentext: boolean;
-  eurobuchPlatform: string;
   eurobuchPassword: string;
 }
 
 interface Arguments {
   isbn: string;
+  tocText?: string;
 }
 
 interface ExternalSource {
@@ -53,6 +54,7 @@ const DNB_SRU_BASE_URL = "https://services.dnb.de/sru/dnb";
 const DNB_BASE_URL = "https://d-nb.info";
 const TOC_SUFFIX = "/04";
 const TEXT_SUFFIX = "/34";
+const EUROBUCH_PLATFORM = "10xx95";
 
 /**
  * Normalizes ISBN by removing all hyphens, spaces, and other separators
@@ -165,8 +167,12 @@ async function checkContentAvailable(url: string): Promise<boolean> {
  * Klappentext-Generierung läuft daher über externe Quellen:
  * Eurobuch → Google Books → Wikipedia → Titel/Autor-Fallback
  * fetchTOCText() bleibt Placeholder bis DNB HTML-Variante anbietet.
+ * Falls manualTocText übergeben wird, wird dieser direkt verwendet.
  */
-async function fetchTOCText(_tocUrl: string): Promise<string> {
+async function fetchTOCText(_tocUrl: string, manualTocText?: string): Promise<string> {
+  if (manualTocText && manualTocText.trim().length > 0) {
+    return manualTocText.trim();
+  }
   return "";
 }
 
@@ -261,7 +267,6 @@ const convertISBN10to13 = (isbn10: string): string => {
  */
 async function fetchEurobuchInfo(isbn: string): Promise<ExternalSource | null> {
   const prefs = getPreferenceValues<Preferences>();
-  if (!prefs.eurobuchPlatform) return null;
 
   try {
     const clean = isbn.replace(/[-\s]/g, "");
@@ -274,7 +279,7 @@ async function fetchEurobuchInfo(isbn: string): Promise<ExternalSource | null> {
     } catch { /* use fallback IP */ }
 
     const params = new URLSearchParams({
-      platform: prefs.eurobuchPlatform,
+      platform: EUROBUCH_PLATFORM,
       password: prefs.eurobuchPassword || "",
       isbn: searchIsbn,
       author: "",
@@ -400,11 +405,12 @@ async function generateVerifiedKlappentext(
   isbn: string,
   title: string,
   author: string,
+  manualTocText?: string,
 ): Promise<KlappentextResult> {
   const sources: ExternalSource[] = [];
 
-  // 1. Fetch TOC text
-  const tocText = await fetchTOCText(tocUrl);
+  // 1. Fetch TOC text (manual input takes priority over URL fetch)
+  const tocText = await fetchTOCText(tocUrl, manualTocText);
 
   // 2. Assess TOC quality (skip AI assessment if no text could be extracted)
   const hasTOCText = tocText.trim().length > 0;
@@ -585,12 +591,14 @@ function KlappentextView({
   isbn,
   title,
   author,
+  tocFromClipboard,
 }: {
   result: KlappentextResult;
   tocUrl: string;
   isbn: string;
   title: string;
   author: string;
+  tocFromClipboard: string | null;
 }) {
   const getConfidenceColor = (conf: number): Color => {
     if (conf >= 70) return Color.Green;
@@ -670,6 +678,7 @@ ${result.sources.map((s) => `- **${s.name}** (Konfidenz: ${s.confidence}%)${s.ur
             icon={{ source: getConfidenceIcon(result.confidence), tintColor: getConfidenceColor(result.confidence) }}
           />
           <Detail.Metadata.Label title="Quellen" text={result.sources.length.toString()} />
+          <Detail.Metadata.Label title="TOC-Quelle" text={tocFromClipboard ? "Clipboard" : "Nicht verfügbar"} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="DNB" text="Inhaltsverzeichnis" target={tocUrl} />
         </Detail.Metadata>
@@ -682,13 +691,13 @@ ${result.sources.map((s) => `- **${s.name}** (Konfidenz: ${s.confidence}%)${s.ur
  * Main Command Component
  */
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const { isbn } = props.arguments;
+  const { isbn, tocText: argTocText } = props.arguments;
   const preferences = getPreferenceValues<Preferences>();
 
   const [isLoading, setIsLoading] = useState(true);
   const [showDetail, setShowDetail] = useState(false);
   const [result, setResult] = useState<KlappentextResult | null>(null);
-  const [bookInfo, setBookInfo] = useState<{ title: string; author: string; tocUrl: string } | null>(null);
+  const [bookInfo, setBookInfo] = useState<{ title: string; author: string; tocUrl: string; tocFromClipboard: string | null } | null>(null);
 
   useEffect(() => {
     async function runCommand() {
@@ -712,6 +721,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         setIsLoading(false);
         return;
       }
+
+      const clipboardContent = await Clipboard.readText();
+      const tocFromClipboard =
+        clipboardContent &&
+        clipboardContent.length > 100 &&
+        !/^\d[\d\s\-]{8,}$/.test(clipboardContent.trim())
+          ? clipboardContent
+          : null;
 
       const toast = await showToast({
         style: Toast.Style.Animated,
@@ -771,12 +788,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
             return;
           }
 
-          toast.message = "Prüfe Quellen und generiere Klappentext...";
+          const effectiveTocText = argTocText || tocFromClipboard || undefined;
+          if (tocFromClipboard && !argTocText) {
+            toast.message = "TOC aus Clipboard erkannt – generiere Klappentext...";
+          } else {
+            toast.message = "Prüfe Quellen und generiere Klappentext...";
+          }
 
           try {
-            const klappentextResult = await generateVerifiedKlappentext(tocUrl, normalizeISBN(isbn), title, author);
+            const klappentextResult = await generateVerifiedKlappentext(tocUrl, normalizeISBN(isbn), title, author, effectiveTocText);
 
-            setBookInfo({ title, author, tocUrl });
+            setBookInfo({ title, author, tocUrl, tocFromClipboard });
             setResult(klappentextResult);
             setShowDetail(true);
             await toast.hide();
@@ -857,6 +879,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         isbn={normalizeISBN(isbn)}
         title={bookInfo.title}
         author={bookInfo.author}
+        tocFromClipboard={bookInfo.tocFromClipboard}
       />
     );
   }

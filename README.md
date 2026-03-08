@@ -1,59 +1,72 @@
-# dnb-content-viewer
-Show book contents of "Deutsche Nationalbibliothek", if ISBN 10/13 exists
+# DNB Book Content
 
-DNB Inhalte - Raycast Extension
-Öffne schnell Inhaltsverzeichnisse und Inhaltstexte von Büchern aus der Deutschen Nationalbibliothek (DNB) direkt per ISBN.
-Der Sammelauftrag der Deutschen Nationalbibliothek umfasst alle Publikationen in Schrift, Bild und Ton, die seit 1913 in Deutschland, in deutscher Sprache D-A-CH, als Übersetzung aus der deutschen Sprache oder über Deutschland veröffentlicht wurden. Ebenso Netzpublikationen, E-Books und Hörbücher.
+Search for book contents in the [Deutsche Nationalbibliothek (DNB)](https://www.dnb.de) by ISBN and optionally generate an AI-powered book description (Klappentext) with keywords.
 
-📚 Features
+## Features
 
-ISBN zu DNB-Inhalte: Gib eine ISBN ein und öffne automatisch:
+### ISBN → DNB Lookup
+Enter an ISBN-10 or ISBN-13 and the extension queries the DNB SRU API (MARC21-XML). It resolves the internal DNB identifier (IDN) and opens the scanned table of contents (PDF) or full text directly in your browser.
 
-Inhaltsverzeichnis (/04)
-Inhaltstext (/34)
-Oder beides gleichzeitig
+### AI Klappentext Generation (optional)
+When enabled, the extension generates a concise German book description (max. 150 words) plus five search keywords — useful for book listings, shop descriptions, or cataloging.
 
+Because DNB's `/04` endpoint delivers scan-only PDFs (no extractable text), the AI pipeline draws from external sources in priority order:
 
-Intelligente Verfügbarkeitsprüfung: Prüft automatisch, ob Inhalte verfügbar sind
-Flexibel konfigurierbar: Wähle in den Preferences, welcher Inhalt standardmäßig geöffnet werden soll
-Automatischer Fallback: Öffnet den Katalog-Eintrag, wenn keine Inhalte verfügbar sind
-ISBN-10 & ISBN-13 Support: Beide Formate werden unterstützt
+| Priority | Source | What it provides |
+|---|---|---|
+| 1 | **Clipboard** | Manually copied TOC text |
+| 2 | **Eurobuch** | Title, author confirmation |
+| 3 | **Google Books** | Publisher description |
+| 4 | **Wikipedia (DE)** | Article extract |
 
-🚀 Verwendung
+TOC quality is assessed automatically. If the content is rich enough, the Klappentext is generated directly from it. Otherwise external sources fill the gap.
 
-Öffne Raycast
-Tippe DNB oder dnb
-Gib die ISBN ein (z.B. 9783957577597 oder 3957577597)
-Drücke Enter
+### TOC via Clipboard
+Copy a table of contents from any source, then trigger the extension. If the clipboard contains more than 100 characters of non-ISBN text, it is automatically detected and used as the primary TOC input — no manual pasting required.
 
-Die Extension sucht automatisch die DNB-IDN und öffnet die gewünschten Inhalte.
-⚙️ Einstellungen
-In den Raycast Preferences kannst du wählen:
+### MARC21 Author Parser
+The extension parses MARC21 fields in priority order: `100$a` (main entry) → `700$a` (added entry) → `110$a` (corporate body) → fallback extraction from the `245` title field for patterns like `"von Vorname Nachname"`.
 
-Nur Inhaltsverzeichnis - Öffnet nur das Inhaltsverzeichnis
-Nur Inhaltstext - Öffnet nur den Inhaltstext
-Beides - Öffnet beide Inhalte in separaten Tabs
+## Setup
 
-🔗 DNB URL-Struktur
-Die Extension nutzt folgendes URL-Schema:
-https://d-nb.info/{IDN}/04  → Inhaltsverzeichnis
-https://d-nb.info/{IDN}/34  → Inhaltstext
-https://d-nb.info/{IDN}     → Katalog-Eintrag (Fallback)
+No API keys are required for basic usage (browser open mode).
 
-📦 Installation
-Für die Entwicklung:
-bashnpm install
-npm run dev
-Für die Produktion:
-bashnpm run build
-🛠️ Technische Details
-Die Extension verwendet:
+### Preferences
 
-DNB SRU API: Für die Umwandlung ISBN → IDN
-HEAD Requests: Zur Prüfung der Verfügbarkeit von Inhalten
-Raycast API: Für die native Integration
+| Preference | Default | Description |
+|---|---|---|
+| **Content to Open** | Table of Contents | What to open in the browser when Klappentext is disabled: TOC, full text, or both |
+| **Klappentext generieren** | Off | Enable AI-generated book description. Requires Raycast Pro or BYOK. |
+| **Eurobuch Passwort** | — | Optional Eurobuch API password for title/author cross-referencing |
 
-📄 Lizenz
-MIT
-🤝 Beitragen
-Feedback und Pull Requests sind willkommen!
+## Workflow
+
+### Standard run
+1. Trigger the command and enter an ISBN
+2. The extension queries the DNB SRU API, resolves the IDN, and checks content availability
+3. If Klappentext is disabled: opens TOC and/or full text in the browser
+4. If Klappentext is enabled: fetches external sources, generates description, shows result view with confidence score and metadata sidebar
+
+### Clipboard run
+1. Copy a table of contents from any source (PDF viewer, website, OCR output)
+2. Trigger the command and enter the ISBN
+3. The extension detects the clipboard content automatically
+4. Toast shows: *"TOC aus Clipboard erkannt"*
+5. Klappentext is generated directly from the copied text — external sources are skipped if quality is sufficient
+
+### Result view
+The Klappentext detail view shows:
+- Generated description with optional confidence warning
+- Search keywords
+- List of sources used, with links
+- Metadata sidebar: title, author, ISBN, confidence %, source count, TOC source, DNB link
+
+## Requirements
+
+- **Raycast** (macOS)
+- **Raycast Pro or BYOK** — required only for AI Klappentext generation
+- Internet connection for the DNB SRU API and optional external sources
+
+## Author
+
+Werner Deuermeier · [wdeu.de](https://wdeu.de)

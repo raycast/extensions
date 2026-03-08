@@ -38,13 +38,19 @@
           "placeholder": "ISBN-10 or ISBN-13 (e.g., 9783957577597)",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "tocText",
+          "placeholder": "TOC einfügen (optional)",
+          "type": "text",
+          "required": false
         }
       ],
       "preferences": [
         {
           "name": "contentType",
           "type": "dropdown",
-          "required": true,
+          "required": false,
           "title": "Content to Open",
           "description": "Choose which content should be opened (when Klappentext disabled)",
           "default": "toc",
@@ -71,15 +77,6 @@
           "description": "Generiert automatisch einen Klappentext (max. 150 Wörter) + Suchwörter. Benötigt Raycast Pro oder BYOK.",
           "default": false,
           "required": false
-        },
-        {
-          "name": "eurobuchPlatform",
-          "type": "text",
-          "title": "Eurobuch Platform-ID",
-          "description": "Eurobuch API Platform-ID",
-          "required": false,
-          "default": "",
-          "placeholder": "z.B. 12345"
         },
         {
           "name": "eurobuchPassword",
