@@ -1,6 +1,6 @@
 # superwhisper Changelog
 
-## [Copy/Paste Last History and fix missing meta files] - {PR_MERGE_DATE}
+## [Copy/Paste Last History and fix missing meta files] - 2026-03-08
 
 - Added no-view commands to copy or paste the most recent Superwhisper transcript.
 - Added command settings to choose AI Processed vs Unprocessed transcript variant for copy/paste behavior.
