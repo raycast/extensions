@@ -19,6 +19,8 @@ import { useState, useEffect } from "react";
 interface Preferences {
   contentType: "toc" | "text" | "both";
   generateKlappentext: boolean;
+  eurobuchPlatform: string;
+  eurobuchPassword: string;
 }
 
 interface Arguments {
@@ -92,9 +94,44 @@ async function searchDNBMetadata(isbn: string): Promise<{ idn: string; title: st
     const titleMatch = text.match(/<datafield tag="245"[^>]*>[\s\S]*?<subfield code="a">([^<]+)<\/subfield>/);
     const title = titleMatch?.[1]?.trim().replace(/\s*\/\s*$/, "") || "";
 
-    // Extract author from datafield 100, subfield a
-    const authorMatch = text.match(/<datafield tag="100"[^>]*>[\s\S]*?<subfield code="a">([^<]+)<\/subfield>/);
-    const author = authorMatch?.[1]?.trim().replace(/,\s*$/, "") || "";
+    // Extract full 245 field for fallback author parsing
+    const field245 = text.match(/<datafield tag="245"[^>]*>([\s\S]*?)<\/datafield>/);
+    const field245text = field245?.[1] ?? "";
+
+    // Extract author: Priorität 100$a → 700$a → 110$a → aus 245 → ""
+    const field100 = text.match(/<datafield tag="100"[^>]*>[\s\S]*?<subfield code="a">([^<]+)<\/subfield>/);
+    const field700 = text.match(/<datafield tag="700"[^>]*>[\s\S]*?<subfield code="a">([^<]+)<\/subfield>/);
+    const field110 = text.match(/<datafield tag="110"[^>]*>[\s\S]*?<subfield code="a">([^<]+)<\/subfield>/);
+
+    // Fallback: Autor aus 245-Subfields extrahieren (z.B. "/ von Ingrid Knoche" oder "/ Max Mustermann")
+    let field245author = "";
+    if (!field100 && !field700 && !field110) {
+      const subfieldValues = [...field245text.matchAll(/<subfield code="[^"]*">([^<]+)<\/subfield>/g)].map(
+        (m) => m[1],
+      );
+      const combined = subfieldValues.join(" ");
+      // Priorität 1: "von Vorname Nachname" (beide Teile mit Großbuchstabe)
+      const vonMatch = combined.match(/\bvon\s+([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+)+)/);
+      // Priorität 2: "/ Vorname Nachname" (direkt nach Slash, kein "von")
+      const slashMatch = combined.match(/\/\s+([A-ZÄÖÜ][a-zäöüß]+(?:\s+[A-ZÄÖÜ][a-zäöüß]+)+)(?:\s|$|\.\.\.)/);
+      field245author = vonMatch?.[1]?.trim() ?? slashMatch?.[1]?.trim() ?? "";
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(`[DNB] ISBN ${normalized} – creator fields:`);
+      console.log(`  MARC 100 (Haupteintrag Person): ${field100?.[1] ?? "—"}`);
+      console.log(`  MARC 700 (Nebeneintrag Person): ${field700?.[1] ?? "—"}`);
+      console.log(`  MARC 110 (Körperschaft):        ${field110?.[1] ?? "—"}`);
+      console.log(`  MARC 245 (Titelfeld, komplett): ${field245text.replace(/\s+/g, " ").trim()}`);
+      console.log(`  Fallback aus 245:               ${field245author || "—"}`);
+    }
+
+    const authorRaw = field100?.[1] ?? field700?.[1] ?? field110?.[1] ?? field245author;
+    const author = authorRaw.trim().replace(/,\s*$/, "");
+
+    if (process.env.NODE_ENV === "development") {
+      console.log(`  → Extrahierter Autor:           ${author || "(leer)"}`);
+    }
 
     return { idn, title, author };
   } catch (error) {
@@ -121,12 +158,16 @@ async function checkContentAvailable(url: string): Promise<boolean> {
 }
 
 /**
- * Fetches table of contents text from DNB (simplified - would need actual scraping)
+ * Fetches TOC text from DNB.
+ * NOTE: DNB /04 liefert ausschließlich application/pdf (bestätigt März 2026).
+ * PDF-Extraktion nicht möglich in Raycast/Node ohne DOM.
+ * pdfjs-dist und pdf-parse scheitern beide an DOMMatrix.
+ * Klappentext-Generierung läuft daher über externe Quellen:
+ * Eurobuch → Google Books → Wikipedia → Titel/Autor-Fallback
+ * fetchTOCText() bleibt Placeholder bis DNB HTML-Variante anbietet.
  */
-async function fetchTOCText(tocUrl: string): Promise<string> {
-  // NOTE: In real implementation, this would scrape the HTML/PDF
-  // For now, return placeholder that AI can work with
-  return `Inhaltsverzeichnis verfügbar unter: ${tocUrl}`;
+async function fetchTOCText(_tocUrl: string): Promise<string> {
+  return "";
 }
 
 /**
@@ -170,6 +211,98 @@ Antworte NUR mit dem JSON-Objekt, nichts anderes!`;
       reason: "Automatische Bewertung fehlgeschlagen",
       hasEnoughInfo: true,
     };
+  }
+}
+
+// --- Eurobuch helpers (extracted from eurobuch-search-v2) ---
+
+const decodeXMLEntities = (str: string): string =>
+  str
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">");
+
+interface EurobuchBook {
+  title: string;
+  author: string;
+}
+
+const parseEurobuchXML = (xml: string): EurobuchBook[] => {
+  const books: EurobuchBook[] = [];
+  const bookRegex = /<Book\s+([^>]*?)\s*\/>/g;
+  let match: RegExpExecArray | null;
+
+  while ((match = bookRegex.exec(xml)) !== null) {
+    const captured = match[1];
+    const getAttribute = (name: string): string => {
+      const value = new RegExp(`${name}="([^"]*)"`, "i").exec(captured)?.[1] || "";
+      return decodeXMLEntities(value);
+    };
+    const book = { title: getAttribute("title"), author: getAttribute("author") };
+    if (book.title) books.push(book);
+  }
+
+  return books;
+};
+
+const convertISBN10to13 = (isbn10: string): string => {
+  const clean = isbn10.replace(/[-\s]/g, "");
+  if (clean.length !== 10) return isbn10;
+  const base = "978" + clean.substring(0, 9);
+  let sum = 0;
+  for (let i = 0; i < 12; i++) sum += parseInt(base[i]) * (i % 2 === 0 ? 1 : 3);
+  return base + ((10 - (sum % 10)) % 10);
+};
+
+/**
+ * Fetches book info from Eurobuch API (requires platform credentials in preferences)
+ */
+async function fetchEurobuchInfo(isbn: string): Promise<ExternalSource | null> {
+  const prefs = getPreferenceValues<Preferences>();
+  if (!prefs.eurobuchPlatform) return null;
+
+  try {
+    const clean = isbn.replace(/[-\s]/g, "");
+    const searchIsbn = clean.length === 10 ? convertISBN10to13(clean) : clean;
+
+    let clientIP = "0.0.0.0";
+    try {
+      const ipRes = await fetch("https://api.ipify.org?format=text", { signal: AbortSignal.timeout(3000) });
+      clientIP = await ipRes.text();
+    } catch { /* use fallback IP */ }
+
+    const params = new URLSearchParams({
+      platform: prefs.eurobuchPlatform,
+      password: prefs.eurobuchPassword || "",
+      isbn: searchIsbn,
+      author: "",
+      title: "",
+      mediatype: "0",
+      clientip: clientIP,
+      format: "xml",
+      maxresults: "1",
+    });
+
+    const response = await fetch(`https://www.eurobuch.de/extreq/meta/extquery.php?${params}`, {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!response.ok) return null;
+
+    const books = parseEurobuchXML(await response.text());
+    if (books.length === 0) return null;
+
+    const book = books[0];
+    return {
+      name: "Eurobuch",
+      snippet: book.author ? `${book.title} / ${book.author}` : book.title,
+      url: `https://www.eurobuch.de/buch/isbn/${searchIsbn}.html`,
+      confidence: 90,
+    };
+  } catch (error) {
+    console.error("Eurobuch fetch failed:", error);
+    return null;
   }
 }
 
@@ -273,16 +406,21 @@ async function generateVerifiedKlappentext(
   // 1. Fetch TOC text
   const tocText = await fetchTOCText(tocUrl);
 
-  // 2. Assess TOC quality
-  const tocQuality = await assessTOCQuality(tocText);
+  // 2. Assess TOC quality (skip AI assessment if no text could be extracted)
+  const hasTOCText = tocText.trim().length > 0;
+  const tocQuality = hasTOCText
+    ? await assessTOCQuality(tocText)
+    : { quality: "poor" as const, confidence: 0, reason: "Kein TOC-Text verfügbar (Scan-PDF oder Abruf fehlgeschlagen)", hasEnoughInfo: false };
 
-  // 3. Fetch external sources (especially if TOC quality is poor/medium)
-  if (tocQuality.quality === "poor" || tocQuality.quality === "medium") {
-    // Fetch Google Books
+  // 3. Fetch external sources if TOC quality is poor/medium or no text at all
+  // Priority: Eurobuch → Google Books → Wikipedia
+  if (!hasTOCText || tocQuality.quality === "poor" || tocQuality.quality === "medium") {
+    const eurobuch = await fetchEurobuchInfo(isbn);
+    if (eurobuch) sources.push(eurobuch);
+
     const googleBooks = await fetchGoogleBooksInfo(isbn);
     if (googleBooks) sources.push(googleBooks);
 
-    // Fetch Wikipedia
     const wikipedia = await fetchWikipediaInfo(title, author);
     if (wikipedia) sources.push(wikipedia);
   }
@@ -299,7 +437,45 @@ async function generateVerifiedKlappentext(
   }
 
   // 5. Generate Klappentext with sources
-  const prompt = `Du bist ein deutschsprachiger Klappentext-Generator mit strengem Fact-Checking.
+  const poorTocWithSources = (!hasTOCText || tocQuality.quality === "poor") && sources.length > 0;
+
+  const prompt = poorTocWithSources
+    ? `Du bist ein sachlicher Buchbeschreibungs-Generator.
+
+REGEL: Erfinde NICHTS. Nutze ausschließlich die bereitgestellten Quellen.
+
+BUCH-INFORMATIONEN:
+Titel: ${title}
+Autor: ${author}
+ISBN: ${isbn}
+
+EXTERNE QUELLEN:
+${sources.map((s) => `\n${s.name}:\n${s.snippet}\nURL: ${s.url}\n`).join("\n")}
+
+AUFGABE:
+1. Erstelle eine sachliche Kurzbeschreibung (max. 100 Wörter, deutsch)
+   - Kein Roman-Klappentext, keine blumige Sprache
+   - Beschreibe das Themengebiet: was lernt/findet der Leser?
+   - Nutze nur Informationen aus den Quellen oben
+   - Falls zu wenig Info: Antworte "INSUFFICIENT_DATA: [Grund]"
+
+2. Erstelle 5 Suchwörter (Hauptwörter, kommagetrennt)
+
+3. Konfidenz: 40-60% (da kein Buchinhalt direkt verfügbar)
+
+ANTWORT-FORMAT (exakt so):
+KLAPPENTEXT:
+[Deine sachliche Beschreibung - oder "INSUFFICIENT_DATA: [Grund]"]
+
+SUCHWÖRTER:
+[Begriff1, Begriff2, Begriff3, Begriff4, Begriff5]
+
+QUELLEN_GENUTZT:
+[Liste der genutzten Quellen]
+
+KONFIDENZ:
+[Zahl 40-60]%`
+    : `Du bist ein deutschsprachiger Klappentext-Generator mit strengem Fact-Checking.
 
 KRITISCH WICHTIG - GOLDEN RULES:
 1. Erfinde NICHTS! Nutze nur Informationen aus den bereitgestellten Quellen.
@@ -379,7 +555,9 @@ KONFIDENZ:
 
     // Generate warning if confidence is low
     let warning: string | undefined;
-    if (confidence < 50) {
+    if (poorTocWithSources) {
+      warning = "ℹ️ Basiert auf Titel und externen Quellen – kein Buchinhalt verfügbar.";
+    } else if (confidence < 50) {
       warning = "⚠️ Niedrige Konfidenz - Bitte manuell prüfen!";
     } else if (tocQuality.quality === "poor") {
       warning = "ℹ️ Basiert hauptsächlich auf externen Quellen (Inhaltsverzeichnis wenig aussagekräftig)";

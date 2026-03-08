@@ -6,10 +6,26 @@
   "icon": "extension-icon.png",
   "author": "wdeu",
   "version": "1.0.0",
-  "platforms": ["macOS"],
-  "categories": ["Data", "Productivity"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
   "license": "MIT",
-  "keywords": ["dnb", "deutsche nationalbibliothek", "isbn", "books", "library", "catalog", "table of contents", "germany", "ai", "klappentext"],
+  "keywords": [
+    "dnb",
+    "deutsche nationalbibliothek",
+    "isbn",
+    "books",
+    "library",
+    "catalog",
+    "table of contents",
+    "germany",
+    "ai",
+    "klappentext"
+  ],
   "commands": [
     {
       "name": "search-content",
@@ -33,9 +49,18 @@
           "description": "Choose which content should be opened (when Klappentext disabled)",
           "default": "toc",
           "data": [
-            {"title": "Table of Contents Only", "value": "toc"},
-            {"title": "Content Text Only", "value": "text"},
-            {"title": "Both (Table of Contents & Content Text)", "value": "both"}
+            {
+              "title": "Table of Contents Only",
+              "value": "toc"
+            },
+            {
+              "title": "Content Text Only",
+              "value": "text"
+            },
+            {
+              "title": "Both (Table of Contents & Content Text)",
+              "value": "both"
+            }
           ]
         },
         {
@@ -46,6 +71,23 @@
           "description": "Generiert automatisch einen Klappentext (max. 150 Wörter) + Suchwörter. Benötigt Raycast Pro oder BYOK.",
           "default": false,
           "required": false
+        },
+        {
+          "name": "eurobuchPlatform",
+          "type": "text",
+          "title": "Eurobuch Platform-ID",
+          "description": "Eurobuch API Platform-ID",
+          "required": false,
+          "default": "",
+          "placeholder": "z.B. 12345"
+        },
+        {
+          "name": "eurobuchPassword",
+          "type": "password",
+          "title": "Eurobuch Passwort",
+          "description": "Eurobuch API Passwort (optional)",
+          "required": false,
+          "default": ""
         }
       ]
     }
