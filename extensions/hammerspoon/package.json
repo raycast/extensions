@@ -48,10 +48,10 @@
       "preferences": [
         {
           "name": "clearConsole",
-          "label": "Also Clear Console",
+          "label": "Clear Console",
           "description": "Clear the Hammerspoon Console before reloading the configuration file",
           "type": "checkbox",
-          "default": true,
+          "default": false,
           "required": false
         },
         {
