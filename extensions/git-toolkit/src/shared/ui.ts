@@ -38,13 +38,17 @@ export function getStatusTag(status: RepoStatus): { value: string; color: Color 
 
 export function openInApp(appPath: string, projectPath: string, options?: { passProjectPathArg?: boolean }) {
   const passProjectPathArg = options?.passProjectPathArg ?? true;
+  const envWithoutRaycastVars = {};
 
   const child =
     process.platform === "win32"
       ? spawn("cmd", ["/c", "start", "", "/d", projectPath, appPath, ...(passProjectPathArg ? [projectPath] : [])], {
           detached: true,
+          env: envWithoutRaycastVars,
         })
-      : spawn("open", ["-a", appPath, ...(passProjectPathArg ? [projectPath] : [])]);
+      : spawn("open", ["-a", appPath, ...(passProjectPathArg ? [projectPath] : [])], {
+          env: envWithoutRaycastVars,
+        });
 
   child.on("error", (err) => {
     showToast({ style: Toast.Style.Failure, title: "Failed to open app", message: String(err) });
