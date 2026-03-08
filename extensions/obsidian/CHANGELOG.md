@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [Silent Mode No Longer Activates Obsidian] - {PR_MERGE_DATE}
+
+- Fix: Append to Daily Note, Append Task, and custom actions with silent mode enabled no longer bring Obsidian to the foreground
+- Fix: Multi-vault Append Task was missing the silent flag, causing Obsidian to always activate on vault selection
+- Uses macOS `open -g` (background flag) instead of Raycast `open()` when silent mode is on
+
 ## [AI Search Tool Content Search Parameter] - 2026-02-16
 
 - Add searchContent parameter to searchNote AI tool for controlling search mode
