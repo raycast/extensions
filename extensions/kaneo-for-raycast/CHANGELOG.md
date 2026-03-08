@@ -1,6 +1,6 @@
 # Kaneo Changelog
 
-## [Assign Task] - {PR_MERGE_DATE}
+## [Assign Task] - 2026-03-08
 
 - Added "Assign to me" action for tasks
 - Added shortcut to revalidate tasks list
