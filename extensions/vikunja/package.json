@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vikunja",
+  "title": "Vikunja Task Manager",
+  "description": "Create tasks in your Vikunja instance directly from Raycast",
+  "icon": "command-icon.png",
+  "author": "flexorflex",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "subtitle": "Vikunja",
+      "description": "Create a new task in Vikunja",
+      "mode": "view"
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "subtitle": "Vikunja",
+      "description": "Browse and manage tasks in your Vikunja projects",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "Vikunja URL",
+      "description": "Base URL of your Vikunja instance (e.g. https://tasks.rehmlab.cc)",
+      "type": "textfield",
+      "required": true,
+      "default": "https://tasks.rehmlab.cc"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Vikunja API token for authentication",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
