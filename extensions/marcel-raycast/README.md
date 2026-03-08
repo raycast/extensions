@@ -35,15 +35,6 @@ Open Raycast, type "View Quests", and:
 - Use Actions menu to change status
 - Search to filter quests instantly
 
-## Development
-
-```bash
-npm run dev          # Development mode
-npm run build        # Production build
-npm run lint         # Check code style
-npm run publish      # Publish to Raycast Store
-```
-
 ## License
 
 MIT

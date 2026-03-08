@@ -104,7 +104,7 @@ export default function QuestsCommand() {
           description="Please check your Marcel API token in extension preferences."
           actions={
             <ActionPanel>
-              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />

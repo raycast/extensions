@@ -125,7 +125,7 @@ export function QuestListItem({
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel.Section>
         </ActionPanel>
       }
