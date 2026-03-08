@@ -1,6 +1,6 @@
 # Pomodoro Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-03-08
 
 - Add session label to end of interval notification
 - Add random rewards preference
