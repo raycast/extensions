@@ -4,7 +4,7 @@ import { fetchOrbitaPosts } from "./get-rss";
 import { formatRelativeDate } from "./utils";
 
 export default function Command() {
-  const { isLoading, data, error, revalidate } = useCachedPromise(async () => await fetchOrbitaPosts(), []);
+  const { isLoading, data, error, revalidate } = useCachedPromise(fetchOrbitaPosts);
   const posts = data || [];
 
   return (
