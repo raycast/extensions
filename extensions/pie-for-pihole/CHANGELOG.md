@@ -1,6 +1,6 @@
 # Pie for Pi-hole Changelog
 
-## [Pi-hole v6 Support] - {PR_MERGE_DATE}
+## [Pi-hole v6 Support] - 2026-03-08
 
 - Added Pi-hole v6 API support with session-based authentication and 2FA/TOTP
 - Added 9 new commands: Manage Domains, Add Domain, Subscription Lists, Add List, Check Domain, Update Gravity, Restart DNS, Flush Logs, Backup Config, Groups & Clients, View Configuration

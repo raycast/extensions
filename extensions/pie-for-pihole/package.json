@@ -132,8 +132,14 @@
       "description": "Select your Pi-hole version",
       "default": "v5",
       "data": [
-        { "title": "Pi-hole 5", "value": "v5" },
-        { "title": "Pi-hole 6", "value": "v6" }
+        {
+          "title": "Pi-hole 5",
+          "value": "v5"
+        },
+        {
+          "title": "Pi-hole 6",
+          "value": "v6"
+        }
       ]
     },
     {
@@ -178,5 +184,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
