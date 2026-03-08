@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - 2026-03-08
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Create tasks with title, description, project, due date, priority, labels, and favorite
 - List and browse tasks by project (defaults to Inbox)

@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiUrl: string;
-  apiToken: string;
-}
-
 export interface Project {
   id: number;
   title: string;
@@ -50,12 +45,12 @@ export interface TaskInput {
 }
 
 function getBaseUrl(): string {
-  const { apiUrl } = getPreferenceValues<Preferences>();
+  const { apiUrl } = getPreferenceValues<ExtensionPreferences>();
   return apiUrl.replace(/\/+$/, "");
 }
 
 function getHeaders(): Record<string, string> {
-  const { apiToken } = getPreferenceValues<Preferences>();
+  const { apiToken } = getPreferenceValues<ExtensionPreferences>();
   return {
     Authorization: `Bearer ${apiToken}`,
     "Content-Type": "application/json",

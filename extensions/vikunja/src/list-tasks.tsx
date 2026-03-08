@@ -39,9 +39,9 @@ function formatDueDate(dueDate: string | null): string | undefined {
   if (days < 0) return `${Math.abs(days)}d overdue`;
   if (days === 0) return "Today";
   if (days === 1) return "Tomorrow";
-  return date.toLocaleDateString("de-DE", {
-    day: "2-digit",
-    month: "2-digit",
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
     year: "numeric",
   });
 }
@@ -147,7 +147,7 @@ export default function ListTasks() {
     }
   }
 
-  const { apiUrl } = getPreferenceValues<{ apiUrl: string }>();
+  const { apiUrl } = getPreferenceValues<Preferences.ListTasks>();
   const baseUrl = apiUrl.replace(/\/+$/, "");
 
   const openTasks = tasks.filter((t) => !t.done);

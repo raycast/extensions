@@ -98,7 +98,7 @@ export default function CreateTask() {
         primaryAction: {
           title: "Open in Vikunja",
           onAction: () => {
-            const { apiUrl } = getPreferenceValues<{ apiUrl: string }>();
+            const { apiUrl } = getPreferenceValues<Preferences.CreateTask>();
             open(`${apiUrl.replace(/\/+$/, "")}/projects/${projectId}`);
           },
         },
@@ -131,7 +131,7 @@ export default function CreateTask() {
             />
             <Action.OpenInBrowser
               title="Open Vikunja"
-              url={getPreferenceValues<{ apiUrl: string }>().apiUrl}
+              url={getPreferenceValues<Preferences.CreateTask>().apiUrl}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
           </ActionPanel.Section>
