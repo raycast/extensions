@@ -38,16 +38,17 @@ export function getStatusTag(status: RepoStatus): { value: string; color: Color 
 
 export function openInApp(appPath: string, projectPath: string, options?: { passProjectPathArg?: boolean }) {
   const passProjectPathArg = options?.passProjectPathArg ?? true;
-  const envWithoutRaycastVars = {};
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { NODE_ENV, ...filteredEnv } = process.env;
 
   const child =
     process.platform === "win32"
       ? spawn("cmd", ["/c", "start", "", "/d", projectPath, appPath, ...(passProjectPathArg ? [projectPath] : [])], {
           detached: true,
-          env: envWithoutRaycastVars,
+          env: filteredEnv,
         })
       : spawn("open", ["-a", appPath, ...(passProjectPathArg ? [projectPath] : [])], {
-          env: envWithoutRaycastVars,
+          env: {},
         });
 
   child.on("error", (err) => {
