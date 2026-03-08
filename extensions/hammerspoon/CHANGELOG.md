@@ -2,7 +2,7 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
-- add `Also Clear Console` preference to `Reload Configuration File` command to optionally clear the Hammerspoon Console before reloading
+- add `Clear Console` preference to `Reload Configuration File` command to optionally clear the Hammerspoon Console before reloading
 
 ## [New Commands] - 2026-01-24
 
