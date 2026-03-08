@@ -27,7 +27,7 @@
     {
       "name": "apiUrl",
       "title": "Vikunja URL",
-      "description": "Base URL of your Vikunja instance (e.g. https://tasks.rehmlab.cc)",
+      "description": "Base URL of your Vikunja instance (e.g. https://tasks.example.com)",
       "type": "textfield",
       "required": true,
       "placeholder": "https://tasks.example.com"

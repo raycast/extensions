@@ -98,10 +98,8 @@ export default function CreateTask() {
         primaryAction: {
           title: "Open in Vikunja",
           onAction: () => {
-            const project = projects.find((p) => p.id === projectId);
-            if (project) {
-              open(`https://tasks.rehmlab.cc/projects/${projectId}`);
-            }
+            const { apiUrl } = getPreferenceValues<{ apiUrl: string }>();
+            open(`${apiUrl.replace(/\/+$/, "")}/projects/${projectId}`);
           },
         },
       });
