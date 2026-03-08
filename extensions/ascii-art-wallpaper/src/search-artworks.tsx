@@ -84,7 +84,7 @@ export default function SearchArtworks() {
     <Grid
       columns={4}
       aspectRatio="3/4"
-      fit="fill"
+      fit={Grid.Fit.Fill}
       isLoading={isLoading || isSearching}
       onSearchTextChange={search}
       searchBarPlaceholder="Search artworks... (e.g. Monet, Van Gogh, starry night)"
