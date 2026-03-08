@@ -31,12 +31,31 @@
  */
 
 import React from "react";
-import { Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useState, useMemo } from "react";
 import { Position, AssetType } from "../utils/types";
 import { ASSET_TYPE_LABELS } from "../utils/constants";
-import { validateUnits, parseUnits } from "../utils/validation";
+import {
+  validateUnits,
+  parseUnits,
+  validateTotalValue,
+  parseTotalValue,
+  computeUnitsFromTotalValue,
+} from "../utils/validation";
 import { formatUnits, formatCurrency, getDisplayName } from "../utils/formatting";
+import { useAssetPrice } from "../hooks/useAssetPrice";
+import { useFxRate } from "../hooks/useFxRate";
+
+// ──────────────────────────────────────────
+// Input Mode
+// ──────────────────────────────────────────
+
+/**
+ * Input mode for specifying additional position size.
+ * - "units"  — user enters number of units to add
+ * - "value"  — user enters total value to add, units are auto-calculated from current price
+ */
+type AddInputMode = "units" | "value";
 
 // ──────────────────────────────────────────
 // Props
@@ -85,16 +104,52 @@ export function AddUnitsForm({
 }: AddUnitsFormProps): React.JSX.Element {
   const { pop } = useNavigation();
 
+  // ── Price Data (for total-value mode) ──
+
+  const isCash = position.assetType === AssetType.CASH;
+  const symbol = isCash ? undefined : position.symbol;
+  const { price, isLoading: isPriceLoading } = useAssetPrice(symbol);
+  const { baseCurrency } = getPreferenceValues<Preferences>();
+
+  const referencePrice = useMemo(() => {
+    if (position.priceOverride && position.priceOverride > 0) return position.priceOverride;
+    return price?.price ?? 0;
+  }, [position.priceOverride, price]);
+
+  const hasPriceForValueMode = !isCash && referencePrice > 0;
+
+  // ── Currency options for value mode ──
+
+  const valueCurrencyOptions = useMemo(() => {
+    const options: Array<{ value: string; title: string }> = [];
+    options.push({ value: baseCurrency, title: `${baseCurrency} (Base Currency)` });
+    if (position.currency !== baseCurrency) {
+      options.push({ value: position.currency, title: `${position.currency} (Asset Currency)` });
+    }
+    return options;
+  }, [baseCurrency, position.currency]);
+
   // ── Form State ──
 
+  const [inputMode, setInputMode] = useState<AddInputMode>("units");
+  const [valueCurrency, setValueCurrency] = useState<string>(baseCurrency);
   const [unitsToAdd, setUnitsToAdd] = useState<string>("");
   const [unitsError, setUnitsError] = useState<string | undefined>(undefined);
+  const [totalValueInput, setTotalValueInput] = useState<string>("");
+  const [totalValueError, setTotalValueError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const needsFxConversion = valueCurrency !== position.currency;
+
+  // FX rate: valueCurrency → assetCurrency (only fetched when currencies differ)
+  const { rate: fxRate, isLoading: isFxLoading } = useFxRate(
+    needsFxConversion ? valueCurrency : undefined,
+    needsFxConversion ? position.currency : undefined,
+  );
 
   // ── Display Values ──
 
   const typeLabel = ASSET_TYPE_LABELS[position.assetType] ?? "Unknown";
-  const isCash = position.assetType === AssetType.CASH;
   const currentUnitsDisplay = isCash ? formatCurrency(position.units, position.currency) : formatUnits(position.units);
 
   // Context-aware labels
@@ -105,7 +160,7 @@ export function AddUnitsForm({
   const fieldPlaceholder = isCash ? "e.g. 500, 1250.50, 10000" : "e.g. 10, 5.5, 0.25";
   const currentLabel = isCash ? "Current Balance" : "Current Units";
 
-  // ── Computed New Total ──
+  // ── Computed New Total (units mode) ──
 
   const newTotal = useMemo(() => {
     const trimmed = unitsToAdd.trim();
@@ -117,6 +172,49 @@ export function AddUnitsForm({
 
   const newTotalDisplay =
     newTotal !== null ? (isCash ? formatCurrency(newTotal, position.currency) : formatUnits(newTotal)) : "—";
+
+  // ── Computed New Total (value mode) ──
+
+  const computedUnitsFromValue = useMemo(() => {
+    const trimmed = totalValueInput.trim();
+    if (!trimmed || !referencePrice) return null;
+    const parsed = Number(trimmed);
+    if (isNaN(parsed) || parsed <= 0) return null;
+    const valueInAssetCurrency = needsFxConversion && fxRate ? parsed * fxRate : parsed;
+    if (needsFxConversion && !fxRate) return null;
+    return computeUnitsFromTotalValue(valueInAssetCurrency, referencePrice);
+  }, [totalValueInput, referencePrice, needsFxConversion, fxRate]);
+
+  const newTotalFromValue = useMemo(() => {
+    if (computedUnitsFromValue === null) return null;
+    return position.units + computedUnitsFromValue;
+  }, [computedUnitsFromValue, position.units]);
+
+  const valuePreviewText = useMemo(() => {
+    if (needsFxConversion && !fxRate && totalValueInput.trim()) {
+      return "Loading FX rate...";
+    }
+    if (computedUnitsFromValue === null || newTotalFromValue === null) {
+      return needsFxConversion
+        ? `Enter the total amount to invest in ${valueCurrency}. Will be converted to ${position.currency} then divided by ${formatCurrency(referencePrice, position.currency)}/unit.`
+        : `Enter the total amount to invest in ${valueCurrency}. Units will be calculated at ${formatCurrency(referencePrice, position.currency)}/unit.`;
+    }
+    const nativeAdded = computedUnitsFromValue * referencePrice;
+    if (needsFxConversion && fxRate) {
+      return `→ ${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(referencePrice, position.currency)} = ${formatCurrency(nativeAdded, position.currency)} (${formatCurrency(Number(totalValueInput.trim()), valueCurrency)} at ${fxRate.toFixed(4)} ${valueCurrency}/${position.currency})\n${currentUnitsDisplay} + ${formatUnits(computedUnitsFromValue)} = ${formatUnits(newTotalFromValue)} units`;
+    }
+    return `→ ${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(referencePrice, position.currency)} = ${formatCurrency(nativeAdded, position.currency)}\n${currentUnitsDisplay} + ${formatUnits(computedUnitsFromValue)} = ${formatUnits(newTotalFromValue)} units`;
+  }, [
+    computedUnitsFromValue,
+    newTotalFromValue,
+    referencePrice,
+    position.currency,
+    currentUnitsDisplay,
+    needsFxConversion,
+    fxRate,
+    totalValueInput,
+    valueCurrency,
+  ]);
 
   // ── Validation ──
 
@@ -135,17 +233,62 @@ export function AddUnitsForm({
     }
   }
 
+  function handleTotalValueBlur(event: Form.Event<string>) {
+    if (event.target.value && event.target.value.trim().length > 0) {
+      const error = validateTotalValue(event.target.value);
+      setTotalValueError(error);
+    }
+  }
+
+  function handleTotalValueChange(value: string) {
+    setTotalValueInput(value);
+    if (totalValueError) setTotalValueError(undefined);
+  }
+
+  function handleInputModeChange(value: string) {
+    setInputMode(value as AddInputMode);
+    setUnitsError(undefined);
+    setTotalValueError(undefined);
+  }
+
   // ── Submission ──
 
-  async function handleSubmit(values: { unitsToAdd: string }) {
-    // Validate the input
-    const unitValidation = validateUnits(values.unitsToAdd);
-    if (unitValidation) {
-      setUnitsError(unitValidation);
-      return;
+  async function handleSubmit(values: {
+    unitsToAdd?: string;
+    totalValueToAdd?: string;
+    inputMode?: string;
+    valueCurrency?: string;
+  }) {
+    let addedUnits: number;
+
+    if (!isCash && inputMode === "value") {
+      const tvValidation = validateTotalValue(values.totalValueToAdd);
+      if (tvValidation) {
+        setTotalValueError(tvValidation);
+        return;
+      }
+
+      if (needsFxConversion && !fxRate) {
+        setTotalValueError("FX rate not available yet. Please wait a moment.");
+        return;
+      }
+
+      const totalValue = parseTotalValue(values.totalValueToAdd!);
+      const totalValueInAssetCurrency = needsFxConversion && fxRate ? totalValue * fxRate : totalValue;
+      addedUnits = computeUnitsFromTotalValue(totalValueInAssetCurrency, referencePrice);
+      if (addedUnits <= 0) {
+        setTotalValueError("Computed units would be zero — check the price and total value.");
+        return;
+      }
+    } else {
+      const unitValidation = validateUnits(values.unitsToAdd);
+      if (unitValidation) {
+        setUnitsError(unitValidation);
+        return;
+      }
+      addedUnits = parseUnits(values.unitsToAdd!);
     }
 
-    const addedUnits = parseUnits(values.unitsToAdd);
     const computedTotal = position.units + addedUnits;
 
     setIsSubmitting(true);
@@ -165,7 +308,7 @@ export function AddUnitsForm({
   return (
     <Form
       navigationTitle={navTitle}
-      isLoading={isSubmitting}
+      isLoading={isSubmitting || isPriceLoading || isFxLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} icon={Icon.PlusCircle} onSubmit={handleSubmit} />
@@ -185,30 +328,66 @@ export function AddUnitsForm({
       {/* ── Current Value (read-only) ── */}
       <Form.Description title={currentLabel} text={currentUnitsDisplay} />
 
-      {/* ── Amount to Add ── */}
-      <Form.TextField
-        id="unitsToAdd"
-        title={fieldTitle}
-        placeholder={fieldPlaceholder}
-        error={unitsError}
-        onChange={handleUnitsChange}
-        onBlur={handleUnitsBlur}
-        autoFocus
-      />
+      {/* ── Input Mode Toggle (non-cash with price only) ── */}
+      {hasPriceForValueMode && (
+        <Form.Dropdown id="inputMode" title="Specify By" value={inputMode} onChange={handleInputModeChange}>
+          <Form.Dropdown.Item value="units" title="Number of Units" icon={Icon.Hashtag} />
+          <Form.Dropdown.Item value="value" title="Amount to Invest" icon={Icon.BankNote} />
+        </Form.Dropdown>
+      )}
 
-      {/* ── New Total Preview ── */}
-      <Form.Description
-        title="New Total"
-        text={
-          newTotal !== null
-            ? isCash
-              ? `${currentUnitsDisplay} + ${formatCurrency(Number(unitsToAdd.trim()), position.currency)} = ${newTotalDisplay}`
-              : `${currentUnitsDisplay} + ${unitsToAdd.trim()} = ${newTotalDisplay} units`
-            : isCash
-              ? `Enter the amount to add to your current ${currentUnitsDisplay} balance.`
-              : `Enter the number of units you purchased. They will be added to your current ${currentUnitsDisplay} units.`
-        }
-      />
+      {/* ── Units to Add (default mode) ── */}
+      {(isCash || inputMode === "units") && (
+        <>
+          <Form.TextField
+            id="unitsToAdd"
+            title={fieldTitle}
+            placeholder={fieldPlaceholder}
+            error={unitsError}
+            onChange={handleUnitsChange}
+            onBlur={handleUnitsBlur}
+            autoFocus
+          />
+
+          {/* ── New Total Preview ── */}
+          <Form.Description
+            title="New Total"
+            text={
+              newTotal !== null
+                ? isCash
+                  ? `${currentUnitsDisplay} + ${formatCurrency(Number(unitsToAdd.trim()), position.currency)} = ${newTotalDisplay}`
+                  : `${currentUnitsDisplay} + ${unitsToAdd.trim()} = ${newTotalDisplay} units`
+                : isCash
+                  ? `Enter the amount to add to your current ${currentUnitsDisplay} balance.`
+                  : `Enter the number of units you purchased. They will be added to your current ${currentUnitsDisplay} units.`
+            }
+          />
+        </>
+      )}
+
+      {/* ── Total Value to Add (value mode) ── */}
+      {!isCash && inputMode === "value" && (
+        <>
+          {/* ── Currency Selector ── */}
+          <Form.Dropdown id="valueCurrency" title="Value Currency" value={valueCurrency} onChange={setValueCurrency}>
+            {valueCurrencyOptions.map((opt) => (
+              <Form.Dropdown.Item key={opt.value} value={opt.value} title={opt.title} />
+            ))}
+          </Form.Dropdown>
+
+          <Form.TextField
+            id="totalValueToAdd"
+            title="Amount to Invest"
+            placeholder={`e.g. 500, 1000, 5000 (${valueCurrency})`}
+            error={totalValueError}
+            onChange={handleTotalValueChange}
+            onBlur={handleTotalValueBlur}
+            autoFocus
+          />
+
+          <Form.Description title="" text={valuePreviewText} />
+        </>
+      )}
     </Form>
   );
 }

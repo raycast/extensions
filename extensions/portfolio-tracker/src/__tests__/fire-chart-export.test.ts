@@ -143,8 +143,11 @@ describe("writeSvgToTempFile", () => {
 // ──────────────────────────────────────────
 // saveSvgToDownloads
 // ──────────────────────────────────────────
+// ~/Downloads only exists on macOS — skip on Linux CI runners.
 
-describe("saveSvgToDownloads", () => {
+const describeOnMac = process.platform === "darwin" ? describe : describe.skip;
+
+describeOnMac("saveSvgToDownloads", () => {
   // Use a unique filename to avoid conflicts with real user files
   const TEST_FILENAME = `_FIRE-test-${Date.now()}.svg`;
   const cleanupPaths: string[] = [];

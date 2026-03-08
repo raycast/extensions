@@ -39,13 +39,21 @@
  */
 
 import React from "react";
-import { Form, ActionPanel, Action, Icon } from "@raycast/api";
-import { useState } from "react";
-import { Position } from "../utils/types";
+import { Form, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { useState, useMemo } from "react";
+import { Position, AssetType } from "../utils/types";
 import { ASSET_TYPE_LABELS } from "../utils/constants";
-import { validateUnits, parseUnits } from "../utils/validation";
+import {
+  validateUnits,
+  parseUnits,
+  validateTotalValue,
+  parseTotalValue,
+  computeUnitsFromTotalValue,
+} from "../utils/validation";
 import { formatUnits, formatCurrency, getDisplayName, hasCustomName } from "../utils/formatting";
 import { BatchRenameMatch } from "./BatchRenameForm";
+import { useAssetPrice } from "../hooks/useAssetPrice";
+import { useFxRate } from "../hooks/useFxRate";
 
 // ──────────────────────────────────────────
 // Props
@@ -177,6 +185,13 @@ export function EditPositionForm({
 // Phase 1 — Edit Mode
 // ──────────────────────────────────────────
 
+/**
+ * Input mode for specifying position size in the edit form.
+ * - "units"  — user enters number of units directly
+ * - "value"  — user enters total value, units are auto-calculated from priceOverride or last known price
+ */
+type EditInputMode = "units" | "value";
+
 interface EditPhaseFormProps {
   position: Position;
   accountName: string;
@@ -194,16 +209,42 @@ function EditPhaseForm({
   onDone,
   onBatchNeeded,
 }: EditPhaseFormProps): React.JSX.Element {
+  // ── Price Data (for total-value mode) ──
+
+  const isCash = position.assetType === AssetType.CASH;
+  const isProperty = position.assetType === AssetType.MORTGAGE || position.assetType === AssetType.OWNED_PROPERTY;
+  const isDebt =
+    position.assetType === AssetType.CREDIT_CARD ||
+    position.assetType === AssetType.LOAN ||
+    position.assetType === AssetType.STUDENT_LOAN ||
+    position.assetType === AssetType.AUTO_LOAN ||
+    position.assetType === AssetType.BNPL;
+
+  const symbol = isCash || isProperty || isDebt ? undefined : position.symbol;
+  const { price, isLoading: isPriceLoading } = useAssetPrice(symbol);
+
+  const { baseCurrency } = getPreferenceValues<Preferences>();
+
+  const livePrice = useMemo(() => {
+    if (position.priceOverride && position.priceOverride > 0) return position.priceOverride;
+    return price?.price ?? 0;
+  }, [position.priceOverride, price]);
+
+  const showValueMode = !isCash && !isProperty && !isDebt && livePrice > 0;
+
   // ── Form State ──
 
+  const [inputMode, setInputMode] = useState<EditInputMode>("units");
   const [unitsError, setUnitsError] = useState<string | undefined>(undefined);
+  const [totalValueError, setTotalValueError] = useState<string | undefined>(undefined);
+  const [totalValueInput, setTotalValueInput] = useState<string>("");
+  const [valueCurrency, setValueCurrency] = useState<string>(baseCurrency);
   const [nameError, setNameError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ── Display Values ──
 
   const typeLabel = ASSET_TYPE_LABELS[position.assetType] ?? "Unknown";
-  const isCash = position.assetType === "CASH";
   const currentUnitsDisplay = isCash ? formatCurrency(position.units, position.currency) : formatUnits(position.units);
   const displayName = getDisplayName(position);
   const isRenamed = hasCustomName(position);
@@ -214,6 +255,49 @@ function EditPhaseForm({
   const unitsHelpText = isCash
     ? `Current balance: ${currentUnitsDisplay}. Enter the new total cash balance.`
     : `Current holding: ${currentUnitsDisplay} units. Enter the new total number of units you hold.`;
+
+  // ── Currency options for value mode ──
+
+  const valueCurrencyOptions = useMemo(() => {
+    const options: Array<{ value: string; title: string }> = [];
+    options.push({ value: baseCurrency, title: `${baseCurrency} (Base Currency)` });
+    if (position.currency !== baseCurrency) {
+      options.push({ value: position.currency, title: `${position.currency} (Asset Currency)` });
+    }
+    return options;
+  }, [baseCurrency, position.currency]);
+
+  const needsFxConversion = valueCurrency !== position.currency;
+
+  // FX rate: valueCurrency → assetCurrency (only fetched when currencies differ)
+  const { rate: fxRate, isLoading: isFxLoading } = useFxRate(
+    needsFxConversion ? valueCurrency : undefined,
+    needsFxConversion ? position.currency : undefined,
+  );
+
+  // ── Computed values for total-value mode ──
+
+  const computedUnitsFromValue = useMemo(() => {
+    const trimmed = totalValueInput.trim();
+    if (!trimmed || !livePrice) return null;
+    const parsed = Number(trimmed);
+    if (isNaN(parsed) || parsed <= 0) return null;
+    const valueInAssetCurrency = needsFxConversion && fxRate ? parsed * fxRate : parsed;
+    if (needsFxConversion && !fxRate) return null;
+    return computeUnitsFromTotalValue(valueInAssetCurrency, livePrice);
+  }, [totalValueInput, livePrice, needsFxConversion, fxRate]);
+
+  const computedValueDisplay = useMemo(() => {
+    if (needsFxConversion && !fxRate && totalValueInput.trim()) {
+      return "Loading FX rate...";
+    }
+    if (computedUnitsFromValue === null) return null;
+    const nativeTotal = computedUnitsFromValue * livePrice;
+    if (needsFxConversion && fxRate) {
+      return `→ ${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(livePrice, position.currency)} = ${formatCurrency(nativeTotal, position.currency)} (${formatCurrency(Number(totalValueInput.trim()), valueCurrency)} at ${fxRate.toFixed(4)} ${valueCurrency}/${position.currency})`;
+    }
+    return `→ ${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(livePrice, position.currency)} = ${formatCurrency(nativeTotal, position.currency)}`;
+  }, [computedUnitsFromValue, livePrice, position.currency, needsFxConversion, fxRate, totalValueInput, valueCurrency]);
 
   // ── Validation ──
 
@@ -229,6 +313,24 @@ function EditPhaseForm({
     if (unitsError) {
       setUnitsError(undefined);
     }
+  }
+
+  function handleTotalValueBlur(event: Form.Event<string>) {
+    if (event.target.value && event.target.value.trim().length > 0) {
+      const error = validateTotalValue(event.target.value);
+      setTotalValueError(error);
+    }
+  }
+
+  function handleTotalValueChange(value: string) {
+    setTotalValueInput(value);
+    if (totalValueError) setTotalValueError(undefined);
+  }
+
+  function handleInputModeChange(value: string) {
+    setInputMode(value as EditInputMode);
+    setUnitsError(undefined);
+    setTotalValueError(undefined);
   }
 
   function handleNameBlur(event: Form.Event<string>) {
@@ -248,14 +350,13 @@ function EditPhaseForm({
 
   // ── Submission ──
 
-  async function handleSubmit(values: { units: string; displayName?: string }) {
-    // Validate units
-    const unitValidation = validateUnits(values.units);
-    if (unitValidation) {
-      setUnitsError(unitValidation);
-      return;
-    }
-
+  async function handleSubmit(values: {
+    units?: string;
+    totalValue?: string;
+    inputMode?: string;
+    valueCurrency?: string;
+    displayName?: string;
+  }) {
     // Validate name (if provided)
     const trimmedName = values.displayName?.trim() ?? "";
     if (trimmedName && trimmedName === position.name) {
@@ -263,7 +364,34 @@ function EditPhaseForm({
       return;
     }
 
-    const newUnits = parseUnits(values.units);
+    let newUnits: number;
+
+    if (!isCash && inputMode === "value") {
+      const tvValidation = validateTotalValue(values.totalValue);
+      if (tvValidation) {
+        setTotalValueError(tvValidation);
+        return;
+      }
+      if (needsFxConversion && !fxRate) {
+        setTotalValueError("FX rate not available yet. Please wait a moment.");
+        return;
+      }
+
+      const totalValue = parseTotalValue(values.totalValue!);
+      const totalValueInAssetCurrency = needsFxConversion && fxRate ? totalValue * fxRate : totalValue;
+      newUnits = computeUnitsFromTotalValue(totalValueInAssetCurrency, livePrice);
+      if (newUnits <= 0) {
+        setTotalValueError("Computed units would be zero — check the price and total value.");
+        return;
+      }
+    } else {
+      const unitValidation = validateUnits(values.units);
+      if (unitValidation) {
+        setUnitsError(unitValidation);
+        return;
+      }
+      newUnits = parseUnits(values.units!);
+    }
 
     // Determine what changed
     const unitsChanged = newUnits !== position.units;
@@ -318,7 +446,7 @@ function EditPhaseForm({
   return (
     <Form
       navigationTitle={`Edit ${displayName}`}
-      isLoading={isSubmitting}
+      isLoading={isSubmitting || isPriceLoading || isFxLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />
@@ -376,18 +504,64 @@ function EditPhaseForm({
 
       <Form.Separator />
 
-      {/* ── Units (editable) ── */}
-      <Form.TextField
-        id="units"
-        title={unitsFieldTitle}
-        placeholder={unitsFieldPlaceholder}
-        defaultValue={isCash ? String(position.units) : currentUnitsDisplay}
-        error={unitsError}
-        onChange={handleUnitsChange}
-        onBlur={handleUnitsBlur}
-      />
+      {/* ── Input Mode Toggle (non-cash, non-property, non-debt positions) ── */}
+      {showValueMode && (
+        <Form.Dropdown id="inputMode" title="Specify By" value={inputMode} onChange={handleInputModeChange}>
+          <Form.Dropdown.Item value="units" title="Number of Units" icon={Icon.Hashtag} />
+          <Form.Dropdown.Item value="value" title="Total Value Invested" icon={Icon.BankNote} />
+        </Form.Dropdown>
+      )}
 
-      <Form.Description title="" text={unitsHelpText} />
+      {/* ── Units (editable, default mode) ── */}
+      {(isCash || !showValueMode || inputMode === "units") && (
+        <>
+          <Form.TextField
+            id="units"
+            title={unitsFieldTitle}
+            placeholder={unitsFieldPlaceholder}
+            defaultValue={isCash ? String(position.units) : currentUnitsDisplay}
+            error={unitsError}
+            onChange={handleUnitsChange}
+            onBlur={handleUnitsBlur}
+          />
+
+          <Form.Description title="" text={unitsHelpText} />
+        </>
+      )}
+
+      {/* ── Total Value (value mode, non-cash only) ── */}
+      {showValueMode && inputMode === "value" && (
+        <>
+          {/* ── Currency Selector ── */}
+          <Form.Dropdown id="valueCurrency" title="Value Currency" value={valueCurrency} onChange={setValueCurrency}>
+            {valueCurrencyOptions.map((opt) => (
+              <Form.Dropdown.Item key={opt.value} value={opt.value} title={opt.title} />
+            ))}
+          </Form.Dropdown>
+
+          <Form.TextField
+            id="totalValue"
+            title="Total Value"
+            placeholder={`e.g. 1000, 5000, 25000 (${valueCurrency})`}
+            error={totalValueError}
+            onChange={handleTotalValueChange}
+            onBlur={handleTotalValueBlur}
+          />
+
+          <Form.Description
+            title=""
+            text={
+              computedValueDisplay
+                ? computedValueDisplay
+                : livePrice > 0
+                  ? needsFxConversion
+                    ? `Enter total amount in ${valueCurrency}. Will be converted to ${position.currency} then divided by ${formatCurrency(livePrice, position.currency)}/unit.`
+                    : `Enter total value in ${valueCurrency}. Units will be calculated at ${formatCurrency(livePrice, position.currency)}/unit.`
+                  : "Waiting for price data..."
+            }
+          />
+        </>
+      )}
     </Form>
   );
 }

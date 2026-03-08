@@ -201,6 +201,94 @@ export function validateAssetName(name: string | undefined): ValidationResult {
 // ──────────────────────────────────────────
 
 /**
+ * Validates a total investment value input string (from a text field).
+ *
+ * Used when the user specifies the total amount invested rather than
+ * individual units. The value is divided by the current price to
+ * compute units automatically.
+ *
+ * Rules:
+ * - Must not be empty (when provided as the primary input)
+ * - Must be a valid number
+ * - Must be greater than zero
+ * - Must not exceed a reasonable maximum (10 billion)
+ * - Must not have more than 2 decimal places (currency precision)
+ *
+ * @param input - Raw string from the text input
+ * @param options - Optional config: `allowEmpty` skips the empty check (default false)
+ * @returns Error message or undefined if valid
+ *
+ * @example
+ * validateTotalValue("")                        // "Total value is required"
+ * validateTotalValue("", { allowEmpty: true })  // undefined (valid, skipped)
+ * validateTotalValue("abc")                     // "Must be a valid number"
+ * validateTotalValue("0")                       // "Total value must be greater than zero"
+ * validateTotalValue("-500")                    // "Total value must be greater than zero"
+ * validateTotalValue("1500.50")                 // undefined (valid)
+ * validateTotalValue("1500.123")                // "Maximum 2 decimal places allowed for currency values"
+ */
+export function validateTotalValue(input: string | undefined, options?: { allowEmpty?: boolean }): ValidationResult {
+  const trimmed = (input ?? "").trim();
+
+  if (trimmed.length === 0) {
+    if (options?.allowEmpty) return undefined;
+    return "Total value is required";
+  }
+
+  const value = Number(trimmed);
+
+  if (isNaN(value) || !isFinite(value)) {
+    return "Must be a valid number";
+  }
+
+  if (value <= 0) {
+    return "Total value must be greater than zero";
+  }
+
+  if (value > 10_000_000_000) {
+    return "Total value seems too large — please check your input";
+  }
+
+  const parts = trimmed.split(".");
+  if (parts.length === 2 && parts[1].length > 2) {
+    return "Maximum 2 decimal places allowed for currency values";
+  }
+
+  return undefined;
+}
+
+/**
+ * Parses a validated total value string to a number.
+ * Should only be called after `validateTotalValue` returns undefined.
+ *
+ * @param input - Validated total value string
+ * @returns Parsed number
+ */
+export function parseTotalValue(input: string): number {
+  return Number(input.trim());
+}
+
+/**
+ * Computes the number of units from a total investment value and price per unit.
+ *
+ * Rounds to 6 decimal places to match the maximum precision allowed
+ * by `validateUnits`. Returns 0 if the price is zero or negative.
+ *
+ * @param totalValue - Total amount invested
+ * @param pricePerUnit - Current price per unit
+ * @returns Computed number of units (≥ 0)
+ *
+ * @example
+ * computeUnitsFromTotalValue(1000, 50)     // 20
+ * computeUnitsFromTotalValue(1000, 72.45)  // 13.802623
+ * computeUnitsFromTotalValue(1000, 0)      // 0
+ */
+export function computeUnitsFromTotalValue(totalValue: number, pricePerUnit: number): number {
+  if (pricePerUnit <= 0) return 0;
+  return Math.round((totalValue / pricePerUnit) * 1_000_000) / 1_000_000;
+}
+
+/**
  * Validates a price input string (from a text field).
  *
  * Rules:
