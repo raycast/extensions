@@ -1,6 +1,6 @@
 # Claude Code Launcher
 
-## [1.0.3] - 2026-03-08
+## [1.0.3] - {PR_MERGE_DATE}
 
 ### Fixed
 - Reverted Ghostty `-i` flag which caused unintended session restore and duplicate tabs
