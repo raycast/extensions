@@ -148,15 +148,16 @@ function updateFrecency(searchQuery: string | undefined, project: Project) {
 }
 
 function open(app: string, path: string) {
-  const envWithoutRaycastVars = {};
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { NODE_ENV, ...filteredEnv } = process.env;
   if (process.platform === "win32") {
     spawn("cmd", ["/c", "start", "", app, path], {
       detached: true,
       stdio: "ignore",
-      env: envWithoutRaycastVars,
+      env: filteredEnv,
     }).unref();
   } else {
-    spawn("open", ["-a", app, path], { env: envWithoutRaycastVars });
+    spawn("open", ["-a", app, path], { env: {} });
   }
 }
 
