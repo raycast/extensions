@@ -40,7 +40,7 @@ export function OpenInTerminal({ repoPath }: { repoPath: string }) {
       title={`Open in ${app.name}`}
       icon={{ fileIcon: app.path }}
       shortcut={{ modifiers: ["cmd"], key: "t" }}
-      onAction={() => openInApp(app.path, repoPath, { passProjectPathArg: false })}
+      onAction={() => openInApp(app.path, repoPath)}
     />
   );
 }
