@@ -1,6 +1,6 @@
 # Plex Changelog
 
-## [Design Overhaul] - {PR_MERGE_DATE}
+## [Design Overhaul] - 2026-03-09
 
 - Richer detail view with genres, cast, directors, writers, studio, and content rating
 - Replaced posters in detail view with art to better fit the layout
