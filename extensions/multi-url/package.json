@@ -9,6 +9,7 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish",
+    "publish:gate": "node ../../scripts/publish-gate.mjs",
     "test": "node -e \"console.log('No standalone tests for multi-url yet')\""
   },
   "dependencies": {

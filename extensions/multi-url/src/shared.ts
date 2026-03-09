@@ -80,7 +80,6 @@ export const STORAGE_KEYS = {
   history: "multi-url.history.v2",
   slots: "multi-url.shortcut-slots.v1",
   trash: "multi-url.trash.v1",
-  runLock: "multi-url.run-lock.v1",
 } as const;
 
 export const KNOWN_BROWSER_APPS = [

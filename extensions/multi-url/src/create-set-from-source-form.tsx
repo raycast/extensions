@@ -93,7 +93,9 @@ function normalizeSingleEmoji(input: string): string | null {
   }
 
   if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-    const segmenter = new Intl.Segmenter("sv-SE", { granularity: "grapheme" });
+    const segmenter = new Intl.Segmenter(undefined, {
+      granularity: "grapheme",
+    });
     const first = segmenter.segment(trimmed)[Symbol.iterator]().next();
     if (!first.done && first.value.segment.trim().length > 0) {
       return first.value.segment;

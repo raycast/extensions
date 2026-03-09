@@ -5,6 +5,7 @@ import { parseInputUrls } from "./shared";
 
 const PAGE_TITLE_TIMEOUT_MS = 4000;
 const MAX_TITLE_LENGTH = 90;
+const MAX_TITLE_HTML_LENGTH = 50_000;
 const DEFAULT_CLIPBOARD_SET_NAME = "Clipboard Set";
 const TITLE_MATCHERS = [
   /<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*>/i,
@@ -103,7 +104,7 @@ async function fetchSuggestedPageTitle(url: string): Promise<string | null> {
       return null;
     }
 
-    const html = (await response.text()).slice(0, 50000);
+    const html = await readTitleHtml(response);
     for (const matcher of TITLE_MATCHERS) {
       const match = html.match(matcher);
       const suggestedTitle = match?.[1]
@@ -117,6 +118,32 @@ async function fetchSuggestedPageTitle(url: string): Promise<string | null> {
     return null;
   } catch {
     return null;
+  }
+}
+
+async function readTitleHtml(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    return (await response.text()).slice(0, MAX_TITLE_HTML_LENGTH);
+  }
+
+  const decoder = new TextDecoder();
+  let html = "";
+
+  try {
+    while (html.length < MAX_TITLE_HTML_LENGTH) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+
+      html += decoder.decode(value, { stream: true });
+    }
+
+    html += decoder.decode();
+    return html.slice(0, MAX_TITLE_HTML_LENGTH);
+  } finally {
+    await reader.cancel().catch(() => undefined);
   }
 }
 

@@ -1,5 +1,8 @@
-import { closeMainWindow, LocalStorage, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, showToast, Toast } from "@raycast/api";
 import { randomUUID } from "node:crypto";
+import { open as openFile, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   applySavedSetRunStats,
@@ -13,44 +16,113 @@ import {
   parseInputUrls,
   saveHistory,
   saveSavedSets,
-  STORAGE_KEYS,
   ShortcutSlotKey,
 } from "./shared";
 
 const RUN_LOCK_TTL_MS = 15_000;
+const RUN_LOCK_PATH = join(tmpdir(), "multi-url.quickurl.lock.json");
 
 type RunLock = {
   acquiredAt: number;
-  slot: ShortcutSlotKey;
+  token: string;
 };
 
-async function acquireRunLock(slot: ShortcutSlotKey): Promise<boolean> {
-  const now = Date.now();
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEYS.runLock);
-  const existing = parseJson<RunLock | null>(raw, null);
-
-  if (existing && now - existing.acquiredAt < RUN_LOCK_TTL_MS) {
-    return false;
-  }
-
-  const nextLock: RunLock = {
-    acquiredAt: now,
-    slot,
-  };
-  await LocalStorage.setItem(STORAGE_KEYS.runLock, JSON.stringify(nextLock));
-  return true;
+function isErrnoError(error: unknown): error is NodeJS.ErrnoException {
+  return typeof error === "object" && error !== null && "code" in error;
 }
 
-async function releaseRunLock(): Promise<void> {
-  await LocalStorage.removeItem(STORAGE_KEYS.runLock);
+async function readRunLock(): Promise<RunLock | null> {
+  try {
+    return parseJson<RunLock | null>(
+      await readFile(RUN_LOCK_PATH, "utf8"),
+      null,
+    );
+  } catch (error) {
+    if (isErrnoError(error) && error.code === "ENOENT") {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+async function removeRunLockFile(): Promise<void> {
+  try {
+    await rm(RUN_LOCK_PATH);
+  } catch (error) {
+    if (isErrnoError(error) && error.code === "ENOENT") {
+      return;
+    }
+
+    throw error;
+  }
+}
+
+async function writeRunLock(lock: RunLock): Promise<boolean> {
+  let handle: Awaited<ReturnType<typeof openFile>> | undefined;
+
+  try {
+    handle = await openFile(RUN_LOCK_PATH, "wx");
+    await handle.writeFile(JSON.stringify(lock), "utf8");
+    return true;
+  } catch (error) {
+    if (handle) {
+      await removeRunLockFile();
+    }
+
+    if (isErrnoError(error) && error.code === "EEXIST") {
+      return false;
+    }
+
+    throw error;
+  } finally {
+    await handle?.close().catch(() => undefined);
+  }
+}
+
+async function acquireRunLock(): Promise<RunLock | null> {
+  const nextLock: RunLock = {
+    acquiredAt: Date.now(),
+    token: randomUUID(),
+  };
+
+  for (let attempts = 0; attempts < 3; attempts += 1) {
+    nextLock.acquiredAt = Date.now();
+
+    if (await writeRunLock(nextLock)) {
+      return nextLock;
+    }
+
+    const existing = await readRunLock();
+    if (existing && Date.now() - existing.acquiredAt < RUN_LOCK_TTL_MS) {
+      return null;
+    }
+
+    await removeRunLockFile();
+  }
+
+  return null;
+}
+
+async function releaseRunLock(lock: RunLock | null): Promise<void> {
+  if (!lock) {
+    return;
+  }
+
+  const existing = await readRunLock();
+  if (existing?.token !== lock.token) {
+    return;
+  }
+
+  await removeRunLockFile();
 }
 
 export async function runShortcutSlot(
   slot: ShortcutSlotKey,
   slotLabel: string,
 ): Promise<void> {
-  const hasLock = await acquireRunLock(slot);
-  if (!hasLock) {
+  const runLock = await acquireRunLock();
+  if (!runLock) {
     await showToast({
       style: Toast.Style.Failure,
       title: `${slotLabel}: command already running`,
@@ -164,6 +236,6 @@ export async function runShortcutSlot(
       message: selectedSet.name,
     });
   } finally {
-    await releaseRunLock();
+    await releaseRunLock(runLock);
   }
 }
