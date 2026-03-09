@@ -61,7 +61,14 @@ export async function searchIcons(
 
 export async function getIcon(slug: string): Promise<IconDetail> {
   const res = await fetch(`${BASE_URL}/api/registry/${slug}`);
-  if (!res.ok) throw new Error(`Icon not found: ${slug}`);
+  if (!res.ok) {
+    if (res.status === 404) {
+      throw new Error(`Icon not found: ${slug}`);
+    }
+    throw new Error(
+      `Failed to fetch icon "${slug}": ${res.status} ${res.statusText || ""}`.trim(),
+    );
+  }
   return res.json();
 }
 

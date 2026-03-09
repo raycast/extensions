@@ -11,12 +11,11 @@ Browse and search the full theSVG library. Filter by category, preview icons, an
 **Actions:**
 
 - **Copy SVG** (`Cmd+C`) - Copy the SVG source code to clipboard
-- **Copy CDN URL** (`Cmd+Shift+C`) - Copy the direct CDN URL
+- **Copy Direct URL** (`Cmd+Shift+C`) - Copy the theSVG direct URL
 - **Copy jsDelivr URL** (`Cmd+Option+C`) - Copy the jsDelivr CDN URL
-- **Copy Color** (`Cmd+Shift+H`) - Copy the brand hex color
 - **Open on theSVG** (`Cmd+O`) - Open the icon page in your browser
-- **Open Brand Website** (`Cmd+Shift+O`) - Visit the brand's official site
 - **View Details** (`Cmd+D`) - See all variants, SVG source, and metadata
+- **Copy Color** - Copy the brand hex color (Detail view only)
 
 ### Quick Copy
 

@@ -101,7 +101,7 @@ function IconListItem({ icon }: { icon: IconEntry }) {
           <ActionPanel.Section title="Copy">
             <CopySvgAction slug={icon.slug} title={icon.title} />
             <Action.CopyToClipboard
-              title="Copy CDN URL"
+              title="Copy Direct URL"
               content={getIconUrl(icon.slug)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
@@ -169,6 +169,10 @@ function CopySvgAction({ slug, title }: { slug: string; title: string }) {
   );
 }
 
+function escapeMarkdown(text: string): string {
+  return text.replace(/[[\]()#*`\\>_~|!]/g, "\\$&");
+}
+
 function isVisibleHex(hex: string): boolean {
   const lower = hex.toLowerCase();
   return (
@@ -192,14 +196,15 @@ function IconDetailView({ slug }: { slug: string }) {
     ? `<img src="${getIconUrl(slug)}" width="128" height="128" />`
     : "";
 
+  const safeTitle = escapeMarkdown(icon.title);
   const markdown = `
-# ${icon.title}
+# ${safeTitle}
 
 ${svgPreview}
 
 ## Variants (${variantKeys.length})
 
-${variantKeys.map((v) => `- \`${v}\` - [Preview](${getIconUrl(slug, v)})`).join("\n")}
+${variantKeys.map((v) => `- \`${escapeMarkdown(v)}\` - [Preview](${getIconUrl(encodeURIComponent(slug), encodeURIComponent(v))})`).join("\n")}
 
 ## SVG Source
 
@@ -277,7 +282,7 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy URLs">
             <Action.CopyToClipboard
-              title="Copy CDN URL"
+              title="Copy Direct URL"
               content={getIconUrl(slug)}
             />
             <Action.CopyToClipboard

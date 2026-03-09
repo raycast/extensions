@@ -47,6 +47,8 @@ export default async function CopyIcon(
     }
 
     await Clipboard.copy(variant.svg);
+    toast.style = Toast.Style.Success;
+    toast.title = `Copied ${match.title} SVG`;
     await showHUD(`Copied ${match.title} SVG`);
   } catch (error) {
     await showToast({
