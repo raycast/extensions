@@ -1,0 +1,145 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "time-plus",
+  "title": "Time Plus",
+  "description": "Shows date and time",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "clock",
+      "title": "Clock",
+      "description": "Shows the current date and time in the command subtitle.",
+      "mode": "view",
+      "subtitle": "Loading...",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "weekday",
+          "title": "Weekday",
+          "description": "Show the day of the week in the subtitle.",
+          "type": "dropdown",
+          "default": "short",
+          "data": [
+            { "title": "Short (Mon)", "value": "short" },
+            { "title": "Long (Monday)", "value": "long" },
+            { "title": "Hidden", "value": "none" }
+          ],
+          "required": true
+        },
+        {
+          "name": "month",
+          "title": "Month",
+          "description": "Show the name of the month in the subtitle.",
+          "type": "dropdown",
+          "default": "short",
+          "data": [
+            { "title": "Short (Mar)", "value": "short" },
+            { "title": "Long (March)", "value": "long" },
+            { "title": "Numeric (3)", "value": "numeric" },
+            { "title": "Hidden", "value": "none" }
+          ],
+          "required": true
+        },
+        {
+          "name": "yearDigits",
+          "title": "Year Digits",
+          "description": "Use 2 or 4 digits for the year.",
+          "type": "dropdown",
+          "default": "4",
+          "data": [
+            { "title": "4 digits (2026)", "value": "4" },
+            { "title": "2 digits (26)", "value": "2" }
+          ],
+          "required": true
+        },
+        {
+          "name": "showSeconds",
+          "title": "Show Seconds",
+          "description": "Include seconds in the time.",
+          "type": "checkbox",
+          "label": "Show seconds",
+          "default": false,
+          "required": true
+        },
+        {
+          "name": "use24Hour",
+          "title": "Time Format",
+          "description": "Use 24-hour or 12-hour time.",
+          "type": "dropdown",
+          "default": "24h",
+          "data": [
+            { "title": "24-hour (13:05)", "value": "24h" },
+            { "title": "12-hour (1:05 PM)", "value": "12h" }
+          ],
+          "required": true
+        },
+        {
+          "name": "showAmPm",
+          "title": "AM/PM",
+          "description": "Show AM/PM in 12-hour format.",
+          "type": "checkbox",
+          "label": "Show AM/PM",
+          "default": true,
+          "required": true
+        },
+        {
+          "name": "dateOrder",
+          "title": "Date Order",
+          "description": "Order of the date elements.",
+          "type": "dropdown",
+          "default": "MDY",
+          "data": [
+            { "title": "Month Day Year (Mar 5 2026)", "value": "MDY" },
+            { "title": "Day Month Year (5 Mar 2026)", "value": "DMY" },
+            { "title": "Year Month Day (2026 Mar 5)", "value": "YMD" }
+          ],
+          "required": true
+        },
+        {
+          "name": "dateTimeOrder",
+          "title": "Date & Time Order",
+          "description": "Order of date and time in the subtitle.",
+          "type": "dropdown",
+          "default": "date-time",
+          "data": [
+            { "title": "Date then Time", "value": "date-time" },
+            { "title": "Time then Date", "value": "time-date" }
+          ],
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "reinier",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
