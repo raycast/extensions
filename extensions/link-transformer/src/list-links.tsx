@@ -4,7 +4,7 @@ import AddLink, { EditLink } from "./add-link";
 import { closeExtension, dataFilePath, deleteLink, executeCode, readData } from "./utils";
 
 export default function ListLinks() {
-  const { push } = useNavigation();
+  const { push, pop } = useNavigation();
   const [data, setData] = useState(readData());
   const links = data.links;
   const actions = data.actions;
@@ -23,7 +23,20 @@ export default function ListLinks() {
   };
 
   const addLinkAction = (
-    <Action icon={Icon.Plus} title="Add Link" onAction={() => push(<AddLink afterUpdate={refreshData} />)} />
+    <Action
+      icon={Icon.Plus}
+      title="Add Link"
+      onAction={() =>
+        push(
+          <AddLink
+            afterUpdate={() => {
+              refreshData();
+              pop();
+            }}
+          />,
+        )
+      }
+    />
   );
 
   return (
@@ -43,7 +56,17 @@ export default function ListLinks() {
                 <Action
                   icon={Icon.Pencil}
                   title="Edit Link"
-                  onAction={() => push(<EditLink id={link.id} afterUpdate={refreshData} />)}
+                  onAction={() =>
+                    push(
+                      <EditLink
+                        id={link.id}
+                        afterUpdate={() => {
+                          refreshData();
+                          pop();
+                        }}
+                      />,
+                    )
+                  }
                 />
                 <Action
                   icon={Icon.Trash}

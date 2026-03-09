@@ -48,12 +48,12 @@ export default function ListActions() {
           title={action.name}
           subtitle={action.code.length > 50 ? `${action.code.substring(0, 50)}...` : action.code}
           accessories={
-            action.shortcut
+            action.shortcut && "modifiers" in action.shortcut
               ? [
                   {
-                    text: `${(action.shortcut as any).modifiers
-                      .map((m: string) => m.charAt(0).toUpperCase() + m.slice(1))
-                      .join("+")}+${(action.shortcut as any).key.toUpperCase()}`,
+                    text: `${action.shortcut.modifiers
+                      .map((m) => m.charAt(0).toUpperCase() + m.slice(1))
+                      .join("+")}+${action.shortcut.key.toUpperCase()}`,
                   },
                 ]
               : []

@@ -3,14 +3,13 @@ import { useForm } from "@raycast/utils";
 import { ActionType } from "./type";
 import { addAction, readData, updateAction } from "./utils";
 
-const modifierOptions = [
-  { value: "cmd" as Keyboard.KeyModifier, label: "Cmd" },
-  { value: "ctrl" as Keyboard.KeyModifier, label: "Ctrl" },
-  { value: "opt" as Keyboard.KeyModifier, label: "Opt" },
-  { value: "shift" as Keyboard.KeyModifier, label: "Shift" },
-  { value: "alt" as Keyboard.KeyModifier, label: "Alt" },
-  { value: "windows" as Keyboard.KeyModifier, label: "Windows" },
-  { value: "fn" as Keyboard.KeyModifier, label: "Fn" },
+const modifierOptions: { value: Keyboard.KeyModifier; label: string }[] = [
+  { value: "cmd", label: "Cmd" },
+  { value: "ctrl", label: "Ctrl" },
+  { value: "opt", label: "Opt" },
+  { value: "shift", label: "Shift" },
+  { value: "alt", label: "Alt" },
+  { value: "windows", label: "Windows" },
 ];
 
 const keyOptions = [
@@ -161,8 +160,8 @@ export function EditAction({ id, afterUpdate }: { id: string; afterUpdate?: () =
         name: action.name,
         code: action.code,
         hasShortcut: !!action.shortcut,
-        modifiers: (action.shortcut as any)?.modifiers || [],
-        key: (action.shortcut as any)?.key || "",
+        modifiers: action.shortcut && "modifiers" in action.shortcut ? action.shortcut.modifiers : [],
+        key: action.shortcut && "key" in action.shortcut ? action.shortcut.key : "",
       }}
       submitTitle="Update Action"
       submitIcon={Icon.Pencil}
