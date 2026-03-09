@@ -1,0 +1,156 @@
+{
+  "name": "multi-url",
+  "version": "0.1.0",
+  "description": "Save recurring links as URL sets and open them together in your preferred browser without cluttering your bookmarks bar.",
+  "type": "module",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish",
+    "test": "node -e \"console.log('No standalone tests for multi-url yet')\""
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@workspace/raycast-core": "file:../../packages/raycast-core",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.9.3"
+  },
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "title": "Multi-URL",
+  "icon": "icon.png",
+  "author": "filipkillander",
+  "keywords": [
+    "url",
+    "links",
+    "browser",
+    "tabs",
+    "workflow",
+    "bookmarks",
+    "favorites",
+    "session"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "icon": "icon.png",
+      "name": "multi-url",
+      "title": "Multi-URL",
+      "subtitle": "Saved Sets dashboard for managing and opening URL sets",
+      "description": "Open, edit, and organize your saved URL sets with pinning, tags, browser selection, and recent runs.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "saved",
+        "history",
+        "quickurl"
+      ],
+      "mode": "view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "new-set-from-clipboard",
+      "title": "New Set from Clipboard",
+      "subtitle": "Create a URL set from your current clipboard text",
+      "description": "Read clipboard text, extract valid URLs, suggest a page title for single-link imports, and save them as a reusable set.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "clipboard",
+        "import",
+        "set",
+        "urls"
+      ],
+      "mode": "view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "slot-1",
+      "title": "QuickURL #1",
+      "subtitle": "Launch instantly",
+      "description": "Open the URL set assigned to QuickURL #1 from a hotkey-friendly no-view command.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "quickurl",
+        "shortcut",
+        "hotkey"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "slot-2",
+      "title": "QuickURL #2",
+      "subtitle": "Launch instantly",
+      "description": "Open the URL set assigned to QuickURL #2 from a hotkey-friendly no-view command.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "quickurl",
+        "shortcut",
+        "hotkey"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "slot-3",
+      "title": "QuickURL #3",
+      "subtitle": "Launch instantly",
+      "description": "Open the URL set assigned to QuickURL #3 from a hotkey-friendly no-view command.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "quickurl",
+        "shortcut",
+        "hotkey"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "slot-4",
+      "title": "QuickURL #4",
+      "subtitle": "Launch instantly",
+      "description": "Open the URL set assigned to QuickURL #4 from a hotkey-friendly no-view command.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "quickurl",
+        "shortcut",
+        "hotkey"
+      ],
+      "mode": "no-view"
+    },
+    {
+      "icon": "icon.png",
+      "name": "slot-5",
+      "title": "QuickURL #5",
+      "subtitle": "Launch instantly",
+      "description": "Open the URL set assigned to QuickURL #5 from a hotkey-friendly no-view command.",
+      "disabledByDefault": false,
+      "keywords": [
+        "multi-url",
+        "quickurl",
+        "shortcut",
+        "hotkey"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [],
+  "platforms": [
+    "macOS"
+  ],
+  "access": "public"
+}
