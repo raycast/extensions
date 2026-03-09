@@ -1,6 +1,6 @@
 # Beeper Changelog
 
-## [Unreleased]
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
