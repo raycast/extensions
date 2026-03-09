@@ -4,10 +4,6 @@ import { parseService } from "../utils/types";
 import { getServiceDisplayName } from "../utils/service-icons";
 import { MOCK_ACCOUNTS } from "../utils/mock-data";
 
-interface Preferences {
-  useMockData?: boolean;
-}
-
 export default async function () {
   const { useMockData } = getPreferenceValues<Preferences>();
   if (useMockData) {

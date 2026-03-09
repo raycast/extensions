@@ -1,13 +1,17 @@
 import BeeperDesktop from "@beeper/desktop-api";
 import { closeMainWindow, getPreferenceValues, LocalStorage, OAuth, showHUD } from "@raycast/api";
+import {
+  MOCK_ACCOUNTS,
+  MOCK_CHATS,
+  MOCK_CONTACTS,
+  MOCK_MESSAGES,
+  mockChatToBeeperChat,
+  mockMessageToBeeperMessage,
+} from "./utils/mock-data";
 import { OAuthService, usePromise, getAccessToken } from "@raycast/utils";
 import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
-
-interface Preferences {
-  baseUrl?: string;
-}
 
 let clientInstance: BeeperDesktop | null = null;
 let lastBaseURL: string | null = null;
@@ -15,6 +19,8 @@ let lastAccessToken: string | null = null;
 export const TOKEN_STORAGE_KEY = "beeper-oauth-token";
 
 const getPreferences = () => getPreferenceValues<Preferences>();
+
+const useMockData = () => getPreferences().useMockData === true;
 
 const createOAuthClient = () =>
   new OAuth.PKCEClient({
@@ -109,6 +115,11 @@ export const retrieveChat = async (
   chatID: string,
   options?: { maxParticipantCount?: number | null },
 ): Promise<BeeperDesktop.Chat> => {
+  if (useMockData()) {
+    const match = MOCK_CHATS.find((c) => c.id === chatID);
+    if (!match) throw new Error(`Chat not found: ${chatID}`);
+    return mockChatToBeeperChat(match);
+  }
   return (await getBeeperDesktop().get(`/v1/chats/${encodeURIComponent(chatID)}`, {
     query: options,
   })) as BeeperDesktop.Chat;
@@ -280,11 +291,24 @@ export const getServeAssetURL = (url: string) => {
 };
 
 export const listAccounts = async (): Promise<BeeperDesktop.Account[]> => {
+  if (useMockData()) {
+    return MOCK_ACCOUNTS.map((a) => ({
+      accountID: a.id,
+      network: a.service,
+      user: { fullName: a.displayName, username: a.username },
+    })) as BeeperDesktop.Account[];
+  }
   const response = await getBeeperDesktop().get("/v1/accounts");
   return getItemsFromResponse<BeeperDesktop.Account>(response);
 };
 
 export const searchContacts = async (accountID: string, query: string) => {
+  if (useMockData()) {
+    const q = query.toLowerCase();
+    return MOCK_CONTACTS.filter(
+      (c) => c.accountID === accountID && [c.fullName, c.username, c.id].some((v) => v?.toLowerCase().includes(q)),
+    ).map(({ accountID: _, ...rest }) => rest as BeeperDesktop.User);
+  }
   const response = await getBeeperDesktop().get(`/v1/accounts/${encodeURIComponent(accountID)}/contacts`, {
     query: { query },
   });
@@ -314,6 +338,22 @@ export const searchChats = async (params: {
   unreadOnly?: boolean;
   limit?: number;
 }) => {
+  if (useMockData()) {
+    const requestedInbox = params.inbox ?? "primary";
+    let items = requestedInbox === "primary" ? MOCK_CHATS.map((c) => mockChatToBeeperChat(c, "primary")) : [];
+    if (params.unreadOnly) {
+      items = items.filter((c) => (c.unreadCount ?? 0) > 0);
+    }
+    if (params.includeMuted === false) {
+      items = items.filter((c) => !c.isMuted);
+    }
+    if (params.type && params.type !== "any") {
+      items = items.filter((c) => c.type === params.type);
+    }
+    const limit = params.limit ?? 50;
+    const result = items.slice(0, limit);
+    return { items: result, hasMore: false, newestCursor: null, oldestCursor: null };
+  }
   const response = await getBeeperDesktop().get("/v1/chats/search", { query: params });
   return normalizeUnknownCursorResponse<BeeperDesktop.Chat>(response);
 };
@@ -332,6 +372,12 @@ export const listChatMessages = async (
   chatID: string,
   params?: { cursor?: string | null; direction?: "after" | "before" },
 ): Promise<CursorResponse<BeeperDesktop.Message>> => {
+  if (useMockData()) {
+    const items = MOCK_MESSAGES.filter((m) => m.chatId === chatID)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .map(mockMessageToBeeperMessage);
+    return { items, hasMore: false };
+  }
   const response = await getBeeperDesktop().get(`/v1/chats/${encodeURIComponent(chatID)}/messages`, {
     query: params,
   });
@@ -353,6 +399,32 @@ export const searchMessages = async (params: {
   direction?: "after" | "before";
   limit?: number;
 }): Promise<CursorResponse<BeeperDesktop.Message>> => {
+  if (useMockData()) {
+    let items = [...MOCK_MESSAGES];
+    if (params.query) {
+      const q = params.query.toLowerCase();
+      items = items.filter(
+        (m) =>
+          m.text.toLowerCase().includes(q) ||
+          m.senderName.toLowerCase().includes(q) ||
+          m.service.toLowerCase().includes(q),
+      );
+    }
+    if (params.chatIDs?.length) {
+      const ids = new Set(params.chatIDs);
+      items = items.filter((m) => ids.has(m.chatId));
+    }
+    if (params.sender === "me") {
+      items = items.filter((m) => m.isSender);
+    } else if (params.sender === "others") {
+      items = items.filter((m) => !m.isSender);
+    }
+    const limit = params.limit ?? 20;
+    return {
+      items: items.slice(0, limit).map(mockMessageToBeeperMessage),
+      hasMore: false,
+    };
+  }
   const response = await getBeeperDesktop().get("/v1/messages/search", { query: params });
   return normalizeUnknownCursorResponse<BeeperDesktop.Message>(response);
 };

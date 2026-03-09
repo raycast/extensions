@@ -27,36 +27,42 @@
     {
       "name": "chat",
       "title": "Recent Chats",
+      "subtitle": "Beeper Desktop",
       "description": "Browse recent chats from Beeper Desktop",
       "mode": "view"
     },
     {
       "name": "focus-app",
       "title": "Open Beeper",
+      "subtitle": "Beeper Desktop",
       "description": "Bring Beeper to the foreground",
       "mode": "no-view"
     },
     {
       "name": "unread-chats",
       "title": "Unread Chats",
+      "subtitle": "Beeper Desktop",
       "description": "See unread chats from Beeper Desktop",
       "mode": "view"
     },
     {
       "name": "contacts",
       "title": "Contacts",
+      "subtitle": "Beeper Desktop",
       "description": "Search contacts across connected Beeper accounts",
       "mode": "view"
     },
     {
       "name": "search-messages",
       "title": "Search Recent Messages",
+      "subtitle": "Beeper Desktop",
       "description": "Search recent messages across Beeper chats",
       "mode": "view"
     },
     {
       "name": "list-accounts",
       "title": "Connected Accounts",
+      "subtitle": "Beeper Desktop",
       "description": "View all connected messaging services",
       "mode": "view"
     }
@@ -83,16 +89,16 @@
   "dependencies": {
     "@beeper/desktop-api": "latest",
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/utils": "^2.2.3",
     "fuse.js": "^7.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.19.3",
-    "@types/react": "19.2.7",
-    "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

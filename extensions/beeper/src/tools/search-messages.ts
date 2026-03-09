@@ -17,10 +17,6 @@ interface MessageResult {
   chatId: string;
 }
 
-interface Preferences {
-  useMockData?: boolean;
-}
-
 export default async function (input: Input): Promise<{ messages: MessageResult[]; count: number }> {
   const { useMockData } = getPreferenceValues<Preferences>();
 

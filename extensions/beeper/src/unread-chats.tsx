@@ -6,7 +6,6 @@ function UnreadChatsCommand() {
   return (
     <ChatListView
       stateKey="chat:unread"
-      navigationTitle="Unread Chats"
       searchPlaceholder="Search unread chats"
       showPinnedSection={false}
       defaultFilters={{

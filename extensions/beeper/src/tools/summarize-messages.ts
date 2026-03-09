@@ -30,10 +30,6 @@ interface SummarizeMessagesResult {
   fallbackToMostRecentDay?: boolean;
 }
 
-interface Preferences {
-  useMockData?: boolean;
-}
-
 export default async function (input: Input): Promise<SummarizeMessagesResult> {
   const { useMockData } = getPreferenceValues<Preferences>();
 

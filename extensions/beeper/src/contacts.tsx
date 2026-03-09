@@ -160,7 +160,6 @@ export function ContactsView() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Search Contacts"
       searchBarPlaceholder="Search contacts by name"
       searchBarAccessory={dropdown}
       onSearchTextChange={setQuery}

@@ -314,7 +314,6 @@ const buildSearchFields = (chat: BeeperDesktop.Chat): ChatSearchFields => {
 
 type ChatListViewProps = {
   stateKey: string;
-  navigationTitle: string;
   searchPlaceholder: string;
   defaultFilters: ChatFilters;
   showPinnedSection?: boolean;
@@ -324,7 +323,6 @@ type ChatListViewProps = {
 
 export function ChatListView({
   stateKey,
-  navigationTitle,
   searchPlaceholder,
   defaultFilters,
   showPinnedSection = true,
@@ -871,7 +869,6 @@ export function ChatListView({
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={navigationTitle}
       searchBarPlaceholder={searchPlaceholder}
       onSearchTextChange={setSearchText}
       searchBarAccessory={inboxDropdown}
@@ -1356,7 +1353,6 @@ function RecentChatsCommand() {
   return (
     <ChatListView
       stateKey="chat"
-      navigationTitle="Recent Chats"
       searchPlaceholder="Search recent chats"
       defaultFilters={recentDefaultFilters}
       showSmartSections

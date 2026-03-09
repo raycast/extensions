@@ -3,10 +3,6 @@ import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { getAccessToken } from "@raycast/utils";
 import { TOKEN_STORAGE_KEY } from "../api";
 
-interface Preferences {
-  baseUrl?: string;
-}
-
 let clientInstance: BeeperDesktop | null = null;
 let lastAccessToken: string | null = null;
 let lastBaseURL: string | null = null;

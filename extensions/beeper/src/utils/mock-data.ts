@@ -1,3 +1,4 @@
+import BeeperDesktop from "@beeper/desktop-api";
 import { BeeperAccount, BeeperService } from "./types";
 
 export interface MockChatItem {
@@ -149,4 +150,48 @@ export const MOCK_MESSAGES: MockMessageResult[] = [
     service: "imessage",
     isSender: false,
   },
+];
+
+/** Convert MockChatItem to BeeperDesktop.Chat for view components */
+export function mockChatToBeeperChat(
+  item: MockChatItem,
+  inbox: "primary" | "low-priority" | "archive" = "primary",
+): BeeperDesktop.Chat {
+  return {
+    id: item.id,
+    accountID: item.accountId,
+    network: item.networkRaw,
+    participants: { hasMore: false, items: [], total: 0 },
+    type: item.type === "space" ? "group" : item.type,
+    unreadCount: item.unreadCount ?? 0,
+    isArchived: item.isArchived ?? false,
+    isMuted: item.isMuted ?? false,
+    isPinned: false,
+    lastActivity: item.lastMessageAt ?? undefined,
+    title: item.name,
+    localChatID: null,
+  };
+}
+
+/** Convert MockMessageResult to BeeperDesktop.Message for view components */
+export function mockMessageToBeeperMessage(msg: MockMessageResult): BeeperDesktop.Message {
+  return {
+    id: msg.id,
+    messageID: msg.id,
+    text: msg.text,
+    senderName: msg.senderName,
+    chatID: msg.chatId,
+    timestamp: msg.timestamp,
+    isSender: msg.isSender,
+  };
+}
+
+/** Mock contacts derived from chat participants for Contacts view */
+export const MOCK_CONTACTS: Array<BeeperDesktop.User & { accountID?: string }> = [
+  { id: "mock-user-1", fullName: "Sarah Chen", username: "+1 555 123 4567", accountID: "whatsapp-1", isSelf: false },
+  { id: "mock-user-2", fullName: "Alex Rivera", username: "@alex_r", accountID: "telegram-1", isSelf: false },
+  { id: "mock-user-3", fullName: "Mom", username: "mom@icloud.com", accountID: "imessage-1", isSelf: false },
+  { id: "mock-user-4", fullName: "Jordan Taylor", username: "+1 555 987 6543", accountID: "signal-1", isSelf: false },
+  { id: "mock-user-5", fullName: "Design Team", username: "design-team", accountID: "slack-1", isSelf: false },
+  { id: "mock-user-6", fullName: "Family Group", username: "family", accountID: "whatsapp-1", isSelf: false },
 ];

@@ -33,10 +33,6 @@ interface SummarizeResult {
   totalUnreadCount?: number;
 }
 
-interface Preferences {
-  useMockData?: boolean;
-}
-
 export default async function (input: Input): Promise<SummarizeResult> {
   const { useMockData } = getPreferenceValues<Preferences>();
 

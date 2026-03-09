@@ -6,10 +6,6 @@ import { MOCK_ACCOUNTS } from "./utils/mock-data";
 import { getServiceDisplayName, getServiceIcon } from "./utils/service-icons";
 import { BeeperAccount, parseService } from "./utils/types";
 
-interface Preferences {
-  useMockData?: boolean;
-}
-
 function ListAccountsCommand() {
   const {
     data: accounts,

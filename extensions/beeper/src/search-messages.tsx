@@ -149,7 +149,6 @@ function SearchMessagesCommand(props: LaunchProps<{ launchContext?: SearchMessag
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Search Recent Messages"
       searchBarPlaceholder="Search recent messages"
       onSearchTextChange={setSearchText}
       isShowingDetail={isShowingDetail}
