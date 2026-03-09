@@ -57,7 +57,7 @@ function ReplyForm({ onSend }: { onSend: (text: string) => void }) {
 
 export default function Command(props: { arguments: Arguments.Lmstudio & { prompt: string; model: string } }) {
   const { push } = useNavigation();
-  const { prompt } = props.arguments;
+  const { prompt, model } = props.arguments;
   const [messages, setMessages] = useState<Message[]>([{ role: "user", content: prompt }]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
