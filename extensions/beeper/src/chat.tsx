@@ -855,9 +855,9 @@ export function ChatListView({
                   icon={filters.includeMuted ? Icon.Checkmark : Icon.Circle}
                   onAction={() => toggleFilter("includeMuted")}
                 />
-                <Action title="Type: Any" onAction={() => setChatType("any")} />
-                <Action title="Type: Direct Messages" onAction={() => setChatType("single")} />
-                <Action title="Type: Group Chats" onAction={() => setChatType("group")} />
+                <Action title="Type: Any" icon={Icon.BulletPoints} onAction={() => setChatType("any")} />
+                <Action title="Type: Direct Messages" icon={Icon.Person} onAction={() => setChatType("single")} />
+                <Action title="Type: Group Chats" icon={Icon.TwoPeople} onAction={() => setChatType("group")} />
               </ActionPanel.Submenu>
             </ActionPanel.Section>
           </ActionPanel>

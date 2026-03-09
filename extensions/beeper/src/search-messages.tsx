@@ -325,9 +325,9 @@ function MessageSearchActions({
         />
       </ActionPanel.Section>
       <ActionPanel.Submenu title="Filters" icon={Icon.Filter}>
-        <Action title="Sender: Any" onAction={() => updateFilters({ sender: "any" })} />
-        <Action title="Sender: Me" onAction={() => updateFilters({ sender: "me" })} />
-        <Action title="Sender: Others" onAction={() => updateFilters({ sender: "others" })} />
+        <Action title="Sender: Any" icon={Icon.BulletPoints} onAction={() => updateFilters({ sender: "any" })} />
+        <Action title="Sender: Me" icon={Icon.Person} onAction={() => updateFilters({ sender: "me" })} />
+        <Action title="Sender: Others" icon={Icon.TwoPeople} onAction={() => updateFilters({ sender: "others" })} />
         <Action
           title={`Include Muted: ${filters.includeMuted ? "On" : "Off"}`}
           icon={filters.includeMuted ? Icon.Checkmark : Icon.Circle}
