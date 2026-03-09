@@ -18,7 +18,6 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search monitors..."
-      navigationTitle="Phare Monitors"
       isShowingDetail
     >
       {monitors.length === 0 && !isLoading ? (
