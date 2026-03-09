@@ -56,7 +56,10 @@ export default function AddOrEditAuthor({ author }: AddOrEditAuthorProps) {
             }}
           />
           <Action.SubmitForm
-            shortcut={{ macOS: { modifiers: ["cmd", "shift"], key: "return" }, Windows: { modifiers: ["ctrl", "shift"], key: "return" } }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "return" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "return" },
+            }}
             title={`Add Another Author`}
             icon={Icon.AddPerson}
             onSubmit={async (input) => {
