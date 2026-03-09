@@ -12,10 +12,6 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 
-interface Preferences {
-  apiKey: string;
-}
-
 interface TitlePresence {
   titleId: string;
   titleName: string;
