@@ -15,9 +15,9 @@ A Raycast extension to share passwords, API keys, and private notes securely. Wh
 
 When you first run the extension, you can optionally configure a custom Whisper server URL in the extension preferences. By default, it uses the hosted instance at `https://whisper.quentinvedrenne.com`.
 
-| Preference | Description | Required | Default |
-|---|---|---|---|
-| Whisper Server URL | URL of the Whisper server (for self-hosted instances) | No | `https://whisper.quentinvedrenne.com` |
+| Preference         | Description                                           | Required | Default                               |
+| ------------------ | ----------------------------------------------------- | -------- | ------------------------------------- |
+| Whisper Server URL | URL of the Whisper server (for self-hosted instances) | No       | `https://whisper.quentinvedrenne.com` |
 
 ## Commands
 
@@ -33,6 +33,7 @@ Create a secret link in one shot. The format is:
 - `self-destruct` — `false` to allow multiple views (default: `true`)
 
 **Examples:**
+
 - `my-api-key` → 1h expiration, self-destructs
 - `my-password 24h` → 24h expiration, self-destructs
 - `my-note 7d false` → 7 days, viewable multiple times

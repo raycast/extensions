@@ -59,16 +59,28 @@ export async function createSecret(
     formData.set("self_destruct", "true");
   }
 
-  const response = await fetch(`${getWhisperUrl()}/secret?source=raycast`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: formData.toString(),
-    redirect: "manual",
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${getWhisperUrl()}/secret?source=raycast`, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: formData.toString(),
+      redirect: "manual",
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Network request failed";
+    throw new Error(`Could not reach Whisper server: ${message}`);
+  }
 
   const location = response.headers.get("location");
   if (!location) {
-    throw new Error(`Unexpected response from Whisper server: ${response.status}`);
+    const body = await response.text();
+    const detail = body.trim().slice(0, 100);
+    throw new Error(
+      response.ok
+        ? `Unexpected response from Whisper server (${response.status}). ${detail ? detail : "No details."}`
+        : `Whisper server error (${response.status}). ${detail ? detail : "Please try again later."}`,
+    );
   }
 
   const url = new URL(location, getWhisperUrl());
