@@ -85,20 +85,6 @@ export function calculateRemainingTime(
   const hours = Math.floor(absDiffMs / (1000 * 60 * 60));
   const minutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-  return { hours, minutes, isPast };
-}
-
-const START_HOURS = [7, 8, 9, 10, 11, 12, 13] as const;
-const MINUTE_OPTIONS = [0, 15, 30, 45] as const;
-
-/** Generate HH:MM format time string */
-export function formatTimeString(hours: number, minutes: number): string {
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-}
-
-export function generateTimeOptions(
-  workHours: number,
-  breakMinutes: number,
 ): TimeOption[] {
   return START_HOURS.flatMap((hour) =>
     MINUTE_OPTIONS.map((minute) => {
