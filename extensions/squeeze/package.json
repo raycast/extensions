@@ -7,6 +7,17 @@
   "author": "daniel_ac",
   "license": "MIT",
   "access": "public",
+  "preferences": [
+    {
+      "name": "autoPaste",
+      "type": "checkbox",
+      "label": "Paste after squeeze",
+      "title": "Output Behavior",
+      "default": false,
+      "required": false,
+      "description": "When enabled, squeezed text is pasted into the active app instead of just being copied to the clipboard."
+    }
+  ],
   "commands": [
     {
       "name": "advanced-squeeze",

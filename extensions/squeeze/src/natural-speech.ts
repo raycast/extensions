@@ -1,5 +1,6 @@
 import { Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 export default async function Command() {
   const preferences = getPreferenceValues<Preferences.NaturalSpeech>();
@@ -31,7 +32,7 @@ export default async function Command() {
     // Trim leading and trailing whitespace
     processed = processed.trim();
 
-    await Clipboard.copy(processed);
+    await outputResult(processed);
 
     await showToast({
       style: Toast.Style.Success,

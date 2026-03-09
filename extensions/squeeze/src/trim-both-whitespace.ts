@@ -1,5 +1,6 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 function trimParagraphs(text: string) {
   // Split text into paragraphs by newline
@@ -23,7 +24,7 @@ export default async function Command() {
 
     const processed = trimParagraphs(text);
 
-    await Clipboard.copy(processed);
+    await outputResult(processed);
 
     await showToast({
       style: Toast.Style.Success,
