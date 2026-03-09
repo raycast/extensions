@@ -1,5 +1,15 @@
+import { execFile } from "child_process";
 import { get, post, patch, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
+import { extensionStartScript, extensionStopScript, extensionUpdateScript } from "@/helpers/preferences";
+
+function runTrigger(scriptPath: string, payload?: TimeEntry | null) {
+  if (!scriptPath) return;
+  const args = payload ? [JSON.stringify(payload)] : [];
+  execFile(scriptPath, args, (error) => {
+    if (error) console.error(`Trigger error: ${error}`);
+  });
+}
 
 export async function getMyTimeEntries<Meta extends boolean = false>({
   startDate,
@@ -14,17 +24,6 @@ export async function getMyTimeEntries<Meta extends boolean = false>({
     `/me/time_entries?start_date=${startDate.toISOString()}&end_date=${endDate.toISOString()}&meta=${includeMetadata ?? false}`,
   );
   return timeEntries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
-}
-
-import { exec } from "child_process";
-import { extensionStartScript, extensionStopScript, extensionUpdateScript } from "@/helpers/preferences";
-
-function runTrigger(scriptPath: string, payload?: any) {
-  if (!scriptPath) return;
-  const arg = payload ? JSON.stringify(payload) : "";
-  exec(`${scriptPath} '${arg.replace(/'/g, "'\\''")}'`, (error) => {
-    if (error) console.error(`Trigger error: ${error}`);
-  });
 }
 
 export async function getRunningTimeEntry() {
