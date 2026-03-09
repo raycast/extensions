@@ -58,8 +58,7 @@
   },
   "author": "louison_gautreau",
   "platforms": [
-    "Windows",
-    "macOS"
+    "Windows"
   ],
   "categories": [
     "Developer Tools"
