@@ -26,6 +26,6 @@ export async function showWarningMessage(message: string) {
   if (environment.launchType === LaunchType.Background) {
     await showHUD(`⚠️ ${message}`);
   } else {
-    await showToast({ style: Toast.Style.Animated, title: `⚠️ ${message}` });
+    await showToast({ style: Toast.Style.Failure, title: `⚠️ ${message}` });
   }
 }
