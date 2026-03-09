@@ -11,6 +11,7 @@ export default async function Command() {
 
   if (!confirmed) return;
 
+  // Since there's no clean API for resetting frecency this action does not clear the ordering
   clearAuthorsCache();
 
   await showToast({ style: Toast.Style.Success, title: "All authors cleared" });

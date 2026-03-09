@@ -65,13 +65,13 @@ export default function ChooseAuthor() {
               {selectedAuthors.length > 0 && (
                 <>
                   <Action.CopyToClipboard
-                    onCopy={() => popToRoot()}
+                    onCopy={async () => await popToRoot()}
                     content={selectedAuthors
                       .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
                       .join("\n")}
                   />
                   <Action.Paste
-                    onPaste={() => popToRoot()}
+                    onPaste={async () => await popToRoot()}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "shift"], key: "enter" },
                       Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
