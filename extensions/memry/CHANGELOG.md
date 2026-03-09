@@ -1,6 +1,6 @@
 # Memry Changelog
 
-## [Initial Version] - 2025-02-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 
