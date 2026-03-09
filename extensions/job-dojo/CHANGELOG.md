@@ -1,5 +1,11 @@
 # Job Dojo Changelog
 
+## [Bug Fixes] - 2026-03-09
+
+- Fixed API key authentication with production server
+- Fixed default API base URL to use correct domain
+- Removed default model from extension settings
+
 ## [Initial Version] - 2026-03-03
 
 - Initial release
