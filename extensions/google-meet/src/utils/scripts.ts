@@ -65,6 +65,14 @@ export function getOpenedUrlForFirefox(browserName: string) {
   `;
 }
 
+export function getSwitchToPreviousAppScript(): string {
+  return `
+    tell application "System Events"
+      keystroke tab using {command down}
+    end tell
+  `;
+}
+
 export const supportedBrowsers = [
   "Arc",
   "Brave",

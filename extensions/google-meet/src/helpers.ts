@@ -5,6 +5,7 @@ import {
   getOpenedUrlForArc,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
+  getSwitchToPreviousAppScript,
   supportedBrowsers,
 } from "./utils/scripts";
 
@@ -77,6 +78,10 @@ export async function openMeetTabDefaultProfile(): Promise<void> {
   const preferredBrowser = getPreferredBrowser();
 
   await open(openMeetTabUrl, preferredBrowser?.name);
+}
+
+export async function switchToPreviousApp(): Promise<void> {
+  await runAppleScript(getSwitchToPreviousAppScript());
 }
 
 export async function openMeetTabSelectedProfile(profile: string): Promise<void> {
