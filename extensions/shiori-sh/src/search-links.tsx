@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { getFavicon, useCachedPromise, useForm } from "@raycast/utils";
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
 import { fetchLinks, updateLinks, deleteLink, createLink, updateLinkDetails } from "./api";
 import { Link } from "./types";
 
@@ -90,19 +90,11 @@ export default function SearchLinks() {
   const [filter, setFilter] = useState<ReadFilter>("all");
   const [showDetail, setShowDetail] = useState(true);
   const [searchText, setSearchText] = useState("");
-  const throttleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-
-  const handleSearchChange = useCallback((text: string) => {
-    setSearchText(text);
-    if (throttleRef.current) clearTimeout(throttleRef.current);
-    throttleRef.current = setTimeout(() => setDebouncedSearch(text), 300);
-  }, []);
 
   const { data, isLoading, revalidate, mutate } = useCachedPromise(
     (readFilter: ReadFilter, search: string) =>
       fetchLinks({ limit: 100, read: readFilter, sort: "newest", search: search || undefined }),
-    [filter, debouncedSearch],
+    [filter, searchText],
     { keepPreviousData: true },
   );
 
@@ -233,7 +225,8 @@ export default function SearchLinks() {
       isShowingDetail={showDetail}
       filtering={false}
       searchText={searchText}
-      onSearchTextChange={handleSearchChange}
+      onSearchTextChange={setSearchText}
+      throttle
       searchBarPlaceholder="Search links..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" value={filter} onChange={(val) => setFilter(val as ReadFilter)}>
