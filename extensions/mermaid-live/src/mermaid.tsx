@@ -513,7 +513,7 @@ function detectDiagramType(code: string): string {
 }
 
 function generateId(): string {
-  return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 // Migrate existing data to add lastAccessed
