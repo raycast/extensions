@@ -33,10 +33,10 @@
     {
       "name": "projectPaths",
       "title": "Project Paths",
-      "description": "Comma-separated paths to project directories (e.g. ~/dev/matahari, ~/dev/xitment)",
+      "description": "Comma-separated paths to project directories (e.g. ~/dev/group-a, ~/dev/group-b)",
       "type": "textfield",
       "required": true,
-      "placeholder": "~/dev/matahari, ~/dev/xitment"
+      "placeholder": "~/dev/group-a, ~/dev/group-b"
     },
     {
       "name": "editorApp",
