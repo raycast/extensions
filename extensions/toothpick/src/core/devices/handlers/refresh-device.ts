@@ -27,5 +27,5 @@ export async function refreshDevice(device: Device) {
     closeMainWindow();
   }
 
-  return !!disconnectResult && connectResult;
+  return !!disconnectResult && !!connectResult;
 }
