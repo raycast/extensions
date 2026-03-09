@@ -131,6 +131,26 @@ export function formatSetTimestamp(date: Date): string {
   return formatLocalTimestamp(date, "-");
 }
 
+export function normalizeSingleEmoji(input: string): string | null {
+  const trimmed = input.trim();
+  if (trimmed.length === 0) {
+    return null;
+  }
+
+  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
+    const segmenter = new Intl.Segmenter(undefined, {
+      granularity: "grapheme",
+    });
+    const first = segmenter.segment(trimmed)[Symbol.iterator]().next();
+    if (!first.done && first.value.segment.trim().length > 0) {
+      return first.value.segment;
+    }
+  }
+
+  const firstCodePoint = Array.from(trimmed)[0];
+  return firstCodePoint ?? null;
+}
+
 export function splitInput(input: string): string[] {
   const rows = input
     .split(/\r?\n|;|\t/)
@@ -145,7 +165,7 @@ export function splitInput(input: string): string[] {
     }
 
     const schemeMatches = row.match(/[a-zA-Z][a-zA-Z0-9+.-]*:\/\//g)?.length ?? 0;
-    const shouldSplitByComma = schemeMatches !== 1 || !row.includes("://");
+    const shouldSplitByComma = schemeMatches !== 1;
 
     if (!shouldSplitByComma) {
       values.push(row);

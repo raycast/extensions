@@ -24,6 +24,7 @@ import {
   loadSavedSets,
   MAX_HISTORY_ITEMS,
   MAX_URLS_PER_RUN,
+  normalizeSingleEmoji,
   openInBrowser,
   parseInputUrls,
   parseTagInput,
@@ -84,26 +85,6 @@ type SubmitOptions = {
 
 function fallbackSetName(sourceLabel: string): string {
   return `${sourceLabel} ${formatSetTimestamp(new Date())}`;
-}
-
-function normalizeSingleEmoji(input: string): string | null {
-  const trimmed = input.trim();
-  if (trimmed.length === 0) {
-    return null;
-  }
-
-  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-    const segmenter = new Intl.Segmenter(undefined, {
-      granularity: "grapheme",
-    });
-    const first = segmenter.segment(trimmed)[Symbol.iterator]().next();
-    if (!first.done && first.value.segment.trim().length > 0) {
-      return first.value.segment;
-    }
-  }
-
-  const firstCodePoint = Array.from(trimmed)[0];
-  return firstCodePoint ?? null;
 }
 
 export function CreateSetFromSourceForm({ navigationTitle, loadSource }: CreateSetFromSourceFormProps) {

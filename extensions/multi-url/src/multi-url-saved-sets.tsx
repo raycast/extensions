@@ -42,6 +42,7 @@ import {
   MAX_HISTORY_ITEMS,
   MAX_TRASH_ITEMS,
   MAX_URLS_PER_RUN,
+  normalizeSingleEmoji,
   openInBrowser,
   parseSharedSetsInput,
   parseInputUrls,
@@ -155,26 +156,6 @@ function getAssignedSlots(slots: ShortcutSlots, setId: string): ShortcutSlotKey[
 
 function countValidUrls(rawUrls: string): number {
   return parseInputUrls(rawUrls).uniqueValid.length;
-}
-
-function normalizeSingleEmoji(input: string): string | null {
-  const trimmed = input.trim();
-  if (trimmed.length === 0) {
-    return null;
-  }
-
-  if (typeof Intl !== "undefined" && "Segmenter" in Intl) {
-    const segmenter = new Intl.Segmenter(undefined, {
-      granularity: "grapheme",
-    });
-    const first = segmenter.segment(trimmed)[Symbol.iterator]().next();
-    if (!first.done && first.value.segment.trim().length > 0) {
-      return first.value.segment;
-    }
-  }
-
-  const firstCodePoint = Array.from(trimmed)[0];
-  return firstCodePoint ?? null;
 }
 
 function formatTagAccessory(tags: string[]): string | null {
