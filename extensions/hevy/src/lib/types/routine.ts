@@ -6,37 +6,36 @@ export type RoutinesRequest = {
   folder_id?: string;
 };
 
+export type RoutineSortField = "title" | "created_at";
+export type RoutineSortOrder = "asc" | "desc";
+
 export type RoutineSet = {
-  index: number;
-  type: "normal" | "warmup" | "dropset" | "failure";
-  weight_kg: number | null;
-  reps: number | null;
-  distance_meters: number | null;
-  duration_seconds: number | null;
-  custom_metric: unknown | null;
+  sets: number;
+  reps: string;
+  rest_period: number;
 };
 
 export type RoutineExercise = {
-  index: number;
-  title: string;
-  notes: string | null;
+  name: string;
+  sets: RoutineSet;
   exercise_template_id: string;
-  superset_id: string | null;
-  sets: RoutineSet[];
-  rest_seconds: number;
 };
 
 export type Routine = {
   id: string;
   title: string;
-  folder_id: string | null;
-  updated_at: string;
-  created_at: string;
+  description?: string;
+  folder_id?: string;
   exercises: RoutineExercise[];
+  created_at: string;
+  updated_at: string;
 };
 
 export type RoutinesResponse = {
-  page: number;
-  page_count: number;
   routines: Routine[];
+  pagination: {
+    total_routines: number;
+    current_page: number;
+    total_pages: number;
+  };
 };

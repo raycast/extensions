@@ -1,5 +1,5 @@
 # Hevy Changelog
 
-## [Initial Version] - 2026-01-09
+## [Initial Version] - {PR_MERGE_DATE}
 
-- Initial version that allows you to fetch your workouts and routines using the Hevy API
+- Intial version that allows you to fetch your workouts and routines using the Hevy API

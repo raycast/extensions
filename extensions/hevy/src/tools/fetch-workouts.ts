@@ -10,10 +10,7 @@ export const fetchWorkouts = async () => {
     const response = await getWorkouts();
     return {
       workouts: response.workouts,
-      pagination: {
-        page: response.page,
-        page_count: response.page_count,
-      },
+      pagination: response.pagination,
     };
   } catch (error) {
     throw new Error(`Failed to fetch workouts: ${error instanceof Error ? error.message : String(error)}`);

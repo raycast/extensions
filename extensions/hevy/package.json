@@ -23,20 +23,54 @@
       "title": "API Key",
       "description": "Your Hevy API key. Only available for Pro users.",
       "placeholder": "your-api-key"
+    },
+    {
+      "name": "sortRoutinesBy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sort Routines By",
+      "description": "Sort routines by title or created_at.",
+      "default": "title",
+      "data": [
+        {
+          "title": "Title",
+          "value": "title"
+        },
+        {
+          "title": "Created At",
+          "value": "created_at"
+        }
+      ]
+    },
+    {
+      "name": "sortRoutinesOrder",
+      "type": "dropdown",
+      "required": false,
+      "title": "Sort Routines Order",
+      "description": "Sort routines in ascending or descending order.",
+      "default": "asc",
+      "data": [
+        {
+          "title": "Ascending",
+          "value": "asc"
+        },
+        {
+          "title": "Descending",
+          "value": "desc"
+        }
+      ]
     }
   ],
   "commands": [
     {
       "name": "search-workouts",
       "title": "Search Workouts",
-      "subtitle": "Hevy",
       "description": "View your workouts on a list",
       "mode": "view"
     },
     {
       "name": "search-routines",
       "title": "Search Routines",
-      "subtitle": "Hevy",
       "description": "View your routines on a list",
       "mode": "view"
     }
@@ -157,8 +191,7 @@
   },
   "dependencies": {
     "@raycast/api": "^1.103.9",
-    "@raycast/utils": "^2.2.2",
-    "date-fns": "^4.1.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
