@@ -33,10 +33,7 @@ function isErrnoError(error: unknown): error is NodeJS.ErrnoException {
 
 async function readRunLock(): Promise<RunLock | null> {
   try {
-    return parseJson<RunLock | null>(
-      await readFile(RUN_LOCK_PATH, "utf8"),
-      null,
-    );
+    return parseJson<RunLock | null>(await readFile(RUN_LOCK_PATH, "utf8"), null);
   } catch (error) {
     if (isErrnoError(error) && error.code === "ENOENT") {
       return null;
@@ -117,10 +114,7 @@ async function releaseRunLock(lock: RunLock | null): Promise<void> {
   await removeRunLockFile();
 }
 
-export async function runShortcutSlot(
-  slot: ShortcutSlotKey,
-  slotLabel: string,
-): Promise<void> {
+export async function runShortcutSlot(slot: ShortcutSlotKey, slotLabel: string): Promise<void> {
   const runLock = await acquireRunLock();
   if (!runLock) {
     await showToast({
@@ -132,10 +126,7 @@ export async function runShortcutSlot(
   }
 
   try {
-    const [slots, savedSets] = await Promise.all([
-      loadShortcutSlots(),
-      loadSavedSets(),
-    ]);
+    const [slots, savedSets] = await Promise.all([loadShortcutSlots(), loadSavedSets()]);
 
     const setId = slots[slot];
     if (!setId) {
@@ -177,10 +168,7 @@ export async function runShortcutSlot(
 
     await closeMainWindow();
 
-    const openFailures = await openInBrowser(
-      parsed.uniqueValid,
-      selectedSet.browserApp,
-    );
+    const openFailures = await openInBrowser(parsed.uniqueValid, selectedSet.browserApp);
     const openedCount = parsed.uniqueValid.length - openFailures.length;
     const now = new Date().toISOString();
 

@@ -114,10 +114,7 @@ type EditSetFormProps = {
 };
 
 type CreateSetFormProps = {
-  onSubmit: (
-    values: CreateSetFormValues,
-    options?: CreateSetSubmitOptions,
-  ) => Promise<boolean>;
+  onSubmit: (values: CreateSetFormValues, options?: CreateSetSubmitOptions) => Promise<boolean>;
 };
 
 type SetStatsDetailProps = {
@@ -152,10 +149,7 @@ function slotLabel(slot: ShortcutSlotKey): string {
   return `QuickURL #${slot.replace("slot", "")}`;
 }
 
-function getAssignedSlots(
-  slots: ShortcutSlots,
-  setId: string,
-): ShortcutSlotKey[] {
+function getAssignedSlots(slots: ShortcutSlots, setId: string): ShortcutSlotKey[] {
   return SLOT_KEYS.filter((slot) => slots[slot] === setId);
 }
 
@@ -196,10 +190,7 @@ function formatTagAccessory(tags: string[]): string | null {
 }
 
 function SetStatsDetail({ savedSet }: SetStatsDetailProps) {
-  const totalUrlEvents =
-    savedSet.totalOpenedCount +
-    savedSet.totalFailedCount +
-    savedSet.totalInvalidCount;
+  const totalUrlEvents = savedSet.totalOpenedCount + savedSet.totalFailedCount + savedSet.totalInvalidCount;
   const failureRate = getSetFailureRate(savedSet);
   const successRate = totalUrlEvents > 0 ? 1 - failureRate : 0;
 
@@ -230,25 +221,13 @@ function EditSetForm({ savedSet, onSave }: EditSetFormProps) {
   const [name, setName] = useState(savedSet.name);
   const [tags, setTags] = useState(savedSet.tags.join(", "));
   const [urls, setUrls] = useState(savedSet.urls);
-  const [browserChoice, setBrowserChoice] = useState<string>(
-    initialBrowser.browserChoice,
-  );
-  const [customBrowserApp, setCustomBrowserApp] = useState<string>(
-    initialBrowser.customBrowserApp,
-  );
-  const hasQuickOption = QUICK_EMOJI_OPTIONS.some(
-    (item) => item.value === savedSet.emoji,
-  );
+  const [browserChoice, setBrowserChoice] = useState<string>(initialBrowser.browserChoice);
+  const [customBrowserApp, setCustomBrowserApp] = useState<string>(initialBrowser.customBrowserApp);
+  const hasQuickOption = QUICK_EMOJI_OPTIONS.some((item) => item.value === savedSet.emoji);
   const [emojiChoice, setEmojiChoice] = useState(
-    savedSet.emoji
-      ? hasQuickOption
-        ? savedSet.emoji
-        : EMOJI_CUSTOM
-      : EMOJI_NONE,
+    savedSet.emoji ? (hasQuickOption ? savedSet.emoji : EMOJI_CUSTOM) : EMOJI_NONE,
   );
-  const [customEmoji, setCustomEmoji] = useState(
-    savedSet.emoji && !hasQuickOption ? savedSet.emoji : "",
-  );
+  const [customEmoji, setCustomEmoji] = useState(savedSet.emoji && !hasQuickOption ? savedSet.emoji : "");
 
   async function handleSubmit(values: EditSetFormValues) {
     const didSave = await onSave(savedSet.id, values);
@@ -275,19 +254,10 @@ function EditSetForm({ savedSet, onSave }: EditSetFormProps) {
         onChange={setUrls}
         placeholder={`https://raycast.com\nhttps://openai.com\nexample.com`}
       />
-      <Form.Dropdown
-        id="emojiChoice"
-        title="Emoji"
-        value={emojiChoice}
-        onChange={setEmojiChoice}
-      >
+      <Form.Dropdown id="emojiChoice" title="Emoji" value={emojiChoice} onChange={setEmojiChoice}>
         <Form.Dropdown.Item value={EMOJI_NONE} title="None" />
         {QUICK_EMOJI_OPTIONS.map((item) => (
-          <Form.Dropdown.Item
-            key={`emoji-option-${item.value}`}
-            value={item.value}
-            title={item.title}
-          />
+          <Form.Dropdown.Item key={`emoji-option-${item.value}`} value={item.value} title={item.title} />
         ))}
         <Form.Dropdown.Item value={EMOJI_CUSTOM} title="Custom..." />
       </Form.Dropdown>
@@ -300,19 +270,8 @@ function EditSetForm({ savedSet, onSave }: EditSetFormProps) {
           placeholder="Example: 🐱"
         />
       )}
-      <Form.TextArea
-        id="tags"
-        title="Tags"
-        value={tags}
-        onChange={setTags}
-        placeholder="work, news, clients"
-      />
-      <Form.Dropdown
-        id="browserChoice"
-        title="Browser"
-        value={browserChoice}
-        onChange={setBrowserChoice}
-      >
+      <Form.TextArea id="tags" title="Tags" value={tags} onChange={setTags} placeholder="work, news, clients" />
+      <Form.Dropdown id="browserChoice" title="Browser" value={browserChoice} onChange={setBrowserChoice}>
         <Form.Dropdown.Item value="default" title="System Default Browser" />
         {KNOWN_BROWSER_APPS.map((browser) => (
           <Form.Dropdown.Item key={browser} value={browser} title={browser} />
@@ -371,13 +330,7 @@ function CreateSetForm({ onSubmit }: CreateSetFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        value={name}
-        onChange={setName}
-        placeholder="Example: Morning Links"
-      />
+      <Form.TextField id="name" title="Name" value={name} onChange={setName} placeholder="Example: Morning Links" />
       <Form.TextArea
         id="urls"
         title="URLs"
@@ -385,19 +338,10 @@ function CreateSetForm({ onSubmit }: CreateSetFormProps) {
         onChange={setUrls}
         placeholder={`https://raycast.com\nhttps://openai.com\nexample.com`}
       />
-      <Form.Dropdown
-        id="emojiChoice"
-        title="Emoji"
-        value={emojiChoice}
-        onChange={setEmojiChoice}
-      >
+      <Form.Dropdown id="emojiChoice" title="Emoji" value={emojiChoice} onChange={setEmojiChoice}>
         <Form.Dropdown.Item value={EMOJI_NONE} title="None" />
         {QUICK_EMOJI_OPTIONS.map((item) => (
-          <Form.Dropdown.Item
-            key={`emoji-option-${item.value}`}
-            value={item.value}
-            title={item.title}
-          />
+          <Form.Dropdown.Item key={`emoji-option-${item.value}`} value={item.value} title={item.title} />
         ))}
         <Form.Dropdown.Item value={EMOJI_CUSTOM} title="Custom..." />
       </Form.Dropdown>
@@ -410,19 +354,8 @@ function CreateSetForm({ onSubmit }: CreateSetFormProps) {
           placeholder="Example: 🐱"
         />
       )}
-      <Form.TextArea
-        id="tags"
-        title="Tags"
-        value={tags}
-        onChange={setTags}
-        placeholder="work, news, clients"
-      />
-      <Form.Dropdown
-        id="browserChoice"
-        title="Browser"
-        value={browserChoice}
-        onChange={setBrowserChoice}
-      >
+      <Form.TextArea id="tags" title="Tags" value={tags} onChange={setTags} placeholder="work, news, clients" />
+      <Form.Dropdown id="browserChoice" title="Browser" value={browserChoice} onChange={setBrowserChoice}>
         <Form.Dropdown.Item value="default" title="System Default Browser" />
         {KNOWN_BROWSER_APPS.map((browser) => (
           <Form.Dropdown.Item key={browser} value={browser} title={browser} />
@@ -474,15 +407,9 @@ function ImportSharedSetForm({ onSubmit }: ImportSharedSetFormProps) {
   );
 }
 
-function ExportUrlSetsForm({
-  selectedSet,
-  savedSetsCount,
-  onCopy,
-}: ExportUrlSetsFormProps) {
+function ExportUrlSetsForm({ selectedSet, savedSetsCount, onCopy }: ExportUrlSetsFormProps) {
   const { pop } = useNavigation();
-  const [scope, setScope] = useState<ExportScope>(
-    selectedSet ? "selected" : "all",
-  );
+  const [scope, setScope] = useState<ExportScope>(selectedSet ? "selected" : "all");
 
   async function handleSubmit(values: ExportFormValues) {
     const didCopy = await onCopy(values.scope);
@@ -507,16 +434,8 @@ function ExportUrlSetsForm({
         value={scope}
         onChange={(value) => setScope(value as ExportScope)}
       >
-        {selectedSet && (
-          <Form.Dropdown.Item
-            value="selected"
-            title={`Selected Set: ${selectedSet.name}`}
-          />
-        )}
-        <Form.Dropdown.Item
-          value="all"
-          title={`All Saved Sets (${savedSetsCount})`}
-        />
+        {selectedSet && <Form.Dropdown.Item value="selected" title={`Selected Set: ${selectedSet.name}`} />}
+        <Form.Dropdown.Item value="all" title={`All Saved Sets (${savedSetsCount})`} />
       </Form.Dropdown>
     </Form>
   );
@@ -538,13 +457,12 @@ export function MultiUrlSavedSetsList() {
   useEffect(() => {
     async function loadData() {
       setIsLoading(true);
-      const [loadedSavedSets, loadedHistory, loadedSlots, loadedTrash] =
-        await Promise.all([
-          loadSavedSets(),
-          loadHistory(),
-          loadShortcutSlots(),
-          loadTrash(),
-        ]);
+      const [loadedSavedSets, loadedHistory, loadedSlots, loadedTrash] = await Promise.all([
+        loadSavedSets(),
+        loadHistory(),
+        loadShortcutSlots(),
+        loadTrash(),
+      ]);
       setSavedSets(sortSavedSets(loadedSavedSets));
       setHistory(loadedHistory);
       setSlots(loadedSlots);
@@ -555,57 +473,30 @@ export function MultiUrlSavedSetsList() {
     void loadData();
   }, []);
 
-  const assignedCount = useMemo(
-    () => Object.values(slots).filter(Boolean).length,
-    [slots],
-  );
+  const assignedCount = useMemo(() => Object.values(slots).filter(Boolean).length, [slots]);
   const availableTags = useMemo(
-    () =>
-      Array.from(new Set(savedSets.flatMap((item) => item.tags))).sort((a, b) =>
-        a.localeCompare(b),
-      ),
+    () => Array.from(new Set(savedSets.flatMap((item) => item.tags))).sort((a, b) => a.localeCompare(b)),
     [savedSets],
   );
   const filteredSavedSets = useMemo(
-    () =>
-      selectedTag === TAG_FILTER_ALL
-        ? savedSets
-        : savedSets.filter((item) => item.tags.includes(selectedTag)),
+    () => (selectedTag === TAG_FILTER_ALL ? savedSets : savedSets.filter((item) => item.tags.includes(selectedTag))),
     [savedSets, selectedTag],
   );
-  const pinnedSets = useMemo(
-    () => filteredSavedSets.filter((item) => item.pinned),
-    [filteredSavedSets],
-  );
-  const unpinnedSets = useMemo(
-    () => filteredSavedSets.filter((item) => !item.pinned),
-    [filteredSavedSets],
-  );
+  const pinnedSets = useMemo(() => filteredSavedSets.filter((item) => item.pinned), [filteredSavedSets]);
+  const unpinnedSets = useMemo(() => filteredSavedSets.filter((item) => !item.pinned), [filteredSavedSets]);
   const pinnedCount = useMemo(() => pinnedSets.length, [pinnedSets]);
   const savedSetUrlCounts = useMemo(
-    () =>
-      new Map(
-        savedSets.map((item) => [item.id, countValidUrls(item.urls)] as const),
-      ),
+    () => new Map(savedSets.map((item) => [item.id, countValidUrls(item.urls)] as const)),
     [savedSets],
   );
   const trashUrlCounts = useMemo(
-    () =>
-      new Map(
-        trash.map(
-          (item) => [item.id, countValidUrls(item.sourceSet.urls)] as const,
-        ),
-      ),
+    () => new Map(trash.map((item) => [item.id, countValidUrls(item.sourceSet.urls)] as const)),
     [trash],
   );
-  const activeTagLabel =
-    selectedTag === TAG_FILTER_ALL ? "all tags" : `#${selectedTag}`;
+  const activeTagLabel = selectedTag === TAG_FILTER_ALL ? "all tags" : `#${selectedTag}`;
 
   useEffect(() => {
-    if (
-      selectedTag !== TAG_FILTER_ALL &&
-      !availableTags.includes(selectedTag)
-    ) {
+    if (selectedTag !== TAG_FILTER_ALL && !availableTags.includes(selectedTag)) {
       setSelectedTag(TAG_FILTER_ALL);
     }
   }, [availableTags, selectedTag]);
@@ -634,8 +525,7 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function assignSetToSlot(setId: string, slot: ShortcutSlotKey) {
-    const previousSlot =
-      SLOT_KEYS.find((item) => slots[item] === setId) ?? null;
+    const previousSlot = SLOT_KEYS.find((item) => slots[item] === setId) ?? null;
     const didToggleOff = slots[slot] === setId;
     const nextSlots = toggleSetQuickUrlSlot(slots, setId, slot);
     await saveShortcutSlots(nextSlots);
@@ -643,9 +533,7 @@ export function MultiUrlSavedSetsList() {
 
     await showToast({
       style: Toast.Style.Success,
-      title: didToggleOff
-        ? `${slotLabel(slot)} cleared`
-        : `${slotLabel(slot)} updated`,
+      title: didToggleOff ? `${slotLabel(slot)} cleared` : `${slotLabel(slot)} updated`,
       message: didToggleOff
         ? "The saved set was removed from this QuickURL."
         : previousSlot && previousSlot !== slot
@@ -705,10 +593,7 @@ export function MultiUrlSavedSetsList() {
     });
   }
 
-  async function updateSet(
-    setId: string,
-    values: EditSetFormValues,
-  ): Promise<boolean> {
+  async function updateSet(setId: string, values: EditSetFormValues): Promise<boolean> {
     const nextName = values.name.trim();
     if (nextName.length === 0) {
       await showToast({
@@ -718,10 +603,7 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const duplicate = savedSets.find(
-      (item) =>
-        item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase(),
-    );
+    const duplicate = savedSets.find((item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase());
 
     if (duplicate) {
       await showToast({
@@ -741,10 +623,7 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const browserApp = resolveBrowserApp(
-      values.browserChoice,
-      values.customBrowserApp,
-    );
+    const browserApp = resolveBrowserApp(values.browserChoice, values.customBrowserApp);
     if (values.browserChoice === "custom" && !browserApp) {
       await showToast({
         style: Toast.Style.Failure,
@@ -796,10 +675,7 @@ export function MultiUrlSavedSetsList() {
     return true;
   }
 
-  async function createSet(
-    values: CreateSetFormValues,
-    options?: CreateSetSubmitOptions,
-  ): Promise<boolean> {
+  async function createSet(values: CreateSetFormValues, options?: CreateSetSubmitOptions): Promise<boolean> {
     const rawName = values.name.trim();
     if (rawName.length === 0) {
       await showToast({
@@ -818,10 +694,7 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const browserApp = resolveBrowserApp(
-      values.browserChoice,
-      values.customBrowserApp,
-    );
+    const browserApp = resolveBrowserApp(values.browserChoice, values.customBrowserApp);
     if (values.browserChoice === "custom" && !browserApp) {
       await showToast({
         style: Toast.Style.Failure,
@@ -898,10 +771,7 @@ export function MultiUrlSavedSetsList() {
     return true;
   }
 
-  async function copyShareCode(
-    scope: ExportScope,
-    selectedSet: SavedSet | null,
-  ): Promise<boolean> {
+  async function copyShareCode(scope: ExportScope, selectedSet: SavedSet | null): Promise<boolean> {
     try {
       const shareCode =
         scope === "selected" && selectedSet
@@ -923,10 +793,7 @@ export function MultiUrlSavedSetsList() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not export URL-sets",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Try again when at least one valid set is available.",
+        message: error instanceof Error ? error.message : "Try again when at least one valid set is available.",
       });
 
       return false;
@@ -941,15 +808,12 @@ export function MultiUrlSavedSetsList() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not import URL-set",
-        message:
-          error instanceof Error ? error.message : "Share code is invalid.",
+        message: error instanceof Error ? error.message : "Share code is invalid.",
       });
       return false;
     }
 
-    const existingFingerprints = new Set(
-      savedSets.map((set) => createSavedSetShareFingerprint(set)),
-    );
+    const existingFingerprints = new Set(savedSets.map((set) => createSavedSetShareFingerprint(set)));
     const nextNames = savedSets.map((set) => set.name);
     const now = new Date().toISOString();
     const importedSets: SavedSet[] = [];
@@ -1092,10 +956,7 @@ export function MultiUrlSavedSetsList() {
     }
 
     const targetParsed = parseInputUrls(targetSet.urls);
-    const mergedUrls = dedupe([
-      ...targetParsed.uniqueValid,
-      ...sourceParsed.uniqueValid,
-    ]);
+    const mergedUrls = dedupe([...targetParsed.uniqueValid, ...sourceParsed.uniqueValid]);
     if (mergedUrls.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
@@ -1116,10 +977,7 @@ export function MultiUrlSavedSetsList() {
     );
     await persistSavedSets(nextSavedSets);
 
-    const addedCount = Math.max(
-      0,
-      mergedUrls.length - targetParsed.uniqueValid.length,
-    );
+    const addedCount = Math.max(0, mergedUrls.length - targetParsed.uniqueValid.length);
     await showToast({
       style: Toast.Style.Success,
       title: "Sets merged",
@@ -1141,9 +999,7 @@ export function MultiUrlSavedSetsList() {
 
     const now = new Date().toISOString();
     const existingIds = new Set(currentSavedSets.map((item) => item.id));
-    const restoredId = existingIds.has(target.sourceSet.id)
-      ? randomUUID()
-      : target.sourceSet.id;
+    const restoredId = existingIds.has(target.sourceSet.id) ? randomUUID() : target.sourceSet.id;
     const restoredName = createUniqueSetName(
       target.sourceSet.name,
       currentSavedSets.map((item) => item.name),
@@ -1168,15 +1024,9 @@ export function MultiUrlSavedSetsList() {
     }
 
     const nextSavedSets = sortSavedSets([restoredSet, ...currentSavedSets]);
-    const nextTrash = sortTrash(
-      currentTrash.filter((item) => item.id !== target.id),
-    );
+    const nextTrash = sortTrash(currentTrash.filter((item) => item.id !== target.id));
 
-    await Promise.all([
-      saveSavedSets(nextSavedSets),
-      saveShortcutSlots(nextSlots),
-      saveTrash(nextTrash),
-    ]);
+    await Promise.all([saveSavedSets(nextSavedSets), saveShortcutSlots(nextSlots), saveTrash(nextTrash)]);
 
     setSavedSets(nextSavedSets);
     setSlots(nextSlots);
@@ -1246,8 +1096,7 @@ export function MultiUrlSavedSetsList() {
   async function deleteSet(savedSet: SavedSet) {
     const shouldDelete = await confirmAlert({
       title: `Move ${savedSet.name} to trash?`,
-      message:
-        "The set will be removed from active lists and can be restored from Trash.",
+      message: "The set will be removed from active lists and can be restored from Trash.",
       primaryAction: {
         title: "Move to Trash",
         style: Alert.ActionStyle.Destructive,
@@ -1277,16 +1126,9 @@ export function MultiUrlSavedSetsList() {
       }
     }
 
-    const nextTrash = sortTrash([trashEntry, ...trash]).slice(
-      0,
-      MAX_TRASH_ITEMS,
-    );
+    const nextTrash = sortTrash([trashEntry, ...trash]).slice(0, MAX_TRASH_ITEMS);
 
-    await Promise.all([
-      saveSavedSets(nextSavedSets),
-      saveShortcutSlots(nextSlots),
-      saveTrash(nextTrash),
-    ]);
+    await Promise.all([saveSavedSets(nextSavedSets), saveShortcutSlots(nextSlots), saveTrash(nextTrash)]);
 
     setSavedSets(sortSavedSets(nextSavedSets));
     setSlots(nextSlots);
@@ -1305,10 +1147,7 @@ export function MultiUrlSavedSetsList() {
     });
   }
 
-  async function runSavedSet(
-    savedSet: SavedSet,
-    baseSavedSets: SavedSet[] = savedSets,
-  ) {
+  async function runSavedSet(savedSet: SavedSet, baseSavedSets: SavedSet[] = savedSets) {
     const parsed = parseInputUrls(savedSet.urls);
 
     if (parsed.uniqueValid.length === 0) {
@@ -1330,15 +1169,10 @@ export function MultiUrlSavedSetsList() {
 
     await closeMainWindow();
 
-    const openFailures = await openInBrowser(
-      parsed.uniqueValid,
-      savedSet.browserApp,
-    );
+    const openFailures = await openInBrowser(parsed.uniqueValid, savedSet.browserApp);
     const openedCount = parsed.uniqueValid.length - openFailures.length;
     const now = new Date().toISOString();
-    const savedSetsToUpdate = baseSavedSets.some(
-      (item) => item.id === savedSet.id,
-    )
+    const savedSetsToUpdate = baseSavedSets.some((item) => item.id === savedSet.id)
       ? baseSavedSets
       : [savedSet, ...baseSavedSets];
     const nextSavedSets = savedSetsToUpdate.map((item) =>
@@ -1424,10 +1258,7 @@ export function MultiUrlSavedSetsList() {
 
       await closeMainWindow();
 
-      const openFailures = await openInBrowser(
-        parsed.uniqueValid,
-        entry.browserApp,
-      );
+      const openFailures = await openInBrowser(parsed.uniqueValid, entry.browserApp);
       const openedCount = parsed.uniqueValid.length - openFailures.length;
       const now = new Date().toISOString();
 
@@ -1556,11 +1387,7 @@ export function MultiUrlSavedSetsList() {
     const slotText = setSlots.map((slot) => slotLabel(slot)).join(", ");
     const tagText = formatTagAccessory(savedSet.tags);
     const mergeTargets = savedSets.filter((item) => item.id !== savedSet.id);
-    const setIcon = savedSet.emoji
-      ? { source: savedSet.emoji }
-      : savedSet.pinned
-        ? Icon.Star
-        : Icon.Link;
+    const setIcon = savedSet.emoji ? { source: savedSet.emoji } : savedSet.pinned ? Icon.Star : Icon.Link;
 
     return (
       <List.Item
@@ -1573,19 +1400,13 @@ export function MultiUrlSavedSetsList() {
           ...(slotText.length > 0 ? [{ text: slotText }] : []),
           { text: `${savedSet.useCount} opens` },
           {
-            text: savedSet.lastOpenedAt
-              ? formatDateTime(savedSet.lastOpenedAt)
-              : "Never opened",
+            text: savedSet.lastOpenedAt ? formatDateTime(savedSet.lastOpenedAt) : "Never opened",
           },
         ]}
         actions={
           <ActionPanel>
             <ActionPanel.Section title="MAIN ACTIONS">
-              <Action
-                title="Open Set"
-                icon={Icon.Play}
-                onAction={() => void openSavedSet(savedSet)}
-              />
+              <Action title="Open Set" icon={Icon.Play} onAction={() => void openSavedSet(savedSet)} />
               {renderCreateSetAction()}
               {renderCreateFromClipboardAction()}
             </ActionPanel.Section>
@@ -1600,9 +1421,7 @@ export function MultiUrlSavedSetsList() {
                 title={savedSet.pinned ? "Unpin Set" : "Pin Set"}
                 icon={Icon.Star}
                 shortcut={
-                  savedSet.pinned
-                    ? { modifiers: ["cmd", "shift"], key: "p" }
-                    : { modifiers: ["cmd", "opt"], key: "p" }
+                  savedSet.pinned ? { modifiers: ["cmd", "shift"], key: "p" } : { modifiers: ["cmd", "opt"], key: "p" }
                 }
                 onAction={() => void togglePinned(savedSet.id)}
               />
@@ -1650,11 +1469,7 @@ export function MultiUrlSavedSetsList() {
                 {SLOT_KEYS.map((slot) => (
                   <Action
                     key={`${savedSet.id}-${slot}`}
-                    title={
-                      slots[slot] === savedSet.id
-                        ? `Remove from ${slotLabel(slot)}`
-                        : `Map to ${slotLabel(slot)}`
-                    }
+                    title={slots[slot] === savedSet.id ? `Remove from ${slotLabel(slot)}` : `Map to ${slotLabel(slot)}`}
                     onAction={() => void assignSetToSlot(savedSet.id, slot)}
                   />
                 ))}
@@ -1697,26 +1512,16 @@ export function MultiUrlSavedSetsList() {
       isLoading={isLoading}
       searchBarPlaceholder="Search saved sets, trash, or recent runs"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by tag"
-          value={selectedTag}
-          onChange={setSelectedTag}
-        >
+        <List.Dropdown tooltip="Filter by tag" value={selectedTag} onChange={setSelectedTag}>
           <List.Dropdown.Item value={TAG_FILTER_ALL} title="All Tags" />
           {availableTags.map((tag) => (
-            <List.Dropdown.Item
-              key={`tag-filter-${tag}`}
-              value={tag}
-              title={`#${tag}`}
-            />
+            <List.Dropdown.Item key={`tag-filter-${tag}`} value={tag} title={`#${tag}`} />
           ))}
         </List.Dropdown>
       }
     >
       {pinnedSets.length > 0 && (
-        <List.Section title={`Pinned Sets (${pinnedSets.length})`}>
-          {pinnedSets.map(renderSavedSetItem)}
-        </List.Section>
+        <List.Section title={`Pinned Sets (${pinnedSets.length})`}>{pinnedSets.map(renderSavedSetItem)}</List.Section>
       )}
 
       {unpinnedSets.length > 0 && (
@@ -1741,11 +1546,7 @@ export function MultiUrlSavedSetsList() {
                 <ActionPanel>
                   {renderCreateSetAction()}
                   {renderCreateFromClipboardAction()}
-                  <Action
-                    title="Open Again"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() => void openHistoryEntry(entry)}
-                  />
+                  <Action title="Open Again" icon={Icon.ArrowClockwise} onAction={() => void openHistoryEntry(entry)} />
                   {renderExportSetAction(null)}
                   {renderImportSetAction()}
                   <MultiUrlHelpAction />

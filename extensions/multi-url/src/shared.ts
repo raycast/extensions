@@ -59,13 +59,7 @@ export type ShortcutSlotKey = "slot1" | "slot2" | "slot3" | "slot4" | "slot5";
 
 export type ShortcutSlots = Record<ShortcutSlotKey, string | null>;
 
-export const SHORTCUT_SLOT_KEYS: ShortcutSlotKey[] = [
-  "slot1",
-  "slot2",
-  "slot3",
-  "slot4",
-  "slot5",
-];
+export const SHORTCUT_SLOT_KEYS: ShortcutSlotKey[] = ["slot1", "slot2", "slot3", "slot4", "slot5"];
 
 export const DEFAULT_SHORTCUT_SLOTS: ShortcutSlots = {
   slot1: null,
@@ -150,8 +144,7 @@ export function splitInput(input: string): string[] {
       continue;
     }
 
-    const schemeMatches =
-      row.match(/[a-zA-Z][a-zA-Z0-9+.-]*:\/\//g)?.length ?? 0;
+    const schemeMatches = row.match(/[a-zA-Z][a-zA-Z0-9+.-]*:\/\//g)?.length ?? 0;
     const shouldSplitByComma = schemeMatches !== 1 || !row.includes("://");
 
     if (!shouldSplitByComma) {
@@ -214,9 +207,7 @@ function shouldDropTrackingParam(key: string): boolean {
     return true;
   }
 
-  return TRACKING_PARAM_PREFIXES.some((prefix) =>
-    normalized.startsWith(prefix),
-  );
+  return TRACKING_PARAM_PREFIXES.some((prefix) => normalized.startsWith(prefix));
 }
 
 function normalizeDomain(parsed: URL): void {
@@ -291,19 +282,11 @@ export function dedupe(values: string[]): string[] {
 }
 
 export function sortSavedSets(savedSets: SavedSet[]): SavedSet[] {
-  return [...savedSets].sort(
-    (a, b) =>
-      Number(b.pinned) - Number(a.pinned) ||
-      b.updatedAt.localeCompare(a.updatedAt),
-  );
+  return [...savedSets].sort((a, b) => Number(b.pinned) - Number(a.pinned) || b.updatedAt.localeCompare(a.updatedAt));
 }
 
 function normalizeTagValue(value: string): string | null {
-  const normalized = value
-    .trim()
-    .replace(/^#+/, "")
-    .replace(/\s+/g, " ")
-    .toLowerCase();
+  const normalized = value.trim().replace(/^#+/, "").replace(/\s+/g, " ").toLowerCase();
 
   return normalized.length > 0 ? normalized : null;
 }
@@ -363,10 +346,7 @@ export function ensureSetName(input: string): string {
   return `Set ${formatSetTimestamp(new Date())}`;
 }
 
-export function resolveBrowserApp(
-  choice: string,
-  customBrowserApp: string,
-): string | null {
+export function resolveBrowserApp(choice: string, customBrowserApp: string): string | null {
   if (choice === "default") {
     return null;
   }
@@ -387,21 +367,14 @@ export function browserChoiceFromApp(browserApp: string | null): {
     return { browserChoice: "default", customBrowserApp: "" };
   }
 
-  if (
-    KNOWN_BROWSER_APPS.includes(
-      browserApp as (typeof KNOWN_BROWSER_APPS)[number],
-    )
-  ) {
+  if (KNOWN_BROWSER_APPS.includes(browserApp as (typeof KNOWN_BROWSER_APPS)[number])) {
     return { browserChoice: browserApp, customBrowserApp: "" };
   }
 
   return { browserChoice: "custom", customBrowserApp: browserApp };
 }
 
-export async function openInBrowser(
-  urls: string[],
-  browserApp: string | null,
-): Promise<string[]> {
+export async function openInBrowser(urls: string[], browserApp: string | null): Promise<string[]> {
   const failures: string[] = [];
 
   for (let i = 0; i < urls.length; i += OPEN_BATCH_SIZE) {
@@ -500,16 +473,11 @@ function normalizeSharedSet(value: unknown): SharedSetV1 | null {
     urls?: unknown;
     browserApp?: unknown;
   };
-  const name =
-    typeof candidate.name === "string" ? ensureSetName(candidate.name) : "";
+  const name = typeof candidate.name === "string" ? ensureSetName(candidate.name) : "";
   const emoji =
-    typeof candidate.emoji === "string" && candidate.emoji.trim().length > 0
-      ? candidate.emoji.trim()
-      : null;
+    typeof candidate.emoji === "string" && candidate.emoji.trim().length > 0 ? candidate.emoji.trim() : null;
   const tags = Array.isArray(candidate.tags)
-    ? normalizeTags(
-        candidate.tags.filter((tag): tag is string => typeof tag === "string"),
-      )
+    ? normalizeTags(candidate.tags.filter((tag): tag is string => typeof tag === "string"))
     : [];
 
   const urlValues: string[] = [];
@@ -537,15 +505,9 @@ function normalizeSharedSet(value: unknown): SharedSetV1 | null {
   };
 }
 
-function buildShareFingerprint(
-  urls: string[],
-  tags: string[],
-  browserApp: string | null,
-): string {
+function buildShareFingerprint(urls: string[], tags: string[], browserApp: string | null): string {
   const normalizedUrls = dedupe(
-    urls
-      .map((entry) => normalizeUrl(entry))
-      .filter((entry): entry is string => Boolean(entry)),
+    urls.map((entry) => normalizeUrl(entry)).filter((entry): entry is string => Boolean(entry)),
   );
   const normalizedBrowser = browserApp?.trim().toLowerCase() ?? "default";
   const normalizedTags = normalizeTags(tags);
@@ -558,20 +520,12 @@ function buildShareFingerprint(
 }
 
 export function createSharedSetFingerprint(sharedSet: SharedSetV1): string {
-  return buildShareFingerprint(
-    sharedSet.urls,
-    sharedSet.tags,
-    sharedSet.browserApp,
-  );
+  return buildShareFingerprint(sharedSet.urls, sharedSet.tags, sharedSet.browserApp);
 }
 
 export function createSavedSetShareFingerprint(savedSet: SavedSet): string {
   const parsed = parseInputUrls(savedSet.urls);
-  return buildShareFingerprint(
-    parsed.uniqueValid,
-    savedSet.tags,
-    savedSet.browserApp,
-  );
+  return buildShareFingerprint(parsed.uniqueValid, savedSet.tags, savedSet.browserApp);
 }
 
 export function parseSharedSetsInput(rawInput: string): SharedSetV1[] {
@@ -762,10 +716,7 @@ export async function saveShortcutSlots(slots: ShortcutSlots): Promise<void> {
     ...DEFAULT_SHORTCUT_SLOTS,
     ...slots,
   });
-  await LocalStorage.setItem(
-    STORAGE_KEYS.slots,
-    JSON.stringify(normalizedSlots),
-  );
+  await LocalStorage.setItem(STORAGE_KEYS.slots, JSON.stringify(normalizedSlots));
 }
 
 export function normalizeShortcutSlots(slots: ShortcutSlots): ShortcutSlots {
@@ -793,11 +744,7 @@ export function normalizeShortcutSlots(slots: ShortcutSlots): ShortcutSlots {
   return nextSlots;
 }
 
-export function toggleSetQuickUrlSlot(
-  slots: ShortcutSlots,
-  setId: string,
-  targetSlot: ShortcutSlotKey,
-): ShortcutSlots {
+export function toggleSetQuickUrlSlot(slots: ShortcutSlots, setId: string, targetSlot: ShortcutSlotKey): ShortcutSlots {
   const nextSlots = normalizeShortcutSlots(slots);
   const wasMappedToTargetSlot = nextSlots[targetSlot] === setId;
 
@@ -831,8 +778,7 @@ export function applySavedSetRunStats(
 }
 
 export function getSetFailureRate(set: SavedSet): number {
-  const total =
-    set.totalOpenedCount + set.totalFailedCount + set.totalInvalidCount;
+  const total = set.totalOpenedCount + set.totalFailedCount + set.totalInvalidCount;
 
   if (total === 0) {
     return 0;
@@ -845,10 +791,7 @@ export function formatPercent(value: number): string {
   return `${(value * 100).toFixed(1)}%`;
 }
 
-export function createUniqueSetName(
-  desiredName: string,
-  existingNames: string[],
-): string {
+export function createUniqueSetName(desiredName: string, existingNames: string[]): string {
   const normalize = (value: string) => value.trim().toLowerCase();
   const taken = new Set(existingNames.map(normalize));
   const baseName = desiredName.trim();

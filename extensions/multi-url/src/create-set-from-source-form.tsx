@@ -106,10 +106,7 @@ function normalizeSingleEmoji(input: string): string | null {
   return firstCodePoint ?? null;
 }
 
-export function CreateSetFromSourceForm({
-  navigationTitle,
-  loadSource,
-}: CreateSetFromSourceFormProps) {
+export function CreateSetFromSourceForm({ navigationTitle, loadSource }: CreateSetFromSourceFormProps) {
   const [isLoadingSource, setIsLoadingSource] = useState(true);
   const [sourceLabel, setSourceLabel] = useState("Source");
   const [sourceError, setSourceError] = useState<string | null>(null);
@@ -136,10 +133,7 @@ export function CreateSetFromSourceForm({
       return "Loading URLs from source...";
     }
 
-    const parts = [
-      `Loaded from ${sourceLabel}.`,
-      `${validUrlCount} valid URL${validUrlCount === 1 ? "" : "s"} ready.`,
-    ];
+    const parts = [`Loaded from ${sourceLabel}.`, `${validUrlCount} valid URL${validUrlCount === 1 ? "" : "s"} ready.`];
 
     if (sourceInvalidCount > 0) {
       parts.push(
@@ -154,14 +148,7 @@ export function CreateSetFromSourceForm({
     }
 
     return parts.join(" ");
-  }, [
-    invalidUrlCount,
-    isLoadingSource,
-    sourceError,
-    sourceInvalidCount,
-    sourceLabel,
-    validUrlCount,
-  ]);
+  }, [invalidUrlCount, isLoadingSource, sourceError, sourceInvalidCount, sourceLabel, validUrlCount]);
 
   const refreshSource = useCallback(async () => {
     setIsLoadingSource(true);
@@ -172,24 +159,17 @@ export function CreateSetFromSourceForm({
       const parsed = parseInputUrls(source.rawInput);
 
       if (parsed.uniqueValid.length === 0) {
-        throw new Error(
-          `No valid URLs found in ${source.sourceLabel.toLowerCase()}.`,
-        );
+        throw new Error(`No valid URLs found in ${source.sourceLabel.toLowerCase()}.`);
       }
 
       setSourceLabel(source.sourceLabel);
       setSourceInvalidCount(parsed.invalid.length);
       setUrls(parsed.uniqueValid.join("\n"));
-      setSetName(
-        source.suggestedName?.trim() || fallbackSetName(source.sourceLabel),
-      );
+      setSetName(source.suggestedName?.trim() || fallbackSetName(source.sourceLabel));
       setBrowserChoice("default");
       setCustomBrowserApp("");
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Could not load URLs from source.";
+      const message = error instanceof Error ? error.message : "Could not load URLs from source.";
       setSourceError(message);
       setSourceInvalidCount(0);
       setUrls("");
@@ -208,10 +188,7 @@ export function CreateSetFromSourceForm({
     const parsed = parseInputUrls(savedSet.urls);
     await closeMainWindow();
 
-    const openFailures = await openInBrowser(
-      parsed.uniqueValid,
-      savedSet.browserApp,
-    );
+    const openFailures = await openInBrowser(parsed.uniqueValid, savedSet.browserApp);
     const openedCount = parsed.uniqueValid.length - openFailures.length;
     const now = new Date().toISOString();
     const nextSavedSets = baseSavedSets.map((item) =>
@@ -271,8 +248,7 @@ export function CreateSetFromSourceForm({
     const resolvedTags = values.tags ?? tags;
     const resolvedUrls = values.urls ?? urls;
     const resolvedBrowserChoice = values.browserChoice ?? browserChoice;
-    const resolvedCustomBrowserApp =
-      values.customBrowserApp ?? customBrowserApp;
+    const resolvedCustomBrowserApp = values.customBrowserApp ?? customBrowserApp;
     const resolvedEmojiChoice = values.emojiChoice ?? emojiChoice;
     const resolvedCustomEmoji = values.customEmoji ?? customEmoji;
 
@@ -285,10 +261,7 @@ export function CreateSetFromSourceForm({
       return;
     }
 
-    const browserApp = resolveBrowserApp(
-      resolvedBrowserChoice,
-      resolvedCustomBrowserApp,
-    );
+    const browserApp = resolveBrowserApp(resolvedBrowserChoice, resolvedCustomBrowserApp);
     if (resolvedBrowserChoice === "custom" && !browserApp) {
       await showToast({
         style: Toast.Style.Failure,
@@ -385,23 +358,15 @@ export function CreateSetFromSourceForm({
           <Action.SubmitForm
             title="Save Set and Open Links"
             shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
-            onSubmit={(values) =>
-              handleCreateSet(values, { openAfterSave: true })
-            }
+            onSubmit={(values) => handleCreateSet(values, { openAfterSave: true })}
           />
           <Action
             title="Reload Source URLs"
             onAction={() => void refreshSource()}
             shortcut={Keyboard.Shortcut.Common.Refresh}
           />
-          <Action.Push
-            title="Open Saved Sets"
-            target={<MultiUrlSavedSetsList />}
-          />
-          <Action
-            title="Open Extension Settings"
-            onAction={() => void openExtensionPreferences()}
-          />
+          <Action.Push title="Open Saved Sets" target={<MultiUrlSavedSetsList />} />
+          <Action title="Open Extension Settings" onAction={() => void openExtensionPreferences()} />
           <MultiUrlHelpAction />
         </ActionPanel>
       }
@@ -424,19 +389,10 @@ export function CreateSetFromSourceForm({
         placeholder={`https://raycast.com\nhttps://openai.com\nexample.com`}
       />
 
-      <Form.Dropdown
-        id="emojiChoice"
-        title="Emoji"
-        value={emojiChoice}
-        onChange={setEmojiChoice}
-      >
+      <Form.Dropdown id="emojiChoice" title="Emoji" value={emojiChoice} onChange={setEmojiChoice}>
         <Form.Dropdown.Item value={EMOJI_NONE} title="None" />
         {QUICK_EMOJI_OPTIONS.map((item) => (
-          <Form.Dropdown.Item
-            key={`emoji-option-${item.value}`}
-            value={item.value}
-            title={item.title}
-          />
+          <Form.Dropdown.Item key={`emoji-option-${item.value}`} value={item.value} title={item.title} />
         ))}
         <Form.Dropdown.Item value={EMOJI_CUSTOM} title="Custom..." />
       </Form.Dropdown>
@@ -451,20 +407,9 @@ export function CreateSetFromSourceForm({
         />
       )}
 
-      <Form.TextArea
-        id="tags"
-        title="Tags"
-        value={tags}
-        onChange={setTags}
-        placeholder="work, news, clients"
-      />
+      <Form.TextArea id="tags" title="Tags" value={tags} onChange={setTags} placeholder="work, news, clients" />
 
-      <Form.Dropdown
-        id="browserChoice"
-        title="Browser"
-        value={browserChoice}
-        onChange={setBrowserChoice}
-      >
+      <Form.Dropdown id="browserChoice" title="Browser" value={browserChoice} onChange={setBrowserChoice}>
         <Form.Dropdown.Item value="default" title="System Default Browser" />
         {KNOWN_BROWSER_APPS.map((browser) => (
           <Form.Dropdown.Item key={browser} value={browser} title={browser} />

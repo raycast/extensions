@@ -16,47 +16,42 @@ const TITLE_MATCHERS = [
 ] as const;
 
 function decodeHtmlEntities(value: string): string {
-  return value.replace(
-    /&(#x?[0-9a-f]+|amp|apos|gt|lt|nbsp|quot);/gi,
-    (match, entity: string) => {
-      const normalized = entity.toLowerCase();
-      switch (normalized) {
-        case "amp":
-          return "&";
-        case "apos":
-          return "'";
-        case "gt":
-          return ">";
-        case "lt":
-          return "<";
-        case "nbsp":
-          return " ";
-        case "quot":
-          return '"';
-        default: {
-          if (!normalized.startsWith("#")) {
-            return match;
-          }
+  return value.replace(/&(#x?[0-9a-f]+|amp|apos|gt|lt|nbsp|quot);/gi, (match, entity: string) => {
+    const normalized = entity.toLowerCase();
+    switch (normalized) {
+      case "amp":
+        return "&";
+      case "apos":
+        return "'";
+      case "gt":
+        return ">";
+      case "lt":
+        return "<";
+      case "nbsp":
+        return " ";
+      case "quot":
+        return '"';
+      default: {
+        if (!normalized.startsWith("#")) {
+          return match;
+        }
 
-          const isHex = normalized.startsWith("#x");
-          const rawCodePoint = isHex
-            ? normalized.slice(2)
-            : normalized.slice(1);
-          const codePoint = Number.parseInt(rawCodePoint, isHex ? 16 : 10);
+        const isHex = normalized.startsWith("#x");
+        const rawCodePoint = isHex ? normalized.slice(2) : normalized.slice(1);
+        const codePoint = Number.parseInt(rawCodePoint, isHex ? 16 : 10);
 
-          if (!Number.isFinite(codePoint)) {
-            return match;
-          }
+        if (!Number.isFinite(codePoint)) {
+          return match;
+        }
 
-          try {
-            return String.fromCodePoint(codePoint);
-          } catch {
-            return match;
-          }
+        try {
+          return String.fromCodePoint(codePoint);
+        } catch {
+          return match;
         }
       }
-    },
-  );
+    }
+  });
 }
 
 function sanitizeSuggestedTitle(rawTitle: string): string | null {
@@ -96,20 +91,14 @@ async function fetchSuggestedPageTitle(url: string): Promise<string | null> {
     }
 
     const contentType = response.headers.get("content-type")?.toLowerCase();
-    if (
-      contentType &&
-      !contentType.includes("text/html") &&
-      !contentType.includes("application/xhtml+xml")
-    ) {
+    if (contentType && !contentType.includes("text/html") && !contentType.includes("application/xhtml+xml")) {
       return null;
     }
 
     const html = await readTitleHtml(response);
     for (const matcher of TITLE_MATCHERS) {
       const match = html.match(matcher);
-      const suggestedTitle = match?.[1]
-        ? sanitizeSuggestedTitle(match[1])
-        : null;
+      const suggestedTitle = match?.[1] ? sanitizeSuggestedTitle(match[1]) : null;
       if (suggestedTitle) {
         return suggestedTitle;
       }

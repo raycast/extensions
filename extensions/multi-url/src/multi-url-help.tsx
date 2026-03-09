@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 const HELP_MARKDOWN = `# Multi-URL
 
@@ -54,11 +48,7 @@ export function MultiUrlHelpDetail() {
       markdown={HELP_MARKDOWN}
       actions={
         <ActionPanel>
-          <Action
-            title="Open Extension Settings"
-            icon={Icon.Gear}
-            onAction={() => void openExtensionPreferences()}
-          />
+          <Action title="Open Extension Settings" icon={Icon.Gear} onAction={() => void openExtensionPreferences()} />
         </ActionPanel>
       }
     />
