@@ -421,7 +421,11 @@ function isMermaidCode(text: string): boolean {
   ];
 
   return mermaidKeywords.some(
-    (keyword) => trimmed.startsWith(keyword) || trimmed.includes(`\n${keyword}`) || trimmed.includes(` ${keyword}`),
+    (keyword) =>
+      trimmed.startsWith(keyword + " ") ||
+      trimmed.startsWith(keyword + "\n") ||
+      trimmed.includes(`\n${keyword} `) ||
+      trimmed.includes(`\n${keyword}\n`),
   );
 }
 
@@ -470,8 +474,13 @@ async function saveToHistory(code: string): Promise<HistoryItem> {
     history.unshift(currentItem); // Add at beginning
   }
 
-  // Limit history to 100 items
-  const limitedHistory = history.slice(0, 100);
+  // Sort before limiting: pinned first, then by lastAccessed
+  const sortedHistory = history.sort((a, b) => {
+    if (a.isPinned && !b.isPinned) return -1;
+    if (!a.isPinned && b.isPinned) return 1;
+    return new Date(b.lastAccessed).getTime() - new Date(a.lastAccessed).getTime();
+  });
+  const limitedHistory = sortedHistory.slice(0, 100);
   await LocalStorage.setItem("mermaid-history", JSON.stringify(limitedHistory));
 
   return currentItem;
