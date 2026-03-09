@@ -109,6 +109,7 @@ export default function ChooseAuthor() {
                       onAction: () => {
                         removeAuthorFromCache(author.email);
                         showToast(Toast.Style.Success, `Removed ${author.name}`);
+                        setSelectedAuthors(selectedAuthors.filter((a) => a.email !== author.email));
                       },
                     },
                   });
@@ -125,7 +126,7 @@ export default function ChooseAuthor() {
                     message: `Are you sure you want to clear all co-authors?`,
                     icon: { source: Icon.ClearFormatting, tintColor: Color.Red },
                     primaryAction: {
-                      title: "Remove",
+                      title: "Clear",
                       style: Alert.ActionStyle.Destructive,
                       onAction: () => {
                         sortedData.forEach((item) => resetRanking(item));
