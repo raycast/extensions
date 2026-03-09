@@ -76,14 +76,7 @@
       "title": "API Base URL",
       "description": "The base URL for the Job Dojo API (usually https://jobdojo.app)",
       "type": "textfield",
-      "default": "https://jobdojo.app",
-      "required": false
-    },
-    {
-      "name": "modelId",
-      "title": "Default Model",
-      "description": "The AI model to use (leave empty for default)",
-      "type": "textfield",
+      "default": "https://www.jobdojo.app",
       "required": false
     }
   ],
