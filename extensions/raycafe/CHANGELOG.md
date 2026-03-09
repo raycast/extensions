@@ -1,6 +1,6 @@
 # Raycafe Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-09
 
 - Add `Browse Upcoming Events` command for Raycast Community meetups
 - Parse public ICS events and show upcoming entries sorted by date
