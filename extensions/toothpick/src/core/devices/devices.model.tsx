@@ -4,6 +4,7 @@ import { DevicesMap } from "src/core/devices/constants/specifications";
 import { DeviceBatteryLevels } from "./devices.types";
 import { disconnectDevice } from "src/core/devices/handlers/disconnect-device";
 import { connectDevice } from "./handlers/connect-device";
+import { refreshDevice } from "./handlers/refresh-device";
 
 export class Device {
   name: string;
@@ -66,6 +67,7 @@ export class Device {
           icon={{ source: "icons/connect.svg", tintColor: Color.PrimaryText }}
         />
       ),
+      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
       <Action
         title={`Copy Mac Address: ${this.macAddress}`}
         key="copy-mac-address"
