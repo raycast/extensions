@@ -1,6 +1,6 @@
 # Navidrome Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-09
 
 - Search (with recent searches)
 - Recently Added Albums
