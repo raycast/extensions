@@ -19,6 +19,13 @@ export function ensureHubstaffInstalled(): void {
 export const PROJECTS_CACHE_KEY = "hubstaff-projects-cache";
 export const PROJECTS_CACHE_TIME_KEY = "hubstaff-projects-cache-time";
 export const STATUS_CACHE_KEY = "hubstaff-status-cache";
+export const ORGS_CACHE_KEY = "hubstaff-orgs-cache";
+export const SELECTED_ORG_KEY = "hubstaff-selected-org";
+
+export interface Organization {
+  id: number;
+  name: string;
+}
 
 export interface Project {
   id: number;
@@ -81,13 +88,32 @@ function hubstaffAsync(args: string[]): Promise<string> {
   });
 }
 
+export async function fetchOrganizationsAsync(): Promise<Organization[]> {
+  try {
+    const result = JSON.parse(await hubstaffAsync(["organizations"]));
+    return result.organizations ?? [];
+  } catch {
+    return [];
+  }
+}
+
 export async function fetchProjectsAsync(): Promise<Project[]> {
   try {
-    const orgs = JSON.parse(await hubstaffAsync(["organizations"]));
-    const orgId = orgs.organizations?.[0]?.id;
-    if (!orgId) return [];
-    const result = JSON.parse(await hubstaffAsync(["projects", String(orgId)]));
-    return result.projects ?? [];
+    const orgs = await fetchOrganizationsAsync();
+    if (orgs.length === 0) return [];
+    const projectLists = await Promise.all(
+      orgs.map(async (org) => {
+        try {
+          const result = JSON.parse(
+            await hubstaffAsync(["projects", String(org.id)]),
+          );
+          return (result.projects ?? []) as Project[];
+        } catch {
+          return [] as Project[];
+        }
+      }),
+    );
+    return projectLists.flat();
   } catch {
     return [];
   }

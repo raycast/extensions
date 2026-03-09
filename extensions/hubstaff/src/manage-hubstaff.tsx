@@ -8,11 +8,12 @@ import {
   Toast,
   LocalStorage,
 } from "@raycast/api";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import {
   hubstaff,
   getStatusAsync,
   fetchProjectsAsync,
+  fetchOrganizationsAsync,
   getTasksAsync,
   formatCacheAge,
   getCacheTimestamp,
@@ -20,8 +21,12 @@ import {
   PROJECTS_CACHE_KEY,
   PROJECTS_CACHE_TIME_KEY,
   STATUS_CACHE_KEY,
+  ORGS_CACHE_KEY,
+  SELECTED_ORG_KEY,
 } from "./shared";
-import type { Project, Task, Status } from "./shared";
+import type { Organization, Project, Task, Status } from "./shared";
+
+const ALL_ORGS = "all";
 
 export default function Command() {
   try {
@@ -44,6 +49,8 @@ export default function Command() {
 function ProjectList() {
   const [status, setStatus] = useState<Status>({ tracking: false });
   const [projects, setProjects] = useState<Project[]>([]);
+  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [selectedOrg, setSelectedOrg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [cacheAge, setCacheAge] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState<string | null>(null);
@@ -81,6 +88,13 @@ function ProjectList() {
     status.active_project?.tracked_today,
   ]);
 
+  const filteredProjects = useMemo(() => {
+    if (!selectedOrg || selectedOrg === ALL_ORGS) return projects;
+    const org = organizations.find((o) => String(o.id) === selectedOrg);
+    if (!org) return projects;
+    return projects.filter((p) => p.organization_name === org.name);
+  }, [projects, selectedOrg, organizations]);
+
   // Update cache age display
   const updateCacheAge = useCallback(async () => {
     const ts = await getCacheTimestamp();
@@ -95,6 +109,8 @@ function ProjectList() {
 
   const loadProjects = useCallback(async () => {
     setIsLoading(true);
+
+    // Restore cached status
     const cachedStatus = await LocalStorage.getItem<string>(STATUS_CACHE_KEY);
     if (cachedStatus) {
       try {
@@ -103,6 +119,24 @@ function ProjectList() {
         /* ignore */
       }
     }
+
+    // Restore cached orgs
+    const cachedOrgs = await LocalStorage.getItem<string>(ORGS_CACHE_KEY);
+    if (cachedOrgs) {
+      try {
+        setOrganizations(JSON.parse(cachedOrgs));
+      } catch {
+        /* ignore */
+      }
+    }
+
+    // Restore selected org
+    const savedOrg = await LocalStorage.getItem<string>(SELECTED_ORG_KEY);
+    if (savedOrg) {
+      setSelectedOrg(savedOrg);
+    }
+
+    // Restore cached projects
     const cached = await LocalStorage.getItem<string>(PROJECTS_CACHE_KEY);
     if (cached) {
       try {
@@ -111,12 +145,27 @@ function ProjectList() {
         /* ignore */
       }
     }
+
     if (!cached) {
-      const fresh = await fetchProjectsAsync();
-      setProjects(fresh);
-      await LocalStorage.setItem(PROJECTS_CACHE_KEY, JSON.stringify(fresh));
+      const [freshOrgs, freshProjects] = await Promise.all([
+        fetchOrganizationsAsync(),
+        fetchProjectsAsync(),
+      ]);
+      setOrganizations(freshOrgs);
+      setProjects(freshProjects);
+      await LocalStorage.setItem(ORGS_CACHE_KEY, JSON.stringify(freshOrgs));
+      await LocalStorage.setItem(
+        PROJECTS_CACHE_KEY,
+        JSON.stringify(freshProjects),
+      );
       await LocalStorage.setItem(PROJECTS_CACHE_TIME_KEY, String(Date.now()));
+      if (!savedOrg && freshOrgs.length > 0) {
+        const defaultOrg = String(freshOrgs[0].id);
+        setSelectedOrg(defaultOrg);
+        await LocalStorage.setItem(SELECTED_ORG_KEY, defaultOrg);
+      }
     }
+
     await updateCacheAge();
     setIsLoading(false);
     refreshStatus();
@@ -124,18 +173,34 @@ function ProjectList() {
 
   const refreshProjects = useCallback(async () => {
     await showToast(Toast.Style.Animated, "Refreshing projects...");
-    const fresh = await fetchProjectsAsync();
-    setProjects(fresh);
-    await LocalStorage.setItem(PROJECTS_CACHE_KEY, JSON.stringify(fresh));
+    const [freshOrgs, freshProjects] = await Promise.all([
+      fetchOrganizationsAsync(),
+      fetchProjectsAsync(),
+    ]);
+    setOrganizations(freshOrgs);
+    setProjects(freshProjects);
+    await LocalStorage.setItem(ORGS_CACHE_KEY, JSON.stringify(freshOrgs));
+    await LocalStorage.setItem(
+      PROJECTS_CACHE_KEY,
+      JSON.stringify(freshProjects),
+    );
     await LocalStorage.setItem(PROJECTS_CACHE_TIME_KEY, String(Date.now()));
     await updateCacheAge();
     refreshStatus();
-    await showToast(Toast.Style.Success, `Loaded ${fresh.length} projects`);
+    await showToast(
+      Toast.Style.Success,
+      `Loaded ${freshProjects.length} projects from ${freshOrgs.length} org${freshOrgs.length !== 1 ? "s" : ""}`,
+    );
   }, [refreshStatus, updateCacheAge]);
 
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
+
+  async function handleOrgChange(orgId: string) {
+    setSelectedOrg(orgId);
+    await LocalStorage.setItem(SELECTED_ORG_KEY, orgId);
+  }
 
   async function startProject(project: Project) {
     await showToast(Toast.Style.Animated, "Starting timer...");
@@ -207,6 +272,26 @@ function ProjectList() {
       isLoading={isLoading}
       searchBarPlaceholder="Search projects..."
       navigationTitle={navTitle}
+      searchBarAccessory={
+        organizations.length > 1 ? (
+          <List.Dropdown
+            tooltip="Filter by Organization"
+            value={selectedOrg ?? ALL_ORGS}
+            onChange={handleOrgChange}
+          >
+            <List.Dropdown.Item title="All Organizations" value={ALL_ORGS} />
+            <List.Dropdown.Section>
+              {organizations.map((org) => (
+                <List.Dropdown.Item
+                  key={org.id}
+                  title={org.name}
+                  value={String(org.id)}
+                />
+              ))}
+            </List.Dropdown.Section>
+          </List.Dropdown>
+        ) : undefined
+      }
     >
       {status.tracking && status.active_project && (
         <List.Section title="Running">
@@ -242,13 +327,16 @@ function ProjectList() {
       )}
 
       <List.Section title="Projects" subtitle={projectsSubtitle}>
-        {[...projects]
+        {[...filteredProjects]
           .filter((project) => !isActive(project))
           .map((project) => (
             <List.Item
               key={project.id}
               icon={Icon.Circle}
               title={project.name}
+              subtitle={
+                organizations.length > 1 ? project.organization_name : undefined
+              }
               actions={
                 <ActionPanel>
                   <Action
