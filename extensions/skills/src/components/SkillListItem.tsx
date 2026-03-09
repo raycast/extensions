@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { Skill, SkillFrontmatter, buildInstallCommand, formatInstalls } from "../shared";
+import { Skill, SkillFrontmatter, buildInstallCommand, formatInstalls, normalizeAllowedTools } from "../shared";
 import { useSkillContent } from "../hooks/useSkillContent";
 import { useRepoStats, RepoStats } from "../hooks/useRepoStats";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
@@ -72,13 +72,16 @@ ${installCommand}
               icon={Icon.Checkmark}
             />
           )}
-          {frontmatter["allowed-tools"] && frontmatter["allowed-tools"].length > 0 && (
-            <List.Item.Detail.Metadata.TagList title="Allowed Tools">
-              {frontmatter["allowed-tools"].map((tool) => (
-                <List.Item.Detail.Metadata.TagList.Item key={tool} text={tool} color={Color.Blue} />
-              ))}
-            </List.Item.Detail.Metadata.TagList>
-          )}
+          {(() => {
+            const allowedTools = normalizeAllowedTools(frontmatter["allowed-tools"]);
+            return allowedTools.length > 0 ? (
+              <List.Item.Detail.Metadata.TagList title="Allowed Tools">
+                {allowedTools.map((tool: string) => (
+                  <List.Item.Detail.Metadata.TagList.Item key={tool} text={tool} color={Color.Blue} />
+                ))}
+              </List.Item.Detail.Metadata.TagList>
+            ) : null;
+          })()}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Link
             title="Repository"
