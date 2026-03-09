@@ -1,5 +1,9 @@
 # Amazon Search Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed autocomplete suggestions not loading for the India marketplace by using the correct endpoint (`amazon.{tld}/suggestions`), which also works for all other marketplaces.
+
 ## [Enhancements] - 2024-12-20
 
 - Added the ability for the user-entered term to always appear as the first suggestion, regardless of API results.
