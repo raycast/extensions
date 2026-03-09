@@ -1,6 +1,6 @@
 # Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-03-09
 
 - Feature: Added a per-model `Reasoning` toggle with an `Effort` selector (`none`, `low`, `medium`, `high`) in the model form.
 - Feature: Added support for passing `reasoning_effort` in Chat Completions requests only when the reasoning override is enabled.
