@@ -1,6 +1,6 @@
 # Amazon Search Changelog
 
-## [Fixes and Enhancements] - 2026-03-09
+## [Fixes and Enhancements] - {PR_MERGE_DATE}
 
 - Added support for the Ireland, South Africa, and United Arab Emirates marketplaces.
 - Fixed autocomplete suggestions not loading for the India marketplace by using the correct endpoint (`amazon.{tld}/suggestions`), which also works for all other marketplaces.
