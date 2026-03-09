@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, Color, List, closeMainWindow, PopToRootType, showHUD } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Color,
+  List,
+  Toast,
+  closeMainWindow,
+  PopToRootType,
+  showHUD,
+  showToast,
+} from "@raycast/api";
 import { Author, Authors } from "./types";
 import { useState } from "react";
 import { addAllAuthorsToCache } from "./utils";
@@ -40,7 +51,12 @@ export default function AuthorsSelector({ authors, allSelected }: AuthorsSelecto
                 <Action
                   title="Save Selected Authors"
                   onAction={() => {
-                    addAllAuthorsToCache(items.filter((item) => item.selected).map((item) => item.author));
+                    const selected = items.filter((item) => item.selected).map((item) => item.author);
+                    if (selected.length === 0) {
+                      showToast({ style: Toast.Style.Failure, title: "No authors selected" });
+                      return;
+                    }
+                    addAllAuthorsToCache(selected);
                     showHUD("Selected authors saved");
                     closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
                   }}
