@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Behavior
-response in Japanese only.
+response in English only.
 
 ## Project Structure & Module Organization
 - `src/calculate-leave-time.tsx`: main Raycast command UI and background subtitle updater.
@@ -9,8 +9,6 @@ response in Japanese only.
 - `src/lib/time-utils.ts`: leave-time and remaining-time calculations.
 - `src/lib/storage.ts`: Raycast `LocalStorage` access for daily start time state.
 - `tests/`: Vitest suites (currently `tests/time-utils.test.ts`).
-- `metadata/en/` and `assets/`: screenshots and icon assets used in extension metadata and docs.
-- `index.ts` is intentionally unused for runtime entry; Raycast uses the command file in `src/`.
 
 ## Build, Test, and Development Commands
 - `bun install`: install dependencies.
