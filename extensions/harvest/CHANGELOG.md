@@ -1,6 +1,6 @@
 # Harvest Changelog
 
-## [Improved Project Filtering With Clients Included] - {PR_MERGE_DATE}
+## [Improved Project Filtering With Clients Included] - 2026-03-09
 
 - Added: New preference "Show Client Name in Project Dropdown" (default off) — when enabled, the project dropdown additionally displays entries with client name for easier filtering by client name
 - Changed: Projects and client groups are now sorted alphabetically in the project dropdown
