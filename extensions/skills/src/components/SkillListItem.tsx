@@ -18,6 +18,7 @@ function InlineDetail({
   stats: RepoStats | undefined;
 }) {
   const installCommand = buildInstallCommand(skill);
+  const allowedTools = normalizeAllowedTools(frontmatter["allowed-tools"]);
 
   const markdown = isLoading
     ? `# ${skill.name}\n\nLoading...`
@@ -72,16 +73,13 @@ ${installCommand}
               icon={Icon.Checkmark}
             />
           )}
-          {(() => {
-            const allowedTools = normalizeAllowedTools(frontmatter["allowed-tools"]);
-            return allowedTools.length > 0 ? (
-              <List.Item.Detail.Metadata.TagList title="Allowed Tools">
-                {allowedTools.map((tool: string) => (
-                  <List.Item.Detail.Metadata.TagList.Item key={tool} text={tool} color={Color.Blue} />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
-            ) : null;
-          })()}
+          {allowedTools.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Allowed Tools">
+              {allowedTools.map((tool: string) => (
+                <List.Item.Detail.Metadata.TagList.Item key={tool} text={tool} color={Color.Blue} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Link
             title="Repository"
