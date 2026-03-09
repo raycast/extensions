@@ -89,20 +89,16 @@ export async function getCoAuthorsForDir(path: string): Promise<Authors> {
   const cmd = "git --no-pager shortlog --group=author --group=trailer:co-authored-by -s -e -n HEAD";
 
   try {
-    const { stdout, stderr } = await exec(cmd, {
+    const { stdout } = await exec(cmd, {
       cwd: path,
     });
-
-    if (stderr.length !== 0) {
-      return [];
-    }
 
     const authors = [] as Authors;
 
     stdout
       .trim()
       .split("\n")
-      .forEach((row) => {
+      .forEach((row: string) => {
         const matches = row.match(/\s*[0-9]+\s(.*)<(.*)>/);
 
         const name = matches?.[1].trim();
