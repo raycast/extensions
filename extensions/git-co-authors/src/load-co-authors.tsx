@@ -39,8 +39,10 @@ export default function LoadCoAuthorsFromFolder() {
           if (selection.length === 0) {
             ++scanIdRef.current; // invalidate any in-flight scan
             setAuthors(new Map());
+            await showToast({ style: Toast.Style.Failure, title: "Scan cancelled" });
             return;
           }
+
           const currentScanId = ++scanIdRef.current;
 
           try {
