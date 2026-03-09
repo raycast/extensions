@@ -88,6 +88,7 @@ export const supportedBrowsers = [
   "Vivaldi",
   "Yandex",
   "Zen",
+  "Dia",
 ] as const;
 
 // Easy way to access the focused window when the meet link opens
