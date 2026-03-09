@@ -47,8 +47,11 @@ function formatDate(
 
 function formatWeekday(now: Date, weekday: WeekdayPreference) {
   if (weekday === "none") return "";
+  // "numeric" isn't a valid Intl weekday format; map legacy value to "short".
+  const weekdayFormat: "short" | "long" | "narrow" =
+    weekday === "numeric" ? "short" : weekday;
   return new Intl.DateTimeFormat(undefined, {
-    weekday: weekday,
+    weekday: weekdayFormat,
   }).format(now);
 }
 
