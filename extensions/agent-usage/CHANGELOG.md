@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Claude Usage Provider] - {PR_MERGE_DATE}
+## [Add Claude Usage Provider] - 2026-03-09
 
 - Add Claude usage provider powered by Claude CLI OAuth credentials
 - Fetch Claude usage from Anthropic OAuth usage endpoint (5h, weekly, model-specific, extra usage)
