@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix allowed-tools TypeError] - {PR_MERGE_DATE}
+## [Fix allowed-tools TypeError] - 2026-03-09
 
 - Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
 - Normalize allowed-tools to array before rendering
