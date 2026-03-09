@@ -1,5 +1,4 @@
-import { getDevicesService } from "src/core/devices/devices.service";
-import { DevicesService } from "src/core/devices/devices.service";
+import { getDevicesService, DevicesService } from "src/core/devices/devices.service";
 import { showAnimatedMessage, showErrorMessage, showSuccessMessage } from "src/utils";
 
 export default async function refreshBluetooth() {
