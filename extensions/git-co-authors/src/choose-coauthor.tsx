@@ -128,10 +128,10 @@ export default function ChooseAuthor() {
                     primaryAction: {
                       title: "Clear",
                       style: Alert.ActionStyle.Destructive,
-                      onAction: () => {
+                      onAction: async () => {
                         sortedData.forEach((item) => resetRanking(item));
                         clearAuthorsCache();
-                        popToRoot();
+                        await popToRoot();
                         showToast(Toast.Style.Success, `Authors Cleared`);
                       },
                     },
