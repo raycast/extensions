@@ -106,9 +106,9 @@ export default function ChooseAuthor() {
                     primaryAction: {
                       title: "Remove",
                       style: Alert.ActionStyle.Destructive,
-                      onAction: () => {
+                      onAction: async () => {
                         removeAuthorFromCache(author.email);
-                        showToast(Toast.Style.Success, `Removed ${author.name}`);
+                        await showToast(Toast.Style.Success, `Removed ${author.name}`);
                         setSelectedAuthors(selectedAuthors.filter((a) => a.email !== author.email));
                       },
                     },
