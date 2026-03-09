@@ -1,6 +1,6 @@
 # Job Dojo Changelog
 
-## [Bug Fixes] - 2026-03-09
+## [Bug Fixes] - {PR_MERGE_DATE}
 
 - Fixed API key authentication with production server
 - Fixed default API base URL to use correct domain

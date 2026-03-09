@@ -74,7 +74,7 @@
     {
       "name": "apiBaseUrl",
       "title": "API Base URL",
-      "description": "The base URL for the Job Dojo API (usually https://jobdojo.app)",
+      "description": "The base URL for the Job Dojo API (usually https://www.jobdojo.app)",
       "type": "textfield",
       "default": "https://www.jobdojo.app",
       "required": false
