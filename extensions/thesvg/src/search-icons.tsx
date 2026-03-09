@@ -106,14 +106,14 @@ function IconListItem({ icon }: { icon: IconEntry }) {
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
             <Action.CopyToClipboard
-              title="Copy jsDelivr URL"
+              title="Copy JsDelivr URL"
               content={getCdnUrl(icon.slug)}
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open">
             <Action.OpenInBrowser
-              title="Open on theSVG"
+              title="Open on TheSVG"
               url={getIconPageUrl(icon.slug)}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
             />
@@ -286,7 +286,7 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
               content={getIconUrl(slug)}
             />
             <Action.CopyToClipboard
-              title="Copy jsDelivr URL"
+              title="Copy JsDelivr URL"
               content={getCdnUrl(slug)}
             />
             {hexVisible && (
@@ -298,7 +298,7 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
           </ActionPanel.Section>
           <ActionPanel.Section title="Open">
             <Action.OpenInBrowser
-              title="Open on theSVG"
+              title="Open on TheSVG"
               url={getIconPageUrl(slug)}
             />
             {icon.url && (
