@@ -22,7 +22,7 @@ export default function LoadCoAuthorsFromFolder() {
                 await showToast(Toast.Style.Failure, "No authors loaded yet");
                 return;
               }
-              }
+
               const _authors = [...authors.values()];
               _authors.sort((a1, a2) => (a1.name < a2.name ? -1 : 1));
               nav.push(<AuthorsSelector authors={_authors} allSelected />);
