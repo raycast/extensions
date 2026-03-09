@@ -60,7 +60,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
         heading: heading,
         silent: silent,
       });
-      openUrl(target, { background: silent });
+      await openUrl(target, { background: silent });
       clearCache();
       popToRoot();
       closeMainWindow();
@@ -141,7 +141,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
             <ActionPanel>
               <Action
                 title="Append Task"
-                onAction={() => {
+                onAction={async () => {
                   const target = Obsidian.getTarget({
                     type: ObsidianTargetType.AppendTask,
                     path: notePath,
@@ -150,7 +150,7 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
                     heading: heading,
                     silent: silent,
                   });
-                  openUrl(target, { background: silent });
+                  await openUrl(target, { background: silent });
                   clearCache();
                   popToRoot();
                   closeMainWindow();

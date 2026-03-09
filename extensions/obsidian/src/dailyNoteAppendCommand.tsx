@@ -86,7 +86,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
               <ActionPanel>
                 <Action
                   title="Append to Daily Note"
-                  onAction={() => {
+                  onAction={async () => {
                     const target = Obsidian.getTarget({
                       type: ObsidianTargetType.DailyNoteAppend,
                       vault: vault,
@@ -95,7 +95,7 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
                       prepend: prepend,
                       silent: silent,
                     });
-                    openUrl(target, { background: silent });
+                    await openUrl(target, { background: silent });
                     clearCache();
                     popToRoot();
                     closeMainWindow();
