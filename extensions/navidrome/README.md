@@ -4,11 +4,11 @@ Search and browse your [Navidrome](https://www.navidrome.org/) music library dir
 
 ## Commands
 
-| Command | Description | View |
-| --- | --- | --- |
-| Search | Search artists, albums, and songs with recent search history | List |
-| Recently Added Albums | Browse your newest albums with cover art | Grid |
-| Most Played Albums | Browse your most frequently played albums | Grid |
+| Command               | Description                                                  | View |
+| --------------------- | ------------------------------------------------------------ | ---- |
+| Search                | Search artists, albums, and songs with recent search history | List |
+| Recently Added Albums | Browse your newest albums with cover art                     | Grid |
+| Most Played Albums    | Browse your most frequently played albums                    | Grid |
 
 ## Features
 
@@ -46,13 +46,13 @@ Authentication uses the Subsonic token+salt method — your password is never se
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-| --- | --- |
-| `Enter` | Open in Navidrome |
-| `⌘ C` | Copy name/title |
-| `⌘ ⇧ C` | Copy URL |
-| `⌃ X` | Remove recent search |
-| `⌃ ⇧ X` | Clear all recent searches |
+| Shortcut | Action                    |
+| -------- | ------------------------- |
+| `Enter`  | Open in Navidrome         |
+| `⌘ C`    | Copy name/title           |
+| `⌘ ⇧ C`  | Copy URL                  |
+| `⌃ X`    | Remove recent search      |
+| `⌃ ⇧ X`  | Clear all recent searches |
 
 ## License
 
