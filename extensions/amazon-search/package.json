@@ -50,6 +50,10 @@
           "value": "cn"
         },
         {
+          "title": "Egypt",
+          "value": "eg"
+        },
+        {
           "title": "France",
           "value": "fr"
         },
@@ -60,6 +64,10 @@
         {
           "title": "India",
           "value": "in"
+        },
+        {
+          "title": "Ireland",
+          "value": "ie"
         },
         {
           "title": "Italy",
@@ -94,12 +102,20 @@
           "value": "es"
         },
         {
+          "title": "South Africa",
+          "value": "co.za"
+        },
+        {
           "title": "Sweden",
           "value": "se"
         },
         {
           "title": "Turkey",
           "value": "com.tr"
+        },
+        {
+          "title": "United Arab Emirates",
+          "value": "ae"
         },
         {
           "title": "United Kingdom",
