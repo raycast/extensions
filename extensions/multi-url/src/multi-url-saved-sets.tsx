@@ -701,9 +701,10 @@ export function MultiUrlSavedSetsList() {
 
     const normalizedUrls = parsed.uniqueValid.join("\n");
     const tags = parseTagInput(values.tags);
+    const freshSavedSets = await loadSavedSets();
     const resolvedName = createUniqueSetName(
       rawName,
-      savedSets.map((item) => item.name),
+      freshSavedSets.map((item) => item.name),
     );
     const now = new Date().toISOString();
 
@@ -724,7 +725,7 @@ export function MultiUrlSavedSetsList() {
       browserApp,
     };
 
-    const nextSavedSets = [nextSet, ...savedSets];
+    const nextSavedSets = [nextSet, ...freshSavedSets];
     await persistSavedSets(nextSavedSets);
 
     if (options?.openAfterSave) {
@@ -782,6 +783,7 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function importSharedSets(rawShareCode: string): Promise<boolean> {
+    const freshSavedSets = await loadSavedSets();
     let parsedSharedSets;
     try {
       parsedSharedSets = parseSharedSetsInput(rawShareCode);
@@ -794,8 +796,8 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const existingFingerprints = new Set(savedSets.map((set) => createSavedSetShareFingerprint(set)));
-    const nextNames = savedSets.map((set) => set.name);
+    const existingFingerprints = new Set(freshSavedSets.map((set) => createSavedSetShareFingerprint(set)));
+    const nextNames = freshSavedSets.map((set) => set.name);
     const now = new Date().toISOString();
     const importedSets: SavedSet[] = [];
     let skippedDuplicateCount = 0;
@@ -856,7 +858,7 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const nextSavedSets = [...importedSets, ...savedSets];
+    const nextSavedSets = [...importedSets, ...freshSavedSets];
     await persistSavedSets(nextSavedSets);
 
     await showToast({
@@ -896,10 +898,11 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function duplicateSet(sourceSet: SavedSet) {
+    const freshSavedSets = await loadSavedSets();
     const now = new Date().toISOString();
     const duplicateName = createUniqueSetName(
       `${sourceSet.name} Copy`,
-      savedSets.map((item) => item.name),
+      freshSavedSets.map((item) => item.name),
     );
 
     const duplicate: SavedSet = {
@@ -916,7 +919,7 @@ export function MultiUrlSavedSetsList() {
       totalInvalidCount: 0,
     };
 
-    const nextSavedSets = [duplicate, ...savedSets];
+    const nextSavedSets = [duplicate, ...freshSavedSets];
     await persistSavedSets(nextSavedSets);
 
     await showToast({

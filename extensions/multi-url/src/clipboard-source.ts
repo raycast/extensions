@@ -113,7 +113,8 @@ async function fetchSuggestedPageTitle(url: string): Promise<string | null> {
 async function readTitleHtml(response: Response): Promise<string> {
   const reader = response.body?.getReader();
   if (!reader) {
-    return (await response.text()).slice(0, MAX_TITLE_HTML_LENGTH);
+    // If the body can't be streamed, skip the title suggestion rather than buffering an arbitrary-sized response.
+    return "";
   }
 
   const decoder = new TextDecoder();
