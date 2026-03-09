@@ -17,10 +17,11 @@ export default function LoadCoAuthorsFromFolder() {
           <Action.SubmitForm
             title={"Load Authors"}
             icon={Icon.AddPerson}
-            onSubmit={() => {
+            onSubmit={async () => {
               if (authors.size === 0) {
-                showToast(Toast.Style.Failure, "No authors loaded yet");
+                await showToast(Toast.Style.Failure, "No authors loaded yet");
                 return;
+              }
               }
               const _authors = [...authors.values()];
               _authors.sort((a1, a2) => (a1.name < a2.name ? -1 : 1));
