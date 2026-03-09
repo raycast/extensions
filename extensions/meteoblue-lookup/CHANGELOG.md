@@ -1,6 +1,6 @@
 # Meteoblue Lookup Changelog
 
-## [March 2026 Update] - {PR_MERGE_DATE}
+## [March 2026 Update] - 2026-03-09
 
 - Added favorites functionality across all weather views
 - Added detailed hourly breakdowns with DayHourlyForecast and HourDetail components
