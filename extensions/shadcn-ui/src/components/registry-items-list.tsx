@@ -146,25 +146,28 @@ function RegistryItemListItem({ item, registry }: { item: RegistryItem; registry
               icon="npm-icon.png"
               title="Copy Add Component [Npm]"
               content={`npx shadcn@latest add ${registry.name}/${item.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
             />
             <Action.CopyToClipboard
               icon="pnpm-icon.png"
               title="Copy Add Component [Pnpm]"
               content={`pnpm dlx shadcn@latest add ${registry.name}/${item.name}`}
-              shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "ctrl"], key: "p" },
+                Windows: { modifiers: ["ctrl", "alt"], key: "p" },
+              }}
             />
             <Action.CopyToClipboard
               icon="yarn-icon.png"
               title="Copy Add Component [Yarn]"
               content={`yarn shadcn@latest add ${registry.name}/${item.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "y" }, Windows: { modifiers: ["ctrl"], key: "y" } }}
             />
             <Action.CopyToClipboard
               icon="bun-icon.png"
               title="Copy Add Component [Bun]"
               content={`bunx --bun shadcn@latest add ${registry.name}/${item.name}`}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "b" }, Windows: { modifiers: ["ctrl"], key: "b" } }}
             />
           </ActionPanel.Section>
         </ActionPanel>

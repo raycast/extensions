@@ -104,3 +104,23 @@ export async function installSkill(skill: Skill): Promise<void> {
 export async function removeSkill(skillName: string): Promise<void> {
   await execWithPath(`${SKILLS_CLI} remove ${shellEscape(skillName)} -g -y`);
 }
+
+/**
+ * Check for available skill updates.
+ * Parses `npx -y skills@latest check` output for "↑ skillName" lines.
+ */
+export async function checkForUpdates(): Promise<string[]> {
+  const { stdout } = await execWithPath(`${SKILLS_CLI} check`);
+  return stripAnsi(stdout)
+    .split("\n")
+    .map((line) => line.match(/↑\s+(\S+)/))
+    .filter((m): m is RegExpMatchArray => m !== null)
+    .map((m) => m[1]);
+}
+
+/**
+ * Update all installed skills.
+ */
+export async function updateAllSkills(): Promise<void> {
+  await execWithPath(`${SKILLS_CLI} update -y`);
+}

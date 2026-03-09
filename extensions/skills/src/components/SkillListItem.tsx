@@ -1,10 +1,22 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { Skill, buildInstallCommand, formatInstalls } from "../shared";
+import { Skill, SkillFrontmatter, buildInstallCommand, formatInstalls } from "../shared";
 import { useSkillContent } from "../hooks/useSkillContent";
+import { useRepoStats, RepoStats } from "../hooks/useRepoStats";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 
-function InlineDetail({ skill, isSelected }: { skill: Skill; isSelected: boolean }) {
-  const { content, isLoading } = useSkillContent(skill, isSelected);
+function InlineDetail({
+  skill,
+  content,
+  frontmatter,
+  isLoading,
+  stats,
+}: {
+  skill: Skill;
+  content: string | undefined;
+  frontmatter: SkillFrontmatter;
+  isLoading: boolean;
+  stats: RepoStats | undefined;
+}) {
   const installCommand = buildInstallCommand(skill);
 
   const markdown = isLoading
@@ -30,11 +42,44 @@ ${installCommand}
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
+          {frontmatter.description && (
+            <List.Item.Detail.Metadata.Label title="Description" text={frontmatter.description} />
+          )}
+          {frontmatter.description && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title="Installs"
             text={formatInstalls(skill.installs)}
             icon={Icon.Download}
           />
+          {stats?.rateLimited ? (
+            <List.Item.Detail.Metadata.Label title="GitHub Stars" text="Rate limited" icon={Icon.Warning} />
+          ) : (
+            stats?.stars != null && (
+              <List.Item.Detail.Metadata.Label
+                title="GitHub Stars"
+                text={formatInstalls(stats.stars)}
+                icon={Icon.Star}
+              />
+            )
+          )}
+          {frontmatter.license && (
+            <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
+          )}
+          {frontmatter.compatibility && (
+            <List.Item.Detail.Metadata.Label
+              title="Compatibility"
+              text={frontmatter.compatibility}
+              icon={Icon.Checkmark}
+            />
+          )}
+          {frontmatter["allowed-tools"] && frontmatter["allowed-tools"].length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Allowed Tools">
+              {frontmatter["allowed-tools"].map((tool) => (
+                <List.Item.Detail.Metadata.TagList.Item key={tool} text={tool} color={Color.Blue} />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
+          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Link
             title="Repository"
             text={skill.source}
@@ -63,6 +108,8 @@ interface SkillListItemProps {
 
 export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
   const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
+  const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
+  const { stats } = useRepoStats(skill, isSelected);
 
   const icon =
     rank != null
@@ -72,12 +119,14 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
   return (
     <List.Item
       title={title}
-      subtitle={isShowingDetail ? undefined : skill.source}
+      subtitle={isShowingDetail ? undefined : (frontmatter.description ?? skill.source)}
       keywords={[skill.name, skill.source, skill.id]}
       icon={icon}
       accessories={isShowingDetail ? [] : [{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
       id={skill.id}
-      detail={<InlineDetail skill={skill} isSelected={isSelected} />}
+      detail={
+        <InlineDetail skill={skill} content={content} frontmatter={frontmatter} isLoading={isLoading} stats={stats} />
+      }
       actions={
         <ActionPanel>
           <InstallSkillAction skill={skill} />

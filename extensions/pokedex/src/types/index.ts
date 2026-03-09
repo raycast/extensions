@@ -177,6 +177,7 @@ export interface PokemonForm {
 export interface PokemonFormType {
   form_name: string;
   pokemon_id: number;
+  is_mega: boolean;
   variety: boolean;
   pokemonformnames: PokemonFormName[];
   pokemonformtypes: PokemonType[];

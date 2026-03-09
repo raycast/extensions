@@ -1,4 +1,5 @@
 import { type PreferenceValues } from "@raycast/api";
+import imagePreferencesConfig from "../config/image-preferences.json";
 
 type Range<
   START extends number,
@@ -507,117 +508,68 @@ export const DEFAULT_VBR_QUALITIES = {
   ".webm": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
 } as const;
 
-export const IMAGE_QUALITY_PRESET_MAPPINGS = {
-  ".jpg": {
-    lowest: 40,
-    low: 60,
-    medium: 80,
-    high: 90,
-    highest: 95,
-  },
-  ".heic": {
-    lowest: 40,
-    low: 60,
-    medium: 80,
-    high: 90,
-    highest: 95,
-  },
-  ".webp": {
-    lowest: 40,
-    low: 60,
-    medium: 80,
-    high: 90,
-    highest: "lossless" as const,
-  },
-  ".png": {
-    lowest: "png-8",
-    low: "png-8",
-    medium: "png-24",
-    high: "png-24",
-    highest: "png-24",
-  },
-  ".tiff": {
-    lowest: "deflate",
-    low: "deflate",
-    medium: "deflate",
-    high: "deflate",
-    highest: "deflate",
-  },
-  ".avif": {
-    lowest: 40,
-    low: 60,
-    medium: 80,
-    high: 90,
-    highest: 100,
-  },
-} as const;
+const imagePreferenceDomains = imagePreferencesConfig.valueDomains as Record<string, string[]>;
+const percentageStep5Domain = new Set(imagePreferenceDomains.percentageStep5 ?? []);
+const webpQualityDomain = new Set(imagePreferenceDomains.webpQuality ?? []);
+const pngVariantDomain = new Set(imagePreferenceDomains.pngVariant ?? []);
+const tiffCompressionDomain = new Set(imagePreferenceDomains.tiffCompression ?? []);
 
-type ImageQualityPresetFormat = keyof typeof IMAGE_QUALITY_PRESET_MAPPINGS;
-type ImageQualityPresetMap = (typeof IMAGE_QUALITY_PRESET_MAPPINGS)[ImageQualityPresetFormat];
+function parsePercentagePreference(value: unknown, fallback: Percentage): Percentage {
+  const normalized = typeof value === "string" ? value : "";
+  if (percentageStep5Domain.has(normalized)) {
+    return Number(normalized) as Percentage;
+  }
+  return fallback;
+}
+
+function toImageQualitySettings<K extends OutputImageExtension>(format: K, value: ImageQuality[K]): QualitySettings {
+  return {
+    [format]: value,
+  } as unknown as QualitySettings;
+}
 
 export function getDefaultImageQuality(format: OutputImageExtension, preferences: PreferenceValues): QualitySettings {
-  const imagePreset = (preferences.defaultImageQualityPreset as string | undefined) ?? "80";
-  const mapping = (IMAGE_QUALITY_PRESET_MAPPINGS as Record<ImageQualityPresetFormat, ImageQualityPresetMap>)[format];
-  const toFormatQuality = (qualityNumber: number): QualitySettings => {
-    if (format === ".png") {
-      return {
-        [format]: qualityNumber >= 80 ? "png-24" : "png-8",
-      } as unknown as QualitySettings;
+  switch (format) {
+    case ".jpg": {
+      const fallback = DEFAULT_QUALITIES[".jpg"] as Percentage;
+      return toImageQualitySettings(".jpg", parsePercentagePreference(preferences.defaultJpgQuality, fallback));
     }
-    if (format === ".tiff") {
-      return {
-        [format]: "deflate",
-      } as unknown as QualitySettings;
+    case ".webp": {
+      const configured = typeof preferences.defaultWebpQuality === "string" ? preferences.defaultWebpQuality : "";
+      if (configured === "lossless" && webpQualityDomain.has(configured)) {
+        return toImageQualitySettings(".webp", "lossless");
+      }
+      const fallback = DEFAULT_QUALITIES[".webp"] as Percentage;
+      const value =
+        configured !== "lossless" && webpQualityDomain.has(configured) ? (Number(configured) as Percentage) : fallback;
+      return toImageQualitySettings(".webp", value);
     }
-    return {
-      [format]: qualityNumber,
-    } as unknown as QualitySettings;
-  };
-
-  const legacyPreset = imagePreset as QualityLevel;
-  if (legacyPreset in (mapping ?? {})) {
-    const legacyValue = mapping?.[legacyPreset];
-    if (legacyValue !== undefined) {
-      return {
-        [format]: legacyValue,
-      } as unknown as QualitySettings;
+    case ".png": {
+      const configured = typeof preferences.defaultPngVariant === "string" ? preferences.defaultPngVariant : "";
+      const fallback = DEFAULT_QUALITIES[".png"] as ImageQuality[".png"];
+      const value = pngVariantDomain.has(configured) ? (configured as ImageQuality[".png"]) : fallback;
+      return toImageQualitySettings(".png", value);
+    }
+    case ".heic": {
+      const fallback = DEFAULT_QUALITIES[".heic"] as Percentage;
+      return toImageQualitySettings(".heic", parsePercentagePreference(preferences.defaultHeicQuality, fallback));
+    }
+    case ".tiff": {
+      const configured =
+        typeof preferences.defaultTiffCompression === "string" ? preferences.defaultTiffCompression : "";
+      const fallback = DEFAULT_QUALITIES[".tiff"] as ImageQuality[".tiff"];
+      const value = tiffCompressionDomain.has(configured) ? (configured as ImageQuality[".tiff"]) : fallback;
+      return toImageQualitySettings(".tiff", value);
+    }
+    case ".avif": {
+      const fallback = DEFAULT_QUALITIES[".avif"] as Percentage;
+      return toImageQualitySettings(".avif", parsePercentagePreference(preferences.defaultAvifQuality, fallback));
+    }
+    default: {
+      const exhaustiveCheck: never = format;
+      throw new Error(`Unsupported image format for defaults: ${String(exhaustiveCheck)}`);
     }
   }
-
-  if (imagePreset === "lossless") {
-    if (format === ".webp") {
-      return { [format]: "lossless" } as unknown as QualitySettings;
-    }
-    return toFormatQuality(100);
-  }
-
-  if (imagePreset === "png-24" || imagePreset === "png-8") {
-    if (format === ".png") {
-      return { [format]: imagePreset } as unknown as QualitySettings;
-    }
-    return {
-      [format]: DEFAULT_QUALITIES[format],
-    } as unknown as QualitySettings;
-  }
-
-  if (imagePreset === "deflate" || imagePreset === "lzw") {
-    if (format === ".tiff") {
-      return { [format]: imagePreset } as unknown as QualitySettings;
-    }
-    return {
-      [format]: DEFAULT_QUALITIES[format],
-    } as unknown as QualitySettings;
-  }
-
-  const numericPreset = Number(imagePreset);
-  if (!Number.isNaN(numericPreset) && Number.isFinite(numericPreset)) {
-    const clampedPreset = Math.max(0, Math.min(100, Math.round(numericPreset)));
-    return toFormatQuality(clampedPreset);
-  }
-
-  return {
-    [format]: DEFAULT_QUALITIES[format],
-  } as unknown as QualitySettings;
 }
 
 // =============================================================================
@@ -634,6 +586,10 @@ export function getMediaType(extension: string): MediaType | null {
 
 type SimpleQualityMappingExtension = keyof typeof SIMPLE_QUALITY_MAPPINGS;
 
+function isOutputImageExtension(format: AllOutputExtension): format is OutputImageExtension {
+  return OUTPUT_IMAGE_EXTENSIONS.includes(format as OutputImageExtension);
+}
+
 export function getDefaultQuality(
   format: AllOutputExtension,
   preferences: PreferenceValues,
@@ -644,8 +600,8 @@ export function getDefaultQuality(
     throw new Error(`fn getDefaultQuality: Provide preferences`);
   }
 
-  if (getMediaType(format) === "image") {
-    return getDefaultImageQuality(format as OutputImageExtension, preferences);
+  if (isOutputImageExtension(format)) {
+    return getDefaultImageQuality(format, preferences);
   }
 
   if (preferences.moreConversionSettings) {

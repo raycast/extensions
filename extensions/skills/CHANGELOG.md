@@ -1,5 +1,18 @@
 # Changelog
 
+## [Rich Skill Metadata] - 2026-03-07
+
+- Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
+- Show GitHub star count alongside install count
+- Show skill description as list item subtitle when the detail panel is hidden
+
+## [Update Skills] - 2026-03-01
+
+- Check for available skill updates on launch
+- Show "Update available" badge on skills with updates
+- "Updates Available" summary section with update count
+- "Update All Skills" action (Cmd+Shift+U)
+
 ## [Inline Detail Panel] - 2026-02-26
 
 - Replace push-to-detail views with inline detail panels across all commands

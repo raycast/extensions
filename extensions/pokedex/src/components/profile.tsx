@@ -11,11 +11,7 @@ import json2md from "json2md";
 import { useMemo } from "react";
 import { fetchPokemon } from "../api";
 import { PokemonSpeciesName, Pokemon, EvolutionSpecies } from "../types";
-import {
-  fixFlavorText,
-  getMarkdownPokemonImage,
-  nationalDexNumber,
-} from "../utils";
+import { fixFlavorText, getPokemonImageTag, nationalDexNumber } from "../utils";
 import PokemonEncounters from "./encounter";
 import PokedexEntries from "./entry";
 import PokemonForms from "./form";
@@ -102,7 +98,7 @@ export default function PokeProfile(props: { id: number }) {
         p: fixFlavorText(flavors[0]?.flavor_text),
       },
       {
-        p: getMarkdownPokemonImage(pokemon.id),
+        p: getPokemonImageTag(pokemon.id),
       },
       {
         h2: "Training",
@@ -147,9 +143,7 @@ export default function PokeProfile(props: { id: number }) {
               : "",
         },
         ...evolutions(evolutionchain.pokemonspecies).map((evolution) => ({
-          p: evolution
-            .map((specy) => getMarkdownPokemonImage(specy.id))
-            .join(" "),
+          p: evolution.map((specy) => getPokemonImageTag(specy.id)).join(" "),
         })),
       );
     }

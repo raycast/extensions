@@ -1,17 +1,20 @@
-import { useRef } from "react";
-import { MenuBarExtra, Icon, getPreferenceValues, Image } from "@raycast/api";
+import { useRef, useCallback } from "react";
+import { MenuBarExtra, Icon, getPreferenceValues, Image, LocalStorage, showHUD } from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 
 import { cpuUsage as osCpuUsage } from "os-utils";
-import { openActivityMonitorAppleScript } from "./utils";
 import { calculateDiskStorage, getOSInfo } from "./SystemInfo/SystemUtils";
 import { getMemoryUsage } from "./Memory/MemoryUtils";
 import { getNetworkData } from "./Network/NetworkUtils";
 import { getBatteryData } from "./Power/PowerUtils";
 import { getTemperatureData, formatTemperature } from "./Temperature/TemperatureUtils";
 
-import { formatBytes, isObjectEmpty } from "./utils";
+import { formatBytes, isObjectEmpty, openActivityMonitorAppleScript } from "./utils";
+
+type PinnedStat = "cpu" | "temperature" | "memory" | "battery" | "network" | "storage" | "none";
+
+const PINNED_STAT_KEY = "menubarPinnedStat";
 
 export default function Command() {
   const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
@@ -19,6 +22,36 @@ export default function Command() {
     getPreferenceValues<ExtensionPreferences>();
   const { cpuMenubarFormat, memoryMenubarFormat, powerMenubarFormat, networkMenubarFormat, diskMenubarFormat } =
     getPreferenceValues<Preferences.MenubarSystemMonitor>();
+
+  const { data: pinnedStat, revalidate: revalidatePinned } = usePromise(async () => {
+    const value = await LocalStorage.getItem<string>(PINNED_STAT_KEY);
+    return (value as PinnedStat) ?? "none";
+  });
+
+  const togglePin = useCallback(
+    async (stat: PinnedStat) => {
+      const next = pinnedStat === stat ? "none" : stat;
+      await LocalStorage.setItem(PINNED_STAT_KEY, next);
+      revalidatePinned();
+      if (next === "none") {
+        await showHUD("Unpinned from menu bar");
+      } else {
+        const labels: Record<PinnedStat, string> = {
+          cpu: "CPU Usage",
+          temperature: "CPU Temperature",
+          memory: "Memory Usage",
+          battery: "Battery",
+          network: "Network Usage",
+          storage: "Storage",
+          none: "",
+        };
+        await showHUD(`Pinned ${labels[next]} to menu bar`);
+      }
+    },
+    [pinnedStat, revalidatePinned],
+  );
+
+  const pinIcon = (stat: PinnedStat) => (pinnedStat === stat ? { source: Icon.Pin, tintColor: "#007AFF" } : undefined);
 
   const {
     data: systemInfo,
@@ -118,8 +151,45 @@ export default function Command() {
     revalidateMemory();
     revalidateNetwork();
     revalidateBattery();
-    revalidateTemperature();
   }, 1000);
+
+  // Temperature reads from an external binary (IOKit HID sensors) which is
+  // slower than the in-process stats above. Polling it on its own 3s interval
+  // prevents revalidation calls from stacking up and producing stale readings.
+  useInterval(revalidateTemperature, 3000);
+
+  const getPinnedTitle = (): string | undefined => {
+    switch (pinnedStat) {
+      case "cpu":
+        if (!cpuUsage) return undefined;
+        return displayModeCpu === "free" ? `${100 - +cpuUsage} %` : `${cpuUsage} %`;
+      case "temperature":
+        if (!temperatureData?.sensorAvailable) return undefined;
+        return formatTemperature(temperatureData.cpuAverage);
+      case "memory":
+        if (!memoryUsage) return undefined;
+        return displayModeMemory === "free"
+          ? `${memoryUsage.freeMemPercentage} %`
+          : `${100 - +memoryUsage.freeMemPercentage} %`;
+      case "battery":
+        if (!batteryData) return undefined;
+        return `${batteryData.batteryData.batteryLevel} %`;
+      case "storage": {
+        const disk = systemInfo?.storage?.[0];
+        if (!disk) return undefined;
+        const used = parseFloat(disk.usedStorage);
+        const total = parseFloat(disk.totalSize);
+        if (!total) return undefined;
+        const pct = Math.round((used / total) * 100);
+        return displayModeDisk === "free" ? `${100 - pct} %` : `${pct} %`;
+      }
+      case "network":
+        if (!networkUsage) return undefined;
+        return `↓ ${formatBytes(networkUsage.download)}/s`;
+      default:
+        return undefined;
+    }
+  };
 
   return (
     <MenuBarExtra
@@ -128,6 +198,7 @@ export default function Command() {
         mask: Image.Mask.RoundedRectangle,
         fallback: "command-icon.png",
       }}
+      title={getPinnedTitle()}
       tooltip="System Monitor"
       isLoading={isLoading}
     >
@@ -136,7 +207,6 @@ export default function Command() {
           title="macOS"
           subtitle={`${systemInfo?.osInfo.release}` || "Loading..."}
           icon={Icon.Finder}
-          onAction={() => runAppleScript(openActivityMonitorAppleScript())}
         />
       </MenuBarExtra.Section>
 
@@ -156,8 +226,8 @@ export default function Command() {
                   )
                 : "Loading…"
             }
-            icon={Icon.HardDrive}
-            onAction={() => runAppleScript(openActivityMonitorAppleScript(4))}
+            icon={pinIcon("storage") ?? Icon.HardDrive}
+            onAction={() => togglePin("storage")}
           />
         ))}
       </MenuBarExtra.Section>
@@ -176,8 +246,8 @@ export default function Command() {
                 )
               : "Loading..."
           }
-          icon={Icon.Monitor}
-          onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
+          icon={pinIcon("cpu") ?? Icon.Monitor}
+          onAction={() => togglePin("cpu")}
         />
       </MenuBarExtra.Section>
 
@@ -185,8 +255,8 @@ export default function Command() {
         <MenuBarExtra.Item
           title="CPU Temperature"
           subtitle={temperatureData?.sensorAvailable ? formatTemperature(temperatureData.cpuAverage) : "N/A"}
-          icon={Icon.Temperature}
-          onAction={() => runAppleScript(openActivityMonitorAppleScript(1))}
+          icon={pinIcon("temperature") ?? Icon.Temperature}
+          onAction={() => togglePin("temperature")}
         />
       </MenuBarExtra.Section>
 
@@ -210,8 +280,8 @@ export default function Command() {
                   )
               : "Loading…"
           }
-          icon={Icon.MemoryChip}
-          onAction={() => runAppleScript(openActivityMonitorAppleScript(2))}
+          icon={pinIcon("memory") ?? Icon.MemoryChip}
+          onAction={() => togglePin("memory")}
         />
       </MenuBarExtra.Section>
 
@@ -225,8 +295,8 @@ export default function Command() {
                   .replace("<DOWN>", formatBytes(networkUsage.download))
               : "Loading…"
           }
-          icon={Icon.Network}
-          onAction={() => runAppleScript(openActivityMonitorAppleScript(5))}
+          icon={pinIcon("network") ?? Icon.Network}
+          onAction={() => togglePin("network")}
         />
       </MenuBarExtra.Section>
 
@@ -245,8 +315,16 @@ export default function Command() {
                 )
               : "Loading…"
           }
-          icon={Icon.Plug}
-          onAction={() => runAppleScript(openActivityMonitorAppleScript(3))}
+          icon={pinIcon("battery") ?? Icon.Plug}
+          onAction={() => togglePin("battery")}
+        />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title="Open Activity Monitor"
+          icon={Icon.Bolt}
+          onAction={() => runAppleScript(openActivityMonitorAppleScript())}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

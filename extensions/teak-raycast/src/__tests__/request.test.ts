@@ -8,7 +8,13 @@ mock.module("@raycast/api", () => ({
   getPreferenceValues: getPreferenceValuesMock,
 }));
 
-const { RaycastApiError, request, searchCards } = await import("../lib/api");
+const {
+  RaycastApiError,
+  request,
+  searchCards,
+  setCardFavorite,
+  softDeleteCard,
+} = await import("../lib/api");
 
 const sampleCard = {
   id: "card_123",
@@ -34,19 +40,30 @@ const createCardsResponse = (
   status = 200,
   body: Record<string, unknown> = {},
 ) => {
-  return new Response(
-    JSON.stringify(status === 200 ? { items: [sampleCard], total: 1 } : body),
-    {
-      headers: { "Content-Type": "application/json" },
-      status,
-    },
-  );
+  const payload =
+    status === 200 && Object.keys(body).length === 0
+      ? { items: [sampleCard], total: 1 }
+      : body;
+
+  return new Response(JSON.stringify(payload), {
+    headers: { "Content-Type": "application/json" },
+    status,
+  });
+};
+
+const createEmptyResponse = (status: number): Response => {
+  return new Response(null, {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
 const originalFetch = globalThis.fetch;
+const originalRequestTimeout = process.env.TEAK_API_REQUEST_TIMEOUT_MS;
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
+  process.env.TEAK_API_REQUEST_TIMEOUT_MS = originalRequestTimeout;
   getPreferenceValuesMock.mockReset();
   getPreferenceValuesMock.mockImplementation(() => ({
     apiKey: "valid-test-key",
@@ -64,7 +81,7 @@ describe("raycast request handling", () => {
     );
     globalThis.fetch = fetchMock as unknown as typeof fetch;
 
-    await request("/api/raycast/search?limit=1", parseCardsResponse, {
+    await request("/cards/search?limit=1", parseCardsResponse, {
       headers: {
         Authorization: "Bearer attacker",
         "Content-Type": "text/plain",
@@ -81,6 +98,28 @@ describe("raycast request handling", () => {
   test("maps fetch failures to NETWORK_ERROR", async () => {
     globalThis.fetch = mock(() => {
       throw new Error("Connection failed");
+    }) as unknown as typeof fetch;
+
+    try {
+      await searchCards("", 1);
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(RaycastApiError);
+      expect((error as InstanceType<typeof RaycastApiError>).code).toBe(
+        "NETWORK_ERROR",
+      );
+    }
+  });
+
+  test("maps timed out requests to NETWORK_ERROR", async () => {
+    process.env.TEAK_API_REQUEST_TIMEOUT_MS = "5";
+
+    globalThis.fetch = mock((_input: RequestInfo | URL, init?: RequestInit) => {
+      return new Promise((_, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(new Error("Request aborted"));
+        });
+      });
     }) as unknown as typeof fetch;
 
     try {
@@ -124,6 +163,65 @@ describe("raycast request handling", () => {
         "RATE_LIMITED",
       );
     }
+  });
+
+  test("maps 404 responses to NOT_FOUND", async () => {
+    globalThis.fetch = mock(async () =>
+      createCardsResponse(404),
+    ) as unknown as typeof fetch;
+
+    try {
+      await searchCards("", 1);
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(RaycastApiError);
+      expect((error as InstanceType<typeof RaycastApiError>).code).toBe(
+        "NOT_FOUND",
+      );
+    }
+  });
+
+  test("setCardFavorite patches favorite state on the favorite endpoint", async () => {
+    let capturedUrl: string | null = null;
+    let capturedMethod: string | null = null;
+    let capturedBody: unknown = null;
+
+    globalThis.fetch = mock(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        capturedUrl = String(input);
+        capturedMethod = init?.method ?? null;
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, {
+          ...sampleCard,
+          isFavorited: false,
+        });
+      },
+    ) as unknown as typeof fetch;
+
+    const updated = await setCardFavorite("card_123", false);
+
+    expect(capturedUrl).toContain("/cards/card_123/favorite");
+    expect(capturedMethod).toBe("PATCH");
+    expect(capturedBody).toEqual({ isFavorited: false });
+    expect(updated.isFavorited).toBe(false);
+  });
+
+  test("softDeleteCard sends a delete request and accepts 204 responses", async () => {
+    let capturedUrl: string | null = null;
+    let capturedMethod: string | null = null;
+
+    globalThis.fetch = mock(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        capturedUrl = String(input);
+        capturedMethod = init?.method ?? null;
+        return createEmptyResponse(204);
+      },
+    ) as unknown as typeof fetch;
+
+    await softDeleteCard("card_123");
+
+    expect(capturedUrl).toContain("/cards/card_123");
+    expect(capturedMethod).toBe("DELETE");
   });
 
   test("fails fast when API key is missing", async () => {

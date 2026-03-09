@@ -1,11 +1,16 @@
 import { useCachedPromise } from "@raycast/utils";
 
-import { type Skill, removeFrontmatter } from "../shared";
+import { type Skill, type SkillFrontmatter, parseFrontmatter } from "../shared";
+
+type SkillContentResult = {
+  frontmatter: SkillFrontmatter;
+  body: string;
+};
 
 /**
  * Fetch skill content from GitHub, trying SKILL.md first, then README.md
  */
-async function fetchSkillContent(skill: Skill): Promise<string | undefined> {
+async function fetchSkillContent(skill: Skill): Promise<SkillContentResult | undefined> {
   // Extract owner from source and try removing prefix from skillId
   const owner = skill.source.split("/")[0];
   const ownerPrefix = owner.split("-")[0] + "-"; // "vercel-labs" -> "vercel-"
@@ -30,7 +35,7 @@ async function fetchSkillContent(skill: Skill): Promise<string | undefined> {
     const response = await fetch(url);
     if (response.ok && !response.headers.get("content-type")?.includes("text/html")) {
       const text = await response.text();
-      return removeFrontmatter(text);
+      return parseFrontmatter(text);
     }
     throw new Error(`Failed to fetch ${url}`);
   };
@@ -62,13 +67,14 @@ async function fetchSkillContent(skill: Skill): Promise<string | undefined> {
  * Hook to fetch and cache skill content from GitHub
  */
 export function useSkillContent(skill: Skill, execute = true) {
-  const { data: content, isLoading } = useCachedPromise((skill) => fetchSkillContent(skill), [skill], {
+  const { data, isLoading } = useCachedPromise((skill) => fetchSkillContent(skill), [skill], {
     keepPreviousData: true,
     execute,
   });
 
   return {
-    content,
+    content: data?.body,
+    frontmatter: data?.frontmatter ?? {},
     isLoading,
   };
 }

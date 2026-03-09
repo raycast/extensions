@@ -22,7 +22,8 @@
     "pernielsentikaer",
     "j3lte",
     "0xdhrv",
-    "xmok"
+    "xmok",
+    "hayk_safaryan"
   ],
   "pastContributors": [
     "jonasengelmann"
@@ -90,6 +91,13 @@
       "title": "Open Current Tab in Guest",
       "subtitle": "Google Chrome",
       "description": "Open the current active tab's URL in a new Chrome Guest window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "name-window",
+      "title": "Name Window",
+      "subtitle": "Google Chrome",
+      "description": "Name the currently active Google Chrome window.",
       "mode": "no-view"
     }
   ],

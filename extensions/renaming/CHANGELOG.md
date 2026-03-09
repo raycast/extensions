@@ -1,5 +1,14 @@
 # Rename Changelog
 
+## [New Feature] - 2026-03-05
+
+### Added
+
+- Added "Advanced Batch Rename" command with a rule-based engine.
+- Supports stacking multiple rules: Find & Replace (Regex), Change Case, Add Text, Sequential Numbering, and Extension Management.
+- Real-time "Will Rename" preview with conflict detection.
+- Rule reordering and editing support.
+
 ## [Enhancement] - 2025-09-15
 
 - Fix the bug that cause rename incorrect issue.

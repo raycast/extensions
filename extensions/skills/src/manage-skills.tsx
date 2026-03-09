@@ -1,7 +1,8 @@
-import { List, Icon, Detail, ActionPanel, Action } from "@raycast/api";
+import { List, Icon, Detail, ActionPanel, Action, Color } from "@raycast/api";
 import { useState } from "react";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
+import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
 export default function Command() {
   const { skills, isLoading, error, revalidate } = useInstalledSkills();
@@ -32,6 +33,7 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
+  const updatableCount = filteredSkills.filter((s) => s.hasUpdate).length;
 
   return (
     <List
@@ -59,18 +61,38 @@ export default function Command() {
           icon={Icon.Box}
         />
       ) : (
-        <List.Section title="Installed Skills" subtitle={`${filteredSkills.length} skills`}>
-          {filteredSkills.map((skill) => (
-            <InstalledSkillListItem
-              key={skill.name}
-              skill={skill}
-              isSelected={selectedId === skill.name}
-              isShowingDetail={isShowingDetail}
-              onToggleDetail={toggleDetail}
-              onUpdate={revalidate}
-            />
-          ))}
-        </List.Section>
+        <>
+          {updatableCount > 0 && (
+            <List.Section title="Updates Available">
+              <List.Item
+                title={`${updatableCount} skill${updatableCount > 1 ? "s" : ""} can be updated`}
+                icon={{ source: Icon.ArrowClockwise, tintColor: Color.Orange }}
+                detail={
+                  <List.Item.Detail
+                    markdown={`# Updates Available\n\n**${updatableCount}** skill${updatableCount > 1 ? "s have" : " has"} updates available.\n\nPress **Enter** to update all skills.`}
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <UpdateSkillAction onUpdate={revalidate} />
+                  </ActionPanel>
+                }
+              />
+            </List.Section>
+          )}
+          <List.Section title="Installed Skills" subtitle={`${filteredSkills.length} skills`}>
+            {filteredSkills.map((skill) => (
+              <InstalledSkillListItem
+                key={skill.name}
+                skill={skill}
+                isSelected={selectedId === skill.name}
+                isShowingDetail={isShowingDetail}
+                onToggleDetail={toggleDetail}
+                onUpdate={revalidate}
+              />
+            ))}
+          </List.Section>
+        </>
       )}
     </List>
   );
