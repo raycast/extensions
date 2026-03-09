@@ -54,10 +54,13 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
         silent: silent,
       });
 
-      openUrl(target, { background: silent });
-      clearCache();
-      popToRoot();
-      closeMainWindow();
+      const doOpen = async () => {
+        await openUrl(target, { background: silent });
+        clearCache();
+        popToRoot();
+        closeMainWindow();
+      };
+      doOpen();
     }
   }, [ready, content, vaults, vaultsWithPlugin, vaultName]);
 
