@@ -181,7 +181,7 @@ function pickEventUrl(raw: RawEvent): string | undefined {
     return undefined;
   }
 
-  const match = raw.DESCRIPTION.match(/https?:\/\/\S+/);
+  const match = raw.DESCRIPTION.match(/https?:\/\/[^\s)"'>]+/);
   return match?.[0];
 }
 
