@@ -327,6 +327,12 @@ export default function Command() {
                     url={`https://www.beeminder.com/${beeminderUsername}/${goal.slug}`}
                   />
                   <Action
+                    title="Refresh data"
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
+                    icon={Icon.RotateClockwise}
+                    onAction={fetchData}
+                  />
+                  <Action
                     title={isPinned ? "Unpin Goal" : "Pin Goal"}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     icon={isPinned ? Icon.PinDisabled : Icon.Pin}
