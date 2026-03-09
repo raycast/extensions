@@ -1,6 +1,6 @@
 # Extend Display Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-03-09
 
 Fixed display menu click failing on macOS Tahoe (26+).
 
