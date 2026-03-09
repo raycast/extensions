@@ -36,7 +36,10 @@ export default function LoadCoAuthorsFromFolder() {
         canChooseDirectories
         canChooseFiles={false}
         onChange={async (selection) => {
-          if (selection.length === 0) return;
+          if (selection.length === 0) {
+            setAuthors(new Map());
+            return;
+          }
 
           const currentScanId = ++scanIdRef.current;
 

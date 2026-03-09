@@ -34,9 +34,7 @@ export default function AuthorsSelector({ authors, allSelected }: AuthorsSelecto
                 <Action
                   title="Select"
                   onAction={() => {
-                    const newItems = [...items];
-                    newItems[idx].selected = !newItems[idx].selected;
-                    setItems(newItems);
+                    setItems(items.map((item, i) => (i === idx ? { ...item, selected: !item.selected } : item)));
                   }}
                 />
                 <Action
