@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useMemo } from "react";
-import { CONTAINER_BIN, containerExec, parseNetworkList } from "./lib/container";
+import { CONTAINER_BIN, containerExec, parseNetworkList, splitCommand } from "./lib/container";
 
 interface RunFormValues {
   image: string;
@@ -74,7 +74,7 @@ export default function RunContainer() {
     args.push(image);
 
     if (values.command.trim()) {
-      args.push(...values.command.trim().split(/\s+/));
+      args.push(...splitCommand(values.command.trim()));
     }
 
     setIsSubmitting(true);

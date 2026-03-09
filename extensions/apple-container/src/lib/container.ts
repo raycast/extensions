@@ -195,3 +195,28 @@ function parseMountType(type: any): string {
   const keys = Object.keys(type);
   return keys[0] || "unknown";
 }
+
+export function splitCommand(input: string): string[] {
+  const args: string[] = [];
+  let current = "";
+  let inDouble = false;
+  let inSingle = false;
+
+  for (const char of input) {
+    if (char === '"' && !inSingle) {
+      inDouble = !inDouble;
+    } else if (char === "'" && !inDouble) {
+      inSingle = !inSingle;
+    } else if (/\s/.test(char) && !inDouble && !inSingle) {
+      if (current) {
+        args.push(current);
+        current = "";
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  if (current) args.push(current);
+  return args;
+}

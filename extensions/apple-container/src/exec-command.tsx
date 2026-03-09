@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import { containerExec } from "./lib/container";
+import { containerExec, splitCommand } from "./lib/container";
 
 export default function ExecCommand({ containerName }: { containerName: string }) {
   const [output, setOutput] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export default function ExecCommand({ containerName }: { containerName: string }
               }
               setIsLoading(true);
               try {
-                const result = await containerExec(["exec", containerName, ...cmd.split(/\s+/)]);
+                const result = await containerExec(["exec", containerName, ...splitCommand(cmd)]);
                 setOutput(result || "(no output)");
               } catch (e) {
                 setOutput(`Error: ${String(e)}`);

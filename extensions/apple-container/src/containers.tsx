@@ -244,7 +244,7 @@ function ContainerItem({
                 shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                 onAction={async () => {
                   try {
-                    await openTerminalWithCommand(`/usr/local/bin/container exec -it ${container.name} /bin/sh`);
+                    await openTerminalWithCommand(`${CONTAINER_BIN} exec -it ${container.name} /bin/sh`);
                   } catch (e) {
                     await showToast(Toast.Style.Failure, "Failed to open terminal", String(e));
                   }
