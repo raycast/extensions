@@ -7,9 +7,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
 import { Server } from "./types";
 import { randomUUID } from "crypto";
+import { useState } from "react";
 
 interface FormValues {
   name: string;
@@ -19,7 +19,6 @@ interface FormValues {
 }
 
 export default function Command() {
-  const [nameError, setNameError] = useState<string | undefined>();
   const [ipError, setIpError] = useState<string | undefined>();
 
   async function handleSubmit(values: FormValues) {
@@ -38,19 +37,38 @@ export default function Command() {
       let port = parseInt(values.port);
       let ip = values.ip;
 
-      // Extract port from IP if present (e.g., ip:port)
-      if (ip.includes(":")) {
-        const parts = ip.split(":");
-        ip = parts[0];
-        const extractedPort = parseInt(parts[1]);
-        if (!isNaN(extractedPort)) {
-          port = extractedPort;
+      // Extract port from IP if present (e.g., ip:port or [IPv6]:port)
+      if (ip.startsWith("[")) {
+        // [IPv6]:port format
+        const match = ip.match(/^\[(.+)\](?::(\d+))?$/);
+        if (match) {
+          ip = match[1];
+          if (match[2]) {
+            const extractedPort = parseInt(match[2]);
+            if (!isNaN(extractedPort)) {
+              port = extractedPort;
+            }
+          }
         }
+      } else if (ip.includes(":")) {
+        // Could be host:port or bare IPv6 — only split on last colon
+        const lastColon = ip.lastIndexOf(":");
+        const possiblePort = parseInt(ip.slice(lastColon + 1));
+        if (!isNaN(possiblePort) && possiblePort > 0 && possiblePort <= 65535) {
+          port = possiblePort;
+          ip = ip.slice(0, lastColon);
+        }
+        // If port is not valid, assume it's a bare IPv6 address and don't split
       }
 
       if (isNaN(port)) {
         // Default ports if not specified or invalid
         port = serverType === "java" ? 25565 : 19132;
+      } else if (port < 1 || port > 65535) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Invalid port";
+        toast.message = "Port must be between 1 and 65535.";
+        return;
       }
 
       const newServer: Server = {
@@ -107,8 +125,6 @@ export default function Command() {
         id="name"
         title="Name"
         placeholder="My Favorite Server (Optional)"
-        error={nameError}
-        onChange={() => setNameError(undefined)}
       />
     </Form>
   );

@@ -212,7 +212,7 @@ function ServerListItem({
   if (!loading && status) {
     if (status.online) {
       icon = status.icon
-        ? { source: status.icon as Icon, tintColor: undefined }
+        ? { source: status.icon, tintColor: undefined }
         : { source: Icon.CheckCircle, tintColor: Color.Green };
       statusText = "Online";
     } else {
