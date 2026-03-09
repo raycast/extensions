@@ -25,8 +25,19 @@ export type SkillFrontmatter = {
   description?: string;
   license?: string;
   compatibility?: string;
-  "allowed-tools"?: string[];
+  "allowed-tools"?: string | string[];
 };
+
+/**
+ * Normalizes allowed-tools to always be an array.
+ * YAML parsing may return a single string instead of an array
+ * when only one tool is specified (e.g., "allowed-tools: Bash").
+ */
+export function normalizeAllowedTools(tools: string | string[] | undefined): string[] {
+  if (!tools) return [];
+  if (Array.isArray(tools)) return tools;
+  return [tools];
+}
 
 export const API_BASE_URL = "https://skills.sh/api";
 const REPO_URL = "https://github.com/raycast/extensions";

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix allowed-tools TypeError] - {PR_MERGE_DATE}
+
+- Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
+- Normalize allowed-tools to array before rendering
+
 ## [Rich Skill Metadata] - 2026-03-07
 
 - Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
