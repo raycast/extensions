@@ -1,6 +1,6 @@
 # shiori.sh Changelog
 
-## [0.1.2] - {PR_MERGE_DATE}
+## [0.1.2] - 2026-03-09
 
 - Add server-side search with debounce, replacing client-side filtering
 - Fix `Link` type to match public API (remove `favicon_url`, add 7 new fields: `deleted_at`, `hn_url`, `file_type`, `file_mime_type`, `notion_page_id`, `author`, `discoverable_feed_url`)
