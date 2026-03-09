@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { getFavicon, useCachedPromise, useForm } from "@raycast/utils";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { fetchLinks, updateLinks, deleteLink, createLink, updateLinkDetails } from "./api";
 import { Link } from "./types";
 
@@ -89,10 +89,20 @@ function EditLinkForm(props: { link: Link; onSave: (values: EditLinkValues) => P
 export default function SearchLinks() {
   const [filter, setFilter] = useState<ReadFilter>("all");
   const [showDetail, setShowDetail] = useState(true);
+  const [searchText, setSearchText] = useState("");
+  const throttleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const handleSearchChange = useCallback((text: string) => {
+    setSearchText(text);
+    if (throttleRef.current) clearTimeout(throttleRef.current);
+    throttleRef.current = setTimeout(() => setDebouncedSearch(text), 300);
+  }, []);
 
   const { data, isLoading, revalidate, mutate } = useCachedPromise(
-    (readFilter: ReadFilter) => fetchLinks({ limit: 100, read: readFilter, sort: "newest" }),
-    [filter],
+    (readFilter: ReadFilter, search: string) =>
+      fetchLinks({ limit: 100, read: readFilter, sort: "newest", search: search || undefined }),
+    [filter, debouncedSearch],
     { keepPreviousData: true },
   );
 
@@ -221,7 +231,10 @@ export default function SearchLinks() {
     <List
       isLoading={isLoading}
       isShowingDetail={showDetail}
-      searchBarPlaceholder="Filter links..."
+      filtering={false}
+      searchText={searchText}
+      onSearchTextChange={handleSearchChange}
+      searchBarPlaceholder="Search links..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" value={filter} onChange={(val) => setFilter(val as ReadFilter)}>
           <List.Dropdown.Item title="All" value="all" />
@@ -262,6 +275,7 @@ export default function SearchLinks() {
                         : { source: Icon.Circle, tintColor: Color.Blue }
                     }
                   />
+                  {link.author ? <List.Item.Detail.Metadata.Label title="Author" text={link.author} /> : null}
                   {link.source ? <List.Item.Detail.Metadata.Label title="Source" text={link.source} /> : null}
                 </List.Item.Detail.Metadata>
               }
