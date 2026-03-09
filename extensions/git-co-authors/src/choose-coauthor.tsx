@@ -46,7 +46,6 @@ export default function ChooseAuthor() {
                 title={`Select ${author.name}`}
                 icon={Icon.Check}
                 onAction={async () => {
-                  visitItem(author);
                   // If the author is already selected and the user clicks this action, we need to
                   // remove this author from the selected authors array:
                   if (selectedAuthors.filter((_author) => _author.email === author.email).length == 1) {
@@ -56,6 +55,7 @@ export default function ChooseAuthor() {
                     return;
                   }
 
+                  visitItem(author);
                   setSelectedAuthors([...selectedAuthors.filter((_author) => _author.email !== author.email), author]);
 
                   await showToast(Toast.Style.Success, `Author ${author.name} selected`);

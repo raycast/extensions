@@ -71,8 +71,12 @@ export async function findGitReposInDir(dir: string): Promise<string[]> {
 
   try {
     entries = await readdir(dir, { withFileTypes: true, recursive: true });
-  } catch {
-    // TODO error handling
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to read directory",
+      message: e instanceof Error ? e.message : String(e),
+    });
     return [];
   }
 

@@ -21,7 +21,7 @@ export default function AuthorsSelector({ authors, allSelected }: AuthorsSelecto
       {items.map((item, idx) => {
         return (
           <List.Item
-            key={idx.toString()}
+            key={item.author.email}
             title={item.author.name + ""}
             subtitle={item.author.email}
             icon={
