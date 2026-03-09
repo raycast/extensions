@@ -1,0 +1,53 @@
+{
+  "name": "raycast-markdown-to-pdf",
+  "version": "0.1.0",
+  "title": "Markdown to PDF",
+  "description": "Raycast extension for converting Markdown files into styled PDFs.",
+  "icon": "icon.png",
+  "author": "max_R",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "preferredBrowser",
+      "type": "appPicker",
+      "title": "Chromium Browser",
+      "description": "Browser used for headless PDF rendering. Chrome, Brave, Edge, Chromium, and Arc work.",
+      "required": false,
+      "default": "Google Chrome"
+    }
+  ],
+  "commands": [
+    {
+      "name": "convert-markdown-to-pdf",
+      "title": "Convert Markdown to PDF",
+      "description": "Render a Markdown file into a styled PDF document.",
+      "mode": "no-view"
+    }
+  ],
+  "private": true,
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "highlight.js": "^11.11.1",
+    "markdown-it": "^14.1.1",
+    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-task-lists": "^2.1.1",
+    "puppeteer-core": "^24.38.0",
+    "react": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3"
+  }
+}
