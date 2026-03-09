@@ -20,7 +20,7 @@
     {
       "name": "choose-coauthor",
       "title": "Choose Co-Author",
-      "description": "Choose and copy the 'Co-author-by:' line for your commit",
+      "description": "Choose and copy the 'Co-authored-by:' line for your commit",
       "mode": "view"
     },
     {
