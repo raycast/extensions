@@ -184,7 +184,6 @@ export default function Command() {
                   ? "Now"
                   : date.toLocaleDateString([], {
                       weekday: "short",
-                      hour: "2-digit",
                     });
 
               return (
