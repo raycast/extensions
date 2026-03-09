@@ -338,12 +338,7 @@ export default function Command() {
                     icon={isPinned ? Icon.PinDisabled : Icon.Pin}
                     onAction={() => togglePin(goal.slug)}
                   />
-                  <Action
-                    title="Refresh data"
-                    shortcut={Keyboard.Shortcut.Common.Refresh}
-                    icon={Icon.RotateClockwise}
-                    onAction={fetchData}
-                  />
+                </ActionPanel>
                 </ActionPanel>
               }
             />
