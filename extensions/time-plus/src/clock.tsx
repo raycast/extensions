@@ -80,6 +80,7 @@ function formatSubtitle(now: Date, preferences: Preferences) {
     : `${dateWithWeekday} - ${time}`;
 }
 
+// This shows the formatted time and date in the detail view
 function ClockDetail(props: { now: Date; preferences: Preferences }) {
   const subtitle = useMemo(
     () => formatSubtitle(props.now, props.preferences),

@@ -8,8 +8,8 @@
   "commands": [
     {
       "name": "clock",
-      "title": "Clock",
-      "description": "Shows the current date and time in the command subtitle.",
+      "title": "Show Time and Date",
+      "description": "Shows the current time and date.",
       "mode": "view",
       "subtitle": "Loading...",
       "interval": "1m",
@@ -17,7 +17,7 @@
         {
           "name": "weekday",
           "title": "Weekday",
-          "description": "Show the day of the week in the subtitle.",
+          "description": "Show the day of the week.",
           "type": "dropdown",
           "default": "short",
           "data": [
@@ -30,7 +30,7 @@
         {
           "name": "month",
           "title": "Month",
-          "description": "Show the name of the month in the subtitle.",
+          "description": "Show the name of the month.",
           "type": "dropdown",
           "default": "short",
           "data": [
@@ -99,7 +99,7 @@
         {
           "name": "dateTimeOrder",
           "title": "Date & Time Order",
-          "description": "Order of date and time in the subtitle.",
+          "description": "Order of time and date.",
           "type": "dropdown",
           "default": "date-time",
           "data": [
