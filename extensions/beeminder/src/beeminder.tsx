@@ -339,7 +339,6 @@ export default function Command() {
                     onAction={() => togglePin(goal.slug)}
                   />
                 </ActionPanel>
-                </ActionPanel>
               }
             />
           );
