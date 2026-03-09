@@ -132,7 +132,7 @@ export default function ChooseAuthor() {
                         sortedData.forEach((item) => resetRanking(item));
                         clearAuthorsCache();
                         await popToRoot();
-                        showToast(Toast.Style.Success, `Authors Cleared`);
+                        await showToast(Toast.Style.Success, `Authors Cleared`);
                       },
                     },
                   });
