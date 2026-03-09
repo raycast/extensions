@@ -1,6 +1,6 @@
 # Beeminder Changelog
 
-## [Pin goals to the top of the list] - {PR_MERGE_DATE}
+## [Pin goals to the top of the list] - 2026-03-09
 
 - Adds the ability to pin goals to the top of the list via a new "Pin Goal" action (⌘⇧P).
 - Pinned goals persist across sessions using local storage.
