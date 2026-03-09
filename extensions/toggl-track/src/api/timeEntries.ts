@@ -1,4 +1,5 @@
 import { execFile } from "child_process";
+
 import { get, post, patch, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
 import { extensionStartScript, extensionStopScript, extensionUpdateScript } from "@/helpers/preferences";
