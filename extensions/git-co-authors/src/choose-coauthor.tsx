@@ -72,7 +72,10 @@ export default function ChooseAuthor() {
                   />
                   <Action.Paste
                     onPaste={() => popToRoot()}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+                    }}
                     content={selectedAuthors
                       .map((selectedAuthor) => `Co-authored-by: ${selectedAuthor.name} <${selectedAuthor.email}>`)
                       .join("\n")}
@@ -82,14 +85,14 @@ export default function ChooseAuthor() {
 
               <Action.Push
                 title="Add New Author"
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
                 target={<AddOrEditAuthor />}
                 icon={Icon.AddPerson}
               />
 
               <Action.Push
                 title={`Edit ${author.name}`}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
                 target={<AddOrEditAuthor author={author} />}
                 icon={Icon.Pencil}
               />
@@ -97,7 +100,10 @@ export default function ChooseAuthor() {
                 title={`Remove ${author.name}`}
                 icon={Icon.RemovePerson}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl"], key: "backspace" },
+                }}
                 onAction={async () => {
                   await confirmAlert({
                     title: "Remove Author",
@@ -119,7 +125,10 @@ export default function ChooseAuthor() {
                 title="Clear Authors"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "backspace" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "opt"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl", "alt"], key: "backspace" },
+                }}
                 onAction={async () => {
                   await confirmAlert({
                     title: "Clear All Authors",
