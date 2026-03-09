@@ -4,7 +4,9 @@
   "title": "Beeper Desktop",
   "description": "Access your chats from Beeper Desktop (requires Beeper Desktop API to be enabled)",
   "icon": "extension-icon.png",
+  "access": "public",
   "author": "batuhan",
+  "owner": "automattic",
   "contributors": [
     "pernielsentikaer",
     "clins1994",
