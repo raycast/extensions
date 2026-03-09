@@ -13,7 +13,6 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.8",
-    "@workspace/raycast-core": "file:../../packages/raycast-core",
     "react": "^19.0.0"
   },
   "devDependencies": {

@@ -17,6 +17,7 @@ import {
   applySavedSetRunStats,
   createUniqueSetName,
   ensureSetName,
+  formatSetTimestamp,
   HistoryEntry,
   KNOWN_BROWSER_APPS,
   loadHistory,
@@ -35,13 +36,6 @@ import {
 import { MultiUrlHelpAction } from "./multi-url-help";
 import { MultiUrlSavedSetsList } from "./multi-url-saved-sets";
 
-const SOURCE_NAME_FORMATTER = new Intl.DateTimeFormat("sv-SE", {
-  year: "2-digit",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 const EMOJI_NONE = "__none__";
 const EMOJI_CUSTOM = "__custom__";
 const QUICK_EMOJI_OPTIONS = [
@@ -89,8 +83,7 @@ type SubmitOptions = {
 };
 
 function fallbackSetName(sourceLabel: string): string {
-  const stamp = SOURCE_NAME_FORMATTER.format(new Date()).replace(/\//g, "-");
-  return `${sourceLabel} ${stamp}`;
+  return `${sourceLabel} ${formatSetTimestamp(new Date())}`;
 }
 
 function normalizeSingleEmoji(input: string): string | null {

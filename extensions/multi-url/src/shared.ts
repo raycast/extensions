@@ -120,17 +120,23 @@ const TRACKING_PARAM_KEYS = new Set<string>([
   "yclid",
   "zanpid",
 ]);
-const DATE_TIME_FORMATTER = new Intl.DateTimeFormat("sv-SE", {
-  dateStyle: "short",
-  timeStyle: "short",
-});
-const SET_NAME_FORMATTER = new Intl.DateTimeFormat("sv-SE", {
-  year: "2-digit",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
+function padDatePart(value: number): string {
+  return String(value).padStart(2, "0");
+}
+
+function formatLocalTimestamp(date: Date, separator = ":"): string {
+  const year = date.getFullYear();
+  const month = padDatePart(date.getMonth() + 1);
+  const day = padDatePart(date.getDate());
+  const hour = padDatePart(date.getHours());
+  const minute = padDatePart(date.getMinutes());
+
+  return `${year}-${month}-${day} ${hour}${separator}${minute}`;
+}
+
+export function formatSetTimestamp(date: Date): string {
+  return formatLocalTimestamp(date, "-");
+}
 
 export function splitInput(input: string): string[] {
   const rows = input
@@ -343,7 +349,7 @@ export function formatDateTime(value: string): string {
       return value;
     }
 
-    return DATE_TIME_FORMATTER.format(parsedDate);
+    return formatLocalTimestamp(parsedDate);
   } catch {
     return value;
   }
@@ -355,7 +361,7 @@ export function ensureSetName(input: string): string {
     return trimmed;
   }
 
-  return `Set ${SET_NAME_FORMATTER.format(new Date()).replace(/\//g, "-")}`;
+  return `Set ${formatSetTimestamp(new Date())}`;
 }
 
 export function resolveBrowserApp(
