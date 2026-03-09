@@ -760,7 +760,7 @@ export default function Command() {
     });
   }, []);
 
-  function handleSubmit(values: FormValues) {
+  async function handleSubmit(values: FormValues) {
     // Validate IP
     if (!isValidIP(values.ip)) {
       setIpError("Invalid IP address format");
