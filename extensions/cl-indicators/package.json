@@ -4,18 +4,23 @@
   "description": "Check Chilean financial indicators — Dólar, UF, Euro and UTM — powered by mindicador.cl",
   "icon": "icon.png",
   "author": "rodrigoherera",
-  "categories": ["Finance"],
+  "categories": [
+    "Finance"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "indicators",
-      "title": "CLP Indicators",
+      "title": "View Chilean Indicators",
       "description": "Shows Chilean financial indicators: Dólar, UF, Euro, UTM",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
+    "@raycast/api": "^1.104.8",
     "@raycast/utils": "^1.15.0"
   },
   "devDependencies": {

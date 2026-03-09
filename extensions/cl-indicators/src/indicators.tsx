@@ -43,7 +43,7 @@ export default function Command() {
     : [];
 
   return (
-    <List isLoading={isLoading} navigationTitle="CLP Indicators">
+    <List isLoading={isLoading}>
       {error ? (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
