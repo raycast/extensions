@@ -3,10 +3,7 @@ import { newDocUrl } from "./affine-api";
 
 export default function NewDocCommand() {
   const { baseUrl, workspaceId } = getPreferenceValues<{
-    baseUrl: string;
-    workspaceId?: string;
-  }>();
-  const url = newDocUrl(baseUrl, workspaceId?.trim() || undefined);
+  const { baseUrl, workspaceId } = getPreferenceValues<Preferences.NewDoc>();
   open(url);
   return null;
 }
