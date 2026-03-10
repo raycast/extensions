@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  open,
+  showHUD,
+} from "@raycast/api";
 import { formatStep, keywordsForSteps, tooltipForStep } from "./keymap";
 import { isKommandInstalled } from "./database";
 import { KommandShortcut } from "./types";
@@ -51,6 +59,11 @@ export function ShortcutItem({
       accessories={accessories}
       actions={
         <ActionPanel>
+          <Action
+            title="Show Shortcut"
+            icon={Icon.Keyboard}
+            onAction={() => showHUD(formatted)}
+          />
           <Action.CopyToClipboard title="Copy Shortcut" content={formatted} />
           <Action title="Open in Kommand" onAction={openKommand} />
         </ActionPanel>
