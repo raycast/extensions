@@ -584,7 +584,10 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const duplicate = savedSets.find((item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase());
+    const freshSavedSets = await loadSavedSets();
+    const duplicate = freshSavedSets.find(
+      (item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase(),
+    );
 
     if (duplicate) {
       await showToast({
@@ -631,7 +634,7 @@ export function MultiUrlSavedSetsList() {
     const tags = parseTagInput(values.tags);
     const normalizedUrls = parsed.uniqueValid.join("\n");
     const now = new Date().toISOString();
-    const nextSavedSets = savedSets.map((item) =>
+    const nextSavedSets = freshSavedSets.map((item) =>
       item.id === setId
         ? {
             ...item,
