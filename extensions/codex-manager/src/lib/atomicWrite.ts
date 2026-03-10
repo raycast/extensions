@@ -27,10 +27,7 @@ export async function backupFile(filePath: string): Promise<string | null> {
   return backupPath;
 }
 
-export async function atomicWrite(
-  filePath: string,
-  content: string,
-): Promise<void> {
+export async function atomicWrite(filePath: string, content: string): Promise<void> {
   const dir = path.dirname(filePath);
   const base = path.basename(filePath);
   const tmpPath = path.join(dir, `.${base}.tmp`);

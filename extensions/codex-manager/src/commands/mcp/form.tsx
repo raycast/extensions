@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  getPreferenceValues,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
 import { useMemo } from "react";
 import type { McpServer, McpServerDoc } from "@/types";
 import { buildDuplicateName, deleteMcpServer, setMcpServer } from "@/lib/mcp";
@@ -21,10 +13,7 @@ type McpFormProps = {
   onSaved?: () => void | Promise<void>;
 };
 
-function serializeArgs(
-  args: string[] | undefined,
-  format: "lines" | "json",
-): string {
+function serializeArgs(args: string[] | undefined, format: "lines" | "json"): string {
   if (!args || args.length === 0) {
     return "";
   }
@@ -40,10 +29,7 @@ function parseArgs(value: string, format: "lines" | "json"): string[] {
   }
   if (format === "json") {
     const parsed = JSON.parse(value);
-    if (
-      !Array.isArray(parsed) ||
-      parsed.some((item) => typeof item !== "string")
-    ) {
+    if (!Array.isArray(parsed) || parsed.some((item) => typeof item !== "string")) {
       throw new Error("Args JSON must be an array of strings.");
     }
     return parsed;
@@ -90,12 +76,7 @@ function parseEnv(value: string): Record<string, string> {
   return env;
 }
 
-export default function McpForm({
-  mode,
-  initial,
-  existingNames,
-  onSaved,
-}: McpFormProps) {
+export default function McpForm({ mode, initial, existingNames, onSaved }: McpFormProps) {
   const preferences = getPreferenceValues<Preferences>();
   const configPath = expandTilde(preferences.configPath);
   const { pop } = useNavigation();
@@ -118,9 +99,7 @@ export default function McpForm({
 
   async function handleSubmit(values: typeof initialValues) {
     const trimmedName = values.name.trim();
-    const existingNamesLower = new Set(
-      existingNames.map((name) => name.toLowerCase()),
-    );
+    const existingNamesLower = new Set(existingNames.map((name) => name.toLowerCase()));
     const originalName = initial?.name;
 
     if (!trimmedName) {
@@ -217,45 +196,17 @@ export default function McpForm({
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="playwright"
-        defaultValue={initialValues.name}
-      />
-      <Form.TextField
-        id="command"
-        title="Command"
-        placeholder="npx"
-        defaultValue={initialValues.command}
-      />
+      <Form.TextField id="name" title="Name" placeholder="playwright" defaultValue={initialValues.name} />
+      <Form.TextField id="command" title="Command" placeholder="npx" defaultValue={initialValues.command} />
       <Form.TextArea
         id="args"
         title="Args"
-        placeholder={
-          preferences.argsFormat === "json"
-            ? '["arg1", "arg2"]'
-            : "one arg per line"
-        }
+        placeholder={preferences.argsFormat === "json" ? '["arg1", "arg2"]' : "one arg per line"}
         defaultValue={initialValues.args}
       />
-      <Form.TextArea
-        id="env"
-        title="Env"
-        placeholder="KEY=value"
-        defaultValue={initialValues.env}
-      />
-      <Form.TextField
-        id="cwd"
-        title="Cwd"
-        placeholder="/path/to/project"
-        defaultValue={initialValues.cwd}
-      />
-      <Form.Checkbox
-        id="enabled"
-        label="Enabled"
-        defaultValue={initialValues.enabled}
-      />
+      <Form.TextArea id="env" title="Env" placeholder="KEY=value" defaultValue={initialValues.env} />
+      <Form.TextField id="cwd" title="Cwd" placeholder="/path/to/project" defaultValue={initialValues.cwd} />
+      <Form.Checkbox id="enabled" label="Enabled" defaultValue={initialValues.enabled} />
     </Form>
   );
 }

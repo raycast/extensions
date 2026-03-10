@@ -15,9 +15,7 @@ export function detectMcpBlockKey(doc: Record<string, unknown>): string | null {
   return null;
 }
 
-export function getMcpServers(
-  doc: Record<string, unknown>,
-): Record<string, McpServerDoc> {
+export function getMcpServers(doc: Record<string, unknown>): Record<string, McpServerDoc> {
   const key = detectMcpBlockKey(doc);
   if (!key) {
     return {};
@@ -35,9 +33,7 @@ export function upsertMcpServer(
   payload: McpServerDoc,
 ): Record<string, unknown> {
   const key = detectMcpBlockKey(doc) ?? "mcp_servers";
-  const existingBlock = isPlainObject(doc[key])
-    ? (doc[key] as Record<string, McpServerDoc>)
-    : {};
+  const existingBlock = isPlainObject(doc[key]) ? (doc[key] as Record<string, McpServerDoc>) : {};
   const existingServer = existingBlock[name] ?? {};
   const mergedServer = { ...existingServer, ...payload };
   existingBlock[name] = mergedServer;
@@ -51,18 +47,13 @@ export function setMcpServer(
   server: McpServerDoc,
 ): Record<string, unknown> {
   const key = detectMcpBlockKey(doc) ?? "mcp_servers";
-  const existingBlock = isPlainObject(doc[key])
-    ? (doc[key] as Record<string, McpServerDoc>)
-    : {};
+  const existingBlock = isPlainObject(doc[key]) ? (doc[key] as Record<string, McpServerDoc>) : {};
   existingBlock[name] = server;
   doc[key] = existingBlock;
   return doc;
 }
 
-export function deleteMcpServer(
-  doc: Record<string, unknown>,
-  name: string,
-): boolean {
+export function deleteMcpServer(doc: Record<string, unknown>, name: string): boolean {
   const key = detectMcpBlockKey(doc);
   if (!key) {
     return false;
@@ -78,10 +69,7 @@ export function deleteMcpServer(
   return true;
 }
 
-export function buildDuplicateName(
-  existingNames: string[],
-  baseName: string,
-): string {
+export function buildDuplicateName(existingNames: string[], baseName: string): string {
   const normalized = new Set(existingNames.map((name) => name.toLowerCase()));
   let candidate = `${baseName}-copy`;
   let index = 2;

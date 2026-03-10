@@ -19,16 +19,12 @@ function toTitleCase(name: string): string {
     .join(" ");
 }
 
-export function buildSkillTemplate(
-  name: string,
-  metadata?: SkillMetadata,
-): string {
+export function buildSkillTemplate(name: string, metadata?: SkillMetadata): string {
   const description = metadata?.description ?? "Describe what this skill does.";
   const shortDescription = metadata?.description ?? description;
   const title = toTitleCase(name);
 
-  const formatValue = (value: string) =>
-    value.trim().length > 0 ? value : '""';
+  const formatValue = (value: string) => (value.trim().length > 0 ? value : '""');
 
   return `---\nname: ${name}\ndescription: ${formatValue(description)}\nmetadata:\n  short-description: ${formatValue(shortDescription)}\n---\n\n# ${title}\n\nDescribe what this skill does...\n`;
 }
@@ -67,8 +63,7 @@ export async function listSkills(skillsDir: string): Promise<Skill[]> {
       hasSkillFile = true;
       const parsed = matter(content);
       metadata = parsed.data as SkillMetadata;
-      description =
-        metadata?.description ?? extractFirstHeading(parsed.content);
+      description = metadata?.description ?? extractFirstHeading(parsed.content);
     } catch {
       hasSkillFile = false;
     }
@@ -131,9 +126,7 @@ export async function createSkill(
   const skillPath = path.join(skillsDir, name);
   await fs.mkdir(skillPath, { recursive: true });
   const skillFile = path.join(skillPath, SKILL_FILE);
-  const content = contentOverride?.trim()
-    ? contentOverride
-    : buildSkillTemplate(name, metadata);
+  const content = contentOverride?.trim() ? contentOverride : buildSkillTemplate(name, metadata);
   await fs.writeFile(skillFile, content, "utf8");
   return skillPath;
 }
@@ -142,10 +135,7 @@ export async function deleteSkill(skillPath: string): Promise<void> {
   await trash(skillPath);
 }
 
-export async function updateSkillMetadata(
-  skillPath: string,
-  metadata: SkillMetadata,
-): Promise<void> {
+export async function updateSkillMetadata(skillPath: string, metadata: SkillMetadata): Promise<void> {
   const skillFile = path.join(skillPath, SKILL_FILE);
   const content = await fs.readFile(skillFile, "utf8");
   const parsed = matter(content);
@@ -153,10 +143,7 @@ export async function updateSkillMetadata(
   await fs.writeFile(skillFile, updated, "utf8");
 }
 
-export async function updateSkillContent(
-  skillPath: string,
-  content: string,
-): Promise<void> {
+export async function updateSkillContent(skillPath: string, content: string): Promise<void> {
   const skillFile = path.join(skillPath, SKILL_FILE);
   await fs.writeFile(skillFile, content, "utf8");
 }
@@ -166,9 +153,7 @@ type ImportSkillOptions = {
   skillName?: string;
 };
 
-type ZipValidationResult =
-  | { mode: "root" }
-  | { mode: "folder"; rootFolder: string };
+type ZipValidationResult = { mode: "root" } | { mode: "folder"; rootFolder: string };
 
 async function listZipEntries(zipPath: string): Promise<string[]> {
   const { stdout } = await execFileAsync("unzip", ["-Z1", zipPath], {
@@ -184,10 +169,7 @@ async function extractZip(zipPath: string, destination: string): Promise<void> {
   await execFileAsync("ditto", ["-x", "-k", zipPath, destination]);
 }
 
-async function copyDirectory(
-  source: string,
-  destination: string,
-): Promise<void> {
+async function copyDirectory(source: string, destination: string): Promise<void> {
   await execFileAsync("ditto", [source, destination]);
 }
 
@@ -208,9 +190,7 @@ function isIgnorableZipEntry(entry: string): boolean {
 function validateZipEntries(entries: string[]): ZipValidationResult {
   const relevant = entries.filter((entry) => !isIgnorableZipEntry(entry));
   const fileEntries = relevant.filter((entry) => !entry.endsWith("/"));
-  const skillFiles = fileEntries.filter(
-    (entry) => path.posix.basename(entry) === SKILL_FILE,
-  );
+  const skillFiles = fileEntries.filter((entry) => path.posix.basename(entry) === SKILL_FILE);
   if (skillFiles.length === 0) {
     throw new Error("ZIP must include a SKILL.md file.");
   }
@@ -223,13 +203,9 @@ function validateZipEntries(entries: string[]): ZipValidationResult {
     return { mode: "root" };
   }
 
-  const topLevel = new Set(
-    fileEntries.map((entry) => entry.split("/")[0]).filter(Boolean),
-  );
+  const topLevel = new Set(fileEntries.map((entry) => entry.split("/")[0]).filter(Boolean));
   if (topLevel.size !== 1) {
-    throw new Error(
-      "ZIP must contain files at the root level or a single root folder.",
-    );
+    throw new Error("ZIP must contain files at the root level or a single root folder.");
   }
 
   const rootFolder = Array.from(topLevel)[0];
@@ -251,10 +227,7 @@ export async function importSkillFromZip(
   const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "codex-skill-"));
   try {
     await extractZip(zipPath, tempDir);
-    const sourceDir =
-      validation.mode === "folder"
-        ? path.join(tempDir, validation.rootFolder)
-        : tempDir;
+    const sourceDir = validation.mode === "folder" ? path.join(tempDir, validation.rootFolder) : tempDir;
     await fs.stat(sourceDir);
     if (options.overwrite) {
       await trash(targetDir);
@@ -267,12 +240,8 @@ export async function importSkillFromZip(
 }
 
 function findSkillFileEntry(entries: string[]): string {
-  const fileEntries = entries.filter(
-    (entry) => !entry.endsWith("/") && !isIgnorableZipEntry(entry),
-  );
-  const skillFiles = fileEntries.filter(
-    (entry) => path.posix.basename(entry) === SKILL_FILE,
-  );
+  const fileEntries = entries.filter((entry) => !entry.endsWith("/") && !isIgnorableZipEntry(entry));
+  const skillFiles = fileEntries.filter((entry) => path.posix.basename(entry) === SKILL_FILE);
   if (skillFiles.length === 0) {
     throw new Error("ZIP must include a SKILL.md file.");
   }
@@ -282,9 +251,7 @@ function findSkillFileEntry(entries: string[]): string {
   return skillFiles[0];
 }
 
-export async function getSkillMarkdownFromZip(
-  zipPath: string,
-): Promise<string> {
+export async function getSkillMarkdownFromZip(zipPath: string): Promise<string> {
   const entries = await listZipEntries(zipPath);
   const skillEntry = findSkillFileEntry(entries);
   const { stdout } = await execFileAsync("unzip", ["-p", zipPath, skillEntry], {

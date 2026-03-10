@@ -6,19 +6,13 @@ import { ensureDirExists } from "@/lib/paths";
 
 export type TomlDocument = Record<string, unknown>;
 
-export async function readTomlConfig(
-  configPath: string,
-): Promise<{ rawText: string; doc: TomlDocument }> {
+export async function readTomlConfig(configPath: string): Promise<{ rawText: string; doc: TomlDocument }> {
   const rawText = await fs.readFile(configPath, "utf8");
   const doc = TOML.parse(rawText) as TomlDocument;
   return { rawText, doc };
 }
 
-export async function writeTomlConfig(
-  configPath: string,
-  doc: TomlDocument,
-  createBackup: boolean,
-): Promise<void> {
+export async function writeTomlConfig(configPath: string, doc: TomlDocument, createBackup: boolean): Promise<void> {
   const content = TOML.stringify(doc as TOML.JsonMap);
   if (createBackup) {
     await backupFile(configPath);

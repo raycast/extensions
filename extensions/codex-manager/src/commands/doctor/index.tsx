@@ -115,10 +115,7 @@ export default function DoctorCommand() {
           continue;
         }
         const description = skill.metadata?.description;
-        if (
-          typeof description !== "string" ||
-          description.trim().length === 0
-        ) {
+        if (typeof description !== "string" || description.trim().length === 0) {
           nextIssues.push({
             id: `skill-description-${skill.name}`,
             title: `Skill ${skill.name}`,
@@ -176,26 +173,12 @@ export default function DoctorCommand() {
             key={issue.id}
             title={issue.title}
             subtitle={issue.detail}
-            icon={
-              issue.severity === "error"
-                ? Icon.XmarkCircle
-                : Icon.ExclamationMark
-            }
+            icon={issue.severity === "error" ? Icon.XmarkCircle : Icon.ExclamationMark}
             accessories={[{ tag: issue.severity.toUpperCase() }]}
             actions={
               <ActionPanel>
-                {issue.action === "openConfig" && (
-                  <Action
-                    title="Open Config.toml"
-                    onAction={handleOpenConfig}
-                  />
-                )}
-                {issue.action === "openSkills" && (
-                  <Action
-                    title="Open Skills Folder"
-                    onAction={handleOpenSkills}
-                  />
-                )}
+                {issue.action === "openConfig" && <Action title="Open Config.toml" onAction={handleOpenConfig} />}
+                {issue.action === "openSkills" && <Action title="Open Skills Folder" onAction={handleOpenSkills} />}
                 <Action title="Copy Report" onAction={handleCopyReport} />
               </ActionPanel>
             }

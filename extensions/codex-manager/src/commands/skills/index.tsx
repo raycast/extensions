@@ -143,24 +143,12 @@ export default function SkillsCommand() {
               <Action.Push
                 title="Create Skill"
                 icon={Icon.Plus}
-                target={
-                  <SkillForm
-                    mode="create"
-                    skillsDir={skillsDir}
-                    existingNames={[]}
-                    onSaved={loadSkills}
-                  />
-                }
+                target={<SkillForm mode="create" skillsDir={skillsDir} existingNames={[]} onSaved={loadSkills} />}
               />
               <Action.Push
                 title="Import Skill from Zip"
                 icon={Icon.ArrowDownCircle}
-                target={
-                  <SkillImportForm
-                    skillsDir={skillsDir}
-                    onImported={loadSkills}
-                  />
-                }
+                target={<SkillImportForm skillsDir={skillsDir} onImported={loadSkills} />}
               />
               <Action
                 title="Open Doctor"
@@ -184,9 +172,7 @@ export default function SkillsCommand() {
             accessories={[
               { icon: skill.hasSkillFile ? Icon.Checkmark : Icon.XmarkCircle },
               ...(skill.hasSkillFile ? [] : [{ tag: "Missing SKILL.md" }]),
-              ...(typeof skill.fileCount === "number"
-                ? [{ tag: `Files: ${skill.fileCount}` }]
-                : []),
+              ...(typeof skill.fileCount === "number" ? [{ tag: `Files: ${skill.fileCount}` }] : []),
             ]}
             actions={
               <ActionPanel>
@@ -205,12 +191,7 @@ export default function SkillsCommand() {
                 <Action.Push
                   title="Import Skill from Zip"
                   icon={Icon.ArrowDownCircle}
-                  target={
-                    <SkillImportForm
-                      skillsDir={skillsDir}
-                      onImported={loadSkills}
-                    />
-                  }
+                  target={<SkillImportForm skillsDir={skillsDir} onImported={loadSkills} />}
                 />
                 <Action.Push
                   title="Browse Files"
@@ -221,12 +202,7 @@ export default function SkillsCommand() {
                 <Action.Push
                   title="Add File or Folder"
                   icon={Icon.PlusCircle}
-                  target={
-                    <SkillEntryForm
-                      skillPath={skill.path}
-                      onSaved={loadSkills}
-                    />
-                  }
+                  target={<SkillEntryForm skillPath={skill.path} onSaved={loadSkills} />}
                 />
                 <Action.Push
                   title="Edit Metadata"
@@ -237,9 +213,7 @@ export default function SkillsCommand() {
                       mode="edit"
                       skill={skill}
                       skillsDir={skillsDir}
-                      existingNames={skills
-                        .filter((item) => item.name !== skill.name)
-                        .map((item) => item.name)}
+                      existingNames={skills.filter((item) => item.name !== skill.name).map((item) => item.name)}
                       onSaved={loadSkills}
                     />
                   }
@@ -250,11 +224,7 @@ export default function SkillsCommand() {
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                   onAction={() => handleCopySkill(skill)}
                 />
-                <Action
-                  title="Reveal in Finder"
-                  icon={Icon.Finder}
-                  onAction={() => showInFinder(skill.path)}
-                />
+                <Action title="Reveal in Finder" icon={Icon.Finder} onAction={() => showInFinder(skill.path)} />
                 <Action
                   title="Delete"
                   icon={Icon.Trash}

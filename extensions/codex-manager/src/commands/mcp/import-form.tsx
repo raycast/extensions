@@ -40,17 +40,8 @@ function parseImportPayload(text: string): ImportPayload {
     throw new Error("JSON must be an object.");
   }
 
-  const knownServerKeys = new Set([
-    "command",
-    "args",
-    "env",
-    "cwd",
-    "enabled",
-    "description",
-  ]);
-  const bulkKey = ["mcp_servers", "mcpServers", "mcp"].find((key) =>
-    isPlainObject(parsed[key]),
-  );
+  const knownServerKeys = new Set(["command", "args", "env", "cwd", "enabled", "description"]);
+  const bulkKey = ["mcp_servers", "mcpServers", "mcp"].find((key) => isPlainObject(parsed[key]));
   if (bulkKey) {
     return {
       mode: "bulk",
@@ -90,9 +81,7 @@ function parseImportPayload(text: string): ImportPayload {
   if (entries.length === 1) {
     const [name, server] = entries[0];
     if (!isPlainObject(server)) {
-      throw new Error(
-        "JSON object value must be an object with server fields.",
-      );
+      throw new Error("JSON object value must be an object with server fields.");
     }
     return {
       mode: "single",
@@ -153,11 +142,7 @@ export default function McpImportForm({ onSaved }: McpImportFormProps) {
       if (payload.mode === "bulk") {
         const errors: string[] = [];
         for (const [serverName, server] of Object.entries(payload.servers)) {
-          errors.push(
-            ...validateMcpServer(serverName, server).map(
-              (error) => `${serverName}: ${error}`,
-            ),
-          );
+          errors.push(...validateMcpServer(serverName, server).map((error) => `${serverName}: ${error}`));
         }
         if (errors.length > 0) {
           await showToast({
@@ -168,9 +153,7 @@ export default function McpImportForm({ onSaved }: McpImportFormProps) {
           return;
         }
 
-        const conflicting = Object.keys(payload.servers).filter((serverName) =>
-          Boolean(servers[serverName]),
-        );
+        const conflicting = Object.keys(payload.servers).filter((serverName) => Boolean(servers[serverName]));
         if (conflicting.length > 0) {
           const confirmed = await confirmAlert({
             title: `Overwrite ${conflicting.length} servers?`,

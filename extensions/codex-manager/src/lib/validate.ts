@@ -7,37 +7,26 @@ import { pathExists } from "@/lib/paths";
 const MCP_NAME_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]*$/;
 const SKILL_NAME_PATTERN = /^[a-z0-9][a-z0-9-_]{1,63}$/;
 
-export function validateMcpServer(
-  name: string,
-  server: McpServerDoc,
-): string[] {
+export function validateMcpServer(name: string, server: McpServerDoc): string[] {
   const errors: string[] = [];
 
   if (!name || !MCP_NAME_PATTERN.test(name)) {
     errors.push("Invalid MCP server name.");
   }
 
-  if (
-    typeof server.command !== "string" ||
-    server.command.trim().length === 0
-  ) {
+  if (typeof server.command !== "string" || server.command.trim().length === 0) {
     errors.push("Command is required.");
   }
 
   if (
     server.args !== undefined &&
-    (!Array.isArray(server.args) ||
-      server.args.some((arg) => typeof arg !== "string"))
+    (!Array.isArray(server.args) || server.args.some((arg) => typeof arg !== "string"))
   ) {
     errors.push("Args must be an array of strings.");
   }
 
   if (server.env !== undefined) {
-    if (
-      typeof server.env !== "object" ||
-      server.env === null ||
-      Array.isArray(server.env)
-    ) {
+    if (typeof server.env !== "object" || server.env === null || Array.isArray(server.env)) {
       errors.push("Env must be an object of string values.");
     } else {
       for (const [key, value] of Object.entries(server.env)) {
@@ -59,9 +48,7 @@ export function validateMcpServer(
   return errors;
 }
 
-export function validateMcpServers(
-  servers: Record<string, McpServerDoc>,
-): string[] {
+export function validateMcpServers(servers: Record<string, McpServerDoc>): string[] {
   const errors: string[] = [];
   for (const [name, server] of Object.entries(servers)) {
     const serverErrors = validateMcpServer(name, server);
@@ -95,27 +82,19 @@ export type SkillFormErrors = {
   content?: string;
 };
 
-export function validateSkillNameWithDuplicates(
-  name: string,
-  existingNames: string[],
-): string | undefined {
+export function validateSkillNameWithDuplicates(name: string, existingNames: string[]): string | undefined {
   const nameError = validateSkillName(name);
   if (nameError) {
     return nameError;
   }
-  const existingNamesSet = new Set(
-    existingNames.map((existingName) => existingName.toLowerCase()),
-  );
+  const existingNamesSet = new Set(existingNames.map((existingName) => existingName.toLowerCase()));
   if (existingNamesSet.has(name.toLowerCase())) {
     return "Skill name already exists";
   }
   return undefined;
 }
 
-export function validateSkillContent(
-  content: string | undefined,
-  expectedName?: string,
-): string | undefined {
+export function validateSkillContent(content: string | undefined, expectedName?: string): string | undefined {
   if (!content?.trim()) {
     return "SKILL.md content is required";
   }
@@ -125,10 +104,7 @@ export function validateSkillContent(
   if (typeof nameValue !== "string" || nameValue.trim().length === 0) {
     return "Frontmatter must include a non-empty name.";
   }
-  if (
-    typeof descriptionValue !== "string" ||
-    descriptionValue.trim().length === 0
-  ) {
+  if (typeof descriptionValue !== "string" || descriptionValue.trim().length === 0) {
     return "Frontmatter must include a non-empty description.";
   }
   if (expectedName && nameValue.trim() !== expectedName.trim()) {
@@ -147,10 +123,7 @@ type SkillValidationOptions = {
   checkDuplicates?: boolean;
 };
 
-export function validateSkillForm(
-  values: SkillFormValues,
-  options: SkillValidationOptions = {},
-): SkillFormErrors {
+export function validateSkillForm(values: SkillFormValues, options: SkillValidationOptions = {}): SkillFormErrors {
   const trimmedName = values.name.trim();
   const nameError =
     options.checkDuplicates && options.existingNames
@@ -180,9 +153,7 @@ export function validateSkills(skills: Skill[]): string[] {
     const lower = skill.name.toLowerCase();
     const existing = seen.get(lower);
     if (existing && existing !== skill.name) {
-      errors.push(
-        `Duplicate skill name (case-insensitive): ${skill.name} vs ${existing}.`,
-      );
+      errors.push(`Duplicate skill name (case-insensitive): ${skill.name} vs ${existing}.`);
     } else {
       seen.set(lower, skill.name);
     }
@@ -191,9 +162,7 @@ export function validateSkills(skills: Skill[]): string[] {
   return errors;
 }
 
-export async function validateSkillsFolder(
-  skillsDir: string,
-): Promise<string[]> {
+export async function validateSkillsFolder(skillsDir: string): Promise<string[]> {
   const exists = await pathExists(skillsDir);
   if (!exists) {
     return [`Skills folder not found: ${skillsDir}`];

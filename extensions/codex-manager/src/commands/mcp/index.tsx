@@ -174,10 +174,7 @@ export default function McpServersCommand() {
           description="Create config.toml to start managing MCP servers."
           actions={
             <ActionPanel>
-              <Action
-                title="Create Config.toml"
-                onAction={handleCreateConfig}
-              />
+              <Action title="Create Config.toml" onAction={handleCreateConfig} />
               <Action
                 title="Open Doctor"
                 onAction={() =>
@@ -218,24 +215,14 @@ export default function McpServersCommand() {
               <Action.Push
                 title="Add MCP Server"
                 icon={Icon.Plus}
-                target={
-                  <McpForm
-                    mode="create"
-                    existingNames={[]}
-                    onSaved={loadServers}
-                  />
-                }
+                target={<McpForm mode="create" existingNames={[]} onSaved={loadServers} />}
               />
               <Action.Push
                 title="Import from JSON"
                 icon={Icon.ArrowDownCircle}
                 target={<McpImportForm onSaved={loadServers} />}
               />
-              <Action
-                title="Open Config.toml"
-                icon={Icon.Document}
-                onAction={handleOpenConfig}
-              />
+              <Action title="Open Config.toml" icon={Icon.Document} onAction={handleOpenConfig} />
               <Action
                 title="Open Doctor"
                 icon={Icon.Heartbeat}
@@ -258,18 +245,13 @@ export default function McpServersCommand() {
             accessories={[
               { tag: "MCP" },
               {
-                icon:
-                  server.enabled === false ? Icon.XmarkCircle : Icon.Checkmark,
+                icon: server.enabled === false ? Icon.XmarkCircle : Icon.Checkmark,
                 tooltip: server.enabled === false ? "Disabled" : "Enabled",
               },
             ]}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="View Details"
-                  icon={Icon.Sidebar}
-                  target={<McpDetail server={server} />}
-                />
+                <Action.Push title="View Details" icon={Icon.Sidebar} target={<McpDetail server={server} />} />
                 <Action.CopyToClipboard
                   title="Copy JSON"
                   content={buildMcpJson(server)}
@@ -291,11 +273,7 @@ export default function McpServersCommand() {
                   title="Add MCP Server"
                   icon={Icon.Plus}
                   target={
-                    <McpForm
-                      mode="create"
-                      existingNames={servers.map((item) => item.name)}
-                      onSaved={loadServers}
-                    />
+                    <McpForm mode="create" existingNames={servers.map((item) => item.name)} onSaved={loadServers} />
                   }
                 />
                 <Action.Push
@@ -321,16 +299,8 @@ export default function McpServersCommand() {
                   style={Action.Style.Destructive}
                   onAction={() => handleDelete(server)}
                 />
-                <Action
-                  title="Validate"
-                  icon={Icon.Check}
-                  onAction={() => handleValidate(server)}
-                />
-                <Action
-                  title="Open Config.toml"
-                  icon={Icon.Document}
-                  onAction={handleOpenConfig}
-                />
+                <Action title="Validate" icon={Icon.Check} onAction={() => handleValidate(server)} />
+                <Action title="Open Config.toml" icon={Icon.Document} onAction={handleOpenConfig} />
                 <Action
                   title="Open Doctor"
                   icon={Icon.Heartbeat}

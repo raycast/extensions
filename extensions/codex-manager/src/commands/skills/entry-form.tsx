@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
 import { useEffect, useRef, useState } from "react";
@@ -33,12 +26,7 @@ function resolveEntryPath(skillPath: string, entryPath: string): string {
   return resolved;
 }
 
-export default function SkillEntryForm({
-  skillPath,
-  mode = "create",
-  entryPath,
-  onSaved,
-}: SkillEntryFormProps) {
+export default function SkillEntryForm({ skillPath, mode = "create", entryPath, onSaved }: SkillEntryFormProps) {
   const { pop } = useNavigation();
   const [contentValue, setContentValue] = useState("");
   const [entryPathValue, setEntryPathValue] = useState(entryPath ?? "");
@@ -241,10 +229,7 @@ export default function SkillEntryForm({
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={mode === "edit" ? "Save" : "Create"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={mode === "edit" ? "Save" : "Create"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -280,17 +265,9 @@ export default function SkillEntryForm({
             <Form.Dropdown.Item value="file" title="File" />
             <Form.Dropdown.Item value="folder" title="Folder" />
           </Form.Dropdown>
-          <Form.TextField
-            id="entryPath"
-            title="Relative Path"
-            placeholder="scripts/setup.sh"
-          />
+          <Form.TextField id="entryPath" title="Relative Path" placeholder="scripts/setup.sh" />
           {entryType === "file" ? (
-            <Form.TextArea
-              id="content"
-              title="Content"
-              placeholder="Optional file content"
-            />
+            <Form.TextArea id="content" title="Content" placeholder="Optional file content" />
           ) : null}
         </>
       )}

@@ -171,9 +171,7 @@ export default function SkillFiles({ skill }: { skill: Skill }) {
   async function handleDelete(entry: Entry) {
     const confirmed = await confirmAlert({
       title: `Delete ${entry.relativePath}?`,
-      message: entry.isDirectory
-        ? "This will remove the folder and its contents."
-        : "This will remove the file.",
+      message: entry.isDirectory ? "This will remove the folder and its contents." : "This will remove the file.",
       primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
 
@@ -231,12 +229,7 @@ export default function SkillFiles({ skill }: { skill: Skill }) {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search files"
-      navigationTitle={skill.name}
-      isShowingDetail
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search files" navigationTitle={skill.name} isShowingDetail>
       {items.length === 0 ? (
         <List.EmptyView
           title="No files found"
@@ -246,20 +239,14 @@ export default function SkillFiles({ skill }: { skill: Skill }) {
               <Action.Push
                 title="Add File or Folder"
                 icon={Icon.Plus}
-                target={
-                  <SkillEntryForm
-                    skillPath={skill.path}
-                    onSaved={loadEntries}
-                  />
-                }
+                target={<SkillEntryForm skillPath={skill.path} onSaved={loadEntries} />}
               />
             </ActionPanel>
           }
         />
       ) : (
         items.map((entry) => {
-          const indent =
-            entry.depth > 0 ? `${"│   ".repeat(entry.depth - 1)}├─ ` : "";
+          const indent = entry.depth > 0 ? `${"│   ".repeat(entry.depth - 1)}├─ ` : "";
           const title = `${indent}${entry.name}`;
           const subtitle = entry.depth > 0 ? entry.relativePath : undefined;
           const language = entry.isDirectory ? "" : getLanguageHint(entry.path);
@@ -273,26 +260,14 @@ export default function SkillFiles({ skill }: { skill: Skill }) {
               title={title}
               subtitle={subtitle}
               icon={entry.isDirectory ? Icon.Folder : Icon.Document}
-              detail={
-                entry.isDirectory ? null : (
-                  <List.Item.Detail markdown={detailMarkdown} />
-                )
-              }
+              detail={entry.isDirectory ? null : <List.Item.Detail markdown={detailMarkdown} />}
               actions={
                 <ActionPanel>
                   {entry.isDirectory ? (
-                    <Action
-                      title="Reveal in Finder"
-                      icon={Icon.Finder}
-                      onAction={() => showInFinder(entry.path)}
-                    />
+                    <Action title="Reveal in Finder" icon={Icon.Finder} onAction={() => showInFinder(entry.path)} />
                   ) : (
                     <>
-                      <Action
-                        title="Open in Editor"
-                        icon={Icon.ArrowRight}
-                        onAction={() => handleOpen(entry)}
-                      />
+                      <Action title="Open in Editor" icon={Icon.ArrowRight} onAction={() => handleOpen(entry)} />
                       <Action.Push
                         title="Edit File"
                         icon={Icon.Pencil}
@@ -305,28 +280,19 @@ export default function SkillFiles({ skill }: { skill: Skill }) {
                           />
                         }
                       />
-                      <Action
-                        title="Copy File"
-                        icon={Icon.Clipboard}
-                        onAction={() => handleCopy(entry)}
-                      />
+                      <Action title="Copy File" icon={Icon.Clipboard} onAction={() => handleCopy(entry)} />
                     </>
                   )}
                   <Action
                     title="Open Skill Folder in Editor"
                     icon={Icon.Folder}
-                    onAction={() =>
-                      openInEditor(skill.path, preferences.editorPreference)
-                    }
+                    onAction={() => openInEditor(skill.path, preferences.editorPreference)}
                   />
                   <Action.Push
                     title="Add File or Folder"
                     icon={Icon.Plus}
                     target={
-                      <SkillEntryForm
-                        skillPath={entry.isDirectory ? entry.path : skill.path}
-                        onSaved={loadEntries}
-                      />
+                      <SkillEntryForm skillPath={entry.isDirectory ? entry.path : skill.path} onSaved={loadEntries} />
                     }
                   />
                   <Action

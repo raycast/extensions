@@ -1,22 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import fs from "fs/promises";
 import path from "path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Skill, SkillMetadata } from "@/types";
-import {
-  buildSkillTemplate,
-  createSkill,
-  updateSkillContent,
-} from "@/lib/skills";
+import { buildSkillTemplate, createSkill, updateSkillContent } from "@/lib/skills";
 import {
   type SkillFormErrors,
   validateSkillContent,
@@ -105,10 +92,7 @@ export default function SkillForm(props: SkillFormProps) {
 
     const loadContent = async () => {
       try {
-        const content = await fs.readFile(
-          path.join(props.skill.path, SKILL_FILE),
-          "utf8",
-        );
+        const content = await fs.readFile(path.join(props.skill.path, SKILL_FILE), "utf8");
         setContentValue(content);
       } catch (error) {
         await showToast({
@@ -153,12 +137,7 @@ export default function SkillForm(props: SkillFormProps) {
 
     try {
       if (props.mode === "create") {
-        await createSkill(
-          props.skillsDir,
-          trimmedName,
-          metadata,
-          values.content,
-        );
+        await createSkill(props.skillsDir, trimmedName, metadata, values.content);
         await showToast({ style: Toast.Style.Success, title: "Skill created" });
       } else {
         let skillPath = props.skill.path;
@@ -195,12 +174,7 @@ export default function SkillForm(props: SkillFormProps) {
             <Action.Push
               title="Import Skill from Zip"
               icon={Icon.ArrowDownCircle}
-              target={
-                <SkillImportForm
-                  skillsDir={props.skillsDir}
-                  onImported={props.onSaved}
-                />
-              }
+              target={<SkillImportForm skillsDir={props.skillsDir} onImported={props.onSaved} />}
             />
           ) : null}
           <Action.SubmitForm
@@ -234,10 +208,7 @@ export default function SkillForm(props: SkillFormProps) {
             if (showErrors) {
               setErrors((current) => ({
                 ...current,
-                name: validateSkillNameWithDuplicates(
-                  value.trim(),
-                  props.existingNames,
-                ),
+                name: validateSkillNameWithDuplicates(value.trim(), props.existingNames),
                 content: validateSkillContent(contentValue, value),
               }));
             }
@@ -254,10 +225,7 @@ export default function SkillForm(props: SkillFormProps) {
             if (showErrors) {
               setErrors((current) => ({
                 ...current,
-                name: validateSkillNameWithDuplicates(
-                  value.trim(),
-                  props.existingNames,
-                ),
+                name: validateSkillNameWithDuplicates(value.trim(), props.existingNames),
                 content: validateSkillContent(contentValue),
               }));
             }
@@ -272,10 +240,7 @@ export default function SkillForm(props: SkillFormProps) {
           value={contentValue}
           error={showErrors ? errors.content : undefined}
           onChange={(value) => {
-            if (
-              value === lastAutoTemplate.current ||
-              value.trim().length === 0
-            ) {
+            if (value === lastAutoTemplate.current || value.trim().length === 0) {
               setContentTouched(false);
             } else {
               setContentTouched(true);

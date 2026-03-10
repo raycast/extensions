@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Form,
-  Toast,
-  confirmAlert,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Form, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
 import path from "path";
 import { useEffect, useMemo, useState } from "react";
 import { getSkillMarkdownFromZip, importSkillFromZip } from "@/lib/skills";
@@ -28,29 +19,19 @@ function getSkillNameFromZip(zipPath: string): string {
   return path.basename(zipPath, path.extname(zipPath));
 }
 
-export default function SkillImportForm({
-  skillsDir,
-  onImported,
-}: SkillImportFormProps) {
+export default function SkillImportForm({ skillsDir, onImported }: SkillImportFormProps) {
   const { pop } = useNavigation();
   const [zipPath, setZipPath] = useState<string | null>(null);
   const [skillName, setSkillName] = useState("");
   const [zipError, setZipError] = useState<string | undefined>(undefined);
   const [preview, setPreview] = useState("");
-  const [previewError, setPreviewError] = useState<string | undefined>(
-    undefined,
-  );
+  const [previewError, setPreviewError] = useState<string | undefined>(undefined);
   const [previewLoading, setPreviewLoading] = useState(false);
 
-  const defaultName = useMemo(
-    () => (zipPath ? getSkillNameFromZip(zipPath) : ""),
-    [zipPath],
-  );
+  const defaultName = useMemo(() => (zipPath ? getSkillNameFromZip(zipPath) : ""), [zipPath]);
 
   const displayName = skillName || defaultName;
-  const previewText = previewLoading
-    ? "Loading preview..."
-    : preview || "Select a ZIP file";
+  const previewText = previewLoading ? "Loading preview..." : preview || "Select a ZIP file";
 
   useEffect(() => {
     let isActive = true;
@@ -70,8 +51,7 @@ export default function SkillImportForm({
           return;
         }
         const trimmed = content.trim();
-        const truncated =
-          trimmed.length > 5000 ? `${trimmed.slice(0, 5000)}\n\n...` : trimmed;
+        const truncated = trimmed.length > 5000 ? `${trimmed.slice(0, 5000)}\n\n...` : trimmed;
         setPreview(truncated);
         setPreviewError(undefined);
       } catch (error) {
@@ -79,9 +59,7 @@ export default function SkillImportForm({
           return;
         }
         setPreview("");
-        setPreviewError(
-          error instanceof Error ? error.message : "Failed to read SKILL.md.",
-        );
+        setPreviewError(error instanceof Error ? error.message : "Failed to read SKILL.md.");
       } finally {
         if (isActive) {
           setPreviewLoading(false);
@@ -204,12 +182,7 @@ export default function SkillImportForm({
           }
         }}
       />
-      <Form.TextField
-        id="skillName"
-        title="Skill Name"
-        value={displayName}
-        onChange={setSkillName}
-      />
+      <Form.TextField id="skillName" title="Skill Name" value={displayName} onChange={setSkillName} />
       <Form.TextArea
         id="preview"
         title="SKILL.md Preview"
