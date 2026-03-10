@@ -1,6 +1,6 @@
 # Changelog
 
-## [Store-ready command and metadata refresh] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added six metadata screenshots for the extension store listing.
 - Made `Multi-URL` the dashboard/root command for saved sets management.
