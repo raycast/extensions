@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { ExecutableLookupError, locateMmdcExecutable, locateNodeExecutable } from "../executables";
+import { locateMmdcExecutable, locateNodeExecutable } from "../executables";
 
 describe("locateNodeExecutable", () => {
   it("returns the first existing known node path", async () => {
@@ -77,7 +77,7 @@ describe("locateMmdcExecutable", () => {
           homeDir: "/Users/test",
         },
       ),
-    ).rejects.toMatchObject<ExecutableLookupError>({
+    ).rejects.toMatchObject({
       code: "MMDC_NOT_FOUND",
     });
   });

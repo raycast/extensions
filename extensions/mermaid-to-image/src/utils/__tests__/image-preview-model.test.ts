@@ -6,7 +6,6 @@ describe("buildImagePreviewItems", () => {
     const items = buildImagePreviewItems({
       imagePath: "/tmp/diagram.svg",
       imageContent: "data:image/png;base64,abc123",
-      format: "svg",
       engineLabel: "beautiful",
     });
 
@@ -21,7 +20,6 @@ describe("buildImagePreviewItems", () => {
     const items = buildImagePreviewItems({
       imagePath: "/tmp/diagram.svg",
       imageContent: "data:image/png;base64,abc123",
-      format: "svg",
       engineLabel: "beautiful",
       asciiContent: "+---+\n| A |\n+---+",
       beautifulMermaidSourceLabel: "bundled v1.1.3",
@@ -42,7 +40,6 @@ describe("buildImagePreviewItems", () => {
     const items = buildImagePreviewItems({
       imagePath: "/tmp/diagram.png",
       imageContent: "data:image/png;base64,abc123",
-      format: "png",
       engineLabel: "mmdc",
       beautifulMermaidSourceLabel: "global v1.1.3",
     });

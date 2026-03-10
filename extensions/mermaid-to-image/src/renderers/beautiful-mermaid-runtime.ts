@@ -12,7 +12,7 @@ import {
 const execFilePromise = promisify(execFile);
 
 export interface BeautifulMermaidModule {
-  THEMES: Record<string, Record<string, string>>;
+  THEMES: Record<string, BeautifulMermaidThemeColors>;
   renderMermaidSVG: (code: string, options?: Record<string, unknown>) => string;
   renderMermaidASCII: (
     code: string,
@@ -21,6 +21,16 @@ export interface BeautifulMermaidModule {
       colorMode?: "none" | "auto" | "ansi16" | "ansi256" | "truecolor" | "html";
     },
   ) => string;
+}
+
+interface BeautifulMermaidThemeColors {
+  bg: string;
+  fg: string;
+  line?: string;
+  accent?: string;
+  muted?: string;
+  surface?: string;
+  border?: string;
 }
 
 export type BeautifulMermaidSourceKind = "custom" | "global" | "bundled";

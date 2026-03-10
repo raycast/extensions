@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Clipboard, environment, getSelectedText } from "@raycast/api";
+import { Clipboard, environment, getSelectedText, type Toast } from "@raycast/api";
 
 import { type DiagramFormat } from "../renderers/types";
 import { cleanupOldTempFiles, cleanupTempFile } from "../utils/files";
@@ -40,6 +40,10 @@ function getDefaultFormat(preferences: Pick<Preferences, "outputFormat">): Diagr
   return preferences.outputFormat ?? "svg";
 }
 
+async function readClipboardText(): Promise<string | null> {
+  return (await Clipboard.readText()) ?? null;
+}
+
 export function useManualMermaidCommand(preferences: Preferences): UseManualMermaidCommandReturn {
   const defaultFormat = getDefaultFormat(preferences);
   const [state, setState] = useState<ManualCommandState>(() => createInitialManualCommandState(defaultFormat));
@@ -61,11 +65,11 @@ export function useManualMermaidCommand(preferences: Preferences): UseManualMerm
         resolveSelectionInput: () =>
           resolveManualInput({
             getSelectedText,
-            getClipboardText: Clipboard.readText,
+            getClipboardText: readClipboardText,
           }),
         resolveClipboardOnlyInput: () =>
           resolveClipboardOnlyManualInput({
-            getClipboardText: Clipboard.readText,
+            getClipboardText: readClipboardText,
           }),
         runManualDiagramGeneration,
         installManagedBrowser,
@@ -74,8 +78,10 @@ export function useManualMermaidCommand(preferences: Preferences): UseManualMerm
         notifyManualGenerationSuccess,
         notifyManualGenerationFailure,
         notifyManagedBrowserDownloadStarted,
-        notifyManagedBrowserDownloadProgress,
-        notifyManagedBrowserDownloadSuccess,
+        notifyManagedBrowserDownloadProgress: (toast: Toast, message: string) =>
+          notifyManagedBrowserDownloadProgress(toast, message),
+        notifyManagedBrowserDownloadSuccess: (toast: Toast, source: string, supportRoot: string) =>
+          notifyManagedBrowserDownloadSuccess(toast, source, supportRoot),
         notifyManagedBrowserDownloadFailure,
         notifyManualGenerationCancelled,
         cleanupTempFile,

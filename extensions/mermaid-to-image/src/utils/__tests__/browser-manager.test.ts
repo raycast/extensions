@@ -101,6 +101,7 @@ describe("installManagedBrowser", () => {
   it("writes managed browser metadata after install", async () => {
     const writeFile = vi.fn();
     const installBrowser = vi.fn().mockResolvedValue({
+      browser: Browser.CHROMEHEADLESSSHELL,
       executablePath: "/Support/Raycast/browser-cache/chrome-headless-shell/mac-131/chrome-headless-shell",
       buildId: "131.0.6778.204",
       path: "/Support/Raycast/browser-cache/chrome-headless-shell/mac-131",
@@ -150,10 +151,12 @@ describe("installManagedBrowser", () => {
   });
 
   it("suppresses duplicate concurrent installs with a shared lock", async () => {
-    let resolveInstall: ((value: { executablePath: string; buildId: string; path: string }) => void) | undefined;
+    let resolveInstall:
+      | ((value: { browser: Browser; executablePath: string; buildId: string; path: string }) => void)
+      | undefined;
     const installBrowser = vi.fn(
       () =>
-        new Promise<{ executablePath: string; buildId: string; path: string }>((resolve) => {
+        new Promise<{ browser: Browser; executablePath: string; buildId: string; path: string }>((resolve) => {
           resolveInstall = resolve;
         }),
     );
@@ -182,6 +185,7 @@ describe("installManagedBrowser", () => {
     await Promise.resolve();
 
     resolveInstall?.({
+      browser: Browser.CHROMEHEADLESSSHELL,
       executablePath: "/Support/Raycast/browser-cache/chrome-headless-shell/mac-131/chrome-headless-shell",
       buildId: "131.0.6778.204",
       path: "/Support/Raycast/browser-cache/chrome-headless-shell/mac-131",

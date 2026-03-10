@@ -154,7 +154,6 @@ export function ImagePreview({ imagePath, format, engineLabel, svgRasterStrategy
   const items = buildImagePreviewItems({
     imagePath,
     imageContent,
-    format,
     engineLabel,
     asciiContent,
     beautifulMermaidSourceLabel,

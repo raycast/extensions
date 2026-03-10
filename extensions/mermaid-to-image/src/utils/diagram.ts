@@ -40,11 +40,14 @@ export async function generateMermaidDiagram(
   tempFileRef: MutableRefObject<string | null>,
   options?: DiagramOptions,
 ): Promise<DiagramResult> {
+  const preferences = getPreferenceValues<Preferences>();
+  const fallbackRenderer = options?.renderEngine ?? preferences.renderEngine ?? "auto";
+  const fallbackFormat = options?.outputFormat ?? preferences.outputFormat ?? "svg";
+
   try {
-    const preferences = getPreferenceValues<Preferences>();
     const cleanCode = cleanMermaidCode(mermaidCode);
-    const outputFormat = options?.outputFormat ?? preferences.outputFormat ?? "svg";
-    const requestedEngine = options?.renderEngine ?? preferences.renderEngine ?? "auto";
+    const outputFormat = fallbackFormat;
+    const requestedEngine = fallbackRenderer;
     const outputPath = createOutputPath(outputFormat, Boolean(options?.usePersistentOutputDir));
 
     const timeoutValue = preferences.generationTimeout || 10;
@@ -85,8 +88,8 @@ export async function generateMermaidDiagram(
     });
   } catch (error) {
     logOperationalError("generate-mermaid-diagram-failed", error, {
-      renderer: options?.renderEngine ?? preferences?.renderEngine ?? "auto",
-      format: options?.outputFormat ?? preferences?.outputFormat ?? "svg",
+      renderer: fallbackRenderer,
+      format: fallbackFormat,
     });
 
     if (error instanceof Error) {

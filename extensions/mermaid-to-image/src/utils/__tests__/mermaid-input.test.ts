@@ -37,7 +37,7 @@ describe("resolveMermaidInput", () => {
         getSelectedText: vi.fn().mockResolvedValue("   "),
         getClipboardText: vi.fn().mockResolvedValue(""),
       }),
-    ).rejects.toMatchObject<InputResolutionError>({
+    ).rejects.toMatchObject({
       code: "NO_INPUT",
     });
   });

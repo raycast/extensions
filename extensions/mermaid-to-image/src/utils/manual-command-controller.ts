@@ -1,16 +1,13 @@
+import type { Toast } from "@raycast/api";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import type { ResolvedMermaidInput } from "./mermaid-input";
 import type { DiagramFormat, ResolvedEngine } from "../renderers/types";
-import {
-  createFatalManualCommandState,
-  createIdleManualCommandState,
-  createPendingManualCommandState,
-  mapManualGenerationStateToCommandState,
-  type ManualCommandState,
-} from "./manual-command-state";
+import { createIdleManualCommandState, type ManualCommandState } from "./manual-command-state";
 import type { ManualDiagramExecutionOptions, ManualGenerationState } from "./manual-command-service";
-import { formatByteSize } from "./byte-size";
 import type { Preferences } from "../types";
+import { createManualCommandSession } from "./manual-command-session";
+import { createManualCommandGenerationRunner } from "./manual-command-generation-runner";
+import { createManualCommandBrowserDownloadFlow } from "./manual-command-browser-download";
 
 export interface ManualCommandControllerActions {
   runFromSelection: () => Promise<void>;
@@ -35,9 +32,9 @@ interface ManualCommandControllerServices {
   notifyManualGenerationStarted: (source: string) => Promise<void>;
   notifyManualGenerationSuccess: (source: string, engine: ResolvedEngine) => Promise<void>;
   notifyManualGenerationFailure: (error: unknown, message: string) => Promise<void>;
-  notifyManagedBrowserDownloadStarted: () => Promise<unknown>;
-  notifyManagedBrowserDownloadProgress: (toast: unknown, message: string) => void;
-  notifyManagedBrowserDownloadSuccess: (toast: unknown, source: string, supportRoot: string) => void;
+  notifyManagedBrowserDownloadStarted: () => Promise<Toast>;
+  notifyManagedBrowserDownloadProgress: (toast: Toast, message: string) => void;
+  notifyManagedBrowserDownloadSuccess: (toast: Toast, source: string, supportRoot: string) => void;
   notifyManagedBrowserDownloadFailure: (error: unknown) => Promise<void>;
   notifyManualGenerationCancelled: () => Promise<void>;
   cleanupTempFile: (path: string | null) => void;
@@ -60,119 +57,49 @@ interface ManualCommandController {
   dispose: () => void;
 }
 
-function createSession(options: {
-  tempFileRef: MutableRefObject<string | null>;
-  activeImagePathRef: MutableRefObject<string | null>;
-  browserSetupInputRef: MutableRefObject<ResolvedMermaidInput | null>;
-  cleanupTempFile: (path: string | null) => void;
-}) {
-  let isProcessing = false;
-
-  return {
-    begin(): boolean {
-      if (isProcessing) {
-        return false;
-      }
-
-      isProcessing = true;
-      options.browserSetupInputRef.current = null;
-      return true;
-    },
-    finish() {
-      isProcessing = false;
-    },
-    rememberInput(input: ResolvedMermaidInput) {
-      options.browserSetupInputRef.current = input;
-    },
-    getPendingInput() {
-      return options.browserSetupInputRef.current;
-    },
-    clearPendingInput() {
-      options.browserSetupInputRef.current = null;
-    },
-    finalizeImagePath(result: ManualGenerationState) {
-      if (result.kind !== "success") {
-        return;
-      }
-
-      const nextImagePath = result.result.outputPath;
-      if (options.activeImagePathRef.current && options.activeImagePathRef.current !== nextImagePath) {
-        options.cleanupTempFile(options.activeImagePathRef.current);
-      }
-      options.activeImagePathRef.current = nextImagePath;
-    },
-    clearTempFile() {
-      options.cleanupTempFile(options.tempFileRef.current);
-      options.tempFileRef.current = null;
-    },
-    dispose() {
-      options.cleanupTempFile(options.activeImagePathRef.current);
-      options.cleanupTempFile(options.tempFileRef.current);
-    },
-  };
-}
-
 export function createManualCommandController(options: CreateManualCommandControllerOptions): ManualCommandController {
   const { preferences, defaultFormat, setState, tempFileRef, environmentSupportPath, services } = options;
-  const session = createSession({
+  const session = createManualCommandSession({
     tempFileRef,
     activeImagePathRef: options.activeImagePathRef,
     browserSetupInputRef: options.browserSetupInputRef,
     cleanupTempFile: services.cleanupTempFile,
   });
-
-  const runGeneration = async (
-    inputLoader: () => Promise<ResolvedMermaidInput>,
-    executionOptions?: Pick<ManualDiagramExecutionOptions, "skipBrowserCheck">,
-  ) => {
-    if (!session.begin()) {
-      return;
-    }
-
-    setState((previousState) => createPendingManualCommandState(previousState));
-
-    try {
-      const resolvedInput = await inputLoader();
-      session.rememberInput(resolvedInput);
-      await services.notifyManualGenerationStarted(resolvedInput.source);
-
-      const result = await services.runManualDiagramGeneration(resolvedInput, {
-        preferences,
-        tempFileRef,
-        ...executionOptions,
-      });
-
-      session.finalizeImagePath(result);
-      setState((previousState) => mapManualGenerationStateToCommandState(previousState, result));
-
-      if (result.kind === "success") {
-        await services.notifyManualGenerationSuccess(resolvedInput.source, result.result.engine);
-      }
-
-      if (result.kind === "error") {
-        await services.notifyManualGenerationFailure(result.error, result.message);
-      }
-    } catch (error) {
-      const userMessage = error instanceof Error ? error.message : "Failed to generate diagram. Please try again.";
-
-      services.logOperationalError("process-mermaid-code-failed", error, {
-        renderer: preferences.renderEngine,
-      });
-
-      setState((previousState) => createFatalManualCommandState(previousState, userMessage));
-      await services.notifyManualGenerationFailure(error, userMessage);
-    } finally {
-      session.finish();
-    }
-  };
+  const generationRunner = createManualCommandGenerationRunner({
+    preferences,
+    setState,
+    tempFileRef,
+    session,
+    services: {
+      runManualDiagramGeneration: services.runManualDiagramGeneration,
+      notifyManualGenerationStarted: services.notifyManualGenerationStarted,
+      notifyManualGenerationSuccess: services.notifyManualGenerationSuccess,
+      notifyManualGenerationFailure: services.notifyManualGenerationFailure,
+      logOperationalError: services.logOperationalError,
+    },
+  });
+  const browserDownloadFlow = createManualCommandBrowserDownloadFlow({
+    session,
+    environmentSupportPath,
+    services: {
+      installManagedBrowser: services.installManagedBrowser,
+      getManagedBrowserSupportRoot: services.getManagedBrowserSupportRoot,
+      notifyManagedBrowserDownloadStarted: services.notifyManagedBrowserDownloadStarted,
+      notifyManagedBrowserDownloadProgress: services.notifyManagedBrowserDownloadProgress,
+      notifyManagedBrowserDownloadSuccess: services.notifyManagedBrowserDownloadSuccess,
+      notifyManagedBrowserDownloadFailure: services.notifyManagedBrowserDownloadFailure,
+      logOperationalError: services.logOperationalError,
+      runResolvedInput: generationRunner.runResolvedInput,
+    },
+  });
 
   return {
     actions: {
       runFromSelection: async () => {
-        await runGeneration(services.resolveSelectionInput);
+        await generationRunner.run(services.resolveSelectionInput);
       },
       runFromClipboardOnly: async () => {
-        await runGeneration(services.resolveClipboardOnlyInput);
+        await generationRunner.run(services.resolveClipboardOnlyInput);
       },
       retryBrowserSetup: async () => {
         const pendingInput = session.getPendingInput();
@@ -180,36 +107,10 @@ export function createManualCommandController(options: CreateManualCommandContro
           return;
         }
 
-        await runGeneration(() => Promise.resolve(pendingInput));
+        await generationRunner.runResolvedInput(pendingInput);
       },
       downloadManagedBrowserAndRetry: async () => {
-        const pendingInput = session.getPendingInput();
-        if (!pendingInput) {
-          return;
-        }
-
-        try {
-          const toast = await services.notifyManagedBrowserDownloadStarted();
-          const installResult = await services.installManagedBrowser({
-            onProgress: (downloadedBytes, totalBytes) => {
-              services.notifyManagedBrowserDownloadProgress(
-                toast,
-                `${formatByteSize(downloadedBytes)} / ${formatByteSize(totalBytes)}`,
-              );
-            },
-          });
-
-          services.notifyManagedBrowserDownloadSuccess(
-            toast,
-            installResult.source,
-            services.getManagedBrowserSupportRoot(environmentSupportPath),
-          );
-
-          await runGeneration(() => Promise.resolve(pendingInput));
-        } catch (error) {
-          services.logOperationalError("download-managed-browser-failed", error, { source: "managed" });
-          await services.notifyManagedBrowserDownloadFailure(error);
-        }
+        await browserDownloadFlow.run();
       },
       cancelGeneration: async () => {
         session.clearTempFile();

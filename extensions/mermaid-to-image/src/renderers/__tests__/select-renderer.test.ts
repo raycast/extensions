@@ -7,7 +7,6 @@ describe("resolveRenderer", () => {
       code: "graph TD\nA-->B",
       format: "svg",
       requestedEngine: "auto",
-      outputPath: "/tmp/diagram.svg",
     });
 
     expect(result).toBe("beautiful");
@@ -18,7 +17,6 @@ describe("resolveRenderer", () => {
       code: "journey\ntitle Daily routine",
       format: "svg",
       requestedEngine: "auto",
-      outputPath: "/tmp/diagram.svg",
     });
 
     expect(result).toBe("mmdc");
@@ -29,7 +27,6 @@ describe("resolveRenderer", () => {
       code: "graph TD\nA-->B",
       format: "png",
       requestedEngine: "auto",
-      outputPath: "/tmp/diagram.png",
     });
 
     expect(result).toBe("mmdc");
@@ -40,7 +37,6 @@ describe("resolveRenderer", () => {
       code: "graph TD\nA-->B",
       format: "svg",
       requestedEngine: "compatible",
-      outputPath: "/tmp/diagram.svg",
     });
 
     expect(result).toBe("mmdc");
@@ -51,7 +47,6 @@ describe("resolveRenderer", () => {
       code: "journey\ntitle Daily routine",
       format: "svg",
       requestedEngine: "beautiful",
-      outputPath: "/tmp/diagram.svg",
     });
 
     expect(result).toBe("beautiful");

@@ -1,3 +1,4 @@
+import type { PathLike } from "fs";
 import { describe, expect, it, vi } from "vitest";
 import { BrowserBootstrapRequiredError } from "../../utils/browser-errors";
 import { renderWithMmdc } from "../mmdc";
@@ -56,7 +57,7 @@ describe("renderWithMmdc", () => {
           executablePath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
         }),
         execFile,
-        fileExists: vi.fn((target: string) => target === outputPath),
+        fileExists: vi.fn((target: PathLike) => String(target) === outputPath),
       },
     );
 
