@@ -74,8 +74,8 @@ export default function OpenDocCommand() {
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={desktopUrl}
+                <Action.Open
+                  target={desktopUrl}
                   title="Open in Desktop App"
                 />
                 <Action.OpenInBrowser url={url} title="Open in Browser" />
