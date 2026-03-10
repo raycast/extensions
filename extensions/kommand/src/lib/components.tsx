@@ -107,7 +107,7 @@ export function groupByCategory(shortcuts: KommandShortcut[]): {
     string,
     { isDefault: boolean; shortcuts: KommandShortcut[] }
   >();
-  for (const s of shortcuts) {
+  for (const s of shortcuts.filter((s) => !s.isFavorite)) {
     const key = s.categoryName;
     if (!categoryMap.has(key)) {
       categoryMap.set(key, { isDefault: s.categoryIsDefault, shortcuts: [] });
