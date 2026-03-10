@@ -17,7 +17,6 @@ export const CardListItem = ({ card }: CardListItemProps): JSX.Element => {
     <List.Item
       id={card.id}
       title={card.name}
-      accessoryTitle={dueDate}
       subtitle={card.desc}
       icon={card.dueComplete ? Icon.CheckCircle : Icon.Checkmark}
       accessories={accessories}
