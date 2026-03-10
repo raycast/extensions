@@ -1,10 +1,50 @@
-import { ActionPanel, Action, List, open, showHUD } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  open,
+  showHUD,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   readRoutes,
   getActiveWorktrees,
   type WorktreeInfo,
+  type WorktreeApp,
 } from "./lib/portless";
+
+function WorkplacePicker({ app }: { app: WorktreeApp }) {
+  const { pop } = useNavigation();
+  const [search, setSearch] = useState("");
+
+  return (
+    <List
+      searchBarPlaceholder="Enter workplace name (e.g. granola)"
+      onSearchTextChange={setSearch}
+    >
+      <List.Item
+        title={search || "Type a workplace name…"}
+        subtitle={search ? `Opens ${app.url}/${search}` : undefined}
+        actions={
+          search.trim() ? (
+            <ActionPanel>
+              <Action
+                title="Open Workplace"
+                onAction={async () => {
+                  const workplace = search.trim();
+                  await open(app.url + "/" + workplace);
+                  pop();
+                  await showHUD(`Opened ${workplace}`);
+                }}
+              />
+            </ActionPanel>
+          ) : undefined
+        }
+      />
+    </List>
+  );
+}
 
 export default function Command() {
   const [worktrees, setWorktrees] = useState<WorktreeInfo[]>([]);
@@ -39,13 +79,21 @@ export default function Command() {
                   );
                 }}
               />
-              {apps.map((app) => (
-                <Action.OpenInBrowser
-                  key={app.app}
-                  title={`Open ${app.app}`}
-                  url={app.url}
-                />
-              ))}
+              {apps.map((app) =>
+                app.app === "workplace" ? (
+                  <Action.Push
+                    key={app.app}
+                    title={`Open ${app.app}`}
+                    target={<WorkplacePicker app={app} />}
+                  />
+                ) : (
+                  <Action.OpenInBrowser
+                    key={app.app}
+                    title={`Open ${app.app}`}
+                    url={app.url}
+                  />
+                ),
+              )}
             </ActionPanel>
           }
         />
