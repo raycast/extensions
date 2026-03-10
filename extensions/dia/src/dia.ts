@@ -155,7 +155,9 @@ export function useSearchHistory(searchText?: string, options: { limit?: number 
 /** Escapes unescaped " inside JSON string values so JSON.parse succeeds (AppleScript may miss some). */
 function fixUnescapedQuotesInJson(jsonStr: string): string {
   let inString = false;
+  let inKey = false; // true when the current string is a key (e.g. "title"), false when a value
   let escaped = false;
+  let lastStructural = "{"; // so first " is treated as key
   let result = "";
   for (let i = 0; i < jsonStr.length; i++) {
     const c = jsonStr[i];
@@ -169,12 +171,17 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
       escaped = true;
       continue;
     }
+    if (!inString && (c === "{" || c === "," || c === ":" || c === "}" || c === "]")) {
+      lastStructural = c;
+    }
     if (c === '"') {
       if (inString) {
         let j = i + 1;
         while (j < jsonStr.length && jsonStr[j] === " ") j++;
         const next = jsonStr[j];
-        if (next === "," || next === "}" || next === "]" || next === ":" || next === undefined) {
+        const keyClose = inKey && next === ":";
+        const valueClose = !inKey && (next === "," || next === "}" || next === "]" || next === undefined);
+        if (keyClose || valueClose) {
           result += c;
           inString = false;
         } else {
@@ -183,6 +190,7 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
       } else {
         result += c;
         inString = true;
+        inKey = lastStructural === "{" || lastStructural === ",";
       }
       continue;
     }
@@ -305,7 +313,6 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
               set _url to ""
               try
                 set _url to my escape_value(get URL of _tab)
-                if _url is missing value then set _url to ""
               end try
               set _id to get id of _tab
               set _isPinned to get isPinned of _tab
