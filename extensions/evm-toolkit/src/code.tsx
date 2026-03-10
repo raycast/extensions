@@ -6,7 +6,7 @@ import {
   showHUD,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { buildDethUrl } from "./lib/build-deth-url";
+import { buildDethUrl, isDethSupported } from "./lib/build-deth-url";
 import { detectInputType } from "./lib/detect-input";
 import { getNetwork } from "./lib/get-network";
 
@@ -39,6 +39,14 @@ export default async function Command(
   const network = getNetwork(networkArg);
   if (!network) {
     await showFailureToast("Unknown network");
+    return;
+  }
+
+  if (!isDethSupported(network)) {
+    await showFailureToast(
+      `${network.name} is not supported by deth.net. Supported networks: Mainnet, Base, Arbitrum, Polygon, Optimism, BSC, Avalanche, Gnosis, Blast, Sonic`,
+      { title: "Unsupported network" },
+    );
     return;
   }
 

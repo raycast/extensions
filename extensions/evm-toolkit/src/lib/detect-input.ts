@@ -14,12 +14,3 @@ export function detectInputType(input: string): InputType | null {
 
   return null;
 }
-
-export function isValidEvmInput(input: string): boolean {
-  return detectInputType(input) !== null;
-}
-
-export function looksLikeEvmData(input: string): boolean {
-  const trimmed = input.trim();
-  return trimmed.startsWith("0x") || BLOCK_REGEX.test(trimmed);
-}
