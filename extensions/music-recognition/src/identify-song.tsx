@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, environment, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   getBundledShortcutPath,
   isProxyShortcutInstalled,
@@ -89,14 +90,15 @@ function markdownForState(state: ViewState, animationFrame = 0) {
       return `# Error\n\n${state.message}${state.details ? `\n\n\`\`\`\n${state.details}\n\`\`\`` : ""}`;
     case "success": {
       const { result } = state;
+      const artworkSource = result.artworkPath ? pathToFileURL(result.artworkPath).href : result.artworkUrl;
       const lines = [
         `# ${result.title}`,
         "",
         result.artist ? `**Artist:** ${result.artist}` : "",
         result.album ? `**Album:** ${result.album}` : "",
       ].filter(Boolean);
-      if (result.artworkUrl) {
-        lines.push("", `![Artwork](${result.artworkUrl})`);
+      if (artworkSource) {
+        lines.push("", `![Artwork](${artworkSource}?raycast-height=260)`);
       }
       if (result.appleMusicUrl) {
         lines.push("", `[Open in Apple Music](${result.appleMusicUrl})`);

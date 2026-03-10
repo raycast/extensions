@@ -1,19 +1,22 @@
 import { Clipboard, environment } from "@raycast/api";
 import { spawn } from "node:child_process";
+import crypto from "node:crypto";
 import { constants as fsConstants } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 
-export const SHORTCUT_NAME = "RaycastShazam";
-const LEGACY_SHORTCUT_NAME = "Raycast Music Recognition Proxy";
+export const SHORTCUT_NAME = "RaycastShazam-v1.1";
 
-const BUNDLED_SHORTCUT_FILENAME = "RaycastShazam.shortcut";
+const BUNDLED_SHORTCUT_FILENAME = "RaycastShazam-v1.1.shortcut";
 
 export type ShortcutProxySuccess = {
   status: "ok";
   title: string;
   artist?: string;
   album?: string;
+  artworkBase64?: string;
+  artworkMimeType?: string;
+  artworkPath?: string;
   appleMusicUrl?: string;
   artworkUrl?: string;
   shazamUrl?: string;
@@ -23,6 +26,8 @@ type LegacyStatuslessPayload = {
   title?: string;
   artist?: string;
   album?: string;
+  artworkBase64?: string;
+  artworkMimeType?: string;
   url?: string;
   appleMusicUrl?: string;
   artworkUrl?: string;
@@ -108,7 +113,7 @@ export async function listInstalledShortcuts() {
 
 export async function isProxyShortcutInstalled() {
   const shortcuts = await listInstalledShortcuts();
-  return shortcuts.some((name) => name === SHORTCUT_NAME || name === LEGACY_SHORTCUT_NAME);
+  return shortcuts.some((name) => name === SHORTCUT_NAME);
 }
 
 function parsePayload(text: string): ShortcutProxyPayload | null {
@@ -119,7 +124,15 @@ function parsePayload(text: string): ShortcutProxyPayload | null {
     }
 
     if (typeof parsed.status === "string" && parsed.status === "ok" && typeof parsed.title === "string") {
-      return parsed as ShortcutProxySuccess;
+      return {
+        ...parsed,
+        ...(typeof parsed.artworkBase64 === "string" && parsed.artworkBase64.trim()
+          ? { artworkBase64: parsed.artworkBase64.trim() }
+          : {}),
+        ...(typeof parsed.artworkMimeType === "string" && parsed.artworkMimeType.trim()
+          ? { artworkMimeType: parsed.artworkMimeType.trim() }
+          : {}),
+      } as ShortcutProxySuccess;
     }
     if (typeof parsed.status === "string" && parsed.status === "no_match") {
       return parsed as ShortcutProxyNoMatch;
@@ -137,6 +150,8 @@ function parsePayload(text: string): ShortcutProxyPayload | null {
       const shazamUrl = typeof parsed.shazamUrl === "string" ? parsed.shazamUrl.trim() : undefined;
       const appleMusicUrl = typeof parsed.appleMusicUrl === "string" ? parsed.appleMusicUrl.trim() : undefined;
       const artworkUrl = typeof parsed.artworkUrl === "string" ? parsed.artworkUrl.trim() : undefined;
+      const artworkBase64 = typeof parsed.artworkBase64 === "string" ? parsed.artworkBase64.trim() : undefined;
+      const artworkMimeType = typeof parsed.artworkMimeType === "string" ? parsed.artworkMimeType.trim() : undefined;
 
       if (!title && !artist) {
         return { status: "no_match", message: "No song recognized" };
@@ -148,6 +163,8 @@ function parsePayload(text: string): ShortcutProxyPayload | null {
         ...(artist ? { artist } : {}),
         ...(typeof parsed.album === "string" && parsed.album.trim() ? { album: parsed.album.trim() } : {}),
         ...(appleMusicUrl ? { appleMusicUrl } : {}),
+        ...(artworkBase64 ? { artworkBase64 } : {}),
+        ...(artworkMimeType ? { artworkMimeType } : {}),
         ...(artworkUrl ? { artworkUrl } : {}),
         ...(shazamUrl || url ? { shazamUrl: shazamUrl || url } : {}),
       };
@@ -157,6 +174,60 @@ function parsePayload(text: string): ShortcutProxyPayload | null {
   } catch {
     return null;
   }
+}
+
+function extensionForMimeType(mimeType?: string) {
+  switch (mimeType?.toLowerCase()) {
+    case "image/jpeg":
+    case "image/jpg":
+      return "jpg";
+    case "image/webp":
+      return "webp";
+    case "image/gif":
+      return "gif";
+    case "image/heic":
+      return "heic";
+    case "image/heif":
+      return "heif";
+    case "image/png":
+    default:
+      return "png";
+  }
+}
+
+async function writeArtworkFromBase64(payload: ShortcutProxySuccess) {
+  if (!payload.artworkBase64) {
+    return payload;
+  }
+
+  const base64 = payload.artworkBase64.replace(/\s+/g, "");
+  let buffer: Buffer;
+
+  try {
+    buffer = Buffer.from(base64, "base64");
+  } catch {
+    return payload;
+  }
+
+  if (buffer.length === 0) {
+    return payload;
+  }
+
+  const artworkDirectory = path.join(environment.supportPath, "artwork-cache");
+  await fs.mkdir(artworkDirectory, { recursive: true });
+
+  const extension = extensionForMimeType(payload.artworkMimeType);
+  const filename = `${crypto.createHash("sha256").update(buffer).digest("hex")}.${extension}`;
+  const artworkPath = path.join(artworkDirectory, filename);
+
+  if (!(await fileExists(artworkPath))) {
+    await fs.writeFile(artworkPath, buffer);
+  }
+
+  return {
+    ...payload,
+    artworkPath,
+  } satisfies ShortcutProxySuccess;
 }
 
 export async function runProxyShortcut(options?: { timeoutMs?: number; onStatus?: (message: string) => void }) {
@@ -205,7 +276,8 @@ export async function runProxyShortcut(options?: { timeoutMs?: number; onStatus?
   }
 
   if (payload.status === "ok") {
-    return { kind: "match", payload } satisfies ShortcutRunResult;
+    options?.onStatus?.("Preparing artwork…");
+    return { kind: "match", payload: await writeArtworkFromBase64(payload) } satisfies ShortcutRunResult;
   }
   if (payload.status === "no_match") {
     return { kind: "no_match", message: payload.message } satisfies ShortcutRunResult;
