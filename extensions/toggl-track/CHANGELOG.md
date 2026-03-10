@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [New Feature] - 2026-03-09
+## [New Feature] - {PR_MERGE_DATE}
 
 - Add optional Script Triggers preferences to run local shell scripts when a timer starts, stops, or is fetched, enabling integration with tools like Sketchybar or Hammerspoon without independent API polling
 
