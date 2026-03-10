@@ -1,10 +1,16 @@
-import { Action, ActionPanel, List, open } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getAllShortcuts, isKommandInstalled } from "./lib/database";
-import { KommandNotInstalledView, ShortcutItem } from "./lib/components";
+import {
+  KommandNotInstalledView,
+  openKommand,
+  ShortcutItem,
+} from "./lib/components";
 
 export default function SearchShortcuts() {
-  const { data, isLoading, error } = usePromise(getAllShortcuts);
+  const { data, isLoading, error } = usePromise(getAllShortcuts, [], {
+    execute: isKommandInstalled(),
+  });
 
   if (!isKommandInstalled()) {
     return <KommandNotInstalledView />;
@@ -29,10 +35,7 @@ export default function SearchShortcuts() {
           description="Open Kommand to start adding keyboard shortcuts."
           actions={
             <ActionPanel>
-              <Action
-                title="Open Kommand"
-                onAction={() => open("kommand://")}
-              />
+              <Action title="Open Kommand" onAction={openKommand} />
             </ActionPanel>
           }
         />

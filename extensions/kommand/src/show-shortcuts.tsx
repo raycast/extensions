@@ -3,13 +3,13 @@ import {
   ActionPanel,
   getFrontmostApplication,
   List,
-  open,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getShortcutsForApp, isKommandInstalled } from "./lib/database";
 import {
   groupByCategory,
   KommandNotInstalledView,
+  openKommand,
   ShortcutItem,
 } from "./lib/components";
 
@@ -31,7 +31,7 @@ export default function ShowShortcuts() {
     async (bundleId: string) => getShortcutsForApp(bundleId),
     [app?.bundleId ?? ""],
     {
-      execute: !!app?.bundleId,
+      execute: isKommandInstalled() && !!app?.bundleId,
     },
   );
 
@@ -61,10 +61,7 @@ export default function ShowShortcuts() {
           description="Open Kommand to add shortcuts for this app."
           actions={
             <ActionPanel>
-              <Action
-                title="Open Kommand"
-                onAction={() => open("kommand://")}
-              />
+              <Action title="Open Kommand" onAction={openKommand} />
             </ActionPanel>
           }
         />

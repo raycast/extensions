@@ -160,13 +160,6 @@ export function formatStep(step: ShortcutStep): string {
   return parts.join("");
 }
 
-/**
- * Format an array of steps as a sequence (e.g. "⌘K → ⌘C")
- */
-export function formatSteps(steps: ShortcutStep[]): string {
-  return steps.map(formatStep).join(" → ");
-}
-
 // ── Modifier name lookups (for keywords & tooltips) ─────────────────────
 
 const MODIFIER_NAMES: { flag: number; symbol: string; names: string[] }[] = [

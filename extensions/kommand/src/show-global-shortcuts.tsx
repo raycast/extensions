@@ -1,10 +1,16 @@
-import { Action, ActionPanel, List, open } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getGlobalShortcuts, isKommandInstalled } from "./lib/database";
-import { KommandNotInstalledView, ShortcutItem } from "./lib/components";
+import {
+  KommandNotInstalledView,
+  openKommand,
+  ShortcutItem,
+} from "./lib/components";
 
 export default function ShowGlobalShortcuts() {
-  const { data, isLoading, error } = usePromise(getGlobalShortcuts);
+  const { data, isLoading, error } = usePromise(getGlobalShortcuts, [], {
+    execute: isKommandInstalled(),
+  });
 
   if (!isKommandInstalled()) {
     return <KommandNotInstalledView />;
@@ -29,10 +35,7 @@ export default function ShowGlobalShortcuts() {
           description="Mark shortcuts as global in Kommand to see them here."
           actions={
             <ActionPanel>
-              <Action
-                title="Open Kommand"
-                onAction={() => open("kommand://")}
-              />
+              <Action title="Open Kommand" onAction={openKommand} />
             </ActionPanel>
           }
         />

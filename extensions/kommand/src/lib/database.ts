@@ -118,8 +118,24 @@ ORDER BY a.ZLOCALIZEDNAME ASC, c.ZISDEFAULT ASC, c.ZNAME ASC, s.ZTITLE ASC
 
 function globalShortcutsQuery(s: SchemaInfo): string {
   if (!s.hasGlobal) {
-    // Column doesn't exist yet — return a query that yields no rows
-    return `SELECT * FROM ZSHORTCUT WHERE 0`;
+    // Column doesn't exist yet — return a query that yields no rows with same shape as ShortcutRowWithApp
+    return `
+SELECT
+  s.Z_PK            AS id,
+  s.ZTITLE           AS title,
+  s.ZISFAVORITE      AS isFavorite,
+  0                  AS isGlobal,
+  ${sequenceDataSelect(s)},
+  s.ZKEYCODE         AS legacyKeyCode,
+  s.ZMODIFIERFLAGS   AS legacyModifierFlags,
+  c.ZNAME            AS categoryName,
+  c.ZISDEFAULT       AS categoryIsDefault,
+  a.ZLOCALIZEDNAME   AS appName,
+  a.ZBUNDLEIDENTIFIER AS bundleIdentifier
+FROM ZSHORTCUT s
+JOIN ZSHORTCUTCATEGORY c ON s.ZCATEGORY = c.Z_PK
+JOIN ZAPPLICATION a ON c.ZAPPLICATION = a.Z_PK
+WHERE 0`;
   }
   return `
 SELECT

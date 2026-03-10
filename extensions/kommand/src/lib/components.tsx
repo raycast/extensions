@@ -1,6 +1,28 @@
-import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { formatStep, keywordsForSteps, tooltipForStep } from "./keymap";
 import { KommandShortcut } from "./types";
+
+/** Open Kommand via URL scheme; shows a failure toast if the scheme isn't registered. */
+export async function openKommand(): Promise<void> {
+  try {
+    await open("kommand://");
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not open Kommand",
+      message: e instanceof Error ? e.message : String(e),
+    });
+  }
+}
 
 // ── Shared Components ───────────────────────────────────────────────────
 
@@ -40,7 +62,7 @@ export function ShortcutItem({
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Shortcut" content={formatted} />
-          <Action title="Open in Kommand" onAction={() => open("kommand://")} />
+          <Action title="Open in Kommand" onAction={openKommand} />
         </ActionPanel>
       }
     />
