@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Performance and Features] - {PR_MERGE_DATE}
+## [Performance and Features] - 2026-03-10
 
 ### Performance
 
