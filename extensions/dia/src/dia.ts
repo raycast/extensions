@@ -311,20 +311,24 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
             set allTabs to properties of every tab of w
             set tabsCount to count of allTabs
             repeat with i from 1 to tabsCount
-              if _output is not "" then
-                set _output to (_output & ",")
-              end if
-              set _tab to item i of allTabs
-              set _title to my escape_value(get title of _tab)
-              set _url to ""
               try
-                set _url to my escape_value(get URL of _tab)
-              end try
-              set _id to get id of _tab
-              set _isPinned to get isPinned of _tab
-              set _isFocused to get isFocused of _tab
+                set _tab to item i of allTabs
+                set _title to my escape_value(get title of _tab)
+                set _url to ""
+                try
+                  set _url to my escape_value(get URL of _tab)
+                end try
+                set _id to get id of _tab
+                set _isPinned to get isPinned of _tab
+                set _isFocused to get isFocused of _tab
 
-              set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+                if _output is not "" then
+                  set _output to (_output & ",")
+                end if
+                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+              on error
+                (* skip this tab, avoid dangling comma *)
+              end try
             end repeat
           on error errMsg number errNum
             (* swallow error for this window so we still return tabs from other windows *)
