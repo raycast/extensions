@@ -1093,9 +1093,13 @@ export function MultiUrlSavedSetsList() {
       return;
     }
 
-    const freshSavedSets = await loadSavedSets();
+    const [freshSavedSets, freshSlots, freshTrash] = await Promise.all([
+      loadSavedSets(),
+      loadShortcutSlots(),
+      loadTrash(),
+    ]);
     const now = new Date().toISOString();
-    const previousSlots = getAssignedSlots(slots, savedSet.id);
+    const previousSlots = getAssignedSlots(freshSlots, savedSet.id);
     const trashEntry: TrashedSet = {
       id: randomUUID(),
       deletedAt: now,
@@ -1105,7 +1109,7 @@ export function MultiUrlSavedSetsList() {
 
     const nextSavedSets = freshSavedSets.filter((item) => item.id !== savedSet.id);
     const nextSlots: ShortcutSlots = {
-      ...slots,
+      ...freshSlots,
     };
     for (const slot of SLOT_KEYS) {
       if (nextSlots[slot] === savedSet.id) {
@@ -1113,7 +1117,7 @@ export function MultiUrlSavedSetsList() {
       }
     }
 
-    const nextTrash = sortTrash([trashEntry, ...trash]).slice(0, MAX_TRASH_ITEMS);
+    const nextTrash = sortTrash([trashEntry, ...freshTrash]).slice(0, MAX_TRASH_ITEMS);
 
     await Promise.all([saveSavedSets(nextSavedSets), saveShortcutSlots(nextSlots), saveTrash(nextTrash)]);
 
