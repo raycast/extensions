@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pdfzus-merge-pdfs-offline",
+  "title": "Merge PDFs Offline",
+  "description": "Merge local PDF files offline, reorder them, and save a single combined document.",
+  "icon": "icon.png",
+  "author": "thomas",
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "pdf",
+    "merge pdf",
+    "merge pdfs",
+    "combine pdf",
+    "offline pdf",
+    "local pdf",
+    "pdfzus"
+  ],
+  "license": "MIT",
+  "homepage": "https://pdfzus.de/",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:wsgtcyx/raycast-pdf-zusammenfuegen.git"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Merge PDFs",
+      "subtitle": "pdfzus",
+      "description": "Pick PDF files, reorder them, and save a merged PDF locally.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.3",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/**/*.test.ts",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
