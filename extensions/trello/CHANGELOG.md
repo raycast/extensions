@@ -1,6 +1,6 @@
 # Trello Changelog
 
-## [Update] - 2026-03-01
+## [Update] - {PR_MERGE_DATE}
 
 - Rebuilt extension with Trello REST client
 - Added commands: Fetch Board filtered Cards
