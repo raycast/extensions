@@ -2,18 +2,7 @@ import { getPreferenceValues, Icon } from "@raycast/api";
 
 const BASE_URL = "https://prim.iledefrance-mobilites.fr/marketplace/v2/navitia";
 
-export const MODE_ORDER = [
-  "Metro",
-  "RER",
-  "Transilien",
-  "Tram",
-  "Bus",
-  "Noctilien",
-];
-
-interface Preferences {
-  apiKey: string;
-}
+export const MODE_ORDER = ["Metro", "RER", "Transilien", "Tram", "Bus", "Noctilien"];
 
 function getHeaders() {
   const { apiKey } = getPreferenceValues<Preferences>();
@@ -102,8 +91,7 @@ export async function searchPlaces(query: string): Promise<Place[]> {
   });
 
   if (!res.ok) {
-    if (res.status === 401)
-      throw new Error("Invalid API key. Check your preferences.");
+    if (res.status === 401) throw new Error("Invalid API key. Check your preferences.");
     throw new Error(`API error: ${res.status} ${res.statusText}`);
   }
 
@@ -124,16 +112,12 @@ export async function getDepartures(stopAreaId: string): Promise<Departure[]> {
     data_freshness: "realtime",
   });
 
-  const res = await fetch(
-    `${BASE_URL}/stop_areas/${encodedId}/departures?${params}`,
-    {
-      headers: getHeaders(),
-    },
-  );
+  const res = await fetch(`${BASE_URL}/stop_areas/${encodedId}/departures?${params}`, {
+    headers: getHeaders(),
+  });
 
   if (!res.ok) {
-    if (res.status === 401)
-      throw new Error("Invalid API key. Check your preferences.");
+    if (res.status === 401) throw new Error("Invalid API key. Check your preferences.");
     if (res.status === 404) return [];
     throw new Error(`API error: ${res.status} ${res.statusText}`);
   }
@@ -167,8 +151,7 @@ export async function getDisruptions(): Promise<Disruption[]> {
   });
 
   if (!res.ok) {
-    if (res.status === 401)
-      throw new Error("Invalid API key. Check your preferences.");
+    if (res.status === 401) throw new Error("Invalid API key. Check your preferences.");
     throw new Error(`API error: ${res.status} ${res.statusText}`);
   }
 

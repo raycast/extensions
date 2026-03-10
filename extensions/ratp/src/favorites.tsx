@@ -1,20 +1,6 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import {
-  DeparturesView,
-  FavoriteStation,
-  favoriteKey,
-  favoriteLabel,
-} from "./search-station";
+import { DeparturesView, FavoriteStation, favoriteKey, favoriteLabel } from "./search-station";
 
 export default function Favorites() {
   const { push } = useNavigation();
@@ -40,10 +26,7 @@ export default function Favorites() {
           description="Add favorites from the Search Station command"
         />
       ) : (
-        <List.Section
-          title="Favorites"
-          subtitle={`${favs.length} station${favs.length > 1 ? "s" : ""}`}
-        >
+        <List.Section title="Favorites" subtitle={`${favs.length} station${favs.length > 1 ? "s" : ""}`}>
           {favs.map((fav) => (
             <List.Item
               key={favoriteKey(fav)}

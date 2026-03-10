@@ -106,12 +106,8 @@ function getDetailMarkdown(disruption: Disruption): string {
   lines.push(`**${severityLabel(effect)}**`);
   lines.push("");
 
-  const detailMsg = disruption.messages?.find(
-    (m) => m.channel?.name !== "titre" && m.text,
-  );
-  const titleMsg = disruption.messages?.find(
-    (m) => m.channel?.name === "titre" && m.text,
-  );
+  const detailMsg = disruption.messages?.find((m) => m.channel?.name !== "titre" && m.text);
+  const titleMsg = disruption.messages?.find((m) => m.channel?.name === "titre" && m.text);
 
   if (detailMsg?.text) {
     lines.push(cleanText(detailMsg.text));
@@ -150,19 +146,15 @@ function getDisruptionTitle(disruption: Disruption): string {
 }
 
 export default function Disruptions() {
-  const { isLoading, data, revalidate, error } = usePromise(
-    getDisruptions,
-    [],
-    {
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: err.message,
-        });
-      },
+  const { isLoading, data, revalidate, error } = usePromise(getDisruptions, [], {
+    onError: (err) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: err.message,
+      });
     },
-  );
+  });
 
   if (error) {
     return (
@@ -170,20 +162,9 @@ export default function Disruptions() {
         markdown={`# Error\n\n${error.message}`}
         actions={
           <ActionPanel>
-            <Action
-              title="Retry"
-              icon={Icon.ArrowClockwise}
-              onAction={revalidate}
-            />
-            <Action.OpenInBrowser
-              title="Get Free Api Key"
-              url="https://prim.iledefrance-mobilites.fr"
-            />
-            <Action
-              title="Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-            />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action.OpenInBrowser title="Get Free Api Key" url="https://prim.iledefrance-mobilites.fr" />
+            <Action title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
@@ -204,11 +185,7 @@ export default function Disruptions() {
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      searchBarPlaceholder="Filter alerts..."
-    >
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Filter alerts...">
       {disruptions.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.CheckCircle}
@@ -227,11 +204,7 @@ export default function Disruptions() {
         />
       ) : (
         sortedGroups.map(([effect, items]) => (
-          <List.Section
-            key={effect}
-            title={severityLabel(effect)}
-            subtitle={`${items.length}`}
-          >
+          <List.Section key={effect} title={severityLabel(effect)} subtitle={`${items.length}`}>
             {items.map((disruption) => {
               const titleMsg = getTitleMessage(disruption);
               return (
@@ -243,11 +216,7 @@ export default function Disruptions() {
                   }}
                   title={getDisruptionTitle(disruption)}
                   subtitle={titleMsg.slice(0, 80)}
-                  detail={
-                    <List.Item.Detail
-                      markdown={getDetailMarkdown(disruption)}
-                    />
-                  }
+                  detail={<List.Item.Detail markdown={getDetailMarkdown(disruption)} />}
                   actions={
                     <ActionPanel>
                       <Action

@@ -10,6 +10,7 @@
     "Data"
   ],
   "license": "MIT",
+  "platforms": ["macOS"],
   "commands": [
     {
       "name": "search-station",

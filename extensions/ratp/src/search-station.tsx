@@ -43,8 +43,7 @@ export function favoriteLabel(fav: FavoriteStation): string {
     const dir = fav.filter.split("::dir:")[1];
     return `${fav.name} → ${dir}`;
   }
-  if (fav.filter.startsWith("mode:"))
-    return `${fav.name} (${fav.filter.slice(5)})`;
+  if (fav.filter.startsWith("mode:")) return `${fav.name} (${fav.filter.slice(5)})`;
   return fav.name;
 }
 
@@ -57,25 +56,16 @@ interface DeparturesViewProps {
   setFavorites: (value: FavoriteStation[]) => void;
 }
 
-export function DeparturesView({
-  stopArea,
-  initialFilter,
-  favorites,
-  setFavorites,
-}: DeparturesViewProps) {
-  const { isLoading, data, revalidate, error } = usePromise(
-    getDepartures,
-    [stopArea.id],
-    {
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: err.message,
-        });
-      },
+export function DeparturesView({ stopArea, initialFilter, favorites, setFavorites }: DeparturesViewProps) {
+  const { isLoading, data, revalidate, error } = usePromise(getDepartures, [stopArea.id], {
+    onError: (err) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: err.message,
+      });
     },
-  );
+  });
 
   const [selectedFilter, setSelectedFilter] = useState(initialFilter ?? "all");
 
@@ -85,9 +75,7 @@ export function DeparturesView({
     filter: selectedFilter,
   };
   const currentKey = favoriteKey(currentFav);
-  const isCurrentFavorite = favorites.some(
-    (f) => favoriteKey(f) === currentKey,
-  );
+  const isCurrentFavorite = favorites.some((f) => favoriteKey(f) === currentKey);
 
   function toggleCurrentFavorite() {
     if (isCurrentFavorite) {
@@ -111,20 +99,9 @@ export function DeparturesView({
         markdown={`# Error\n\n${error.message}\n\n---\n\nGet your free API key at [prim.iledefrance-mobilites.fr](https://prim.iledefrance-mobilites.fr)`}
         actions={
           <ActionPanel>
-            <Action
-              title="Retry"
-              icon={Icon.ArrowClockwise}
-              onAction={revalidate}
-            />
-            <Action.OpenInBrowser
-              title="Get Free Api Key"
-              url="https://prim.iledefrance-mobilites.fr"
-            />
-            <Action
-              title="Preferences"
-              icon={Icon.Gear}
-              onAction={openExtensionPreferences}
-            />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action.OpenInBrowser title="Get Free Api Key" url="https://prim.iledefrance-mobilites.fr" />
+            <Action title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
@@ -140,24 +117,12 @@ export function DeparturesView({
       isShowingDetail
       searchBarAccessory={
         modeDirections.length > 0 ? (
-          <List.Dropdown
-            tooltip="Filter"
-            value={selectedFilter}
-            onChange={setSelectedFilter}
-          >
-            <List.Dropdown.Item
-              title="Show All"
-              value="all"
-              icon={Icon.Train}
-            />
+          <List.Dropdown tooltip="Filter" value={selectedFilter} onChange={setSelectedFilter}>
+            <List.Dropdown.Item title="Show All" value="all" icon={Icon.Train} />
             {modeDirections.map(({ mode, directions }) => (
               <List.Dropdown.Section key={mode} title={mode}>
                 {modeDirections.length > 1 && (
-                  <List.Dropdown.Item
-                    title={`All ${mode}`}
-                    value={`mode:${mode}`}
-                    icon={getModeIcon(mode)}
-                  />
+                  <List.Dropdown.Item title={`All ${mode}`} value={`mode:${mode}`} icon={getModeIcon(mode)} />
                 )}
                 {directions.map((dir) => (
                   <List.Dropdown.Item
@@ -181,9 +146,7 @@ export function DeparturesView({
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action
-            title={
-              isCurrentFavorite ? "Remove from Favorites" : "Add to Favorites"
-            }
+            title={isCurrentFavorite ? "Remove from Favorites" : "Add to Favorites"}
             icon={isCurrentFavorite ? Icon.StarDisabled : Icon.Star}
             shortcut={{ modifiers: ["cmd"], key: "f" }}
             onAction={toggleCurrentFavorite}
@@ -202,17 +165,9 @@ export function DeparturesView({
           }
           actions={
             <ActionPanel>
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
               <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                onAction={revalidate}
-              />
-              <Action
-                title={
-                  isCurrentFavorite
-                    ? "Remove from Favorites"
-                    : "Add to Favorites"
-                }
+                title={isCurrentFavorite ? "Remove from Favorites" : "Add to Favorites"}
                 icon={isCurrentFavorite ? Icon.StarDisabled : Icon.Star}
                 shortcut={{ modifiers: ["cmd"], key: "f" }}
                 onAction={toggleCurrentFavorite}
@@ -224,20 +179,13 @@ export function DeparturesView({
         grouped.map(({ line, departures }) => (
           <List.Section
             key={line.id}
-            title={
-              line.code === line.name
-                ? line.code
-                : `${line.code} — ${line.name}`
-            }
+            title={line.code === line.name ? line.code : `${line.code} — ${line.name}`}
             subtitle={`${departures.length} upcoming`}
           >
             {departures.map((dep, i) => {
-              const wait = formatWaitTime(
-                dep.stop_date_time.departure_date_time,
-              );
+              const wait = formatWaitTime(dep.stop_date_time.departure_date_time);
               const time = formatTime(dep.stop_date_time.departure_date_time);
-              const isRealtime =
-                dep.stop_date_time.data_freshness === "realtime";
+              const isRealtime = dep.stop_date_time.data_freshness === "realtime";
 
               return (
                 <List.Item
@@ -252,10 +200,7 @@ export function DeparturesView({
                         }
                       : Color.Blue,
                   }}
-                  title={
-                    dep.display_informations.direction ||
-                    dep.display_informations.headsign
-                  }
+                  title={dep.display_informations.direction || dep.display_informations.headsign}
                   subtitle={dep.stop_point.name}
                   accessories={[
                     {
@@ -266,9 +211,7 @@ export function DeparturesView({
                     },
                     {
                       text: time,
-                      icon: isRealtime
-                        ? { source: Icon.Circle, tintColor: Color.Green }
-                        : Icon.Clock,
+                      icon: isRealtime ? { source: Icon.Circle, tintColor: Color.Green } : Icon.Clock,
                       tooltip: isRealtime ? "Real time" : "Scheduled",
                     },
                   ]}
@@ -282,37 +225,21 @@ export function DeparturesView({
                             text={dep.display_informations.direction}
                             icon={Icon.ArrowRight}
                           />
-                          <List.Item.Detail.Metadata.Label
-                            title="Departing In"
-                            text={wait}
-                            icon={Icon.Clock}
-                          />
-                          <List.Item.Detail.Metadata.Label
-                            title="Departure Time"
-                            text={time}
-                          />
+                          <List.Item.Detail.Metadata.Label title="Departing In" text={wait} icon={Icon.Clock} />
+                          <List.Item.Detail.Metadata.Label title="Departure Time" text={time} />
                           <List.Item.Detail.Metadata.Separator />
                           <List.Item.Detail.Metadata.Label
                             title="Line"
                             text={dep.display_informations.code}
-                            icon={getModeIcon(
-                              dep.display_informations.commercial_mode,
-                            )}
+                            icon={getModeIcon(dep.display_informations.commercial_mode)}
                           />
                           <List.Item.Detail.Metadata.Label
                             title="Mode"
                             text={dep.display_informations.commercial_mode}
                           />
-                          <List.Item.Detail.Metadata.Label
-                            title="Network"
-                            text={dep.display_informations.network}
-                          />
+                          <List.Item.Detail.Metadata.Label title="Network" text={dep.display_informations.network} />
                           <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label
-                            title="Stop"
-                            text={dep.stop_point.name}
-                            icon={Icon.Pin}
-                          />
+                          <List.Item.Detail.Metadata.Label title="Stop" text={dep.stop_point.name} icon={Icon.Pin} />
                           <List.Item.Detail.Metadata.Label
                             title="Data"
                             text={isRealtime ? "Real time" : "Scheduled"}
@@ -338,11 +265,7 @@ export function DeparturesView({
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                       />
                       <Action
-                        title={
-                          isCurrentFavorite
-                            ? "Remove from Favorites"
-                            : "Add to Favorites"
-                        }
+                        title={isCurrentFavorite ? "Remove from Favorites" : "Add to Favorites"}
                         icon={isCurrentFavorite ? Icon.StarDisabled : Icon.Star}
                         shortcut={{ modifiers: ["cmd"], key: "f" }}
                         onAction={toggleCurrentFavorite}
@@ -426,24 +349,14 @@ export default function SearchStation() {
           description={`${error.message}\n\nGet your free API key at: https://prim.iledefrance-mobilites.fr`}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Get Free Api Key"
-                url="https://prim.iledefrance-mobilites.fr"
-              />
-              <Action
-                title="Configure Api Key"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
+              <Action.OpenInBrowser title="Get Free Api Key" url="https://prim.iledefrance-mobilites.fr" />
+              <Action title="Configure Api Key" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
       ) : !query || query.length < 2 ? (
         favs.length > 0 ? (
-          <List.Section
-            title="Favorites"
-            subtitle={`${favs.length} station${favs.length > 1 ? "s" : ""}`}
-          >
+          <List.Section title="Favorites" subtitle={`${favs.length} station${favs.length > 1 ? "s" : ""}`}>
             {favs.map((fav) => (
               <List.Item
                 key={favoriteKey(fav)}
@@ -488,39 +401,25 @@ export default function SearchStation() {
       ) : (
         <List.Section
           title={`Results for "${query}"`}
-          subtitle={
-            data ? `${data.length} station${data.length > 1 ? "s" : ""}` : ""
-          }
+          subtitle={data ? `${data.length} station${data.length > 1 ? "s" : ""}` : ""}
         >
           {(data ?? [])
             .filter((p) => p.embedded_type === "stop_area" && p.stop_area)
             .map((place) => {
-              const region = place.stop_area?.administrative_regions?.find(
-                (r) => r.level === 8,
-              )?.name;
+              const region = place.stop_area?.administrative_regions?.find((r) => r.level === 8)?.name;
               const isFav = isStationFavorite(place.stop_area!.id);
               return (
                 <List.Item
                   key={place.id}
-                  icon={
-                    isFav
-                      ? { source: Icon.Star, tintColor: Color.Yellow }
-                      : Icon.Train
-                  }
+                  icon={isFav ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.Train}
                   title={place.name}
                   subtitle={region}
                   accessories={[{ icon: Icon.ChevronRight }]}
                   actions={
                     <ActionPanel>
+                      <Action title="View Upcoming Departures" icon={Icon.Train} onAction={() => handleSelect(place)} />
                       <Action
-                        title="View Upcoming Departures"
-                        icon={Icon.Train}
-                        onAction={() => handleSelect(place)}
-                      />
-                      <Action
-                        title={
-                          isFav ? "Remove from Favorites" : "Add to Favorites"
-                        }
+                        title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                         icon={isFav ? Icon.StarDisabled : Icon.Star}
                         shortcut={{ modifiers: ["cmd"], key: "f" }}
                         onAction={() =>
@@ -565,34 +464,24 @@ function buildModeDirections(departures: Departure[]) {
     });
 }
 
-function filterDepartures(
-  departures: Departure[],
-  filter: string,
-): Departure[] {
+function filterDepartures(departures: Departure[], filter: string): Departure[] {
   if (filter === "all") return departures;
   if (filter.startsWith("mode:")) {
     const mode = filter.slice(5);
-    return departures.filter(
-      (d) => d.display_informations.commercial_mode === mode,
-    );
+    return departures.filter((d) => d.display_informations.commercial_mode === mode);
   }
   if (filter.includes("::dir:")) {
     const [mode, dirPart] = filter.split("::dir:");
     const dir = dirPart;
     return departures.filter(
-      (d) =>
-        d.display_informations.commercial_mode === mode &&
-        d.display_informations.direction === dir,
+      (d) => d.display_informations.commercial_mode === mode && d.display_informations.direction === dir,
     );
   }
   return departures;
 }
 
 function groupByLine(departures: Departure[]) {
-  const map = new Map<
-    string,
-    { line: Departure["route"]["line"]; departures: Departure[] }
-  >();
+  const map = new Map<string, { line: Departure["route"]["line"]; departures: Departure[] }>();
 
   for (const dep of departures) {
     const key = dep.route.line.id;
@@ -603,12 +492,8 @@ function groupByLine(departures: Departure[]) {
   }
 
   return Array.from(map.values()).sort((a, b) => {
-    const modeA = MODE_ORDER.findIndex((m) =>
-      a.line.commercial_mode?.name?.includes(m),
-    );
-    const modeB = MODE_ORDER.findIndex((m) =>
-      b.line.commercial_mode?.name?.includes(m),
-    );
+    const modeA = MODE_ORDER.findIndex((m) => a.line.commercial_mode?.name?.includes(m));
+    const modeB = MODE_ORDER.findIndex((m) => b.line.commercial_mode?.name?.includes(m));
     if (modeA !== modeB) return modeA - modeB;
     return a.line.code.localeCompare(b.line.code, "en", { numeric: true });
   });
@@ -639,9 +524,7 @@ function buildDepartureMarkdown(dep: Departure): string {
     `**Departure:** ${time} *(${wait})*`,
     "",
     isRealtime ? "**Real-time data**" : "*Scheduled time*",
-    dep.display_informations.description
-      ? `\n> ${dep.display_informations.description}`
-      : "",
+    dep.display_informations.description ? `\n> ${dep.display_informations.description}` : "",
   ]
     .join("\n")
     .trim();
