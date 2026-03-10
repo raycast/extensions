@@ -180,7 +180,7 @@ function fixUnescapedQuotesInJson(jsonStr: string): string {
         while (j < jsonStr.length && jsonStr[j] === " ") j++;
         const next = jsonStr[j];
         const keyClose = inKey && next === ":";
-        const valueClose = !inKey && (next === "," || next === "}" || next === "]" || next === undefined);
+        const valueClose = !inKey && (next === "," || next === "}" || next === "]" || j >= jsonStr.length);
         if (keyClose || valueClose) {
           result += c;
           inString = false;
