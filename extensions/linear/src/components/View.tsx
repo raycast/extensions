@@ -40,11 +40,13 @@ class AuthErrorBoundary extends React.Component<{ children: React.ReactNode }, A
     if (!error) return this.props.children;
 
     const isAuthError =
-      error.message.includes("fetch failed") ||
       error.message.includes("invalid_grant") ||
       error.message.includes("Error while fetching tokens") ||
       error.message.includes("Could not initialize OAuth");
 
+    // Re-throwing inside render() delegates to the next parent error boundary (Raycast's
+    // top-level handler). This is intentional: we only want to intercept known auth errors
+    // and let everything else surface normally.
     if (!isAuthError) throw error;
 
     return (

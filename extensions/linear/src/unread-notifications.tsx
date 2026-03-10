@@ -194,7 +194,8 @@ class BackgroundAuthBoundary extends React.Component<{ children: React.ReactNode
       return null;
     }
 
-    // Re-throw other errors to Raycast's top-level handler
+    // Re-throwing inside render() delegates to the next parent error boundary (Raycast's
+    // top-level handler). This is intentional: only the background OAuth error is silenced.
     throw error;
   }
 }
