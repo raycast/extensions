@@ -1,18 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  docUrl,
-  desktopAppUrl,
-  searchAllWorkspaces,
-  type SearchResult,
-} from "./affine-api";
+import { docUrl, desktopAppUrl, searchAllWorkspaces, type SearchResult } from "./affine-api";
 
 export default function SearchDocsCommand() {
   const [query, setQuery] = useState("");
@@ -45,18 +33,10 @@ export default function SearchDocsCommand() {
   const totalDocs = results.reduce((n, r) => n + r.docs.length, 0);
 
   return (
-    <List
-      searchBarPlaceholder="Search AFFiNE documents..."
-      onSearchTextChange={setQuery}
-      isLoading={loading}
-      throttle
-    >
+    <List searchBarPlaceholder="Search AFFiNE documents..." onSearchTextChange={setQuery} isLoading={loading} throttle>
       {error && <List.EmptyView title="Error" description={error} icon="⚠️" />}
       {!error && query.trim() && totalDocs === 0 && !loading && (
-        <List.EmptyView
-          title="No documents found"
-          description={`No results for "${query}"`}
-        />
+        <List.EmptyView title="No documents found" description={`No results for "${query}"`} />
       )}
       {!error && !query.trim() && (
         <List.EmptyView
@@ -73,24 +53,13 @@ export default function SearchDocsCommand() {
               key={`${workspaceId}-${doc.docId}`}
               title={doc.title || "Untitled"}
               subtitle={doc.highlight ?? undefined}
-              accessories={[
-                { text: new Date(doc.updatedAt).toLocaleDateString() },
-              ]}
+              accessories={[{ text: new Date(doc.updatedAt).toLocaleDateString() }]}
               actions={
                 <ActionPanel>
-                  <Action.Open
-                    target={desktopUrl}
-                    title="Open in Desktop App"
-                  />
+                  <Action.Open target={desktopUrl} title="Open in Desktop App" />
                   <Action.OpenInBrowser url={url} title="Open in Browser" />
-                  <Action.CopyToClipboard
-                    content={desktopUrl}
-                    title="Copy Desktop App URL"
-                  />
-                  <Action.CopyToClipboard
-                    content={url}
-                    title="Copy Affine URL"
-                  />
+                  <Action.CopyToClipboard content={desktopUrl} title="Copy Desktop App URL" />
+                  <Action.CopyToClipboard content={url} title="Copy Affine URL" />
                 </ActionPanel>
               }
             />

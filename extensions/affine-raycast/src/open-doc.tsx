@@ -1,18 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  getWorkspaceDocs,
-  docUrl,
-  desktopAppUrl,
-  type AffineDoc,
-} from "./affine-api";
+import { getWorkspaceDocs, docUrl, desktopAppUrl, type AffineDoc } from "./affine-api";
 
 export default function OpenDocCommand() {
   const [docs, setDocs] = useState<AffineDoc[]>([]);
@@ -31,9 +19,7 @@ export default function OpenDocCommand() {
       return;
     }
     if (!workspaceId?.trim()) {
-      setError(
-        "Set Default Workspace ID in extension preferences to list documents.",
-      );
+      setError("Set Default Workspace ID in extension preferences to list documents.");
       setLoading(false);
       return;
     }
@@ -49,11 +35,7 @@ export default function OpenDocCommand() {
   if (error) {
     return (
       <List>
-        <List.EmptyView
-          title="Configuration needed"
-          description={error}
-          icon="⚠️"
-        />
+        <List.EmptyView title="Configuration needed" description={error} icon="⚠️" />
       </List>
     );
   }
@@ -74,15 +56,9 @@ export default function OpenDocCommand() {
             ]}
             actions={
               <ActionPanel>
-                <Action.Open
-                  target={desktopUrl}
-                  title="Open in Desktop App"
-                />
+                <Action.Open target={desktopUrl} title="Open in Desktop App" />
                 <Action.OpenInBrowser url={url} title="Open in Browser" />
-                <Action.CopyToClipboard
-                  content={desktopUrl}
-                  title="Copy Desktop App URL"
-                />
+                <Action.CopyToClipboard content={desktopUrl} title="Copy Desktop App URL" />
                 <Action.CopyToClipboard content={url} title="Copy Affine URL" />
               </ActionPanel>
             }
@@ -90,10 +66,7 @@ export default function OpenDocCommand() {
         );
       })}
       {!loading && docs.length === 0 && (
-        <List.EmptyView
-          title="No documents"
-          description="No documents in the default workspace"
-        />
+        <List.EmptyView title="No documents" description="No documents in the default workspace" />
       )}
     </List>
   );

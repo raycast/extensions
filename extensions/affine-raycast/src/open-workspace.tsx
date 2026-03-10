@@ -1,17 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  getWorkspaces,
-  workspaceUrl,
-  type AffineWorkspace,
-} from "./affine-api";
+import { getWorkspaces, workspaceUrl, type AffineWorkspace } from "./affine-api";
 
 export default function OpenWorkspaceCommand() {
   const [workspaces, setWorkspaces] = useState<AffineWorkspace[]>([]);
@@ -59,19 +48,13 @@ export default function OpenWorkspaceCommand() {
           ]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                url={workspaceUrl(baseUrl, ws.id)}
-                title="Open Workspace in Browser"
-              />
+              <Action.OpenInBrowser url={workspaceUrl(baseUrl, ws.id)} title="Open Workspace in Browser" />
             </ActionPanel>
           }
         />
       ))}
       {!loading && workspaces.length === 0 && (
-        <List.EmptyView
-          title="No workspaces"
-          description="No AFFiNE workspaces found for this account"
-        />
+        <List.EmptyView title="No workspaces" description="No AFFiNE workspaces found for this account" />
       )}
     </List>
   );

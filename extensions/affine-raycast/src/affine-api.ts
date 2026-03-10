@@ -108,23 +108,12 @@ export async function affineGraphQL<T>(
   return json.data as T;
 }
 
-export async function getWorkspaces(
-  baseUrl: string,
-  token: string,
-): Promise<AffineWorkspace[]> {
-  const data = await affineGraphQL<{ workspaces: AffineWorkspace[] }>(
-    baseUrl,
-    token,
-    WORKSPACES_QUERY,
-  );
+export async function getWorkspaces(baseUrl: string, token: string): Promise<AffineWorkspace[]> {
+  const data = await affineGraphQL<{ workspaces: AffineWorkspace[] }>(baseUrl, token, WORKSPACES_QUERY);
   return data.workspaces ?? [];
 }
 
-export async function getWorkspaceDocs(
-  baseUrl: string,
-  token: string,
-  workspaceId: string,
-): Promise<AffineDoc[]> {
+export async function getWorkspaceDocs(baseUrl: string, token: string, workspaceId: string): Promise<AffineDoc[]> {
   const data = await affineGraphQL<{
     workspace: {
       docs: { edges: { node: AffineDoc }[] };
@@ -178,11 +167,7 @@ export async function searchAllWorkspaces(
 }
 
 /** Build URL to open a document in the browser. */
-export function docUrl(
-  baseUrl: string,
-  workspaceId: string,
-  docId: string,
-): string {
+export function docUrl(baseUrl: string, workspaceId: string, docId: string): string {
   return `${ensureNoTrailingSlash(baseUrl)}/workspace/${workspaceId}/${docId}`;
 }
 
@@ -192,12 +177,7 @@ export function docUrl(
  * /workspace/:id/:docId; optional ?new-tab=1 opens in new tab (addTabWithUrl).
  * Scheme: stable = "affine", canary/beta = "affine-canary" etc.; we use "affine".
  */
-export function desktopAppUrl(
-  baseUrl: string,
-  workspaceId: string,
-  docId: string,
-  newTab = true,
-): string {
+export function desktopAppUrl(baseUrl: string, workspaceId: string, docId: string, newTab = true): string {
   const base = baseUrl.startsWith("http") ? baseUrl : `https://${baseUrl}`;
   const host = new URL(base).host;
   const pathname = `/workspace/${workspaceId}/${docId}`;
