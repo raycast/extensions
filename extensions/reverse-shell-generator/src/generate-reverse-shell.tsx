@@ -773,25 +773,27 @@ ${cmd.listener ? `## Listener Command\n\n\`\`\`bash\n${cmd.listener}\n\`\`\`` : 
                   />
                   <ActionPanel.Section title="Sort">
                     <Action
-                      title="Sort By Category"
+                      title="Sort by Category"
                       icon={Icon.AppWindowList}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
                       onAction={() => setSortBy("category")}
                     />
                     <Action
-                      title="Sort By Name"
+                      title="Sort by Name"
                       icon={Icon.Text}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
                       onAction={() => setSortBy("name")}
                     />
                     <Action
-                      title="Sort By OS"
+                      // eslint-disable-next-line @raycast/prefer-title-case
+                      title="Sort by OS"
                       icon={Icon.ComputerChip}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
                       onAction={() => setSortBy("os")}
                     />
                   </ActionPanel.Section>
                   <Action
+                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Re-enter IP/Port"
                     icon={Icon.ArrowClockwise}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -903,4 +905,3 @@ export default function Command() {
     </Form>
   );
 }
-
