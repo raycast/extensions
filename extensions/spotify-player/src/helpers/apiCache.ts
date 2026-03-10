@@ -10,7 +10,8 @@ export function withCache<TArgs extends unknown[], TResult>(
   fn: (...args: TArgs) => Promise<TResult>,
 ): (...args: TArgs) => Promise<TResult> {
   return async (...args) => {
-    const raw = cache.get(key);
+    const cacheKey = args.length > 0 ? `${key}:${JSON.stringify(args)}` : key;
+    const raw = cache.get(cacheKey);
     if (raw) {
       try {
         const entry: CacheEntry<TResult> = JSON.parse(raw);
@@ -20,7 +21,7 @@ export function withCache<TArgs extends unknown[], TResult>(
       }
     }
     const data = await fn(...args);
-    cache.set(key, JSON.stringify({ data, timestamp: Date.now() }));
+    cache.set(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
     return data;
   };
 }

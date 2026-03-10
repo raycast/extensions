@@ -19,11 +19,14 @@ export function withRateLimitRetry(fetchFn: FetchFn): FetchFn {
     if (response.status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       const waitSeconds = retryAfter ? parseInt(retryAfter, 10) : 1;
+      const waitMs = (isNaN(waitSeconds) ? 1 : waitSeconds) * 1000;
 
       // Set global rate limit so other concurrent requests also wait
-      rateLimitedUntil = Date.now() + (isNaN(waitSeconds) ? 1 : waitSeconds) * 1000;
+      rateLimitedUntil = Date.now() + waitMs;
+      await new Promise((resolve) => setTimeout(resolve, waitMs));
 
-      throw new Error(`Spotify API rate limit exceeded (retry after ${waitSeconds}s)`);
+      // Retry once after honouring the Retry-After window
+      return fetchFn(url, init);
     }
 
     return response;

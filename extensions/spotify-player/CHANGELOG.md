@@ -6,7 +6,7 @@
 - Removed cascading background command launches from playback commands (next, previous, like, dislike, skip15, back15)
 - Lazy-load Your Library sections by selected category instead of fetching all upfront
 - Increased menu bar polling interval and added debouncing to prevent refresh bursts
-- Replaced retry-based rate limit handling with immediate error propagation for clearer feedback
+- Simplified rate limit middleware to a single retry after honouring Retry-After
 
 ## [Fix Rate Limiting from Spotify API Changes] - 2026-03-08
 
