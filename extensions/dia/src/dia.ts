@@ -313,7 +313,15 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
             repeat with i from 1 to tabsCount
               try
                 set _tab to item i of allTabs
-                set _title to my escape_value(get title of _tab)
+                set _title to ""
+                try
+                  set _title to my escape_value(get title of _tab)
+                end try
+                if _title is "" then
+                  try
+                    set _title to my escape_value(get name of _tab)
+                  end try
+                end if
                 set _url to ""
                 try
                   set _url to my escape_value(get URL of _tab)
