@@ -1,6 +1,6 @@
 # Voicenotes Changelog
 
-## [Initial Version] - 2026-02-16
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
 - Search and filter notes
