@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { buildTranslationDetailMarkdown } from "./lib/markdown";
 import { clearHistory, deleteTranslation, getHistory } from "./lib/storage";
@@ -92,10 +82,7 @@ export default function History() {
       onSearchTextChange={setSearchText}
     >
       {filtered.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No translations yet"
-          description="Use Translate Word to get started"
-        />
+        <List.EmptyView title="No translations yet" description="Use Translate Word to get started" />
       ) : (
         filtered.map((item) => (
           <List.Item
@@ -106,11 +93,7 @@ export default function History() {
               { tag: { value: item.partOfSpeech, color: Color.Blue } },
               { text: relativeTime(item.timestamp) },
             ]}
-            detail={
-              <List.Item.Detail
-                markdown={buildTranslationDetailMarkdown(item)}
-              />
-            }
+            detail={<List.Item.Detail markdown={buildTranslationDetailMarkdown(item)} />}
             actions={
               <ActionPanel>
                 <Action

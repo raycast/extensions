@@ -1,3 +1,5 @@
+VocaBuilder Changelog
+
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - Added `Translate Word` command to translate English words to Ukrainian using Gemini.

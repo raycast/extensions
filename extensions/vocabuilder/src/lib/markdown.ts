@@ -16,10 +16,7 @@ function escapeMarkdownMultiline(value: string): string {
 }
 
 export function buildTranslationDetailMarkdown(
-  translation: Pick<
-    Translation,
-    "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation"
-  >,
+  translation: Pick<Translation, "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation">,
 ): string {
   return `## ${escapeMarkdown(translation.word)}
 
@@ -35,10 +32,7 @@ ${escapeMarkdownMultiline(translation.example)}
 }
 
 export function buildFlashcardDetailMarkdown(
-  card: Pick<
-    Translation,
-    "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation"
-  >,
+  card: Pick<Translation, "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation">,
 ): string {
   return `# ${escapeMarkdown(card.word)}
 

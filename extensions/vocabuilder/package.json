@@ -13,18 +13,21 @@
     {
       "name": "translate",
       "title": "Translate Word",
+      "subtitle": "VocaBuilder",
       "description": "Translate an English word to Ukrainian",
       "mode": "view"
     },
     {
       "name": "history",
       "title": "Translation History",
+      "subtitle": "VocaBuilder",
       "description": "Browse your saved translations",
       "mode": "view"
     },
     {
       "name": "flashcards",
-      "title": "Flashcards",
+      "title": "View Flashcards",
+      "subtitle": "VocaBuilder",
       "description": "Review saved words with spaced repetition",
       "mode": "view"
     }
@@ -52,11 +55,12 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
-    "@raycast/eslint-plugin": "^2.1.1",
-    "prettier": "^3.8.1",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "^8.56.1"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

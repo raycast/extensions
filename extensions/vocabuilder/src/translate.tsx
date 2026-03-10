@@ -44,8 +44,7 @@ function getUserFacingErrorMessage(errorCode: string): string {
 }
 
 export default function Translate() {
-  const { geminiApiKey, readClipboardOnOpen } =
-    getPreferenceValues<Preferences.Translate>();
+  const { geminiApiKey, readClipboardOnOpen } = getPreferenceValues<Preferences.Translate>();
   const { push } = useNavigation();
 
   const [searchText, setSearchText] = useState("");
@@ -155,11 +154,7 @@ export default function Translate() {
     setResult(null);
 
     try {
-      const geminiResult = await translateWord(
-        word,
-        geminiApiKey,
-        controller.signal,
-      );
+      const geminiResult = await translateWord(word, geminiApiKey, controller.signal);
 
       if (controller.signal.aborted) return;
 
@@ -178,15 +173,12 @@ export default function Translate() {
       // Auto-save
       const saved = await saveTranslation(translation);
       if (saved) {
-        setRecentHistory((prev) =>
-          [translation, ...prev.filter((h) => h.word !== word)].slice(0, 5),
-        );
+        setRecentHistory((prev) => [translation, ...prev.filter((h) => h.word !== word)].slice(0, 5));
       } else {
         await showToast({
           style: Toast.Style.Failure,
           title: "Saved data is corrupted",
-          message:
-            "Translation was not written to storage to avoid overwriting existing data.",
+          message: "Translation was not written to storage to avoid overwriting existing data.",
         });
       }
     } catch (err) {
@@ -212,8 +204,7 @@ export default function Translate() {
   const showRecent = showEmpty && recentHistory.length > 0;
   const normalizedSearchWord = normalizeWordInput(searchText);
   const showResult = !!result && result.word === normalizedSearchWord;
-  const showManualSubmitItem =
-    !showEmpty && !error && !showResult && !isLoading;
+  const showManualSubmitItem = !showEmpty && !error && !showResult && !isLoading;
 
   return (
     <List
@@ -230,11 +221,7 @@ export default function Translate() {
           actions={
             <ActionPanel>
               {error.includes("API key") && (
-                <Action
-                  title="Open Preferences"
-                  onAction={openExtensionPreferences}
-                  icon={Icon.Gear}
-                />
+                <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
               )}
             </ActionPanel>
           }
@@ -245,11 +232,7 @@ export default function Translate() {
             title={result.word}
             subtitle={result.translation}
             accessories={[{ tag: result.partOfSpeech }]}
-            detail={
-              <List.Item.Detail
-                markdown={buildTranslationDetailMarkdown(result)}
-              />
-            }
+            detail={<List.Item.Detail markdown={buildTranslationDetailMarkdown(result)} />}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard
@@ -275,11 +258,7 @@ export default function Translate() {
             icon={Icon.ArrowRight}
             actions={
               <ActionPanel>
-                <Action
-                  title="Translate Now"
-                  icon={Icon.Book}
-                  onAction={() => submitTranslation(searchText)}
-                />
+                <Action title="Translate Now" icon={Icon.Book} onAction={() => submitTranslation(searchText)} />
               </ActionPanel>
             }
           />
@@ -289,11 +268,7 @@ export default function Translate() {
           <List.Section title="Clipboard">
             <List.Item
               title={clipboardSuggestion || "Read Clipboard"}
-              subtitle={
-                clipboardSuggestion
-                  ? "Use the suggested clipboard word"
-                  : "Read clipboard and validate safely"
-              }
+              subtitle={clipboardSuggestion ? "Use the suggested clipboard word" : "Read clipboard and validate safely"}
               icon={Icon.Clipboard}
               actions={
                 <ActionPanel>
@@ -307,17 +282,9 @@ export default function Translate() {
                       }}
                     />
                   ) : (
-                    <Action
-                      title="Read Clipboard"
-                      icon={Icon.Clipboard}
-                      onAction={handleReadClipboard}
-                    />
+                    <Action title="Read Clipboard" icon={Icon.Clipboard} onAction={handleReadClipboard} />
                   )}
-                  <Action
-                    title="Refresh Clipboard"
-                    icon={Icon.ArrowClockwise}
-                    onAction={handleReadClipboard}
-                  />
+                  <Action title="Refresh Clipboard" icon={Icon.ArrowClockwise} onAction={handleReadClipboard} />
                 </ActionPanel>
               }
             />

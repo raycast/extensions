@@ -1,56 +1,30 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useReducer } from "react";
 import { buildFlashcardDetailMarkdown } from "./lib/markdown";
 import { getSessionCards, saveFlashcardProgress } from "./lib/storage";
 import { FlashcardProgress, Rating, Translation } from "./lib/types";
 
-/**
- * TODO: Implement the SM-2 spaced repetition update.
- *
- * - `again`: repetitions=0, interval=1, EF=max(1.3, EF-0.2)
- * - `good`: repetitions++, interval = rep<2 ? (rep===1 ? 6 : 1) : round(prev*EF)
- * - `easy`: same as `good`; interval=round(interval*1.3); EF=min(2.5, EF+0.15)
- *
- * `nextReviewDate` should be `now + interval * 86_400_000`.
- * Return a new object and do not mutate `progress`.
- */
-function updateProgress(
-  progress: FlashcardProgress,
-  rating: Rating,
-  now: number,
-): FlashcardProgress {
+function updateProgress(progress: FlashcardProgress, rating: Rating, now: number): FlashcardProgress {
   const dayMs = 86_400_000;
-  const previousRepetitions = progress.repetitions;
-  const previousInterval = progress.interval;
-  const previousEaseFactor = progress.easeFactor;
+  const prevRepetitions = progress.repetitions;
+  const prevInterval = progress.interval;
+  const prevEaseFactor = progress.easeFactor;
 
   let repetitions: number;
   let interval: number;
-  let easeFactor = previousEaseFactor;
+  let easeFactor = prevEaseFactor;
 
   if (rating === "again") {
     repetitions = 0;
     interval = 1;
-    easeFactor = Math.max(1.3, previousEaseFactor - 0.2);
+    easeFactor = Math.max(1.3, prevEaseFactor - 0.2);
   } else {
-    repetitions = previousRepetitions + 1;
-    interval =
-      previousRepetitions < 2
-        ? previousRepetitions === 1
-          ? 6
-          : 1
-        : Math.round(previousInterval * previousEaseFactor);
+    repetitions = prevRepetitions + 1;
+    interval = repetitions < 2 ? (repetitions === 1 ? 6 : 1) : Math.round(prevInterval * prevEaseFactor);
 
     if (rating === "easy") {
       interval = Math.round(interval * 1.3);
-      easeFactor = Math.min(2.5, previousEaseFactor + 0.15);
+      easeFactor = Math.min(2.5, prevEaseFactor + 0.15);
     }
   }
 
@@ -115,10 +89,7 @@ function reducer(state: StudyState, action: StudyAction): StudyState {
         phase: isDone ? "done" : "studying",
         currentIndex: isDone ? state.currentIndex : next,
         revealed: false,
-        progressMap: new Map(state.progressMap).set(
-          action.updated.word,
-          action.updated,
-        ),
+        progressMap: new Map(state.progressMap).set(action.updated.word, action.updated),
         againCount: state.againCount + (action.rating === "again" ? 1 : 0),
         goodCount: state.goodCount + (action.rating === "good" ? 1 : 0),
         easyCount: state.easyCount + (action.rating === "easy" ? 1 : 0),
@@ -150,8 +121,7 @@ export default function Flashcards() {
 
   async function handleRate(rating: Rating) {
     const card = state.sessionCards[state.currentIndex];
-    const existing =
-      state.progressMap.get(card.word) ?? freshProgress(card.word);
+    const existing = state.progressMap.get(card.word) ?? freshProgress(card.word);
     const updated = updateProgress(existing, rating, Date.now());
     const saved = await saveFlashcardProgress(updated);
     if (!saved) {
@@ -177,10 +147,7 @@ export default function Flashcards() {
         : `Again: ${state.againCount}  ·  Good: ${state.goodCount}  ·  Easy: ${state.easyCount}`;
     return (
       <List searchBarPlaceholder="">
-        <List.EmptyView
-          title={total === 0 ? "Nothing to review" : "Session complete!"}
-          description={description}
-        />
+        <List.EmptyView title={total === 0 ? "Nothing to review" : "Session complete!"} description={description} />
       </List>
     );
   }
@@ -198,18 +165,12 @@ export default function Flashcards() {
         key={card.word}
         title={card.word}
         subtitle={state.revealed ? undefined : "···"}
-        accessories={[
-          isNew ? { tag: { value: "New", color: Color.Green } } : {},
-          { text: position },
-        ]}
+        accessories={[isNew ? { tag: { value: "New", color: Color.Green } } : {}, { text: position }]}
         detail={<List.Item.Detail markdown={detailMarkdown} />}
         actions={
           <ActionPanel>
             {!state.revealed ? (
-              <Action
-                title="Reveal Answer"
-                onAction={() => dispatch({ type: "reveal" })}
-              />
+              <Action title="Reveal Answer" onAction={() => dispatch({ type: "reveal" })} />
             ) : (
               <>
                 <Action

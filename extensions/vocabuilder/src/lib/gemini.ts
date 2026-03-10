@@ -1,18 +1,10 @@
-import {
-  GeminiApiResponseSchema,
-  GeminiResponse,
-  GeminiResponseSchema,
-} from "./types";
+import { GeminiApiResponseSchema, GeminiResponse, GeminiResponseSchema } from "./types";
 import { asJsonStringLiteral, normalizeWordInput } from "./input";
 
 const MODEL = "gemini-2.5-flash-lite";
 const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
-export async function translateWord(
-  word: string,
-  apiKey: string,
-  signal?: AbortSignal,
-): Promise<GeminiResponse> {
+export async function translateWord(word: string, apiKey: string, signal?: AbortSignal): Promise<GeminiResponse> {
   const normalizedWord = normalizeWordInput(word);
   if (!normalizedWord) {
     throw new Error("INVALID_WORD_INPUT");
