@@ -8,7 +8,7 @@ module.exports = defineConfig([
       "@raycast/prefer-title-case": [
         "warn",
         {
-          extraFixedCaseWords: ["API, CLI"],
+          extraFixedCaseWords: ["API", "CLI"],
         },
       ],
     },
