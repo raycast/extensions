@@ -584,10 +584,7 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const freshSavedSets = await loadSavedSets();
-    const duplicate = freshSavedSets.find(
-      (item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase(),
-    );
+    const duplicate = savedSets.find((item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase());
 
     if (duplicate) {
       await showToast({
@@ -634,7 +631,7 @@ export function MultiUrlSavedSetsList() {
     const tags = parseTagInput(values.tags);
     const normalizedUrls = parsed.uniqueValid.join("\n");
     const now = new Date().toISOString();
-    const nextSavedSets = freshSavedSets.map((item) =>
+    const nextSavedSets = savedSets.map((item) =>
       item.id === setId
         ? {
             ...item,
@@ -877,9 +874,10 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function togglePinned(setId: string) {
+    const freshSavedSets = await loadSavedSets();
     let isPinned = false;
     const now = new Date().toISOString();
-    const nextSavedSets = savedSets.map((item) => {
+    const nextSavedSets = freshSavedSets.map((item) => {
       if (item.id !== setId) {
         return item;
       }
@@ -952,8 +950,9 @@ export function MultiUrlSavedSetsList() {
       return;
     }
 
+    const freshSavedSets = await loadSavedSets();
     const now = new Date().toISOString();
-    const nextSavedSets = savedSets.map((item) =>
+    const nextSavedSets = freshSavedSets.map((item) =>
       item.id === targetSet.id
         ? {
             ...item,
@@ -1094,6 +1093,7 @@ export function MultiUrlSavedSetsList() {
       return;
     }
 
+    const freshSavedSets = await loadSavedSets();
     const now = new Date().toISOString();
     const previousSlots = getAssignedSlots(slots, savedSet.id);
     const trashEntry: TrashedSet = {
@@ -1103,7 +1103,7 @@ export function MultiUrlSavedSetsList() {
       previousSlots,
     };
 
-    const nextSavedSets = savedSets.filter((item) => item.id !== savedSet.id);
+    const nextSavedSets = freshSavedSets.filter((item) => item.id !== savedSet.id);
     const nextSlots: ShortcutSlots = {
       ...slots,
     };
