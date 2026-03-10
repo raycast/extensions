@@ -1,0 +1,10 @@
+{
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "lib": ["ES2023"],
+    "verbatimModuleSyntax": false
+  },
+  "include": ["src/**/*", "raycast-env.d.ts"],
+  "exclude": ["node_modules"]
+}

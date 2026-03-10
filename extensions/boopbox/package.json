@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "boopbox",
+  "title": "BoopBox",
+  "description": "Meme snippet registry. Mark favorites and play instantly using hotkeys",
+  "icon": "extension_icon.png",
+  "author": "sai-eashwar",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "type": "textfield",
+      "required": false,
+      "default": "https://server-production-7b53.up.railway.app",
+      "description": "URL of the BoopBox server"
+    }
+  ],
+  "commands": [
+    {
+      "name": "sound-board",
+      "title": "Sound Board",
+      "description": "Browse sounds",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^1.17.0",
+    "@repo/domain": "workspace:*",
+    "effect": "^3.19.19"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "publish": "pnpx @raycast/api@latest publish"
+  }
+}
