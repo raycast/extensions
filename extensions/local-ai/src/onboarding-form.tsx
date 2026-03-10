@@ -6,6 +6,7 @@ import {
   Toast,
   showToast,
   useNavigation,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { DEFAULT_URLS, PROVIDER_NAMES, fetchModels } from "./lib/api";
@@ -13,6 +14,8 @@ import type { ProviderType, ProviderConfig } from "./lib/types";
 import {
   setProviderUrl,
   getProviderUrl,
+  setActiveProvider,
+  getActiveProvider,
   markOnboardingComplete,
 } from "./lib/onboarding";
 
@@ -20,15 +23,24 @@ const PROVIDERS: ProviderType[] = ["ollama", "lmstudio", "llamacpp", "custom"];
 
 export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
   const { pop } = useNavigation();
-  const [provider, setProvider] = useState<ProviderType>("ollama");
+  // Initialize provider from Raycast prefs (synchronous) so it's correct on first render
+  const prefs = getPreferenceValues<Preferences>();
+  const [provider, setProvider] = useState<ProviderType>(
+    (prefs.provider as ProviderType) || "ollama",
+  );
   const [ollamaUrl, setOllamaUrl] = useState(DEFAULT_URLS.ollama);
   const [lmstudioUrl, setLmstudioUrl] = useState(DEFAULT_URLS.lmstudio);
   const [llamacppUrl, setLlamacppUrl] = useState(DEFAULT_URLS.llamacpp);
   const [customUrl, setCustomUrl] = useState("");
 
-  // Load previously saved per-provider URLs
+  // Load previously saved provider (overrides Raycast prefs) and per-provider URLs
   useEffect(() => {
     (async () => {
+      const savedProvider = await getActiveProvider();
+      if (savedProvider) {
+        setProvider(savedProvider as ProviderType);
+      }
+
       const saved = {
         ollama: await getProviderUrl("ollama"),
         lmstudio: await getProviderUrl("lmstudio"),
@@ -87,7 +99,7 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
       const msg = err instanceof Error ? err.message : "Connection failed";
       await showToast({
         style: Toast.Style.Failure,
-        title: "Connection Failed",
+        title: `${PROVIDER_NAMES[provider]} Connection Failed`,
         message: msg,
       });
     }
@@ -106,11 +118,33 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
       await setProviderUrl(provider, selectedUrl);
     }
 
+    await setActiveProvider(provider);
     await markOnboardingComplete();
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Settings Saved",
-    });
+
+    // Test connection and show appropriate feedback
+    const testConfig: ProviderConfig = {
+      type: provider,
+      baseUrl: urlForProvider(provider).trim(),
+      defaultModel: "",
+      temperature: 0.7,
+      maxTokens: 2048,
+      systemPrompt: "",
+      streamResponses: true,
+    };
+    try {
+      const models = await fetchModels(testConfig);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Settings Saved",
+        message: `Connected to ${PROVIDER_NAMES[provider]} (${models.length} model${models.length !== 1 ? "s" : ""})`,
+      });
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `${PROVIDER_NAMES[provider]} Not Reachable`,
+        message: `Settings saved, but could not connect. Make sure the server is running.`,
+      });
+    }
     onComplete();
     try {
       pop();

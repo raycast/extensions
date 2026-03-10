@@ -108,6 +108,7 @@ function ResponseView({
     })();
   }, [question, config, model]);
 
+  const providerLabel = PROVIDER_LABELS[config.type] || config.type;
   const markdown =
     isLoading && !response
       ? `### ${question}\n\n*Thinking...*`
@@ -115,6 +116,7 @@ function ResponseView({
 
   return (
     <Detail
+      navigationTitle={`${model} — ${providerLabel}`}
       isLoading={isLoading}
       markdown={markdown}
       actions={
@@ -173,13 +175,22 @@ function ResponseView({
   );
 }
 
+const PROVIDER_LABELS: Record<string, string> = {
+  ollama: "Ollama",
+  lmstudio: "LM Studio",
+  llamacpp: "llama.cpp",
+  custom: "Custom",
+};
+
 /** Form for entering a question when no argument was provided. */
 function AskForm({ config, model }: { config: ProviderConfig; model: string }) {
   const { push } = useNavigation();
   const [selectedPresetId, setSelectedPresetId] = useState("default");
+  const providerLabel = PROVIDER_LABELS[config.type] || config.type;
 
   return (
     <Form
+      navigationTitle={`${model || "Quick Ask"} — ${providerLabel}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -292,7 +303,7 @@ function QuickAskView(props: LaunchProps<{ arguments: Arguments.QuickAsk }>) {
     return <Detail isLoading markdown="" />;
   }
 
-  if (query) {
+  if (query && !hasNavigated.current) {
     return <Detail isLoading markdown="" />;
   }
 

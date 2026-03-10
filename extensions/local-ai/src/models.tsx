@@ -110,33 +110,40 @@ function ModelsView() {
     : "";
 
   if (!isLoading && connectionError) {
+    const providerHelp: Record<string, string> = {
+      ollama: "Ollama: ollama serve (port 11434)",
+      lmstudio: "LM Studio: Start server in app (port 1234)",
+      llamacpp: "llama.cpp: llama-server -m model.gguf (port 8080)",
+      custom: "Check your custom server endpoint",
+    };
     const setupInstructions =
       `${config?.baseUrl || "Unknown URL"}\n\n` +
       `${connectionError}\n\n` +
       `How to start your server:\n` +
-      `\u2022 Ollama: ollama serve (port 11434)\n` +
-      `\u2022 LM Studio: Start server in app (port 1234)\n` +
-      `\u2022 llama.cpp: llama-server -m model.gguf (port 8080)`;
+      `\u2022 ${providerHelp[config?.type ?? "ollama"]}`;
 
     return (
       <List
         actions={
           <ActionPanel>
             <Action
-              title="Open Settings"
-              icon={Icon.Gear}
-              onAction={() => openExtensionPreferences()}
+              title="Configure Extension"
+              icon={Icon.Cog}
+              onAction={() =>
+                push(
+                  <OnboardingForm
+                    onComplete={() => {
+                      loadModels();
+                    }}
+                  />,
+                )
+              }
             />
             <Action
               title="Retry"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={loadModels}
-            />
-            <Action
-              title="Configure Extension"
-              icon={Icon.Cog}
-              onAction={() => push(<OnboardingForm onComplete={() => {}} />)}
             />
           </ActionPanel>
         }
@@ -183,101 +190,133 @@ function ModelsView() {
     );
   }
 
+  const defaultModel = models.find((m) => m.id === defaultModelId);
+  const otherModels = models.filter((m) => m.id !== defaultModelId);
+
+  function buildSubtitle(model: Model): string {
+    const parts: string[] = [];
+    if (model.parameterSize) parts.push(model.parameterSize);
+    if (model.quantizationLevel) parts.push(model.quantizationLevel);
+    if (model.family) parts.push(model.family);
+    return parts.length > 0 ? parts.join("  ·  ") : providerLabel;
+  }
+
+  function buildAccessories(
+    model: Model,
+    showCheckmark: boolean,
+  ): List.Item.Accessory[] {
+    const accessories: List.Item.Accessory[] = [];
+    if (model.supportsVision) {
+      accessories.push({
+        icon: { source: Icon.Eye, tintColor: Color.Green },
+        tooltip: "Vision model",
+      });
+    }
+    if (model.diskSize) {
+      accessories.push({
+        tag: formatDiskSize(model.diskSize),
+        tooltip: "Disk size",
+      });
+    }
+    if (model.maxContextLength) {
+      accessories.push({
+        tag: `${Math.round(model.maxContextLength / 1024)}K ctx`,
+        tooltip: "Max context length",
+      });
+    }
+    if (model.format) {
+      accessories.push({
+        tag: model.format.toUpperCase(),
+        tooltip: "Format",
+      });
+    }
+    accessories.push({
+      tag: { value: providerLabel, color: Color.Blue },
+      tooltip: "Provider",
+    });
+    if (showCheckmark) {
+      accessories.push({
+        icon: { source: Icon.Checkmark, tintColor: Color.Green },
+        tooltip: "Default model",
+      });
+    }
+    return accessories;
+  }
+
+  function renderModelItem(model: Model, isDefault: boolean) {
+    return (
+      <List.Item
+        key={model.id}
+        title={model.id}
+        subtitle={buildSubtitle(model)}
+        icon={Icon.ComputerChip}
+        accessories={buildAccessories(
+          model,
+          !isDefault && model.id === defaultModelId,
+        )}
+        actions={
+          <ActionPanel>
+            {isDefault ? (
+              <Action
+                title="Start Chat"
+                icon={Icon.Message}
+                onAction={() => handleStartChat(model.id)}
+              />
+            ) : (
+              <Action
+                title="Set as Default"
+                icon={Icon.Star}
+                onAction={() => handleSetDefault(model.id)}
+              />
+            )}
+            {isDefault ? (
+              <Action
+                title="Set as Default"
+                icon={Icon.Star}
+                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                onAction={() => handleSetDefault(model.id)}
+              />
+            ) : (
+              <Action
+                title="Start Chat"
+                icon={Icon.Message}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                onAction={() => handleStartChat(model.id)}
+              />
+            )}
+            <Action
+              title="Copy Model Name"
+              icon={Icon.Clipboard}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onAction={() => handleCopyModelName(model.id)}
+            />
+            <Action
+              title="Refresh Models"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={loadModels}
+            />
+            <Action
+              title="Configure Extension"
+              icon={Icon.Cog}
+              onAction={() => push(<OnboardingForm onComplete={() => {}} />)}
+            />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter models...">
-      {models.map((model) => {
-        // Build subtitle from available metadata
-        const subtitleParts: string[] = [];
-        if (model.parameterSize) subtitleParts.push(model.parameterSize);
-        if (model.quantizationLevel)
-          subtitleParts.push(model.quantizationLevel);
-        if (model.family) subtitleParts.push(model.family);
-        const subtitle =
-          subtitleParts.length > 0
-            ? subtitleParts.join("  ·  ")
-            : providerLabel;
-
-        // Build accessories
-        const accessories: List.Item.Accessory[] = [];
-        if (model.supportsVision) {
-          accessories.push({
-            icon: { source: Icon.Eye, tintColor: Color.Green },
-            tooltip: "Vision model",
-          });
-        }
-        if (model.diskSize) {
-          accessories.push({
-            tag: formatDiskSize(model.diskSize),
-            tooltip: "Disk size",
-          });
-        }
-        if (model.maxContextLength) {
-          accessories.push({
-            tag: `${Math.round(model.maxContextLength / 1024)}K ctx`,
-            tooltip: "Max context length",
-          });
-        }
-        if (model.format) {
-          accessories.push({
-            tag: model.format.toUpperCase(),
-            tooltip: "Format",
-          });
-        }
-        accessories.push({
-          tag: { value: providerLabel, color: Color.Blue },
-          tooltip: "Provider",
-        });
-        if (model.id === defaultModelId) {
-          accessories.push({
-            icon: { source: Icon.Checkmark, tintColor: Color.Green },
-            tooltip: "Default model",
-          });
-        }
-
-        return (
-          <List.Item
-            key={model.id}
-            title={model.id}
-            subtitle={subtitle}
-            icon={Icon.ComputerChip}
-            accessories={accessories}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Set as Default"
-                  icon={Icon.Star}
-                  onAction={() => handleSetDefault(model.id)}
-                />
-                <Action
-                  title="Start Chat"
-                  icon={Icon.Message}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                  onAction={() => handleStartChat(model.id)}
-                />
-                <Action
-                  title="Copy Model Name"
-                  icon={Icon.Clipboard}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  onAction={() => handleCopyModelName(model.id)}
-                />
-                <Action
-                  title="Refresh Models"
-                  icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={loadModels}
-                />
-                <Action
-                  title="Configure Extension"
-                  icon={Icon.Cog}
-                  onAction={() =>
-                    push(<OnboardingForm onComplete={() => {}} />)
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {defaultModel && (
+        <List.Section title="Current Model">
+          {renderModelItem(defaultModel, true)}
+        </List.Section>
+      )}
+      <List.Section title="Available Models">
+        {otherModels.map((model) => renderModelItem(model, false))}
+      </List.Section>
     </List>
   );
 }

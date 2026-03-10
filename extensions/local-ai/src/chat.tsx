@@ -717,6 +717,48 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
     [messages, currentResponse, isLoading, modelLabel, providerLabel],
   );
 
+  // Focused markdown for streaming items: only last question + response
+  // (Raycast's detail pane has no scroll API, so keeping content short
+  // ensures the latest text stays visible during generation)
+  const focusedMarkdown = useMemo(() => {
+    if (!isLoading) return conversationMarkdown;
+    const parts: string[] = [];
+    parts.push(`*${modelLabel} on ${providerLabel}*\n`);
+
+    const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
+    if (lastUserMsg) {
+      const imgSection =
+        lastUserMsg.images && lastUserMsg.images.length > 0
+          ? lastUserMsg.images.map((p) => `![Image](${p})`).join("\n\n") +
+            "\n\n"
+          : "";
+      const textSection = lastUserMsg.content
+        ? `> ${lastUserMsg.content.split("\n").join("\n> ")}`
+        : "";
+      parts.push(`---\n\n> **You**\n>\n${imgSection}${textSection}\n`);
+    }
+
+    if (currentResponse) {
+      parts.push(
+        `---\n\n**Assistant**\n\n${currentResponse}\n\n*Generating\u2026*\n`,
+      );
+    } else if (isSearching) {
+      parts.push(`---\n\n*Searching the web\u2026*\n`);
+    } else {
+      parts.push(`---\n\n*Thinking\u2026*\n`);
+    }
+
+    return parts.join("\n");
+  }, [
+    isLoading,
+    isSearching,
+    messages,
+    currentResponse,
+    modelLabel,
+    providerLabel,
+    conversationMarkdown,
+  ]);
+
   // Shared action panel
   const actions = (
     <ActionPanel>
@@ -909,7 +951,17 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
         <List.EmptyView
           icon={Icon.Warning}
           title="Setup Required"
-          description={`${initError}\n\nStart your local AI server and configure the URL in extension preferences.\n\nOllama: ollama serve (port 11434)\nLM Studio: Start server in app (port 1234)\nllama.cpp: llama-server -m model.gguf (port 8080)`}
+          description={`${initError}\n\nStart your local AI server and configure the URL in extension preferences.\n\n${
+            config?.type === "ollama"
+              ? "Ollama: ollama serve (port 11434)"
+              : config?.type === "lmstudio"
+                ? "LM Studio: Start server in app (port 1234)"
+                : config?.type === "llamacpp"
+                  ? "llama.cpp: llama-server -m model.gguf (port 8080)"
+                  : config?.type === "custom"
+                    ? "Check your custom server endpoint"
+                    : "Ollama: ollama serve (port 11434)"
+          }`}
           actions={
             <ActionPanel>
               <Action
@@ -1036,7 +1088,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
           id="searching"
           title="Searching the web\u2026"
           icon={{ source: Icon.Globe, tintColor: Color.Blue }}
-          detail={<List.Item.Detail markdown={conversationMarkdown} />}
+          detail={<List.Item.Detail markdown={focusedMarkdown} />}
           actions={actions}
         />
       )}
@@ -1049,7 +1101,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
           title="Assistant"
           subtitle="Thinking..."
           icon={{ source: Icon.Stars, tintColor: Color.Orange }}
-          detail={<List.Item.Detail markdown={conversationMarkdown} />}
+          detail={<List.Item.Detail markdown={focusedMarkdown} />}
           actions={actions}
         />
       )}
@@ -1062,7 +1114,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
           title="Assistant"
           subtitle={truncate(currentResponse, 50)}
           icon={{ source: Icon.Stars, tintColor: Color.Green }}
-          detail={<List.Item.Detail markdown={conversationMarkdown} />}
+          detail={<List.Item.Detail markdown={focusedMarkdown} />}
           actions={actions}
         />
       )}

@@ -9,7 +9,7 @@ import type {
   ChatResponse,
   Tool,
 } from "./types";
-import { getProviderUrl } from "./onboarding";
+import { getProviderUrl, getActiveProvider } from "./onboarding";
 
 export const DEFAULT_URLS: Record<ProviderType, string> = {
   ollama: "http://localhost:11434",
@@ -47,7 +47,9 @@ export async function getDefaultBaseUrl(
 export async function getProviderConfig(): Promise<ProviderConfig> {
   const prefs = getPreferenceValues<Preferences>();
 
-  const providerType = prefs.provider as ProviderType;
+  // Active provider set via Configure Extension takes precedence over Raycast prefs
+  const storedProvider = await getActiveProvider();
+  const providerType = (storedProvider || prefs.provider) as ProviderType;
   const baseUrl = await getDefaultBaseUrl(providerType);
 
   return {
