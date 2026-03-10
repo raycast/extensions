@@ -31,23 +31,10 @@ const getHeaders = () => {
   };
 };
 
-export async function getRecordings(): Promise<VoiceNote[]> {
-  const response = await fetch(`${BASE_URL}/recordings`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({
-      last_synced_note_updated_at: undefined,
-      obsidian_deleted_recording_ids: [],
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch recordings: ${response.statusText}`);
-  }
-
-  const json = (await response.json()) as RecordingsResponse;
-  return json.data;
-}
+  body: JSON.stringify({
+    last_synced_note_updated_at: null,
+    obsidian_deleted_recording_ids: [],
+  }),
 
 export async function getUserInfo() {
   const response = await fetch(`${BASE_URL}/user/info`, {
