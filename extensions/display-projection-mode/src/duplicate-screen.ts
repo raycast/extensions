@@ -1,9 +1,12 @@
 import { showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
 
 export default async function main() {
   try {
-    execSync("DisplaySwitch.exe /clone", {
+    await execAsync("DisplaySwitch.exe /clone", {
       encoding: "utf-8",
       windowsHide: true,
     });
