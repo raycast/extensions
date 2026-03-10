@@ -12,7 +12,7 @@ export default async function main() {
     });
     await showToast({
       style: Toast.Style.Success,
-      title: "Duplicate Screen activated",
+      title: "Switching to Duplicate Screen...",
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

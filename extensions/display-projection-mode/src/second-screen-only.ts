@@ -12,7 +12,7 @@ export default async function main() {
     });
     await showToast({
       style: Toast.Style.Success,
-      title: "Second Screen Only activated",
+      title: "Switching to Second Screen Only...",
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);

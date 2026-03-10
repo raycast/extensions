@@ -12,7 +12,7 @@ export default async function main() {
     });
     await showToast({
       style: Toast.Style.Success,
-      title: "Extend Screen activated",
+      title: "Switching to Extend Screen...",
     });
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
