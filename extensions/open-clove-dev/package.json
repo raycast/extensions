@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "version": "1.0.0",
+  "name": "open-clove-dev",
+  "title": "Open Clove Dev",
+  "description": "Open Clove frontend dev apps for a worktree in your browser",
+  "icon": "command-icon.png",
+  "author": "archie",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-worktree",
+      "title": "Open Worktree",
+      "description": "Open all running Clove apps for a worktree",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "worktree",
+          "placeholder": "Worktree name (e.g. london)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-worktrees",
+      "title": "List Active Worktrees",
+      "description": "Show worktrees with running Clove dev apps",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
