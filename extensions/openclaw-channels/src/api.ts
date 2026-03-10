@@ -1,8 +1,4 @@
 import { type GatewayProfile } from "./profiles";
-import {
-  buildSessionKeyForContext,
-  createMainContext,
-} from "./session-context";
 
 export interface Message {
   role: "user" | "assistant";
@@ -112,90 +108,4 @@ export async function sendMessage(
     const data = (await response.json()) as ChatCompletionResponse;
     return data.choices[0]?.message?.content || "";
   }
-}
-
-export async function askQuestion(
-  profile: GatewayProfile,
-  question: string,
-): Promise<string> {
-  const sessionKey = buildSessionKeyForContext(profile, createMainContext());
-  return sendMessage(
-    profile,
-    [{ role: "user", content: question }],
-    undefined,
-    { sessionKey },
-  );
-}
-
-// Async/background processing types and functions
-
-interface AsyncSubmitResponse {
-  ok: boolean;
-  runId: string;
-}
-
-export interface AsyncResultResponse {
-  status: "pending" | "complete" | "error";
-  content?: string;
-  error?: string;
-}
-
-/**
- * Fire-and-forget message submission via hooks endpoint.
- * Returns immediately with a runId that can be polled for results.
- */
-export async function submitAsyncMessage(
-  profile: GatewayProfile,
-  messages: Message[],
-  sessionKey: string,
-): Promise<string> {
-  const url = `${profile.endpoint}/hooks/agent`;
-  const agentId = profile.agentId || "main";
-
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${profile.token}`,
-    },
-    body: JSON.stringify({
-      model: `openclaw:${agentId}`,
-      messages,
-      sessionKey,
-    }),
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Async submit failed: ${response.status} - ${text}`);
-  }
-
-  const data = (await response.json()) as AsyncSubmitResponse;
-  return data.runId;
-}
-
-/**
- * Poll for the result of an async message submission.
- */
-export async function pollAsyncResult(
-  profile: GatewayProfile,
-  runId: string,
-): Promise<AsyncResultResponse> {
-  const url = `${profile.endpoint}/api/runs/${encodeURIComponent(runId)}`;
-
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${profile.token}`,
-    },
-  });
-
-  if (!response.ok) {
-    // Not ready yet or error
-    if (response.status === 404) {
-      return { status: "pending" };
-    }
-    return { status: "error", error: `Poll failed: ${response.status}` };
-  }
-
-  return response.json() as Promise<AsyncResultResponse>;
 }

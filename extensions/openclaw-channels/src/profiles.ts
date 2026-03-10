@@ -11,16 +11,6 @@ export type GatewayProfile = {
   namespace?: string;
 };
 
-type RawPreferences = {
-  endpoint: string;
-  token: string;
-  agentId?: string;
-  mainKey?: string;
-  webUiBaseUrl?: string;
-  profilesJson?: string;
-  defaultProfileId?: string;
-};
-
 export type ProfileConnectionResult = {
   ok: boolean;
   latencyMs: number;
@@ -165,7 +155,7 @@ function parseProfilesJson(raw: string): GatewayProfile[] {
   return dedupeProfiles(profiles);
 }
 
-function buildLegacyFallbackProfile(prefs: RawPreferences): GatewayProfile {
+function buildLegacyFallbackProfile(prefs: Preferences): GatewayProfile {
   return normalizeProfile(
     {
       id: "default",
@@ -184,7 +174,7 @@ export function loadProfilesFromPreferences(): {
   profiles: GatewayProfile[];
   defaultProfileId: string;
 } {
-  const prefs = getPreferenceValues<RawPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const defaultFromPrefs = sanitizeId(
     String(prefs.defaultProfileId || "default"),
     "default",

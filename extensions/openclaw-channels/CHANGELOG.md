@@ -1,6 +1,6 @@
 # OpenClaw Channels Changelog
 
-## [Current Build] - 2026-03-10
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Chat-first command set (`Chat`, `Gateway Status`, `Open Webchat`)
 - Channel/context model aligned with OpenClaw session key semantics
