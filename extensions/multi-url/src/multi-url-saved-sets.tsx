@@ -47,6 +47,7 @@ import {
   parseSharedSetsInput,
   parseInputUrls,
   parseTagInput,
+  QUICK_EMOJI_OPTIONS,
   resolveBrowserApp,
   saveHistory,
   saveSavedSets,
@@ -66,24 +67,6 @@ const SLOT_KEYS = SHORTCUT_SLOT_KEYS;
 const TAG_FILTER_ALL = "__all__";
 const EMOJI_NONE = "__none__";
 const EMOJI_CUSTOM = "__custom__";
-const QUICK_EMOJI_OPTIONS = [
-  { value: "🚀", title: "🚀 Rocket" },
-  { value: "⚡", title: "⚡ Lightning" },
-  { value: "🔥", title: "🔥 Fire" },
-  { value: "✅", title: "✅ Check" },
-  { value: "🧠", title: "🧠 Brain" },
-  { value: "🎯", title: "🎯 Target" },
-  { value: "🛠️", title: "🛠️ Tools" },
-  { value: "📚", title: "📚 Books" },
-  { value: "📰", title: "📰 News" },
-  { value: "💼", title: "💼 Briefcase" },
-  { value: "🌐", title: "🌐 Globe" },
-  { value: "💡", title: "💡 Idea" },
-  { value: "📈", title: "📈 Growth" },
-  { value: "💰", title: "💰 Money" },
-  { value: "🧪", title: "🧪 Lab" },
-  { value: "🤖", title: "🤖 Robot" },
-] as const;
 
 type EditSetFormValues = {
   name: string;
@@ -761,10 +744,16 @@ export function MultiUrlSavedSetsList() {
 
   async function copyShareCode(scope: ExportScope, selectedSet: SavedSet | null): Promise<boolean> {
     try {
-      const shareCode =
-        scope === "selected" && selectedSet
-          ? createShareCodeFromSavedSet(selectedSet)
-          : createShareCodeFromSavedSets(savedSets);
+      let shareCode: string;
+      let exportCount: number;
+      if (scope === "selected" && selectedSet) {
+        shareCode = createShareCodeFromSavedSet(selectedSet);
+        exportCount = 1;
+      } else {
+        const freshSavedSets = await loadSavedSets();
+        shareCode = createShareCodeFromSavedSets(freshSavedSets);
+        exportCount = freshSavedSets.length;
+      }
       await Clipboard.copy(shareCode);
 
       await showToast({
@@ -773,7 +762,7 @@ export function MultiUrlSavedSetsList() {
         message:
           scope === "selected" && selectedSet
             ? selectedSet.name
-            : `${savedSets.length} URL-set${savedSets.length === 1 ? "" : "s"}`,
+            : `${exportCount} URL-set${exportCount === 1 ? "" : "s"}`,
       });
 
       return true;

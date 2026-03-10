@@ -28,6 +28,7 @@ import {
   openInBrowser,
   parseInputUrls,
   parseTagInput,
+  QUICK_EMOJI_OPTIONS,
   resolveBrowserApp,
   saveHistory,
   saveSavedSets,
@@ -39,24 +40,6 @@ import { MultiUrlSavedSetsList } from "./multi-url-saved-sets";
 
 const EMOJI_NONE = "__none__";
 const EMOJI_CUSTOM = "__custom__";
-const QUICK_EMOJI_OPTIONS = [
-  { value: "🚀", title: "🚀 Rocket" },
-  { value: "⚡", title: "⚡ Lightning" },
-  { value: "🔥", title: "🔥 Fire" },
-  { value: "✅", title: "✅ Check" },
-  { value: "🧠", title: "🧠 Brain" },
-  { value: "🎯", title: "🎯 Target" },
-  { value: "🛠️", title: "🛠️ Tools" },
-  { value: "📚", title: "📚 Books" },
-  { value: "📰", title: "📰 News" },
-  { value: "💼", title: "💼 Briefcase" },
-  { value: "🌐", title: "🌐 Globe" },
-  { value: "💡", title: "💡 Idea" },
-  { value: "📈", title: "📈 Growth" },
-  { value: "💰", title: "💰 Money" },
-  { value: "🧪", title: "🧪 Lab" },
-  { value: "🤖", title: "🤖 Robot" },
-] as const;
 
 type FormValues = {
   setName?: string;

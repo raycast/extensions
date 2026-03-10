@@ -151,6 +151,25 @@ export function normalizeSingleEmoji(input: string): string | null {
   return firstCodePoint ?? null;
 }
 
+export const QUICK_EMOJI_OPTIONS = [
+  { value: "🚀", title: "🚀 Rocket" },
+  { value: "⚡", title: "⚡ Lightning" },
+  { value: "🔥", title: "🔥 Fire" },
+  { value: "✅", title: "✅ Check" },
+  { value: "🧠", title: "🧠 Brain" },
+  { value: "🎯", title: "🎯 Target" },
+  { value: "🛠️", title: "🛠️ Tools" },
+  { value: "📚", title: "📚 Books" },
+  { value: "📰", title: "📰 News" },
+  { value: "💼", title: "💼 Briefcase" },
+  { value: "🌐", title: "🌐 Globe" },
+  { value: "💡", title: "💡 Idea" },
+  { value: "📈", title: "📈 Growth" },
+  { value: "💰", title: "💰 Money" },
+  { value: "🧪", title: "🧪 Lab" },
+  { value: "🤖", title: "🤖 Robot" },
+] as const;
+
 export function splitInput(input: string): string[] {
   const rows = input
     .split(/\r?\n|;|\t/)
