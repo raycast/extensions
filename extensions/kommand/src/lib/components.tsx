@@ -1,26 +1,16 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
 import { formatStep, keywordsForSteps, tooltipForStep } from "./keymap";
+import { isKommandInstalled } from "./database";
 import { KommandShortcut } from "./types";
 
-/** Open Kommand via URL scheme; shows a failure toast if the scheme isn't registered. */
+export const APP_STORE_URL = "https://apps.apple.com/app/kommand/id6752623076";
+
+/** Open Kommand via URL scheme, or the App Store if not installed. */
 export async function openKommand(): Promise<void> {
-  try {
+  if (isKommandInstalled()) {
     await open("kommand://");
-  } catch (e) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open Kommand",
-      message: e instanceof Error ? e.message : String(e),
-    });
+  } else {
+    await open(APP_STORE_URL);
   }
 }
 

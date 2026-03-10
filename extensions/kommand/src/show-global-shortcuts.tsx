@@ -1,7 +1,12 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getGlobalShortcuts, isKommandInstalled } from "./lib/database";
 import {
+  getGlobalShortcuts,
+  isAppBundlePresent,
+  isKommandInstalled,
+} from "./lib/database";
+import {
+  APP_STORE_URL,
   KommandNotInstalledView,
   openKommand,
   ShortcutItem,
@@ -35,7 +40,14 @@ export default function ShowGlobalShortcuts() {
           description="Mark shortcuts as global in Kommand to see them here."
           actions={
             <ActionPanel>
-              <Action title="Open Kommand" onAction={openKommand} />
+              {isAppBundlePresent() ? (
+                <Action title="Open Kommand" onAction={openKommand} />
+              ) : (
+                <Action.OpenInBrowser
+                  title="Get Kommand on App Store"
+                  url={APP_STORE_URL}
+                />
+              )}
             </ActionPanel>
           }
         />

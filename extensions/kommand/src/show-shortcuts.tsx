@@ -5,8 +5,13 @@ import {
   List,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getShortcutsForApp, isKommandInstalled } from "./lib/database";
 import {
+  getShortcutsForApp,
+  isAppBundlePresent,
+  isKommandInstalled,
+} from "./lib/database";
+import {
+  APP_STORE_URL,
   groupByCategory,
   KommandNotInstalledView,
   openKommand,
@@ -61,7 +66,14 @@ export default function ShowShortcuts() {
           description="Open Kommand to add shortcuts for this app."
           actions={
             <ActionPanel>
-              <Action title="Open Kommand" onAction={openKommand} />
+              {isAppBundlePresent() ? (
+                <Action title="Open Kommand" onAction={openKommand} />
+              ) : (
+                <Action.OpenInBrowser
+                  title="Get Kommand on App Store"
+                  url={APP_STORE_URL}
+                />
+              )}
             </ActionPanel>
           }
         />
