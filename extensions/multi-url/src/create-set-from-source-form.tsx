@@ -155,7 +155,9 @@ export function CreateSetFromSourceForm({ navigationTitle, loadSource }: CreateS
     const openFailures = await openInBrowser(parsed.uniqueValid, savedSet.browserApp);
     const openedCount = parsed.uniqueValid.length - openFailures.length;
     const now = new Date().toISOString();
-    const nextSavedSets = baseSavedSets.map((item) =>
+    const [freshSavedSets, history] = await Promise.all([loadSavedSets(), loadHistory()]);
+    const savedSetsToUpdate = freshSavedSets.some((item) => item.id === savedSet.id) ? freshSavedSets : baseSavedSets;
+    const nextSavedSets = savedSetsToUpdate.map((item) =>
       item.id === savedSet.id
         ? applySavedSetRunStats(
             item,
@@ -168,7 +170,6 @@ export function CreateSetFromSourceForm({ navigationTitle, loadSource }: CreateS
           )
         : item,
     );
-    const history = await loadHistory();
     const nextHistory: HistoryEntry[] = [
       {
         id: randomUUID(),
