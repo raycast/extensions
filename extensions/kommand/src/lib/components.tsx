@@ -64,7 +64,6 @@ export function ShortcutItem({
             icon={Icon.Keyboard}
             onAction={() => showHUD(formatted)}
           />
-          <Action.CopyToClipboard title="Copy Shortcut" content={formatted} />
           <Action title="Open in Kommand" onAction={openKommand} />
         </ActionPanel>
       }
