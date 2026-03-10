@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add Compare JSON] - {PR_MERGE_DATE}
+## [Add Compare JSON] - 2026-03-10
 
 - Add new command to compare two JSON objects with a git-style diff view
 - Real-time JSON validation with inline error messages
