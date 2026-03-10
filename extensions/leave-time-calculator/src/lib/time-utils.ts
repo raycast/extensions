@@ -67,7 +67,7 @@ export function calculateRemainingTime(
       // - now < start:
       //     Already past midnight in the early morning (e.g., 01:00).
       //     06:00 refers to today's calendar date, so no +24 hours needed.
-      if (now >= start || now > leave) {
+      if (now >= start) {
         // Still on start day -> leave is tomorrow on the calendar
         leave = new Date(leave.getTime() + 24 * 60 * 60 * 1000);
       }

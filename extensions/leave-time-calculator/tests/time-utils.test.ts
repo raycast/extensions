@@ -273,12 +273,12 @@ describe("calculateRemainingTime - with mocked time", () => {
 		expect(result.isPast).toBe(false);
 	});
 
-	test("night shift late night: at 05:00, 23 hours until 04:00 leave (next day)", () => {
+	test("night shift late night: at 05:00, 1 hour past 04:00 leave", () => {
 		vi.setSystemTime(new Date(2026, 0, 16, 5, 0, 0)); // 05:00 (after leave)
 		const result = calculateRemainingTime("04:00", "19:00");
-		expect(result.hours).toBe(23);
+		expect(result.hours).toBe(1);
 		expect(result.minutes).toBe(0);
-		expect(result.isPast).toBe(false);
+		expect(result.isPast).toBe(true);
 	});
 
 	test("without startTime, no overnight detection", () => {
@@ -305,12 +305,20 @@ describe("calculateRemainingTime - with mocked time", () => {
 		expect(result.isPast).toBe(false);
 	});
 
-	test("22:00 start -> 06:00 leave, at 10:00 is 20 hours remaining", () => {
+	test("22:00 start -> 06:00 leave, at 10:00 is 4 hours past", () => {
 		vi.setSystemTime(new Date(2026, 0, 16, 10, 0, 0)); // 10:00
 		const result = calculateRemainingTime("06:00", "22:00");
-		expect(result.hours).toBe(20);
+		expect(result.hours).toBe(4);
 		expect(result.minutes).toBe(0);
-		expect(result.isPast).toBe(false);
+		expect(result.isPast).toBe(true);
+	});
+
+	test("22:00 start -> 06:00 leave, at 07:30 is 1h30m past", () => {
+		vi.setSystemTime(new Date(2026, 0, 17, 7, 30, 0)); // next day 07:30
+		const result = calculateRemainingTime("06:00", "22:00");
+		expect(result.hours).toBe(1);
+		expect(result.minutes).toBe(30);
+		expect(result.isPast).toBe(true);
 	});
 
 	test("with currentTime input, ignores current seconds and keeps minute-aligned result", () => {
