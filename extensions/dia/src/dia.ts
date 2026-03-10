@@ -206,9 +206,9 @@ async function getTabs(): Promise<Tab[]> {
   // bulk AppleScript using `properties of every tab` (still 10-14x faster
   // than the original per-tab property access).
   try {
-    const jxaResult = await getTabsJXA();
+    const { tabs: jxaResult, windowCount } = await getTabsJXA();
     // When JXA returns 0 tabs but Dia has windows (JXA bug in some versions), try AppleScript
-    if (jxaResult.length === 0) {
+    if (jxaResult.length === 0 && windowCount > 0) {
       try {
         const asResult = await getTabsBulkAppleScript();
         if (asResult.length > 0) return asResult;
@@ -226,7 +226,7 @@ async function getTabs(): Promise<Tab[]> {
   }
 }
 
-async function getTabsJXA(): Promise<Tab[]> {
+async function getTabsJXA(): Promise<{ tabs: Tab[]; windowCount: number }> {
   const jxa = `
     (() => {
       const dia = Application("Dia");
@@ -252,7 +252,7 @@ async function getTabsJXA(): Promise<Tab[]> {
           }
         } catch(e) {}
       }
-      return JSON.stringify(tabs);
+      return JSON.stringify({ tabs: tabs, windowCount: wins.length });
     })()
   `;
 
@@ -261,19 +261,25 @@ async function getTabsJXA(): Promise<Tab[]> {
     encoding: "utf-8",
   }).trim();
 
-  const parsed = JSON.parse(result) as Array<{
-    windowId: string;
-    tabId: string;
-    title: string;
-    url: string;
-    isPinned: boolean;
-    isFocused: boolean;
-  }>;
+  const parsed = JSON.parse(result) as {
+    tabs: Array<{
+      windowId: string;
+      tabId: string;
+      title: string;
+      url: string;
+      isPinned: boolean;
+      isFocused: boolean;
+    }>;
+    windowCount: number;
+  };
 
-  return parsed.map((t) => ({
-    ...t,
-    url: t.url || undefined,
-  }));
+  return {
+    tabs: parsed.tabs.map((t) => ({
+      ...t,
+      url: t.url || undefined,
+    })),
+    windowCount: parsed.windowCount,
+  };
 }
 
 async function getTabsBulkAppleScript(): Promise<Tab[]> {
