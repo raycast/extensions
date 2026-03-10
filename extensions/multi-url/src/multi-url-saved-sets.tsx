@@ -791,58 +791,63 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const existingFingerprints = new Set(freshSavedSets.map((set) => createSavedSetShareFingerprint(set)));
-    const nextNames = freshSavedSets.map((set) => set.name);
-    const now = new Date().toISOString();
-    const importedSets: SavedSet[] = [];
-    let skippedDuplicateCount = 0;
+    const buildImportPlan = (baseSavedSets: SavedSet[], now: string) => {
+      const existingFingerprints = new Set(baseSavedSets.map((set) => createSavedSetShareFingerprint(set)));
+      const nextNames = baseSavedSets.map((set) => set.name);
+      const importedSets: SavedSet[] = [];
+      let skippedDuplicateCount = 0;
 
-    for (const sharedSet of parsedSharedSets) {
-      const fingerprint = createSharedSetFingerprint(sharedSet);
-      if (existingFingerprints.has(fingerprint)) {
-        skippedDuplicateCount += 1;
-        continue;
+      for (const sharedSet of parsedSharedSets) {
+        const fingerprint = createSharedSetFingerprint(sharedSet);
+        if (existingFingerprints.has(fingerprint)) {
+          skippedDuplicateCount += 1;
+          continue;
+        }
+
+        const resolvedName = createUniqueSetName(sharedSet.name, nextNames);
+        nextNames.push(resolvedName);
+        existingFingerprints.add(fingerprint);
+
+        importedSets.push({
+          id: randomUUID(),
+          name: resolvedName,
+          emoji: normalizeSingleEmoji(sharedSet.emoji ?? ""),
+          tags: parseTagInput(sharedSet.tags.join(", ")),
+          urls: sharedSet.urls.join("\n"),
+          createdAt: now,
+          updatedAt: now,
+          useCount: 0,
+          pinned: false,
+          lastOpenedAt: null,
+          totalOpenedCount: 0,
+          totalFailedCount: 0,
+          totalInvalidCount: 0,
+          browserApp: sharedSet.browserApp,
+        });
       }
 
-      const resolvedName = createUniqueSetName(sharedSet.name, nextNames);
-      nextNames.push(resolvedName);
-      existingFingerprints.add(fingerprint);
+      return { importedSets, skippedDuplicateCount };
+    };
 
-      importedSets.push({
-        id: randomUUID(),
-        name: resolvedName,
-        emoji: normalizeSingleEmoji(sharedSet.emoji ?? ""),
-        tags: parseTagInput(sharedSet.tags.join(", ")),
-        urls: sharedSet.urls.join("\n"),
-        createdAt: now,
-        updatedAt: now,
-        useCount: 0,
-        pinned: false,
-        lastOpenedAt: null,
-        totalOpenedCount: 0,
-        totalFailedCount: 0,
-        totalInvalidCount: 0,
-        browserApp: sharedSet.browserApp,
-      });
-    }
+    const previewPlan = buildImportPlan(freshSavedSets, new Date().toISOString());
 
-    if (importedSets.length === 0) {
+    if (previewPlan.importedSets.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No new URL-sets to import",
         message:
-          skippedDuplicateCount > 0
-            ? `${skippedDuplicateCount} duplicate URL-set${skippedDuplicateCount === 1 ? "" : "s"} skipped`
+          previewPlan.skippedDuplicateCount > 0
+            ? `${previewPlan.skippedDuplicateCount} duplicate URL-set${previewPlan.skippedDuplicateCount === 1 ? "" : "s"} skipped`
             : "Share code did not contain importable URL-sets.",
       });
       return false;
     }
 
     const shouldImport = await confirmAlert({
-      title: `Import ${importedSets.length} URL-set${importedSets.length === 1 ? "" : "s"}?`,
+      title: `Import ${previewPlan.importedSets.length} URL-set${previewPlan.importedSets.length === 1 ? "" : "s"}?`,
       message:
-        skippedDuplicateCount > 0
-          ? `${skippedDuplicateCount} duplicate URL-set${skippedDuplicateCount === 1 ? "" : "s"} will be skipped.`
+        previewPlan.skippedDuplicateCount > 0
+          ? `${previewPlan.skippedDuplicateCount} duplicate URL-set${previewPlan.skippedDuplicateCount === 1 ? "" : "s"} will be skipped.`
           : undefined,
       primaryAction: {
         title: "Import URL-Set",
@@ -853,15 +858,29 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const nextSavedSets = [...importedSets, ...freshSavedSets];
+    const latestSavedSets = await loadSavedSets();
+    const confirmedPlan = buildImportPlan(latestSavedSets, new Date().toISOString());
+    if (confirmedPlan.importedSets.length === 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No new URL-sets to import",
+        message:
+          confirmedPlan.skippedDuplicateCount > 0
+            ? `${confirmedPlan.skippedDuplicateCount} duplicate URL-set${confirmedPlan.skippedDuplicateCount === 1 ? "" : "s"} skipped`
+            : "Share code did not contain importable URL-sets.",
+      });
+      return false;
+    }
+
+    const nextSavedSets = [...confirmedPlan.importedSets, ...latestSavedSets];
     await persistSavedSets(nextSavedSets);
 
     await showToast({
       style: Toast.Style.Success,
-      title: `Imported ${importedSets.length} URL-set${importedSets.length === 1 ? "" : "s"}`,
+      title: `Imported ${confirmedPlan.importedSets.length} URL-set${confirmedPlan.importedSets.length === 1 ? "" : "s"}`,
       message:
-        skippedDuplicateCount > 0
-          ? `${skippedDuplicateCount} duplicate${skippedDuplicateCount === 1 ? "" : "s"} skipped`
+        confirmedPlan.skippedDuplicateCount > 0
+          ? `${confirmedPlan.skippedDuplicateCount} duplicate${confirmedPlan.skippedDuplicateCount === 1 ? "" : "s"} skipped`
           : undefined,
     });
 
