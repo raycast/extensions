@@ -1138,7 +1138,7 @@ export function MultiUrlSavedSetsList() {
     });
   }
 
-  async function runSavedSet(savedSet: SavedSet, baseSavedSets: SavedSet[] = savedSets) {
+  async function runSavedSet(savedSet: SavedSet, baseSavedSets?: SavedSet[]) {
     const parsed = parseInputUrls(savedSet.urls);
 
     if (parsed.uniqueValid.length === 0) {
@@ -1163,9 +1163,12 @@ export function MultiUrlSavedSetsList() {
     const openFailures = await openInBrowser(parsed.uniqueValid, savedSet.browserApp);
     const openedCount = parsed.uniqueValid.length - openFailures.length;
     const now = new Date().toISOString();
-    const savedSetsToUpdate = baseSavedSets.some((item) => item.id === savedSet.id)
-      ? baseSavedSets
-      : [savedSet, ...baseSavedSets];
+    const [freshSavedSets, freshHistory] = await Promise.all([loadSavedSets(), loadHistory()]);
+    const savedSetsToUpdate = freshSavedSets.some((item) => item.id === savedSet.id)
+      ? freshSavedSets
+      : baseSavedSets && baseSavedSets.some((item) => item.id === savedSet.id)
+        ? baseSavedSets
+        : [savedSet, ...freshSavedSets];
     const nextSavedSets = savedSetsToUpdate.map((item) =>
       item.id === savedSet.id
         ? applySavedSetRunStats(
@@ -1192,7 +1195,7 @@ export function MultiUrlSavedSetsList() {
         sourceSetId: savedSet.id,
         browserApp: savedSet.browserApp,
       },
-      ...history,
+      ...freshHistory,
     ].slice(0, MAX_HISTORY_ITEMS);
 
     await Promise.all([saveSavedSets(nextSavedSets), saveHistory(nextHistory)]);
@@ -1252,6 +1255,7 @@ export function MultiUrlSavedSetsList() {
       const openFailures = await openInBrowser(parsed.uniqueValid, entry.browserApp);
       const openedCount = parsed.uniqueValid.length - openFailures.length;
       const now = new Date().toISOString();
+      const [freshSavedSets, freshHistory] = await Promise.all([loadSavedSets(), loadHistory()]);
 
       const nextHistory: HistoryEntry[] = [
         {
@@ -1265,12 +1269,12 @@ export function MultiUrlSavedSetsList() {
           sourceSetId: entry.sourceSetId,
           browserApp: entry.browserApp,
         },
-        ...history,
+        ...freshHistory,
       ].slice(0, MAX_HISTORY_ITEMS);
 
-      let nextSavedSets = savedSets;
+      let nextSavedSets = freshSavedSets;
       if (entry.sourceSetId) {
-        nextSavedSets = savedSets.map((item) =>
+        nextSavedSets = freshSavedSets.map((item) =>
           item.id === entry.sourceSetId
             ? applySavedSetRunStats(
                 item,
