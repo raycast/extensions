@@ -1,6 +1,10 @@
-import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, Cache } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import yaml from "js-yaml";
+
+// Cache for GitHub API responses (24 hour TTL)
+const cache = new Cache();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 // Types for navigation structure
 type NavItem = string | { [key: string]: string | NavItem[] };
@@ -295,16 +299,43 @@ function isSectionedPath(path: string): boolean {
   return SECTIONED_FOLDERS.some((folder) => path.startsWith(`${folder}/`));
 }
 
-// Fetch folder contents from GitHub API
+// Fetch folder contents from GitHub API with caching
 async function fetchFolderContents(folderPath: string): Promise<DocItem[]> {
+  const cacheKey = `folder:${folderPath}`;
+
+  // Check cache first
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp < CACHE_TTL_MS) {
+      return data;
+    }
+  }
+
   const url = `${GITHUB_API_BASE}/${folderPath}`;
   const response = await fetch(url);
+
+  // Handle rate limiting - return cached data if available
+  if (response.status === 403 || response.status === 429) {
+    if (cached) {
+      const { data } = JSON.parse(cached);
+      return data;
+    }
+    throw new Error("GitHub API rate limit exceeded. Please try again later.");
+  }
+
   if (!response.ok) {
+    // Return stale cache on other errors
+    if (cached) {
+      const { data } = JSON.parse(cached);
+      return data;
+    }
     throw new Error(`Failed to fetch folder ${folderPath}: ${response.statusText}`);
   }
+
   const files = (await response.json()) as GitHubFile[];
 
-  return files
+  const items = files
     .filter((file) => file.name.endsWith(".md") || file.type === "dir")
     .filter((file) => file.name !== "index.md") // Skip index files in listing
     .sort((a, b) => a.name.localeCompare(b.name))
@@ -313,6 +344,11 @@ async function fetchFolderContents(folderPath: string): Promise<DocItem[]> {
       path: `${folderPath}/${file.name}`,
       isFolder: file.type === "dir",
     }));
+
+  // Store in cache
+  cache.set(cacheKey, JSON.stringify({ data: items, timestamp: Date.now() }));
+
+  return items;
 }
 
 // Detail view for markdown files
