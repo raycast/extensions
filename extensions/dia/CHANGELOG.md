@@ -1,9 +1,5 @@
 # Dia Changelog
 
-## [Update Raycast Utils] - 2026-03-06
-
-- Updated `@raycast/utils` from `^2.2.2` to `^2.2.3`.
-
 ## [Performance and Features] - {PR_MERGE_DATE}
 
 ### Performance
@@ -23,6 +19,10 @@
 - **Open URL in Dia**: New no-view command to open a URL in Dia with argument, clipboard fallback, and Google search for non-URLs
 - **URL detection in Search**: Typing a URL shows "Open [url]" as the first result with default action to open in Dia
 - **Tab action preference**: Choose default Enter action (Focus Existing Tab or Open in New Tab) via extension preferences. Defaults to Focus Existing Tab
+
+## [Update Raycast Utils] - 2026-03-06
+
+- Updated `@raycast/utils` from `^2.2.2` to `^2.2.3`.
 
 ## [Search Bookmarks: Open all in folder] - 2026-02-02
 
