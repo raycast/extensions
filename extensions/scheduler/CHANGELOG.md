@@ -1,5 +1,10 @@
 # Scheduler Changelog
 
+## [Fix interval schedule timing] - 2026-03-05
+
+- Fixed interval schedule calculations so `15mins` and `30mins` now run at their correct cadence instead of effectively using hourly timing in due-check logic.
+- Refactored interval handling to use a shared interval mapping for `15mins`, `30mins`, and `hourly`, keeping next-run and due-check behavior consistent.
+
 ## [Fix execution of view-based commands] - 2026-02-16
 
 - Fixed an error where commands with a UI (e.g. `brew > upgrade`) would fail with "Invalid launch: mode 'default' cannot launch mode 'view' with type 'background'" when scheduled to run in the background. These commands now automatically fall back to user-initiated launch mode so they still execute on schedule.
@@ -13,7 +18,6 @@
 - Added deeplink validation before execution to surface clear errors for empty or malformed deeplinks.
 - Storage writes are now skipped when no mutations occurred, reducing unnecessary I/O during background execution.
 - Improved the user interface to automatically refresh the list of scheduled commands when the view becomes visible, ensuring that changes made by the background task are immediately reflected.
-
 
 ## [Background Refresh Alert] - 2025-11-18
 

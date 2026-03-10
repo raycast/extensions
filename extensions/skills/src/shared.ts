@@ -21,11 +21,80 @@ export type InstalledSkill = {
   hasUpdate?: boolean;
 };
 
+export type SkillFrontmatter = {
+  description?: string;
+  license?: string;
+  compatibility?: string;
+  "allowed-tools"?: string | string[];
+};
+
+/**
+ * Normalizes allowed-tools to always be an array.
+ * YAML parsing may return a single string instead of an array
+ * when only one tool is specified (e.g., "allowed-tools: Bash").
+ */
+export function normalizeAllowedTools(tools: string | string[] | undefined): string[] {
+  if (!tools) return [];
+  if (Array.isArray(tools)) return tools;
+  return [tools];
+}
+
 export const API_BASE_URL = "https://skills.sh/api";
 const REPO_URL = "https://github.com/raycast/extensions";
 
+export function parseFrontmatter(content: string): { frontmatter: SkillFrontmatter; body: string } {
+  const match = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+  if (!match) return { frontmatter: {}, body: content };
+
+  const yamlStr = match[1];
+  const body = match[2];
+  const frontmatter: SkillFrontmatter = {};
+
+  const lines = yamlStr.split("\n");
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const keyValueMatch = line.match(/^(\S[^:]*?):\s*(.*)$/);
+    if (keyValueMatch) {
+      const key = keyValueMatch[1].trim();
+      const value = keyValueMatch[2].trim();
+
+      if (value === "") {
+        // Possibly a block array — look ahead for "  - item" lines
+        const items: string[] = [];
+        i++;
+        while (i < lines.length && /^\s+-\s+/.test(lines[i])) {
+          items.push(lines[i].replace(/^\s+-\s+/, "").trim());
+          i++;
+        }
+        if (items.length > 0) {
+          (frontmatter as Record<string, unknown>)[key] = items;
+        }
+        continue;
+      } else if (value === "|" || value === ">" || value === "|-" || value === ">-") {
+        // block scalar — multi-line body parsing is not supported, skip this key
+        i++;
+        continue;
+      } else if (value.startsWith("[") && value.endsWith("]")) {
+        // Inline array: [item1, item2, item3]
+        const items = value
+          .slice(1, -1)
+          .split(",")
+          .map((s) => s.trim().replace(/^["'](.*)["']$/, "$1"))
+          .filter(Boolean);
+        (frontmatter as Record<string, unknown>)[key] = items;
+      } else {
+        (frontmatter as Record<string, unknown>)[key] = value.replace(/^["'](.*)["']$/, "$1");
+      }
+    }
+    i++;
+  }
+
+  return { frontmatter, body };
+}
+
 export function removeFrontmatter(content: string): string {
-  return content.replace(/^---\s*\n[\s\S]*?\n---\s*\n/, "");
+  return parseFrontmatter(content).body;
 }
 
 export function formatInstalls(count: number): string {

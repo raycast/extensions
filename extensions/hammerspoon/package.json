@@ -7,7 +7,8 @@
   "icon": "icon-prod.png",
   "author": "bjrmatos",
   "contributors": [
-    "that70schris"
+    "that70schris",
+    "CaffeineCat"
   ],
   "categories": [
     "Productivity"
@@ -45,6 +46,14 @@
       "description": "Reloads the Hammerspoon configuration file",
       "mode": "no-view",
       "preferences": [
+        {
+          "name": "clearConsole",
+          "label": "Clear Console",
+          "description": "Clear the Hammerspoon Console before reloading the configuration file",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
         {
           "name": "openConsole",
           "label": "Open Console",

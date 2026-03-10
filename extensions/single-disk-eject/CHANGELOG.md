@@ -1,8 +1,16 @@
 # Single Disk Eject Changelog
 
+## [Dependency update] - 2026-03-08
+
+- Updated dependencies
+  - Updated to Node.js 22 and latest Raycast API (v1.103.10)
+  - Migrated to new Toast and Action APIs
+- Minor error handling improvements
+
 ## [Windows Support] 2026-01-09
 
 - Added windows support with a C# helper (compiles at runtime) and PowerShell
+
 
 ## [Bug Fix] 2023-11-10
 

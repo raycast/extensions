@@ -1,7 +1,7 @@
 {
   "name": "teak-raycast",
   "title": "Teak",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "MIT",
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
@@ -59,7 +59,7 @@
     "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@types/node": "^24.3.1",
+    "@types/node": "^25.3.0",
     "@types/react": "19.2.10",
     "typescript": "^5.9.3"
   }

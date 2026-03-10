@@ -1,5 +1,34 @@
 # Karakeep Changelog
 
+## [2.2.0] - 2026-03-09
+
+### New Features
+
+- **List management** — Create, edit, and delete lists from the Lists command. Supports manual and smart lists; smart lists include a query builder with one-click insertion of valid filter qualifiers.
+- **Tag management** — Create, rename, and delete tags from the Tags command.
+- **Tag picker on bookmark and note creation** — Select existing tags or type new ones when saving a bookmark or note.
+- **List filter in Bookmarks** — Filter the Bookmarks view by list using the search bar dropdown.
+- **Browser extension links** — Install the Karakeep extension for Chrome, Firefox, or Safari directly from the Actions panel on any bookmark.
+
+### New Commands
+
+- **Notes** — Dedicated view for text notes, separate from link bookmarks.
+- **Highlights** — View, edit, and delete highlights saved from web pages, with a direct action to open the source bookmark.
+- **My Stats** — Library overview with bookmark counts by type, top domains, top tags, activity this week/month/year, and storage usage. Includes charts for bookmark sources and activity patterns.
+- **Backups** — Create, download, and delete account backups. The list polls automatically while a backup is in progress and updates when it completes. Download is only available once a backup succeeds; failed backups are shown in red.
+
+### Improvements
+
+- Stats sidebar links navigate directly to the related command (Bookmarks, Tags, Lists, etc.)
+- Backup status tags are color-coded: green for success, red for failure, gray for pending
+- Error toasts show human-readable messages from the API rather than raw error bodies
+- All delete actions use destructive styling
+- Smart list queries are validated before submission with inline error messages
+
+### Chores
+
+- Updated dependencies and regenerated TypeScript definitions
+
 ## [2.1.1] - 2026-02-23
 
 ### Fixes
@@ -18,6 +47,7 @@
 - **Type safety improvements**: `List` type now includes `parentId` and `icon` fields used by the hierarchy view; `Asset.assetType` is now an optional property instead of a `| undefined` union member.
 - **Simplified `useTranslation` hook**: Removed unnecessary `isInitialMount` ref pattern; language sync is now handled by a single clean effect.
 - **Removed redundant imports and calls**: Cleaned up duplicate `Bookmark` import in `quickBookmark.tsx`, unnecessary `URL` polyfill import in `apis/index.ts`, and a redundant `showHUD` call that duplicated the success toast in `createNote.tsx`.
+
 ## [2.1.0] 2025-11-21
 
 ### Big changes

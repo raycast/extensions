@@ -76,7 +76,7 @@ export function getDayWeatherIcon(day: WeatherData): string {
   return getWeatherCodeIcon(code || "");
 }
 
-export function DayListItem(props: { day: WeatherData; title: string }): JSX.Element {
+export function DayListItem(props: { day: WeatherData; title: string }): React.ReactElement {
   const data = props.day;
   const wd = getWeekday(data.date);
   const weatherCodes = data.hourly.map((h) => h.weatherCode);
@@ -355,12 +355,14 @@ function WeatherDailyForecastFragment(props: { data: Weather | undefined }): Rea
   const { title } = getMetaData(data);
   return (
     <List.Section title="Daily Forecast">
-      {data?.weather?.map((d) => <DayListItem key={d.date} day={d} title={title} />)}
+      {data?.weather?.map((d) => (
+        <DayListItem key={d.date} day={d} title={title} />
+      ))}
     </List.Section>
   );
 }
 
-export function WeatherListOrDay(props: { day?: WttrDay }): JSX.Element {
+export function WeatherListOrDay(props: { day?: WttrDay }): React.ReactElement {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useWeather(query);
   if (props.day) {

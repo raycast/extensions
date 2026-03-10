@@ -9,6 +9,7 @@ const KNOWN_ERROR_CODES = [
   "METHOD_NOT_ALLOWED",
   "MISSING_API_KEY",
   "NETWORK_ERROR",
+  "NOT_FOUND",
   "RATE_LIMITED",
   "REQUEST_FAILED",
   "UNAUTHORIZED",
@@ -35,6 +36,8 @@ const getErrorMessage = (code: RaycastApiErrorCode): string => {
       return "Too many requests right now. Please wait a moment and try again.";
     case "NETWORK_ERROR":
       return "Unable to reach Teak. Check your internet connection and try again.";
+    case "NOT_FOUND":
+      return "This card no longer exists in Teak.";
     case "INVALID_INPUT":
     case "BAD_REQUEST":
       return "The request could not be processed. Please check your input and try again.";
@@ -117,6 +120,8 @@ export const getRecoveryHint = (error: unknown): string | null => {
       return "Wait a few seconds, then retry.";
     case "NETWORK_ERROR":
       return "Check network connectivity, then retry.";
+    case "NOT_FOUND":
+      return "Refresh the card list and try again.";
     default:
       return null;
   }

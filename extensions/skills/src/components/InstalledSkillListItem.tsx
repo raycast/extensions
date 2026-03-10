@@ -2,21 +2,24 @@ import { ActionPanel, Action, Icon, Keyboard, List, Color } from "@raycast/api";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { useCachedPromise } from "@raycast/utils";
-import { type InstalledSkill, removeFrontmatter } from "../shared";
+import { type InstalledSkill, parseFrontmatter } from "../shared";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 
 function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected: boolean }) {
-  const { data: content, isLoading } = useCachedPromise(
+  const { data: parsed, isLoading } = useCachedPromise(
     async (path: string) => {
       const raw = await readFile(join(path, "SKILL.md"), "utf-8");
-      return removeFrontmatter(raw);
+      return parseFrontmatter(raw);
     },
     [skill.path],
     { execute: isSelected },
   );
 
-  const markdown = isLoading ? `# ${skill.name}\n\nLoading...` : (content ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const markdown = isLoading
+    ? `# ${skill.name}\n\nLoading...`
+    : (parsed?.body ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const frontmatter = parsed?.frontmatter ?? {};
 
   return (
     <List.Item.Detail
@@ -24,7 +27,13 @@ function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
+          {frontmatter.description && (
+            <List.Item.Detail.Metadata.Label title="Description" text={frontmatter.description} />
+          )}
           <List.Item.Detail.Metadata.Label title="Name" text={skill.name} />
+          {frontmatter.license && (
+            <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
+          )}
           {skill.hasUpdate && (
             <List.Item.Detail.Metadata.TagList title="Status">
               <List.Item.Detail.Metadata.TagList.Item text="Update available" color={Color.Orange} />

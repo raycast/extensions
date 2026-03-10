@@ -46,8 +46,8 @@
     }
   ],
   "dependencies": {
-    "@hugeicons/core-free-icons": "^2.0.0",
-    "@hugeicons/react": "^1.1.2",
+    "@hugeicons/core-free-icons": "^3.3.0",
+    "@hugeicons/react": "^1.1.5",
     "@raycast/api": "^1.104.1",
     "title-case": "^3.0.3"
   },

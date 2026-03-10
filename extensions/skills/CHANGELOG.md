@@ -1,5 +1,16 @@
 # Changelog
 
+## [Fix allowed-tools TypeError] - 2026-03-09
+
+- Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
+- Normalize allowed-tools to array before rendering
+
+## [Rich Skill Metadata] - 2026-03-07
+
+- Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
+- Show GitHub star count alongside install count
+- Show skill description as list item subtitle when the detail panel is hidden
+
 ## [Update Skills] - 2026-03-01
 
 - Check for available skill updates on launch
