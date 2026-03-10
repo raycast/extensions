@@ -826,6 +826,20 @@ function ConversationView(props: {
             title="Start this channel"
             subtitle="Type above and press Enter"
             detail={<List.Item.Detail markdown="No messages yet." />}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Send Message"
+                  onAction={() => void send()}
+                  shortcut={{ modifiers: [], key: "return" }}
+                />
+                <Action
+                  title="Send Message (Cmd+Enter)"
+                  onAction={() => void send()}
+                  shortcut={{ modifiers: ["cmd"], key: "return" }}
+                />
+              </ActionPanel>
+            }
           />
         ) : (
           mergedMessages.map((message, index) => (
@@ -844,7 +858,11 @@ function ConversationView(props: {
               }
               actions={
                 <ActionPanel>
-                  <Action title="Send Message" onAction={() => void send()} />
+                  <Action
+                    title="Send Message"
+                    onAction={() => void send()}
+                    shortcut={{ modifiers: [], key: "return" }}
+                  />
                   <Action
                     title="Send Message (Cmd+Enter)"
                     onAction={() => void send()}
