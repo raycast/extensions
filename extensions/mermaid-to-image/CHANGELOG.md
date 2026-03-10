@@ -1,6 +1,6 @@
 # Mermaid to Image Changelog
 
-## [Hybrid Renderer & Raycast Preview Improvements] - {PR_MERGE_DATE}
+## [Hybrid Renderer & Raycast Preview Improvements] - 2026-03-10
 
 ### Added
 
