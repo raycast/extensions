@@ -1,5 +1,3 @@
-import type { TimeOption } from "./types";
-
 function parseTime(timeStr: string): Date {
   const parts = timeStr.split(":").map(Number);
   const hours = parts[0] ?? 0;
@@ -85,16 +83,10 @@ export function calculateRemainingTime(
   const hours = Math.floor(absDiffMs / (1000 * 60 * 60));
   const minutes = Math.floor((absDiffMs % (1000 * 60 * 60)) / (1000 * 60));
 
-): TimeOption[] {
-  return START_HOURS.flatMap((hour) =>
-    MINUTE_OPTIONS.map((minute) => {
-      const startTime = formatTimeString(hour, minute);
-      return {
-        startTime,
-        leaveTime: calculateLeaveTime(startTime, workHours, breakMinutes),
-        workHours,
-        breakMinutes,
-      };
-    }),
-  );
+  return { hours, minutes, isPast };
+}
+
+/** Generate HH:MM format time string */
+export function formatTimeString(hours: number, minutes: number): string {
+  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
 }

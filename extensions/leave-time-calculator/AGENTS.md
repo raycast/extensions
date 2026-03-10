@@ -9,6 +9,7 @@ response in English only.
 - `src/lib/time-utils.ts`: leave-time and remaining-time calculations.
 - `src/lib/storage.ts`: Raycast `LocalStorage` access for daily start time state.
 - `tests/`: Vitest suites (currently `tests/time-utils.test.ts`).
+- `assets/`: icon assets used in extension metadata and docs.
 
 ## Build, Test, and Development Commands
 - `bun install`: install dependencies.

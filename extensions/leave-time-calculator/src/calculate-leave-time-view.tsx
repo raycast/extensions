@@ -60,13 +60,12 @@ export default function Command() {
 
   useEffect(() => {
     const interval = setInterval(() => {
-  useEffect(() => {
-    const interval = setInterval(() => {
       setCurrentTime(getCurrentTimeString());
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
+
+  const handleSelect = async (startTime: string) => {
     await setTodayStartTime(startTime);
     setTodayStart(startTime);
     await refreshTopCommandSubtitle();
