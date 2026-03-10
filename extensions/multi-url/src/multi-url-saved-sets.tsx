@@ -506,9 +506,10 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function assignSetToSlot(setId: string, slot: ShortcutSlotKey) {
-    const previousSlot = SLOT_KEYS.find((item) => slots[item] === setId) ?? null;
-    const didToggleOff = slots[slot] === setId;
-    const nextSlots = toggleSetQuickUrlSlot(slots, setId, slot);
+    const freshSlots = await loadShortcutSlots();
+    const previousSlot = SLOT_KEYS.find((item) => freshSlots[item] === setId) ?? null;
+    const didToggleOff = freshSlots[slot] === setId;
+    const nextSlots = toggleSetQuickUrlSlot(freshSlots, setId, slot);
     await saveShortcutSlots(nextSlots);
     setSlots(nextSlots);
 
@@ -524,8 +525,9 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function clearSetFromSlots(setId: string) {
+    const freshSlots = await loadShortcutSlots();
     const nextSlots: ShortcutSlots = {
-      ...slots,
+      ...freshSlots,
     };
 
     for (const slot of SLOT_KEYS) {
@@ -544,7 +546,8 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function clearAllQuickUrlMappings() {
-    const hasMappings = SLOT_KEYS.some((slot) => slots[slot] !== null);
+    const freshSlots = await loadShortcutSlots();
+    const hasMappings = SLOT_KEYS.some((slot) => freshSlots[slot] !== null);
     if (!hasMappings) {
       return;
     }
@@ -584,7 +587,10 @@ export function MultiUrlSavedSetsList() {
       return false;
     }
 
-    const duplicate = savedSets.find((item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase());
+    const freshSavedSets = await loadSavedSets();
+    const duplicate = freshSavedSets.find(
+      (item) => item.id !== setId && item.name.toLowerCase() === nextName.toLowerCase(),
+    );
 
     if (duplicate) {
       await showToast({
@@ -631,7 +637,7 @@ export function MultiUrlSavedSetsList() {
     const tags = parseTagInput(values.tags);
     const normalizedUrls = parsed.uniqueValid.join("\n");
     const now = new Date().toISOString();
-    const nextSavedSets = savedSets.map((item) =>
+    const nextSavedSets = freshSavedSets.map((item) =>
       item.id === setId
         ? {
             ...item,
@@ -1042,7 +1048,8 @@ export function MultiUrlSavedSetsList() {
       return;
     }
 
-    const nextTrash = sortTrash(trash.filter((item) => item.id !== entry.id));
+    const freshTrash = await loadTrash();
+    const nextTrash = sortTrash(freshTrash.filter((item) => item.id !== entry.id));
     await saveTrash(nextTrash);
     setTrash(nextTrash);
 
@@ -1053,7 +1060,8 @@ export function MultiUrlSavedSetsList() {
   }
 
   async function clearTrash() {
-    if (trash.length === 0) {
+    const freshTrash = await loadTrash();
+    if (freshTrash.length === 0) {
       return;
     }
 
