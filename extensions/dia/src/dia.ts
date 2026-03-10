@@ -336,8 +336,7 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
   let sanitized = result
     .split("")
     .map((c) => (c.charCodeAt(0) <= 31 ? " " : c))
-    .join("")
-    .replace(/  +/g, " ");
+    .join("");
   // Escape unescaped " inside string values (e.g. titles with literal ") so JSON.parse succeeds.
   sanitized = fixUnescapedQuotesInJson(sanitized);
 
