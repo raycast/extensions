@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import { readFile } from "fs/promises";
 import * as path from "path";
 
 const LITTERBOX_API = "https://litterbox.catbox.moe/resources/internals/api.php";
@@ -16,7 +16,7 @@ export const EXPIRY_OPTIONS: { value: ExpiryTime; label: string }[] = [
  * Upload a file to Litterbox. Returns the shareable URL (plain text response).
  */
 export async function uploadFile(filePath: string, time: ExpiryTime): Promise<string> {
-  const buffer = fs.readFileSync(filePath);
+  const buffer = await readFile(filePath);
   const filename = path.basename(filePath);
   const fileBytes = new Uint8Array(buffer);
   const form = new FormData();
