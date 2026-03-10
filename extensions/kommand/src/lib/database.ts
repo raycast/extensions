@@ -25,9 +25,9 @@ export const DB_PATH = resolve(
   "Library/Containers/com.curiouscode.kommand/Data/Library/Application Support/default.store",
 );
 
-/** Check whether the Kommand database exists (i.e. the app has been used) */
+/** Check whether Kommand is installed and has been used at least once */
 export function isKommandInstalled(): boolean {
-  return existsSync(DB_PATH);
+  return isAppBundlePresent() && existsSync(DB_PATH);
 }
 
 /** Check whether the Kommand app bundle actually exists on disk */
