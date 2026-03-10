@@ -172,7 +172,9 @@ export async function runShortcutSlot(slot: ShortcutSlotKey, slotLabel: string):
     const openedCount = parsed.uniqueValid.length - openFailures.length;
     const now = new Date().toISOString();
 
-    const nextSavedSets = savedSets.map((item) =>
+    const [freshSavedSets, history] = await Promise.all([loadSavedSets(), loadHistory()]);
+    const savedSetsToUpdate = freshSavedSets.some((item) => item.id === selectedSet.id) ? freshSavedSets : savedSets;
+    const nextSavedSets = savedSetsToUpdate.map((item) =>
       item.id === selectedSet.id
         ? applySavedSetRunStats(
             item,
@@ -185,9 +187,6 @@ export async function runShortcutSlot(slot: ShortcutSlotKey, slotLabel: string):
           )
         : item,
     );
-    await saveSavedSets(nextSavedSets);
-
-    const history = await loadHistory();
     const nextHistory = [
       {
         id: randomUUID(),
@@ -202,7 +201,7 @@ export async function runShortcutSlot(slot: ShortcutSlotKey, slotLabel: string):
       },
       ...history,
     ].slice(0, MAX_HISTORY_ITEMS);
-    await saveHistory(nextHistory);
+    await Promise.all([saveSavedSets(nextSavedSets), saveHistory(nextHistory)]);
 
     if (openFailures.length > 0 || parsed.invalid.length > 0) {
       await showToast({
