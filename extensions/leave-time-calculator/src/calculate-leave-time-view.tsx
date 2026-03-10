@@ -61,7 +61,7 @@ export default function Command() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(getCurrentTimeString());
-    }, 1000);
+    }, 60_000);
     return () => clearInterval(interval);
   }, []);
 

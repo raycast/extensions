@@ -5,12 +5,8 @@ export type WorkPreferences = {
   breakMinutes: number;
 };
 
-// Both commands (calculate-leave-time, calculate-leave-time-view) share
-// identical preference definitions in package.json. Keep them in sync.
-type CommandPreferences = Preferences.CalculateLeaveTime;
-
 export function getWorkPreferences(): WorkPreferences {
-  const prefs = getPreferenceValues<CommandPreferences>();
+  const prefs = getPreferenceValues<Preferences.CalculateLeaveTime>();
   const workHours = parseFloat(prefs.defaultWorkHours);
   const breakMinutes = parseInt(prefs.defaultBreakMinutes, 10);
   return {
