@@ -1,4 +1,5 @@
 import { URL } from "url";
+import { confirmAlert, Icon } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { BrowserConfig } from "./types";
 
@@ -261,12 +262,15 @@ export const openGoogleChrome = async (
     }
   `;
 
+  let profilesMenuError: unknown;
+
   try {
     await willOpen();
     await runAppleScript(script);
     return;
   } catch (error) {
     // If the Profiles menu approach fails, fall back to the shell script method
+    profilesMenuError = error;
     console.error("Profiles menu approach failed, falling back to shell script:", error);
   }
 
@@ -285,7 +289,22 @@ export const openGoogleChrome = async (
   try {
     await willOpen();
     await runAppleScript(fallbackScript);
-  } catch (error) {
-    console.error("Fallback shell script failed:", error);
+  } catch (fallbackError) {
+    console.error("Fallback shell script failed:", fallbackError);
+
+    await confirmAlert({
+      title: `Failed to open ${browser.appName}`,
+      icon: Icon.ExclamationMark,
+      message: [
+        `Profile: ${profile.name}`,
+        "",
+        `Profiles menu error: ${String(profilesMenuError)}`,
+        "",
+        `Fallback error: ${String(fallbackError)}`,
+        "",
+        `Is ${browser.appName} installed and accessible at "${browser.binaryPath}"?`,
+      ].join("\n"),
+      primaryAction: { title: "OK" },
+    });
   }
 };
