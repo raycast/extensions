@@ -1,5 +1,6 @@
 import { URL } from "url";
 import { runAppleScript } from "@raycast/utils";
+import { BrowserConfig } from "./types";
 
 export type ChromeTarget = { action: "focus" } | { action: "newTab" } | { action: "openUrl"; url: string };
 
@@ -179,21 +180,19 @@ export const openGoogleChrome = async (
   profile: { name: string; directory: string },
   target: ChromeTarget,
   willOpen: () => Promise<void>,
+  browser: BrowserConfig,
 ) => {
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
-  // Escape all user-controlled input to prevent AppleScript injection
   const escapedProfileName = escapeAppleScriptString(profile.name);
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
+  const escapedAppName = escapeAppleScriptString(browser.appName);
 
-  // Use menu bar item 8 for Profiles menu (language-independent position)
-  // Chrome menu bar: 1=Apple, 2=Chrome, 3=File, 4=Edit, 5=View, 6=History, 7=Bookmarks, 8=Profiles, 9=Tab, 10=Window, 11=Help
   const script = `
-    tell application "Google Chrome" to activate
+    tell application "${escapedAppName}" to activate
     tell application "System Events"
-      tell process "Google Chrome"
-        -- Focus the profile window via Profiles menu (menu bar item 8, language-independent)
+      tell process "${escapedAppName}"
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
 
@@ -223,9 +222,8 @@ export const openGoogleChrome = async (
     ${
       action === "newTab"
         ? `
-    tell application "Google Chrome"
+    tell application "${escapedAppName}"
       set currentURL to URL of active tab of front window
-      -- Check if current tab is already a new tab
       if currentURL is not "chrome://newtab/" then
         make new tab at end of tabs of front window
       end if
@@ -237,7 +235,7 @@ export const openGoogleChrome = async (
     ${
       escapedUrl
         ? `
-    tell application "Google Chrome"
+    tell application "${escapedAppName}"
       set targetURL to "${escapedUrl}"
       set tabCount to count of tabs of front window
       set foundTab to false
@@ -263,16 +261,15 @@ export const openGoogleChrome = async (
     await runAppleScript(script);
     return;
   } catch (error) {
-    // If the Profiles menu approach fails, fall back to the shell script method
     console.error("Profiles menu approach failed, falling back to shell script:", error);
   }
 
-  // Fallback: use shell script to open Chrome with profile directory
   const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
   const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
   const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
+  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
   const fallbackScript = `
-    set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    set theAppPath to quoted form of "${escapedBinaryPath}"
     set theProfile to quoted form of "${escapedProfileDirectory}"
     set theLink to quoted form of "${escapedFallbackUrl}"
     do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
@@ -282,6 +279,6 @@ export const openGoogleChrome = async (
     await willOpen();
     await runAppleScript(fallbackScript);
   } catch (error) {
-    // Handle errors silently
+    console.error("Fallback shell script failed:", error);
   }
 };

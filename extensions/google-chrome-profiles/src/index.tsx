@@ -17,11 +17,13 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import {
+  BrowserConfig,
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
   GoogleChromeBookmarkURL,
   GoogleChromeInfoCache,
   GoogleChromeLocalState,
+  getSelectedBrowser,
   Preferences,
   Profile,
 } from "./util/types";
@@ -36,8 +38,8 @@ import {
 } from "./util/util";
 import { getFavicon } from "@raycast/utils";
 
-const ProfileItem = (props: { index: number; profile: Profile }) => {
-  const { index, profile } = props;
+const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserConfig }) => {
+  const { index, profile, browser } = props;
 
   return (
     <List.Item
@@ -48,7 +50,11 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
       keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Bookmarks" icon={Icon.Link} target={<ListBookmarks profile={profile} />} />
+          <Action.Push
+            title="Show Bookmarks"
+            icon={Icon.Link}
+            target={<ListBookmarks profile={profile} browser={browser} />}
+          />
           <Action
             title="Bring to Front"
             icon={Icon.Window}
@@ -56,7 +62,7 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
             onAction={async () => {
               await openGoogleChrome(profile, ChromeAction.Focus, async () => {
                 await showHUD("Bringing to front...");
-              });
+              }, browser);
             }}
           />
         </ActionPanel>
@@ -66,23 +72,19 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
 };
 
 export default function Command() {
+  const browser = getSelectedBrowser();
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
     async function listProfiles() {
       try {
-        // for google-chrome-profiles-1.png:
-        // 1. comment the code below:
-        const path = join(homedir(), "Library/Application Support/Google/Chrome/Local State");
+        const path = join(homedir(), browser.dataPath, "Local State");
         const localStateFileBuffer = await readFile(path);
         const localStateFileText = localStateFileBuffer.toString("utf-8");
         setLocalState(JSON.parse(localStateFileText));
-        // 2. uncomment function _createDataSetForScreenshot1() at the bottom of the file
-        // 3. uncomment code below:
-        // setLocalState(_createDataSetForScreenshot1());
       } catch (error) {
-        setError(Error("No profile found\nIs Google Chrome installed?"));
+        setError(Error(`No profile found\nIs ${browser.name} installed?`));
       }
     }
 
@@ -101,7 +103,9 @@ export default function Command() {
       {profiles &&
         profiles
           .sort(sortAlphabetically)
-          .map((profile, index) => <ProfileItem key={profile.directory} index={index} profile={profile} />)}
+          .map((profile, index) => (
+            <ProfileItem key={profile.directory} index={index} profile={profile} browser={browser} />
+          ))}
     </List>
   );
 }
@@ -146,7 +150,7 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
 // Components
 //-------------
 
-function ListBookmarks(props: { profile: Profile }) {
+function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
   const [bookmarkFile, setBookmarkFile] = useState<GoogleChromeBookmarkFile>();
   const [error, setError] = useState<Error>();
   const [searchText, setSearchText] = useState("");
@@ -156,7 +160,7 @@ function ListBookmarks(props: { profile: Profile }) {
     async function listBookmarks() {
       try {
         const dir = props.profile.directory;
-        const path = join(homedir(), "Library/Application Support/Google/Chrome", dir, "Bookmarks");
+        const path = join(homedir(), props.browser.dataPath, dir, "Bookmarks");
         const bookmarkFileBuffer = await readFile(path);
         const bookmarkFileText = bookmarkFileBuffer.toString("utf-8");
         setBookmarkFile(JSON.parse(bookmarkFileText));
@@ -255,7 +259,7 @@ function ListBookmarks(props: { profile: Profile }) {
           <List.Item
             title="Bring to Front"
             icon={Icon.Window}
-            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} />}
+            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} browser={props.browser} />}
           />
           {newTabItems.map((tab, index) => (
             <List.Item
@@ -263,7 +267,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={tab.title}
               subtitle={tab.subtitle}
               icon={tab.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} />}
+              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
           {clipboardItem && (
@@ -271,7 +275,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={clipboardItem.title}
               subtitle={clipboardItem.subtitle}
               icon={clipboardItem.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={clipboardItem.target} />}
+              actions={<ActionPanelForTarget profile={props.profile} target={clipboardItem.target} browser={props.browser} />}
             />
           )}
         </List.Section>
@@ -284,7 +288,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={tab.title}
               subtitle={tab.subtitle}
               icon={tab.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} />}
+              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
         </List.Section>
@@ -297,7 +301,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={b.title}
               subtitle={b.subtitle}
               icon={getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })}
-              actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.openUrl(b.url)} />}
+              actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.openUrl(b.url)} browser={props.browser} />}
             />
           ))}
         </List.Section>
@@ -310,7 +314,7 @@ function newTabUrlWithQuery(searchText: string) {
   return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
-function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget }) {
+function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
   const context = encodeURIComponent(
     JSON.stringify({ directory: props.profile.directory, name: props.profile.name, ...props.target }),
   );
@@ -337,12 +341,12 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget })
   return (
     <ActionPanel>
       <Action
-        title="Open in Google Chrome"
+        title={`Open in ${props.browser.name}`}
         icon={Icon.Globe}
         onAction={() => {
           openGoogleChrome(props.profile, props.target, async () => {
             await showHUD(hudMessage);
-          });
+          }, props.browser);
         }}
       />
       <Action.CreateQuicklink title={quicklinkTitle} quicklink={{ name: quicklinkName, link: deeplink }} />

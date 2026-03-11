@@ -1,3 +1,5 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export type GoogleChromeLocalState = {
   profile: { info_cache: GoogleChromeInfoCache };
 };
@@ -82,4 +84,32 @@ export type GoogleChromeBookmarkFile = {
 
 export interface Preferences {
   newTabURL: string;
+  browser: string;
+}
+
+export interface BrowserConfig {
+  readonly name: string;
+  readonly dataPath: string;
+  readonly appName: string;
+  readonly binaryPath: string;
+}
+
+export const BROWSERS: Record<string, BrowserConfig> = {
+  chrome: {
+    name: "Google Chrome",
+    dataPath: "Library/Application Support/Google/Chrome",
+    appName: "Google Chrome",
+    binaryPath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  },
+  "chrome-canary": {
+    name: "Google Chrome Canary",
+    dataPath: "Library/Application Support/Google/Chrome Canary",
+    appName: "Google Chrome Canary",
+    binaryPath: "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+  },
+};
+
+export function getSelectedBrowser(): BrowserConfig {
+  const { browser } = getPreferenceValues<Preferences>();
+  return BROWSERS[browser] ?? BROWSERS["chrome"];
 }
