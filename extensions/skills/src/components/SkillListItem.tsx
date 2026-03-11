@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   type AuditStatus,
   type SkillFrontmatter,
@@ -179,13 +179,17 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
       : { source: Icon.Hammer };
 
+  const shownErrorTimestampRef = useRef<string | undefined>(undefined);
+
   useEffect(() => {
     if (
       isSelected &&
       audits.errorDetails !== undefined &&
       audits.errorDetails.skillSource === skill.source &&
-      audits.errorDetails.skillId === skill.skillId
+      audits.errorDetails.skillId === skill.skillId &&
+      audits.errorDetails.timestamp !== shownErrorTimestampRef.current
     ) {
+      shownErrorTimestampRef.current = audits.errorDetails.timestamp;
       void showSkillAuditErrorToast({
         error: audits.error ?? new Error("Unknown error"),
         errorDetails: audits.errorDetails,
