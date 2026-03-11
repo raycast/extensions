@@ -285,9 +285,6 @@ export default function Command() {
 
         const json = await response.json();
 
-        console.log(json, idx);
-      }
-
       if (idx != "0") {
         songs.forEach((s) => {
           if (s.index_queue < idx) {
