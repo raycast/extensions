@@ -88,7 +88,7 @@ export default function Command() {
         const localStateFileText = localStateFileBuffer.toString("utf-8");
         setLocalState(JSON.parse(localStateFileText));
       } catch (error) {
-        setError(Error(`No profile found\nIs ${browser.name} installed?`));
+        setError(Error(`No profile found\nIs ${browser.appName} installed?`));
       }
     }
 
@@ -355,7 +355,7 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
   return (
     <ActionPanel>
       <Action
-        title={`Open in ${props.browser.name}`}
+        title={`Open in ${props.browser.appName}`}
         icon={Icon.Globe}
         onAction={() => {
           openGoogleChrome(

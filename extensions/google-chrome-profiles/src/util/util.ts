@@ -185,14 +185,18 @@ export const openGoogleChrome = async (
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
+  // Escape all user-controlled input to prevent AppleScript injection
   const escapedProfileName = escapeAppleScriptString(profile.name);
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
   const escapedAppName = escapeAppleScriptString(browser.appName);
 
+  // Use menu bar item 8 for Profiles menu (language-independent position)
+  // Chrome menu bar: 1=Apple, 2=Chrome, 3=File, 4=Edit, 5=View, 6=History, 7=Bookmarks, 8=Profiles, 9=Tab, 10=Window, 11=Help
   const script = `
     tell application "${escapedAppName}" to activate
     tell application "System Events"
       tell process "${escapedAppName}"
+        -- Focus the profile window via Profiles menu (menu bar item 8, language-independent)
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
 
@@ -224,6 +228,7 @@ export const openGoogleChrome = async (
         ? `
     tell application "${escapedAppName}"
       set currentURL to URL of active tab of front window
+      -- Check if current tab is already a new tab
       if currentURL is not "chrome://newtab/" then
         make new tab at end of tabs of front window
       end if
@@ -261,9 +266,11 @@ export const openGoogleChrome = async (
     await runAppleScript(script);
     return;
   } catch (error) {
+    // If the Profiles menu approach fails, fall back to the shell script method
     console.error("Profiles menu approach failed, falling back to shell script:", error);
   }
 
+  // Fallback: use shell script to open Chrome with profile directory
   const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
   const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
   const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
