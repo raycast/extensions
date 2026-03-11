@@ -2,7 +2,7 @@ import { List, ActionPanel, Action, showToast, Toast, Icon, Image, getPreference
 import { useState, useEffect } from "react";
 
 // Config
-const preferences = getPreferenceValues<{ token: string }>();
+const preferences = getPreferenceValues<Preferences>();
 const BASE_URL = "http://localhost:10767/api/v1";
 const API_TOKEN = preferences.token;
 
