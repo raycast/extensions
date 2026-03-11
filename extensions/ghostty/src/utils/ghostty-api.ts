@@ -117,7 +117,7 @@ function buildAppleScript(target: RunGhosttyAppleScriptTarget) {
     `set projectDir to ${appleScriptString(target.directory)}`,
     `set windowTitle to ${appleScriptString(target.layout.windowTitle ?? getDirectoryName(target.directory))}`,
     "",
-    'if ghosttyWasRunning is false then',
+    "if ghosttyWasRunning is false then",
     '    tell application "Ghostty" to launch',
     "end if",
     "",
