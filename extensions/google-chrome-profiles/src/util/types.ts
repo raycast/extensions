@@ -82,11 +82,6 @@ export type GoogleChromeBookmarkFile = {
   };
 };
 
-export interface Preferences {
-  newTabURL: string;
-  browser: string;
-}
-
 export interface BrowserConfig {
   readonly name: string;
   readonly dataPath: string;
@@ -110,6 +105,6 @@ export const BROWSERS: Record<string, BrowserConfig> = {
 };
 
 export function getSelectedBrowser(): BrowserConfig {
-  const { browser } = getPreferenceValues<Preferences>();
+  const { browser } = getPreferenceValues<ExtensionPreferences>();
   return BROWSERS[browser] ?? BROWSERS["chrome"];
 }

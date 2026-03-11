@@ -24,7 +24,6 @@ import {
   GoogleChromeInfoCache,
   GoogleChromeLocalState,
   getSelectedBrowser,
-  Preferences,
   Profile,
 } from "./util/types";
 import {
@@ -326,7 +325,7 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
 }
 
 function newTabUrlWithQuery(searchText: string) {
-  return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
+  return getPreferenceValues<ExtensionPreferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
 function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
