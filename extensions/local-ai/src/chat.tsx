@@ -20,28 +20,12 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { homedir } from "os";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
-import {
-  getProviderConfig,
-  fetchModels,
-  sendChatStream,
-  trimMessages,
-  PROVIDER_NAMES,
-} from "./lib/api";
+import { getProviderConfig, fetchModels, sendChatStream, trimMessages, PROVIDER_NAMES } from "./lib/api";
 import { parseSSEStream } from "./lib/streaming";
 import { webSearch, formatSearchContext, shouldSearch } from "./lib/web-search";
 import { BUILT_IN_TOOLS, runWithTools } from "./lib/tools";
-import {
-  saveConversation,
-  getConversation,
-  generateId,
-  generateTitle,
-} from "./lib/storage";
-import type {
-  ChatMessage,
-  ProviderConfig,
-  Model,
-  Conversation,
-} from "./lib/types";
+import { saveConversation, getConversation, generateId, generateTitle } from "./lib/storage";
+import type { ChatMessage, ProviderConfig, Model, Conversation } from "./lib/types";
 import { PROMPT_PRESETS } from "./lib/prompts";
 import { useOnboarding } from "./lib/use-onboarding";
 import { OnboardingForm } from "./onboarding-form";
@@ -64,13 +48,7 @@ const PROVIDER_LABELS: Record<string, string> = {
 };
 
 /** Pushed view for picking a different model mid-conversation. */
-function ModelSelector({
-  models,
-  onSelect,
-}: {
-  models: Model[];
-  onSelect: (modelId: string) => void;
-}) {
+function ModelSelector({ models, onSelect }: { models: Model[]; onSelect: (modelId: string) => void }) {
   const { pop } = useNavigation();
 
   return (
@@ -166,12 +144,7 @@ function ChatSettingsForm({
         }}
       >
         {PROMPT_PRESETS.map((preset) => (
-          <Form.Dropdown.Item
-            key={preset.id}
-            value={preset.id}
-            title={preset.name}
-            icon={preset.icon}
-          />
+          <Form.Dropdown.Item key={preset.id} value={preset.id} title={preset.name} icon={preset.icon} />
         ))}
       </Form.Dropdown>
       {showModelField && (
@@ -230,12 +203,8 @@ function buildConversationMarkdown(
   for (const msg of visibleMessages) {
     if (msg.role === "user") {
       const imgSection =
-        msg.images && msg.images.length > 0
-          ? msg.images.map((p) => `![Image](${p})`).join("\n\n") + "\n\n"
-          : "";
-      const textSection = msg.content
-        ? `> ${msg.content.split("\n").join("\n> ")}`
-        : "";
+        msg.images && msg.images.length > 0 ? msg.images.map((p) => `![Image](${p})`).join("\n\n") + "\n\n" : "";
+      const textSection = msg.content ? `> ${msg.content.split("\n").join("\n> ")}` : "";
       parts.push(`---\n\n> **You**\n>\n${imgSection}${textSection}\n`);
     } else {
       parts.push(`---\n\n**Assistant**\n\n${msg.content}\n`);
@@ -244,9 +213,7 @@ function buildConversationMarkdown(
 
   // Streaming response
   if (isLoading && currentResponse) {
-    parts.push(
-      `---\n\n**Assistant**\n\n${currentResponse}\n\n*Generating\u2026*\n`,
-    );
+    parts.push(`---\n\n**Assistant**\n\n${currentResponse}\n\n*Generating\u2026*\n`);
   } else if (isLoading && !currentResponse) {
     parts.push(`---\n\n*Thinking\u2026*\n`);
   }
@@ -255,11 +222,7 @@ function buildConversationMarkdown(
 }
 
 /** Build a clean markdown document for file export. */
-function buildExportMarkdown(
-  messages: ChatMessage[],
-  modelLabel: string,
-  providerLabel: string,
-): string {
+function buildExportMarkdown(messages: ChatMessage[], modelLabel: string, providerLabel: string): string {
   const date = new Date().toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -268,13 +231,9 @@ function buildExportMarkdown(
   const lines: string[] = [];
 
   const firstUserMsg = messages.find((m) => m.role === "user");
-  const title = firstUserMsg
-    ? firstUserMsg.content.slice(0, 60).replace(/\n/g, " ")
-    : "Conversation";
+  const title = firstUserMsg ? firstUserMsg.content.slice(0, 60).replace(/\n/g, " ") : "Conversation";
   lines.push(`# ${title}\n`);
-  lines.push(
-    `**Model:** ${modelLabel}  \n**Provider:** ${providerLabel}  \n**Date:** ${date}\n`,
-  );
+  lines.push(`**Model:** ${modelLabel}  \n**Provider:** ${providerLabel}  \n**Date:** ${date}\n`);
   lines.push(`---\n`);
 
   for (const msg of messages) {
@@ -342,12 +301,9 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
     systemPrompt: null,
   });
 
-  const effectiveTemperature =
-    sessionOverrides.temperature ?? config?.temperature ?? 0.7;
-  const effectiveMaxTokens =
-    sessionOverrides.maxTokens ?? config?.maxTokens ?? 2048;
-  const effectiveSystemPrompt =
-    sessionOverrides.systemPrompt ?? config?.systemPrompt ?? "";
+  const effectiveTemperature = sessionOverrides.temperature ?? config?.temperature ?? 0.7;
+  const effectiveMaxTokens = sessionOverrides.maxTokens ?? config?.maxTokens ?? 2048;
+  const effectiveSystemPrompt = sessionOverrides.systemPrompt ?? config?.systemPrompt ?? "";
 
   // ── Initialise ──
   useEffect(() => {
@@ -368,8 +324,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
         setModels(modelList);
 
         if (modelList.length === 0) {
-          const providerName =
-            PROVIDER_NAMES[providerConfig.type] || providerConfig.type;
+          const providerName = PROVIDER_NAMES[providerConfig.type] || providerConfig.type;
           await showToast({
             style: Toast.Style.Animated,
             title: "No Models Found",
@@ -377,30 +332,18 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
           });
         }
 
-        const storedDefault =
-          await LocalStorage.getItem<string>("default_model");
-        if (
-          storedDefault &&
-          modelList.length > 0 &&
-          !modelList.some((m) => m.id === storedDefault)
-        ) {
+        const storedDefault = await LocalStorage.getItem<string>("default_model");
+        if (storedDefault && modelList.length > 0 && !modelList.some((m) => m.id === storedDefault)) {
           await LocalStorage.removeItem("default_model");
         }
 
         const validStoredDefault =
-          storedDefault &&
-          (modelList.length === 0 ||
-            modelList.some((m) => m.id === storedDefault))
+          storedDefault && (modelList.length === 0 || modelList.some((m) => m.id === storedDefault))
             ? storedDefault
             : undefined;
 
         const contextModel = launchContext?.model;
-        const model =
-          contextModel ||
-          validStoredDefault ||
-          providerConfig.defaultModel ||
-          modelList[0]?.id ||
-          "";
+        const model = contextModel || validStoredDefault || providerConfig.defaultModel || modelList[0]?.id || "";
         setCurrentModel(model);
 
         if (!contextHandled.current && launchContext?.conversationId) {
@@ -418,9 +361,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
 
         if (!contextHandled.current && launchContext?.initialQuestion) {
           contextHandled.current = true;
-          const initialMessages: ChatMessage[] = [
-            { role: "user", content: launchContext.initialQuestion },
-          ];
+          const initialMessages: ChatMessage[] = [{ role: "user", content: launchContext.initialQuestion }];
           if (launchContext.initialResponse) {
             initialMessages.push({
               role: "assistant",
@@ -436,8 +377,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
         setInitDone(true);
       } catch (err) {
         contextHandled.current = true;
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error";
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         setInitError(errorMessage);
         setInitDone(true);
         await showToast({
@@ -555,8 +495,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
           await showToast({
             style: Toast.Style.Failure,
             title: "No Response Received",
-            message:
-              "Does this model support image input? Try a vision model like Qwen3-VL-4B.",
+            message: "Does this model support image input? Try a vision model like Qwen3-VL-4B.",
           });
           setIsLoading(false);
           return;
@@ -618,8 +557,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
             message: "Partial response saved",
           });
         } else {
-          const errorMessage =
-            err instanceof Error ? err.message : "Unknown error";
+          const errorMessage = err instanceof Error ? err.message : "Unknown error";
           const imageHint = hasImages
             ? " Does this model support image input? Try a vision model like Qwen3-VL-4B."
             : "";
@@ -668,9 +606,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
   }, []);
 
   const handleCopyLastResponse = useCallback(async () => {
-    const lastAssistant = [...messages]
-      .reverse()
-      .find((m) => m.role === "assistant");
+    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
     if (lastAssistant) {
       await Clipboard.copy(lastAssistant.content);
       await showToast({ style: Toast.Style.Success, title: "Copied" });
@@ -699,21 +635,12 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
     await showToast({ style: Toast.Style.Success, title: "Saved" });
   }, [messages, conversationId, currentModel, createdAt]);
 
-  const providerLabel = config
-    ? PROVIDER_LABELS[config.type] || config.type
-    : "";
+  const providerLabel = config ? PROVIDER_LABELS[config.type] || config.type : "";
   const modelLabel = currentModel || "Not set";
 
   // Build conversation markdown (memoized to avoid rebuilding on unrelated re-renders)
   const conversationMarkdown = useMemo(
-    () =>
-      buildConversationMarkdown(
-        messages,
-        currentResponse,
-        isLoading,
-        modelLabel,
-        providerLabel,
-      ),
+    () => buildConversationMarkdown(messages, currentResponse, isLoading, modelLabel, providerLabel),
     [messages, currentResponse, isLoading, modelLabel, providerLabel],
   );
 
@@ -729,19 +656,14 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
     if (lastUserMsg) {
       const imgSection =
         lastUserMsg.images && lastUserMsg.images.length > 0
-          ? lastUserMsg.images.map((p) => `![Image](${p})`).join("\n\n") +
-            "\n\n"
+          ? lastUserMsg.images.map((p) => `![Image](${p})`).join("\n\n") + "\n\n"
           : "";
-      const textSection = lastUserMsg.content
-        ? `> ${lastUserMsg.content.split("\n").join("\n> ")}`
-        : "";
+      const textSection = lastUserMsg.content ? `> ${lastUserMsg.content.split("\n").join("\n> ")}` : "";
       parts.push(`---\n\n> **You**\n>\n${imgSection}${textSection}\n`);
     }
 
     if (currentResponse) {
-      parts.push(
-        `---\n\n**Assistant**\n\n${currentResponse}\n\n*Generating\u2026*\n`,
-      );
+      parts.push(`---\n\n**Assistant**\n\n${currentResponse}\n\n*Generating\u2026*\n`);
     } else if (isSearching) {
       parts.push(`---\n\n*Searching the web\u2026*\n`);
     } else {
@@ -749,24 +671,12 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
     }
 
     return parts.join("\n");
-  }, [
-    isLoading,
-    isSearching,
-    messages,
-    currentResponse,
-    modelLabel,
-    providerLabel,
-    conversationMarkdown,
-  ]);
+  }, [isLoading, isSearching, messages, currentResponse, modelLabel, providerLabel, conversationMarkdown]);
 
   // Shared action panel
   const actions = (
     <ActionPanel>
-      <Action
-        title="Send Message"
-        icon={Icon.Message}
-        onAction={() => handleSendMessage(searchText)}
-      />
+      <Action title="Send Message" icon={Icon.Message} onAction={() => handleSendMessage(searchText)} />
       <Action
         title="Send Clipboard Image"
         icon={Icon.Image}
@@ -822,15 +732,9 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
             return;
           }
           try {
-            const markdown = buildExportMarkdown(
-              messages,
-              modelLabel,
-              providerLabel,
-            );
+            const markdown = buildExportMarkdown(messages, modelLabel, providerLabel);
             const firstUserMsg = messages.find((m) => m.role === "user");
-            const titleSlug = sanitizeFilename(
-              firstUserMsg?.content.slice(0, 60) || "conversation",
-            );
+            const titleSlug = sanitizeFilename(firstUserMsg?.content.slice(0, 60) || "conversation");
             const dateStr = new Date().toISOString().slice(0, 10);
             const filename = `${dateStr}-${titleSlug}.md`;
 
@@ -919,18 +823,9 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
               }}
               onApply={(overrides) => {
                 setSessionOverrides((prev) => ({
-                  temperature:
-                    overrides.temperature !== undefined
-                      ? overrides.temperature
-                      : prev.temperature,
-                  maxTokens:
-                    overrides.maxTokens !== undefined
-                      ? overrides.maxTokens
-                      : prev.maxTokens,
-                  systemPrompt:
-                    overrides.systemPrompt !== undefined
-                      ? overrides.systemPrompt
-                      : prev.systemPrompt,
+                  temperature: overrides.temperature !== undefined ? overrides.temperature : prev.temperature,
+                  maxTokens: overrides.maxTokens !== undefined ? overrides.maxTokens : prev.maxTokens,
+                  systemPrompt: overrides.systemPrompt !== undefined ? overrides.systemPrompt : prev.systemPrompt,
                 }));
                 showToast({
                   style: Toast.Style.Success,
@@ -964,11 +859,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
           }`}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Settings"
-                icon={Icon.Gear}
-                onAction={() => openExtensionPreferences()}
-              />
+              <Action title="Open Settings" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
               <Action
                 title="Configure Extension"
                 icon={Icon.Cog}
@@ -1016,9 +907,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
         }
       }}
       searchBarPlaceholder={
-        isLoading
-          ? "Generating response\u2026"
-          : `Message ${modelLabel} \u2014 press Enter to send`
+        isLoading ? "Generating response\u2026" : `Message ${modelLabel} \u2014 press Enter to send`
       }
       isShowingDetail
       searchBarAccessory={
@@ -1032,12 +921,7 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
             }}
           >
             {models.map((m) => (
-              <List.Dropdown.Item
-                key={m.id}
-                value={m.id}
-                title={m.id}
-                icon={Icon.ComputerChip}
-              />
+              <List.Dropdown.Item key={m.id} value={m.id} title={m.id} icon={Icon.ComputerChip} />
             ))}
           </List.Dropdown>
         ) : undefined
@@ -1062,19 +946,11 @@ function ChatView(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
             key={`msg-${index}`}
             id={`msg-${index}`}
             title={isUser ? "You" : "Assistant"}
-            subtitle={
-              hasImages
-                ? `[Image] ${truncate(msg.content, 40)}`
-                : truncate(msg.content, 50)
-            }
+            subtitle={hasImages ? `[Image] ${truncate(msg.content, 40)}` : truncate(msg.content, 50)}
             icon={
-              isUser
-                ? { source: Icon.Person, tintColor: Color.Blue }
-                : { source: Icon.Stars, tintColor: Color.Purple }
+              isUser ? { source: Icon.Person, tintColor: Color.Blue } : { source: Icon.Stars, tintColor: Color.Purple }
             }
-            accessories={
-              hasImages ? [{ icon: Icon.Image, tooltip: "Has image" }] : []
-            }
+            accessories={hasImages ? [{ icon: Icon.Image, tooltip: "Has image" }] : []}
             detail={<List.Item.Detail markdown={conversationMarkdown} />}
             actions={actions}
           />
@@ -1186,15 +1062,9 @@ Visit [brave.com/search/api](https://brave.com/search/api) to get a free key —
   );
 }
 
-export default function Chat(
-  props: LaunchProps<{ launchContext?: ChatLaunchContext }>,
-) {
+export default function Chat(props: LaunchProps<{ launchContext?: ChatLaunchContext }>) {
   const { needsOnboarding, isChecking, markDone } = useOnboarding();
-  const {
-    showTip,
-    checking: tipChecking,
-    dismiss: dismissTip,
-  } = useWebSearchTip();
+  const { showTip, checking: tipChecking, dismiss: dismissTip } = useWebSearchTip();
 
   if (isChecking || tipChecking) {
     return <Detail isLoading markdown="" />;

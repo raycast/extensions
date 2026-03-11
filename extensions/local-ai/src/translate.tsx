@@ -101,8 +101,7 @@ function TranslateResultView({
           }
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error";
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         await showToast({
           style: Toast.Style.Failure,
           title: "Translation Error",
@@ -195,8 +194,7 @@ function TranslateForm() {
 
       let selectedModel = providerConfig.defaultModel;
       try {
-        const storedDefault =
-          await LocalStorage.getItem<string>("default_model");
+        const storedDefault = await LocalStorage.getItem<string>("default_model");
         if (storedDefault) {
           selectedModel = storedDefault;
         } else if (!selectedModel) {
@@ -229,11 +227,7 @@ function TranslateForm() {
           <Action.SubmitForm
             title="Translate"
             icon={Icon.Globe}
-            onSubmit={(values: {
-              sourceLanguage: string;
-              targetLanguage: string;
-              text: string;
-            }) => {
+            onSubmit={(values: { sourceLanguage: string; targetLanguage: string; text: string }) => {
               const text = values.text.trim();
               if (!text) {
                 showToast({
@@ -281,12 +275,7 @@ function TranslateForm() {
           <Form.Dropdown.Item key={lang} value={lang} title={lang} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea
-        id="text"
-        title="Text"
-        placeholder="Text to translate..."
-        defaultValue={inputText}
-      />
+      <Form.TextArea id="text" title="Text" placeholder="Text to translate..." defaultValue={inputText} />
     </Form>
   );
 }

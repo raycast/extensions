@@ -23,8 +23,7 @@ export const PROMPT_PRESETS: PromptPreset[] = [
   {
     id: "technical",
     name: "Technical",
-    prompt:
-      "You are a senior software engineer. Provide technical, precise answers with code examples when relevant.",
+    prompt: "You are a senior software engineer. Provide technical, precise answers with code examples when relevant.",
     icon: Icon.Code,
   },
   {
@@ -36,15 +35,13 @@ export const PROMPT_PRESETS: PromptPreset[] = [
   {
     id: "tutor",
     name: "Tutor",
-    prompt:
-      "Explain concepts step by step as a patient tutor would. Use analogies and examples.",
+    prompt: "Explain concepts step by step as a patient tutor would. Use analogies and examples.",
     icon: Icon.Bookmark,
   },
   {
     id: "code-review",
     name: "Code Review",
-    prompt:
-      "Review code for bugs, security issues, and improvements. Be thorough and specific.",
+    prompt: "Review code for bugs, security issues, and improvements. Be thorough and specific.",
     icon: Icon.MagnifyingGlass,
   },
   {

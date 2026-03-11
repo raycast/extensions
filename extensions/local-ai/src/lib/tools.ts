@@ -1,10 +1,4 @@
-import type {
-  ChatMessage,
-  ChatRequest,
-  Tool,
-  ToolCall,
-  ProviderConfig,
-} from "./types";
+import type { ChatMessage, ChatRequest, Tool, ToolCall, ProviderConfig } from "./types";
 import { sendChatWithTools, sendChatStream } from "./api";
 import { webSearch, formatSearchContext } from "./web-search";
 
@@ -78,20 +72,13 @@ export async function runWithTools(
   const maxRounds = 3;
 
   for (let round = 0; round < maxRounds; round++) {
-    const response = await sendChatWithTools(
-      config,
-      { ...request, messages },
-      tools,
-    );
+    const response = await sendChatWithTools(config, { ...request, messages }, tools);
 
     const choice = response.choices[0];
     if (!choice) throw new Error("No response from model");
 
     // If the model wants to call tools
-    if (
-      choice.finish_reason === "tool_calls" &&
-      choice.message.tool_calls?.length
-    ) {
+    if (choice.finish_reason === "tool_calls" && choice.message.tool_calls?.length) {
       // Add assistant message with tool calls
       const assistantMsg: ChatMessage = {
         role: "assistant",

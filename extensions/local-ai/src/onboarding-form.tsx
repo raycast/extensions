@@ -1,13 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation,
-  getPreferenceValues,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, Toast, showToast, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { DEFAULT_URLS, PROVIDER_NAMES, fetchModels } from "./lib/api";
 import type { ProviderType, ProviderConfig } from "./lib/types";
@@ -25,9 +16,7 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
   const { pop } = useNavigation();
   // Initialize provider from Raycast prefs (synchronous) so it's correct on first render
   const prefs = getPreferenceValues<Preferences>();
-  const [provider, setProvider] = useState<ProviderType>(
-    (prefs.provider as ProviderType) || "ollama",
-  );
+  const [provider, setProvider] = useState<ProviderType>((prefs.provider as ProviderType) || "ollama");
   const [ollamaUrl, setOllamaUrl] = useState(DEFAULT_URLS.ollama);
   const [lmstudioUrl, setLmstudioUrl] = useState(DEFAULT_URLS.lmstudio);
   const [llamacppUrl, setLlamacppUrl] = useState(DEFAULT_URLS.llamacpp);
@@ -157,11 +146,7 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Configuration"
-            icon={Icon.Checkmark}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Configuration" icon={Icon.Checkmark} onSubmit={handleSubmit} />
           <Action
             title="Test Connection"
             icon={Icon.Wifi}
@@ -186,16 +171,8 @@ export function OnboardingForm({ onComplete }: { onComplete: () => void }) {
         onChange={(val) => setProvider(val as ProviderType)}
       >
         <Form.Dropdown.Item value="ollama" title="Ollama" icon={Icon.Globe} />
-        <Form.Dropdown.Item
-          value="lmstudio"
-          title="LM Studio"
-          icon={Icon.Globe}
-        />
-        <Form.Dropdown.Item
-          value="llamacpp"
-          title="llama.cpp"
-          icon={Icon.Globe}
-        />
+        <Form.Dropdown.Item value="lmstudio" title="LM Studio" icon={Icon.Globe} />
+        <Form.Dropdown.Item value="llamacpp" title="llama.cpp" icon={Icon.Globe} />
         <Form.Dropdown.Item value="custom" title="Custom" icon={Icon.Globe} />
       </Form.Dropdown>
 

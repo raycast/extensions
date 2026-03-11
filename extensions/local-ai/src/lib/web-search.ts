@@ -21,10 +21,7 @@ interface BraveSearchResponse {
  * Requires a free API key from https://brave.com/search/api/
  * Free tier: 2,000 queries/month.
  */
-export async function webSearch(
-  query: string,
-  maxResults = 5,
-): Promise<SearchResult[]> {
+export async function webSearch(query: string, maxResults = 5): Promise<SearchResult[]> {
   const prefs = getPreferenceValues<Preferences>();
   const apiKey = prefs.searchApiKey?.trim();
 
@@ -44,15 +41,11 @@ export async function webSearch(
   });
 
   if (res.status === 401 || res.status === 403) {
-    throw new Error(
-      "Invalid Brave Search API key. Check your key in extension preferences.",
-    );
+    throw new Error("Invalid Brave Search API key. Check your key in extension preferences.");
   }
 
   if (res.status === 429) {
-    throw new Error(
-      "Brave Search rate limit reached. Free tier allows 2,000 queries/month.",
-    );
+    throw new Error("Brave Search rate limit reached. Free tier allows 2,000 queries/month.");
   }
 
   if (!res.ok) {
@@ -63,9 +56,7 @@ export async function webSearch(
   try {
     data = (await res.json()) as BraveSearchResponse;
   } catch {
-    throw new Error(
-      "Brave Search returned invalid response data. Try again later.",
-    );
+    throw new Error("Brave Search returned invalid response data. Try again later.");
   }
   const results = data.web?.results ?? [];
 
@@ -82,9 +73,7 @@ export async function webSearch(
 export function formatSearchContext(results: SearchResult[]): string {
   if (results.length === 0) return "";
 
-  const lines = results.map(
-    (r, i) => `${i + 1}. [${r.title}](${r.url})\n   ${r.snippet}`,
-  );
+  const lines = results.map((r, i) => `${i + 1}. [${r.title}](${r.url})\n   ${r.snippet}`);
   return `Web search results:\n\n${lines.join("\n\n")}`;
 }
 

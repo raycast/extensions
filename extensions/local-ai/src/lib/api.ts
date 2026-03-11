@@ -1,14 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { readFileSync } from "fs";
-import type {
-  ProviderConfig,
-  ProviderType,
-  Model,
-  ChatMessage,
-  ChatRequest,
-  ChatResponse,
-  Tool,
-} from "./types";
+import { readFile } from "fs/promises";
+import type { ProviderConfig, ProviderType, Model, ChatMessage, ChatRequest, ChatResponse, Tool } from "./types";
 import { getProviderUrl, getActiveProvider } from "./onboarding";
 
 export const DEFAULT_URLS: Record<ProviderType, string> = {
@@ -29,9 +21,7 @@ export const PROVIDER_NAMES: Record<ProviderType, string> = {
  * Returns the default base URL for a given provider type.
  * Priority: per-provider stored URL > global serverUrl preference > built-in default.
  */
-export async function getDefaultBaseUrl(
-  provider: ProviderType,
-): Promise<string> {
+export async function getDefaultBaseUrl(provider: ProviderType): Promise<string> {
   const stored = await getProviderUrl(provider);
   if (stored) return stored;
   const prefs = getPreferenceValues<Preferences>();
@@ -69,44 +59,24 @@ function translateFetchError(err: unknown, config: ProviderConfig): Error {
 
   // Timeout (AbortSignal.timeout throws DOMException with name "TimeoutError")
   if (err instanceof DOMException && err.name === "TimeoutError") {
-    return new Error(
-      `Server took too long to respond. Check that ${name} is running at ${config.baseUrl}.`,
-    );
+    return new Error(`Server took too long to respond. Check that ${name} is running at ${config.baseUrl}.`);
   }
 
   // Node timeout errors may also come as AbortError
   if (err instanceof Error && err.name === "AbortError") {
-    return new Error(
-      `Server took too long to respond. Check that ${name} is running at ${config.baseUrl}.`,
-    );
+    return new Error(`Server took too long to respond. Check that ${name} is running at ${config.baseUrl}.`);
   }
 
   // Network errors — ECONNREFUSED, ENOTFOUND, etc.
-  if (
-    err instanceof TypeError ||
-    (err instanceof Error && err.message.includes("fetch"))
-  ) {
-    const cause =
-      err instanceof Error
-        ? (err as Error & { cause?: Error }).cause
-        : undefined;
-    const code =
-      cause && typeof cause === "object" && "code" in cause
-        ? (cause as { code?: string }).code
-        : undefined;
+  if (err instanceof TypeError || (err instanceof Error && err.message.includes("fetch"))) {
+    const cause = err instanceof Error ? (err as Error & { cause?: Error }).cause : undefined;
+    const code = cause && typeof cause === "object" && "code" in cause ? (cause as { code?: string }).code : undefined;
 
-    if (
-      code === "ECONNREFUSED" ||
-      (err instanceof Error && err.message.includes("ECONNREFUSED"))
-    ) {
-      return new Error(
-        `Server not running at ${config.baseUrl}. Start your ${name} server and try again.`,
-      );
+    if (code === "ECONNREFUSED" || (err instanceof Error && err.message.includes("ECONNREFUSED"))) {
+      return new Error(`Server not running at ${config.baseUrl}. Start your ${name} server and try again.`);
     }
 
-    return new Error(
-      `Cannot connect to ${name} at ${config.baseUrl} — is it running?`,
-    );
+    return new Error(`Cannot connect to ${name} at ${config.baseUrl} — is it running?`);
   }
 
   // Pass through any other errors
@@ -235,36 +205,35 @@ export async function fetchModels(config: ProviderConfig): Promise<Model[]> {
  * attached images into the OpenAI multimodal content-parts format.
  * Messages without images pass through unchanged.
  */
-function prepareMessagesForApi(messages: ChatMessage[]): unknown[] {
+async function prepareMessagesForApi(messages: ChatMessage[]): Promise<unknown[]> {
   if (!messages.some((m) => m.images?.length)) return messages;
 
-  return messages.map((msg) => {
-    if (!msg.images?.length) return msg;
+  return Promise.all(
+    messages.map(async (msg) => {
+      if (!msg.images?.length) return msg;
 
-    const parts: unknown[] = [];
-    if (msg.content) {
-      parts.push({ type: "text", text: msg.content });
-    }
-    for (const imgPath of msg.images) {
-      try {
-        const b64 = readFileSync(imgPath).toString("base64");
-        parts.push({
-          type: "image_url",
-          image_url: { url: `data:image/png;base64,${b64}` },
-        });
-      } catch (err) {
-        console.error(`[api] Failed to read image ${imgPath}:`, err);
-        parts.push({ type: "text", text: "[Image failed to load]" });
+      const parts: unknown[] = [];
+      if (msg.content) {
+        parts.push({ type: "text", text: msg.content });
       }
-    }
-    return { role: msg.role, content: parts.length > 0 ? parts : msg.content };
-  });
+      for (const imgPath of msg.images) {
+        try {
+          const b64 = (await readFile(imgPath)).toString("base64");
+          parts.push({
+            type: "image_url",
+            image_url: { url: `data:image/png;base64,${b64}` },
+          });
+        } catch (err) {
+          console.error(`[api] Failed to read image ${imgPath}:`, err);
+          parts.push({ type: "text", text: "[Image failed to load]" });
+        }
+      }
+      return { role: msg.role, content: parts.length > 0 ? parts : msg.content };
+    }),
+  );
 }
 
-export async function sendChat(
-  config: ProviderConfig,
-  request: ChatRequest,
-): Promise<ChatResponse> {
+export async function sendChat(config: ProviderConfig, request: ChatRequest): Promise<ChatResponse> {
   const url = `${config.baseUrl}/v1/chat/completions`;
   try {
     const res = await fetch(url, {
@@ -272,7 +241,7 @@ export async function sendChat(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...request,
-        messages: prepareMessagesForApi(request.messages),
+        messages: await prepareMessagesForApi(request.messages),
         stream: false,
       }),
       signal: AbortSignal.timeout(300_000), // 5 minutes — local LLMs can be slow
@@ -286,10 +255,7 @@ export async function sendChat(
   }
 }
 
-export async function sendChatStream(
-  config: ProviderConfig,
-  request: ChatRequest,
-): Promise<ReadableStream> {
+export async function sendChatStream(config: ProviderConfig, request: ChatRequest): Promise<ReadableStream> {
   const url = `${config.baseUrl}/v1/chat/completions`;
   try {
     // No timeout on the stream request itself — local LLMs can take minutes.
@@ -299,7 +265,7 @@ export async function sendChatStream(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...request,
-        messages: prepareMessagesForApi(request.messages),
+        messages: await prepareMessagesForApi(request.messages),
         stream: true,
       }),
     });
@@ -307,9 +273,7 @@ export async function sendChatStream(
       throw new Error(`Server returned ${res.status} ${res.statusText}`);
     }
     if (!res.body) {
-      throw new Error(
-        "Response body is empty — streaming not supported by server",
-      );
+      throw new Error("Response body is empty — streaming not supported by server");
     }
     return res.body;
   } catch (err) {
@@ -334,7 +298,7 @@ export async function sendChatWithTools(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         ...request,
-        messages: prepareMessagesForApi(request.messages),
+        messages: await prepareMessagesForApi(request.messages),
         stream: false,
         tools,
       }),
@@ -366,10 +330,7 @@ export async function checkHealth(config: ProviderConfig): Promise<boolean> {
  * Keeps the system prompt (if first message is role "system") plus the
  * last `maxMessages` non-system messages.
  */
-export function trimMessages(
-  messages: ChatMessage[],
-  maxMessages = 50,
-): ChatMessage[] {
+export function trimMessages(messages: ChatMessage[], maxMessages = 50): ChatMessage[] {
   if (messages.length <= maxMessages) return messages;
 
   const systemMessages: ChatMessage[] = [];

@@ -1,10 +1,4 @@
-import {
-  getSelectedText,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { getSelectedText, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 
 export default async function Command() {
   try {

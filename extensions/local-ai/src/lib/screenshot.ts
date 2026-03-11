@@ -1,6 +1,6 @@
 import { environment, Clipboard } from "@raycast/api";
 import { execFileSync, execFile } from "child_process";
-import { readFileSync, existsSync, mkdirSync } from "fs";
+import { readFileSync, existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from "fs";
 import { join } from "path";
 
 const SCREENCAPTURE = "/usr/sbin/screencapture";
@@ -12,8 +12,27 @@ function ensureImageDir() {
   }
 }
 
+/** Delete screenshot files older than 24 hours. */
+function cleanupOldImages() {
+  try {
+    const maxAge = 24 * 60 * 60 * 1000;
+    const now = Date.now();
+    for (const file of readdirSync(IMAGE_DIR)) {
+      const filePath = join(IMAGE_DIR, file);
+      try {
+        if (now - statSync(filePath).mtimeMs > maxAge) unlinkSync(filePath);
+      } catch (err) {
+        console.warn(`[screenshot] cleanup failed for ${file}:`, err);
+      }
+    }
+  } catch {
+    /* directory may not exist yet */
+  }
+}
+
 function generateImagePath(): string {
   ensureImageDir();
+  cleanupOldImages();
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   return join(IMAGE_DIR, `img-${id}.png`);
 }
@@ -26,14 +45,11 @@ export function captureFullScreen(): string {
   try {
     execFileSync(SCREENCAPTURE, ["-x", imagePath]);
   } catch (err: unknown) {
-    const detail =
-      err instanceof Error ? err.message : "check Screen Recording permission";
+    const detail = err instanceof Error ? err.message : "check Screen Recording permission";
     throw new Error(`screencapture failed: ${detail}`);
   }
   if (!existsSync(imagePath)) {
-    throw new Error(
-      "No screenshot created — grant Raycast Screen Recording permission in System Settings > Privacy",
-    );
+    throw new Error("No screenshot created — grant Raycast Screen Recording permission in System Settings > Privacy");
   }
   return imagePath;
 }
@@ -66,18 +82,12 @@ export async function readClipboardImage(): Promise<string | null> {
         filePath = filePath.slice(7);
       }
       const lower = filePath.toLowerCase();
-      if (
-        IMAGE_EXTS.some((ext) => lower.endsWith(ext)) &&
-        existsSync(filePath)
-      ) {
+      if (IMAGE_EXTS.some((ext) => lower.endsWith(ext)) && existsSync(filePath)) {
         return filePath;
       }
     }
   } catch (err) {
-    console.warn(
-      "[screenshot] Clipboard.read() failed, trying AppleScript:",
-      err,
-    );
+    console.warn("[screenshot] Clipboard.read() failed, trying AppleScript:", err);
   }
 
   // Approach 2: AppleScript — extracts raw PNG data from clipboard

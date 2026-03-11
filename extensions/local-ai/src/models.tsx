@@ -53,9 +53,7 @@ function ModelsView() {
       setModels(modelList);
 
       const storedDefault = await LocalStorage.getItem<string>("default_model");
-      setDefaultModelId(
-        storedDefault || providerConfig.defaultModel || modelList[0]?.id || "",
-      );
+      setDefaultModelId(storedDefault || providerConfig.defaultModel || modelList[0]?.id || "");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
       setConnectionError(msg);
@@ -105,9 +103,7 @@ function ModelsView() {
     });
   }, []);
 
-  const providerLabel = config
-    ? PROVIDER_LABELS[config.type] || config.type
-    : "";
+  const providerLabel = config ? PROVIDER_LABELS[config.type] || config.type : "";
 
   if (!isLoading && connectionError) {
     const providerHelp: Record<string, string> = {
@@ -168,11 +164,7 @@ function ModelsView() {
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={loadModels}
             />
-            <Action
-              title="Open Settings"
-              icon={Icon.Gear}
-              onAction={() => openExtensionPreferences()}
-            />
+            <Action title="Open Settings" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
             <Action
               title="Configure Extension"
               icon={Icon.Cog}
@@ -201,10 +193,7 @@ function ModelsView() {
     return parts.length > 0 ? parts.join("  ·  ") : providerLabel;
   }
 
-  function buildAccessories(
-    model: Model,
-    showCheckmark: boolean,
-  ): List.Item.Accessory[] {
+  function buildAccessories(model: Model, showCheckmark: boolean): List.Item.Accessory[] {
     const accessories: List.Item.Accessory[] = [];
     if (model.supportsVision) {
       accessories.push({
@@ -250,24 +239,13 @@ function ModelsView() {
         title={model.id}
         subtitle={buildSubtitle(model)}
         icon={Icon.ComputerChip}
-        accessories={buildAccessories(
-          model,
-          !isDefault && model.id === defaultModelId,
-        )}
+        accessories={buildAccessories(model, !isDefault && model.id === defaultModelId)}
         actions={
           <ActionPanel>
             {isDefault ? (
-              <Action
-                title="Start Chat"
-                icon={Icon.Message}
-                onAction={() => handleStartChat(model.id)}
-              />
+              <Action title="Start Chat" icon={Icon.Message} onAction={() => handleStartChat(model.id)} />
             ) : (
-              <Action
-                title="Set as Default"
-                icon={Icon.Star}
-                onAction={() => handleSetDefault(model.id)}
-              />
+              <Action title="Set as Default" icon={Icon.Star} onAction={() => handleSetDefault(model.id)} />
             )}
             {isDefault ? (
               <Action
@@ -309,14 +287,8 @@ function ModelsView() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter models...">
-      {defaultModel && (
-        <List.Section title="Current Model">
-          {renderModelItem(defaultModel, true)}
-        </List.Section>
-      )}
-      <List.Section title="Available Models">
-        {otherModels.map((model) => renderModelItem(model, false))}
-      </List.Section>
+      {defaultModel && <List.Section title="Current Model">{renderModelItem(defaultModel, true)}</List.Section>}
+      <List.Section title="Available Models">{otherModels.map((model) => renderModelItem(model, false))}</List.Section>
     </List>
   );
 }

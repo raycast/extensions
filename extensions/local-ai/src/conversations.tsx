@@ -13,12 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
-import {
-  listConversations,
-  getConversation,
-  deleteConversation,
-  updateConversationTitle,
-} from "./lib/storage";
+import { listConversations, getConversation, deleteConversation, updateConversationTitle } from "./lib/storage";
 import type { ChatMessage } from "./lib/types";
 import { useOnboarding } from "./lib/use-onboarding";
 import { OnboardingForm } from "./onboarding-form";
@@ -49,8 +44,7 @@ function formatPreviewMarkdown(messages: ChatMessage[]): string {
   let md = "";
   for (const msg of preview) {
     const label = msg.role === "user" ? "**You**" : "**Assistant**";
-    const content =
-      msg.content.length > 300 ? msg.content.slice(0, 300) + "…" : msg.content;
+    const content = msg.content.length > 300 ? msg.content.slice(0, 300) + "…" : msg.content;
     md += `${label}\n\n${content}\n\n---\n\n`;
   }
   if (nonSystem.length > 6) {
@@ -66,19 +60,11 @@ function groupByTimePeriod(conversations: ConversationEntry[]): {
   older: ConversationEntry[];
 } {
   const now = new Date();
-  const startOfToday = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-  ).getTime();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
   // Start of this week (Monday)
   const dayOfWeek = now.getDay();
   const diffToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const startOfWeek = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate() - diffToMonday,
-  ).getTime();
+  const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).getTime();
 
   const today: ConversationEntry[] = [];
   const thisWeek: ConversationEntry[] = [];
@@ -134,8 +120,7 @@ function RenameForm({
                 });
                 pop();
               } catch (err) {
-                const msg =
-                  err instanceof Error ? err.message : "Unknown error";
+                const msg = err instanceof Error ? err.message : "Unknown error";
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Rename Failed",
@@ -266,8 +251,7 @@ function ConversationsView() {
       });
       return;
     }
-    const markdown =
-      `# ${title}\n\n` + formatConversationMarkdown(conversation.messages);
+    const markdown = `# ${title}\n\n` + formatConversationMarkdown(conversation.messages);
     await Clipboard.copy(markdown);
     await showToast({
       style: Toast.Style.Success,
@@ -276,9 +260,7 @@ function ConversationsView() {
   }, []);
 
   const handleRenamed = useCallback((id: string, newTitle: string) => {
-    setConversations((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)),
-    );
+    setConversations((prev) => prev.map((c) => (c.id === id ? { ...c, title: newTitle } : c)));
   }, []);
 
   if (!isLoading && conversations.length === 0) {
@@ -295,23 +277,13 @@ function ConversationsView() {
 
   const renderActions = (conv: ConversationEntry) => (
     <ActionPanel>
-      <Action
-        title="Resume Conversation"
-        icon={Icon.ArrowRight}
-        onAction={() => handleResume(conv.id)}
-      />
+      <Action title="Resume Conversation" icon={Icon.ArrowRight} onAction={() => handleResume(conv.id)} />
       <Action
         title="Rename"
         icon={Icon.Pencil}
         shortcut={{ modifiers: ["cmd"], key: "r" }}
         onAction={() =>
-          push(
-            <RenameForm
-              conversationId={conv.id}
-              currentTitle={conv.title}
-              onRenamed={handleRenamed}
-            />,
-          )
+          push(<RenameForm conversationId={conv.id} currentTitle={conv.title} onRenamed={handleRenamed} />)
         }
       />
       <Action
@@ -352,15 +324,8 @@ function ConversationsView() {
           markdown={previews[conv.id] || "*Loading preview...*"}
           metadata={
             <List.Item.Detail.Metadata>
-              <List.Item.Detail.Metadata.Label
-                title="Model"
-                text={conv.model}
-                icon={Icon.ComputerChip}
-              />
-              <List.Item.Detail.Metadata.Label
-                title="Updated"
-                text={new Date(conv.updatedAt).toLocaleString()}
-              />
+              <List.Item.Detail.Metadata.Label title="Model" text={conv.model} icon={Icon.ComputerChip} />
+              <List.Item.Detail.Metadata.Label title="Updated" text={new Date(conv.updatedAt).toLocaleString()} />
             </List.Item.Detail.Metadata>
           }
         />
@@ -372,22 +337,10 @@ function ConversationsView() {
   const { today, thisWeek, older } = groupByTimePeriod(conversations);
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      searchBarPlaceholder="Filter conversations..."
-    >
-      {today.length > 0 && (
-        <List.Section title="Today">{today.map(renderItem)}</List.Section>
-      )}
-      {thisWeek.length > 0 && (
-        <List.Section title="This Week">
-          {thisWeek.map(renderItem)}
-        </List.Section>
-      )}
-      {older.length > 0 && (
-        <List.Section title="Older">{older.map(renderItem)}</List.Section>
-      )}
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Filter conversations...">
+      {today.length > 0 && <List.Section title="Today">{today.map(renderItem)}</List.Section>}
+      {thisWeek.length > 0 && <List.Section title="This Week">{thisWeek.map(renderItem)}</List.Section>}
+      {older.length > 0 && <List.Section title="Older">{older.map(renderItem)}</List.Section>}
     </List>
   );
 }

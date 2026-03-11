@@ -90,8 +90,7 @@ function ResponseView({
           setResponse(fullResponse);
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Unknown error";
+        const errorMessage = err instanceof Error ? err.message : "Unknown error";
         await showToast({
           style: Toast.Style.Failure,
           title: "Connection Error",
@@ -158,12 +157,7 @@ function ResponseView({
               }
             }}
           />
-          <Action
-            title="Ask Another"
-            icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={pop}
-          />
+          <Action title="Ask Another" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} onAction={pop} />
           <Action
             title="Configure Extension"
             icon={Icon.Cog}
@@ -199,17 +193,10 @@ function AskForm({ config, model }: { config: ProviderConfig; model: string }) {
             onSubmit={(values: { question: string }) => {
               const text = values.question.trim();
               if (text) {
-                const preset = PROMPT_PRESETS.find(
-                  (p) => p.id === selectedPresetId,
-                );
+                const preset = PROMPT_PRESETS.find((p) => p.id === selectedPresetId);
                 const presetPrompt = preset?.prompt || undefined;
                 push(
-                  <ResponseView
-                    question={text}
-                    config={config}
-                    model={model}
-                    systemPromptOverride={presetPrompt}
-                  />,
+                  <ResponseView question={text} config={config} model={model} systemPromptOverride={presetPrompt} />,
                 );
               }
             }}
@@ -230,20 +217,10 @@ function AskForm({ config, model }: { config: ProviderConfig; model: string }) {
         onChange={setSelectedPresetId}
       >
         {PROMPT_PRESETS.map((preset) => (
-          <Form.Dropdown.Item
-            key={preset.id}
-            value={preset.id}
-            title={preset.name}
-            icon={preset.icon}
-          />
+          <Form.Dropdown.Item key={preset.id} value={preset.id} title={preset.name} icon={preset.icon} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea
-        id="question"
-        title="Question"
-        placeholder="Ask anything..."
-        autoFocus
-      />
+      <Form.TextArea id="question" title="Question" placeholder="Ask anything..." autoFocus />
     </Form>
   );
 }
@@ -265,8 +242,7 @@ function QuickAskView(props: LaunchProps<{ arguments: Arguments.QuickAsk }>) {
       let selectedModel = providerConfig.defaultModel;
 
       try {
-        const storedDefault =
-          await LocalStorage.getItem<string>("default_model");
+        const storedDefault = await LocalStorage.getItem<string>("default_model");
         if (storedDefault) {
           selectedModel = storedDefault;
         } else if (!selectedModel) {
@@ -274,8 +250,7 @@ function QuickAskView(props: LaunchProps<{ arguments: Arguments.QuickAsk }>) {
           selectedModel = modelList[0]?.id || "";
         }
       } catch (err) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Cannot connect to server";
+        const errorMessage = err instanceof Error ? err.message : "Cannot connect to server";
         await showToast({
           style: Toast.Style.Failure,
           title: "Connection Error",
@@ -310,9 +285,7 @@ function QuickAskView(props: LaunchProps<{ arguments: Arguments.QuickAsk }>) {
   return <AskForm config={config} model={model} />;
 }
 
-export default function QuickAsk(
-  props: LaunchProps<{ arguments: Arguments.QuickAsk }>,
-) {
+export default function QuickAsk(props: LaunchProps<{ arguments: Arguments.QuickAsk }>) {
   const { needsOnboarding, isChecking, markDone } = useOnboarding();
 
   if (isChecking) {

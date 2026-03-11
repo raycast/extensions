@@ -9,19 +9,12 @@ const PROVIDER_URL_PREFIX = "provider_url_";
  * Each provider can have its own endpoint URL stored in LocalStorage,
  * independent of the global `serverUrl` preference.
  */
-export async function getProviderUrl(
-  provider: string,
-): Promise<string | undefined> {
-  const raw = await LocalStorage.getItem<string>(
-    `${PROVIDER_URL_PREFIX}${provider}`,
-  );
+export async function getProviderUrl(provider: string): Promise<string | undefined> {
+  const raw = await LocalStorage.getItem<string>(`${PROVIDER_URL_PREFIX}${provider}`);
   return raw || undefined;
 }
 
-export async function setProviderUrl(
-  provider: string,
-  url: string,
-): Promise<void> {
+export async function setProviderUrl(provider: string, url: string): Promise<void> {
   await LocalStorage.setItem(`${PROVIDER_URL_PREFIX}${provider}`, url);
 }
 

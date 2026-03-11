@@ -11,9 +11,7 @@ import type { ChatStreamChunk } from "./types";
  * - Empty lines and SSE comment lines (`:` prefix)
  * - Malformed JSON (warns and skips)
  */
-export async function* parseSSEStream(
-  stream: ReadableStream<Uint8Array>,
-): AsyncGenerator<string> {
+export async function* parseSSEStream(stream: ReadableStream<Uint8Array>): AsyncGenerator<string> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -86,10 +84,7 @@ export async function* parseSSEStream(
             yield content;
           }
         } catch {
-          console.warn(
-            "[streaming] Malformed JSON in final buffer, skipping:",
-            payload,
-          );
+          console.warn("[streaming] Malformed JSON in final buffer, skipping:", payload);
         }
       }
     }
@@ -103,9 +98,7 @@ export async function* parseSSEStream(
  * Useful as a non-streaming fallback: sends the request with stream: true
  * but waits for the full response before returning.
  */
-export async function streamToString(
-  stream: ReadableStream<Uint8Array>,
-): Promise<string> {
+export async function streamToString(stream: ReadableStream<Uint8Array>): Promise<string> {
   let result = "";
   for await (const token of parseSSEStream(stream)) {
     result += token;

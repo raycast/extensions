@@ -12,14 +12,9 @@ interface ConversationIndexEntry {
   updatedAt: number;
 }
 
-export async function saveConversation(
-  conversation: Conversation,
-): Promise<void> {
+export async function saveConversation(conversation: Conversation): Promise<void> {
   // Store the full conversation
-  await LocalStorage.setItem(
-    `${CONV_PREFIX}${conversation.id}`,
-    JSON.stringify(conversation),
-  );
+  await LocalStorage.setItem(`${CONV_PREFIX}${conversation.id}`, JSON.stringify(conversation));
 
   // Update the index
   const index = await getIndex();
@@ -51,9 +46,7 @@ export async function saveConversation(
   await LocalStorage.setItem(INDEX_KEY, JSON.stringify(index));
 }
 
-export async function getConversation(
-  id: string,
-): Promise<Conversation | null> {
+export async function getConversation(id: string): Promise<Conversation | null> {
   const raw = await LocalStorage.getItem<string>(`${CONV_PREFIX}${id}`);
   if (!raw) return null;
   try {
@@ -76,18 +69,12 @@ export async function deleteConversation(id: string): Promise<void> {
   await LocalStorage.setItem(INDEX_KEY, JSON.stringify(updated));
 }
 
-export async function updateConversationTitle(
-  id: string,
-  title: string,
-): Promise<void> {
+export async function updateConversationTitle(id: string, title: string): Promise<void> {
   // Update the full conversation record
   const conversation = await getConversation(id);
   if (conversation) {
     conversation.title = title;
-    await LocalStorage.setItem(
-      `${CONV_PREFIX}${id}`,
-      JSON.stringify(conversation),
-    );
+    await LocalStorage.setItem(`${CONV_PREFIX}${id}`, JSON.stringify(conversation));
   }
 
   // Update the index entry

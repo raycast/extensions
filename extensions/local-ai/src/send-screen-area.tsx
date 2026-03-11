@@ -1,10 +1,4 @@
-import {
-  closeMainWindow,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { closeMainWindow, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { captureScreenArea } from "./lib/screenshot";
 
 export default async function Command() {

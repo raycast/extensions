@@ -43,9 +43,7 @@ function TransformView({ title, systemPrompt }: TextTransformProps) {
         text = await getInputText();
       } catch {
         setIsLoading(false);
-        setError(
-          "No text found. Select text in any app or copy it to clipboard first.",
-        );
+        setError("No text found. Select text in any app or copy it to clipboard first.");
         return;
       }
       setInputText(text);
@@ -54,8 +52,7 @@ function TransformView({ title, systemPrompt }: TextTransformProps) {
       let selectedModel = config.defaultModel;
 
       try {
-        const storedDefault =
-          await LocalStorage.getItem<string>("default_model");
+        const storedDefault = await LocalStorage.getItem<string>("default_model");
         if (storedDefault) {
           selectedModel = storedDefault;
         } else if (!selectedModel) {
@@ -64,8 +61,7 @@ function TransformView({ title, systemPrompt }: TextTransformProps) {
         }
       } catch (err) {
         if (!selectedModel) {
-          const msg =
-            err instanceof Error ? err.message : "Cannot connect to server";
+          const msg = err instanceof Error ? err.message : "Cannot connect to server";
           setIsLoading(false);
           setError(msg);
           return;
@@ -76,9 +72,7 @@ function TransformView({ title, systemPrompt }: TextTransformProps) {
 
       if (!selectedModel) {
         setIsLoading(false);
-        setError(
-          "No model configured. Set a default model in Browse Models or extension preferences.",
-        );
+        setError("No model configured. Set a default model in Browse Models or extension preferences.");
         return;
       }
 
@@ -86,12 +80,7 @@ function TransformView({ title, systemPrompt }: TextTransformProps) {
     })();
   }, []);
 
-  const runTransform = async (
-    config: ProviderConfig,
-    modelId: string,
-    text: string,
-    sysPrompt: string,
-  ) => {
+  const runTransform = async (config: ProviderConfig, modelId: string, text: string, sysPrompt: string) => {
     const messages: ChatMessage[] = [
       { role: "system", content: sysPrompt },
       { role: "user", content: text },
@@ -148,11 +137,7 @@ function TransformView({ title, systemPrompt }: TextTransformProps) {
         markdown={`## ${title}\n\n**Error:** ${error}`}
         actions={
           <ActionPanel>
-            <Action
-              title="Open Settings"
-              icon={Icon.Gear}
-              onAction={() => openExtensionPreferences()}
-            />
+            <Action title="Open Settings" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
           </ActionPanel>
         }
       />
