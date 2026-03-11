@@ -89,7 +89,8 @@ ${installCommand}
           {stats?.rateLimited ? (
             <List.Item.Detail.Metadata.Label title="GitHub Stars" text="Rate limited" icon={Icon.Warning} />
           ) : (
-            stats?.stars != null && (
+            stats?.stars !== undefined &&
+            stats?.stars !== null && (
               <List.Item.Detail.Metadata.Label
                 title="GitHub Stars"
                 text={formatInstalls(stats.stars)}
@@ -166,7 +167,7 @@ interface SkillListItemProps {
 }
 
 export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
-  const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
+  const title = rank !== undefined && rank !== null ? `#${rank} ${skill.name}` : skill.name;
   const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
   const { stats } = useRepoStats(skill, isSelected);
   const audits = useSkillAudits(skill, {
@@ -174,7 +175,7 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
   });
 
   const icon =
-    rank != null
+    rank !== undefined && rank !== null
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
       : { source: Icon.Hammer };
 

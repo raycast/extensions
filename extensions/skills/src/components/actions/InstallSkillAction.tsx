@@ -1,4 +1,5 @@
 import { Action, Alert, Icon, showToast, Toast, confirmAlert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { AUDIT_PROVIDER_LABELS, type Skill } from "../../shared";
 import { useSkillAudits } from "../../hooks/useSkillAudits";
 import { type SkillAuditsResult, fetchSkillAudits } from "../../utils/skill-audits";
@@ -69,9 +70,8 @@ export function InstallSkillAction({ skill, prefetchedAuditResult }: InstallSkil
       toast.title = "Skill installed successfully";
       toast.message = `${skill.name} is now available`;
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to install skill";
-      toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+      await toast.hide();
+      await showFailureToast(error, { title: "Failed to install skill" });
     }
   };
 

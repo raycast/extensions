@@ -1,4 +1,5 @@
 import { Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { updateAllSkills } from "../../utils/skills-cli";
 
 interface UpdateSkillActionProps {
@@ -26,9 +27,8 @@ export function UpdateSkillAction({ onUpdate }: UpdateSkillActionProps) {
           toast.title = "All skills updated";
           onUpdate();
         } catch (error) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Failed to update skills";
-          toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+          await toast.hide();
+          await showFailureToast(error, { title: "Failed to update skills" });
         }
       }}
     />

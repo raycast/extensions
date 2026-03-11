@@ -61,18 +61,26 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Popular Skills" subtitle={`${skills.length} skills`}>
-        {skills.map((skill, index) => (
-          <SkillListItem
-            key={skill.id}
-            skill={skill}
-            rank={index + 1}
-            isSelected={selectedId === skill.id}
-            isShowingDetail={isShowingDetail}
-            onToggleDetail={toggleDetail}
-          />
-        ))}
-      </List.Section>
+      {skills.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Skills Found"
+          description="No trending skills are available right now"
+          icon={Icon.Trophy}
+        />
+      ) : (
+        <List.Section title="Popular Skills" subtitle={`${skills.length} skills`}>
+          {skills.map((skill, index) => (
+            <SkillListItem
+              key={skill.id}
+              skill={skill}
+              rank={index + 1}
+              isSelected={selectedId === skill.id}
+              isShowingDetail={isShowingDetail}
+              onToggleDetail={toggleDetail}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
