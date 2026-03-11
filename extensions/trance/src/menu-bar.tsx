@@ -21,7 +21,7 @@ export default function MenuBarCommand() {
   }>({ active: false, expired: false, remainingFormatted: "" });
   const [isLoading, setIsLoading] = useState(true);
 
-  const prefs = getPreferenceValues<{ showMenuBarCount?: boolean }>();
+  const prefs = getPreferenceValues<Preferences>();
   const showCount = prefs.showMenuBarCount !== false;
 
   useEffect(() => {
