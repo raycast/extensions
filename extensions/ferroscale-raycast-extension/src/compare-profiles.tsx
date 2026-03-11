@@ -197,13 +197,13 @@ function ResultRow({
   primaryAction,
   primaryActionTitle,
   primaryActionIcon,
-  secondaryAction,
+  onChangeA,
 }: {
   result: QuickWeightResult;
   primaryAction: () => void;
   primaryActionTitle: string;
   primaryActionIcon: Icon;
-  secondaryAction?: React.ReactNode;
+  onChangeA?: () => void;
 }) {
   const tonnes = result.totalWeightKg / 1000;
   const tonnesStr = tonnes >= 0.001 ? ` · ${tonnes.toFixed(3)} t` : "";
@@ -220,7 +220,13 @@ function ResultRow({
             icon={primaryActionIcon}
             onAction={primaryAction}
           />
-          {secondaryAction}
+          {onChangeA && (
+            <Action
+              title="Change Profile a"
+              icon={Icon.ArrowLeft}
+              onAction={onChangeA}
+            />
+          )}
         </ActionPanel>
       }
     />
@@ -274,14 +280,6 @@ export function CompareProfilesView() {
     setPhase("entering_a");
   }
 
-  const changeAAction = (
-    <Action
-      title="Change Profile a"
-      icon={Icon.ArrowLeft}
-      onAction={handleChangeA}
-    />
-  );
-
   return (
     <List
       key={phase}
@@ -307,7 +305,15 @@ export function CompareProfilesView() {
               { text: `${lockedResultA.linearDensityKgPerM.toFixed(3)} kg/m` },
               { text: lockedQueryA, icon: Icon.Code },
             ]}
-            actions={<ActionPanel>{changeAAction}</ActionPanel>}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Change Profile a"
+                  icon={Icon.ArrowLeft}
+                  onAction={handleChangeA}
+                />
+              </ActionPanel>
+            }
           />
         </List.Section>
       ) : null}
@@ -352,7 +358,7 @@ export function CompareProfilesView() {
                 : Icon.TwoArrowsClockwise
             }
             primaryAction={phase === "entering_a" ? handleLockA : handleCompare}
-            secondaryAction={phase === "entering_b" ? changeAAction : undefined}
+            onChangeA={phase === "entering_b" ? handleChangeA : undefined}
           />
         ) : null}
       </List.Section>

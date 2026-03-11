@@ -282,7 +282,7 @@ const QUICK_REF_ENTRIES: RefEntry[] = [
     title: "sb",
     subtitle: "Square Bar  ·  A × L",
     example: "sb 30x6000",
-    icon: Icon.Square,
+    icon: Icon.Stop,
     iconColor: Color.Orange,
   },
   {
@@ -307,7 +307,7 @@ const QUICK_REF_ENTRIES: RefEntry[] = [
     title: "shs",
     subtitle: "Square Hollow Section  ·  A × T × L",
     example: "shs 40x4x6000",
-    icon: Icon.Square,
+    icon: Icon.Stop,
     iconColor: Color.Blue,
   },
   {
@@ -324,7 +324,7 @@ const QUICK_REF_ENTRIES: RefEntry[] = [
     title: "shss  /  shstd",
     subtitle: "SHS EN table  ·  A × T × L",
     example: "shss 40x4x6000 mat=s355",
-    icon: Icon.Square,
+    icon: Icon.Stop,
     iconColor: Color.Purple,
   },
   {
