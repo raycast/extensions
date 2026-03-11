@@ -1,4 +1,10 @@
-export type MetalFamilyId = "steel" | "stainless_steel" | "aluminum";
+export type MetalFamilyId =
+  | "steel"
+  | "stainless_steel"
+  | "aluminum"
+  | "copper"
+  | "titanium"
+  | "cast_iron";
 
 export interface MetalFamily {
   id: MetalFamilyId;
@@ -44,6 +50,9 @@ export type ProfileId =
   | "pipe"
   | "rectangular_tube"
   | "square_hollow"
+  | "shs_std_en"
+  | "rhs_std_en"
+  | "angle_std_en"
   | "channel_upn_en"
   | "channel_upe_en"
   | "beam_ipe_en"
@@ -78,6 +87,8 @@ export interface StandardSizeOption {
   label: string;
   areaMm2: number;
   referenceLabel: string;
+  /** Outer perimeter in mm — used for surface area / paint quantity estimates */
+  perimeterMm?: number;
 }
 
 export interface ManualProfileDefinition {

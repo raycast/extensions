@@ -38,6 +38,14 @@ export function resolveAreaMm2(input: CalculationInput): {
     return { areaMm2: 0, expression: "Invalid profile" };
   }
 
+  // Custom area override — bypasses both standard size lookup and manual formulas
+  if (typeof input.customAreaMm2 === "number" && input.customAreaMm2 > 0) {
+    return {
+      areaMm2: input.customAreaMm2,
+      expression: `A = ${input.customAreaMm2} mm² (custom override)`,
+    };
+  }
+
   if (profile.mode === "standard") {
     const size = profile.sizes.find((item) => item.id === input.selectedSizeId);
     if (!size) {

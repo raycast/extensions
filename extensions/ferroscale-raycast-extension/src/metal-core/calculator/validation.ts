@@ -115,7 +115,20 @@ export function validateCalculationInput(
     });
   }
 
-  if (profile.mode === "standard") {
+  if (input.customAreaMm2 != null) {
+    if (
+      !Number.isFinite(input.customAreaMm2) ||
+      input.customAreaMm2 <= 0 ||
+      input.customAreaMm2 > 1_000_000
+    ) {
+      issues.push({
+        field: "customAreaMm2",
+        message: "Custom area must be a positive number up to 1,000,000 mm².",
+        messageKey: "validation.customAreaRange",
+      });
+    }
+    // Skip all profile dimension / size validation when a custom area is supplied
+  } else if (profile.mode === "standard") {
     if (!input.selectedSizeId) {
       issues.push({
         field: "selectedSizeId",

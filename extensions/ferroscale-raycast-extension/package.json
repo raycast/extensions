@@ -8,14 +8,16 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "quick-metal-weight",
-      "title": "Quick Metal Weight",
-      "description": "Calculate metal weight from shorthand input and flags.",
+      "name": "ferroscale",
+      "title": "Ferroscale",
+      "description": "Metal weight calculator with profile browser, comparison and history.",
       "mode": "view",
       "icon": "icon.png"
     }
   ],
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "private": true,
   "scripts": {
     "dev": "ray develop",

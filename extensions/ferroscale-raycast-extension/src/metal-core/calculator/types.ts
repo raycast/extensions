@@ -34,6 +34,8 @@ export interface CalculationInput {
   profileId: ProfileId;
   selectedSizeId?: string;
   manualDimensions: Partial<Record<DimensionKey, UnitValue>>;
+  /** When set, overrides the cross-section area from profile/size lookup */
+  customAreaMm2?: number;
   length: UnitValue;
   quantity: number;
   priceBasis: PriceBasis;
