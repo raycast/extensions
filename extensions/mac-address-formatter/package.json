@@ -1,0 +1,136 @@
+{
+  "name": "mac-address-formatter",
+  "title": "MAC Address Formatter",
+  "author": "richard_carter",
+  "description": "Convert MAC addresses between common formats.",
+  "icon": "icon.png",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-to-colon-separated",
+      "title": "MAC to Colon",
+      "icon": "icon.png",
+      "subtitle": "MAC Address Formatter",
+      "description": "Convert a MAC address to XX:XX:XX:XX:XX:XX.",
+      "keywords": [
+        "mac",
+        "address",
+        "format",
+        "formatter",
+        "colon",
+        "colon-separated",
+        "xx:xx"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "macAddress",
+          "placeholder": "Paste a MAC address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "convert-to-hyphen-separated",
+      "title": "MAC to Hyphen",
+      "icon": "icon.png",
+      "subtitle": "MAC Address Formatter",
+      "description": "Convert a MAC address to XX-XX-XX-XX-XX-XX.",
+      "keywords": [
+        "mac",
+        "address",
+        "format",
+        "formatter",
+        "hyphen",
+        "dash",
+        "hyphen-separated",
+        "xx-xx"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "macAddress",
+          "placeholder": "Paste a MAC address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "convert-to-dot-separated",
+      "title": "MAC to Dot",
+      "icon": "icon.png",
+      "subtitle": "MAC Address Formatter",
+      "description": "Convert a MAC address to XXXX.XXXX.XXXX.",
+      "keywords": [
+        "mac",
+        "address",
+        "format",
+        "formatter",
+        "dot",
+        "period",
+        "cisco",
+        "xxxx.xxxx.xxxx"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "macAddress",
+          "placeholder": "Paste a MAC address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "convert-to-no-separators",
+      "title": "MAC to Plain",
+      "icon": "icon.png",
+      "subtitle": "MAC Address Formatter",
+      "description": "Convert a MAC address to XXXXXXXXXXXX.",
+      "keywords": [
+        "mac",
+        "address",
+        "format",
+        "formatter",
+        "plain",
+        "compact",
+        "nosep",
+        "raw"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "macAddress",
+          "placeholder": "Paste a MAC address",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}

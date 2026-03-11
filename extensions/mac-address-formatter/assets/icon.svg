@@ -1,0 +1,63 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="120" fill="url(#bg)" />
+  <rect x="78" y="116" width="356" height="280" rx="88" fill="#F8FAFC" fill-opacity="0.1" />
+
+  <path
+    d="M146 160C124.909 160 108 176.909 108 198V314C108 335.091 124.909 352 146 352"
+    stroke="#E2E8F0"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M366 160C387.091 160 404 176.909 404 198V314C404 335.091 387.091 352 366 352"
+    stroke="#E2E8F0"
+    stroke-width="22"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <rect x="158" y="191" width="44" height="44" rx="18" fill="#F59E0B" />
+  <rect x="214" y="191" width="44" height="44" rx="18" fill="#F8FAFC" />
+  <rect x="158" y="277" width="44" height="44" rx="18" fill="#F8FAFC" />
+  <rect x="214" y="277" width="44" height="44" rx="18" fill="#F59E0B" />
+
+  <rect x="286" y="191" width="68" height="18" rx="9" fill="#F8FAFC" />
+  <rect x="286" y="217" width="68" height="18" rx="9" fill="#F8FAFC" />
+  <rect x="286" y="277" width="68" height="18" rx="9" fill="#F8FAFC" />
+  <rect x="286" y="303" width="68" height="18" rx="9" fill="#F8FAFC" />
+
+  <g filter="url(#shadow)">
+    <circle cx="360" cy="362" r="62" fill="#0F172A" />
+    <path
+      d="M386 348C380.857 336.475 369.3 328.435 355.866 328.05C342.431 327.665 330.434 334.999 324.641 346.212"
+      stroke="#22C55E"
+      stroke-width="18"
+      stroke-linecap="round"
+    />
+    <path
+      d="M387 336V360H363"
+      stroke="#22C55E"
+      stroke-width="18"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+  </g>
+
+  <defs>
+    <linearGradient id="bg" x1="84" y1="58" x2="426" y2="454" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1E293B" />
+      <stop offset="1" stop-color="#0F172A" />
+    </linearGradient>
+    <filter id="shadow" x="282" y="286" width="156" height="156" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix" />
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+      <feOffset dy="2" />
+      <feGaussianBlur stdDeviation="8" />
+      <feComposite in2="hardAlpha" operator="out" />
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0588235 0 0 0 0 0.0941176 0 0 0 0 0.156863 0 0 0 0.35 0" />
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_1" />
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_1" result="shape" />
+    </filter>
+  </defs>
+</svg>
