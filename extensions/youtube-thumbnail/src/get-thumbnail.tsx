@@ -263,8 +263,8 @@ export default function Command() {
       const buffer = Buffer.from(arrayBuffer);
       const fileName = path.join(downloadPath, `${videoId}-${thumbnail.key}.jpg`);
 
-      fs.mkdirSync(downloadPath, { recursive: true });
-      fs.writeFileSync(fileName, buffer);
+      await fs.promises.mkdir(downloadPath, { recursive: true });
+      await fs.promises.writeFile(fileName, buffer);
       showToast(Toast.Style.Success, "Thumbnail Downloaded", `Saved to ${downloadPath}`);
     } catch (error) {
       if (error instanceof Error) {
@@ -340,7 +340,7 @@ export default function Command() {
     showToast(Toast.Style.Success, "Removed From History");
   }
 
-  function useHistoryUrl(url: string) {
+  function openHistoryEntry(url: string) {
     setUrlInput(url);
     setSelectedView("thumbnails");
   }
@@ -426,7 +426,7 @@ export default function Command() {
               content={historyThumbnailUrls[entry.url] ? { source: historyThumbnailUrls[entry.url] } : Icon.Clock}
               actions={
                 <ActionPanel>
-                  <Action title="Open Thumbnails" onAction={() => useHistoryUrl(entry.url)} icon={Icon.AppWindow} />
+                  <Action title="Open Thumbnails" onAction={() => openHistoryEntry(entry.url)} icon={Icon.AppWindow} />
                   <Action title="Copy URL" onAction={() => Clipboard.copy(entry.url)} icon={Icon.CopyClipboard} />
                   <Action
                     title="Remove from History"
