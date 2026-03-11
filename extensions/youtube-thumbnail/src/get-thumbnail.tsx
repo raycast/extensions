@@ -571,12 +571,9 @@ ${downloadPathError}`;
     return "Loading thumbnails...";
   }
 
-  if (videoId) {
-    return `## Thumbnail Not Found  
+  return `## Thumbnail Not Found  
 This video may not have a public thumbnail image available.`;
-  }
-
-  return "Enter a YouTube URL.";
+}
 }
 
 function getPlaceholderEmptyState(params: {
