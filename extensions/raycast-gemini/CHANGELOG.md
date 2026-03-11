@@ -1,5 +1,9 @@
 # Google Gemini Changelog
 
+## [Fix copy actions in AI Chat] - 2026-03-07
+
+- 🐛 Fix: enable “Copy Answer”, “Copy Prompt”, and “Copy Entire Chat (Transcript)” actions for the selected message.
+
 ## [New models & SDK Migration] - 2026-01-19
 
 - 🆕 New Model: Gemini 3.0 Flash

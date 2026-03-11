@@ -1,8 +1,5 @@
-import { Icon, LocalStorage, showToast, Toast, Color } from "@raycast/api";
+import { Icon, getPreferenceValues, openExtensionPreferences, showToast, Toast, Color } from "@raycast/api";
 
-export const API_TOKEN_KEY = "singularity-api-token";
-export const MAX_COUNT_KEY = "singularity-max-count";
-export const DEFAULT_MAX_COUNT = 3000;
 const API_BASE_URL = "https://api.singularity-app.com";
 
 export function getAPIDateString(date: Date): string {
@@ -63,28 +60,50 @@ async function parseErrorResponse(response: Response): Promise<string> {
   }
 }
 
-export async function getApiToken(): Promise<string | undefined> {
-  return await LocalStorage.getItem<string>(API_TOKEN_KEY);
-}
+const PAGE_SIZE = 1000;
 
-export async function getMaxCount(): Promise<number> {
-  const stored = await LocalStorage.getItem<number>(MAX_COUNT_KEY);
-  return stored ?? DEFAULT_MAX_COUNT;
-}
-
-export async function setMaxCount(value: number): Promise<void> {
-  await LocalStorage.setItem(MAX_COUNT_KEY, value);
-}
-
-async function getAuthHeaders(): Promise<Record<string, string>> {
-  const token = await getApiToken();
-  if (!token) {
-    throw new ApiError("API token not set. Please use 'Set API Token' command first.");
-  }
+function getAuthHeaders(): Record<string, string> {
+  const { apiToken } = getPreferenceValues<Preferences>();
   return {
-    Authorization: `Bearer ${token}`,
+    Authorization: `Bearer ${apiToken}`,
     "Content-Type": "application/json",
   };
+}
+
+/** Fetches all pages from a paginated endpoint, auto-handling offset. */
+async function fetchAllPages<TItem>(url: string, responseKey: string, baseParams: URLSearchParams): Promise<TItem[]> {
+  const all: TItem[] = [];
+  let offset = 0;
+
+  while (true) {
+    const params = new URLSearchParams(baseParams);
+    params.set("maxCount", String(PAGE_SIZE));
+    params.set("offset", String(offset));
+
+    const response = await fetch(`${url}?${params}`, {
+      method: "GET",
+      headers: getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const errorBody = await parseErrorResponse(response);
+      throw new ApiError(
+        `Failed to fetch ${responseKey}: ${errorBody}`,
+        response.status,
+        response.statusText,
+        errorBody,
+      );
+    }
+
+    const data = (await response.json()) as Record<string, TItem[]>;
+    const page = data[responseKey] ?? [];
+    all.push(...page);
+
+    if (page.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+
+  return all;
 }
 
 export interface Task {
@@ -140,7 +159,7 @@ export interface Note {
 }
 
 export async function createTask(params: TaskCreateParams): Promise<Task> {
-  const headers = await getAuthHeaders();
+  const headers = getAuthHeaders();
 
   const response = await fetch(`${API_BASE_URL}/v2/task`, {
     method: "POST",
@@ -163,57 +182,34 @@ export async function getTasks(params?: {
   includeRemoved?: boolean;
   includeArchived?: boolean;
   includeAllRecurrenceInstances?: boolean;
-  maxCount?: number;
 }): Promise<Task[]> {
-  const headers = await getAuthHeaders();
-
   const queryParams = new URLSearchParams();
   if (params?.projectId) queryParams.append("projectId", params.projectId);
   if (params?.includeRemoved !== undefined) queryParams.append("includeRemoved", String(params.includeRemoved));
-  if (params?.maxCount) queryParams.append("maxCount", String(params.maxCount));
   if (params?.includeArchived !== undefined) queryParams.append("includeArchived", String(params.includeArchived));
   if (params?.startDateFrom) queryParams.append("startDateFrom", params.startDateFrom);
   if (params?.startDateTo) queryParams.append("startDateTo", params.startDateTo);
   if (params?.includeAllRecurrenceInstances)
     queryParams.append("includeAllRecurrenceInstances", String(params.includeAllRecurrenceInstances));
 
-  const url = `${API_BASE_URL}/v2/task${queryParams.toString() ? `?${queryParams}` : ""}`;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorBody = await parseErrorResponse(response);
-    throw new ApiError(`Failed to fetch tasks: ${errorBody}`, response.status, response.statusText, errorBody);
-  }
-
-  const data = (await response.json()) as TaskListResponse;
-  return data.tasks;
+  return await fetchAllPages<Task>(`${API_BASE_URL}/v2/task`, "tasks", queryParams);
 }
 
 export async function getTasksForToday(): Promise<Task[]> {
   const today = new Date();
   const endOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999);
-  const maxCount = await getMaxCount();
 
-  const tasks = await getTasks({
+  return await getTasks({
     startDateTo: endOfDay.toISOString(),
     includeRemoved: false,
     includeArchived: false,
-    maxCount,
   });
-
-  return tasks;
 }
 
 export async function getInboxTasks(): Promise<Task[]> {
-  const maxCount = await getMaxCount();
   const tasks = await getTasks({
     includeRemoved: false,
     includeArchived: false,
-    maxCount,
   });
 
   // Inbox tasks are those without a project assigned and without a date scheduled
@@ -223,25 +219,19 @@ export async function getInboxTasks(): Promise<Task[]> {
 export async function getUpcomingTasks(): Promise<Task[]> {
   const today = new Date();
   const startOfTomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1, 0, 0, 0, 0);
-  const maxCount = await getMaxCount();
 
-  const tasks = await getTasks({
+  return await getTasks({
     startDateFrom: startOfTomorrow.toISOString(),
     includeRemoved: false,
     includeArchived: false,
-    maxCount,
   });
-
-  return tasks;
 }
 
 export async function getCompletedTasks(): Promise<Task[]> {
-  const maxCount = await getMaxCount();
   const tasks = await getTasks({
     includeRemoved: false,
     includeArchived: true,
     includeAllRecurrenceInstances: true,
-    maxCount,
   });
 
   // Filter to only include completed tasks
@@ -249,15 +239,11 @@ export async function getCompletedTasks(): Promise<Task[]> {
 }
 
 export async function getProjectTasks(projectId: string): Promise<Task[]> {
-  const maxCount = await getMaxCount();
-  const tasks = await getTasks({
+  return await getTasks({
     projectId,
     includeRemoved: false,
     includeArchived: false,
-    maxCount,
   });
-
-  return tasks;
 }
 
 export interface TaskUpdateParams {
@@ -274,7 +260,7 @@ export interface TaskUpdateParams {
 }
 
 export async function updateTask(taskId: string, params: TaskUpdateParams): Promise<Task> {
-  const headers = await getAuthHeaders();
+  const headers = getAuthHeaders();
 
   const response = await fetch(`${API_BASE_URL}/v2/task/${taskId}`, {
     method: "PATCH",
@@ -291,7 +277,7 @@ export async function updateTask(taskId: string, params: TaskUpdateParams): Prom
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
-  const headers = await getAuthHeaders();
+  const headers = getAuthHeaders();
 
   const response = await fetch(`${API_BASE_URL}/v2/task/${taskId}`, {
     method: "DELETE",
@@ -313,7 +299,7 @@ export async function uncompleteTask(taskId: string): Promise<Task> {
 }
 
 export async function getNote(noteId: string): Promise<Note | null> {
-  const headers = await getAuthHeaders();
+  const headers = getAuthHeaders();
 
   try {
     const response = await fetch(`${API_BASE_URL}/v2/note/${noteId}`, {
@@ -334,20 +320,7 @@ export async function getNote(noteId: string): Promise<Note | null> {
 }
 
 export async function getProjects(): Promise<Project[]> {
-  const headers = await getAuthHeaders();
-
-  const response = await fetch(`${API_BASE_URL}/v2/project`, {
-    method: "GET",
-    headers,
-  });
-
-  if (!response.ok) {
-    const errorBody = await parseErrorResponse(response);
-    throw new ApiError(`Failed to fetch projects: ${errorBody}`, response.status, response.statusText, errorBody);
-  }
-
-  const data = (await response.json()) as ProjectListResponse;
-  return data.projects;
+  return await fetchAllPages<Project>(`${API_BASE_URL}/v2/project`, "projects", new URLSearchParams());
 }
 
 export async function withErrorHandling<T>(
@@ -363,7 +336,12 @@ export async function withErrorHandling<T>(
 
     if (error instanceof ApiError) {
       message = error.userFriendlyMessage;
-      if (options?.showDetails && error.responseBody) {
+      if (error.statusCode === 401) {
+        primaryAction = {
+          title: "Open Preferences",
+          onAction: () => openExtensionPreferences(),
+        };
+      } else if (options?.showDetails && error.responseBody) {
         primaryAction = {
           title: "Copy Error Details",
           onAction: async (toast) => {

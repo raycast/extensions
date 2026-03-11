@@ -1,5 +1,11 @@
 # Apple Notes Changelog
 
+## [Bug Fix Update] - 2026-02-26
+
+- Fix `get-note-content` and `update-note` timing out when Notes is not already running by using a longer AppleScript timeout.
+- Fix AI tool failures caused by UUID note IDs by resolving them to x-coredata IDs before calling AppleScript.
+- Add optional `searchText` filtering to `search-notes` so older notes can be found outside the most recent results window.
+
 ## [View Random Note command] - 2025-06-30
 
 Add a new command for viewing a random note from a user's note library.

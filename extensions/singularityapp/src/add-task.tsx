@@ -1,26 +1,17 @@
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { createTask, getProjects, Project, withErrorHandling, getApiToken, getProjectIcon } from "./api";
-import { NO_TOKEN_MESSAGE } from "./utils/constants";
+import { createTask, getProjects, Project, withErrorHandling, getProjectIcon } from "./api";
 
-export default function Command() {
+function Command() {
   const [title, setTitle] = useState("");
   const [note, setNote] = useState<string | null>(null);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [projectId, setProjectId] = useState<string>("");
   const [projects, setProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasToken, setHasToken] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const token = await getApiToken();
-      if (!token) {
-        setHasToken(false);
-        setIsLoading(false);
-        return;
-      }
-
       const result = await withErrorHandling(() => getProjects(), "Failed to load projects");
       if (result) {
         setProjects(result);
@@ -59,14 +50,6 @@ export default function Command() {
       });
       await popToRoot();
     }
-  }
-
-  if (!hasToken) {
-    return (
-      <Form>
-        <Form.Description text={`⚠️ API Token not set. ${NO_TOKEN_MESSAGE}`} />
-      </Form>
-    );
   }
 
   return (
@@ -112,3 +95,5 @@ export default function Command() {
     </Form>
   );
 }
+
+export default Command;

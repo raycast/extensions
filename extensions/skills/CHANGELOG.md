@@ -1,5 +1,29 @@
 # Changelog
 
+## [Fix allowed-tools TypeError] - 2026-03-09
+
+- Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
+- Normalize allowed-tools to array before rendering
+
+## [Rich Skill Metadata] - 2026-03-07
+
+- Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
+- Show GitHub star count alongside install count
+- Show skill description as list item subtitle when the detail panel is hidden
+
+## [Update Skills] - 2026-03-01
+
+- Check for available skill updates on launch
+- Show "Update available" badge on skills with updates
+- "Updates Available" summary section with update count
+- "Update All Skills" action (Cmd+Shift+U)
+
+## [Inline Detail Panel] - 2026-02-26
+
+- Replace push-to-detail views with inline detail panels across all commands
+- Toggle detail panel visibility with Cmd+D
+- Lazy-load skill content only for the selected item
+
 ## [Install & Remove Skills] - 2026-02-17
 
 - Install skills directly from search and trending commands

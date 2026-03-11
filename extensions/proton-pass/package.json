@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proton-pass",
   "title": "Proton Pass",
-  "description": "Search and manage your Proton Pass items, generate passwords, and get TOTP codes",
+  "description": "Search and manage your Proton Pass items, generate passwords, and get TOTP codes.",
   "icon": "extension-icon.png",
   "author": "izyuumi",
+  "contributors": [
+    "FeernandoOFF"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -91,6 +94,24 @@
       "title": "Transient Clipboard",
       "label": "Clear password from clipboard after paste",
       "description": "When enabled, passwords will be cleared from clipboard after pasting",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableBackgroundRefresh",
+      "type": "checkbox",
+      "title": "Background Refresh",
+      "label": "Automatically refresh cached vault and item data",
+      "description": "When enabled, cached results will refresh in the background",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableWebIntegration",
+      "type": "checkbox",
+      "title": "Web Integration",
+      "label": "Match active browser tab URL in Search Items",
+      "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
       "default": true,
       "required": false
     }

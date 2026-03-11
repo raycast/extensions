@@ -11,6 +11,7 @@ export interface Display {
 }
 
 const STORAGE_KEY = "known_displays";
+const QUICK_CONNECT_KEY = "quick_connect_display";
 const MIRROR_SECTION_NAME = "Mirror or extend to";
 
 // AppleScript to scan available displays from System Settings dropdown
@@ -21,10 +22,23 @@ do shell script "open -b com.apple.systempreferences /System/Library/PreferenceP
 
 set deviceNames to {}
 
+on cleanup()
+  try
+    tell application "System Settings" to quit
+  end try
+  do shell script "open '" & (system attribute "Raycast_Deeplink") & "'"
+end cleanup
+
 tell application "System Events"
-  repeat until (exists window 1 of application process "System Settings")
+  set windowWait to 0
+  repeat until (exists window 1 of application process "System Settings") or windowWait >= 50
     delay 0.1
+    set windowWait to windowWait + 1
   end repeat
+  if windowWait >= 50 then
+    my cleanup()
+    return ""
+  end if
 
   tell process "System Settings"
     set frontmost to true
@@ -51,7 +65,7 @@ tell application "System Events"
     end repeat
     
     if popUpButton is missing value then
-      tell application "System Settings" to quit
+      my cleanup()
       return ""
     end if
 
@@ -59,9 +73,24 @@ tell application "System Events"
     click popUpButton
     delay 0.3
     
-    repeat until exists menu 1 of popUpButton
-      delay 0.1
+    -- Use try-based check instead of "exists" which throws -1700 on AXMenuButton
+    set menuWait to 0
+    set menuReady to false
+    repeat until menuReady or menuWait >= 30
+      try
+        set menuItemCount to count of menu items of menu 1 of popUpButton
+        if menuItemCount > 0 then set menuReady to true
+      end try
+      if not menuReady then
+        delay 0.1
+        set menuWait to menuWait + 1
+      end if
     end repeat
+    if not menuReady then
+      key code 53
+      my cleanup()
+      return ""
+    end if
 
     tell menu 1 of popUpButton
       set mirrorFound to false
@@ -97,6 +126,7 @@ export async function scanDisplaysFromSystem(): Promise<Display[]> {
   try {
     const deeplink = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/connect-to-display`;
     const { stdout } = await execFileAsync("osascript", ["-e", scanScript], {
+      timeout: 15000,
       env: {
         ...process.env,
         Mirror_Section_Name: MIRROR_SECTION_NAME,
@@ -174,4 +204,19 @@ export async function markDisplayConnected(name: string): Promise<void> {
     display.lastConnected = Date.now();
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(displays));
   }
+}
+
+// --- Quick Connect ---
+
+export async function getQuickConnectDisplay(): Promise<string | undefined> {
+  const stored = await LocalStorage.getItem<string>(QUICK_CONNECT_KEY);
+  return stored || undefined;
+}
+
+export async function setQuickConnectDisplay(name: string): Promise<void> {
+  await LocalStorage.setItem(QUICK_CONNECT_KEY, name);
+}
+
+export async function clearQuickConnectDisplay(): Promise<void> {
+  await LocalStorage.removeItem(QUICK_CONNECT_KEY);
 }

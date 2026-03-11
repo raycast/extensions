@@ -16,7 +16,7 @@ export default async function Command() {
 
   try {
     const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
-    await seek(currentPositionSeconds + 15);
+    await seek(currentPositionSeconds + 15, currentlyPlayingData?.item?.duration_ms);
     await showHUD("Skipped ahead 15 seconds");
     await safeLaunchCommandInBackground("current-track");
   } catch {

@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
 import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
 import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
+import { createSimpleHook } from "../agents/hooks";
+import { formatResetTime } from "../agents/format";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -57,24 +58,6 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
     return JSON.parse(payload);
   } catch {
     return null;
-  }
-}
-
-function formatResetTime(isoTime: string): string {
-  try {
-    const resetDate = new Date(isoTime);
-    const now = new Date();
-    const diffMs = resetDate.getTime() - now.getTime();
-    if (diffMs <= 0) return "now";
-
-    const diffMins = Math.floor(diffMs / 60000);
-    if (diffMins < 60) return `${diffMins}m`;
-
-    const hours = Math.floor(diffMins / 60);
-    const mins = diffMins % 60;
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  } catch {
-    return "unknown";
   }
 }
 
@@ -343,38 +326,4 @@ async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: G
   }
 }
 
-export function useGeminiUsage() {
-  const [usage, setUsage] = useState<GeminiUsage | null>(null);
-  const [error, setError] = useState<GeminiError | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-
-    const result = await fetchGeminiUsage();
-
-    setUsage(result.usage);
-    setError(result.error);
-    setIsLoading(false);
-    setHasInitialFetch(true);
-  }, []);
-
-  useEffect(() => {
-    if (!hasInitialFetch) {
-      fetchData();
-    }
-  }, [hasInitialFetch, fetchData]);
-
-  const revalidate = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
-
-  return {
-    isLoading,
-    usage,
-    error,
-    revalidate,
-  };
-}
+export const useGeminiUsage = createSimpleHook<GeminiUsage, GeminiError>({ fetcher: fetchGeminiUsage });

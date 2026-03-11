@@ -290,6 +290,7 @@ export const fetchPokemon = async (
           pokemonforms {
             form_name
             pokemon_id
+            is_mega
             pokemonformnames(where: {language_id: {_eq: $language_id}}) {
               name
               pokemon_name

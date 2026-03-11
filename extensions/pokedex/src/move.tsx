@@ -3,31 +3,22 @@ import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import debounce from "lodash.debounce";
 import groupBy from "lodash.groupby";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { fetchMove, fetchMoves } from "./api";
 import Descriptions from "./components/description";
 import MoveMetadata from "./components/metadata/move";
 import MoveLearnset from "./components/move_learnset";
 import TypeDropdown from "./components/type_dropdown";
 
-export default function PokeMoves(props: {
-  id?: number;
-  arguments?: { search?: string };
-}) {
+export default function PokeMoves(props: { arguments?: { search?: string } }) {
   const { search } = props.arguments || {};
 
-  const { data: moves, isLoading } = usePromise(fetchMoves);
+  const { data: moves } = usePromise(fetchMoves);
 
   const [type, setType] = useState<string>("all");
   const [selectedMoveId, setSelectedMoveId] = useState<number>(71);
 
-  useEffect(() => {
-    if (props.id) {
-      setSelectedMoveId(props.id);
-    }
-  }, [props.id]);
-
-  const { data: move } = usePromise(fetchMove, [selectedMoveId]);
+  const { data: move, isLoading } = usePromise(fetchMove, [selectedMoveId]);
 
   const debouncedSelectionChange = useCallback(
     debounce((index: string | null) => {
@@ -81,6 +72,7 @@ export default function PokeMoves(props: {
                   icon={`moves/${m.movedamageclass.name || "status"}.svg`}
                   keywords={[m.name, moveName]}
                   detail={
+                    !isLoading &&
                     move && (
                       <List.Item.Detail
                         markdown={

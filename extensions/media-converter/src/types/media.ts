@@ -1,4 +1,5 @@
 import { type PreferenceValues } from "@raycast/api";
+import imagePreferencesConfig from "../config/image-preferences.json";
 
 type Range<
   START extends number,
@@ -507,6 +508,70 @@ export const DEFAULT_VBR_QUALITIES = {
   ".webm": { encodingMode: "vbr", bitrate: "2000", maxBitrate: "", quality: "good" },
 } as const;
 
+const imagePreferenceDomains = imagePreferencesConfig.valueDomains as Record<string, string[]>;
+const percentageStep5Domain = new Set(imagePreferenceDomains.percentageStep5 ?? []);
+const webpQualityDomain = new Set(imagePreferenceDomains.webpQuality ?? []);
+const pngVariantDomain = new Set(imagePreferenceDomains.pngVariant ?? []);
+const tiffCompressionDomain = new Set(imagePreferenceDomains.tiffCompression ?? []);
+
+function parsePercentagePreference(value: unknown, fallback: Percentage): Percentage {
+  const normalized = typeof value === "string" ? value : "";
+  if (percentageStep5Domain.has(normalized)) {
+    return Number(normalized) as Percentage;
+  }
+  return fallback;
+}
+
+function toImageQualitySettings<K extends OutputImageExtension>(format: K, value: ImageQuality[K]): QualitySettings {
+  return {
+    [format]: value,
+  } as unknown as QualitySettings;
+}
+
+export function getDefaultImageQuality(format: OutputImageExtension, preferences: PreferenceValues): QualitySettings {
+  switch (format) {
+    case ".jpg": {
+      const fallback = DEFAULT_QUALITIES[".jpg"] as Percentage;
+      return toImageQualitySettings(".jpg", parsePercentagePreference(preferences.defaultJpgQuality, fallback));
+    }
+    case ".webp": {
+      const configured = typeof preferences.defaultWebpQuality === "string" ? preferences.defaultWebpQuality : "";
+      if (configured === "lossless" && webpQualityDomain.has(configured)) {
+        return toImageQualitySettings(".webp", "lossless");
+      }
+      const fallback = DEFAULT_QUALITIES[".webp"] as Percentage;
+      const value =
+        configured !== "lossless" && webpQualityDomain.has(configured) ? (Number(configured) as Percentage) : fallback;
+      return toImageQualitySettings(".webp", value);
+    }
+    case ".png": {
+      const configured = typeof preferences.defaultPngVariant === "string" ? preferences.defaultPngVariant : "";
+      const fallback = DEFAULT_QUALITIES[".png"] as ImageQuality[".png"];
+      const value = pngVariantDomain.has(configured) ? (configured as ImageQuality[".png"]) : fallback;
+      return toImageQualitySettings(".png", value);
+    }
+    case ".heic": {
+      const fallback = DEFAULT_QUALITIES[".heic"] as Percentage;
+      return toImageQualitySettings(".heic", parsePercentagePreference(preferences.defaultHeicQuality, fallback));
+    }
+    case ".tiff": {
+      const configured =
+        typeof preferences.defaultTiffCompression === "string" ? preferences.defaultTiffCompression : "";
+      const fallback = DEFAULT_QUALITIES[".tiff"] as ImageQuality[".tiff"];
+      const value = tiffCompressionDomain.has(configured) ? (configured as ImageQuality[".tiff"]) : fallback;
+      return toImageQualitySettings(".tiff", value);
+    }
+    case ".avif": {
+      const fallback = DEFAULT_QUALITIES[".avif"] as Percentage;
+      return toImageQualitySettings(".avif", parsePercentagePreference(preferences.defaultAvifQuality, fallback));
+    }
+    default: {
+      const exhaustiveCheck: never = format;
+      throw new Error(`Unsupported image format for defaults: ${String(exhaustiveCheck)}`);
+    }
+  }
+}
+
 // =============================================================================
 // Helper Functions
 // =============================================================================
@@ -521,17 +586,25 @@ export function getMediaType(extension: string): MediaType | null {
 
 type SimpleQualityMappingExtension = keyof typeof SIMPLE_QUALITY_MAPPINGS;
 
+function isOutputImageExtension(format: AllOutputExtension): format is OutputImageExtension {
+  return OUTPUT_IMAGE_EXTENSIONS.includes(format as OutputImageExtension);
+}
+
 export function getDefaultQuality(
   format: AllOutputExtension,
   preferences: PreferenceValues,
   qualityLevel?: QualityLevel,
 ): QualitySettings {
-  // For images or when advanced settings are enabled, use DEFAULT_QUALITIES
+  // Images use preset mapping; when advanced settings are enabled, use DEFAULT_QUALITIES.
   if (!preferences) {
     throw new Error(`fn getDefaultQuality: Provide preferences`);
   }
 
-  if (getMediaType(format) === "image" || preferences.moreConversionSettings) {
+  if (isOutputImageExtension(format)) {
+    return getDefaultImageQuality(format, preferences);
+  }
+
+  if (preferences.moreConversionSettings) {
     return {
       [format]: DEFAULT_QUALITIES[format],
     } as QualitySettings;

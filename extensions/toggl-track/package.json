@@ -172,6 +172,30 @@
       "title": "Cache TTL",
       "type": "textfield",
       "default": "30"
+    },
+    {
+      "name": "extensionStartScript",
+      "type": "textfield",
+      "required": false,
+      "title": "On Timer Start Script",
+      "description": "Path to a script or command to run when a timer starts. The time entry JSON is passed as an argument.",
+      "placeholder": "/path/to/script.sh"
+    },
+    {
+      "name": "extensionStopScript",
+      "type": "textfield",
+      "required": false,
+      "title": "On Timer Stop Script",
+      "description": "Path to a script or command to run when a timer stops.",
+      "placeholder": "/path/to/script.sh"
+    },
+    {
+      "name": "extensionUpdateScript",
+      "type": "textfield",
+      "required": false,
+      "title": "On Timer Fetch Script",
+      "description": "Path to a script or command to run whenever the running time entry is fetched. Useful for keeping external bars in sync.",
+      "placeholder": "/path/to/script.sh"
     }
   ],
   "dependencies": {

@@ -19,6 +19,7 @@ export interface Item {
   title: string;
   type: ItemType;
   vaultName: string;
+  urls?: string[];
   username?: string;
   email?: string;
   hasTotp: boolean;

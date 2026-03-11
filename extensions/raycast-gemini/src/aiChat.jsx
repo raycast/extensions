@@ -105,9 +105,52 @@ export default function Chat({ launchContext }) {
     );
   };
 
-  let GeminiActionPanel = () => {
+  // Accept idx so the ActionPanel can target the selected message.
+  let GeminiActionPanel = ({ idx } = {}) => {
+    const currentChatObj = chatData ? getChat(chatData.currentChat) : null;
+    const message =
+      currentChatObj && typeof idx === "number" && currentChatObj.messages && currentChatObj.messages[idx]
+        ? currentChatObj.messages[idx]
+        : null;
+
+    // Optional: build a "copy entire chat" payload
+    const fullChatText =
+      currentChatObj && currentChatObj.messages?.length
+        ? currentChatObj.messages
+            .slice() // keep original order shown in UI
+            .map((m) => {
+              const p = (m?.prompt ?? "").trim();
+              const a = (m?.answer ?? "").trim();
+              const d = m?.creationDate ? `(${formatDate(m.creationDate)}) ` : "";
+              return `${d}USER:\n${p}\n\nMODEL:\n${a}`.trim();
+            })
+            .join("\n\n---\n\n")
+        : "";
+
     return (
       <ActionPanel>
+        {/* NEW: Copy actions for the currently selected message */}
+        {message && (
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Answer" content={message.answer ?? ""} />
+            <Action.CopyToClipboard
+              title="Copy Prompt"
+              content={message.prompt ?? ""}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+          </ActionPanel.Section>
+        )}
+
+        {/* Optional: copy the entire chat transcript */}
+        {fullChatText && (
+          <ActionPanel.Section title="Export">
+            <Action.CopyToClipboard
+              title="Copy Entire Chat (Transcript)"
+              content={fullChatText}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+            />
+          </ActionPanel.Section>
+        )}
         <Action
           icon={Icon.Message}
           title="Send to Gemini"

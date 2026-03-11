@@ -1,5 +1,16 @@
+import { execFile } from "child_process";
+
 import { get, post, patch, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
+import { extensionStartScript, extensionStopScript, extensionUpdateScript } from "@/helpers/preferences";
+
+function runTrigger(scriptPath: string, payload?: TimeEntry | null) {
+  if (!scriptPath) return;
+  const args = payload ? [JSON.stringify(payload)] : [];
+  execFile(scriptPath, args, (error) => {
+    if (error) console.error(`Trigger error: ${error}`);
+  });
+}
 
 export async function getMyTimeEntries<Meta extends boolean = false>({
   startDate,
@@ -16,8 +27,12 @@ export async function getMyTimeEntries<Meta extends boolean = false>({
   return timeEntries.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
 }
 
-export function getRunningTimeEntry() {
-  return get<TimeEntry | null>("/me/time_entries/current");
+export async function getRunningTimeEntry() {
+  const result = await get<TimeEntry | null>("/me/time_entries/current");
+  if (extensionUpdateScript) {
+    runTrigger(extensionUpdateScript, result);
+  }
+  return result;
 }
 
 type CreateTimeEntryParameters = {
@@ -28,7 +43,7 @@ type CreateTimeEntryParameters = {
   taskId?: number;
   billable?: boolean;
 };
-export function createTimeEntry({
+export async function createTimeEntry({
   projectId,
   workspaceId,
   description,
@@ -37,7 +52,7 @@ export function createTimeEntry({
   billable,
 }: CreateTimeEntryParameters) {
   const now = new Date();
-  return post<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries`, {
+  const response = await post<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries`, {
     billable,
     created_with: "raycast-toggl-track",
     description,
@@ -49,10 +64,18 @@ export function createTimeEntry({
     workspace_id: workspaceId,
     task_id: taskId,
   });
+  if (response.data && extensionStartScript) {
+    runTrigger(extensionStartScript, response.data);
+  }
+  return response;
 }
 
-export function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
-  return patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
+export async function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
+  const response = await patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
+  if (response.data && extensionStopScript) {
+    runTrigger(extensionStopScript, response.data);
+  }
+  return response;
 }
 
 export function removeTimeEntry(workspaceId: number, timeEntryId: number) {

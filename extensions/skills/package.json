@@ -56,5 +56,14 @@
   "platforms": [
     "macOS",
     "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional token to increase the GitHub API rate limit from 60 to 5,000 requests/hour.",
+      "type": "password",
+      "required": false
+    }
   ]
 }

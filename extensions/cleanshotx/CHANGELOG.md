@@ -1,5 +1,10 @@
 # Cleanshot X Changelog
 
+## [Preset management commands] - 2026-03-04
+
+- Add new commands to manage recording presets
+- Add new command to record screen at a chosen preset resolution
+
 ## [Update app icon] - 2026-01-09
 
 - Update icon for extension

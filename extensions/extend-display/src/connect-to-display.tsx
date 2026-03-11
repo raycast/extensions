@@ -1,6 +1,7 @@
 import {
   ActionPanel,
   Action,
+  Color,
   List,
   showToast,
   Toast,
@@ -17,6 +18,9 @@ import {
   removeDisplay,
   markDisplayConnected,
   scanDisplaysFromSystem,
+  getQuickConnectDisplay,
+  setQuickConnectDisplay,
+  clearQuickConnectDisplay,
   Display,
 } from "./utils/displays";
 import { connectToDisplay } from "./utils/connect";
@@ -89,13 +93,18 @@ export default function Command() {
   const [hasDeps, setHasDeps] = useState<boolean | null>(null);
   const [displays, setDisplays] = useState<Display[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [quickConnectName, setQuickConnectName] = useState<
+    string | undefined
+  >();
+
+  const loadQuickConnect = useCallback(async () => {
+    setQuickConnectName(await getQuickConnectDisplay());
+  }, []);
 
   const loadDisplays = useCallback(async () => {
     setIsLoading(true);
     try {
       const list = await getAvailableDisplays();
-      // Sort by last connected (most recent first)
-      list.sort((a, b) => (b.lastConnected || 0) - (a.lastConnected || 0));
       setDisplays(list);
     } catch (error) {
       showToast({
@@ -113,12 +122,23 @@ export default function Command() {
       setHasDeps(deps);
       if (deps) {
         loadDisplays();
+        loadQuickConnect();
       } else {
         setIsLoading(false);
       }
     }
     init();
-  }, [loadDisplays]);
+  }, [loadDisplays, loadQuickConnect]);
+
+  const sortedDisplays = [...displays].sort((a, b) => {
+    if (a.name === quickConnectName) return -1;
+    if (b.name === quickConnectName) return 1;
+    if (a.lastConnected && b.lastConnected)
+      return b.lastConnected - a.lastConnected;
+    if (a.lastConnected) return -1;
+    if (b.lastConnected) return 1;
+    return a.name.localeCompare(b.name);
+  });
 
   async function handleRemove(name: string) {
     await removeDisplay(name);
@@ -228,7 +248,7 @@ export default function Command() {
       searchBarPlaceholder="Search monitors and displays..."
     >
       <List.Section title="Your Displays">
-        {displays.map((display) => (
+        {sortedDisplays.map((display) => (
           <List.Item
             key={display.name}
             title={display.name}
@@ -243,16 +263,19 @@ export default function Command() {
               "ipad",
               "mac",
             ]}
-            accessories={
-              display.lastConnected
+            accessories={[
+              ...(quickConnectName === display.name
+                ? [{ tag: { value: "Quick Connect", color: Color.Blue } }]
+                : []),
+              ...(display.lastConnected
                 ? [
                     {
                       date: new Date(display.lastConnected),
                       tooltip: "Last connected",
                     },
                   ]
-                : []
-            }
+                : []),
+            ]}
             actions={
               <ActionPanel>
                 <Action
@@ -260,6 +283,36 @@ export default function Command() {
                   icon={Icon.Link}
                   onAction={() => handleConnect(display)}
                 />
+                {quickConnectName === display.name ? (
+                  <Action
+                    title="Clear Quick Connect"
+                    icon={Icon.StarDisabled}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    onAction={async () => {
+                      await clearQuickConnectDisplay();
+                      setQuickConnectName(undefined);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Quick Connect cleared",
+                      });
+                    }}
+                  />
+                ) : (
+                  <Action
+                    title="Set as Quick Connect"
+                    icon={Icon.Star}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    onAction={async () => {
+                      await setQuickConnectDisplay(display.name);
+                      setQuickConnectName(display.name);
+                      showToast({
+                        style: Toast.Style.Success,
+                        title: "Quick Connect set",
+                        message: display.name,
+                      });
+                    }}
+                  />
+                )}
                 <Action
                   title="Scan for Displays"
                   icon={Icon.MagnifyingGlass}

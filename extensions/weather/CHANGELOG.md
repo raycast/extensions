@@ -1,5 +1,9 @@
 # Weather Changelog
 
+## [Maintenance] - 2026-03-06
+
+- Bump all dependencies to the latest
+
 ## [Chore: Renamed file] - 2025-04-29
 
 ## [SF Symbols] - 2024-03-04

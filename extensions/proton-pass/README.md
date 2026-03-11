@@ -26,7 +26,13 @@ Run the login command in your terminal:
 pass-cli login
 ```
 
-Follow the prompts to authenticate with your Proton account.
+This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
+
+Optional: use terminal prompts with interactive login:
+
+```bash
+pass-cli login --interactive user@proton.me
+```
 
 ### 3. Verify
 
@@ -42,6 +48,8 @@ pass-cli vault list
 - **Default Password Length**: Length for generated passwords (default: 20)
 - **Default Password Type**: Random characters or memorable passphrase
 - **Transient Clipboard**: Clear password from clipboard after pasting
+- **Background Refresh**: Automatically refresh cached vault and item data
+- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
 
 ## Troubleshooting
 

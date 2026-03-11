@@ -47,6 +47,7 @@ System Settings → Privacy & Security → Accessibility → Enable Raycast
 
 **Keyboard shortcuts:**
 - `Enter` - Connect to selected display (or scan if empty)
+- `⌘⇧Q` - Set/clear as Quick Connect display
 - `⌘R` - Rescan for displays
 - `⌘N` - Add display manually
 - `⌘O` - Open System Settings to see display names
@@ -55,9 +56,11 @@ System Settings → Privacy & Security → Accessibility → Enable Raycast
 ### Quick Connect Mode (For daily use)
 
 1. Open Raycast: `⌘ Space`
-2. Go to extension preferences and set your display name (e.g., "iPad Pro")
+2. Search: "Connect to Display", select your display, and press `⌘⇧Q` to set it as Quick Connect
 3. Search: "Quick Connect"
 4. Instant toggle with one command!
+
+You can also set the display name manually in extension preferences as a fallback.
 
 Pro tip: Assign a hotkey to Quick Connect for instant access.
 

@@ -1,5 +1,13 @@
 # Hugeicons UI Changelog
 
+## [1.0.1] - 2026-03-08
+
+### Changed
+
+- Updated `@hugeicons/core-free-icons` to the latest version
+- Updated `@hugeicons/react` to the latest version
+- Regenerated bundled Hugeicons metadata
+
 ## [1.0.0] - 2026-01-20
 
 ### Added

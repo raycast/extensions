@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lightdash-navigator",
+  "title": "Lightdash Navigator",
+  "description": "Search and open Lightdash Dashboards, Charts, and Spaces quickly.",
+  "icon": "extension-icon.png",
+  "author": "endiruslan",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lightdash-search",
+      "title": "Search Lightdash",
+      "description": "Quickly search Lightdash Dashboards, Charts, and Spaces.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "lightdashUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Lightdash Instance URL",
+      "description": "Your Lightdash instance URL (e.g., https://app.lightdash.cloud or https://lightdash.yourcompany.com)",
+      "placeholder": "https://app.lightdash.cloud"
+    },
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Personal Access Token created in Lightdash Settings",
+      "placeholder": "Your Lightdash Personal Access Token"
+    },
+    {
+      "name": "projectUuid",
+      "type": "textfield",
+      "required": true,
+      "title": "Project UUID",
+      "description": "UUID of the Lightdash project to search in. Found in the project URL: /projects/{projectUuid}/...",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

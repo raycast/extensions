@@ -15,6 +15,8 @@ interface ShowListItemProps {
   show: Show;
   isMyShow?: boolean;
   onArchiveChange?: (showId: number, archived: boolean) => void;
+  notificationsEnabled?: boolean;
+  onToggleNotifications?: (showId: number, enabled: boolean) => void;
   onLogout?: () => void;
 }
 
@@ -22,6 +24,8 @@ export function ShowListItem({
   show,
   isMyShow = false,
   onArchiveChange,
+  notificationsEnabled = true,
+  onToggleNotifications,
   onLogout,
 }: ShowListItemProps) {
   const [isAdded, setIsAdded] = useState(show.in_account);
@@ -81,11 +85,22 @@ export function ShowListItem({
     if (isMyShow) {
       // For "My Shows", display unwatched episodes count
       const remaining = show.user?.remaining ?? 0;
+      const trackingIcon = isArchived
+        ? Icon.MinusCircle
+        : notificationsEnabled
+          ? Icon.Livestream
+          : Icon.LivestreamDisabled;
+
       if (remaining === 0) {
-        return [{ text: "All episodes watched" }, { icon: Icon.CheckCircle }];
+        return [
+          { text: "All episodes watched" },
+          { icon: Icon.CheckCircle },
+          { icon: trackingIcon },
+        ];
       } else {
         return [
           { text: `${remaining} episode${remaining > 1 ? "s" : ""} to watch` },
+          { icon: trackingIcon },
         ];
       }
     } else {
@@ -127,6 +142,23 @@ export function ShowListItem({
                 url={show.resource_url}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               />
+              {!isArchived && onToggleNotifications && (
+                <Action
+                  title={
+                    notificationsEnabled
+                      ? "Disable Notifications for This Show"
+                      : "Enable Notifications for This Show"
+                  }
+                  icon={
+                    notificationsEnabled
+                      ? Icon.LivestreamDisabled
+                      : Icon.Livestream
+                  }
+                  onAction={() =>
+                    onToggleNotifications(show.id, !notificationsEnabled)
+                  }
+                />
+              )}
               {onLogout && (
                 <Action
                   title="Logout"

@@ -12,7 +12,11 @@ import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
 
 export function UsageLimits() {
-  const { data, isLoading, error, isStale, lastFetched, revalidate } = useClaudeUsageLimits();
+  const { data, isLoading, error, isStale, lastFetched, revalidate, isUsageLimitsAvailable } = useClaudeUsageLimits();
+
+  if (!isUsageLimitsAvailable) {
+    return null;
+  }
 
   const fiveHourUtil = data?.five_hour?.utilization ?? 0;
   const sevenDayUtil = data?.seven_day?.utilization ?? 0;

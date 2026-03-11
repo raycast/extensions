@@ -158,10 +158,11 @@ async function execPassCli(
   cliPath: string,
   args: string[],
   env: NodeJS.ProcessEnv,
+  timeout = 60_000,
 ): Promise<{ stdout: string; stderr: string }> {
   const baseOptions = {
     env,
-    timeout: 60_000,
+    timeout,
     maxBuffer: 20 * 1024 * 1024,
   };
 
@@ -177,46 +178,66 @@ async function runCli(args: string[]): Promise<string> {
     const { stdout } = await execPassCli(cliPath, args, env);
     return (stdout ?? "").trim();
   } catch (error: unknown) {
-    const execErr = error as NodeJS.ErrnoException & { killed?: boolean; signal?: string; stderr?: string };
-    if (execErr?.killed && typeof execErr?.signal === "string") {
-      throw new PassCliError("pass-cli timed out. Please try again.", "timeout");
-    }
+    throw normalizeCliExecutionError(error, cliPath, "pass-cli timed out. Please try again.");
+  }
+}
 
-    const message = error instanceof Error ? error.message : "";
-    const stderr = typeof execErr?.stderr === "string" ? execErr.stderr : "";
+function normalizeCliExecutionError(error: unknown, cliPath: string, timeoutMessage: string): PassCliError {
+  const execErr = error as NodeJS.ErrnoException & { killed?: boolean; signal?: string; stderr?: string };
+  if (execErr?.killed && typeof execErr?.signal === "string") {
+    return new PassCliError(timeoutMessage, "timeout");
+  }
 
-    const isEnoent = execErr?.code === "ENOENT" || execErr?.errno === -2;
-    if (isEnoent) {
-      throw new PassCliError(
-        `pass-cli not found at '${cliPath}'. Install it or set the correct path in extension preferences.`,
-        "not_installed",
-      );
-    }
+  const message = error instanceof Error ? error.message : "";
+  const stderr = typeof execErr?.stderr === "string" ? execErr.stderr : "";
 
-    const combined = [stderr, message]
-      .map((s) => s.trim())
-      .filter((s) => s.length > 0)
-      .join("\n");
-    const type = classifyCliError(combined);
+  const isEnoent = execErr?.code === "ENOENT" || execErr?.errno === -2;
+  if (isEnoent) {
+    return new PassCliError(
+      `pass-cli not found at '${cliPath}'. Install it or set the correct path in extension preferences.`,
+      "not_installed",
+    );
+  }
 
-    if (type === "keyring_error") {
-      throw new PassCliError(
-        "pass-cli could not access secure key storage. Try: pass-cli logout --force, then set PROTON_PASS_KEY_PROVIDER=fs and login again.",
-        "keyring_error",
-      );
-    }
+  const combined = [stderr, message]
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0)
+    .join("\n");
+  const type = classifyCliError(combined);
 
-    if (type === "not_authenticated") {
-      throw new PassCliError("Not authenticated. Run pass-cli login to authenticate.", "not_authenticated");
-    }
+  if (type === "keyring_error") {
+    return new PassCliError(
+      "pass-cli could not access secure key storage. Try: pass-cli logout --force, then set PROTON_PASS_KEY_PROVIDER=fs and login again.",
+      "keyring_error",
+    );
+  }
 
-    if (type === "network_error") {
-      throw new PassCliError("Network error. Check your connection and try again.", "network_error");
-    }
+  if (type === "not_authenticated") {
+    return new PassCliError("Not authenticated. Run pass-cli login to authenticate.", "not_authenticated");
+  }
 
-    const safeDetails =
-      combined.length > 0 ? truncateMiddle(combined, 600) : "An unknown error occurred while running pass-cli.";
-    throw new PassCliError(safeDetails, "unknown");
+  if (type === "network_error") {
+    return new PassCliError("Network error. Check your connection and try again.", "network_error");
+  }
+
+  const safeDetails =
+    combined.length > 0 ? truncateMiddle(combined, 600) : "An unknown error occurred while running pass-cli.";
+  return new PassCliError(safeDetails, "unknown");
+}
+
+export async function loginWithBrowser(): Promise<void> {
+  if (useMockData()) {
+    await ensureMockCacheCleared();
+    return;
+  }
+
+  const cliPath = await getCliPathAsync();
+  const env = createExecEnv();
+
+  try {
+    await execPassCli(cliPath, ["login"], env, 10 * 60_000);
+  } catch (error: unknown) {
+    throw normalizeCliExecutionError(error, cliPath, "Login timed out. Complete browser authentication and try again.");
   }
 }
 
@@ -303,6 +324,7 @@ function normalizeItem(raw: unknown, vaultNameOverride?: string): Item {
 
   const username = loginData ? trimOrUndefined(loginData.username) : trimOrUndefined(raw.username);
   const email = loginData ? trimOrUndefined(loginData.email) : trimOrUndefined(raw.email);
+  const urls = loginData ? normalizeUrls(loginData.urls) : undefined;
 
   const totpUri = loginData ? trimOrUndefined(loginData.totp_uri ?? loginData.totpUri) : undefined;
   const hasTotp = totpUri !== undefined && totpUri.length > 0;
@@ -319,6 +341,7 @@ function normalizeItem(raw: unknown, vaultNameOverride?: string): Item {
     title,
     type,
     vaultName,
+    urls,
     username,
     email,
     hasTotp,
@@ -346,9 +369,17 @@ function normalizeCustomFields(raw: unknown): ItemDetail["customFields"] {
   return mapped.length > 0 ? mapped : undefined;
 }
 
-function normalizeStringArray(raw: unknown): string[] | undefined {
+function normalizeUrls(raw: unknown): string[] | undefined {
   if (!Array.isArray(raw)) return undefined;
-  const values = raw.map((v) => trimOrUndefined(v)).filter((v): v is string => Boolean(v));
+
+  const values = raw
+    .map((entry) => {
+      if (typeof entry === "string") return trimOrUndefined(entry);
+      if (!isRecord(entry)) return undefined;
+      return trimOrUndefined(entry.url ?? entry.href ?? entry.value ?? entry.link);
+    })
+    .filter((value): value is string => Boolean(value));
+
   return values.length > 0 ? values : undefined;
 }
 
@@ -380,7 +411,7 @@ function normalizeItemDetail(raw: unknown): ItemDetail {
 
   const password = typeData ? trimOrUndefined(typeData.password) : undefined;
 
-  const urls = typeData ? normalizeStringArray(typeData.urls) : undefined;
+  const urls = typeData ? normalizeUrls(typeData.urls) : undefined;
 
   const note = trimOrUndefined(outerContent.note ?? raw.note);
 

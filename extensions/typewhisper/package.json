@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "typewhisper",
+  "title": "TypeWhisper",
+  "description": "Voice dictation, transcription history, and profile management for TypeWhisper",
+  "icon": "icon.png",
+  "author": "SeoFood",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "port",
+      "title": "API Port Override",
+      "description": "Leave empty for auto-discovery. Only set if using a custom port.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search and browse TypeWhisper transcription history",
+      "mode": "view"
+    },
+    {
+      "name": "switch-profile",
+      "title": "Switch Profile",
+      "description": "View and toggle TypeWhisper profiles",
+      "mode": "view"
+    },
+    {
+      "name": "start-dictation",
+      "title": "Start Dictation",
+      "description": "Start or stop voice dictation",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-last-transcription",
+      "title": "Show Last Transcription",
+      "description": "Copy the most recent transcription to clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "transcribe-file",
+      "title": "Transcribe File",
+      "description": "Transcribe an audio file using TypeWhisper",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.7.0",
+    "@types/node": "22.x"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

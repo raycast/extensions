@@ -29,7 +29,7 @@ export function useGoogleSuggestions(searchText: string) {
       headers: {
         "Content-Type": "text/plain; charset=UTF-8",
       },
-      execute: !!searchText,
+      execute: !!searchText && searchText.trim().length >= 2,
       keepPreviousData: true,
       parseResponse: async (response) => {
         try {
