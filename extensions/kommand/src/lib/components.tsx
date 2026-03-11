@@ -7,19 +7,30 @@ import {
   open,
   showHUD,
 } from "@raycast/api";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { findKommandAppPath } from "./database";
 import type { KeyLabelLookup } from "./key-layout-helper";
 import { formatStep, keywordsForSteps, tooltipForStep } from "./keymap";
 import { KommandShortcut } from "./types";
 
 export const APP_STORE_URL = "https://apps.apple.com/app/kommand/id6752623076";
+const execFileAsync = promisify(execFile);
 
-/** Open Kommand via URL scheme, or the App Store if not installed. */
+/** Open Kommand via its installed app bundle, or the App Store if unavailable. */
 export async function openKommand(): Promise<void> {
-  try {
-    await open("kommand://");
-  } catch {
-    await open(APP_STORE_URL);
+  const appPath = await findKommandAppPath();
+
+  if (appPath) {
+    try {
+      await execFileAsync("/usr/bin/open", [appPath]);
+      return;
+    } catch (error) {
+      console.error("Failed to open Kommand app bundle:", error);
+    }
   }
+
+  await open(APP_STORE_URL);
 }
 
 // ── Shared Components ───────────────────────────────────────────────────
