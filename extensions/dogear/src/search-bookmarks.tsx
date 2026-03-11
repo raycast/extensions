@@ -1,7 +1,8 @@
-import { ActionPanel, Action, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
 import fs from "fs";
 import os from "os";
+
+import { Action, ActionPanel, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import yaml from "js-yaml";
 
 interface Bookmark {
@@ -11,10 +12,6 @@ interface Bookmark {
 
 interface Config {
   bookmarks: Bookmark[];
-}
-
-interface Preferences {
-  configPath: string;
 }
 
 function expandPath(filePath: string): string {
@@ -47,7 +44,7 @@ export default function Command() {
   const { bookmarks, error } = loadBookmarks(configPath);
 
   if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Failed to load bookmarks", message: error });
+    void showToast({ style: Toast.Style.Failure, title: "Failed to load bookmarks", message: error });
   }
 
   return (

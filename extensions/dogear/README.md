@@ -1,26 +1,47 @@
-# DOGEAR
+# <img src="assets/extension-icon.png" width="28" height="28" /> DOGEAR
 
-Fuzzy search bookmarks from a YAML config file and open them in your browser.
+![DOGEAR screenshot](metadata/dogear-1.png)
 
-## Setup
+Raycast extension for fuzzy searching bookmarks from a YAML config file and opening them in the browser.
+DOGEAR uses the same `config.yaml` format as [fzf-bookmark-opener](https://github.com/flexphere/fzf-bookmark-opener).
+If you already have a config file at `~/.config/fzf-bookmark-opener/config.yaml`, you can point DOGEAR directly to it — no migration needed.
 
-1. Create a `config.yaml` file anywhere on your system:
+## Features
+
+- Fuzzy search across all bookmarks
+- Favicon display for each bookmark
+- Open in browser or copy URL to clipboard
+- YAML-based configuration
+
+## Installation
+
+### Raycast Store
+
+Search for "DOGEAR" in the Raycast Store.
+
+### Development Build
+
+```bash
+npm install
+npm run dev
+```
+
+## Configuration
+
+Set the **Config File Path** preference in Raycast to point to your `config.yaml`.
+
+### config.yaml format
 
 ```yaml
 bookmarks:
   - title: "GitHub"
     url: "https://github.com"
-  - title: "Stack Overflow"
-    url: "https://stackoverflow.com"
-  - title: "Raycast Store"
-    url: "https://www.raycast.com/store"
+  - title: "Google Cloud Console"
+    url: "https://console.cloud.google.com"
 ```
 
-2. Open the extension preferences and set the **Config File Path** to your `config.yaml` location.
+Each entry requires `title` and `url` fields. Comments (`#`) can be used to organize bookmarks by category.
 
-## Features
+## License
 
-- Fuzzy search through all your bookmarks
-- Displays favicons for each bookmark
-- Open bookmarks in your default browser
-- Copy bookmark URLs to clipboard
+MIT

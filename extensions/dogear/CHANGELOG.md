@@ -1,6 +1,6 @@
 # DOGEAR Changelog
 
-## [Initial Version] - 2026-03-11
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Fuzzy search bookmarks from a YAML config file
 - Open bookmarks in browser

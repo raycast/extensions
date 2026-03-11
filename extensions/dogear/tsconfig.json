@@ -6,6 +6,8 @@
     "module": "commonjs",
     "target": "ES2023",
     "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "jsx": "react-jsx",
     "resolveJsonModule": true
   }

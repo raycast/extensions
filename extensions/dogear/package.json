@@ -5,7 +5,9 @@
   "description": "Fuzzy search bookmarks from config.yaml and open in browser",
   "icon": "extension-icon.png",
   "author": "flexphere",
-  "categories": ["Productivity"],
+  "categories": [
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -39,8 +41,8 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "build": "ray build -e dist",
     "dev": "ray develop",
-    "build": "ray build",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
   }
