@@ -6,19 +6,26 @@ import {
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
+  collectShortcutKeyCodes,
+  serializeKeyCodes,
+  translateSerializedKeyCodes,
+} from "./lib/key-layout-helper";
+import {
+  findKommandAppPath,
   getShortcutsForApp,
-  isAppBundlePresent,
-  isKommandInstalled,
+  hasKommandLibrary,
 } from "./lib/database";
 import {
-  APP_STORE_URL,
   groupByCategory,
   KommandNotInstalledView,
+  KommandSetupView,
   openKommand,
   ShortcutItem,
 } from "./lib/components";
 
 export default function ShowShortcuts() {
+  const hasLibrary = hasKommandLibrary();
+
   const {
     data: app,
     isLoading: appLoading,
@@ -36,12 +43,35 @@ export default function ShowShortcuts() {
     async (bundleId: string) => getShortcutsForApp(bundleId),
     [app?.bundleId ?? ""],
     {
-      execute: isKommandInstalled() && !!app?.bundleId,
+      execute: hasLibrary && !!app?.bundleId,
     },
   );
 
-  if (!isKommandInstalled()) {
-    return <KommandNotInstalledView />;
+  const { data: kommandAppPath, isLoading: appLookupLoading } = usePromise(
+    findKommandAppPath,
+    [],
+    {
+      execute: !hasLibrary,
+    },
+  );
+
+  const serializedKeyCodes = serializeKeyCodes(
+    collectShortcutKeyCodes(shortcuts ?? []),
+  );
+
+  const { data: keyLabels, isLoading: labelsLoading } = usePromise(
+    translateSerializedKeyCodes,
+    [serializedKeyCodes],
+    {
+      execute: serializedKeyCodes.length > 0,
+    },
+  );
+
+  if (!hasLibrary) {
+    if (appLookupLoading) {
+      return <List isLoading />;
+    }
+    return kommandAppPath ? <KommandSetupView /> : <KommandNotInstalledView />;
   }
 
   if (appError || dbError) {
@@ -55,7 +85,7 @@ export default function ShowShortcuts() {
     );
   }
 
-  const isLoading = appLoading || dbLoading;
+  const isLoading = appLoading || dbLoading || labelsLoading;
   const appName = app?.name ?? "…";
 
   if (!isLoading && shortcuts && shortcuts.length === 0) {
@@ -66,14 +96,7 @@ export default function ShowShortcuts() {
           description="Open Kommand to add shortcuts for this app."
           actions={
             <ActionPanel>
-              {isAppBundlePresent() ? (
-                <Action title="Open Kommand" onAction={openKommand} />
-              ) : (
-                <Action.OpenInBrowser
-                  title="Get Kommand on App Store"
-                  url={APP_STORE_URL}
-                />
-              )}
+              <Action title="Open Kommand" onAction={openKommand} />
             </ActionPanel>
           }
         />
@@ -91,7 +114,7 @@ export default function ShowShortcuts() {
       {favorites.length > 0 && (
         <List.Section title="Favorites" subtitle={`${favorites.length}`}>
           {favorites.map((s) => (
-            <ShortcutItem key={s.id} shortcut={s} />
+            <ShortcutItem key={s.id} shortcut={s} keyLabels={keyLabels} />
           ))}
         </List.Section>
       )}
@@ -103,7 +126,7 @@ export default function ShowShortcuts() {
           subtitle={`${section.shortcuts.length}`}
         >
           {section.shortcuts.map((s) => (
-            <ShortcutItem key={s.id} shortcut={s} />
+            <ShortcutItem key={s.id} shortcut={s} keyLabels={keyLabels} />
           ))}
         </List.Section>
       ))}

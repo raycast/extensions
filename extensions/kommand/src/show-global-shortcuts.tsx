@@ -1,24 +1,54 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import {
+  collectGroupKeyCodes,
+  serializeKeyCodes,
+  translateSerializedKeyCodes,
+} from "./lib/key-layout-helper";
+import {
+  findKommandAppPath,
   getGlobalShortcuts,
-  isAppBundlePresent,
-  isKommandInstalled,
+  hasKommandLibrary,
 } from "./lib/database";
 import {
-  APP_STORE_URL,
   KommandNotInstalledView,
+  KommandSetupView,
   openKommand,
   ShortcutItem,
 } from "./lib/components";
 
 export default function ShowGlobalShortcuts() {
+  const hasLibrary = hasKommandLibrary();
+
   const { data, isLoading, error } = usePromise(getGlobalShortcuts, [], {
-    execute: isKommandInstalled(),
+    execute: hasLibrary,
   });
 
-  if (!isKommandInstalled()) {
-    return <KommandNotInstalledView />;
+  const { data: kommandAppPath, isLoading: appLookupLoading } = usePromise(
+    findKommandAppPath,
+    [],
+    {
+      execute: !hasLibrary,
+    },
+  );
+
+  const serializedKeyCodes = serializeKeyCodes(
+    collectGroupKeyCodes(data ?? []),
+  );
+
+  const { data: keyLabels, isLoading: labelsLoading } = usePromise(
+    translateSerializedKeyCodes,
+    [serializedKeyCodes],
+    {
+      execute: serializedKeyCodes.length > 0,
+    },
+  );
+
+  if (!hasLibrary) {
+    if (appLookupLoading) {
+      return <List isLoading />;
+    }
+    return kommandAppPath ? <KommandSetupView /> : <KommandNotInstalledView />;
   }
 
   if (error) {
@@ -40,14 +70,7 @@ export default function ShowGlobalShortcuts() {
           description="Mark shortcuts as global in Kommand to see them here."
           actions={
             <ActionPanel>
-              {isAppBundlePresent() ? (
-                <Action title="Open Kommand" onAction={openKommand} />
-              ) : (
-                <Action.OpenInBrowser
-                  title="Get Kommand on App Store"
-                  url={APP_STORE_URL}
-                />
-              )}
+              <Action title="Open Kommand" onAction={openKommand} />
             </ActionPanel>
           }
         />
@@ -56,7 +79,10 @@ export default function ShowGlobalShortcuts() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search global shortcuts">
+    <List
+      isLoading={isLoading || labelsLoading}
+      searchBarPlaceholder="Search global shortcuts"
+    >
       {(data ?? []).map((appGroup) => (
         <List.Section
           key={appGroup.bundleId}
@@ -64,7 +90,7 @@ export default function ShowGlobalShortcuts() {
           subtitle={`${appGroup.shortcuts.length}`}
         >
           {appGroup.shortcuts.map((s) => (
-            <ShortcutItem key={s.id} shortcut={s} />
+            <ShortcutItem key={s.id} shortcut={s} keyLabels={keyLabels} />
           ))}
         </List.Section>
       ))}

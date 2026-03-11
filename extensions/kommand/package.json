@@ -49,6 +49,7 @@
     "typescript": "^5.7.3"
   },
   "scripts": {
+    "build-helper": "./scripts/build-keylayout-helper.sh",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

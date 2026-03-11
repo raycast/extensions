@@ -7,17 +7,17 @@ import {
   open,
   showHUD,
 } from "@raycast/api";
+import type { KeyLabelLookup } from "./key-layout-helper";
 import { formatStep, keywordsForSteps, tooltipForStep } from "./keymap";
-import { isKommandInstalled } from "./database";
 import { KommandShortcut } from "./types";
 
 export const APP_STORE_URL = "https://apps.apple.com/app/kommand/id6752623076";
 
 /** Open Kommand via URL scheme, or the App Store if not installed. */
 export async function openKommand(): Promise<void> {
-  if (isKommandInstalled()) {
+  try {
     await open("kommand://");
-  } else {
+  } catch {
     await open(APP_STORE_URL);
   }
 }
@@ -27,13 +27,15 @@ export async function openKommand(): Promise<void> {
 export function ShortcutItem({
   shortcut,
   subtitle,
+  keyLabels,
 }: {
   shortcut: KommandShortcut;
   subtitle?: string;
+  keyLabels?: KeyLabelLookup;
 }) {
   const stepTags: List.Item.Accessory[] = shortcut.steps.map((step) => ({
-    tag: { value: formatStep(step), color: Color.SecondaryText },
-    tooltip: tooltipForStep(step),
+    tag: { value: formatStep(step, keyLabels), color: Color.SecondaryText },
+    tooltip: tooltipForStep(step, keyLabels),
   }));
 
   const accessories: List.Item.Accessory[] = [
@@ -49,13 +51,15 @@ export function ShortcutItem({
     ...stepTags,
   ];
 
-  const formatted = shortcut.steps.map(formatStep).join(" → ");
+  const formatted = shortcut.steps
+    .map((step) => formatStep(step, keyLabels))
+    .join(" → ");
 
   return (
     <List.Item
       title={shortcut.title}
       subtitle={subtitle}
-      keywords={keywordsForSteps(shortcut.steps)}
+      keywords={keywordsForSteps(shortcut.steps, keyLabels)}
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -83,6 +87,22 @@ export function KommandNotInstalledView() {
               title="Open Mac App Store"
               url="https://apps.apple.com/app/kommand/id6752623076"
             />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+}
+
+export function KommandSetupView() {
+  return (
+    <List>
+      <List.EmptyView
+        title="Open Kommand to Finish Setup"
+        description="Kommand is installed, but its shortcut library is not available yet. Open the app once, then come back here."
+        actions={
+          <ActionPanel>
+            <Action title="Open Kommand" onAction={openKommand} />
           </ActionPanel>
         }
       />

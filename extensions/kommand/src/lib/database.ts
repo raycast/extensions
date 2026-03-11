@@ -8,7 +8,7 @@
  *   ~/Library/Containers/com.curiouscode.kommand/Data/Library/Application Support/default.store
  */
 
-import { executeSQL } from "@raycast/utils";
+import { executeSQL, runAppleScript } from "@raycast/utils";
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { resolve } from "path";
@@ -19,20 +19,51 @@ import {
   ShortcutStep,
 } from "./types";
 
+const KOMMAND_BUNDLE_IDENTIFIER = "com.curiouscode.kommand";
+
 /** Path to Kommand's SwiftData SQLite store */
 export const DB_PATH = resolve(
   homedir(),
   "Library/Containers/com.curiouscode.kommand/Data/Library/Application Support/default.store",
 );
 
-/** Check whether Kommand is installed and has been used at least once */
-export function isKommandInstalled(): boolean {
-  return isAppBundlePresent() && existsSync(DB_PATH);
+/** Check whether Kommand's shortcut library exists locally */
+export function hasKommandLibrary(): boolean {
+  return existsSync(DB_PATH);
 }
 
-/** Check whether the Kommand app bundle actually exists on disk */
-export function isAppBundlePresent(): boolean {
-  return existsSync("/Applications/Kommand.app");
+let _kommandAppPathPromise: Promise<string | null> | null = null;
+
+/** Resolve the installed Kommand app via Launch Services, independent of its path */
+export async function findKommandAppPath(): Promise<string | null> {
+  if (_kommandAppPathPromise) {
+    return _kommandAppPathPromise;
+  }
+
+  _kommandAppPathPromise = (async () => {
+    try {
+      const appPath = await runAppleScript(
+        `
+try
+  POSIX path of (path to application id "${KOMMAND_BUNDLE_IDENTIFIER}")
+on error
+  return ""
+end try
+`,
+      );
+
+      const trimmedPath = appPath.trim();
+      return trimmedPath.length > 0 ? trimmedPath : null;
+    } catch (error) {
+      console.error(
+        "Failed to resolve Kommand app via Launch Services:",
+        error,
+      );
+      return null;
+    }
+  })();
+
+  return _kommandAppPathPromise;
 }
 
 // ── Schema detection ────────────────────────────────────────────────────

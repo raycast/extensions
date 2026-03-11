@@ -2,15 +2,16 @@
  * KeyCode → display name mapping for macOS virtual key codes.
  *
  * Values match KeyboardShortcuts.Key.rawValue (which are kVK_* Carbon constants).
- * This is a static US-ANSI mapping — Raycast extensions can't call UCKeyTranslate,
- * so we use the same fallback the Swift app uses for non-localized contexts.
+ * This remains a static US-ANSI fallback for cases where the local helper
+ * is unavailable or doesn't return a label for a given key code.
  */
 
+import type { KeyLabelLookup } from "./key-layout-helper";
 import { ShortcutStep } from "./types";
 
 // ── Key code → display label ────────────────────────────────────────────
 
-const KEY_MAP: Record<number, string> = {
+const FALLBACK_KEY_MAP: Record<number, string> = {
   // Letters (ANSI layout)
   0: "A",
   1: "S",
@@ -149,17 +150,6 @@ function modifierSymbols(flags: number): string[] {
   return symbols;
 }
 
-/**
- * Format a single shortcut step (e.g. "⌘Z", "⇧", "G")
- */
-export function formatStep(step: ShortcutStep): string {
-  const parts = modifierSymbols(step.modifierFlags);
-  if (step.keyCode != null) {
-    parts.push(KEY_MAP[step.keyCode] ?? `Key${step.keyCode}`);
-  }
-  return parts.join("");
-}
-
 // ── Modifier name lookups (for keywords & tooltips) ─────────────────────
 
 const MODIFIER_NAMES: { flag: number; symbol: string; names: string[] }[] = [
@@ -183,12 +173,32 @@ function modifierFullNames(flags: number): string[] {
 /**
  * Returns a human-readable tooltip for a single step (e.g. "Control + D")
  */
-export function tooltipForStep(step: ShortcutStep): string {
+function labelForKeyCode(keyCode: number, keyLabels?: KeyLabelLookup): string {
+  return (
+    keyLabels?.get(keyCode) ?? FALLBACK_KEY_MAP[keyCode] ?? `Key${keyCode}`
+  );
+}
+
+export function formatStep(
+  step: ShortcutStep,
+  keyLabels?: KeyLabelLookup,
+): string {
+  const parts = modifierSymbols(step.modifierFlags);
+  if (step.keyCode != null) {
+    parts.push(labelForKeyCode(step.keyCode, keyLabels));
+  }
+  return parts.join("");
+}
+
+export function tooltipForStep(
+  step: ShortcutStep,
+  keyLabels?: KeyLabelLookup,
+): string {
   const parts = modifierFullNames(step.modifierFlags).map(
     (n) => n.charAt(0).toUpperCase() + n.slice(1),
   );
   if (step.keyCode != null) {
-    parts.push(KEY_MAP[step.keyCode] ?? `Key${step.keyCode}`);
+    parts.push(labelForKeyCode(step.keyCode, keyLabels));
   }
   return parts.join(" + ");
 }
@@ -198,7 +208,10 @@ export function tooltipForStep(step: ShortcutStep): string {
  * Includes all modifier name variants and key names in lowercase.
  * Example: [{ keyCode: 2, modifierFlags: 262144 }] → ["ctrl", "control", "d"]
  */
-export function keywordsForSteps(steps: ShortcutStep[]): string[] {
+export function keywordsForSteps(
+  steps: ShortcutStep[],
+  keyLabels?: KeyLabelLookup,
+): string[] {
   const keywords = new Set<string>();
   for (const step of steps) {
     for (const m of MODIFIER_NAMES) {
@@ -207,7 +220,7 @@ export function keywordsForSteps(steps: ShortcutStep[]): string[] {
       }
     }
     if (step.keyCode != null) {
-      const keyName = KEY_MAP[step.keyCode] ?? `Key${step.keyCode}`;
+      const keyName = labelForKeyCode(step.keyCode, keyLabels);
       keywords.add(keyName.toLowerCase());
     }
   }
