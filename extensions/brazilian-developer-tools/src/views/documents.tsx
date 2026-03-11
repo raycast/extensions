@@ -9,7 +9,7 @@ const generateCnpjFormatted = new GenerateCnpjFormatted();
 
 export function Documents() {
   return (
-    <List navigationTitle="Generate documents">
+    <List navigationTitle="Generate Documents">
       <List.Item
         title="CPF"
         subtitle="12345678909"

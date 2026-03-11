@@ -15,10 +15,10 @@
       "mode": "view"
     }
   ],
+  "categories": ["Developer Tools"],
   "dependencies": {
     "@raycast/api": "^1.104.8",
     "@raycast/utils": "^2.2.3",
-    "cheerio": "^1.2.0",
     "nanoid": "^5.1.6",
     "uuidv7": "^1.1.0"
   },
@@ -38,6 +38,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "packageManager": "yarn@4.7.0+sha512.5a0afa1d4c1d844b3447ee3319633797bcd6385d9a44be07993ae52ff4facabccafb4af5dcd1c2f9a94ac113e5e9ff56f6130431905884414229e284e37bb7c9"
+  }
 }

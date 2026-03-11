@@ -1,10 +1,11 @@
 import { Action, ActionPanel, List } from "@raycast/api";
 import { RandomNanoid } from "../actions/ids/random-nanoid";
 import { RandomUuidV4 } from "../actions/ids/random-uuid-v4";
+import { RandomUuidV7 } from "../actions/ids/random-uuid-v7";
 
 const randomUuid = new RandomUuidV4();
 const randomNanoid = new RandomNanoid();
-const randomUuidV7 = new RandomUuidV4();
+const randomUuidV7 = new RandomUuidV7();
 
 export function Ids() {
   return (
