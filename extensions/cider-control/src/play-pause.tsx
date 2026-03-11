@@ -17,7 +17,7 @@ export default async function Command() {
     });
 
     if (response.ok) {
-      // TODO fill
+      await showToast({ style: Toast.Style.Success, title: "Play/Pause" });
     } else {
       const errorText = await response.text();
       console.error("Cider Error:", errorText);
