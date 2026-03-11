@@ -35,6 +35,8 @@ interface HistoryEntry {
   title: string;
 }
 
+type SelectedView = "thumbnails" | "history";
+
 const ICON_TINT_COLOR = "#FF0033";
 const URL_HISTORY_STORAGE_KEY = "youtube-url-history";
 const MAX_HISTORY_ITEMS = 20;
@@ -48,7 +50,7 @@ const THUMBNAIL_VARIANTS: ThumbnailVariant[] = [
 ];
 
 export default function Command() {
-  const [selectedView, setSelectedView] = useState<"thumbnails" | "history">("thumbnails");
+  const [selectedView, setSelectedView] = useState<SelectedView>("thumbnails");
   const [urlInput, setUrlInput] = useState<string>("");
   const [historySearchText, setHistorySearchText] = useState<string>("");
   const normalizedUrl = normalizeInput(urlInput);
@@ -126,10 +128,15 @@ export default function Command() {
         return;
       }
 
+      const missingEntries = urlHistory.filter((entry) => !historyThumbnailUrls[entry.url]);
+      if (missingEntries.length === 0) {
+        return;
+      }
+
       const entries = await Promise.all(
-        urlHistory.map(async (url) => {
-          const largestThumbnailUrl = await findLargestThumbnailUrl(url.videoId);
-          return [url.url, largestThumbnailUrl ?? ""] as const;
+        missingEntries.map(async (entry) => {
+          const largestThumbnailUrl = await findLargestThumbnailUrl(entry.videoId);
+          return [entry.url, largestThumbnailUrl ?? ""] as const;
         }),
       );
 
@@ -137,9 +144,10 @@ export default function Command() {
         return;
       }
 
-      setHistoryThumbnailUrls(
-        Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry[1].length > 0)),
-      );
+      setHistoryThumbnailUrls((currentUrls) => ({
+        ...currentUrls,
+        ...Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry[1].length > 0)),
+      }));
     }
 
     void loadHistoryThumbnails();
@@ -147,7 +155,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [urlHistory]);
+  }, [historyThumbnailUrls, urlHistory]);
 
   async function findAvailableThumbnails(id: string): Promise<AvailableThumbnail[]> {
     const results = await Promise.all(
@@ -342,12 +350,8 @@ export default function Command() {
     return query.length === 0 || url.title.toLowerCase().includes(query) || url.url.toLowerCase().includes(query);
   });
 
-  const viewDropdown = (
-    <List.Dropdown
-      tooltip="View"
-      value={selectedView}
-      onChange={(value) => setSelectedView(value as "thumbnails" | "history")}
-    >
+  const listViewDropdown = (
+    <List.Dropdown tooltip="View" value={selectedView} onChange={(value) => setSelectedView(value as SelectedView)}>
       <List.Dropdown.Item
         title="Thumbnails"
         value="thumbnails"
@@ -361,10 +365,25 @@ export default function Command() {
     </List.Dropdown>
   );
 
+  const gridViewDropdown = (
+    <Grid.Dropdown tooltip="View" value={selectedView} onChange={(value) => setSelectedView(value as SelectedView)}>
+      <Grid.Dropdown.Item
+        title="Thumbnails"
+        value="thumbnails"
+        icon={{ source: Icon.Image, tintColor: Color.SecondaryText }}
+      />
+      <Grid.Dropdown.Item
+        title="History"
+        value="history"
+        icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
+      />
+    </Grid.Dropdown>
+  );
+
   if (selectedView === "history") {
     return (
       <Grid
-        searchBarAccessory={viewDropdown}
+        searchBarAccessory={gridViewDropdown}
         searchText={historySearchText}
         onSearchTextChange={setHistorySearchText}
         searchBarPlaceholder="Filter previous YouTube URLs..."
@@ -444,7 +463,7 @@ export default function Command() {
       <List
         isShowingDetail={true}
         isLoading={isPrefillingUrl || isLoadingThumbnails}
-        searchBarAccessory={viewDropdown}
+        searchBarAccessory={listViewDropdown}
         searchText={urlInput}
         onSearchTextChange={setUrlInput}
         searchBarPlaceholder="Paste a YouTube URL..."
@@ -489,7 +508,7 @@ export default function Command() {
     <List
       isShowingDetail={true}
       isLoading={isPrefillingUrl || isLoadingThumbnails}
-      searchBarAccessory={viewDropdown}
+      searchBarAccessory={listViewDropdown}
       searchText={urlInput}
       onSearchTextChange={setUrlInput}
       searchBarPlaceholder="Paste a YouTube URL..."
