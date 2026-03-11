@@ -17,9 +17,6 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 
-interface Preferences {
-  downloadLocation: string;
-}
 
 interface ThumbnailVariant {
   key: string;
