@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "trance",
+  "title": "Trance",
+  "description": "Ambient sound mixer for focus and relaxation. Layer multiple sounds, save presets, and control from your menu bar.",
+  "icon": "icon.png",
+  "author": "chandlervdw",
+  "categories": ["Productivity", "Media"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "mix-sounds",
+      "title": "Mix Sounds",
+      "description": "Browse and mix ambient sounds with individual volume control",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-playback",
+      "title": "Toggle Playback",
+      "description": "Play or pause the current sound mix",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Trance Menu Bar",
+      "description": "Persistent menu bar controls for Trance",
+      "mode": "menu-bar",
+      "interval": "30s"
+    },
+    {
+      "name": "manage-presets",
+      "title": "Manage Presets",
+      "description": "Save, load, and delete sound mix presets",
+      "mode": "view"
+    },
+    {
+      "name": "set-timer",
+      "title": "Set Sleep Timer",
+      "description": "Set an auto-stop timer for the current mix",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultVolume",
+      "title": "Default Volume",
+      "description": "Default volume when adding a new sound (0-100)",
+      "type": "textfield",
+      "default": "75",
+      "required": false
+    },
+    {
+      "name": "showMenuBarCount",
+      "title": "Show Sound Count in Menu Bar",
+      "description": "Display the number of active sounds next to the menu bar icon",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Show count"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
