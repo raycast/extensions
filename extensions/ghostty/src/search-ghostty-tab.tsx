@@ -8,7 +8,6 @@ type TabInfo = { windowIndex: number; tabIndex: number; name: string };
 
 const fetchTabsScript = `
 tell application "Ghostty"
-  activate
   if (count of windows) is 0 then
     return "Error: Ghostty has no windows"
   end if

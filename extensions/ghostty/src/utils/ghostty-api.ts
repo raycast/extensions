@@ -1,6 +1,6 @@
 import { access } from "node:fs/promises";
 
-import { closeMainWindow, showToast, Toast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 import { runAppleScript, runJavaScriptForAutomation } from "./applescript";
 import type { WorkspaceLaunchTarget } from "./types";
@@ -11,11 +11,13 @@ type RunGhosttyAppleScriptTarget = {
   workspaceName: string;
   directory: string;
   layout: WorkspaceLaunchTarget["layout"];
+  autoFocus: boolean;
 };
 
 export async function openWorkspace(target: WorkspaceLaunchTarget) {
   const directory = expandHome(target.directory);
   const layout = target.layout;
+  const autoFocus = getPreferenceValues<Preferences>().autoFocusGhostty ?? true;
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -29,6 +31,7 @@ export async function openWorkspace(target: WorkspaceLaunchTarget) {
       workspaceName: target.title,
       directory,
       layout: target.layout,
+      autoFocus,
     });
 
     toast.style = Toast.Style.Success;
@@ -37,10 +40,12 @@ export async function openWorkspace(target: WorkspaceLaunchTarget) {
 
     await closeMainWindow();
 
-    try {
-      await moveMouseToFirstPanelCenter();
-    } catch {
-      // Workspace opening succeeded; mouse positioning is best-effort only.
+    if (autoFocus) {
+      try {
+        await moveMouseToFirstPanelCenter();
+      } catch {
+        // Workspace opening succeeded; mouse positioning is best-effort only.
+      }
     }
   } catch (error) {
     toast.style = Toast.Style.Failure;
@@ -106,12 +111,20 @@ function buildAppleScript(target: RunGhosttyAppleScriptTarget) {
 
   const lines = [
     `set workspaceName to ${appleScriptString(target.workspaceName)}`,
+    `set shouldActivate to ${target.autoFocus ? "true" : "false"}`,
+    'set ghosttyWasRunning to application "Ghostty" is running',
     `set openInNewWindow to ${target.layout.openInNewWindow === true ? "true" : "false"}`,
     `set projectDir to ${appleScriptString(target.directory)}`,
     `set windowTitle to ${appleScriptString(target.layout.windowTitle ?? getDirectoryName(target.directory))}`,
     "",
+    'if ghosttyWasRunning is false then',
+    '    tell application "Ghostty" to launch',
+    "end if",
+    "",
     'tell application "Ghostty"',
-    "    activate",
+    "    if shouldActivate then",
+    "        activate",
+    "    end if",
     "",
     "    if (count of windows) is not 0 then",
     "        set matchedWindow to missing value",
@@ -143,7 +156,9 @@ function buildAppleScript(target: RunGhosttyAppleScriptTarget) {
     "",
     "        if matchedTab is not missing value then",
     "            select tab matchedTab",
-    "            activate window matchedWindow",
+    "            if shouldActivate then",
+    "                activate window matchedWindow",
+    "            end if",
     "            focus (focused terminal of matchedTab)",
     '            return "focused-existing"',
     "        end if",
@@ -171,7 +186,9 @@ function buildAppleScript(target: RunGhosttyAppleScriptTarget) {
       lines.push("        set targetWindow to front window");
       lines.push(`        set ${tabVar} to new tab in targetWindow with configuration ${cfgVar}`);
       lines.push(`        select tab ${tabVar}`);
-      lines.push("        activate window targetWindow");
+      lines.push("        if shouldActivate then");
+      lines.push("            activate window targetWindow");
+      lines.push("        end if");
       lines.push("    end if");
     } else {
       lines.push(`    set ${tabVar} to new tab in targetWindow with configuration ${cfgVar}`);
@@ -214,7 +231,9 @@ function buildAppleScript(target: RunGhosttyAppleScriptTarget) {
   });
 
   lines.push(`    select tab ${focusTabVar}`);
-  lines.push("    activate window targetWindow");
+  lines.push("    if shouldActivate then");
+  lines.push("        activate window targetWindow");
+  lines.push("    end if");
   lines.push(`    focus ${focusPaneVar}`);
   lines.push('    return "opened-new"');
   lines.push("end tell");

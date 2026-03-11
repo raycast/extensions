@@ -38,6 +38,14 @@
         { "title": "5", "value": "5" },
         { "title": "6", "value": "6" }
       ]
+    },
+    {
+      "name": "autoFocusGhostty",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Focus on Tab Selection",
+      "description": "Move cursor to the selected tab after selecting it",
+      "default": false
     }
   ],
   "commands": [
