@@ -1,6 +1,6 @@
 # Changelog
 
-## [Remote Access Support] - {PR_MERGE_DATE}
+## [Remote Access Support] - 2026-03-11
 
 - **Remote Working Memory**: the Working Memory command now reads from the Mem API, so remote Mem setups work correctly
 - **Safer local editing contract**: `Edit Working Memory` now refuses remote connections and stays explicitly local-only
