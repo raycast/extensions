@@ -1,5 +1,9 @@
 # Changelog
 
+## [Fix Duplicate Audit Error Toast] - {PR_MERGE_DATE}
+
+- Fix error toast showing twice when re-selecting a skill with a failed audit fetch
+
 ## [Security Audits Data] - 2026-03-11
 
 - Parse security audit data from skills.sh and show their status in the skill's details
