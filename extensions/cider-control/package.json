@@ -5,9 +5,11 @@
   "description": "Search and control Cider playback from Raycast",
   "icon": "logo.png",
   "author": "luis_14",
+  "categories": ["Media"],
   "platforms": [
     "macOS",
     "Windows"
+  ],
   ],
   "license": "MIT",
   "commands": [
