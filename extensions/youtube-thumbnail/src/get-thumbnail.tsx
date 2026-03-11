@@ -4,8 +4,11 @@ import {
   ActionPanel,
   Action,
   Clipboard,
+  Color,
   Icon,
+  Grid,
   List,
+  LocalStorage,
   getPreferenceValues,
   environment,
 } from "@raycast/api";
@@ -30,7 +33,15 @@ interface AvailableThumbnail {
   url: string;
 }
 
+interface HistoryEntry {
+  url: string;
+  videoId: string;
+  title: string;
+}
+
 const ICON_TINT_COLOR = "#FF0033";
+const URL_HISTORY_STORAGE_KEY = "youtube-url-history";
+const MAX_HISTORY_ITEMS = 20;
 
 const THUMBNAIL_VARIANTS: ThumbnailVariant[] = [
   { key: "maxres", label: "Max Resolution", fileName: "maxresdefault.jpg" },
@@ -41,11 +52,15 @@ const THUMBNAIL_VARIANTS: ThumbnailVariant[] = [
 ];
 
 export default function Command() {
-  const [searchText, setSearchText] = useState<string>("");
-  const normalizedUrl = normalizeInput(searchText);
+  const [selectedView, setSelectedView] = useState<"thumbnails" | "history">("thumbnails");
+  const [urlInput, setUrlInput] = useState<string>("");
+  const [historySearchText, setHistorySearchText] = useState<string>("");
+  const normalizedUrl = normalizeInput(urlInput);
   const videoId = normalizedUrl ? extractVideoId(normalizedUrl) : null;
   const [availableThumbnails, setAvailableThumbnails] = useState<AvailableThumbnail[]>([]);
-  const [quickLookPaths, setQuickLookPaths] = useState<Record<string, string>>({});
+  const [urlHistory, setUrlHistory] = useState<HistoryEntry[]>([]);
+  const [historyThumbnailUrls, setHistoryThumbnailUrls] = useState<Record<string, string>>({});
+  const [isHistoryLoaded, setIsHistoryLoaded] = useState<boolean>(false);
   const [isPrefillingUrl, setIsPrefillingUrl] = useState<boolean>(true);
   const [isLoadingThumbnails, setIsLoadingThumbnails] = useState<boolean>(false);
   const [downloadPathError, setDownloadPathError] = useState<string | null>(null);
@@ -54,6 +69,10 @@ export default function Command() {
 
   useEffect(() => {
     void prefillUrlFromClipboard();
+  }, []);
+
+  useEffect(() => {
+    void loadUrlHistory();
   }, []);
 
   useEffect(() => {
@@ -74,6 +93,7 @@ export default function Command() {
         return;
       }
 
+      setAvailableThumbnails([]);
       setIsLoadingThumbnails(true);
       const foundThumbnails = await findAvailableThumbnails(videoId);
       if (cancelled) return;
@@ -94,37 +114,44 @@ export default function Command() {
   }, [videoId]);
 
   useEffect(() => {
+    if (!isHistoryLoaded || !videoId) {
+      return;
+    }
+
+    void saveUrlToHistory(videoId);
+  }, [isHistoryLoaded, videoId]);
+
+  useEffect(() => {
     let cancelled = false;
 
-    async function prepareQuickLookFiles() {
-      if (!videoId || availableThumbnails.length === 0) {
-        setQuickLookPaths({});
+    async function loadHistoryThumbnails() {
+      if (urlHistory.length === 0) {
+        setHistoryThumbnailUrls({});
         return;
       }
 
       const entries = await Promise.all(
-        availableThumbnails.map(async (thumbnail) => {
-          try {
-            const filePath = await getQuickLookFilePath(videoId, thumbnail);
-            return [thumbnail.key, filePath] as const;
-          } catch {
-            return [thumbnail.key, ""] as const;
-          }
+        urlHistory.map(async (url) => {
+          const largestThumbnailUrl = await findLargestThumbnailUrl(url.videoId);
+          return [url.url, largestThumbnailUrl ?? ""] as const;
         }),
       );
 
-      if (cancelled) return;
-      setQuickLookPaths(
+      if (cancelled) {
+        return;
+      }
+
+      setHistoryThumbnailUrls(
         Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry[1].length > 0)),
       );
     }
 
-    void prepareQuickLookFiles();
+    void loadHistoryThumbnails();
 
     return () => {
       cancelled = true;
     };
-  }, [videoId, availableThumbnails]);
+  }, [urlHistory]);
 
   async function findAvailableThumbnails(id: string): Promise<AvailableThumbnail[]> {
     const results = await Promise.all(
@@ -140,6 +167,32 @@ export default function Command() {
     );
 
     return results.filter((thumbnail): thumbnail is AvailableThumbnail => thumbnail !== null);
+  }
+
+  async function findLargestThumbnailUrl(id: string): Promise<string | null> {
+    for (const variant of THUMBNAIL_VARIANTS) {
+      const resolvedUrl = await findThumbnailForVariant(id, variant.fileName);
+      if (resolvedUrl) {
+        return resolvedUrl;
+      }
+    }
+
+    return null;
+  }
+
+  async function fetchVideoTitle(id: string): Promise<string | null> {
+    try {
+      const oEmbedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(`https://www.youtube.com/watch?v=${id}`)}&format=json`;
+      const response = await fetch(oEmbedUrl);
+      if (!response.ok) {
+        return null;
+      }
+
+      const data = (await response.json()) as { title?: unknown };
+      return typeof data.title === "string" && data.title.trim().length > 0 ? data.title.trim() : null;
+    } catch {
+      return null;
+    }
   }
 
   async function findThumbnailForVariant(id: string, fileName: string): Promise<string | null> {
@@ -162,7 +215,7 @@ export default function Command() {
   async function prefillUrlFromClipboard() {
     const clipboardUrl = await readClipboardText();
     if (clipboardUrl) {
-      setSearchText(clipboardUrl);
+      setUrlInput(clipboardUrl);
     }
     setIsPrefillingUrl(false);
   }
@@ -173,7 +226,8 @@ export default function Command() {
       return;
     }
 
-    setSearchText(clipboardUrl);
+    setUrlInput(clipboardUrl);
+    setSelectedView("thumbnails");
   }
 
   async function readClipboardText(): Promise<string | null> {
@@ -222,6 +276,164 @@ export default function Command() {
     showToast(Toast.Style.Success, "Thumbnail URL Copied", url);
   }
 
+  async function loadUrlHistory() {
+    try {
+      const storedHistory = await LocalStorage.getItem<string>(URL_HISTORY_STORAGE_KEY);
+      if (!storedHistory) {
+        setUrlHistory([]);
+        setIsHistoryLoaded(true);
+        return;
+      }
+
+      const parsedHistory = JSON.parse(storedHistory);
+      if (!Array.isArray(parsedHistory)) {
+        setUrlHistory([]);
+        setIsHistoryLoaded(true);
+        return;
+      }
+
+      const validHistory = parsedHistory
+        .map((entry) => normalizeHistoryEntry(entry))
+        .filter((entry): entry is HistoryEntry => entry !== null);
+      setUrlHistory(validHistory);
+      setIsHistoryLoaded(true);
+    } catch {
+      setUrlHistory([]);
+      setIsHistoryLoaded(true);
+    }
+  }
+
+  async function saveUrlToHistory(id: string) {
+    const canonicalUrl = `https://www.youtube.com/watch?v=${id}`;
+    const title = await fetchVideoTitle(id);
+    const nextEntry: HistoryEntry = {
+      url: canonicalUrl,
+      videoId: id,
+      title: title ?? canonicalUrl,
+    };
+    const nextHistory = [nextEntry, ...urlHistory.filter((entry) => entry.videoId !== id)].slice(0, MAX_HISTORY_ITEMS);
+
+    setUrlHistory(nextHistory);
+    await LocalStorage.setItem(URL_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+  }
+
+  async function clearUrlHistory() {
+    setUrlHistory([]);
+    await LocalStorage.removeItem(URL_HISTORY_STORAGE_KEY);
+    showToast(Toast.Style.Success, "History Cleared");
+  }
+
+  async function removeHistoryEntry(videoId: string) {
+    const nextHistory = urlHistory.filter((entry) => entry.videoId !== videoId);
+    setUrlHistory(nextHistory);
+
+    if (nextHistory.length === 0) {
+      await LocalStorage.removeItem(URL_HISTORY_STORAGE_KEY);
+    } else {
+      await LocalStorage.setItem(URL_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+    }
+
+    showToast(Toast.Style.Success, "Removed From History");
+  }
+
+  function useHistoryUrl(url: string) {
+    setUrlInput(url);
+    setSelectedView("thumbnails");
+  }
+
+  const filteredHistory = urlHistory.filter((url) => {
+    const query = historySearchText.trim().toLowerCase();
+    return query.length === 0 || url.title.toLowerCase().includes(query) || url.url.toLowerCase().includes(query);
+  });
+
+  const viewDropdown = (
+    <List.Dropdown
+      tooltip="View"
+      value={selectedView}
+      onChange={(value) => setSelectedView(value as "thumbnails" | "history")}
+    >
+      <List.Dropdown.Item
+        title="Thumbnails"
+        value="thumbnails"
+        icon={{ source: Icon.Image, tintColor: Color.SecondaryText }}
+      />
+      <List.Dropdown.Item
+        title="History"
+        value="history"
+        icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
+      />
+    </List.Dropdown>
+  );
+
+  if (selectedView === "history") {
+    return (
+      <Grid
+        searchBarAccessory={viewDropdown}
+        searchText={historySearchText}
+        onSearchTextChange={setHistorySearchText}
+        searchBarPlaceholder="Filter previous YouTube URLs..."
+        columns={3}
+        inset={Grid.Inset.Zero}
+        fit={Grid.Fit.Fill}
+        aspectRatio="16/9"
+      >
+        {filteredHistory.length === 0 ? (
+          <Grid.EmptyView
+            title="No History"
+            description="Valid YouTube URLs you open will appear in this list."
+            icon={{
+              source: path.join(environment.assetsPath, "icons", "history-off.svg"),
+              tintColor: ICON_TINT_COLOR,
+            }}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Switch to Thumbnails"
+                  onAction={() => setSelectedView("thumbnails")}
+                  icon={Icon.AppWindow}
+                />
+                {urlHistory.length > 0 ? (
+                  <Action
+                    title="Clear History"
+                    onAction={clearUrlHistory}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                  />
+                ) : null}
+              </ActionPanel>
+            }
+          />
+        ) : (
+          filteredHistory.map((entry) => (
+            <Grid.Item
+              key={entry.videoId}
+              title={entry.title}
+              content={historyThumbnailUrls[entry.url] ? { source: historyThumbnailUrls[entry.url] } : Icon.Clock}
+              actions={
+                <ActionPanel>
+                  <Action title="Open Thumbnails" onAction={() => useHistoryUrl(entry.url)} icon={Icon.AppWindow} />
+                  <Action title="Copy URL" onAction={() => Clipboard.copy(entry.url)} icon={Icon.CopyClipboard} />
+                  <Action
+                    title="Remove from History"
+                    onAction={() => removeHistoryEntry(entry.videoId)}
+                    icon={Icon.MinusCircle}
+                    style={Action.Style.Destructive}
+                  />
+                  <Action
+                    title="Clear All History"
+                    onAction={clearUrlHistory}
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        )}
+      </Grid>
+    );
+  }
+
   if (!videoId || availableThumbnails.length === 0) {
     const statusMarkdown = getStatusMarkdown({
       isPrefillingUrl,
@@ -236,8 +448,9 @@ export default function Command() {
       <List
         isShowingDetail={true}
         isLoading={isPrefillingUrl || isLoadingThumbnails}
-        searchText={searchText}
-        onSearchTextChange={setSearchText}
+        searchBarAccessory={viewDropdown}
+        searchText={urlInput}
+        onSearchTextChange={setUrlInput}
         searchBarPlaceholder="Paste a YouTube URL..."
       >
         {placeholder ? (
@@ -280,30 +493,21 @@ export default function Command() {
     <List
       isShowingDetail={true}
       isLoading={isPrefillingUrl || isLoadingThumbnails}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
+      searchBarAccessory={viewDropdown}
+      searchText={urlInput}
+      onSearchTextChange={setUrlInput}
       searchBarPlaceholder="Paste a YouTube URL..."
     >
       {availableThumbnails.map((thumbnail) => (
         <List.Item
-          key={thumbnail.key}
+          key={`${videoId}-${thumbnail.key}`}
           title={thumbnail.label}
           icon={getThumbnailVariantIcon(thumbnail.key)}
-          accessories={[{ icon: Icon.Link, tooltip: thumbnail.url }]}
           detail={<List.Item.Detail markdown={`![${thumbnail.label}](${thumbnail.url})`} />}
-          quickLook={
-            quickLookPaths[thumbnail.key]
-              ? {
-                  name: `${thumbnail.label}.jpg`,
-                  path: quickLookPaths[thumbnail.key],
-                }
-              : undefined
-          }
           actions={
             <ActionPanel>
               <Action title="Download Thumbnail" onAction={() => downloadImage(thumbnail)} icon={Icon.Download} />
               <Action title="Copy Thumbnail URL" onAction={() => copyImageUrl(thumbnail.url)} icon={Icon.Link} />
-              {quickLookPaths[thumbnail.key] ? <Action.ToggleQuickLook /> : null}
               <Action
                 title="Paste URL from Clipboard"
                 onAction={pasteUrlFromClipboard}
@@ -333,41 +537,6 @@ function getThumbnailVariantIcon(variantKey: string) {
     source,
     tintColor: ICON_TINT_COLOR,
   };
-}
-
-async function getQuickLookFilePath(videoId: string, thumbnail: AvailableThumbnail): Promise<string> {
-  const quickLookDir = path.join(environment.supportPath, "quicklook");
-  fs.mkdirSync(quickLookDir, { recursive: true });
-
-  const filePath = path.join(quickLookDir, `${videoId}-${thumbnail.key}.jpg`);
-  if (isUsableImageFile(filePath)) {
-    return filePath;
-  }
-
-  const response = await fetch(thumbnail.url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch thumbnail for quick look: ${thumbnail.url}`);
-  }
-
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = Buffer.from(arrayBuffer);
-  if (buffer.length === 0) {
-    throw new Error(`Empty thumbnail response for quick look: ${thumbnail.url}`);
-  }
-
-  const tempPath = `${filePath}.tmp`;
-  fs.writeFileSync(tempPath, buffer);
-  fs.renameSync(tempPath, filePath);
-  return filePath;
-}
-
-function isUsableImageFile(filePath: string): boolean {
-  try {
-    const stats = fs.statSync(filePath);
-    return stats.isFile() && stats.size > 0;
-  } catch {
-    return false;
-  }
 }
 
 function getStatusMarkdown(params: {
@@ -443,6 +612,41 @@ function normalizeInput(input?: string | null): string | null {
   if (typeof input !== "string") return null;
   const normalized = input.trim();
   return normalized.length > 0 ? normalized : null;
+}
+
+function normalizeHistoryEntry(entry: unknown): HistoryEntry | null {
+  if (typeof entry === "string") {
+    const videoId = extractVideoId(entry);
+    if (!videoId) {
+      return null;
+    }
+
+    const canonicalUrl = `https://www.youtube.com/watch?v=${videoId}`;
+    return {
+      url: canonicalUrl,
+      videoId,
+      title: canonicalUrl,
+    };
+  }
+
+  if (typeof entry !== "object" || entry === null) {
+    return null;
+  }
+
+  const candidate = entry as Partial<HistoryEntry>;
+  const url = normalizeInput(candidate.url);
+  const videoId = typeof candidate.videoId === "string" ? candidate.videoId : url ? extractVideoId(url) : null;
+  const title = normalizeInput(candidate.title);
+
+  if (!url || !videoId) {
+    return null;
+  }
+
+  return {
+    url: `https://www.youtube.com/watch?v=${videoId}`,
+    videoId,
+    title: title ?? `https://www.youtube.com/watch?v=${videoId}`,
+  };
 }
 
 function extractVideoId(url: string): string | null {
