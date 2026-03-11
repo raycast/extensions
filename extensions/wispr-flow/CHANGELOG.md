@@ -22,3 +22,8 @@
 - Start and stop voice recording via Raycast commands
 - Open Wispr Flow app
 - Automatic install detection with download prompt
+
+## [Update] - 2026-03-10
+
+### Transcription History
+- Added a Paste Last Transcript command to paste the latest unarchived Wispr Flow transcript into the active app
