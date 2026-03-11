@@ -130,13 +130,6 @@ export class AudioEngine {
       }
     }
 
-    // Safety net: kill any stray afplay processes we may have spawned
-    try {
-      execSync("killall afplay 2>/dev/null || true");
-    } catch {
-      // Ignore
-    }
-
     this.writeRegistry({ entries: [], lastUpdated: Date.now() });
   }
 
