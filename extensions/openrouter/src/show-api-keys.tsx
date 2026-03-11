@@ -145,6 +145,7 @@ export default function Command() {
               .map((apiKey: ApiKeyData) => (
                 <List.Item
                   title={apiKey.name}
+                  key={apiKey.name}
                   detail={
                     <List.Item.Detail
                       metadata={

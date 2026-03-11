@@ -18,6 +18,7 @@ export default function Command(props: LaunchProps<{ draftValues: createApiKeyFo
   const preferences = getPreferenceValues<Preferences>();
 
   async function createAndCopyApiKey(body: Record<string, unknown>) {
+    let success;
     await fetch("https://openrouter.ai/api/v1/keys", {
       method: "POST",
       headers: {
@@ -39,10 +40,14 @@ export default function Command(props: LaunchProps<{ draftValues: createApiKeyFo
           title: "API Key created successfully!",
           message: "The key has automatically been copied to your clipboard.",
         });
+        success = true;
       })
       .catch((error) => {
         setError(error instanceof Error ? error : new Error(String(error)));
+        success = false;
       });
+
+    return success;
   }
 
   useEffect(() => {
@@ -56,14 +61,14 @@ export default function Command(props: LaunchProps<{ draftValues: createApiKeyFo
   }, [error]);
 
   const { handleSubmit, itemProps, reset } = useForm<createApiKeyFormValues>({
-    onSubmit(values) {
+    async onSubmit(values) {
       const payload: Record<string, unknown> = { name: values.name };
       if (values.limit) payload.limit = Number(values.limit);
       if (values.limit_reset) payload.limit_reset = values.limit_reset;
       if (values.expires_at) payload.expires_at = values.expires_at.toISOString();
       if (values.include_byok_in_limit) payload.include_byok_in_limit = values.include_byok_in_limit;
-      createAndCopyApiKey(payload);
-      reset();
+      const success = await createAndCopyApiKey(payload);
+      if (success) reset();
     },
     validation: {
       name: FormValidation.Required,
