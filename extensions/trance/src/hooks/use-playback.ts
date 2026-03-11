@@ -12,7 +12,7 @@ export function usePlayback() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  const prefs = getPreferenceValues<{ defaultVolume?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const defaultVolume = prefs.defaultVolume ? parseInt(prefs.defaultVolume, 10) || DEFAULT_VOLUME : DEFAULT_VOLUME;
 
   const refresh = useCallback(async () => {
