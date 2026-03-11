@@ -111,13 +111,17 @@ export default function Command() {
     };
   }, [videoId]);
 
+  const currentVideoThumbnailUrl = videoId
+    ? (availableThumbnails.find((thumbnail) => thumbnail.url.includes(`/vi/${videoId}/`))?.url ?? null)
+    : null;
+
   useEffect(() => {
-    if (!isHistoryLoaded || !videoId) {
+    if (!isHistoryLoaded || !videoId || !currentVideoThumbnailUrl) {
       return;
     }
 
-    void saveUrlToHistory(videoId);
-  }, [isHistoryLoaded, videoId]);
+    void saveUrlToHistory(videoId, currentVideoThumbnailUrl);
+  }, [currentVideoThumbnailUrl, isHistoryLoaded, videoId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -307,7 +311,7 @@ export default function Command() {
     }
   }
 
-  async function saveUrlToHistory(id: string) {
+  async function saveUrlToHistory(id: string, thumbnailUrl: string) {
     const canonicalUrl = `https://www.youtube.com/watch?v=${id}`;
     const title = await fetchVideoTitle(id);
     const nextEntry: HistoryEntry = {
@@ -317,6 +321,10 @@ export default function Command() {
     };
     const nextHistory = [nextEntry, ...urlHistory.filter((entry) => entry.videoId !== id)].slice(0, MAX_HISTORY_ITEMS);
 
+    setHistoryThumbnailUrls((currentUrls) => ({
+      ...currentUrls,
+      [canonicalUrl]: thumbnailUrl,
+    }));
     setUrlHistory(nextHistory);
     await LocalStorage.setItem(URL_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
   }
