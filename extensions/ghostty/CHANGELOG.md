@@ -1,5 +1,10 @@
 # Ghostty Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Use new Ghostty AppleScript API
+- Add new command to list git repos in a directory and open with your launch configuration
+
 ## [Command] 2025-03-13
 
 - Add new command to open currently selected Finder directory in new Ghostty Window
