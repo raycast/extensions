@@ -1,12 +1,13 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Detail,
-  Form,
   Icon,
+  List,
   useNavigation,
 } from "@raycast/api";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { calculateQuickFromQuery } from "@ferroscale/metal-core/quick";
 import type { QuickWeightResult } from "@ferroscale/metal-core/quick";
 
@@ -37,7 +38,6 @@ function fmtPrice(r: QuickWeightResult): string {
 }
 
 function cell(value: string): string {
-  // Pad or escape for markdown table
   return value.replace(/\|/g, "\\|");
 }
 
@@ -70,7 +70,6 @@ function buildMarkdown(
     ["Total price", fmtPrice(a), fmtPrice(b)],
   ];
 
-  // Weight delta
   const deltaKg = b.totalWeightKg - a.totalWeightKg;
   const deltaSign = deltaKg > 0 ? "+" : "";
   const deltaPct =
@@ -189,101 +188,204 @@ function ComparisonDetail({
   );
 }
 
+/* ------------------------------------------------------------------ */
+/*  Result row helpers (shared between phase A and B live previews)   */
+/* ------------------------------------------------------------------ */
+
+function ResultRow({
+  result,
+  primaryAction,
+  primaryActionTitle,
+  primaryActionIcon,
+  secondaryAction,
+}: {
+  result: QuickWeightResult;
+  primaryAction: () => void;
+  primaryActionTitle: string;
+  primaryActionIcon: Icon;
+  secondaryAction?: React.ReactNode;
+}) {
+  const tonnes = result.totalWeightKg / 1000;
+  const tonnesStr = tonnes >= 0.001 ? ` · ${tonnes.toFixed(3)} t` : "";
+  return (
+    <List.Item
+      title={`${fmtKgLbs(result.unitWeightKg)}${tonnesStr}`}
+      subtitle={`${result.profileAlias.toUpperCase()} · ${result.lengthMm.toFixed(0)} mm · ${result.materialGradeId}`}
+      icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+      accessories={[{ text: `${result.linearDensityKgPerM.toFixed(3)} kg/m` }]}
+      actions={
+        <ActionPanel>
+          <Action
+            title={primaryActionTitle}
+            icon={primaryActionIcon}
+            onAction={primaryAction}
+          />
+          {secondaryAction}
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main view                                                          */
+/* ------------------------------------------------------------------ */
+
+type Phase = "entering_a" | "entering_b";
+
 export function CompareProfilesView() {
   const { push } = useNavigation();
+
+  const [phase, setPhase] = useState<Phase>("entering_a");
   const [queryA, setQueryA] = useState("");
   const [queryB, setQueryB] = useState("");
-  const [errorA, setErrorA] = useState<string | undefined>();
-  const [errorB, setErrorB] = useState<string | undefined>();
+  const [lockedQueryA, setLockedQueryA] = useState("");
+  const [lockedResultA, setLockedResultA] = useState<QuickWeightResult | null>(
+    null,
+  );
+
+  const activeQuery = phase === "entering_a" ? queryA : queryB;
+
+  const response = useMemo(() => {
+    if (!activeQuery.trim()) return null;
+    return calculateQuickFromQuery(activeQuery.trim());
+  }, [activeQuery]);
+
+  function handleLockA() {
+    if (!response?.ok) return;
+    setLockedQueryA(queryA.trim());
+    setLockedResultA(response.result);
+    setPhase("entering_b");
+  }
 
   function handleCompare() {
-    let valid = true;
-
-    const responseA = calculateQuickFromQuery(queryA.trim());
-    if (!responseA.ok) {
-      setErrorA(responseA.issues[0]?.message ?? "Invalid query A");
-      valid = false;
-    } else {
-      setErrorA(undefined);
-    }
-
-    const responseB = calculateQuickFromQuery(queryB.trim());
-    if (!responseB.ok) {
-      setErrorB(responseB.issues[0]?.message ?? "Invalid query B");
-      valid = false;
-    } else {
-      setErrorB(undefined);
-    }
-
-    if (!valid) return;
-    if (!responseA.ok || !responseB.ok) return;
-
+    if (!response?.ok || !lockedResultA) return;
     push(
       <ComparisonDetail
-        queryA={queryA.trim()}
+        queryA={lockedQueryA}
         queryB={queryB.trim()}
-        resultA={responseA.result}
-        resultB={responseB.result}
+        resultA={lockedResultA}
+        resultB={response.result}
       />,
     );
   }
 
+  function handleChangeA() {
+    setPhase("entering_a");
+  }
+
+  const changeAAction = (
+    <Action
+      title="Change Profile a"
+      icon={Icon.ArrowLeft}
+      onAction={handleChangeA}
+    />
+  );
+
   return (
-    <Form
-      navigationTitle="Compare Profiles"
-      actions={
-        <ActionPanel>
-          <Action
-            title="Compare"
-            icon={Icon.ArrowRight}
-            onAction={handleCompare}
-          />
-          <Action.CopyToClipboard
-            content="ipe 200x6000 mat=s355"
-            title="Copy Example Query"
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-          />
-        </ActionPanel>
+    <List
+      key={phase}
+      searchText={phase === "entering_a" ? queryA : queryB}
+      onSearchTextChange={phase === "entering_a" ? setQueryA : setQueryB}
+      searchBarPlaceholder={
+        phase === "entering_a"
+          ? "Profile A: ipe 200x6000 mat=s355"
+          : "Profile B: hea 200x6000 mat=s355"
+      }
+      navigationTitle={
+        phase === "entering_a" ? "Compare — Profile A" : "Compare — Profile B"
       }
     >
-      <Form.Description
-        title="How to use"
-        text="Enter two quick-weight queries (same syntax as Quick Metal Weight). Press Compare to see a side-by-side breakdown and weight delta."
-      />
-      <Form.TextField
-        id="queryA"
-        title="Query A"
-        placeholder="ipe 200x6000 mat=s355"
-        value={queryA}
-        onChange={setQueryA}
-        error={errorA}
-        onBlur={() => {
-          if (!queryA.trim()) return;
-          const r = calculateQuickFromQuery(queryA.trim());
-          setErrorA(r.ok ? undefined : (r.issues[0]?.message ?? "Invalid"));
-        }}
-      />
-      <Form.TextField
-        id="queryB"
-        title="Query B"
-        placeholder="hea 200x6000 mat=s355"
-        value={queryB}
-        onChange={setQueryB}
-        error={errorB}
-        onBlur={() => {
-          if (!queryB.trim()) return;
-          const r = calculateQuickFromQuery(queryB.trim());
-          setErrorB(r.ok ? undefined : (r.issues[0]?.message ?? "Invalid"));
-        }}
-      />
-      <Form.Description
-        title="Examples"
-        text={[
-          "A: ipe 200x6000 mat=s355     B: hea 200x6000 mat=s355",
-          "A: shss 80x5x6000            B: rhs 80x60x5x6000",
-          "A: rb 30x6000 qty=10         B: shs 40x40x3x6000 qty=10",
-        ].join("\n")}
-      />
-    </Form>
+      {/* ---- Phase B: locked A summary ---- */}
+      {phase === "entering_b" && lockedResultA ? (
+        <List.Section title="Profile A (Locked)">
+          <List.Item
+            title={`${fmtKgLbs(lockedResultA.unitWeightKg)}`}
+            subtitle={`${lockedResultA.profileAlias.toUpperCase()} · ${lockedResultA.lengthMm.toFixed(0)} mm · ${lockedResultA.materialGradeId}`}
+            icon={{ source: Icon.Pin, tintColor: Color.Blue }}
+            accessories={[
+              { text: `${lockedResultA.linearDensityKgPerM.toFixed(3)} kg/m` },
+              { text: lockedQueryA, icon: Icon.Code },
+            ]}
+            actions={<ActionPanel>{changeAAction}</ActionPanel>}
+          />
+        </List.Section>
+      ) : null}
+
+      {/* ---- Active profile input section ---- */}
+      <List.Section title={phase === "entering_a" ? "Profile A" : "Profile B"}>
+        {/* Empty state */}
+        {!activeQuery.trim() ? (
+          <List.Item
+            title={
+              phase === "entering_a"
+                ? "Type a quick-weight query"
+                : "Type a query to compare against A"
+            }
+            subtitle="e.g. ipe 200x6000 mat=s355  ·  shss 80x5x6000  ·  rb 30x6000"
+            icon={{
+              source: Icon.MagnifyingGlass,
+              tintColor: Color.SecondaryText,
+            }}
+          />
+        ) : null}
+
+        {/* Error state */}
+        {activeQuery.trim() && response && !response.ok ? (
+          <List.Item
+            title={response.issues[0]?.message ?? "Invalid query"}
+            subtitle="Check alias, dimensions and flags"
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          />
+        ) : null}
+
+        {/* Valid state */}
+        {activeQuery.trim() && response?.ok ? (
+          <ResultRow
+            result={response.result}
+            primaryActionTitle={
+              phase === "entering_a" ? "Lock Profile A" : "Compare"
+            }
+            primaryActionIcon={
+              phase === "entering_a"
+                ? Icon.LockUnlocked
+                : Icon.TwoArrowsClockwise
+            }
+            primaryAction={phase === "entering_a" ? handleLockA : handleCompare}
+            secondaryAction={phase === "entering_b" ? changeAAction : undefined}
+          />
+        ) : null}
+      </List.Section>
+
+      {/* ---- Examples (only in empty phase A) ---- */}
+      {phase === "entering_a" && !queryA.trim() ? (
+        <List.Section title="Examples">
+          {[
+            ["ipe 200x6000 mat=s355", "EN I-beam, 6 m, S355"],
+            ["hea 200x6000 mat=s355", "EN HEA beam, 6 m, S355"],
+            ["shss 80x5x6000", "Standard SHS 80×5, 6 m"],
+            ["rhss 100x60x5x6000", "Standard RHS 100×60×5, 6 m"],
+            ["rb 30x6000 qty=10", "Round bar Ø30, 6 m, qty 10"],
+          ].map(([query, subtitle]) => (
+            <List.Item
+              key={query}
+              title={query}
+              subtitle={subtitle}
+              icon={Icon.Text}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Use as Profile a"
+                    icon={Icon.ArrowRight}
+                    onAction={() => setQueryA(query)}
+                  />
+                  <Action.CopyToClipboard content={query} title="Copy Query" />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      ) : null}
+    </List>
   );
 }
