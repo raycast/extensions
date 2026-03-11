@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Duplicate Audit Error Toast] - {PR_MERGE_DATE}
+## [Fix Duplicate Audit Error Toast] - 2026-03-11
 
 - Fix error toast showing twice when re-selecting a skill with a failed audit fetch
 
