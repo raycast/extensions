@@ -6,7 +6,7 @@
 
 - Added support for showing all available YouTube thumbnail variants (`maxres`, `sd`, `hq`, `mq`, `default`) in the list.
 - Added per-variant thumbnail preview in the detail pane.
-- Added Quick Look support per thumbnail item.
+- Added History section for viewing previous thumbnails.
 
 ### Changed
 
