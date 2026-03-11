@@ -17,21 +17,21 @@ export function getFeatureFlags(): { showWindDirection: boolean; showSunTimes: b
 }
 
 export function formatTemperatureCelsius(celsius?: number, units: Units = getUnits()): string | undefined {
-  if (typeof celsius !== "number") return undefined;
+  if (typeof celsius !== "number" || !Number.isFinite(celsius)) return undefined;
   const isImperial = units === "imperial";
   const temp = convertTemperature(celsius, isImperial);
   return `${Math.round(temp)} ${isImperial ? "°F" : "°C"}`;
 }
 
 export function formatWindSpeed(speedMs?: number, units: Units = getUnits()): string | undefined {
-  if (typeof speedMs !== "number") return undefined;
+  if (typeof speedMs !== "number" || !Number.isFinite(speedMs)) return undefined;
   const isImperial = units === "imperial";
   const speed = convertSpeed(speedMs, isImperial);
   return `${Math.round(speed)} ${isImperial ? "mph" : "m/s"}`;
 }
 
 export function formatPrecip(mm?: number, units: Units = getUnits()): string | undefined {
-  if (typeof mm !== "number") return undefined;
+  if (typeof mm !== "number" || !Number.isFinite(mm)) return undefined;
   const isImperial = units === "imperial";
   const precip = convertPrecipitation(mm, isImperial);
 

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { getForecast, type TimeseriesEntry } from "../weather-client";
+import { getForecastWithMetadata, type TimeseriesEntry, type WeatherDataWithMetadata } from "../weather-client";
 import { DebugLogger } from "../utils/debug-utils";
-import { buildGraphMarkdown } from "../graph";
+import { buildGraphMarkdown } from "../graph-utils";
 
 /**
  * Custom hook for managing weather data fetching
@@ -10,6 +10,8 @@ export function useWeatherData(lat: number, lon: number, preGenerateGraph = fals
   const [series, setSeries] = useState<TimeseriesEntry[]>([]);
   const [showNoData, setShowNoData] = useState(false);
   const [preRenderedGraph, setPreRenderedGraph] = useState<string>("");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [metadata, setMetadata] = useState<WeatherDataWithMetadata["metadata"] | null>(null);
 
   const [loading, setLoading] = useState(true);
   const cancelledRef = useRef(false);
@@ -18,19 +20,22 @@ export function useWeatherData(lat: number, lon: number, preGenerateGraph = fals
   useEffect(() => {
     let cancelled = false;
     cancelledRef.current = cancelled;
+    const controller = new AbortController();
 
     async function fetchData() {
       setLoading(true);
       setShowNoData(false);
 
       try {
-        const result = await getForecast(lat, lon);
+        const result = await getForecastWithMetadata(lat, lon, { signal: controller.signal, timeoutMs: 10000 });
         if (!cancelled) {
-          setSeries(result);
+          const forecastData = Array.isArray(result.data) ? result.data : [result.data];
+          setSeries(forecastData);
+          setMetadata(result.metadata);
 
           // Pre-generate graph if requested and we have data
-          if (preGenerateGraph && result.length > 0) {
-            const graphMarkdown = buildGraphMarkdown("Location", result, 48, {
+          if (preGenerateGraph && forecastData.length > 0) {
+            const graphMarkdown = buildGraphMarkdown("Location", forecastData, 48, {
               title: "48h forecast",
               smooth: true,
             }).markdown;
@@ -38,7 +43,7 @@ export function useWeatherData(lat: number, lon: number, preGenerateGraph = fals
           }
 
           // Only show no data if we actually have no data after fetching
-          if (result.length === 0) {
+          if (forecastData.length === 0) {
             setShowNoData(true);
           }
         }
@@ -76,17 +81,24 @@ export function useWeatherData(lat: number, lon: number, preGenerateGraph = fals
     return () => {
       cancelled = true;
       cancelledRef.current = true;
+      controller.abort();
       if (noDataTimeoutRef.current) {
         clearTimeout(noDataTimeoutRef.current);
         noDataTimeoutRef.current = null;
       }
     };
-  }, [lat, lon]);
+  }, [lat, lon, refreshTrigger]);
+
+  const refresh = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   return {
     series,
     loading,
     showNoData,
     preRenderedGraph,
+    metadata,
+    refresh,
   };
 }

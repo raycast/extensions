@@ -1,3 +1,6 @@
+import { DebugLogger } from "./utils/debug-utils";
+import { stripDiacritics } from "./utils/string-utils";
+
 export type QueryIntent = {
   locationQuery?: string;
   targetDate?: Date;
@@ -81,11 +84,6 @@ const monthTokenToIndex: Record<string, number> = {
   desember: 11,
 };
 
-function stripDiacritics(value: string): string {
-  // Normalize and strip combining marks without relying on Unicode properties
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-}
-
 function normalizeToken(token: string): string {
   return stripDiacritics(token.toLowerCase());
 }
@@ -99,9 +97,17 @@ function startOfLocalDay(date: Date): Date {
 function thisOrNextOccurrence(weekday: number, now = new Date()): Date {
   const base = startOfLocalDay(now);
   const current = base.getDay();
-  const delta = (weekday - current + 7) % 7; // allow today
+  let delta = (weekday - current + 7) % 7;
+  if (delta === 0) {
+    delta = 7; // If it's the same day, go to next week
+  }
   const target = new Date(base);
   target.setDate(base.getDate() + delta);
+
+  DebugLogger.debug(
+    `thisOrNextOccurrence: weekday=${weekday}, current=${current}, delta=${delta}, target=${target.toDateString()}`,
+  );
+
   return target;
 }
 
@@ -158,6 +164,9 @@ export function parseQueryIntent(input: string, now = new Date()): QueryIntent {
     const dw = dayTokenToWeekday[t];
     if (typeof dw === "number") {
       weekday = dw;
+      DebugLogger.debug(
+        `Found weekday token: "${t}" -> ${dw} (${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dw]})`,
+      );
       continue;
     }
   }

@@ -1,0 +1,66 @@
+# Documentation Style Guide
+
+This rule enforces consistent documentation style for README.md and CHANGELOG.md files.
+
+## Voice & Tone
+
+- **"Løs i snippen, rask i toppen"**: Relaxed and informal on the surface, but intellectually sharp and precise underneath
+- **UK English spelling**: Use "favour", "colour", "behaviour", "optimise", "realise", etc.
+- **Short sentences**: Keep prose punchy and scannable
+- **Strong structure**: Use clear headings and bullet points
+- **Dry humour sparingly**: Maximum 1-2 light lines per section, never at the expense of clarity
+- **Zero fluff**: If a sentence doesn't inform, cut it
+- **Assume reader is smart and busy**: Get to the point quickly
+
+## README Requirements
+
+### Structure
+
+- **What it is**: 1-2 sentences, no marketing fluff
+- **Quick start**: Essential actions only
+- **Features**: Organised by function (Search, Favourites, Views, etc.)
+- **Keyboard shortcuts**: Complete reference, but only shortcuts that exist in code
+- **Preferences**: Match `package.json` preference names and semantics exactly
+- **Data sources & caching**: Explicit TTLs, clear API documentation links
+- **Privacy**: Factual, clear about what's local vs network
+
+### Fact-Checking
+
+- **No guessing**: Every claim must be verifiable against code or manifest
+- **Verify shortcuts**: Check `src/yr.tsx` and `src/forecast.tsx` for actual keyboard shortcuts
+- **Verify preferences**: Match `package.json` preferences exactly (names, defaults, descriptions)
+- **Verify TTLs**: Check `src/utils/api-config.ts` and `src/config/weather-thresholds.ts` for cache durations
+- **If uncertain**: State plainly and suggest verification step (e.g., "check Raycast command preferences to confirm X")
+
+### URL Consistency
+
+- **Canonical repo**: Always use `https://github.com/kyndig/yr-wfc` for repository and issue links
+- **Contact**: Use `weather@kynd.no` for contact email
+
+## CHANGELOG Requirements
+
+### Raycast Format
+
+- **Heading format**: `## [Short descriptive title] - {PR_MERGE_DATE}`
+- **No version numbers**: Raycast uses descriptive titles, not semantic versioning in headings
+- **No subheadings**: Use bullet points only (no `### Improvements` / `### Fixes` sections)
+- **De-duplicate**: Remove repeated items across sections
+- **Conservative claims**: Match code/manifest; avoid vague "improved" without concrete user-facing description
+
+### Content Guidelines
+
+- **User-facing focus**: Describe what users see/experience, not internal implementation
+- **Concise bullets**: One clear point per bullet
+- **Factual**: Every entry should be verifiable against code changes
+
+## Verification Checklist
+
+Before committing documentation changes:
+
+1. ✅ All shortcuts match actual implementation in `src/yr.tsx` and `src/forecast.tsx`
+2. ✅ Preferences list matches `package.json` exactly
+3. ✅ TTLs match `src/utils/api-config.ts` and `src/config/weather-thresholds.ts`
+4. ✅ All repo/issue links point to `https://github.com/kyndig/yr-wfc`
+5. ✅ UK English spelling throughout
+6. ✅ CHANGELOG format matches Raycast convention (descriptive title, no subheadings)
+7. ✅ No unverifiable claims or guessing
