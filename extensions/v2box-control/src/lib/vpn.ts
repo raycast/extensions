@@ -7,6 +7,9 @@ const scutilPath = "/usr/sbin/scutil";
 
 type NetworkCommandAction = "status" | "start" | "stop";
 type ExecFileError = Error & { stdout?: string; stderr?: string };
+type ExtensionPreferences = {
+  serviceName: string;
+};
 
 export type VpnState =
   | "connected"
@@ -26,7 +29,7 @@ function normalizeOutput(stdout?: string, stderr?: string): string {
 }
 
 function getServiceName(): string {
-  const { serviceName } = getPreferenceValues<Preferences>();
+  const { serviceName } = getPreferenceValues<ExtensionPreferences>();
   const value = serviceName.trim();
 
   if (!value) {
