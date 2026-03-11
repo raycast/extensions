@@ -43,5 +43,7 @@ export async function launchInTerminal(terminalValue: string, command: string) {
     case "ghostty":
       await execFileAsync("open", ["-na", "Ghostty", "--args", "-e", shell, "-lic", command]);
       break;
+    default:
+      throw new Error(`Unsupported terminal: ${terminalValue}`);
   }
 }
