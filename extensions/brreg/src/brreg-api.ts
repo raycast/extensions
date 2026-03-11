@@ -1,10 +1,17 @@
-import fetch from "node-fetch";
 import { Company, Enhet } from "./types";
 import type { FinancialYear } from "./types";
+import { getBregUrl, getVatRegistrationStatus } from "./utils/entity";
+import { USER_AGENT } from "./constants";
+import { toNumber, formatCurrency } from "./utils/format";
+import { TTLCache } from "./utils/ttl-cache";
 
 const BASE_URL = "https://data.brreg.no/enhetsregisteret/api";
 
-interface BrregEntity {
+const TEN_MINUTES = 10 * 60 * 1000;
+const companyCache = new TTLCache<string, Company>(TEN_MINUTES);
+const searchCache = new TTLCache<string, Enhet[]>(TEN_MINUTES);
+
+export interface BrregEntity {
   navn?: string;
   organisasjonsnummer?: string;
   forretningsadresse?: {
@@ -28,7 +35,7 @@ interface BrregEntity {
   registrertIMvaregisteret?: boolean;
 }
 
-function createCompanyFromBrregEntity(entity: BrregEntity): Company {
+export function createCompanyFromBrregEntity(entity: BrregEntity): Company {
   const name = entity.navn || "";
   const organizationNumber = entity.organisasjonsnummer || "";
 
@@ -69,15 +76,10 @@ function createCompanyFromBrregEntity(entity: BrregEntity): Company {
 
   const cleanOrgNumber = organizationNumber.replace(/\s+/g, "").trim();
   const bregUrl = cleanOrgNumber
-    ? `https://virksomhet.brreg.no/oppslag/enheter/${cleanOrgNumber}`
+    ? getBregUrl(cleanOrgNumber)
     : `https://www.brreg.no/sok?q=${encodeURIComponent(name)}`;
 
-  const isVatRegistered =
-    typeof entity.mvaRegistrert === "boolean"
-      ? entity.mvaRegistrert
-      : typeof entity.registrertIMvaregisteret === "boolean"
-        ? entity.registrertIMvaregisteret
-        : undefined;
+  const isVatRegistered = getVatRegistrationStatus(entity);
 
   return {
     name,
@@ -100,13 +102,13 @@ function createCompanyFromBrregEntity(entity: BrregEntity): Company {
 }
 
 export async function getCompanyDetails(organizationNumber: string): Promise<Company | null> {
+  const cached = companyCache.get(organizationNumber);
+  if (cached) return cached;
+
   try {
     const detailUrl = `${BASE_URL}/enheter/${organizationNumber}`;
     const response = await fetch(detailUrl, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent": "Raycast-Brreg-Search/1.0.0",
-      },
+      headers: { Accept: "application/json", "User-Agent": USER_AGENT },
     });
 
     if (!response.ok) {
@@ -144,6 +146,7 @@ export async function getCompanyDetails(organizationNumber: string): Promise<Com
       // ignore financial errors
     }
 
+    companyCache.set(organizationNumber, company);
     return company;
   } catch {
     return null;
@@ -154,19 +157,22 @@ export async function getCompanyDetails(organizationNumber: string): Promise<Com
 export async function searchEntities(query: string): Promise<Enhet[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
+
+  const cached = searchCache.get(trimmed);
+  if (cached) return cached;
+
   const isNumeric = /^\d+$/.test(trimmed);
   const paramName = isNumeric ? "organisasjonsnummer" : "navn";
   const response = await fetch(`${BASE_URL}/enheter?${paramName}=${encodeURIComponent(trimmed)}`, {
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "Raycast-Brreg-Search/1.0.0",
-    },
+    headers: { Accept: "application/json", "User-Agent": USER_AGENT },
   });
   if (!response.ok) {
     throw new Error(`Search failed with status ${response.status}`);
   }
   const data = (await response.json()) as { _embedded?: { enheter?: Enhet[] } };
-  return data._embedded?.enheter || [];
+  const results = data._embedded?.enheter || [];
+  searchCache.set(trimmed, results);
+  return results;
 }
 
 export async function getAnnualAccounts(organizationNumber: string): Promise<{
@@ -185,39 +191,11 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
   try {
     const accountsUrl = `https://data.brreg.no/regnskapsregisteret/regnskap/${organizationNumber}`;
     const response = await fetch(accountsUrl, {
-      headers: {
-        Accept: "application/xml",
-        "User-Agent": "Raycast-Brreg-Search/1.0.0",
-      },
+      headers: { Accept: "application/xml", "User-Agent": USER_AGENT },
     });
     if (!response.ok) return null;
     const xmlData = await response.text();
     if (!xmlData) return null;
-
-    const toNumber = (raw: string): number | undefined => {
-      if (!raw) return undefined;
-      let text = String(raw).trim();
-      const wasParenNegative = /^\(.*\)$/.test(text);
-      if (wasParenNegative) text = text.slice(1, -1);
-      text = text.replace(/[\s\u00A0]/g, "");
-      text = text.replace(/[^0-9,.-]/g, "");
-      if (text.includes(",") && text.includes(".")) text = text.replace(/\./g, "");
-      text = text.replace(/,/g, ".");
-      const num = parseFloat(text);
-      if (Number.isNaN(num)) return undefined;
-      return wasParenNegative ? -num : num;
-    };
-
-    const formatCurrency = (amount: string) => {
-      const num = toNumber(amount);
-      if (num === undefined) return undefined;
-      return new Intl.NumberFormat("no-NO", {
-        style: "currency",
-        currency: "NOK",
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      }).format(num);
-    };
 
     const extractValue = (tag: string): string | undefined => {
       // Use [\0-\uFFFF] to approximate any char without escaping \s/\S to satisfy linter

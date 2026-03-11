@@ -1,0 +1,18 @@
+# Changelog Format Rules
+
+## Raycast Extensions Monorepo Compliance
+- Top entry for new PRs must use `[PR_MERGE_DATE]` placeholder (not `{PR_MERGE_DATE}`)
+- Format: `## [Short Title] [Version] - [PR_MERGE_DATE]`
+- For historical entries with actual dates: `## [Short Title] [Version] - YYYY-MM-DD`
+
+## Consistency
+- All entries use consistent header pattern: `## [Title] [Version] - Date`
+- Keep bullets **end-user facing** (this is what Raycast surfaces in Version History)
+- Avoid internal refactor diaries; focus on user-visible changes
+- Normalise spelling and capitalisation (e.g. "README", "Favourites" not "Favorites")
+
+## Content Guidelines
+- Each bullet should describe a user-visible change
+- Group related changes under subheadings when appropriate
+- Use UK English spelling throughout
+- Be concise and specific

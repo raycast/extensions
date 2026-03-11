@@ -1,70 +1,55 @@
-# BRREG Search Changelog
+# Brreg Search Changelog
 
-## [Version 2.0.3 – Updated README] - 2025-09-02
-- Nothing big, just an absent-minded dev
+## [Quality & Testing Sweep] - 2026-03-11
 
-## [Version 2.0.2 – New keyboard shortcuts for financial data] - 2025-08-25
-- Added keyboard shortcuts for copying revenue (⌘⇧R) and net result (⌘⇧N)
-- Refactored all keyboard shortcuts to use centralized constants for better maintainability
+- Added Vitest infrastructure with Raycast API mocks
+- Added smoke tests for core utilities and Brreg API mapping
+- Added TTL cache for API responses to reduce redundant network calls
+- Debounced search input for snappier typing
+- Shortcut help labels derived from shared constants — single source of truth
+- Copy shortcuts normalised to `⌘⇧` combinations for consistency
+- Improved favourites responsiveness and toast feedback
+- Centralised constants and map URL logic in details view
+- Extracted shared VAT copy utility
+- Extracted and tested format helpers (`formatCurrency`, `formatDate`, etc.)
+- Removed dead types and unused settings hook
+- Fixed dependabot security alerts by updating vulnerable transitive deps
+- Upgraded ESLint to v9 with flat config
 
-## [Version 2.0.1 – Minor updates and typography fixes] - 2025-08-25
-- Updated Welcome message
-- Added Keyboard Shortcuts to the Welcome screen and made it available from all views
-- Companies can now be added (⌘F) or removed (⌘⇧F) from Favorites, including from the Detail view
-- Favorites are hidden while typing; only search results show once you start typing
-- Added a visual metadata tag indicating whether a company is in the Favorites list or not
-- Simplified Favorites empty state copy
-- Added link to GitHub for feedback and feature requests
-- Removed uncessecary settings view
-- Fixed some links not working as intended
+## [Documentation Update] - 2026-01-22
 
-## [Version 2.0.0 - Major Refactoring & Enhancement Release] - 2025-08-19
-🚀 **What's New?**
+- Updated README to reflect current functionality
+- Added privacy and networking section
+- Normalised changelog format
 
-### ✨ **Enhanced User Experience**
-- **Welcome Messages**: Helpful onboarding for new users with no favorites
-- **User Settings**: Customizable preferences including welcome message display and performance monitoring
-- **Keyboard Shortcuts Help**: Comprehensive guide accessible from the welcome section
-- **Improved Empty States**: Better guidance when no favorites or search results exist
+## [Keyboard Shortcuts for Financial Data] - 2025-08-25
 
-### 🏗️ **Architecture Improvements**
-- **Component Extraction**: Broke down monolithic component into focused, reusable pieces
-- **Custom Hooks**: Extracted business logic into specialized hooks for better maintainability
-- **Zero Code Duplication**: Eliminated all redundant action code with shared components
-- **Performance Optimization**: React.memo implementation and optimized data structures
+- Added keyboard shortcuts for copying revenue (`⌘⇧R`) and net result (`⌘⇧N`)
+- Refactored all shortcuts to use centralised constants
 
-### 🎨 **New Components**
-- **EntityActions**: Common actions for all entities (view, copy, open in browser)
-- **FavoriteActions**: Specialized actions for favorites (emoji, reorder, remove)
-- **SearchResultActions**: Conditional actions for search results
-- **SettingsView**: User preferences management interface
-- **KeyboardShortcutsHelp**: Comprehensive shortcuts reference
-- **ErrorBoundary**: Robust error handling with graceful fallbacks
+## [Favourites & UX Polish] - 2025-08-25
 
-### 🔧 **Technical Enhancements**
-- **Type Safety**: 100% TypeScript coverage with strict typing
-- **Error Handling**: Comprehensive error boundaries and user feedback
-- **Performance Monitoring**: Development tools for component performance tracking
-- **Constants Management**: Centralized configuration for easy maintenance
-- **Dependency Cleanup**: Removed unused Google Static Maps API key requirement
+- Welcome message and keyboard shortcuts help on all views
+- Add/remove favourites from detail view (`⌘F` / `⌘⇧F`)
+- Favourites hidden while typing
+- Metadata tag for favourite status
+- Removed unnecessary settings view
+- Fixed broken links
 
-## [Version 1.1.0 - Initial Enhancement Release] – 2025-08-19
+## [Major Refactoring] - 2025-08-19
 
-♻️ **What's Changed:**
-- Corrected the English name of Brønnøysundregistrene to the official translation (The Brønnøysund Register Centre).
+- Broke monolithic component into focused, reusable pieces
+- Extracted business logic into custom hooks
+- Added React.memo, error boundaries, strict TypeScript throughout
+- Welcome messages, keyboard shortcuts help, improved empty states
 
-⭐ **What's New:**
-- Favorite entities to keep your most-used companies and organisations at your fingertips
-- Basic search functionality for Norwegian companies
-- Company details view with financial information
-- Map integration for company locations
+## [Initial Enhancement] - 2025-08-19
 
-## [Version 1.0.0 - Initial Release] - 2025-02-25
+- Corrected English name of Brønnøysundregistrene
+- Added favourites, company details, financial info, map integration
 
-🎯 **Core Features:**
-- Search Norwegian companies by name or organization number
-- View company details and financial information
-- Copy company data to clipboard
-- Open companies in Brønnøysundregistrene website
+## [Initial Release] - 2025-02-25
 
-Made with 🫶 by [kynd](https://www.kynd.no) 
+- Search Norwegian companies by name or organisation number
+- Company details and financial information
+- Copy actions and external links

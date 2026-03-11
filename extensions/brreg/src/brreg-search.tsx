@@ -1,4 +1,5 @@
 import { List, ActionPanel, Action } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import CompanyDetailsView from "./components/CompanyDetailsView";
 import FavoritesList from "./components/FavoritesList";
 import SearchResults from "./components/SearchResults";
@@ -6,37 +7,22 @@ import WelcomeView from "./components/WelcomeView";
 import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
 import { useFavorites } from "./hooks/useFavorites";
 import { useSearch } from "./hooks/useSearch";
-import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCompanyView } from "./hooks/useCompanyView";
 import { useSettings } from "./hooks/useSettings";
+import { UI_TEXT } from "./constants";
 
 export default function SearchAndCopyCommand() {
   const favoritesResult = useFavorites();
   const searchResult = useSearch();
-  const keyboardResult = useKeyboardShortcuts();
   const companyViewResult = useCompanyView();
   const settingsResult = useSettings();
 
-  // Guard against undefined hook results
-  if (!favoritesResult || !searchResult || !keyboardResult || !companyViewResult || !settingsResult) {
-    return (
-      <List isLoading={true}>
-        <List.Section title="Loading">
-          <List.Item title="Initializing..." subtitle="Please wait..." />
-        </List.Section>
-      </List>
-    );
-  }
-
-  // Now safe to destructure all hooks
   const { entities, isLoading, setSearchText, trimmed } = searchResult;
-  const { showMoveIndicators: keyboardMoveIndicators } = keyboardResult;
   const { currentCompany, isLoadingDetails, isCompanyViewOpen, handleViewDetails, closeCompanyView } =
     companyViewResult;
 
   const { settings } = settingsResult;
 
-  // Now safe to destructure
   const {
     favorites,
     favoriteIds,
@@ -50,26 +36,25 @@ export default function SearchAndCopyCommand() {
     moveFavoriteUp,
     moveFavoriteDown,
     toggleMoveMode,
+    showMoveIndicators,
   } = favoritesResult;
 
-  // Use the keyboard shortcuts from the hook
-  const showMoveIndicators = keyboardMoveIndicators;
-
-  if (isCompanyViewOpen) {
-    const orgNumber = currentCompany!.organizationNumber;
+  if (isCompanyViewOpen && currentCompany) {
+    const orgNumber = currentCompany.organizationNumber;
     const isFav = favoriteIds.has(orgNumber);
     const toEnhet = () => ({
-      organisasjonsnummer: currentCompany!.organizationNumber,
-      navn: currentCompany!.name,
-      forretningsadresse: currentCompany!.address
-        ? { adresse: [currentCompany!.address], postnummer: currentCompany!.postalCode, poststed: currentCompany!.city }
+      organisasjonsnummer: currentCompany.organizationNumber,
+      navn: currentCompany.name,
+      forretningsadresse: currentCompany.address
+        ? { adresse: [currentCompany.address], postnummer: currentCompany.postalCode, poststed: currentCompany.city }
         : undefined,
-      website: currentCompany!.website,
+      website: currentCompany.website,
+      faviconUrl: currentCompany.website ? getFavicon(currentCompany.website) : undefined,
     });
 
     return (
       <CompanyDetailsView
-        company={currentCompany!}
+        company={currentCompany}
         isLoading={isLoadingDetails}
         onBack={closeCompanyView}
         isFavorite={isFav}
@@ -84,11 +69,7 @@ export default function SearchAndCopyCommand() {
       isLoading={isLoading || isLoadingFavorites}
       onSearchTextChange={setSearchText}
       throttle
-      searchBarPlaceholder={
-        showMoveIndicators
-          ? "Move Mode Active - Use ⌘⇧↑↓ to reorder favorites"
-          : "Search for name or organisation number"
-      }
+      searchBarPlaceholder={showMoveIndicators ? UI_TEXT.MOVE_MODE_ACTIVE : UI_TEXT.SEARCH_PLACEHOLDER}
     >
       {trimmed.length === 0 && (
         <FavoritesList
@@ -108,7 +89,7 @@ export default function SearchAndCopyCommand() {
       {trimmed.length > 0 && (
         <SearchResults
           entities={entities}
-          favoriteIds={favoriteIds as Set<string>}
+          favoriteIds={favoriteIds}
           favoriteById={favoriteById}
           onViewDetails={handleViewDetails}
           onAddFavorite={addFavorite}

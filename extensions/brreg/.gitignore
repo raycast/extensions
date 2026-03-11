@@ -10,4 +10,8 @@ raycast-env.d.ts
 compiled_raycast_swift
 
 # misc
+.npm-cache/
 .DS_Store
+COMPONENT_STORIES.md
+DEVELOPER.md
+REFACTORING_SUMMARY.md

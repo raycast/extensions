@@ -1,8 +1,19 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import KeyboardShortcutsHelp from "./KeyboardShortcutsHelp";
 import { Company } from "../types";
-import { KEYBOARD_SHORTCUTS } from "../constants";
-import { useState, useEffect } from "react";
+import { KEYBOARD_SHORTCUTS, USER_AGENT } from "../constants";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { copyVatNumberToClipboard } from "../utils/entity";
+import { getMapTileUrl } from "../utils/map";
+
+const TAB_ORDER = ["overview", "financials", "map"] as const;
+type TabId = (typeof TAB_ORDER)[number];
+
+const TABS = [
+  { id: "overview", title: "Overview" },
+  { id: "financials", title: "Financials" },
+  { id: "map", title: "Map" },
+] as const satisfies ReadonlyArray<{ id: TabId; title: string }>;
 
 interface CompanyDetailsViewProps {
   company: Company;
@@ -21,29 +32,30 @@ export default function CompanyDetailsView({
   onAddFavorite,
   onRemoveFavorite,
 }: CompanyDetailsViewProps) {
-  const [activeTab, setActiveTab] = useState<"overview" | "financials" | "map">("overview");
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [mapImageUrl, setMapImageUrl] = useState<string | undefined>(undefined);
-  const [mapImageDataUri, setMapImageDataUri] = useState<string | undefined>(undefined);
+  const geocodeCacheRef = useMemo(() => new Map<string, { lat: number; lon: number }>(), []);
+  const lastGeocodeAtRef = useMemo(() => ({ value: 0 }), []);
+
+  const copyVatNumber = useCallback(
+    () => copyVatNumberToClipboard(company.organizationNumber, company.name, company.isVatRegistered),
+    [company.organizationNumber, company.name, company.isVatRegistered],
+  );
 
   // Format address manually since we don't have the Enhet format
-  const addressParts: string[] = [];
-  if (company.address) addressParts.push(company.address);
-  if (company.postalCode && company.city) addressParts.push(`${company.postalCode} ${company.city}`);
-  else if (company.city) addressParts.push(company.city);
-  const formattedAddress = addressParts.join(", ");
+  const formattedAddress = useMemo(() => {
+    const addressParts: string[] = [];
+    if (company.address) addressParts.push(company.address);
+    if (company.postalCode && company.city) addressParts.push(`${company.postalCode} ${company.city}`);
+    else if (company.city) addressParts.push(company.city);
+    return addressParts.join(", ");
+  }, [company.address, company.postalCode, company.city]);
 
-  const tabOrder: Array<"overview" | "financials" | "map"> = ["overview", "financials", "map"];
-  const goToPreviousTab = () => {
-    const currentIndex = tabOrder.indexOf(activeTab);
-    const previousIndex = (currentIndex - 1 + tabOrder.length) % tabOrder.length;
-    setActiveTab(tabOrder[previousIndex]);
-  };
-
-  const tabs = [
-    { id: "overview", title: "Overview" },
-    { id: "financials", title: "Financials" },
-    { id: "map", title: "Map" },
-  ] as const;
+  const goToPreviousTab = useCallback(() => {
+    const currentIndex = TAB_ORDER.indexOf(activeTab);
+    const previousIndex = (currentIndex - 1 + TAB_ORDER.length) % TAB_ORDER.length;
+    setActiveTab(TAB_ORDER[previousIndex]);
+  }, [activeTab]);
 
   // Map functionality
   useEffect(() => {
@@ -51,31 +63,29 @@ export default function CompanyDetailsView({
     async function geocodeAndBuildMap() {
       if (activeTab !== "map" || !formattedAddress || mapImageUrl) return;
       try {
+        // Very lightweight rate limiting to avoid accidental bursts
+        const now = Date.now();
+        if (now - lastGeocodeAtRef.value < 1000) return;
+        lastGeocodeAtRef.value = now;
+
+        const ZOOM = 14;
+        const cached = geocodeCacheRef.get(formattedAddress);
+        if (cached) {
+          setMapImageUrl(getMapTileUrl(cached.lat, cached.lon, ZOOM));
+          return;
+        }
+
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(formattedAddress)}`,
-          {
-            headers: {
-              Accept: "application/json",
-              "User-Agent": "Raycast-Brreg-Search/1.0.0 (contact: support@raycast.local)",
-            },
-          },
+          { headers: { Accept: "application/json", "User-Agent": USER_AGENT } },
         );
         if (!res.ok) return;
         const json = (await res.json()) as Array<{ lat: string; lon: string }>;
         if (cancelled || !json?.length) return;
-        const { lat, lon } = json[0];
-        const zoom = 14;
-        const latNum = parseFloat(lat);
-        const lonNum = parseFloat(lon);
-        const n = Math.pow(2, zoom);
-        const xTile = Math.floor(((lonNum + 180) / 360) * n);
-        const yTile = Math.floor(
-          ((1 - Math.log(Math.tan((latNum * Math.PI) / 180) + 1 / Math.cos((latNum * Math.PI) / 180)) / Math.PI) / 2) *
-            n,
-        );
-        const url = `https://tile.openstreetmap.org/${zoom}/${xTile}/${yTile}.png`;
-        setMapImageUrl(url);
-        setMapImageDataUri(undefined);
+        const latNum = parseFloat(json[0].lat);
+        const lonNum = parseFloat(json[0].lon);
+        geocodeCacheRef.set(formattedAddress, { lat: latNum, lon: lonNum });
+        setMapImageUrl(getMapTileUrl(latNum, lonNum, ZOOM));
       } catch {
         // ignore
       }
@@ -84,67 +94,67 @@ export default function CompanyDetailsView({
     return () => {
       cancelled = true;
     };
-  }, [activeTab, formattedAddress, mapImageUrl]);
+  }, [activeTab, formattedAddress, mapImageUrl, geocodeCacheRef, lastGeocodeAtRef]);
 
-  // Fetch the static map image and embed as data URI to avoid remote image load issues
-  useEffect(() => {
-    let cancelled = false;
-    async function loadMapImage() {
-      if (!mapImageUrl || mapImageDataUri) return;
-      try {
-        const res = await fetch(mapImageUrl);
-        if (!res.ok) return;
-        const arrayBuf = await res.arrayBuffer();
-        if (cancelled) return;
-        const b64 = Buffer.from(arrayBuf).toString("base64");
-        setMapImageDataUri(`data:image/png;base64,${b64}`);
-      } catch {
-        // ignore
-      }
+  const tabsHeader = useMemo(() => {
+    return TABS.map((t) => {
+      const isActive = t.id === activeTab;
+      const bullet = isActive ? "●" : "○";
+      const label = isActive ? `**${t.title}**` : t.title;
+      return `${bullet} ${label}`;
+    }).join("   ");
+  }, [activeTab]);
+
+  const markdown = useMemo(() => {
+    if (activeTab === "overview") {
+      return `${tabsHeader}\n\n# ${company.name}
+
+${company.description ? `**Description:** ${company.description}\n\n` : ""}${company.organizationNumber ? `**Organization Number:** ${company.organizationNumber}\n\n` : ""}${company.address ? `**Address:** ${company.address}\n\n` : ""}${company.phone ? `**Phone:** ${company.phone}\n\n` : ""}${company.email ? `**Email:** ${company.email}\n\n` : ""}${company.website ? `**Website:** [${company.website}](${company.website})\n\n` : ""}${company.employees ? `**Employees:** ${company.employees}\n\n` : ""}${company.industry ? `**Industry:** ${company.industry}\n\n` : ""}${company.isVatRegistered !== undefined ? `**VAT Registered:** ${company.isVatRegistered ? "Yes" : "No"}\n\n` : ""}${company.isAudited !== undefined ? `**Audited:** ${company.isAudited ? "Yes" : "No"}\n\n` : ""}${company.lastAccountsFromDate ? `**Last Filing Date:** ${company.lastAccountsFromDate}\n\n` : ""}${company.bregUrl ? `[Open in Brønnøysundregistrene](${company.bregUrl})` : ""}${company.organizationNumber ? ` | [Search in Proff](https://www.proff.no/bransjes%C3%B8k?q=${encodeURIComponent(company.name)})` : ""}`;
     }
-    loadMapImage();
-    return () => {
-      cancelled = true;
-    };
-  }, [mapImageUrl, mapImageDataUri]);
 
-  const markdown =
-    activeTab === "overview"
-      ? `${tabs
-          .map((t) => {
-            const isActive = t.id === activeTab;
-            const bullet = isActive ? "●" : "○";
-            const label = isActive ? `**${t.title}**` : t.title;
-            return `${bullet} ${label}`;
-          })
-          .join("   ")}\n\n# ${company.name}
+    if (activeTab === "financials") {
+      return `${tabsHeader}\n\n# Financial Information
 
-${company.description ? `**Description:** ${company.description}\n\n` : ""}${company.organizationNumber ? `**Organization Number:** ${company.organizationNumber}\n\n` : ""}${company.address ? `**Address:** ${company.address}\n\n` : ""}${company.phone ? `**Phone:** ${company.phone}\n\n` : ""}${company.email ? `**Email:** ${company.email}\n\n` : ""}${company.website ? `**Website:** [${company.website}](${company.website})\n\n` : ""}${company.employees ? `**Employees:** ${company.employees}\n\n` : ""}${company.industry ? `**Industry:** ${company.industry}\n\n` : ""}${company.isVatRegistered !== undefined ? `**VAT Registered:** ${company.isVatRegistered ? "Yes" : "No"}\n\n` : ""}${company.isAudited !== undefined ? `**Audited:** ${company.isAudited ? "Yes" : "No"}\n\n` : ""}${company.lastAccountsFromDate ? `**Last Filing Date:** ${company.lastAccountsFromDate}\n\n` : ""}${company.bregUrl ? `[Open in Brønnøysundregistrene](${company.bregUrl})` : ""}${company.organizationNumber ? ` | [Search in Proff](https://www.proff.no/bransjes%C3%B8k?q=${encodeURIComponent(company.name)})` : ""}`
-      : activeTab === "financials"
-        ? `${tabs
-            .map((t) => {
-              const isActive = t.id === activeTab;
-              const bullet = isActive ? "●" : "○";
-              const label = isActive ? `**${t.title}**` : t.title;
-              return `${bullet} ${label}`;
-            })
-            .join("   ")}\n\n# Financial Information
+${company.accountingYear ? `**Accounting Year:** ${company.accountingYear}\n\n` : ""}${company.revenue ? `**Revenue:** ${company.revenue}\n\n` : ""}${company.ebitda ? `**EBITDA:** ${company.ebitda}\n\n` : ""}${company.operatingResult ? `**Operating Result:** ${company.operatingResult}\n\n` : ""}${company.result ? `**Net Result:** ${company.result}\n\n` : ""}${company.totalAssets ? `**Total Assets:** ${company.totalAssets}\n\n` : ""}${company.equity ? `**Equity:** ${company.equity}\n\n` : ""}${company.totalDebt ? `**Total Debt:** ${company.totalDebt}\n\n` : ""}${company.depreciation ? `**Depreciation:** ${company.depreciation}\n\n` : ""}${company.isAudited !== undefined ? `**Audited:** ${company.isAudited ? "Yes" : "No"}\n\n` : ""}`;
+    }
 
-${company.accountingYear ? `**Accounting Year:** ${company.accountingYear}\n\n` : ""}${company.revenue ? `**Revenue:** ${company.revenue}\n\n` : ""}${company.ebitda ? `**EBITDA:** ${company.ebitda}\n\n` : ""}${company.operatingResult ? `**Operating Result:** ${company.operatingResult}\n\n` : ""}${company.result ? `**Net Result:** ${company.result}\n\n` : ""}${company.totalAssets ? `**Total Assets:** ${company.totalAssets}\n\n` : ""}${company.equity ? `**Equity:** ${company.equity}\n\n` : ""}${company.totalDebt ? `**Total Debt:** ${company.totalDebt}\n\n` : ""}${company.depreciation ? `**Depreciation:** ${company.depreciation}\n\n` : ""}${company.isAudited !== undefined ? `**Audited:** ${company.isAudited ? "Yes" : "No"}\n\n` : ""}`
-        : activeTab === "map"
-          ? `${tabs
-              .map((t) => {
-                const isActive = t.id === activeTab;
-                const bullet = isActive ? "●" : "○";
-                const label = isActive ? `**${t.title}**` : t.title;
-                return `${bullet} ${label}`;
-              })
-              .join("   ")}\n\n# Location Information
+    if (activeTab === "map") {
+      return `${tabsHeader}\n\n# Location Information
 
-${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataUri ? `![Map](${mapImageDataUri})\n\n` : mapImageUrl ? `![Map](${mapImageUrl})\n\n` : ""}${formattedAddress ? `[Get Directions](https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formattedAddress)})` : ""}`
-          : "";
+${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageUrl ? `![Map](${mapImageUrl})\n\n` : ""}${formattedAddress ? `[Get Directions](https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(formattedAddress)})` : ""}`;
+    }
 
-  const renderMetadata = () => {
+    return "";
+  }, [
+    activeTab,
+    company.name,
+    company.description,
+    company.organizationNumber,
+    company.address,
+    company.phone,
+    company.email,
+    company.website,
+    company.employees,
+    company.industry,
+    company.isVatRegistered,
+    company.isAudited,
+    company.lastAccountsFromDate,
+    company.bregUrl,
+    company.accountingYear,
+    company.revenue,
+    company.ebitda,
+    company.operatingResult,
+    company.result,
+    company.totalAssets,
+    company.equity,
+    company.totalDebt,
+    company.depreciation,
+    formattedAddress,
+    mapImageUrl,
+    tabsHeader,
+  ]);
+
+  const metadata = useMemo(() => {
     if (activeTab === "overview") {
       return (
         <Detail.Metadata>
@@ -237,13 +247,13 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
     }
 
     return null;
-  };
+  }, [activeTab, company, formattedAddress, isFavorite]);
 
   return (
     <Detail
       isLoading={isLoading}
       markdown={markdown}
-      metadata={renderMetadata()}
+      metadata={metadata}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Brreg" url={company.bregUrl || "https://www.brreg.no"} />
@@ -258,6 +268,14 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
               title="Copy Organization Number"
               content={company.organizationNumber}
               shortcut={KEYBOARD_SHORTCUTS.COPY_ORG_NUMBER}
+            />
+          )}
+          {company.organizationNumber && (
+            <Action
+              title="Copy Vat Number"
+              icon={Icon.Clipboard}
+              onAction={copyVatNumber}
+              shortcut={KEYBOARD_SHORTCUTS.COPY_VAT_NUMBER}
             />
           )}
           {formattedAddress && (
@@ -288,7 +306,11 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageDataU
               shortcut={KEYBOARD_SHORTCUTS.REMOVE_FROM_FAVORITES}
             />
           ) : (
-            <Action title="Add to Favorites" onAction={onAddFavorite} shortcut={KEYBOARD_SHORTCUTS.ADD_TO_FAVORITES} />
+            <Action
+              title="⭐ Add to Favorites"
+              onAction={onAddFavorite}
+              shortcut={KEYBOARD_SHORTCUTS.ADD_TO_FAVORITES}
+            />
           )}
           <ActionPanel.Section title="Tabs">
             <Action

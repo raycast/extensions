@@ -4,6 +4,7 @@ import { formatAddress } from "../utils/format";
 import { getEntityIcon, isFavorite, getFavoriteEntity } from "../utils/entity";
 import EntityActions from "./EntityActions";
 import SearchResultActions from "./SearchResultActions";
+import { useMemo } from "react";
 
 interface SearchResultsProps {
   entities: Enhet[];
@@ -28,6 +29,17 @@ export default function SearchResults({
   onResetToFavicon,
   onRefreshFavicon,
 }: SearchResultsProps) {
+  const displayItems = useMemo(() => {
+    return entities.map((entity) => {
+      const addressString = formatAddress(entity.forretningsadresse);
+      const alreadyFavorite = isFavorite(entity, favoriteIds);
+      const fav = getFavoriteEntity(entity, favoriteById);
+      const itemIcon = getEntityIcon(fav || entity);
+
+      return { entity, addressString, alreadyFavorite, fav, itemIcon };
+    });
+  }, [entities, favoriteIds, favoriteById]);
+
   if (entities.length === 0) {
     return (
       <List.Section title="Search Results">
@@ -47,12 +59,7 @@ export default function SearchResults({
 
   return (
     <List.Section title="Results">
-      {entities.map((entity) => {
-        const addressString = formatAddress(entity.forretningsadresse);
-        const alreadyFavorite = isFavorite(entity, favoriteIds);
-        const fav = getFavoriteEntity(entity, favoriteById);
-        const itemIcon = getEntityIcon(fav || entity);
-
+      {displayItems.map(({ entity, addressString, alreadyFavorite, fav, itemIcon }) => {
         return (
           <List.Item
             key={entity.organisasjonsnummer}
@@ -62,18 +69,7 @@ export default function SearchResults({
             accessories={addressString ? [{ text: addressString }] : []}
             actions={
               <ActionPanel>
-                <EntityActions
-                  entity={entity}
-                  addressString={addressString}
-                  onViewDetails={onViewDetails}
-                  onCopyOrgNumber={() => {
-                    // Show success toast - clipboard is handled by Action.CopyToClipboard
-                  }}
-                  onCopyAddress={() => {
-                    // Show success toast - clipboard is handled by Action.CopyToClipboard
-                  }}
-                  onOpenInBrowser={() => {}}
-                />
+                <EntityActions entity={entity} addressString={addressString} onViewDetails={onViewDetails} />
                 <SearchResultActions
                   entity={entity}
                   isFavorite={alreadyFavorite}

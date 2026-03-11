@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Company, Enhet } from "../types";
 import { getCompanyDetails } from "../brreg-api";
 import { showFailureToast } from "../utils/toast";
+import { getBregUrl } from "../utils/entity";
 
 export function useCompanyView() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -14,7 +15,7 @@ export function useCompanyView() {
       address: entity.forretningsadresse?.adresse?.join(", ") || undefined,
       postalCode: entity.forretningsadresse?.postnummer || undefined,
       city: entity.forretningsadresse?.poststed || undefined,
-      bregUrl: `https://virksomhet.brreg.no/oppslag/enheter/${entity.organisasjonsnummer}`,
+      bregUrl: getBregUrl(entity.organisasjonsnummer),
     };
 
     setSelectedCompany(base);
@@ -23,7 +24,7 @@ export function useCompanyView() {
     try {
       const details = await getCompanyDetails(entity.organisasjonsnummer);
       setDetailedCompany(details ?? base);
-    } catch (e) {
+    } catch {
       setDetailedCompany(base);
       showFailureToast("Failed to load details");
     }

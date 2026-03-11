@@ -1,16 +1,45 @@
 import type { Keyboard } from "@raycast/api";
 
+const MODIFIER_SYMBOLS: Record<string, string> = {
+  cmd: "⌘",
+  shift: "⇧",
+  ctrl: "⌃",
+  alt: "⌥",
+};
+
+const KEY_SYMBOLS: Record<string, string> = {
+  arrowUp: "↑",
+  arrowDown: "↓",
+  arrowLeft: "←",
+  arrowRight: "→",
+  enter: "↵",
+  backspace: "⌫",
+  tab: "⇥",
+  space: "Space",
+};
+
+/**
+ * Format a Raycast Keyboard.Shortcut to a human-readable symbol string (e.g. "⌘⇧C").
+ * Handles both the plain { modifiers, key } variant and the cross-platform { macOS, Windows } variant.
+ */
+export function formatShortcut(shortcut: Keyboard.Shortcut): string {
+  const resolved = "macOS" in shortcut ? shortcut.macOS : shortcut;
+  const mods = (resolved.modifiers ?? []).map((m) => MODIFIER_SYMBOLS[m] ?? m).join("");
+  const keyValue = String(resolved.key);
+  const key = KEY_SYMBOLS[keyValue] ?? keyValue.toUpperCase();
+  return `${mods}${key}`;
+}
+
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: "https://virksomhet.brreg.no",
-  SEARCH_ENDPOINT: "/oppslag/enheter",
   MIN_ORG_NUMBER_LENGTH: 9,
 } as const;
 
 // Keyboard Shortcuts
-export const KEYBOARD_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
-  COPY_ORG_NUMBER: { modifiers: ["cmd"], key: "o" },
-  COPY_ADDRESS: { modifiers: ["cmd"], key: "b" },
+export const KEYBOARD_SHORTCUTS = {
+  COPY_ORG_NUMBER: { modifiers: ["cmd", "shift"], key: "c" },
+  COPY_VAT_NUMBER: { modifiers: ["cmd", "shift"], key: "v" },
+  COPY_ADDRESS: { modifiers: ["cmd", "shift"], key: "b" },
   COPY_REVENUE: { modifiers: ["cmd", "shift"], key: "r" },
   COPY_NET_RESULT: { modifiers: ["cmd", "shift"], key: "n" },
   OPEN_IN_BROWSER: { modifiers: ["cmd", "shift"], key: "enter" },
@@ -24,7 +53,7 @@ export const KEYBOARD_SHORTCUTS: Record<string, Keyboard.Shortcut> = {
   SHOW_MAP: { modifiers: ["cmd"], key: "3" },
   PREVIOUS_TAB: { modifiers: [], key: "backspace" },
   GO_BACK: { modifiers: ["cmd"], key: "arrowLeft" },
-};
+} satisfies Record<string, Keyboard.Shortcut>;
 
 // Emoji Categories
 export const EMOJI_CATEGORIES = [
@@ -50,18 +79,14 @@ export const UI_TEXT = {
   SEARCH_PLACEHOLDER: "Search for name or organisation number",
   MOVE_MODE_ACTIVE: "Move Mode Active - Use ⌘⇧↑↓ to reorder favorites",
   FAVORITES_SECTION: "Favorites",
-  RESULTS_SECTION: "Results",
   MOVE_MODE_INDICATOR: " - Move Mode Active (⌘⇧)",
-  COPY_SUCCESS: {
-    ORG_NUMBER: "Organization number copied to clipboard",
-    ADDRESS: "Address copied to clipboard",
-    REVENUE: "Revenue copied to clipboard",
-    NET_RESULT: "Net result copied to clipboard",
-  },
 } as const;
 
 // Project Links
 export const GITHUB_REPO_URL = "https://github.com/kyndig/brreg-search" as const;
+
+// HTTP
+export const USER_AGENT = `Raycast-Brreg-Search/1.0.0 (${GITHUB_REPO_URL})` as const;
 
 // Markdown Content
 export const WELCOME_MARKDOWN =
