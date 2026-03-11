@@ -5,6 +5,7 @@ import { saveIntake, getIntakes, getCustomDrinks } from "./utils/storage";
 import { BUILT_IN_PRESETS, OTHER_OPTION } from "./utils/drinkPresets";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
+import { getStatusEmoji, getStatusMessage } from "./utils/statusHelpers";
 import { CaffeineIntake, CaffeineCalculation } from "./types";
 
 function generateId(): string {
@@ -15,32 +16,6 @@ interface FormValues {
   drinkType: string;
   amountDescription: string;
   caffeineAmount: string;
-}
-
-function getStatusEmoji(status: string): string {
-  switch (status) {
-    case "no-more-caffeine":
-      return "🚫";
-    case "warning":
-      return "⚠️";
-    case "safe":
-      return "✅";
-    default:
-      return "";
-  }
-}
-
-function getStatusMessage(status: string): string {
-  switch (status) {
-    case "no-more-caffeine":
-      return "No More Caffeine";
-    case "warning":
-      return "Warning";
-    case "safe":
-      return "Safe";
-    default:
-      return "Unknown";
-  }
 }
 
 export default function Command() {

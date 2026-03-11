@@ -27,11 +27,47 @@ export async function getIntakes(): Promise<CaffeineIntake[]> {
   }
 
   try {
-    const parsed = JSON.parse(stored);
-    return parsed.map((intake: CaffeineIntake) => ({
-      ...intake,
-      timestamp: new Date(intake.timestamp),
-    }));
+    const parsedUnknown = JSON.parse(stored) as unknown;
+    if (!Array.isArray(parsedUnknown)) {
+      return [];
+    }
+
+    const parsedArray = parsedUnknown as Array<Record<string, unknown>>;
+
+    // Convert and validate each entry without using `any`
+    const withDates: CaffeineIntake[] = parsedArray.map((intake) => {
+      const ts = intake.timestamp;
+      let timestamp: Date;
+      if (typeof ts === "string") {
+        timestamp = new Date(ts);
+      } else if (typeof ts === "number") {
+        timestamp = new Date(ts);
+      } else {
+        timestamp = new Date();
+      }
+
+      const amountRaw = intake.amount;
+      const amount = typeof amountRaw === "number" ? amountRaw : Number(amountRaw);
+
+      return {
+        id: typeof intake.id === "string" ? intake.id : String(intake.id),
+        timestamp,
+        amount,
+        drinkType: typeof intake.drinkType === "string" ? intake.drinkType : String(intake.drinkType),
+        amountDescription: typeof intake.amountDescription === "string" ? intake.amountDescription : undefined,
+      } as CaffeineIntake;
+    });
+
+    // Cleanup old intakes older than TIME_WINDOW_HOURS
+    const cutoffTime = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000);
+    const filtered = withDates.filter((intake) => intake.timestamp >= cutoffTime);
+
+    if (filtered.length !== withDates.length) {
+      // Persist cleaned data back to storage
+      await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(filtered));
+    }
+
+    return filtered;
   } catch (error) {
     console.error("Error parsing intakes:", error);
     return [];
@@ -50,12 +86,7 @@ export async function deleteIntake(id: string): Promise<void> {
 /**
  * Clear old intake records (older than time window)
  */
-export async function clearOldIntakes(): Promise<void> {
-  const intakes = await getIntakes();
-  const cutoffTime = new Date(Date.now() - TIME_WINDOW_HOURS * 60 * 60 * 1000);
-  const filtered = intakes.filter((intake) => intake.timestamp >= cutoffTime);
-  await LocalStorage.setItem(INTAKES_KEY, JSON.stringify(filtered));
-}
+// Note: old-intake cleanup is performed within `getIntakes` to avoid unused exported helpers.
 
 /**
  * Get all custom drink presets

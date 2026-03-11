@@ -44,47 +44,7 @@ function formatDateKey(date: Date): string {
 /**
  * Get color for status indicator
  */
-function getStatusColor(status: string): Color {
-  switch (status) {
-    case "no-more-caffeine":
-      return Color.Red;
-    case "warning":
-      return Color.Orange;
-    case "safe":
-      return Color.Green;
-    default:
-      return Color.PrimaryText;
-  }
-}
-
-/**
- * Get emoji for status indicator
- */
-function getStatusEmoji(status: string): string {
-  switch (status) {
-    case "no-more-caffeine":
-      return "🚫";
-    case "warning":
-      return "⚠️";
-    case "safe":
-      return "✅";
-    default:
-      return "";
-  }
-}
-
-function getStatusMessage(status: string): string {
-  switch (status) {
-    case "no-more-caffeine":
-      return "No More Caffeine";
-    case "warning":
-      return "Warning";
-    case "safe":
-      return "Safe";
-    default:
-      return "Unknown";
-  }
-}
+import { getStatusColor, getStatusEmoji, getStatusMessage } from "./utils/statusHelpers";
 
 /**
  * Group caffeine intakes by date (YYYY-MM-DD format)
@@ -152,7 +112,7 @@ export default function Command() {
     return (
       <List>
         <List.EmptyView
-          icon={Icon.Code}
+          icon={Icon.Mug}
           title="No Caffeine Logged"
           description="Start logging your caffeine intake to track residual levels"
         />

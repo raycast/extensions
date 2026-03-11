@@ -4,31 +4,7 @@ import { getIntakes } from "./utils/storage";
 import { calculateCaffeineMetrics } from "./utils/caffeineModel";
 import { getSettings } from "./utils/preferences";
 
-function getStatusText(status: string): string {
-  switch (status) {
-    case "no-more-caffeine":
-      return "No More Caffeine";
-    case "warning":
-      return "Warning";
-    case "safe":
-      return "Safe";
-    default:
-      return "Unknown";
-  }
-}
-
-function getStatusColor(status: string): Color {
-  switch (status) {
-    case "no-more-caffeine":
-      return Color.Red;
-    case "warning":
-      return Color.Orange;
-    case "safe":
-      return Color.Green;
-    default:
-      return Color.PrimaryText;
-  }
-}
+import { getStatusText, getStatusColor } from "./utils/statusHelpers";
 
 export default function Command() {
   const { data: intakes, isLoading } = useCachedPromise(getIntakes);

@@ -1,4 +1,14 @@
-import { Form, ActionPanel, Action, List, Icon, showToast, Toast, openExtensionPreferences } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  showToast,
+  Toast,
+  openExtensionPreferences,
+  useNavigation,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getCustomDrinks, saveCustomDrink, deleteCustomDrink } from "./utils/storage";
@@ -76,31 +86,10 @@ function CustomDrinkForm({
 }
 
 export default function Command() {
-  const [showCustomDrinkForm, setShowCustomDrinkForm] = useState(false);
-  const [editingDrink, setEditingDrink] = useState<CustomDrink | undefined>();
+  const { push, pop } = useNavigation();
   const { data: customDrinks, revalidate } = useCachedPromise(getCustomDrinks);
 
   const preferences = getSettings();
-
-  async function handleSaveCustomDrink(drink: CustomDrink) {
-    try {
-      await saveCustomDrink(drink);
-      await revalidate();
-      setShowCustomDrinkForm(false);
-      setEditingDrink(undefined);
-      showToast({
-        style: Toast.Style.Success,
-        title: drink.id && customDrinks?.some((d) => d.id === drink.id) ? "Updated" : "Created",
-        message: `Custom drink "${drink.name}" saved`,
-      });
-    } catch {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error",
-        message: "Failed to save custom drink",
-      });
-    }
-  }
 
   async function handleDelete(drink: CustomDrink) {
     try {
@@ -118,19 +107,6 @@ export default function Command() {
         message: "Failed to delete custom drink",
       });
     }
-  }
-
-  if (showCustomDrinkForm) {
-    return (
-      <CustomDrinkForm
-        drink={editingDrink}
-        onSave={handleSaveCustomDrink}
-        onCancel={() => {
-          setShowCustomDrinkForm(false);
-          setEditingDrink(undefined);
-        }}
-      />
-    );
   }
 
   return (
@@ -191,10 +167,32 @@ export default function Command() {
                   <Action
                     icon={Icon.Pencil}
                     title="Edit Drink"
-                    onAction={() => {
-                      setEditingDrink(drink);
-                      setShowCustomDrinkForm(true);
-                    }}
+                    onAction={() =>
+                      push(
+                        <CustomDrinkForm
+                          drink={drink}
+                          onSave={async (d: CustomDrink) => {
+                            try {
+                              await saveCustomDrink(d);
+                              await revalidate();
+                              showToast({
+                                style: Toast.Style.Success,
+                                title: d.id && customDrinks?.some((c) => c.id === d.id) ? "Updated" : "Created",
+                                message: `Custom drink "${d.name}" saved`,
+                              });
+                              pop();
+                            } catch {
+                              showToast({
+                                style: Toast.Style.Failure,
+                                title: "Error",
+                                message: "Failed to save custom drink",
+                              });
+                            }
+                          }}
+                          onCancel={() => pop()}
+                        />,
+                      )
+                    }
                   />
                   <Action
                     icon={Icon.Trash}
@@ -213,7 +211,35 @@ export default function Command() {
             subtitle="Create your first custom drink preset"
             actions={
               <ActionPanel>
-                <Action icon={Icon.Plus} title="Create Custom Drink" onAction={() => setShowCustomDrinkForm(true)} />
+                <Action
+                  icon={Icon.Plus}
+                  title="Create Custom Drink"
+                  onAction={() =>
+                    push(
+                      <CustomDrinkForm
+                        onSave={async (d: CustomDrink) => {
+                          try {
+                            await saveCustomDrink(d);
+                            await revalidate();
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: "Created",
+                              message: `Custom drink "${d.name}" saved`,
+                            });
+                            pop();
+                          } catch {
+                            showToast({
+                              style: Toast.Style.Failure,
+                              title: "Error",
+                              message: "Failed to save custom drink",
+                            });
+                          }
+                        }}
+                        onCancel={() => pop()}
+                      />,
+                    )
+                  }
+                />
               </ActionPanel>
             }
           />
@@ -224,7 +250,35 @@ export default function Command() {
           subtitle="Add a new drink preset"
           actions={
             <ActionPanel>
-              <Action icon={Icon.Plus} title="Create Custom Drink" onAction={() => setShowCustomDrinkForm(true)} />
+              <Action
+                icon={Icon.Plus}
+                title="Create Custom Drink"
+                onAction={() =>
+                  push(
+                    <CustomDrinkForm
+                      onSave={async (d: CustomDrink) => {
+                        try {
+                          await saveCustomDrink(d);
+                          await revalidate();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Created",
+                            message: `Custom drink "${d.name}" saved`,
+                          });
+                          pop();
+                        } catch {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Error",
+                            message: "Failed to save custom drink",
+                          });
+                        }
+                      }}
+                      onCancel={() => pop()}
+                    />,
+                  )
+                }
+              />
             </ActionPanel>
           }
         />
