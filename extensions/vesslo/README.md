@@ -1,13 +1,14 @@
 # Vesslo
 
+<p align="center">
+  <img src="assets/extension-icon.png" height="128">
+  <h1 align="center">Vesslo</h1>
+</p>
+
 🌐 **Website**: [https://vesslo.top](https://vesslo.top)
 📦 **GitHub**: [https://github.com/hjm79/Vesslo-MacAppManager](https://github.com/hjm79/Vesslo-MacAppManager)
 
 Search and manage your Vesslo app library directly from Raycast.
-
-## Demo
-
-![Vesslo Raycast Extension Demo](media/demo.gif)
 
 ## Features
 
@@ -31,8 +32,16 @@ Quickly find apps in your Vesslo library with flexible filtering options.
 
 ### 🔄 View Updates
 Check all available updates across different sources with Vesslo integration.
-- **Sources**: Homebrew, Sparkle, App Store
+- **Sources**: Homebrew, Sparkle, App Store, Manual
+- **Source Priority** (grouped view): Homebrew > Sparkle > App Store > Manual
 - **Actions**: Update via Vesslo Deep Link (Recommended), Direct execution, or Terminal
+
+| Action | Shortcut |
+|--------|----------|
+| Homebrew Quick Update | `⌘⇧↩` |
+| Homebrew Update via Terminal | `⌘⇧T` |
+| Open in App Store | `⌘⇧O` |
+| App Store Update via Terminal (mas) | `⌘⇧M` |
 
 ### 🏷️ Browse by Tag
 Organize and explore your app collection by custom tags.

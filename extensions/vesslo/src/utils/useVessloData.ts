@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { loadVessloData } from "./data";
+import { loadVessloData, getVessloDataModifiedTime } from "./data";
 import { VessloData } from "../types";
 import { showToast, Toast } from "@raycast/api";
 
@@ -9,13 +9,18 @@ export function useVessloData() {
   const [data, setData] = useState<VessloData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const lastExportedAt = useRef<string | null>(null);
+  const lastModifiedTime = useRef<number | null>(null);
+  const isMounted = useRef(true); // 언마운트 후 setData 호출 방지
 
   useEffect(() => {
+    isMounted.current = true;
+
     // Initial load
     const initialData = loadVessloData();
     setData(initialData);
     setIsLoading(false);
     lastExportedAt.current = initialData?.exportedAt ?? null;
+    lastModifiedTime.current = getVessloDataModifiedTime();
 
     if (!initialData) {
       showToast({
@@ -29,16 +34,27 @@ export function useVessloData() {
     const interval = setInterval(() => {
       const newData = loadVessloData();
       if (!newData) return;
+      const newModifiedTime = getVessloDataModifiedTime();
+      const modifiedTimeChanged =
+        newModifiedTime !== null &&
+        newModifiedTime !== lastModifiedTime.current;
 
       // Compare exportedAt timestamp to detect changes
-      if (newData.exportedAt !== lastExportedAt.current) {
+      if (
+        newData.exportedAt !== lastExportedAt.current ||
+        modifiedTimeChanged
+      ) {
         lastExportedAt.current = newData.exportedAt;
-        setData(newData);
+        lastModifiedTime.current = newModifiedTime;
+        if (isMounted.current) setData(newData); // 마운트 상태일 때만 업데이트
       }
     }, REFRESH_INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => {
+      isMounted.current = false;
+      clearInterval(interval);
+    };
   }, []); // Empty dependency array - run only once
 
-  return { data, isLoading, setData };
+  return { data, isLoading };
 }

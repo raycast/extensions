@@ -1,5 +1,5 @@
 import { homedir } from "os";
-import { readFileSync, existsSync } from "fs";
+import { readFileSync, existsSync, statSync } from "fs";
 import { join } from "path";
 import { VessloApp, VessloData } from "../types";
 
@@ -10,6 +10,17 @@ const DATA_PATH = join(
   "Vesslo",
   "raycast_data.json",
 );
+
+export function getVessloDataModifiedTime(): number | null {
+  try {
+    if (!existsSync(DATA_PATH)) {
+      return null;
+    }
+    return statSync(DATA_PATH).mtimeMs;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Load and validate Vesslo data from JSON file
@@ -58,9 +69,6 @@ export function loadVessloData(): VessloData | null {
         sources: Array.isArray(app.sources) ? app.sources : [],
         appStoreId: app.appStoreId ?? null,
         homebrewCask: app.homebrewCask ?? null,
-        isDeleted: app.isDeleted ?? false,
-        isSkipped: app.isSkipped ?? false,
-        isIgnored: app.isIgnored ?? false,
       }));
 
     return {
