@@ -80,8 +80,11 @@ export function KVStoreKeys({ store }: KVStoreKeysProps) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Exporting store..." });
       const exported: Record<string, string> = {};
 
-      for (const key of keys) {
-        exported[key] = await getKVStoreKeyValue(store.id, key);
+      const BATCH_SIZE = 20;
+      for (let i = 0; i < keys.length; i += BATCH_SIZE) {
+        const batch = keys.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(batch.map((key) => getKVStoreKeyValue(store.id, key)));
+        batch.forEach((key, idx) => (exported[key] = results[idx]));
       }
 
       const json = JSON.stringify(exported, null, 2);

@@ -3,51 +3,12 @@ import { useState } from "react";
 import { updateComputeACLEntries } from "../api";
 import { ComputeACLBulkEntry } from "../types";
 import { FormValidation, useForm } from "@raycast/utils";
+import { parseBulkIPLine } from "../utils/ip-validation";
 
 interface ACLBulkAddFormProps {
   aclId: string;
   aclName: string;
   onSaved?: () => void;
-}
-
-function isValidIPv4(ip: string): boolean {
-  const parts = ip.split(".");
-  if (parts.length !== 4) return false;
-  return parts.every((p) => {
-    const num = parseInt(p, 10);
-    return !isNaN(num) && num >= 0 && num <= 255 && String(num) === p;
-  });
-}
-
-function isValidIPv6(ip: string): boolean {
-  if (ip.includes("::")) {
-    const sides = ip.split("::");
-    if (sides.length > 2) return false;
-    const totalGroups = (sides[0] ? sides[0].split(":").length : 0) + (sides[1] ? sides[1].split(":").length : 0);
-    if (totalGroups > 7) return false;
-  } else {
-    if (ip.split(":").length !== 8) return false;
-  }
-  return ip.split(":").every((g) => g === "" || /^[0-9a-fA-F]{1,4}$/.test(g));
-}
-
-function parseLine(line: string): string | null {
-  const trimmed = line.trim();
-  if (!trimmed || trimmed.startsWith("#")) return null;
-
-  const slashIdx = trimmed.indexOf("/");
-  if (slashIdx !== -1) {
-    const ip = trimmed.slice(0, slashIdx);
-    const subnet = parseInt(trimmed.slice(slashIdx + 1), 10);
-    if (isNaN(subnet)) return null;
-    if (isValidIPv4(ip) && subnet >= 0 && subnet <= 32) return trimmed;
-    if (isValidIPv6(ip) && subnet >= 0 && subnet <= 128) return trimmed;
-    return null;
-  }
-
-  if (isValidIPv4(trimmed)) return `${trimmed}/32`;
-  if (isValidIPv6(trimmed)) return `${trimmed}/128`;
-  return null;
 }
 
 export function ACLBulkAddForm({ aclId, aclName, onSaved }: ACLBulkAddFormProps) {
@@ -61,7 +22,7 @@ export function ACLBulkAddForm({ aclId, aclName, onSaved }: ACLBulkAddFormProps)
       const invalid: string[] = [];
 
       for (const line of lines) {
-        const result = parseLine(line);
+        const result = parseBulkIPLine(line);
         if (result) {
           parsed.push(result);
         } else {
