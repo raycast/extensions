@@ -124,8 +124,11 @@ export async function toggleVpn(): Promise<VpnStatus> {
     case "connecting":
       return turnOffVpn();
     case "disconnected":
-    case "disconnecting":
       return turnOnVpn();
+    case "disconnecting":
+      throw new Error(
+        "VPN is currently disconnecting, please try again shortly",
+      );
     case "invalid":
       throw new Error("VPN service is invalid");
     default:
