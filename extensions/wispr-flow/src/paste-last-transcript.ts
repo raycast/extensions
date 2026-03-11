@@ -1,9 +1,17 @@
-import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  closeMainWindow,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { dbExists, getDbPath } from "./db";
 import { getLatestTranscriptText } from "./history";
 
 export default async function main() {
   const dbPath = getDbPath();
+  const { minimumDuration } = getPreferenceValues<Preferences>();
+  const minDuration = Number(minimumDuration) || 0;
 
   if (!dbExists()) {
     await showToast({
@@ -15,7 +23,10 @@ export default async function main() {
   }
 
   try {
-    const latestTranscriptText = await getLatestTranscriptText(dbPath);
+    const latestTranscriptText = await getLatestTranscriptText(
+      dbPath,
+      minDuration,
+    );
 
     if (!latestTranscriptText) {
       await showToast({
