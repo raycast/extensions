@@ -58,7 +58,7 @@ export function isLocalConnection(): boolean {
   }
 }
 
-function buildHeaders(initHeaders?: HeadersInit): Headers {
+function buildHeaders(initHeaders?: Record<string, string>): Headers {
   const headers = new Headers(initHeaders);
   const { apiKey } = getConnectionConfig();
 
@@ -84,7 +84,7 @@ async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
   const { baseUrl } = getConnectionConfig();
   const res = await fetch(`${baseUrl}${path}`, {
     ...init,
-    headers: buildHeaders(init?.headers),
+    headers: buildHeaders(init?.headers as Record<string, string> | undefined),
   });
 
   if (!res.ok) {
