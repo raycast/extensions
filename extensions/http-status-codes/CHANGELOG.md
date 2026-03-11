@@ -1,5 +1,11 @@
 # HTTP Status Codes Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add support for Windows
+- Add additional extension categories
+- Replace `.eslintrc.json` with `eslint.config.js`
+
 ## [Update & New Additions] - 2024-05-17
 
 - Update dependencies and `package.json` file structure to follow the latest version from Raycast

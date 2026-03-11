@@ -1,5 +1,4 @@
 import { Clipboard, Color, Toast, showHUD, showToast } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import tempy, { FileOptions } from "tempy";
 import fetch from "node-fetch";
 import path from "path";
@@ -22,15 +21,13 @@ const copyFileToClipboard = async (url: string, name: string) => {
     file = await tempy.write(await response.body, tempyOpt);
   } catch (e) {
     const error = e as Error;
-
     throw new Error(`Failed to download image: "${error.message}".`);
   }
 
   try {
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${file}" )`);
+    await Clipboard.copy({ file });
   } catch (e) {
     const error = e as Error;
-
     throw new Error(`Failed to copy image: "${error.message}"`);
   }
 
