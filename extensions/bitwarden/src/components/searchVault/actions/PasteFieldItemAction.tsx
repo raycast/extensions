@@ -1,5 +1,4 @@
-import { Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
@@ -22,12 +21,11 @@ function PasteFieldItemAction({ label, content, shortcut }: PasteFieldItemAction
   };
 
   return (
-    <ActionWithReprompt
+    <Action
       title={currentApplication ? `Paste ${label} into ${currentApplication}` : `Paste ${label}`}
       icon={Icon.Window}
       onAction={tryPaste}
       shortcut={shortcut}
-      repromptDescription={currentApplication ? `Pasting ${label} into ${currentApplication}` : `Pasting ${label}`}
     />
   );
 }

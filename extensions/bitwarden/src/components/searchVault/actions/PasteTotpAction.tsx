@@ -1,5 +1,5 @@
-import { Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
+import ActionWithReprompt, { ActionWithRepromptProps } from "~/components/actions/ActionWithReprompt";
 import { useBitwarden } from "~/context/bitwarden";
 import { useSelectedVaultItem } from "~/components/searchVault/context/vaultItem";
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
@@ -7,11 +7,11 @@ import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 
 type PasteTotpActionProps = {
-  omitShortcut?: boolean;
-  shortcut?: Keyboard.Shortcut;
+  skipReprompt?: boolean;
+  shortcut?: Keyboard.Shortcut | null;
 };
 
-function PasteTotpAction({ omitShortcut, shortcut }: PasteTotpActionProps) {
+function PasteTotpAction({ skipReprompt, shortcut }: PasteTotpActionProps) {
   const bitwarden = useBitwarden();
   const selectedItem = useSelectedVaultItem();
   const getUpdatedVaultItem = useGetUpdatedVaultItem();
@@ -35,21 +35,23 @@ function PasteTotpAction({ omitShortcut, shortcut }: PasteTotpActionProps) {
     }
   };
 
-  return (
-    <ActionWithReprompt
-      title={currentApplicationName ? `Paste TOTP into ${currentApplicationName}` : "Paste TOTP"}
-      icon={Icon.Window}
-      onAction={pasteTotp}
-      shortcut={
-        !omitShortcut
-          ? shortcut ?? {
-              macOS: { key: "t", modifiers: ["opt", "shift"] },
-              Windows: { key: "t", modifiers: ["alt", "shift"] },
-            }
-          : undefined
-      }
-      repromptDescription={`Pasting the TOTP of <${selectedItem.name}>`}
-    />
+  const actionProps: Omit<ActionWithRepromptProps, "repromptDescription"> = {
+    title: currentApplicationName ? `Paste TOTP into ${currentApplicationName}` : "Paste TOTP",
+    icon: Icon.Window,
+    onAction: pasteTotp,
+    shortcut:
+      shortcut === null
+        ? undefined
+        : shortcut ?? {
+            macOS: { key: "t", modifiers: ["opt", "shift"] },
+            Windows: { key: "t", modifiers: ["alt", "shift"] },
+          },
+  };
+
+  return skipReprompt ? (
+    <Action {...actionProps} />
+  ) : (
+    <ActionWithReprompt {...actionProps} repromptDescription={`Pasting the TOTP of <${selectedItem.name}>`} />
   );
 }
 

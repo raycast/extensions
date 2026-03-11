@@ -12,4 +12,6 @@ export { default as CopyLoginUrisActions } from "./CopyLoginUrisActions";
 export { default as CopyNotesAction } from "./CopyNotesAction";
 export { default as CopyCustomFieldsActions } from "./CopyCustomFieldsActions";
 export { default as CopyPublicKeyAction } from "./CopyPublicKeyAction";
+export { default as CopyFieldItemAction } from "./CopyFieldItemAction";
+export { default as PasteFieldItemAction } from "./PasteFieldItemAction";
 export { default as ShowItemDetailsAction } from "./ShowItemDetailsAction";

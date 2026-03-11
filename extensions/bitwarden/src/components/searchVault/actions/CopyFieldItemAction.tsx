@@ -1,5 +1,4 @@
-import { Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import ActionWithReprompt from "~/components/actions/ActionWithReprompt";
+import { Action, Clipboard, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { showCopySuccessMessage } from "~/utils/clipboard";
 import { captureException } from "~/utils/development";
 import { getTransientCopyPreference } from "~/utils/preferences";
@@ -23,15 +22,7 @@ function CopyFieldItemAction({ label, content, type, shortcut }: CopyFieldItemAc
     }
   };
 
-  return (
-    <ActionWithReprompt
-      title={`Copy ${label}`}
-      icon={Icon.Clipboard}
-      onAction={tryCopy}
-      shortcut={shortcut}
-      repromptDescription={`Copying ${label}`}
-    />
-  );
+  return <Action title={`Copy ${label}`} icon={Icon.Clipboard} onAction={tryCopy} shortcut={shortcut} />;
 }
 
 export default CopyFieldItemAction;

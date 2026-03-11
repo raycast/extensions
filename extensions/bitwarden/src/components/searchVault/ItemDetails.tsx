@@ -19,21 +19,7 @@ type ItemDetails = {
 };
 
 /**
- * Detail screen for a single vault item, pushed via {@link ShowItemDetailsAction}.
- *
- * On mount, fetches the latest version of the item from the Bitwarden CLI
- * (via {@link useGetUpdatedVaultItem}) to ensure decrypted field data is
- * up-to-date. While loading, a spinner is shown; on failure, an error view with
- * a "Try Again" action is rendered.
- *
- * Once loaded, the item is placed into {@link VaultItemContext} so that
- * descendant action components (copy, paste, reprompt, etc.) can access it, and
- * the fields are rendered via {@link ItemFieldList}.
- *
- * @param props
- * @param props.selectedItem - The vault item selected from the search list.
- *        Used as the initial value and as the key for re-fetching.
- * @returns A Raycast `List` showing loading, error, empty, or field-list states.
+ * Detail screen for a single vault item.
  */
 function ItemDetails({ selectedItem }: ItemDetails) {
   const { folders } = useVaultContext();

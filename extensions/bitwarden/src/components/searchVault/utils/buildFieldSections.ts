@@ -2,18 +2,6 @@ import { Icon } from "@raycast/api";
 import { Card, Field, FieldType, Identity, Item, ItemType, Login, SshKey } from "~/types/vault";
 import { FieldSection, ItemField } from "../types/item-field";
 
-/**
- * Builds field sections for a login vault item.
- *
- * Produces up to two sections:
- * 1. **Login** — username (text), password (hidden), and TOTP (totp) fields.
- * 2. **URIs** — one link field per non-empty URI attached to the login.
- *
- * Empty sections are omitted.
- *
- * @param login - The login data from the vault item.
- * @returns An array of {@link FieldSection}s, potentially empty if the login has no populated fields.
- */
 function buildLoginSections(login: Login): FieldSection[] {
   const sections: FieldSection[] = [];
   const mainLoginFields: ItemField[] = [];
@@ -62,20 +50,6 @@ function buildLoginSections(login: Login): FieldSection[] {
   return sections;
 }
 
-/**
- * Builds field sections for an identity vault item.
- *
- * Produces up to three sections:
- * 1. **Personal Details** — full name (composed from title/first/middle/last), username, company.
- * 2. **Identification** — SSN (hidden), passport number, license number.
- * 3. **Contact Information** — email, phone, and a multi-line address composed from
- *    address lines, city/state/postal code, and country.
- *
- * Each section is only included when at least one of its fields has a value.
- *
- * @param identity - The identity data from the vault item.
- * @returns An array of {@link FieldSection}s, potentially empty if no identity fields are populated.
- */
 function buildIdentitySections(identity: Identity): FieldSection[] {
   const sections: FieldSection[] = [];
 
@@ -188,16 +162,6 @@ function buildIdentitySections(identity: Identity): FieldSection[] {
   return sections;
 }
 
-/**
- * Builds a single "Card" field section for a payment card vault item.
- *
- * Fields included (when present): cardholder name, brand, card number (hidden),
- * expiry month, expiry year, and security code (hidden).
- *
- * @param card - The card data from the vault item.
- * @returns A single-element array containing the "Card" section, or an empty array
- *          if the card is falsy or has no populated fields.
- */
 function buildCardSections(card: Card): FieldSection[] {
   if (!card) return [];
   const fields: ItemField[] = [];
@@ -217,14 +181,6 @@ function buildCardSections(card: Card): FieldSection[] {
   return [{ title: "Card", fields }];
 }
 
-/**
- * Builds a single "SSH Key" field section containing the public key, key
- * fingerprint, and private key (hidden) fields.
- *
- * @param sshKey - The SSH key data from the vault item.
- * @returns A single-element array containing the "SSH Key" section, or an empty
- *          array if {@link sshKey} is falsy.
- */
 function buildSshKeySections(sshKey: SshKey): FieldSection[] {
   if (!sshKey) return [];
   return [
@@ -245,20 +201,6 @@ function buildSshKeySections(sshKey: SshKey): FieldSection[] {
   ];
 }
 
-/**
- * Converts Bitwarden custom fields into a single "Custom Fields" section.
- *
- * - Fields of type {@link FieldType.LINKED} are excluded (they are resolved
- *   server-side and have no standalone value).
- * - Fields with a `null` value are excluded.
- * - {@link FieldType.HIDDEN} fields render as masked/revealable rows.
- * - {@link FieldType.BOOLEAN} fields display "Yes" / "No" with a matching icon.
- * - All other types render as plain text.
- *
- * @param fields - The custom `fields` array from the vault item.
- * @returns A single-element array containing the "Custom Fields" section, or an
- *          empty array if no displayable fields remain after filtering.
- */
 function buildCustomFieldSections(fields: Field[]): FieldSection[] {
   const entries: ItemField[] = fields
     .filter((f) => f.type !== FieldType.LINKED && f.value != null)
@@ -274,13 +216,6 @@ function buildCustomFieldSections(fields: Field[]): FieldSection[] {
   return [{ title: "Custom Fields", fields: entries }];
 }
 
-/**
- * Wraps a vault item's notes string into a single "Notes" field section.
- *
- * @param notes - The free-form notes text from the vault item, or `null` if absent.
- * @returns A single-element array containing the "Notes" section, or an empty
- *          array when {@link notes} is `null` or empty.
- */
 function buildNoteSection(notes: string | null): FieldSection[] {
   if (!notes) return [];
   return [
@@ -299,20 +234,6 @@ function buildNoteSection(notes: string | null): FieldSection[] {
   ];
 }
 
-/**
- * Converts a vault item into an ordered array of {@link FieldSection}s ready
- * for rendering in the detail list view.
- *
- * Section ordering follows a consistent pattern per item type:
- * 1. Type-specific sections (login credentials, card details, identity info, SSH keys).
- * 2. Notes section (if present).
- * 3. Custom fields section (if any exist).
- *
- * @param item - The full Bitwarden vault item to transform.
- * @returns An ordered array of sections. May be empty if the item carries no
- *          displayable data (e.g. a login with no username, password, URIs, notes,
- *          or custom fields).
- */
 export function buildFieldSections(item: Item): FieldSection[] {
   const sections: FieldSection[] = [];
 

@@ -13,12 +13,6 @@ import { useVaultListeners, VaultListenersContext } from "../context/vaultListen
  * Because Raycast's `useNavigation().push` mounts the target component in a
  * fresh React tree, all ancestor contexts (Bitwarden CLI, session, vault, and
  * vault listeners) must be explicitly re-provided around {@link ItemDetails}.
- *
- * The action is wrapped in {@link ActionWithReprompt} so items flagged with
- * master-password reprompt will require re-authentication before the detail
- * screen is shown.
- *
- * @returns A Raycast `Action` that, when triggered, navigates to the item detail view.
  */
 function ShowItemDetailsAction() {
   const { push } = useNavigation();
