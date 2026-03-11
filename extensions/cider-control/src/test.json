@@ -1,0 +1,2008 @@
+{
+  "data": {
+    "next": "/v1/me/library/albums?offset=100",
+    "data": [
+      {
+        "id": "l.OPGhKfg",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.OPGhKfg",
+        "attributes": {
+          "artistName": "From Indian Lakes",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/89/9a/31/899a3111-a4d6-ee0d-8a48-1e15b4e1c35c/859709136769_cover.tif/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Able Bodies",
+          "playParams": { "id": "l.OPGhKfg", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2012-11-13",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.Ave6y83",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.Ave6y83",
+        "attributes": {
+          "artistName": "St. Vincent",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/12/43/28/1243286d-5762-de13-1ece-4ad1fc8c79fd/652637291957.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-02-01T23:02:36Z",
+          "genreNames": ["Alternative"],
+          "name": "Actor (Bonus Track Version)",
+          "playParams": { "id": "l.Ave6y83", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2009-05-04",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.KgC6fr1",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.KgC6fr1",
+        "attributes": {
+          "artistName": "St. Vincent",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/6d/00/8c/6d008c01-074d-e2af-c691-943a155e4a60/00196922832147_Cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-02-01T23:14:07Z",
+          "genreNames": ["Alternative"],
+          "name": "All Born Screaming",
+          "playParams": { "id": "l.KgC6fr1", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-04-26",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.6sMKGdA",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.6sMKGdA",
+        "attributes": {
+          "artistName": "INOHA",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/cd/c2/fc/cdc2fc54-eeb3-7773-49e5-0d5364223be7/198474508280_xADBBEDEEAAACopyrightDataVersion.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Rock"],
+          "name": "ALOHA INOHA",
+          "playParams": { "id": "l.6sMKGdA", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-03-08",
+          "trackCount": 2
+        }
+      },
+      {
+        "id": "l.Se4cF45",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.Se4cF45",
+        "attributes": {
+          "artistName": "planet girl",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/e6/35/0f/e6350f3b-1024-67cb-a196-5a1ac1be2700/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Singer/Songwriter"],
+          "name": "Amethyst - Single",
+          "playParams": { "id": "l.Se4cF45", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-03-24",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.bNaiVFa",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.bNaiVFa",
+        "attributes": {
+          "artistName": "Luther, LUCASV & amne",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/39/1c/db/391cdbbf-a7ab-ea1d-209f-14488f02ba5c/196871001854.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:55Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "AMI - Single",
+          "playParams": { "id": "l.bNaiVFa", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-03-30",
+          "trackCount": 3
+        }
+      },
+      {
+        "id": "l.nRBSHKl",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.nRBSHKl",
+        "attributes": {
+          "artistName": "Lomepal",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/40/1d/e4/401de4a2-47ea-6067-2e15-848565a1accb/3663729099891_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T11:34:46Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Amina",
+          "playParams": { "id": "l.nRBSHKl", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-10-25",
+          "trackCount": 29
+        }
+      },
+      {
+        "id": "l.uI50Cix",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.uI50Cix",
+        "attributes": {
+          "artistName": "This Town Needs Guns",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/3c/69/fc/3c69fc11-5ce2-2465-93d5-8bda0325067e/859704622656_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-02T22:23:54Z",
+          "genreNames": ["Alternative"],
+          "name": "Animals",
+          "playParams": { "id": "l.uI50Cix", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2008-10-13",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.X4l25w6",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.X4l25w6",
+        "attributes": {
+          "artistName": "Black Country, New Road",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/8f/6a/c6/8f6ac6c6-5bcd-fa25-94f2-fd9922725215/5054429151442.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T11:34:55Z",
+          "genreNames": ["Alternative"],
+          "name": "Ants From Up There",
+          "playParams": { "id": "l.X4l25w6", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-02-04",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.xjXM5oc",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.xjXM5oc",
+        "attributes": {
+          "artistName": "Grimes",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music6/v4/da/c0/9f/dac09f19-c801-84ee-2843-801a4a926a3a/cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-11-07T09:54:28Z",
+          "genreNames": ["Electronic"],
+          "name": "Art Angels",
+          "playParams": { "id": "l.xjXM5oc", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2015-11-06",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.YVSslHj",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.YVSslHj",
+        "attributes": {
+          "artistName": "XXXTENTACION",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/6d/7b/91/6d7b91ed-4820-fc05-0cf1-272f4b25285e/194690007002_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:26Z",
+          "genreNames": ["Pop"],
+          "name": "Bad Vibes Forever",
+          "playParams": { "id": "l.YVSslHj", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-12-06",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.WomR9Jo",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.WomR9Jo",
+        "attributes": {
+          "artistName": "Mitski",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/04/bc/5e/04bc5edd-006a-a5d9-0f63-effb5956e44b/656605145068.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-28T22:24:48Z",
+          "genreNames": ["Indie Rock"],
+          "name": "Be the Cowboy",
+          "playParams": { "id": "l.WomR9Jo", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-06-26",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.HitbOkx",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.HitbOkx",
+        "attributes": {
+          "artistName": "Andrea Chahayed",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/d6/8f/4b/d68f4bb8-cc41-14f8-d9c9-ff172d057834/p9Aa5zdod0XKD-belong-original.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Pop"],
+          "name": "Belong - Single",
+          "playParams": { "id": "l.HitbOkx", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-08-12",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.rKuaQOf",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.rKuaQOf",
+        "attributes": {
+          "artistName": "Laufey",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/10/c1/05/10c10515-a196-6d33-8e4d-4012bcbf4e0c/197190934007.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-27T12:00:13Z",
+          "genreNames": ["Jazz"],
+          "name": "Bewitched: The Goddess Edition",
+          "playParams": { "id": "l.rKuaQOf", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-09-08",
+          "trackCount": 18
+        }
+      },
+      {
+        "id": "l.d2J5Wgf",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.d2J5Wgf",
+        "attributes": {
+          "artistName": "Smerz",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/78/0f/3b/780f3b17-64e1-4406-abd1-fd5539a78002/cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-12-02T15:15:31Z",
+          "genreNames": ["Alternative"],
+          "name": "Big city life",
+          "playParams": { "id": "l.d2J5Wgf", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-05-22",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.ohExjub",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.ohExjub",
+        "attributes": {
+          "artistName": "Dove Ellis",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/df/ff/8b/dfff8bcf-5769-d787-8dc4-01592c08e5ad/198704795954_Cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-12-10T11:51:10Z",
+          "genreNames": ["Singer/Songwriter"],
+          "name": "Blizzard",
+          "playParams": { "id": "l.ohExjub", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-12-05",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.qpeB7Fd",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.qpeB7Fd",
+        "attributes": {
+          "artistName": "Frank Ocean",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/bb/45/68/bb4568f3-68cd-619d-fbcb-4e179916545d/BlondCover-Final.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:53Z",
+          "genreNames": ["Pop"],
+          "name": "Blonde",
+          "playParams": { "id": "l.qpeB7Fd", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2016-08-20",
+          "trackCount": 17
+        }
+      },
+      {
+        "id": "l.o1Wk2oo",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.o1Wk2oo",
+        "attributes": {
+          "artistName": "Allie X",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/b1/a1/15/b1a1150c-f817-e7eb-6f16-0c3517f3641b/5056167119791_1.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-14T21:35:52Z",
+          "genreNames": ["Pop"],
+          "name": "Cape God",
+          "playParams": { "id": "l.o1Wk2oo", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-12-12",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.O3GidAu",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.O3GidAu",
+        "attributes": {
+          "artistName": "black midi",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/b0/85/ab/b085abc7-834a-0cc3-0957-1399b1970ece/191402021257.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-09-18T22:33:28Z",
+          "genreNames": ["Alternative"],
+          "name": "Cavalcade",
+          "playParams": { "id": "l.O3GidAu", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-05-28",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.8Tdeu66",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.8Tdeu66",
+        "attributes": {
+          "artistName": "Candy Claws",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/08/93/d9/0893d90c-14e9-3097-e82c-6b3d425238a2/3663729260338_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-13T23:20:27Z",
+          "genreNames": ["Alternative"],
+          "name": "Ceres & Calypso in the Deep Time (10th Anniversary)",
+          "playParams": { "id": "l.8Tdeu66", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2013-06-25",
+          "trackCount": 25
+        }
+      },
+      {
+        "id": "l.nqzMH9o",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.nqzMH9o",
+        "attributes": {
+          "artistName": "Frank Ocean",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/04/f8/63/04f863fc-2852-604f-c910-a97ac069506b/12UMGIM40339.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:52Z",
+          "genreNames": ["Pop"],
+          "name": "channel ORANGE",
+          "playParams": { "id": "l.nqzMH9o", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2012-07-10",
+          "trackCount": 17
+        }
+      },
+      {
+        "id": "l.z61HxTp",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.z61HxTp",
+        "attributes": {
+          "artistName": "Tyler, The Creator",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/7d/bd/e9/7dbde97e-b97d-8cc3-0203-218b687408a9/196872555059.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T18:53:02Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "CHROMAKOPIA",
+          "playParams": { "id": "l.z61HxTp", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-10-28",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.CtgahL4",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.CtgahL4",
+        "attributes": {
+          "artistName": "Mac Miller",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/23/39/38/23393826-762f-ec76-dc1e-9344f647c958/093624905981.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T11:35:31Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Circles",
+          "playParams": { "id": "l.CtgahL4", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2020-01-17",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.F13oSuh",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.F13oSuh",
+        "attributes": {
+          "artistName": "Kendrick Lamar",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/86/c9/bb/86c9bb30-fe3d-442e-33c1-c106c4d23705/17UMGIM88776.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T17:12:18Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "DAMN.",
+          "playParams": { "id": "l.F13oSuh", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2017-04-14",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.v1nJCxl",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.v1nJCxl",
+        "attributes": {
+          "artistName": "Anna von Hausswolff",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/fa/80/75/fa80755c-083e-0518-09b8-86d7a1d2bbd8/4250506828172.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-22T18:28:33Z",
+          "genreNames": ["Alternative"],
+          "name": "Dead Magic",
+          "playParams": { "id": "l.v1nJCxl", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-02-12",
+          "trackCount": 5
+        }
+      },
+      {
+        "id": "l.CpC8WUz",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.CpC8WUz",
+        "attributes": {
+          "artistName": "Candelabro",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/7c/85/2c/7c852c54-3300-4ec2-79e6-bcfe8dd6b813/199538942446.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-05T21:29:46Z",
+          "genreNames": ["Prog-Rock/Art Rock"],
+          "name": "Deseo, Carne y Voluntad",
+          "playParams": { "id": "l.CpC8WUz", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-10-03",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.JC9USs5",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.JC9USs5",
+        "attributes": {
+          "artistName": "Asia Menor",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/96/54/9f/96549fff-dc98-a4b0-95b1-3b3003f007e1/8445162952941.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-11-09T08:07:45Z",
+          "genreNames": ["Adult Alternative"],
+          "name": "Enola Gay",
+          "playParams": { "id": "l.JC9USs5", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-08-25",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.8d5SJl9",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.8d5SJl9",
+        "attributes": {
+          "artistName": "Laufey",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/a4/e7/5e/a4e75e8c-2875-4576-12d8-ac8d2f865815/5056167175841_1.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Everything I Know About Love",
+          "playParams": { "id": "l.8d5SJl9", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-06-01",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.e73EmUB",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.e73EmUB",
+        "attributes": {
+          "artistName": "Luther",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/d4/cf/a1/d4cfa1a3-1ff2-76c6-8ea5-87cbb6265f67/196871819480.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T11:36:29Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "EXIT",
+          "playParams": { "id": "l.e73EmUB", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-03-01",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.0QWEjyf",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.0QWEjyf",
+        "attributes": {
+          "artistName": "FINNEAS",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/1e/f6/6a/1ef66a49-98ed-b22d-eb90-56e5640e09dd/24UMGIM79281.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-02T22:27:44Z",
+          "genreNames": ["Alternative"],
+          "name": "For Cryin' Out Loud!",
+          "playParams": { "id": "l.0QWEjyf", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-10-04",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.htatzJt",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.htatzJt",
+        "attributes": {
+          "artistName": "Black Country, New Road",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/18/aa/41/18aa41e4-084e-d08c-d2ad-57a00bbe24be/5054429142419.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T17:08:38Z",
+          "genreNames": ["Alternative"],
+          "name": "For the First Time",
+          "playParams": { "id": "l.htatzJt", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-02-05",
+          "trackCount": 6
+        }
+      },
+      {
+        "id": "l.18URNUx",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.18URNUx",
+        "attributes": {
+          "artistName": "Black Country, New Road",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/f7/08/ac/f708ac5d-4553-4253-dcd3-11c61327a532/5054429199741.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-17T18:46:57Z",
+          "genreNames": ["Alternative"],
+          "name": "Forever Howlong",
+          "playParams": { "id": "l.18URNUx", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-01-30",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.evVzoe",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.evVzoe",
+        "attributes": {
+          "artistName": "The Last Dinner Party",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/2e/7e/0c/2e7e0c02-97c7-d224-73f9-b96c91810340/25UMGIM84354.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-12-10T12:52:21Z",
+          "genreNames": ["Rock"],
+          "name": "From The Pyre",
+          "playParams": { "id": "l.evVzoe", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-10-17",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.B9OoSK2",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.B9OoSK2",
+        "attributes": {
+          "artistName": "Xiu Xiu",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/03/7e/f2/037ef20a-70f3-fb73-c0b9-d650902e454a/644110037398.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-05T18:04:07Z",
+          "genreNames": ["Alternative"],
+          "name": "Girl with Basket of Fruit",
+          "playParams": { "id": "l.B9OoSK2", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-02-08",
+          "trackCount": 9
+        }
+      },
+      {
+        "id": "l.6BdyZjy",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.6BdyZjy",
+        "attributes": {
+          "artistName": "LAUSSE THE CAT",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/8d/53/3c/8d533c7e-44c3-8262-4b65-43d981e0ea65/800739544437.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-11-23T10:12:03Z",
+          "genreNames": ["Alternative Rap"],
+          "name": "The Girl, The Cat and The Tree",
+          "playParams": { "id": "l.6BdyZjy", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-06-19",
+          "trackCount": 8
+        }
+      },
+      {
+        "id": "l.2CDgJRi",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.2CDgJRi",
+        "attributes": {
+          "artistName": "Kendrick Lamar",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/50/c2/cc/50c2cc95-3658-9417-0d4b-831abde44ba1/24UM1IM28978.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:53Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "GNX",
+          "playParams": { "id": "l.2CDgJRi", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-11-22",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.y0e3uG1",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.y0e3uG1",
+        "attributes": {
+          "artistName": "Eliza McLamb",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/5a/48/4c/5a484cf8-b144-01bb-6f6b-2d07c7508ea2/25SYMIM20650.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-23T23:09:48Z",
+          "genreNames": ["Alternative"],
+          "name": "Good Story",
+          "playParams": { "id": "l.y0e3uG1", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-10-24",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.v7Ho1tA",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.v7Ho1tA",
+        "attributes": {
+          "artistName": "Chon",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/49/0c/65/490c6591-b688-74fd-4e9b-537eadbd4149/00817424014892_Cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-02T22:26:07Z",
+          "genreNames": ["Rock"],
+          "name": "Grow",
+          "playParams": { "id": "l.v7Ho1tA", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2015-03-23",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.8A70Qnt",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.8A70Qnt",
+        "attributes": {
+          "artistName": "Billie Eilish",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/92/9f/69/929f69f1-9977-3a44-d674-11f70c852d1b/24UMGIM36186.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T11:38:08Z",
+          "genreNames": ["Alternative"],
+          "name": "HIT ME HARD AND SOFT",
+          "playParams": { "id": "l.8A70Qnt", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-05-17",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.tVj8AdB",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.tVj8AdB",
+        "attributes": {
+          "artistName": "DEADLETTER",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/19/f1/44/19f1444f-2917-bf17-2208-149c27e3a052/cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-12-10T11:50:38Z",
+          "genreNames": ["Punk"],
+          "name": "Hysterical Strength",
+          "playParams": { "id": "l.tVj8AdB", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-09-13",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.7PmhIMq",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.7PmhIMq",
+        "attributes": {
+          "artistName": "scruffpuppie",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/0f/a2/b7/0fa2b769-f9a7-4622-9893-004b92be22a5/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-02T22:26:31Z",
+          "genreNames": ["Alternative"],
+          "name": "If Jodi Could Breathe",
+          "playParams": { "id": "l.7PmhIMq", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-05-08",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.Kc5dPd1",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.Kc5dPd1",
+        "attributes": {
+          "artistName": "Tyler, The Creator",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/0c/06/05/0c060581-6242-6a2a-a677-20170f2cf8da/886447710180.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-16T01:06:21Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "IGOR",
+          "playParams": { "id": "l.Kc5dPd1", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-05-16",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.9dz20w9",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.9dz20w9",
+        "attributes": {
+          "artistName": "Magdalena Bay",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/8f/e3/6c/8fe36c7a-d280-2d0e-8e67-4ee0fd4523cd/810090095448.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-06T12:39:56Z",
+          "genreNames": ["Indie Pop"],
+          "name": "Imaginal Disk",
+          "playParams": { "id": "l.9dz20w9", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-08-23",
+          "trackCount": 15
+        }
+      },
+      {
+        "id": "l.WTZIFcr",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.WTZIFcr",
+        "attributes": {
+          "artistName": "Radiohead",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/dd/50/c7/dd50c790-99ac-d3d0-5ab8-e3891fb8fd52/634904032463.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:13Z",
+          "genreNames": ["Alternative"],
+          "name": "In Rainbows",
+          "playParams": { "id": "l.WTZIFcr", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2007-10-10",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.3msZwko",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.3msZwko",
+        "attributes": {
+          "artistName": "Into It. Over It. & Hikes",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/3d/d7/18/3dd718f0-a1bc-0890-44dc-2b6ff89cb123/859760520774.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Into It. over It. & Hikes Present: Reciprocity - EP",
+          "playParams": { "id": "l.3msZwko", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-04-01",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.8EN5ggh",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.8EN5ggh",
+        "attributes": {
+          "artistName": "Japanese Breakfast",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/93/8b/8b/938b8b5d-1022-414f-995e-a25608fc68c3/17251.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-03T20:44:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Jubilee",
+          "playParams": { "id": "l.8EN5ggh", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-06-04",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.7oUMvvf",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.7oUMvvf",
+        "attributes": {
+          "artistName": "Stromae",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/8b/a2/e5/8ba2e544-09d4-02af-f51f-590799f6bd22/21UM1IM55175.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-11-02T23:02:46Z",
+          "genreNames": ["French Pop"],
+          "name": "L’enfer - Single",
+          "playParams": { "id": "l.7oUMvvf", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-01-09",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.hEjVGz1",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.hEjVGz1",
+        "attributes": {
+          "artistName": "Hesse Kassel",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/ef/e4/6d/efe46d14-4dbf-2120-f1f0-585c65566964/7300343754299.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-02-01T23:28:47Z",
+          "genreNames": ["Prog-Rock/Art Rock"],
+          "name": "La Brea",
+          "playParams": { "id": "l.hEjVGz1", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-03-01",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.SBs8Z9p",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.SBs8Z9p",
+        "attributes": {
+          "artistName": "Mitski",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/8f/4b/40/8f4b4044-d02b-dc25-7d01-7d9d225fdce4/40240.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-24T09:18:43Z",
+          "genreNames": ["Alternative"],
+          "name": "The Land Is Inhospitable and So Are We",
+          "playParams": { "id": "l.SBs8Z9p", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-07-31",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.fc51yIB",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.fc51yIB",
+        "attributes": {
+          "artistName": "Pomme",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music113/v4/43/11/7e/43117e41-00f3-1110-1725-8782fb8d4081/19UMGIM64976.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-21T16:36:38Z",
+          "genreNames": ["French Pop"],
+          "name": "Les failles",
+          "playParams": { "id": "l.fc51yIB", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-11-01",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.ZsndNZy",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.ZsndNZy",
+        "attributes": {
+          "artistName": "Clipse, Pusha T & Malice",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/70/a6/9a/70a69aeb-3bcf-968b-de75-f3cb44a89e1b/1605.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-11-22T23:08:11Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Let God Sort Em Out",
+          "playParams": { "id": "l.ZsndNZy", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-07-11",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.4lmLOIg",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.4lmLOIg",
+        "attributes": {
+          "artistName": "planet girl & Ryce",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/d9/f7/a8/d9f7a856-feb4-fc3d-d066-e4aa5442b9b5/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Pop"],
+          "name": "Let's Stay the Same? - Single",
+          "playParams": { "id": "l.4lmLOIg", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-08-26",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.NFI7I6",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.NFI7I6",
+        "attributes": {
+          "artistName": "Black Country, New Road",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/08/2a/c4/082ac441-1acf-c22d-94fb-410703aa5668/5054429172508.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:53Z",
+          "genreNames": ["Alternative"],
+          "name": "Live at Bush Hall",
+          "playParams": { "id": "l.NFI7I6", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-03-24",
+          "trackCount": 9
+        }
+      },
+      {
+        "id": "l.psVeNH1",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.psVeNH1",
+        "attributes": {
+          "artistName": "Car Seat Headrest",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music4/v4/87/05/1c/87051cb7-93ac-c09a-1bbe-d2bb3c7f8ab2/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-02-06T13:03:51Z",
+          "genreNames": ["Alternative"],
+          "name": "Living While Starving - EP",
+          "playParams": { "id": "l.psVeNH1", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2013-10-27",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.HJNjXGa",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.HJNjXGa",
+        "attributes": {
+          "artistName": "Still Woozy",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/69/14/9b/69149b95-ee6a-b612-1724-5443f31354d5/24UMGIM53785.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Loveseat",
+          "playParams": { "id": "l.HJNjXGa", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-04-19",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.iHYuJN",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.iHYuJN",
+        "attributes": {
+          "artistName": "Ichiko Aoba",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/84/a7/d6/84a7d65d-3b19-b329-b876-6c3e1dd44aca/5063176060181_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-03T20:39:51Z",
+          "genreNames": ["Alternative"],
+          "name": "Luminescent Creatures",
+          "playParams": { "id": "l.iHYuJN", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-02-14",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.ugzsrRu",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.ugzsrRu",
+        "attributes": {
+          "artistName": "ROSALÍA",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/95/ae/80/95ae8046-a6b9-e493-0def-5ae33d63f43a/196873722672.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-27T21:24:16Z",
+          "genreNames": ["Rock y Alternativo"],
+          "name": "LUX",
+          "playParams": { "id": "l.ugzsrRu", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-11-06",
+          "trackCount": 15
+        }
+      },
+      {
+        "id": "l.vobtXT6",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.vobtXT6",
+        "attributes": {
+          "artistName": "Teethe",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/67/46/c5/6746c538-2a24-9247-38a5-0dc9307b16ba/53286.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-02-05T09:56:25Z",
+          "genreNames": ["Alternative"],
+          "name": "Magic Of The Sale",
+          "playParams": { "id": "l.vobtXT6", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-08-08",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.aXRyKC1",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.aXRyKC1",
+        "attributes": {
+          "artistName": "Father John Misty",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/e5/b9/94/e5b994a7-fc83-0c5e-89db-ba03e1681a92/098787166668.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-03T20:38:33Z",
+          "genreNames": ["Alternative"],
+          "name": "Mahashmashana",
+          "playParams": { "id": "l.aXRyKC1", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-11-22",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.p8Mj7ni",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.p8Mj7ni",
+        "attributes": {
+          "artistName": "Laufey",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/de/5b/8e/de5b8ece-134b-1dcb-e785-52005810f134/199350548420.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-21T23:14:29Z",
+          "genreNames": ["Pop"],
+          "name": "A Matter of Time",
+          "playParams": { "id": "l.p8Mj7ni", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-08-22",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.Psu83yz",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.Psu83yz",
+        "attributes": {
+          "artistName": "Not for Radio",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/2d/ea/c4/2deac43a-245e-72c3-bad7-5c30a429028c/075679601292.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-12T13:29:59Z",
+          "genreNames": ["Alternative"],
+          "name": "Melt",
+          "playParams": { "id": "l.Psu83yz", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-10-10",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.dJ4DMwm",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.dJ4DMwm",
+        "attributes": {
+          "artistName": "Wallace Cleaver",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/09/c1/23/09c1236d-3384-773b-b333-39c9279938f2/196871966641.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-11-09T22:31:13Z",
+          "genreNames": ["Rap"],
+          "name": "merci",
+          "playParams": { "id": "l.dJ4DMwm", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-06-28",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.PH8BV1w",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.PH8BV1w",
+        "attributes": {
+          "artistName": "Armand Hammer & The Alchemist",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/47/06/47/470647e7-15c9-6a74-b61b-7fc6f1f12313/5063778675431_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-01-26T20:41:32Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Mercy",
+          "playParams": { "id": "l.PH8BV1w", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-11-07",
+          "trackCount": 14
+        }
+      },
+      {
+        "id": "l.5xdYKik",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.5xdYKik",
+        "attributes": {
+          "artistName": "LAUSSE THE CAT",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/93/c6/47/93c647ab-f5e8-3d94-e04b-d1f309efa583/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-01-01T16:26:38Z",
+          "genreNames": ["Alternative"],
+          "name": "The Mocking Stars",
+          "playParams": { "id": "l.5xdYKik", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-11-06",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.mbtdSL3",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.mbtdSL3",
+        "attributes": {
+          "artistName": "Death Grips",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/ff/3e/d8/ff3ed801-2487-d7ca-2efb-363cfbea3361/886443403192.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T21:58:17Z",
+          "genreNames": ["Alternative"],
+          "name": "The Money Store",
+          "playParams": { "id": "l.mbtdSL3", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2012-04-20",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.CYrAGFr",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.CYrAGFr",
+        "attributes": {
+          "artistName": "Frank Ocean",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/42/62/50/426250f9-7e39-f907-687c-442caa436636/dj.nhptxziz.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T18:47:24Z",
+          "genreNames": ["Pop"],
+          "name": "Moon River - Single",
+          "playParams": { "id": "l.CYrAGFr", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-02-14",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.9Grp9kC",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.9Grp9kC",
+        "attributes": {
+          "artistName": "Radiohead",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/b7/f2/5d/b7f25d91-4320-47c8-146a-6f84d5bc7e78/cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-04T14:17:00Z",
+          "genreNames": ["Alternative"],
+          "name": "A Moon Shaped Pool",
+          "playParams": { "id": "l.9Grp9kC", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2016-05-03",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.IdrjZdp",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.IdrjZdp",
+        "attributes": {
+          "artistName": "Kendrick Lamar",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/f6/65/b5/f665b52b-8d6d-b94d-cc2c-db826e35304e/22UMGIM52376.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:13Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Mr. Morale & The Big Steppers",
+          "playParams": { "id": "l.IdrjZdp", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-05-13",
+          "trackCount": 2
+        }
+      },
+      {
+        "id": "l.BjPuhJi",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.BjPuhJi",
+        "attributes": {
+          "artistName": "By Storm & Injury Reserve",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/07/8f/21/078f2133-1c3c-aeed-a08f-74f535d7e3e4/193436454834_MGGGCoverIRL.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-01-30T19:54:40Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "My Ghosts Go Ghost",
+          "playParams": { "id": "l.BjPuhJi", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2026-01-30",
+          "trackCount": 9
+        }
+      },
+      {
+        "id": "l.QuLrWNt",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.QuLrWNt",
+        "attributes": {
+          "artistName": "Dry Cleaning",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/97/88/77/978877e3-628d-3b5a-4108-e8112e3df12e/191400025479.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-09-24T20:59:07Z",
+          "genreNames": ["Alternative"],
+          "name": "New Long Leg",
+          "playParams": { "id": "l.QuLrWNt", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-04-02",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.lq6OG1q",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.lq6OG1q",
+        "attributes": {
+          "artistName": "Geordie Greep",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/80/a4/d6/80a4d66f-b8ca-ce9b-b3ad-63fe44a19704/191402049978.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:53Z",
+          "genreNames": ["Alternative"],
+          "name": "The New Sound",
+          "playParams": { "id": "l.lq6OG1q", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-10-04",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.MTfrA98",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.MTfrA98",
+        "attributes": {
+          "artistName": "toe",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/4f/42/c6/4f42c6a3-03a0-4748-31a8-2e3555d776a9/4580789644702.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Rock"],
+          "name": "NOW I SEE THE LIGHT",
+          "playParams": { "id": "l.MTfrA98", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-07-10",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.HPZgn6m",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.HPZgn6m",
+        "attributes": {
+          "artistName": "Xiu Xiu",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/b8/65/28/b865287c-d7a2-ac07-b5a1-308220b16ee8/644110042699.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-05T23:33:15Z",
+          "genreNames": ["Alternative"],
+          "name": "Oh No",
+          "playParams": { "id": "l.HPZgn6m", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-03-26",
+          "trackCount": 15
+        }
+      },
+      {
+        "id": "l.PXzfuXq",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.PXzfuXq",
+        "attributes": {
+          "artistName": "Radiohead",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/07/60/ba/0760ba0f-148c-b18f-d0ff-169ee96f3af5/634904078164.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:53Z",
+          "genreNames": ["Alternative"],
+          "name": "OK Computer",
+          "playParams": { "id": "l.PXzfuXq", "isLibrary": true, "kind": "album" },
+          "releaseDate": "1997-05-21",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.ucIn8a4",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.ucIn8a4",
+        "attributes": {
+          "artistName": "Vampire Weekend",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/f9/9f/ed/f99fed7a-3b13-3531-3db6-fac34e1d1c7c/196871790307.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-24T16:53:11Z",
+          "genreNames": ["Alternative"],
+          "name": "Only God Was Above Us",
+          "playParams": { "id": "l.ucIn8a4", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-04-05",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.UZptWd6",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.UZptWd6",
+        "attributes": {
+          "artistName": "King Krule",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music116/v4/62/e2/ca/62e2ca0c-98c7-880e-7cfd-778e597f8c00/191404087251.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-09-28T22:12:04Z",
+          "genreNames": ["Alternative"],
+          "name": "The OOZ",
+          "playParams": { "id": "l.UZptWd6", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2017-10-13",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.SivToO8",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.SivToO8",
+        "attributes": {
+          "artistName": "Uboa",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music123/v4/80/1a/e9/801ae9ae-25b0-4d21-4769-5a14adc09026/5059137229049_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-22T16:05:31Z",
+          "genreNames": ["Alternative"],
+          "name": "The Origin of My Depression",
+          "playParams": { "id": "l.SivToO8", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-02-14",
+          "trackCount": 7
+        }
+      },
+      {
+        "id": "l.KAENcb2",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.KAENcb2",
+        "attributes": {
+          "artistName": "Maruja",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/5c/7f/dc/5c7fdc93-2d8a-f43d-1fcb-5fb5ac7af479/196873074993.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-09-11T23:13:00Z",
+          "genreNames": ["Rock"],
+          "name": "Pain to Power",
+          "playParams": { "id": "l.KAENcb2", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-09-12",
+          "trackCount": 8
+        }
+      },
+      {
+        "id": "l.QMFfKP8",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.QMFfKP8",
+        "attributes": {
+          "artistName": "Horsegirl",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/47/a4/47/47a4476a-6884-642c-ef94-8de52645467d/191401210072.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-03T20:40:21Z",
+          "genreNames": ["Alternative"],
+          "name": "Phonetics On and On",
+          "playParams": { "id": "l.QMFfKP8", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-02-14",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.Y3zjyJc",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.Y3zjyJc",
+        "attributes": {
+          "artistName": "Model/Actriz",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/64/99/ca/6499ca0c-ee3a-ee12-735a-2308cd177865/198704347542_Cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-09-28T22:24:11Z",
+          "genreNames": ["Alternative"],
+          "name": "Pirouette",
+          "playParams": { "id": "l.Y3zjyJc", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-05-02",
+          "trackCount": 11
+        }
+      },
+      {
+        "id": "l.BZWqMj4",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.BZWqMj4",
+        "attributes": {
+          "artistName": "Nando García",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/86/31/21/863121de-eb5e-1bd2-0286-d4cd8f0dd0f6/8445162458405.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-20T21:24:09Z",
+          "genreNames": ["Folk"],
+          "name": "Pirueta",
+          "playParams": { "id": "l.BZWqMj4", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-08-27",
+          "trackCount": 9
+        }
+      },
+      {
+        "id": "l.8o1yPxB",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.8o1yPxB",
+        "attributes": {
+          "artistName": "The Orchestra (For Now)",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/b4/f4/ec/b4f4ecdf-c617-42b4-5ce5-1141cb920234/750122163144_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-28T18:10:10Z",
+          "genreNames": ["Alternative"],
+          "name": "Plan 75 - EP",
+          "playParams": { "id": "l.8o1yPxB", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-03-28",
+          "trackCount": 4
+        }
+      },
+      {
+        "id": "l.ymNycm8",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.ymNycm8",
+        "attributes": {
+          "artistName": "Pool Kids",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music112/v4/61/2f/9b/612f9b92-e66e-17e8-5686-86bec0c3a648/195729340800_cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Indie Rock"],
+          "name": "Pool Kids",
+          "playParams": { "id": "l.ymNycm8", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-05-24",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.IwIqKw4",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.IwIqKw4",
+        "attributes": {
+          "artistName": "Ethel Cain",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/a7/ed/58/a7ed5868-e006-c8cb-5283-e138ea399701/5056167172390_1.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-02-22T21:58:32Z",
+          "genreNames": ["Alternative"],
+          "name": "Preacher’s Daughter",
+          "playParams": { "id": "l.IwIqKw4", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-05-12",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.2osFJho",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.2osFJho",
+        "attributes": {
+          "artistName": "Racing Mount Pleasant",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b9/2d/4b/b92d4b0b-d8d8-fdee-b14b-2a9de71e1b2d/198704605284_Cover.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-20T20:27:02Z",
+          "genreNames": ["Alternative"],
+          "name": "Racing Mount Pleasant",
+          "playParams": { "id": "l.2osFJho", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-07-11",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.LlkSF0u",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.LlkSF0u",
+        "attributes": {
+          "artistName": "LAUSSE THE CAT",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/5d/6a/8e/5d6a8ec1-67b6-98cf-eda2-a289d03ed7f8/800739796362.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-01-04T09:23:12Z",
+          "genreNames": ["Spoken Word"],
+          "name": "Redstripe Rhapsody - Single",
+          "playParams": { "id": "l.LlkSF0u", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-09-28",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.5evnifg",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.5evnifg",
+        "attributes": {
+          "artistName": "Polyphia",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/d1/7c/1d/d17c1d66-d31d-ac54-7db5-4ccb38526522/4050538873566.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-02T22:29:23Z",
+          "genreNames": ["Hard Rock"],
+          "name": "Remember That You Will Die",
+          "playParams": { "id": "l.5evnifg", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2022-08-18",
+          "trackCount": 12
+        }
+      },
+      {
+        "id": "l.Rkkny28",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.Rkkny28",
+        "attributes": {
+          "artistName": "rug",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/b7/20/00/b7200011-3d2b-2585-3db6-71efe2b67b72/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-02T17:38:26Z",
+          "genreNames": ["Rock"],
+          "name": "Revelry - EP",
+          "playParams": { "id": "l.Rkkny28", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-04-29",
+          "trackCount": 4
+        }
+      },
+      {
+        "id": "l.uWkc7dy",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.uWkc7dy",
+        "attributes": {
+          "artistName": "Jane Remover",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/18/cf/f6/18cff6df-c7b6-0ca1-8067-83743f6c1f8a/193436418720_coverGriffinMcMahon.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-05T17:27:23Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Revengeseekerz",
+          "playParams": { "id": "l.uWkc7dy", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-04-04",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.W5A1Bfx",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.W5A1Bfx",
+        "attributes": {
+          "artistName": "Bon Iver",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/44/95/21/449521a9-3e07-9a15-02be-d1412884e240/51719.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2026-01-18T20:08:24Z",
+          "genreNames": ["Alternative"],
+          "name": "SABLE, fABLE",
+          "playParams": { "id": "l.W5A1Bfx", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-10-18",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.2BurPK3",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.2BurPK3",
+        "attributes": {
+          "artistName": "black midi",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/74/14/eb/7414eb0c-80d0-d30e-4f4f-4a7462ccafda/191402007350.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T16:53:29Z",
+          "genreNames": ["Alternative"],
+          "name": "Schlagenheim",
+          "playParams": { "id": "l.2BurPK3", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2019-06-21",
+          "trackCount": 9
+        }
+      },
+      {
+        "id": "l.aeW1lWa",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.aeW1lWa",
+        "attributes": {
+          "artistName": "sean",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/29/cd/db/29cddb2d-bc68-d508-eedf-144648e303dd/196871423526.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:26Z",
+          "genreNames": ["Hip-Hop"],
+          "name": "Se laver de ses péchés - Single",
+          "playParams": { "id": "l.aeW1lWa", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2023-09-13",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.aRNU1Hr",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.aRNU1Hr",
+        "attributes": {
+          "artistName": "Seashine",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/e4/28/6a/e4286a63-68b4-a228-29ee-92922855b43e/artwork.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-12-29T21:30:25Z",
+          "genreNames": ["Alternative"],
+          "name": "Seashine",
+          "playParams": { "id": "l.aRNU1Hr", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-03-21",
+          "trackCount": 7
+        }
+      },
+      {
+        "id": "l.pf2vET",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.pf2vET",
+        "attributes": {
+          "artistName": "Mahmood & Angèle",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/bc/cf/14/bccf14af-73e3-b6ab-0491-6fefdd8c4643/24UMGIM28152.rgb.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:20Z",
+          "genreNames": ["Pop"],
+          "name": "SEMPRE / JAMAIS - Single",
+          "playParams": { "id": "l.pf2vET", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-02-16",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.ipsWodu",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.ipsWodu",
+        "attributes": {
+          "artistName": "Simón Campusano & Diego Lorenzini",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/0b/3d/be/0b3dbe6b-6c3f-5ed8-75cc-dafc110b2b95/8447053283523.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-10-20T22:38:11Z",
+          "genreNames": ["Alternative Folk"],
+          "name": "Serotonina - Single",
+          "playParams": { "id": "l.ipsWodu", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-09-23",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.h70XdAr",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.h70XdAr",
+        "attributes": {
+          "artistName": "Lingua Ignota",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/29/48/3e/29483edd-65b6-4f82-e67c-c0c9186550e1/114007.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-28T19:24:35Z",
+          "genreNames": ["Hard Rock"],
+          "name": "SINNER GET READY",
+          "playParams": { "id": "l.h70XdAr", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2021-08-06",
+          "trackCount": 9
+        }
+      },
+      {
+        "id": "l.9G142Ot",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.9G142Ot",
+        "attributes": {
+          "artistName": "MINOVA",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music221/v4/a6/32/e7/a632e7eb-c57b-484c-2b47-0b910ad07618/442445.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Stranger - Single",
+          "playParams": { "id": "l.9G142Ot", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2024-11-01",
+          "trackCount": 1
+        }
+      },
+      {
+        "id": "l.9pbL5B",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.9pbL5B",
+        "attributes": {
+          "artistName": "Field Medic",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/2d/68/ab/2d68abcc-6975-4034-8da6-e423bf99dc3b/8721215441090.png/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-09T17:14:04Z",
+          "genreNames": ["Alternative"],
+          "name": "Surrender Instead",
+          "playParams": { "id": "l.9pbL5B", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2025-08-08",
+          "trackCount": 10
+        }
+      },
+      {
+        "id": "l.K1Vb24d",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.K1Vb24d",
+        "attributes": {
+          "artistName": "Mac Miller",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/e3/38/b5/e338b529-da3f-b4b9-b8f9-1fae428e7a23/093624905899.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-01T15:59:54Z",
+          "genreNames": ["Hip-Hop/Rap"],
+          "name": "Swimming",
+          "playParams": { "id": "l.K1Vb24d", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2018-08-03",
+          "trackCount": 13
+        }
+      },
+      {
+        "id": "l.FBJhXrf",
+        "type": "library-albums",
+        "href": "/v1/me/library/albums/l.FBJhXrf",
+        "attributes": {
+          "artistName": "COVET",
+          "artwork": {
+            "hasP3": false,
+            "height": 1200,
+            "url": "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/d8/6a/62/d86a62e0-53e5-9847-83d8-78ac0e808443/646920324163.jpg/{w}x{h}bb.jpg",
+            "width": 1200
+          },
+          "dateAdded": "2025-08-02T22:30:20Z",
+          "genreNames": ["Rock"],
+          "name": "technicolor",
+          "playParams": { "id": "l.FBJhXrf", "isLibrary": true, "kind": "album" },
+          "releaseDate": "2020-06-05",
+          "trackCount": 10
+        }
+      }
+    ],
+    "meta": { "total": 113 }
+  }
+}

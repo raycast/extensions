@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cider-control",
+  "title": "Cider Control",
+  "description": "Search and control Cider playback from Raycast",
+  "icon": "logo.png",
+  "author": "luis_14",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Music",
+      "description": "Search Apple Music and play via Cider",
+      "mode": "view"
+    },
+    {
+      "name": "play-pause",
+      "title": "Toggle Play/Pause",
+      "description": "Continues playing music",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-track",
+      "title": "Go to the Next Track",
+      "description": "Goes to the next track in the queue",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous-track",
+      "title": "Go to the Previous Track",
+      "description": "Goes to the previous track in the queue",
+      "mode": "no-view"
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "description": "Lets you change see the song queue and change if you want",
+      "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Search Your Library",
+      "description": "Lets you play an album from your library",
+      "mode": "view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "See info about the music that you're listening to right now",
+      "mode": "view"
+    },
+    {
+      "name": "volume",
+      "title": "Set Volume to",
+      "description": "Demonstrates usage of arguments",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "volume",
+          "placeholder": "%",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "title": "Cider API Token",
+      "description": "Your API Token from Cider Settings -> Connectivity",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter token..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
