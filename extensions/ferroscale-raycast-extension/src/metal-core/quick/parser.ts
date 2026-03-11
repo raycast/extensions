@@ -576,7 +576,7 @@ function parseManualGeometry(
     );
   }
 
-  let values = numbers as number[];
+  const values = numbers as number[];
   const dimensions: Partial<Record<DimensionKey, number>> = {};
   let lengthValue = 0;
 

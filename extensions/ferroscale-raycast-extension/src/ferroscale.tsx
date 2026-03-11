@@ -303,7 +303,10 @@ function DimSearchResults({
         <List.Item
           title="No profiles found"
           subtitle={`No standard size matches ${dimLabel}`}
-          icon={{ source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText }}
+          icon={{
+            source: Icon.MagnifyingGlass,
+            tintColor: Color.SecondaryText,
+          }}
         />
       </List.Section>
     );
@@ -341,7 +344,7 @@ function DimSearchResults({
                   actions={
                     <ActionPanel>
                       <Action
-                        title="Calculate (6 m Default)"
+                        title="Calculate (6 M Default)"
                         icon={Icon.Calculator}
                         onAction={() => onCalculate(calcQuery)}
                       />
@@ -378,10 +381,7 @@ export default function Command() {
   const trimmedQuery = query.trim();
 
   // Detect dimension search mode
-  const dims = useMemo(
-    () => parseDimSearchQuery(trimmedQuery),
-    [trimmedQuery],
-  );
+  const dims = useMemo(() => parseDimSearchQuery(trimmedQuery), [trimmedQuery]);
 
   const dimMatches = useMemo(
     () => (dims !== null ? searchByDimension(dims) : []),
@@ -516,17 +516,17 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Search 40 mm Profiles"
+                    title="Search 40 Mm Profiles"
                     icon={Icon.MagnifyingGlass}
                     onAction={() => setQuery("?40")}
                   />
                   <Action
-                    title="Search 100 mm Profiles"
+                    title="Search 100 Mm Profiles"
                     icon={Icon.MagnifyingGlass}
                     onAction={() => setQuery("?100")}
                   />
                   <Action
-                    title="Search 200 mm Profiles"
+                    title="Search 200 Mm Profiles"
                     icon={Icon.MagnifyingGlass}
                     onAction={() => setQuery("?200")}
                   />
@@ -729,11 +729,11 @@ export default function Command() {
                   <ActionPanel>
                     <Action.CopyToClipboard
                       content={`${response.result.unitWeightKg.toFixed(3)} kg`}
-                      title="Copy Single Weight (kg)"
+                      title="Copy Single Weight (Kg)"
                     />
                     <Action.CopyToClipboard
                       content={`${(response.result.unitWeightKg * KG_TO_LBS).toFixed(3)} lbs`}
-                      title="Copy Single Weight (lbs)"
+                      title="Copy Single Weight (Lbs)"
                     />
                     <ExtraCopyActions result={response.result} />
                     <AliasQuickReferenceActions />
@@ -750,16 +750,16 @@ export default function Command() {
                   <ActionPanel>
                     <Action.CopyToClipboard
                       content={`${response.result.totalWeightKg.toFixed(3)} kg`}
-                      title="Copy Total Weight (kg)"
+                      title="Copy Total Weight (Kg)"
                     />
                     <Action.CopyToClipboard
                       content={`${(response.result.totalWeightKg * KG_TO_LBS).toFixed(3)} lbs`}
-                      title="Copy Total Weight (lbs)"
+                      title="Copy Total Weight (Lbs)"
                     />
                     {formatTonnes(response.result.totalWeightKg) ? (
                       <Action.CopyToClipboard
                         content={formatTonnes(response.result.totalWeightKg)}
-                        title="Copy Total Weight (t)"
+                        title="Copy Total Weight (T)"
                       />
                     ) : null}
                     <ExtraCopyActions result={response.result} />
@@ -779,16 +779,16 @@ export default function Command() {
                 <ActionPanel>
                   <Action.CopyToClipboard
                     content={`${response.result.unitWeightKg.toFixed(3)} kg`}
-                    title="Copy Weight (kg)"
+                    title="Copy Weight (Kg)"
                   />
                   <Action.CopyToClipboard
                     content={`${(response.result.unitWeightKg * KG_TO_LBS).toFixed(3)} lbs`}
-                    title="Copy Weight (lbs)"
+                    title="Copy Weight (Lbs)"
                   />
                   {formatTonnes(response.result.unitWeightKg) ? (
                     <Action.CopyToClipboard
                       content={formatTonnes(response.result.unitWeightKg)}
-                      title="Copy Weight (t)"
+                      title="Copy Weight (T)"
                     />
                   ) : null}
                   <ExtraCopyActions result={response.result} />

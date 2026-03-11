@@ -74,7 +74,7 @@ function GradeDetail({
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
               content={String(grade.densityKgPerM3)}
-              title="Copy Density (kg/m³)"
+              title="Copy Density (Kg/m³)"
               icon={Icon.Gauge}
             />
             <Action.CopyToClipboard
@@ -84,7 +84,7 @@ function GradeDetail({
             />
             <Action.CopyToClipboard
               content={`mat=${grade.id}`}
-              title="Copy mat= Flag"
+              title="Copy Mat= Flag"
               icon={Icon.Tag}
             />
             <Action.CopyToClipboard
@@ -109,7 +109,13 @@ const GRADE_SHORTCUTS: Record<string, string[]> = {
   "steel-s355jr": ["mat=s355", "mat=s355jr"],
   "steel-s420m": ["mat=s420", "mat=s420m"],
   "steel-s460m": ["mat=s460", "mat=s460m"],
-  "stainless-304": ["mat=304", "mat=aisi304", "mat=14301", "mat=stainless", "mat=inox"],
+  "stainless-304": [
+    "mat=304",
+    "mat=aisi304",
+    "mat=14301",
+    "mat=stainless",
+    "mat=inox",
+  ],
   "stainless-316": ["mat=316", "mat=aisi316", "mat=14401"],
   "stainless-316l": ["mat=316l", "mat=aisi316l", "mat=14404"],
   "stainless-duplex-2205": ["mat=duplex", "mat=2205", "mat=14462"],
@@ -185,12 +191,12 @@ function GradeItem({
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
               content={String(grade.densityKgPerM3)}
-              title="Copy Density (kg/m³)"
+              title="Copy Density (Kg/m³)"
               icon={Icon.Gauge}
             />
             <Action.CopyToClipboard
               content={`mat=${grade.id}`}
-              title="Copy mat= Flag"
+              title="Copy Mat= Flag"
               icon={Icon.Tag}
             />
             <Action.CopyToClipboard
@@ -200,36 +206,12 @@ function GradeItem({
             />
             <Action.CopyToClipboard
               content={`dens=${grade.densityKgPerM3}`}
-              title="Copy dens= Flag"
+              title="Copy Dens= Flag"
               icon={Icon.Gauge}
             />
           </ActionPanel.Section>
         </ActionPanel>
       }
-    />
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Family section header detail                                       */
-/* ------------------------------------------------------------------ */
-
-function FamilySummaryItem({ family }: { family: MetalFamily }) {
-  const grades = MATERIAL_GRADES.filter((g) => g.familyId === family.id);
-  const densities = grades.map((g) => g.densityKgPerM3);
-  const minD = Math.min(...densities);
-  const maxD = Math.max(...densities);
-  const rangeText =
-    minD === maxD
-      ? `${minD.toLocaleString()} kg/m³`
-      : `${minD.toLocaleString()} – ${maxD.toLocaleString()} kg/m³`;
-
-  return (
-    <List.Item
-      title={`${family.label} overview`}
-      subtitle={`${grades.length} grade${grades.length !== 1 ? "s" : ""}  ·  density range: ${rangeText}`}
-      icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
-      accessories={[{ text: family.referenceLabel }]}
     />
   );
 }

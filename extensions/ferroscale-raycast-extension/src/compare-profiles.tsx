@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Color,
   Detail,
   Form,
   Icon,
@@ -59,7 +58,11 @@ function buildMarkdown(
     ],
     ["Length", `${a.lengthMm.toFixed(0)} mm`, `${b.lengthMm.toFixed(0)} mm`],
     ["Quantity", String(a.quantity), String(b.quantity)],
-    ["Linear density", `${a.linearDensityKgPerM.toFixed(3)} kg/m`, `${b.linearDensityKgPerM.toFixed(3)} kg/m`],
+    [
+      "Linear density",
+      `${a.linearDensityKgPerM.toFixed(3)} kg/m`,
+      `${b.linearDensityKgPerM.toFixed(3)} kg/m`,
+    ],
     ["Unit weight", fmtKgLbs(a.unitWeightKg), fmtKgLbs(b.unitWeightKg)],
     ["Total weight", fmtKgLbs(a.totalWeightKg), fmtKgLbs(b.totalWeightKg)],
     ["Total (tonnes)", fmtTonnes(a.totalWeightKg), fmtTonnes(b.totalWeightKg)],
@@ -71,9 +74,7 @@ function buildMarkdown(
   const deltaKg = b.totalWeightKg - a.totalWeightKg;
   const deltaSign = deltaKg > 0 ? "+" : "";
   const deltaPct =
-    a.totalWeightKg > 0
-      ? ((deltaKg / a.totalWeightKg) * 100).toFixed(1)
-      : "—";
+    a.totalWeightKg > 0 ? ((deltaKg / a.totalWeightKg) * 100).toFixed(1) : "—";
 
   const tableHeader = `| | **A** | **B** |\n|:---|:---|:---|\n`;
   const tableRows = rows
@@ -175,7 +176,7 @@ function ComparisonDetail({
             />
             <Action.CopyToClipboard
               content={`${resultA.totalWeightKg.toFixed(3)} kg`}
-              title="Copy A Total Weight"
+              title="Copy a Total Weight"
             />
             <Action.CopyToClipboard
               content={`${resultB.totalWeightKg.toFixed(3)} kg`}

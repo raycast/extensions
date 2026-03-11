@@ -8,7 +8,6 @@ import {
   Icon,
   List,
   LocalStorage,
-  useNavigation,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import type { QuickWeightResult } from "@ferroscale/metal-core/quick";
@@ -210,18 +209,18 @@ function EntryDetail({
             />
             <Action.CopyToClipboard
               content={`${r.totalWeightKg.toFixed(3)} kg`}
-              title="Copy Total Weight (kg)"
+              title="Copy Total Weight (Kg)"
               icon={Icon.Download}
             />
             <Action.CopyToClipboard
               content={`${(r.totalWeightKg * KG_TO_LBS).toFixed(3)} lbs`}
-              title="Copy Total Weight (lbs)"
+              title="Copy Total Weight (Lbs)"
               icon={Icon.Download}
             />
             {formatTonnes(r.totalWeightKg) ? (
               <Action.CopyToClipboard
                 content={formatTonnes(r.totalWeightKg)}
-                title="Copy Total Weight (t)"
+                title="Copy Total Weight (T)"
                 icon={Icon.Download}
               />
             ) : null}
@@ -277,7 +276,6 @@ function EntryDetail({
 /* ------------------------------------------------------------------ */
 
 export function CalculationHistoryView() {
-  const { push } = useNavigation();
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -404,7 +402,7 @@ export function CalculationHistoryView() {
                   />
                   <Action.CopyToClipboard
                     content={`${r.totalWeightKg.toFixed(3)} kg`}
-                    title="Copy Total Weight (kg)"
+                    title="Copy Total Weight (Kg)"
                     icon={Icon.Download}
                   />
                   {r.linearDensityKgPerM != null && (

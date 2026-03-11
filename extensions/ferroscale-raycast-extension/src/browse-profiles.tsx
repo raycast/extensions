@@ -11,7 +11,10 @@ import { PROFILE_CATEGORY_LABELS } from "./metal-core/datasets/types";
 /*  Category display config                                            */
 /* ------------------------------------------------------------------ */
 
-const CATEGORY_ICONS: Record<ProfileCategory, { source: Icon; tintColor: Color }> = {
+const CATEGORY_ICONS: Record<
+  ProfileCategory,
+  { source: Icon; tintColor: Color }
+> = {
   bars: { source: Icon.Minus, tintColor: Color.Orange },
   tubes: { source: Icon.Circle, tintColor: Color.Blue },
   plates_sheets: { source: Icon.AppWindowGrid2x2, tintColor: Color.Red },
@@ -30,9 +33,7 @@ function StandardProfileDetail({
   const rows = profile.sizes
     .map((size) => {
       const perimeter =
-        size.perimeterMm != null
-          ? `${size.perimeterMm} mm`
-          : "—";
+        size.perimeterMm != null ? `${size.perimeterMm} mm` : "—";
       return `| ${size.label} | ${size.areaMm2.toLocaleString()} | ${perimeter} | ${size.referenceLabel} |`;
     })
     .join("\n");
@@ -211,7 +212,10 @@ const CATEGORY_ORDER: ProfileCategory[] = [
 
 export function BrowseProfilesView() {
   const byCategory = CATEGORY_ORDER.reduce<
-    Record<ProfileCategory, (ManualProfileDefinition | StandardProfileDefinition)[]>
+    Record<
+      ProfileCategory,
+      (ManualProfileDefinition | StandardProfileDefinition)[]
+    >
   >(
     (acc, cat) => {
       acc[cat] = PROFILE_DEFINITIONS.filter((p) => p.category === cat);
