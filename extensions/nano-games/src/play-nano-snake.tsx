@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { gridToBraille } from "./lib/braille-renderer";
@@ -33,8 +33,6 @@ export default function Command() {
           });
         }
         revalidate();
-        open("raycast://extensions/raycast/raycast/confetti?emojis=💀☠️🦴");
-        await showHUD(`💀☠️🦴 GAME OVER 💀☠️🦴`);
       };
       handleGameOver();
     }
