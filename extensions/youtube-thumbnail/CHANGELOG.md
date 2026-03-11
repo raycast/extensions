@@ -1,6 +1,6 @@
 # YouTube Thumbnail Grabber Changelog
 
-## [1.1.0] - 2026-02-23
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Added
 
