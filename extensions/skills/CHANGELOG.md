@@ -1,6 +1,6 @@
 # Changelog
 
-## [Security Audits Data] - {PR_MERGE_DATE}
+## [Security Audits Data] - 2026-03-11
 
 - Parse security audit data from skills.sh and show their status in the skill's details
 - Warn before installing skills with failed security audits
