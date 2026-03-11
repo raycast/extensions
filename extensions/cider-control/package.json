@@ -57,8 +57,7 @@
     },
     {
       "name": "volume",
-      "title": "Set Volume to",
-      "description": "Demonstrates usage of arguments",
+      "description": "Set the playback volume in Cider",
       "mode": "no-view",
       "arguments": [
         {
