@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "golinks",
+  "title": "GoLinks",
+  "description": "Search and create GoLinks on your Tailscale tailnet",
+  "icon": "command-icon.png",
+  "author": "will_bunting",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list",
+      "title": "Search GoLinks",
+      "subtitle": "GoLinks",
+      "description": "Search your GoLinks",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create GoLink",
+      "subtitle": "GoLinks",
+      "description": "Create a new GoLink",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "prettier -w src/**",
+    "lint": "eslint src/**"
+  },
+  "preferences": [
+    {
+      "name": "hostname",
+      "type": "textfield",
+      "required": false,
+      "title": "Hostname",
+      "description": "Hostname of your GoLinks service (default: go)",
+      "placeholder": "go"
+    }
+  ]
+}
