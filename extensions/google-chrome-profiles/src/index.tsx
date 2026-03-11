@@ -60,9 +60,14 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
             icon={Icon.Window}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
-              await openGoogleChrome(profile, ChromeAction.Focus, async () => {
-                await showHUD("Bringing to front...");
-              }, browser);
+              await openGoogleChrome(
+                profile,
+                ChromeAction.Focus,
+                async () => {
+                  await showHUD("Bringing to front...");
+                },
+                browser,
+              );
             }}
           />
         </ActionPanel>
@@ -259,7 +264,9 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
           <List.Item
             title="Bring to Front"
             icon={Icon.Window}
-            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} browser={props.browser} />}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} browser={props.browser} />
+            }
           />
           {newTabItems.map((tab, index) => (
             <List.Item
@@ -275,7 +282,9 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               title={clipboardItem.title}
               subtitle={clipboardItem.subtitle}
               icon={clipboardItem.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={clipboardItem.target} browser={props.browser} />}
+              actions={
+                <ActionPanelForTarget profile={props.profile} target={clipboardItem.target} browser={props.browser} />
+              }
             />
           )}
         </List.Section>
@@ -301,7 +310,13 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               title={b.title}
               subtitle={b.subtitle}
               icon={getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })}
-              actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.openUrl(b.url)} browser={props.browser} />}
+              actions={
+                <ActionPanelForTarget
+                  profile={props.profile}
+                  target={ChromeAction.openUrl(b.url)}
+                  browser={props.browser}
+                />
+              }
             />
           ))}
         </List.Section>
@@ -344,9 +359,14 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
         title={`Open in ${props.browser.name}`}
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profile, props.target, async () => {
-            await showHUD(hudMessage);
-          }, props.browser);
+          openGoogleChrome(
+            props.profile,
+            props.target,
+            async () => {
+              await showHUD(hudMessage);
+            },
+            props.browser,
+          );
         }}
       />
       <Action.CreateQuicklink title={quicklinkTitle} quicklink={{ name: quicklinkName, link: deeplink }} />

@@ -33,9 +33,14 @@ export default async function Command(props: LaunchProps) {
       : `${profileName} > Opening ${target.url}`;
 
   const profile: Profile = { directory: profileDirectory, name: profileName };
-  await openGoogleChrome(profile, target, async () => {
-    await showHUD(processName);
-  }, browser);
+  await openGoogleChrome(
+    profile,
+    target,
+    async () => {
+      await showHUD(processName);
+    },
+    browser,
+  );
 
   return null;
 }
