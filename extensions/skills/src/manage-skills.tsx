@@ -33,6 +33,7 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
+  // Global count — "Update All" applies to all agents regardless of filter
   const updatableCount = skills.filter((s) => s.hasUpdate).length;
 
   return (
