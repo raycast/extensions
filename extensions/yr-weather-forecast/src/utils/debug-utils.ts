@@ -1,14 +1,10 @@
-import { getPreferenceValues } from "@raycast/api";
-
-type DebugPreferences = {
-  debugMode?: boolean;
-};
+import { getAppPreferences } from "../preferences";
 
 // Evaluated once at module load. Raycast extensions are short-lived processes,
 // so a preference change takes effect on the next launch — which is acceptable.
 const DEBUG_ENABLED = (() => {
   try {
-    return getPreferenceValues<DebugPreferences>().debugMode === true;
+    return getAppPreferences().debugMode === true;
   } catch {
     return false;
   }

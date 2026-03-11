@@ -46,7 +46,7 @@ export class LocationUtils {
         {targetDate && (
           <>
             <Action.Push
-              title="View Tomorrow's Weather"
+              title={`View ${targetDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })} Weather`}
               icon={Icon.Clock}
               target={
                 <LazyForecastView

@@ -1,15 +1,15 @@
-import { getPreferenceValues } from "@raycast/api";
 import { convertTemperature, convertSpeed, convertPrecipitation } from "./config/weather-config";
+import { getAppPreferences } from "./preferences";
 
 export type Units = "metric" | "imperial";
 
 export function getUnits(): Units {
-  const prefs = getPreferenceValues<{ units?: Units }>();
+  const prefs = getAppPreferences();
   return (prefs.units as Units) ?? "metric";
 }
 
 export function getFeatureFlags(): { showWindDirection: boolean; showSunTimes: boolean } {
-  const prefs = getPreferenceValues<{ showWindDirection?: boolean; showSunTimes?: boolean }>();
+  const prefs = getAppPreferences();
   return {
     showWindDirection: prefs.showWindDirection ?? true,
     showSunTimes: prefs.showSunTimes ?? true,
