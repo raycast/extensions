@@ -13,7 +13,7 @@ export async function getFinderSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
 }
 
 export async function getHoudahSpotSelection(): Promise<string[]> {
@@ -26,7 +26,7 @@ export async function getHoudahSpotSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
 }
 
 export async function getNeoFinderSelection(): Promise<string[]> {
@@ -39,7 +39,7 @@ export async function getNeoFinderSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
 }
 
 export async function getPathFinderSelection(): Promise<string[]> {
@@ -52,7 +52,7 @@ export async function getPathFinderSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
 }
 
 export async function getQSpaceSelection(): Promise<string[]> {
@@ -65,7 +65,7 @@ export async function getQSpaceSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
 }
 
 export async function getForkLiftSelection(): Promise<string[]> {
@@ -78,5 +78,5 @@ export async function getForkLiftSelection(): Promise<string[]> {
   if (Array.isArray(result)) {
     return result;
   }
-  return result.split(",").map((x) => x.trim());
+  return result.split(", /").map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
 }
