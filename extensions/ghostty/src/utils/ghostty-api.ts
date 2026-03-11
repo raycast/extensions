@@ -30,13 +30,18 @@ export async function openWorkspace(target: WorkspaceLaunchTarget) {
       directory,
       layout: target.layout,
     });
-    await moveMouseToFirstPanelCenter();
 
     toast.style = Toast.Style.Success;
     toast.title = result === "focused-existing" ? `Focused ${target.title}` : `Opened ${target.title}`;
     toast.message = toTildePath(directory);
 
     await closeMainWindow();
+
+    try {
+      await moveMouseToFirstPanelCenter();
+    } catch {
+      // Workspace opening succeeded; mouse positioning is best-effort only.
+    }
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = `Couldn't open ${target.title}`;

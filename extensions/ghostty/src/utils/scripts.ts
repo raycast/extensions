@@ -8,9 +8,10 @@
 
 /** Open a new Ghostty window using the native `new window` command */
 export const openGhosttyWindow = `
+set wasRunning to application "Ghostty" is running
 tell application "Ghostty"
     activate
-    if (count of windows) is greater than 0 then
+    if wasRunning then
         set newWin to new window
         activate window newWin
     end if

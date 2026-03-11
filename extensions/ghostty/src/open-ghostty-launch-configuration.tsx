@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Form, List, useNavigation, Detail, confirmAlert, Alert } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  List,
+  useNavigation,
+  Detail,
+  confirmAlert,
+  Alert,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
 
 import { openWorkspace } from "./utils/ghostty-api";
@@ -92,6 +103,11 @@ async function runLaunchConfiguration(item: StoredLaunchConfig) {
     }
   } catch (error) {
     console.error("Failed to parse or execute launch configuration:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Couldn't run ${item.name}`,
+      message: error instanceof Error ? error.message : String(error),
+    });
   }
 }
 

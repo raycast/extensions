@@ -161,11 +161,7 @@ async function runLaunchConfigWithRepo(stored: StoredLaunchConfig, repo: ChildDi
 }
 
 function getPreferences() {
-  const prefs = getPreferenceValues<{
-    workspaceParentDirectory?: string;
-    workspaceScanDepth?: string;
-    editorApplication?: { path?: string; bundleId?: string; name?: string } | string;
-  }>();
+  const prefs = getPreferenceValues<Preferences.OpenGhosttyWorkspace>();
 
   const maxDepth = Number.parseInt(String(prefs.workspaceScanDepth ?? "3"), 10);
   const rawDir = prefs.workspaceParentDirectory?.trim();
