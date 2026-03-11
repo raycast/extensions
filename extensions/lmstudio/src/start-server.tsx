@@ -31,7 +31,7 @@ async function loadModel(model: string): Promise<void> {
   await execAsync(`${LMS} load "${model}" --yes`);
 }
 
-export default function Command(props: { arguments: Arguments.StartServer & { model: string } }) {
+export default function Command(props: { arguments: Arguments.StartServer }) {
   const { model } = props.arguments;
   const [status, setStatus] = useState<Status>("loading");
   const [message, setMessage] = useState("Checking LM Studio server...");
