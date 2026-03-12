@@ -1,6 +1,6 @@
 # Floaty Changelog
 
-## [Updated README] - {PR_MERGE_DATE}
+## [Updated README] - 2026-03-12
 
 - Updated README documentation for the Floaty extension
 
