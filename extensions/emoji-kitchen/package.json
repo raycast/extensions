@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "emoji-kitchen",
+  "title": "Emoji Kitchen",
+  "description": "Browse and copy Google Emoji Kitchen mashups.",
+  "icon": "icon.png",
+  "author": "corey_o_neal",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "emoji",
+    "kitchen",
+    "google",
+    "mashup",
+    "sticker",
+    "raycast-extension"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Emoji Kitchen",
+      "description": "Search for emojis and see their mashups.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you want to publish your extension to the Raycast Store instead, please add raycast-extension to your keywords in package.json and run \\`npx @raycast/api@latest publish\\`.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,16 @@
+# Node.js
+node_modules
+dist
+.DS_Store
+
+# Raycast
+.raycast
+raycast-env.d.ts
+
+# Large Metadata
+metadata.json
+processed_data.json
+reprocess.py
+split.py
+regroup.py
+mockup.png
