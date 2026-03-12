@@ -7,14 +7,13 @@ export const DEFAULT_METADATA_PLACEHOLDER = "Not available";
 export const UNKNOWN_DATE_PLACEHOLDER = DEFAULT_METADATA_PLACEHOLDER;
 export const INVALID_DATE_PREFIX = "0001-01-01";
 const TAG_COLORS: Color.ColorLike[] = [
-  "#B22222",
-  "#4B0082",
-  "#006400",
-  "#8B4513",
-  "#4682B4",
-  "#800080",
-  "#FF8C00",
-  "#2F4F4F",
+  Color.Red,
+  Color.Purple,
+  Color.Green,
+  Color.Orange,
+  Color.Blue,
+  Color.Magenta,
+  Color.Yellow,
 ];
 
 export function getArticleUrl(article: Article): string {
