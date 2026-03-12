@@ -1,5 +1,5 @@
 # Focus Changelog
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-03-12
 - Fixed an issue where Focus app icon would appear in the Dock when running commands.
 - Improved profile list loading to use caching, so profiles appear instantly on repeat opens.
 - Fixed a bug where stopping a break with a profile would send the unbreak command twice.
