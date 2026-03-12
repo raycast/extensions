@@ -1,6 +1,6 @@
 # Image Modification Changelog
 
-## [1.11.3 - File Path Comma Fixes] - {PR_MERGE_DATE}
+## [1.11.3 - File Path Comma Fixes] - 2026-03-12
 
 - Fixed file selection breaking when filenames contain commas
 - Improved path delimiter handling in clipboard image parsing and temporary file tracking
