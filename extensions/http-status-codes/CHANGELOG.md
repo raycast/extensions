@@ -1,6 +1,6 @@
 # HTTP Status Codes Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-03-12
 
 - Add support for Windows
 - Add additional extension categories
