@@ -121,9 +121,13 @@ export async function getPersonTerms(
 ): Promise<Term[]> {
   const url = `${BASE_URL}/CedarInfo/Json/GetTerms?id=${id}&past=5&future=2&summer=true`;
   const res = await fetch(url, { headers: makeHeaders(cookie) });
-  if (!res.ok) return [];
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
+  if (!res.ok || !res.headers.get("content-type")?.includes("json")) return [];
+  try {
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
 export async function getPersonInfo(
@@ -133,9 +137,13 @@ export async function getPersonInfo(
 ): Promise<PersonInfo | null> {
   const url = `${BASE_URL}/CedarInfo/Info/Json?id=${id}&term=${term}`;
   const res = await fetch(url, { headers: makeHeaders(cookie) });
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data as PersonInfo;
+  if (!res.ok || !res.headers.get("content-type")?.includes("json")) return null;
+  try {
+    const data = await res.json();
+    return data as PersonInfo;
+  } catch {
+    return null;
+  }
 }
 
 export async function searchDirectory(
