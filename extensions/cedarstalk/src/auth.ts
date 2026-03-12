@@ -35,8 +35,9 @@ export async function clearCookie(): Promise<void> {
 // grants it proper window-server access. Cookie is returned through a temp file.
 export async function launchAuthBrowser(signInUrl: string): Promise<string> {
   const binaryPath = await ensureBinary();
-  const appBundle = await ensureAppBundle(binaryPath);
-  const cookieFile = path.join(os.tmpdir(), "cedarstalk-cookie.txt");
+  const sessionId = Date.now().toString(36);
+  const appBundle = await ensureAppBundle(binaryPath, sessionId);
+  const cookieFile = path.join(os.tmpdir(), `cedarstalk-cookie-${sessionId}.txt`);
 
   await unlink(cookieFile).catch(() => {});
 
@@ -61,6 +62,8 @@ export async function launchAuthBrowser(signInUrl: string): Promise<string> {
     .then((s) => s.trim())
     .catch(() => "");
   await unlink(cookieFile).catch(() => {});
+  // Clean up the ephemeral app bundle
+  await execAsync(`rm -rf "${appBundle}"`).catch(() => {});
 
   if (!cookie) throw new Error("Sign-in cancelled");
   return cookie;
@@ -93,8 +96,8 @@ async function ensureBinary(): Promise<string> {
   }
 }
 
-async function ensureAppBundle(binaryPath: string): Promise<string> {
-  const appDir = path.join(os.tmpdir(), "CedarStalkAuth.app");
+async function ensureAppBundle(binaryPath: string, sessionId: string): Promise<string> {
+  const appDir = path.join(os.tmpdir(), `CedarStalkAuth-${sessionId}.app`);
   const macosDir = path.join(appDir, "Contents", "MacOS");
   const plistPath = path.join(appDir, "Contents", "Info.plist");
   const bundledBinary = path.join(macosDir, "CedarStalkAuth");
