@@ -39,24 +39,24 @@ export async function copyImageToClipboard(url: string, name: string) {
     style: Toast.Style.Animated,
   });
 
+  let tempFile: string | undefined;
   try {
-    const tempFile = await downloadImage(url, name);
+    tempFile = await downloadImage(url, name);
     await Clipboard.copy({ file: tempFile });
-
-    // Small delay to ensure the clipboard system has registered the file reference
-    // before we delete the physical file from the temp directory.
-    setTimeout(() => {
-      if (fs.existsSync(tempFile)) {
-        fs.unlinkSync(tempFile);
-      }
-    }, 1000);
-
     await showHUD("Image copied to clipboard");
     toast.hide();
   } catch (error) {
     toast.title = "Failed to copy image";
     toast.message = String(error);
     toast.style = Toast.Style.Failure;
+  } finally {
+    if (tempFile && fs.existsSync(tempFile)) {
+      try {
+        fs.unlinkSync(tempFile);
+      } catch (e) {
+        console.error("Failed to delete temp file", e);
+      }
+    }
   }
 }
 

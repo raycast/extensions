@@ -165,17 +165,18 @@ export default function Command() {
   const handleRandomize = () => {
     if (!index) return;
     const keys = Object.keys(index);
-    let randomKey1 = "";
-    let emoji1Combs: Combinations = {};
-    let combKeys: string[] = [];
+    let randomKey1: string;
+    let emoji1Combs: Combinations;
+    let combKeys: string[];
 
-    // Iterative search for a valid combination with a retry limit to avoid stack overflow
-    for (let i = 0; i < 20; i++) {
+    // Retry until we find an emoji with at least one combination
+    let attempts = 0;
+    do {
       randomKey1 = keys[Math.floor(Math.random() * keys.length)];
       emoji1Combs = loadCombinations(randomKey1);
       combKeys = Object.keys(emoji1Combs);
-      if (combKeys.length > 0) break;
-    }
+      attempts++;
+    } while (combKeys.length === 0 && attempts < 20);
 
     if (combKeys.length === 0) {
       showToast({
