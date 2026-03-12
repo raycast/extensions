@@ -4,7 +4,7 @@
 
 - Add support for Windows
 - Add additional extension categories
-- Replace `.eslintrc.json` with `eslint.config.js`
+- Update dependencies and replace `.eslintrc.json` with `eslint.config.js`
 
 ## [Update & New Additions] - 2024-05-17
 

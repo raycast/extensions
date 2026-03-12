@@ -8,12 +8,5 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
-/.idea/.gitignore
-/.idea/codeStyles/codeStyleConfig.xml
-/.idea/http-status-codes.iml
-/.idea/jsLibraryMappings.xml
-/.idea/misc.xml
-/.idea/modules.xml
-/.idea/prettier.xml
-/.idea/inspectionProfiles/Project_Default.xml
-/.idea/vcs.xml
+.idea
+*.iml
