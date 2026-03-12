@@ -18,6 +18,7 @@ import {
   loadEmojiVectors,
   getQueryVector,
   cosineSimilarity,
+  formatEmojiName,
 } from "./utils";
 import { ResultView } from "./components/ResultView";
 import { MashupGrid } from "./components/MashupGrid";
@@ -240,7 +241,7 @@ export default function Command() {
             <Grid.Item
               key={item.unicode}
               content={item.e}
-              title={item.a}
+              title={formatEmojiName(item.a)}
               actions={
                 <ActionPanel>
                   <Action
@@ -272,10 +273,9 @@ export default function Command() {
               <Grid.Item
                 key={item.unicode}
                 content={item.e}
-                title={item.a}
+                title={formatEmojiName(item.a)}
                 keywords={item.k}
-                actions={
-                  <ActionPanel>
+                actions={                  <ActionPanel>
                     <Action
                       title={mode === "combine" ? "Combine" : "Explore"}
                       onAction={() => handleSelectEmoji(item)}

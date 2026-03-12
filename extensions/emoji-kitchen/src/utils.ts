@@ -115,6 +115,13 @@ export function cosineSimilarity(
   return dot;
 }
 
+export function formatEmojiName(name: string): string {
+  return name
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export function loadCombinations(unicode: string): Combinations {
   try {
     const prefix = unicode.slice(0, 2);
