@@ -6,8 +6,8 @@ import { Clipboard, Icon, showToast, Toast } from "@raycast/api";
  * Get the display icon for an entity, prioritizing emoji over favicon.
  * Falls back to Icon.Globe when neither is set.
  */
-export function getEntityIcon(entity: Enhet): Image.ImageLike {
-  return entity.emoji || entity.faviconUrl || Icon.Globe;
+export function getEntityIcon(entity: Enhet, searchFaviconUrl?: Image.ImageLike): Image.ImageLike {
+  return entity.emoji || entity.faviconUrl || searchFaviconUrl || Icon.Globe;
 }
 
 /**
@@ -29,6 +29,28 @@ export function getFavoriteEntity(entity: Enhet, favoriteById: Map<string, Enhet
  */
 export function getBregUrl(organisasjonsnummer: string): string {
   return `https://virksomhet.brreg.no/oppslag/enheter/${organisasjonsnummer}`;
+}
+
+/**
+ * Normalize website URL from BRREG fields for consistent usage.
+ */
+export function normalizeWebsiteUrl(rawWebsite?: string): string | undefined {
+  if (!rawWebsite) return undefined;
+
+  let website = rawWebsite.trim();
+  website = website.replace(/^[^\w]+|[^\w./-]+$/g, "");
+  if (!website) return undefined;
+
+  if (!website.startsWith("http://") && !website.startsWith("https://")) {
+    website = `https://${website}`;
+  }
+
+  try {
+    new URL(website);
+    return website;
+  } catch {
+    return undefined;
+  }
 }
 
 /**

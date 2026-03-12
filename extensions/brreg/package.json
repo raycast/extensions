@@ -20,20 +20,6 @@
       "title": "Brreg Search",
       "description": "Search for Norwegian companies by name or organisation number",
       "mode": "view"
-    },
-    {
-      "name": "copy-vat-number",
-      "title": "Copy Vat Number",
-      "description": "Copy Norwegian VAT number (NO {orgnr} MVA) for a company by organization number",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "organizationNumber",
-          "placeholder": "Organization Number",
-          "type": "text",
-          "required": true
-        }
-      ]
     }
   ],
   "dependencies": {

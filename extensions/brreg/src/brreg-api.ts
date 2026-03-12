@@ -1,6 +1,6 @@
 import { Company, Enhet } from "./types";
 import type { FinancialYear } from "./types";
-import { getBregUrl, getVatRegistrationStatus } from "./utils/entity";
+import { getBregUrl, getVatRegistrationStatus, normalizeWebsiteUrl } from "./utils/entity";
 import { USER_AGENT } from "./constants";
 import { toNumber, formatCurrency } from "./utils/format";
 import { TTLCache } from "./utils/ttl-cache";
@@ -59,20 +59,7 @@ export function createCompanyFromBrregEntity(entity: BrregEntity): Company {
 
   const phone = entity.telefon || "";
   const email = entity.epost || "";
-  let website = entity.hjemmeside || "";
-
-  if (website) {
-    website = website.trim();
-    website = website.replace(/^[^\w]+|[^\w./-]+$/g, "");
-    if (!website.startsWith("http://") && !website.startsWith("https://")) {
-      website = `https://${website}`;
-    }
-    try {
-      new URL(website);
-    } catch {
-      website = "";
-    }
-  }
+  const website = normalizeWebsiteUrl(entity.hjemmeside);
 
   const cleanOrgNumber = organizationNumber.replace(/\s+/g, "").trim();
   const bregUrl = cleanOrgNumber
@@ -91,7 +78,7 @@ export function createCompanyFromBrregEntity(entity: BrregEntity): Company {
     municipalityNumber: entity.forretningsadresse?.kommunenummer,
     phone: phone || undefined,
     email: email || undefined,
-    website: website || undefined,
+    website,
     industry: industry || undefined,
     naceCode,
     employees: employees || undefined,
@@ -170,7 +157,10 @@ export async function searchEntities(query: string): Promise<Enhet[]> {
     throw new Error(`Search failed with status ${response.status}`);
   }
   const data = (await response.json()) as { _embedded?: { enheter?: Enhet[] } };
-  const results = data._embedded?.enheter || [];
+  const results = (data._embedded?.enheter || []).map((entity) => ({
+    ...entity,
+    website: normalizeWebsiteUrl(entity.website ?? entity.hjemmeside),
+  }));
   searchCache.set(trimmed, results);
   return results;
 }

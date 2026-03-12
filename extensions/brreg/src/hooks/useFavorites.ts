@@ -111,7 +111,7 @@ export function useFavorites() {
 
   // Favorites management functions
   const addFavorite = async (entity: Enhet) => {
-    if (favoriteIds.has(entity.organisasjonsnummer)) return;
+    if (favoriteIds.has(entity.organisasjonsnummer)) return undefined;
 
     // Use website already on the entity (e.g. from detail view) to avoid a redundant API fetch.
     // Fall back to fetching company details only when website is unknown.
@@ -126,9 +126,11 @@ export function useFavorites() {
     }
 
     const faviconUrl = website ? getFavicon(website) : undefined;
-    const next = [{ ...entity, website, faviconUrl }, ...favoritesList];
+    const enrichedEntity = { ...entity, website, faviconUrl };
+    const next = [enrichedEntity, ...favoritesList];
     setFavorites(next);
     showToast({ style: Toast.Style.Success, title: "Added to Favorites", message: entity.navn });
+    return enrichedEntity;
   };
 
   const removeFavorite = (entity: Enhet) => {

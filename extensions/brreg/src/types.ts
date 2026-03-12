@@ -46,6 +46,11 @@ export interface Enhet {
   organisasjonsnummer: string;
   navn: string;
   /**
+   * Raw website field from BRREG search responses.
+   * Internal code should prefer `website` (normalized URL).
+   */
+  hjemmeside?: string;
+  /**
    * VAT registration flags as returned by BRREG Enhetsregisteret.
    * Either field may be present depending on endpoint/version.
    */

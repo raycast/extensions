@@ -1,5 +1,5 @@
 import { List, ActionPanel, Action } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { useEffect } from "react";
 import CompanyDetailsView from "./components/CompanyDetailsView";
 import FavoritesList from "./components/FavoritesList";
 import SearchResults from "./components/SearchResults";
@@ -9,7 +9,9 @@ import { useFavorites } from "./hooks/useFavorites";
 import { useSearch } from "./hooks/useSearch";
 import { useCompanyView } from "./hooks/useCompanyView";
 import { useSettings } from "./hooks/useSettings";
+import { useSearchFavicons } from "./hooks/useSearchFavicons";
 import { UI_TEXT } from "./constants";
+import type { Enhet } from "./types";
 
 export default function SearchAndCopyCommand() {
   const favoritesResult = useFavorites();
@@ -39,6 +41,17 @@ export default function SearchAndCopyCommand() {
     showMoveIndicators,
   } = favoritesResult;
 
+  const { getSearchFavicon, upsertFromFavorite, upsertFromDetails } = useSearchFavicons(entities, favoriteById);
+
+  useEffect(() => {
+    upsertFromDetails(currentCompany);
+  }, [currentCompany, upsertFromDetails]);
+
+  const handleAddFavorite = async (entity: Enhet) => {
+    const added = await addFavorite(entity);
+    upsertFromFavorite(added ?? entity);
+  };
+
   if (isCompanyViewOpen && currentCompany) {
     const orgNumber = currentCompany.organizationNumber;
     const isFav = favoriteIds.has(orgNumber);
@@ -49,7 +62,6 @@ export default function SearchAndCopyCommand() {
         ? { adresse: [currentCompany.address], postnummer: currentCompany.postalCode, poststed: currentCompany.city }
         : undefined,
       website: currentCompany.website,
-      faviconUrl: currentCompany.website ? getFavicon(currentCompany.website) : undefined,
     });
 
     return (
@@ -58,7 +70,7 @@ export default function SearchAndCopyCommand() {
         isLoading={isLoadingDetails}
         onBack={closeCompanyView}
         isFavorite={isFav}
-        onAddFavorite={() => addFavorite(toEnhet())}
+        onAddFavorite={() => handleAddFavorite(toEnhet())}
         onRemoveFavorite={() => removeFavorite(toEnhet())}
       />
     );
@@ -91,8 +103,9 @@ export default function SearchAndCopyCommand() {
           entities={entities}
           favoriteIds={favoriteIds}
           favoriteById={favoriteById}
+          getSearchFavicon={getSearchFavicon}
           onViewDetails={handleViewDetails}
-          onAddFavorite={addFavorite}
+          onAddFavorite={handleAddFavorite}
           onRemoveFavorite={removeFavorite}
           onUpdateEmoji={updateFavoriteEmoji}
           onResetToFavicon={resetFavoriteToFavicon}

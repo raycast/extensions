@@ -8,6 +8,8 @@ Search Norwegian companies from the Central Coordinating Register for Legal Enti
 
 Search for Norwegian companies directly from Raycast. View company details, financial information, and locations. Save favourites for quick access. All data comes from the official [Brønnøysund Register Centre (Brreg)](https://www.brreg.no) API.
 
+The extension intentionally ships as a single command: `Brreg Search`.
+
 ## Quick Start
 
 Type a company name or 9-digit organisation number in the search bar.
@@ -22,6 +24,7 @@ Type a company name or 9-digit organisation number in the search bar.
 
 - **Name search**: Type any part of a company name. Results update as you type (debounced for performance).
 - **Organisation number**: Must be exactly 9 digits. Incomplete numbers won't trigger a search.
+- **Favicon loading**: Search view hydrates favicons for the top 3 hits only, using an in-memory session cache to reduce churn.
 
 ## Favourites
 

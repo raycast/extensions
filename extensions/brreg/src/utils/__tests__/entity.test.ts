@@ -4,6 +4,7 @@ import {
   isFavorite,
   getFavoriteEntity,
   getBregUrl,
+  normalizeWebsiteUrl,
   canMoveUp,
   canMoveDown,
   getMoveIndicators,
@@ -33,6 +34,39 @@ describe("getEntityIcon", () => {
 
   it("returns Icon.Globe fallback when neither set", () => {
     expect(getEntityIcon(makeEnhet())).toBe(Icon.Globe);
+  });
+
+  it("uses search favicon fallback before Icon.Globe", () => {
+    const searchFavicon = "https://example.com/favicon.ico";
+    expect(getEntityIcon(makeEnhet(), searchFavicon)).toBe(searchFavicon);
+  });
+
+  it("prioritizes entity favicon over search favicon", () => {
+    expect(
+      getEntityIcon(
+        makeEnhet({ faviconUrl: "https://entity.example/favicon.ico" }),
+        "https://search.example/favicon.ico",
+      ),
+    ).toBe("https://entity.example/favicon.ico");
+  });
+});
+
+describe("normalizeWebsiteUrl", () => {
+  it("returns undefined when empty", () => {
+    expect(normalizeWebsiteUrl("")).toBeUndefined();
+    expect(normalizeWebsiteUrl(undefined)).toBeUndefined();
+  });
+
+  it("adds https scheme when missing", () => {
+    expect(normalizeWebsiteUrl("example.com")).toBe("https://example.com");
+  });
+
+  it("keeps existing scheme", () => {
+    expect(normalizeWebsiteUrl("https://example.com")).toBe("https://example.com");
+  });
+
+  it("returns undefined for malformed input", () => {
+    expect(normalizeWebsiteUrl("not a url !!")).toBeUndefined();
   });
 });
 

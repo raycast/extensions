@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { createCompanyFromBrregEntity, BrregEntity } from "../brreg-api";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createCompanyFromBrregEntity, BrregEntity, searchEntities } from "../brreg-api";
 
 const base: BrregEntity = {
   navn: "Acme AS",
@@ -84,5 +84,37 @@ describe("createCompanyFromBrregEntity", () => {
   it("returns undefined employees when not present", () => {
     const company = createCompanyFromBrregEntity(base);
     expect(company.employees).toBeUndefined();
+  });
+});
+
+describe("searchEntities", () => {
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+  });
+
+  it("normalizes hjemmeside to website in search results", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        _embedded: {
+          enheter: [
+            {
+              organisasjonsnummer: "123456789",
+              navn: "Acme AS",
+              hjemmeside: "example.com",
+            },
+          ],
+        },
+      }),
+    }) as unknown as typeof fetch;
+
+    const results = await searchEntities("acme");
+    expect(results[0].website).toBe("https://example.com");
   });
 });
