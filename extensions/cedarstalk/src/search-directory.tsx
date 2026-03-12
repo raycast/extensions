@@ -26,6 +26,7 @@ import {
 } from "./api";
 import {
   clearCookie,
+  drainPendingCookie,
   getStoredCookie,
   launchAuthBrowser,
   storeCookie,
@@ -33,10 +34,12 @@ import {
 import { getCacheSize, mergePeopleIntoCache, searchCache } from "./cache";
 import { getCachedPhotoPath } from "./images";
 
+const SIGN_IN_URL = "https://selfservice.cedarville.edu/cedarinfo/directory";
+
 type AuthState =
   | { kind: "loading" }
   | { kind: "ready"; cookie: string }
-  | { kind: "sign-in"; signInUrl: string }
+  | { kind: "sign-in" }
   | { kind: "signing-in" };
 
 const CLASS_LABELS: Record<string, string> = {
@@ -575,7 +578,18 @@ export default function SearchDirectory() {
 
   useEffect(() => {
     (async () => {
-      const cookie = await getStoredCookie();
+      let cookie = await getStoredCookie();
+
+      // Raycast may have closed mid-auth while the Swift browser was still
+      // running. If it finished and wrote the cookie file, pick it up now.
+      if (!cookie) {
+        const pending = await drainPendingCookie();
+        if (pending) {
+          await storeCookie(pending);
+          cookie = pending;
+        }
+      }
+
       if (cookie) {
         setAuthState({ kind: "ready", cookie });
         setCacheSize(await getCacheSize());
@@ -583,21 +597,7 @@ export default function SearchDirectory() {
         getPopulations(cookie).then(setPopulations);
         return;
       }
-      try {
-        await searchDirectory("probe", "probe");
-        setAuthState({
-          kind: "sign-in",
-          signInUrl: "https://selfservice.cedarville.edu/cedarinfo/directory",
-        });
-      } catch (err) {
-        setAuthState({
-          kind: "sign-in",
-          signInUrl:
-            err instanceof AuthRequiredError
-              ? err.signInUrl
-              : "https://selfservice.cedarville.edu/cedarinfo/directory",
-        });
-      }
+      setAuthState({ kind: "sign-in" });
     })();
   }, []);
 
@@ -671,7 +671,7 @@ export default function SearchDirectory() {
         if (controller.signal.aborted) return;
         if (err instanceof AuthRequiredError) {
           await clearCookie();
-          setAuthState({ kind: "sign-in", signInUrl: err.signInUrl });
+          setAuthState({ kind: "sign-in" });
         } else {
           await showToast({
             style: Toast.Style.Failure,
@@ -705,24 +705,12 @@ export default function SearchDirectory() {
   async function handleSignOut() {
     await clearCookie();
     setResults([]);
-    try {
-      await searchDirectory("probe", "probe");
-      setAuthState({
-        kind: "sign-in",
-        signInUrl: "https://selfservice.cedarville.edu/cedarinfo/directory",
-      });
-    } catch (err) {
-      setAuthState({
-        kind: "sign-in",
-        signInUrl:
-          err instanceof AuthRequiredError
-            ? err.signInUrl
-            : "https://selfservice.cedarville.edu/cedarinfo/directory",
-      });
-    }
+    // Always use the base URL — let the server issue a fresh SAML redirect
+    // when the browser opens, rather than using a potentially stale one.
+    setAuthState({ kind: "sign-in" });
   }
 
-  async function handleSignIn(signInUrl: string) {
+  async function handleSignIn() {
     setAuthState({ kind: "signing-in" });
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -730,7 +718,7 @@ export default function SearchDirectory() {
       message: "Complete login in the window that opens",
     });
     try {
-      const cookie = await launchAuthBrowser(signInUrl);
+      const cookie = await launchAuthBrowser(SIGN_IN_URL);
       await storeCookie(cookie);
       toast.style = Toast.Style.Success;
       toast.title = "Signed in!";
@@ -741,7 +729,7 @@ export default function SearchDirectory() {
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = String(err);
-      setAuthState({ kind: "sign-in", signInUrl });
+      setAuthState({ kind: "sign-in" });
     }
   }
 
@@ -761,7 +749,7 @@ export default function SearchDirectory() {
               <Action
                 title="Sign In"
                 icon={Icon.Person}
-                onAction={() => handleSignIn(authState.signInUrl)}
+                onAction={handleSignIn}
               />
             </ActionPanel>
           }
