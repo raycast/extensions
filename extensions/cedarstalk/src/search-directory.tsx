@@ -123,6 +123,65 @@ function formatTime(t: string): string {
   return `${hour > 12 ? hour - 12 : hour || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
 }
 
+const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAY_ABBR: Record<string, string> = {
+  Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th",
+  Friday: "F", Saturday: "Sa", Sunday: "Su",
+};
+const TYPE_LABEL: Record<string, string> = {
+  Lecture: "",
+  Laboratory: "Lab",
+  "Instructional Laboratory": "Lab",
+  "Participation Course": "Participation",
+};
+
+function buildScheduleText(items: ScheduleItem[], demo: boolean): string {
+  // Collapse repeated per-day entries into one slot per unique time+type
+  const slotMap = new Map<string, { item: ScheduleItem; days: string[] }>();
+  for (const item of items) {
+    const key = `${item.title}|${item.startTime}|${item.endTime}|${item.type}`;
+    if (!slotMap.has(key)) slotMap.set(key, { item, days: [] });
+    slotMap.get(key)!.days.push(item.day);
+  }
+
+  // Group slots by course title so lecture + lab appear under one heading
+  const courseMap = new Map<string, { item: ScheduleItem; days: string[] }[]>();
+  for (const slot of slotMap.values()) {
+    if (!courseMap.has(slot.item.title)) courseMap.set(slot.item.title, []);
+    courseMap.get(slot.item.title)!.push(slot);
+  }
+
+  // Sort courses by earliest day of week
+  const courses = [...courseMap.entries()].sort((a, b) => {
+    const earliest = (slots: { days: string[] }[]) =>
+      Math.min(...slots.flatMap((s) => s.days.map((d) => DAY_ORDER.indexOf(d))));
+    return earliest(a[1]) - earliest(b[1]);
+  });
+
+  return courses
+    .map(([courseTitle, slots]) => {
+      const course = demo ? "DEPT 000" : courseTitle;
+      const desc = demo ? "Course Name" : slots[0].item.description;
+
+      const sortedSlots = [...slots].sort((a, b) => {
+        const aFirst = Math.min(...a.days.map((d) => DAY_ORDER.indexOf(d)));
+        const bFirst = Math.min(...b.days.map((d) => DAY_ORDER.indexOf(d)));
+        return aFirst - bFirst || a.item.startTime.localeCompare(b.item.startTime);
+      });
+
+      const timeLines = sortedSlots.map(({ item, days }) => {
+        const sortedDays = [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+        const dayStr = sortedDays.map((d) => DAY_ABBR[d] ?? d).join("");
+        const timeStr = `${formatTime(item.startTime)}–${formatTime(item.endTime)}`;
+        const typeStr = TYPE_LABEL[item.type] ?? item.type;
+        return `- ${dayStr} ${timeStr}${typeStr ? ` *(${typeStr})*` : ""}`;
+      });
+
+      return `**${course}** — ${desc}\n${timeLines.join("\n")}`;
+    })
+    .join("\n\n");
+}
+
 function PersonDetail({
   person,
   photoPath,
@@ -207,13 +266,17 @@ function PersonDetail({
     ? info.faculty.term?.description
     : info?.student?.term?.description;
 
-  if (scheduleItems.length) {
-    md.push(`## Schedule${termDesc ? ` — ${termDesc}` : ""}`);
-    for (const item of scheduleItems) {
-      const title = demo ? "DEPT 000" : item.title;
-      const desc  = demo ? "Course Name" : item.description;
+  const nonScheduled = info?.student?.isStudent ? (info.student.nonScheduledCourses ?? []) : [];
+
+  if (scheduleItems.length || nonScheduled.length) {
+    md.push(`## Schedule${termDesc ? ` — ${termDesc}` : ""}\n`);
+    if (scheduleItems.length) md.push(buildScheduleText(scheduleItems, demo));
+    if (nonScheduled.length) {
+      md.push("**Online / Unscheduled**");
       md.push(
-        `**${title}** — ${desc}  \n${item.day} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`,
+        nonScheduled
+          .map((c) => `- ${demo ? "DEPT 000" : c.code} — ${demo ? "Course Name" : c.title} *(${c.methods})*`)
+          .join("\n"),
       );
     }
   }
@@ -286,7 +349,8 @@ function PersonDetail({
           )}
           {!!(person.DormName ||
             person.OfficeBuildingName ||
-            person.OfficePhone) && <Detail.Metadata.Separator />}
+            person.OfficePhone ||
+            info?.person?.box) && <Detail.Metadata.Separator />}
           {person.DormName && (
             <Detail.Metadata.Label
               title="Dorm"
@@ -297,6 +361,12 @@ function PersonDetail({
                     ? `${person.DormName}, Room ${person.DormRoom}`
                     : person.DormName
               }
+            />
+          )}
+          {info?.person?.box && (
+            <Detail.Metadata.Label
+              title="Box"
+              text={demo ? "#0000" : `#${info.person.box}`}
             />
           )}
           {person.OfficeBuildingCode && (

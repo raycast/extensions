@@ -78,6 +78,10 @@ export interface PersonInfo {
     concentrations: { code: string; desc: string }[];
     advisors: { advisor: { id: string; name: string; email: string }; advisement: { type: string } }[];
     term: { key: string | null; description: string | null };
+    nonScheduledCourses: { code: string; title: string; methods: string }[];
+  };
+  person: {
+    box: string | null;
   };
 }
 
