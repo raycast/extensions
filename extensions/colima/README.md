@@ -10,13 +10,13 @@ Manage [Colima](https://github.com/abiosoft/colima) virtual machine instances an
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| **List Colima Instances** | View, start, stop, delete, and create Colima VM instances |
-| **List Docker Containers** | View, start, stop, restart, and remove Docker containers |
-| **List Docker Images** | View and remove Docker images |
-| **Pull Docker Image** | Pull a Docker image from a registry |
-| **Run Docker Container** | Run a new container from an image with a structured form or raw command |
+| Command                    | Description                                                             |
+| -------------------------- | ----------------------------------------------------------------------- |
+| **List Colima Instances**  | View, start, stop, delete, and create Colima VM instances               |
+| **List Docker Containers** | View, start, stop, restart, and remove Docker containers                |
+| **List Docker Images**     | View and remove Docker images                                           |
+| **Pull Docker Image**      | Pull a Docker image from a registry                                     |
+| **Run Docker Container**   | Run a new container from an image with a structured form or raw command |
 
 ## Development
 

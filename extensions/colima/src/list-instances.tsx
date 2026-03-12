@@ -16,6 +16,7 @@ import { useColimaTemplateDefaults } from "./hooks/useColimaTemplateDefaults";
 import { useDependencyCheck } from "./hooks/useDependencyCheck";
 import { colimaStart, colimaStop, colimaDelete, colimaCreate } from "./utils/cli";
 import { ColimaCreateOptions } from "./utils/types";
+import { useState, useEffect } from "react";
 
 interface CreateInstanceFormProps {
   onCreated: () => void;
@@ -41,6 +42,27 @@ function getErrorMessage(error: unknown): string {
 
 function CreateInstanceForm({ onCreated }: CreateInstanceFormProps) {
   const { defaults, isLoading } = useColimaTemplateDefaults();
+  const [formValues, setFormValues] = useState<CreateInstanceFormValues>({
+    profile: "",
+    cpus: String(defaults.cpus),
+    memory: String(defaults.memory),
+    disk: String(defaults.disk),
+    runtime: defaults.runtime,
+    vmType: defaults.vmType,
+    kubernetes: defaults.kubernetes,
+  });
+
+  useEffect(() => {
+    setFormValues((prev) => ({
+      ...prev,
+      cpus: String(defaults.cpus),
+      memory: String(defaults.memory),
+      disk: String(defaults.disk),
+      runtime: defaults.runtime,
+      vmType: defaults.vmType,
+      kubernetes: defaults.kubernetes,
+    }));
+  }, [defaults.cpus, defaults.memory, defaults.disk, defaults.runtime, defaults.vmType, defaults.kubernetes]);
 
   async function handleSubmit(values: CreateInstanceFormValues) {
     const { profile, cpus, memory, disk, runtime, vmType, kubernetes } = values;
@@ -95,25 +117,41 @@ function CreateInstanceForm({ onCreated }: CreateInstanceFormProps) {
       }
     >
       <Form.TextField id="profile" title="Profile Name" placeholder="e.g. default, dev, test" />
-      <Form.TextField 
-        id="cpus" 
-        title="CPUs" 
-        defaultValue={String(defaults.cpus)} 
+      <Form.TextField
+        id="cpus"
+        title="CPUs"
+        value={formValues.cpus}
         placeholder="Number of CPUs"
-        error={values.cpus && isNaN(Number(values.cpus)) ? "Must be a number" : undefined}
+        onChange={(v) => setFormValues((s) => ({ ...s, cpus: v }))}
+        error={formValues.cpus && isNaN(Number(formValues.cpus)) ? "Must be a number" : undefined}
       />
-      />
-      <Form.Dropdown id="runtime" title="Runtime" defaultValue={defaults.runtime}>
+      <Form.Dropdown
+        id="runtime"
+        title="Runtime"
+        defaultValue={defaults.runtime}
+        onChange={(v) => setFormValues((s) => ({ ...s, runtime: v as CreateInstanceFormValues["runtime"] }))}
+      >
         <Form.Dropdown.Item value="docker" title="docker" />
         <Form.Dropdown.Item value="containerd" title="containerd" />
         <Form.Dropdown.Item value="incus" title="incus" />
       </Form.Dropdown>
-      <Form.Dropdown id="vmType" title="VM Type" defaultValue={defaults.vmType}>
+      <Form.Dropdown
+        id="vmType"
+        title="VM Type"
+        defaultValue={defaults.vmType}
+        onChange={(v) => setFormValues((s) => ({ ...s, vmType: v as CreateInstanceFormValues["vmType"] }))}
+      >
         <Form.Dropdown.Item value="qemu" title="qemu" />
         <Form.Dropdown.Item value="vz" title="vz" />
         <Form.Dropdown.Item value="krunkit" title="krunkit" />
       </Form.Dropdown>
-      <Form.Checkbox id="kubernetes" title="Kubernetes" label="Enable Kubernetes" defaultValue={defaults.kubernetes} />
+      <Form.Checkbox
+        id="kubernetes"
+        title="Kubernetes"
+        label="Enable Kubernetes"
+        defaultValue={defaults.kubernetes}
+        onChange={(v) => setFormValues((s) => ({ ...s, kubernetes: v }))}
+      />
       <Form.Description text="Note: Runtime, architecture, and VM type cannot be changed after creation." />
     </Form>
   );
