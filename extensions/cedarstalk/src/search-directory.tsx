@@ -324,39 +324,30 @@ function PersonDetail({
               text={demo ? "City, OH" : [person.AddressCity, person.AddressState].filter(Boolean).join(", ")}
             />
           )}
-          {info?.student?.isStudent && info.student.majors.length > 0 && (
-            <>
-              <Detail.Metadata.Separator />
-              {info.student.majors.map((m) => (
-                <Detail.Metadata.Label
-                  key={m.code}
-                  title="Major"
-                  text={m.description}
-                />
-              ))}
-              {info.student.minors.map((m) => (
-                <Detail.Metadata.Label
-                  key={m.code}
-                  title="Minor"
-                  text={m.description}
-                />
-              ))}
-              {info.student.concentrations.map((c) => (
-                <Detail.Metadata.Label
-                  key={c.code}
-                  title="Concentration"
-                  text={c.description}
-                />
-              ))}
-              {info.student.advisors.map((a) => (
-                <Detail.Metadata.Label
-                  key={a.id}
-                  title="Advisor"
-                  text={demo ? "Advisor Name" : a.name}
-                />
-              ))}
-            </>
-          )}
+          {info?.student?.isStudent && (() => {
+            const majors = info.student.majors.filter(m => m.desc?.trim());
+            const minors = info.student.minors.filter(m => m.desc?.trim());
+            const concentrations = info.student.concentrations.filter(c => c.desc?.trim());
+            const advisors = info.student.advisors.filter(a => a.advisor.name?.trim());
+            if (!majors.length && !minors.length && !concentrations.length && !advisors.length) return null;
+            return (
+              <>
+                <Detail.Metadata.Separator />
+                {majors.map((m) => (
+                  <Detail.Metadata.Label key={m.code} title="Major" text={m.desc} />
+                ))}
+                {minors.map((m) => (
+                  <Detail.Metadata.Label key={m.code} title="Minor" text={m.desc} />
+                ))}
+                {concentrations.map((c) => (
+                  <Detail.Metadata.Label key={c.code} title="Concentration" text={c.desc} />
+                ))}
+                {advisors.map((a) => (
+                  <Detail.Metadata.Label key={a.advisor.id} title="Advisor" text={demo ? "Advisor Name" : a.advisor.name} />
+                ))}
+              </>
+            );
+          })()}
           {info?.faculty?.isFaculty && info.faculty.facultyDepts.length > 0 && (
             <>
               <Detail.Metadata.Separator />

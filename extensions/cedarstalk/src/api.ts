@@ -67,17 +67,17 @@ export interface PersonInfo {
     isFaculty: boolean;
     facultyDepts: { code: string; description: string; division: string }[];
     scheduleItems: ScheduleItem[];
-    term: { key: string; description: string };
+    term: { key: string | null; description: string | null };
   };
   student: {
     isStudent: boolean;
     scheduleItems: ScheduleItem[];
-    programs: string[];
-    majors: { code: string; description: string }[];
-    minors: { code: string; description: string }[];
-    concentrations: { code: string; description: string }[];
-    advisors: { id: string; name: string }[];
-    term: { key: string; description: string };
+    programs: { key: string; title: string }[];
+    majors: { code: string; desc: string }[];
+    minors: { code: string; desc: string }[];
+    concentrations: { code: string; desc: string }[];
+    advisors: { advisor: { id: string; name: string; email: string }; advisement: { type: string } }[];
+    term: { key: string | null; description: string | null };
   };
 }
 
