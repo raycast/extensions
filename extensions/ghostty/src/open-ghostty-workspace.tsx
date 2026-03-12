@@ -2,19 +2,23 @@ import path from "node:path";
 import { useEffect, useState } from "react";
 
 import { Action, ActionPanel, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 import { openDirectoryInEditor } from "./utils/editor";
 import { openWorkspace } from "./utils/ghostty-api";
-import { loadStoredLaunchConfigs, type StoredLaunchConfig } from "./utils/launch-configs";
 import { launchConfigToWorkspaceLayouts } from "./utils/launch-config-converter";
+import { loadStoredLaunchConfigs, type StoredLaunchConfig } from "./utils/launch-configs";
 import { expandHome, toTildePath } from "./utils/paths";
 
 import type { ChildDirectory } from "./utils/types";
 import { listChildDirectories } from "./utils/workspaces";
 
+type WorkspaceSortOrder = "name" | "lastModified" | "path";
+
 export default function Command() {
   const prefs = getPreferences();
+  const [storedSortOrder, setStoredSortOrder] = useCachedState<string>("open-ghostty-workspace-sort-order", "name");
+  const sortOrder = normalizeSortOrder(storedSortOrder);
   const {
     data: repos,
     isLoading,
@@ -49,13 +53,20 @@ export default function Command() {
     );
   }
 
-  const reposList = repos ?? [];
+  const reposList = sortRepositories(repos ?? [], sortOrder);
 
   return (
     <List
       isLoading={isLoading}
       navigationTitle={`Git Repos in ${path.basename(prefs.parentDirectory) || prefs.parentDirectory}`}
       searchBarPlaceholder="Search repositories"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Sort Repositories" value={sortOrder} onChange={setStoredSortOrder}>
+          <List.Dropdown.Item title="Name" value="name" />
+          <List.Dropdown.Item title="Last Modified" value="lastModified" />
+          <List.Dropdown.Item title="Path" value="path" />
+        </List.Dropdown>
+      }
     >
       {error ? (
         <List.EmptyView
@@ -90,7 +101,9 @@ export default function Command() {
           key={repo.directory}
           icon={Icon.Folder}
           title={repo.name}
-          accessories={[{ text: toTildePath(repo.directory) }]}
+          accessories={[
+            { text: toTildePath(repo.directory), tooltip: "Path" },
+          ]}
           actions={
             <RepoActions repo={repo} configs={configs} editor={prefs.editorApplication} onRefresh={revalidate} />
           }
@@ -172,4 +185,30 @@ function getPreferences() {
     maxDepth: Number.isNaN(maxDepth) ? 3 : Math.max(1, maxDepth),
     editorApplication: prefs.editorApplication,
   };
+}
+
+function sortRepositories(repos: ChildDirectory[], sortOrder: WorkspaceSortOrder) {
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const sorted = [...repos];
+
+  switch (sortOrder) {
+    case "lastModified":
+      return sorted.sort((a, b) => b.lastModified - a.lastModified || collator.compare(a.name, b.name));
+    case "path":
+      return sorted.sort((a, b) => collator.compare(a.directory, b.directory) || collator.compare(a.name, b.name));
+    case "name":
+    default:
+      return sorted.sort((a, b) => collator.compare(a.name, b.name) || collator.compare(a.directory, b.directory));
+  }
+}
+
+function normalizeSortOrder(value: string): WorkspaceSortOrder {
+  switch (value) {
+    case "lastModified":
+    case "path":
+    case "name":
+      return value;
+    default:
+      return "name";
+  }
 }

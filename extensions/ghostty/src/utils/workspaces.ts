@@ -1,5 +1,5 @@
 import path from "node:path";
-import { readdir, realpath } from "node:fs/promises";
+import { readdir, realpath, stat } from "node:fs/promises";
 
 import type { ChildDirectory } from "./types";
 import { expandHome } from "./paths";
@@ -18,7 +18,7 @@ export async function listChildDirectories(
 
   await collectGitRepositories(resolvedPath, options.maxDepth, directories, visitedPaths);
 
-  return directories.sort((a, b) => a.name.localeCompare(b.name));
+  return directories;
 }
 
 async function collectGitRepositories(
@@ -37,9 +37,11 @@ async function collectGitRepositories(
 
     const entries = await readdir(resolvedDirectory, { withFileTypes: true });
     if (entries.some((entry) => entry.name === ".git" && (entry.isDirectory() || entry.isFile()))) {
+      const directoryStats = await stat(resolvedDirectory);
       directories.push({
         name: path.basename(resolvedDirectory),
         directory: resolvedDirectory,
+        lastModified: directoryStats.mtimeMs,
       });
       return;
     }

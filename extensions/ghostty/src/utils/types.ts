@@ -45,4 +45,5 @@ export interface WorkspaceLaunchTarget {
 export interface ChildDirectory {
   name: string;
   directory: string;
+  lastModified: number;
 }
