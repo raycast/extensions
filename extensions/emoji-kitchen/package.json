@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "emoji-kitchen",
-  "title": "Emoji Kitchen",
-  "description": "Browse and copy Google Emoji Kitchen mashups.",
+  "title": "Emoji Mashups",
+  "description": "Discover and copy Google Emoji Kitchen mashups fast. Browse unique emoji combinations and use them as fun, expressive images in messages and posts. Copy/paste or save.",
   "icon": "icon.png",
   "author": "corey_o_neal",
   "categories": [
