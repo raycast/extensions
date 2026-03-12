@@ -79,5 +79,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "vitest"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
