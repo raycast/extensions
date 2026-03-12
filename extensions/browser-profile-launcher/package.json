@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "browser-profile-launcher",
+  "title": "Browser Profile Shortcuts",
+  "description": "Browse, open, and toggle Chromium browser profiles with keyboard shortcuts",
+  "icon": "extension-icon.png",
+  "author": "mittul",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "browse-profiles",
+      "title": "Browse Profiles",
+      "description": "Browse and open browser profiles from all Chromium browsers",
+      "mode": "view"
+    },
+    {
+      "name": "open-profile",
+      "title": "Open Profile",
+      "description": "Open a specific browser profile (used by quicklinks)",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableChrome",
+      "type": "checkbox",
+      "title": "Browsers",
+      "label": "Google Chrome",
+      "default": true,
+      "description": "Include Google Chrome profiles",
+      "required": false
+    },
+    {
+      "name": "enableEdge",
+      "type": "checkbox",
+      "label": "Microsoft Edge",
+      "default": true,
+      "description": "Include Microsoft Edge profiles",
+      "required": false
+    },
+    {
+      "name": "enableBrave",
+      "type": "checkbox",
+      "label": "Brave Browser",
+      "default": true,
+      "description": "Include Brave Browser profiles",
+      "required": false
+    },
+    {
+      "name": "enableArc",
+      "type": "checkbox",
+      "label": "Arc",
+      "default": true,
+      "description": "Include Arc profiles",
+      "required": false
+    },
+    {
+      "name": "enableVivaldi",
+      "type": "checkbox",
+      "label": "Vivaldi",
+      "default": true,
+      "description": "Include Vivaldi profiles",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
