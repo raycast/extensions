@@ -29,13 +29,17 @@ export default function Command() {
   const [mode, setMode] = useState<"combine" | "explore">("explore");
   const [searchText, setSearchText] = useState("");
 
-  const { data: index, isLoading: isLoadingIndex } = useCachedPromise(async () => {
-    return loadEmojiIndex();
-  });
+  const { data: index, isLoading: isLoadingIndex } = useCachedPromise(
+    async () => {
+      return loadEmojiIndex();
+    },
+  );
 
-  const { data: vectors, isLoading: isLoadingVectors } = useCachedPromise(async () => {
-    return loadEmojiVectors();
-  });
+  const { data: vectors, isLoading: isLoadingVectors } = useCachedPromise(
+    async () => {
+      return loadEmojiVectors();
+    },
+  );
 
   const isLoading = isLoadingIndex || isLoadingVectors;
 
@@ -275,7 +279,8 @@ export default function Command() {
                 content={item.e}
                 title={formatEmojiName(item.a)}
                 keywords={item.k}
-                actions={                  <ActionPanel>
+                actions={
+                  <ActionPanel>
                     <Action
                       title={mode === "combine" ? "Combine" : "Explore"}
                       onAction={() => handleSelectEmoji(item)}

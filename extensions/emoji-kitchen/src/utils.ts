@@ -4,12 +4,10 @@ import {
   Clipboard,
   showHUD,
   environment,
-  open,
 } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { exec } from "child_process";
 import { EmojiMetadata, Combinations } from "./types";
 
 export function getGStaticUrl(left: string, right: string, date: string) {
@@ -18,7 +16,10 @@ export function getGStaticUrl(left: string, right: string, date: string) {
   return `https://www.gstatic.com/android/keyboard/emojikitchen/${date}/${pLeft}/${pLeft}_${pRight}.png`;
 }
 
-export async function downloadImage(url: string, name: string): Promise<string> {
+export async function downloadImage(
+  url: string,
+  name: string,
+): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to download image");
 
@@ -78,7 +79,7 @@ export async function saveImageToDownloads(url: string, name: string) {
 }
 
 let _cachedIndex: Record<string, EmojiMetadata> | null = null;
-let _cachedVectors: Record<string, Record<string, number[]>> | null = null;
+let _cachedVectors: Record<string, number[]> | null = null;
 
 export const VECTOR_DIMENSION = 128;
 
@@ -91,12 +92,12 @@ export function loadEmojiIndex(): Record<string, EmojiMetadata> {
 }
 
 export function loadEmojiVectors(): Record<string, number[]> {
-  if (_cachedVectors) return _cachedVectors as any;
+  if (_cachedVectors) return _cachedVectors;
   const dataPath = path.join(environment.assetsPath, "vectors.json");
   if (!fs.existsSync(dataPath)) return {};
   const rawData = fs.readFileSync(dataPath, "utf-8");
   _cachedVectors = JSON.parse(rawData);
-  return _cachedVectors as any;
+  return _cachedVectors!;
 }
 
 export function hashString(str: string): number {
