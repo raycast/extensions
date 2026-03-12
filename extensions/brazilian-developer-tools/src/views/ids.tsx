@@ -21,7 +21,7 @@ export function Ids() {
       />
       <List.Item
         title="UUID v7"
-        subtitle="123e4567-e89b-12d3-a456-426614174000"
+        subtitle="019cdf71-a7fb-7312-bba2-e526c32d3897"
         actions={
           <ActionPanel>
             <Action title={randomUuidV7.name} onAction={randomUuidV7.action} />

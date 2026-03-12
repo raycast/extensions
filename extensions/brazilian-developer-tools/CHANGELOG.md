@@ -1,6 +1,6 @@
 # Brazilian Developer Tools Changelog
 
-## [Initial Version] - 2025-03-10
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Show tools command to access Brazilian developer utilities
 - Generate CPF (raw and formatted)
