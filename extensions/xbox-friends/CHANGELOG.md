@@ -1,10 +1,11 @@
 # Xbox Friends Changelog
 
-## [Store Improvements] - {PR_MERGE_DATE}
+## [1.1.0] - {PR_MERGE_DATE}
 
-- Added store README with setup instructions
+- Added store README with setup instructions and feature overview
 - Added mock data mode to preview the extension without an API key
 - API key is now optional when mock data is enabled
+- Upgraded to latest Raycast dependencies
 
 ## [Initial Version] - 2026-03-12
 
