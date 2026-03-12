@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cedarstalk",
+  "title": "CedarStalk",
+  "description": "Search the Cedarville University student/staff directory",
+  "icon": "icon.png",
+  "author": "taciturnaxolotl",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": ["Productivity", "Web"],
+  "commands": [
+    {
+      "name": "search-directory",
+      "title": "Search Cedarville Directory",
+      "description": "Search the Cedarville directory by name",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.17.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
