@@ -1,9 +1,11 @@
 # Repository Guidelines
 
 ## Behavior
+
 response in English only.
 
 ## Project Structure & Module Organization
+
 - `src/calculate-leave-time.tsx`: main Raycast command UI and background subtitle updater.
 - `src/lib/`: shared logic and types.
 - `src/lib/time-utils.ts`: leave-time and remaining-time calculations.
@@ -12,6 +14,7 @@ response in English only.
 - `assets/`: icon assets used in extension metadata and docs.
 
 ## Build, Test, and Development Commands
+
 - `bun install`: install dependencies.
 - `bun run dev`: run Raycast development mode (`ray develop`).
 - `bun run build`: create production build in `dist/`.
@@ -21,6 +24,7 @@ response in English only.
 - `bun run format`: apply Biome formatting.
 
 ## Coding Style & Naming Conventions
+
 - Language: TypeScript + React (Raycast API).
 - Formatting is enforced by Biome (`biome.json`): tabs for indentation, double quotes.
 - Keep reusable logic in `src/lib/`; keep command rendering/event wiring in command files.
@@ -28,6 +32,7 @@ response in English only.
 - Keep time values in `HH:MM` string format unless a `Date` object is explicitly needed.
 
 ## Testing Guidelines
+
 - Framework: Vitest (`vitest.config.ts`) with `node` environment and globals enabled.
 - Place tests under `tests/` and use `*.test.ts` naming.
 - Mirror source responsibility in test names, for example `describe("calculateLeaveTime")`.
@@ -35,6 +40,7 @@ response in English only.
 - Run `bun run test` locally before opening a PR.
 
 ## Commit & Pull Request Guidelines
+
 - Prefer Conventional Commit prefixes visible in history: `feat:`, `fix:`, `docs:`, `chore:`.
 - Keep commit subjects imperative and specific (example: `fix: handle overnight leave rollover`).
 - PRs should include a concise summary, linked issue (if applicable), updated tests for logic changes, and screenshots for UI/metadata updates.

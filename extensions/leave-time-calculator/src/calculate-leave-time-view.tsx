@@ -7,6 +7,7 @@ import {
   List,
   launchCommand,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import React, { useEffect, useState } from "react";
 import { buildLeaveStatus, formatRemainingLabel } from "./lib/leave-status";
 import { getWorkPreferences } from "./lib/preferences";
@@ -35,10 +36,16 @@ const START_TIMES = (() => {
 })();
 
 async function refreshTopCommandSubtitle() {
-  await launchCommand({
-    name: "calculate-leave-time",
-    type: LaunchType.Background,
-  });
+  try {
+    await launchCommand({
+      name: "calculate-leave-time",
+      type: LaunchType.Background,
+    });
+  } catch (err) {
+    await showFailureToast(
+      `Failed to refresh menu subtitle: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
 }
 
 export default function Command() {
