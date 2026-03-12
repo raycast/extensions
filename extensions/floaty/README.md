@@ -51,9 +51,3 @@ Open Raycast and run any of the commands above. Typical flows:
 - Project / website: [https://www.floatytool.com/](https://www.floatytool.com/)
 - Repository: [https://github.com/raycast/extensions](https://github.com/raycast/extensions) (this extension lives under `extensions/floaty`)
 
----
-
-If you want, I can also:
-
-- Remove any additional non-English text across the repo (I removed Chinese comments from config already).
-- Add a short `CONTRIBUTING.md` and developer run scripts for local testing.
