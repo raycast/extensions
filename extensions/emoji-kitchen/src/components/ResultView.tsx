@@ -13,9 +13,8 @@ export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
   const name = `${e1}_${e2}_mashup`;
 
   const markdown = `
-<div align="center">
-  <img src="${url}" alt="${e1} + ${e2}" width="250" />
-</div>
+# 
+<img src="${url}" alt="${e1} + ${e2}" width="250" />
 `;
 
   return (
