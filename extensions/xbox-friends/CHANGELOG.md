@@ -1,6 +1,6 @@
 # Xbox Friends Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-12
 
 - Initial release of Xbox Friends extension
 - View Xbox Live friends grouped by Online, Away, and Offline status
