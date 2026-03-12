@@ -1,6 +1,6 @@
 # Betaseries Changelog
 
-## [Menu Bar Background Refresh Fix] - {PR_MERGE_DATE}
+## [Menu Bar Background Refresh Fix] - 2026-03-12
 
 - Fixed an error when marking an episode as watched from **My Shows** while **New Episodes Menu Bar** had not been activated yet.
 - The menu bar refresh is now skipped when the command is unavailable in background mode, so the episode action still succeeds without showing a failure message.
