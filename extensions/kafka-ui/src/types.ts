@@ -19,11 +19,6 @@ export interface StoredEnvironment {
   color: EnvColorValue;
 }
 
-export interface Preferences {
-  lagThresholdWarning: string;
-  lagThresholdCritical: string;
-}
-
 export interface ConsumerGroupOverview {
   groupId: string;
   state: ConsumerGroupState;

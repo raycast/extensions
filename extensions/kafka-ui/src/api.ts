@@ -1,9 +1,4 @@
-import {
-  ConsumerGroupDetail,
-  ConsumerGroupOverview,
-  ConsumerGroupPartition,
-  TopicOverview,
-} from "./types";
+import { ConsumerGroupDetail, ConsumerGroupOverview, ConsumerGroupPartition, TopicOverview } from "./types";
 
 function normalizeUrl(url: string): string {
   return url.replace(/\/+$/, "");
@@ -16,25 +11,15 @@ async function fetchJson<T>(url: string): Promise<T> {
 
   if (!contentType.includes("application/json")) {
     const body = await response.text();
-    console.error(
-      `[kafka-ui] Expected JSON but got "${contentType}" from ${url}`,
-    );
-    console.error(
-      `[kafka-ui] Response body (first 500 chars): ${body.substring(0, 500)}`,
-    );
-    throw new Error(
-      `Kafka UI returned non-JSON response. Verify your Kafka UI URL and Cluster Name. URL: ${url}`,
-    );
+    console.error(`[kafka-ui] Expected JSON but got "${contentType}" from ${url}`);
+    console.error(`[kafka-ui] Response body (first 500 chars): ${body.substring(0, 500)}`);
+    throw new Error(`Kafka UI returned non-JSON response. Verify your Kafka UI URL and Cluster Name. URL: ${url}`);
   }
 
   if (!response.ok) {
     const body = await response.text();
-    console.error(
-      `[kafka-ui] API error: ${response.status} ${response.statusText} - ${body}`,
-    );
-    throw new Error(
-      `Kafka UI API ${response.status}: ${response.statusText}. URL: ${url}`,
-    );
+    console.error(`[kafka-ui] API error: ${response.status} ${response.statusText} - ${body}`);
+    throw new Error(`Kafka UI API ${response.status}: ${response.statusText}. URL: ${url}`);
   }
 
   return response.json() as Promise<T>;
@@ -48,10 +33,7 @@ function unwrapArray<T>(data: unknown, arrayKey: string): T[] {
     if (Array.isArray(nested)) return nested as T[];
   }
 
-  console.error(
-    `[kafka-ui] Unexpected response shape:`,
-    JSON.stringify(data).substring(0, 500),
-  );
+  console.error(`[kafka-ui] Unexpected response shape:`, JSON.stringify(data).substring(0, 500));
   return [];
 }
 
@@ -67,9 +49,7 @@ function extractLag(raw: Record<string, unknown>): number {
   return 0;
 }
 
-function normalizeConsumerGroupOverview(
-  raw: Record<string, unknown>,
-): ConsumerGroupOverview {
+function normalizeConsumerGroupOverview(raw: Record<string, unknown>): ConsumerGroupOverview {
   return {
     groupId: (raw.groupId as string) ?? "",
     state: (raw.state as ConsumerGroupOverview["state"]) ?? "UNKNOWN",
@@ -81,9 +61,7 @@ function normalizeConsumerGroupOverview(
   };
 }
 
-function normalizePartition(
-  raw: Record<string, unknown>,
-): ConsumerGroupPartition {
+function normalizePartition(raw: Record<string, unknown>): ConsumerGroupPartition {
   return {
     topic: (raw.topic as string) ?? "",
     partition: (raw.partition ?? 0) as number,
@@ -99,35 +77,22 @@ export function buildKafkaUiHomeUrl(kafkaUiUrl: string): string {
   return normalizeUrl(kafkaUiUrl);
 }
 
-export function buildConsumerGroupsListUrl(
-  kafkaUiUrl: string,
-  clusterName: string,
-): string {
+export function buildConsumerGroupsListUrl(kafkaUiUrl: string, clusterName: string): string {
   const base = normalizeUrl(kafkaUiUrl);
   return `${base}/ui/clusters/${clusterName}/consumer-groups`;
 }
 
-export function buildConsumerGroupUrl(
-  kafkaUiUrl: string,
-  clusterName: string,
-  groupId: string,
-): string {
+export function buildConsumerGroupUrl(kafkaUiUrl: string, clusterName: string, groupId: string): string {
   const base = normalizeUrl(kafkaUiUrl);
   return `${base}/ui/clusters/${clusterName}/consumer-groups/${encodeURIComponent(groupId)}`;
 }
 
-export function buildTopicUrl(
-  kafkaUiUrl: string,
-  clusterName: string,
-  topicName: string,
-): string {
+export function buildTopicUrl(kafkaUiUrl: string, clusterName: string, topicName: string): string {
   const base = normalizeUrl(kafkaUiUrl);
   return `${base}/ui/clusters/${clusterName}/all-topics/${encodeURIComponent(topicName)}`;
 }
 
-export async function fetchClusters(
-  kafkaUiUrl: string,
-): Promise<{ name: string; status: string }[]> {
+export async function fetchClusters(kafkaUiUrl: string): Promise<{ name: string; status: string }[]> {
   const base = normalizeUrl(kafkaUiUrl);
   const url = `${base}/api/clusters`;
   const data = await fetchJson<unknown>(url);
@@ -142,10 +107,7 @@ export async function fetchClusters(
   }));
 }
 
-async function tryFetchConsumerGroups(
-  base: string,
-  clusterName: string,
-): Promise<{ data: unknown; source: string }> {
+async function tryFetchConsumerGroups(base: string, clusterName: string): Promise<{ data: unknown; source: string }> {
   const pagedUrl = `${base}/api/clusters/${clusterName}/consumer-groups/paged?perPage=500&page=1`;
   console.log(`[kafka-ui] Trying paged endpoint: ${pagedUrl}`);
   try {
@@ -162,10 +124,7 @@ async function tryFetchConsumerGroups(
   return { data, source: "plain" };
 }
 
-export async function fetchConsumerGroups(
-  kafkaUiUrl: string,
-  clusterName: string,
-): Promise<ConsumerGroupOverview[]> {
+export async function fetchConsumerGroups(kafkaUiUrl: string, clusterName: string): Promise<ConsumerGroupOverview[]> {
   const base = normalizeUrl(kafkaUiUrl);
   const { data, source } = await tryFetchConsumerGroups(base, clusterName);
   const raw = unwrapArray<Record<string, unknown>>(data, "consumerGroups");
@@ -173,10 +132,7 @@ export async function fetchConsumerGroups(
     `[kafka-ui] Consumer groups (source: ${source}) first item keys:`,
     raw[0] ? Object.keys(raw[0]) : "empty",
   );
-  console.log(
-    `[kafka-ui] Consumer groups first item sample:`,
-    JSON.stringify(raw[0] ?? {}).substring(0, 500),
-  );
+  console.log(`[kafka-ui] Consumer groups first item sample:`, JSON.stringify(raw[0] ?? {}).substring(0, 500));
   return raw.map(normalizeConsumerGroupOverview);
 }
 
@@ -190,26 +146,16 @@ export async function fetchConsumerGroupDetail(
   const raw = await fetchJson<Record<string, unknown>>(url);
   console.log(`[kafka-ui] Consumer group detail keys:`, Object.keys(raw));
 
-  const rawPartitions = Array.isArray(raw.partitions)
-    ? (raw.partitions as Record<string, unknown>[])
-    : [];
+  const rawPartitions = Array.isArray(raw.partitions) ? (raw.partitions as Record<string, unknown>[]) : [];
   if (rawPartitions.length > 0) {
-    console.log(
-      `[kafka-ui] Partition sample keys:`,
-      Object.keys(rawPartitions[0]),
-    );
-    console.log(
-      `[kafka-ui] Partition sample:`,
-      JSON.stringify(rawPartitions[0]).substring(0, 500),
-    );
+    console.log(`[kafka-ui] Partition sample keys:`, Object.keys(rawPartitions[0]));
+    console.log(`[kafka-ui] Partition sample:`, JSON.stringify(rawPartitions[0]).substring(0, 500));
   }
 
   return {
     groupId: (raw.groupId as string) ?? groupId,
     state: (raw.state as ConsumerGroupDetail["state"]) ?? "UNKNOWN",
-    members: Array.isArray(raw.members)
-      ? (raw.members as ConsumerGroupDetail["members"])
-      : [],
+    members: Array.isArray(raw.members) ? (raw.members as ConsumerGroupDetail["members"]) : [],
     partitions: rawPartitions.map(normalizePartition),
     coordinator: (raw.coordinator ?? 0) as number,
     partitionAssignor: (raw.partitionAssignor ?? "") as string,
@@ -225,14 +171,8 @@ export async function fetchTopicConsumerGroups(
   const url = `${base}/api/clusters/${clusterName}/topics/${encodeURIComponent(topicName)}/consumer-groups`;
   const data = await fetchJson<unknown>(url);
   const raw = unwrapArray<Record<string, unknown>>(data, "consumerGroups");
-  console.log(
-    `[kafka-ui] Topic consumer groups first item keys:`,
-    raw[0] ? Object.keys(raw[0]) : "empty",
-  );
-  console.log(
-    `[kafka-ui] Topic consumer groups first item:`,
-    JSON.stringify(raw[0] ?? {}).substring(0, 500),
-  );
+  console.log(`[kafka-ui] Topic consumer groups first item keys:`, raw[0] ? Object.keys(raw[0]) : "empty");
+  console.log(`[kafka-ui] Topic consumer groups first item:`, JSON.stringify(raw[0] ?? {}).substring(0, 500));
   return raw.map(normalizeConsumerGroupOverview);
 }
 
@@ -241,36 +181,20 @@ export async function fetchTopicConsumerGroupsWithLag(
   clusterName: string,
   topicName: string,
 ): Promise<ConsumerGroupOverview[]> {
-  const groups = await fetchTopicConsumerGroups(
-    kafkaUiUrl,
-    clusterName,
-    topicName,
-  );
+  const groups = await fetchTopicConsumerGroups(kafkaUiUrl, clusterName, topicName);
 
   const enriched = await Promise.all(
     groups.map(async (group) => {
       try {
-        const detail = await fetchConsumerGroupDetail(
-          kafkaUiUrl,
-          clusterName,
-          group.groupId,
-        );
-        const topicPartitions = detail.partitions.filter(
-          (p) => p.topic === topicName,
-        );
-        const topicLag = topicPartitions.reduce(
-          (sum, p) => sum + (p.messagesBehind ?? 0),
-          0,
-        );
+        const detail = await fetchConsumerGroupDetail(kafkaUiUrl, clusterName, group.groupId);
+        const topicPartitions = detail.partitions.filter((p) => p.topic === topicName);
+        const topicLag = topicPartitions.reduce((sum, p) => sum + (p.messagesBehind ?? 0), 0);
         console.log(
           `[kafka-ui] Computed lag for ${group.groupId} on ${topicName}: ${topicLag} (from ${topicPartitions.length} partitions)`,
         );
         return { ...group, messagesBehind: topicLag };
       } catch (err) {
-        console.error(
-          `[kafka-ui] Failed to fetch detail for ${group.groupId}:`,
-          err,
-        );
+        console.error(`[kafka-ui] Failed to fetch detail for ${group.groupId}:`, err);
         return group;
       }
     }),
@@ -279,10 +203,7 @@ export async function fetchTopicConsumerGroupsWithLag(
   return enriched;
 }
 
-export async function fetchTopics(
-  kafkaUiUrl: string,
-  clusterName: string,
-): Promise<TopicOverview[]> {
+export async function fetchTopics(kafkaUiUrl: string, clusterName: string): Promise<TopicOverview[]> {
   const base = normalizeUrl(kafkaUiUrl);
   const allTopics: TopicOverview[] = [];
   let page = 1;
@@ -294,9 +215,7 @@ export async function fetchTopics(
     const topics = unwrapArray<TopicOverview>(data, "topics");
     allTopics.push(...topics);
     const pageCount = extractPageCount(data);
-    console.log(
-      `[kafka-ui] Topics page ${page}/${pageCount}, got ${topics.length} topics`,
-    );
+    console.log(`[kafka-ui] Topics page ${page}/${pageCount}, got ${topics.length} topics`);
 
     if (page >= pageCount || topics.length === 0) break;
     page++;

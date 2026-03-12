@@ -31,11 +31,7 @@ export function EnvDropdown({
   onSelect: (id: string) => void;
 }) {
   return (
-    <List.Dropdown
-      tooltip="Select Environment"
-      value={selectedId}
-      onChange={onSelect}
-    >
+    <List.Dropdown tooltip="Select Environment" value={selectedId} onChange={onSelect}>
       <List.Dropdown.Section title="Environments">
         {environments.map((env) => (
           <List.Dropdown.Item

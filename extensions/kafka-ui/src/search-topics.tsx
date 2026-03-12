@@ -1,35 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import {
-  fetchTopicConsumerGroupsWithLag,
-  fetchTopics,
-  buildConsumerGroupUrl,
-  buildTopicUrl,
-} from "./api";
+import { fetchTopicConsumerGroupsWithLag, fetchTopics, buildConsumerGroupUrl, buildTopicUrl } from "./api";
 import { EnvDropdown, useEnvironments } from "./env-actions";
-import {
-  LagStatus,
-  Preferences,
-  StoredEnvironment,
-  TopicOverview,
-} from "./types";
-
-function getLagThresholds(): { warning: number; critical: number } {
-  const prefs = getPreferenceValues<Preferences>();
-  return {
-    warning: parseInt(prefs.lagThresholdWarning, 10) || 1000,
-    critical: parseInt(prefs.lagThresholdCritical, 10) || 10000,
-  };
-}
+import { determineLagStatus, formatLag, lagStatusIcon, statusColor } from "./lag-utils";
+import { StoredEnvironment, TopicOverview } from "./types";
 
 function getConfiguredPrefixes(env: StoredEnvironment): string[] {
   const raw = env.topicPrefixes ?? "";
@@ -38,39 +13,6 @@ function getConfiguredPrefixes(env: StoredEnvironment): string[] {
     .split(",")
     .map((p) => p.trim().toLowerCase())
     .filter((p) => p.length > 0);
-}
-
-function determineLagStatus(lag: number): LagStatus {
-  const { warning, critical } = getLagThresholds();
-  if (lag >= critical) return LagStatus.CRITICAL;
-  if (lag >= warning) return LagStatus.WARNING;
-  return LagStatus.OK;
-}
-
-function lagStatusIcon(status: LagStatus): { source: Icon; tintColor: Color } {
-  switch (status) {
-    case LagStatus.CRITICAL:
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
-    case LagStatus.WARNING:
-      return { source: Icon.Warning, tintColor: Color.Orange };
-    case LagStatus.OK:
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
-  }
-}
-
-function statusColor(status: LagStatus): Color {
-  switch (status) {
-    case LagStatus.CRITICAL:
-      return Color.Red;
-    case LagStatus.WARNING:
-      return Color.Orange;
-    case LagStatus.OK:
-      return Color.Green;
-  }
-}
-
-function formatLag(lag: number): string {
-  return lag.toLocaleString("en-US");
 }
 
 function formatBytes(bytes: number): string {
@@ -117,25 +59,13 @@ function consumerGroupStateColor(state: string): Color {
   }
 }
 
-function TopicDetailView({
-  env,
-  topic,
-}: {
-  env: StoredEnvironment;
-  topic: TopicOverview;
-}) {
+function TopicDetailView({ env, topic }: { env: StoredEnvironment; topic: TopicOverview }) {
   const {
     isLoading,
     data: consumers = [],
     revalidate,
-  } = useCachedPromise(fetchTopicConsumerGroupsWithLag, [
-    env.kafkaUiUrl,
-    env.clusterName,
-    topic.name,
-  ]);
-  const sorted = [...consumers].sort(
-    (a, b) => (b.messagesBehind ?? 0) - (a.messagesBehind ?? 0),
-  );
+  } = useCachedPromise(fetchTopicConsumerGroupsWithLag, [env.kafkaUiUrl, env.clusterName, topic.name]);
+  const sorted = [...consumers].sort((a, b) => (b.messagesBehind ?? 0) - (a.messagesBehind ?? 0));
 
   return (
     <List
@@ -184,15 +114,9 @@ function TopicDetailView({
           }
         />
       </List.Section>
-      <List.Section
-        title="Consumer Groups"
-        subtitle={`${sorted.length} consumers`}
-      >
+      <List.Section title="Consumer Groups" subtitle={`${sorted.length} consumers`}>
         {sorted.length === 0 && !isLoading ? (
-          <List.Item
-            icon={Icon.Info}
-            title="No consumer groups for this topic"
-          />
+          <List.Item icon={Icon.Info} title="No consumer groups for this topic" />
         ) : (
           sorted.map((cg) => {
             const lag = cg.messagesBehind ?? 0;
@@ -221,20 +145,12 @@ function TopicDetailView({
                   <ActionPanel>
                     <Action.OpenInBrowser
                       title="Open Consumer Group in Kafka UI"
-                      url={buildConsumerGroupUrl(
-                        env.kafkaUiUrl,
-                        env.clusterName,
-                        cg.groupId,
-                      )}
+                      url={buildConsumerGroupUrl(env.kafkaUiUrl, env.clusterName, cg.groupId)}
                       shortcut={{ modifiers: ["cmd"], key: "o" }}
                     />
                     <Action.OpenInBrowser
                       title="Open Topic in Kafka UI"
-                      url={buildTopicUrl(
-                        env.kafkaUiUrl,
-                        env.clusterName,
-                        topic.name,
-                      )}
+                      url={buildTopicUrl(env.kafkaUiUrl, env.clusterName, topic.name)}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                     />
                     <Action.CopyToClipboard
@@ -271,10 +187,7 @@ export default function SearchTopics() {
   const [isDeepSearch, setDeepSearch] = useState(false);
 
   useEffect(() => {
-    if (
-      environments.length > 0 &&
-      !environments.find((e) => e.id === selectedEnvId)
-    ) {
+    if (environments.length > 0 && !environments.find((e) => e.id === selectedEnvId)) {
       setSelectedEnvId(environments[0].id);
     }
   }, [environments, selectedEnvId]);
@@ -285,13 +198,9 @@ export default function SearchTopics() {
     isLoading: dataLoading,
     data: topics = [],
     revalidate,
-  } = useCachedPromise(
-    fetchTopics,
-    [selectedEnv?.kafkaUiUrl ?? "", selectedEnv?.clusterName ?? ""],
-    {
-      execute: !!selectedEnv,
-    },
-  );
+  } = useCachedPromise(fetchTopics, [selectedEnv?.kafkaUiUrl ?? "", selectedEnv?.clusterName ?? ""], {
+    execute: !!selectedEnv,
+  });
 
   const isLoading = envsLoading || dataLoading;
 
@@ -307,9 +216,7 @@ export default function SearchTopics() {
     );
   }
 
-  const configuredPrefixes = selectedEnv
-    ? getConfiguredPrefixes(selectedEnv)
-    : [];
+  const configuredPrefixes = selectedEnv ? getConfiguredPrefixes(selectedEnv) : [];
   const hasPrefixFilter = configuredPrefixes.length > 0 && !isDeepSearch;
 
   const filtered = topics
@@ -326,27 +233,17 @@ export default function SearchTopics() {
   const grouped = groupByPrefix(sorted);
 
   const modeLabel = hasPrefixFilter ? "Filtered" : "All Topics";
-  const toggleLabel = isDeepSearch
-    ? "Switch to Filtered Prefixes"
-    : "Deep Search (All Topics)";
+  const toggleLabel = isDeepSearch ? "Switch to Filtered Prefixes" : "Deep Search (All Topics)";
   const toggleIcon = isDeepSearch ? Icon.Filter : Icon.MagnifyingGlass;
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={
-        hasPrefixFilter
-          ? "Search within configured prefixes..."
-          : "Search across all topics..."
-      }
+      searchBarPlaceholder={hasPrefixFilter ? "Search within configured prefixes..." : "Search across all topics..."}
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
-        <EnvDropdown
-          environments={environments}
-          selectedId={selectedEnvId}
-          onSelect={setSelectedEnvId}
-        />
+        <EnvDropdown environments={environments} selectedId={selectedEnvId} onSelect={setSelectedEnvId} />
       }
     >
       {sorted.length === 0 && !isLoading ? (
@@ -373,11 +270,7 @@ export default function SearchTopics() {
         />
       ) : (
         Array.from(grouped.entries()).map(([prefix, prefixTopics]) => (
-          <List.Section
-            key={prefix}
-            title={prefix}
-            subtitle={`${prefixTopics.length} topics`}
-          >
+          <List.Section key={prefix} title={prefix} subtitle={`${prefixTopics.length} topics`}>
             {prefixTopics.map((topic) => (
               <List.Item
                 key={topic.name}
@@ -404,17 +297,11 @@ export default function SearchTopics() {
                       <Action.Push
                         icon={Icon.Eye}
                         title="View Topic Details"
-                        target={
-                          <TopicDetailView env={selectedEnv} topic={topic} />
-                        }
+                        target={<TopicDetailView env={selectedEnv} topic={topic} />}
                       />
                       <Action.OpenInBrowser
                         title="Open in Kafka UI"
-                        url={buildTopicUrl(
-                          selectedEnv.kafkaUiUrl,
-                          selectedEnv.clusterName,
-                          topic.name,
-                        )}
+                        url={buildTopicUrl(selectedEnv.kafkaUiUrl, selectedEnv.clusterName, topic.name)}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                       />
                       {configuredPrefixes.length > 0 && (

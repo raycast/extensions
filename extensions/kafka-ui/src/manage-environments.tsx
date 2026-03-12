@@ -12,13 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  getEnvironments,
-  addEnvironment,
-  updateEnvironment,
-  deleteEnvironment,
-  generateId,
-} from "./storage";
+import { getEnvironments, addEnvironment, updateEnvironment, deleteEnvironment, generateId } from "./storage";
 import { ENV_COLOR_OPTIONS, EnvColorValue, StoredEnvironment } from "./types";
 import { resolveEnvColor } from "./env-actions";
 
@@ -40,13 +34,7 @@ interface EnvironmentFormValues {
   color: string;
 }
 
-function EnvironmentForm({
-  environment,
-  onSave,
-}: {
-  environment?: StoredEnvironment;
-  onSave: () => void;
-}) {
+function EnvironmentForm({ environment, onSave }: { environment?: StoredEnvironment; onSave: () => void }) {
   const { pop } = useNavigation();
   const isEditing = !!environment;
 
@@ -102,9 +90,7 @@ function EnvironmentForm({
 
   return (
     <Form
-      navigationTitle={
-        isEditing ? `Edit ${environment.name}` : "Add Environment"
-      }
+      navigationTitle={isEditing ? `Edit ${environment.name}` : "Add Environment"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -115,12 +101,7 @@ function EnvironmentForm({
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Production"
-        defaultValue={environment?.name ?? ""}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Production" defaultValue={environment?.name ?? ""} />
       <Form.TextField
         id="kafkaUiUrl"
         title="Kafka UI URL"
@@ -134,11 +115,7 @@ function EnvironmentForm({
         defaultValue={environment?.clusterName ?? ""}
       />
       <Form.Separator />
-      <Form.Dropdown
-        id="color"
-        title="Color"
-        defaultValue={environment?.color ?? "Blue"}
-      >
+      <Form.Dropdown id="color" title="Color" defaultValue={environment?.color ?? "Blue"}>
         {ENV_COLOR_OPTIONS.map((opt) => (
           <Form.Dropdown.Item
             key={opt.value}
@@ -159,11 +136,7 @@ function EnvironmentForm({
 }
 
 export default function ManageEnvironments() {
-  const {
-    data: environments = [],
-    isLoading,
-    revalidate,
-  } = useCachedPromise(getEnvironments);
+  const { data: environments = [], isLoading, revalidate } = useCachedPromise(getEnvironments);
 
   async function handleDelete(env: StoredEnvironment) {
     const confirmed = await confirmAlert({
@@ -204,10 +177,7 @@ export default function ManageEnvironments() {
           }
         />
       ) : (
-        <List.Section
-          title="Kafka UI Environments"
-          subtitle={`${environments.length} configured`}
-        >
+        <List.Section title="Kafka UI Environments" subtitle={`${environments.length} configured`}>
           {environments.map((env) => (
             <List.Item
               key={env.id}
@@ -216,18 +186,14 @@ export default function ManageEnvironments() {
               subtitle={env.clusterName}
               accessories={[
                 { text: env.kafkaUiUrl },
-                ...(env.topicPrefixes
-                  ? [{ tag: `prefixes: ${env.topicPrefixes}` }]
-                  : []),
+                ...(env.topicPrefixes ? [{ tag: `prefixes: ${env.topicPrefixes}` }] : []),
               ]}
               actions={
                 <ActionPanel>
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Edit Environment"
-                    target={
-                      <EnvironmentForm environment={env} onSave={revalidate} />
-                    }
+                    target={<EnvironmentForm environment={env} onSave={revalidate} />}
                   />
                   <Action.Push
                     icon={Icon.Plus}

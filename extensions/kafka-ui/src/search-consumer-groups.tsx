@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -17,60 +9,10 @@ import {
   buildTopicUrl,
 } from "./api";
 import { EnvDropdown, useEnvironments } from "./env-actions";
-import {
-  ConsumerGroupOverview,
-  ConsumerGroupPartition,
-  LagStatus,
-  Preferences,
-  StoredEnvironment,
-  TopicLagSummary,
-} from "./types";
+import { determineLagStatus, formatLag, lagStatusIcon, statusColor } from "./lag-utils";
+import { ConsumerGroupOverview, ConsumerGroupPartition, StoredEnvironment, TopicLagSummary } from "./types";
 
-function getLagThresholds(): { warning: number; critical: number } {
-  const prefs = getPreferenceValues<Preferences>();
-  return {
-    warning: parseInt(prefs.lagThresholdWarning, 10) || 1000,
-    critical: parseInt(prefs.lagThresholdCritical, 10) || 10000,
-  };
-}
-
-function determineLagStatus(lag: number): LagStatus {
-  const { warning, critical } = getLagThresholds();
-  if (lag >= critical) return LagStatus.CRITICAL;
-  if (lag >= warning) return LagStatus.WARNING;
-  return LagStatus.OK;
-}
-
-function lagStatusIcon(status: LagStatus): { source: Icon; tintColor: Color } {
-  switch (status) {
-    case LagStatus.CRITICAL:
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
-    case LagStatus.WARNING:
-      return { source: Icon.Warning, tintColor: Color.Orange };
-    case LagStatus.OK:
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
-  }
-}
-
-function statusColor(status: LagStatus): Color {
-  switch (status) {
-    case LagStatus.CRITICAL:
-      return Color.Red;
-    case LagStatus.WARNING:
-      return Color.Orange;
-    case LagStatus.OK:
-      return Color.Green;
-  }
-}
-
-function formatLag(lag: number): string {
-  return lag.toLocaleString("en-US");
-}
-
-function aggregateByTopic(
-  groupId: string,
-  partitions: ConsumerGroupPartition[],
-): TopicLagSummary[] {
+function aggregateByTopic(groupId: string, partitions: ConsumerGroupPartition[]): TopicLagSummary[] {
   const topicMap = new Map<string, ConsumerGroupPartition[]>();
   for (const p of partitions) {
     const existing = topicMap.get(p.topic) ?? [];
@@ -85,24 +27,15 @@ function aggregateByTopic(
   }));
 }
 
-function ConsumerGroupDetailView({
-  env,
-  group,
-}: {
-  env: StoredEnvironment;
-  group: ConsumerGroupOverview;
-}) {
-  const { isLoading, data, revalidate } = useCachedPromise(
-    fetchConsumerGroupDetail,
-    [env.kafkaUiUrl, env.clusterName, group.groupId],
-  );
+function ConsumerGroupDetailView({ env, group }: { env: StoredEnvironment; group: ConsumerGroupOverview }) {
+  const { isLoading, data, revalidate } = useCachedPromise(fetchConsumerGroupDetail, [
+    env.kafkaUiUrl,
+    env.clusterName,
+    group.groupId,
+  ]);
 
-  const topicSummaries = data
-    ? aggregateByTopic(group.groupId, data.partitions ?? [])
-    : [];
-  const sortedSummaries = topicSummaries.sort(
-    (a, b) => b.totalLag - a.totalLag,
-  );
+  const topicSummaries = data ? aggregateByTopic(group.groupId, data.partitions ?? []) : [];
+  const sortedSummaries = topicSummaries.sort((a, b) => b.totalLag - a.totalLag);
 
   return (
     <List
@@ -139,20 +72,12 @@ function ConsumerGroupDetailView({
                   />
                   <Action.OpenInBrowser
                     title="Open Consumer Group in Kafka UI"
-                    url={buildConsumerGroupUrl(
-                      env.kafkaUiUrl,
-                      env.clusterName,
-                      group.groupId,
-                    )}
+                    url={buildConsumerGroupUrl(env.kafkaUiUrl, env.clusterName, group.groupId)}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
                   <Action.OpenInBrowser
                     title="Open Topic in Kafka UI"
-                    url={buildTopicUrl(
-                      env.kafkaUiUrl,
-                      env.clusterName,
-                      summary.topic,
-                    )}
+                    url={buildTopicUrl(env.kafkaUiUrl, env.clusterName, summary.topic)}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                   />
                   <Action.CopyToClipboard
@@ -176,22 +101,11 @@ function ConsumerGroupDetailView({
   );
 }
 
-function PartitionDetailView({
-  env,
-  summary,
-}: {
-  env: StoredEnvironment;
-  summary: TopicLagSummary;
-}) {
-  const sortedPartitions = [...summary.partitions].sort(
-    (a, b) => a.partition - b.partition,
-  );
+function PartitionDetailView({ env, summary }: { env: StoredEnvironment; summary: TopicLagSummary }) {
+  const sortedPartitions = [...summary.partitions].sort((a, b) => a.partition - b.partition);
 
   return (
-    <List
-      navigationTitle={`[${env.name}] ${summary.topic} partitions`}
-      searchBarPlaceholder="Filter partitions..."
-    >
+    <List navigationTitle={`[${env.name}] ${summary.topic} partitions`} searchBarPlaceholder="Filter partitions...">
       <List.Section
         title={summary.topic}
         subtitle={`Consumer: ${summary.consumerGroup} | Total Lag: ${formatLag(summary.totalLag)}`}
@@ -204,11 +118,7 @@ function PartitionDetailView({
               key={`${p.topic}-${p.partition}`}
               icon={lagStatusIcon(status)}
               title={`Partition ${p.partition}`}
-              subtitle={
-                p.consumerId
-                  ? `Consumer: ${p.consumerId}`
-                  : "No active consumer"
-              }
+              subtitle={p.consumerId ? `Consumer: ${p.consumerId}` : "No active consumer"}
               accessories={[
                 { text: `${p.currentOffset}/${p.endOffset}` },
                 {
@@ -222,11 +132,7 @@ function PartitionDetailView({
                 <ActionPanel>
                   <Action.OpenInBrowser
                     title="Open Topic in Kafka UI"
-                    url={buildTopicUrl(
-                      env.kafkaUiUrl,
-                      env.clusterName,
-                      summary.topic,
-                    )}
+                    url={buildTopicUrl(env.kafkaUiUrl, env.clusterName, summary.topic)}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
                   <Action.CopyToClipboard
@@ -250,10 +156,7 @@ export default function SearchConsumerGroups() {
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    if (
-      environments.length > 0 &&
-      !environments.find((e) => e.id === selectedEnvId)
-    ) {
+    if (environments.length > 0 && !environments.find((e) => e.id === selectedEnvId)) {
       setSelectedEnvId(environments[0].id);
     }
   }, [environments, selectedEnvId]);
@@ -264,13 +167,9 @@ export default function SearchConsumerGroups() {
     isLoading: dataLoading,
     data: groups = [],
     revalidate,
-  } = useCachedPromise(
-    fetchConsumerGroups,
-    [selectedEnv?.kafkaUiUrl ?? "", selectedEnv?.clusterName ?? ""],
-    {
-      execute: !!selectedEnv,
-    },
-  );
+  } = useCachedPromise(fetchConsumerGroups, [selectedEnv?.kafkaUiUrl ?? "", selectedEnv?.clusterName ?? ""], {
+    execute: !!selectedEnv,
+  });
 
   const isLoading = envsLoading || dataLoading;
 
@@ -286,12 +185,8 @@ export default function SearchConsumerGroups() {
     );
   }
 
-  const filtered = groups.filter((g) =>
-    g.groupId.toLowerCase().includes(searchText.toLowerCase()),
-  );
-  const sorted = filtered.sort(
-    (a, b) => (b.messagesBehind ?? 0) - (a.messagesBehind ?? 0),
-  );
+  const filtered = groups.filter((g) => g.groupId.toLowerCase().includes(searchText.toLowerCase()));
+  const sorted = filtered.sort((a, b) => (b.messagesBehind ?? 0) - (a.messagesBehind ?? 0));
 
   return (
     <List
@@ -300,11 +195,7 @@ export default function SearchConsumerGroups() {
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
-        <EnvDropdown
-          environments={environments}
-          selectedId={selectedEnvId}
-          onSelect={setSelectedEnvId}
-        />
+        <EnvDropdown environments={environments} selectedId={selectedEnvId} onSelect={setSelectedEnvId} />
       }
     >
       {sorted.length === 0 && !isLoading ? (
@@ -318,10 +209,7 @@ export default function SearchConsumerGroups() {
           }
         />
       ) : (
-        <List.Section
-          title={`Consumer Groups [${selectedEnv?.name ?? ""}]`}
-          subtitle={`${sorted.length} results`}
-        >
+        <List.Section title={`Consumer Groups [${selectedEnv?.name ?? ""}]`} subtitle={`${sorted.length} results`}>
           {sorted.map((group) => {
             const lag = group.messagesBehind ?? 0;
             const status = determineLagStatus(lag);
@@ -346,28 +234,16 @@ export default function SearchConsumerGroups() {
                       <Action.Push
                         icon={Icon.List}
                         title="View Consumer Group Details"
-                        target={
-                          <ConsumerGroupDetailView
-                            env={selectedEnv}
-                            group={group}
-                          />
-                        }
+                        target={<ConsumerGroupDetailView env={selectedEnv} group={group} />}
                       />
                       <Action.OpenInBrowser
                         title="Open in Kafka UI"
-                        url={buildConsumerGroupUrl(
-                          selectedEnv.kafkaUiUrl,
-                          selectedEnv.clusterName,
-                          group.groupId,
-                        )}
+                        url={buildConsumerGroupUrl(selectedEnv.kafkaUiUrl, selectedEnv.clusterName, group.groupId)}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                       />
                       <Action.OpenInBrowser
                         title="Open Consumer Groups Page"
-                        url={buildConsumerGroupsListUrl(
-                          selectedEnv.kafkaUiUrl,
-                          selectedEnv.clusterName,
-                        )}
+                        url={buildConsumerGroupsListUrl(selectedEnv.kafkaUiUrl, selectedEnv.clusterName)}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                       />
                       <Action.CopyToClipboard

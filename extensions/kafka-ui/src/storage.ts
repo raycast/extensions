@@ -9,9 +9,7 @@ export async function getEnvironments(): Promise<StoredEnvironment[]> {
   return JSON.parse(raw) as StoredEnvironment[];
 }
 
-export async function saveEnvironments(
-  envs: StoredEnvironment[],
-): Promise<void> {
+export async function saveEnvironments(envs: StoredEnvironment[]): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(envs));
 }
 
@@ -21,9 +19,7 @@ export async function addEnvironment(env: StoredEnvironment): Promise<void> {
   await saveEnvironments(envs);
 }
 
-export async function updateEnvironment(
-  updated: StoredEnvironment,
-): Promise<void> {
+export async function updateEnvironment(updated: StoredEnvironment): Promise<void> {
   const envs = await getEnvironments();
   const index = envs.findIndex((e) => e.id === updated.id);
   if (index >= 0) {
