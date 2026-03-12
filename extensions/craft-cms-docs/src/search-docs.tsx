@@ -49,19 +49,13 @@ type GlossaryIndex = Record<string, string>;
 const cache = new Cache({ namespace: "craft-docs-search" });
 const queryCache = new Map<string, DocsSearchResult[]>();
 
-interface Preferences {
-  cmsVersion: "1.x" | "2.x" | "3.x" | "4.x" | "5.x";
-  commerceVersion: "1.x" | "2.x" | "3.x" | "4.x" | "5.x";
-  viewMode: "rich" | "compact";
-}
-
 type Props = LaunchProps<{
   arguments: { term?: string };
   launchContext?: { slug?: string; product?: DocsProduct };
 }>;
 
 export default function Command(props: Props) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchDocs>();
   const argumentTerm = props.arguments?.term?.trim();
   const deeplinkSlug = props.launchContext?.slug?.trim();
   const deeplinkProduct = props.launchContext?.product;
