@@ -4,16 +4,32 @@ import {
   Clipboard,
   showHUD,
   environment,
+  open,
 } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import os from "os";
+import { exec } from "child_process";
 import { EmojiMetadata, Combinations } from "./types";
 
 export function getGStaticUrl(left: string, right: string, date: string) {
   const pLeft = `u${left.toLowerCase().replace(/-/g, "-u")}`;
   const pRight = `u${right.toLowerCase().replace(/-/g, "-u")}`;
   return `https://www.gstatic.com/android/keyboard/emojikitchen/${date}/${pLeft}/${pLeft}_${pRight}.png`;
+}
+
+export async function downloadImage(url: string, name: string): Promise<string> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Failed to download image");
+
+  const buffer = await response.arrayBuffer();
+  const tempFile = path.join(
+    os.tmpdir(),
+    `${name.replace(/[^a-z0-9]/gi, "_")}.png`,
+  );
+
+  fs.writeFileSync(tempFile, new Uint8Array(buffer));
+  return tempFile;
 }
 
 export async function copyImageToClipboard(url: string, name: string) {
@@ -23,22 +39,31 @@ export async function copyImageToClipboard(url: string, name: string) {
   });
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to download image");
-
-    const buffer = await response.arrayBuffer();
-    const tempFile = path.join(
-      os.tmpdir(),
-      `${name.replace(/[^a-z0-9]/gi, "_")}.png`,
-    );
-
-    fs.writeFileSync(tempFile, new Uint8Array(buffer));
-
+    const tempFile = await downloadImage(url, name);
     await Clipboard.copy({ file: tempFile });
     await showHUD("Image copied to clipboard");
     toast.hide();
   } catch (error) {
     toast.title = "Failed to copy image";
+    toast.message = String(error);
+    toast.style = Toast.Style.Failure;
+  }
+}
+
+export async function openInMessages(url: string, name: string) {
+  const toast = await showToast({
+    title: "Opening in Messages...",
+    style: Toast.Style.Animated,
+  });
+
+  try {
+    const tempFile = await downloadImage(url, name);
+    // Use 'open -a Messages' to open the file in Messages
+    exec(`open -a Messages "${tempFile}"`);
+    await showHUD("Opened in Messages! Right-click image to 'Save to Stickers'");
+    toast.hide();
+  } catch (error) {
+    toast.title = "Failed to open in Messages";
     toast.message = String(error);
     toast.style = Toast.Style.Failure;
   }

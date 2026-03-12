@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Grid, useNavigation, Icon } from "@raycast/api";
-import { copyImageToClipboard } from "../utils";
+import { copyImageToClipboard, openInMessages } from "../utils";
 
 interface ResultViewProps {
   url: string;
@@ -23,6 +23,11 @@ export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
               title="Copy Image"
               icon={Icon.CopyClipboard}
               onAction={() => copyImageToClipboard(url, name)}
+            />
+            <Action
+              title="Add to iMessage Stickers"
+              icon={Icon.PlusCircle}
+              onAction={() => openInMessages(url, name)}
             />
             <Action.CopyToClipboard title="Copy Image URL" content={url} />
             <Action.OpenInBrowser title="Open in Browser" url={url} />
