@@ -1,6 +1,6 @@
 # Fuzzy File Search Changelog
 
-## [Open With Action] - {PR_MERGE_DATE}
+## [Open With Action] - 2026-03-12
 
 - Add "Open With" action to open files with a specific application (Cmd+O).
 
