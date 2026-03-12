@@ -1,3 +1,4 @@
+import { todayDateOnlyEpoch, tomorrowDateOnlyEpoch } from "./date-codecs";
 import type { TaskRecord, TaskState, TaskView } from "../api/types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -6,15 +7,6 @@ function startOfDayEpoch(now: Date): number {
   const start = new Date(now);
   start.setHours(0, 0, 0, 0);
   return start.getTime();
-}
-
-function startOfDayIso(now: Date): string {
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-}
-
-function tomorrowIso(now: Date): string {
-  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-  return tomorrow.toISOString();
 }
 
 function toEpoch(value: string | null | undefined): number | null {
@@ -36,11 +28,11 @@ export function buildTaskStartFields(
 ): {
   start: string;
   startBucket: string;
-  startDate: string | null;
-  todayIndexReferenceDate: string | null;
+  startDate: number | null;
+  todayIndexReferenceDate: number | null;
 } {
-  const today = startOfDayIso(now);
-  const tomorrow = tomorrowIso(now);
+  const today = todayDateOnlyEpoch(now);
+  const tomorrow = tomorrowDateOnlyEpoch(now);
 
   switch (view) {
     case "inbox":

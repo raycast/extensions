@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { instantEpochFromDate } from "../helpers/date-codecs";
 import { buildTaskStartFields } from "../helpers/task-helpers";
 import { getUserId, syncMutate } from "./client";
 import type { TaskView } from "./types";
@@ -30,8 +31,8 @@ export async function createTask(
     title: string;
     description?: string;
     view?: TaskView;
-    startDate?: string;
-    deadlineAt?: string;
+    startDate?: number;
+    deadlineAt?: number;
     projectId?: string;
     teamId?: string;
     assigneeId?: string;
@@ -51,10 +52,10 @@ export async function createTask(
   if (fields.description) {
     payload.description = fields.description;
   }
-  if (fields.startDate) {
+  if (typeof fields.startDate !== "undefined") {
     payload.startDate = fields.startDate;
   }
-  if (fields.deadlineAt) {
+  if (typeof fields.deadlineAt !== "undefined") {
     payload.deadlineAt = fields.deadlineAt;
   }
   if (fields.projectId) {
@@ -74,7 +75,7 @@ export async function createTask(
 export async function completeTask(taskId: string): Promise<void> {
   await syncMutate(
     buildMutateRequest("Task", taskId, "UPDATE", {
-      completedAt: new Date().toISOString(),
+      completedAt: instantEpochFromDate(new Date()),
     }),
   );
 }
@@ -97,7 +98,7 @@ export async function createProject(
     name: string;
     key: string;
     description?: string;
-    targetDate?: string;
+    targetDate?: number;
   },
 ): Promise<string> {
   const id = randomUUID();
@@ -113,7 +114,7 @@ export async function createProject(
   if (fields.description) {
     payload.description = fields.description;
   }
-  if (fields.targetDate) {
+  if (typeof fields.targetDate !== "undefined") {
     payload.targetDate = fields.targetDate;
   }
 

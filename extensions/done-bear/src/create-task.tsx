@@ -3,6 +3,7 @@ import { withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { createChecklistItem, createTask } from "./api/mutations";
 import type { TaskView } from "./api/types";
+import { dateOnlyEpochFromLocalDate } from "./helpers/date-codecs";
 import { useProjects } from "./hooks/use-projects";
 import { useTeams } from "./hooks/use-teams";
 import { ALL_WORKSPACES_ID, useWorkspaces } from "./hooks/use-workspaces";
@@ -66,8 +67,8 @@ function CreateTask() {
         title: values.title.trim(),
         description: values.description?.trim() || undefined,
         view: (values.when as TaskView) || "today",
-        startDate: values.startDate?.toISOString() || undefined,
-        deadlineAt: values.deadline?.toISOString() || undefined,
+        startDate: values.startDate ? dateOnlyEpochFromLocalDate(values.startDate) : undefined,
+        deadlineAt: values.deadline ? dateOnlyEpochFromLocalDate(values.deadline) : undefined,
         projectId: values.projectId || undefined,
         teamId: values.teamId || undefined,
       });

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@r
 import { withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { createProject } from "./api/mutations";
+import { dateOnlyEpochFromLocalDate } from "./helpers/date-codecs";
 import { ALL_WORKSPACES_ID, useWorkspaces } from "./hooks/use-workspaces";
 import { oauthService } from "./oauth";
 
@@ -48,7 +49,7 @@ function CreateProject() {
         name: values.name.trim(),
         key: values.key.trim().toUpperCase(),
         description: values.description?.trim() || undefined,
-        targetDate: values.targetDate?.toISOString() || undefined,
+        targetDate: values.targetDate ? dateOnlyEpochFromLocalDate(values.targetDate) : undefined,
       });
       await showToast({ style: Toast.Style.Success, title: "Project created" });
       await popToRoot();
