@@ -6,7 +6,8 @@
   "icon": "recents.png",
   "author": "GastroGeek",
   "contributors": [
-    "kgrhartlage"
+    "kgrhartlage",
+    "anwarulislam"
   ],
   "license": "MIT",
   "commands": [

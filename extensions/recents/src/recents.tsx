@@ -119,7 +119,7 @@ export default function Command(props: { scope?: string | undefined }) {
 
           return kinds;
         }, [])
-        .sort((a, b) => a?.localeCompare(b))
+        .sort((a, b) => a?.localeCompare(b)),
     );
   }, [loading]);
 
@@ -190,6 +190,7 @@ export default function Command(props: { scope?: string | undefined }) {
                   onAction={() => showInfoInFinder(recent)}
                 />
                 <ActionPanel.Section>
+                  <Action.Paste title={`Paste ${kMDItemKind}`} content={{ file: kMDItemPath }} />
                   <Action.CopyToClipboard
                     title={`Copy ${kMDItemKind}`}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
