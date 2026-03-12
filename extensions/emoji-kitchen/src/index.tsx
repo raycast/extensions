@@ -1,4 +1,12 @@
-import { ActionPanel, Action, Grid, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Grid,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { EmojiWithUnicode } from "./types";
@@ -33,22 +41,24 @@ export default function Command() {
       cats[cat].push(item);
     });
 
-    return Object.entries(cats).sort(([a], [b]) => {
-      const indexA = CATEGORY_ORDER.indexOf(a.toLowerCase());
-      const indexB = CATEGORY_ORDER.indexOf(b.toLowerCase());
-      
-      if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-      if (indexA === -1) return 1;
-      if (indexB === -1) return -1;
-      return indexA - indexB;
-    }).map(([cat, items]) => {
-      return [cat, items.sort((a, b) => a.o - b.o)] as const;
-    });
+    return Object.entries(cats)
+      .sort(([a], [b]) => {
+        const indexA = CATEGORY_ORDER.indexOf(a.toLowerCase());
+        const indexB = CATEGORY_ORDER.indexOf(b.toLowerCase());
+
+        if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        return indexA - indexB;
+      })
+      .map(([cat, items]) => {
+        return [cat, items.sort((a, b) => a.o - b.o)] as const;
+      });
   }, [emojiList, index]);
 
   const handleSelectEmoji = (item: EmojiWithUnicode) => {
     if (!index) return;
-    
+
     if (mode === "explore") {
       push(<MashupGrid baseEmoji={item} index={index} />);
     } else {
@@ -62,19 +72,19 @@ export default function Command() {
       } else {
         const emoji1Combs = loadCombinations(selectedEmoji1);
         const comboStr = emoji1Combs[item.unicode];
-        
+
         if (comboStr) {
           const [date, left] = comboStr.split("/");
           const right = left === item.unicode ? selectedEmoji1 : item.unicode;
           const url = getGStaticUrl(left, right, date);
-          
+
           push(
-            <ResultView 
-              url={url} 
-              e1={index[selectedEmoji1].e} 
-              e2={item.e} 
-              onReset={() => setSelectedEmoji1(null)} 
-            />
+            <ResultView
+              url={url}
+              e1={index[selectedEmoji1].e}
+              e2={item.e}
+              onReset={() => setSelectedEmoji1(null)}
+            />,
           );
         } else {
           showToast({
@@ -97,18 +107,18 @@ export default function Command() {
     if (combKeys.length === 0) return handleRandomize();
     const randomKey2 = combKeys[Math.floor(Math.random() * combKeys.length)];
     const comboStr = emoji1Combs[randomKey2];
-    
+
     const [date, left] = comboStr.split("/");
     const right = left === randomKey2 ? randomKey1 : randomKey2;
     const url = getGStaticUrl(left, right, date);
-    
+
     push(
-      <ResultView 
-        url={url} 
-        e1={index[randomKey1].e} 
-        e2={index[randomKey2].e} 
-        onReset={() => setSelectedEmoji1(null)} 
-      />
+      <ResultView
+        url={url}
+        e1={index[randomKey1].e}
+        e2={index[randomKey2].e}
+        onReset={() => setSelectedEmoji1(null)}
+      />,
     );
   };
 
@@ -119,7 +129,7 @@ export default function Command() {
       inset={Grid.Inset.Small}
       searchBarPlaceholder={
         selectedEmoji1 && index
-          ? `Combining ${index[selectedEmoji1].e} with...` 
+          ? `Combining ${index[selectedEmoji1].e} with...`
           : "Search emoji to cook..."
       }
       searchBarAccessory={
@@ -131,20 +141,32 @@ export default function Command() {
             setSelectedEmoji1(null);
           }}
         >
-          <Grid.Dropdown.Item title="Explore Mashups" value="explore" icon={Icon.MagnifyingGlass} />
-          <Grid.Dropdown.Item title="Combine Emojis" value="combine" icon={Icon.PlusCircle} />
+          <Grid.Dropdown.Item
+            title="Explore Mashups"
+            value="explore"
+            icon={Icon.MagnifyingGlass}
+          />
+          <Grid.Dropdown.Item
+            title="Combine Emojis"
+            value="combine"
+            icon={Icon.PlusCircle}
+          />
         </Grid.Dropdown>
       }
     >
       {selectedEmoji1 && index && (
         <Grid.Section title="Current Selection">
-           <Grid.Item
+          <Grid.Item
             key="selected"
             content={index[selectedEmoji1].e}
             title="Selected"
             actions={
               <ActionPanel>
-                <Action title="Clear Selection" onAction={() => setSelectedEmoji1(null)} icon={Icon.XMarkCircle} />
+                <Action
+                  title="Clear Selection"
+                  onAction={() => setSelectedEmoji1(null)}
+                  icon={Icon.XMarkCircle}
+                />
               </ActionPanel>
             }
           />
@@ -160,10 +182,22 @@ export default function Command() {
               title={item.a}
               actions={
                 <ActionPanel>
-                  <Action title={mode === "combine" ? "Combine" : "Explore"} onAction={() => handleSelectEmoji(item)} />
-                  <Action title="Randomize" onAction={handleRandomize} icon={Icon.Wand} shortcut={{ modifiers: ["cmd"], key: "r" }} />
+                  <Action
+                    title={mode === "combine" ? "Combine" : "Explore"}
+                    onAction={() => handleSelectEmoji(item)}
+                  />
+                  <Action
+                    title="Randomize"
+                    onAction={handleRandomize}
+                    icon={Icon.Wand}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  />
                   {selectedEmoji1 && (
-                    <Action title="Clear Selection" onAction={() => setSelectedEmoji1(null)} icon={Icon.XMarkCircle} />
+                    <Action
+                      title="Clear Selection"
+                      onAction={() => setSelectedEmoji1(null)}
+                      icon={Icon.XMarkCircle}
+                    />
                   )}
                 </ActionPanel>
               }

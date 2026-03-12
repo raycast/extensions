@@ -1,4 +1,10 @@
-import { showToast, Toast, Clipboard, showHUD, environment } from "@raycast/api";
+import {
+  showToast,
+  Toast,
+  Clipboard,
+  showHUD,
+  environment,
+} from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -19,12 +25,15 @@ export async function copyImageToClipboard(url: string, name: string) {
   try {
     const response = await fetch(url);
     if (!response.ok) throw new Error("Failed to download image");
-    
+
     const buffer = await response.arrayBuffer();
-    const tempFile = path.join(os.tmpdir(), `${name.replace(/[^a-z0-9]/gi, "_")}.png`);
-    
+    const tempFile = path.join(
+      os.tmpdir(),
+      `${name.replace(/[^a-z0-9]/gi, "_")}.png`,
+    );
+
     fs.writeFileSync(tempFile, new Uint8Array(buffer));
-    
+
     await Clipboard.copy({ file: tempFile });
     await showHUD("Image copied to clipboard");
     toast.hide();
@@ -48,7 +57,11 @@ export function loadEmojiIndex(): Record<string, EmojiMetadata> {
 export function loadCombinations(unicode: string): Combinations {
   try {
     const prefix = unicode.slice(0, 2);
-    const dataPath = path.join(environment.assetsPath, "combinations", `${prefix}.json`);
+    const dataPath = path.join(
+      environment.assetsPath,
+      "combinations",
+      `${prefix}.json`,
+    );
     const rawData = fs.readFileSync(dataPath, "utf-8");
     const group = JSON.parse(rawData);
     return group[unicode] || {};

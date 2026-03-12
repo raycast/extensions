@@ -1,7 +1,11 @@
 import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
 import { useMemo } from "react";
 import { EmojiMetadata, EmojiWithUnicode } from "../types";
-import { getGStaticUrl, copyImageToClipboard, loadCombinations } from "../utils";
+import {
+  getGStaticUrl,
+  copyImageToClipboard,
+  loadCombinations,
+} from "../utils";
 
 interface MashupGridProps {
   baseEmoji: EmojiWithUnicode;
@@ -14,7 +18,7 @@ export function MashupGrid({ baseEmoji, index }: MashupGridProps) {
     return Object.entries(combs).map(([otherUnicode, comboStr]) => {
       const [date, left] = comboStr.split("/");
       const right = left === otherUnicode ? baseEmoji.unicode : otherUnicode;
-      
+
       return {
         otherUnicode,
         date,
@@ -37,16 +41,19 @@ export function MashupGrid({ baseEmoji, index }: MashupGridProps) {
             subtitle={combo.otherAlt}
             actions={
               <ActionPanel>
-                <Action 
-                  title="Copy Image" 
+                <Action
+                  title="Copy Image"
                   icon={Icon.CopyClipboard}
-                  onAction={() => copyImageToClipboard(combo.url, name)} 
+                  onAction={() => copyImageToClipboard(combo.url, name)}
                 />
-                <Action.CopyToClipboard title="Copy Image URL" content={combo.url} />
+                <Action.CopyToClipboard
+                  title="Copy Image URL"
+                  content={combo.url}
+                />
                 <Action.OpenInBrowser title="Open in Browser" url={combo.url} />
-                <Action.CopyToClipboard 
-                  title="Copy Emoji Combination" 
-                  content={`${baseEmoji.e}${combo.otherEmoji}`} 
+                <Action.CopyToClipboard
+                  title="Copy Emoji Combination"
+                  content={`${baseEmoji.e}${combo.otherEmoji}`}
                 />
               </ActionPanel>
             }

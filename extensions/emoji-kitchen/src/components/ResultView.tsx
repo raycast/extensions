@@ -19,23 +19,23 @@ export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
         title={`${e1} + ${e2}`}
         actions={
           <ActionPanel>
-            <Action 
-              title="Copy Image" 
+            <Action
+              title="Copy Image"
               icon={Icon.CopyClipboard}
-              onAction={() => copyImageToClipboard(url, name)} 
+              onAction={() => copyImageToClipboard(url, name)}
             />
             <Action.CopyToClipboard title="Copy Image URL" content={url} />
             <Action.OpenInBrowser title="Open in Browser" url={url} />
-            <Action.CopyToClipboard 
-              title="Copy Emoji Combination" 
-              content={`${e1}${e2}`} 
+            <Action.CopyToClipboard
+              title="Copy Emoji Combination"
+              content={`${e1}${e2}`}
             />
-            <Action 
-              title="Mix More" 
+            <Action
+              title="Mix More"
               onAction={() => {
                 onReset();
                 pop();
-              }} 
+              }}
               icon={Icon.PlusCircle}
             />
           </ActionPanel>
