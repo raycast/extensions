@@ -99,7 +99,9 @@ function isBoxChar(ch: string): boolean {
 }
 
 function stripBoxArt(line: string): string {
-  return [...line].filter((ch) => !isBoxChar(ch)).join("");
+  return Array.from(line)
+    .filter((ch) => !isBoxChar(ch))
+    .join("");
 }
 
 function trimPipeEdges(line: string): string {
