@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Menu Bar Energy Optimization] - {PR_MERGE_DATE}
+## [Menu Bar Energy Optimization] - 2026-03-12
 
 - Consolidated menu bar polling into a single AppleScript snapshot that checks whether Music is running, reads player state, and fetches current track metadata in one call — reducing subprocess count from 3 to 1 per refresh.
 - Cached the macOS version lookup so favorite-property detection no longer spawns `sw_vers` on every menu bar refresh.
