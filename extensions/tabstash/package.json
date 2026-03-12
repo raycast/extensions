@@ -25,6 +25,7 @@
     {
       "name": "search-links",
       "title": "Search Bookmarks",
+      "subtitle": "TabStash",
       "description": "Search and browse your TabStash bookmarks",
       "mode": "view",
       "keywords": [
@@ -46,6 +47,7 @@
     {
       "name": "capture-link",
       "title": "Capture Current Tab",
+      "subtitle": "TabStash",
       "description": "Save the active browser tab to TabStash",
       "mode": "no-view",
       "keywords": [
