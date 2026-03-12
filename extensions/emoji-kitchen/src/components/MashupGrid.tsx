@@ -5,7 +5,6 @@ import {
   getGStaticUrl,
   copyImageToClipboard,
   loadCombinations,
-  openInMessages,
 } from "../utils";
 
 interface MashupGridProps {
@@ -46,11 +45,6 @@ export function MashupGrid({ baseEmoji, index }: MashupGridProps) {
                   title="Copy Image"
                   icon={Icon.CopyClipboard}
                   onAction={() => copyImageToClipboard(combo.url, name)}
-                />
-                <Action
-                  title="Add to iMessage Stickers"
-                  icon={Icon.PlusCircle}
-                  onAction={() => openInMessages(combo.url, name)}
                 />
                 <Action.CopyToClipboard
                   title="Copy Image URL"

@@ -50,46 +50,6 @@ export async function copyImageToClipboard(url: string, name: string) {
   }
 }
 
-export async function createSticker(url: string, name: string): Promise<string> {
-  const tempFile = await downloadImage(url, name);
-  const stickerFile = path.join(os.tmpdir(), `sticker_${path.basename(tempFile)}`);
-
-  return new Promise((resolve, reject) => {
-    // Add white border (sticker style) using ImageMagick
-    const cmd = `magick "${tempFile}" -background none -bordercolor none -border 10 \\( +clone -alpha extract -morphology Dilate Disk:10 -background white -alpha shape \\) -compose DstOver -composite "${stickerFile}"`;
-    exec(cmd, (error) => {
-      if (error) {
-        console.error("Magick error:", error);
-        resolve(tempFile); // Fallback to raw image if magick fails
-      } else {
-        resolve(stickerFile);
-      }
-    });
-  });
-}
-
-export async function openInMessages(url: string, name: string) {
-  const toast = await showToast({
-    title: "Preparing Sticker...",
-    style: Toast.Style.Animated,
-  });
-
-  try {
-    const stickerFile = await createSticker(url, name);
-    await Clipboard.copy({ file: stickerFile });
-
-    // Open Messages
-    exec(`open -a Messages`);
-
-    await showHUD("Sticker Copied! Paste (Cmd+V) in Messages, then right-click to 'Save to Stickers'");
-    toast.hide();
-  } catch (error) {
-    toast.title = "Failed to prepare sticker";
-    toast.message = String(error);
-    toast.style = Toast.Style.Failure;
-  }
-}
-
 let _cachedIndex: Record<string, EmojiMetadata> | null = null;
 let _cachedVectors: Record<string, Record<string, number[]>> | null = null;
 
