@@ -4,6 +4,7 @@ import { EmojiMetadata, EmojiWithUnicode } from "../types";
 import {
   getGStaticUrl,
   copyImageToClipboard,
+  saveImageToDownloads,
   loadCombinations,
 } from "../utils";
 
@@ -45,6 +46,12 @@ export function MashupGrid({ baseEmoji, index }: MashupGridProps) {
                   title="Copy Image"
                   icon={Icon.CopyClipboard}
                   onAction={() => copyImageToClipboard(combo.url, name)}
+                />
+                <Action
+                  title="Save to Downloads"
+                  icon={Icon.Download}
+                  onAction={() => saveImageToDownloads(combo.url, name)}
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Image URL"

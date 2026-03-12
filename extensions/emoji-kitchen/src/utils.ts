@@ -50,6 +50,33 @@ export async function copyImageToClipboard(url: string, name: string) {
   }
 }
 
+export async function saveImageToDownloads(url: string, name: string) {
+  const toast = await showToast({
+    title: "Saving to Downloads...",
+    style: Toast.Style.Animated,
+  });
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to download image");
+
+    const buffer = await response.arrayBuffer();
+    const downloadPath = path.join(
+      os.homedir(),
+      "Downloads",
+      `${name.replace(/[^a-z0-9]/gi, "_")}.png`,
+    );
+
+    fs.writeFileSync(downloadPath, new Uint8Array(buffer));
+    await showHUD(`Saved to Downloads: ${path.basename(downloadPath)}`);
+    toast.hide();
+  } catch (error) {
+    toast.title = "Failed to save image";
+    toast.message = String(error);
+    toast.style = Toast.Style.Failure;
+  }
+}
+
 let _cachedIndex: Record<string, EmojiMetadata> | null = null;
 let _cachedVectors: Record<string, Record<string, number[]>> | null = null;
 

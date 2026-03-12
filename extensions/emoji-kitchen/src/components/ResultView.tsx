@@ -1,5 +1,5 @@
 import { ActionPanel, Action, Detail, useNavigation, Icon } from "@raycast/api";
-import { copyImageToClipboard } from "../utils";
+import { copyImageToClipboard, saveImageToDownloads } from "../utils";
 
 interface ResultViewProps {
   url: string;
@@ -27,6 +27,12 @@ export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
             title="Copy Image"
             icon={Icon.CopyClipboard}
             onAction={() => copyImageToClipboard(url, name)}
+          />
+          <Action
+            title="Save to Downloads"
+            icon={Icon.Download}
+            onAction={() => saveImageToDownloads(url, name)}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
           <Action.CopyToClipboard title="Copy Image URL" content={url} />
           <Action.OpenInBrowser title="Open in Browser" url={url} />
