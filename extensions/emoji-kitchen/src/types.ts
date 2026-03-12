@@ -11,11 +11,3 @@ export interface EmojiWithUnicode extends EmojiMetadata {
 }
 
 export type Combinations = Record<string, string>;
-
-export interface Combination {
-  otherUnicode: string;
-  date: string;
-  otherEmoji: string;
-  otherAlt: string;
-  url: string;
-}

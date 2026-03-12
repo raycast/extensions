@@ -42,6 +42,15 @@ export async function copyImageToClipboard(url: string, name: string) {
   try {
     const tempFile = await downloadImage(url, name);
     await Clipboard.copy({ file: tempFile });
+
+    // Small delay to ensure the clipboard system has registered the file reference
+    // before we delete the physical file from the temp directory.
+    setTimeout(() => {
+      if (fs.existsSync(tempFile)) {
+        fs.unlinkSync(tempFile);
+      }
+    }, 1000);
+
     await showHUD("Image copied to clipboard");
     toast.hide();
   } catch (error) {
