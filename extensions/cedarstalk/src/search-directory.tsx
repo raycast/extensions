@@ -825,7 +825,6 @@ export default function SearchDirectory() {
       ) : (
         <List.Section
           title={`${results.length} result${results.length !== 1 ? "s" : ""}`}
-          footer={cacheSize > 0 ? `${cacheSize} people cached` : undefined}
         >
           {results.map((person) => (
             <PersonListItem
