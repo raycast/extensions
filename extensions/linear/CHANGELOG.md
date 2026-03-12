@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [Auth fixes and toolbar icon] - 2026-03-12
+
+- Fix authentication errors during sign-in that could show "Something went wrong" or fail with "invalid_grant"/"fetch failed", preventing issue creation. See <https://github.com/raycast/extensions/issues/23050> and <https://github.com/raycast/extensions/issues/26174>
+- Fix red triangle icon appearing in the toolbar/menubar caused by background auth failures. See <https://github.com/raycast/extensions/issues/24993>
+
 ## [Update Shortcuts] - 2026-01-06
 
 - Updated shortcuts to make them cross-platform

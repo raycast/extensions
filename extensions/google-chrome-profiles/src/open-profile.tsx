@@ -1,12 +1,22 @@
-import { LaunchProps, showHUD } from "@raycast/api";
+import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 import { ChromeTarget, openGoogleChrome } from "./util/util";
-import { Profile } from "./util/types";
+import { getSelectedBrowser, Profile } from "./util/types";
 
 export default async function Command(props: LaunchProps) {
+  const browser = getSelectedBrowser();
   const profileDirectory = props.launchContext?.directory;
   const profileName = props.launchContext?.name;
   const action = props.launchContext?.action ?? "newTab";
   const url = props.launchContext?.url;
+
+  if (!profileDirectory || !profileName) {
+    await showToast(
+      Toast.Style.Failure,
+      "No profile context provided",
+      "This command is meant to be launched via a Quicklink. Use 'Switch Profiles' to create one.",
+    );
+    return null;
+  }
 
   const target: ChromeTarget =
     action === "focus"
@@ -22,12 +32,15 @@ export default async function Command(props: LaunchProps) {
       ? `${profileName} > Opening New Tab`
       : `${profileName} > Opening ${target.url}`;
 
-  if (profileDirectory && profileName) {
-    const profile: Profile = { directory: profileDirectory, name: profileName };
-    await openGoogleChrome(profile, target, async () => {
+  const profile: Profile = { directory: profileDirectory, name: profileName };
+  await openGoogleChrome(
+    profile,
+    target,
+    async () => {
       await showHUD(processName);
-    });
-  }
+    },
+    browser,
+  );
 
   return null;
 }

@@ -152,6 +152,53 @@ export function useSearchHistory(searchText?: string, options: { limit?: number 
   return result;
 }
 
+/** Escapes unescaped " inside JSON string values so JSON.parse succeeds (AppleScript may miss some). */
+function fixUnescapedQuotesInJson(jsonStr: string): string {
+  let inString = false;
+  let inKey = false; // true when the current string is a key (e.g. "title"), false when a value
+  let escaped = false;
+  let lastStructural = "{"; // so first " is treated as key
+  let result = "";
+  for (let i = 0; i < jsonStr.length; i++) {
+    const c = jsonStr[i];
+    if (escaped) {
+      result += c;
+      escaped = false;
+      continue;
+    }
+    if (c === "\\") {
+      result += c;
+      escaped = true;
+      continue;
+    }
+    if (!inString && (c === "{" || c === "," || c === ":" || c === "}" || c === "]")) {
+      lastStructural = c;
+    }
+    if (c === '"') {
+      if (inString) {
+        let j = i + 1;
+        while (j < jsonStr.length && jsonStr[j] === " ") j++;
+        const next = jsonStr[j];
+        const keyClose = inKey && next === ":";
+        const valueClose = !inKey && (next === "," || next === "}" || next === "]" || j >= jsonStr.length);
+        if (keyClose || valueClose) {
+          result += c;
+          inString = false;
+        } else {
+          result += "\\" + c;
+        }
+      } else {
+        result += c;
+        inString = true;
+        inKey = lastStructural === "{" || lastStructural === ",";
+      }
+      continue;
+    }
+    result += c;
+  }
+  return result;
+}
+
 async function getTabs(): Promise<Tab[]> {
   // JXA (JavaScript for Automation) is significantly faster than AppleScript
   // for complex data extraction: native JSON, no O(n^2) string concat.
@@ -159,7 +206,17 @@ async function getTabs(): Promise<Tab[]> {
   // bulk AppleScript using `properties of every tab` (still 10-14x faster
   // than the original per-tab property access).
   try {
-    return await getTabsJXA();
+    const { tabs: jxaResult, windowCount } = await getTabsJXA();
+    // When JXA returns 0 tabs but Dia has windows (JXA bug in some versions), try AppleScript
+    if (jxaResult.length === 0 && windowCount > 0) {
+      try {
+        const asResult = await getTabsBulkAppleScript();
+        if (asResult.length > 0) return asResult;
+      } catch {
+        // ignore, return []
+      }
+    }
+    return jxaResult;
   } catch {
     try {
       return await getTabsBulkAppleScript();
@@ -169,7 +226,7 @@ async function getTabs(): Promise<Tab[]> {
   }
 }
 
-async function getTabsJXA(): Promise<Tab[]> {
+async function getTabsJXA(): Promise<{ tabs: Tab[]; windowCount: number }> {
   const jxa = `
     (() => {
       const dia = Application("Dia");
@@ -195,7 +252,7 @@ async function getTabsJXA(): Promise<Tab[]> {
           }
         } catch(e) {}
       }
-      return JSON.stringify(tabs);
+      return JSON.stringify({ tabs: tabs, windowCount: wins.length });
     })()
   `;
 
@@ -204,19 +261,25 @@ async function getTabsJXA(): Promise<Tab[]> {
     encoding: "utf-8",
   }).trim();
 
-  const parsed = JSON.parse(result) as Array<{
-    windowId: string;
-    tabId: string;
-    title: string;
-    url: string;
-    isPinned: boolean;
-    isFocused: boolean;
-  }>;
+  const parsed = JSON.parse(result) as {
+    tabs: Array<{
+      windowId: string;
+      tabId: string;
+      title: string;
+      url: string;
+      isPinned: boolean;
+      isFocused: boolean;
+    }>;
+    windowCount: number;
+  };
 
-  return parsed.map((t) => ({
-    ...t,
-    url: t.url || undefined,
-  }));
+  return {
+    tabs: parsed.tabs.map((t) => ({
+      ...t,
+      url: t.url || undefined,
+    })),
+    windowCount: parsed.windowCount,
+  };
 }
 
 async function getTabsBulkAppleScript(): Promise<Tab[]> {
@@ -225,6 +288,8 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
   const result = await runAppleScript(
     `
       on escape_value(this_text)
+        if this_text is missing value then return ""
+        set this_text to this_text as text
         set AppleScript's text item delimiters to "\\\\"
         set the item_list to every text item of this_text
         set AppleScript's text item delimiters to "\\\\\\\\"
@@ -246,23 +311,35 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
             set allTabs to properties of every tab of w
             set tabsCount to count of allTabs
             repeat with i from 1 to tabsCount
-              set _tab to item i of allTabs
-              set _title to my escape_value(get name of _tab)
-              set _url to ""
               try
-                set _url to my escape_value(get URL of _tab)
-                if _url is missing value then set _url to ""
+                set _tab to item i of allTabs
+                set _title to ""
+                try
+                  set _title to my escape_value(get title of _tab)
+                end try
+                if _title is "" then
+                  try
+                    set _title to my escape_value(get name of _tab)
+                  end try
+                end if
+                set _url to ""
+                try
+                  set _url to my escape_value(get URL of _tab)
+                end try
+                set _id to get id of _tab
+                set _isPinned to get isPinned of _tab
+                set _isFocused to get isFocused of _tab
+
+                if _output is not "" then
+                  set _output to (_output & ",")
+                end if
+                set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
+              on error
+                (* skip this tab, avoid dangling comma *)
               end try
-              set _id to get id of _tab
-              set _isPinned to get isPinned of _tab
-              set _isFocused to get isFocused of _tab
-
-              set _output to (_output & "{\\"windowId\\": \\"" & wId & "\\", \\"tabId\\": \\"" & _id & "\\", \\"title\\": \\"" & _title & "\\", \\"url\\": \\"" & _url & "\\", \\"isPinned\\": " & _isPinned & ", \\"isFocused\\": " & _isFocused & "}")
-
-              if i < tabsCount then
-                set _output to (_output & ",")
-              end if
             end repeat
+          on error errMsg number errNum
+            (* swallow error for this window so we still return tabs from other windows *)
           end try
         end repeat
       end tell
@@ -273,7 +350,15 @@ async function getTabsBulkAppleScript(): Promise<Tab[]> {
 
   if (!result || result.trim() === "[]") return [];
 
-  const parsed = JSON.parse(result) as Array<{
+  // AppleScript escape_value only escapes \ and "; control chars in title/URL break JSON. Normalize them.
+  let sanitized = result
+    .split("")
+    .map((c) => (c.charCodeAt(0) <= 31 ? " " : c))
+    .join("");
+  // Escape unescaped " inside string values (e.g. titles with literal ") so JSON.parse succeeds.
+  sanitized = fixUnescapedQuotesInJson(sanitized);
+
+  const parsed = JSON.parse(sanitized) as Array<{
     windowId: string;
     tabId: string;
     title: string;

@@ -1,5 +1,11 @@
 # Dia Changelog
 
+## [Fix tab fetching and JSON parsing] - 2026-03-12
+
+- Fix unescaped quotes in JSON from AppleScript so tab data parses correctly
+- When JXA returns 0 tabs but Dia has windows, fall back to AppleScript bulk fetch
+- Handle missing value in AppleScript escape_value to avoid errors
+
 ## [Performance and Features] - 2026-03-10
 
 ### Performance
