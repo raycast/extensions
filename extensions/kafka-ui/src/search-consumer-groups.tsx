@@ -280,7 +280,7 @@ export default function SearchConsumerGroups() {
         <List.EmptyView
           icon={Icon.Gear}
           title="No Environments Configured"
-          description='Run "Manage Kafka Environments" to add your first environment'
+          description='Run "Kafka Configuration Manager" to add your first environment'
         />
       </List>
     );

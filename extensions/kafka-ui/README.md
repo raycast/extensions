@@ -10,15 +10,15 @@ This extension is powered by the [Kafbat UI](https://github.com/kafbat/kafka-ui)
 
 ## Features
 
-- **Search Consumer Groups** - Browse consumer groups, inspect per-topic and per-partition lag with color-coded severity (OK / Warning / Critical)
-- **Search Topics** - Browse Kafka topics grouped by prefix, view partition and replication details, see consumer groups per topic
+- **Kafka Search Consumer Groups** - Browse consumer groups, inspect per-topic and per-partition lag with color-coded severity (OK / Warning / Critical)
+- **Kafka Search Topics** - Browse Kafka topics grouped by prefix, view partition and replication details, see consumer groups per topic
 - **Multi-Environment** - Configure any number of Kafka UI environments (DEV, QA, PROD, etc.) and switch between them from a dropdown
-- **Per-User Configuration** - Each team member manages their own environments independently through the Manage Environments command
+- **Per-User Configuration** - Each team member manages their own environments independently through the Kafka Configuration Manager command
 
 ## Setup
 
 1. Install the extension from the Raycast Store
-2. Run the **Manage Kafka Environments** command
+2. Run the **Kafka Configuration Manager** command
 3. Add your first environment with:
    - **Name**: A display label (e.g. "DEV", "Staging", "Production")
    - **Kafka UI URL**: The base URL of your Kafka UI instance (e.g. `https://kafka-ui.internal.example.com`)

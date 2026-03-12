@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "search-consumer-groups",
-      "title": "Search Consumer Groups",
+      "title": "Kafka Search Consumer Groups",
       "subtitle": "Kafka UI",
       "description": "Search consumer groups, inspect lag per topic and partition",
       "mode": "view",
@@ -18,7 +18,7 @@
     },
     {
       "name": "search-topics",
-      "title": "Search Topics",
+      "title": "Kafka Search Topics",
       "subtitle": "Kafka UI",
       "description": "Search and browse Kafka topics with partition and replication details",
       "mode": "view",
@@ -26,7 +26,7 @@
     },
     {
       "name": "manage-environments",
-      "title": "Manage Kafka Environments",
+      "title": "Kafka Configuration Manager",
       "subtitle": "Kafka UI",
       "description": "Add, edit, or remove Kafka UI environments and cluster connections",
       "mode": "view",
