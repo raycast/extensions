@@ -18,6 +18,7 @@ import {
   type DirectoryPerson,
   type PersonInfo,
   type Population,
+  type ScheduleItem,
   getDepartments,
   getPersonInfo,
   getPersonTerms,
