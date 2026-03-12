@@ -20,9 +20,9 @@ A no-UI command that instantly pastes your most recent photo into the frontmost 
 
 ## Preferences
 
-| Preference | Default | Description |
-|---|---|---|
-| Number of Photos | 24 | How many recent photos to show in the grid |
+| Preference       | Default | Description                                |
+| ---------------- | ------- | ------------------------------------------ |
+| Number of Photos | 24      | How many recent photos to show in the grid |
 
 ## Notes
 

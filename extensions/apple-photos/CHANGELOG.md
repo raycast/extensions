@@ -3,6 +3,7 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
+
 - **Search Recent Photos** command: Browse your most recent Apple Photos in a 3-column grid
 - **Paste Recent Photo** command: Paste your most recent photo directly into the frontmost app
 - Progressive thumbnail loading — photos appear in order as they generate

@@ -9,7 +9,7 @@ import {
   getPreferenceValues,
   getFrontmostApplication,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 
 import { fetchPhotoMetadata, getOrExportThumbnail, getOrExportOriginal, openPhotoInPhotos } from "./api/photos";
@@ -27,17 +27,17 @@ function formatDate(dateStr: string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const timeStr = date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 
   if (diffDays === 0) return `Today at ${timeStr}`;
   if (diffDays === 1) return `Yesterday at ${timeStr}`;
-  if (diffDays < 7) return date.toLocaleDateString([], { weekday: "long" });
-  if (diffDays < 365) return date.toLocaleDateString([], { month: "short", day: "numeric" });
-  return date.toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" });
+  if (diffDays < 7) return date.toLocaleDateString("en-US", { weekday: "long" });
+  if (diffDays < 365) return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
 export default function Command() {
-  const { photoCount } = getPreferenceValues<Preferences.SearchPhotos>();
+  const { photoCount } = getPreferenceValues();
   const count = Math.max(1, parseInt(photoCount, 10) || 24);
 
   const [photos, setPhotos] = useState<PhotoState[]>([]);
@@ -89,7 +89,7 @@ export default function Command() {
       if (!cancelled) setIsLoading(false);
     }
 
-    load().catch(console.error);
+    load().catch((e) => showFailureToast(`Failed to load photos: ${String(e)}`));
     return () => {
       cancelled = true;
     };
@@ -115,10 +115,14 @@ export default function Command() {
                     title="Copy to Clipboard"
                     icon={Icon.Clipboard}
                     onAction={async () => {
-                      const origPath = await getOrExportOriginal(photo.id);
-                      await Clipboard.copy({ file: origPath });
-                      await closeMainWindow();
-                      await showHUD("Copied to Clipboard");
+                      try {
+                        const origPath = await getOrExportOriginal(photo.id);
+                        await Clipboard.copy({ file: origPath });
+                        await closeMainWindow();
+                        await showHUD("Copied to Clipboard");
+                      } catch (e) {
+                        showFailureToast(`Copy failed: ${String(e)}`);
+                      }
                     }}
                   />
                   <Action
@@ -126,21 +130,31 @@ export default function Command() {
                     icon={Icon.ArrowRight}
                     shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={async () => {
-                      const origPath = await getOrExportOriginal(photo.id);
-                      await Clipboard.copy({ file: origPath });
-                      await closeMainWindow();
-                      await runAppleScript(`
-                        tell application "System Events"
-                          keystroke "v" using command down
-                        end tell
-                      `);
+                      try {
+                        const origPath = await getOrExportOriginal(photo.id);
+                        await Clipboard.copy({ file: origPath });
+                        await closeMainWindow();
+                        await runAppleScript(`
+                          tell application "System Events"
+                            keystroke "v" using command down
+                          end tell
+                        `);
+                      } catch (e) {
+                        showFailureToast(`Paste failed: ${String(e)}`);
+                      }
                     }}
                   />
                   <Action
                     title="Open in Photos"
                     icon={Icon.AppWindow}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
-                    onAction={() => openPhotoInPhotos(photo.id)}
+                    onAction={async () => {
+                      try {
+                        await openPhotoInPhotos(photo.id);
+                      } catch (e) {
+                        showFailureToast(`Open failed: ${String(e)}`);
+                      }
+                    }}
                   />
                   {thumbnailPath ? <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} /> : null}
                 </ActionPanel.Section>

@@ -5,18 +5,23 @@
   "description": "Browse your recent Apple Photos in a grid and paste the latest photo directly into any app.",
   "icon": "command-icon.png",
   "author": "wesbaker",
-  "categories": ["Media", "Productivity"],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-photos",
       "title": "Search Recent Photos",
+      "subtitle": "Apple Photos",
       "description": "Browse your most recent photos in a grid",
       "mode": "view"
     },
     {
       "name": "paste-photo",
       "title": "Paste Recent Photo",
+      "subtitle": "Apple Photos",
       "description": "Paste the most recent photo into the frontmost app",
       "mode": "no-view"
     }
@@ -51,5 +56,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "platforms": ["macOS"]
+  "platforms": [
+    "macOS"
+  ]
 }
