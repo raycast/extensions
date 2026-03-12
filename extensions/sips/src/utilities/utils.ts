@@ -35,6 +35,7 @@ import {
   getNeoFinderSelection,
   getPathFinderSelection,
   getQSpaceSelection,
+  splitPaths,
 } from "./scripts/file-selection";
 
 /**
@@ -112,9 +113,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   if (inputMethod == "Clipboard") {
     // Extract images from clipboard
     try {
-      const clipboardImages = (await getClipboardImages())
-        .split(", /")
-        .map((x, i) => (i === 0 ? x.trim() : `/${x.trim()}`));
+      const clipboardImages = splitPaths(await getClipboardImages());
       await LocalStorage.setItem("itemsToRemove", clipboardImages.join("\n"));
       if (clipboardImages.filter((i) => i.trim().length > 0).length > 0) {
         return clipboardImages;
