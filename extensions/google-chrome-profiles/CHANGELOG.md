@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-03-12
 
 - Add Google Chrome Canary support via a new Browser preference dropdown
 - Show informative toast when "Open Profile with Context" is launched without a quicklink context
