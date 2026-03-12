@@ -16,8 +16,12 @@ async function fetchJson<T>(url: string): Promise<T> {
 
   if (!contentType.includes("application/json")) {
     const body = await response.text();
-    console.error(`[kafka-ui] Expected JSON but got "${contentType}" from ${url}`);
-    console.error(`[kafka-ui] Response body (first 500 chars): ${body.substring(0, 500)}`);
+    console.error(
+      `[kafka-ui] Expected JSON but got "${contentType}" from ${url}`,
+    );
+    console.error(
+      `[kafka-ui] Response body (first 500 chars): ${body.substring(0, 500)}`,
+    );
     throw new Error(
       `Kafka UI returned non-JSON response. Verify your Kafka UI URL and Cluster Name. URL: ${url}`,
     );
@@ -25,8 +29,12 @@ async function fetchJson<T>(url: string): Promise<T> {
 
   if (!response.ok) {
     const body = await response.text();
-    console.error(`[kafka-ui] API error: ${response.status} ${response.statusText} - ${body}`);
-    throw new Error(`Kafka UI API ${response.status}: ${response.statusText}. URL: ${url}`);
+    console.error(
+      `[kafka-ui] API error: ${response.status} ${response.statusText} - ${body}`,
+    );
+    throw new Error(
+      `Kafka UI API ${response.status}: ${response.statusText}. URL: ${url}`,
+    );
   }
 
   return response.json() as Promise<T>;
@@ -144,7 +152,7 @@ async function tryFetchConsumerGroups(
     const data = await fetchJson<unknown>(pagedUrl);
     console.log(`[kafka-ui] Paged endpoint succeeded`);
     return { data, source: "paged" };
-  } catch (pagedErr) {
+  } catch {
     console.log(`[kafka-ui] Paged endpoint failed, trying non-paged`);
   }
 
