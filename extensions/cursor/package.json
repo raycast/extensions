@@ -19,6 +19,12 @@
 			"title": "Search Cursor.sh Documentation",
 			"description": "Search the Cursor documentation right from Raycast",
 			"mode": "view"
+		},
+		{
+			"name": "active-workspaces",
+			"title": "Show Active Workspaces",
+			"description": "Show currently active Cursor windows and workspaces",
+			"mode": "view"
 		}
 	],
 	"dependencies": {
