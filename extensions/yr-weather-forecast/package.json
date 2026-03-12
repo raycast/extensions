@@ -130,7 +130,6 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^30.2.0",
     "prettier": "^3.5.3",
@@ -156,7 +155,6 @@
     "test:integration": "jest tests/integration",
     "test:runner": "ts-node tests/run-tests.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
-    "prepare": "husky"
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -17,6 +17,8 @@ dist/
 BUNDLE_OPTIMIZATION.md
 TESTING.md
 docs/
+.cursor/
+.husky/
 
 # Coverage output
 coverage/
