@@ -1,6 +1,6 @@
 # CedarStalk
 
-![detail of a user](./metadata/cedarstalk-1.png)
+![detail of a user](./media/cedarstalk-1.png)
 
 Search the Cedarville University student and staff directory from Raycast. Look up anyone by name, view their schedule, majors, office, and contact info -- all without opening a browser.
 
