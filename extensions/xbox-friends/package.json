@@ -32,6 +32,7 @@
       "label": "Show mock friends for testing without API key",
       "description": "Display fake friend data so you can preview the extension without an OpenXBL API key.",
       "type": "checkbox",
+      "required": false,
       "default": false
     }
   ],
