@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { EmojiWithUnicode } from "./types";
+import { EmojiWithUnicode, Combinations } from "./types";
 import { CATEGORY_ORDER, GLOBAL_SYNONYMS } from "./constants";
 import {
   loadEmojiIndex,
