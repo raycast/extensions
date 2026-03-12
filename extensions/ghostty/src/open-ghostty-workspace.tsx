@@ -101,9 +101,7 @@ export default function Command() {
           key={repo.directory}
           icon={Icon.Folder}
           title={repo.name}
-          accessories={[
-            { text: toTildePath(repo.directory), tooltip: "Path" },
-          ]}
+          accessories={[{ text: toTildePath(repo.directory), tooltip: "Path" }]}
           actions={
             <RepoActions repo={repo} configs={configs} editor={prefs.editorApplication} onRefresh={revalidate} />
           }
