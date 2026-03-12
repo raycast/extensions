@@ -45,6 +45,9 @@ export async function copyImageToClipboard(url: string, name: string) {
 }
 
 let _cachedIndex: Record<string, EmojiMetadata> | null = null;
+let _cachedVectors: Record<string, Record<string, number[]>> | null = null;
+
+export const VECTOR_DIMENSION = 128;
 
 export function loadEmojiIndex(): Record<string, EmojiMetadata> {
   if (_cachedIndex) return _cachedIndex;
@@ -52,6 +55,64 @@ export function loadEmojiIndex(): Record<string, EmojiMetadata> {
   const rawData = fs.readFileSync(dataPath, "utf-8");
   _cachedIndex = JSON.parse(rawData);
   return _cachedIndex!;
+}
+
+export function loadEmojiVectors(): Record<string, number[]> {
+  if (_cachedVectors) return _cachedVectors as any;
+  const dataPath = path.join(environment.assetsPath, "vectors.json");
+  if (!fs.existsSync(dataPath)) return {};
+  const rawData = fs.readFileSync(dataPath, "utf-8");
+  _cachedVectors = JSON.parse(rawData);
+  return _cachedVectors as any;
+}
+
+export function hashString(str: string): number {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = (hash << 5) + hash + str.charCodeAt(i);
+  }
+  return hash >>> 0;
+}
+
+export function getQueryVector(text: string): Float32Array {
+  const vector = new Float32Array(VECTOR_DIMENSION);
+  const tokens = text
+    .toLowerCase()
+    .replace(/[^\w\s]/g, "")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (tokens.length === 0) return vector;
+
+  for (const token of tokens) {
+    const idx = hashString(token) % VECTOR_DIMENSION;
+    vector[idx] += 1;
+  }
+
+  let norm = 0;
+  for (let i = 0; i < VECTOR_DIMENSION; i++) {
+    norm += vector[i] * vector[i];
+  }
+  norm = Math.sqrt(norm);
+
+  if (norm > 0) {
+    for (let i = 0; i < VECTOR_DIMENSION; i++) {
+      vector[i] /= norm;
+    }
+  }
+
+  return vector;
+}
+
+export function cosineSimilarity(
+  v1: Float32Array | number[],
+  v2: Float32Array | number[],
+): number {
+  let dot = 0;
+  for (let i = 0; i < VECTOR_DIMENSION; i++) {
+    dot += v1[i] * v2[i];
+  }
+  return dot;
 }
 
 export function loadCombinations(unicode: string): Combinations {

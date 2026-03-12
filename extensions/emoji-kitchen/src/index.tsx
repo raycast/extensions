@@ -10,8 +10,15 @@ import {
 import { useMemo, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { EmojiWithUnicode } from "./types";
-import { CATEGORY_ORDER } from "./constants";
-import { loadEmojiIndex, loadCombinations, getGStaticUrl } from "./utils";
+import { CATEGORY_ORDER, GLOBAL_SYNONYMS } from "./constants";
+import {
+  loadEmojiIndex,
+  loadCombinations,
+  getGStaticUrl,
+  loadEmojiVectors,
+  getQueryVector,
+  cosineSimilarity,
+} from "./utils";
 import { ResultView } from "./components/ResultView";
 import { MashupGrid } from "./components/MashupGrid";
 
@@ -19,21 +26,73 @@ export default function Command() {
   const { push } = useNavigation();
   const [selectedEmoji1, setSelectedEmoji1] = useState<string | null>(null);
   const [mode, setMode] = useState<"combine" | "explore">("explore");
+  const [searchText, setSearchText] = useState("");
 
-  const { data: index, isLoading } = useCachedPromise(async () => {
+  const { data: index, isLoading: isLoadingIndex } = useCachedPromise(async () => {
     return loadEmojiIndex();
   });
 
+  const { data: vectors, isLoading: isLoadingVectors } = useCachedPromise(async () => {
+    return loadEmojiVectors();
+  });
+
+  const isLoading = isLoadingIndex || isLoadingVectors;
+
   const emojiList = useMemo(() => {
     if (!index) return [];
-    return Object.entries(index).map(([u, info]) => ({
-      unicode: u,
-      ...info,
-    }));
+    const synonymsEntries = Object.entries(GLOBAL_SYNONYMS);
+
+    return Object.entries(index).map(([u, info]) => {
+      const extraKeywords = new Set<string>();
+      const baseKeywords = info.k || [];
+
+      // Add synonyms if any base keyword matches a synonym category
+      synonymsEntries.forEach(([key, values]) => {
+        if (
+          values.some((v) => baseKeywords.includes(v)) ||
+          baseKeywords.includes(key)
+        ) {
+          extraKeywords.add(key);
+          values.forEach((v) => extraKeywords.add(v));
+        }
+      });
+
+      return {
+        unicode: u,
+        ...info,
+        k: Array.from(new Set([...baseKeywords, ...Array.from(extraKeywords)])),
+      };
+    });
   }, [index]);
 
+  const searchResults = useMemo(() => {
+    if (!searchText || !vectors) return null;
+
+    const query = searchText.toLowerCase().trim();
+    const queryVec = getQueryVector(query);
+
+    return emojiList
+      .map((item) => {
+        const vec = vectors[item.unicode];
+        if (!vec) return { ...item, score: 0 };
+
+        let score = cosineSimilarity(queryVec, vec);
+
+        // Keyword boosting
+        if (item.a.toLowerCase() === query) score += 0.5;
+        else if (item.a.toLowerCase().includes(query)) score += 0.2;
+        else if (item.k.some((k) => k === query)) score += 0.15;
+        else if (item.k.some((k) => k.includes(query))) score += 0.05;
+
+        return { ...item, score };
+      })
+      .filter((item) => item.score > 0.05)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 50);
+  }, [emojiList, searchText, vectors]);
+
   const categories = useMemo(() => {
-    if (!index) return [];
+    if (!emojiList.length || searchResults) return [];
     const cats: Record<string, typeof emojiList> = {};
     emojiList.forEach((item) => {
       const cat = item.c || "other";
@@ -54,7 +113,7 @@ export default function Command() {
       .map(([cat, items]) => {
         return [cat, items.sort((a, b) => a.o - b.o)] as const;
       });
-  }, [emojiList, index]);
+  }, [emojiList, searchResults]);
 
   const handleSelectEmoji = (item: EmojiWithUnicode) => {
     if (!index) return;
@@ -127,6 +186,8 @@ export default function Command() {
       columns={8}
       isLoading={isLoading}
       inset={Grid.Inset.Small}
+      filtering={false}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder={
         selectedEmoji1 && index
           ? `Combining ${index[selectedEmoji1].e} with...`
@@ -173,9 +234,9 @@ export default function Command() {
         </Grid.Section>
       )}
 
-      {categories.map(([cat, items]) => (
-        <Grid.Section key={cat} title={cat.toUpperCase()}>
-          {items.map((item) => (
+      {searchResults ? (
+        <Grid.Section title="Search Results">
+          {searchResults.map((item) => (
             <Grid.Item
               key={item.unicode}
               content={item.e}
@@ -204,7 +265,41 @@ export default function Command() {
             />
           ))}
         </Grid.Section>
-      ))}
+      ) : (
+        categories.map(([cat, items]) => (
+          <Grid.Section key={cat} title={cat.toUpperCase()}>
+            {items.map((item) => (
+              <Grid.Item
+                key={item.unicode}
+                content={item.e}
+                title={item.a}
+                keywords={item.k}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title={mode === "combine" ? "Combine" : "Explore"}
+                      onAction={() => handleSelectEmoji(item)}
+                    />
+                    <Action
+                      title="Randomize"
+                      onAction={handleRandomize}
+                      icon={Icon.Wand}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
+                    {selectedEmoji1 && (
+                      <Action
+                        title="Clear Selection"
+                        onAction={() => setSelectedEmoji1(null)}
+                        icon={Icon.XMarkCircle}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </Grid.Section>
+        ))
+      )}
     </Grid>
   );
 }
