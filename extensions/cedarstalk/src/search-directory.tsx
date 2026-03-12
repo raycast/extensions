@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Detail,
+  getPreferenceValues,
   Icon,
   Image,
   List,
@@ -92,6 +93,15 @@ function isFacultyHeuristic(person: DirectoryPerson): boolean {
 	return !!person.Title && FACULTY_TITLE_KEYWORDS.test(person.Title);
 }
 
+const DEMO_NAMES_STUDENT = ["Alex Johnson", "Jordan Smith", "Taylor Williams"];
+const DEMO_NAMES_STAFF   = ["Dr. Chris Brown", "Pat Miller", "Sam Davis"];
+
+function demoName(person: DirectoryPerson): string {
+  const isStaffPerson = !person.StudentType || !!(person.Title?.trim() && person.OfficeBuildingCode);
+  const pool = isStaffPerson ? DEMO_NAMES_STAFF : DEMO_NAMES_STUDENT;
+  return pool[parseInt(person.Id.slice(-2), 10) % pool.length];
+}
+
 function parseSearchQuery(query: string): {
   firstName: string;
   lastName: string;
@@ -115,13 +125,15 @@ function PersonDetail({
   photoPath,
   cookie,
   onSignOut,
+  demo,
 }: {
   person: DirectoryPerson;
   photoPath: string | null;
   cookie: string;
   onSignOut: () => void;
+  demo: boolean;
 }) {
-  const name = displayName(person, true);
+  const name = demo ? demoName(person) : displayName(person, true);
   const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
   const [info, setInfo] = useState<PersonInfo | null>(null);
 
@@ -159,7 +171,7 @@ function PersonDetail({
 
   // Photo full-width at top, name + italic tags below
   const md: string[] = [];
-  if (photoDataUrl) md.push(`![Photo](${photoDataUrl})`);
+  if (!demo && photoDataUrl) md.push(`![Photo](${photoDataUrl})`);
   md.push(`# ${name}`);
   const isStaff = !person.StudentType || !!(person.Title?.trim() && person.OfficeBuildingCode);
   const tags: string[] = [];
@@ -195,8 +207,10 @@ function PersonDetail({
   if (scheduleItems.length) {
     md.push(`## Schedule${termDesc ? ` — ${termDesc}` : ""}`);
     for (const item of scheduleItems) {
+      const title = demo ? "DEPT 000" : item.title;
+      const desc  = demo ? "Course Name" : item.description;
       md.push(
-        `**${item.title}** — ${item.description}  \n${item.day} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`,
+        `**${title}** — ${desc}  \n${item.day} ${formatTime(item.startTime)}–${formatTime(item.endTime)}`,
       );
     }
   }
@@ -211,7 +225,7 @@ function PersonDetail({
           {person.Username && (
             <Detail.Metadata.Label
               title="Email"
-              text={email(person.Username)}
+              text={demo ? "username@cedarville.edu" : email(person.Username)}
             />
           )}
           {person.DepartmentDescription && (
@@ -220,7 +234,7 @@ function PersonDetail({
               text={person.DepartmentDescription}
             />
           )}
-          {(isStaff ||
+          {!!(isStaff ||
             person.StudentClass ||
             person.studentWorker) && <Detail.Metadata.Separator />}
           {isStaff ? (
@@ -267,16 +281,18 @@ function PersonDetail({
               />
             </Detail.Metadata.TagList>
           )}
-          {(person.DormName ||
+          {!!(person.DormName ||
             person.OfficeBuildingName ||
             person.OfficePhone) && <Detail.Metadata.Separator />}
           {person.DormName && (
             <Detail.Metadata.Label
               title="Dorm"
               text={
-                person.DormRoom
-                  ? `${person.DormName}, Room ${person.DormRoom}`
-                  : person.DormName
+                demo
+                  ? "Residence Hall, Room 000"
+                  : person.DormRoom
+                    ? `${person.DormName}, Room ${person.DormRoom}`
+                    : person.DormName
               }
             />
           )}
@@ -293,18 +309,16 @@ function PersonDetail({
           {person.OfficePhone && (
             <Detail.Metadata.Label
               title="Phone"
-              text={formatPhone(person.OfficePhone)}
+              text={demo ? "ext. ****" : formatPhone(person.OfficePhone)}
             />
           )}
-          {(person.AddressCity || person.AddressState) && (
+          {!!(person.AddressCity || person.AddressState) && (
             <Detail.Metadata.Separator />
           )}
-          {(person.AddressCity || person.AddressState) && (
+          {!!(person.AddressCity || person.AddressState) && (
             <Detail.Metadata.Label
               title="Hometown"
-              text={[person.AddressCity, person.AddressState]
-                .filter(Boolean)
-                .join(", ")}
+              text={demo ? "City, OH" : [person.AddressCity, person.AddressState].filter(Boolean).join(", ")}
             />
           )}
           {info?.student?.isStudent && info.student.majors.length > 0 && (
@@ -335,7 +349,7 @@ function PersonDetail({
                 <Detail.Metadata.Label
                   key={a.id}
                   title="Advisor"
-                  text={a.name}
+                  text={demo ? "Advisor Name" : a.name}
                 />
               ))}
             </>
@@ -353,7 +367,7 @@ function PersonDetail({
             </>
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="ID" text={person.Id} />
+          <Detail.Metadata.Label title="ID" text={demo ? "000000000" : person.Id} />
         </Detail.Metadata>
       }
       actions={
@@ -361,31 +375,35 @@ function PersonDetail({
           {person.Username && (
             <Action.CopyToClipboard
               title="Copy Email"
-              content={email(person.Username)}
+              content={demo ? "username@cedarville.edu" : email(person.Username)}
             />
           )}
           {person.OfficePhone && (
             <Action.CopyToClipboard
               title="Copy Phone"
-              content={formatPhone(person.OfficePhone)}
+              content={demo ? "ext. ****" : formatPhone(person.OfficePhone)}
             />
           )}
           <Action.CopyToClipboard
             title="Copy ID"
-            content={person.Id}
+            content={demo ? "000000000" : person.Id}
             icon={Icon.Person}
           />
-          <Action.OpenInBrowser
-            title="Open Info Page"
-            url={`https://selfservice.cedarville.edu/Cedarinfo/Info?id=${person.Id}`}
-            icon={Icon.Globe}
-          />
-          <Action.CopyToClipboard
-            title="Export as JSON"
-            icon={Icon.Code}
-            content={JSON.stringify(person, null, 2)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
-          />
+          {!demo && (
+            <Action.OpenInBrowser
+              title="Open Info Page"
+              url={`https://selfservice.cedarville.edu/Cedarinfo/Info?id=${person.Id}`}
+              icon={Icon.Globe}
+            />
+          )}
+          {!demo && (
+            <Action.CopyToClipboard
+              title="Export as JSON"
+              icon={Icon.Code}
+              content={JSON.stringify(person, null, 2)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+            />
+          )}
           <Action
             title="Sign Out"
             icon={Icon.ArrowLeft}
@@ -405,13 +423,15 @@ function PersonListItem({
   photoPath,
   cookie,
   onSignOut,
+  demo,
 }: {
   person: DirectoryPerson;
   photoPath: string | null;
   cookie: string;
   onSignOut: () => void;
+  demo: boolean;
 }) {
-  const name = displayName(person);
+  const name = demo ? demoName(person) : displayName(person);
 
   // Subtitle: title for staff, dorm for students
   const isStudent =
@@ -419,15 +439,17 @@ function PersonListItem({
     !!person.StudentType &&
     !(person.Title?.trim() && person.OfficeBuildingCode);
   const hasOffice = !isStudent && !!person.OfficeBuildingCode;
-  const rawTitle = isStudent
-    ? person.DormName
-      ? `${person.DormName}${person.DormRoom ? ` ${person.DormRoom}` : ""}`
-      : person.Username
-        ? email(person.Username)
-        : undefined
-    : ((person.Title?.trim() ||
-        (person.Username ? email(person.Username) : undefined)) ??
-      undefined);
+  const rawTitle = demo
+    ? undefined
+    : isStudent
+      ? person.DormName
+        ? `${person.DormName}${person.DormRoom ? ` ${person.DormRoom}` : ""}`
+        : person.Username
+          ? email(person.Username)
+          : undefined
+      : ((person.Title?.trim() ||
+          (person.Username ? email(person.Username) : undefined)) ??
+        undefined);
   const subtitle =
     hasOffice && rawTitle && rawTitle.length > 30
       ? `${rawTitle.slice(0, 29)}…`
@@ -468,7 +490,7 @@ function PersonListItem({
       title={name}
       subtitle={subtitle}
       icon={
-        photoPath
+        !demo && photoPath
           ? {
               source: photoPath,
               mask: Image.Mask.Circle,
@@ -488,37 +510,42 @@ function PersonListItem({
                 photoPath={photoPath}
                 cookie={cookie}
                 onSignOut={onSignOut}
+                demo={demo}
               />
             }
           />
           {person.Username && (
             <Action.CopyToClipboard
               title="Copy Email"
-              content={email(person.Username)}
+              content={demo ? "username@cedarville.edu" : email(person.Username)}
             />
           )}
           {person.OfficePhone && (
             <Action.CopyToClipboard
               title="Copy Phone"
-              content={formatPhone(person.OfficePhone)}
+              content={demo ? "ext. ****" : formatPhone(person.OfficePhone)}
             />
           )}
           <Action.CopyToClipboard
             title="Copy ID"
-            content={person.Id}
+            content={demo ? "000000000" : person.Id}
             icon={Icon.Person}
           />
-          <Action.OpenInBrowser
-            title="Open Info Page"
-            url={`https://selfservice.cedarville.edu/Cedarinfo/Info?id=${person.Id}`}
-            icon={Icon.Globe}
-          />
-          <Action.CopyToClipboard
-            title="Export as JSON"
-            icon={Icon.Code}
-            content={JSON.stringify(person, null, 2)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
-          />
+          {!demo && (
+            <Action.OpenInBrowser
+              title="Open Info Page"
+              url={`https://selfservice.cedarville.edu/Cedarinfo/Info?id=${person.Id}`}
+              icon={Icon.Globe}
+            />
+          )}
+          {!demo && (
+            <Action.CopyToClipboard
+              title="Export as JSON"
+              icon={Icon.Code}
+              content={JSON.stringify(person, null, 2)}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+            />
+          )}
           <Action
             title="Sign Out"
             icon={Icon.ArrowLeft}
@@ -534,6 +561,7 @@ function PersonListItem({
 // ─── Main command ──────────────────────────────────────────────────────────
 
 export default function SearchDirectory() {
+  const { demoMode: demo } = getPreferenceValues<{ demoMode: boolean }>();
   const [authState, setAuthState] = useState<AuthState>({ kind: "loading" });
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("");
@@ -818,6 +846,7 @@ export default function SearchDirectory() {
               photoPath={photoPaths[person.Id] ?? null}
               cookie={authState.cookie}
               onSignOut={handleSignOut}
+              demo={demo}
             />
           ))}
         </List.Section>

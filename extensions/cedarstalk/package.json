@@ -15,7 +15,18 @@
       "name": "search-directory",
       "title": "Search Cedarville Directory",
       "description": "Search the Cedarville directory by name",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "demoMode",
+          "title": "Demo Mode",
+          "description": "Redact personal information for screenshots and demos",
+          "type": "checkbox",
+          "label": "Hide personal data",
+          "required": false,
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {
