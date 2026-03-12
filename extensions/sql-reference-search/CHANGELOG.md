@@ -1,6 +1,6 @@
 # SQL Reference Search Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-03-12
 
 - Removed custom dialect persistence via `LocalStorage` and now rely on Raycast dropdown `storeValue` as the single source of truth.
 - Removed obsolete default-dialect action and deleted `src/lib/dialect-storage.ts`.
@@ -10,7 +10,7 @@
 - Filtered all `View as ...` actions to entry-supported dialects only in both list and detail views.
 - Updated preference description in `package.json` to match the new persistence behavior.
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-03-12
 
 - Added `SQL Lookup` command with weighted search scoring (title, alias, tags, summary).
 - Added dialect-aware documentation rendering for PostgreSQL, MySQL, SQLite, and T-SQL.
