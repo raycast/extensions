@@ -101,7 +101,8 @@ class AuthBrowser: NSObject, NSApplicationDelegate, WKNavigationDelegate, NSWind
 
             self.didComplete = true
             let cookieStr = site.map { "\($0.name)=\($0.value)" }.joined(separator: "; ")
-            try? cookieStr.write(toFile: self.config.cookieFile, atomically: true, encoding: .utf8)
+            // Write non-atomically so the pre-created 0o600 permissions are preserved.
+            try? cookieStr.write(toFile: self.config.cookieFile, atomically: false, encoding: .utf8)
             self.log("auth complete, wrote cookie")
             NSApp.terminate(nil)
         }

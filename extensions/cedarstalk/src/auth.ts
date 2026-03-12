@@ -52,6 +52,9 @@ export async function launchAuthBrowser(signInUrl: string): Promise<string> {
   // Write config before launch — Swift reads this instead of using --args
   await unlink(COOKIE_FILE).catch(() => {});
   await unlink(LOG_FILE).catch(() => {});
+  // Pre-create with owner-only permissions so the cookie is never world-readable.
+  // Swift writes non-atomically to preserve these permissions.
+  await writeFile(COOKIE_FILE, "", { mode: 0o600 });
   await writeFile(CONFIG_FILE, JSON.stringify({ signInUrl, cookieFile: COOKIE_FILE, logFile: LOG_FILE }));
 
   await new Promise<void>((resolve, reject) => {

@@ -564,7 +564,7 @@ function PersonListItem({
 // ─── Main command ──────────────────────────────────────────────────────────
 
 export default function SearchDirectory() {
-  const { demoMode: demo } = getPreferenceValues<{ demoMode: boolean }>();
+  const { demoMode: demo } = getPreferenceValues<Preferences.SearchDirectory>();
   const [authState, setAuthState] = useState<AuthState>({ kind: "loading" });
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("");

@@ -33,12 +33,12 @@
     "@raycast/api": "^1.104.9"
   },
   "devDependencies": {
-    "@raycast/utils": "^1.17.0",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "prebuild": "swiftc -O assets/auth-browser.swift -target arm64-apple-macos13 -o /tmp/cedarstalk-auth-arm64 && swiftc -O assets/auth-browser.swift -target x86_64-apple-macos13 -o /tmp/cedarstalk-auth-x86_64 && lipo -create -output assets/auth-browser-bin /tmp/cedarstalk-auth-arm64 /tmp/cedarstalk-auth-x86_64 && codesign --sign - --force assets/auth-browser-bin",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
