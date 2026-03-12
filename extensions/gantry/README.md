@@ -4,26 +4,9 @@ A Raycast extension for managing macOS launchd services — view, run, edit sche
 
 ## Install
 
-1. Clone this repository:
+Install Gantry from the Raycast Store by searching for "Gantry" in Raycast.
 
-   ```sh
-   git clone https://github.com/elicollinson/gantry-raycast.git
-   cd gantry-raycast
-   ```
-
-2. Install dependencies:
-
-   ```sh
-   npm install
-   ```
-
-3. Start the extension in development mode:
-
-   ```sh
-   npm run dev
-   ```
-
-   This opens Raycast with the extension loaded. Search for **"Gantry"** to launch it.
+For development, follow the steps in the "Development" section below.
 
 ## Features
 

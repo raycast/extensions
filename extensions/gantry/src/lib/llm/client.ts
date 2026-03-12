@@ -7,6 +7,10 @@ export interface LLMCallOptions {
   signal?: AbortSignal;
 }
 
+type AnthropicResponse = {
+  content?: Array<{ text?: string }>;
+};
+
 async function callAnthropic(
   apiKey: string,
   modelId: string,
@@ -28,10 +32,13 @@ async function callAnthropic(
     signal: options.signal,
   });
   if (!res.ok) throw new Error(`Anthropic API error: ${res.status}`);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = (await res.json()) as any;
-  return data.content[0]?.text ?? "";
+  const data = (await res.json()) as AnthropicResponse;
+  return data.content?.[0]?.text ?? "";
 }
+
+type GoogleResponse = {
+  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+};
 
 async function callGoogle(
   apiKey: string,
@@ -49,10 +56,13 @@ async function callGoogle(
     signal: options.signal,
   });
   if (!res.ok) throw new Error(`Google API error: ${res.status}`);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = (await res.json()) as any;
+  const data = (await res.json()) as GoogleResponse;
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
 }
+
+type OpenAIResponse = {
+  choices?: Array<{ message?: { content?: string } }>;
+};
 
 async function callOpenAI(
   apiKey: string,
@@ -76,8 +86,7 @@ async function callOpenAI(
     signal: options.signal,
   });
   if (!res.ok) throw new Error(`OpenAI API error: ${res.status}`);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = (await res.json()) as any;
+  const data = (await res.json()) as OpenAIResponse;
   return data.choices?.[0]?.message?.content ?? "";
 }
 

@@ -54,7 +54,7 @@ export function ScheduleEditorForm({
         // If local parsing fails and AI is configured, try AI parsing asynchronously
         if (!result.ok && hasAI) {
           const config = getConfig();
-          parseLLMSchedule(config, value).then(setParseResult);
+          parseLLMSchedule(config, value).then(setParseResult).catch(() => undefined);
         }
       }
     },
@@ -163,7 +163,7 @@ export function ScheduleEditorForm({
           {parseResult.nextRun && (
             <Form.Description
               title="Next Run"
-              text={`${formatRelativeTime(parseResult.nextRun)}  (${parseResult.nextRun.toLocaleString()})`}
+              text={`${formatRelativeTime(parseResult.nextRun)}  (${parseResult.nextRun.toLocaleString("en-US")})`}
             />
           )}
         </>

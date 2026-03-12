@@ -14,7 +14,9 @@ interface JobDetailData {
 
 export function useJobDetail(job: LaunchJob | null) {
   const { data, isLoading, revalidate } = useCachedPromise(
-    async (j: LaunchJob): Promise<JobDetailData> => {
+    async (j: LaunchJob | null): Promise<JobDetailData> => {
+      if (!j) return { printInfo: null, logContent: null, summary: null };
+
       const [printInfo, logContent] = await Promise.all([
         getPrintInfo(j.label),
         getLogContent(j),
@@ -36,7 +38,7 @@ export function useJobDetail(job: LaunchJob | null) {
 
       return { printInfo, logContent, summary };
     },
-    [job!],
+    [job],
     {
       execute: job !== null,
       keepPreviousData: true,

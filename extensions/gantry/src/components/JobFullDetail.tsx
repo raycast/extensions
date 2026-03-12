@@ -111,7 +111,7 @@ export function JobFullDetail({ job, onRefresh }: JobFullDetailProps) {
           {job.schedule.nextRun && (
             <Detail.Metadata.Label
               title="Next Run"
-              text={`${formatRelativeTime(job.schedule.nextRun)} (${job.schedule.nextRun.toLocaleString()})`}
+              text={`${formatRelativeTime(job.schedule.nextRun)} (${job.schedule.nextRun.toLocaleString("en-US")})`}
             />
           )}
 

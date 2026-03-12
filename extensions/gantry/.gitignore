@@ -7,6 +7,13 @@ dist/
 # Raycast
 .raycast/
 
+# Raycast generated/types
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
 # OS
 .DS_Store
 
