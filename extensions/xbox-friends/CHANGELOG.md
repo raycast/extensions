@@ -1,5 +1,11 @@
 # Xbox Friends Changelog
 
+## [Store Improvements] - {PR_MERGE_DATE}
+
+- Added store README with setup instructions
+- Added mock data mode to preview the extension without an API key
+- API key is now optional when mock data is enabled
+
 ## [Initial Version] - 2026-03-12
 
 - Initial release of Xbox Friends extension
