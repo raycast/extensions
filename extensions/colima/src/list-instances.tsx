@@ -95,18 +95,13 @@ function CreateInstanceForm({ onCreated }: CreateInstanceFormProps) {
       }
     >
       <Form.TextField id="profile" title="Profile Name" placeholder="e.g. default, dev, test" />
-      <Form.TextField id="cpus" title="CPUs" defaultValue={String(defaults.cpus)} placeholder="Number of CPUs" />
-      <Form.TextField
-        id="memory"
-        title="Memory (GiB)"
-        defaultValue={String(defaults.memory)}
-        placeholder="Memory in GiB"
+      <Form.TextField 
+        id="cpus" 
+        title="CPUs" 
+        defaultValue={String(defaults.cpus)} 
+        placeholder="Number of CPUs"
+        error={values.cpus && isNaN(Number(values.cpus)) ? "Must be a number" : undefined}
       />
-      <Form.TextField
-        id="disk"
-        title="Disk (GiB)"
-        defaultValue={String(defaults.disk)}
-        placeholder="Disk size in GiB"
       />
       <Form.Dropdown id="runtime" title="Runtime" defaultValue={defaults.runtime}>
         <Form.Dropdown.Item value="docker" title="docker" />
