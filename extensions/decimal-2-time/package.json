@@ -12,7 +12,26 @@
       "name": "dectime",
       "title": "Decimal 2 Time",
       "description": "Convert between decimal and time formats",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "value",
+          "placeholder": "3.4322 or 01:30:00",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "preferences": [
+        {
+          "name": "autoCopy",
+          "type": "checkbox",
+          "title": "Auto Copy",
+          "description": "Instantly copy the result to clipboard instead of showing a list",
+          "required": false,
+          "default": false,
+          "label": "Copy result to clipboard automatically"
+        }
+      ]
     }
   ],
   "dependencies": {

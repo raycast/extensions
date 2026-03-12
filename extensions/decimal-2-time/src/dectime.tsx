@@ -1,5 +1,14 @@
-import { List, ActionPanel, Action } from "@raycast/api";
-import { useState } from "react";
+import {
+  List,
+  ActionPanel,
+  Action,
+  LaunchProps,
+  Clipboard,
+  showToast,
+  Toast,
+  getPreferenceValues,
+} from "@raycast/api";
+import { useEffect } from "react";
 
 function toTime(decimal: number): string {
   const totalSeconds = Math.round(decimal * 3600);
@@ -19,69 +28,63 @@ function toDecimal(time: string): number {
   return hours + minutes / 60 + seconds / 3600;
 }
 
-export default function Command() {
-  const [query, setQuery] = useState("");
+interface Preferences {
+  autoCopy: boolean;
+}
 
-  const items: { title: string; subtitle: string; value: string }[] = [];
+function convert(input: string): { result: string; subtitle: string } | null {
+  const hasColon = input.includes(":");
 
-  const trimmed = query.trim();
-  if (trimmed) {
-    const hasDecimal = trimmed.includes(".");
-    const hasColon = trimmed.includes(":");
-
-    if (hasColon) {
-      const decimal = toDecimal(trimmed);
-      if (!isNaN(decimal)) {
-        const formatted = parseFloat(decimal.toFixed(6)).toString();
-        items.push({
-          title: formatted,
-          subtitle: "Decimal Conversion",
-          value: formatted,
-        });
-      }
-    } else {
-      const num = parseFloat(trimmed);
-      if (!isNaN(num)) {
-        const time = toTime(num);
-        items.push({ title: time, subtitle: "Time Conversion", value: time });
-
-        if (!hasDecimal) {
-          const decimal = toDecimal(trimmed + ":00");
-          const formatted = parseFloat(decimal.toFixed(6)).toString();
-          items.push({
-            title: formatted,
-            subtitle: "Decimal Conversion",
-            value: formatted,
-          });
-        }
-      }
-    }
+  if (hasColon) {
+    const decimal = toDecimal(input);
+    if (isNaN(decimal)) return null;
+    const formatted = parseFloat(decimal.toFixed(6)).toString();
+    return { result: formatted, subtitle: `${input} → Decimal` };
+  } else {
+    const num = parseFloat(input);
+    if (isNaN(num)) return null;
+    const time = toTime(num);
+    return { result: time, subtitle: `${input} → Time` };
   }
+}
+
+export default function Command(
+  props: LaunchProps<{ arguments: { value: string } }>,
+) {
+  const input = props.arguments.value.trim();
+  const { autoCopy } = getPreferenceValues<Preferences>();
+  const conversion = input ? convert(input) : null;
+
+  useEffect(() => {
+    if (autoCopy && conversion) {
+      Clipboard.copy(conversion.result).then(() => {
+        showToast({
+          style: Toast.Style.Success,
+          title: `Copied ${conversion.result}`,
+        });
+      });
+    }
+  }, []);
 
   return (
-    <List
-      searchBarPlaceholder="Enter decimal (3.4322) or time (03:25:56)"
-      onSearchTextChange={setQuery}
-      throttle
-    >
-      {items.length > 0 ? (
-        items.map((item) => (
-          <List.Item
-            key={item.subtitle}
-            title={item.title}
-            subtitle={item.subtitle}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard content={item.value} />
-                <Action.Paste content={item.value} />
-              </ActionPanel>
-            }
-          />
-        ))
+    <List>
+      {conversion ? (
+        <List.Item
+          title={conversion.result}
+          subtitle={
+            autoCopy ? `${conversion.subtitle} (copied)` : conversion.subtitle
+          }
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={conversion.result} />
+              <Action.Paste content={conversion.result} />
+            </ActionPanel>
+          }
+        />
       ) : (
         <List.EmptyView
-          title="Decimal 2 Time"
-          description="Enter a decimal value (e.g., 3.4322) or time (e.g., 03:25:56)"
+          title="No Result"
+          description="Enter a decimal (3.4322) or time (01:30:00)"
         />
       )}
     </List>
