@@ -725,9 +725,9 @@ function getProductType(url: string): DocsProduct {
 }
 
 function getSelectedVersion(
-  preferences: Preferences,
+  preferences: Preferences.SearchDocs,
   product: DocsProduct,
-): Preferences[keyof Preferences] | undefined {
+): Preferences.SearchDocs[keyof Preferences.SearchDocs] | undefined {
   if (product === "all") return undefined;
   if (product === "commerce") return preferences.commerceVersion;
   if (isUnversionedProduct(product)) return undefined;
@@ -818,7 +818,10 @@ function buildEmptyViewIcon(selectedProduct: DocsProduct): { source: string; tin
   return tintListIcon(product.icon);
 }
 
-function buildEmptyViewContent(product: DocsProduct, preferences: Preferences): { title: string; description: string } {
+function buildEmptyViewContent(
+  product: DocsProduct,
+  preferences: Preferences.SearchDocs,
+): { title: string; description: string } {
   if (product === "cms") {
     return {
       title: "Craft CMS Docs",
@@ -980,14 +983,14 @@ function buildScopes({
   return [];
 }
 
-function getDropdownTitle(product: DocsProduct, preferences: Preferences): string {
+function getDropdownTitle(product: DocsProduct, preferences: Preferences.SearchDocs): string {
   if (product === "cms") return `CMS (${preferences.cmsVersion})`;
   if (product === "commerce") return `Commerce (${preferences.commerceVersion})`;
   const base = DOC_PRODUCTS.find((item) => item.value === product);
   return base?.title ?? product;
 }
 
-function buildSearchPlaceholder(product: DocsProduct, preferences: Preferences): string {
+function buildSearchPlaceholder(product: DocsProduct, preferences: Preferences.SearchDocs): string {
   if (product === "bookmarks") return "Search Bookmarks...";
   if (product === "cms") return `Search Craft CMS ${preferences.cmsVersion} Docs...`;
   if (product === "commerce") return `Search Craft Commerce ${preferences.commerceVersion} Docs...`;
