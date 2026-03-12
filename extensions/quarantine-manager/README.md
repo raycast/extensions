@@ -2,7 +2,7 @@
 
 Inspect and manage extended attributes on macOS files and applications — without opening Terminal.
 
-When you download an app outside the Mac App Store, macOS tags it with a `com.apple.quarantine` extended attribute. This triggers a Gatekeeper prompt on first launch: *"This app was downloaded from the internet. Are you sure you want to open it?"*
+When you download an app outside the Mac App Store, macOS tags it with a `com.apple.quarantine` extended attribute. This triggers a Gatekeeper prompt on first launch: _"This app was downloaded from the internet. Are you sure you want to open it?"_
 
 Developers and power users frequently need to check and clear this flag — for apps built locally, tools distributed via direct download, or utilities that Gatekeeper misidentifies. This extension gives you a fast, readable way to do that from Raycast.
 
@@ -13,12 +13,14 @@ Developers and power users frequently need to check and clear this flag — for 
 Opens a file picker (or uses your current Finder selection), then shows a full breakdown of the file's quarantine status and extended attributes. From there you can remove the quarantine flag in one action.
 
 **What it shows:**
+
 - Quarantine status (quarantined / clean) with color-coded badge
 - Parsed quarantine data: download source app + timestamp + flags
 - All extended attributes with raw and parsed values
 - File metadata: size, type, last modified, path
 
 **Actions available via ⌘K:**
+
 - **Remove Quarantine** — removes `com.apple.quarantine` (prompts for admin if needed)
 - **Remove All Attributes** — clears all xattr data on the file
 - **Select Different File** `⌘O` — pick another file without relaunching

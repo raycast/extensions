@@ -1,8 +1,9 @@
-# Quarantine Manager Changelog
+# Quarantine Manager
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
+
 - **Remove Quarantine** command — view quarantine status and remove `com.apple.quarantine` attribute with one action
 - **Check Quarantine Status** command — inspect all extended attributes on any file in a detailed list view
 - Auto-detects currently selected file in Finder (skips file picker if already selected)
