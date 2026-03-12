@@ -4,7 +4,7 @@ All notable changes to the Sadaqah Box Raycast Extension will be documented in t
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-12
 
 ### Added
 
