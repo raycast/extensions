@@ -1,11 +1,23 @@
 import { LocalStorage } from "@raycast/api";
 import { z } from "zod";
 import { FlashcardProgress, FlashcardProgressSchema, Translation, TranslationSchema } from "./types";
+import { LanguagePair, storageKeyPrefix } from "./languages";
 
-const STORAGE_KEY = "vocabuilder-history";
-const HISTORY_CORRUPT_BACKUP_KEY = `${STORAGE_KEY}-corrupt-backup`;
-const FLASHCARD_KEY = "vocabuilder-flashcards";
-const FLASHCARD_CORRUPT_BACKUP_KEY = `${FLASHCARD_KEY}-corrupt-backup`;
+function historyKey(pair: LanguagePair): string {
+  return `vocabuilder-history-${storageKeyPrefix(pair)}`;
+}
+
+function historyCorruptBackupKey(pair: LanguagePair): string {
+  return `${historyKey(pair)}-corrupt-backup`;
+}
+
+function flashcardKey(pair: LanguagePair): string {
+  return `vocabuilder-flashcards-${storageKeyPrefix(pair)}`;
+}
+
+function flashcardCorruptBackupKey(pair: LanguagePair): string {
+  return `${flashcardKey(pair)}-corrupt-backup`;
+}
 
 async function backupCorruptedStorage(
   sourceKey: string,
@@ -34,63 +46,63 @@ async function parseStoredArray<T>(
   }
 }
 
-export async function getHistory(): Promise<Translation[]> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+export async function getHistory(pair: LanguagePair): Promise<Translation[]> {
+  const key = historyKey(pair);
+  const raw = await LocalStorage.getItem<string>(key);
   if (!raw) return [];
-  const parsed = await parseStoredArray(STORAGE_KEY, HISTORY_CORRUPT_BACKUP_KEY, raw, z.array(TranslationSchema));
+  const parsed = await parseStoredArray(key, historyCorruptBackupKey(pair), raw, z.array(TranslationSchema));
   return parsed ?? [];
 }
 
-export async function saveTranslation(t: Translation): Promise<boolean> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+export async function saveTranslation(t: Translation, pair: LanguagePair): Promise<boolean> {
+  const key = historyKey(pair);
+  const raw = await LocalStorage.getItem<string>(key);
   const history = raw
-    ? await parseStoredArray(STORAGE_KEY, HISTORY_CORRUPT_BACKUP_KEY, raw, z.array(TranslationSchema))
+    ? await parseStoredArray(key, historyCorruptBackupKey(pair), raw, z.array(TranslationSchema))
     : [];
   if (!history) return false;
 
   const updated = [t, ...history.filter((h) => h.word !== t.word)];
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  await LocalStorage.setItem(key, JSON.stringify(updated));
   return true;
 }
 
-export async function deleteTranslation(id: string): Promise<boolean> {
-  const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+export async function deleteTranslation(id: string, pair: LanguagePair): Promise<boolean> {
+  const key = historyKey(pair);
+  const raw = await LocalStorage.getItem<string>(key);
   const history = raw
-    ? await parseStoredArray(STORAGE_KEY, HISTORY_CORRUPT_BACKUP_KEY, raw, z.array(TranslationSchema))
+    ? await parseStoredArray(key, historyCorruptBackupKey(pair), raw, z.array(TranslationSchema))
     : [];
   if (!history) return false;
 
   const updated = history.filter((h) => h.id !== id);
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+  await LocalStorage.setItem(key, JSON.stringify(updated));
   return true;
 }
 
-export async function clearHistory(): Promise<void> {
-  await LocalStorage.removeItem(STORAGE_KEY);
+export async function clearHistory(pair: LanguagePair): Promise<void> {
+  await LocalStorage.removeItem(historyKey(pair));
 }
 
-async function getFlashcardProgress(): Promise<Map<string, FlashcardProgress>> {
-  const raw = await LocalStorage.getItem<string>(FLASHCARD_KEY);
+async function getFlashcardProgress(pair: LanguagePair): Promise<Map<string, FlashcardProgress>> {
+  const key = flashcardKey(pair);
+  const raw = await LocalStorage.getItem<string>(key);
   if (!raw) return new Map();
-  const arr = await parseStoredArray(
-    FLASHCARD_KEY,
-    FLASHCARD_CORRUPT_BACKUP_KEY,
-    raw,
-    z.array(FlashcardProgressSchema),
-  );
+  const arr = await parseStoredArray(key, flashcardCorruptBackupKey(pair), raw, z.array(FlashcardProgressSchema));
   return new Map((arr ?? []).map((p) => [p.word, p]));
 }
 
-export async function saveFlashcardProgress(progress: FlashcardProgress): Promise<boolean> {
-  const raw = await LocalStorage.getItem<string>(FLASHCARD_KEY);
+export async function saveFlashcardProgress(progress: FlashcardProgress, pair: LanguagePair): Promise<boolean> {
+  const key = flashcardKey(pair);
+  const raw = await LocalStorage.getItem<string>(key);
   const arr = raw
-    ? await parseStoredArray(FLASHCARD_KEY, FLASHCARD_CORRUPT_BACKUP_KEY, raw, z.array(FlashcardProgressSchema))
+    ? await parseStoredArray(key, flashcardCorruptBackupKey(pair), raw, z.array(FlashcardProgressSchema))
     : [];
   if (!arr) return false;
 
   const map = new Map(arr.map((p) => [p.word, p]));
   map.set(progress.word, progress);
-  await LocalStorage.setItem(FLASHCARD_KEY, JSON.stringify([...map.values()]));
+  await LocalStorage.setItem(key, JSON.stringify([...map.values()]));
   return true;
 }
 
@@ -108,8 +120,9 @@ function shuffle<T>(arr: T[]): T[] {
   return out;
 }
 
-export async function getSessionCards(): Promise<SessionData> {
-  const [history, progressMap] = await Promise.all([getHistory(), getFlashcardProgress()]);
+export async function getSessionCards(pair: LanguagePair): Promise<SessionData> {
+  const [allHistory, progressMap] = await Promise.all([getHistory(pair), getFlashcardProgress(pair)]);
+  const history = allHistory.filter((t) => t.type !== "text");
   const now = Date.now();
 
   const due = history

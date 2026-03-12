@@ -1,8 +1,16 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { posColor } from "./lib/colors";
 import { useEffect, useState } from "react";
-import { buildTranslationDetailMarkdown } from "./lib/markdown";
+import LanguageConfigError from "./components/LanguageConfigError";
+import { useLanguagePair } from "./hooks/useLanguagePair";
+import { buildTranslationDetailMarkdown, buildTextTranslationDetailMarkdown } from "./lib/markdown";
 import { clearHistory, deleteTranslation, getHistory } from "./lib/storage";
 import { Translation } from "./lib/types";
+
+function truncate(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen - 1) + "…";
+}
 
 function relativeTime(timestamp: number): string {
   const diff = Date.now() - timestamp;
@@ -16,17 +24,22 @@ function relativeTime(timestamp: number): string {
 }
 
 export default function History() {
+  const langResult = useLanguagePair();
   const [history, setHistory] = useState<Translation[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    getHistory().then((h) => {
+    if (!langResult.pair) return;
+    getHistory(langResult.pair).then((h) => {
       setHistory(h);
       setIsLoading(false);
     });
   }, []);
+
+  if (langResult.error) return <LanguageConfigError message={langResult.error} />;
+  const languagePair = langResult.pair;
 
   const filtered = searchText
     ? history.filter(
@@ -44,7 +57,7 @@ export default function History() {
     });
     if (!confirmed) return;
 
-    const deleted = await deleteTranslation(id);
+    const deleted = await deleteTranslation(id, languagePair);
     if (!deleted) {
       await showToast({
         style: Toast.Style.Failure,
@@ -69,7 +82,7 @@ export default function History() {
     });
     if (!confirmed) return;
 
-    await clearHistory();
+    await clearHistory(languagePair);
     setHistory([]);
     await showToast({ style: Toast.Style.Success, title: "History cleared" });
   }
@@ -82,18 +95,30 @@ export default function History() {
       onSearchTextChange={setSearchText}
     >
       {filtered.length === 0 && !isLoading ? (
-        <List.EmptyView title="No translations yet" description="Use Translate Word to get started" />
+        <List.EmptyView title="No translations yet" description="Use Translate to get started" />
       ) : (
         filtered.map((item) => (
           <List.Item
             key={item.id}
-            title={item.word}
-            subtitle={isShowingDetail ? undefined : item.translation}
+            title={item.type === "text" ? truncate(item.word, 60) : item.word}
+            subtitle={
+              isShowingDetail ? undefined : item.type === "text" ? truncate(item.translation, 60) : item.translation
+            }
             accessories={[
-              { tag: { value: item.partOfSpeech, color: Color.Blue } },
+              item.type === "text"
+                ? { tag: { value: "text", color: Color.Purple } }
+                : { tag: { value: item.partOfSpeech, color: posColor(item.partOfSpeech) } },
               { text: relativeTime(item.timestamp) },
             ]}
-            detail={<List.Item.Detail markdown={buildTranslationDetailMarkdown(item)} />}
+            detail={
+              <List.Item.Detail
+                markdown={
+                  item.type === "text"
+                    ? buildTextTranslationDetailMarkdown(item.word, item.translation)
+                    : buildTranslationDetailMarkdown(item)
+                }
+              />
+            }
             actions={
               <ActionPanel>
                 <Action

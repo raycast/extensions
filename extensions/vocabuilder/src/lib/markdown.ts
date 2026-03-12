@@ -17,8 +17,14 @@ function escapeMarkdownMultiline(value: string): string {
 
 export function buildTranslationDetailMarkdown(
   translation: Pick<Translation, "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation">,
+  originalInput?: string,
 ): string {
+  const correctionNote =
+    originalInput && originalInput !== translation.word
+      ? `\n> *Corrected from "${escapeMarkdown(originalInput)}"*\n`
+      : "";
   return `## ${escapeMarkdown(translation.word)}
+${correctionNote}
 
 **${escapeMarkdown(translation.translation)}** *(${escapeMarkdown(translation.partOfSpeech)})*
 
@@ -29,6 +35,18 @@ export function buildTranslationDetailMarkdown(
 ${escapeMarkdownMultiline(translation.example)}
 
 *${escapeMarkdownMultiline(translation.exampleTranslation)}*`;
+}
+
+export function buildTextTranslationDetailMarkdown(input: string, translation: string): string {
+  return `## Translation
+
+${escapeMarkdownMultiline(translation)}
+
+---
+
+## Original
+
+${escapeMarkdownMultiline(input)}`;
 }
 
 export function buildFlashcardDetailMarkdown(

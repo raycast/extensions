@@ -1,5 +1,7 @@
 import { Action, ActionPanel, Color, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useReducer } from "react";
+import LanguageConfigError from "./components/LanguageConfigError";
+import { useLanguagePair } from "./hooks/useLanguagePair";
 import { buildFlashcardDetailMarkdown } from "./lib/markdown";
 import { getSessionCards, saveFlashcardProgress } from "./lib/storage";
 import { FlashcardProgress, Rating, Translation } from "./lib/types";
@@ -111,19 +113,24 @@ const initialState: StudyState = {
 
 /** Flashcard review command view. */
 export default function Flashcards() {
+  const langResult = useLanguagePair();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    getSessionCards().then(({ sessionCards, progressMap }) => {
+    if (!langResult.pair) return;
+    getSessionCards(langResult.pair).then(({ sessionCards, progressMap }) => {
       dispatch({ type: "loaded", cards: sessionCards, progressMap });
     });
   }, []);
+
+  if (langResult.error) return <LanguageConfigError message={langResult.error} />;
+  const languagePair = langResult.pair;
 
   async function handleRate(rating: Rating) {
     const card = state.sessionCards[state.currentIndex];
     const existing = state.progressMap.get(card.word) ?? freshProgress(card.word);
     const updated = updateProgress(existing, rating, Date.now());
-    const saved = await saveFlashcardProgress(updated);
+    const saved = await saveFlashcardProgress(updated, languagePair);
     if (!saved) {
       await showToast({
         style: Toast.Style.Failure,
@@ -173,21 +180,9 @@ export default function Flashcards() {
               <Action title="Reveal Answer" onAction={() => dispatch({ type: "reveal" })} />
             ) : (
               <>
-                <Action
-                  title="Again (Forgot)"
-                  shortcut={{ modifiers: [], key: "1" }}
-                  onAction={() => handleRate("again")}
-                />
-                <Action
-                  title="Good (Recalled)"
-                  shortcut={{ modifiers: [], key: "2" }}
-                  onAction={() => handleRate("good")}
-                />
-                <Action
-                  title="Easy (Instant Recall)"
-                  shortcut={{ modifiers: [], key: "3" }}
-                  onAction={() => handleRate("easy")}
-                />
+                <Action title="Good" onAction={() => handleRate("good")} />
+                <Action title="Again" shortcut={{ modifiers: [], key: "1" }} onAction={() => handleRate("again")} />
+                <Action title="Easy" shortcut={{ modifiers: [], key: "2" }} onAction={() => handleRate("easy")} />
               </>
             )}
           </ActionPanel>

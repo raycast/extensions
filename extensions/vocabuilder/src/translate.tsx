@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  Color,
   getPreferenceValues,
   Icon,
   List,
@@ -11,10 +12,13 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
+import LanguageConfigError from "./components/LanguageConfigError";
+import { useLanguagePair } from "./hooks/useLanguagePair";
 import History from "./history";
-import { translateWord } from "./lib/gemini";
-import { MAX_WORD_LENGTH, normalizeWordInput } from "./lib/input";
-import { buildTranslationDetailMarkdown } from "./lib/markdown";
+import { translateWord, translateText } from "./lib/gemini";
+import { MAX_WORD_LENGTH, normalizeWordInput, normalizeTextInput } from "./lib/input";
+import { posColor } from "./lib/colors";
+import { buildTranslationDetailMarkdown, buildTextTranslationDetailMarkdown } from "./lib/markdown";
 import { getHistory, saveTranslation } from "./lib/storage";
 import { Translation } from "./lib/types";
 
@@ -37,14 +41,22 @@ function getUserFacingErrorMessage(errorCode: string): string {
     case "GEMINI_INVALID_RESPONSE":
       return "Gemini returned an unexpected response. Please try again.";
     case "INVALID_WORD_INPUT":
-      return `Enter one English word (letters, apostrophe, hyphen, max ${MAX_WORD_LENGTH} chars).`;
+      return `Enter one word (letters, apostrophe, hyphen, max ${MAX_WORD_LENGTH} chars).`;
+    case "INVALID_TEXT_INPUT":
+      return "Text is empty or too long.";
     default:
       return "Translation failed. Please try again.";
   }
 }
 
+function truncate(text: string, maxLen: number): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen - 1) + "…";
+}
+
 export default function Translate() {
   const { geminiApiKey, readClipboardOnOpen } = getPreferenceValues<Preferences.Translate>();
+  const langResult = useLanguagePair();
   const { push } = useNavigation();
 
   const [searchText, setSearchText] = useState("");
@@ -52,11 +64,34 @@ export default function Translate() {
   const [result, setResult] = useState<Translation | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recentHistory, setRecentHistory] = useState<Translation[]>([]);
+  const [originalInput, setOriginalInput] = useState<string | undefined>(undefined);
 
   const [clipboardSuggestion, setClipboardSuggestion] = useState("");
 
   const abortRef = useRef<AbortController | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!langResult.pair) return;
+
+    getHistory(langResult.pair).then((h) => setRecentHistory(h.slice(0, 5)));
+
+    if (!readClipboardOnOpen) return;
+
+    readClipboardSuggestion()
+      .then((suggestion) => {
+        if (suggestion) {
+          setClipboardSuggestion(suggestion);
+        }
+      })
+      .catch(() => {
+        /* ignore */
+      });
+  }, [readClipboardOnOpen]);
+
+  if (langResult.error) return <LanguageConfigError message={langResult.error} />;
+  const languagePair = langResult.pair;
+  const { source } = languagePair;
 
   function clearDebounce() {
     if (debounceRef.current) {
@@ -67,14 +102,22 @@ export default function Translate() {
 
   function submitTranslation(rawText: string, clearPending = true) {
     if (clearPending) clearDebounce();
+
     const normalizedWord = normalizeWordInput(rawText);
-    if (!normalizedWord) {
-      setResult(null);
-      setIsLoading(false);
-      setError(getUserFacingErrorMessage("INVALID_WORD_INPUT"));
+    if (normalizedWord) {
+      fetchWordTranslation(normalizedWord);
       return;
     }
-    fetchTranslation(normalizedWord);
+
+    const normalizedText = normalizeTextInput(rawText);
+    if (normalizedText) {
+      fetchTextTranslation(normalizedText);
+      return;
+    }
+
+    setResult(null);
+    setIsLoading(false);
+    setError(getUserFacingErrorMessage("INVALID_TEXT_INPUT"));
   }
 
   async function readClipboardSuggestion(): Promise<string | null> {
@@ -91,14 +134,14 @@ export default function Translate() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Clipboard not used",
-          message: "Clipboard does not look like a single English word.",
+          message: "Clipboard does not look like a single word.",
         });
         return;
       }
 
       setClipboardSuggestion(suggestion);
       setSearchText(suggestion);
-      fetchTranslation(suggestion);
+      fetchWordTranslation(suggestion);
     } catch {
       await showToast({
         style: Toast.Style.Failure,
@@ -107,26 +150,14 @@ export default function Translate() {
     }
   }
 
-  useEffect(() => {
-    getHistory().then((h) => setRecentHistory(h.slice(0, 5)));
-
-    if (!readClipboardOnOpen) return;
-
-    readClipboardSuggestion()
-      .then((suggestion) => {
-        if (suggestion) {
-          setClipboardSuggestion(suggestion);
-        }
-      })
-      .catch(() => {
-        /* ignore */
-      });
-  }, [readClipboardOnOpen]);
-
   function handleSearchChange(text: string) {
     setSearchText(text);
 
     clearDebounce();
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
+    }
 
     if (!text.trim()) {
       setResult(null);
@@ -136,15 +167,19 @@ export default function Translate() {
     }
 
     setError(null);
+    setResult(null);
+    setIsLoading(false);
 
-    debounceRef.current = setTimeout(() => {
-      debounceRef.current = null;
-      submitTranslation(text, false);
-    }, 1500);
+    // Only auto-translate for word-like input
+    if (normalizeWordInput(text) !== null) {
+      debounceRef.current = setTimeout(() => {
+        debounceRef.current = null;
+        submitTranslation(text, false);
+      }, 1500);
+    }
   }
 
-  async function fetchTranslation(word: string) {
-    // Cancel any in-flight request
+  async function fetchWordTranslation(word: string) {
     if (abortRef.current) abortRef.current.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -152,28 +187,89 @@ export default function Translate() {
     setIsLoading(true);
     setError(null);
     setResult(null);
+    setOriginalInput(word);
 
     try {
-      const geminiResult = await translateWord(word, geminiApiKey, controller.signal);
+      const geminiResult = await translateWord(word, geminiApiKey, languagePair, controller.signal);
 
       if (controller.signal.aborted) return;
 
+      const corrected = geminiResult.correctedWord;
+      const effectiveWord = corrected && corrected !== word ? corrected : word;
+
       const translation: Translation = {
-        id: `${word}-${Date.now()}`,
-        word,
+        id: `${effectiveWord}-${Date.now()}`,
+        word: effectiveWord,
         translation: geminiResult.translation,
         partOfSpeech: geminiResult.partOfSpeech,
         example: geminiResult.example,
         exampleTranslation: geminiResult.exampleTranslation,
         timestamp: Date.now(),
+        type: "word",
       };
 
       setResult(translation);
 
-      // Auto-save
-      const saved = await saveTranslation(translation);
+      const saved = await saveTranslation(translation, languagePair);
       if (saved) {
-        setRecentHistory((prev) => [translation, ...prev.filter((h) => h.word !== word)].slice(0, 5));
+        setRecentHistory((prev) => [translation, ...prev.filter((h) => h.word !== translation.word)].slice(0, 5));
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Saved data is corrupted",
+          message: "Translation was not written to storage to avoid overwriting existing data.",
+        });
+      }
+    } catch (err) {
+      if (controller.signal.aborted) return;
+
+      const errorCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
+      const userMessage = getUserFacingErrorMessage(errorCode);
+      setError(userMessage);
+
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Translation failed",
+        message: userMessage,
+      });
+    } finally {
+      if (!controller.signal.aborted) {
+        setIsLoading(false);
+      }
+    }
+  }
+
+  async function fetchTextTranslation(text: string) {
+    if (abortRef.current) abortRef.current.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    setIsLoading(true);
+    setError(null);
+    setResult(null);
+    setOriginalInput(text);
+
+    try {
+      const geminiResult = await translateText(text, geminiApiKey, languagePair, controller.signal);
+
+      if (controller.signal.aborted) return;
+
+      const translation: Translation = {
+        id: `text-${Date.now()}`,
+        word: text,
+        translation: geminiResult.translation,
+        partOfSpeech: "text",
+        example: "",
+        exampleTranslation: "",
+        timestamp: Date.now(),
+        type: "text",
+      };
+
+      setResult(translation);
+
+      const saved = await saveTranslation(translation, languagePair);
+      if (saved) {
+        setRecentHistory((prev) => [translation, ...prev.filter((h) => h.word !== translation.word)].slice(0, 5));
       } else {
         await showToast({
           style: Toast.Style.Failure,
@@ -202,14 +298,16 @@ export default function Translate() {
 
   const showEmpty = !searchText.trim();
   const showRecent = showEmpty && recentHistory.length > 0;
-  const normalizedSearchWord = normalizeWordInput(searchText);
-  const showResult = !!result && result.word === normalizedSearchWord;
+  const showResult = !!result && !isLoading;
+  const isTextResult = result?.type === "text";
+  const isWordInput = normalizeWordInput(searchText) !== null;
   const showManualSubmitItem = !showEmpty && !error && !showResult && !isLoading;
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Type an English word..."
+      isShowingDetail={showResult && isTextResult}
+      searchBarPlaceholder={`Type a ${source.name} word or text...`}
       searchText={searchText}
       onSearchTextChange={handleSearchChange}
     >
@@ -228,33 +326,66 @@ export default function Translate() {
         />
       ) : showResult && result ? (
         <List.Section title="Translation">
-          <List.Item
-            title={result.word}
-            subtitle={result.translation}
-            accessories={[{ tag: result.partOfSpeech }]}
-            detail={<List.Item.Detail markdown={buildTranslationDetailMarkdown(result)} />}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Translation"
-                  content={result.translation}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                <Action
-                  title="Open History"
-                  icon={Icon.Clock}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
-                  onAction={() => push(<History />)}
-                />
-              </ActionPanel>
-            }
-          />
+          {isTextResult ? (
+            <List.Item
+              title={truncate(result.word, 60)}
+              subtitle={truncate(result.translation, 60)}
+              accessories={[{ tag: { value: "text", color: Color.Purple } }]}
+              detail={
+                <List.Item.Detail markdown={buildTextTranslationDetailMarkdown(result.word, result.translation)} />
+              }
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Translation"
+                    content={result.translation}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action
+                    title="Open History"
+                    icon={Icon.Clock}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                    onAction={() => push(<History />)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ) : (
+            <List.Item
+              title={result.word}
+              subtitle={result.translation}
+              accessories={[
+                ...(result.word !== originalInput
+                  ? [{ tag: { value: `corrected from "${originalInput}"`, color: Color.Orange } }]
+                  : []),
+                { tag: { value: result.partOfSpeech, color: posColor(result.partOfSpeech) } },
+              ]}
+              detail={<List.Item.Detail markdown={buildTranslationDetailMarkdown(result, originalInput)} />}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Translation"
+                    content={result.translation}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action
+                    title="Open History"
+                    icon={Icon.Clock}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                    onAction={() => push(<History />)}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
         </List.Section>
       ) : showManualSubmitItem ? (
         <List.Section title="Translation">
           <List.Item
-            title={`Translate "${searchText.trim()}"`}
-            subtitle="Press Enter to translate immediately (auto-runs in 1.5s)"
+            title={`Translate "${truncate(searchText.trim(), 40)}"`}
+            subtitle={
+              isWordInput ? "Press Enter to translate immediately (auto-runs in 1.5s)" : "Press Enter to translate"
+            }
             icon={Icon.ArrowRight}
             actions={
               <ActionPanel>
@@ -278,7 +409,7 @@ export default function Translate() {
                       icon={Icon.Book}
                       onAction={() => {
                         setSearchText(clipboardSuggestion);
-                        fetchTranslation(clipboardSuggestion);
+                        fetchWordTranslation(clipboardSuggestion);
                       }}
                     />
                   ) : (
@@ -294,9 +425,13 @@ export default function Translate() {
               {recentHistory.map((item) => (
                 <List.Item
                   key={item.id}
-                  title={item.word}
-                  subtitle={item.translation}
-                  accessories={[{ tag: item.partOfSpeech }]}
+                  title={item.type === "text" ? truncate(item.word, 60) : item.word}
+                  subtitle={item.type === "text" ? truncate(item.translation, 40) : item.translation}
+                  accessories={[
+                    item.type === "text"
+                      ? { tag: { value: "text", color: Color.Purple } }
+                      : { tag: { value: item.partOfSpeech, color: posColor(item.partOfSpeech) } },
+                  ]}
                   actions={
                     <ActionPanel>
                       <Action.CopyToClipboard
@@ -317,6 +452,8 @@ export default function Translate() {
             </List.Section>
           )}
         </>
+      ) : isLoading ? (
+        <List.EmptyView title="Translating…" icon={Icon.Book} />
       ) : null}
     </List>
   );

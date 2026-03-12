@@ -1,24 +1,17 @@
-import { GeminiApiResponseSchema, GeminiResponse, GeminiResponseSchema } from "./types";
-import { asJsonStringLiteral, normalizeWordInput } from "./input";
+import {
+  GeminiApiResponseSchema,
+  GeminiResponse,
+  GeminiResponseSchema,
+  GeminiTextResponse,
+  GeminiTextResponseSchema,
+} from "./types";
+import { asJsonStringLiteral, normalizeWordInput, normalizeTextInput } from "./input";
+import { LanguagePair } from "./languages";
 
 const MODEL = "gemini-2.5-flash-lite";
 const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
-export async function translateWord(word: string, apiKey: string, signal?: AbortSignal): Promise<GeminiResponse> {
-  const normalizedWord = normalizeWordInput(word);
-  if (!normalizedWord) {
-    throw new Error("INVALID_WORD_INPUT");
-  }
-
-  const prompt = `Translate the English word ${asJsonStringLiteral(normalizedWord)} to Ukrainian.
-Respond ONLY with valid JSON in this exact format:
-{
-  "translation": "Ukrainian word",
-  "partOfSpeech": "noun/verb/adjective/etc",
-  "example": "Ukrainian example sentence",
-  "exampleTranslation": "English translation of the example"
-}`;
-
+async function callGemini(prompt: string, apiKey: string, signal?: AbortSignal): Promise<string> {
   const url = `${BASE_URL}/${MODEL}:generateContent`;
 
   const response = await fetch(url, {
@@ -41,7 +34,6 @@ Respond ONLY with valid JSON in this exact format:
     throw new Error("GEMINI_REQUEST_FAILED");
   }
 
-  // Validate the outer Gemini API response shape
   const apiData = GeminiApiResponseSchema.parse(await response.json());
   const raw = apiData.candidates[0]?.content.parts[0]?.text ?? "";
 
@@ -49,15 +41,68 @@ Respond ONLY with valid JSON in this exact format:
     throw new Error("GEMINI_EMPTY_RESPONSE");
   }
 
-  // Strip markdown code fences if present
-  const cleaned = raw
+  return raw
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/, "")
     .trim();
+}
+
+export async function translateWord(
+  word: string,
+  apiKey: string,
+  languagePair: LanguagePair,
+  signal?: AbortSignal,
+): Promise<GeminiResponse> {
+  const normalizedWord = normalizeWordInput(word);
+  if (!normalizedWord) {
+    throw new Error("INVALID_WORD_INPUT");
+  }
+
+  const { source, target } = languagePair;
+
+  const prompt = `Translate the ${source.name} word ${asJsonStringLiteral(normalizedWord)} to ${target.name}.
+If the input is a misspelling or typo, correct it and translate the corrected word.
+Respond ONLY with valid JSON:
+{
+  "translation": "${target.name} translation",
+  "partOfSpeech": "noun/verb/adjective/etc",
+  "example": "${target.name} example sentence",
+  "exampleTranslation": "${source.name} translation of the example",
+  "correctedWord": "include ONLY if the input was misspelled; omit if correct"
+}`;
+
+  const cleaned = await callGemini(prompt, apiKey, signal);
 
   try {
-    // Validate the translation JSON shape
     return GeminiResponseSchema.parse(JSON.parse(cleaned));
+  } catch {
+    throw new Error("GEMINI_INVALID_RESPONSE");
+  }
+}
+
+export async function translateText(
+  text: string,
+  apiKey: string,
+  languagePair: LanguagePair,
+  signal?: AbortSignal,
+): Promise<GeminiTextResponse> {
+  const normalizedText = normalizeTextInput(text);
+  if (!normalizedText) {
+    throw new Error("INVALID_TEXT_INPUT");
+  }
+
+  const { source, target } = languagePair;
+
+  const prompt = `Translate the following ${source.name} text to ${target.name}.
+Respond ONLY with valid JSON:
+{ "translation": "..." }
+
+Text: ${asJsonStringLiteral(normalizedText)}`;
+
+  const cleaned = await callGemini(prompt, apiKey, signal);
+
+  try {
+    return GeminiTextResponseSchema.parse(JSON.parse(cleaned));
   } catch {
     throw new Error("GEMINI_INVALID_RESPONSE");
   }
