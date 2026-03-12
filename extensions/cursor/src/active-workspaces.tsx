@@ -97,6 +97,7 @@ export default function ActiveWorkspaces() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search active workspaces...">
+      <List.EmptyView title="No Active Workspaces" description="Open a Cursor window to see it listed here." />
       {windows.map((window, index) => (
         <List.Item
           key={`${window.title}-${index}`}
@@ -109,8 +110,16 @@ export default function ActiveWorkspaces() {
                 title="Focus Window"
                 icon={Icon.Window}
                 onAction={async () => {
-                  await closeMainWindow();
-                  await runAppleScript(buildFocusScript(window.title));
+                  try {
+                    await closeMainWindow();
+                    await runAppleScript(buildFocusScript(window.title));
+                  } catch (error) {
+                    await showToast({
+                      title: "Failed to focus window",
+                      style: Toast.Style.Failure,
+                      message: error instanceof Error ? error.message : String(error),
+                    });
+                  }
                 }}
               />
               <Action
