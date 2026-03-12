@@ -526,6 +526,14 @@ export default function Command() {
           key={`${videoId}-${thumbnail.key}`}
           title={thumbnail.label}
           icon={getThumbnailVariantIcon(thumbnail.key)}
+          accessories={[
+            {
+              text: {
+                value: getThumbnailDimensions(thumbnail.key),
+                color: Color.SecondaryText,
+              },
+            },
+          ]}
           detail={<List.Item.Detail markdown={`![${thumbnail.label}](${thumbnail.url})`} />}
           actions={
             <ActionPanel>
@@ -560,6 +568,18 @@ function getThumbnailVariantIcon(variantKey: string) {
     source,
     tintColor: ICON_TINT_COLOR,
   };
+}
+
+function getThumbnailDimensions(variantKey: string) {
+  const dimensionMap: Record<string, string> = {
+    maxres: "1280 × 720",
+    sd: "640 × 480",
+    hq: "480 × 360",
+    mq: "320 × 180",
+    default: "120 × 90",
+  };
+
+  return dimensionMap[variantKey] ?? "Unknown size";
 }
 
 function getStatusMarkdown(params: {
