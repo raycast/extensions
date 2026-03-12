@@ -176,7 +176,7 @@ export default function Command(props: Props) {
   );
   const showRecentHome = effectiveSelectedProduct === "all" && !shouldSearch && (recentItems?.length ?? 0) > 0;
   const showPlaceholder =
-    (!shouldSearch && effectiveSelectedProduct !== "bookmarks" && !showRecentHome) ||
+    (!shouldSearch && !showRecentHome) ||
     (effectiveSelectedProduct === "bookmarks" && !errorMessage && visibleItems.length === 0) ||
     (shouldSearch &&
       !isGlossaryBrowse &&
