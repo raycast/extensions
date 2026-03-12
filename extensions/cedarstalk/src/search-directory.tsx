@@ -85,8 +85,13 @@ function email(username: string): string {
 }
 
 function formatPhone(phone: string): string {
-  // 4-digit campus extensions → "ext. XXXX"
-  return /^\d{4}$/.test(phone.trim()) ? `ext. ${phone.trim()}` : phone;
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length === 4) return `ext. ${digits}`;
+  if (digits.length === 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  if (digits.length === 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  if (digits.length === 11 && digits[0] === "1")
+    return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
+  return phone.trim();
 }
 
 const FACULTY_TITLE_KEYWORDS = /professor|instructor|lecturer|faculty/i;
@@ -385,7 +390,7 @@ function PersonDetail({
               text={demo ? "ext. ****" : formatPhone(person.OfficePhone)}
             />
           )}
-          {!!(person.AddressCity || person.AddressState) && (
+          {!!(person.AddressCity || person.AddressState || info?.address?.addresslines?.length) && (
             <Detail.Metadata.Separator />
           )}
           {!!(person.AddressCity || person.AddressState) && (
@@ -394,6 +399,12 @@ function PersonDetail({
               text={demo ? "City, OH" : [person.AddressCity, person.AddressState].filter(Boolean).join(", ")}
             />
           )}
+          {info?.address?.addresslines?.filter(Boolean).length ? (
+            <Detail.Metadata.Label
+              title="Address"
+              text={demo ? "123 Example St, City, OH 00000" : info.address.addresslines.filter(Boolean).join(", ")}
+            />
+          ) : null}
           {info?.student?.isStudent && (() => {
             const majors = info.student.majors.filter(m => m.desc?.trim());
             const minors = info.student.minors.filter(m => m.desc?.trim());
@@ -440,6 +451,13 @@ function PersonDetail({
             <Action.CopyToClipboard
               title="Copy Email"
               content={demo ? "username@cedarville.edu" : email(person.Username)}
+            />
+          )}
+          {!demo && person.Username && (
+            <Action.OpenInBrowser
+              title="Send Email"
+              url={`mailto:${email(person.Username)}`}
+              icon={Icon.Envelope}
             />
           )}
           {person.OfficePhone && (
@@ -582,6 +600,13 @@ function PersonListItem({
             <Action.CopyToClipboard
               title="Copy Email"
               content={demo ? "username@cedarville.edu" : email(person.Username)}
+            />
+          )}
+          {!demo && person.Username && (
+            <Action.OpenInBrowser
+              title="Send Email"
+              url={`mailto:${email(person.Username)}`}
+              icon={Icon.Envelope}
             />
           )}
           {person.OfficePhone && (

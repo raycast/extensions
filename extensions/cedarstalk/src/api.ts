@@ -83,6 +83,9 @@ export interface PersonInfo {
   person: {
     box: string | null;
   };
+  address: {
+    addresslines: string[];
+  } | null;
 }
 
 export interface Department {
