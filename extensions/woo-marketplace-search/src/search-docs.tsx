@@ -85,12 +85,16 @@ export default function SearchDocs() {
             ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser url={url} title="Open in Browser" />
-                <Action.CopyToClipboard
-                  content={url}
-                  title="Copy URL"
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
+                {url && (
+                  <Action.OpenInBrowser url={url} title="Open in Browser" />
+                )}
+                {url && (
+                  <Action.CopyToClipboard
+                    content={url}
+                    title="Copy URL"
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                )}
                 <Action.CopyToClipboard
                   content={title}
                   title="Copy Title"
