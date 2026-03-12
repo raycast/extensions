@@ -54,7 +54,9 @@ export function ScheduleEditorForm({
         // If local parsing fails and AI is configured, try AI parsing asynchronously
         if (!result.ok && hasAI) {
           const config = getConfig();
-          parseLLMSchedule(config, value).then(setParseResult).catch(() => undefined);
+          parseLLMSchedule(config, value)
+            .then(setParseResult)
+            .catch(() => undefined);
         }
       }
     },

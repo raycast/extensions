@@ -3,7 +3,7 @@ import type { GantryConfig } from "../lib/config/types";
 import { AVAILABLE_MODELS } from "../lib/config/models";
 
 export function getConfig(): GantryConfig {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
 
   return {
     llm: {
@@ -18,7 +18,7 @@ export function getConfig(): GantryConfig {
 }
 
 export function getShowAppleServices(): boolean {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues();
   return prefs.showAppleServices;
 }
 

@@ -22,18 +22,18 @@ For development, follow the steps in the "Development" section below.
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|---|---|
-| `Enter` | View full job detail |
-| `Cmd+R` | Run job now |
-| `Cmd+E` | Edit schedule (user agents) |
-| `Cmd+L` | View logs |
-| `Cmd+Shift+L` | Live tail logs |
-| `Cmd+Shift+A` | Toggle Apple services |
-| `Cmd+Shift+R` | Refresh job list |
-| `Cmd+C` | Copy job label |
-| `Cmd+Shift+C` | Copy plist path |
-| `Cmd+O` | Open plist in editor |
+| Shortcut      | Action                      |
+| ------------- | --------------------------- |
+| `Enter`       | View full job detail        |
+| `Cmd+R`       | Run job now                 |
+| `Cmd+E`       | Edit schedule (user agents) |
+| `Cmd+L`       | View logs                   |
+| `Cmd+Shift+L` | Live tail logs              |
+| `Cmd+Shift+A` | Toggle Apple services       |
+| `Cmd+Shift+R` | Refresh job list            |
+| `Cmd+C`       | Copy job label              |
+| `Cmd+Shift+C` | Copy plist path             |
+| `Cmd+O`       | Open plist in editor        |
 
 ## Configuration
 

@@ -4,9 +4,14 @@
   "description": "Manage macOS launchd services — view, run, edit schedules, and tail logs",
   "icon": "extension-icon.png",
   "author": "eli_collinson",
-  "categories": ["Developer Tools", "System"],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search-jobs",
@@ -32,10 +37,22 @@
       "description": "AI model for log summaries and natural language schedule parsing",
       "required": false,
       "data": [
-        { "title": "None", "value": "" },
-        { "title": "Claude Haiku 4.5", "value": "claude-haiku-4-5-20251001" },
-        { "title": "Gemini 3 Flash", "value": "gemini-3-flash-preview" },
-        { "title": "GPT-5 Nano", "value": "gpt-5-nano" }
+        {
+          "title": "None",
+          "value": ""
+        },
+        {
+          "title": "Claude Haiku 4.5",
+          "value": "claude-haiku-4-5-20251001"
+        },
+        {
+          "title": "Gemini 3 Flash",
+          "value": "gemini-3-flash-preview"
+        },
+        {
+          "title": "GPT-5 Nano",
+          "value": "gpt-5-nano"
+        }
       ]
     },
     {
