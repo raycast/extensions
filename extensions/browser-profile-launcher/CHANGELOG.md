@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 — Initial Release
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Browse profiles from Chrome, Edge, Brave, Arc, and Vivaldi
 - Open or focus specific profile windows

@@ -24,9 +24,7 @@ export interface BrowserWindow {
 /**
  * Get all open windows for a browser with their first tab info.
  */
-export async function getOpenWindows(
-  browserName: string,
-): Promise<BrowserWindow[]> {
+export async function getOpenWindows(browserName: string): Promise<BrowserWindow[]> {
   const escaped = escapeAppleScript(browserName);
 
   const script = `
@@ -43,9 +41,7 @@ export async function getOpenWindows(
   `;
 
   try {
-    const { stdout } = await execAsync(
-      `osascript -e '${script.replace(/'/g, "'\\''")}'`,
-    );
+    const { stdout } = await execAsync(`osascript -e '${script.replace(/'/g, "'\\''")}'`);
 
     const windows: BrowserWindow[] = [];
     for (const line of stdout.trim().split("\n")) {
@@ -83,10 +79,7 @@ export async function getOpenWindows(
  * Opens chrome://version in each unprobed window, saves the rendered HTML,
  * parses the Profile Path, then closes the tab and cleans up.
  */
-export async function probeWindowProfiles(
-  browserName: string,
-  windows: BrowserWindow[],
-): Promise<BrowserWindow[]> {
+export async function probeWindowProfiles(browserName: string, windows: BrowserWindow[]): Promise<BrowserWindow[]> {
   const unprobed = windows.filter((w) => w.profileDirectory === null);
   if (unprobed.length === 0) return windows;
 
@@ -143,10 +136,7 @@ export async function probeWindowProfiles(
  * Bring a specific window to the front using AXRaise via System Events.
  * Matches the window by its title.
  */
-export async function focusWindowByTitle(
-  browserName: string,
-  windowTitle: string,
-): Promise<boolean> {
+export async function focusWindowByTitle(browserName: string, windowTitle: string): Promise<boolean> {
   const escapedApp = escapeAppleScript(browserName);
   const escapedTitle = escapeAppleScript(windowTitle);
 
@@ -169,9 +159,7 @@ export async function focusWindowByTitle(
     return true;
   } catch {
     try {
-      await execAsync(
-        `osascript -e 'tell application "${escapedApp}" to activate'`,
-      );
+      await execAsync(`osascript -e 'tell application "${escapedApp}" to activate'`);
     } catch {
       // ignore
     }

@@ -14,29 +14,11 @@ import { createDeeplink } from "@raycast/utils";
 import { BROWSERS } from "./browsers";
 import { openOrFocusProfile } from "./open-profile";
 import { scanAllProfiles } from "./profiles";
-import {
-  getCachedProfiles,
-  setCachedProfiles,
-  getFavorites,
-  setFavorites,
-} from "./storage";
+import { getCachedProfiles, setCachedProfiles, getFavorites, setFavorites } from "./storage";
 import { Browser, Profile } from "./types";
-import {
-  BrowserWindow,
-  getOpenWindows,
-  probeWindowProfiles,
-  focusWindowByTitle,
-} from "./window-manager";
+import { BrowserWindow, getOpenWindows, probeWindowProfiles, focusWindowByTitle } from "./window-manager";
 
-interface Preferences {
-  enableChrome: boolean;
-  enableEdge: boolean;
-  enableBrave: boolean;
-  enableArc: boolean;
-  enableVivaldi: boolean;
-}
-
-const PREF_KEY_MAP: Record<string, keyof Preferences> = {
+const PREF_KEY_MAP: Record<string, keyof Preferences.BrowseProfiles> = {
   chrome: "enableChrome",
   edge: "enableEdge",
   brave: "enableBrave",
@@ -45,7 +27,7 @@ const PREF_KEY_MAP: Record<string, keyof Preferences> = {
 };
 
 function getEnabledBrowsers() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.BrowseProfiles>();
   return BROWSERS.filter((b) => {
     const key = PREF_KEY_MAP[b.id];
     return key ? prefs[key] : true;
@@ -69,10 +51,7 @@ export default function BrowseProfiles() {
   async function loadProfiles() {
     setIsLoading(true);
     try {
-      const [cached, favs] = await Promise.all([
-        getCachedProfiles(),
-        getFavorites(),
-      ]);
+      const [cached, favs] = await Promise.all([getCachedProfiles(), getFavorites()]);
       setFavoriteIds(favs);
       if (cached && cached.profiles.length > 0) {
         const enabledIds = new Set(enabledBrowsers.map((b) => b.id));
@@ -101,9 +80,7 @@ export default function BrowseProfiles() {
         let profileName: string | null = null;
         if (w.profileDirectory) {
           const matchingProfile = profiles.find(
-            (p) =>
-              p.browserId === browser.id &&
-              p.directoryName === w.profileDirectory,
+            (p) => p.browserId === browser.id && p.directoryName === w.profileDirectory,
           );
           profileName = matchingProfile?.displayName || w.profileDirectory;
         }
@@ -134,9 +111,7 @@ export default function BrowseProfiles() {
 
   async function handleToggleFavorite(profileId: string) {
     const isFav = favoriteIds.includes(profileId);
-    const updated = isFav
-      ? favoriteIds.filter((id) => id !== profileId)
-      : [...favoriteIds, profileId];
+    const updated = isFav ? favoriteIds.filter((id) => id !== profileId) : [...favoriteIds, profileId];
     setFavoriteIds(updated);
     await setFavorites(updated);
   }
@@ -184,15 +159,8 @@ export default function BrowseProfiles() {
         key={profile.id}
         title={profile.displayName}
         subtitle={profile.gaiaName || undefined}
-        icon={
-          profile.avatarPath
-            ? { fileIcon: profile.avatarPath }
-            : { source: browser.icon }
-        }
-        accessories={[
-          ...(isFav ? [{ icon: Icon.Star }] : []),
-          { text: browser.name },
-        ]}
+        icon={profile.avatarPath ? { fileIcon: profile.avatarPath } : { source: browser.icon }}
+        accessories={[...(isFav ? [{ icon: Icon.Star }] : []), { text: browser.name }]}
         actions={
           <ActionPanel>
             <Action
@@ -247,11 +215,7 @@ export default function BrowseProfiles() {
             icon={Icon.Gear}
             actions={
               <ActionPanel>
-                <Action
-                  title="Open Preferences"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
@@ -265,20 +229,14 @@ export default function BrowseProfiles() {
       ) : (
         <>
           {openWindows.length > 0 && (
-            <List.Section
-              title="Open Windows"
-              subtitle={`${openWindows.length} windows`}
-            >
+            <List.Section title="Open Windows" subtitle={`${openWindows.length} windows`}>
               {openWindows.map((item) => (
                 <List.Item
                   key={`window-${item.window.windowId}`}
                   title={item.window.firstTabTitle}
                   subtitle={item.window.firstTabUrl}
                   icon={Icon.Window}
-                  accessories={[
-                    ...(item.profileName ? [{ tag: item.profileName }] : []),
-                    { text: item.browser.name },
-                  ]}
+                  accessories={[...(item.profileName ? [{ tag: item.profileName }] : []), { text: item.browser.name }]}
                   actions={
                     <ActionPanel>
                       <Action
@@ -296,28 +254,19 @@ export default function BrowseProfiles() {
             </List.Section>
           )}
           {favoriteProfiles.length > 0 && (
-            <List.Section
-              title="Favorites"
-              subtitle={`${favoriteProfiles.length} profiles`}
-            >
+            <List.Section title="Favorites" subtitle={`${favoriteProfiles.length} profiles`}>
               {favoriteProfiles.map(renderProfileItem)}
             </List.Section>
           )}
-          {BROWSERS.filter((b) => installedBrowserIds.has(b.id)).map(
-            (browser) => {
-              const browserProfiles = profilesByBrowser.get(browser.id) || [];
-              if (browserProfiles.length === 0) return null;
-              return (
-                <List.Section
-                  key={browser.id}
-                  title={browser.name}
-                  subtitle={`${browserProfiles.length} profiles`}
-                >
-                  {browserProfiles.map(renderProfileItem)}
-                </List.Section>
-              );
-            },
-          )}
+          {BROWSERS.filter((b) => installedBrowserIds.has(b.id)).map((browser) => {
+            const browserProfiles = profilesByBrowser.get(browser.id) || [];
+            if (browserProfiles.length === 0) return null;
+            return (
+              <List.Section key={browser.id} title={browser.name} subtitle={`${browserProfiles.length} profiles`}>
+                {browserProfiles.map(renderProfileItem)}
+              </List.Section>
+            );
+          })}
         </>
       )}
     </List>
