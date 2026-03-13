@@ -6,8 +6,7 @@
   "icon": "ai-agency.png",
   "author": "marcin-91",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Developer Tools"
