@@ -44,7 +44,7 @@
       "name": "configPath",
       "title": "MCP Config Path",
       "description": "Path to the Codex config.toml file.",
-      "type": "textfield",
+      "type": "file",
       "default": "~/.codex/config.toml",
       "required": true
     },
@@ -52,7 +52,7 @@
       "name": "skillsDir",
       "title": "Skills Folder",
       "description": "Path to the Codex skills directory.",
-      "type": "textfield",
+      "type": "directory",
       "default": "~/.codex/skills/",
       "required": true
     },
@@ -60,7 +60,7 @@
       "name": "editorPreference",
       "title": "Preferred Editor",
       "description": "Open files with the system default or VS Code (code).",
-      "type": "dropdown",
+      "type": "appPicker",
       "default": "default",
       "data": [
         {
@@ -94,7 +94,7 @@
     },
     {
       "name": "createBackup",
-      "label": "Create backup",
+      "label": "Create Backup",
       "description": "Create a timestamped backup before writing config.toml.",
       "type": "checkbox",
       "default": true,

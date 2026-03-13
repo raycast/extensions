@@ -177,6 +177,12 @@ export default function SkillsCommand() {
             actions={
               <ActionPanel>
                 <Action.Push
+                  title="Browse Files"
+                  icon={Icon.Folder}
+                  shortcut={{ modifiers: ["cmd"], key: "b" }}
+                  target={<SkillFiles skill={skill} />}
+                />
+                <Action.Push
                   title="Create Skill"
                   icon={Icon.Plus}
                   target={
@@ -192,12 +198,6 @@ export default function SkillsCommand() {
                   title="Import Skill from Zip"
                   icon={Icon.ArrowDownCircle}
                   target={<SkillImportForm skillsDir={skillsDir} onImported={loadSkills} />}
-                />
-                <Action.Push
-                  title="Browse Files"
-                  icon={Icon.Folder}
-                  shortcut={{ modifiers: ["cmd"], key: "b" }}
-                  target={<SkillFiles skill={skill} />}
                 />
                 <Action.Push
                   title="Add File or Folder"
