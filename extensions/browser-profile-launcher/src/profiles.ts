@@ -26,10 +26,7 @@ function parseLocalState(filePath: string): LocalState | null {
   }
 }
 
-function findAvatarPath(
-  profileRootPath: string,
-  directoryName: string,
-): string | null {
+function findAvatarPath(profileRootPath: string, directoryName: string): string | null {
   const profileDir = join(profileRootPath, directoryName);
   const googlePicture = join(profileDir, "Google Profile Picture.png");
   if (existsSync(googlePicture)) {

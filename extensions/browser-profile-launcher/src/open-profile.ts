@@ -1,11 +1,11 @@
 import { LaunchProps, showHUD } from "@raycast/api";
-import { execFile } from "child_process";
+import { exec } from "child_process";
 import { promisify } from "util";
 import { getBrowserById } from "./browsers";
 import { getOpenWindows, probeWindowProfiles, focusWindowByTitle, isProcessRunning } from "./window-manager";
 import { OpenProfileContext } from "./types";
 
-const execFileAsync = promisify(execFile);
+const execAsync = promisify(exec);
 
 export default async function OpenProfile(props: LaunchProps<{ launchContext: OpenProfileContext }>) {
   const context = props.launchContext;
@@ -52,7 +52,7 @@ export async function openOrFocusProfile(
     } else {
       // No window for this profile — open a new one
       try {
-        await execFileAsync("open", ["-a", browserName, "--args", `--profile-directory=${profileDirectory}`]);
+        await execAsync(`open -a "${browserName}" --args --profile-directory="${profileDirectory}"`);
         await showHUD(`Opened ${displayName} — ${browserName}`);
       } catch {
         await showHUD(`Failed to open ${displayName}`);
@@ -61,7 +61,7 @@ export async function openOrFocusProfile(
   } else {
     // Browser not running — launch with the specific profile
     try {
-      await execFileAsync("open", ["-a", browserName, "--args", `--profile-directory=${profileDirectory}`]);
+      await execAsync(`open -a "${browserName}" --args --profile-directory="${profileDirectory}"`);
       await showHUD(`Opened ${displayName} — ${browserName}`);
     } catch {
       await showHUD(`${browserName} is not installed`);

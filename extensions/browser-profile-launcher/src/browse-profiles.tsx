@@ -18,7 +18,15 @@ import { getCachedProfiles, setCachedProfiles, getFavorites, setFavorites } from
 import { Browser, Profile } from "./types";
 import { BrowserWindow, getOpenWindows, probeWindowProfiles, focusWindowByTitle } from "./window-manager";
 
-const PREF_KEY_MAP: Record<string, keyof Preferences.BrowseProfiles> = {
+interface Preferences {
+  enableChrome: boolean;
+  enableEdge: boolean;
+  enableBrave: boolean;
+  enableArc: boolean;
+  enableVivaldi: boolean;
+}
+
+const PREF_KEY_MAP: Record<string, keyof Preferences> = {
   chrome: "enableChrome",
   edge: "enableEdge",
   brave: "enableBrave",
@@ -27,7 +35,7 @@ const PREF_KEY_MAP: Record<string, keyof Preferences.BrowseProfiles> = {
 };
 
 function getEnabledBrowsers() {
-  const prefs = getPreferenceValues<Preferences.BrowseProfiles>();
+  const prefs = getPreferenceValues<Preferences>();
   return BROWSERS.filter((b) => {
     const key = PREF_KEY_MAP[b.id];
     return key ? prefs[key] : true;
