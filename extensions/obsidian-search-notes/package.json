@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-search-notes",
+  "title": "Search Obsidian Notes",
+  "description": "Search and open Obsidian notes, ordered by recency",
+  "icon": "extension-icon.png",
+  "author": "young_woo_choi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Vault Path",
+      "description": "Absolute path to your Obsidian vault",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "/Users/you/Obsidian/MyVault"
+    },
+    {
+      "name": "vaultName",
+      "title": "Vault Name",
+      "description": "Obsidian vault name (used for obsidian:// URI)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "MyVault"
+    },
+    {
+      "name": "ignoreFolders",
+      "title": "Ignore Folders",
+      "description": "Comma-separated folder names to exclude (e.g., .obsidian,templates,attachments)",
+      "type": "textfield",
+      "required": false,
+      "default": ".obsidian,.trash,templates,attachments"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Obsidian Notes",
+      "subtitle": "Obsidian",
+      "description": "Search all Obsidian notes, ordered by recency",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
