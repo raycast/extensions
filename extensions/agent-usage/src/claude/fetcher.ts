@@ -211,6 +211,9 @@ async function readClaudeCredentials(): Promise<{ credentials: ClaudeCredentials
   if (keychainJson) {
     const result = parseClaudeCredentials(keychainJson, "keychain");
     if (result.credentials) return result;
+    // Keychain had data but it failed validation — surface that specific error
+    // rather than falling through to a generic "not configured" message.
+    return result;
   }
 
   // Fall back to credentials file (Linux/WSL/SSH sessions)
