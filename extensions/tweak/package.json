@@ -1,0 +1,312 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tweak",
+  "title": "Tweak",
+  "description": "Small tweak, big difference. Fix grammar, adjust tone, paraphrase — without changing what you mean. Works with Groq (free), OpenAI, or Anthropic.",
+  "icon": "icon.png",
+  "author": "iampdwivedi",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "grammar-fix",
+      "title": "Fix Grammar",
+      "subtitle": "Tweak",
+      "description": "Fix grammar and spelling only, No tone changes, no added content.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "grammar",
+        "spelling",
+        "fix",
+        "correct"
+      ],
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Customize the prompt for this command. Leave empty to use the default.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Leave empty for default prompt"
+        }
+      ]
+    },
+    {
+      "name": "enhance-prompt",
+      "title": "Enhance Prompt",
+      "subtitle": "Tweak",
+      "description": "Turn a rough 1-2 line idea into a detailed, tool-specific AI prompt. Supports Claude, ChatGPT, Midjourney, DALL-E, Stable Diffusion, Cursor, and more.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "prompt",
+        "enhance",
+        "engineer",
+        "supercharge",
+        "ai",
+        "midjourney",
+        "chatgpt",
+        "claude"
+      ],
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Customize the prompt enhancer behavior. Leave empty to use the default.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Leave empty for default prompt"
+        }
+      ]
+    },
+    {
+      "name": "format-digestible",
+      "title": "Format Digestible",
+      "subtitle": "Tweak",
+      "description": "Convert a long paragraph into digestible text chunks using line breaks, pointers, and numbers for Slack.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "format",
+        "digestible",
+        "chunks",
+        "bullets"
+      ],
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Customize the prompt for this command. Leave empty to use the default.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Leave empty for default prompt"
+        }
+      ]
+    },
+    {
+      "name": "paraphrase",
+      "title": "Paraphrase",
+      "subtitle": "Tweak",
+      "description": "Rewrite text in clear, simple English while keeping the meaning.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "paraphrase",
+        "rewrite",
+        "clear",
+        "simple"
+      ],
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Customize the prompt. Leave empty to use default.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Leave empty for default prompt"
+        }
+      ]
+    },
+    {
+      "name": "complete-thought",
+      "title": "Complete Thought",
+      "subtitle": "Tweak",
+      "description": "Stuck mid-sentence? Naturally finish your message in your exact tone.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "complete",
+        "finish",
+        "continue",
+        "stuck"
+      ],
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Customize the completion behavior. Leave empty for default.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Leave empty for default prompt"
+        }
+      ]
+    },
+    {
+      "name": "custom-action-1",
+      "title": "Tweak Custom 1",
+      "subtitle": "Tweak",
+      "description": "Your custom AI action. Set the title and prompt in preferences.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "custom",
+        "action"
+      ],
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "actionTitle",
+          "title": "Action Title",
+          "description": "Give this action a name.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate to Hindi"
+        },
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Write your custom AI prompt here.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate the message to Hindi. Return only the translation."
+        }
+      ]
+    },
+    {
+      "name": "custom-action-2",
+      "title": "Tweak Custom 2",
+      "subtitle": "Tweak",
+      "description": "Your custom AI action. Set the title and prompt in preferences.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "custom",
+        "action"
+      ],
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "actionTitle",
+          "title": "Action Title",
+          "description": "Give this action a name.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate to Hindi"
+        },
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Write your custom AI prompt here.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate the message to Hindi. Return only the translation."
+        }
+      ]
+    },
+    {
+      "name": "custom-action-3",
+      "title": "Tweak Custom 3",
+      "subtitle": "Tweak",
+      "description": "Your custom AI action. Set the title and prompt in preferences.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "custom",
+        "action"
+      ],
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "actionTitle",
+          "title": "Action Title",
+          "description": "Give this action a name.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate to Hindi"
+        },
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Write your custom AI prompt here.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate the message to Hindi. Return only the translation."
+        }
+      ]
+    },
+    {
+      "name": "custom-action-4",
+      "title": "Tweak Custom 4",
+      "subtitle": "Tweak",
+      "description": "Your custom AI action. Set the title and prompt in preferences.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "custom",
+        "action"
+      ],
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "actionTitle",
+          "title": "Action Title",
+          "description": "Give this action a name.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate to Hindi"
+        },
+        {
+          "name": "customPrompt",
+          "title": "AI Prompt",
+          "description": "Write your custom AI prompt here.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. Translate the message to Hindi. Return only the translation."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "description": "Choose your AI provider. Groq is free.",
+      "type": "dropdown",
+      "required": true,
+      "default": "groq",
+      "data": [
+        {
+          "title": "Groq (Free — Llama 3.3 70B)",
+          "value": "groq"
+        },
+        {
+          "title": "OpenAI (GPT-4o mini)",
+          "value": "openai"
+        },
+        {
+          "title": "Anthropic (Claude Sonnet)",
+          "value": "anthropic"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key. For Groq: console.groq.com/keys (free). For OpenAI: platform.openai.com. For Anthropic: console.anthropic.com.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.4",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
