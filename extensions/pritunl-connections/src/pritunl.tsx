@@ -52,9 +52,7 @@ async function resolveLnkTarget(lnkPath: string): Promise<string> {
 async function getCLIPath(): Promise<string> {
   const prefs = getPreferenceValues<Preferences>();
   if (!prefs.application) {
-    throw new InvalidCLIPathError(
-      "Could not resolve a valid .exe path from the selected application.",
-    );
+    throw new InvalidCLIPathError("Could not resolve a valid .exe path from the selected application.");
   }
   if (process.platform === "win32") {
     let exePath = prefs.application.path;
@@ -62,9 +60,7 @@ async function getCLIPath(): Promise<string> {
       exePath = await resolveLnkTarget(exePath);
     }
     if (!exePath.toLowerCase().endsWith("pritunl.exe")) {
-      throw new InvalidCLIPathError(
-        "Could not resolve a valid .exe path from the selected application.",
-      );
+      throw new InvalidCLIPathError("Could not resolve a valid .exe path from the selected application.");
     }
     return exePath.replace(/pritunl\.exe$/i, "pritunl-client.exe");
   }
@@ -77,20 +73,17 @@ function formatUptime(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  return [h ? `${h}h` : null, m ? `${m}m` : null, `${s}s`]
-    .filter(Boolean)
-    .join(" ");
+  return [h ? `${h}h` : null, m ? `${m}m` : null, `${s}s`].filter(Boolean).join(" ");
 }
 
 export default function Command() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [invalidCLI, setInvalidCLI] = useState(false);
-  const [savedProtocols, setSavedProtocols] = useState<
-    Record<string, "ovpn" | "wg">
-  >({});
+  const [savedProtocols, setSavedProtocols] = useState<Record<string, "ovpn" | "wg">>({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingRef = useRef<Map<string, PendingConnection>>(new Map());
+  const isPollingRef = useRef(false);
 
   useEffect(() => {
     LocalStorage.getItem<string>("profileProtocols").then((raw) => {
@@ -180,7 +173,15 @@ export default function Command() {
 
   useEffect(() => {
     loadProfiles();
-    intervalRef.current = setInterval(loadProfiles, 1000);
+    intervalRef.current = setInterval(async () => {
+      if (isPollingRef.current) return;
+      isPollingRef.current = true;
+      try {
+        await loadProfiles();
+      } finally {
+        isPollingRef.current = false;
+      }
+    }, 1000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -190,16 +191,12 @@ export default function Command() {
     const willEnable = profile.state === "Disabled";
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: willEnable
-        ? "Enabling autostart\u2026"
-        : "Disabling autostart\u2026",
+      title: willEnable ? "Enabling autostart\u2026" : "Disabling autostart\u2026",
       message: profile.name,
     });
     try {
       const cliPath = await getCLIPath();
-      await execAsync(
-        `"${cliPath}" ${willEnable ? "enable" : "disable"} ${profile.id}`,
-      );
+      await execAsync(`"${cliPath}" ${willEnable ? "enable" : "disable"} ${profile.id}`);
       toast.style = Toast.Style.Success;
       toast.title = willEnable ? "Autostart enabled" : "Autostart disabled";
       toast.message = profile.name;
@@ -211,29 +208,21 @@ export default function Command() {
     }
   }
 
-  async function toggleConnection(
-    profile: Profile,
-    overrideProtocol?: "ovpn" | "wg",
-  ) {
+  async function toggleConnection(profile: Profile, overrideProtocol?: "ovpn" | "wg") {
     const isActive = profile.run_state === "Active";
-    const effectiveProtocol =
-      overrideProtocol ?? savedProtocols[profile.id] ?? "ovpn";
+    const effectiveProtocol = overrideProtocol ?? savedProtocols[profile.id] ?? "ovpn";
     if (overrideProtocol) {
       await saveProtocol(profile.id, overrideProtocol);
     }
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: isActive
-        ? `Disconnecting ${profile.name}`
-        : `Connecting ${profile.name}`,
+      title: isActive ? `Disconnecting ${profile.name}` : `Connecting ${profile.name}`,
       message: `mode: ${effectiveProtocol.toUpperCase()}`,
     });
     try {
       const cliPath = await getCLIPath();
       if (!isActive) {
-        await execAsync(
-          `"${cliPath}" start ${profile.id} -m ${effectiveProtocol}`,
-        );
+        await execAsync(`"${cliPath}" start ${profile.id} -m ${effectiveProtocol}`);
         pendingRef.current.set(profile.id, {
           protocol: effectiveProtocol,
           toast,
@@ -258,11 +247,7 @@ export default function Command() {
       description="Open extension settings and select the Pritunl application."
       actions={
         <ActionPanel>
-          <Action
-            title="Open Extension Settings"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Settings" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -295,8 +280,7 @@ export default function Command() {
                   subtitle={
                     profile.connected
                       ? "Connected"
-                      : profile.status === "Connecting" ||
-                          profile.status.endsWith("secs")
+                      : profile.status === "Connecting" || profile.status.endsWith("secs")
                         ? "Connecting"
                         : "Disconnected"
                   }
@@ -312,9 +296,7 @@ export default function Command() {
                     ...(profile.connected && profile.status !== "Connecting"
                       ? [{ text: uptime, icon: Icon.Clock, tooltip: "Uptime" }]
                       : []),
-                    ...(profile.client_address
-                      ? [{ text: profile.client_address, tooltip: "Client IP" }]
-                      : []),
+                    ...(profile.client_address ? [{ text: profile.client_address, tooltip: "Client IP" }] : []),
                   ]}
                   actions={
                     <ActionPanel>
@@ -341,11 +323,7 @@ export default function Command() {
                       )}
                       <ActionPanel.Section title="Autostart">
                         <Action
-                          title={
-                            profile.state === "Disabled"
-                              ? "Enable Autostart"
-                              : "Disable Autostart"
-                          }
+                          title={profile.state === "Disabled" ? "Enable Autostart" : "Disable Autostart"}
                           icon={Icon.Power}
                           shortcut={{ modifiers: ["cmd"], key: "e" }}
                           onAction={() => toggleAutostart(profile)}
