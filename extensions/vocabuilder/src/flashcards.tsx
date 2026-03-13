@@ -123,7 +123,7 @@ export default function Flashcards() {
     });
   }, []);
 
-  if (langResult.error) return <LanguageConfigError message={langResult.error} />;
+  if (!langResult.pair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
   const languagePair = langResult.pair;
 
   async function handleRate(rating: Rating) {

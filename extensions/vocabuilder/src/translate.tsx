@@ -89,7 +89,7 @@ export default function Translate() {
       });
   }, [readClipboardOnOpen]);
 
-  if (langResult.error) return <LanguageConfigError message={langResult.error} />;
+  if (!langResult.pair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
   const languagePair = langResult.pair;
   const { source } = languagePair;
 

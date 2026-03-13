@@ -38,7 +38,7 @@ export default function History() {
     });
   }, []);
 
-  if (langResult.error) return <LanguageConfigError message={langResult.error} />;
+  if (!langResult.pair) return <LanguageConfigError message={langResult.error ?? "Invalid language configuration."} />;
   const languagePair = langResult.pair;
 
   const filtered = searchText
