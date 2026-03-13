@@ -39,17 +39,6 @@ type GenerationSession = {
   result: string;
 };
 
-type SavedPreset = {
-  id: string;
-  name: string;
-  purpose: PurposeId;
-  enhancement: EnhancementId;
-  tone: ToneId;
-  customPrompt: string;
-  model: ModelId;
-  creativity: CreativityId;
-};
-
 type ExtensionPreferences = {
   defaultPurpose?: PurposeId;
   defaultEnhancement?: EnhancementId;

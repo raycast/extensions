@@ -391,11 +391,11 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.9",
-    "react": "^18.3.1"
+    "react": "19.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/react": "^18.3.12",
+    "@types/react": "19.0.10",
     "eslint": "^9.17.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2"
