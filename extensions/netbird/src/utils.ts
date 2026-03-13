@@ -165,13 +165,13 @@ export async function getAdminUrl(): Promise<string> {
   const config_filenames = ["active_profile.json", "default.json"];
 
   try {
-    for (const path of NETBIRD_CONFIG_PATHS) {
+    for (const folder_path of NETBIRD_CONFIG_PATHS) {
       for (const filename of config_filenames) {
-        const fullPath = `${path}/${filename}`;
+        const fullPath = `${folder_path}/${filename}`;
 
         if (fs.existsSync(fullPath)) {
           try {
-            const configContent = await fs.promises.readFile(path, "utf-8");
+            const configContent = await fs.promises.readFile(fullPath, "utf-8");
             const config = JSON.parse(configContent);
 
             // check AdminURL first
@@ -187,10 +187,10 @@ export async function getAdminUrl(): Promise<string> {
             if (config.ManagementURL) {
               let url: string | undefined;
 
-              if (typeof config.AdminURL === "string") {
-                url = config.AdminURL;
-              } else if (config.AdminURL.Scheme && config.AdminURL.Host) {
-                url = `${config.AdminURL.Scheme}://${config.AdminURL.Host}`;
+              if (typeof config.ManagementURL === "string") {
+                url = config.ManagementURL;
+              } else if (config.ManagementURL.Scheme && config.ManagementURL.Host) {
+                url = `${config.ManagementURL.Scheme}://${config.ManagementURL.Host}`;
               }
 
               if (url && (url.includes("api.netbird.io") || url.includes("api.wiretrustee.com"))) {

@@ -1,4 +1,4 @@
 # NetBird Changelog
 
-## [Initial Version] - 13-03-2026
+## [Initial Version] - {PR_MERGE_DATE}
 - Initial release of the NetBird Raycast Extension.

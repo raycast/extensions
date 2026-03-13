@@ -8,6 +8,12 @@
   "platforms": [
     "macOS"
   ],
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "System",
+    "Communication"
+  ],
   "license": "MIT",
   "commands": [
     {
