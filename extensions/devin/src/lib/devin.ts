@@ -1,4 +1,5 @@
 import { getExtensionPreferences } from "./preferences";
+import { getDemoDevinClient } from "./demo";
 import {
   CreateSessionInput,
   CreateSessionResult,
@@ -55,9 +56,7 @@ function normalizeBaseUrl(url: string): string {
   return url.replace(/\/+$/, "");
 }
 
-function buildQuery(
-  params: Record<string, string | number | undefined | string[]>,
-): string {
+function buildQuery(params: Record<string, string | number | undefined | string[]>): string {
   const searchParams = new URLSearchParams();
 
   for (const [key, value] of Object.entries(params)) {
@@ -91,33 +90,22 @@ function formatStatusLabel(status: string): string {
     .join(" ");
 }
 
-function buildSessionUrl(
-  sessionId: string,
-  appBaseUrl: string,
-  explicitUrl?: string | null,
-): string {
+function buildSessionUrl(sessionId: string, appBaseUrl: string, explicitUrl?: string | null): string {
   if (explicitUrl) {
     if (/^https?:\/\//i.test(explicitUrl)) {
       return explicitUrl;
     }
 
-    const normalizedPath = explicitUrl.startsWith("/")
-      ? explicitUrl
-      : `/${explicitUrl}`;
+    const normalizedPath = explicitUrl.startsWith("/") ? explicitUrl : `/${explicitUrl}`;
     return `${normalizeBaseUrl(appBaseUrl)}${normalizedPath}`;
   }
 
-  const normalizedSessionId = sessionId.startsWith("devin-")
-    ? sessionId.slice("devin-".length)
-    : sessionId;
+  const normalizedSessionId = sessionId.startsWith("devin-") ? sessionId.slice("devin-".length) : sessionId;
 
   return `${normalizeBaseUrl(appBaseUrl)}/sessions/${encodeURIComponent(normalizedSessionId)}`;
 }
 
-function normalizeSummary(
-  raw: SessionSummaryResponse,
-  appBaseUrl: string,
-): SessionSummary {
+function normalizeSummary(raw: SessionSummaryResponse, appBaseUrl: string): SessionSummary {
   const status = normalizeStatus(raw);
 
   return {
@@ -133,11 +121,7 @@ function normalizeSummary(
     pullRequestUrl: raw.pull_request?.url || undefined,
     structuredOutput: raw.structured_output,
     tags: raw.tags ?? [],
-    url: buildSessionUrl(
-      raw.session_id,
-      appBaseUrl,
-      raw.url || raw.session_url,
-    ),
+    url: buildSessionUrl(raw.session_id, appBaseUrl, raw.url || raw.session_url),
   };
 }
 
@@ -166,8 +150,7 @@ function normalizeMessage(message: unknown): SessionMessage | null {
                     if (
                       entry &&
                       typeof entry === "object" &&
-                      typeof (entry as Record<string, unknown>).text ===
-                        "string"
+                      typeof (entry as Record<string, unknown>).text === "string"
                     ) {
                       return (entry as Record<string, string>).text;
                     }
@@ -193,8 +176,7 @@ function normalizeMessage(message: unknown): SessionMessage | null {
             ? value.username
             : value.type === "devin_message"
               ? "Devin"
-              : typeof value.type === "string" &&
-                  value.type.includes("user_message")
+              : typeof value.type === "string" && value.type.includes("user_message")
                 ? "You"
                 : undefined;
 
@@ -216,16 +198,20 @@ async function parseError(response: Response): Promise<never> {
   let message = `Request failed with status ${response.status}`;
 
   try {
-    const payload = (await response.json()) as {
-      detail?: string;
-      message?: string;
-    };
-    message = payload.detail || payload.message || message;
-  } catch {
     const text = await response.text();
     if (text) {
-      message = text;
+      try {
+        const payload = JSON.parse(text) as {
+          detail?: string;
+          message?: string;
+        };
+        message = payload.detail || payload.message || message;
+      } catch {
+        message = text;
+      }
     }
+  } catch {
+    // Ignore body read errors and throw the status-based message below.
   }
 
   throw new DevinApiError(message, response.status);
@@ -274,13 +260,8 @@ class HttpDevinClient implements DevinClient {
       user_email: input.userEmail,
     });
 
-    const response = await this.request<{ sessions: SessionSummaryResponse[] }>(
-      `/sessions${query}`,
-      { method: "GET" },
-    );
-    const sessions = response.sessions.map((session) =>
-      normalizeSummary(session, this.appBaseUrl),
-    );
+    const response = await this.request<{ sessions: SessionSummaryResponse[] }>(`/sessions${query}`, { method: "GET" });
+    const sessions = response.sessions.map((session) => normalizeSummary(session, this.appBaseUrl));
 
     return {
       sessions,
@@ -290,10 +271,9 @@ class HttpDevinClient implements DevinClient {
   }
 
   async getSession(sessionId: string): Promise<SessionDetail> {
-    const response = await this.request<SessionDetailResponse>(
-      `/sessions/${encodeURIComponent(sessionId)}`,
-      { method: "GET" },
-    );
+    const response = await this.request<SessionDetailResponse>(`/sessions/${encodeURIComponent(sessionId)}`, {
+      method: "GET",
+    });
 
     return {
       ...normalizeSummary(response, this.appBaseUrl),
@@ -326,31 +306,36 @@ class HttpDevinClient implements DevinClient {
   }
 
   async sendMessage(sessionId: string, message: string): Promise<string> {
-    const response = await this.request<MessageSentResponse>(
-      `/sessions/${encodeURIComponent(sessionId)}/message`,
-      {
-        method: "POST",
-        body: JSON.stringify({ message }),
-      },
-    );
+    const response = await this.request<MessageSentResponse>(`/sessions/${encodeURIComponent(sessionId)}/message`, {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
 
     return response.detail || "Message sent.";
   }
 }
 
 let client: DevinClient | undefined;
+let clientKey: string | undefined;
 
 export function getDevinClient(): DevinClient {
-  if (client) {
+  const preferences = getExtensionPreferences();
+  const nextClientKey = preferences.demoMode
+    ? "demo"
+    : `${preferences.apiBaseUrl}|${preferences.appBaseUrl}|${preferences.apiKey}`;
+
+  if (client && clientKey === nextClientKey) {
     return client;
   }
 
-  const preferences = getExtensionPreferences();
-  client = new HttpDevinClient(
-    normalizeBaseUrl(preferences.apiBaseUrl),
-    normalizeBaseUrl(preferences.appBaseUrl),
-    preferences.apiKey,
-  );
+  client = preferences.demoMode
+    ? getDemoDevinClient()
+    : new HttpDevinClient(
+        normalizeBaseUrl(preferences.apiBaseUrl),
+        normalizeBaseUrl(preferences.appBaseUrl),
+        preferences.apiKey,
+      );
+  clientKey = nextClientKey;
 
   return client;
 }

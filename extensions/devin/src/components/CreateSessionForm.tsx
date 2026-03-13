@@ -1,16 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Keyboard,
-  Toast,
-  open,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Keyboard, Toast, open, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { getDevinClient } from "../lib/devin";
 import { parseTags } from "../lib/format";
+import { getExtensionPreferences } from "../lib/preferences";
 import { CreateSessionResult } from "../types";
 
 type FormValues = {
@@ -30,6 +22,7 @@ type Props = {
 
 export function CreateSessionForm({ onCreated }: Props) {
   const client = getDevinClient();
+  const preferences = getExtensionPreferences();
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -43,9 +36,7 @@ export function CreateSessionForm({ onCreated }: Props) {
         tags: parseTags(values.tags),
         snapshotId: values.snapshotId.trim() || undefined,
         playbookId: values.playbookId.trim() || undefined,
-        maxAcuLimit: values.maxAcuLimit
-          ? Number(values.maxAcuLimit)
-          : undefined,
+        maxAcuLimit: values.maxAcuLimit ? Number(values.maxAcuLimit) : undefined,
         unlisted: values.unlisted,
         idempotent: values.idempotent,
       });
@@ -53,9 +44,7 @@ export function CreateSessionForm({ onCreated }: Props) {
       await onCreated?.(session);
       await showToast({
         style: Toast.Style.Success,
-        title: session.isNewSession
-          ? "Session created"
-          : "Reused existing session",
+        title: session.isNewSession ? "Session created" : "Reused existing session",
         message: session.id,
       });
       await open(session.url);
@@ -77,53 +66,20 @@ export function CreateSessionForm({ onCreated }: Props) {
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle="Create Devin Session"
+      navigationTitle={preferences.demoMode ? "Create Demo Session" : "Create Devin Session"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Session"
-            onSubmit={handleSubmit}
-            shortcut={Keyboard.Shortcut.Common.Save}
-          />
+          <Action.SubmitForm title="Create Session" onSubmit={handleSubmit} shortcut={Keyboard.Shortcut.Common.Save} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="prompt"
-        title="Prompt"
-        placeholder="Describe the task for Devin"
-      />
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Optional custom title"
-      />
-      <Form.TextField
-        id="tags"
-        title="Tags"
-        placeholder="frontend, bugfix, urgent"
-      />
-      <Form.TextField
-        id="snapshotId"
-        title="Snapshot ID"
-        placeholder="Optional snapshot ID"
-      />
-      <Form.TextField
-        id="playbookId"
-        title="Playbook ID"
-        placeholder="Optional playbook ID"
-      />
-      <Form.TextField
-        id="maxAcuLimit"
-        title="Max ACU Limit"
-        placeholder="Optional positive integer"
-      />
-      <Form.Checkbox
-        id="unlisted"
-        title="Visibility"
-        label="Create as unlisted session"
-        defaultValue={false}
-      />
+      <Form.TextArea id="prompt" title="Prompt" placeholder="Describe the task for Devin" />
+      <Form.TextField id="title" title="Title" placeholder="Optional custom title" />
+      <Form.TextField id="tags" title="Tags" placeholder="frontend, bugfix, urgent" />
+      <Form.TextField id="snapshotId" title="Snapshot ID" placeholder="Optional snapshot ID" />
+      <Form.TextField id="playbookId" title="Playbook ID" placeholder="Optional playbook ID" />
+      <Form.TextField id="maxAcuLimit" title="Max ACU Limit" placeholder="Optional positive integer" />
+      <Form.Checkbox id="unlisted" title="Visibility" label="Create as unlisted session" defaultValue={false} />
       <Form.Checkbox
         id="idempotent"
         title=""

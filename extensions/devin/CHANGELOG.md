@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version]
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added a `Devin` command to browse, search, and manage Devin sessions from Raycast
 - Added split-view session details with recent message transcript rendering

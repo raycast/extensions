@@ -1,13 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { getDevinClient } from "../lib/devin";
+import { getExtensionPreferences } from "../lib/preferences";
 
 type FormValues = {
   message: string;
@@ -20,6 +14,7 @@ type Props = {
 
 export function SendMessageForm({ sessionId, onSent }: Props) {
   const client = getDevinClient();
+  const preferences = getExtensionPreferences();
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,18 +44,14 @@ export function SendMessageForm({ sessionId, onSent }: Props) {
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle={`Message ${sessionId}`}
+      navigationTitle={preferences.demoMode ? `Message ${sessionId} (Demo)` : `Message ${sessionId}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Send Message" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="message"
-        title="Message"
-        placeholder="Send additional instructions to this Devin session"
-      />
+      <Form.TextArea id="message" title="Message" placeholder="Send additional instructions to this Devin session" />
     </Form>
   );
 }

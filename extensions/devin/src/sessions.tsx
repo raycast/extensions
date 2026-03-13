@@ -1,25 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  Toast,
-  open,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, open, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CreateSessionForm } from "./components/CreateSessionForm";
 import { SessionDetailView } from "./components/SessionDetailView";
 import { SendMessageForm } from "./components/SendMessageForm";
 import { getDevinClient } from "./lib/devin";
 import { getExtensionPreferences } from "./lib/preferences";
-import {
-  buildSessionMarkdown,
-  filterSessions,
-  sessionStatusIcon,
-  sortSessions,
-} from "./lib/format";
+import { buildSessionMarkdown, filterSessions, sessionStatusIcon, sortSessions } from "./lib/format";
 import {
   getFavoriteSessionIds,
   getRecentSessionIds,
@@ -60,12 +46,8 @@ export default function Command() {
           offset: nextOffset,
         });
         setSessions((previous) => {
-          const merged = reset
-            ? result.sessions
-            : [...previous, ...result.sessions];
-          const deduped = Array.from(
-            new Map(merged.map((session) => [session.id, session])).values(),
-          );
+          const merged = reset ? result.sessions : [...previous, ...result.sessions];
+          const deduped = Array.from(new Map(merged.map((session) => [session.id, session])).values());
           return deduped;
         });
         offsetRef.current = result.nextOffset;
@@ -85,10 +67,7 @@ export default function Command() {
   );
 
   const refreshStorageState = useCallback(async () => {
-    const [favoriteIds, recentIds] = await Promise.all([
-      getFavoriteSessionIds(),
-      getRecentSessionIds(),
-    ]);
+    const [favoriteIds, recentIds] = await Promise.all([getFavoriteSessionIds(), getRecentSessionIds()]);
     setFavorites(favoriteIds);
     setRecents(recentIds);
   }, []);
@@ -99,8 +78,7 @@ export default function Command() {
   }, [loadSessions, refreshStorageState]);
 
   const visibleSessions = useMemo(
-    () =>
-      filterSessions(sortSessions(sessions, favorites, recents), searchText),
+    () => filterSessions(sortSessions(sessions, favorites, recents), searchText),
     [favorites, recents, searchText, sessions],
   );
   const groupedSessions = useMemo(
@@ -169,17 +147,14 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail
+      navigationTitle={preferences.demoMode ? "Devin Demo Data" : "Devin"}
       searchBarPlaceholder="Search Devin sessions by title, ID, tag, or creator"
       onSearchTextChange={setSearchText}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       throttle
     >
       {groupedSessions.map((group) => (
-        <List.Section
-          key={group.key}
-          title={group.title}
-          subtitle={`${group.sessions.length}`}
-        >
+        <List.Section key={group.key} title={group.title} subtitle={`${group.sessions.length}`}>
           {group.sessions.map((session) => {
             const detail = details[session.id];
             const statusIcon = sessionStatusIcon(session.status);
@@ -209,18 +184,10 @@ export default function Command() {
                 title={session.title}
                 subtitle={buildSubtitle(session)}
                 accessories={accessories}
-                detail={
-                  <List.Item.Detail
-                    markdown={buildSessionMarkdown(session, detail)}
-                  />
-                }
+                detail={<List.Item.Detail markdown={buildSessionMarkdown(session, detail)} />}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Open in Devin"
-                      icon={Icon.ArrowRight}
-                      onAction={() => handleOpenSession(session)}
-                    />
+                    <Action title="Open in Devin" icon={Icon.ArrowRight} onAction={() => handleOpenSession(session)} />
                     <Action.Push
                       title="Show Details"
                       icon={Icon.Sidebar}
@@ -235,12 +202,7 @@ export default function Command() {
                     <Action.Push
                       title="Send Message"
                       icon={Icon.Message}
-                      target={
-                        <SendMessageForm
-                          sessionId={session.id}
-                          onSent={() => handleMessageSent(session.id)}
-                        />
-                      }
+                      target={<SendMessageForm sessionId={session.id} onSent={() => handleMessageSent(session.id)} />}
                     />
                     <Action.Push
                       title="Create Session"
@@ -252,26 +214,12 @@ export default function Command() {
                       icon={isFavorite ? Icon.StarDisabled : Icon.Star}
                       onAction={() => handleToggleFavorite(session.id)}
                     />
-                    <Action.CopyToClipboard
-                      title="Copy Session ID"
-                      content={session.id}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Session URL"
-                      content={session.url}
-                    />
+                    <Action.CopyToClipboard title="Copy Session ID" content={session.id} />
+                    <Action.CopyToClipboard title="Copy Session URL" content={session.url} />
                     {session.pullRequestUrl ? (
-                      <Action.OpenInBrowser
-                        title="Open Pull Request"
-                        url={session.pullRequestUrl}
-                        icon={Icon.Code}
-                      />
+                      <Action.OpenInBrowser title="Open Pull Request" url={session.pullRequestUrl} icon={Icon.Code} />
                     ) : null}
-                    <Action
-                      title="Refresh Sessions"
-                      icon={Icon.ArrowClockwise}
-                      onAction={() => loadSessions(true)}
-                    />
+                    <Action title="Refresh Sessions" icon={Icon.ArrowClockwise} onAction={() => loadSessions(true)} />
                   </ActionPanel>
                 }
               />
@@ -282,16 +230,11 @@ export default function Command() {
       {hasMore ? (
         <List.Item
           id="load-more"
-          title={
-            isLoadingMore ? "Loading More Sessions..." : "Load More Sessions"
-          }
+          title={isLoadingMore ? "Loading More Sessions..." : "Load More Sessions"}
           icon={Icon.ChevronDown}
           actions={
             <ActionPanel>
-              <Action
-                title="Load More Sessions"
-                onAction={() => loadSessions(false)}
-              />
+              <Action title="Load More Sessions" onAction={() => loadSessions(false)} />
             </ActionPanel>
           }
         />
@@ -301,9 +244,7 @@ export default function Command() {
           icon={Icon.MagnifyingGlass}
           title="No matching sessions"
           description={
-            searchText
-              ? "Try a different search term or refresh the list."
-              : "Create a session to get started."
+            searchText ? "Try a different search term or refresh the list." : "Create a session to get started."
           }
           actions={
             <ActionPanel>
@@ -312,10 +253,7 @@ export default function Command() {
                 icon={Icon.Plus}
                 target={<CreateSessionForm onCreated={handleCreated} />}
               />
-              <Action
-                title="Refresh Sessions"
-                onAction={() => loadSessions(true)}
-              />
+              <Action title="Refresh Sessions" onAction={() => loadSessions(true)} />
             </ActionPanel>
           }
         />
@@ -383,14 +321,8 @@ function groupSessionsByOwner(
     return buildStatusSections("all", "All Sessions", sessions);
   }
 
-  const mySessions = sessions.filter(
-    (session) =>
-      session.requestingUserEmail?.toLowerCase() === currentUserEmail,
-  );
-  const otherSessions = sessions.filter(
-    (session) =>
-      session.requestingUserEmail?.toLowerCase() !== currentUserEmail,
-  );
+  const mySessions = sessions.filter((session) => session.requestingUserEmail?.toLowerCase() === currentUserEmail);
+  const otherSessions = sessions.filter((session) => session.requestingUserEmail?.toLowerCase() !== currentUserEmail);
 
   return [
     ...buildStatusSections("mine", "My Sessions", mySessions),
@@ -414,16 +346,9 @@ function buildStatusSections(
   titlePrefix: string,
   sessions: SessionSummary[],
 ): Array<{ key: string; title: string; sessions: SessionSummary[] }> {
-  const activeSessions = sessions.filter((session) =>
-    isActiveStatus(session.status),
-  );
-  const finishedSessions = sessions.filter(
-    (session) => session.status === "finished",
-  );
-  const otherSessions = sessions.filter(
-    (session) =>
-      !isActiveStatus(session.status) && session.status !== "finished",
-  );
+  const activeSessions = sessions.filter((session) => isActiveStatus(session.status));
+  const finishedSessions = sessions.filter((session) => session.status === "finished");
+  const otherSessions = sessions.filter((session) => !isActiveStatus(session.status) && session.status !== "finished");
 
   return [
     {

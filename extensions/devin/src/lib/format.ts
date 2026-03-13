@@ -32,11 +32,7 @@ export function parseTags(value: string): string[] {
     .filter(Boolean);
 }
 
-export function sortSessions(
-  sessions: SessionSummary[],
-  favoriteIds: string[],
-  recentIds: string[],
-): SessionSummary[] {
+export function sortSessions(sessions: SessionSummary[], favoriteIds: string[], recentIds: string[]): SessionSummary[] {
   const favoriteRank = new Map(favoriteIds.map((id, index) => [id, index]));
   const recentRank = new Map(recentIds.map((id, index) => [id, index]));
 
@@ -63,16 +59,11 @@ export function sortSessions(
       return recentRank.get(left.id)! - recentRank.get(right.id)!;
     }
 
-    return (
-      new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
-    );
+    return new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
   });
 }
 
-export function filterSessions(
-  sessions: SessionSummary[],
-  searchText: string,
-): SessionSummary[] {
+export function filterSessions(sessions: SessionSummary[], searchText: string): SessionSummary[] {
   const query = searchText.trim().toLowerCase();
   if (!query) {
     return sessions;
@@ -108,22 +99,15 @@ function renderStructuredOutput(structuredOutput: unknown): string {
   }
 }
 
-export function buildSessionMarkdown(
-  session: SessionSummary,
-  detail?: SessionDetail,
-): string {
+export function buildSessionMarkdown(session: SessionSummary, detail?: SessionDetail): string {
   const structuredOutput = detail?.structuredOutput ?? session.structuredOutput;
-  const tags = session.tags.length
-    ? session.tags.map((tag) => `\`${tag}\``).join(" ")
-    : "_None_";
+  const tags = session.tags.length ? session.tags.map((tag) => `\`${tag}\``).join(" ") : "_None_";
   const messages = detail?.messages.length
     ? detail.messages
         .slice(-5)
         .map((message) => {
           const author = formatMessageAuthor(message.author);
-          const timestamp = message.createdAt
-            ? ` · ${new Date(message.createdAt).toLocaleString()}`
-            : "";
+          const timestamp = message.createdAt ? ` · ${new Date(message.createdAt).toLocaleString()}` : "";
 
           return `**${author}**${timestamp}\n\n${message.body}`;
         })
@@ -135,12 +119,8 @@ export function buildSessionMarkdown(
     `**Created**  \n${new Date(session.createdAt).toLocaleString()}`,
     `**Session ID**  \n\`${session.id}\``,
     `**Tags**  \n${tags}`,
-    session.requestingUserEmail
-      ? `**Creator**  \n${session.requestingUserEmail}`
-      : undefined,
-    session.pullRequestUrl
-      ? `**Pull Request**  \n${session.pullRequestUrl}`
-      : undefined,
+    session.requestingUserEmail ? `**Creator**  \n${session.requestingUserEmail}` : undefined,
+    session.pullRequestUrl ? `**Pull Request**  \n${session.pullRequestUrl}` : undefined,
   ].filter(Boolean);
 
   return [
@@ -150,9 +130,7 @@ export function buildSessionMarkdown(
     hasStructuredOutput(structuredOutput) ? "" : undefined,
     hasStructuredOutput(structuredOutput) ? "## Structured Output" : undefined,
     hasStructuredOutput(structuredOutput) ? "" : undefined,
-    hasStructuredOutput(structuredOutput)
-      ? renderStructuredOutput(structuredOutput)
-      : undefined,
+    hasStructuredOutput(structuredOutput) ? renderStructuredOutput(structuredOutput) : undefined,
     "",
     "## Recent Messages",
     "",
