@@ -1,7 +1,15 @@
 import path from "node:path";
 import { useEffect, useState } from "react";
 
-import { Action, ActionPanel, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  openCommandPreferences,
+  type Application,
+} from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 import { openDirectoryInEditor } from "./utils/editor";
@@ -119,7 +127,7 @@ function RepoActions({
 }: {
   repo: ChildDirectory;
   configs: StoredLaunchConfig[];
-  editor: { path?: string; bundleId?: string; name?: string } | string | undefined;
+  editor: Application | string | undefined;
   onRefresh: () => void;
 }) {
   return (
@@ -139,7 +147,7 @@ function RepoActions({
       {editor ? (
         <Action
           title="Open in Editor"
-          icon={Icon.Code}
+          icon={getEditorIcon(editor)}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
           onAction={() => openDirectoryInEditor(repo.directory, editor)}
         />
@@ -209,4 +217,16 @@ function normalizeSortOrder(value: string): WorkspaceSortOrder {
     default:
       return "name";
   }
+}
+
+function getEditorIcon(editor: Application | string) {
+  if (typeof editor === "string") {
+    return Icon.Code;
+  }
+
+  if (editor.path) {
+    return { fileIcon: editor.path };
+  }
+
+  return Icon.Code;
 }
