@@ -1,0 +1,90 @@
+{
+  "name": "raycast-github-gist-explorer",
+  "title": "GitHub Gist Explorer",
+  "version": "0.1.0",
+  "description": "Search, browse, create, and locally index your GitHub gists in Raycast.",
+  "icon": "icon.png",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "github",
+    "gist",
+    "search",
+    "snippets",
+    "developer"
+  ],
+  "main": "src/search-gists.tsx",
+  "author": "kivayan",
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.3",
+    "minisearch": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  },
+  "commands": [
+    {
+      "name": "search-gists",
+      "title": "Search Gists",
+      "subtitle": "GitHub",
+      "description": "Search your GitHub gists from a local index",
+      "keywords": [
+        "github",
+        "code",
+        "snippet"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "create-gist",
+      "title": "Create Gist",
+      "subtitle": "GitHub",
+      "description": "Create a GitHub gist",
+      "keywords": [
+        "github",
+        "new",
+        "snippet"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "refresh-gists",
+      "title": "Refresh Gists",
+      "subtitle": "GitHub",
+      "description": "Refresh and rebuild the local gist index",
+      "keywords": [
+        "github",
+        "sync",
+        "reindex"
+      ],
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "fetchFullTruncatedContent",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Fetch Full Truncated File Content",
+      "label": "Fetch full raw content for truncated gist files",
+      "description": "When enabled, the indexer fetches full raw content for truncated gist files"
+    }
+  ]
+}
