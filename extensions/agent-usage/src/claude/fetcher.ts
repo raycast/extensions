@@ -1,8 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { execFile } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { promisify } from "node:util";
 import type { ClaudeUsage, ClaudeError } from "./types";
+
+const execFileAsync = promisify(execFile);
 
 const CLAUDE_CREDENTIALS_PATH = path.join(os.homedir(), ".claude", ".credentials.json");
 const CLAUDE_USAGE_API = "https://api.anthropic.com/api/oauth/usage";
@@ -15,6 +19,7 @@ interface ClaudeCredentials {
   scopes: string[];
   rateLimitTier?: string;
   subscriptionType?: string;
+  source: "keychain" | "file";
   raw: {
     claudeAiOauth?: {
       accessToken?: string;
@@ -115,19 +120,26 @@ function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+async function readKeychainCredentials(): Promise<string | null> {
   try {
-    if (!fs.existsSync(CLAUDE_CREDENTIALS_PATH)) {
-      return {
-        credentials: null,
-        error: {
-          type: "not_configured",
-          message: "Claude CLI not configured. Run 'claude' to authenticate.",
-        },
-      };
-    }
+    const { stdout } = await execFileAsync(
+      "/usr/bin/security",
+      ["find-generic-password", "-s", "Claude Code-credentials", "-w"],
+      { timeout: 5000 },
+    );
+    return stdout.trim() || null;
+  } catch {
+    return null;
+  }
+}
 
-    const raw = fs.readFileSync(CLAUDE_CREDENTIALS_PATH, "utf-8");
+type ClaudeCredentialSource = "keychain" | "file";
+
+function parseClaudeCredentials(
+  raw: string,
+  source: ClaudeCredentialSource,
+): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+  try {
     const parsed = JSON.parse(raw) as {
       claudeAiOauth?: {
         accessToken?: string;
@@ -177,6 +189,7 @@ function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error
         scopes,
         rateLimitTier,
         subscriptionType,
+        source,
         raw: parsed,
       },
       error: null,
@@ -192,7 +205,34 @@ function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error
   }
 }
 
+async function readClaudeCredentials(): Promise<{ credentials: ClaudeCredentials | null; error: ClaudeError | null }> {
+  // Try macOS Keychain first (native Claude Code credential storage)
+  const keychainJson = await readKeychainCredentials();
+  if (keychainJson) {
+    const result = parseClaudeCredentials(keychainJson, "keychain");
+    if (result.credentials) return result;
+  }
+
+  // Fall back to credentials file (Linux/WSL/SSH sessions)
+  if (fs.existsSync(CLAUDE_CREDENTIALS_PATH)) {
+    const raw = fs.readFileSync(CLAUDE_CREDENTIALS_PATH, "utf-8");
+    return parseClaudeCredentials(raw, "file");
+  }
+
+  return {
+    credentials: null,
+    error: {
+      type: "not_configured",
+      message: "Claude CLI not configured. Run 'claude' to authenticate.",
+    },
+  };
+}
+
 function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: OAuthRefreshResponse) {
+  // Skip file persistence for keychain-sourced credentials;
+  // Claude Code manages its own keychain lifecycle.
+  if (credentials.source === "keychain") return;
+
   const raw = credentials.raw || {};
   const oauth = raw.claudeAiOauth || {};
 
@@ -416,7 +456,7 @@ export function useClaudeUsage(enabled = true) {
     setIsLoading(true);
     setError(null);
 
-    const { credentials, error: credentialsError } = readClaudeCredentials();
+    const { credentials, error: credentialsError } = await readClaudeCredentials();
     if (!credentials) {
       if (requestId !== requestIdRef.current) {
         return;
