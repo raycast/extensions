@@ -17,24 +17,28 @@
     {
       "name": "set-key",
       "title": "Set Key",
+      "subtitle": "Watchkey",
       "description": "Store a secret in the keychain",
       "mode": "view"
     },
     {
       "name": "get-key",
       "title": "Get Key",
+      "subtitle": "Watchkey",
       "description": "Retrieve a secret from the keychain and copy to clipboard",
       "mode": "view"
     },
     {
       "name": "delete-key",
       "title": "Delete Key",
+      "subtitle": "Watchkey",
       "description": "Delete a secret from the keychain",
       "mode": "view"
     },
     {
       "name": "import-key",
       "title": "Import Key",
+      "subtitle": "Watchkey",
       "description": "Import an existing keychain item into watchkey",
       "mode": "view"
     }
