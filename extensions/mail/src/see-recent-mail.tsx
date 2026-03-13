@@ -1,6 +1,6 @@
 import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
@@ -20,20 +20,24 @@ export default function SeeRecentMail() {
       return [];
     }
 
-    const messages = await Promise.all(
-      accounts.map((account) => {
-        const mailbox = account.mailboxes.find(isInbox);
-        if (!mailbox) {
-          return [];
-        }
-        return getMessages(account, mailbox, getPreferenceValues().unreadonly);
-      }),
-    );
+    const unreadOnly = getPreferenceValues().unreadonly;
+    const accountsWithMessages: Account[] = [];
 
-    return accounts.map((account, index) => {
-      account.messages = messages[index] ?? [];
-      return account;
-    });
+    for (const account of accounts) {
+      if (account.enabled === false) continue;
+
+      const mailbox = account.mailboxes.find(isInbox);
+
+      if (!mailbox) {
+        accountsWithMessages.push({ ...account, messages: [] });
+        continue;
+      }
+
+      const messages = await getMessages(account, mailbox, unreadOnly, undefined, "summary");
+      accountsWithMessages.push({ ...account, messages: messages ?? [] });
+    }
+
+    return accountsWithMessages;
   }, []);
 
   const accountsAbortController = useRef<AbortController>(new AbortController());
@@ -47,6 +51,44 @@ export default function SeeRecentMail() {
     abortable: accountsAbortController,
     failureToastOptions: { title: "Could not get recent messages from accounts" },
   });
+
+  useEffect(() => {
+    if (!accounts || accounts.length === 0) return;
+
+    let isMounted = true;
+    const hydratePreviews = async () => {
+      let hasUpdates = false;
+      const unreadOnly = getPreferenceValues().unreadonly;
+      const updatedAccounts = [...accounts];
+
+      for (let i = 0; i < updatedAccounts.length; i++) {
+        const account = updatedAccounts[i];
+        const mailbox = account.mailboxes.find(isInbox);
+        if (!mailbox) continue;
+
+        const needsPreview = account.messages?.some(
+          (m) => m.hydrationStage === "summary" || (!m.senderName && !m.senderAddress),
+        );
+        if (needsPreview) {
+          const previewMessages = await getMessages(account, mailbox, unreadOnly, undefined, "preview");
+          if (previewMessages) {
+            updatedAccounts[i] = { ...account, messages: previewMessages };
+            hasUpdates = true;
+          }
+        }
+      }
+
+      if (isMounted && hasUpdates) {
+        mutateAccounts(Promise.resolve(updatedAccounts), { shouldRevalidateAfter: false });
+      }
+    };
+
+    hydratePreviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [accounts, mutateAccounts]);
 
   const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
     mutateAccounts(
@@ -63,7 +105,7 @@ export default function SeeRecentMail() {
           if (!data) return data;
 
           return data.map((account) => {
-            const messages = Cache.getMessages(account.id, mailbox.name);
+            const messages = Cache.getMessagesSummary(account.id, mailbox.name);
             account.messages = messages.filter((x) => !x.read);
             return account;
           });
@@ -95,7 +137,7 @@ export default function SeeRecentMail() {
         >
           <List.Dropdown.Item title="All Accounts" value="" />
           <List.Dropdown.Section>
-            {accounts?.map((account) => (
+            {accounts?.filter((a) => a.enabled !== false).map((account) => (
               <List.Dropdown.Item
                 key={account.id}
                 title={account.name}
@@ -107,28 +149,29 @@ export default function SeeRecentMail() {
         </List.Dropdown>
       }
     >
-      {numMessages &&
-        accounts
-          ?.filter((a) => account === undefined || a.id === account.id)
-          .map((account) => {
-            const recentMailbox = account.mailboxes.find(isInbox);
-            return recentMailbox ? (
-              <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
-                {account.messages?.map((message) => (
-                  <MessageListItem
-                    key={message.id}
-                    mailbox={recentMailbox}
-                    account={account}
-                    message={message}
-                    onAction={(action) => {
-                      handleAction(action, recentMailbox);
-                    }}
-                    onRefresh={handleRefresh}
-                  />
-                ))}
-              </List.Section>
-            ) : undefined;
-          })}
+      {numMessages > 0
+        ? accounts
+            ?.filter((a) => (account === undefined || a.id === account.id) && a.enabled !== false)
+            .map((account) => {
+              const recentMailbox = account.mailboxes.find(isInbox);
+              return recentMailbox ? (
+                <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
+                  {account.messages?.map((message) => (
+                    <MessageListItem
+                      key={message.id}
+                      mailbox={recentMailbox}
+                      account={account}
+                      message={message}
+                      onAction={(action) => {
+                        handleAction(action, recentMailbox);
+                      }}
+                      onRefresh={handleRefresh}
+                    />
+                  ))}
+                </List.Section>
+              ) : null;
+            })
+        : null}
       {!error && !numMessages && !isLoadingAccounts && (
         <List.EmptyView
           title={"No Recent Unread Messages"}

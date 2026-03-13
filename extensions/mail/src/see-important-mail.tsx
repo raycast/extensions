@@ -1,6 +1,6 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MessageListItem } from "./components";
 import { getAccounts } from "./scripts/accounts";
@@ -20,20 +20,18 @@ export default function SeeImportantMail() {
       return [];
     }
 
-    const messages = await Promise.all(
-      accounts.map((account) => {
-        const mailbox = account.mailboxes.find(isImportantMailbox);
-        if (!mailbox) {
-          return [];
-        }
-        return getMessages(account, mailbox, true);
-      }),
-    );
+    const accountsWithMessages: Account[] = [];
 
-    return accounts.map((account, index) => {
-      account.messages = messages[index] ?? [];
-      return account;
-    });
+    for (const account of accounts) {
+      if (account.enabled === false) continue;
+      const mailbox = account.mailboxes.find(isImportantMailbox);
+      accountsWithMessages.push({
+        ...account,
+        messages: mailbox ? ((await getMessages(account, mailbox, true, undefined, "summary")) ?? []) : [],
+      });
+    }
+
+    return accountsWithMessages;
   }, []);
 
   const accountsAbortController = useRef<AbortController>(new AbortController());
@@ -47,6 +45,43 @@ export default function SeeImportantMail() {
     abortable: accountsAbortController,
     failureToastOptions: { title: "Could not get important messages from accounts" },
   });
+
+  useEffect(() => {
+    if (!accounts || accounts.length === 0) return;
+
+    let isMounted = true;
+    const hydratePreviews = async () => {
+      let hasUpdates = false;
+      const updatedAccounts = [...accounts];
+
+      for (let i = 0; i < updatedAccounts.length; i++) {
+        const account = updatedAccounts[i];
+        const mailbox = account.mailbox.find(isImportantMailbox);
+        if (!mailbox) continue;
+
+        const needsPreview = account.messages?.some(
+          (m) => m.hydrationStage === "summary" || (!m.senderName && !m.senderAddress),
+        );
+        if (needsPreview) {
+          const previewMessages = await getMessages(account, mailbox, true, undefined, "preview");
+          if (previewMessages) {
+            updatedAccounts[i] = { ...account, messages: previewMessages };
+            hasUpdates = true;
+          }
+        }
+      }
+
+      if (isMounted && hasUpdates) {
+        mutateAccounts(Promise.resolve(updatedAccounts), { shouldRevalidateAfter: false });
+      }
+    };
+
+    hydratePreviews();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [accounts, mutateAccounts]);
 
   const handleAction = useCallback((action: () => Promise<void>, mailbox: Mailbox) => {
     mutateAccounts(
@@ -63,7 +98,7 @@ export default function SeeImportantMail() {
           if (!data) return data;
 
           return data.map((account) => {
-            const messages = Cache.getMessages(account.id, mailbox.name);
+            const messages = Cache.getMessagesSummary(account.id, mailbox.name);
             account.messages = messages;
             return account;
           });
@@ -95,7 +130,7 @@ export default function SeeImportantMail() {
         >
           <List.Dropdown.Item title="All Accounts" value="" />
           <List.Dropdown.Section>
-            {accounts?.map((account) => (
+            {accounts?.filter((a) => a.enabled !== false).map((account) => (
               <List.Dropdown.Item
                 key={account.id}
                 title={account.name}
@@ -107,28 +142,29 @@ export default function SeeImportantMail() {
         </List.Dropdown>
       }
     >
-      {numMessages &&
-        accounts
-          ?.filter((a) => account === undefined || a.id === account.id)
-          .map((account) => {
-            const importantMailbox = account.mailboxes.find(isImportantMailbox);
-            return importantMailbox ? (
-              <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
-                {account.messages?.map((message) => (
-                  <MessageListItem
-                    key={message.id}
-                    mailbox={importantMailbox}
-                    account={account}
-                    message={message}
-                    onAction={(action) => {
-                      handleAction(action, importantMailbox);
-                    }}
-                    onRefresh={handleRefresh}
-                  />
-                ))}
-              </List.Section>
-            ) : undefined;
-          })}
+      {numMessages > 0
+        ? accounts
+            ?.filter((a) => (account === undefined || a.id === account.id) && a.enabled !== false)
+            .map((account) => {
+              const importantMailbox = account.mailboxes.find(isImportantMailbox);
+              return importantMailbox ? (
+                <List.Section key={account.id} title={account.name} subtitle={account.emails[0]}>
+                  {account.messages?.map((message) => (
+                    <MessageListItem
+                      key={message.id}
+                      mailbox={importantMailbox}
+                      account={account}
+                      message={message}
+                      onAction={(action) => {
+                        handleAction(action, importantMailbox);
+                      }}
+                      onRefresh={handleRefresh}
+                    />
+                  ))}
+                </List.Section>
+              ) : null;
+            })
+        : null}
       {!error && !numMessages && !isLoadingAccounts && (
         <List.EmptyView
           title={"No Important Messages"}
@@ -138,7 +174,7 @@ export default function SeeImportantMail() {
       )}
       {error && (
         <List.EmptyView
-          title="Could not get recent messages"
+          title="Could not get important messages"
           description={error.message}
           icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
         />

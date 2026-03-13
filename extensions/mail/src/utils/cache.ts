@@ -10,7 +10,7 @@ export enum ExpirationTime {
   Week = 7 * Day,
 }
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 7;
 
 const isCacheExpired = (time: number, limit = ExpirationTime.Day): boolean => {
   return Date.now() - time > limit;
@@ -41,23 +41,28 @@ const getAccount = (idOrName: string): Account | undefined => {
 };
 
 const setAccounts = (data: Account[]) => {
-  accounts.set("accounts", JSON.stringify({ time: Date.now(), data: data, version: CACHE_VERSION }));
+  accounts.set("accounts", JSON.stringify({ time: Date.now(), data, version: CACHE_VERSION }));
 };
 
-const messages = new RaycastCache();
+const messagesSummary = new RaycastCache();
+const messagesDetail = new RaycastCache();
+
+const summaryKey = (account: string, mailbox: string) => `${account}-${mailbox}-summary`;
+const detailKey = (account: string, mailbox: string) => `${account}-${mailbox}-detail`;
 
 const invalidateMessages = () => {
-  messages.clear();
+  messagesSummary.clear();
+  messagesDetail.clear();
 };
 
-const getMessages = (account: string, mailbox: string): Message[] => {
-  const key = `${account}-${mailbox}`;
-  if (messages.has(key)) {
-    const response = messages.get(key);
+const getMessagesSummary = (account: string, mailbox: string): Message[] => {
+  const key = summaryKey(account, mailbox);
+  if (messagesSummary.has(key)) {
+    const response = messagesSummary.get(key);
     if (response) {
       const { time, data, version } = JSON.parse(response);
       if (!isCacheExpired(time) && version === CACHE_VERSION) {
-        return data.slice(0, messageLimit);
+        return (data as Message[]).slice(0, messageLimit);
       }
     }
   }
@@ -65,9 +70,64 @@ const getMessages = (account: string, mailbox: string): Message[] => {
   return [];
 };
 
+const getMessagesDetail = (account: string, mailbox: string): Message[] => {
+  const key = detailKey(account, mailbox);
+  if (messagesDetail.has(key)) {
+    const response = messagesDetail.get(key);
+    if (response) {
+      const { time, data, version } = JSON.parse(response);
+      if (!isCacheExpired(time) && version === CACHE_VERSION) {
+        return data as Message[];
+      }
+    }
+  }
+
+  return [];
+};
+
+const setMessagesSummary = (data: Message[], account: string, mailbox: string) => {
+  const key = summaryKey(account, mailbox);
+  messagesSummary.set(key, JSON.stringify({ time: Date.now(), data, version: CACHE_VERSION }));
+};
+
+const setMessagesDetail = (data: Message[], account: string, mailbox: string) => {
+  const key = detailKey(account, mailbox);
+  messagesDetail.set(key, JSON.stringify({ time: Date.now(), data, version: CACHE_VERSION }));
+};
+
+const mergeById = (base: Message[], incoming: Message[]): Message[] => {
+  const map = new Map<string, Message>();
+  for (const item of base) map.set(item.id, item);
+  for (const item of incoming) {
+    const existing = map.get(item.id);
+    map.set(item.id, existing ? { ...existing, ...item } : item);
+  }
+  return Array.from(map.values());
+};
+
+/**
+ * Compatibility wrapper:
+ * Historically callers used `getMessages(account, mailbox)` and expected one list.
+ * We now prefer detail when available, then merge with summary for resilience.
+ */
+const getMessages = (account: string, mailbox: string): Message[] => {
+  const detail = getMessagesDetail(account, mailbox);
+  const summary = getMessagesSummary(account, mailbox);
+
+  if (detail.length === 0) return summary.slice(0, messageLimit);
+  if (summary.length === 0) return detail.slice(0, messageLimit);
+
+  return mergeById(detail, summary).slice(0, messageLimit);
+};
+
+/**
+ * Compatibility wrapper:
+ * Historically callers used `setMessages(data, account, mailbox)`.
+ * We persist to detail and also keep summary in sync.
+ */
 const setMessages = (data: Message[], account: string, mailbox: string) => {
-  const key = `${account}-${mailbox}`;
-  messages.set(key, JSON.stringify({ time: Date.now(), data: data, version: CACHE_VERSION }));
+  setMessagesDetail(data, account, mailbox);
+  setMessagesSummary(data, account, mailbox);
 };
 
 const addMessage = (data: Message, account: string, mailbox: string) => {
@@ -100,24 +160,38 @@ const deleteMessage = (id: string, account: string, mailbox: string) => {
 const defaultAccount = new RaycastCache();
 
 const getDefaultAccount = (): Account | undefined => {
-  const accounts = getAccounts();
+  const allAccounts = getAccounts();
 
-  if (!accounts || accounts.length === 0) {
+  if (!allAccounts || allAccounts.length === 0) {
     return undefined;
   }
 
   const defaultAccountId = defaultAccount.get("default-account-id");
 
   if (defaultAccountId) {
-    const account = accounts.find((account) => account.id === defaultAccountId);
+    const account = allAccounts.find((account) => account.id === defaultAccountId);
     if (account) return account;
   }
 
-  return accounts[0];
+  return allAccounts[0];
 };
 
 const setDefaultAccount = (id: string) => {
   defaultAccount.set("default-account-id", id);
+};
+
+const clearAll = () => {
+  accounts.clear();
+  messagesSummary.clear();
+  messagesDetail.clear();
+  defaultAccount.clear();
+};
+
+const inspectState = () => {
+  return {
+    hasAccounts: accounts.has("accounts"),
+    hasDefaultAccount: defaultAccount.has("default-account-id"),
+  };
 };
 
 export const Cache = Object.freeze({
@@ -127,8 +201,19 @@ export const Cache = Object.freeze({
   setDefaultAccount,
   getAccount,
   invalidateAccounts,
+  clearAll,
+  inspectState,
+
+  // New staged API
+  getMessagesSummary,
+  setMessagesSummary,
+  getMessagesDetail,
+  setMessagesDetail,
+
+  // Compatibility API
   getMessages,
   setMessages,
+
   addMessage,
   updateMessage,
   deleteMessage,
