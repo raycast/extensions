@@ -35,7 +35,8 @@ export async function setSystemProxyEnabled(enabled: boolean, host: string, port
         await execCommand(NETWORKSETUP_BIN, ["-setwebproxy", service, host, String(port)]);
         await execCommand(NETWORKSETUP_BIN, ["-setsecurewebproxy", service, host, String(port)]);
         await execCommand(NETWORKSETUP_BIN, ["-setsocksfirewallproxy", service, host, String(port)]);
-        await execCommand(NETWORKSETUP_BIN, ["-setproxybypassdomains", service, ...PROXY_BYPASS_DOMAINS]);
+        const bypassDomains = await getMergedProxyBypassDomains(service);
+        await execCommand(NETWORKSETUP_BIN, ["-setproxybypassdomains", service, ...bypassDomains]);
         await execCommand(NETWORKSETUP_BIN, ["-setwebproxystate", service, "on"]);
         await execCommand(NETWORKSETUP_BIN, ["-setsecurewebproxystate", service, "on"]);
         await execCommand(NETWORKSETUP_BIN, ["-setsocksfirewallproxystate", service, "on"]);
@@ -49,6 +50,17 @@ export async function setSystemProxyEnabled(enabled: boolean, host: string, port
       throw new Error(formatSystemProxyError(`${prefix} system proxy for network service "${service}".`, error));
     }
   }
+}
+
+async function getMergedProxyBypassDomains(service: string): Promise<string[]> {
+  const { stdout } = await execCommand(NETWORKSETUP_BIN, ["-getproxybypassdomains", service], { timeoutMs: 6000 });
+  const existingDomains = stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !line.startsWith("There aren't any bypass domains set on"));
+
+  return [...new Set([...existingDomains, ...PROXY_BYPASS_DOMAINS])];
 }
 
 export async function listActiveNetworkServices(): Promise<string[]> {
