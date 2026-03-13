@@ -917,9 +917,10 @@ export async function getRunningAudioApps(): Promise<AudioApp[]> {
       "com.apple.dock",
       "com.apple.systempreferences",
       "com.finetuneapp.FineTune",
+      "com.lowtechguys.Clop",
       "com.apple.controlcenter",
     ]);
-    const excludedProcessNames = new Set(["raycast graphics and media"]);
+    const excludedProcessNames = new Set(["raycast graphics and media", "clop graphics and media"]);
 
     const knownAudioBundleIds = new Set([
       "com.spotify.client",
@@ -1084,6 +1085,7 @@ export async function getRunningAudioApps(): Promise<AudioApp[]> {
 // Constants for browser detection
 const CHROMIUM_BROWSERS = ["google chrome", "chrome", "brave", "arc", "microsoft edge", "edge", "opera", "vivaldi"];
 const FIREFOX_BROWSERS = ["firefox", "zen", "floorp", "librewolf"];
+const DIRECT_VOLUME_APPS = new Set(["safari", "iina", "vlc", "music", "spotify", "tv", "apple music"]);
 const COMMUNICATION_BUNDLE_IDS = new Set([
   "com.microsoft.teams",
   "com.microsoft.teams2",
@@ -1108,6 +1110,13 @@ function isFirefox(name: string): boolean {
   return FIREFOX_BROWSERS.some((b) => lower.includes(b));
 }
 
+export type AppVolumeControlKind = "direct" | "fineTune" | "unsupported";
+
+export interface AppVolumeControlCapability {
+  kind: AppVolumeControlKind;
+  reason: "known-direct" | "observed-direct" | "communication-app" | "unsupported-browser" | "unsupported-app";
+}
+
 export function isCommunicationApp(appName: string, bundleId?: string): boolean {
   const lowerName = appName.toLowerCase();
   const lowerBundleId = bundleId?.toLowerCase() ?? "";
@@ -1117,6 +1126,46 @@ export function isCommunicationApp(appName: string, bundleId?: string): boolean 
     COMMUNICATION_NAME_KEYWORDS.some((keyword) => lowerName.includes(keyword)) ||
     COMMUNICATION_NAME_KEYWORDS.some((keyword) => lowerBundleId.includes(keyword))
   );
+}
+
+export function getAppVolumeControlCapability(
+  appName: string,
+  options?: { bundleId?: string; observedVolume?: number | null },
+): AppVolumeControlCapability {
+  const lowerName = appName.toLowerCase();
+
+  if (isCommunicationApp(appName, options?.bundleId)) {
+    return { kind: "fineTune", reason: "communication-app" };
+  }
+
+  if (isChromium(appName) || DIRECT_VOLUME_APPS.has(lowerName)) {
+    return { kind: "direct", reason: "known-direct" };
+  }
+
+  if (isFirefox(appName)) {
+    return { kind: "unsupported", reason: "unsupported-browser" };
+  }
+
+  if (typeof options?.observedVolume === "number" && Number.isFinite(options.observedVolume)) {
+    return { kind: "direct", reason: "observed-direct" };
+  }
+
+  return { kind: "unsupported", reason: "unsupported-app" };
+}
+
+export function canControlAppVolume(
+  capability: AppVolumeControlCapability,
+  options?: { fineTuneAvailable?: boolean | null; fineTuneEnabled?: boolean | null },
+): boolean {
+  if (capability.kind === "direct") {
+    return true;
+  }
+
+  if (capability.kind === "fineTune") {
+    return options?.fineTuneAvailable === true && options?.fineTuneEnabled === true;
+  }
+
+  return false;
 }
 
 // Get application status (volume + state)
@@ -1643,6 +1692,10 @@ async function isFineTuneToggleEnabledByUser(): Promise<boolean> {
   return state !== "off";
 }
 
+export async function isFineTuneManagedToggleEnabled(): Promise<boolean> {
+  return isFineTuneToggleEnabledByUser();
+}
+
 async function setFineTuneToggleState(enabled: boolean): Promise<void> {
   await LocalStorage.setItem(FINETUNE_TOGGLE_STATE_KEY, enabled ? "on" : "off");
 }
@@ -1756,8 +1809,7 @@ async function startFineTune(): Promise<void> {
 }
 
 async function canUseFineTuneFeatures(): Promise<boolean> {
-  if (!(await isFineTuneToggleEnabledByUser())) return false;
-  return isFineTuneInstalled();
+  return isFineTuneEnabled();
 }
 
 export async function isFineTuneAvailable(): Promise<boolean> {
@@ -1765,7 +1817,9 @@ export async function isFineTuneAvailable(): Promise<boolean> {
 }
 
 export async function isFineTuneEnabled(): Promise<boolean> {
-  return isFineTuneToggleEnabledByUser();
+  if (!(await isFineTuneInstalled())) return false;
+  if (await isFineTuneToggleEnabledByUser()) return true;
+  return isFineTuneRunning();
 }
 
 export async function setFineTuneEnabled(enabled: boolean): Promise<boolean> {

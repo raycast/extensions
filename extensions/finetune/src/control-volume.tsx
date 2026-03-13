@@ -282,7 +282,6 @@ export default function Command() {
           const isRouted = Boolean(routedDeviceUid && routedDeviceUid !== systemOutputUid);
           const routedDeviceName = routedDevice?.name ?? null;
           const outputDeviceName = isRouted ? routedDeviceName || routedDeviceUid || "Routed Output" : systemOutputName;
-          const outputColor = isRouted ? Color.Yellow : Color.Blue;
           const outputIconSource = isRouted
             ? getOutputDeviceIconSourceFromName(routedDeviceName || routedDeviceUid)
             : getOutputDeviceIconSourceFromName(systemOutputName);
@@ -300,40 +299,40 @@ export default function Command() {
             }
 
             accessories.push({
-              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.Orange },
+              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.PrimaryText },
               tooltip: `Volume ${displayVolume}%`,
             });
             accessories.push({
-              tag: { value: `${displayVolume}%`, color: Color.Orange },
+              tag: { value: `${displayVolume}%`, color: Color.PrimaryText },
             });
           } else if (isActiveOutput) {
             accessories.push({ tag: { value: "Active", color: Color.Green } });
             accessories.push({
-              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.Orange },
+              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.PrimaryText },
               tooltip: `Volume ${displayVolume}%`,
             });
             accessories.push({
-              tag: { value: `${displayVolume}%`, color: Color.Orange },
+              tag: { value: `${displayVolume}%`, color: Color.PrimaryText },
             });
           } else {
             accessories.push({
-              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.Orange },
+              icon: { source: getVolumeIcon(displayVolume), tintColor: Color.PrimaryText },
               tooltip: `Volume ${displayVolume}%`,
             });
             accessories.push({
-              tag: { value: `${displayVolume}%`, color: Color.Orange },
+              tag: { value: `${displayVolume}%`, color: Color.PrimaryText },
             });
           }
 
           accessories.push({
-            icon: { source: outputIconSource, tintColor: outputColor },
+            icon: { source: outputIconSource, tintColor: Color.PrimaryText },
             tooltip: isRouted ? "Routed Output Device" : "System Output Device",
           });
-          accessories.push({ tag: { value: outputDeviceName, color: outputColor } });
+          accessories.push({ tag: { value: outputDeviceName, color: Color.PrimaryText } });
 
           if (isRouted) {
             accessories.push({
-              icon: { source: Icon.ArrowRightCircle, tintColor: Color.Yellow },
+              icon: { source: Icon.ArrowRightCircle, tintColor: Color.PrimaryText },
               tooltip: "Routed",
             });
           }

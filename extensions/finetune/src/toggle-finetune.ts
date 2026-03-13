@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
-import { isFineTuneAvailable, isFineTuneEnabled, setFineTuneEnabled } from "./utils/audio";
+import { isFineTuneAvailable, isFineTuneManagedToggleEnabled, setFineTuneEnabled } from "./utils/audio";
 
 export default async function Command() {
   try {
@@ -18,7 +18,7 @@ export default async function Command() {
     return;
   }
 
-  const currentlyEnabled = await isFineTuneEnabled();
+  const currentlyEnabled = await isFineTuneManagedToggleEnabled();
   const nextEnabled = !currentlyEnabled;
   const success = await setFineTuneEnabled(nextEnabled);
 

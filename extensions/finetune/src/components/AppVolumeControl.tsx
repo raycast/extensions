@@ -3,7 +3,9 @@ import {
   AudioApp,
   AppStatus,
   AudioDevice,
+  canControlAppVolume,
   getAppStatus,
+  getAppVolumeControlCapability,
   getAppOutputDevice,
   getOutputDeviceIconSource,
   isFineTuneAvailable,
@@ -14,7 +16,7 @@ import {
   setAppVolume,
   VOLUME_PRESETS,
 } from "../utils/audio";
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface AppVolumeControlProps {
   app: AudioApp;
@@ -36,8 +38,18 @@ export function AppVolumeControl({
   const [routedDeviceUid, setRoutedDeviceUid] = useState<string | undefined>(initialRoutedDeviceUid ?? undefined);
   const [fineTuneAvailable, setFineTuneAvailable] = useState<boolean | null>(null);
   const [fineTuneEnabled, setFineTuneEnabled] = useState<boolean>(true);
+  const missingFineTuneToastShownRef = useRef(false);
   const communicationApp = isCommunicationApp(app.name, app.bundleId);
   const presets = communicationApp ? VOLUME_PRESETS.filter((preset) => preset.value <= 100) : VOLUME_PRESETS;
+  const observedVolume = currentVolume ?? initialStatus?.volume ?? null;
+  const volumeCapability = getAppVolumeControlCapability(app.name, {
+    bundleId: app.bundleId,
+    observedVolume,
+  });
+  const volumeControlsAvailable = canControlAppVolume(volumeCapability, {
+    fineTuneAvailable,
+    fineTuneEnabled,
+  });
 
   const closeWithHUD = async (message: string) => {
     try {
@@ -66,6 +78,22 @@ export function AppVolumeControl({
       active = false;
     };
   }, []);
+
+  useEffect(() => {
+    if (fineTuneAvailable !== false || missingFineTuneToastShownRef.current) return;
+
+    missingFineTuneToastShownRef.current = true;
+    const message =
+      volumeCapability.kind === "fineTune"
+        ? `Install FineTune in /Applications to control volume or routing for ${app.name}`
+        : "Install FineTune in /Applications to use per-app routing";
+
+    void showToast({
+      style: Toast.Style.Failure,
+      title: "FineTune app not found",
+      message,
+    });
+  }, [app.name, fineTuneAvailable, volumeCapability.kind]);
 
   useEffect(() => {
     if (initialRoutedDeviceUid !== undefined) return;
@@ -109,7 +137,52 @@ export function AppVolumeControl({
     return true;
   };
 
+  const getVolumeUnavailableCopy = () => {
+    if (volumeCapability.kind === "fineTune") {
+      if (fineTuneAvailable === false) {
+        return {
+          title: "FineTune app not found",
+          subtitle: `Install FineTune in /Applications to control volume for ${app.name}`,
+        };
+      }
+
+      if (fineTuneEnabled === false) {
+        return {
+          title: "FineTune is disabled",
+          subtitle: `Run 'Toggle FineTune' to control volume for ${app.name}`,
+        };
+      }
+
+      return {
+        title: "Checking FineTune availability",
+        subtitle: "One moment...",
+      };
+    }
+
+    if (volumeCapability.reason === "unsupported-browser") {
+      return {
+        title: "Direct app volume unavailable",
+        subtitle: "Firefox-based browsers do not expose AppleScript volume control",
+      };
+    }
+
+    return {
+      title: "Direct app volume unavailable",
+      subtitle: `${app.name} does not expose a direct volume API that Raycast can use`,
+    };
+  };
+
   const handleSetVolume = async (volume: number) => {
+    if (!volumeControlsAvailable) {
+      const unavailable = getVolumeUnavailableCopy();
+      await showToast({
+        style: Toast.Style.Failure,
+        title: unavailable.title,
+        message: unavailable.subtitle,
+      });
+      return;
+    }
+
     const result = await setAppVolume(app.name, volume, app.bundleId);
 
     if (result === "true") {
@@ -118,17 +191,29 @@ export function AppVolumeControl({
       await closeWithHUD(`${app.name} volume set to ${volume}%`);
     } else if (result.startsWith("error:")) {
       const msg = result.replace("error: ", "");
+      const lowerMessage = msg.toLowerCase();
+
       if (msg.includes("Allow JavaScript")) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Permission Required",
           message: "Enable View > Developer > Allow JavaScript from Apple Events",
         });
-      } else {
+      } else if (lowerMessage.includes("no open websites found")) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Volume control failed",
-          message: msg.substring(0, 80), // Truncate long errors
+          title: "No Controllable Browser Tab",
+          message: "Open audio in the front browser window and try again",
+        });
+      } else {
+        const unavailable = getVolumeUnavailableCopy();
+        await showToast({
+          style: Toast.Style.Failure,
+          title: volumeCapability.kind === "direct" ? "Volume control failed" : unavailable.title,
+          message:
+            volumeCapability.kind === "direct"
+              ? "Raycast couldn't change the volume for this app."
+              : unavailable.subtitle,
         });
       }
     } else {
@@ -172,6 +257,48 @@ export function AppVolumeControl({
     });
   };
 
+  const getVolumeTitle = (presetValue: number) => {
+    if (currentVolume === presetValue) {
+      return `Current Volume: ${presetValue}%`;
+    }
+
+    return undefined;
+  };
+
+  const getVolumeTitleOrName = (presetName: string, presetValue: number) => {
+    return getVolumeTitle(presetValue) ?? presetName;
+  };
+
+  const getVolumeSubtitle = (presetName: string, presetValue: number) => {
+    if (currentVolume === presetValue) {
+      return presetName;
+    }
+
+    return `${presetValue}%`;
+  };
+
+  const getOutputTitle = (device: AudioDevice, isSystemCurrent: boolean, isRouted: boolean) => {
+    if (isRouted || (!routedDeviceUid && isSystemCurrent)) {
+      return `Current Output: ${device.name}`;
+    }
+
+    return device.name;
+  };
+
+  const getOutputSubtitle = (isSystemCurrent: boolean, isRouted: boolean) => {
+    if (isRouted) {
+      return "Per-app routed output";
+    }
+
+    if (!routedDeviceUid && isSystemCurrent) {
+      return "System output device";
+    }
+
+    return undefined;
+  };
+
+  const volumeUnavailableCopy = getVolumeUnavailableCopy();
+  const routingStatusLoading = fineTuneAvailable === null;
   const routingUnavailable = fineTuneAvailable === false || fineTuneEnabled === false;
   const routingUnavailableTitle = fineTuneAvailable === false ? "FineTune app not found" : "FineTune is disabled";
   const routingUnavailableSubtitle =
@@ -182,28 +309,48 @@ export function AppVolumeControl({
   return (
     <List navigationTitle={`Control ${app.name}`}>
       <List.Section title="Volume Control">
-        {presets.map((preset) => (
+        {volumeControlsAvailable ? (
+          presets.map((preset) => (
+            <List.Item
+              key={preset.value}
+              title={getVolumeTitleOrName(preset.name, preset.value)}
+              subtitle={getVolumeSubtitle(preset.name, preset.value)}
+              icon={{
+                source: preset.icon,
+                tintColor: currentVolume === preset.value ? Color.Green : Color.PrimaryText,
+              }}
+              accessories={currentVolume === preset.value ? [{ tag: { value: "Current", color: Color.Green } }] : []}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={`Set Volume to ${preset.name}`}
+                    icon={preset.icon}
+                    onAction={() => handleSetVolume(preset.value)}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        ) : (
           <List.Item
-            key={preset.value}
-            title={preset.name}
-            subtitle={`${preset.value}%`}
-            icon={{ source: preset.icon, tintColor: currentVolume === preset.value ? Color.Orange : Color.PrimaryText }}
-            accessories={currentVolume === preset.value ? [{ tag: { value: "Current", color: Color.Orange } }] : []}
-            actions={
-              <ActionPanel>
-                <Action
-                  title={`Set Volume to ${preset.name}`}
-                  icon={preset.icon}
-                  onAction={() => handleSetVolume(preset.value)}
-                />
-              </ActionPanel>
-            }
+            title={volumeUnavailableCopy.title}
+            subtitle={volumeUnavailableCopy.subtitle}
+            icon={{
+              source: volumeCapability.kind === "fineTune" && fineTuneAvailable === null ? Icon.Clock : Icon.Info,
+              tintColor: Color.Orange,
+            }}
           />
-        ))}
+        )}
       </List.Section>
 
       <List.Section title={`Route ${app.name} Output (FineTune)`}>
-        {routingUnavailable ? (
+        {routingStatusLoading ? (
+          <List.Item
+            title="Checking FineTune availability"
+            subtitle="One moment..."
+            icon={{ source: Icon.Clock, tintColor: Color.Orange }}
+          />
+        ) : routingUnavailable ? (
           <List.Item
             title={routingUnavailableTitle}
             subtitle={routingUnavailableSubtitle}
@@ -213,18 +360,22 @@ export function AppVolumeControl({
           devices.map((device) => {
             const isSystemCurrent = systemDeviceUid ? device.uid === systemDeviceUid : device.isDefault;
             const isRouted = device.uid === routedDeviceUid;
+            const isCurrentOutput = isRouted || (!routedDeviceUid && isSystemCurrent);
 
             return (
               <List.Item
                 key={device.uid}
-                title={device.name}
+                title={getOutputTitle(device, isSystemCurrent, isRouted)}
+                subtitle={getOutputSubtitle(isSystemCurrent, isRouted)}
                 icon={{
                   source: getOutputDeviceIconSource(device),
-                  tintColor: isRouted ? Color.Yellow : isSystemCurrent ? Color.Blue : Color.PrimaryText,
+                  tintColor: isCurrentOutput ? Color.Green : Color.PrimaryText,
                 }}
                 accessories={[
-                  ...(isRouted ? [{ tag: { value: "Routed", color: Color.Yellow } }] : []),
-                  ...(isSystemCurrent ? [{ tag: { value: "System", color: Color.Blue } }] : []),
+                  ...(isCurrentOutput ? [{ tag: { value: "Current", color: Color.Green } }] : []),
+                  ...(!isCurrentOutput && isSystemCurrent
+                    ? [{ tag: { value: "System", color: Color.PrimaryText } }]
+                    : []),
                 ]}
                 actions={
                   <ActionPanel>
