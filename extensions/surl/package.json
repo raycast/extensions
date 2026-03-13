@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "surl",
+  "title": "Surl",
+  "description": "Make your URLs shorter",
+  "icon": "surl.png",
+  "author": "fujiyamaorange",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Shorten URL",
+      "subtitle": "Surl",
+      "description": "Make Your URL Shorten",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://example.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Show History",
+      "subtitle": "Surl",
+      "description": "History of Surl",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "expirationDate",
+      "label": "Expiration Date",
+      "description": "Enter the number of days it is valid",
+      "type": "dropdown",
+      "data": [
+        {
+          "value": "1",
+          "title": "1 Day"
+        },
+        {
+          "value": "7",
+          "title": "7 Days"
+        },
+        {
+          "value": "30",
+          "title": "30 Days"
+        }
+      ],
+      "title": "Expiration Date",
+      "required": false,
+      "default": "7"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

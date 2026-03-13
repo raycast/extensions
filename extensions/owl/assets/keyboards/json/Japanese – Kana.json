@@ -1,0 +1,190 @@
+{
+    "Digit1": {
+        "lower": "ぬ",
+        "upper": "ぬ"
+    },
+    "Digit2": {
+        "lower": "ふ",
+        "upper": "ふ"
+    },
+    "Digit3": {
+        "lower": "あ",
+        "upper": "ぁ"
+    },
+    "Digit4": {
+        "lower": "う",
+        "upper": "ぅ"
+    },
+    "Digit5": {
+        "lower": "え",
+        "upper": "ぇ"
+    },
+    "Digit6": {
+        "lower": "お",
+        "upper": "ぉ"
+    },
+    "Digit7": {
+        "lower": "や",
+        "upper": "ゃ"
+    },
+    "Digit8": {
+        "lower": "ゆ",
+        "upper": "ゅ"
+    },
+    "Digit9": {
+        "lower": "よ",
+        "upper": "ょ"
+    },
+    "Digit0": {
+        "lower": "わ",
+        "upper": "を"
+    },
+    "Minus": {
+        "lower": "ほ",
+        "upper": "ほ"
+    },
+    "Equal": {
+        "lower": "゜",
+        "upper": "「"
+    },
+    "KeyQ": {
+        "lower": "た",
+        "upper": "た"
+    },
+    "KeyW": {
+        "lower": "て",
+        "upper": "て"
+    },
+    "KeyE": {
+        "lower": "い",
+        "upper": "ぃ"
+    },
+    "KeyR": {
+        "lower": "す",
+        "upper": "す"
+    },
+    "KeyT": {
+        "lower": "か",
+        "upper": "か"
+    },
+    "KeyY": {
+        "lower": "ん",
+        "upper": "ん"
+    },
+    "KeyU": {
+        "lower": "な",
+        "upper": "な"
+    },
+    "KeyI": {
+        "lower": "に",
+        "upper": "に"
+    },
+    "KeyO": {
+        "lower": "ら",
+        "upper": "ら"
+    },
+    "KeyP": {
+        "lower": "せ",
+        "upper": "せ"
+    },
+    "BracketLeft": {
+        "lower": "゛",
+        "upper": "」"
+    },
+    "BracketRight": {
+        "lower": "゜",
+        "upper": "「"
+    },
+    "KeyA": {
+        "lower": "ち",
+        "upper": "ち"
+    },
+    "KeyS": {
+        "lower": "と",
+        "upper": "と"
+    },
+    "KeyD": {
+        "lower": "し",
+        "upper": "し"
+    },
+    "KeyF": {
+        "lower": "は",
+        "upper": "は"
+    },
+    "KeyG": {
+        "lower": "き",
+        "upper": "き"
+    },
+    "KeyH": {
+        "lower": "く",
+        "upper": "く"
+    },
+    "KeyJ": {
+        "lower": "ま",
+        "upper": "ま"
+    },
+    "KeyK": {
+        "lower": "の",
+        "upper": "の"
+    },
+    "KeyL": {
+        "lower": "り",
+        "upper": "り"
+    },
+    "Semicolon": {
+        "lower": "れ",
+        "upper": "れ"
+    },
+    "Quote": {
+        "lower": "け",
+        "upper": "け"
+    },
+    "Backquote": {
+        "lower": "`",
+        "upper": "~"
+    },
+    "Backslash": {
+        "lower": "へ",
+        "upper": "へ"
+    },
+    "KeyZ": {
+        "lower": "つ",
+        "upper": "っ"
+    },
+    "KeyX": {
+        "lower": "さ",
+        "upper": "さ"
+    },
+    "KeyC": {
+        "lower": "そ",
+        "upper": "そ"
+    },
+    "KeyV": {
+        "lower": "ひ",
+        "upper": "ひ"
+    },
+    "KeyB": {
+        "lower": "こ",
+        "upper": "こ"
+    },
+    "KeyN": {
+        "lower": "み",
+        "upper": "み"
+    },
+    "KeyM": {
+        "lower": "も",
+        "upper": "も"
+    },
+    "Comma": {
+        "lower": "ね",
+        "upper": "、"
+    },
+    "Period": {
+        "lower": "る",
+        "upper": "。"
+    },
+    "Slash": {
+        "lower": "め",
+        "upper": "・"
+    }
+}

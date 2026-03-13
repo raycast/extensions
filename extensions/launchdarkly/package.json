@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "launchdarkly",
+  "title": "LaunchDarkly",
+  "description": "A Raycast extension integrating with LaunchDarkly",
+  "icon": "launchdarkly-transparent-bg.png",
+  "author": "luarmr",
+  "categories": [
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-feature-flags",
+      "title": "List Feature Flags",
+      "subtitle": "LaunchDarkly",
+      "description": "List and search through your LaunchDarkly feature flags, view their details, and manage environments",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "LaunchDarkly API Token",
+      "description": "Your personal access token for LaunchDarkly. Must be set before using the extension.",
+      "required": true
+    },
+    {
+      "name": "projectKey",
+      "type": "textfield",
+      "title": "LaunchDarkly Project Key",
+      "description": "If left blank, defaults to 'default'.",
+      "required": false
+    },
+    {
+      "name": "ldApiUrl",
+      "type": "textfield",
+      "title": "LaunchDarkly Base URL",
+      "description": "LaunchDarkly API URL (usually should be blank)",
+      "defaultValue": "https://app.launchdarkly.com",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "cors": "^2.8.5",
+    "eslint": "^8.57.1",
+    "express": "^4.21.2",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "mock-server": "ts-node ./mock/mock-ld-server.ts"
+  }
+}

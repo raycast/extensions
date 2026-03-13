@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wip",
+  "title": "WIP",
+  "description": "Manage your WIP todos and projects from Raycast.",
+  "icon": "icon.png",
+  "author": "marckohlbrugge",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "todos",
+      "title": "Search Todos",
+      "subtitle": "WIP",
+      "description": "Search your WIP todos",
+      "mode": "view"
+    },
+    {
+      "name": "streak",
+      "title": "Show Streak",
+      "subtitle": "WIP",
+      "description": "Show WIP Streak",
+      "mode": "no-view",
+      "interval": "10s"
+    },
+    {
+      "name": "done",
+      "title": "Add Completed Todo",
+      "subtitle": "WIP",
+      "description": "Add a completed todo to your WIP account",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "subtitle": "WIP",
+      "description": "Search your WIP projects",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "date-fns": "^3.6.0",
+    "file-type": "^19.6.0",
+    "lodash.debounce": "^4.0.8",
+    "mime-types": "^2.1.35",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash.debounce": "^4.0.9",
+    "@types/mime-types": "^2.1.4",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "environment",
+      "type": "dropdown",
+      "title": "Environment",
+      "description": "Choose the environment",
+      "default": "production",
+      "required": false,
+      "data": [
+        {
+          "title": "Development",
+          "value": "development"
+        },
+        {
+          "title": "Production",
+          "value": "production"
+        }
+      ]
+    }
+  ]
+}

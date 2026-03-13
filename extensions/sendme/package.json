@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sendme",
+  "title": "Sendme File Share",
+  "description": "Send and receive files peer-to-peer directly from Raycast with no intermediary servers or accounts required",
+  "icon": "command-icon.png",
+  "author": "nazif_ishrak",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Share File",
+      "description": "Share files peer-to-peer directly from Raycast with no intermediary servers or accounts required",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "receive",
+      "title": "Receive File",
+      "description": "Download a file by pasting a sendme ticket - secure, fast, and with no intermediary servers",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "autoInstallSendme",
+      "title": "Auto Install Sendme",
+      "description": "Automatically install sendme when needed without asking",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Auto Install"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.10.0",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~18.16.0",
+    "@types/react": "^18.0.28",
+    "eslint": "^8.32.0",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

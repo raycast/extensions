@@ -1,0 +1,229 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-system-monitor",
+  "title": "System Monitor",
+  "description": "Show information and usage related to CPU, memory, power, network and temperature",
+  "icon": "command-icon.png",
+  "author": "hossammourad",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "contributors": [
+    "crehan144",
+    "pernielsentikaer",
+    "lucasmezencio",
+    "ridemountainpig",
+    "xmok",
+    "jadenmajid",
+    "ADCAdams"
+  ],
+  "commands": [
+    {
+      "name": "system-monitor",
+      "title": "System Monitor",
+      "description": "Show information and usage related to CPU, memory, power, network and temperature",
+      "mode": "view"
+    },
+    {
+      "name": "menubar-system-monitor",
+      "title": "Menubar System Monitor",
+      "description": "Show information and usage related to CPU, memory, power and network on the menubar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "customIconUrl",
+          "description": "Custom icon URL for the menubar icon",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Icon URL",
+          "placeholder": "https://example.com/icon.png"
+        },
+        {
+          "name": "cpuMenubarFormat",
+          "description": "Options:<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "CPU Formatting",
+          "placeholder": "<PERCENT> %",
+          "default": "<PERCENT> %"
+        },
+        {
+          "name": "memoryMenubarFormat",
+          "description": "Options:<VALUE>,<TOTAL>,<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Memory Formatting",
+          "placeholder": "<PERCENT> % (<VALUE> GB / <TOTAL> GB)",
+          "default": "<PERCENT> % (<VALUE> GB / <TOTAL> GB)"
+        },
+        {
+          "name": "networkMenubarFormat",
+          "description": "Options:<UP>,<DOWN>",
+          "type": "textfield",
+          "required": false,
+          "title": "Network Formatting",
+          "placeholder": "↓ <DOWN>/s ↑ <UP>/s",
+          "default": "↓ <DOWN>/s ↑ <UP>/s"
+        },
+        {
+          "name": "diskMenubarFormat",
+          "description": "Options:<VALUE>,<TOTAL>",
+          "type": "textfield",
+          "required": false,
+          "title": "Disk Formatting",
+          "placeholder": "<VALUE> GB / <TOTAL> GB",
+          "default": "<VALUE> GB / <TOTAL> GB"
+        },
+        {
+          "name": "powerMenubarFormat",
+          "description": "Options:<PERCENT>",
+          "type": "textfield",
+          "required": false,
+          "title": "Power Formatting",
+          "placeholder": "<PERCENT> %",
+          "default": "<PERCENT> %"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/utils": "^2.2.2",
+    "os-utils": "0.0.14",
+    "plist": "^3.1.0",
+    "systeminformation": "^5.22.7",
+    "usehooks-ts": "^3.1.0",
+    "@raycast/api": "^1.104.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/os-utils": "0.0.4",
+    "@types/plist": "^3.0.5",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader"
+  },
+  "preferences": [
+    {
+      "name": "defaultView",
+      "description": "Select active tab upon launch",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default tab",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "System Info",
+          "value": "system-info"
+        },
+        {
+          "title": "CPU",
+          "value": "cpu"
+        },
+        {
+          "title": "Memory",
+          "value": "memory"
+        },
+        {
+          "title": "Power",
+          "value": "power"
+        },
+        {
+          "title": "Network",
+          "value": "network"
+        }
+      ]
+    },
+    {
+      "name": "displayModeCpu",
+      "description": "Select cpu usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "CPU usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "used"
+    },
+    {
+      "name": "displayModeBattery",
+      "description": "Select battery usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Battery usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "free"
+    },
+    {
+      "name": "displayModeDisk",
+      "description": "Select disk usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Disk usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "free"
+    },
+    {
+      "name": "displayModeMemory",
+      "description": "Select memory usage display mode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Memory usage display mode",
+      "placeholder": "placeHolder",
+      "data": [
+        {
+          "title": "Display Free",
+          "value": "free"
+        },
+        {
+          "title": "Display Used",
+          "value": "used"
+        }
+      ],
+      "default": "used"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

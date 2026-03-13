@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "diff-view",
+  "title": "Diff View",
+  "description": "Compare the last two entries of your clipboard in VS Code or Cursor",
+  "author": "kalaschnik",
+  "license": "MIT",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "diff-view",
+      "title": "Show Diff View",
+      "description": "Compare the last two entries of your clipboard in VS Code or Cursor",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": true,
+      "name": "editor",
+      "title": "Editor",
+      "description": "Select Your Preferred Editor",
+      "type": "dropdown",
+      "default": "code",
+      "data": [
+        {
+          "title": "VS Code",
+          "value": "code"
+        },
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

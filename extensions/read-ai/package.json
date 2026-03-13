@@ -1,0 +1,576 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "read-ai",
+  "title": "Read AI - Text to Speech",
+  "description": "Revolutionize your reading with OpenAI's TTS technology—bringing words to your ears, ideal for auditory learners and the visually impaired.",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "author": "JungHoonGhae",
+  "contributors": [
+    "zezhehh"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "read-selected-text-audio-only",
+      "title": "Read Selected Text | Background Audio",
+      "subtitle": "Read AI - Text to Speech",
+      "description": "listen to the seleted text with subtitles",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-selected-text-script",
+      "title": "Read Selected Text | with Script",
+      "subtitle": "Read AI - Text to Speech",
+      "description": "Read and listen to the seleted text with script and subtitles",
+      "mode": "view"
+    },
+    {
+      "name": "read-clipboard-image",
+      "title": "Read Clipboard Image | Background Audio",
+      "subtitle": "Read AI - Text to Speech",
+      "description": "Read and listen to the text in the image with subtitles",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "OpenAI API Key",
+      "description": "Provide your OpenAI API Key here",
+      "required": true,
+      "label": "API Key"
+    },
+    {
+      "name": "directRead",
+      "type": "checkbox",
+      "title": "Direct Read",
+      "description": "Read the selected text directly without translation and script generation",
+      "required": false,
+      "default": false,
+      "label": "Direct Read"
+    },
+    {
+      "name": "subtitlesToggle",
+      "type": "checkbox",
+      "title": "Subtitles",
+      "description": "Turn on or off subtitles",
+      "required": true,
+      "default": true,
+      "label": "Subtitles"
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "title": "Default Voice",
+      "description": "Select the default voice for text-to-speech",
+      "required": true,
+      "default": "alloy",
+      "data": [
+        {
+          "value": "alloy",
+          "title": "Alloy (male)"
+        },
+        {
+          "value": "echo",
+          "title": "Echo (male)"
+        },
+        {
+          "value": "fable",
+          "title": "Fable (male-british)"
+        },
+        {
+          "value": "onyx",
+          "title": "Onyx (male)"
+        },
+        {
+          "value": "nova",
+          "title": "Nova (female)"
+        },
+        {
+          "value": "shimmer",
+          "title": "Shimmer (female)"
+        }
+      ]
+    },
+    {
+      "name": "readingStyle",
+      "type": "dropdown",
+      "title": "Reading Style",
+      "description": "Select the reading style for text-to-speech",
+      "required": true,
+      "default": "autoDetect",
+      "label": "Reading Style",
+      "data": [
+        {
+          "value": "autoDetect",
+          "title": "Auto Detect"
+        },
+        {
+          "value": "summary",
+          "title": "Summary"
+        },
+        {
+          "value": "detailed",
+          "title": "Detailed"
+        },
+        {
+          "value": "audioBook",
+          "title": "Audio Book"
+        },
+        {
+          "value": "educational",
+          "title": "Educational"
+        },
+        {
+          "value": "explainCode",
+          "title": "Explain Code"
+        },
+        {
+          "value": "codeReview",
+          "title": "Code Review"
+        },
+        {
+          "value": "podcast",
+          "title": "Podcast"
+        },
+        {
+          "value": "news",
+          "title": "News"
+        },
+        {
+          "value": "tweet",
+          "title": "Tweet"
+        },
+        {
+          "value": "sparkNotes",
+          "title": "SparkNotes"
+        }
+      ]
+    },
+    {
+      "name": "gptModel",
+      "type": "dropdown",
+      "title": "GPT Model",
+      "description": "Choose the GPT model to use for text script generation",
+      "required": true,
+      "default": "gpt-3.5-turbo-16k",
+      "label": "GPT Model",
+      "data": [
+        {
+          "value": "gpt-3.5-turbo",
+          "title": "gpt-3.5-turbo"
+        },
+        {
+          "value": "gpt-3.5-turbo-0301",
+          "title": "gpt-3.5-turbo-0301"
+        },
+        {
+          "value": "gpt-3.5-turbo-0613",
+          "title": "gpt-3.5-turbo-0613"
+        },
+        {
+          "value": "gpt-3.5-turbo-1106",
+          "title": "gpt-3.5-turbo-1106"
+        },
+        {
+          "value": "gpt-3.5-turbo-16k",
+          "title": "gpt-3.5-turbo-16k"
+        },
+        {
+          "value": "gpt-3.5-turbo-16k-0613",
+          "title": "gpt-3.5-turbo-16k-0613"
+        },
+        {
+          "value": "gpt-4",
+          "title": "gpt-4"
+        },
+        {
+          "value": "gpt-4-0314",
+          "title": "gpt-4-0314"
+        },
+        {
+          "value": "gpt-4-0613",
+          "title": "gpt-4-0613"
+        },
+        {
+          "value": "gpt-4-1106-preview",
+          "title": "gpt-4-1106-preview"
+        },
+        {
+          "value": "gpt-4-32k",
+          "title": "gpt-4-32k"
+        },
+        {
+          "value": "gpt-4-32k-0314",
+          "title": "gpt-4-32k-0314"
+        },
+        {
+          "value": "gpt-4-32k-0613",
+          "title": "gpt-4-32k-0613"
+        }
+      ]
+    },
+    {
+      "name": "speed",
+      "type": "textfield",
+      "title": "Speed",
+      "description": "Input the speed of the voice, varying from 0.25 to 4.0",
+      "required": false,
+      "default": "1.0",
+      "label": "Speed"
+    },
+    {
+      "name": "temperature",
+      "type": "dropdown",
+      "title": "Temperature",
+      "description": "Adjust the creativity of the text-to-speech output",
+      "required": true,
+      "default": "0.7",
+      "label": "Temperature",
+      "data": [
+        {
+          "value": "0.1",
+          "title": "0.1"
+        },
+        {
+          "value": "0.2",
+          "title": "0.2"
+        },
+        {
+          "value": "0.3",
+          "title": "0.3"
+        },
+        {
+          "value": "0.4",
+          "title": "0.4"
+        },
+        {
+          "value": "0.5",
+          "title": "0.5"
+        },
+        {
+          "value": "0.6",
+          "title": "0.6"
+        },
+        {
+          "value": "0.7",
+          "title": "0.7"
+        },
+        {
+          "value": "0.8",
+          "title": "0.8"
+        },
+        {
+          "value": "0.9",
+          "title": "0.9"
+        },
+        {
+          "value": "1.0",
+          "title": "1.0"
+        },
+        {
+          "value": "1.1",
+          "title": "1.1"
+        },
+        {
+          "value": "1.2",
+          "title": "1.2"
+        },
+        {
+          "value": "1.3",
+          "title": "1.3"
+        },
+        {
+          "value": "1.4",
+          "title": "1.4"
+        },
+        {
+          "value": "1.5",
+          "title": "1.5"
+        },
+        {
+          "value": "1.6",
+          "title": "1.6"
+        },
+        {
+          "value": "1.7",
+          "title": "1.7"
+        },
+        {
+          "value": "1.8",
+          "title": "1.8"
+        },
+        {
+          "value": "1.9",
+          "title": "1.9"
+        },
+        {
+          "value": "2.0",
+          "title": "2.0"
+        }
+      ]
+    },
+    {
+      "name": "outputLanguage",
+      "type": "dropdown",
+      "title": "Output Language",
+      "description": "Select the output language for text-to-speech",
+      "required": true,
+      "default": "English",
+      "label": "Output Language",
+      "data": [
+        {
+          "value": "Afrikaans",
+          "title": "Afrikaans"
+        },
+        {
+          "value": "Arabic",
+          "title": "Arabic"
+        },
+        {
+          "value": "Armenian",
+          "title": "Armenian"
+        },
+        {
+          "value": "Azerbaijani",
+          "title": "Azerbaijani"
+        },
+        {
+          "value": "Belarusian",
+          "title": "Belarusian"
+        },
+        {
+          "value": "Bosnian",
+          "title": "Bosnian"
+        },
+        {
+          "value": "Bulgarian",
+          "title": "Bulgarian"
+        },
+        {
+          "value": "Catalan",
+          "title": "Catalan"
+        },
+        {
+          "value": "Chinese",
+          "title": "Chinese"
+        },
+        {
+          "value": "Croatian",
+          "title": "Croatian"
+        },
+        {
+          "value": "Czech",
+          "title": "Czech"
+        },
+        {
+          "value": "Danish",
+          "title": "Danish"
+        },
+        {
+          "value": "Dutch",
+          "title": "Dutch"
+        },
+        {
+          "value": "English",
+          "title": "English"
+        },
+        {
+          "value": "Estonian",
+          "title": "Estonian"
+        },
+        {
+          "value": "Finnish",
+          "title": "Finnish"
+        },
+        {
+          "value": "French",
+          "title": "French"
+        },
+        {
+          "value": "Galician",
+          "title": "Galician"
+        },
+        {
+          "value": "German",
+          "title": "German"
+        },
+        {
+          "value": "Greek",
+          "title": "Greek"
+        },
+        {
+          "value": "Hebrew",
+          "title": "Hebrew"
+        },
+        {
+          "value": "Hindi",
+          "title": "Hindi"
+        },
+        {
+          "value": "Hungarian",
+          "title": "Hungarian"
+        },
+        {
+          "value": "Icelandic",
+          "title": "Icelandic"
+        },
+        {
+          "value": "Indonesian",
+          "title": "Indonesian"
+        },
+        {
+          "value": "Italian",
+          "title": "Italian"
+        },
+        {
+          "value": "Japanese",
+          "title": "Japanese"
+        },
+        {
+          "value": "Kannada",
+          "title": "Kannada"
+        },
+        {
+          "value": "Kazakh",
+          "title": "Kazakh"
+        },
+        {
+          "value": "Korean",
+          "title": "Korean"
+        },
+        {
+          "value": "Latvian",
+          "title": "Latvian"
+        },
+        {
+          "value": "Lithuanian",
+          "title": "Lithuanian"
+        },
+        {
+          "value": "Macedonian",
+          "title": "Macedonian"
+        },
+        {
+          "value": "Malay",
+          "title": "Malay"
+        },
+        {
+          "value": "Marathi",
+          "title": "Marathi"
+        },
+        {
+          "value": "Maori",
+          "title": "Maori"
+        },
+        {
+          "value": "Nepali",
+          "title": "Nepali"
+        },
+        {
+          "value": "Norwegian",
+          "title": "Norwegian"
+        },
+        {
+          "value": "Persian",
+          "title": "Persian"
+        },
+        {
+          "value": "Polish",
+          "title": "Polish"
+        },
+        {
+          "value": "Portuguese",
+          "title": "Portuguese"
+        },
+        {
+          "value": "Romanian",
+          "title": "Romanian"
+        },
+        {
+          "value": "Russian",
+          "title": "Russian"
+        },
+        {
+          "value": "Serbian",
+          "title": "Serbian"
+        },
+        {
+          "value": "Slovak",
+          "title": "Slovak"
+        },
+        {
+          "value": "Slovenian",
+          "title": "Slovenian"
+        },
+        {
+          "value": "Spanish",
+          "title": "Spanish"
+        },
+        {
+          "value": "Swahili",
+          "title": "Swahili"
+        },
+        {
+          "value": "Swedish",
+          "title": "Swedish"
+        },
+        {
+          "value": "Tagalog",
+          "title": "Tagalog"
+        },
+        {
+          "value": "Tamil",
+          "title": "Tamil"
+        },
+        {
+          "value": "Thai",
+          "title": "Thai"
+        },
+        {
+          "value": "Turkish",
+          "title": "Turkish"
+        },
+        {
+          "value": "Ukrainian",
+          "title": "Ukrainian"
+        },
+        {
+          "value": "Urdu",
+          "title": "Urdu"
+        },
+        {
+          "value": "Vietnamese",
+          "title": "Vietnamese"
+        },
+        {
+          "value": "Welsh",
+          "title": "Welsh"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "openai": "4.20.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

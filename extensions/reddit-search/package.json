@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reddit-search",
+  "title": "Reddit Search",
+  "description": "Search Reddit, Subreddits, or within Subreddits and list the results in Raycast.",
+  "icon": "reddit_icon_512.png",
+  "author": "ewlcheng",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Reddit",
+      "description": "Searches Reddit and lists the results with the option to sort, show more, or show the results on Reddit.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "resultLimit",
+      "description": "Indicate the number of results to display from your queries. Minimum of 1 and maximum of 100.",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of results to display (1–100)",
+      "default": "10"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.30.0",
+    "node-fetch": "^3.2.2"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.10",
+    "@types/react": "^17.0.39",
+    "@typescript-eslint/eslint-plugin": "^5.14.0",
+    "@typescript-eslint/parser": "^5.14.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "meta-music",
+  "title": "Meta Music",
+  "description": "Manage the ID3 tags of audio files directly in Raycast!",
+  "icon": "meta-music.png",
+  "author": "teziovsky",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-id3-tags",
+      "title": "Manage ID3 Tags",
+      "description": "Manage the ID3 tags of audio files directly in Raycast!",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "edit-id3-tags",
+      "title": "Edit ID3 Tags",
+      "description": "Edit the ID3 tags of audio files directly in Raycast!"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "musicDir",
+      "description": "The path to the music folder",
+      "type": "directory",
+      "required": false,
+      "title": "Default Music Dir",
+      "placeholder": "~/Music",
+      "default": "~/Music"
+    },
+    {
+      "name": "useFinderSelection",
+      "description": "Use Finder selection to handle the selected file or folder on launch.",
+      "type": "checkbox",
+      "required": false,
+      "title": "Finder Selection",
+      "label": "Handle the selected file or folder on launch",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^2.2.1",
+    "date-fns": "^4.1.0",
+    "filesize": "^11.0.2",
+    "mime": "^4.0.7",
+    "node-id3": "^0.2.9"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "24.3.1",
+    "@types/react": "19.1.12",
+    "eslint": "^9.35.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "pull-contributions": "npx @raycast/api@latest pull-contributions",
+    "evals": "ray evals"
+  },
+  "ai": {
+    "instructions": "You are an AI assistant whose sole purpose is to update ID3 tags using the 'edit-id3-tags' Raycast tool. Guidelines: 1. ALWAYS satisfy the user request by calling the tool exactly once after you have a COMPLETE and VALIDATED set of metadata. 2. Gather metadata in this order of priority:    a. Explicit values provided by the user.    b. Values that can be confidently parsed from the file name (e.g. 'Artist - Title.mp3', 'Artist/Album/Title.mp3') passed as the path argument if user will ask you to infer the metadata from the file name. 3. Writable fields are: title, artist, album, performerInfo (album artist), composer, genre, year, trackNumber, partOfSet (disc number), comment. 4. If user will pass the 'comment', that field must be an object of the form { 'language': '<ISO-639-2 code>', 'text': '<comment text>' }. If user will not pass the 'comment.language' - infer the language from the comment text (if empty use eng). 4. Validate numeric fields (year, trackNumber, partOfSet) and ensure they are numbers or numeric strings if user will pass the value. 5. When the user only asks explanatory questions, describe the tool or your plan without calling the tool. 6. To clear a tag, pass an empty string (') for that field, or an empty comment object as described in rule 7.  Follow these rules strictly so that the command always receives correct data.",
+    "evals": [
+      {
+        "input": "How does the edit-id3-tags tool work?",
+        "expected": [
+          {
+            "meetsCriteria": "The tool is designed to update ID3 tags in audio files"
+          }
+        ]
+      },
+      {
+        "input": "What are the fields that can be edited with the edit-id3-tags tool?",
+        "expected": [
+          {
+            "meetsCriteria": "The fields that can be edited with the edit-id3-tags tool are: title, artist, album, performerInfo, composer, genre, year, trackNumber, partOfSet, comment"
+          }
+        ]
+      },
+      {
+        "input": "@meta-music @finder Update the ID3 tags based on the file name",
+        "mocks": {
+          "edit-id3-tags": {
+            "path": "/Users/user/Music/Tiesto/Just Be/Traffic.mp3",
+            "title": "Traffic",
+            "artist": "Tiesto",
+            "album": "Just Be",
+            "genre": "Trance"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "edit-id3-tags",
+              "arguments": {
+                "path": "/Users/user/Music/Tiesto/Just Be/Traffic.mp3",
+                "title": "Traffic",
+                "artist": "Tiesto",
+                "album": "Just Be",
+                "genre": "Trance"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@meta-music @finder Clear the comment tag",
+        "mocks": {
+          "edit-id3-tags": {
+            "path": "/Users/user/Music/Tiesto/Just Be/Traffic.mp3",
+            "comment": {
+              "language": "eng",
+              "text": ""
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "edit-id3-tags",
+              "arguments": {
+                "path": "/Users/user/Music/Tiesto/Just Be/Traffic.mp3",
+                "comment": {
+                  "language": "eng",
+                  "text": ""
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@meta-music @finder Set the genre to 'Rock' and add album artist 'The Beatles'",
+        "mocks": {
+          "edit-id3-tags": {
+            "path": "/Users/user/Music/The Beatles/Abbey Road/Come Together.mp3",
+            "genre": "Rock",
+            "performerInfo": "The Beatles"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "edit-id3-tags",
+              "arguments": {
+                "path": "/Users/user/Music/The Beatles/Abbey Road/Come Together.mp3",
+                "genre": "Rock",
+                "performerInfo": "The Beatles"
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@meta-music @finder Set disc number to 1 of 2 and add a comment 'Remastered version'",
+        "mocks": {
+          "edit-id3-tags": {
+            "path": "/Users/user/Music/The Beatles/Abbey Road/Come Together.mp3",
+            "partOfSet": "1/2",
+            "comment": {
+              "language": "eng",
+              "text": "Remastered version"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "edit-id3-tags",
+              "arguments": {
+                "path": "/Users/user/Music/The Beatles/Abbey Road/Come Together.mp3",
+                "partOfSet": "1/2",
+                "comment": {
+                  "language": "eng",
+                  "text": "Remastered version"
+                }
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      },
+      {
+        "input": "@meta-music @finder Update all metadata fields: title 'Imagine', artist 'John Lennon', album 'Imagine', year '1971', track 1, genre 'Pop', composer 'John Lennon'",
+        "mocks": {
+          "edit-id3-tags": {
+            "path": "/Users/user/Music/John Lennon/Imagine/Imagine.mp3",
+            "title": "Imagine",
+            "artist": "John Lennon",
+            "album": "Imagine",
+            "year": "1971",
+            "trackNumber": "1",
+            "genre": "Pop",
+            "composer": "John Lennon"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "edit-id3-tags",
+              "arguments": {
+                "path": "/Users/user/Music/John Lennon/Imagine/Imagine.mp3",
+                "title": "Imagine",
+                "artist": "John Lennon",
+                "album": "Imagine",
+                "year": "1971",
+                "trackNumber": "1",
+                "genre": "Pop",
+                "composer": "John Lennon"
+              }
+            }
+          }
+        ],
+        "usedAsExample": false
+      }
+    ]
+  }
+}

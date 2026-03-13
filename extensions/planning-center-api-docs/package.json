@@ -1,0 +1,319 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "planning-center-api-docs",
+  "title": "Planning Center API Docs",
+  "description": "Quickly find the docs you need for the Planning Center API.",
+  "icon": "pco-logo-blue.png",
+  "author": "thomas.harmond",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-docs",
+      "title": "Search API Docs",
+      "subtitle": "Planning Center (PCO)",
+      "description": "Search and open Planning Center (PCO) API documentation pages",
+      "mode": "view"
+    },
+    {
+      "name": "search-on-web",
+      "title": "Search API Docs on Web",
+      "subtitle": "Planning Center (PCO)",
+      "description": "Search the Planning Center (PCO) API docs on the web",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiVersion",
+      "title": "API Version",
+      "description": "API version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2025-09-30",
+      "data": [
+        {
+          "title": "2025-09-30",
+          "value": "2025-09-30"
+        },
+        {
+          "title": "2019-02-13",
+          "value": "2019-02-13"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "calendarVersion",
+      "title": "Calendar Version",
+      "description": "Calendar version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2022-07-07",
+      "data": [
+        {
+          "title": "2022-07-07",
+          "value": "2022-07-07"
+        },
+        {
+          "title": "2021-07-20",
+          "value": "2021-07-20"
+        },
+        {
+          "title": "2020-04-08",
+          "value": "2020-04-08"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "checkInsVersion",
+      "title": "Check-Ins Version",
+      "description": "Check-Ins version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2025-05-28",
+      "data": [
+        {
+          "title": "2025-05-28",
+          "value": "2025-05-28"
+        },
+        {
+          "title": "2024-11-07",
+          "value": "2024-11-07"
+        },
+        {
+          "title": "2024-09-03",
+          "value": "2024-09-03"
+        },
+        {
+          "title": "2023-04-05",
+          "value": "2023-04-05"
+        },
+        {
+          "title": "2019-07-17",
+          "value": "2019-07-17"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "givingVersion",
+      "title": "Giving Version",
+      "description": "Giving version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2019-10-18",
+      "data": [
+        {
+          "title": "2019-10-18",
+          "value": "2019-10-18"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "groupsVersion",
+      "title": "Groups Version",
+      "description": "Groups version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2023-07-10",
+      "data": [
+        {
+          "title": "2023-07-10",
+          "value": "2023-07-10"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "peopleVersion",
+      "title": "People Version",
+      "description": "People version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2025-07-17",
+      "data": [
+        {
+          "title": "2025-07-17",
+          "value": "2025-07-17"
+        },
+        {
+          "title": "2025-07-02",
+          "value": "2025-07-02"
+        },
+        {
+          "title": "2025-03-20",
+          "value": "2025-03-20"
+        },
+        {
+          "title": "2024-09-12",
+          "value": "2024-09-12"
+        },
+        {
+          "title": "2023-03-21",
+          "value": "2023-03-21"
+        },
+        {
+          "title": "2023-02-15",
+          "value": "2023-02-15"
+        },
+        {
+          "title": "2022-07-14",
+          "value": "2022-07-14"
+        },
+        {
+          "title": "2022-01-28",
+          "value": "2022-01-28"
+        },
+        {
+          "title": "2022-01-05",
+          "value": "2022-01-05"
+        },
+        {
+          "title": "2021-08-17",
+          "value": "2021-08-17"
+        },
+        {
+          "title": "2020-07-22",
+          "value": "2020-07-22"
+        },
+        {
+          "title": "2020-04-06",
+          "value": "2020-04-06"
+        },
+        {
+          "title": "2019-10-10",
+          "value": "2019-10-10"
+        },
+        {
+          "title": "2019-01-14",
+          "value": "2019-01-14"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "publishingVersion",
+      "title": "Publishing Version",
+      "description": "Publishing version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2024-03-25",
+      "data": [
+        {
+          "title": "2024-03-25",
+          "value": "2024-03-25"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "registrationsVersion",
+      "title": "Registrations Version",
+      "description": "Registrations version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2025-05-01",
+      "data": [
+        {
+          "title": "2025-05-01",
+          "value": "2025-05-01"
+        }
+      ]
+    },
+    {
+      "name": "servicesVersion",
+      "title": "Services Version",
+      "description": "Services version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2018-11-01",
+      "data": [
+        {
+          "title": "2018-11-01",
+          "value": "2018-11-01"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
+      "name": "webhooksVersion",
+      "title": "Webhooks Version",
+      "description": "Webhooks version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2022-10-20",
+      "data": [
+        {
+          "title": "2022-10-20",
+          "value": "2022-10-20"
+        },
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

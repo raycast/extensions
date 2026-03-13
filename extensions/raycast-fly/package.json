@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-fly",
+  "title": "Fly.io",
+  "description": "View and modify your Fly.io applications",
+  "categories": [
+    "Developer Tools"
+  ],
+  "icon": "command-icon.png",
+  "author": "devuo",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Fly.io Applications",
+      "description": "View all of your Fly.io applications",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "authToken",
+      "type": "password",
+      "title": "Authentication Token",
+      "description": "A Fly.io's authentication token used to authenticate requests to the Fly.io API",
+      "placeholder": "See documentation on how to get a token",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.67.1",
+    "@raycast/utils": "1.12.4",
+    "node-fetch": "3.3.2",
+    "uniqolor": "1.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "8.51.0",
+    "prettier": "3.0.3",
+    "typescript": "5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,212 @@
+[
+  {
+    "Appearance": "blind_small.png",
+    "Name": "Small Blind",
+    "Effect": "None.",
+    "Beat": "Score at least 1x Base to earn $$$",
+    "Type": "Small Blind"
+  },
+  {
+    "Appearance": "blind_big.png",
+    "Name": "Big Blind",
+    "Effect": "None.",
+    "Beat": "Score at least 1.5x Base to earn $$$$",
+    "Type": "Big Blind"
+  },
+  {
+    "Appearance": "blind_hook.png",
+    "Name": "The Hook",
+    "Effect": "Discards 2 random cards per hand played",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_ox.png",
+    "Name": "The Ox",
+    "Effect": "Playing a [most played hand] sets money to $0",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_house.png",
+    "Name": "The House",
+    "Effect": "First hand is drawn face down",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_wall.png",
+    "Name": "The Wall",
+    "Effect": "Extra large blind",
+    "Beat": "Score at least 4x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_wheel.png",
+    "Name": "The Wheel",
+    "Effect": "1 in 7 cards get drawn face down",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_arm.png",
+    "Name": "The Arm",
+    "Effect": "Decrease level of played poker hand",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_camel.png",
+    "Name": "The Club",
+    "Effect": "All ♣️ cards are debuffed",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_fish.png",
+    "Name": "The Fish",
+    "Effect": "Cards drawn face down after each hand played",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_psychic.png",
+    "Name": "The Psychic",
+    "Effect": "Must play 5 cards",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_goad.png",
+    "Name": "The Goad",
+    "Effect": "All ♠️ cards are debuffed",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_water.png",
+    "Name": "The Water",
+    "Effect": "Start with 0 discards",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_window.png",
+    "Name": "The Window",
+    "Effect": "All ♦️ cards are debuffed",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_manacle.png",
+    "Name": "The Manacle",
+    "Effect": "-1 hand size",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_eye.png",
+    "Name": "The Eye",
+    "Effect": "No repeat hand types this round",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_mouth.png",
+    "Name": "The Mouth",
+    "Effect": "Play only 1 hand type this round",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_plant.png",
+    "Name": "The Plant",
+    "Effect": "All face cards are debuffed",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_nun.png",
+    "Name": "The Serpent",
+    "Effect": "After Play or Discard, always draw 3 cards",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_pillar.png",
+    "Name": "The Pillar",
+    "Effect": "Cards played previously this Ante are debuffed",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_needle.png",
+    "Name": "The Needle",
+    "Effect": "Play only 1 hand",
+    "Beat": "Score at least 1x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_head.png",
+    "Name": "The Head",
+    "Effect": "All ♥️ cards are debuffed",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_tooth.png",
+    "Name": "The Tooth",
+    "Effect": "Lose $1 per card played",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_flint.png",
+    "Name": "The Flint",
+    "Effect": "Base Chips and Mult are halved",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_mark.png",
+    "Name": "The Mark",
+    "Effect": "All face cards are drawn face down",
+    "Beat": "Score at least 2x Base to earn $$$$$",
+    "Type": "Boss Blind"
+  },
+  {
+    "Appearance": "blind_amberacorn.png",
+    "Name": "Amber Acorn",
+    "Effect": "Flips and shuffles all Joker cards",
+    "Beat": "Score at least 2x Base To earn $$$$$$$$",
+    "Type": "Final Boss Blind"
+  },
+  {
+    "Appearance": "blind_verdantleaf.png",
+    "Name": "Verdant Leaf",
+    "Effect": "All cards debuffed until 1 Joker sold",
+    "Beat": "Score at least 2x Base To earn $$$$$$$$",
+    "Type": "Final Boss Blind"
+  },
+  {
+    "Appearance": "blind_violetvessel.png",
+    "Name": "Violet Vessel",
+    "Effect": "Very large blind",
+    "Beat": "Score at least 6x Base To earn $$$$$$$$",
+    "Type": "Final Boss Blind"
+  },
+  {
+    "Appearance": "blind_crimsonheart.png",
+    "Name": "Crimson Heart",
+    "Effect": "One random Joker disabled every hand",
+    "Beat": "Score at least 2x Base To earn $$$$$$$$",
+    "Type": "Final Boss Blind"
+  },
+  {
+    "Appearance": "blind_ceruleanbell.png",
+    "Name": "Cerulean Bell",
+    "Effect": "Forces 1 card to always be selected",
+    "Beat": "Score at least 2x Base To earn $$$$$$$$",
+    "Type": "Final Boss Blind"
+  }
+]

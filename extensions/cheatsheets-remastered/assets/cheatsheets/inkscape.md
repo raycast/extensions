@@ -1,0 +1,34 @@
+---
+title: Inkscape
+category: Apps
+tags:
+  - WIP
+tech: inkscape
+status: active
+lastReviewed: '2025-09-05'
+---
+
+### All
+
+| `-` _/_ `=` | Zoom in/out
+| `3` _/_ `4` | Zoom to selection / drawing
+| `5` _/_ `6` | Zoom to page / page width
+{: .-shortcuts}
+
+### Select tool (F1)
+
+| `[ ]` | Rotate
+{: .-shortcuts}
+
+### Edit path (F2)
+
+| `Ctrl` | constraint
+{: .-shortcuts}
+
+### Dragging an anchor handle
+
+| `Ctrl` | snap to 15 degrees
+| `Alt` | ?
+{: .-shortcuts}
+
+### Bezier (Shift F6)

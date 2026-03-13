@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zendesk",
+  "title": "Zendesk — Search Support Center",
+  "description": "Search Zendesk support center for articles.",
+  "icon": "zendesk.png",
+  "author": "cpenned",
+  "contributors": [
+    "xmok"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Data"
+  ],
+  "commands": [
+    {
+      "name": "search-zendesk-support-center",
+      "title": "Search Support Center",
+      "subtitle": "Zendesk",
+      "description": "Search any Zendesk support center.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "supportCenter",
+      "type": "textfield",
+      "required": true,
+      "title": "Support center base URL",
+      "placeholder": "e.g., support.mycompany.com",
+      "description": "The base URL for your Zendesk support center. When viewing your support articles online, the URL will be in the format https://support.mycompany.com/hc/en-us/articles/3600000000000-My-Article-Title. The base URL is everything after the https:// and before the /hc/ part of the URL."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.30.0",
+    "prettier": "^2.8.1",
+    "react": "^18.2.0",
+    "typescript": "^4.9.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

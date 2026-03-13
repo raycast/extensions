@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-router",
+  "title": "Search Router",
+  "description": "Local-first search with Kagi's !Bangs (similar to unduck.link with DuckDuckGo's !Bangs)",
+  "icon": "extension-icon.png",
+  "author": "franzwilhelm",
+  "contributors": [
+    "lachero",
+    "raeperd",
+    "ahetzm",
+    "Xeyn",
+    "ridemountainpig"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "unduck",
+    "duckduckgo",
+    "bangs",
+    "kagi"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search the Web",
+      "keywords": [
+        "search",
+        "unduck",
+        "duckduckgo",
+        "bangs",
+        "kagi"
+      ],
+      "subtitle": "Search the Web with !bangs",
+      "description": "Search the Web using any of the available search engines. Powered by Kagi's Bangs and custom search engines",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "browse-search-engines",
+      "title": "Browse Search Engines",
+      "subtitle": "Browse and select your default search engine",
+      "description": "View all available search engines, manage custom engines, and set your default search engine to use with the search command.",
+      "mode": "view",
+      "keywords": [
+        "unduck",
+        "duckduckgo",
+        "bangs",
+        "kagi",
+        "custom",
+        "manage"
+      ]
+    },
+    {
+      "name": "add-custom-search-engine",
+      "title": "Add Custom Search Engine",
+      "subtitle": "Create a new custom search engine",
+      "description": "Add a new custom search engine with a personalized trigger and URL.",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "custom",
+        "search",
+        "engine",
+        "bang",
+        "create"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.2",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "download-kagi-bangs": "npx ts-node scripts/download-kagi-bangs.ts && npm run fix-lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

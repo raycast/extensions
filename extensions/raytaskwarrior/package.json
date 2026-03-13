@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raytaskwarrior",
+  "title": "Taskwarrior",
+  "description": "Taskwarrior integration to Raycast",
+  "icon": "icon.png",
+  "author": "yosy2010",
+  "contributors": [
+    "tim.shilov",
+    "chromy"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-active-tasks",
+      "title": "List Active Tasks",
+      "subtitle": "Taskwarrior",
+      "description": "list all your active tasks",
+      "mode": "view"
+    },
+    {
+      "name": "addTaskSimple",
+      "title": "Add Task",
+      "subtitle": "Taskwarrior",
+      "description": "Add a new task using a simple command-line-like interface",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "taskInput",
+          "placeholder": "Enter task details",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "addTaskAdvanced",
+      "subtitle": "Taskwarrior",
+      "title": "Add Task Advanced",
+      "description": "Add a new Task using a full interface",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "preferences": [
+    {
+      "name": "taskPath",
+      "title": "Taskwarrior Path",
+      "description": "Your Taskwarrior path. Type 'which task' in your terminal and paste the path here.",
+      "type": "textfield",
+      "placeholder": "/bin/task",
+      "required": true
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

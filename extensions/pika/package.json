@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pika",
+  "title": "Pika",
+  "description": "Beautify screenshots quickly using pika.style",
+  "icon": "pika-icon.png",
+  "author": "rishi",
+  "categories": [
+    "Design Tools",
+    "Web",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "openFromURL",
+      "title": "Open URL in Pika",
+      "subtitle": "Pika",
+      "description": "Open website or Image URL in Pika",
+      "mode": "view"
+    },
+    {
+      "name": "openImage",
+      "title": "Open Image in Pika",
+      "subtitle": "Pika",
+      "description": "Open Image in Pika",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.1",
+    "node-fetch": "^3.2.9",
+    "raycast-toolkit": "^1.0.6",
+    "run-applescript": "^6.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

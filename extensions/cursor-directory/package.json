@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursor-directory",
+  "title": "Cursor Directory",
+  "description": "Your cursor.directory in Raycast",
+  "icon": "extension-icon.png",
+  "author": "escwxyz",
+  "contributors": [
+    "litomore"
+  ],
+  "crossExtensions": [
+    "degouville/cursor-recent-projects"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "preferences": [
+    {
+      "name": "cacheInterval",
+      "title": "Cache Interval in day",
+      "type": "textfield",
+      "required": false,
+      "default": "1",
+      "description": "How many days should the local cache expire"
+    },
+    {
+      "name": "showDetailedView",
+      "title": "Show Detailed View",
+      "label": "Show detailed view in cursor rules list",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "description": "Show detailed view in cursor rules list"
+    },
+    {
+      "name": "defaultCursorRulesList",
+      "title": "Default Cursor Rules List",
+      "type": "dropdown",
+      "required": false,
+      "default": "popular",
+      "description": "If show all cursor rules or only popular ones in cursor rules list",
+      "data": [
+        {
+          "title": "Popular",
+          "value": "popular"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
+      ]
+    },
+    {
+      "name": "skipConfirmationOnCopy",
+      "title": "Skip Confirmation on Copy",
+      "label": "Skip confirmation on copying a cursor rule",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "description": "Skip confirmation on copying a cursor rule"
+    },
+    {
+      "name": "replaceOnLaunch",
+      "title": "Replace on Launch",
+      "label": "Replace the content if .cursorrules file already exists",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "description": "Replace the content if .cursorrules file already exists"
+    },
+    {
+      "name": "projectsDirectory",
+      "title": "Projects Directory",
+      "type": "directory",
+      "required": false,
+      "description": "The path to the directory to store your projects"
+    },
+    {
+      "name": "exportDirectory",
+      "title": "Exported Cursor Rules Directory",
+      "type": "directory",
+      "required": false,
+      "default": "~/Documents/CursorRules",
+      "description": "The path to the directory to export cursor rules"
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cursor Rules",
+      "description": "Search cursor rules from cursor.directory for usage inside Cursor Code Editor",
+      "mode": "view"
+    },
+    {
+      "name": "youtube",
+      "title": "Search Cursor Videos",
+      "description": "Search cursor Youtube videos curated by cursor.directory",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Search Cursor Projects",
+      "description": "Search projects to open with Cursor, creating .cursorrules file if necessary",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.2",
+    "@raycast/utils": "^1.18.0",
+    "dayjs": "^1.11.13",
+    "node-fetch": "^3.3.2",
+    "raycast-cross-extension": "^0.2.3",
+    "yaml": "^2.5.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/utils": "^8.3.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

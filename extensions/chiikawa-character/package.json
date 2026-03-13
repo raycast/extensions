@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "chiikawa-character",
+  "title": "Chiikawa Characters",
+  "description": "Search and browse Chiikawa characters offline",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-characters",
+      "title": "Search Chiikawa Characters",
+      "description": "Search and browse with category, sorting, and list/grid views",
+      "mode": "view"
+    },
+    {
+      "name": "compare-characters",
+      "title": "Compare Chiikawa Characters",
+      "description": "Pick two characters and compare traits side by side",
+      "mode": "view"
+    },
+    {
+      "name": "random-character",
+      "title": "Random Chiikawa Character",
+      "description": "Get a random character by category with smart recent filtering",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "sync:characters": "node scripts/sync-characters.mjs",
+    "sync:characters:refresh-images": "node scripts/sync-characters.mjs --refresh-image-snapshot",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

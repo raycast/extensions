@@ -1,0 +1,98 @@
+[
+  {
+    "Name": "Red",
+    "Appearance": "deck_red.png",
+    "Effect": "+1 discard every round.",
+    "UnlockRequirement": "Unlocked by default."
+  },
+  {
+    "Name": "Blue",
+    "Appearance": "deck_blue.png",
+    "Effect": "+1 hand every round.",
+    "UnlockRequirement": "Discover at least 20 items from your collection."
+  },
+  {
+    "Name": "Yellow",
+    "Appearance": "deck_yellow.png",
+    "Effect": "Start with extra $10.",
+    "UnlockRequirement": "Discover at least 50 items from your collection."
+  },
+  {
+    "Name": "Green",
+    "Appearance": "deck_green.png",
+    "Effect": "At the end of each Round: $2 per remaining Hand, $1 per remaining Discard, Earn no interest.",
+    "UnlockRequirement": "Discover at least 75 items from your collection."
+  },
+  {
+    "Name": "Black",
+    "Appearance": "deck_black.png",
+    "Effect": "+1 Joker slot, -1 hand every round.",
+    "UnlockRequirement": "Discover at least 100 items from your collection."
+  },
+  {
+    "Name": "Magic",
+    "Appearance": "deck_magic.png",
+    "Effect": "Start run with the Crystal Ball voucher active and two copies of The Fool.",
+    "UnlockRequirement": "Win a run with Red Deck on any difficulty."
+  },
+  {
+    "Name": "Nebula",
+    "Appearance": "deck_nebula.png",
+    "Effect": "Start run with the Telescope voucher active, -1 consumable slot.",
+    "UnlockRequirement": "Win a run with Blue Deck on any difficulty."
+  },
+  {
+    "Name": "Ghost",
+    "Appearance": "ghost.png",
+    "Effect": "Spectral cards may appear in the shop, start with a Hex card.",
+    "UnlockRequirement": "Win a run with Yellow Deck on any difficulty."
+  },
+  {
+    "Name": "Abandoned",
+    "Appearance": "deck_abandoned.png",
+    "Effect": "Start run with no Face Cards in your deck.",
+    "UnlockRequirement": "Win a run with Green Deck on any difficulty."
+  },
+  {
+    "Name": "Checkered",
+    "Appearance": "deck_checkered.png",
+    "Effect": "Start run with 26 Spades and 26 Hearts in deck.",
+    "UnlockRequirement": "Win a run with Black Deck on any difficulty."
+  },
+  {
+    "Name": "Zodiac",
+    "Appearance": "zodiac.png",
+    "Effect": "Start run with Tarot Merchant, Planet Merchant, and Overstock.",
+    "UnlockRequirement": "Win a run on any deck with at least Red Stake difficulty."
+  },
+  {
+    "Name": "Painted",
+    "Appearance": "painted.png",
+    "Effect": "+2 hand size, -1 Joker slot.",
+    "UnlockRequirement": "Win a run on any deck with at least Green Stake difficulty."
+  },
+  {
+    "Name": "Anaglyph",
+    "Appearance": "deck_analgyph.png",
+    "Effect": "After defeating each Boss Blind, gain a Double Tag.",
+    "UnlockRequirement": "Win a run on any deck with at least Black Stake difficulty."
+  },
+  {
+    "Name": "Plasma",
+    "Appearance": "plasma.png",
+    "Effect": "Balance Chips and Mult when calculating score for played hand, X2 base Blind size",
+    "UnlockRequirement": "Win a run on any deck with at least Blue Stake difficulty."
+  },
+  {
+    "Name": "Erratic",
+    "Appearance": "deck_erratic.png",
+    "Effect": "All Ranks and Suits in deck are randomized",
+    "UnlockRequirement": "Win a run on any deck with at least Orange Stake difficulty."
+  },
+  {
+    "Name": "Challenge",
+    "Appearance": "deck_challenge.png",
+    "Effect": "Deck used in Challenge mode",
+    "UnlockRequirement": "Unlocked by default in Challenge mode."
+  }
+]

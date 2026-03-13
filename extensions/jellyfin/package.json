@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jellyfin",
+  "title": "Jellyfin",
+  "description": "Find Movies and Shows on your Jellyfin Instance",
+  "icon": "command-icon.png",
+  "author": "d2a",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-movies-series",
+      "title": "Search Movies and Shows",
+      "description": "Browse Movies and Shows from your Jellyfin Instance",
+      "mode": "view"
+    },
+    {
+      "name": "list-collections",
+      "title": "Search Collections",
+      "description": "Browse Collections from your Jellyfin Instance",
+      "mode": "view"
+    },
+    {
+      "name": "scheduled-tasks",
+      "title": "Search Scheduled Tasks",
+      "description": "Browse and Control Scheduled Tasks from your Jellyfin Instance",
+      "mode": "view"
+    },
+    {
+      "name": "recent-sessions",
+      "title": "Search Recent Sessions",
+      "description": "Browse and Control Recent Sessions from your Jellyfin Instance",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "type": "textfield",
+      "name": "jellyfinBase",
+      "required": true,
+      "title": "Jellyfin Base URL",
+      "description": "Base URL of your Jellyfin Instance",
+      "placeholder": "e. g. https://jellyfin.example"
+    },
+    {
+      "type": "textfield",
+      "name": "jellyfinUserID",
+      "required": true,
+      "title": "Jellyfin User ID",
+      "description": "The API requires a user ID to query media items from. You can get it by going to 'Administrator -> Users -> [Username]' and then copy the ID from the URL",
+      "placeholder": "e. g. 6ca1985577a843fd9949d811f6af9248"
+    },
+    {
+      "type": "password",
+      "name": "jellyfinApiKey",
+      "required": true,
+      "title": "Jellyfin API Key",
+      "description": "Get the API Key from 'Administrator -> API Keys -> [+]'",
+      "placeholder": "e. g. 215fbg31ca154524aa5746430f1da1b0"
+    },
+    {
+      "type": "textfield",
+      "name": "columns",
+      "required": false,
+      "title": "Grid Columns",
+      "default": "6",
+      "description": "Must be a number between 1 and 7",
+      "placeholder": "6"
+    },
+    {
+      "type": "checkbox",
+      "name": "showWatchedStatus",
+      "required": false,
+      "title": "Show Watched Status",
+      "default": true,
+      "description": "Adds the '✅' prefix in front of movies/series you already watched",
+      "label": "Show a checkmark for media you already watched"
+    },
+    {
+      "type": "checkbox",
+      "name": "showFavoriteStatus",
+      "required": false,
+      "title": "Show Favorite Status",
+      "default": true,
+      "description": "Adds the '❤️' prefix in front of movies/series you marked as favorite",
+      "label": "Show a heart for media your favorited"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "@raycast/utils": "^1.8.0",
+    "node-fetch": "^3.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

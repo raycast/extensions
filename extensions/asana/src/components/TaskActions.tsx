@@ -1,0 +1,715 @@
+import { useState } from "react";
+import { Icon, ActionPanel, Action, confirmAlert, Color, showToast, Toast, useNavigation } from "@raycast/api";
+import { getAvatarIcon, MutatePromise } from "@raycast/utils";
+import { User } from "../api/users";
+import { Project, addProject, removeProject, Section, addTaskToSection } from "../api/projects";
+import { Tag, addTag, removeTag } from "../api/tags";
+import { useUsers } from "../hooks/useUsers";
+import { useProjects } from "../hooks/useProjects";
+import { useSections } from "../hooks/useSections";
+import { useTags } from "../hooks/useTags";
+import { asanaToRaycastColor } from "../helpers/colors";
+import { getErrorMessage } from "../helpers/errors";
+import {
+  Task,
+  updateTask,
+  deleteTask as apiDeleteTask,
+  CustomField,
+  EnumValue,
+  removeTaskParent,
+  getSubtasks,
+} from "../api/tasks";
+import ParentTaskPicker from "./ParentTaskPicker";
+import CreateSubtaskForm from "./CreateSubtaskForm";
+import RenameTaskForm from "./RenameTaskForm";
+import { format } from "date-fns";
+import { partition } from "lodash";
+
+type TaskActionProps = {
+  task: Task;
+  workspace?: string;
+  isDetail?: boolean;
+  mutateList?: MutatePromise<Task[] | undefined>;
+  mutateDetail?: MutatePromise<Task>;
+  mutateSubtasks?: MutatePromise<Task[] | undefined>;
+};
+
+type MutateParams = {
+  asyncUpdate: Promise<Task>;
+  optimisticUpdate: <T extends Task>(task: T) => T;
+  rollbackUpdate?: <T extends Task>(task: T) => T;
+};
+
+export default function TaskActions({
+  task,
+  workspace,
+  isDetail,
+  mutateList,
+  mutateDetail,
+  mutateSubtasks,
+}: TaskActionProps) {
+  const { pop, push } = useNavigation();
+
+  async function mutate({ asyncUpdate, optimisticUpdate, rollbackUpdate }: MutateParams) {
+    await Promise.all([
+      asyncUpdate,
+      mutateList
+        ? mutateList(asyncUpdate, {
+            optimisticUpdate(data) {
+              if (!data) {
+                return;
+              }
+              return data.map((t) => (t.gid === task.gid ? optimisticUpdate(t) : t));
+            },
+            ...(rollbackUpdate
+              ? {
+                  rollbackOnError(data) {
+                    if (!data) {
+                      return;
+                    }
+                    return data.map((t) => (t.gid === task.gid ? rollbackUpdate(t) : t));
+                  },
+                }
+              : {}),
+          })
+        : Promise.resolve(),
+      mutateDetail
+        ? mutateDetail(asyncUpdate, {
+            optimisticUpdate(data) {
+              return optimisticUpdate(data);
+            },
+            ...(rollbackUpdate
+              ? {
+                  rollbackOnError(data) {
+                    return rollbackUpdate(data);
+                  },
+                }
+              : {}),
+          })
+        : Promise.resolve(),
+    ]);
+  }
+
+  async function toggleTaskCompletion() {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Marking task as ${task.completed ? "incomplete" : "completed"}`,
+      });
+
+      const asyncUpdate = updateTask(task.gid, { completed: !task.completed });
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, completed: !task.completed };
+        },
+        rollbackUpdate(task) {
+          return { ...task, completed: task.completed };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Marked task as ${task.completed ? "incomplete" : "completed"}`,
+        message: task.name,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to mark task as ${task.completed ? "incomplete" : "completed"}`,
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function deleteTask() {
+    if (
+      await confirmAlert({
+        title: "Delete Task",
+        message: "Are you sure you want to delete the selected task?",
+        icon: { source: Icon.Trash, tintColor: Color.Red },
+      })
+    ) {
+      try {
+        await showToast({ style: Toast.Style.Animated, title: "Deleting task" });
+
+        // Convert the client async function to a promise since Bluebird is used under the hood
+        const asyncUpdate = apiDeleteTask(task.gid);
+
+        if (mutateList) {
+          mutateList(asyncUpdate, {
+            optimisticUpdate(data) {
+              if (!data) {
+                return;
+              }
+
+              return data.filter((t) => t.gid !== task.gid);
+            },
+          });
+        }
+
+        if (isDetail) {
+          pop();
+        }
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Task deleted",
+          message: `"${task.name}" is deleted`,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to delete task",
+          message: getErrorMessage(error),
+        });
+      }
+    }
+  }
+
+  async function convertToTask() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Converting to task" });
+
+      const asyncUpdate = removeTaskParent(task.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, parent: null };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Converted to task",
+        message: `"${task.name}" is now a top-level task`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to convert to task",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function handleConvertToSubtask() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Checking for subtasks" });
+
+      const subtasks = await getSubtasks(task.gid);
+      if (subtasks.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot convert to subtask",
+          message: "This task has subtasks. Remove them first.",
+        });
+        return;
+      }
+
+      push(<ParentTaskPicker task={task} workspace={workspace!} mutateList={mutateList} mutateDetail={mutateDetail} />);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to check subtasks",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  const openTaskInBrowserAction = (
+    <Action.OpenInBrowser url={task.permalink_url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+  );
+
+  return (
+    <>
+      {isDetail ? openTaskInBrowserAction : null}
+
+      <Action
+        title={task.completed ? "Mark as Incomplete" : "Mark as Completed"}
+        icon={task.completed ? Icon.Circle : Icon.CheckCircle}
+        onAction={toggleTaskCompletion}
+      />
+
+      {!isDetail ? openTaskInBrowserAction : null}
+
+      <ActionPanel.Section>
+        {!task.parent && workspace && (
+          <Action.Push
+            title="Add Subtask"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            target={<CreateSubtaskForm parentTask={task} workspace={workspace} mutateSubtasks={mutateSubtasks} />}
+          />
+        )}
+
+        {!task.parent && workspace && (
+          <Action title="Convert to Subtask" icon={Icon.ArrowDown} onAction={handleConvertToSubtask} />
+        )}
+
+        {task.parent && <Action title="Convert to Task" icon={Icon.ArrowUp} onAction={convertToTask} />}
+
+        <Action.Push
+          title="Rename Task"
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          target={<RenameTaskForm task={task} mutateList={mutateList} mutateDetail={mutateDetail} />}
+        />
+
+        <UsersSubmenu workspace={workspace} task={task} mutate={mutate} />
+        <DueOnSubMenu task={task} mutate={mutate} />
+        <ProjectsSubmenu workspace={workspace} task={task} mutate={mutate} />
+        <SectionsSubmenu task={task} mutate={mutate} />
+        <TagsSubmenu workspace={workspace} task={task} mutate={mutate} />
+
+        {task.custom_fields &&
+          task.custom_fields.length > 0 &&
+          task.custom_fields
+            .filter((field) => field.resource_subtype === "enum")
+            .map((field) => {
+              return <CustomFieldSubmenu key={field.gid} task={task} field={field} mutate={mutate} />;
+            })}
+
+        <Action
+          style={Action.Style.Destructive}
+          title="Delete Task"
+          icon={Icon.Trash}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          onAction={deleteTask}
+        />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action.CopyToClipboard
+          title="Copy Task URL"
+          content={task.permalink_url}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Task Name"
+          content={task.name}
+          shortcut={{ modifiers: ["cmd"], key: "." }}
+        />
+
+        <Action.CopyToClipboard
+          title="Copy Task Formatted URL"
+          content={`[${task.name}](${task.permalink_url})`}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "." }}
+        />
+
+        <Action.CopyToClipboard title="Copy Task ID" content={task.gid} shortcut={{ modifiers: ["cmd"], key: "i" }} />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section>
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          onAction={() => {
+            if (mutateList) {
+              mutateList();
+            }
+
+            if (mutateDetail) {
+              mutateDetail();
+            }
+          }}
+        />
+      </ActionPanel.Section>
+    </>
+  );
+}
+
+type UsersSubmenuProps = {
+  task: Task;
+  workspace?: string;
+  mutate: (params: MutateParams) => void;
+};
+
+type ProjectsSubmenuProps = UsersSubmenuProps;
+type DueOnSubmenuProps = UsersSubmenuProps;
+type SectionsSubmenuProps = Omit<UsersSubmenuProps, "workspace">;
+
+function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
+  const [load, setLoad] = useState(false);
+  const { data: users, isLoading } = useUsers(workspace, { execute: load });
+
+  async function changeAssignee(assignee: User | null) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Changing assignee" });
+
+      const asyncUpdate = updateTask(task.gid, { assignee: assignee?.gid || null });
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, assignee };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Changed assignee",
+        message: assignee ? `Assigned to ${assignee.name}` : "Task unassigned",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change assignee",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu
+      title="Assign to"
+      icon={Icon.AddPerson}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      onOpen={() => setLoad(true)}
+    >
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          <Action title="Unassigned" icon={Icon.Person} onAction={() => changeAssignee(null)} />
+
+          {users?.map((user) => {
+            return (
+              <Action
+                key={user.gid}
+                title={user.name}
+                icon={getAvatarIcon(user.name)}
+                onAction={() => changeAssignee(user)}
+              />
+            );
+          })}
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
+
+function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
+  const { data: projects, isLoading } = useProjects(workspace);
+
+  const changeProject = async (project: Project, action: "add" | "remove") => {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: action === "add" ? "Adding project" : "Removing project" });
+
+      const asyncUpdate = action === "add" ? addProject(task.gid, project.gid) : removeProject(task.gid, project.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate: (task) => {
+          const newProjects =
+            action === "add" ? [...task.projects, project] : task.projects.filter((p) => p.gid !== project.gid);
+          return { ...task, projects: newProjects };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: action === "add" ? "Added project" : "Removed project",
+        message:
+          action === "add"
+            ? `"${project.name}" added to "${task.name}"`
+            : `"${project.name}" removed from "${task.name}"`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change project",
+        message: getErrorMessage(error),
+      });
+    }
+  };
+
+  const [projectsToAdd, projectsToRemove] = partition(projects, (project) => {
+    return !task.projects.find((p) => p.gid === project.gid);
+  });
+
+  return (
+    <ActionPanel.Submenu title="Change Project" icon={Icon.Folder} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}>
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {projectsToAdd && projectsToAdd.length > 0 ? (
+            <ActionPanel.Submenu title="Add Project" icon={Icon.Plus}>
+              {projectsToAdd.map((project) => (
+                <Action
+                  key={project.gid}
+                  title={project.name}
+                  icon={getAvatarIcon(project.name)}
+                  onAction={() => changeProject(project, "add")}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {projectsToRemove && projectsToRemove.length > 0 ? (
+            <ActionPanel.Submenu title="Remove Project" icon={Icon.Minus}>
+              {projectsToRemove.map((project) => (
+                <Action
+                  key={project.gid}
+                  title={project.name}
+                  icon={getAvatarIcon(project.name)}
+                  onAction={() => changeProject(project, "remove")}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
+
+function DueOnSubMenu({ task, mutate }: DueOnSubmenuProps) {
+  async function changeDueOn(dueOn: Date | null) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Changing due date" });
+
+      // Adjust the date to UTC
+      const utcDueOn = dueOn ? new Date(Date.UTC(dueOn.getFullYear(), dueOn.getMonth(), dueOn.getDate())) : null;
+
+      const asyncUpdate = updateTask(task.gid, { due_on: utcDueOn });
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, due_on: utcDueOn };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Changed due date",
+        message: utcDueOn ? `Due on ${format(utcDueOn, "d MMM yyyy")}` : "No due date",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change due date",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  return (
+    <Action.PickDate
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      icon={Icon.Calendar}
+      type={Action.PickDate.Type.Date}
+      title="Set Due Date…"
+      onChange={changeDueOn}
+    />
+  );
+}
+
+type CustomFieldSubmenuProps = {
+  task: Task;
+  field: CustomField;
+  mutate: (params: MutateParams) => void;
+};
+
+function SectionsSubmenu({ task, mutate }: SectionsSubmenuProps) {
+  const selectedProjectId = task.projects && task.projects.length === 1 ? task.projects[0].gid : undefined;
+  const { data: sections, isLoading } = useSections(selectedProjectId);
+
+  async function moveToSection(section: Section) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Moving to section" });
+
+      const asyncUpdate = addTaskToSection(task.gid, section.gid);
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return { ...task, assignee_section: section };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Moved to section",
+        message: section.name,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to move to section",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  if (!selectedProjectId) {
+    return null;
+  }
+
+  return (
+    <ActionPanel.Submenu title="Move to Section" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {sections?.map((section) => {
+            return (
+              <Action key={section.gid} title={section.name} icon={Icon.List} onAction={() => moveToSection(section)} />
+            );
+          })}
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}
+
+function CustomFieldSubmenu({ task, mutate, field }: CustomFieldSubmenuProps) {
+  async function updateField(option: EnumValue | null) {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: `Changing ${field.name}` });
+
+      // Convert the client async function to a promise since Bluebird is used under the hood
+      const asyncUpdate = updateTask(task.gid, { custom_fields: { [field.gid]: option?.gid || null } });
+
+      mutate({
+        asyncUpdate,
+        optimisticUpdate(task) {
+          return {
+            ...task,
+            custom_fields: task.custom_fields.map((f) => {
+              if (f.gid === field.gid) {
+                return {
+                  ...f,
+                  enum_value: option ? { ...f.enum_value, name: option.name, color: option.color } : null,
+                };
+              }
+
+              return f;
+            }),
+          };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Changed ${field.name}`,
+        message: option ? option.name : "None",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to change ${field.name}`,
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  return (
+    <ActionPanel.Submenu icon={Icon.Pencil} title={`Change ${field.name}`}>
+      {field.enum_options && field.enum_options.length > 0 ? (
+        <>
+          <Action title="–" onAction={() => updateField(null)} />
+
+          {field.enum_options.map((option) => {
+            return (
+              <Action
+                key={option.gid}
+                title={option.name}
+                icon={{ source: Icon.Circle, tintColor: asanaToRaycastColor(option.color) }}
+                onAction={() => updateField(option)}
+              />
+            );
+          })}
+        </>
+      ) : null}
+    </ActionPanel.Submenu>
+  );
+}
+
+type TagsSubmenuProps = {
+  task: Task;
+  workspace?: string;
+  mutate: (params: MutateParams) => void;
+};
+
+function TagsSubmenu({ workspace, task, mutate }: TagsSubmenuProps) {
+  const [load, setLoad] = useState(false);
+  const { data: tags, isLoading } = useTags(workspace, { execute: load });
+
+  const changeTag = async (tag: Tag, action: "add" | "remove") => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: action === "add" ? "Adding tag" : "Removing tag",
+      });
+
+      const asyncUpdate = action === "add" ? addTag(task.gid, tag.gid) : removeTag(task.gid, tag.gid);
+
+      await mutate({
+        asyncUpdate,
+        optimisticUpdate: (task) => {
+          const newTags = action === "add" ? [...task.tags, tag] : task.tags.filter((t) => t.gid !== tag.gid);
+          return { ...task, tags: newTags };
+        },
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: action === "add" ? "Added tag" : "Removed tag",
+        message:
+          action === "add" ? `"${tag.name}" added to "${task.name}"` : `"${tag.name}" removed from "${task.name}"`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to change tag",
+        message: getErrorMessage(error),
+      });
+    }
+  };
+
+  const [tagsToAdd, tagsToRemove] = partition(tags || [], (tag) => {
+    return !task.tags.find((t) => t.gid === tag.gid);
+  });
+
+  return (
+    <ActionPanel.Submenu
+      title="Change Tags"
+      icon={Icon.Tag}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      onOpen={() => setLoad(true)}
+    >
+      {isLoading ? (
+        <Action title="Loading…" />
+      ) : (
+        <>
+          {tagsToAdd && tagsToAdd.length > 0 ? (
+            <ActionPanel.Submenu title="Add Tag" icon={Icon.Plus}>
+              {tagsToAdd.map((tag) => (
+                <Action key={tag.gid} title={tag.name} icon={Icon.Tag} onAction={() => changeTag(tag, "add")} />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {tagsToRemove && tagsToRemove.length > 0 ? (
+            <ActionPanel.Submenu title="Remove Tag" icon={Icon.Minus}>
+              {tagsToRemove.map((tag) => (
+                <Action key={tag.gid} title={tag.name} icon={Icon.Tag} onAction={() => changeTag(tag, "remove")} />
+              ))}
+            </ActionPanel.Submenu>
+          ) : null}
+
+          {(!tagsToAdd || tagsToAdd.length === 0) && (!tagsToRemove || tagsToRemove.length === 0) ? (
+            <Action title="No Tags Available" />
+          ) : null}
+        </>
+      )}
+    </ActionPanel.Submenu>
+  );
+}

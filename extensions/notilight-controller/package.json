@@ -1,0 +1,76 @@
+{
+  "name": "notilight-controller",
+  "title": "NotiLight Controller",
+  "description": "Control NotiLight app via deep links",
+  "icon": "icon.png",
+  "author": "shail_antani",
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start Monitoring",
+      "description": "Start the Notification Light monitoring",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Monitoring",
+      "description": "Stop the Notification Light monitoring",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Monitoring",
+      "description": "Toggle the Notification Light monitoring",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear",
+      "title": "Clear Notifications",
+      "description": "Clear all active notifications",
+      "mode": "no-view"
+    },
+    {
+      "name": "test",
+      "title": "Test Light",
+      "description": "Toggle the test light",
+      "mode": "no-view"
+    },
+    {
+      "name": "settings",
+      "title": "Open Settings",
+      "description": "Open settings window",
+      "mode": "no-view"
+    },
+    {
+      "name": "add",
+      "title": "Add App",
+      "description": "Add a new app to monitor",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

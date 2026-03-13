@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bitbucket",
+  "title": "Bitbucket Search",
+  "description": "The extension allow you to quickly access repositories, pipelines and pull-requests in Bitbucket",
+  "icon": "bitbucket-logo.png",
+  "author": "Francois",
+  "contributors": [
+    "earmstrong42",
+    "mhossain",
+    "kmizzi",
+    "arpitdalal",
+    "litomore",
+    "AaronMoat",
+    "0xdhrv"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "searchRepositories",
+      "title": "Search Repositories",
+      "subtitle": "Bitbucket",
+      "description": "Showing bitbucket results on repositories search",
+      "mode": "view"
+    },
+    {
+      "name": "searchMyOpenPullRequests",
+      "title": "Search My Open Pull Requests",
+      "subtitle": "Bitbucket",
+      "description": "Showing open pull requests for the current user",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspace",
+      "type": "textfield",
+      "title": "Workspace",
+      "required": true,
+      "description": "Bitbucket workspace",
+      "placeholder": "my-organization"
+    },
+    {
+      "name": "email",
+      "type": "textfield",
+      "title": "Account Email",
+      "required": true,
+      "description": "Bitbucket Account Email",
+      "placeholder": "john_doe@example.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "required": true,
+      "description": "Generate an API token at https://id.atlassian.com/manage-profile/security/api-tokens with read:* scopes (or see README for specific scopes)",
+      "placeholder": "bXlzZWNyZXRhcGlrZXkqwd"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "bitbucket": "^2.12.0",
+    "dot-object": "^2.1.5",
+    "node-fetch": "^3.3.2",
+    "node-localstorage": "^3.0.5",
+    "swr": "2.3.6",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.0",
+    "@types/node-localstorage": "^1.3.3",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

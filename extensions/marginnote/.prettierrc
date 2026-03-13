@@ -1,0 +1,14 @@
+{
+  "printWidth": 80,
+  "semi": false,
+  "arrowParens": "avoid",
+  "trailingComma": "none",
+  "overrides": [
+    {
+      "files": ".prettierrc",
+      "options": {
+        "parser": "json"
+      }
+    }
+  ]
+}

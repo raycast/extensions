@@ -1,0 +1,51 @@
+{
+  "name": "percentage-calculator",
+  "title": "Percentage Calculator",
+  "description": "Calculate percentages, percentage differences, and percentage changes with detailed breakdowns",
+  "icon": "logo_resized.png",
+  "author": "theapache64",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "percentage-calculator",
+      "title": "Percentage Calculator",
+      "description": "Calculate percentages with multiple formats",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "value1",
+          "placeholder": "First value",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "value2",
+          "placeholder": "Second value",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

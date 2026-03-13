@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+dist/
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Raycast
+raycast-env.d.ts

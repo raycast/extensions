@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "texts",
+  "title": "Texts",
+  "description": "Use your messaging applications from Raycast with ease, open a conversation fast.",
+  "icon": "extension_icon.png",
+  "author": "zavbala",
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "whatsapp",
+      "title": "Whatsapp",
+      "description": "Send message to WhatsApp user",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "phone",
+          "type": "text",
+          "required": true,
+          "placeholder": "555-2368",
+          "description": "phone number"
+        }
+      ]
+    },
+    {
+      "name": "telegram",
+      "title": "Telegram",
+      "description": "Send message to Telegram user",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "username",
+          "type": "text",
+          "required": true,
+          "placeholder": "zavbala",
+          "description": "username"
+        }
+      ]
+    },
+    {
+      "name": "mail",
+      "title": "Mail",
+      "description": "Send new email to user",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "address",
+          "type": "text",
+          "required": true,
+          "placeholder": "hey@raycast.com",
+          "description": "address"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qrcp",
+  "title": "QRCP",
+  "description": "Transfer files over Wi-Fi from/to your computer to/from your mobile device by scanning a QR code without leaving Raycast.",
+  "icon": "extension-icon.png",
+  "author": "yohann84l",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "receive",
+      "title": "Receive Files",
+      "description": "Display a QR code to be scanned to start the file transfer.",
+      "mode": "view",
+      "path": "src/receive.tsx"
+    },
+    {
+      "name": "send",
+      "title": "Send Files",
+      "description": "Share the currently selected files in Finder by displaying a QR code to be scanned.",
+      "mode": "view",
+      "path": "src/send.tsx"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Location where received files are saved.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "openFinderOnReceive",
+      "label": "Open Finder After Receive",
+      "description": "Automatically open the download folder after receiving a file.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.9.2",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "19.2.2",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

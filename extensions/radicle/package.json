@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "radicle",
+  "title": "Radicle",
+  "description": "Interact with your Radicle storage.",
+  "icon": "radicle.png",
+  "author": "sebastinez_rhizoma",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "seedNodeAddress",
+      "description": "Which seed node should be used.",
+      "type": "textfield",
+      "required": false,
+      "title": "Radicle Seed Node Address",
+      "placeholder": "iris.radicle.xyz",
+      "default": "iris.radicle.xyz"
+    },
+    {
+      "name": "webUrl",
+      "description": "Which web client should be used.",
+      "type": "textfield",
+      "required": false,
+      "title": "Radicle Web Client URL",
+      "placeholder": "https://app.radicle.xyz",
+      "default": "https://app.radicle.xyz"
+    }
+  ],
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Search Projects",
+      "subtitle": "Radicle",
+      "description": "List all your projects and filter by name.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1",
+    "bs58": "^6.0.0",
+    "heartwood-ts": "^0.3.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.29.0",
+    "prettier": "^3.6.1",
+    "typescript": "^5.8.3",
+    "zod": "^3.25.67"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

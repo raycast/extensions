@@ -1,0 +1,168 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "roblox",
+  "title": "Roblox",
+  "description": "Raycast Extension for finding games, users & more on Roblox",
+  "icon": "extension-icon.png",
+  "author": "iamEvan",
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-user",
+      "title": "Show User",
+      "description": "Show a Roblox User!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "username",
+          "placeholder": "Username",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "id",
+          "placeholder": "User ID",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-users",
+      "title": "Search for Users",
+      "description": "Search for a Roblox User!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "startingQuery",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "get-my-account",
+      "title": "Get My Info",
+      "description": "Get your Roblox Account info!",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "myUserId",
+          "title": "Your User ID",
+          "description": "Your Roblox User ID",
+          "type": "textfield",
+          "placeholder": "User ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "show-game",
+      "title": "Show Game",
+      "description": "Show a Roblox Game!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "placeId",
+          "placeholder": "Place ID",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "universeId",
+          "placeholder": "Universe ID",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-games",
+      "title": "Search for Games",
+      "description": "Search for a Roblox Game!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "startingQuery",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "favourite-games",
+      "title": "Favourite Games",
+      "description": "Get Favourited Roblox Games!",
+      "mode": "view"
+    },
+    {
+      "name": "playing-game",
+      "title": "Get Playing Game",
+      "description": "Get Currently Playing Roblox Game!",
+      "mode": "view"
+    },
+    {
+      "name": "favourite-game-players",
+      "title": "Favourite Game Players",
+      "description": "Check Player Count of a Game!",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "gameId",
+          "title": "Game ID",
+          "description": "The Roblox Universe ID to check",
+          "type": "textfield",
+          "placeholder": "Game ID",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "show-image",
+      "title": "Show Image",
+      "description": "Show a Roblox Image!",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "id",
+          "placeholder": "Image ID",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.85.2",
+    "@raycast/utils": "^1.17.0",
+    "cross-fetch": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

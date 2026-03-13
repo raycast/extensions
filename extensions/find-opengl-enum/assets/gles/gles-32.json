@@ -1,0 +1,616 @@
+{
+    "2": [
+        "GL_CONTEXT_FLAG_DEBUG_BIT"
+    ],
+    "4": [
+        "GL_GEOMETRY_SHADER_BIT",
+        "GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT"
+    ],
+    "7": [
+        "GL_QUADS"
+    ],
+    "8": [
+        "GL_TESS_CONTROL_SHADER_BIT"
+    ],
+    "10": [
+        "GL_LINES_ADJACENCY"
+    ],
+    "11": [
+        "GL_LINE_STRIP_ADJACENCY"
+    ],
+    "12": [
+        "GL_TRIANGLES_ADJACENCY"
+    ],
+    "13": [
+        "GL_TRIANGLE_STRIP_ADJACENCY"
+    ],
+    "14": [
+        "GL_PATCHES"
+    ],
+    "16": [
+        "GL_TESS_EVALUATION_SHADER_BIT"
+    ],
+    "1283": [
+        "GL_STACK_OVERFLOW"
+    ],
+    "1284": [
+        "GL_STACK_UNDERFLOW"
+    ],
+    "1287": [
+        "GL_CONTEXT_LOST"
+    ],
+    "4100": [
+        "GL_TEXTURE_BORDER_COLOR"
+    ],
+    "32884": [
+        "GL_VERTEX_ARRAY"
+    ],
+    "33069": [
+        "GL_CLAMP_TO_BORDER"
+    ],
+    "33310": [
+        "GL_CONTEXT_FLAGS"
+    ],
+    "33313": [
+        "GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED"
+    ],
+    "33346": [
+        "GL_DEBUG_OUTPUT_SYNCHRONOUS"
+    ],
+    "33347": [
+        "GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH"
+    ],
+    "33348": [
+        "GL_DEBUG_CALLBACK_FUNCTION"
+    ],
+    "33349": [
+        "GL_DEBUG_CALLBACK_USER_PARAM"
+    ],
+    "33350": [
+        "GL_DEBUG_SOURCE_API"
+    ],
+    "33351": [
+        "GL_DEBUG_SOURCE_WINDOW_SYSTEM"
+    ],
+    "33352": [
+        "GL_DEBUG_SOURCE_SHADER_COMPILER"
+    ],
+    "33353": [
+        "GL_DEBUG_SOURCE_THIRD_PARTY"
+    ],
+    "33354": [
+        "GL_DEBUG_SOURCE_APPLICATION"
+    ],
+    "33355": [
+        "GL_DEBUG_SOURCE_OTHER"
+    ],
+    "33356": [
+        "GL_DEBUG_TYPE_ERROR"
+    ],
+    "33357": [
+        "GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR"
+    ],
+    "33358": [
+        "GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR"
+    ],
+    "33359": [
+        "GL_DEBUG_TYPE_PORTABILITY"
+    ],
+    "33360": [
+        "GL_DEBUG_TYPE_PERFORMANCE"
+    ],
+    "33361": [
+        "GL_DEBUG_TYPE_OTHER"
+    ],
+    "33362": [
+        "GL_LOSE_CONTEXT_ON_RESET"
+    ],
+    "33363": [
+        "GL_GUILTY_CONTEXT_RESET"
+    ],
+    "33364": [
+        "GL_INNOCENT_CONTEXT_RESET"
+    ],
+    "33365": [
+        "GL_UNKNOWN_CONTEXT_RESET"
+    ],
+    "33366": [
+        "GL_RESET_NOTIFICATION_STRATEGY"
+    ],
+    "33374": [
+        "GL_LAYER_PROVOKING_VERTEX"
+    ],
+    "33376": [
+        "GL_UNDEFINED_VERTEX"
+    ],
+    "33377": [
+        "GL_NO_RESET_NOTIFICATION"
+    ],
+    "33384": [
+        "GL_DEBUG_TYPE_MARKER"
+    ],
+    "33385": [
+        "GL_DEBUG_TYPE_PUSH_GROUP"
+    ],
+    "33386": [
+        "GL_DEBUG_TYPE_POP_GROUP"
+    ],
+    "33387": [
+        "GL_DEBUG_SEVERITY_NOTIFICATION"
+    ],
+    "33388": [
+        "GL_MAX_DEBUG_GROUP_STACK_DEPTH"
+    ],
+    "33389": [
+        "GL_DEBUG_GROUP_STACK_DEPTH"
+    ],
+    "33504": [
+        "GL_BUFFER"
+    ],
+    "33505": [
+        "GL_SHADER"
+    ],
+    "33506": [
+        "GL_PROGRAM"
+    ],
+    "33507": [
+        "GL_QUERY"
+    ],
+    "33508": [
+        "GL_PROGRAM_PIPELINE"
+    ],
+    "33510": [
+        "GL_SAMPLER"
+    ],
+    "33512": [
+        "GL_MAX_LABEL_LENGTH"
+    ],
+    "34924": [
+        "GL_MAX_TESS_CONTROL_INPUT_COMPONENTS"
+    ],
+    "34925": [
+        "GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS"
+    ],
+    "34943": [
+        "GL_GEOMETRY_SHADER_INVOCATIONS"
+    ],
+    "35094": [
+        "GL_GEOMETRY_VERTICES_OUT"
+    ],
+    "35095": [
+        "GL_GEOMETRY_INPUT_TYPE"
+    ],
+    "35096": [
+        "GL_GEOMETRY_OUTPUT_TYPE"
+    ],
+    "35372": [
+        "GL_MAX_GEOMETRY_UNIFORM_BLOCKS"
+    ],
+    "35378": [
+        "GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS"
+    ],
+    "35881": [
+        "GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS"
+    ],
+    "35882": [
+        "GL_TEXTURE_BUFFER",
+        "GL_TEXTURE_BUFFER_BINDING"
+    ],
+    "35883": [
+        "GL_MAX_TEXTURE_BUFFER_SIZE"
+    ],
+    "35884": [
+        "GL_TEXTURE_BINDING_BUFFER"
+    ],
+    "35885": [
+        "GL_TEXTURE_BUFFER_DATA_STORE_BINDING"
+    ],
+    "35894": [
+        "GL_SAMPLE_SHADING"
+    ],
+    "35895": [
+        "GL_MIN_SAMPLE_SHADING_VALUE"
+    ],
+    "35975": [
+        "GL_PRIMITIVES_GENERATED"
+    ],
+    "36263": [
+        "GL_FRAMEBUFFER_ATTACHMENT_LAYERED"
+    ],
+    "36264": [
+        "GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS"
+    ],
+    "36290": [
+        "GL_SAMPLER_BUFFER"
+    ],
+    "36304": [
+        "GL_INT_SAMPLER_BUFFER"
+    ],
+    "36312": [
+        "GL_UNSIGNED_INT_SAMPLER_BUFFER"
+    ],
+    "36313": [
+        "GL_GEOMETRY_SHADER"
+    ],
+    "36319": [
+        "GL_MAX_GEOMETRY_UNIFORM_COMPONENTS"
+    ],
+    "36320": [
+        "GL_MAX_GEOMETRY_OUTPUT_VERTICES"
+    ],
+    "36321": [
+        "GL_MAX_GEOMETRY_TOTAL_OUTPUT_COMPONENTS"
+    ],
+    "36382": [
+        "GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS"
+    ],
+    "36383": [
+        "GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS"
+    ],
+    "36429": [
+        "GL_FIRST_VERTEX_CONVENTION"
+    ],
+    "36430": [
+        "GL_LAST_VERTEX_CONVENTION"
+    ],
+    "36442": [
+        "GL_MAX_GEOMETRY_SHADER_INVOCATIONS"
+    ],
+    "36443": [
+        "GL_MIN_FRAGMENT_INTERPOLATION_OFFSET"
+    ],
+    "36444": [
+        "GL_MAX_FRAGMENT_INTERPOLATION_OFFSET"
+    ],
+    "36445": [
+        "GL_FRAGMENT_INTERPOLATION_OFFSET_BITS"
+    ],
+    "36466": [
+        "GL_PATCH_VERTICES"
+    ],
+    "36469": [
+        "GL_TESS_CONTROL_OUTPUT_VERTICES"
+    ],
+    "36470": [
+        "GL_TESS_GEN_MODE"
+    ],
+    "36471": [
+        "GL_TESS_GEN_SPACING"
+    ],
+    "36472": [
+        "GL_TESS_GEN_VERTEX_ORDER"
+    ],
+    "36473": [
+        "GL_TESS_GEN_POINT_MODE"
+    ],
+    "36474": [
+        "GL_ISOLINES"
+    ],
+    "36475": [
+        "GL_FRACTIONAL_ODD"
+    ],
+    "36476": [
+        "GL_FRACTIONAL_EVEN"
+    ],
+    "36477": [
+        "GL_MAX_PATCH_VERTICES"
+    ],
+    "36478": [
+        "GL_MAX_TESS_GEN_LEVEL"
+    ],
+    "36479": [
+        "GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS"
+    ],
+    "36480": [
+        "GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS"
+    ],
+    "36481": [
+        "GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS"
+    ],
+    "36482": [
+        "GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS"
+    ],
+    "36483": [
+        "GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS"
+    ],
+    "36484": [
+        "GL_MAX_TESS_PATCH_COMPONENTS"
+    ],
+    "36485": [
+        "GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS"
+    ],
+    "36486": [
+        "GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS"
+    ],
+    "36487": [
+        "GL_TESS_EVALUATION_SHADER"
+    ],
+    "36488": [
+        "GL_TESS_CONTROL_SHADER"
+    ],
+    "36489": [
+        "GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS"
+    ],
+    "36490": [
+        "GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS"
+    ],
+    "36873": [
+        "GL_TEXTURE_CUBE_MAP_ARRAY"
+    ],
+    "36874": [
+        "GL_TEXTURE_BINDING_CUBE_MAP_ARRAY"
+    ],
+    "36876": [
+        "GL_SAMPLER_CUBE_MAP_ARRAY"
+    ],
+    "36877": [
+        "GL_SAMPLER_CUBE_MAP_ARRAY_SHADOW"
+    ],
+    "36878": [
+        "GL_INT_SAMPLER_CUBE_MAP_ARRAY"
+    ],
+    "36879": [
+        "GL_UNSIGNED_INT_SAMPLER_CUBE_MAP_ARRAY"
+    ],
+    "36945": [
+        "GL_IMAGE_BUFFER"
+    ],
+    "36948": [
+        "GL_IMAGE_CUBE_MAP_ARRAY"
+    ],
+    "36956": [
+        "GL_INT_IMAGE_BUFFER"
+    ],
+    "36959": [
+        "GL_INT_IMAGE_CUBE_MAP_ARRAY"
+    ],
+    "36967": [
+        "GL_UNSIGNED_INT_IMAGE_BUFFER"
+    ],
+    "36970": [
+        "GL_UNSIGNED_INT_IMAGE_CUBE_MAP_ARRAY"
+    ],
+    "37067": [
+        "GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS"
+    ],
+    "37068": [
+        "GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS"
+    ],
+    "37069": [
+        "GL_MAX_GEOMETRY_IMAGE_UNIFORMS"
+    ],
+    "37079": [
+        "GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS"
+    ],
+    "37080": [
+        "GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS"
+    ],
+    "37081": [
+        "GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS"
+    ],
+    "37122": [
+        "GL_TEXTURE_2D_MULTISAMPLE_ARRAY"
+    ],
+    "37125": [
+        "GL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY"
+    ],
+    "37131": [
+        "GL_SAMPLER_2D_MULTISAMPLE_ARRAY"
+    ],
+    "37132": [
+        "GL_INT_SAMPLER_2D_MULTISAMPLE_ARRAY"
+    ],
+    "37133": [
+        "GL_UNSIGNED_INT_SAMPLER_2D_MULTISAMPLE_ARRAY"
+    ],
+    "37155": [
+        "GL_MAX_GEOMETRY_INPUT_COMPONENTS"
+    ],
+    "37156": [
+        "GL_MAX_GEOMETRY_OUTPUT_COMPONENTS"
+    ],
+    "37187": [
+        "GL_MAX_DEBUG_MESSAGE_LENGTH"
+    ],
+    "37188": [
+        "GL_MAX_DEBUG_LOGGED_MESSAGES"
+    ],
+    "37189": [
+        "GL_DEBUG_LOGGED_MESSAGES"
+    ],
+    "37190": [
+        "GL_DEBUG_SEVERITY_HIGH"
+    ],
+    "37191": [
+        "GL_DEBUG_SEVERITY_MEDIUM"
+    ],
+    "37192": [
+        "GL_DEBUG_SEVERITY_LOW"
+    ],
+    "37277": [
+        "GL_TEXTURE_BUFFER_OFFSET"
+    ],
+    "37278": [
+        "GL_TEXTURE_BUFFER_SIZE"
+    ],
+    "37279": [
+        "GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT"
+    ],
+    "37524": [
+        "GL_MULTIPLY"
+    ],
+    "37525": [
+        "GL_SCREEN"
+    ],
+    "37526": [
+        "GL_OVERLAY"
+    ],
+    "37527": [
+        "GL_DARKEN"
+    ],
+    "37528": [
+        "GL_LIGHTEN"
+    ],
+    "37529": [
+        "GL_COLORDODGE"
+    ],
+    "37530": [
+        "GL_COLORBURN"
+    ],
+    "37531": [
+        "GL_HARDLIGHT"
+    ],
+    "37532": [
+        "GL_SOFTLIGHT"
+    ],
+    "37534": [
+        "GL_DIFFERENCE"
+    ],
+    "37536": [
+        "GL_EXCLUSION"
+    ],
+    "37549": [
+        "GL_HSL_HUE"
+    ],
+    "37550": [
+        "GL_HSL_SATURATION"
+    ],
+    "37551": [
+        "GL_HSL_COLOR"
+    ],
+    "37552": [
+        "GL_HSL_LUMINOSITY"
+    ],
+    "37566": [
+        "GL_PRIMITIVE_BOUNDING_BOX"
+    ],
+    "37581": [
+        "GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS"
+    ],
+    "37582": [
+        "GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS"
+    ],
+    "37583": [
+        "GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS"
+    ],
+    "37587": [
+        "GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS"
+    ],
+    "37588": [
+        "GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS"
+    ],
+    "37589": [
+        "GL_MAX_GEOMETRY_ATOMIC_COUNTERS"
+    ],
+    "37600": [
+        "GL_DEBUG_OUTPUT"
+    ],
+    "37607": [
+        "GL_IS_PER_PATCH"
+    ],
+    "37639": [
+        "GL_REFERENCED_BY_TESS_CONTROL_SHADER"
+    ],
+    "37640": [
+        "GL_REFERENCED_BY_TESS_EVALUATION_SHADER"
+    ],
+    "37641": [
+        "GL_REFERENCED_BY_GEOMETRY_SHADER"
+    ],
+    "37650": [
+        "GL_FRAMEBUFFER_DEFAULT_LAYERS"
+    ],
+    "37655": [
+        "GL_MAX_FRAMEBUFFER_LAYERS"
+    ],
+    "37761": [
+        "GL_MULTISAMPLE_LINE_WIDTH_RANGE"
+    ],
+    "37762": [
+        "GL_MULTISAMPLE_LINE_WIDTH_GRANULARITY"
+    ],
+    "37808": [
+        "GL_COMPRESSED_RGBA_ASTC_4x4"
+    ],
+    "37809": [
+        "GL_COMPRESSED_RGBA_ASTC_5x4"
+    ],
+    "37810": [
+        "GL_COMPRESSED_RGBA_ASTC_5x5"
+    ],
+    "37811": [
+        "GL_COMPRESSED_RGBA_ASTC_6x5"
+    ],
+    "37812": [
+        "GL_COMPRESSED_RGBA_ASTC_6x6"
+    ],
+    "37813": [
+        "GL_COMPRESSED_RGBA_ASTC_8x5"
+    ],
+    "37814": [
+        "GL_COMPRESSED_RGBA_ASTC_8x6"
+    ],
+    "37815": [
+        "GL_COMPRESSED_RGBA_ASTC_8x8"
+    ],
+    "37816": [
+        "GL_COMPRESSED_RGBA_ASTC_10x5"
+    ],
+    "37817": [
+        "GL_COMPRESSED_RGBA_ASTC_10x6"
+    ],
+    "37818": [
+        "GL_COMPRESSED_RGBA_ASTC_10x8"
+    ],
+    "37819": [
+        "GL_COMPRESSED_RGBA_ASTC_10x10"
+    ],
+    "37820": [
+        "GL_COMPRESSED_RGBA_ASTC_12x10"
+    ],
+    "37821": [
+        "GL_COMPRESSED_RGBA_ASTC_12x12"
+    ],
+    "37840": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4"
+    ],
+    "37841": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4"
+    ],
+    "37842": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5"
+    ],
+    "37843": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5"
+    ],
+    "37844": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6"
+    ],
+    "37845": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5"
+    ],
+    "37846": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6"
+    ],
+    "37847": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8"
+    ],
+    "37848": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5"
+    ],
+    "37849": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6"
+    ],
+    "37850": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8"
+    ],
+    "37851": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10"
+    ],
+    "37852": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10"
+    ],
+    "37853": [
+        "GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12"
+    ]
+}

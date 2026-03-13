@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "acqua",
+  "title": "Acqua",
+  "description": "Acqua helps you remember to regularly drink water.",
+  "icon": "command-icon.png",
+  "author": "FezVrasta",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "drinknow",
+      "title": "Take a Sip of Water",
+      "description": "Log you water intake and reset the timer",
+      "mode": "view",
+      "interval": "1m"
+    },
+    {
+      "name": "menubar",
+      "title": "Menubar Reminder",
+      "description": "Show the Acqua water reminder menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "interval",
+      "title": "Interval",
+      "description": "The interval at which the water reminder should be shown (in minutes).",
+      "type": "textfield",
+      "defaultValue": "15",
+      "placeholder": "15",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.69.0",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

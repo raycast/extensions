@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prowlarr",
+  "title": "Prowlarr",
+  "description": "Search and add to download clients with Prowlarr",
+  "icon": "prowlarr.png",
+  "author": "elcaten",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Torrent",
+      "subtitle": "Prowlarr",
+      "description": "Search with torrent indexers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Host",
+      "required": true,
+      "description": "Hostname of the Prowlarr server",
+      "type": "textfield",
+      "default": "localhost",
+      "placeholder": "localhost"
+    },
+    {
+      "name": "port",
+      "title": "Port",
+      "required": true,
+      "description": "The port of the Prowlarr server",
+      "type": "textfield",
+      "default": "9696",
+      "placeholder": "9696"
+    },
+    {
+      "name": "urlBase",
+      "title": "URL Base (Optional)",
+      "required": false,
+      "description": "The URL Base of the Prowlarr server",
+      "type": "textfield",
+      "default": ""
+    },
+    {
+      "name": "protocol",
+      "title": "Connection Type",
+      "required": true,
+      "description": "Change the connection type for the Prowlarr server",
+      "type": "dropdown",
+      "default": "http",
+      "data": [
+        {
+          "value": "http",
+          "title": "HTTP"
+        },
+        {
+          "value": "https",
+          "title": "HTTPS"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "required": true,
+      "description": "The API key of the Prowlarr server",
+      "type": "password",
+      "default": "",
+      "placeholder": "cjbyxrhgyd7hykqdye9wdztsxgqxrrbr"
+    },
+    {
+      "name": "maxSearchResultsCount",
+      "title": "Max Search Results",
+      "required": false,
+      "description": "Maximum search results list length",
+      "type": "textfield",
+      "default": "100",
+      "placeholder": "100"
+    },
+    {
+      "name": "keepIndexerSelection",
+      "label": "Keep indexer selection",
+      "required": false,
+      "description": "Keep the last used indexers for the next search",
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "keepCategorySelection",
+      "label": "Keep category selection",
+      "required": false,
+      "description": "Keep the last used categories for the next search",
+      "type": "checkbox",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81.2",
+    "@raycast/utils": "^1.16.4",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
