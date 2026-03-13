@@ -6,7 +6,7 @@ import { formatUsd, listStartups, type Startup } from "./lib/api";
 
 const PAGE_SIZE = 50;
 
-const SORT_OPTIONS = [
+const API_SORT_OPTIONS = [
   { value: "revenue-desc", title: "Revenue: High to Low" },
   { value: "revenue-asc", title: "Revenue: Low to High" },
   { value: "price-desc", title: "Price: High to Low" },
@@ -20,7 +20,17 @@ const SORT_OPTIONS = [
   { value: "best-deal", title: "Best Deal" },
 ] as const;
 
+const LOCAL_SORT_OPTIONS = [
+  { value: "rank-asc", title: "Top Ranked" },
+  { value: "mrr-growth-desc", title: "MRR Momentum" },
+  { value: "revenue-per-visitor-desc", title: "High Efficiency" },
+] as const;
+
+const SORT_OPTIONS = [...API_SORT_OPTIONS, ...LOCAL_SORT_OPTIONS] as const;
+
 type SortValue = (typeof SORT_OPTIONS)[number]["value"];
+type ApiSortValue = (typeof API_SORT_OPTIONS)[number]["value"];
+type LocalSortValue = (typeof LOCAL_SORT_OPTIONS)[number]["value"];
 const CATEGORY_LABELS = {
   all: "All Categories",
   ai: "AI",
@@ -59,6 +69,7 @@ const CATEGORY_LABELS = {
 type CategoryValue = keyof typeof CATEGORY_LABELS;
 
 const CATEGORY_VALUES = Object.keys(CATEGORY_LABELS) as CategoryValue[];
+const LOCAL_SORT_VALUES = new Set<LocalSortValue>(LOCAL_SORT_OPTIONS.map((option) => option.value));
 
 type PaginatedData = {
   data: Startup[];
@@ -92,12 +103,56 @@ function SortSubmenu({ sort, onSelectSort }: SortSubmenuProps) {
   );
 }
 
+function toApiSortValue(sort: SortValue): ApiSortValue {
+  if (LOCAL_SORT_VALUES.has(sort as LocalSortValue)) {
+    return "revenue-desc";
+  }
+
+  return sort as ApiSortValue;
+}
+
+function compareNullableNumber(a: number | null, b: number | null, descending: boolean): number {
+  if (a === null && b === null) {
+    return 0;
+  }
+
+  if (a === null) {
+    return 1;
+  }
+
+  if (b === null) {
+    return -1;
+  }
+
+  if (descending) {
+    return b - a;
+  }
+
+  return a - b;
+}
+
+function sortStartups(startups: Startup[], sort: SortValue): Startup[] {
+  if (sort === "rank-asc") {
+    return [...startups].sort((a, b) => compareNullableNumber(a.rank, b.rank, false));
+  }
+
+  if (sort === "mrr-growth-desc") {
+    return [...startups].sort((a, b) => compareNullableNumber(a.growthMRR30d, b.growthMRR30d, true));
+  }
+
+  if (sort === "revenue-per-visitor-desc") {
+    return [...startups].sort((a, b) => compareNullableNumber(a.revenuePerVisitor, b.revenuePerVisitor, true));
+  }
+
+  return startups;
+}
+
 const fetchStartupsPage = withCache(
   async (page: number, sort: SortValue, category: CategoryValue): Promise<PaginatedData> => {
     const response = await listStartups({
       page,
       limit: PAGE_SIZE,
-      sort,
+      sort: toApiSortValue(sort),
       category: category === "all" ? undefined : category,
     });
 
@@ -140,6 +195,59 @@ function mergeStartups(existing: Startup[], incoming: Startup[]): Startup[] {
   }
 
   return merged;
+}
+
+function formatRank(value: number | null): string {
+  if (value === null) {
+    return "-";
+  }
+
+  return `#${value}`;
+}
+
+function formatGrowthPercent(value: number | null): string {
+  if (value === null) {
+    return "-";
+  }
+
+  if (Math.abs(value) <= 1) {
+    return `${(value * 100).toFixed(1)}%`;
+  }
+
+  return `${value.toFixed(1)}%`;
+}
+
+function formatRevenuePerVisitor(value: number | null): string {
+  if (value === null) {
+    return "-";
+  }
+
+  return `$${value.toFixed(2)}`;
+}
+
+function accessoriesForStartup(startup: Startup) {
+  return [
+    {
+      tag: formatRank(startup.rank),
+      tooltip: "Revenue rank",
+    },
+    {
+      text: formatUsd(startup.revenue.last30Days),
+      tooltip: "Revenue (30d)",
+    },
+    {
+      text: `MRR ${formatGrowthPercent(startup.growthMRR30d)}`,
+      tooltip: "MRR growth (30d)",
+    },
+    {
+      text: `Rev/Visit ${formatRevenuePerVisitor(startup.revenuePerVisitor)}`,
+      tooltip: "Revenue per visitor",
+    },
+    {
+      tag: startup.onSale ? "For Sale" : "Private",
+      tooltip: "Sale status",
+    },
+  ];
 }
 
 export default function Command() {
@@ -206,6 +314,7 @@ export default function Command() {
   );
 
   const startups = useMemo(() => mergeStartups(cachedStartups, data ?? []), [cachedStartups, data]);
+  const displayedStartups = useMemo(() => sortStartups(startups, sort), [startups, sort]);
   const totalCount = cachedTotalsByQuery[cacheScopeKey] ?? startups.length;
 
   async function refreshStartups() {
@@ -271,22 +380,13 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      {startups.map((startup) => (
+      {displayedStartups.map((startup) => (
         <List.Item
           key={startup.slug}
           title={startup.name}
           subtitle={subtitle(startup)}
           icon={startup.icon ?? Icon.Building}
-          accessories={[
-            {
-              text: formatUsd(startup.revenue.last30Days),
-              tooltip: "Revenue (30d)",
-            },
-            {
-              tag: startup.onSale ? "For Sale" : "Private",
-              tooltip: "Sale status",
-            },
-          ]}
+          accessories={accessoriesForStartup(startup)}
           actions={
             <ActionPanel>
               <Action.Push

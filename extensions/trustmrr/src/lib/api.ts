@@ -40,7 +40,12 @@ export type Startup = {
   askingPrice: number | null;
   profitMarginLast30Days: number | null;
   growth30d: number | null;
+  growthMRR30d: number | null;
   multiple: number | null;
+  rank: number | null;
+  visitorsLast30Days: number | null;
+  googleSearchImpressionsLast30Days: number | null;
+  revenuePerVisitor: number | null;
   onSale: boolean;
   firstListedForSaleAt: string | null;
   xHandle: string | null;

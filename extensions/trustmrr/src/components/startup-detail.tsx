@@ -37,7 +37,37 @@ function formatPercent(value: number | null): string {
     return "-";
   }
 
+  if (Math.abs(value) > 1) {
+    return `${value.toFixed(1)}%`;
+  }
+
   return `${(value * 100).toFixed(1)}%`;
+}
+
+function formatDecimal(value: number | null): string {
+  if (value === null) {
+    return "-";
+  }
+
+  return new Intl.NumberFormat("en-US", {
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatRevenuePerVisitor(value: number | null): string {
+  if (value === null) {
+    return "-";
+  }
+
+  return `$${value.toFixed(2)}`;
+}
+
+function formatRank(value: number | null): string {
+  if (value === null) {
+    return "-";
+  }
+
+  return `#${value}`;
 }
 
 function startupUrl(slug: string): string {
@@ -71,16 +101,24 @@ export function StartupDetailView({ slug, onReset }: StartupDetailViewProps) {
       <Detail.Metadata.Label title="Revenue (30d)" text={formatUsd(data.revenue.last30Days)} />
       <Detail.Metadata.Label title="MRR" text={formatUsd(data.revenue.mrr)} />
       <Detail.Metadata.Label title="Asking Price" text={formatUsd(data.askingPrice)} />
+      <Detail.Metadata.Label title="Revenue Rank" text={formatRank(data.rank)} />
       <Detail.Metadata.Label title="Growth (30d)" text={formatPercent(data.growth30d)} />
+      <Detail.Metadata.Label title="MRR Growth (30d)" text={formatPercent(data.growthMRR30d)} />
       <Detail.Metadata.Label
         title="Profit Margin"
         text={data.profitMarginLast30Days === null ? "-" : `${data.profitMarginLast30Days}%`}
       />
+      <Detail.Metadata.Label title="Revenue / Visitor" text={formatRevenuePerVisitor(data.revenuePerVisitor)} />
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label title="Payment Provider" text={data.paymentProvider} />
       <Detail.Metadata.Label title="Merchant of Record" text={data.isMerchantOfRecord ? "Yes" : "No"} />
       <Detail.Metadata.Label title="Customers" text={String(data.customers)} />
       <Detail.Metadata.Label title="Active Subscriptions" text={String(data.activeSubscriptions)} />
+      <Detail.Metadata.Label title="Visitors (30d)" text={formatDecimal(data.visitorsLast30Days)} />
+      <Detail.Metadata.Label
+        title="Search Impressions (30d)"
+        text={formatDecimal(data.googleSearchImpressionsLast30Days)}
+      />
       <Detail.Metadata.Separator />
       <Detail.Metadata.TagList title="Tech">
         {data.techStack.map((tech: StartupDetail["techStack"][number]) => (
