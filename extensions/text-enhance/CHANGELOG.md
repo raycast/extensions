@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial public release of Text Enhance.
 - Added the main `Enhance Text` command for rewriting selected text or clipboard text with Raycast AI.
