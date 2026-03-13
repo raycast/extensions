@@ -1,20 +1,6 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Alert,
-  confirmAlert,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Alert, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import {
-  getHistory,
-  deleteHistoryEntry,
-  clearHistory,
-  HistoryEntry,
-} from "./history-storage";
+import { getHistory, deleteHistoryEntry, clearHistory, HistoryEntry } from "./history-storage";
 
 const MODE_LABELS: Record<string, string> = {
   general: "General",
@@ -73,16 +59,9 @@ export default function TranscriptionHistory() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search dictation history..."
-      isShowingDetail={entries.length > 0}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search dictation history..." isShowingDetail={entries.length > 0}>
       {entries.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No Dictations Yet"
-          description="Record something with Dictate to see it here."
-        />
+        <List.EmptyView title="No Dictations Yet" description="Record something with Dictate to see it here." />
       ) : (
         entries.map((entry) => (
           <List.Item
@@ -99,18 +78,9 @@ export default function TranscriptionHistory() {
                 markdown={entry.cleanedText}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Transcribed On"
-                      text={formatDate(entry.timestamp)}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Mode"
-                      text={MODE_LABELS[entry.mode] || entry.mode}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Characters"
-                      text={String(entry.cleanedText.length)}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Transcribed On" text={formatDate(entry.timestamp)} />
+                    <List.Item.Detail.Metadata.Label title="Mode" text={MODE_LABELS[entry.mode] || entry.mode} />
+                    <List.Item.Detail.Metadata.Label title="Characters" text={String(entry.cleanedText.length)} />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -118,10 +88,7 @@ export default function TranscriptionHistory() {
             actions={
               <ActionPanel>
                 <ActionPanel.Section title="Transcription">
-                  <Action.CopyToClipboard
-                    title="Copy Text"
-                    content={entry.cleanedText}
-                  />
+                  <Action.CopyToClipboard title="Copy Text" content={entry.cleanedText} />
                   <Action.Paste
                     title="Paste Text"
                     content={entry.cleanedText}

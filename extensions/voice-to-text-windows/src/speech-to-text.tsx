@@ -1,13 +1,4 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  AI,
-  showToast,
-  Toast,
-  getPreferenceValues,
-  environment,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, AI, showToast, Toast, getPreferenceValues, environment } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { spawn, ChildProcess } from "child_process";
 import { readFile, writeFile, unlink, access } from "fs/promises";
@@ -61,9 +52,7 @@ function renderRecordingBlock(levels: number[], modeLabel: string): string {
           .concat(levels)
       : levels.slice(-WAVEFORM_WIDTH);
 
-  const barHeights = values.map((lvl) =>
-    Math.round(Math.min(Math.sqrt(lvl) * 3, 1) * HALF_DOT_ROWS),
-  );
+  const barHeights = values.map((lvl) => Math.round(Math.min(Math.sqrt(lvl) * 3, 1) * HALF_DOT_ROWS));
 
   const charCols = WAVEFORM_WIDTH / 2; // 80
   const FADE_CHARS = 6;
@@ -99,31 +88,17 @@ function renderRecordingBlock(levels: number[], modeLabel: string): string {
   }
 
   // Mirror: flip each character vertically, reverse row order
-  const topRows = bottomRows
-    .map((row) => [...row].map(flipBrailleChar).join(""))
-    .reverse();
+  const topRows = bottomRows.map((row) => [...row].map(flipBrailleChar).join("")).reverse();
 
   const waveRows = [...topRows, ...bottomRows];
 
   const line1 = "Press Enter to stop and transcribe,  Esc to cancel";
   const line2 = `Mode: ${modeLabel} (change in extension settings)`;
 
-  return (
-    "# Recording\n\n```\n" +
-    line1 +
-    "\n\n" +
-    waveRows.join("\n") +
-    "\n\n" +
-    line2 +
-    "\n```"
-  );
+  return "# Recording\n\n```\n" + line1 + "\n\n" + waveRows.join("\n") + "\n\n" + line2 + "\n```";
 }
 
-function getCleanupPrompt(
-  mode: PromptMode,
-  customPrompt: string,
-  transcription: string,
-): string {
+function getCleanupPrompt(mode: PromptMode, customPrompt: string, transcription: string): string {
   const suffix = `Return ONLY the cleaned text with no explanations or commentary.\n\nTranscription:\n${transcription}`;
 
   switch (mode) {
@@ -151,9 +126,7 @@ export default function SpeechToText() {
   const processRef = useRef<ChildProcess | null>(null);
   const stageRef = useRef<Stage>("recording");
   const wavPath = useRef(join(tmpdir(), `raycast-stt-${Date.now()}.wav`));
-  const stopSignalPath = useRef(
-    join(tmpdir(), `raycast-stt-stop-${Date.now()}`),
-  );
+  const stopSignalPath = useRef(join(tmpdir(), `raycast-stt-stop-${Date.now()}`));
   const stdoutBuffer = useRef("");
   const isTranscribing = useRef(false);
 
@@ -207,9 +180,7 @@ export default function SpeechToText() {
 
     ps.on("close", (code) => {
       if (code != null && code !== 0 && stageRef.current === "recording") {
-        setErrorMessage(
-          `Recording failed (code ${code}). Check microphone access.`,
-        );
+        setErrorMessage(`Recording failed (code ${code}). Check microphone access.`);
         setStage("error");
       }
     });
@@ -267,23 +238,17 @@ export default function SpeechToText() {
       await cleanup();
 
       if (wavBuffer.length < 1000) {
-        throw new Error(
-          "Recording too short. Please speak for at least a second.",
-        );
+        throw new Error("Recording too short. Please speak for at least a second.");
       }
 
       // Whisper API has a 25MB file size limit
       if (wavBuffer.length > 24 * 1024 * 1024) {
-        throw new Error(
-          "Recording too long (exceeds 24MB). Please keep recordings under ~12 minutes.",
-        );
+        throw new Error("Recording too long (exceeds 24MB). Please keep recordings under ~12 minutes.");
       }
 
       const { openaiApiKey: apiKey } = getPreferenceValues<Preferences>();
       if (!apiKey || !apiKey.trim()) {
-        throw new Error(
-          "OpenAI API key is not set. Please configure it in extension preferences.",
-        );
+        throw new Error("OpenAI API key is not set. Please configure it in extension preferences.");
       }
 
       await showToast({
@@ -304,11 +269,7 @@ export default function SpeechToText() {
         title: "Cleaning up with AI...",
       });
       const { customPrompt } = getPreferenceValues<Preferences>();
-      const { text: cleaned, wasRaw } = await processWithAI(
-        transcription,
-        currentMode,
-        customPrompt || "",
-      );
+      const { text: cleaned, wasRaw } = await processWithAI(transcription, currentMode, customPrompt || "");
       setCleanedText(cleaned);
       setStage("done");
       // Save to history
@@ -374,15 +335,7 @@ export default function SpeechToText() {
   }
 
   if (stage === "transcribing") {
-    return (
-      <Detail
-        isLoading={true}
-        markdown={[
-          "# Transcribing\n",
-          "Converting your speech to text...",
-        ].join("\n")}
-      />
-    );
+    return <Detail isLoading={true} markdown={["# Transcribing\n", "Converting your speech to text..."].join("\n")} />;
   }
 
   if (stage === "processing") {
@@ -403,12 +356,7 @@ export default function SpeechToText() {
   if (stage === "error") {
     return (
       <Detail
-        markdown={[
-          "# Error\n",
-          `${errorMessage}\n`,
-          "---\n",
-          "Press **Enter** to try again.",
-        ].join("\n")}
+        markdown={["# Error\n", `${errorMessage}\n`, "---\n", "Press **Enter** to try again."].join("\n")}
         actions={
           <ActionPanel>
             <Action title="Try Again" onAction={handleRecordAgain} />
@@ -424,10 +372,7 @@ export default function SpeechToText() {
       markdown={[`# Result\n`, "---\n", cleanedText].join("\n")}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy to Clipboard"
-            content={cleanedText}
-          />
+          <Action.CopyToClipboard title="Copy to Clipboard" content={cleanedText} />
           <Action.Paste title="Paste to Active App" content={cleanedText} />
           <Action title="Record Again" onAction={handleRecordAgain} />
         </ActionPanel>
@@ -439,8 +384,7 @@ export default function SpeechToText() {
 // --- Helpers ---
 
 async function transcribeWithWhisper(wavBuffer: Buffer): Promise<string> {
-  const { openaiApiKey, language, transcriptionModel } =
-    getPreferenceValues<Preferences>();
+  const { openaiApiKey, language, transcriptionModel } = getPreferenceValues<Preferences>();
   const model = transcriptionModel || "gpt-4o-mini-transcribe";
 
   const boundary = `----FormBoundary${Date.now()}`;
@@ -454,25 +398,13 @@ async function transcribeWithWhisper(wavBuffer: Buffer): Promise<string> {
   parts.push(wavBuffer);
   parts.push(Buffer.from("\r\n"));
 
-  parts.push(
-    Buffer.from(
-      `--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\n${model}\r\n`,
-    ),
-  );
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="model"\r\n\r\n${model}\r\n`));
 
   if (language) {
-    parts.push(
-      Buffer.from(
-        `--${boundary}\r\nContent-Disposition: form-data; name="language"\r\n\r\n${language}\r\n`,
-      ),
-    );
+    parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="language"\r\n\r\n${language}\r\n`));
   }
 
-  parts.push(
-    Buffer.from(
-      `--${boundary}\r\nContent-Disposition: form-data; name="response_format"\r\n\r\ntext\r\n`,
-    ),
-  );
+  parts.push(Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="response_format"\r\n\r\ntext\r\n`));
 
   parts.push(Buffer.from(`--${boundary}--\r\n`));
 
@@ -494,9 +426,7 @@ async function transcribeWithWhisper(wavBuffer: Buffer): Promise<string> {
     });
   } catch (err) {
     if (controller.signal.aborted) {
-      throw new Error(
-        "Transcription request timed out. Please try a shorter recording.",
-      );
+      throw new Error("Transcription request timed out. Please try a shorter recording.");
     }
     throw err;
   } finally {
@@ -587,11 +517,7 @@ async function waitForFile(filePath: string, timeoutMs: number): Promise<void> {
 
 function copyToClipboard(text: string): Promise<void> {
   return new Promise((resolve) => {
-    const clipProc = spawn("powershell.exe", [
-      "-NoProfile",
-      "-Command",
-      "$input | Set-Clipboard",
-    ]);
+    const clipProc = spawn("powershell.exe", ["-NoProfile", "-Command", "$input | Set-Clipboard"]);
     clipProc.stdin.end(text);
     clipProc.on("close", (code) => {
       if (code !== 0) {

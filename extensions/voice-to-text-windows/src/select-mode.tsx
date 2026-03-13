@@ -1,12 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  popToRoot,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { PromptMode, getActiveMode, setActiveMode } from "./history-storage";
 
@@ -51,10 +43,7 @@ export default function SelectMode() {
           accessories={[{ text: `Ctrl+${shortcut}` }]}
           actions={
             <ActionPanel>
-              <Action
-                title={`Select ${label} Mode`}
-                onAction={() => handleSelect(mode, label)}
-              />
+              <Action title={`Select ${label} Mode`} onAction={() => handleSelect(mode, label)} />
             </ActionPanel>
           }
         />

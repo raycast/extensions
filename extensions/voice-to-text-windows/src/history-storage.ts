@@ -23,9 +23,7 @@ export async function getHistory(): Promise<HistoryEntry[]> {
   }
 }
 
-export async function addHistoryEntry(
-  entry: Omit<HistoryEntry, "id" | "timestamp">,
-): Promise<void> {
+export async function addHistoryEntry(entry: Omit<HistoryEntry, "id" | "timestamp">): Promise<void> {
   const history = await getHistory();
   history.unshift({
     ...entry,
