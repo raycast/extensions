@@ -27,7 +27,6 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.2.0",
-    "fast-xml-parser": "^5.2.5",
     "fuse.js": "^7.1.0"
   },
   "devDependencies": {
