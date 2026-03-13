@@ -4,7 +4,6 @@ import {
   closeMainWindow,
   updateCommandMetadata,
 } from "@raycast/api";
-import { Preferences } from "raycast-env";
 import { runPolish } from "./runner";
 
 export default async function Command() {

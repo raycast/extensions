@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-03-14
 
 
 ### Added
@@ -19,7 +19,7 @@
 - Cleaned up HUD feedback for generic custom slots.
 - Passed all Raycast Store validation checks (Linting, Build, Metadata).
 
-## [1.0.0] - 2026-03-09
+## [1.0.0] - 2026-03-08
 - Initial release with Fix Grammar, Enhance Prompt, and Format Digestible.
 - Support for Groq, OpenAI, and Anthropic providers.
 - Custom AI action slots for personalized prompts.

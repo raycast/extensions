@@ -5,7 +5,6 @@ import {
   getPreferenceValues,
   getSelectedText,
 } from "@raycast/api";
-import { Preferences } from "raycast-env";
 import { polishText } from "./api";
 
 export async function runPolish(

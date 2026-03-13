@@ -5,6 +5,7 @@
   "description": "Small tweak, big difference. Fix grammar, adjust tone, paraphrase — without changing what you mean. Works with Groq (free), OpenAI, or Anthropic.",
   "icon": "icon.png",
   "author": "iampdwivedi",
+  "version": "1.1.0",
   "categories": [
     "Productivity",
     "Communication"
