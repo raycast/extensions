@@ -1,4 +1,4 @@
-import type { Application, PreferenceValues } from "@raycast/api";
+import type { Application } from "@raycast/api";
 import type { UninstallerApp } from "./types";
 
 import { getPreferenceValues, updateCommandMetadata } from "@raycast/api";
@@ -12,19 +12,17 @@ export class Uninstaller {
    * @returns The uninstaller app or undefined if none is found.
    */
   static async getUninstaller(): Promise<UninstallerApp | undefined> {
-    const preferred = getPreferenceValues<PreferenceValues>().uninstaller_app;
+    const preferred = getPreferenceValues<Preferences>().uninstaller_app;
     const uninstallers = Array.from(UNINSTALLERS);
 
     if (preferred) {
-      if (preferred) {
-        uninstallers.unshift({
-          id: preferred.bundleId ?? preferred.name,
-          name: preferred.name,
-          path: preferred.path,
-          url: "",
-          icon: "",
-        });
-      }
+      uninstallers.unshift({
+        id: preferred.bundleId ?? preferred.name,
+        name: preferred.name,
+        path: preferred.path,
+        url: "",
+        icon: "",
+      });
     }
 
     // return the first one that exists
