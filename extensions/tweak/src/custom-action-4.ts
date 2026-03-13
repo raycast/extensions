@@ -4,15 +4,11 @@ import {
   closeMainWindow,
   updateCommandMetadata,
 } from "@raycast/api";
+import { Preferences } from "raycast-env";
 import { runPolish } from "./runner";
 
-interface CustomPrefs {
-  actionTitle?: string;
-  customPrompt?: string;
-}
-
 export default async function Command() {
-  const prefs = getPreferenceValues<CustomPrefs>();
+  const prefs = getPreferenceValues<Preferences.CustomAction4>();
 
   if (!prefs.customPrompt?.trim()) {
     await closeMainWindow();

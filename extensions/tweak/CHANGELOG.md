@@ -1,6 +1,7 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [1.1.0] - {PR_MERGE_DATE}
+
 
 ### Added
 - **Complete Thought**: A new core command to naturally finish incomplete messages while matching your tone.

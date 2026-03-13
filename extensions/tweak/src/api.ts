@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-
-const prefs = getPreferenceValues<Preferences>();
+import { Preferences } from "raycast-env";
 
 interface ProviderConfig {
   url: string;

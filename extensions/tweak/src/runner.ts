@@ -5,11 +5,8 @@ import {
   getPreferenceValues,
   getSelectedText,
 } from "@raycast/api";
+import { Preferences } from "raycast-env";
 import { polishText } from "./api";
-
-interface CommandPreferences {
-  customPrompt?: string;
-}
 
 export async function runPolish(
   defaultPrompt: string,
@@ -20,7 +17,8 @@ export async function runPolish(
   await closeMainWindow();
 
   // Check if user has set a custom prompt for this command
-  const commandPrefs = getPreferenceValues<CommandPreferences>();
+  // Each command has its own customPrompt, but they all share the same structure
+  const commandPrefs = getPreferenceValues<Preferences.GrammarFix>();
   const prompt = commandPrefs.customPrompt?.trim() || defaultPrompt;
 
   // Try selected text first, then fall back to clipboard
