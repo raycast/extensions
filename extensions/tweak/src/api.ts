@@ -1,9 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  provider: "groq" | "openai" | "anthropic";
-  apiKey: string;
-}
+const prefs = getPreferenceValues<Preferences>();
 
 interface ProviderConfig {
   url: string;
