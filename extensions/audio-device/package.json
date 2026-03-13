@@ -62,17 +62,17 @@
       "name": "auto-switch-input",
       "title": "Enforce Input Device",
       "subtitle": "Audio Device",
-      "description": "Automatically enforces your default input device and pinned volumes every 20s.",
+      "description": "Automatically enforces your default input device and pinned volumes every 10s.",
       "mode": "no-view",
-      "interval": "20s"
+      "interval": "10s"
     },
     {
       "name": "auto-switch-output",
       "title": "Enforce Output Device",
       "subtitle": "Audio Device",
-      "description": "Automatically enforces your default output device and pinned volumes every 20s.",
+      "description": "Automatically enforces your default output device and pinned volumes every 10s.",
       "mode": "no-view",
-      "interval": "20s"
+      "interval": "10s"
     },
     {
       "name": "favourite",
