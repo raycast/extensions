@@ -1,5 +1,10 @@
 # Agent Usage Changelog
 
+## [Fix Claude Code credentials not detected on macOS] - {PR_MERGE_DATE}
+
+- Read Claude Code OAuth credentials from macOS Keychain instead of only checking `~/.claude/.credentials.json`
+- Fall back to credentials file for Linux/WSL/SSH environments
+
 ## [Add Claude Usage Provider] - 2026-03-09
 
 - Add Claude usage provider powered by Claude CLI OAuth credentials
