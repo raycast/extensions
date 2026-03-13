@@ -51,18 +51,21 @@
     {
       "name": "search-localizations",
       "title": "Search Text",
+      "subtitle": "Apple Localizations",
       "description": "Find translations by meaning using semantic search",
       "mode": "view"
     },
     {
       "name": "lookup-by-key",
       "title": "Lookup by Key",
+      "subtitle": "Apple Localizations",
       "description": "Find translations by source key (substring match)",
       "mode": "view"
     },
     {
       "name": "lookup-by-target",
       "title": "Lookup by Target",
+      "subtitle": "Apple Localizations",
       "description": "Reverse lookup source keys from translated text",
       "mode": "view"
     }

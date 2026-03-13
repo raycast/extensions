@@ -1,16 +1,5 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  getPreferenceValues,
-  showHUD,
-  showToast,
-} from "@raycast/api";
-import { useExec, useLocalStorage, usePromise } from "@raycast/utils";
+import { Action, ActionPanel, Clipboard, Color, Icon, List, getPreferenceValues, showHUD } from "@raycast/api";
+import { useExec, useLocalStorage, usePromise, showFailureToast } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { useCallback, useRef } from "react";
@@ -37,11 +26,11 @@ export function isFuzzyEnabled(): boolean {
   return getPreferenceValues().fuzzy;
 }
 
-export function getResultLimit(): number | undefined {
+export function getResultLimit(): number {
   const { resultLimit } = getPreferenceValues();
-  if (!resultLimit) return undefined;
+  if (!resultLimit) return DEFAULT_PAGE_SIZE;
   const n = parseInt(resultLimit, 10);
-  return Number.isFinite(n) && n > 0 ? n : undefined;
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_PAGE_SIZE;
 }
 
 export interface CLIInfo {
@@ -57,11 +46,7 @@ function formatCliError(err: Error, cliPath: string, dbPath: string): string {
 
 export function cliErrorHandler(cliPath: string, dbPath: string) {
   return (err: Error) => {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "apple-loc failed",
-      message: formatCliError(err, cliPath, dbPath),
-    });
+    showFailureToast(formatCliError(err, cliPath, dbPath));
   };
 }
 
@@ -343,7 +328,7 @@ export function ResultListItem({
                             <List.Item.Detail.Metadata.TagList.Item
                               text={text}
                               color={getDeviceTagColor(
-                                platform,
+                                result.platform,
                                 group.title,
                                 variant,
                                 group.entries.map(([v]) => v),

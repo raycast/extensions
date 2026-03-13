@@ -9,11 +9,11 @@ Raycast extension for searching Apple localizations extracted from macOS/iOS sys
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Search Text** | Full-text search across localized strings |
-| **Lookup by Key** | Find localizations by source key (with fuzzy matching) |
-| **Lookup by Target** | Find localizations by translated text |
+| Command              | Description                                            |
+| -------------------- | ------------------------------------------------------ |
+| **Search Text**      | Full-text search across localized strings              |
+| **Lookup by Key**    | Find localizations by source key (with fuzzy matching) |
+| **Lookup by Target** | Find localizations by translated text                  |
 
 ## Features
 
@@ -25,10 +25,12 @@ Raycast extension for searching Apple localizations extracted from macOS/iOS sys
 
 ## Configuration
 
-| Preference | Default | Description |
-|------------|---------|-------------|
-| CLI Path | `~/.local/bin/apple-loc` | Path to the apple-loc CLI binary |
-| Database Path | `~/.apple-loc/apple-loc.db` | Path to the localization database file |
+| Preference     | Default                     | Description                                                  |
+| -------------- | --------------------------- | ------------------------------------------------------------ |
+| CLI Path       | `~/.local/bin/apple-loc`    | Path to the apple-loc CLI binary                             |
+| Database Path  | `~/.apple-loc/apple-loc.db` | Path to the localization database file                       |
+| Result Limit   | `20`                        | Maximum number of results returned per query                 |
+| Fuzzy Matching | `true`                      | Enable fuzzy (substring) matching for key and target lookups |
 
 ## Development
 

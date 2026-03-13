@@ -61,6 +61,10 @@ export default function LookupByKey() {
               ))}
             </List.Section>
           )}
+      <List.EmptyView
+        title="No results"
+        description="Install the apple-loc CLI and build the database, or try a different query."
+      />
     </List>
   );
 }
