@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tailserve",
+  "title": "TailServe",
+  "description": "Start and manage an OpenCode server published to your Tailscale tailnet",
+  "icon": "extension-icon.png",
+  "author": "leeweisern",
+  "platforms": ["macOS"],
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "keywords": ["opencode", "tailscale", "tailnet", "serve", "remote", "coding"],
+  "preferences": [
+    {
+      "name": "port",
+      "title": "Port",
+      "description": "Port for the OpenCode server",
+      "type": "textfield",
+      "required": false,
+      "default": "4096",
+      "placeholder": "4096"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Optional password to protect the OpenCode server (passed as OPENCODE_SERVER_PASSWORD)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start Server",
+      "description": "Start OpenCode server and publish it to your Tailscale tailnet",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Server",
+      "description": "Stop the OpenCode server and remove the Tailscale listener",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Server Status",
+      "description": "Check if the OpenCode server is running and copy the URL",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npx @raycast/api@latest publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
