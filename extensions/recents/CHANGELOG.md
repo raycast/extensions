@@ -1,5 +1,9 @@
 # Recents Changelog
 
+## [Fixes & Improvements] - {PR_MERGE_DATE}
+
+- Added paste action for recent items
+
 ## [Fixes & Improvements] - 2022-11-02
 
 - Fixed a bug whereby folders would vanish from results upon opening via 'Recent Folders'
