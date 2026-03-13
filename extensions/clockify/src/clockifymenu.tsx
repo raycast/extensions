@@ -7,6 +7,7 @@ import {
   getElapsedTime,
   getTimeEntries,
   getTodayTotalTimeForProject,
+  isInProgress,
   millisecondsToDurationString,
   stopCurrentTimer,
   toMonospaceFont,
@@ -38,21 +39,16 @@ export default function ClockifyMenuCommand() {
         entry.description,
         entry.projectId,
         entry.taskId,
-        () => {
-          // Use the original entry data which has hydrated project/task info
-          // Create a new entry object with updated timeInterval
-          const restartedEntry: TimeEntry = {
-            ...entry,
-            id: Date.now().toString(), // Temporary ID until refresh
-            timeInterval: {
-              start: new Date().toISOString(),
-              end: null,
-            },
-          };
-          setCurrentData({
-            currentEntry: restartedEntry,
-            currentlyElapsedTime: getElapsedTime(restartedEntry),
-          });
+        async () => {
+          // Refresh time entries to get hydrated data with full project info
+          const freshEntries = await getTimeEntries({});
+          const activeEntry = freshEntries.find((e) => isInProgress(e));
+          if (activeEntry) {
+            setCurrentData({
+              currentEntry: activeEntry,
+              currentlyElapsedTime: getElapsedTime(activeEntry),
+            });
+          }
           setRecentEntries([]);
         },
         new Date(),
@@ -93,6 +89,11 @@ export default function ClockifyMenuCommand() {
 
   const currentEntry = currentData?.currentEntry;
   const currentlyElapsedTime = currentData?.currentlyElapsedTime;
+
+  // Debug logging
+  console.log("DEBUG MENU: currentEntry:", currentEntry);
+  console.log("DEBUG MENU: projectId:", currentEntry?.projectId);
+  console.log("DEBUG MENU: project:", currentEntry?.project);
 
   // Fetch data asynchronously without blocking render
   useEffect(() => {
@@ -154,7 +155,7 @@ export default function ClockifyMenuCommand() {
                   (currentEntry.timeInterval.start
                     ? new Date().getTime() - new Date(currentEntry.timeInterval.start).getTime()
                     : 0),
-              )} total today`}
+              )} on ${currentEntry.project.name} today`}
               icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
             />
           )}

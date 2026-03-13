@@ -259,9 +259,12 @@ export async function getTodayTotalTimeForProject(projectId: string): Promise<nu
       return 0;
     }
 
+    // Filter by projectId since API parameter doesn't work correctly
+    const filteredData = data.filter((entry: TimeEntry) => entry.projectId === projectId);
+
     let totalMs = 0;
 
-    for (const entry of data) {
+    for (const entry of filteredData) {
       const entryStart = new Date(entry.timeInterval.start);
       const entryEnd = entry.timeInterval.end ? new Date(entry.timeInterval.end) : new Date();
       totalMs += entryEnd.getTime() - entryStart.getTime();
