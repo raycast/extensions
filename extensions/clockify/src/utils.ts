@@ -233,6 +233,59 @@ export function getAllTimeEntriesFromLocalStorage(): TimeEntry[] {
   }
 }
 
+export async function getTodayTotalTimeForProject(projectId: string): Promise<number> {
+  try {
+    const workspaceId = await LocalStorage.getItem("workspaceId");
+    const userId = await LocalStorage.getItem("userId");
+
+    // Get today's date range in ISO format
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    // Fetch today's entries from API
+    const { data, error } = await fetcher(
+      `/workspaces/${workspaceId}/user/${userId}/time-entries?` +
+        `start=${today.toISOString()}&` +
+        `end=${tomorrow.toISOString()}&` +
+        `projectId=${projectId}&` +
+        `hydrated=true&` +
+        `page-size=500`,
+    );
+
+    if (error || !data) {
+      console.error("Error fetching today's entries:", error);
+      return 0;
+    }
+
+    let totalMs = 0;
+
+    for (const entry of data) {
+      const entryStart = new Date(entry.timeInterval.start);
+      const entryEnd = entry.timeInterval.end ? new Date(entry.timeInterval.end) : new Date();
+      totalMs += entryEnd.getTime() - entryStart.getTime();
+    }
+
+    return totalMs;
+  } catch (e) {
+    console.error("Error calculating today's total time:", e);
+    return 0;
+  }
+}
+
+export function millisecondsToDurationString(ms: number): string {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+}
+
 export async function getProjects({ onError }: { onError?: (state: boolean) => void } = {}): Promise<Project[]> {
   const workspaceId = await LocalStorage.getItem("workspaceId");
 
