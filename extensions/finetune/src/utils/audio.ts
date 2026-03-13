@@ -98,6 +98,10 @@ export function getOutputDeviceIconSource(device: AudioDevice | null | undefined
   return getOutputDeviceIconSourceFromName(device?.name);
 }
 
+function escapeAppleScriptString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\r?\n/g, " ");
+}
+
 const ACTIVE_OUTPUT_CACHE_TTL_MS = 1200;
 const ACTIVE_OUTPUT_LOOKUP_TIMEOUT_MS = 600;
 const RUNNING_PROCESSES_CACHE_TTL_MS = 1200;
@@ -128,113 +132,104 @@ struct AudioDevice: Encodable {
     let name: String
     let uid: String
     let isOutput: Bool
+    let isInput: Bool
     let isDefault: Bool
 }
 
-func getDeviceList() -> [AudioDevice] {
+func hasChannels(id: AudioDeviceID, scope: AudioObjectPropertyScope) -> Bool {
     var propertyAddress = AudioObjectPropertyAddress(
-        mSelector: kAudioHardwarePropertyDevices,
-        mScope: kAudioObjectPropertyScopeGlobal,
+        mSelector: kAudioDevicePropertyStreamConfiguration,
+        mScope: scope,
         mElement: kAudioObjectPropertyElementMain
     )
 
     var dataSize: UInt32 = 0
-    let status = AudioObjectGetPropertyDataSize(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &dataSize)
-    guard status == noErr else { return [] }
+    guard AudioObjectGetPropertyDataSize(id, &propertyAddress, 0, nil, &dataSize) == noErr else {
+        return false
+    }
 
-    let deviceCount = Int(dataSize) / MemoryLayout<AudioDeviceID>.size
-    var deviceIDs = [AudioDeviceID](repeating: 0, count: deviceCount)
-    
-    _ = AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &dataSize, &deviceIDs)
+    guard dataSize > 0 else { return false }
 
-    // Get default output device
-    var defaultAddress = AudioObjectPropertyAddress(
-        mSelector: kAudioHardwarePropertyDefaultOutputDevice,
+    let bufferList = UnsafeMutableRawPointer.allocate(byteCount: Int(dataSize), alignment: MemoryLayout<UInt32>.alignment)
+    defer { bufferList.deallocate() }
+
+    guard AudioObjectGetPropertyData(id, &propertyAddress, 0, nil, &dataSize, bufferList) == noErr else {
+        return false
+    }
+
+    let numberBuffers = bufferList.load(as: UInt32.self)
+    for i in 0..<Int(numberBuffers) {
+        let offset = 8 + (i * 16)
+        if offset + 16 <= Int(dataSize) {
+            let numberChannels = bufferList.load(fromByteOffset: offset, as: UInt32.self)
+            if numberChannels > 0 {
+                return true
+            }
+        }
+    }
+
+    return false
+}
+
+func getDefaultDeviceID(selector: AudioObjectPropertySelector) -> AudioDeviceID? {
+    var propertyAddress = AudioObjectPropertyAddress(
+        mSelector: selector,
         mScope: kAudioObjectPropertyScopeGlobal,
         mElement: kAudioObjectPropertyElementMain
     )
     var defaultDeviceID: AudioDeviceID = 0
     var defaultSize = UInt32(MemoryLayout<AudioDeviceID>.size)
-    _ = AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &defaultAddress, 0, nil, &defaultSize, &defaultDeviceID)
+    guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &defaultSize, &defaultDeviceID) == noErr else {
+        return nil
+    }
+    return defaultDeviceID
+}
+
+func getDeviceName(id: AudioDeviceID) -> String? {
+    var nameSize = UInt32(MemoryLayout<CFString>.size)
+    var deviceName: CFString = "" as CFString
+    var nameAddress = AudioObjectPropertyAddress(
+        mSelector: kAudioDevicePropertyDeviceNameCFString,
+        mScope: kAudioObjectPropertyScopeGlobal,
+        mElement: kAudioObjectPropertyElementMain
+    )
+    let status = AudioObjectGetPropertyData(id, &nameAddress, 0, nil, &nameSize, &deviceName)
+    guard status == noErr else { return nil }
+    return deviceName as String
+}
+
+func getDeviceList(outputsOnly: Bool = true) -> [AudioDevice] {
+    let defaultOutputDeviceID = getDefaultDeviceID(selector: kAudioHardwarePropertyDefaultOutputDevice)
+    let defaultInputDeviceID = getDefaultDeviceID(selector: kAudioHardwarePropertyDefaultInputDevice)
 
     var devices: [AudioDevice] = []
 
-    for id in deviceIDs {
-        // Check for output channels
-        var configAddress = AudioObjectPropertyAddress(
-            mSelector: kAudioDevicePropertyStreamConfiguration,
-            mScope: kAudioDevicePropertyScopeOutput,
-            mElement: kAudioObjectPropertyElementMain
-        )
-        var configSize: UInt32 = 0
-        _ = AudioObjectGetPropertyDataSize(id, &configAddress, 0, nil, &configSize)
-        
-        var isOutput = false
-        if configSize > 0 {
-            // Allocate raw memory for AudioBufferList
-            let bufferList = UnsafeMutableRawPointer.allocate(byteCount: Int(configSize), alignment: MemoryLayout<UInt32>.alignment)
-            defer { bufferList.deallocate() }
-            
-            let status = AudioObjectGetPropertyData(id, &configAddress, 0, nil, &configSize, bufferList)
-            
-            if status == noErr {
-                // AudioBufferList layout:
-                // mNumberBuffers: UInt32 (offset 0)
-                // padding: 4 bytes (offset 4) -> because AudioBuffer contains a pointer, aligning to 8 bytes on 64-bit
-                // mBuffers: [AudioBuffer] (offset 8)
-                
-                let mNumberBuffers = bufferList.load(as: UInt32.self)
-                
-                // Iterate buffers to check channels
-                // AudioBuffer layout:
-                // mNumberChannels: UInt32 (0)
-                // mDataByteSize: UInt32 (4)
-                // mData: Pointer (8)
-                // Total size: 16 bytes
-                
-                for i in 0..<Int(mNumberBuffers) {
-                    let offset = 8 + (i * 16)
-                    if offset + 16 <= Int(configSize) {
-                        let mNumberChannels = bufferList.load(fromByteOffset: offset, as: UInt32.self)
-                        if mNumberChannels > 0 {
-                            isOutput = true
-                            break
-                        }
-                    }
-                }
-            }
+    for id in getAllDeviceIDs() {
+        let isOutput = hasChannels(id: id, scope: kAudioDevicePropertyScopeOutput)
+        let isInput = hasChannels(id: id, scope: kAudioDevicePropertyScopeInput)
+
+        if outputsOnly && !isOutput {
+            continue
         }
-        
-        if isOutput {
-            // Name
-            var nameSize = UInt32(MemoryLayout<CFString>.size)
-            var deviceName: CFString = "" as CFString
-            var nameAddress = AudioObjectPropertyAddress(
-                mSelector: kAudioDevicePropertyDeviceNameCFString,
-                mScope: kAudioObjectPropertyScopeGlobal,
-                mElement: kAudioObjectPropertyElementMain
-            )
-            _ = AudioObjectGetPropertyData(id, &nameAddress, 0, nil, &nameSize, &deviceName)
-            
-            // UID
-            var uidSize = UInt32(MemoryLayout<CFString>.size)
-            var deviceUID: CFString = "" as CFString
-            var uidAddress = AudioObjectPropertyAddress(
-                mSelector: kAudioDevicePropertyDeviceUID,
-                mScope: kAudioObjectPropertyScopeGlobal,
-                mElement: kAudioObjectPropertyElementMain
-            )
-            _ = AudioObjectGetPropertyData(id, &uidAddress, 0, nil, &uidSize, &deviceUID)
-            
-            devices.append(AudioDevice(
-                id: id,
-                name: deviceName as String,
-                uid: deviceUID as String,
-                isOutput: true,
-                isDefault: id == defaultDeviceID
-            ))
+
+        if !isOutput && !isInput {
+            continue
         }
+
+        guard let deviceName = getDeviceName(id: id), let deviceUID = getDeviceUID(id: id) else {
+            continue
+        }
+
+        devices.append(AudioDevice(
+            id: id,
+            name: deviceName,
+            uid: deviceUID,
+            isOutput: isOutput,
+            isInput: isInput,
+            isDefault: (isOutput && id == defaultOutputDeviceID) || (isInput && id == defaultInputDeviceID)
+        ))
     }
+
     return devices
 }
 
@@ -310,14 +305,7 @@ func setInputDevice(uid: String) -> Bool {
 }
 
 func getDefaultDeviceUID(selector: AudioObjectPropertySelector) -> String {
-    var propertyAddress = AudioObjectPropertyAddress(
-        mSelector: selector,
-        mScope: kAudioObjectPropertyScopeGlobal,
-        mElement: kAudioObjectPropertyElementMain
-    )
-    var defaultDeviceID: AudioDeviceID = 0
-    var defaultSize = UInt32(MemoryLayout<AudioDeviceID>.size)
-    guard AudioObjectGetPropertyData(AudioObjectID(kAudioObjectSystemObject), &propertyAddress, 0, nil, &defaultSize, &defaultDeviceID) == noErr else {
+    guard let defaultDeviceID = getDefaultDeviceID(selector: selector) else {
         return ""
     }
     return getDeviceUID(id: defaultDeviceID) ?? ""
@@ -421,6 +409,13 @@ if args.count > 2 {
     if command == "--active-output-bundle-ids" {
         let encoder = JSONEncoder()
         if let data = try? encoder.encode(getActiveOutputBundleIDs()), let json = String(data: data, encoding: .utf8) {
+            print(json)
+        } else {
+            print("[]")
+        }
+    } else if command == "--get-all-devices" {
+        let encoder = JSONEncoder()
+        if let data = try? encoder.encode(getDeviceList(outputsOnly: false)), let json = String(data: data, encoding: .utf8) {
             print(json)
         } else {
             print("[]")
@@ -849,6 +844,16 @@ export async function getDetailedAudioDevices(): Promise<AudioDevice[]> {
   }
 }
 
+async function getAllAudioDevices(): Promise<AudioDevice[]> {
+  try {
+    const json = await runNativeAudioControl(["--get-all-devices"]);
+    return JSON.parse(json);
+  } catch (error) {
+    console.error("Native audio device enumeration failed:", error);
+    return [];
+  }
+}
+
 async function getDefaultInputDeviceUid(): Promise<string | null> {
   try {
     const result = await runNativeAudioControl(["--get-default-input-uid"]);
@@ -873,6 +878,26 @@ function getPairedBluetoothInputUid(outputUid: string): string | null {
   return outputUid.replace(/:output$/, ":input");
 }
 
+function isLikelyBluetoothInputDevice(device: AudioDevice): boolean {
+  const haystack = `${device.name} ${device.uid}`.toLowerCase();
+  return haystack.includes("bluetooth") || HEADPHONE_DEVICE_KEYWORDS.some((keyword) => haystack.includes(keyword));
+}
+
+async function getFallbackInputDeviceUid(excludedUid: string): Promise<string | null> {
+  const devices = await getAllAudioDevices();
+  const candidates = devices.filter(
+    (device) => device.isInput && device.uid !== excludedUid && !isLikelyBluetoothInputDevice(device),
+  );
+  if (candidates.length === 0) return null;
+
+  const preferredBuiltIn = candidates.find((device) => {
+    const haystack = `${device.name} ${device.uid}`.toLowerCase();
+    return haystack.includes("built-in") || haystack.includes("internal") || haystack.includes("macbook");
+  });
+
+  return preferredBuiltIn?.uid ?? candidates[0].uid;
+}
+
 async function enforceBluetoothInputSafety(outputUid: string): Promise<void> {
   const pairedInputUid = getPairedBluetoothInputUid(outputUid);
   if (!pairedInputUid) return;
@@ -881,7 +906,9 @@ async function enforceBluetoothInputSafety(outputUid: string): Promise<void> {
   if (currentInputUid !== pairedInputUid) return;
 
   // Keep Bluetooth output in high-quality mode by moving input off headset mic.
-  await setDefaultInputDevice("BuiltInMicrophoneDevice");
+  const fallbackInputUid = await getFallbackInputDeviceUid(pairedInputUid);
+  if (!fallbackInputUid) return;
+  await setDefaultInputDevice(fallbackInputUid);
 }
 
 // Switch audio output device using native Swift code
@@ -1171,6 +1198,7 @@ export function canControlAppVolume(
 // Get application status (volume + state)
 export async function getAppStatus(appName: string, bundleId?: string): Promise<AppStatus> {
   const lowerName = appName.toLowerCase();
+  const safeAppName = escapeAppleScriptString(appName);
   let script = "";
 
   if (isCommunicationApp(appName, bundleId)) {
@@ -1219,7 +1247,7 @@ export async function getAppStatus(appName: string, bundleId?: string): Promise<
     script = `
       try
         set fallbackResult to ""
-        tell application "${appName}"
+        tell application "${safeAppName}"
           repeat with w in windows
             repeat with t in tabs of w
               try
@@ -1278,7 +1306,7 @@ export async function getAppStatus(appName: string, bundleId?: string): Promise<
     script = `
       try
         set fallbackResult to ""
-        tell application "${appName}"
+        tell application "${safeAppName}"
           repeat with w in windows
             repeat with t in tabs of w
               try
@@ -1337,7 +1365,7 @@ export async function getAppStatus(appName: string, bundleId?: string): Promise<
     } catch {
       script = `
         try
-          tell application "${appName}"
+          tell application "${safeAppName}"
             set v to sound volume
             set s to player state as string
             return (v as string) & "|" & s
@@ -1351,7 +1379,7 @@ export async function getAppStatus(appName: string, bundleId?: string): Promise<
     // VLC 'audio volume' and 'playing'
     script = `
       try
-        tell application "${appName}"
+        tell application "${safeAppName}"
           set v to get audio volume
           if (playing) then
             set s to "playing"
@@ -1370,7 +1398,7 @@ export async function getAppStatus(appName: string, bundleId?: string): Promise<
     // Generic fallback
     script = `
       try
-        tell application "${appName}"
+        tell application "${safeAppName}"
           set v to get sound volume
           return (v as string) & "|unknown"
         end tell
@@ -1416,6 +1444,7 @@ export async function getAppStatus(appName: string, bundleId?: string): Promise<
 export async function setAppVolume(appName: string, volume: number, bundleId?: string): Promise<string> {
   const clampedVolume = Math.max(0, Math.min(200, Math.round(volume)));
   const lowerName = appName.toLowerCase();
+  const safeAppName = escapeAppleScriptString(appName);
   const communicationApp = isCommunicationApp(appName, bundleId);
   const safeFineTuneVolume = (communicationApp ? Math.min(clampedVolume, 100) : clampedVolume) / 100;
   const boostRequested = clampedVolume > 100;
@@ -1502,7 +1531,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   if (isChromium(appName)) {
     script = `
       try
-        tell application "${appName}"
+        tell application "${safeAppName}"
           execute front window's active tab javascript "${jsEscaped}"
         end tell
         return "true"
@@ -1515,7 +1544,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   else if (lowerName === "safari") {
     script = `
       try
-        tell application "${appName}"
+        tell application "${safeAppName}"
           if (count of windows) > 0 then
             do JavaScript "${jsEscaped}" in current tab of front window
             return "true"
@@ -1532,7 +1561,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   else if (lowerName === "iina") {
     script = `
       try
-        tell application "${appName}"
+        tell application "${safeAppName}"
           set volume to ${scriptVolume}
         end tell
         return "true"
@@ -1545,8 +1574,8 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   else if (lowerName === "vlc") {
     script = `
       try
-        tell application "${appName}"
-          set audio volume to ${scriptVolume * 4}
+        tell application "${safeAppName}"
+          set audio volume to ${Math.round(scriptVolume * 2.56)}
         end tell
         return "true"
       on error errMsg
@@ -1562,7 +1591,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   else if (["music", "spotify", "tv", "apple music"].includes(lowerName)) {
     script = `
       try
-        run script "tell application \\"${appName}\\" to set sound volume to ${scriptVolume}"
+        run script "tell application \\"${safeAppName}\\" to set sound volume to ${scriptVolume}"
         return "true"
       on error errMsg
         return "error: " & errMsg
@@ -1573,7 +1602,7 @@ export async function setAppVolume(appName: string, volume: number, bundleId?: s
   else {
     script = `
       try
-        tell application "${appName}"
+        tell application "${safeAppName}"
           try
             set sound volume to ${scriptVolume}
             return "true"

@@ -76,7 +76,7 @@ export default function Command() {
                   <Action
                     title={isCurrent ? "Current Output Device" : "Set as Default Output"}
                     icon={Icon.Switch}
-                    onAction={() => handleSetDefaultDevice(device)}
+                    onAction={isCurrent ? undefined : () => handleSetDefaultDevice(device)}
                   />
                   <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => loadDevices()} />
                 </ActionPanel>
