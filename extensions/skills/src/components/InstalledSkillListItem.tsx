@@ -110,7 +110,7 @@ export function InstalledSkillListItem({
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            {skill.hasUpdate && <UpdateSkillAction skillName={skill.name} onUpdate={onUpdate} />}
+            {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}
             <RemoveSkillAction skill={skill} onRemove={onUpdate} />
           </ActionPanel.Section>
           <Action

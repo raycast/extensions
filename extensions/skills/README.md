@@ -11,7 +11,6 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 - View security audit status from `skills.sh` before installing
 - View, update, and remove installed skills
 - Check for skill updates — outdated skills are highlighted with an orange icon
-- Update a single skill or all skills at once (Cmd+Shift+U)
 - Filter installed skills by agent
 - View skill details inline with SKILL.md content, including description, license, compatibility, and allowed tools (toggle with Cmd+D)
 - See GitHub star counts in the detail panel
@@ -30,7 +29,7 @@ View the top skills ranked by total installs. Browse skill details without leavi
 
 ### Manage Skills
 
-View, update, and remove installed skills. Outdated skills are highlighted with an orange icon. Select a skill and press Cmd+Shift+U to update it individually, or use the "Updates Available" section to update all at once. Filter by agent to see which skills are available for each AI agent.
+View, update, and remove installed skills. Outdated skills are highlighted with an orange icon and grouped in the "Updates Available" section. Filter by agent to see which skills are available for each AI agent.
 
 ## Screenshots
 
