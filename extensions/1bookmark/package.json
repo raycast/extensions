@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "1bookmark",
+  "title": "1Bookmark",
+  "description": "One Bookmark Solution for Teams and Personal Use.",
+  "type": "module",
+  "icon": "1bookmark-512x512.png",
+  "access": "public",
+  "author": "onebookmark",
+  "contributors": [
+    "b6pzeusbc54tvhw5jgpyw8pwz2x6gs",
+    "lee_juwon"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-bookmark",
+      "title": "Add Bookmark",
+      "subtitle": "1bookmark",
+      "description": "Add a new bookmark",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "1bookmark",
+      "description": "Search bookmark and open it",
+      "mode": "view"
+    },
+    {
+      "name": "import-bookmarks",
+      "title": "Import Bookmarks",
+      "subtitle": "1bookmark",
+      "description": "Import bookmarks",
+      "mode": "view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.93.1",
+    "@raycast/utils": "^1.19.0",
+    "@tanstack/query-async-storage-persister": "^5.54.1",
+    "@tanstack/react-query": "^5.55.0",
+    "@tanstack/react-query-persist-client": "^5.55.0",
+    "@trpc/client": "^11.0.0-rc.604",
+    "@trpc/react-query": "^11.0.0-rc.604",
+    "@trpc/server": "^11.0.0-rc.604",
+    "axios": "^1.8.4",
+    "fuzzysort": "^3.1.0",
+    "ini": "^4.1.1",
+    "node-fetch": "^3.3.2",
+    "radash": "^12.1.0",
+    "simple-plist": "^1.4.0-0",
+    "sql.js": "^1.12.0",
+    "superjson": "^2.2.1",
+    "ulid": "^2.3.0",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/ini": "^4.1.1",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "@types/sql.js": "^1.4.9",
+    "eslint": "^8.57.0",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "tsc": "npx tsc --project tsconfig.json",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "eslint": "npx eslint --ext .js,.jsx,.ts,.tsx .",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "clean": "rm -rf dist"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

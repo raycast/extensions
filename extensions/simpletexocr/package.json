@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simpletexocr",
+  "title": "SimpleTexOCR",
+  "description": "A LaTeX OCR by Simpletex",
+  "icon": "command-icon.png",
+  "author": "Arthals",
+  "contributors": [
+    "FrankMao"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "required": true,
+      "name": "token",
+      "title": "API Key",
+      "description": "API Key from SimpleTex",
+      "type": "password"
+    },
+    {
+      "required": true,
+      "name": "server_suffix",
+      "title": "Server Location",
+      "description": "Server Location",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "China",
+          "value": "cn"
+        },
+        {
+          "title": "Global",
+          "value": "net"
+        }
+      ],
+      "default": "China"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "LaTeX OCR",
+      "description": "LaTeX OCR by SimpleTex",
+      "mode": "no-view"
+    },
+    {
+      "name": "config",
+      "title": "LaTeX OCR Config",
+      "description": "Config for SimpleTex OCR",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0",
+    "axios": "^1.8.4",
+    "copy-paste": "^1.5.3",
+    "form-data": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/copy-paste": "^1.1.31",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

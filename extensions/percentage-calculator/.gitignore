@@ -1,0 +1,5 @@
+# Created by https://www.toptal.com/developers/gitignore/api/kotlin,intellij,gradle
+# Edit at https://www.toptal.com/developers/gitignore?templates=kotlin,intellij,gradle
+
+node_modules
+raycast-env.d.ts

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rateyourmusic-search",
+  "title": "Rate Your Music Search",
+  "description": "Search Rate Your Music in Raycast",
+  "icon": "extension_icon.png",
+  "author": "leepyd",
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "rym-search",
+      "title": "Search on Rate Your Music",
+      "description": "Opens Rate Your Music with your search query in the URL",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search for...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "category",
+          "type": "dropdown",
+          "placeholder": "Everything",
+          "data": [
+            {
+              "title": "Artist",
+              "value": "artist"
+            },
+            {
+              "title": "Genre",
+              "value": "genre"
+            },
+            {
+              "title": "Release",
+              "value": "release"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.1",
+    "@raycast/utils": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

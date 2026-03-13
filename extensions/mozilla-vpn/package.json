@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mozilla-vpn",
+  "title": "Mozilla VPN Connect",
+  "description": "Interact with the Mozilla VPN from Raycast.",
+  "icon": "MozillaVPN.png",
+  "author": "natew",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "VPN Connect",
+      "subtitle": "Mozilla VPN",
+      "description": "Activate or deactivate the Mozilla VPN.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^2.0.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prettier:check": "prettier --check '**/*.{js,jsx,ts,tsx,json,css,md}'",
+    "prettier:format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'"
+  }
+}

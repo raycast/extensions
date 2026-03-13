@@ -1,0 +1,165 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "iterm",
+  "title": "iTerm",
+  "description": "Control iTerm with Raycast",
+  "icon": "command-icon.png",
+  "author": "ron-myers",
+  "contributors": [
+    "flops",
+    "papey",
+    "jose-elias-alvarez",
+    "luka_nola",
+    "thomas",
+    "metrovoc"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "new-iterm-window",
+      "title": "New iTerm Window",
+      "description": "Launch new window in iTerm",
+      "mode": "view"
+    },
+    {
+      "name": "new-iterm-tab",
+      "title": "New iTerm Tab",
+      "description": "Launch new tab in iTerm",
+      "mode": "view"
+    },
+    {
+      "name": "split-iterm-horizontally",
+      "title": "Split iTerm Horizontally",
+      "description": "Split Horizontally with Current Profile",
+      "mode": "view"
+    },
+    {
+      "name": "split-iterm-vertically",
+      "title": "Split iTerm Vertically",
+      "description": "Split Vertically with Current Profile",
+      "mode": "view"
+    },
+    {
+      "name": "edit-in-iterm",
+      "title": "Edit in iTerm",
+      "description": "Edit the selected file(s) in iTerm using $EDITOR",
+      "mode": "view"
+    },
+    {
+      "name": "open-iterm-here",
+      "title": "Open iTerm Here",
+      "description": "Open iTerm in the currently selected folder(s)",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "windowOrTab",
+          "type": "dropdown",
+          "required": false,
+          "title": "Open Behavior",
+          "description": "Choose whether to open in a new window or a new tab",
+          "default": "new-window",
+          "data": [
+            {
+              "title": "New Window",
+              "value": "new-window"
+            },
+            {
+              "title": "New Tab",
+              "value": "new-tab"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "open-iterm-profile",
+      "title": "Open iTerm Profile",
+      "description": "Open a specific iTerm profile in a new window or tab",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "read-contents",
+      "title": "Read Contents",
+      "description": "Returns the visible contents of the session. Each row is terminated with a newline."
+    },
+    {
+      "name": "write-contents",
+      "title": "Write Contents",
+      "description": "Writes text to the session, as though the user had typed it."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@iterm check git status",
+        "mocks": {
+          "read-contents": "➜ git status \nOn branch master \nYour branch is up to date with 'origin/master'. \n \nnothing to commit, working tree clean \n \nraycast-macos on  master [$]",
+          "write-contents": "Successfully called \"write-contents\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "write-contents",
+              "arguments": {
+                "text": "git status\n"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "read-contents"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@iterm install ffmpeg with brew",
+        "mocks": {
+          "write-contents": "Successfully called \"write-contents\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "text": "brew install ffmpeg\n"
+              },
+              "name": "write-contents"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "file-url": "^4.0.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,0 +1,3579 @@
+{
+  "$schema":"https://www.raycast.com/schemas/extension.json",
+  "name":"figlet",
+  "title":"FIGlet",
+  "description":"Generate a FIGlet",
+  "icon":"icon.png",
+  "author":"pernielsentikaer",
+  "categories":[
+    "Fun"
+  ],
+  "license":"MIT",
+  "commands":[
+    {
+      "name":"copy-figlet",
+      "title":"Copy FIGlet to Clipboard",
+      "description":"Copy FIGlet to clipboard",
+      "mode":"no-view",
+      "arguments":[
+        {
+          "name":"text",
+          "placeholder":"Text / Selection",
+          "type":"text",
+          "required":false
+        },
+        {
+          "name":"font",
+          "placeholder":"Default font",
+          "type":"dropdown",
+          "required":false,
+          "data":[
+            {
+              "title":"1Row",
+              "value":"1Row"
+            },
+            {
+              "title":"3-D",
+              "value":"3-D"
+            },
+            {
+              "title":"3D Diagonal",
+              "value":"3D Diagonal"
+            },
+            {
+              "title":"3D-ASCII",
+              "value":"3D-ASCII"
+            },
+            {
+              "title":"3x5",
+              "value":"3x5"
+            },
+            {
+              "title":"4Max",
+              "value":"4Max"
+            },
+            {
+              "title":"5 Line Oblique",
+              "value":"5 Line Oblique"
+            },
+            {
+              "title":"AMC 3 Line",
+              "value":"AMC 3 Line"
+            },
+            {
+              "title":"AMC 3 Liv1",
+              "value":"AMC 3 Liv1"
+            },
+            {
+              "title":"AMC AAA01",
+              "value":"AMC AAA01"
+            },
+            {
+              "title":"AMC Neko",
+              "value":"AMC Neko"
+            },
+            {
+              "title":"AMC Razor",
+              "value":"AMC Razor"
+            },
+            {
+              "title":"AMC Razor2",
+              "value":"AMC Razor2"
+            },
+            {
+              "title":"AMC Slash",
+              "value":"AMC Slash"
+            },
+            {
+              "title":"AMC Slider",
+              "value":"AMC Slider"
+            },
+            {
+              "title":"AMC Thin",
+              "value":"AMC Thin"
+            },
+            {
+              "title":"AMC Tubes",
+              "value":"AMC Tubes"
+            },
+            {
+              "title":"AMC Untitled",
+              "value":"AMC Untitled"
+            },
+            {
+              "title":"ANSI Regular",
+              "value":"ANSI Regular"
+            },
+            {
+              "title":"ANSI Shadow",
+              "value":"ANSI Shadow"
+            },
+            {
+              "title":"ASCII New Roman",
+              "value":"ASCII New Roman"
+            },
+            {
+              "title":"Acrobatic",
+              "value":"Acrobatic"
+            },
+            {
+              "title":"Alligator",
+              "value":"Alligator"
+            },
+            {
+              "title":"Alligator2",
+              "value":"Alligator2"
+            },
+            {
+              "title":"Alpha",
+              "value":"Alpha"
+            },
+            {
+              "title":"Alphabet",
+              "value":"Alphabet"
+            },
+            {
+              "title":"Arrows",
+              "value":"Arrows"
+            },
+            {
+              "title":"Avatar",
+              "value":"Avatar"
+            },
+            {
+              "title":"B1FF",
+              "value":"B1FF"
+            },
+            {
+              "title":"Banner",
+              "value":"Banner"
+            },
+            {
+              "title":"Banner3-D",
+              "value":"Banner3-D"
+            },
+            {
+              "title":"Banner3",
+              "value":"Banner3"
+            },
+            {
+              "title":"Banner4",
+              "value":"Banner4"
+            },
+            {
+              "title":"Barbwire",
+              "value":"Barbwire"
+            },
+            {
+              "title":"Basic",
+              "value":"Basic"
+            },
+            {
+              "title":"Bear",
+              "value":"Bear"
+            },
+            {
+              "title":"Bell",
+              "value":"Bell"
+            },
+            {
+              "title":"Benjamin",
+              "value":"Benjamin"
+            },
+            {
+              "title":"Big Chief",
+              "value":"Big Chief"
+            },
+            {
+              "title":"Big Money-ne",
+              "value":"Big Money-ne"
+            },
+            {
+              "title":"Big Money-nw",
+              "value":"Big Money-nw"
+            },
+            {
+              "title":"Big Money-se",
+              "value":"Big Money-se"
+            },
+            {
+              "title":"Big Money-sw",
+              "value":"Big Money-sw"
+            },
+            {
+              "title":"Big",
+              "value":"Big"
+            },
+            {
+              "title":"Bigfig",
+              "value":"Bigfig"
+            },
+            {
+              "title":"Binary",
+              "value":"Binary"
+            },
+            {
+              "title":"Block",
+              "value":"Block"
+            },
+            {
+              "title":"Blocks",
+              "value":"Blocks"
+            },
+            {
+              "title":"Bloody",
+              "value":"Bloody"
+            },
+            {
+              "title":"Bolger",
+              "value":"Bolger"
+            },
+            {
+              "title":"Braced",
+              "value":"Braced"
+            },
+            {
+              "title":"Bright",
+              "value":"Bright"
+            },
+            {
+              "title":"Broadway KB",
+              "value":"Broadway KB"
+            },
+            {
+              "title":"Broadway",
+              "value":"Broadway"
+            },
+            {
+              "title":"Bubble",
+              "value":"Bubble"
+            },
+            {
+              "title":"Bulbhead",
+              "value":"Bulbhead"
+            },
+            {
+              "title":"Caligraphy",
+              "value":"Caligraphy"
+            },
+            {
+              "title":"Caligraphy2",
+              "value":"Caligraphy2"
+            },
+            {
+              "title":"Calvin S",
+              "value":"Calvin S"
+            },
+            {
+              "title":"Cards",
+              "value":"Cards"
+            },
+            {
+              "title":"Catwalk",
+              "value":"Catwalk"
+            },
+            {
+              "title":"Chiseled",
+              "value":"Chiseled"
+            },
+            {
+              "title":"Chunky",
+              "value":"Chunky"
+            },
+            {
+              "title":"Coinstak",
+              "value":"Coinstak"
+            },
+            {
+              "title":"Cola",
+              "value":"Cola"
+            },
+            {
+              "title":"Colossal",
+              "value":"Colossal"
+            },
+            {
+              "title":"Computer",
+              "value":"Computer"
+            },
+            {
+              "title":"Contessa",
+              "value":"Contessa"
+            },
+            {
+              "title":"Contrast",
+              "value":"Contrast"
+            },
+            {
+              "title":"Cosmike",
+              "value":"Cosmike"
+            },
+            {
+              "title":"Crawford",
+              "value":"Crawford"
+            },
+            {
+              "title":"Crawford2",
+              "value":"Crawford2"
+            },
+            {
+              "title":"Crazy",
+              "value":"Crazy"
+            },
+            {
+              "title":"Cricket",
+              "value":"Cricket"
+            },
+            {
+              "title":"Cursive",
+              "value":"Cursive"
+            },
+            {
+              "title":"Cyberlarge",
+              "value":"Cyberlarge"
+            },
+            {
+              "title":"Cybermedium",
+              "value":"Cybermedium"
+            },
+            {
+              "title":"Cybersmall",
+              "value":"Cybersmall"
+            },
+            {
+              "title":"Cygnet",
+              "value":"Cygnet"
+            },
+            {
+              "title":"DANC4",
+              "value":"DANC4"
+            },
+            {
+              "title":"DOS Rebel",
+              "value":"DOS Rebel"
+            },
+            {
+              "title":"DWhistled",
+              "value":"DWhistled"
+            },
+            {
+              "title":"Dancing Font",
+              "value":"Dancing Font"
+            },
+            {
+              "title":"Decimal",
+              "value":"Decimal"
+            },
+            {
+              "title":"Def Leppard",
+              "value":"Def Leppard"
+            },
+            {
+              "title":"Delta Corps Priest 1",
+              "value":"Delta Corps Priest 1"
+            },
+            {
+              "title":"Diamond",
+              "value":"Diamond"
+            },
+            {
+              "title":"Diet Cola",
+              "value":"Diet Cola"
+            },
+            {
+              "title":"Digital",
+              "value":"Digital"
+            },
+            {
+              "title":"Doh",
+              "value":"Doh"
+            },
+            {
+              "title":"Doom",
+              "value":"Doom"
+            },
+            {
+              "title":"Dot Matrix",
+              "value":"Dot Matrix"
+            },
+            {
+              "title":"Double Shorts",
+              "value":"Double Shorts"
+            },
+            {
+              "title":"Double",
+              "value":"Double"
+            },
+            {
+              "title":"Dr Pepper",
+              "value":"Dr Pepper"
+            },
+            {
+              "title":"Efti Chess",
+              "value":"Efti Chess"
+            },
+            {
+              "title":"Efti Font",
+              "value":"Efti Font"
+            },
+            {
+              "title":"Efti Italic",
+              "value":"Efti Italic"
+            },
+            {
+              "title":"Efti Piti",
+              "value":"Efti Piti"
+            },
+            {
+              "title":"Efti Robot",
+              "value":"Efti Robot"
+            },
+            {
+              "title":"Efti Wall",
+              "value":"Efti Wall"
+            },
+            {
+              "title":"Efti Water",
+              "value":"Efti Water"
+            },
+            {
+              "title":"Electronic",
+              "value":"Electronic"
+            },
+            {
+              "title":"Elite",
+              "value":"Elite"
+            },
+            {
+              "title":"Epic",
+              "value":"Epic"
+            },
+            {
+              "title":"Fender",
+              "value":"Fender"
+            },
+            {
+              "title":"Filter",
+              "value":"Filter"
+            },
+            {
+              "title":"Fire Font-k",
+              "value":"Fire Font-k"
+            },
+            {
+              "title":"Fire Font-s",
+              "value":"Fire Font-s"
+            },
+            {
+              "title":"Flipped",
+              "value":"Flipped"
+            },
+            {
+              "title":"Flower Power",
+              "value":"Flower Power"
+            },
+            {
+              "title":"Four Tops",
+              "value":"Four Tops"
+            },
+            {
+              "title":"Fraktur",
+              "value":"Fraktur"
+            },
+            {
+              "title":"Fun Face",
+              "value":"Fun Face"
+            },
+            {
+              "title":"Fun Faces",
+              "value":"Fun Faces"
+            },
+            {
+              "title":"Fuzzy",
+              "value":"Fuzzy"
+            },
+            {
+              "title":"Georgi16",
+              "value":"Georgi16"
+            },
+            {
+              "title":"Georgia11",
+              "value":"Georgia11"
+            },
+            {
+              "title":"Ghost",
+              "value":"Ghost"
+            },
+            {
+              "title":"Ghoulish",
+              "value":"Ghoulish"
+            },
+            {
+              "title":"Glenyn",
+              "value":"Glenyn"
+            },
+            {
+              "title":"Goofy",
+              "value":"Goofy"
+            },
+            {
+              "title":"Gothic",
+              "value":"Gothic"
+            },
+            {
+              "title":"Graceful",
+              "value":"Graceful"
+            },
+            {
+              "title":"Gradient",
+              "value":"Gradient"
+            },
+            {
+              "title":"Graffiti",
+              "value":"Graffiti"
+            },
+            {
+              "title":"Greek",
+              "value":"Greek"
+            },
+            {
+              "title":"Heart Left",
+              "value":"Heart Left"
+            },
+            {
+              "title":"Heart Right",
+              "value":"Heart Right"
+            },
+            {
+              "title":"Henry 3D",
+              "value":"Henry 3D"
+            },
+            {
+              "title":"Hex",
+              "value":"Hex"
+            },
+            {
+              "title":"Hieroglyphs",
+              "value":"Hieroglyphs"
+            },
+            {
+              "title":"Hollywood",
+              "value":"Hollywood"
+            },
+            {
+              "title":"Horizontal Left",
+              "value":"Horizontal Left"
+            },
+            {
+              "title":"Horizontal Right",
+              "value":"Horizontal Right"
+            },
+            {
+              "title":"ICL-1900",
+              "value":"ICL-1900"
+            },
+            {
+              "title":"Impossible",
+              "value":"Impossible"
+            },
+            {
+              "title":"Invita",
+              "value":"Invita"
+            },
+            {
+              "title":"Isometric1",
+              "value":"Isometric1"
+            },
+            {
+              "title":"Isometric2",
+              "value":"Isometric2"
+            },
+            {
+              "title":"Isometric3",
+              "value":"Isometric3"
+            },
+            {
+              "title":"Isometric4",
+              "value":"Isometric4"
+            },
+            {
+              "title":"Italic",
+              "value":"Italic"
+            },
+            {
+              "title":"Ivrit",
+              "value":"Ivrit"
+            },
+            {
+              "title":"JS Block Letters",
+              "value":"JS Block Letters"
+            },
+            {
+              "title":"JS Bracket Letters",
+              "value":"JS Bracket Letters"
+            },
+            {
+              "title":"JS Capital Curves",
+              "value":"JS Capital Curves"
+            },
+            {
+              "title":"JS Cursive",
+              "value":"JS Cursive"
+            },
+            {
+              "title":"JS Stick Letters",
+              "value":"JS Stick Letters"
+            },
+            {
+              "title":"Jacky",
+              "value":"Jacky"
+            },
+            {
+              "title":"Jazmine",
+              "value":"Jazmine"
+            },
+            {
+              "title":"Jerusalem",
+              "value":"Jerusalem"
+            },
+            {
+              "title":"Katakana",
+              "value":"Katakana"
+            },
+            {
+              "title":"Kban",
+              "value":"Kban"
+            },
+            {
+              "title":"Keyboard",
+              "value":"Keyboard"
+            },
+            {
+              "title":"Knob",
+              "value":"Knob"
+            },
+            {
+              "title":"Konto Slant",
+              "value":"Konto Slant"
+            },
+            {
+              "title":"Konto",
+              "value":"Konto"
+            },
+            {
+              "title":"LCD",
+              "value":"LCD"
+            },
+            {
+              "title":"Larry 3D 2",
+              "value":"Larry 3D 2"
+            },
+            {
+              "title":"Larry 3D",
+              "value":"Larry 3D"
+            },
+            {
+              "title":"Lean",
+              "value":"Lean"
+            },
+            {
+              "title":"Letters",
+              "value":"Letters"
+            },
+            {
+              "title":"Lil Devil",
+              "value":"Lil Devil"
+            },
+            {
+              "title":"Line Blocks",
+              "value":"Line Blocks"
+            },
+            {
+              "title":"Linux",
+              "value":"Linux"
+            },
+            {
+              "title":"Lockergnome",
+              "value":"Lockergnome"
+            },
+            {
+              "title":"Madrid",
+              "value":"Madrid"
+            },
+            {
+              "title":"Marquee",
+              "value":"Marquee"
+            },
+            {
+              "title":"Maxfour",
+              "value":"Maxfour"
+            },
+            {
+              "title":"Merlin1",
+              "value":"Merlin1"
+            },
+            {
+              "title":"Merlin2",
+              "value":"Merlin2"
+            },
+            {
+              "title":"Mike",
+              "value":"Mike"
+            },
+            {
+              "title":"Mini",
+              "value":"Mini"
+            },
+            {
+              "title":"Mirror",
+              "value":"Mirror"
+            },
+            {
+              "title":"Mnemonic",
+              "value":"Mnemonic"
+            },
+            {
+              "title":"Modular",
+              "value":"Modular"
+            },
+            {
+              "title":"Morse",
+              "value":"Morse"
+            },
+            {
+              "title":"Morse2",
+              "value":"Morse2"
+            },
+            {
+              "title":"Moscow",
+              "value":"Moscow"
+            },
+            {
+              "title":"Mshebrew210",
+              "value":"Mshebrew210"
+            },
+            {
+              "title":"Muzzle",
+              "value":"Muzzle"
+            },
+            {
+              "title":"NScript",
+              "value":"NScript"
+            },
+            {
+              "title":"NT Greek",
+              "value":"NT Greek"
+            },
+            {
+              "title":"NV Script",
+              "value":"NV Script"
+            },
+            {
+              "title":"Nancyj-Fancy",
+              "value":"Nancyj-Fancy"
+            },
+            {
+              "title":"Nancyj-Improved",
+              "value":"Nancyj-Improved"
+            },
+            {
+              "title":"Nancyj-Underlined",
+              "value":"Nancyj-Underlined"
+            },
+            {
+              "title":"Nancyj",
+              "value":"Nancyj"
+            },
+            {
+              "title":"Nipples",
+              "value":"Nipples"
+            },
+            {
+              "title":"O8",
+              "value":"O8"
+            },
+            {
+              "title":"OS2",
+              "value":"OS2"
+            },
+            {
+              "title":"Octal",
+              "value":"Octal"
+            },
+            {
+              "title":"Ogre",
+              "value":"Ogre"
+            },
+            {
+              "title":"Old Banner",
+              "value":"Old Banner"
+            },
+            {
+              "title":"Pagga",
+              "value":"Pagga"
+            },
+            {
+              "title":"Patorjk's Cheese",
+              "value":"Patorjk's Cheese"
+            },
+            {
+              "title":"Patorjk-HeX",
+              "value":"Patorjk-HeX"
+            },
+            {
+              "title":"Pawp",
+              "value":"Pawp"
+            },
+            {
+              "title":"Peaks Slant",
+              "value":"Peaks Slant"
+            },
+            {
+              "title":"Peaks",
+              "value":"Peaks"
+            },
+            {
+              "title":"Pebbles",
+              "value":"Pebbles"
+            },
+            {
+              "title":"Pepper",
+              "value":"Pepper"
+            },
+            {
+              "title":"Poison",
+              "value":"Poison"
+            },
+            {
+              "title":"Puffy",
+              "value":"Puffy"
+            },
+            {
+              "title":"Puzzle",
+              "value":"Puzzle"
+            },
+            {
+              "title":"Pyramid",
+              "value":"Pyramid"
+            },
+            {
+              "title":"Rammstein",
+              "value":"Rammstein"
+            },
+            {
+              "title":"Rectangles",
+              "value":"Rectangles"
+            },
+            {
+              "title":"Red Phoenix",
+              "value":"Red Phoenix"
+            },
+            {
+              "title":"Relief",
+              "value":"Relief"
+            },
+            {
+              "title":"Relief2",
+              "value":"Relief2"
+            },
+            {
+              "title":"Reverse",
+              "value":"Reverse"
+            },
+            {
+              "title":"Roman",
+              "value":"Roman"
+            },
+            {
+              "title":"Rot13",
+              "value":"Rot13"
+            },
+            {
+              "title":"Rotated",
+              "value":"Rotated"
+            },
+            {
+              "title":"Rounded",
+              "value":"Rounded"
+            },
+            {
+              "title":"Rowan Cap",
+              "value":"Rowan Cap"
+            },
+            {
+              "title":"Rozzo",
+              "value":"Rozzo"
+            },
+            {
+              "title":"Runic",
+              "value":"Runic"
+            },
+            {
+              "title":"Runyc",
+              "value":"Runyc"
+            },
+            {
+              "title":"S Blood",
+              "value":"S Blood"
+            },
+            {
+              "title":"SL Script",
+              "value":"SL Script"
+            },
+            {
+              "title":"Santa Clara",
+              "value":"Santa Clara"
+            },
+            {
+              "title":"Script",
+              "value":"Script"
+            },
+            {
+              "title":"Serifcap",
+              "value":"Serifcap"
+            },
+            {
+              "title":"Shadow",
+              "value":"Shadow"
+            },
+            {
+              "title":"Shimrod",
+              "value":"Shimrod"
+            },
+            {
+              "title":"Short",
+              "value":"Short"
+            },
+            {
+              "title":"Slant Relief",
+              "value":"Slant Relief"
+            },
+            {
+              "title":"Slant",
+              "value":"Slant"
+            },
+            {
+              "title":"Slide",
+              "value":"Slide"
+            },
+            {
+              "title":"Small Caps",
+              "value":"Small Caps"
+            },
+            {
+              "title":"Small Isometric1",
+              "value":"Small Isometric1"
+            },
+            {
+              "title":"Small Keyboard",
+              "value":"Small Keyboard"
+            },
+            {
+              "title":"Small Poison",
+              "value":"Small Poison"
+            },
+            {
+              "title":"Small Script",
+              "value":"Small Script"
+            },
+            {
+              "title":"Small Shadow",
+              "value":"Small Shadow"
+            },
+            {
+              "title":"Small Slant",
+              "value":"Small Slant"
+            },
+            {
+              "title":"Small Tengwar",
+              "value":"Small Tengwar"
+            },
+            {
+              "title":"Small",
+              "value":"Small"
+            },
+            {
+              "title":"Soft",
+              "value":"Soft"
+            },
+            {
+              "title":"Speed",
+              "value":"Speed"
+            },
+            {
+              "title":"Spliff",
+              "value":"Spliff"
+            },
+            {
+              "title":"Stacey",
+              "value":"Stacey"
+            },
+            {
+              "title":"Stampate",
+              "value":"Stampate"
+            },
+            {
+              "title":"Stampatello",
+              "value":"Stampatello"
+            },
+            {
+              "title":"Standard",
+              "value":"Standard"
+            },
+            {
+              "title":"Star Strips",
+              "value":"Star Strips"
+            },
+            {
+              "title":"Star Wars",
+              "value":"Star Wars"
+            },
+            {
+              "title":"Stellar",
+              "value":"Stellar"
+            },
+            {
+              "title":"Stforek",
+              "value":"Stforek"
+            },
+            {
+              "title":"Stick Letters",
+              "value":"Stick Letters"
+            },
+            {
+              "title":"Stop",
+              "value":"Stop"
+            },
+            {
+              "title":"Straight",
+              "value":"Straight"
+            },
+            {
+              "title":"Stronger Than All",
+              "value":"Stronger Than All"
+            },
+            {
+              "title":"Sub-Zero",
+              "value":"Sub-Zero"
+            },
+            {
+              "title":"Swamp Land",
+              "value":"Swamp Land"
+            },
+            {
+              "title":"Swan",
+              "value":"Swan"
+            },
+            {
+              "title":"Sweet",
+              "value":"Sweet"
+            },
+            {
+              "title":"THIS",
+              "value":"THIS"
+            },
+            {
+              "title":"Tanja",
+              "value":"Tanja"
+            },
+            {
+              "title":"Tengwar",
+              "value":"Tengwar"
+            },
+            {
+              "title":"Term",
+              "value":"Term"
+            },
+            {
+              "title":"Test1",
+              "value":"Test1"
+            },
+            {
+              "title":"The Edge",
+              "value":"The Edge"
+            },
+            {
+              "title":"Thick",
+              "value":"Thick"
+            },
+            {
+              "title":"Thin",
+              "value":"Thin"
+            },
+            {
+              "title":"Thorned",
+              "value":"Thorned"
+            },
+            {
+              "title":"Three Point",
+              "value":"Three Point"
+            },
+            {
+              "title":"Ticks Slant",
+              "value":"Ticks Slant"
+            },
+            {
+              "title":"Ticks",
+              "value":"Ticks"
+            },
+            {
+              "title":"Tiles",
+              "value":"Tiles"
+            },
+            {
+              "title":"Tinker-Toy",
+              "value":"Tinker-Toy"
+            },
+            {
+              "title":"Tombstone",
+              "value":"Tombstone"
+            },
+            {
+              "title":"Train",
+              "value":"Train"
+            },
+            {
+              "title":"Trek",
+              "value":"Trek"
+            },
+            {
+              "title":"Tsalagi",
+              "value":"Tsalagi"
+            },
+            {
+              "title":"Tubular",
+              "value":"Tubular"
+            },
+            {
+              "title":"Twisted",
+              "value":"Twisted"
+            },
+            {
+              "title":"Two Point",
+              "value":"Two Point"
+            },
+            {
+              "title":"USA Flag",
+              "value":"USA Flag"
+            },
+            {
+              "title":"Univers",
+              "value":"Univers"
+            },
+            {
+              "title":"Varsity",
+              "value":"Varsity"
+            },
+            {
+              "title":"Wavy",
+              "value":"Wavy"
+            },
+            {
+              "title":"Weird",
+              "value":"Weird"
+            },
+            {
+              "title":"Wet Letter",
+              "value":"Wet Letter"
+            },
+            {
+              "title":"Whimsy",
+              "value":"Whimsy"
+            },
+            {
+              "title":"Wow",
+              "value":"Wow"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name":"paste-figlet",
+      "title":"Paste FIGlet to Active App",
+      "description":"Paste FIGlet to active app",
+      "mode":"no-view",
+      "arguments":[
+        {
+          "name":"text",
+          "placeholder":"Text / Selection",
+          "type":"text",
+          "required":false
+        },
+        {
+          "name":"font",
+          "placeholder":"Default font",
+          "type":"dropdown",
+          "required":false,
+          "data":[
+            {
+              "title":"1Row",
+              "value":"1Row"
+            },
+            {
+              "title":"3-D",
+              "value":"3-D"
+            },
+            {
+              "title":"3D Diagonal",
+              "value":"3D Diagonal"
+            },
+            {
+              "title":"3D-ASCII",
+              "value":"3D-ASCII"
+            },
+            {
+              "title":"3x5",
+              "value":"3x5"
+            },
+            {
+              "title":"4Max",
+              "value":"4Max"
+            },
+            {
+              "title":"5 Line Oblique",
+              "value":"5 Line Oblique"
+            },
+            {
+              "title":"AMC 3 Line",
+              "value":"AMC 3 Line"
+            },
+            {
+              "title":"AMC 3 Liv1",
+              "value":"AMC 3 Liv1"
+            },
+            {
+              "title":"AMC AAA01",
+              "value":"AMC AAA01"
+            },
+            {
+              "title":"AMC Neko",
+              "value":"AMC Neko"
+            },
+            {
+              "title":"AMC Razor",
+              "value":"AMC Razor"
+            },
+            {
+              "title":"AMC Razor2",
+              "value":"AMC Razor2"
+            },
+            {
+              "title":"AMC Slash",
+              "value":"AMC Slash"
+            },
+            {
+              "title":"AMC Slider",
+              "value":"AMC Slider"
+            },
+            {
+              "title":"AMC Thin",
+              "value":"AMC Thin"
+            },
+            {
+              "title":"AMC Tubes",
+              "value":"AMC Tubes"
+            },
+            {
+              "title":"AMC Untitled",
+              "value":"AMC Untitled"
+            },
+            {
+              "title":"ANSI Regular",
+              "value":"ANSI Regular"
+            },
+            {
+              "title":"ANSI Shadow",
+              "value":"ANSI Shadow"
+            },
+            {
+              "title":"ASCII New Roman",
+              "value":"ASCII New Roman"
+            },
+            {
+              "title":"Acrobatic",
+              "value":"Acrobatic"
+            },
+            {
+              "title":"Alligator",
+              "value":"Alligator"
+            },
+            {
+              "title":"Alligator2",
+              "value":"Alligator2"
+            },
+            {
+              "title":"Alpha",
+              "value":"Alpha"
+            },
+            {
+              "title":"Alphabet",
+              "value":"Alphabet"
+            },
+            {
+              "title":"Arrows",
+              "value":"Arrows"
+            },
+            {
+              "title":"Avatar",
+              "value":"Avatar"
+            },
+            {
+              "title":"B1FF",
+              "value":"B1FF"
+            },
+            {
+              "title":"Banner",
+              "value":"Banner"
+            },
+            {
+              "title":"Banner3-D",
+              "value":"Banner3-D"
+            },
+            {
+              "title":"Banner3",
+              "value":"Banner3"
+            },
+            {
+              "title":"Banner4",
+              "value":"Banner4"
+            },
+            {
+              "title":"Barbwire",
+              "value":"Barbwire"
+            },
+            {
+              "title":"Basic",
+              "value":"Basic"
+            },
+            {
+              "title":"Bear",
+              "value":"Bear"
+            },
+            {
+              "title":"Bell",
+              "value":"Bell"
+            },
+            {
+              "title":"Benjamin",
+              "value":"Benjamin"
+            },
+            {
+              "title":"Big Chief",
+              "value":"Big Chief"
+            },
+            {
+              "title":"Big Money-ne",
+              "value":"Big Money-ne"
+            },
+            {
+              "title":"Big Money-nw",
+              "value":"Big Money-nw"
+            },
+            {
+              "title":"Big Money-se",
+              "value":"Big Money-se"
+            },
+            {
+              "title":"Big Money-sw",
+              "value":"Big Money-sw"
+            },
+            {
+              "title":"Big",
+              "value":"Big"
+            },
+            {
+              "title":"Bigfig",
+              "value":"Bigfig"
+            },
+            {
+              "title":"Binary",
+              "value":"Binary"
+            },
+            {
+              "title":"Block",
+              "value":"Block"
+            },
+            {
+              "title":"Blocks",
+              "value":"Blocks"
+            },
+            {
+              "title":"Bloody",
+              "value":"Bloody"
+            },
+            {
+              "title":"Bolger",
+              "value":"Bolger"
+            },
+            {
+              "title":"Braced",
+              "value":"Braced"
+            },
+            {
+              "title":"Bright",
+              "value":"Bright"
+            },
+            {
+              "title":"Broadway KB",
+              "value":"Broadway KB"
+            },
+            {
+              "title":"Broadway",
+              "value":"Broadway"
+            },
+            {
+              "title":"Bubble",
+              "value":"Bubble"
+            },
+            {
+              "title":"Bulbhead",
+              "value":"Bulbhead"
+            },
+            {
+              "title":"Caligraphy",
+              "value":"Caligraphy"
+            },
+            {
+              "title":"Caligraphy2",
+              "value":"Caligraphy2"
+            },
+            {
+              "title":"Calvin S",
+              "value":"Calvin S"
+            },
+            {
+              "title":"Cards",
+              "value":"Cards"
+            },
+            {
+              "title":"Catwalk",
+              "value":"Catwalk"
+            },
+            {
+              "title":"Chiseled",
+              "value":"Chiseled"
+            },
+            {
+              "title":"Chunky",
+              "value":"Chunky"
+            },
+            {
+              "title":"Coinstak",
+              "value":"Coinstak"
+            },
+            {
+              "title":"Cola",
+              "value":"Cola"
+            },
+            {
+              "title":"Colossal",
+              "value":"Colossal"
+            },
+            {
+              "title":"Computer",
+              "value":"Computer"
+            },
+            {
+              "title":"Contessa",
+              "value":"Contessa"
+            },
+            {
+              "title":"Contrast",
+              "value":"Contrast"
+            },
+            {
+              "title":"Cosmike",
+              "value":"Cosmike"
+            },
+            {
+              "title":"Crawford",
+              "value":"Crawford"
+            },
+            {
+              "title":"Crawford2",
+              "value":"Crawford2"
+            },
+            {
+              "title":"Crazy",
+              "value":"Crazy"
+            },
+            {
+              "title":"Cricket",
+              "value":"Cricket"
+            },
+            {
+              "title":"Cursive",
+              "value":"Cursive"
+            },
+            {
+              "title":"Cyberlarge",
+              "value":"Cyberlarge"
+            },
+            {
+              "title":"Cybermedium",
+              "value":"Cybermedium"
+            },
+            {
+              "title":"Cybersmall",
+              "value":"Cybersmall"
+            },
+            {
+              "title":"Cygnet",
+              "value":"Cygnet"
+            },
+            {
+              "title":"DANC4",
+              "value":"DANC4"
+            },
+            {
+              "title":"DOS Rebel",
+              "value":"DOS Rebel"
+            },
+            {
+              "title":"DWhistled",
+              "value":"DWhistled"
+            },
+            {
+              "title":"Dancing Font",
+              "value":"Dancing Font"
+            },
+            {
+              "title":"Decimal",
+              "value":"Decimal"
+            },
+            {
+              "title":"Def Leppard",
+              "value":"Def Leppard"
+            },
+            {
+              "title":"Delta Corps Priest 1",
+              "value":"Delta Corps Priest 1"
+            },
+            {
+              "title":"Diamond",
+              "value":"Diamond"
+            },
+            {
+              "title":"Diet Cola",
+              "value":"Diet Cola"
+            },
+            {
+              "title":"Digital",
+              "value":"Digital"
+            },
+            {
+              "title":"Doh",
+              "value":"Doh"
+            },
+            {
+              "title":"Doom",
+              "value":"Doom"
+            },
+            {
+              "title":"Dot Matrix",
+              "value":"Dot Matrix"
+            },
+            {
+              "title":"Double Shorts",
+              "value":"Double Shorts"
+            },
+            {
+              "title":"Double",
+              "value":"Double"
+            },
+            {
+              "title":"Dr Pepper",
+              "value":"Dr Pepper"
+            },
+            {
+              "title":"Efti Chess",
+              "value":"Efti Chess"
+            },
+            {
+              "title":"Efti Font",
+              "value":"Efti Font"
+            },
+            {
+              "title":"Efti Italic",
+              "value":"Efti Italic"
+            },
+            {
+              "title":"Efti Piti",
+              "value":"Efti Piti"
+            },
+            {
+              "title":"Efti Robot",
+              "value":"Efti Robot"
+            },
+            {
+              "title":"Efti Wall",
+              "value":"Efti Wall"
+            },
+            {
+              "title":"Efti Water",
+              "value":"Efti Water"
+            },
+            {
+              "title":"Electronic",
+              "value":"Electronic"
+            },
+            {
+              "title":"Elite",
+              "value":"Elite"
+            },
+            {
+              "title":"Epic",
+              "value":"Epic"
+            },
+            {
+              "title":"Fender",
+              "value":"Fender"
+            },
+            {
+              "title":"Filter",
+              "value":"Filter"
+            },
+            {
+              "title":"Fire Font-k",
+              "value":"Fire Font-k"
+            },
+            {
+              "title":"Fire Font-s",
+              "value":"Fire Font-s"
+            },
+            {
+              "title":"Flipped",
+              "value":"Flipped"
+            },
+            {
+              "title":"Flower Power",
+              "value":"Flower Power"
+            },
+            {
+              "title":"Four Tops",
+              "value":"Four Tops"
+            },
+            {
+              "title":"Fraktur",
+              "value":"Fraktur"
+            },
+            {
+              "title":"Fun Face",
+              "value":"Fun Face"
+            },
+            {
+              "title":"Fun Faces",
+              "value":"Fun Faces"
+            },
+            {
+              "title":"Fuzzy",
+              "value":"Fuzzy"
+            },
+            {
+              "title":"Georgi16",
+              "value":"Georgi16"
+            },
+            {
+              "title":"Georgia11",
+              "value":"Georgia11"
+            },
+            {
+              "title":"Ghost",
+              "value":"Ghost"
+            },
+            {
+              "title":"Ghoulish",
+              "value":"Ghoulish"
+            },
+            {
+              "title":"Glenyn",
+              "value":"Glenyn"
+            },
+            {
+              "title":"Goofy",
+              "value":"Goofy"
+            },
+            {
+              "title":"Gothic",
+              "value":"Gothic"
+            },
+            {
+              "title":"Graceful",
+              "value":"Graceful"
+            },
+            {
+              "title":"Gradient",
+              "value":"Gradient"
+            },
+            {
+              "title":"Graffiti",
+              "value":"Graffiti"
+            },
+            {
+              "title":"Greek",
+              "value":"Greek"
+            },
+            {
+              "title":"Heart Left",
+              "value":"Heart Left"
+            },
+            {
+              "title":"Heart Right",
+              "value":"Heart Right"
+            },
+            {
+              "title":"Henry 3D",
+              "value":"Henry 3D"
+            },
+            {
+              "title":"Hex",
+              "value":"Hex"
+            },
+            {
+              "title":"Hieroglyphs",
+              "value":"Hieroglyphs"
+            },
+            {
+              "title":"Hollywood",
+              "value":"Hollywood"
+            },
+            {
+              "title":"Horizontal Left",
+              "value":"Horizontal Left"
+            },
+            {
+              "title":"Horizontal Right",
+              "value":"Horizontal Right"
+            },
+            {
+              "title":"ICL-1900",
+              "value":"ICL-1900"
+            },
+            {
+              "title":"Impossible",
+              "value":"Impossible"
+            },
+            {
+              "title":"Invita",
+              "value":"Invita"
+            },
+            {
+              "title":"Isometric1",
+              "value":"Isometric1"
+            },
+            {
+              "title":"Isometric2",
+              "value":"Isometric2"
+            },
+            {
+              "title":"Isometric3",
+              "value":"Isometric3"
+            },
+            {
+              "title":"Isometric4",
+              "value":"Isometric4"
+            },
+            {
+              "title":"Italic",
+              "value":"Italic"
+            },
+            {
+              "title":"Ivrit",
+              "value":"Ivrit"
+            },
+            {
+              "title":"JS Block Letters",
+              "value":"JS Block Letters"
+            },
+            {
+              "title":"JS Bracket Letters",
+              "value":"JS Bracket Letters"
+            },
+            {
+              "title":"JS Capital Curves",
+              "value":"JS Capital Curves"
+            },
+            {
+              "title":"JS Cursive",
+              "value":"JS Cursive"
+            },
+            {
+              "title":"JS Stick Letters",
+              "value":"JS Stick Letters"
+            },
+            {
+              "title":"Jacky",
+              "value":"Jacky"
+            },
+            {
+              "title":"Jazmine",
+              "value":"Jazmine"
+            },
+            {
+              "title":"Jerusalem",
+              "value":"Jerusalem"
+            },
+            {
+              "title":"Katakana",
+              "value":"Katakana"
+            },
+            {
+              "title":"Kban",
+              "value":"Kban"
+            },
+            {
+              "title":"Keyboard",
+              "value":"Keyboard"
+            },
+            {
+              "title":"Knob",
+              "value":"Knob"
+            },
+            {
+              "title":"Konto Slant",
+              "value":"Konto Slant"
+            },
+            {
+              "title":"Konto",
+              "value":"Konto"
+            },
+            {
+              "title":"LCD",
+              "value":"LCD"
+            },
+            {
+              "title":"Larry 3D 2",
+              "value":"Larry 3D 2"
+            },
+            {
+              "title":"Larry 3D",
+              "value":"Larry 3D"
+            },
+            {
+              "title":"Lean",
+              "value":"Lean"
+            },
+            {
+              "title":"Letters",
+              "value":"Letters"
+            },
+            {
+              "title":"Lil Devil",
+              "value":"Lil Devil"
+            },
+            {
+              "title":"Line Blocks",
+              "value":"Line Blocks"
+            },
+            {
+              "title":"Linux",
+              "value":"Linux"
+            },
+            {
+              "title":"Lockergnome",
+              "value":"Lockergnome"
+            },
+            {
+              "title":"Madrid",
+              "value":"Madrid"
+            },
+            {
+              "title":"Marquee",
+              "value":"Marquee"
+            },
+            {
+              "title":"Maxfour",
+              "value":"Maxfour"
+            },
+            {
+              "title":"Merlin1",
+              "value":"Merlin1"
+            },
+            {
+              "title":"Merlin2",
+              "value":"Merlin2"
+            },
+            {
+              "title":"Mike",
+              "value":"Mike"
+            },
+            {
+              "title":"Mini",
+              "value":"Mini"
+            },
+            {
+              "title":"Mirror",
+              "value":"Mirror"
+            },
+            {
+              "title":"Mnemonic",
+              "value":"Mnemonic"
+            },
+            {
+              "title":"Modular",
+              "value":"Modular"
+            },
+            {
+              "title":"Morse",
+              "value":"Morse"
+            },
+            {
+              "title":"Morse2",
+              "value":"Morse2"
+            },
+            {
+              "title":"Moscow",
+              "value":"Moscow"
+            },
+            {
+              "title":"Mshebrew210",
+              "value":"Mshebrew210"
+            },
+            {
+              "title":"Muzzle",
+              "value":"Muzzle"
+            },
+            {
+              "title":"NScript",
+              "value":"NScript"
+            },
+            {
+              "title":"NT Greek",
+              "value":"NT Greek"
+            },
+            {
+              "title":"NV Script",
+              "value":"NV Script"
+            },
+            {
+              "title":"Nancyj-Fancy",
+              "value":"Nancyj-Fancy"
+            },
+            {
+              "title":"Nancyj-Improved",
+              "value":"Nancyj-Improved"
+            },
+            {
+              "title":"Nancyj-Underlined",
+              "value":"Nancyj-Underlined"
+            },
+            {
+              "title":"Nancyj",
+              "value":"Nancyj"
+            },
+            {
+              "title":"Nipples",
+              "value":"Nipples"
+            },
+            {
+              "title":"O8",
+              "value":"O8"
+            },
+            {
+              "title":"OS2",
+              "value":"OS2"
+            },
+            {
+              "title":"Octal",
+              "value":"Octal"
+            },
+            {
+              "title":"Ogre",
+              "value":"Ogre"
+            },
+            {
+              "title":"Old Banner",
+              "value":"Old Banner"
+            },
+            {
+              "title":"Pagga",
+              "value":"Pagga"
+            },
+            {
+              "title":"Patorjk's Cheese",
+              "value":"Patorjk's Cheese"
+            },
+            {
+              "title":"Patorjk-HeX",
+              "value":"Patorjk-HeX"
+            },
+            {
+              "title":"Pawp",
+              "value":"Pawp"
+            },
+            {
+              "title":"Peaks Slant",
+              "value":"Peaks Slant"
+            },
+            {
+              "title":"Peaks",
+              "value":"Peaks"
+            },
+            {
+              "title":"Pebbles",
+              "value":"Pebbles"
+            },
+            {
+              "title":"Pepper",
+              "value":"Pepper"
+            },
+            {
+              "title":"Poison",
+              "value":"Poison"
+            },
+            {
+              "title":"Puffy",
+              "value":"Puffy"
+            },
+            {
+              "title":"Puzzle",
+              "value":"Puzzle"
+            },
+            {
+              "title":"Pyramid",
+              "value":"Pyramid"
+            },
+            {
+              "title":"Rammstein",
+              "value":"Rammstein"
+            },
+            {
+              "title":"Rectangles",
+              "value":"Rectangles"
+            },
+            {
+              "title":"Red Phoenix",
+              "value":"Red Phoenix"
+            },
+            {
+              "title":"Relief",
+              "value":"Relief"
+            },
+            {
+              "title":"Relief2",
+              "value":"Relief2"
+            },
+            {
+              "title":"Reverse",
+              "value":"Reverse"
+            },
+            {
+              "title":"Roman",
+              "value":"Roman"
+            },
+            {
+              "title":"Rot13",
+              "value":"Rot13"
+            },
+            {
+              "title":"Rotated",
+              "value":"Rotated"
+            },
+            {
+              "title":"Rounded",
+              "value":"Rounded"
+            },
+            {
+              "title":"Rowan Cap",
+              "value":"Rowan Cap"
+            },
+            {
+              "title":"Rozzo",
+              "value":"Rozzo"
+            },
+            {
+              "title":"Runic",
+              "value":"Runic"
+            },
+            {
+              "title":"Runyc",
+              "value":"Runyc"
+            },
+            {
+              "title":"S Blood",
+              "value":"S Blood"
+            },
+            {
+              "title":"SL Script",
+              "value":"SL Script"
+            },
+            {
+              "title":"Santa Clara",
+              "value":"Santa Clara"
+            },
+            {
+              "title":"Script",
+              "value":"Script"
+            },
+            {
+              "title":"Serifcap",
+              "value":"Serifcap"
+            },
+            {
+              "title":"Shadow",
+              "value":"Shadow"
+            },
+            {
+              "title":"Shimrod",
+              "value":"Shimrod"
+            },
+            {
+              "title":"Short",
+              "value":"Short"
+            },
+            {
+              "title":"Slant Relief",
+              "value":"Slant Relief"
+            },
+            {
+              "title":"Slant",
+              "value":"Slant"
+            },
+            {
+              "title":"Slide",
+              "value":"Slide"
+            },
+            {
+              "title":"Small Caps",
+              "value":"Small Caps"
+            },
+            {
+              "title":"Small Isometric1",
+              "value":"Small Isometric1"
+            },
+            {
+              "title":"Small Keyboard",
+              "value":"Small Keyboard"
+            },
+            {
+              "title":"Small Poison",
+              "value":"Small Poison"
+            },
+            {
+              "title":"Small Script",
+              "value":"Small Script"
+            },
+            {
+              "title":"Small Shadow",
+              "value":"Small Shadow"
+            },
+            {
+              "title":"Small Slant",
+              "value":"Small Slant"
+            },
+            {
+              "title":"Small Tengwar",
+              "value":"Small Tengwar"
+            },
+            {
+              "title":"Small",
+              "value":"Small"
+            },
+            {
+              "title":"Soft",
+              "value":"Soft"
+            },
+            {
+              "title":"Speed",
+              "value":"Speed"
+            },
+            {
+              "title":"Spliff",
+              "value":"Spliff"
+            },
+            {
+              "title":"Stacey",
+              "value":"Stacey"
+            },
+            {
+              "title":"Stampate",
+              "value":"Stampate"
+            },
+            {
+              "title":"Stampatello",
+              "value":"Stampatello"
+            },
+            {
+              "title":"Standard",
+              "value":"Standard"
+            },
+            {
+              "title":"Star Strips",
+              "value":"Star Strips"
+            },
+            {
+              "title":"Star Wars",
+              "value":"Star Wars"
+            },
+            {
+              "title":"Stellar",
+              "value":"Stellar"
+            },
+            {
+              "title":"Stforek",
+              "value":"Stforek"
+            },
+            {
+              "title":"Stick Letters",
+              "value":"Stick Letters"
+            },
+            {
+              "title":"Stop",
+              "value":"Stop"
+            },
+            {
+              "title":"Straight",
+              "value":"Straight"
+            },
+            {
+              "title":"Stronger Than All",
+              "value":"Stronger Than All"
+            },
+            {
+              "title":"Sub-Zero",
+              "value":"Sub-Zero"
+            },
+            {
+              "title":"Swamp Land",
+              "value":"Swamp Land"
+            },
+            {
+              "title":"Swan",
+              "value":"Swan"
+            },
+            {
+              "title":"Sweet",
+              "value":"Sweet"
+            },
+            {
+              "title":"THIS",
+              "value":"THIS"
+            },
+            {
+              "title":"Tanja",
+              "value":"Tanja"
+            },
+            {
+              "title":"Tengwar",
+              "value":"Tengwar"
+            },
+            {
+              "title":"Term",
+              "value":"Term"
+            },
+            {
+              "title":"Test1",
+              "value":"Test1"
+            },
+            {
+              "title":"The Edge",
+              "value":"The Edge"
+            },
+            {
+              "title":"Thick",
+              "value":"Thick"
+            },
+            {
+              "title":"Thin",
+              "value":"Thin"
+            },
+            {
+              "title":"Thorned",
+              "value":"Thorned"
+            },
+            {
+              "title":"Three Point",
+              "value":"Three Point"
+            },
+            {
+              "title":"Ticks Slant",
+              "value":"Ticks Slant"
+            },
+            {
+              "title":"Ticks",
+              "value":"Ticks"
+            },
+            {
+              "title":"Tiles",
+              "value":"Tiles"
+            },
+            {
+              "title":"Tinker-Toy",
+              "value":"Tinker-Toy"
+            },
+            {
+              "title":"Tombstone",
+              "value":"Tombstone"
+            },
+            {
+              "title":"Train",
+              "value":"Train"
+            },
+            {
+              "title":"Trek",
+              "value":"Trek"
+            },
+            {
+              "title":"Tsalagi",
+              "value":"Tsalagi"
+            },
+            {
+              "title":"Tubular",
+              "value":"Tubular"
+            },
+            {
+              "title":"Twisted",
+              "value":"Twisted"
+            },
+            {
+              "title":"Two Point",
+              "value":"Two Point"
+            },
+            {
+              "title":"USA Flag",
+              "value":"USA Flag"
+            },
+            {
+              "title":"Univers",
+              "value":"Univers"
+            },
+            {
+              "title":"Varsity",
+              "value":"Varsity"
+            },
+            {
+              "title":"Wavy",
+              "value":"Wavy"
+            },
+            {
+              "title":"Weird",
+              "value":"Weird"
+            },
+            {
+              "title":"Wet Letter",
+              "value":"Wet Letter"
+            },
+            {
+              "title":"Whimsy",
+              "value":"Whimsy"
+            },
+            {
+              "title":"Wow",
+              "value":"Wow"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences":[
+    {
+      "name":"defaultFont",
+      "description":"Default Font",
+      "type":"dropdown",
+      "required":false,
+      "title":"Default Font",
+      "default":"Big",
+      "placeholder":"Default Font",
+      "data":[
+        {
+          "title":"1Row",
+          "value":"1Row"
+        },
+        {
+          "title":"3-D",
+          "value":"3-D"
+        },
+        {
+          "title":"3D Diagonal",
+          "value":"3D Diagonal"
+        },
+        {
+          "title":"3D-ASCII",
+          "value":"3D-ASCII"
+        },
+        {
+          "title":"3x5",
+          "value":"3x5"
+        },
+        {
+          "title":"4Max",
+          "value":"4Max"
+        },
+        {
+          "title":"5 Line Oblique",
+          "value":"5 Line Oblique"
+        },
+        {
+          "title":"AMC 3 Line",
+          "value":"AMC 3 Line"
+        },
+        {
+          "title":"AMC 3 Liv1",
+          "value":"AMC 3 Liv1"
+        },
+        {
+          "title":"AMC AAA01",
+          "value":"AMC AAA01"
+        },
+        {
+          "title":"AMC Neko",
+          "value":"AMC Neko"
+        },
+        {
+          "title":"AMC Razor",
+          "value":"AMC Razor"
+        },
+        {
+          "title":"AMC Razor2",
+          "value":"AMC Razor2"
+        },
+        {
+          "title":"AMC Slash",
+          "value":"AMC Slash"
+        },
+        {
+          "title":"AMC Slider",
+          "value":"AMC Slider"
+        },
+        {
+          "title":"AMC Thin",
+          "value":"AMC Thin"
+        },
+        {
+          "title":"AMC Tubes",
+          "value":"AMC Tubes"
+        },
+        {
+          "title":"AMC Untitled",
+          "value":"AMC Untitled"
+        },
+        {
+          "title":"ANSI Regular",
+          "value":"ANSI Regular"
+        },
+        {
+          "title":"ANSI Shadow",
+          "value":"ANSI Shadow"
+        },
+        {
+          "title":"ASCII New Roman",
+          "value":"ASCII New Roman"
+        },
+        {
+          "title":"Acrobatic",
+          "value":"Acrobatic"
+        },
+        {
+          "title":"Alligator",
+          "value":"Alligator"
+        },
+        {
+          "title":"Alligator2",
+          "value":"Alligator2"
+        },
+        {
+          "title":"Alpha",
+          "value":"Alpha"
+        },
+        {
+          "title":"Alphabet",
+          "value":"Alphabet"
+        },
+        {
+          "title":"Arrows",
+          "value":"Arrows"
+        },
+        {
+          "title":"Avatar",
+          "value":"Avatar"
+        },
+        {
+          "title":"B1FF",
+          "value":"B1FF"
+        },
+        {
+          "title":"Banner",
+          "value":"Banner"
+        },
+        {
+          "title":"Banner3-D",
+          "value":"Banner3-D"
+        },
+        {
+          "title":"Banner3",
+          "value":"Banner3"
+        },
+        {
+          "title":"Banner4",
+          "value":"Banner4"
+        },
+        {
+          "title":"Barbwire",
+          "value":"Barbwire"
+        },
+        {
+          "title":"Basic",
+          "value":"Basic"
+        },
+        {
+          "title":"Bear",
+          "value":"Bear"
+        },
+        {
+          "title":"Bell",
+          "value":"Bell"
+        },
+        {
+          "title":"Benjamin",
+          "value":"Benjamin"
+        },
+        {
+          "title":"Big Chief",
+          "value":"Big Chief"
+        },
+        {
+          "title":"Big Money-ne",
+          "value":"Big Money-ne"
+        },
+        {
+          "title":"Big Money-nw",
+          "value":"Big Money-nw"
+        },
+        {
+          "title":"Big Money-se",
+          "value":"Big Money-se"
+        },
+        {
+          "title":"Big Money-sw",
+          "value":"Big Money-sw"
+        },
+        {
+          "title":"Big",
+          "value":"Big"
+        },
+        {
+          "title":"Bigfig",
+          "value":"Bigfig"
+        },
+        {
+          "title":"Binary",
+          "value":"Binary"
+        },
+        {
+          "title":"Block",
+          "value":"Block"
+        },
+        {
+          "title":"Blocks",
+          "value":"Blocks"
+        },
+        {
+          "title":"Bloody",
+          "value":"Bloody"
+        },
+        {
+          "title":"Bolger",
+          "value":"Bolger"
+        },
+        {
+          "title":"Braced",
+          "value":"Braced"
+        },
+        {
+          "title":"Bright",
+          "value":"Bright"
+        },
+        {
+          "title":"Broadway KB",
+          "value":"Broadway KB"
+        },
+        {
+          "title":"Broadway",
+          "value":"Broadway"
+        },
+        {
+          "title":"Bubble",
+          "value":"Bubble"
+        },
+        {
+          "title":"Bulbhead",
+          "value":"Bulbhead"
+        },
+        {
+          "title":"Caligraphy",
+          "value":"Caligraphy"
+        },
+        {
+          "title":"Caligraphy2",
+          "value":"Caligraphy2"
+        },
+        {
+          "title":"Calvin S",
+          "value":"Calvin S"
+        },
+        {
+          "title":"Cards",
+          "value":"Cards"
+        },
+        {
+          "title":"Catwalk",
+          "value":"Catwalk"
+        },
+        {
+          "title":"Chiseled",
+          "value":"Chiseled"
+        },
+        {
+          "title":"Chunky",
+          "value":"Chunky"
+        },
+        {
+          "title":"Coinstak",
+          "value":"Coinstak"
+        },
+        {
+          "title":"Cola",
+          "value":"Cola"
+        },
+        {
+          "title":"Colossal",
+          "value":"Colossal"
+        },
+        {
+          "title":"Computer",
+          "value":"Computer"
+        },
+        {
+          "title":"Contessa",
+          "value":"Contessa"
+        },
+        {
+          "title":"Contrast",
+          "value":"Contrast"
+        },
+        {
+          "title":"Cosmike",
+          "value":"Cosmike"
+        },
+        {
+          "title":"Crawford",
+          "value":"Crawford"
+        },
+        {
+          "title":"Crawford2",
+          "value":"Crawford2"
+        },
+        {
+          "title":"Crazy",
+          "value":"Crazy"
+        },
+        {
+          "title":"Cricket",
+          "value":"Cricket"
+        },
+        {
+          "title":"Cursive",
+          "value":"Cursive"
+        },
+        {
+          "title":"Cyberlarge",
+          "value":"Cyberlarge"
+        },
+        {
+          "title":"Cybermedium",
+          "value":"Cybermedium"
+        },
+        {
+          "title":"Cybersmall",
+          "value":"Cybersmall"
+        },
+        {
+          "title":"Cygnet",
+          "value":"Cygnet"
+        },
+        {
+          "title":"DANC4",
+          "value":"DANC4"
+        },
+        {
+          "title":"DOS Rebel",
+          "value":"DOS Rebel"
+        },
+        {
+          "title":"DWhistled",
+          "value":"DWhistled"
+        },
+        {
+          "title":"Dancing Font",
+          "value":"Dancing Font"
+        },
+        {
+          "title":"Decimal",
+          "value":"Decimal"
+        },
+        {
+          "title":"Def Leppard",
+          "value":"Def Leppard"
+        },
+        {
+          "title":"Delta Corps Priest 1",
+          "value":"Delta Corps Priest 1"
+        },
+        {
+          "title":"Diamond",
+          "value":"Diamond"
+        },
+        {
+          "title":"Diet Cola",
+          "value":"Diet Cola"
+        },
+        {
+          "title":"Digital",
+          "value":"Digital"
+        },
+        {
+          "title":"Doh",
+          "value":"Doh"
+        },
+        {
+          "title":"Doom",
+          "value":"Doom"
+        },
+        {
+          "title":"Dot Matrix",
+          "value":"Dot Matrix"
+        },
+        {
+          "title":"Double Shorts",
+          "value":"Double Shorts"
+        },
+        {
+          "title":"Double",
+          "value":"Double"
+        },
+        {
+          "title":"Dr Pepper",
+          "value":"Dr Pepper"
+        },
+        {
+          "title":"Efti Chess",
+          "value":"Efti Chess"
+        },
+        {
+          "title":"Efti Font",
+          "value":"Efti Font"
+        },
+        {
+          "title":"Efti Italic",
+          "value":"Efti Italic"
+        },
+        {
+          "title":"Efti Piti",
+          "value":"Efti Piti"
+        },
+        {
+          "title":"Efti Robot",
+          "value":"Efti Robot"
+        },
+        {
+          "title":"Efti Wall",
+          "value":"Efti Wall"
+        },
+        {
+          "title":"Efti Water",
+          "value":"Efti Water"
+        },
+        {
+          "title":"Electronic",
+          "value":"Electronic"
+        },
+        {
+          "title":"Elite",
+          "value":"Elite"
+        },
+        {
+          "title":"Epic",
+          "value":"Epic"
+        },
+        {
+          "title":"Fender",
+          "value":"Fender"
+        },
+        {
+          "title":"Filter",
+          "value":"Filter"
+        },
+        {
+          "title":"Fire Font-k",
+          "value":"Fire Font-k"
+        },
+        {
+          "title":"Fire Font-s",
+          "value":"Fire Font-s"
+        },
+        {
+          "title":"Flipped",
+          "value":"Flipped"
+        },
+        {
+          "title":"Flower Power",
+          "value":"Flower Power"
+        },
+        {
+          "title":"Four Tops",
+          "value":"Four Tops"
+        },
+        {
+          "title":"Fraktur",
+          "value":"Fraktur"
+        },
+        {
+          "title":"Fun Face",
+          "value":"Fun Face"
+        },
+        {
+          "title":"Fun Faces",
+          "value":"Fun Faces"
+        },
+        {
+          "title":"Fuzzy",
+          "value":"Fuzzy"
+        },
+        {
+          "title":"Georgi16",
+          "value":"Georgi16"
+        },
+        {
+          "title":"Georgia11",
+          "value":"Georgia11"
+        },
+        {
+          "title":"Ghost",
+          "value":"Ghost"
+        },
+        {
+          "title":"Ghoulish",
+          "value":"Ghoulish"
+        },
+        {
+          "title":"Glenyn",
+          "value":"Glenyn"
+        },
+        {
+          "title":"Goofy",
+          "value":"Goofy"
+        },
+        {
+          "title":"Gothic",
+          "value":"Gothic"
+        },
+        {
+          "title":"Graceful",
+          "value":"Graceful"
+        },
+        {
+          "title":"Gradient",
+          "value":"Gradient"
+        },
+        {
+          "title":"Graffiti",
+          "value":"Graffiti"
+        },
+        {
+          "title":"Greek",
+          "value":"Greek"
+        },
+        {
+          "title":"Heart Left",
+          "value":"Heart Left"
+        },
+        {
+          "title":"Heart Right",
+          "value":"Heart Right"
+        },
+        {
+          "title":"Henry 3D",
+          "value":"Henry 3D"
+        },
+        {
+          "title":"Hex",
+          "value":"Hex"
+        },
+        {
+          "title":"Hieroglyphs",
+          "value":"Hieroglyphs"
+        },
+        {
+          "title":"Hollywood",
+          "value":"Hollywood"
+        },
+        {
+          "title":"Horizontal Left",
+          "value":"Horizontal Left"
+        },
+        {
+          "title":"Horizontal Right",
+          "value":"Horizontal Right"
+        },
+        {
+          "title":"ICL-1900",
+          "value":"ICL-1900"
+        },
+        {
+          "title":"Impossible",
+          "value":"Impossible"
+        },
+        {
+          "title":"Invita",
+          "value":"Invita"
+        },
+        {
+          "title":"Isometric1",
+          "value":"Isometric1"
+        },
+        {
+          "title":"Isometric2",
+          "value":"Isometric2"
+        },
+        {
+          "title":"Isometric3",
+          "value":"Isometric3"
+        },
+        {
+          "title":"Isometric4",
+          "value":"Isometric4"
+        },
+        {
+          "title":"Italic",
+          "value":"Italic"
+        },
+        {
+          "title":"Ivrit",
+          "value":"Ivrit"
+        },
+        {
+          "title":"JS Block Letters",
+          "value":"JS Block Letters"
+        },
+        {
+          "title":"JS Bracket Letters",
+          "value":"JS Bracket Letters"
+        },
+        {
+          "title":"JS Capital Curves",
+          "value":"JS Capital Curves"
+        },
+        {
+          "title":"JS Cursive",
+          "value":"JS Cursive"
+        },
+        {
+          "title":"JS Stick Letters",
+          "value":"JS Stick Letters"
+        },
+        {
+          "title":"Jacky",
+          "value":"Jacky"
+        },
+        {
+          "title":"Jazmine",
+          "value":"Jazmine"
+        },
+        {
+          "title":"Jerusalem",
+          "value":"Jerusalem"
+        },
+        {
+          "title":"Katakana",
+          "value":"Katakana"
+        },
+        {
+          "title":"Kban",
+          "value":"Kban"
+        },
+        {
+          "title":"Keyboard",
+          "value":"Keyboard"
+        },
+        {
+          "title":"Knob",
+          "value":"Knob"
+        },
+        {
+          "title":"Konto Slant",
+          "value":"Konto Slant"
+        },
+        {
+          "title":"Konto",
+          "value":"Konto"
+        },
+        {
+          "title":"LCD",
+          "value":"LCD"
+        },
+        {
+          "title":"Larry 3D 2",
+          "value":"Larry 3D 2"
+        },
+        {
+          "title":"Larry 3D",
+          "value":"Larry 3D"
+        },
+        {
+          "title":"Lean",
+          "value":"Lean"
+        },
+        {
+          "title":"Letters",
+          "value":"Letters"
+        },
+        {
+          "title":"Lil Devil",
+          "value":"Lil Devil"
+        },
+        {
+          "title":"Line Blocks",
+          "value":"Line Blocks"
+        },
+        {
+          "title":"Linux",
+          "value":"Linux"
+        },
+        {
+          "title":"Lockergnome",
+          "value":"Lockergnome"
+        },
+        {
+          "title":"Madrid",
+          "value":"Madrid"
+        },
+        {
+          "title":"Marquee",
+          "value":"Marquee"
+        },
+        {
+          "title":"Maxfour",
+          "value":"Maxfour"
+        },
+        {
+          "title":"Merlin1",
+          "value":"Merlin1"
+        },
+        {
+          "title":"Merlin2",
+          "value":"Merlin2"
+        },
+        {
+          "title":"Mike",
+          "value":"Mike"
+        },
+        {
+          "title":"Mini",
+          "value":"Mini"
+        },
+        {
+          "title":"Mirror",
+          "value":"Mirror"
+        },
+        {
+          "title":"Mnemonic",
+          "value":"Mnemonic"
+        },
+        {
+          "title":"Modular",
+          "value":"Modular"
+        },
+        {
+          "title":"Morse",
+          "value":"Morse"
+        },
+        {
+          "title":"Morse2",
+          "value":"Morse2"
+        },
+        {
+          "title":"Moscow",
+          "value":"Moscow"
+        },
+        {
+          "title":"Mshebrew210",
+          "value":"Mshebrew210"
+        },
+        {
+          "title":"Muzzle",
+          "value":"Muzzle"
+        },
+        {
+          "title":"NScript",
+          "value":"NScript"
+        },
+        {
+          "title":"NT Greek",
+          "value":"NT Greek"
+        },
+        {
+          "title":"NV Script",
+          "value":"NV Script"
+        },
+        {
+          "title":"Nancyj-Fancy",
+          "value":"Nancyj-Fancy"
+        },
+        {
+          "title":"Nancyj-Improved",
+          "value":"Nancyj-Improved"
+        },
+        {
+          "title":"Nancyj-Underlined",
+          "value":"Nancyj-Underlined"
+        },
+        {
+          "title":"Nancyj",
+          "value":"Nancyj"
+        },
+        {
+          "title":"Nipples",
+          "value":"Nipples"
+        },
+        {
+          "title":"O8",
+          "value":"O8"
+        },
+        {
+          "title":"OS2",
+          "value":"OS2"
+        },
+        {
+          "title":"Octal",
+          "value":"Octal"
+        },
+        {
+          "title":"Ogre",
+          "value":"Ogre"
+        },
+        {
+          "title":"Old Banner",
+          "value":"Old Banner"
+        },
+        {
+          "title":"Pagga",
+          "value":"Pagga"
+        },
+        {
+          "title":"Patorjk's Cheese",
+          "value":"Patorjk's Cheese"
+        },
+        {
+          "title":"Patorjk-HeX",
+          "value":"Patorjk-HeX"
+        },
+        {
+          "title":"Pawp",
+          "value":"Pawp"
+        },
+        {
+          "title":"Peaks Slant",
+          "value":"Peaks Slant"
+        },
+        {
+          "title":"Peaks",
+          "value":"Peaks"
+        },
+        {
+          "title":"Pebbles",
+          "value":"Pebbles"
+        },
+        {
+          "title":"Pepper",
+          "value":"Pepper"
+        },
+        {
+          "title":"Poison",
+          "value":"Poison"
+        },
+        {
+          "title":"Puffy",
+          "value":"Puffy"
+        },
+        {
+          "title":"Puzzle",
+          "value":"Puzzle"
+        },
+        {
+          "title":"Pyramid",
+          "value":"Pyramid"
+        },
+        {
+          "title":"Rammstein",
+          "value":"Rammstein"
+        },
+        {
+          "title":"Rectangles",
+          "value":"Rectangles"
+        },
+        {
+          "title":"Red Phoenix",
+          "value":"Red Phoenix"
+        },
+        {
+          "title":"Relief",
+          "value":"Relief"
+        },
+        {
+          "title":"Relief2",
+          "value":"Relief2"
+        },
+        {
+          "title":"Reverse",
+          "value":"Reverse"
+        },
+        {
+          "title":"Roman",
+          "value":"Roman"
+        },
+        {
+          "title":"Rot13",
+          "value":"Rot13"
+        },
+        {
+          "title":"Rotated",
+          "value":"Rotated"
+        },
+        {
+          "title":"Rounded",
+          "value":"Rounded"
+        },
+        {
+          "title":"Rowan Cap",
+          "value":"Rowan Cap"
+        },
+        {
+          "title":"Rozzo",
+          "value":"Rozzo"
+        },
+        {
+          "title":"Runic",
+          "value":"Runic"
+        },
+        {
+          "title":"Runyc",
+          "value":"Runyc"
+        },
+        {
+          "title":"S Blood",
+          "value":"S Blood"
+        },
+        {
+          "title":"SL Script",
+          "value":"SL Script"
+        },
+        {
+          "title":"Santa Clara",
+          "value":"Santa Clara"
+        },
+        {
+          "title":"Script",
+          "value":"Script"
+        },
+        {
+          "title":"Serifcap",
+          "value":"Serifcap"
+        },
+        {
+          "title":"Shadow",
+          "value":"Shadow"
+        },
+        {
+          "title":"Shimrod",
+          "value":"Shimrod"
+        },
+        {
+          "title":"Short",
+          "value":"Short"
+        },
+        {
+          "title":"Slant Relief",
+          "value":"Slant Relief"
+        },
+        {
+          "title":"Slant",
+          "value":"Slant"
+        },
+        {
+          "title":"Slide",
+          "value":"Slide"
+        },
+        {
+          "title":"Small Caps",
+          "value":"Small Caps"
+        },
+        {
+          "title":"Small Isometric1",
+          "value":"Small Isometric1"
+        },
+        {
+          "title":"Small Keyboard",
+          "value":"Small Keyboard"
+        },
+        {
+          "title":"Small Poison",
+          "value":"Small Poison"
+        },
+        {
+          "title":"Small Script",
+          "value":"Small Script"
+        },
+        {
+          "title":"Small Shadow",
+          "value":"Small Shadow"
+        },
+        {
+          "title":"Small Slant",
+          "value":"Small Slant"
+        },
+        {
+          "title":"Small Tengwar",
+          "value":"Small Tengwar"
+        },
+        {
+          "title":"Small",
+          "value":"Small"
+        },
+        {
+          "title":"Soft",
+          "value":"Soft"
+        },
+        {
+          "title":"Speed",
+          "value":"Speed"
+        },
+        {
+          "title":"Spliff",
+          "value":"Spliff"
+        },
+        {
+          "title":"Stacey",
+          "value":"Stacey"
+        },
+        {
+          "title":"Stampate",
+          "value":"Stampate"
+        },
+        {
+          "title":"Stampatello",
+          "value":"Stampatello"
+        },
+        {
+          "title":"Standard",
+          "value":"Standard"
+        },
+        {
+          "title":"Star Strips",
+          "value":"Star Strips"
+        },
+        {
+          "title":"Star Wars",
+          "value":"Star Wars"
+        },
+        {
+          "title":"Stellar",
+          "value":"Stellar"
+        },
+        {
+          "title":"Stforek",
+          "value":"Stforek"
+        },
+        {
+          "title":"Stick Letters",
+          "value":"Stick Letters"
+        },
+        {
+          "title":"Stop",
+          "value":"Stop"
+        },
+        {
+          "title":"Straight",
+          "value":"Straight"
+        },
+        {
+          "title":"Stronger Than All",
+          "value":"Stronger Than All"
+        },
+        {
+          "title":"Sub-Zero",
+          "value":"Sub-Zero"
+        },
+        {
+          "title":"Swamp Land",
+          "value":"Swamp Land"
+        },
+        {
+          "title":"Swan",
+          "value":"Swan"
+        },
+        {
+          "title":"Sweet",
+          "value":"Sweet"
+        },
+        {
+          "title":"THIS",
+          "value":"THIS"
+        },
+        {
+          "title":"Tanja",
+          "value":"Tanja"
+        },
+        {
+          "title":"Tengwar",
+          "value":"Tengwar"
+        },
+        {
+          "title":"Term",
+          "value":"Term"
+        },
+        {
+          "title":"Test1",
+          "value":"Test1"
+        },
+        {
+          "title":"The Edge",
+          "value":"The Edge"
+        },
+        {
+          "title":"Thick",
+          "value":"Thick"
+        },
+        {
+          "title":"Thin",
+          "value":"Thin"
+        },
+        {
+          "title":"Thorned",
+          "value":"Thorned"
+        },
+        {
+          "title":"Three Point",
+          "value":"Three Point"
+        },
+        {
+          "title":"Ticks Slant",
+          "value":"Ticks Slant"
+        },
+        {
+          "title":"Ticks",
+          "value":"Ticks"
+        },
+        {
+          "title":"Tiles",
+          "value":"Tiles"
+        },
+        {
+          "title":"Tinker-Toy",
+          "value":"Tinker-Toy"
+        },
+        {
+          "title":"Tombstone",
+          "value":"Tombstone"
+        },
+        {
+          "title":"Train",
+          "value":"Train"
+        },
+        {
+          "title":"Trek",
+          "value":"Trek"
+        },
+        {
+          "title":"Tsalagi",
+          "value":"Tsalagi"
+        },
+        {
+          "title":"Tubular",
+          "value":"Tubular"
+        },
+        {
+          "title":"Twisted",
+          "value":"Twisted"
+        },
+        {
+          "title":"Two Point",
+          "value":"Two Point"
+        },
+        {
+          "title":"USA Flag",
+          "value":"USA Flag"
+        },
+        {
+          "title":"Univers",
+          "value":"Univers"
+        },
+        {
+          "title":"Varsity",
+          "value":"Varsity"
+        },
+        {
+          "title":"Wavy",
+          "value":"Wavy"
+        },
+        {
+          "title":"Weird",
+          "value":"Weird"
+        },
+        {
+          "title":"Wet Letter",
+          "value":"Wet Letter"
+        },
+        {
+          "title":"Whimsy",
+          "value":"Whimsy"
+        },
+        {
+          "title":"Wow",
+          "value":"Wow"
+        }
+      ]
+    },
+    {
+      "name":"defaultAction",
+      "description":"Default Action",
+      "type":"dropdown",
+      "required":false,
+      "title":"Default Action",
+      "default":"copy",
+      "placeholder":"Default Action",
+      "data":[
+        {
+          "title":"Copy to Clipboard",
+          "value":"copy"
+        },
+        {
+          "title":"Paste",
+          "value":"paste"
+        }
+      ]
+    }
+  ],
+  "dependencies":{
+    "@raycast/api":"^1.69.0",
+    "figlet":"^1.7.0",
+    "node-fetch":"^3.3.2"
+  },
+  "devDependencies":{
+    "@raycast/eslint-config":"^1.0.6",
+    "@types/figlet":"^1.5.8",
+    "@types/node":"20.8.10",
+    "@types/react":"18.2.27",
+    "eslint":"^8.51.0",
+    "prettier":"^3.0.3",
+    "typescript":"^5.2.2"
+  },
+  "scripts":{
+    "build":"ray build -e dist",
+    "dev":"ray develop",
+    "fix-lint":"ray lint --fix",
+    "lint":"ray lint",
+    "publish":"npx @raycast/api@latest publish"
+  }
+}

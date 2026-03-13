@@ -1,0 +1,11 @@
+{
+  "root": true,
+  "extends": [
+    "@raycast"
+  ],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-non-null-assertion": "off",
+    "no-extra-semi": "off"
+  }
+}

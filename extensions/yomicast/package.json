@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yomicast",
+  "title": "Yomicast – Offline Japanese-English Dictionary",
+  "description": "Offline Japanese-English dictionary. Instant search for kanji, kana, and English terms.",
+  "icon": "extension-icon.png",
+  "author": "matchai",
+  "license": "MIT",
+  "keywords": [
+    "japanese",
+    "dictionary",
+    "offline",
+    "jmdict",
+    "jisho"
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate Japanese",
+      "subtitle": "Yomicast",
+      "description": "Search for English/Japanese translations.",
+      "mode": "view"
+    },
+    {
+      "name": "update-dictionary",
+      "title": "Update Dictionary",
+      "subtitle": "Yomicast",
+      "description": "Update the dictionary with the latest JMDict definitions.",
+      "mode": "no-view",
+      "interval": "7d"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.2",
+    "@scriptin/jmdict-simplified-loader": "^3.6.1",
+    "adm-zip": "^0.5.16",
+    "sql.js": "1.13.0",
+    "ts-dedent": "^2.2.0",
+    "wanakana": "^5.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@scriptin/jmdict-simplified-types": "^3.6.1",
+    "@types/adm-zip": "^0.5.7",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/sql.js": "1.4.9",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

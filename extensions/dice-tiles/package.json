@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dice-tiles",
+  "title": "Dice Tiles",
+  "description": "A minimalist dice-and-tiles elimination game. Roll dice, eliminate tiles matching their sum, and climb through reward tiers while tracking victories and defeats.",
+  "icon": "dice-tiles.png",
+  "author": "julien_minniti",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Dice Tiles",
+      "subtitle": "Tiles and Dice Challenge",
+      "description": "Roll dice, match tile sums, and progress through levels directly in Raycast.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write ."
+  },
+  "raycast": {
+    "metadata": {
+      "readme": "metadata/README.md",
+      "changelog": "CHANGELOG.md",
+      "screenshot": "metadata/screen_base.png"
+    }
+  },
+  "repository": "https://github.com/Jumitti/dice-tiles"
+}

@@ -1,0 +1,202 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "running-page",
+  "title": "Running Page",
+  "description": "running_page project extension",
+  "icon": "extension_icon.png",
+  "author": "Lemon",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Activities",
+      "description": "Show activities powered by running_page ❤\uFE0F",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "light-style",
+          "title": "Light Style",
+          "description": "Use light style for the map",
+          "type": "dropdown",
+          "default": "dark-v11",
+          "required": false,
+          "data": [
+            {
+              "title": "streets-v12",
+              "value": "streets-v12"
+            },
+            {
+              "title": "outdoors-v12",
+              "value": "outdoors-v12"
+            },
+            {
+              "title": "light-v11",
+              "value": "light-v11"
+            },
+            {
+              "title": "dark-v11",
+              "value": "dark-v11"
+            },
+            {
+              "title": "satellite-v9",
+              "value": "satellite-v9"
+            },
+            {
+              "title": "satellite-streets-v12",
+              "value": "satellite-streets-v12"
+            }
+          ]
+        },
+        {
+          "name": "dark-style",
+          "title": "Dark Style",
+          "description": "Use dark style for the map",
+          "type": "dropdown",
+          "default": "dark-v11",
+          "required": false,
+          "data": [
+            {
+              "title": "streets-v12",
+              "value": "streets-v12"
+            },
+            {
+              "title": "outdoors-v12",
+              "value": "outdoors-v12"
+            },
+            {
+              "title": "light-v11",
+              "value": "light-v11"
+            },
+            {
+              "title": "dark-v11",
+              "value": "dark-v11"
+            },
+            {
+              "title": "satellite-v9",
+              "value": "satellite-v9"
+            },
+            {
+              "title": "satellite-streets-v12",
+              "value": "satellite-streets-v12"
+            }
+          ]
+        },
+        {
+          "name": "stroke-color",
+          "title": "Stroke Color",
+          "description": "A 3- or 6-digit hexadecimal color code for the map line stroke",
+          "type": "textfield",
+          "default": "f44",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menubar-totals",
+      "title": "Workouts Totals",
+      "description": "See your total distance and time for your workouts",
+      "mode": "menu-bar",
+      "interval": "1d",
+      "preferences": [
+        {
+          "name": "primary_sport",
+          "title": "Primary Sport",
+          "description": "The sport you want to see totals for in the menu bar",
+          "type": "dropdown",
+          "default": "Run",
+          "required": true,
+          "data": [
+            {
+              "value": "Run",
+              "title": "Run"
+            },
+            {
+              "value": "Ride",
+              "title": "Ride"
+            },
+            {
+              "value": "Swim",
+              "title": "Swim"
+            }
+          ]
+        },
+        {
+          "name": "primary_stat",
+          "title": "Primary Stat",
+          "description": "The stat you want to see in the menu bar",
+          "type": "dropdown",
+          "default": "recent",
+          "required": true,
+          "data": [
+            {
+              "value": "recent",
+              "title": "Last 4 weeks"
+            },
+            {
+              "value": "year",
+              "title": "This Year"
+            },
+            {
+              "value": "all",
+              "title": "All time"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "statistics",
+      "title": "Statistics",
+      "description": "Display the statistics of your activities",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "repository",
+      "title": "GitHub Repository",
+      "description": "Running page repository location",
+      "type": "textfield",
+      "placeholder": "yihong0618/running_page",
+      "required": true
+    },
+    {
+      "name": "path",
+      "title": "Data Path",
+      "description": "Path to the activities data",
+      "default": "src/static/activities.json",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "mapbox_access_token",
+      "title": "Mapbox Access Token",
+      "description": "Mapbox Access Token",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

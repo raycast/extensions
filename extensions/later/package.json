@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "later",
+  "title": "Read Later",
+  "description": "Read your tabs later",
+  "icon": "command-icon.png",
+  "author": "jimluo",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "preferences": [
+    {
+      "name": "links_from",
+      "title": "Save Links From",
+      "type": "dropdown",
+      "description": "Choose your browser to save links from",
+      "required": true,
+      "default": "chrome",
+      "data": [
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Arc",
+          "value": "arc"
+        }
+      ]
+    },
+    {
+      "name": "links_to",
+      "title": "Open Links On",
+      "type": "dropdown",
+      "description": "Choose your browser to open links on",
+      "required": true,
+      "default": "chrome",
+      "data": [
+        {
+          "title": "Google Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Arc",
+          "value": "arc"
+        }
+      ]
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "later",
+      "title": "Add to List",
+      "subtitle": "Read Later",
+      "description": "Get your active tab and add it to your list",
+      "mode": "no-view"
+    },
+    {
+      "name": "list",
+      "title": "List Links",
+      "subtitle": "Read Later",
+      "description": "List your added links and manage them",
+      "mode": "view"
+    },
+    {
+      "name": "create",
+      "title": "Create Link",
+      "subtitle": "Read Later",
+      "description": "Added link manually",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.16.0",
+    "dayjs": "^1.11.11",
+    "lodash": "^4.17.21",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.17.5",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

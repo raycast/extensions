@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "speedcubing",
+  "title": "Speedcubing",
+  "description": "Time your solves, look up notations and algorithms",
+  "icon": "extension-icon.png",
+  "author": "samuelkraft",
+  "contributors": [
+    "Menchynskyi"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "speedcubing",
+    "rubik",
+    "cube",
+    "puzzle",
+    "solve",
+    "notation",
+    "algorithms"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "four-look-last-layer",
+      "title": "4LLL",
+      "subtitle": "Algorithms",
+      "description": "Show algorithms for solving the cube with 4 Look Last Layer (4LLL)",
+      "mode": "view",
+      "keywords": [
+        "4LLL",
+        "four look last layer",
+        "algorithms"
+      ]
+    },
+    {
+      "name": "orientation-of-the-last-layer",
+      "title": "OLL",
+      "subtitle": "Algorithms",
+      "description": "Show algorithms for solving the cube with Orientation of the Last Layer (OLL)",
+      "mode": "view",
+      "keywords": [
+        "OLL",
+        "algorithms"
+      ]
+    },
+    {
+      "name": "permutation-of-the-last-layer",
+      "title": "PLL",
+      "subtitle": "Algorithms",
+      "description": "Show algorithms for solving the cube with Permutation of the Last Layer (PLL)",
+      "mode": "view",
+      "keywords": [
+        "PLL",
+        "algorithms"
+      ]
+    },
+    {
+      "name": "notation",
+      "title": "Notation",
+      "subtitle": "Speedcubing",
+      "description": "Show the notation for solving the cube",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

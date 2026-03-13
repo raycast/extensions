@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "awork",
+  "title": "awork",
+  "description": "Search for tasks & projects and log time in awork.",
+  "icon": "icon.png",
+  "access": "public",
+  "owner": "hypercode",
+  "author": "hypercode-dev",
+  "contributors": [
+    "malte_18",
+    "eay",
+    "jens_von_der_heydt"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "projects",
+      "title": "Projects",
+      "subtitle": "awork",
+      "description": "Search your projects",
+      "mode": "view"
+    },
+    {
+      "name": "tasks",
+      "title": "Tasks",
+      "subtitle": "awork",
+      "description": "Search your tasks",
+      "mode": "view"
+    },
+    {
+      "name": "logTime",
+      "title": "Log Time",
+      "subtitle": "awork",
+      "description": "Log time on a project or task",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "description": "Enter the Client ID of your workspace",
+      "type": "textfield",
+      "required": true,
+      "title": "Client ID",
+      "placeholder": "my-client-id"
+    },
+    {
+      "name": "clientSecret",
+      "description": "Enter the Client Secret of your workspace",
+      "type": "password",
+      "required": true,
+      "title": "Client Secret",
+      "placeholder": "my-client-secret"
+    },
+    {
+      "name": "showDoneTasks",
+      "title": "Preferences",
+      "label": "Show done tasks",
+      "description": "Show tasks marked as done",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showDoneProjects",
+      "label": "Show closed projects",
+      "description": "Show projects marked as closed",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-projects",
+      "title": "Get Projects",
+      "description": "Gets awork projects"
+    },
+    {
+      "name": "get-tasks",
+      "title": "Get Tasks",
+      "description": "Gets awork tasks"
+    },
+    {
+      "name": "get-types-of-work",
+      "title": "Get Types of Work",
+      "description": "Gets awork types of work"
+    },
+    {
+      "name": "log-time",
+      "title": "Log Time",
+      "description": "Log time for an awork project or task"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@jest/globals": "^30.2.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "@typescript-eslint/parser": "^8.48.1",
+    "eslint": "^9.39.1",
+    "eslint-plugin-import": "^2.32.0",
+    "globals": "^16.5.0",
+    "jest": "^30.2.0",
+    "prettier": "^3.7.3",
+    "react": "^19.2.0",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "test": "jest",
+    "testAi": "ray evals",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,50 @@
+# Brave Changelog
+
+## [Bookmark Folder Search] - 2026-01-05
+
+- Added support for searching bookmark folders.
+- Added an action to open all bookmarks in a folder simultaneously.
+
+## [Bookmarklets Support] - 2025-12-19
+
+- Added support for executing bookmarklets
+
+## [Improvements & Dependency Updates] - 2025-12-09
+
+- Enhanced URL keyword extraction for better search filtering of tabs and history
+- Refactored tab opening logic to use shell commands for improved reliability
+- Added URL validation for favicons, falling back to globe icon for non-HTTP protocols
+- Improved history search to match against both title and URL
+- Enabled client-side filtering on tab search list
+- Upgraded `@raycast/api` and `@raycast/utils` to latest versions
+- Updated TypeScript, ESLint, and Prettier to latest versions
+- Migrated to `@raycast/eslint-config` with flat config
+
+## [Brave Nightly and Brave Beta support] - 2023-12-07
+
+- Added support for Brave Nightly and Brave Beta for all commands
+- New `Brave Browser Option` Dropwdown to select which Brave Browser to use in the preferences
+
+## [Bug Fixes & New Actions] - 2023-03-28
+
+- Fix errors caused by inconsistent number of hooks
+- Fix "Search Brave History" not properly switching between profiles
+- Fix "Open Empty Tab" action not working
+- Improve speed of searching bookmarks, fixing appearance of search not working if there are many bookmarks
+- Add "Move To New Window" action for tabs
+- Add "Open In New Window" action for history and bookmark items
+- Add support for opening tabs/items in incognito mode
+
+## [Profiles Support] - 2023-01-25
+
+- Added support for profiles across all commands
+- Added support for opening tabs in different profiles
+
+## [Search Bookmarks action] - 2022-12-17
+
+- Added search bookmarks action
+- Refactored code to use new useSQL hook
+
+## Added Brave - (2022-03-18)
+
+Initial version code

@@ -1,0 +1,121 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tinypng",
+  "title": "TinyPNG",
+  "description": "Compress the selected images in Finder with TinyPNG.",
+  "icon": "tinypng-icon.png",
+  "author": "kawamataryo",
+  "contributors": [
+    "j3lte"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compressImages",
+      "title": "Compress Images",
+      "subtitle": "TinyPNG",
+      "description": "Compress selected images with TinyPNG.",
+      "mode": "no-view"
+    },
+    {
+      "name": "resizingImages",
+      "title": "Resizing Images",
+      "subtitle": "TinyPNG",
+      "description": "Compress and resizing selected images with TinyPNG.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "method",
+          "placeholder": "fit",
+          "type": "dropdown",
+          "description": "Resize method",
+          "required": true,
+          "data": [
+            {
+              "value": "fit",
+              "title": "fit"
+            },
+            {
+              "value": "scale",
+              "title": "scale"
+            },
+            {
+              "value": "cover",
+              "title": "cover"
+            },
+            {
+              "value": "thumb",
+              "title": "thumb"
+            }
+          ]
+        },
+        {
+          "name": "width",
+          "placeholder": "width(px)",
+          "type": "text",
+          "description": "Width to be resized",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "height(px)",
+          "type": "text",
+          "description": "height to be resized",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "title": "API Key",
+      "name": "apiKey",
+      "description": "TinyPNG API Key.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "title": "Destination Folder Path",
+      "name": "destinationFolderPath",
+      "description": "Set Destination Folder path. Specify an absolute path or a relative path from the target file.",
+      "type": "textfield",
+      "required": true,
+      "default": "./compressed-images"
+    },
+    {
+      "title": "Options",
+      "name": "overwrite",
+      "description": "Whether to overwrite the original image file.",
+      "type": "checkbox",
+      "label": "Overwrite Original Image File",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "node-fetch": "^3.3.2",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish",
+    "test": "vitest"
+  }
+}

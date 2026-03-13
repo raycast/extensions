@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ok-json",
+  "title": "OK JSON",
+  "description": "Control OK JSON with Raycast",
+  "icon": "okjson.png",
+  "author": "anybox",
+  "categories": [
+    "Developer Tools",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "viewFromPasteboard",
+      "title": "View from Pasteboard",
+      "description": "View JSON string or file from pasteboard in OK JSON.",
+      "mode": "no-view"
+    },
+    {
+      "name": "viewFromURL",
+      "title": "View from URL",
+      "description": "Fetch URL response and view the result in OK JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "viewFromcURLCommand",
+      "title": "View from cURL Command",
+      "description": "Run cURL command and view the result in OK JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "runScript",
+      "title": "Run Script",
+      "description": "Run custom scripts with pasteboard content as the input in OK JSON.",
+      "mode": "view"
+    },
+    {
+      "name": "showScriptsPanel",
+      "title": "Show Scripts Panel",
+      "description": "Open Scripts Panel window in OK JSON.",
+      "mode": "no-view"
+    },
+    {
+      "name": "showHistory",
+      "title": "Show History",
+      "description": "Open History window in OK JSON.",
+      "mode": "no-view"
+    },
+    {
+      "name": "reloadScripts",
+      "title": "Reload Scripts",
+      "description": "Reload scripts folder in OK JSON.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.63.0",
+    "osascript-tag": "^0.1.2",
+    "run-applescript": "^6.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.8",
+    "@types/node": "20.10.4",
+    "@types/react": "18.2.43",
+    "eslint": "^8.55.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

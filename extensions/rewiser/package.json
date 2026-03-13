@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rewiser",
+  "title": "Rewiser",
+  "description": "Track and manage your Rewiser transactions directly from Raycast",
+  "icon": "rewiserlogo.png",
+  "author": "rewiser_io",
+  "license": "MIT",
+  "keywords": [
+    "finance",
+    "expense",
+    "income",
+    "ai",
+    "natural language",
+    "transaction",
+    "money",
+    "budget",
+    "accounting"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "add-transaction",
+      "title": "Add Transaction",
+      "subtitle": "Rewiser",
+      "description": "Add a transaction by simply saying \"I spent $20 at a restaurant\"",
+      "mode": "view"
+    },
+    {
+      "name": "transaction-list",
+      "title": "Monthly Transactions",
+      "subtitle": "Rewiser",
+      "description": "Select a folder to view and manage transactions from the current month",
+      "mode": "view"
+    },
+    {
+      "name": "share-folder",
+      "title": "Share Folder",
+      "subtitle": "Rewiser",
+      "description": "Generate and manage share links for your folders",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "personalAccessToken",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Your Rewiser personal API key. Get it from your Rewiser profile settings.",
+      "placeholder": "Enter your personal access token"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

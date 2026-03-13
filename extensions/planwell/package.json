@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "planwell",
+  "title": "PlanWell",
+  "description": "Companion extension for PlanWell - the markdown-native teacher planning app. View today's classes, upcoming events, and todos. Requires a PlanWell vault (planwellmd.com).",
+  "icon": "command-icon.png",
+  "author": "Raynold",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today-classes",
+      "title": "Today's Classes",
+      "description": "Show classes for today",
+      "mode": "view"
+    },
+    {
+      "name": "upcoming-events",
+      "title": "Upcoming Events",
+      "description": "Show upcoming multi-day events",
+      "mode": "view"
+    },
+    {
+      "name": "todos",
+      "title": "Todos",
+      "description": "View and manage todos",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "directory",
+      "required": true,
+      "title": "PlanWell Vault Path",
+      "description": "Path to your PlanWell vault folder"
+    },
+    {
+      "name": "defaultView",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View",
+      "description": "Default view for Today's Classes",
+      "default": "all",
+      "data": [
+        {
+          "title": "All Periods",
+          "value": "all"
+        },
+        {
+          "title": "Classes Only",
+          "value": "classes"
+        }
+      ]
+    },
+    {
+      "name": "externalEditor",
+      "type": "appPicker",
+      "required": false,
+      "title": "External Editor",
+      "description": "App to open markdown files (e.g., TextEdit, Obsidian, VS Code)"
+    },
+    {
+      "name": "obsidianVaultName",
+      "type": "textfield",
+      "required": false,
+      "title": "Obsidian Vault Name",
+      "description": "Exact vault name as shown in Obsidian's vault switcher (required if using Obsidian)"
+    },
+    {
+      "name": "obsidianSubfolder",
+      "type": "textfield",
+      "required": false,
+      "title": "Obsidian Subfolder",
+      "description": "Subfolder/symlink name within vault (leave empty if vault root is your data folder)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "date-fns": "^3.6.0",
+    "gray-matter": "^4.0.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

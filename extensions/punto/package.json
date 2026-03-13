@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "punto",
+  "title": "Punto Switcher",
+  "description": "Changes the layout of selected text. Requires Accessibility access",
+  "icon": "punto-icon.png",
+  "author": "red.avtovo",
+  "contributors":
+  [
+    "ruskoloma"
+  ],
+  "categories":
+  [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands":
+  [
+    {
+      "name": "index",
+      "title": "Switch Layout",
+      "description": "The script changes layout of selected text. EN-RU and EN-UK supported only.\nFor eg:\n- руддщ -> hello\n- ghbdtn -> привет",
+      "mode": "no-view"
+    }
+  ],
+  "preferences":
+  [
+    {
+      "name": "cyrLayoutID",
+      "title": "Cyrillic Layout ID",
+      "description": "The id of the Cyrillic layout",
+      "type": "dropdown",
+      "required": true,
+      "data":
+      [
+        {
+          "title": "Russian",
+          "value": "com.apple.keylayout.Russian"
+        },
+        {
+          "title": "Russian - PC",
+          "value": "com.apple.keylayout.RussianWin"
+        },
+        {
+          "title": "Russian - QWERTY",
+          "value": "com.apple.keylayout.Russian-Phonetic"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "com.apple.keylayout.Ukrainian-PC"
+        },
+        {
+          "title": "Ukrainian - Legacy",
+          "value": "com.apple.keylayout.Ukrainian"
+        },
+        {
+          "title": "Ukrainian - QWERTY",
+          "value": "com.apple.keylayout.Ukrainian-QWERTY"
+        }
+      ]
+    },
+    {
+      "name": "latLayoutID",
+      "title": "Latin Layout ID",
+      "description": "The id of the Latin layout",
+      "type": "textfield",
+      "required": true,
+      "default": "com.apple.keylayout.ABC"
+    },
+    {
+      "name": "showSuccessHUD",
+      "title": "Show Success HUD",
+      "description": "Show a HUD when the layout is switched",
+      "type": "checkbox",
+      "label": "Show Success HUD",
+      "default": false,
+      "required": true
+    }
+  ],
+  "dependencies":
+  {
+    "@raycast/api": "^1.89.0",
+    "@raycast/utils": "^1.10.1"
+  },
+  "devDependencies":
+  {
+    "@types/node": "22.10.7",
+    "@types/react": "19.0.7",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts":
+  {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms":
+  [
+    "macOS"
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pagerduty",
+  "title": "PagerDuty",
+  "description": "Display PagerDuty incidents and helps updating status.",
+  "icon": "command-icon.png",
+  "author": "horimislime",
+  "contributors": [
+    "xmok",
+    "erecarte-twilio"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Incidents",
+      "subtitle": "PagerDuty",
+      "description": "Explore and Update Recent Incidents",
+      "mode": "view"
+    },
+    {
+      "name": "my-incidents",
+      "title": "My Incidents",
+      "subtitle": "PagerDuty",
+      "description": "View and update incidents assigned to you",
+      "mode": "view"
+    },
+    {
+      "name": "oncall-shifts",
+      "title": "My Oncall Shifts",
+      "subtitle": "PagerDuty",
+      "description": "View your current and upcoming on-call schedule",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "User API Token",
+      "placeholder": "PagerDuty API token",
+      "description": "Generate your user API token (not account token) on User Settings page. For more detail, see https://support.pagerduty.com/docs/api-access-keys#section-generate-a-user-token-rest-api-key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
+    "date-fns": "^2.29.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

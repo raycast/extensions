@@ -1,0 +1,172 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "commit-message-formatter",
+  "title": "Commit Message Formatter",
+  "description": "Generate and format your commit message according to the selected text with LLM",
+  "icon": "icon.png",
+  "author": "zrr1999",
+  "contributors": [],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-commit-type",
+      "title": "Search Commit Type",
+      "description": "Search commit type and copy or paste it",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "commitMessage",
+          "placeholder": "Commit message",
+          "required": false,
+          "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "candidateCount",
+          "title": "Candidate Count",
+          "description": "The number of candidate commit message",
+          "type": "textfield",
+          "required": true,
+          "default": "2"
+        }
+      ]
+    },
+    {
+      "name": "generate-commit-message",
+      "title": "Generate Commit Message",
+      "description": "Use LLM to generate commit message according to the selected text",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "emojiFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Emoji format",
+      "data": [
+        {
+          "title": "Emoji ✨",
+          "value": "emoji"
+        },
+        {
+          "title": "Code :sparkles:",
+          "value": "code"
+        }
+      ],
+      "description": "Copy the emoji or copy the code",
+      "default": "emoji"
+    },
+    {
+      "name": "copyFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Copy Format",
+      "data": [
+        {
+          "title": "Emoji `✨`",
+          "value": "emoji"
+        },
+        {
+          "title": "Emoji and Type `✨ feat`",
+          "value": "emoji-type"
+        }
+      ],
+      "description": "Copy format",
+      "default": "emoji-type"
+    },
+    {
+      "name": "terminator",
+      "type": "textfield",
+      "required": false,
+      "title": "Terminator",
+      "description": "The terminator for the emoji",
+      "default": ": "
+    },
+    {
+      "name": "action",
+      "type": "dropdown",
+      "required": false,
+      "title": "Primary Action",
+      "data": [
+        {
+          "title": "Copy",
+          "value": "copy"
+        },
+        {
+          "title": "Paste",
+          "value": "paste"
+        },
+        {
+          "title": "Copy and Paste",
+          "value": "copy-paste"
+        }
+      ],
+      "description": "Primary action of the extension",
+      "default": "copy-paste"
+    },
+    {
+      "name": "openAiApiKey",
+      "title": "OpenAI API Key",
+      "description": "API Key is used to authenticate with OpenAI API",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model is used to specify the model to use",
+      "type": "textfield",
+      "required": false,
+      "default": "gpt-4o-mini"
+    },
+    {
+      "name": "openAiBasePath",
+      "title": "OpenAI Base Path (Optional)",
+      "description": "Base Path is used to override base path with OpenAI API",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "LLM will use this language to generate content",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Lower Case English",
+          "value": "Lower Case English"
+        },
+        {
+          "title": "Simplified Chinese",
+          "value": "Simplified Chinese"
+        }
+      ],
+      "default": "Lower Case English"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.0",
+    "@raycast/utils": "^1.17.0",
+    "openai": "4.58.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

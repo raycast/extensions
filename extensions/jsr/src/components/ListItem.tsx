@@ -1,0 +1,92 @@
+import type { ReactNode } from "react";
+
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+
+import type { SearchResultDocument } from "@/types";
+
+import { compatIcons } from "@/lib/compat";
+
+import CopyActions from "@/components/CopyActions";
+import ItemDetails from "@/components/ItemDetails";
+import { VersionList } from "@/components/VersionList";
+
+type ListItemProps = {
+  item: SearchResultDocument;
+  toggleDetails: () => void;
+  isShowingDetails: boolean;
+  extraActions?: ReactNode;
+  searchQueryURL?: string;
+};
+
+const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQueryURL }: ListItemProps) => {
+  const { openWebsiteByDefault } = getPreferenceValues<Preferences>();
+  const progress = item.score ?? 0;
+  const iconColor = progress >= 80 ? Color.Green : progress >= 50 ? Color.Yellow : Color.Red;
+  const icons = compatIcons(item);
+
+  return (
+    <List.Item
+      id={`${item.scope}/${item.name}`}
+      title={item.id}
+      subtitle={!isShowingDetails ? item.description : undefined}
+      accessories={
+        isShowingDetails
+          ? undefined
+          : [...icons.map((ico) => ({ icon: ico.icon })), { tag: { value: `${progress}%`, color: iconColor } }]
+      }
+      detail={isShowingDetails ? <ItemDetails item={item} progress={progress} iconColor={iconColor} /> : null}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section title="Main">
+            {openWebsiteByDefault ? (
+              <>
+                <Action.OpenInBrowser
+                  title="Open Main Page (JSR)"
+                  icon={{ source: "jsr.svg" }}
+                  url={`https://jsr.io/${item.id}`}
+                />
+                <Action title="Toggle Details" icon={Icon.AppWindowSidebarLeft} onAction={() => toggleDetails()} />
+              </>
+            ) : (
+              <>
+                <Action title="Toggle Details" onAction={() => toggleDetails()} icon={Icon.AppWindowSidebarLeft} />
+                <Action.OpenInBrowser
+                  title="Open Main Page (JSR)"
+                  icon={{ source: "jsr.svg" }}
+                  url={`https://jsr.io/${item.id}`}
+                />
+              </>
+            )}
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Other Actions">
+            <Action.OpenInBrowser
+              title="Open Docs (JSR)"
+              icon={{ source: Icon.Document }}
+              url={`https://jsr.io/${item.id}/doc`}
+              shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+            />
+            <Action.Push
+              title="Show Versions"
+              icon={{ source: Icon.List }}
+              target={<VersionList scope={item.scope} name={item.name} />}
+            />
+            {extraActions ? <>{extraActions}</> : null}
+          </ActionPanel.Section>
+          <CopyActions item={item} />
+          {searchQueryURL ? (
+            <ActionPanel.Section title="Search">
+              <Action.OpenInBrowser
+                title="Open Search (JSR)"
+                icon={{ source: "jsr.svg" }}
+                url={searchQueryURL}
+                shortcut={{ key: "w", modifiers: ["cmd", "shift"] }}
+              />
+            </ActionPanel.Section>
+          ) : null}
+        </ActionPanel>
+      }
+    />
+  );
+};
+
+export default ListItem;

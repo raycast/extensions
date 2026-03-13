@@ -1,0 +1,161 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-herd",
+  "title": "Laravel Herd",
+  "description": "Provides quick access to Laravel Herd features and settings.",
+  "icon": "extension-icon.png",
+  "author": "diana_scharf",
+  "owner": "beyond-code",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "Laravel Herd",
+      "description": "Open the Herd settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-dumps",
+      "title": "Open Dumps",
+      "subtitle": "Laravel Herd",
+      "description": "Open the Dumps window",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-dumps",
+      "title": "Toggle Dumps",
+      "subtitle": "Laravel Herd",
+      "description": "Toggle the Dump interception",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-dumps",
+      "title": "Clear Dumps",
+      "subtitle": "Laravel Herd",
+      "description": "Clear the Dump history",
+      "mode": "no-view"
+    },
+    {
+      "name": "pin-dumps",
+      "title": "Pin Dumps",
+      "subtitle": "Laravel Herd",
+      "description": "Pin or unpin the Dumps Window",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-mails",
+      "title": "Open Mails",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the local mailbox",
+      "mode": "no-view"
+    },
+    {
+      "name": "php-version",
+      "title": "PHP",
+      "subtitle": "Laravel Herd",
+      "description": "Manage installed versions of PHP.",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Services",
+      "subtitle": "Laravel Herd",
+      "description": "Access the Laravel Herd services",
+      "mode": "view"
+    },
+    {
+      "name": "sites",
+      "title": "Sites",
+      "subtitle": "Laravel Herd",
+      "description": "Browse existing sites and create new ones.",
+      "mode": "view"
+    },
+    {
+      "name": "check-for-updates",
+      "title": "Check for Updates",
+      "subtitle": "Laravel Herd",
+      "description": "Checks if there's a new version of Laravel Herd availale.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-recent-site",
+      "title": "Open Recent Site",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the most recent site in your browser.",
+      "mode": "no-view",
+      "interval": "5m"
+    },
+    {
+      "name": "open-recent-site-database",
+      "title": "Open Database of Recent Site",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the database of your most recent site.",
+      "mode": "no-view",
+      "interval": "5s"
+    },
+    {
+      "name": "open-recent-site-tinker",
+      "title": "Open Recent Site in Tinker(well)",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the most recent site in Tinkerwell, if installed. Otherwise, opens a tinker session in the terminal.",
+      "mode": "no-view",
+      "interval": "5m"
+    },
+    {
+      "name": "open-recent-site-logs",
+      "title": "Open Logs for Recent Site",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the Log Viewer for your most recent site.",
+      "mode": "no-view",
+      "interval": "5s"
+    },
+    {
+      "name": "open-docs",
+      "title": "Open Documentation",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the documentation for Laravel Herd.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-config",
+      "title": "Open Configuration Folder",
+      "subtitle": "Laravel Herd",
+      "description": "Opens the general configuration folder for Laravel Herd.",
+      "mode": "no-view"
+    },
+    {
+      "name": "refresh-caches",
+      "title": "Refresh Caches",
+      "subtitle": "Laravel Herd",
+      "description": "Refresh the caches for Laravel Herd.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

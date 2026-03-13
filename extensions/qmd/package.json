@@ -1,0 +1,186 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qmd",
+  "version": "1.0.0",
+  "title": "QMD",
+  "description": "Search your markdown files with QMD (Quick Markdown Search) - fast BM25 keyword search, semantic vector search, and hybrid search with LLM reranking",
+  "icon": "icon.png",
+  "author": "karelvuong",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "keyword-search",
+      "title": "Keyword Search",
+      "subtitle": "QMD",
+      "description": "Fast BM25 keyword search across your markdown collections",
+      "mode": "view"
+    },
+    {
+      "name": "vsearch",
+      "title": "Semantic Search",
+      "subtitle": "QMD",
+      "description": "Vector similarity search using semantic embeddings",
+      "mode": "view"
+    },
+    {
+      "name": "query",
+      "title": "Hybrid Search",
+      "subtitle": "QMD",
+      "description": "Best quality search combining keyword and semantic search with LLM reranking (uses more resources)",
+      "mode": "view"
+    },
+    {
+      "name": "add-collection",
+      "title": "Add Collection",
+      "subtitle": "QMD",
+      "description": "Create a new indexed collection from a folder of markdown files",
+      "mode": "view"
+    },
+    {
+      "name": "manage-collections",
+      "title": "Manage Collections",
+      "subtitle": "QMD",
+      "description": "View, edit, rename, and remove collections",
+      "mode": "view"
+    },
+    {
+      "name": "update-collections",
+      "title": "Update Collections",
+      "subtitle": "QMD",
+      "description": "Scan all collections for new or changed files and update the index",
+      "mode": "no-view"
+    },
+    {
+      "name": "add-context",
+      "title": "Add Context",
+      "subtitle": "QMD",
+      "description": "Add a context description to improve search relevance for a collection or document",
+      "mode": "view"
+    },
+    {
+      "name": "manage-contexts",
+      "title": "Manage Contexts",
+      "subtitle": "QMD",
+      "description": "View, edit, and remove context descriptions",
+      "mode": "view"
+    },
+    {
+      "name": "get-document",
+      "title": "Get Document",
+      "subtitle": "QMD",
+      "description": "Retrieve a document by its path or document ID",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "subtitle": "QMD",
+      "description": "View index health, collection stats, and embedding status",
+      "mode": "view"
+    },
+    {
+      "name": "generate-embeddings",
+      "title": "Generate Embeddings",
+      "subtitle": "QMD",
+      "description": "Generate vector embeddings for semantic search (runs in background)",
+      "mode": "no-view"
+    },
+    {
+      "name": "cleanup",
+      "title": "Cleanup",
+      "subtitle": "QMD",
+      "description": "Remove orphaned data and cache from the QMD index",
+      "mode": "no-view"
+    },
+    {
+      "name": "reset",
+      "title": "Reset QMD",
+      "subtitle": "QMD",
+      "description": "Delete all QMD data including collections, contexts, and embeddings (requires confirmation)",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultResultCount",
+      "title": "Default Result Count",
+      "description": "Number of search results to display",
+      "type": "dropdown",
+      "default": "10",
+      "required": false,
+      "data": [
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        }
+      ]
+    },
+    {
+      "name": "defaultMinScore",
+      "title": "Default Minimum Score",
+      "description": "Minimum relevance score threshold (0-1). Leave at 0 to show all results.",
+      "type": "textfield",
+      "default": "0",
+      "required": false
+    },
+    {
+      "name": "bunExecutablePath",
+      "title": "Custom Bun Executable Path",
+      "description": "Optional: Full path to Bun executable (e.g., /opt/homebrew/bin/bun). Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/bun"
+    },
+    {
+      "name": "qmdExecutablePath",
+      "title": "Custom QMD Executable Path",
+      "description": "Optional: Full path to QMD executable (e.g., /opt/homebrew/bin/qmd). Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/qmd"
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
+    "use-debounce": "^10.1.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.3.13",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "25.0.10",
+    "@types/react": "19.2.9",
+    "typescript": "^5.9.3",
+    "ultracite": "7.0.12"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix": "ultracite fix",
+    "format": "ray lint --fix",
+    "check": "ultracite check",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

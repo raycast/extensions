@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wezterm-navigator",
+  "title": "WezTerm Navigator",
+  "description": "Navigate, manage, and switch between WezTerm tabs, panes, and workspaces directly from Raycast",
+  "icon": "command-icon.png",
+  "author": "louishuyng",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "navigate-tabs",
+      "title": "Navigate WezTerm Tabs",
+      "subtitle": "WezTerm",
+      "description": "List and switch between WezTerm tabs and panes, grouped by workspace",
+      "mode": "view"
+    },
+    {
+      "name": "create-tab",
+      "title": "Create WezTerm Tab",
+      "subtitle": "WezTerm",
+      "description": "Create a new WezTerm tab with optional working directory and workspace",
+      "mode": "view"
+    },
+    {
+      "name": "manage-workspaces",
+      "title": "Manage WezTerm Workspaces",
+      "subtitle": "WezTerm",
+      "description": "View, rename, and manage WezTerm workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "setup-ipc",
+      "title": "Setup WezTerm IPC",
+      "subtitle": "WezTerm",
+      "description": "Setup instructions for cross-workspace switching",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
