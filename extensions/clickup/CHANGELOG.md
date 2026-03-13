@@ -1,5 +1,10 @@
 # ClickUp Changelog
 
+## [New "View Default List" Command] - 2026-03-13
+
+### New Feature
+- Add "View Default List" command to quickly view your default list
+
 ## [New Commands and Major Refactor] - 2026-01-09
 
 ### New Features
