@@ -17,14 +17,6 @@ import { addHistoryEntry, getActiveMode, PromptMode } from "./history-storage";
 
 type Stage = "recording" | "transcribing" | "processing" | "done" | "error";
 
-interface Preferences {
-  openaiApiKey: string;
-  language: string;
-  transcriptionModel: string;
-  promptMode: PromptMode;
-  customPrompt: string;
-}
-
 const PROMPT_LABELS: Record<PromptMode, string> = {
   general: "General",
   email: "Email",
@@ -348,6 +340,10 @@ export default function SpeechToText() {
   }
 
   async function handleRecordAgain() {
+    if (processRef.current && !processRef.current.killed) {
+      processRef.current.kill("SIGTERM");
+      processRef.current = null;
+    }
     await cleanup();
     isTranscribing.current = false;
     setRawTranscription("");
@@ -464,8 +460,7 @@ async function transcribeWithWhisper(wavBuffer: Buffer): Promise<string> {
     ),
   );
 
-  // Language hint only supported by whisper-1
-  if (language && model === "whisper-1") {
+  if (language) {
     parts.push(
       Buffer.from(
         `--${boundary}\r\nContent-Disposition: form-data; name="language"\r\n\r\n${language}\r\n`,

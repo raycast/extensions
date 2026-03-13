@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh pr:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(npm run:*)",
+      "WebFetch(domain:www.raycast.com)",
+      "WebFetch(domain:developers.raycast.com)"
+    ]
+  }
+}
