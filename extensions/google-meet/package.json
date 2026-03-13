@@ -75,6 +75,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
+  "categories": [
+    "Communication"
+  ],
   "platforms": [
     "macOS"
   ]
