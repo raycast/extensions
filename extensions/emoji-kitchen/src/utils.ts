@@ -10,24 +10,79 @@ import path from "path";
 import os from "os";
 import { EmojiMetadata, Combinations } from "./types";
 
+const CLIPBOARD_CACHE_DIR = path.join(os.tmpdir(), "emoji-kitchen-clipboard");
+const CLIPBOARD_CACHE_MAX_FILES = 200;
+const CLIPBOARD_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24;
+
 export function getGStaticUrl(left: string, right: string, date: string) {
   const pLeft = `u${left.toLowerCase().replace(/-/g, "-u")}`;
   const pRight = `u${right.toLowerCase().replace(/-/g, "-u")}`;
   return `https://www.gstatic.com/android/keyboard/emojikitchen/${date}/${pLeft}/${pLeft}_${pRight}.png`;
 }
 
+function sanitizeFileName(name: string): string {
+  return name.replace(/[^a-z0-9]/gi, "_");
+}
+
+function ensureDir(dir: string) {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+function pruneClipboardCache() {
+  if (!fs.existsSync(CLIPBOARD_CACHE_DIR)) return;
+
+  const files = fs
+    .readdirSync(CLIPBOARD_CACHE_DIR)
+    .map((name) => {
+      const filePath = path.join(CLIPBOARD_CACHE_DIR, name);
+      try {
+        const stat = fs.statSync(filePath);
+        return stat.isFile() ? { filePath, mtimeMs: stat.mtimeMs } : null;
+      } catch {
+        return null;
+      }
+    })
+    .filter((item): item is { filePath: string; mtimeMs: number } =>
+      Boolean(item),
+    )
+    .sort((a, b) => b.mtimeMs - a.mtimeMs);
+
+  const now = Date.now();
+  files.forEach((file, index) => {
+    const isTooOld = now - file.mtimeMs > CLIPBOARD_CACHE_MAX_AGE_MS;
+    const overLimit = index >= CLIPBOARD_CACHE_MAX_FILES;
+    if (isTooOld || overLimit) {
+      try {
+        fs.unlinkSync(file.filePath);
+      } catch (e) {
+        console.error("Failed to prune clipboard cache file", e);
+      }
+    }
+  });
+}
+
 export async function downloadImage(
   url: string,
   name: string,
+  options?: {
+    directory?: string;
+    uniqueFileName?: boolean;
+  },
 ): Promise<string> {
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to download image");
 
   const buffer = await response.arrayBuffer();
-  const tempFile = path.join(
-    os.tmpdir(),
-    `${name.replace(/[^a-z0-9]/gi, "_")}.png`,
-  );
+  const directory = options?.directory ?? os.tmpdir();
+  ensureDir(directory);
+
+  const safeName = sanitizeFileName(name);
+  const fileName = options?.uniqueFileName
+    ? `${safeName}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`
+    : `${safeName}.png`;
+  const tempFile = path.join(directory, fileName);
 
   fs.writeFileSync(tempFile, new Uint8Array(buffer));
   return tempFile;
@@ -39,9 +94,12 @@ export async function copyImageToClipboard(url: string, name: string) {
     style: Toast.Style.Animated,
   });
 
-  let tempFile: string | undefined;
   try {
-    tempFile = await downloadImage(url, name);
+    // Keep clipboard files around briefly; some macOS paste targets read file data lazily.
+    const tempFile = await downloadImage(url, name, {
+      directory: CLIPBOARD_CACHE_DIR,
+      uniqueFileName: true,
+    });
     await Clipboard.copy({ file: tempFile });
     await showHUD("Image copied to clipboard");
     toast.hide();
@@ -50,12 +108,10 @@ export async function copyImageToClipboard(url: string, name: string) {
     toast.message = String(error);
     toast.style = Toast.Style.Failure;
   } finally {
-    if (tempFile && fs.existsSync(tempFile)) {
-      try {
-        fs.unlinkSync(tempFile);
-      } catch (e) {
-        console.error("Failed to delete temp file", e);
-      }
+    try {
+      pruneClipboardCache();
+    } catch (e) {
+      console.error("Failed to prune clipboard cache", e);
     }
   }
 }
@@ -67,17 +123,15 @@ export async function saveImageToDownloads(url: string, name: string) {
   });
 
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to download image");
-
-    const buffer = await response.arrayBuffer();
     const downloadPath = path.join(
       os.homedir(),
       "Downloads",
-      `${name.replace(/[^a-z0-9]/gi, "_")}.png`,
+      `${sanitizeFileName(name)}.png`,
     );
-
-    fs.writeFileSync(downloadPath, new Uint8Array(buffer));
+    await downloadImage(url, name, {
+      directory: path.dirname(downloadPath),
+      uniqueFileName: false,
+    });
     await showHUD(`Saved to Downloads: ${path.basename(downloadPath)}`);
     toast.hide();
   } catch (error) {
