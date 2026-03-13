@@ -1,6 +1,6 @@
 # FHIR Changelog
 
-## [Maintenance] - 2026-03-13
+## [Maintenance] - {PR_MERGE_DATE}
 
 - Remove unused `fast-xml-parser` dependency (not imported anywhere; all data flows use JSON)
 

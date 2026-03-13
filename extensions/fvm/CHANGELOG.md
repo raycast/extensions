@@ -1,6 +1,6 @@
 # FVM Changelog
 
-## [Security Fixes] - 2026-03-13
+## [Security Fixes] - {PR_MERGE_DATE}
 
 - Update `tar` to ^7.5.11 to address hardlink path traversal CVE
 

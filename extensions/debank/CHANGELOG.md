@@ -1,9 +1,5 @@
-# MusicThread Changelog
+# debank Changelog
 
 ## [Maintenance] - {PR_MERGE_DATE}
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
-
-## [Initial Version] - 2023-04-15
-- Create "Add link" command
-- Create "Create thread" command

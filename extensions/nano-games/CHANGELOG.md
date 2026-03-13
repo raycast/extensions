@@ -1,6 +1,6 @@
 # Nano Games Changelog
 
-## [Initial Version] - 2026-03-13
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added Games
 

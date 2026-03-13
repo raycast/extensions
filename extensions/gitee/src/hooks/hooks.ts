@@ -26,7 +26,7 @@ export const getUserRepos = (page: number) => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    axios({
+    axios.request({
       method: "GET",
       url: GET_USER_REPOS,
       params: {
@@ -65,7 +65,7 @@ export const searchRepos = (searchContent: string) => {
     }
     setLoading(true);
 
-    axios({
+    axios.request({
       method: "GET",
       url: SEARCH_REPOS,
       params: {
@@ -101,7 +101,7 @@ export const myIssues = (filter: string) => {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    axios({
+    axios.request({
       method: "GET",
       url: USER_ISSUES,
       params: {
@@ -116,7 +116,7 @@ export const myIssues = (filter: string) => {
     })
       .then((response1) => {
         setOpenIssues(response1.data as Issue[]);
-        axios({
+        axios.request({
           method: "GET",
           url: USER_ISSUES,
           params: {
@@ -154,7 +154,7 @@ export const getRepoREADME = (owner: string, repo: string) => {
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    axios({
+    axios.request({
       method: "GET",
       url: GET_REPO_README(owner, repo),
       params: {
@@ -186,7 +186,7 @@ export const getNotifications = (filter: string, refresh: number) => {
   const fetchData = useCallback(async () => {
     setLoading(true);
 
-    axios({
+    axios.request({
       method: "GET",
       url: NOTIFICATIONS,
       params: {
@@ -215,7 +215,7 @@ export const getNotifications = (filter: string, refresh: number) => {
 };
 
 export const setNotificationRead = async (id: number) => {
-  await axios({
+  await axios.request({
     method: "PATCH",
     url: NOTIFICATIONS + "/" + id,
     params: {

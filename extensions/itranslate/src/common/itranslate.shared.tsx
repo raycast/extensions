@@ -1064,7 +1064,7 @@ function fetchSpaceOCR(image: string, provider: IOCRServiceProvider): Promise<st
   return new Promise<string>((resolve, reject) => {
     const formData = new FormData();
     formData.append("file", fs.createReadStream(image));
-    axios({
+    axios.request({
       url: "https://api.ocr.space/parse/image",
       method: "POST",
       headers: { apikey: provider.appKey, ...formData.getHeaders() },
@@ -1086,7 +1086,7 @@ function fetchSpaceOCR(image: string, provider: IOCRServiceProvider): Promise<st
 function fetchGoogleOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const APP_KEY = provider.appKey;
-    axios({
+    axios.request({
       url: "https://vision.googleapis.com/v1/images:annotate?key=" + APP_KEY,
       method: "POST",
       headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -1121,7 +1121,7 @@ function fetchMicrosoftAzureOCR(image: string, provider: IOCRServiceProvider): P
     const APP_KEY = provider.appKey;
     const formData = new FormData();
     formData.append("file", fs.createReadStream(image));
-    axios({
+    axios.request({
       url: `https://${RESOURCE_NAME}.cognitiveservices.azure.com/vision/v3.2/ocr`,
       method: "POST",
       headers: {
@@ -1148,7 +1148,7 @@ function fetchMicrosoftAzureOCR(image: string, provider: IOCRServiceProvider): P
 async function fetchBaiduOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
   const token = await fetchBaiduOCRToken(provider);
   return new Promise<string>((resolve, reject) => {
-    axios({
+    axios.request({
       url: "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=" + token,
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -1185,7 +1185,7 @@ function fetchYoudaoOCR(image: string, provider: IOCRServiceProvider): Promise<s
     const salt = timestamp;
     const sha256Content = APP_ID + truncate(imgBase64) + salt + timestamp + APP_KEY;
     const sign = sha256.update(sha256Content).digest("hex");
-    axios({
+    axios.request({
       url: "https://openapi.youdao.com/ocrapi",
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },

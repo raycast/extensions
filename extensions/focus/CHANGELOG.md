@@ -1,5 +1,5 @@
 # Focus Changelog
-## [Enhancement] - 2026-03-13
+## [Enhancement] - {PR_MERGE_DATE}
 - Commands now close the Raycast window automatically on success, showing a brief HUD notification instead of keeping the window open.
 
 ## [Enhancement] - 2026-03-12

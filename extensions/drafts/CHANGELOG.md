@@ -1,6 +1,6 @@
 # Drafts Changelog
 
-## [Security Maintenance] - 2026-03-13
+## [Security Maintenance] - {PR_MERGE_DATE}
 
 - Update transitive `tar` dependency to 7.5.11 to address hardlink path traversal CVE
 

@@ -407,7 +407,7 @@
     "@raycast/api": "^1.93.0",
     "@raycast/utils": "^1.19.1",
     "@web3-storage/parse-link-header": "^3.1.0",
-    "axios": "^0.24.0",
+    "axios": "^0.30.3",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.2"
   },

@@ -70,7 +70,7 @@ export default function SearchCryptoList() {
                   refreshCoinPrice={refreshCoinPrice}
                 />
               );
-            }) as React.ReactNode
+            })
           }
         </List.Section>
       )}
