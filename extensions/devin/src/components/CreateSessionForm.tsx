@@ -2,7 +2,6 @@ import { Action, ActionPanel, Form, Keyboard, Toast, open, showToast, useNavigat
 import { useState } from "react";
 import { getDevinClient } from "../lib/devin";
 import { parseTags } from "../lib/format";
-import { getExtensionPreferences } from "../lib/preferences";
 import { CreateSessionResult } from "../types";
 
 type FormValues = {
@@ -22,7 +21,6 @@ type Props = {
 
 export function CreateSessionForm({ onCreated }: Props) {
   const client = getDevinClient();
-  const preferences = getExtensionPreferences();
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -66,7 +64,7 @@ export function CreateSessionForm({ onCreated }: Props) {
   return (
     <Form
       isLoading={isSubmitting}
-      navigationTitle={preferences.demoMode ? "Create Demo Session" : "Create Devin Session"}
+      navigationTitle="Create Devin Session"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Session" onSubmit={handleSubmit} shortcut={Keyboard.Shortcut.Common.Save} />

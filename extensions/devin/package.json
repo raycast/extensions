@@ -53,15 +53,6 @@
       "type": "textfield",
       "required": false,
       "placeholder": "you@company.com"
-    },
-    {
-      "name": "demoMode",
-      "title": "Demo Mode",
-      "description": "Use local fake sessions and pull requests so you can capture screenshots without exposing real data.",
-      "type": "checkbox",
-      "label": "Use demo data instead of the live Devin API",
-      "required": false,
-      "default": false
     }
   ],
   "commands": [

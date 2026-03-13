@@ -2,7 +2,6 @@ import { Action, ActionPanel, Detail, Icon, Toast, open, showToast } from "@rayc
 import { useEffect, useState } from "react";
 import { buildSessionMarkdown } from "../lib/format";
 import { getDevinClient } from "../lib/devin";
-import { getExtensionPreferences } from "../lib/preferences";
 import { SessionDetail, SessionSummary } from "../types";
 import { SendMessageForm } from "./SendMessageForm";
 
@@ -14,7 +13,6 @@ type Props = {
 
 export function SessionDetailView({ session, onOpened, onSent }: Props) {
   const client = getDevinClient();
-  const preferences = getExtensionPreferences();
   const [detail, setDetail] = useState<SessionDetail>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,7 +56,7 @@ export function SessionDetailView({ session, onOpened, onSent }: Props) {
     <Detail
       isLoading={isLoading}
       markdown={buildSessionMarkdown(session, detail)}
-      navigationTitle={preferences.demoMode ? `${session.title} (Demo)` : session.title}
+      navigationTitle={session.title}
       actions={
         <ActionPanel>
           <Action title="Open in Devin" icon={Icon.ArrowRight} onAction={handleOpen} />

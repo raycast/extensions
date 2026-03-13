@@ -147,7 +147,7 @@ export default function Command() {
     <List
       isLoading={isLoading}
       isShowingDetail
-      navigationTitle={preferences.demoMode ? "Devin Demo Data" : "Devin"}
+      navigationTitle="Devin"
       searchBarPlaceholder="Search Devin sessions by title, ID, tag, or creator"
       onSearchTextChange={setSearchText}
       onSelectionChange={(id) => setSelectedId(id ?? undefined)}

@@ -1,5 +1,4 @@
 import { getExtensionPreferences } from "./preferences";
-import { getDemoDevinClient } from "./demo";
 import {
   CreateSessionInput,
   CreateSessionResult,
@@ -316,26 +315,18 @@ class HttpDevinClient implements DevinClient {
 }
 
 let client: DevinClient | undefined;
-let clientKey: string | undefined;
 
 export function getDevinClient(): DevinClient {
-  const preferences = getExtensionPreferences();
-  const nextClientKey = preferences.demoMode
-    ? "demo"
-    : `${preferences.apiBaseUrl}|${preferences.appBaseUrl}|${preferences.apiKey}`;
-
-  if (client && clientKey === nextClientKey) {
+  if (client) {
     return client;
   }
 
-  client = preferences.demoMode
-    ? getDemoDevinClient()
-    : new HttpDevinClient(
-        normalizeBaseUrl(preferences.apiBaseUrl),
-        normalizeBaseUrl(preferences.appBaseUrl),
-        preferences.apiKey,
-      );
-  clientKey = nextClientKey;
+  const preferences = getExtensionPreferences();
+  client = new HttpDevinClient(
+    normalizeBaseUrl(preferences.apiBaseUrl),
+    normalizeBaseUrl(preferences.appBaseUrl),
+    preferences.apiKey,
+  );
 
   return client;
 }
