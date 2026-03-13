@@ -265,8 +265,10 @@ export async function getTodayTotalTimeForProject(projectId: string): Promise<nu
     let totalMs = 0;
 
     for (const entry of filteredData) {
+      // Skip the currently running entry; its elapsed time is added live in the UI
+      if (!entry.timeInterval.end) continue;
       const entryStart = new Date(entry.timeInterval.start);
-      const entryEnd = entry.timeInterval.end ? new Date(entry.timeInterval.end) : new Date();
+      const entryEnd = new Date(entry.timeInterval.end);
       totalMs += entryEnd.getTime() - entryStart.getTime();
     }
 

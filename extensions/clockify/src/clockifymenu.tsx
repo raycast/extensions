@@ -64,36 +64,34 @@ export default function ClockifyMenuCommand() {
       currentEntry: entry,
       currentlyElapsedTime: entry ? getElapsedTime(entry) : null,
     });
-
-    if (entry?.projectId) {
-      let counter = 0;
-      const interval = setInterval(() => {
-        counter++;
-        // Trickery - else the component gets reset before the 10s interval is reached
-        if (counter % 2 === 0) {
-          const entry = getCurrentlyActiveTimeEntry();
-          setCurrentData({
-            currentEntry: entry,
-            currentlyElapsedTime: entry ? getElapsedTime(entry) : null,
-          });
-        } else {
-          setCurrentData((prev) => ({
-            currentEntry: prev?.currentEntry || null,
-            currentlyElapsedTime: prev?.currentEntry ? getElapsedTime(prev.currentEntry) : null,
-          }));
-        }
-      }, 1000);
-      return () => clearInterval(interval);
-    }
   }, []);
+
+  // Setup interval to update elapsed time when timer is running
+  useEffect(() => {
+    if (!currentData?.currentEntry?.timeInterval?.start) return;
+
+    let counter = 0;
+    const interval = setInterval(() => {
+      counter++;
+      // Trickery - else the component gets reset before the 10s interval is reached
+      if (counter % 2 === 0) {
+        const entry = getCurrentlyActiveTimeEntry();
+        setCurrentData({
+          currentEntry: entry,
+          currentlyElapsedTime: entry ? getElapsedTime(entry) : null,
+        });
+      } else {
+        setCurrentData((prev) => ({
+          currentEntry: prev?.currentEntry || null,
+          currentlyElapsedTime: prev?.currentEntry ? getElapsedTime(prev.currentEntry) : null,
+        }));
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [currentData?.currentEntry?.timeInterval?.start]);
 
   const currentEntry = currentData?.currentEntry;
   const currentlyElapsedTime = currentData?.currentlyElapsedTime;
-
-  // Debug logging
-  console.log("DEBUG MENU: currentEntry:", currentEntry);
-  console.log("DEBUG MENU: projectId:", currentEntry?.projectId);
-  console.log("DEBUG MENU: project:", currentEntry?.project);
 
   // Fetch data asynchronously without blocking render
   useEffect(() => {
