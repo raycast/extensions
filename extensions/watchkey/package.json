@@ -1,19 +1,18 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "watchkey",
-  "version": "1.0.0",
   "title": "Watchkey",
   "description": "Store and retrieve keychain secrets with Touch ID & Apple Watch",
   "icon": "extension-icon.png",
   "author": "etheirystech",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Developer Tools",
     "Security"
   ],
   "license": "MIT",
-  "platforms": [
-    "macOS"
-  ],
   "commands": [
     {
       "name": "set-key",
@@ -51,6 +50,7 @@
     "prettier": "^3.8.1",
     "typescript": "^5.4.5"
   },
+  "version": "1.0.0",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
