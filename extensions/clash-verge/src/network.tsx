@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
+import { formatErrorMessage } from "./lib/errors";
 import { getMihomoConfig, getProxyHost, setTunEnabled } from "./lib/mihomo";
 import { getSystemProxyStatus, setSystemProxyEnabled } from "./lib/system-proxy";
 import { SystemProxyStatus } from "./lib/types";
@@ -103,6 +104,12 @@ export default function NetworkCommand() {
 
   return (
     <List isLoading={isLoading}>
+      <List.EmptyView
+        icon={Icon.Network}
+        title="No Network Controls Available"
+        description="Refresh after Clash Verge starts, or clear the search filter to see the available actions."
+      />
+
       {hasMismatch && (
         <List.Item
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
@@ -249,8 +256,4 @@ function getMismatchMessages(state: NetworkState | undefined): string[] {
 
 function toEnabledText(value: boolean): string {
   return value ? "enabled" : "disabled";
-}
-
-function formatErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
 }

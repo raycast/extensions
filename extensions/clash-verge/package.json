@@ -5,6 +5,9 @@
   "description": "Control Clash Verge network settings and proxy mode from Raycast",
   "icon": "icon.png",
   "author": "dx5lin",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -14,6 +17,7 @@
     {
       "name": "network",
       "title": "Network",
+      "subtitle": "Clash Verge",
       "description": "Enable or disable System Proxy and TUN Mode",
       "mode": "view",
       "keywords": [
@@ -26,6 +30,7 @@
     {
       "name": "proxy-mode",
       "title": "Proxy Mode",
+      "subtitle": "Clash Verge",
       "description": "Set proxy mode to Rule, Global, or Direct",
       "mode": "view",
       "keywords": [

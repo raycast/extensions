@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
+import { formatErrorMessage } from "./lib/errors";
 import { getMihomoConfig, setProxyMode } from "./lib/mihomo";
 import { Mode } from "./lib/types";
 
@@ -53,6 +54,12 @@ export default function ProxyModeCommand() {
 
   return (
     <List isLoading={isLoading}>
+      <List.EmptyView
+        icon={Icon.Globe}
+        title="No Proxy Modes Available"
+        description="Refresh after Clash Verge starts, or clear the search filter to see all proxy modes."
+      />
+
       {MODE_ITEMS.map((item) => (
         <List.Item
           key={item.mode}
@@ -83,8 +90,4 @@ export default function ProxyModeCommand() {
       )}
     </List>
   );
-}
-
-function formatErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : "Unknown error";
 }
