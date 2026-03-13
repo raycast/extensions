@@ -22,30 +22,23 @@
         {
             "name": "uninstaller_app",
             "key": "uninstaller_app",
-            "title": "Preferred Uninstaller",
-            "description": "Pick your preferred uninstaller",
-            "type": "dropdown",
-            "defaultValue": "appcleaner",
-            "required": false,
-            "data": [
-                { "title": "AppCleaner (FreeMacSoft)", "value": "appcleaner" },
-                { "title": "Pearcleaner", "value": "pearcleaner" },
-                { "title": "TrashMe 3", "value": "trashme" },
-                { "title": "App Cleaner & Uninstaller (Nektony)", "value": "appcleaneruninstaller" }
-            ]
+            "title": "Uninstaller App",
+            "description": "Choose the uninstaller app you want to use for uninstalling applications.",
+            "type": "appPicker",
+            "required": false
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.94.0",
-        "@raycast/utils": "^1.19.1"
+        "@raycast/api": "^1.104.9",
+        "@raycast/utils": "^2.2.3"
     },
     "devDependencies": {
         "@raycast/eslint-config": "^1.0.11",
-        "@types/node": "22.15.21",
-        "@types/react": "19.1.5",
+        "@types/node": "25.5.0",
+        "@types/react": "19.2.14",
         "eslint": "^8.57.1",
-        "prettier": "^3.5.3",
-        "typescript": "^5.8.3"
+        "prettier": "^3.8.1",
+        "typescript": "^5.9.3"
     },
     "scripts": {
         "build": "ray build",
