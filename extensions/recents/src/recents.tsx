@@ -190,7 +190,6 @@ export default function Command(props: { scope?: string | undefined }) {
                   onAction={() => showInfoInFinder(recent)}
                 />
                 <ActionPanel.Section>
-                  <Action.Paste title={`Paste ${kMDItemKind}`} content={{ file: kMDItemPath }} />
                   <Action.CopyToClipboard
                     title={`Copy ${kMDItemKind}`}
                     shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -207,6 +206,11 @@ export default function Command(props: { scope?: string | undefined }) {
                     title="Copy Path"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                     content={kMDItemPath}
+                  />
+                  <Action.Paste
+                    title={`Paste ${kMDItemKind}`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    content={{ file: kMDItemPath }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
