@@ -83,13 +83,8 @@ async function writeSyncState(state: SyncState) {
   await LocalStorage.setItem(SYNC_STATE_KEY, JSON.stringify(state));
 }
 
-async function resetAgentsDirectory() {
-  await fs.rm(AGENTS_DIR, { recursive: true, force: true });
-  await fs.mkdir(AGENTS_DIR, { recursive: true });
-}
-
-async function writeRepoFile(filePath: string, content: string) {
-  const destination = path.join(AGENTS_DIR, filePath);
+async function writeRepoFile(rootDir: string, filePath: string, content: string) {
+  const destination = path.join(rootDir, filePath);
   await fs.mkdir(path.dirname(destination), { recursive: true });
   await fs.writeFile(destination, content, "utf8");
 }
@@ -106,12 +101,22 @@ export async function syncAgentsFromGitHub(options?: { force?: boolean }) {
   }
 
   const filesToSync = tree.tree.filter((entry) => entry.type === "blob" && shouldSyncPath(entry.path));
+  const temporaryDirectory = `${AGENTS_DIR}_tmp_${Date.now()}`;
 
-  await resetAgentsDirectory();
+  await fs.rm(temporaryDirectory, { recursive: true, force: true });
+  await fs.mkdir(temporaryDirectory, { recursive: true });
 
-  for (const entry of filesToSync) {
-    const content = await fetchText(getRawFileUrl(entry.path));
-    await writeRepoFile(entry.path, content);
+  try {
+    for (const entry of filesToSync) {
+      const content = await fetchText(getRawFileUrl(entry.path));
+      await writeRepoFile(temporaryDirectory, entry.path, content);
+    }
+
+    await fs.rm(AGENTS_DIR, { recursive: true, force: true });
+    await fs.rename(temporaryDirectory, AGENTS_DIR);
+  } catch (error) {
+    await fs.rm(temporaryDirectory, { recursive: true, force: true });
+    throw error;
   }
 
   const state: SyncState = {
