@@ -13,12 +13,11 @@
 - "Pinned: X%" tag shown on devices with pinned volumes
 - Background enforcer automatically resets volume if macOS changes it
 
-### Default device and priority ordering
-- Default (sticky) device: star any device as your default (Cmd+Shift+D)
-- Default device is always pinned to the top of the list
-- Priority ordering: reorder devices with Ctrl+Opt+Arrow keys in the device list
-- Always-on background enforcement every 20s -- no manual toggle needed
-- If default device is connected, always use it; otherwise fall back to priority order
+### Default device
+- Default (sticky) device: set any device as your default (Cmd+Shift+D)
+- Default device is pinned to the top of the list
+- Always-on background enforcement every 10s -- no manual toggle needed
+- If default device is connected, always use it
 - Removed separate "Toggle Auto Switch" and "Customize Order" commands
 
 ### New icons
