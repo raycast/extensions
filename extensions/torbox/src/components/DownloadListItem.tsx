@@ -2,15 +2,15 @@ import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@rayca
 import { Download } from "../types";
 import { deleteDownload, deleteQueuedDownload } from "../api/downloads";
 import { formatBytes, formatTypeLabel } from "../utils/formatters";
-import { isVideoFile } from "../utils/video";
-import { openInPlayer } from "../utils/video";
+import { isVideoFile, openInPlayer } from "../utils/video";
 import { copyDownloadLink } from "../utils/downloads";
-import { useVideoPlayers } from "../hooks/useVideoPlayers";
+import { VideoPlayers } from "../hooks/useVideoPlayers";
 import { DownloadFiles } from "./DownloadFiles";
 
 interface DownloadListItemProps {
   download: Download;
   apiKey: string;
+  videoPlayers: VideoPlayers;
   onRefresh: () => void;
 }
 
@@ -64,14 +64,14 @@ const handleDelete = async (apiKey: string, download: Download, onRefresh: () =>
   }
 };
 
-export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListItemProps) => {
+export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh }: DownloadListItemProps) => {
   const status = getStatus(download);
   const isDownloadReady = !download.isQueued && (download.download_finished || download.progress >= 1);
   const hasMultipleFiles = download.files.length > 1;
   const isSingleVideoFile =
     download.files.length === 1 && isVideoFile(download.files[0].short_name || download.files[0].name);
   const subtitle = formatSubtitle(download);
-  const { players, setDefaultPlayer } = useVideoPlayers();
+  const { players, setDefaultPlayer } = videoPlayers;
 
   return (
     <List.Item

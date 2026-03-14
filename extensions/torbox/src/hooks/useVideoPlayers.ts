@@ -29,3 +29,5 @@ export function useVideoPlayers() {
 
   return { players: sortedPlayers, setDefaultPlayer };
 }
+
+export type VideoPlayers = ReturnType<typeof useVideoPlayers>;

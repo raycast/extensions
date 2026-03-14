@@ -19,7 +19,9 @@ const VIDEO_EXTENSIONS = new Set([
 ]);
 
 export const isVideoFile = (filename: string): boolean => {
-  const ext = filename.slice(filename.lastIndexOf(".")).toLowerCase();
+  const dotIndex = filename.lastIndexOf(".");
+  if (dotIndex === -1) return false;
+  const ext = filename.slice(dotIndex).toLowerCase();
   return VIDEO_EXTENSIONS.has(ext);
 };
 
