@@ -1,6 +1,6 @@
 # Job Dojo Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-03-14
 
 - Added error messages for template messages
 - Removed default model from docs
