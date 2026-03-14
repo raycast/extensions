@@ -15,7 +15,7 @@ export default function Command() {
     void (async () => {
       const [targets, lastTarget] = await Promise.all([getRecentTargets(), getLastTarget()]);
       setRecentTargets(targets);
-      const initialTarget =
+      const initialTarget: OpencodeTarget | undefined =
         lastTarget ?? (preferences.defaultDirectory ? { directory: preferences.defaultDirectory } : undefined);
       setDirectory(initialTarget?.directory ?? "");
       setWorkspace(initialTarget?.workspace ?? "");
