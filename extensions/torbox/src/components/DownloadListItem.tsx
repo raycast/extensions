@@ -1,7 +1,11 @@
-import { ActionPanel, Action, List, Icon, Color, showToast, Toast, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
 import { Download } from "../types";
-import { getDownloadLink, deleteDownload, deleteQueuedDownload } from "../api/downloads";
+import { deleteDownload, deleteQueuedDownload } from "../api/downloads";
 import { formatBytes, formatTypeLabel } from "../utils/formatters";
+import { isVideoFile } from "../utils/video";
+import { openInPlayer } from "../utils/video";
+import { copyDownloadLink } from "../utils/downloads";
+import { useVideoPlayers } from "../hooks/useVideoPlayers";
 import { DownloadFiles } from "./DownloadFiles";
 
 interface DownloadListItemProps {
@@ -39,21 +43,6 @@ const formatSubtitle = (download: Download): string => {
   return `${formatBytes(download.size)} · ${typeLabel}${fileCount}`;
 };
 
-const copyDownloadLink = async (apiKey: string, download: Download) => {
-  try {
-    await showToast({ style: Toast.Style.Animated, title: "Getting download link..." });
-    const link = await getDownloadLink(apiKey, download.type, download.id);
-    await Clipboard.copy(link);
-    await showToast({ style: Toast.Style.Success, title: "Download link copied!" });
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to get download link",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-};
-
 const handleDelete = async (apiKey: string, download: Download, onRefresh: () => void) => {
   try {
     await showToast({ style: Toast.Style.Animated, title: "Deleting download..." });
@@ -79,7 +68,10 @@ export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListIt
   const status = getStatus(download);
   const isReady = !download.isQueued && (download.download_finished || download.progress >= 1);
   const hasMultipleFiles = download.files.length > 1;
+  const isSingleVideoFile =
+    download.files.length === 1 && isVideoFile(download.files[0].short_name || download.files[0].name);
   const subtitle = formatSubtitle(download);
+  const { players, setDefaultPlayer } = useVideoPlayers();
 
   return (
     <List.Item
@@ -89,7 +81,19 @@ export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListIt
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {isReady && <Action title="Copy Download Link" onAction={() => copyDownloadLink(apiKey, download)} />}
+            {isReady &&
+              isSingleVideoFile &&
+              players.map((player) => (
+                <Action
+                  key={player.name}
+                  title={`Open in ${player.name}`}
+                  icon={Icon.Play}
+                  onAction={() => openInPlayer(apiKey, download, player)}
+                />
+              ))}
+            {isReady && (
+              <Action title="Copy Download Link" icon={Icon.Link} onAction={() => copyDownloadLink(apiKey, download)} />
+            )}
             {hasMultipleFiles && (
               <Action.Push
                 title="View Files"
@@ -99,6 +103,15 @@ export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListIt
               />
             )}
           </ActionPanel.Section>
+          {isSingleVideoFile && players.length > 1 && (
+            <ActionPanel.Section>
+              <ActionPanel.Submenu title="Set Default Player" icon={Icon.Star}>
+                {players.map((player) => (
+                  <Action key={player.name} title={player.name} onAction={() => setDefaultPlayer(player)} />
+                ))}
+              </ActionPanel.Submenu>
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section>
             <Action title="Refresh All Downloads" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={onRefresh} />
             <Action
