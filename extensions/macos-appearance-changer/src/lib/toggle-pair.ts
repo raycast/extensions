@@ -11,7 +11,12 @@ const STORAGE_KEY = "toggle-pair";
 export class TogglePair {
   static async load(): Promise<TogglePairConfig | null> {
     const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as TogglePairConfig) : null;
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw) as TogglePairConfig;
+    } catch {
+      return null;
+    }
   }
 
   static async save(config: TogglePairConfig): Promise<void> {

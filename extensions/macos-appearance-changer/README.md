@@ -27,13 +27,13 @@ Create a few profiles, then apply whichever one you want from Raycast. That's it
 ## Screenshots
 
 ### Apply Profile
-![Apply Profile](metadata/macos-appearance-changer-1.png)
+![Apply Profile](assets/screenshots/macos-appearance-changer-1.png)
 
 ### Create Profile
-![Create Profile](metadata/macos-appearance-changer-2.png)
+![Create Profile](assets/screenshots/macos-appearance-changer-2.png)
 
 ### Configure Toggle
-![Configure Toggle](metadata/macos-appearance-changer-3.png)
+![Configure Toggle](assets/screenshots/macos-appearance-changer-3.png)
 
 ## How It Works
 

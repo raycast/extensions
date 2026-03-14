@@ -9,8 +9,12 @@ export class Profiles {
     const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
     if (!raw) return [];
 
-    const parsed: unknown[] = JSON.parse(raw);
-    return parsed.filter(isValidProfile);
+    try {
+      const parsed: unknown[] = JSON.parse(raw);
+      return parsed.filter(isValidProfile);
+    } catch {
+      return [];
+    }
   }
 
   static async save(profile: Profile): Promise<void> {
