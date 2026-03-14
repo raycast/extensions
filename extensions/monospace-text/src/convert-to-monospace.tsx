@@ -29,7 +29,7 @@ export default async function Command() {
     }
 
     // 2. Same text processed recently
-    const cache = new Cache("monospace-text-last");
+    const cache = new Cache({ namespace: "monospace-text-last" });
     const lastProcessed = await cache.get("text");
     if (lastProcessed === text) {
       return;
