@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { UsageLimitData } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
@@ -14,14 +14,73 @@ interface CacheState {
 
 type Listener = (state: CacheState) => void;
 
-let cacheState: CacheState = {
-  data: null,
-  error: null,
-  isLoading: true,
-  isStale: false,
-  isUsageLimitsAvailable: false,
-  lastFetched: null,
+interface PersistedUsageLimitsAvailability {
+  isAvailable: boolean;
+  lastCheckedAt: string;
+}
+
+const availabilityCache = new Cache();
+const USAGE_LIMITS_AVAILABILITY_CACHE_KEY = "usage-limits-availability";
+
+const readPersistedAvailability = (): PersistedUsageLimitsAvailability | null => {
+  const cachedValue = availabilityCache.get(USAGE_LIMITS_AVAILABILITY_CACHE_KEY);
+
+  if (!cachedValue) {
+    return null;
+  }
+
+  try {
+    const parsedValue = JSON.parse(cachedValue) as Partial<PersistedUsageLimitsAvailability>;
+
+    if (typeof parsedValue.isAvailable !== "boolean" || typeof parsedValue.lastCheckedAt !== "string") {
+      availabilityCache.remove(USAGE_LIMITS_AVAILABILITY_CACHE_KEY);
+      return null;
+    }
+
+    return {
+      isAvailable: parsedValue.isAvailable,
+      lastCheckedAt: parsedValue.lastCheckedAt,
+    };
+  } catch {
+    availabilityCache.remove(USAGE_LIMITS_AVAILABILITY_CACHE_KEY);
+    return null;
+  }
 };
+
+const persistAvailability = (isAvailable: boolean): void => {
+  const persistedValue: PersistedUsageLimitsAvailability = {
+    isAvailable,
+    lastCheckedAt: new Date().toISOString(),
+  };
+
+  availabilityCache.set(USAGE_LIMITS_AVAILABILITY_CACHE_KEY, JSON.stringify(persistedValue));
+};
+
+const createInitialCacheState = (): CacheState => {
+  const persistedAvailability = readPersistedAvailability();
+
+  if (!persistedAvailability) {
+    return {
+      data: null,
+      error: null,
+      isLoading: true,
+      isStale: false,
+      isUsageLimitsAvailable: false,
+      lastFetched: null,
+    };
+  }
+
+  return {
+    data: null,
+    error: null,
+    isLoading: persistedAvailability.isAvailable,
+    isStale: false,
+    isUsageLimitsAvailable: persistedAvailability.isAvailable,
+    lastFetched: null,
+  };
+};
+
+let cacheState: CacheState = createInitialCacheState();
 
 const listeners = new Set<Listener>();
 let fetchInterval: NodeJS.Timeout | null = null;
@@ -39,7 +98,9 @@ const fetchUsageLimits = async (): Promise<void> => {
 
   try {
     const token = await getClaudeAccessToken();
+
     const isUsageLimitsAvailable = typeof token === "string" && token.trim().length > 0;
+    persistAvailability(isUsageLimitsAvailable);
 
     if (!isUsageLimitsAvailable) {
       cacheState = {
@@ -53,6 +114,14 @@ const fetchUsageLimits = async (): Promise<void> => {
       notifyListeners();
       return;
     }
+
+    cacheState = {
+      ...cacheState,
+      error: null,
+      isLoading: previousData === null,
+      isUsageLimitsAvailable: true,
+    };
+    notifyListeners();
 
     const limitData = await fetchClaudeUsageLimits(token);
 

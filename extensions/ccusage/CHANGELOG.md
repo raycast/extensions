@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.2.3] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Persisted usage limits availability between refreshes so the "Usage Limits" section does not flicker or disappear while OAuth authentication is being rechecked
+
 ## [v2.2.2] - 2026-03-04
 
 ### Fixed
