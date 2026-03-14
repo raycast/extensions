@@ -1,6 +1,6 @@
 # TorBox Changelog
 
-## [Stream video files in external players] - {PR_MERGE_DATE}
+## [Stream video files in external players] - 2026-03-14
 
 - Stream video files directly in VLC, IINA, Infuse, or mpv
 - Automatically detect installed video players
