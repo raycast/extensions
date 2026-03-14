@@ -14,11 +14,10 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import https from "node:https";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 const API_HOST = "https://beard.town";
-const API_TOKEN = "D5A19F84-636A-476D-8C63-94A7C212E3F7";
+const UUID = "D5A19F84-636A-476D-8C63-94A7C212E3F7";
 const DEFAULT_PAGE_SIZE = 50;
 const RESPONSE_CACHE_TTL_MS = 10 * 60 * 1000;
 const ASSETS_DIR = environment.assetsPath;
@@ -486,7 +485,7 @@ function ChallengeDetail({ entry }: { entry: ChallengeEntry }) {
 
     void (async () => {
       try {
-        const payload = await requestJson(parsedUrl.toString(), parsedUrl.hostname.endsWith(".test"));
+        const payload = await requestJson(parsedUrl.toString());
         const fullRecord = getFirstRecord(payload);
         if (!cancelled && fullRecord) {
           setResolvedRecord(unwrapRecord(fullRecord));
@@ -817,47 +816,25 @@ function RelatedResourceScreen({ relation, filter }: { relation: RelationItem; f
   );
 }
 
-async function requestJson(url: string, allowInsecureTls: boolean): Promise<unknown> {
+async function requestJson(url: string): Promise<unknown> {
   const cached = readCachedJson(url);
   if (cached !== null) {
     return cached;
   }
 
-  return await new Promise((resolve, reject) => {
-    const req = https.get(
-      url,
-      {
-        rejectUnauthorized: !allowInsecureTls,
-        headers: {
-          "X-API-Token": API_TOKEN,
-        },
-      },
-      (res) => {
-        const { statusCode = 0 } = res;
-        const chunks: Buffer[] = [];
-
-        res.on("data", (chunk: Buffer) => chunks.push(chunk));
-        res.on("end", () => {
-          const body = Buffer.concat(chunks).toString("utf8");
-
-          if (statusCode < 200 || statusCode >= 300) {
-            reject(new Error(`Request failed with status ${statusCode}`));
-            return;
-          }
-
-          try {
-            const parsed = JSON.parse(body);
-            writeCachedJson(url, parsed);
-            resolve(parsed);
-          } catch (error) {
-            reject(new Error(`Invalid JSON response: ${String(error)}`));
-          }
-        });
-      },
-    );
-
-    req.on("error", reject);
+  const response = await fetch(url, {
+    headers: {
+      "X-API-Token": UUID,
+    },
   });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  const parsed = (await response.json()) as unknown;
+  writeCachedJson(url, parsed);
+  return parsed;
 }
 
 function readCachedJson(url: string): unknown | null {
@@ -897,8 +874,7 @@ async function fetchPaginatedChallenges(
     pageUrl.searchParams.set("limit", String(DEFAULT_PAGE_SIZE));
   }
 
-  const allowInsecureTls = pageUrl.hostname.endsWith(".test");
-  const payload = await requestJson(pageUrl.toString(), allowInsecureTls);
+  const payload = await requestJson(pageUrl.toString());
   const records = getRecords(payload);
   const currentPage = parsePageNumber(pageUrl.searchParams.get("page")) ?? options.page ?? 1;
   const nextUrl = getNextPageUrl(payload, pageUrl.toString());
@@ -953,7 +929,7 @@ async function hydrateChallengeRecords(records: ApiRecord[]): Promise<ApiRecord[
       }
 
       try {
-        const payload = await requestJson(jsonUrl, new URL(jsonUrl).hostname.endsWith(".test"));
+        const payload = await requestJson(jsonUrl);
         const fullRecord = getFirstRecord(payload);
         return fullRecord ? unwrapRecord(fullRecord) : record;
       } catch {
@@ -1040,7 +1016,7 @@ async function openChallengeYouTube(record: ApiRecord): Promise<void> {
   });
 
   try {
-    const payload = await requestJson(jsonUrl, new URL(jsonUrl).hostname.endsWith(".test"));
+    const payload = await requestJson(jsonUrl);
     const fullRecord = getFirstRecord(payload);
     const resolvedUrl = fullRecord ? getYouTubeUrl(unwrapRecord(fullRecord)) : null;
 
