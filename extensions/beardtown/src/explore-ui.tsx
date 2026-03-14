@@ -102,7 +102,7 @@ export function ChallengeDetail({ entry }: { entry: ChallengeEntry }) {
               title="Watch on YouTube"
               icon={PLAY_ACTION_ICON}
               shortcut={{ modifiers: ["cmd"], key: "y" }}
-              onAction={() => openChallengeYouTube(resolvedRecord)}
+              onAction={() => void openChallengeYouTube(resolvedRecord)}
             />
           ) : null}
           {getLocationTitle(resolvedRecord) ? (
@@ -156,7 +156,7 @@ export function entryActions(
           title="Watch on YouTube"
           icon={PLAY_ACTION_ICON}
           shortcut={{ modifiers: ["cmd"], key: "y" }}
-          onAction={() => openChallengeYouTube(entry.record)}
+          onAction={() => void openChallengeYouTube(entry.record)}
         />
       ) : null}
       {isChallenge && getLocationTitle(entry.record) ? (

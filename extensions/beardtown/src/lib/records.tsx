@@ -1,4 +1,5 @@
 import { Color, Detail, Grid, List } from "@raycast/api";
+import { Fragment, type ReactNode } from "react";
 import { API_HOST, FAILED_STATUS_ICON, RESOURCE_CONFIG, SUCCEEDED_STATUS_ICON } from "../config";
 import type { ApiRecord, ChallengeEntry, ChallengeFilter, RelationItem } from "../types";
 import {
@@ -915,73 +916,134 @@ export function buildDetailMetadata(record: ApiRecord, onOpenRelation: (item: Re
     return undefined;
   }
 
+  const sections: ReactNode[][] = [];
+
+  const topSection: ReactNode[] = [];
+  if (locationTitle) {
+    topSection.push(
+      <Detail.Metadata.Link
+        key="location"
+        title="Location"
+        text={locationTitle}
+        target={getLocationMapUrl(locationTitle)}
+      />,
+    );
+  }
+  if (joinedByItems.length > 0) {
+    topSection.push(
+      <Detail.Metadata.TagList key="joined-by" title="Joined By">
+        {joinedByItems.map((item) => (
+          <Detail.Metadata.TagList.Item
+            key={`joined-by-${item.title}`}
+            text={item.title}
+            onAction={() => onOpenRelation(item)}
+          />
+        ))}
+      </Detail.Metadata.TagList>,
+    );
+  }
+  if (topSection.length > 0) {
+    sections.push(topSection);
+  }
+
+  const statsSection: ReactNode[] = [];
+  if (priceValue) {
+    statsSection.push(<Detail.Metadata.Label key="price" title="Price" text={priceValue} />);
+  }
+  if (weightValue) {
+    statsSection.push(<Detail.Metadata.Label key="weight" title="Weight" text={weightValue} />);
+  }
+  if (statsSection.length > 0) {
+    sections.push(statsSection);
+  }
+
+  const timingSection: ReactNode[] = [];
+  if (timeLimitValue) {
+    timingSection.push(<Detail.Metadata.Label key="time-limit" title="Time Limit" text={timeLimitValue} />);
+  }
+  if (timeTakenValue) {
+    timingSection.push(<Detail.Metadata.Label key="time-taken" title="Time Taken" text={timeTakenValue} />);
+  }
+  if (timeUsedValue) {
+    timingSection.push(<Detail.Metadata.Label key="time-used" title="Time Used" text={timeUsedValue} />);
+  }
+  if (statusValue) {
+    timingSection.push(
+      <Detail.Metadata.Label
+        key="status"
+        title="Status"
+        icon={getStatusIcon(statusValue)}
+        text={{ value: statusValue, color: getStatusColor(statusValue) }}
+      />,
+    );
+  }
+  if (timingSection.length > 0) {
+    sections.push(timingSection);
+  }
+
+  const relationsSection: ReactNode[] = [];
+  if (highlightItems.length > 0) {
+    relationsSection.push(
+      <Detail.Metadata.TagList key="highlights" title="Highlights">
+        {highlightItems.map((item) => (
+          <Detail.Metadata.TagList.Item
+            key={`highlight-${item.title}`}
+            text={item.title}
+            onAction={() => onOpenRelation(item)}
+          />
+        ))}
+      </Detail.Metadata.TagList>,
+    );
+  }
+  if (consumedItems.length > 0) {
+    relationsSection.push(
+      <Detail.Metadata.TagList key="consumed" title="Consumed">
+        {consumedItems.map((item) => (
+          <Detail.Metadata.TagList.Item
+            key={`consumed-${item.title}`}
+            text={item.title}
+            onAction={() => onOpenRelation(item)}
+          />
+        ))}
+      </Detail.Metadata.TagList>,
+    );
+  }
+  if (prizeItems.length > 0) {
+    relationsSection.push(
+      <Detail.Metadata.TagList key="prizes" title="Prizes">
+        {prizeItems.map((item) => (
+          <Detail.Metadata.TagList.Item
+            key={`prize-${item.title}`}
+            text={item.title}
+            onAction={() => onOpenRelation(item)}
+          />
+        ))}
+      </Detail.Metadata.TagList>,
+    );
+  }
+  if (relationsSection.length > 0) {
+    sections.push(relationsSection);
+  }
+
+  const videoSection: ReactNode[] = [];
+  if (dateValue) {
+    videoSection.push(<Detail.Metadata.Label key="video-released" title="Video Released" text={dateValue} />);
+  }
+  if (videoLengthValue) {
+    videoSection.push(<Detail.Metadata.Label key="video-length" title="Video Length" text={videoLengthValue} />);
+  }
+  if (videoSection.length > 0) {
+    sections.push(videoSection);
+  }
+
   return (
     <Detail.Metadata>
-      {locationTitle ? (
-        <Detail.Metadata.Link title="Location" text={locationTitle} target={getLocationMapUrl(locationTitle)} />
-      ) : null}
-      {joinedByItems.length > 0 ? (
-        <Detail.Metadata.TagList title="Joined By">
-          {joinedByItems.map((item) => (
-            <Detail.Metadata.TagList.Item
-              key={`joined-by-${item.title}`}
-              text={item.title}
-              onAction={() => onOpenRelation(item)}
-            />
-          ))}
-        </Detail.Metadata.TagList>
-      ) : null}
-      <Detail.Metadata.Separator />
-      {priceValue ? <Detail.Metadata.Label title="Price" text={priceValue} /> : null}
-      {weightValue ? <Detail.Metadata.Label title="Weight" text={weightValue} /> : null}
-      <Detail.Metadata.Separator />
-      {timeLimitValue ? <Detail.Metadata.Label title="Time Limit" text={timeLimitValue} /> : null}
-      {timeTakenValue ? <Detail.Metadata.Label title="Time Taken" text={timeTakenValue} /> : null}
-      {timeUsedValue ? <Detail.Metadata.Label title="Time Used" text={timeUsedValue} /> : null}
-      {statusValue ? (
-        <Detail.Metadata.Label
-          title="Status"
-          icon={getStatusIcon(statusValue)}
-          text={{ value: statusValue, color: getStatusColor(statusValue) }}
-        />
-      ) : null}
-      <Detail.Metadata.Separator />
-      {highlightItems.length > 0 ? (
-        <Detail.Metadata.TagList title="Highlights">
-          {highlightItems.map((item) => (
-            <Detail.Metadata.TagList.Item
-              key={`highlight-${item.title}`}
-              text={item.title}
-              onAction={() => onOpenRelation(item)}
-            />
-          ))}
-        </Detail.Metadata.TagList>
-      ) : null}
-      {consumedItems.length > 0 ? (
-        <Detail.Metadata.TagList title="Consumed">
-          {consumedItems.map((item) => (
-            <Detail.Metadata.TagList.Item
-              key={`consumed-${item.title}`}
-              text={item.title}
-              onAction={() => onOpenRelation(item)}
-            />
-          ))}
-        </Detail.Metadata.TagList>
-      ) : null}
-      {prizeItems.length > 0 ? (
-        <Detail.Metadata.TagList title="Prizes">
-          {prizeItems.map((item) => (
-            <Detail.Metadata.TagList.Item
-              key={`prize-${item.title}`}
-              text={item.title}
-              onAction={() => onOpenRelation(item)}
-            />
-          ))}
-        </Detail.Metadata.TagList>
-      ) : null}
-      <Detail.Metadata.Separator />
-      {dateValue ? <Detail.Metadata.Label title="Video Released" text={dateValue} /> : null}
-      {videoLengthValue ? <Detail.Metadata.Label title="Video Length" text={videoLengthValue} /> : null}
+      {sections.map((section, index) => (
+        <Fragment key={`metadata-section-${index}`}>
+          {index > 0 ? <Detail.Metadata.Separator /> : null}
+          {section}
+        </Fragment>
+      ))}
     </Detail.Metadata>
   );
 }
