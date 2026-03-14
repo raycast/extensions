@@ -516,13 +516,9 @@ export function getLatestRelatedChallengeTooltip(record: ApiRecord): string {
 export function getLatestRelatedChallenge(record: ApiRecord): ApiRecord | null {
   const fields = asObject(record.fields);
   const candidateSources = [record.challenges, fields?.challenges];
-  const candidates = candidateSources
-    .flatMap((value) => normalizeRelationRecords(value))
-    .map(unwrapRecord)
-    .filter(
-      (value, index, array) =>
-        array.findIndex((item) => getDedupKey(item, String(index)) === getDedupKey(value, String(index))) === index,
-    );
+  const candidates = dedupeRecords(
+    candidateSources.flatMap((value) => normalizeRelationRecords(value)).map(unwrapRecord),
+  );
 
   const sortedCandidates = candidates
     .map((item, index) => ({ item, index, timestamp: getRecordTimestamp(item) }))
@@ -563,15 +559,10 @@ export function getLatestVideoThumbnailUrl(record: ApiRecord): string {
     record.featuredVideos,
   ];
 
-  const videos = candidateSources
-    .flatMap((value) => normalizeRelationRecords(value))
-    .map(unwrapRecord)
-    .filter(
-      (value, index, array) =>
-        array.findIndex((item) => getDedupKey(item, String(index)) === getDedupKey(value, String(index))) === index,
-    );
+  const videos = candidateSources.flatMap((value) => normalizeRelationRecords(value)).map(unwrapRecord);
+  const dedupedVideos = dedupeRecords(videos);
 
-  const sortedVideos = videos
+  const sortedVideos = dedupedVideos
     .map((video, index) => ({ video, index, timestamp: getRecordTimestamp(video) }))
     .sort((left, right) => {
       if (left.timestamp === right.timestamp) {
@@ -678,6 +669,20 @@ export function getRecordUrl(record: ApiRecord): string | null {
 
 export function getDedupKey(record: ApiRecord, fallback: string): string {
   return getDisplayValue(record, ["id", "slug", "url"], "") || fallback;
+}
+
+function dedupeRecords(records: ApiRecord[]): ApiRecord[] {
+  const seen = new Set<string>();
+
+  return records.filter((record, index) => {
+    const key = getDedupKey(record, String(index));
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
 }
 
 export function getResourceUrl(filter: ChallengeFilter): string {

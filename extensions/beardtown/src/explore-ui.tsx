@@ -122,7 +122,6 @@ export function ChallengeDetail({ entry }: { entry: ChallengeEntry }) {
 export function entryActions(
   entry: ChallengeEntry,
   selectedFilter: ChallengeFilter,
-  loadInitial: () => void,
   sectionEntries: ChallengeEntry[] = [],
 ) {
   const isChallenge = selectedFilter === "challenges";
@@ -296,7 +295,7 @@ export function RelatedChallengesGrid({
           keywords={relatedEntry.keywords}
           content={relatedEntry.thumbnailUrl ? { source: relatedEntry.thumbnailUrl } : Icon.Image}
           accessory={getChallengeAccessory(relatedEntry.record)}
-          actions={entryActions(relatedEntry, "challenges", () => undefined)}
+          actions={entryActions(relatedEntry, "challenges")}
         />
       ))}
     </Grid>

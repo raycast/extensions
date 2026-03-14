@@ -198,9 +198,7 @@ export default function Command() {
     !error && filteredEntries.length === 0
       ? {
           title: `No ${selectedResource.title} Found`,
-          description: hasSearchText
-            ? `No matches found in ${selectedResource.title}.`
-            : `The API returned an empty result for ${selectedResource.title.toLowerCase()}.`,
+          description: hasSearchText ? `No matches found in ${selectedResource.title}.` : `No matches found.`,
         }
       : null;
 
@@ -243,7 +241,7 @@ export default function Command() {
             keywords={entry.keywords}
             icon={getNonChallengeListIcon(entry)}
             accessories={getNonChallengeAccessories(entry.record)}
-            actions={entryActions(entry, selectedFilter, loadInitial, entries)}
+            actions={entryActions(entry, selectedFilter, entries)}
           />
         ))}
       </List>
@@ -301,7 +299,7 @@ export default function Command() {
               : Icon.Image
           }
           accessory={isTShirtsView ? undefined : getChallengeAccessory(entry.record)}
-          actions={isTShirtsView ? tShirtEntryActions(entry) : entryActions(entry, "challenges", loadInitial, entries)}
+          actions={isTShirtsView ? tShirtEntryActions(entry) : entryActions(entry, "challenges", entries)}
         />
       ))}
     </Grid>
