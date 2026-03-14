@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Grid, Icon, List, type List as ListNamespace } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { fetchAllEntriesForFilter, fetchPaginatedChallenges } from "./api";
 import { RESOURCE_CONFIG } from "./config";
@@ -214,7 +214,7 @@ export default function Command() {
         searchBarPlaceholder={`Search ${selectedResource.title}`}
         searchText={searchText}
         onSearchTextChange={setSearchText}
-        searchBarAccessory={dropdown as typeof ListNamespace.Dropdown}
+        searchBarAccessory={dropdown}
         pagination={{ pageSize, hasMore, onLoadMore: loadMore }}
       >
         {error ? (
@@ -263,7 +263,7 @@ export default function Command() {
       searchBarPlaceholder={`Search ${selectedResource.title}`}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarAccessory={dropdown as typeof Grid.Dropdown}
+      searchBarAccessory={dropdown}
       pagination={{ pageSize, hasMore, onLoadMore: loadMore }}
     >
       {error ? (

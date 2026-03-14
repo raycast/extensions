@@ -271,9 +271,11 @@ export function RelatedChallengesGrid({
           value={selectedEntry?.id}
           onChange={setSelectedEntryId}
         >
-          {sourceEntries.map((entry) => (
-            <Grid.Dropdown.Item key={entry.id} title={entry.title} value={entry.id} />
-          ))}
+          <Grid.Dropdown.Section title={RESOURCE_CONFIG[parentFilter].title}>
+            {sourceEntries.map((entry) => (
+              <Grid.Dropdown.Item key={entry.id} title={entry.title} value={entry.id} />
+            ))}
+          </Grid.Dropdown.Section>
         </Grid.Dropdown>
       }
     >
