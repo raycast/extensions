@@ -1,5 +1,11 @@
 # Oura Changelog
 
+## [Added Menu Bar Command] - {PR_MERGE_DATE}
+
+- Added Oura Menu Bar command: see Readiness, Sleep, and Activity scores at a glance in the menu bar
+- Added actions to open Readiness, Sleep, and Activity detail views from the menu bar
+- Added preference to toggle score display in the menu bar title
+
 ## [2.0.0] - 2026-02-03
 - Migrated authentication to Oura OAuth2 (client ID/secret + PKCE) as Personal Access Tokens are now deprecated. 
 - Update API requests to use OAuth2 tokens
