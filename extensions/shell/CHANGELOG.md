@@ -1,11 +1,5 @@
 # shell Changelog
 
-## [Fix external terminal execution consistency] - 2026-03-05
-
-- Fix Ghostty command injection so commands are entered and executed reliably.
-- Update external terminal runners to return explicit success/failure signals and only show success HUD on true execution.
-- Improve Warp/Ghostty focus + submit flow to auto-run commands instead of leaving them prefilled.
-
 ## [Add cmux support] - {PR_MERGE_DATE}
 
 Adds support for running shell commands in `cmux`, including:
@@ -15,6 +9,12 @@ Adds support for running shell commands in `cmux`, including:
 - Socket path override preference
 - Keychain-first password mode support with optional extension password fallback
 - Improved failure toasts for socket/auth/workspace errors
+
+## [Fix external terminal execution consistency] - 2026-03-05
+
+- Fix Ghostty command injection so commands are entered and executed reliably.
+- Update external terminal runners to return explicit success/failure signals and only show success HUD on true execution.
+- Improve Warp/Ghostty focus + submit flow to auto-run commands instead of leaving them prefilled.
 
 ## [Fix edit executed command] - 2026-02-16
 
