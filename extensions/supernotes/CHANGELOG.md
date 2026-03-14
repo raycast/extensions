@@ -1,6 +1,6 @@
 # Supernotes Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-03-14
 - Added Windows support
 
 ## [AI Extension Support] - 2025-04-03
