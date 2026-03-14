@@ -1,8 +1,8 @@
 import {
   Clipboard,
   closeMainWindow,
-  confirmAlert,
   getPreferenceValues,
+  open,
   popToRoot,
   PopToRootType,
   showHUD,
@@ -10,7 +10,6 @@ import {
   Toast,
 } from "@raycast/api";
 import { exec } from "child_process";
-import open from "open";
 import { read as decodeImage } from "jimp";
 import { randomInt } from "crypto";
 import jsQR from "jsqr";
@@ -72,21 +71,8 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
       } else if (typeof data === "string") {
         Clipboard.copy(data);
         if (data.match(/[a-zA-z]+:\/\/[^\s]*/)) {
-          confirmAlert({
-            title: "Open in Browser?",
-            message: data,
-            primaryAction: {
-              title: "Open",
-              onAction: () => {
-                open(data).then(() => {
-                  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-                });
-              },
-            },
-            dismissAction: {
-              title: "Cancel",
-              onAction: () => popToRoot(),
-            },
+          open(data).then(() => {
+            closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
           });
         } else {
           showHUD("Copied: " + (data.length > 20 ? data.substring(0, 30) + "..." : data));

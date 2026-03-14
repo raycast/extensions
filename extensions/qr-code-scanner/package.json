@@ -5,6 +5,9 @@
   "description": "Simple on-screen QR code scanner. (\"Screen recording\" permission is required)",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
+  "contributors": [
+    "MoienTajik"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -46,8 +49,7 @@
   "dependencies": {
     "@raycast/api": "^1.103.0",
     "jimp": "^0.22.12",
-    "jsqr": "^1.4.0",
-    "open": "^8.4.0"
+    "jsqr": "^1.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",
@@ -63,7 +65,9 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"
