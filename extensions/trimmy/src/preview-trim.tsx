@@ -88,7 +88,9 @@ export default function Command() {
                   title={AGGRESSIVENESS_LABELS[level]}
                   icon={aggressiveness === level ? Icon.CheckCircle : Icon.Circle}
                   shortcut={{ modifiers: ["cmd"], key: String(i + 1) as "1" | "2" | "3" }}
-                  onAction={() => switchAggressiveness(level)}
+                  onAction={async () => {
+                    await switchAggressiveness(level);
+                  }}
                 />
               ))}
             </ActionPanel.Section>

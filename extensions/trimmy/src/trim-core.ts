@@ -111,7 +111,7 @@ export async function resolveInput(preferSelectionFallback: boolean): Promise<Re
 
   throw new Error(
     preferSelectionFallback
-      ? "No selected text, Finder item, or clipboard text was available."
+      ? `No selected text${process.platform === "darwin" ? ", Finder item" : ""}, or clipboard text was available.`
       : "Clipboard is empty. Copy some text first, then run Trim.",
   );
 }
