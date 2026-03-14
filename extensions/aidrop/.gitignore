@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+.DS_Store
+.omx
+main-*.js
+assets/codex-upload-files
+bin/finder-copy-files

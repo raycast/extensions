@@ -1,0 +1,58 @@
+{
+	"name": "aidrop",
+	"version": "0.1.0",
+	"private": true,
+	"title": "AIDrop",
+	"description": "Copy recent files from your chosen folder to the clipboard like Finder",
+	"author": "jinmu_go",
+	"icon": "aidrop-icon.png",
+	"license": "MIT",
+	"platforms": [
+		"macOS"
+	],
+	"categories": [
+		"Productivity",
+		"Developer Tools"
+	],
+	"commands": [
+		{
+			"name": "copy-recent-downloads",
+			"title": "Copy Recent Files",
+			"description": "Copy recent files from your chosen folder like Finder",
+			"icon": "aidrop-icon.png",
+			"mode": "view",
+			"preferences": [
+				{
+					"name": "sourceFolder",
+					"title": "Source Folder",
+					"description": "Folder to scan for recent files. Defaults to Downloads.",
+					"type": "directory",
+					"required": false
+				}
+			]
+		}
+	],
+	"scripts": {
+		"build": "npx ray build -e dist",
+		"build:helper": "node ./scripts/build-helper.mjs",
+		"dev": "npm run build:helper && npx ray develop",
+		"fix-lint": "npx ray lint --fix",
+		"lint": "npm run build:helper && npx ray lint",
+		"publish": "npx @raycast/api@latest publish",
+		"test": "node --import tsx --test src/lib/*.test.ts"
+	},
+	"dependencies": {
+		"@raycast/api": "^1.104.9",
+		"react": "19.0.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.1.1",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.39.4",
+		"prettier": "^3.8.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "npm@11.9.0"
+}
