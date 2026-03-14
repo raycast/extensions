@@ -3,11 +3,7 @@ import { access, readdir } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { getCachedFiles, getMruFiles, setCachedFiles, sortByMru } from "./cache";
-import {
-  filterByAsyncPredicate,
-  searchRootsInParallel,
-  searchRootsWithPartialFallback,
-} from "./file-search-concurrency";
+import { filterByAsyncPredicate, searchRootsWithPartialFallback } from "./file-search-concurrency";
 import { createPathExcluder, getRelativeDepth } from "./file-search-filters";
 
 const execFile = promisify(execFileCallback);
@@ -61,31 +57,27 @@ function buildSpotlightQuery(allowedExtensions: string[]): string {
   return `(${clauses.join(" || ")})`;
 }
 
-async function findWithSpotlight(
-  roots: string[],
+async function findRootWithSpotlight(
+  root: string,
   allowedExtensions: string[],
   searchExcludes: string[],
   searchMaxDepth: number,
-): Promise<{ files: string[]; failedRoots: string[] }> {
+): Promise<string[]> {
   const query = buildSpotlightQuery(allowedExtensions);
   const isExcluded = createPathExcluder(searchExcludes);
-  const summary = await searchRootsInParallel(roots, async (root) => {
-    const { stdout } = await execFile("mdfind", ["-onlyin", root, query], {
-      maxBuffer: 10 * 1024 * 1024,
-    });
-    return stdout
+  const { stdout } = await execFile("mdfind", ["-onlyin", root, query], {
+    maxBuffer: 10 * 1024 * 1024,
+  });
+
+  return dedupeFiles(
+    stdout
       .split(/\r?\n/)
       .map((line) => line.trim())
       .filter(Boolean)
       .filter((filePath) => matchesExtension(filePath, allowedExtensions))
       .filter((filePath) => getRelativeDepth(root, filePath) <= searchMaxDepth)
-      .filter((filePath) => !isExcluded(filePath, root));
-  });
-
-  return {
-    files: dedupeFiles(summary.files),
-    failedRoots: summary.failedRoots,
-  };
+      .filter((filePath) => !isExcluded(filePath, root)),
+  );
 }
 
 async function findWithRecursiveScan(
@@ -166,15 +158,8 @@ export async function findCandidateFiles(options: FileSearchOptions): Promise<st
 
   const filesFromSearch = await searchRootsWithPartialFallback(
     options.roots,
-    async (root) => {
-      const spotlight = await findWithSpotlight(
-        [root],
-        options.allowedExtensions,
-        options.searchExcludes,
-        options.searchMaxDepth,
-      );
-      return spotlight.files;
-    },
+    async (root) =>
+      findRootWithSpotlight(root, options.allowedExtensions, options.searchExcludes, options.searchMaxDepth),
     async (failedRoots) =>
       findWithRecursiveScan(failedRoots, options.allowedExtensions, options.searchExcludes, options.searchMaxDepth),
   );

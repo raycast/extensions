@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "append-to-file",
   "title": "Append Text to File",
-  "description": "Append text to markdown/text files quickly. Either select text from clipboard history or enter text to append without opening files, and was built with AI-assisted development.",
+  "description": "Append text to markdown and text files quickly from clipboard history or direct input.",
   "icon": "text-to-file-icon.png",
   "author": "brusik",
   "license": "MIT",
