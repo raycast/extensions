@@ -1,5 +1,9 @@
 # GitHub Copilot Changelog
 
+## [Fix View Tasks sort field] - {PR_MERGE_DATE}
+
+- Fix 422 error in "View Tasks" command caused by invalid sort field (`last_updated_at` → `updated_at`)
+
 ## [Fix copilot quota 100% cap] - 2026-02-24
 
 - Fix Copilot quota cap at 100% when user has used all of their quota and have the "Allow usage beyond quota" setting enabled
