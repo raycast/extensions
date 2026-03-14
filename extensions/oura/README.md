@@ -11,6 +11,7 @@ Get data from your [Oura ring experience](https://ouraring.com) to keep track of
 - Get Activity - Get your activity for today
 - Get your latest workouts - Get your latest logged activities from Oura; either automatically logged or from outside sources
 - Info - Get your measurement data from Oura
+- Menu Bar - See your Readiness, Sleep, and Activity scores at a glance in the menu bar
 
 ## Getting set up
 In order to get your Oura data directly available in Raycast, follow these steps:
