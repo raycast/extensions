@@ -43,7 +43,7 @@ export async function openOrFocusProfile(
   if (running) {
     // Probe windows to find which one belongs to the requested profile
     const windows = await getOpenWindows(browserName);
-    const probed = await probeWindowProfiles(browserName, windows);
+    const probed = await probeWindowProfiles(browserName, windows, profileRootPath);
     const match = probed.find((w) => w.profileDirectory === profileDirectory);
 
     if (match) {
