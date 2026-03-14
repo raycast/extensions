@@ -1,5 +1,3 @@
-import fetch from "cross-fetch";
-
 export interface FinancialDetails {
   // Balance sheet
   totalAssets?: string;

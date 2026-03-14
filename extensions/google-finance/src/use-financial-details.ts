@@ -7,7 +7,7 @@ export function useFinancialDetails(symbols: string[]) {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const key = symbols.sort().join(",");
+  const key = [...symbols].sort().join(",");
 
   useEffect(() => {
     if (symbols.length === 0) {

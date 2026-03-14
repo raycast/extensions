@@ -1,4 +1,3 @@
-import fetch from "cross-fetch";
 import { Quote, SearchResult } from "./types";
 
 const USER_AGENT =
@@ -211,7 +210,9 @@ export async function searchStocks(
     });
     if (!response.ok) return [];
 
-    const data = await response.json();
+    const data = (await response.json()) as {
+      data?: { s?: string; n?: string; t?: string }[];
+    };
     const items = data?.data;
     if (!Array.isArray(items)) return [];
 
