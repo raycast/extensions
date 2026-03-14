@@ -75,9 +75,7 @@ export function getPreferences<T extends Preferences.Trim | Preferences.TrimAndP
   return getPreferenceValues<T>();
 }
 
-export async function resolveInput(
-  preferSelectionFallback = getPreferences<Preferences.Trim>().preferSelectionFallback,
-): Promise<ResolvedInput> {
+export async function resolveInput(preferSelectionFallback: boolean): Promise<ResolvedInput> {
   if (preferSelectionFallback) {
     try {
       const selectedText = await getSelectedText();
@@ -118,8 +116,14 @@ export async function resolveInput(
   );
 }
 
-export async function runTrimCommand(mode: TrimMode): Promise<void> {
-  const { aggressiveness, preferSelectionFallback } = getPreferences<Preferences.Trim>();
+export async function runTrimCommand(
+  mode: TrimMode,
+  preferences: Pick<
+    Preferences.Trim | Preferences.TrimAndPaste | Preferences.PreviewTrim,
+    "aggressiveness" | "preferSelectionFallback"
+  >,
+): Promise<void> {
+  const { aggressiveness, preferSelectionFallback } = preferences;
 
   try {
     const input = await resolveInput(preferSelectionFallback);

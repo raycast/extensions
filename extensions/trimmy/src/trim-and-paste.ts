@@ -1,5 +1,6 @@
-import { runTrimCommand } from "./trim-core";
+import { runTrimCommand, getPreferences } from "./trim-core";
 
 export default async function command(): Promise<void> {
-  await runTrimCommand("paste");
+  const preferences = getPreferences<Preferences.TrimAndPaste>();
+  await runTrimCommand("paste", preferences);
 }
