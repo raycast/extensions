@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Fix View Tasks sort field] - {PR_MERGE_DATE}
+## [Fix View Tasks sort field] - 2026-03-14
 
 - Fix 422 error in "View Tasks" command caused by invalid sort field (`last_updated_at` → `updated_at`)
 - Update getTaskIconPath to use state field
