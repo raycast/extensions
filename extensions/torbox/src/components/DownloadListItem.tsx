@@ -66,7 +66,7 @@ const handleDelete = async (apiKey: string, download: Download, onRefresh: () =>
 
 export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListItemProps) => {
   const status = getStatus(download);
-  const isReady = !download.isQueued && (download.download_finished || download.progress >= 1);
+  const isDownloadReady = !download.isQueued && (download.download_finished || download.progress >= 1);
   const hasMultipleFiles = download.files.length > 1;
   const isSingleVideoFile =
     download.files.length === 1 && isVideoFile(download.files[0].short_name || download.files[0].name);
@@ -81,7 +81,7 @@ export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListIt
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {isReady &&
+            {isDownloadReady &&
               isSingleVideoFile &&
               players.map((player) => (
                 <Action
@@ -91,7 +91,7 @@ export const DownloadListItem = ({ download, apiKey, onRefresh }: DownloadListIt
                   onAction={() => openInPlayer(apiKey, download, player)}
                 />
               ))}
-            {isReady && (
+            {isDownloadReady && (
               <Action title="Copy Download Link" icon={Icon.Link} onAction={() => copyDownloadLink(apiKey, download)} />
             )}
             {hasMultipleFiles && (

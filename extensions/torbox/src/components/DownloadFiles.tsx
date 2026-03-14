@@ -12,7 +12,7 @@ interface DownloadFilesProps {
 }
 
 export const DownloadFiles = ({ download, apiKey }: DownloadFilesProps) => {
-  const isReady = download.download_finished || download.progress >= 1;
+  const isDownloadReady = download.download_finished || download.progress >= 1;
   const { players, setDefaultPlayer } = useVideoPlayers();
 
   return (
@@ -28,7 +28,7 @@ export const DownloadFiles = ({ download, apiKey }: DownloadFilesProps) => {
               subtitle={formatBytes(file.size)}
               actions={
                 <ActionPanel>
-                  {isReady &&
+                  {isDownloadReady &&
                     isVideo &&
                     players.map((player) => (
                       <Action
@@ -38,7 +38,7 @@ export const DownloadFiles = ({ download, apiKey }: DownloadFilesProps) => {
                         onAction={() => openInPlayer(apiKey, download, player, file.id)}
                       />
                     ))}
-                  {isReady && (
+                  {isDownloadReady && (
                     <Action
                       title="Copy Download Link"
                       icon={Icon.Link}
