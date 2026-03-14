@@ -1,5 +1,9 @@
 # Google Chrome Profiles Changelog
 
+## [Fix] - 2026-03-14
+
+- Add missing contributor entry for NirRosh
+
 ## [Feature] - 2026-03-12
 
 - Add Google Chrome Canary support via a new Browser preference dropdown
