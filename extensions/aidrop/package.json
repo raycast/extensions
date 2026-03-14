@@ -1,6 +1,6 @@
 {
 	"name": "aidrop",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"private": true,
 	"title": "AIDrop",
 	"description": "Copy recent files from your chosen folder to the clipboard like Finder",
@@ -26,6 +26,20 @@
 					"name": "sourceFolder",
 					"title": "Source Folder",
 					"description": "Folder to scan for recent files. Defaults to Downloads.",
+					"type": "directory",
+					"required": false
+				},
+				{
+					"name": "sourceFolder2",
+					"title": "Additional Folder 1",
+					"description": "Optional second folder to scan for recent files.",
+					"type": "directory",
+					"required": false
+				},
+				{
+					"name": "sourceFolder3",
+					"title": "Additional Folder 2",
+					"description": "Optional third folder to scan for recent files.",
 					"type": "directory",
 					"required": false
 				}

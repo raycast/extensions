@@ -23,11 +23,12 @@ import { promisify } from "node:util";
 
 import type { FileItem } from "./lib/recent-files";
 import { compatibilityNote } from "./lib/compatibility-note";
-import { loadRecentFiles } from "./lib/recent-files";
+import { loadRecentFilesFromFolders } from "./lib/recent-files";
 import { togglePathSelection } from "./lib/selection";
 import { copySelectedFiles } from "./lib/copy-selected-files";
 import { getAdjacentItemId } from "./lib/focus-navigation";
-import { getSourceFolderPath } from "./lib/source-folder";
+import { getSourceFolderPaths } from "./lib/source-folder";
+import { formatFileSize, formatRelativeTime } from "./lib/format-file-meta";
 
 const execFileAsync = promisify(execFile);
 
@@ -40,14 +41,16 @@ export default function Command() {
   const [focusedItemId, setFocusedItemId] = useState<string | null>(null);
 
   const preferences = getPreferenceValues<Preferences.CopyRecentDownloads>();
-  const sourceFolderPath = useMemo(
-    () => getSourceFolderPath(preferences, homedir()),
-    [preferences.sourceFolder],
+  const sourceFolderPaths = useMemo(
+    () => getSourceFolderPaths(preferences, homedir()),
+    [
+      preferences.sourceFolder,
+      preferences.sourceFolder2,
+      preferences.sourceFolder3,
+    ],
   );
-  const sourceFolderName = useMemo(
-    () => path.basename(sourceFolderPath) || sourceFolderPath,
-    [sourceFolderPath],
-  );
+  const isMultiFolderMode = sourceFolderPaths.length > 1;
+
   const visibleItems = useMemo(() => {
     const normalizedQuery = searchText.trim().toLowerCase();
 
@@ -64,7 +67,7 @@ export default function Command() {
     setIsLoading(true);
     setLoadError(null);
 
-    void loadRecentFiles(sourceFolderPath)
+    void loadRecentFilesFromFolders(sourceFolderPaths)
       .then((nextItems) => {
         setItems(nextItems);
       })
@@ -73,7 +76,7 @@ export default function Command() {
         setLoadError(error instanceof Error ? error.message : String(error));
       })
       .finally(() => setIsLoading(false));
-  }, [sourceFolderPath]);
+  }, [sourceFolderPaths.join(",")]);
 
   useEffect(() => {
     if (!visibleItems.length) {
@@ -125,8 +128,8 @@ export default function Command() {
     });
   }
 
-  function toggleFileSelection(path: string) {
-    setSelectedPaths((current) => togglePathSelection(current, path));
+  function toggleFileSelection(filePath: string) {
+    setSelectedPaths((current) => togglePathSelection(current, filePath));
   }
 
   function moveFocus(direction: "next" | "previous") {
@@ -147,39 +150,51 @@ export default function Command() {
         ? "Copy 1 Selected File"
         : `Copy ${selectedCount} Selected Files`;
 
+  const primaryFolderPath = sourceFolderPaths[0];
+
   return (
     <List
       filtering={false}
       isLoading={isLoading}
       navigationTitle="Copy Recent Files"
       onSearchTextChange={setSearchText}
-      onSelectionChange={setFocusedItemId}
+      onSelectionChange={(id) => {
+        if (id && visibleItems.some((item) => item.path === id)) {
+          setFocusedItemId(id);
+        }
+      }}
       searchText={searchText}
       searchBarPlaceholder="Search recent files"
       selectedItemId={focusedItemId ?? undefined}
     >
       <List.Section title="Source Folder">
-        <List.Item
-          id="source-folder"
-          icon={Icon.Folder}
-          title={sourceFolderName}
-          subtitle={sourceFolderPath}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Source Folder"
-                icon={Icon.Folder}
-                onAction={() => open(sourceFolderPath)}
-              />
-              <Action
-                title="Set Source Folder"
-                icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-                onAction={openCommandPreferences}
-              />
-            </ActionPanel>
-          }
-        />
+        {sourceFolderPaths.map((folderPath) => {
+          const folderName = path.basename(folderPath) || folderPath;
+          return (
+            <List.Item
+              key={folderPath}
+              id={`source-folder:${folderPath}`}
+              icon={Icon.Folder}
+              title={folderName}
+              subtitle={folderPath}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Open Source Folder"
+                    icon={Icon.Folder}
+                    onAction={() => open(folderPath)}
+                  />
+                  <Action
+                    title="Set Source Folder"
+                    icon={Icon.Gear}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    onAction={openCommandPreferences}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </List.Section>
 
       <List.Section title="Compatibility">
@@ -199,17 +214,17 @@ export default function Command() {
             title={searchText ? "No Matching Files" : "No Recent Files Found"}
             subtitle={
               loadError
-                ? `Could not read ${sourceFolderPath}: ${loadError}`
+                ? `Could not read folder: ${loadError}`
                 : searchText
                   ? "Try a different search term."
-                  : `Put a few files in ${sourceFolderName}, then run AIDrop again.`
+                  : `Put a few files in the source folder, then run AIDrop again.`
             }
             actions={
               <ActionPanel>
                 <Action
                   title="Open Source Folder"
                   icon={Icon.Folder}
-                  onAction={() => open(sourceFolderPath)}
+                  onAction={() => open(primaryFolderPath)}
                 />
                 <Action
                   title="Set Source Folder"
@@ -226,6 +241,21 @@ export default function Command() {
           {visibleItems.map((item) => {
             const isSelected = selectedPaths.has(item.path);
 
+            const accessories: List.Item.Accessory[] = [
+              { text: formatFileSize(item.size) },
+              {
+                text: formatRelativeTime(item.mtimeMs),
+                tooltip: new Date(item.mtimeMs).toLocaleString(),
+              },
+            ];
+
+            if (isMultiFolderMode) {
+              accessories.unshift({
+                icon: Icon.Folder,
+                text: path.basename(item.sourceFolder),
+              });
+            }
+
             return (
               <List.Item
                 key={item.path}
@@ -236,6 +266,7 @@ export default function Command() {
                     : Icon.Circle
                 }
                 title={item.name}
+                accessories={accessories}
                 actions={
                   <ActionPanel>
                     <Action
@@ -248,6 +279,9 @@ export default function Command() {
                       icon={isSelected ? Icon.CheckCircle : Icon.Circle}
                       shortcut={{ modifiers: [], key: "space" }}
                       onAction={() => toggleFileSelection(item.path)}
+                    />
+                    <Action.ToggleQuickLook
+                      shortcut={{ modifiers: ["cmd"], key: "y" }}
                     />
                     <Action
                       title="Focus Next Item"
@@ -265,7 +299,7 @@ export default function Command() {
                       title="Open Source Folder"
                       icon={Icon.Folder}
                       shortcut={Keyboard.Shortcut.Common.Open}
-                      onAction={() => open(sourceFolderPath)}
+                      onAction={() => open(item.sourceFolder)}
                     />
                     <Action
                       title="Set Source Folder"
