@@ -17,7 +17,7 @@ function toMonospace(text: string) {
 }
 
 function isMonospace(text: string) {
-  return /[\u{1D670}-\u{1D7FF}]/u.test(text);
+  return /[\u{1D670}-\u{1D6A3}\u{1D7F6}-\u{1D7FF}]/u.test(text);
 }
 
 export default async function Command() {
