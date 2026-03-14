@@ -284,11 +284,6 @@ export function RelatedChallengesGrid({
           title="No Related Challenges"
           description={`No related challenges were found for ${selectedEntry?.title ?? "this item"}.`}
           icon={Icon.MagnifyingGlass}
-          actions={
-            <ActionPanel>
-              <Action title="Back" onAction={() => undefined} />
-            </ActionPanel>
-          }
         />
       ) : null}
 
