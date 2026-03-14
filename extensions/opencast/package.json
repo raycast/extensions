@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opencast",
+  "title": "OpenCast",
+  "description": "Raycast client for local OpenCode sessions",
+  "icon": "icon.png",
+  "author": "antonio_goncalves",
+  "license": "MIT",
+  "private": false,
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "opencode",
+    "ai",
+    "developer tools",
+    "raycast",
+    "chat"
+  ],
+  "commands": [
+    {
+      "name": "open-opencode",
+      "title": "List Sessions",
+      "subtitle": "OpenCode",
+      "description": "Browse, resume, and manage OpenCode sessions for a local project",
+      "mode": "view"
+    },
+    {
+      "name": "ask-opencode",
+      "title": "Message OpenCode",
+      "subtitle": "OpenCode",
+      "description": "Create a new OpenCode session or send a prompt to an existing one",
+      "mode": "view"
+    },
+    {
+      "name": "switch-opencode-target",
+      "title": "Set Directory",
+      "subtitle": "OpenCode",
+      "description": "Pick the default target directory and workspace for OpenCode",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "type": "textfield",
+      "title": "Server URL",
+      "description": "Optional override. Leave empty to auto-discover a running OpenCode server.",
+      "required": false
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "title": "Username",
+      "description": "Optional basic auth username",
+      "required": false
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "title": "Password",
+      "description": "Optional basic auth password",
+      "required": false
+    },
+    {
+      "name": "defaultDirectory",
+      "type": "textfield",
+      "title": "Default Directory",
+      "description": "Optional default repo path to use when no recent target exists",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json --noEmit",
+    "dev": "./node_modules/.bin/ray develop",
+    "lint": "./node_modules/.bin/ray lint",
+    "publish": "./node_modules/.bin/ray publish",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@opencode-ai/sdk": "^1.2.26",
+    "@raycast/api": "^1.104.9",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.0.3",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}
