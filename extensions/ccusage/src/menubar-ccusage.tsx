@@ -123,13 +123,13 @@ export default function MenuBarccusage() {
                 <>
                   <MenuBarExtra.Item
                     title={`5-Hour: ${limitsData.five_hour.utilization.toFixed(0)}%`}
-                    subtitle={`Resets in ${formatTimeRemaining(limitsData.five_hour.resets_at)}${isStale ? " ⚠️ " : ""}`}
+                    subtitle={`Resets in ${formatTimeRemaining(limitsData.five_hour.resets_at ?? "N/A")}${isStale ? " ⚠️ " : ""}`}
                     icon={Icon.Gauge}
                     onAction={revalidate}
                   />
                   <MenuBarExtra.Item
                     title={`7-Day: ${limitsData.seven_day.utilization.toFixed(0)}%`}
-                    subtitle={`Resets in ${formatTimeRemaining(limitsData.seven_day.resets_at)}${isStale ? " ⚠️" : ""}`}
+                    subtitle={`Resets in ${formatTimeRemaining(limitsData.seven_day.resets_at ?? "N/A")}${isStale ? " ⚠️" : ""}`}
                     icon={Icon.Gauge}
                     onAction={revalidate}
                   />

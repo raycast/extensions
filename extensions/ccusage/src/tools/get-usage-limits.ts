@@ -48,7 +48,11 @@ export default async function getUsageLimits(input?: Input): Promise<{
 
   const data = parseResult.data;
 
-  const formatResetTime = (isoString: string): string => {
+  const formatResetTime = (isoString: string | null): string => {
+    if (!isoString) {
+      return "N/A";
+    }
+
     const resetTime = new Date(isoString);
     const now = new Date();
     const diffMs = resetTime.getTime() - now.getTime();
@@ -75,12 +79,12 @@ export default async function getUsageLimits(input?: Input): Promise<{
     fiveHour: {
       utilization: Math.round(data.five_hour.utilization * 10) / 10,
       resetsAt: formatResetTime(data.five_hour.resets_at),
-      ...(input?.includeRawTimestamps && { rawTimestamp: data.five_hour.resets_at }),
+      ...(input?.includeRawTimestamps && { rawTimestamp: data.five_hour.resets_at ?? undefined }),
     },
     sevenDay: {
       utilization: Math.round(data.seven_day.utilization * 10) / 10,
       resetsAt: formatResetTime(data.seven_day.resets_at),
-      ...(input?.includeRawTimestamps && { rawTimestamp: data.seven_day.resets_at }),
+      ...(input?.includeRawTimestamps && { rawTimestamp: data.seven_day.resets_at ?? undefined }),
     },
   };
 }
