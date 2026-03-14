@@ -1,6 +1,4 @@
-import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
-
-let lastProcessed = "";
+import { Clipboard, Cache, getSelectedText, showHUD } from "@raycast/api";
 
 function toMonospace(text: string) {
   return [...text]
@@ -24,18 +22,20 @@ export default async function Command() {
   try {
     const text = (await getSelectedText()).trim();
 
-    // 1 Empty selection
+    // 1. Empty selection
     if (!text) {
       await showHUD("No text selected.");
       return;
     }
 
-    // 2 Same text processed recently
-    if (text === lastProcessed) {
+    // 2. Same text processed recently
+    const cache = new Cache("monospace-text-last");
+    const lastProcessed = await cache.get("text");
+    if (lastProcessed === text) {
       return;
     }
 
-    // 3 Already monospace
+    // 3. Already monospace
     if (isMonospace(text)) {
       await showHUD("Selected text is already in Monospace.");
       return;
@@ -44,7 +44,7 @@ export default async function Command() {
     const mono = toMonospace(text);
 
     await Clipboard.copy(mono);
-    lastProcessed = text;
+    await cache.set("text", text);
 
     await showHUD("Text converted to Monospace and copied to clipboard.");
   } catch {
