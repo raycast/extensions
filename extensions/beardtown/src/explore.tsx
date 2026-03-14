@@ -376,7 +376,7 @@ export default function Command() {
       filtering={false}
       columns={4}
       aspectRatio="16/9"
-      fit="fill"
+      fit={Grid.Fit.Fill}
       inset={Grid.Inset.Zero}
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
@@ -701,7 +701,7 @@ function RelatedChallengesGrid({
       isLoading={isResolvingEntries}
       columns={4}
       aspectRatio="16/9"
-      fit="fill"
+      fit={Grid.Fit.Fill}
       inset={Grid.Inset.Zero}
       searchBarPlaceholder={`Search ${selectedEntry?.title ?? RESOURCE_CONFIG[parentFilter].title} Challenges`}
       searchBarAccessory={
@@ -1502,7 +1502,7 @@ function formatStatusValue(value: string): string {
   return normalized.charAt(0).toUpperCase() + normalized.slice(1);
 }
 
-function getStatusColor(status: string): Color.ColorLike | undefined {
+function getStatusColor(status: string): Color | undefined {
   const normalized = status.trim().toLowerCase();
   if (normalized === "succeeded") {
     return Color.Green;
