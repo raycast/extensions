@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { fetchFinancialDetails, FinancialDetails } from "./yahoo-finance";
 
 export function useFinancialDetails(symbols: string[]) {
-  const [details, setDetails] = useState<Map<string, FinancialDetails>>(new Map());
+  const [details, setDetails] = useState<Map<string, FinancialDetails>>(
+    new Map(),
+  );
   const [isLoading, setIsLoading] = useState(false);
 
   const key = symbols.sort().join(",");
@@ -20,7 +22,7 @@ export function useFinancialDetails(symbols: string[]) {
       symbols.map(async (symbol) => {
         const result = await fetchFinancialDetails(symbol, controller.signal);
         return [symbol, result] as const;
-      })
+      }),
     )
       .then((results) => {
         const map = new Map<string, FinancialDetails>();

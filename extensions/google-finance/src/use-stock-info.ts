@@ -5,7 +5,10 @@ export function useStockInfo(symbols: { symbol: string; exchange?: string }[]) {
   const [quotes, setQuotes] = useState<Map<string, Quote>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
 
-  const key = symbols.map((s) => `${s.symbol}:${s.exchange || ""}`).sort().join(",");
+  const key = symbols
+    .map((s) => `${s.symbol}:${s.exchange || ""}`)
+    .sort()
+    .join(",");
 
   useEffect(() => {
     if (symbols.length === 0) {

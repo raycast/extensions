@@ -37,7 +37,7 @@ function extractKeyValuePairs(html: string): Record<string, string> {
 function parseQuoteFromHtml(
   html: string,
   symbol: string,
-  exchange: string
+  exchange: string,
 ): Quote | null {
   // Extract current price
   const lastPriceMatch = html.match(/data-last-price="([^"]+)"/);
@@ -92,7 +92,8 @@ function parseQuoteFromHtml(
   const yearRange = kvPairs["Year range"] || undefined;
 
   // Average volume
-  const avgVolume = kvPairs["Avg Volume"] || kvPairs["Average volume"] || undefined;
+  const avgVolume =
+    kvPairs["Avg Volume"] || kvPairs["Average volume"] || undefined;
 
   // P/E ratio
   const peRatio = kvPairs["P/E ratio"] || undefined;
@@ -109,13 +110,10 @@ function parseQuoteFromHtml(
     marketState = "PRE";
   } else if (html.includes("After hours")) {
     marketState = "POST";
-  } else if (
-    html.includes("Market open") ||
-    html.includes("Disclaimer")
-  ) {
+  } else if (html.includes("Market open") || html.includes("Disclaimer")) {
     // If page has a "Disclaimer" link near the timestamp, market data is live
     const timestampArea = html.match(
-      /class="ygUjEc"[^>]*>([^<]*(?:<[^>]*>[^<]*)*)/
+      /class="ygUjEc"[^>]*>([^<]*(?:<[^>]*>[^<]*)*)/,
     );
     if (timestampArea && !timestampArea[0].includes("Closed")) {
       marketState = "REGULAR";
@@ -146,7 +144,7 @@ function parseQuoteFromHtml(
 export async function fetchQuote(
   symbol: string,
   exchange?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<Quote | null> {
   const exchangesToTry = exchange ? [exchange] : EXCHANGES;
 
@@ -176,7 +174,7 @@ export async function fetchQuote(
 
 export async function fetchQuotes(
   symbols: { symbol: string; exchange?: string }[],
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<Map<string, Quote>> {
   const results = new Map<string, Quote>();
 
@@ -201,7 +199,7 @@ export async function fetchQuotes(
 
 export async function searchStocks(
   query: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<SearchResult[]> {
   if (!query.trim()) return [];
 

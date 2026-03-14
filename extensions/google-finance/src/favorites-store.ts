@@ -40,7 +40,7 @@ export function useFavorites() {
       setFavorites(updated);
       await saveFavorites(updated);
     },
-    [favorites]
+    [favorites],
   );
 
   const removeFavorite = useCallback(
@@ -49,7 +49,7 @@ export function useFavorites() {
       setFavorites(updated);
       await saveFavorites(updated);
     },
-    [favorites]
+    [favorites],
   );
 
   const moveUp = useCallback(
@@ -61,7 +61,7 @@ export function useFavorites() {
       setFavorites(updated);
       await saveFavorites(updated);
     },
-    [favorites]
+    [favorites],
   );
 
   const moveDown = useCallback(
@@ -73,12 +73,12 @@ export function useFavorites() {
       setFavorites(updated);
       await saveFavorites(updated);
     },
-    [favorites]
+    [favorites],
   );
 
   const isFavorite = useCallback(
     (symbol: string) => favorites.some((f) => f.symbol === symbol),
-    [favorites]
+    [favorites],
   );
 
   return {
@@ -107,7 +107,7 @@ export function useFavoritesQuotes(favorites: FavoriteEntry[]) {
 
     fetchQuotes(
       favorites.map((f) => ({ symbol: f.symbol, exchange: f.exchange })),
-      controller.signal
+      controller.signal,
     )
       .then((result) => {
         setQuotes(result);

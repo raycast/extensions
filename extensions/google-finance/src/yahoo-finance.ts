@@ -41,7 +41,7 @@ function extractFieldValue(html: string, fieldId: string): string | undefined {
 
 async function fetchStatistics(
   symbol: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<Partial<FinancialDetails>> {
   const url = `https://stockanalysis.com/stocks/${encodeURIComponent(symbol.toLowerCase())}/statistics/`;
   try {
@@ -75,7 +75,7 @@ async function fetchStatistics(
 
 async function fetchBalanceSheet(
   symbol: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<Partial<FinancialDetails>> {
   const url = `https://stockanalysis.com/stocks/${encodeURIComponent(symbol.toLowerCase())}/financials/balance-sheet/?p=quarterly`;
   try {
@@ -141,7 +141,7 @@ async function fetchBalanceSheet(
 
 async function fetchEarningsGrowth(
   symbol: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<Partial<FinancialDetails>> {
   const url = `https://stockanalysis.com/stocks/${encodeURIComponent(symbol.toLowerCase())}/financials/?p=quarterly`;
   try {
@@ -155,7 +155,9 @@ async function fetchEarningsGrowth(
     // Extract datekey array to find which indices are Y/Y comparable
     const dateMatch = html.match(/datekey:\[([^\]]+)\]/);
     if (!dateMatch) return {};
-    const dates = dateMatch[1]!.match(/"([^"]+)"/g)?.map((d) => d.replace(/"/g, ""));
+    const dates = dateMatch[1]!
+      .match(/"([^"]+)"/g)
+      ?.map((d) => d.replace(/"/g, ""));
     if (!dates || dates.length < 5) return {};
 
     // Find the index 4 quarters back (same quarter prior year)
@@ -197,7 +199,7 @@ async function fetchEarningsGrowth(
 
 export async function fetchFinancialDetails(
   symbol: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<FinancialDetails | null> {
   try {
     const [stats, balanceSheet, earnings] = await Promise.all([
@@ -206,7 +208,11 @@ export async function fetchFinancialDetails(
       fetchEarningsGrowth(symbol, signal),
     ]);
 
-    const details: FinancialDetails = { ...stats, ...balanceSheet, ...earnings };
+    const details: FinancialDetails = {
+      ...stats,
+      ...balanceSheet,
+      ...earnings,
+    };
 
     // Return null if we got nothing
     if (Object.keys(details).length === 0) return null;

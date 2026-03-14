@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { searchStocks, fetchQuotes, Quote, SearchResult } from "./google-finance";
+import {
+  searchStocks,
+  fetchQuotes,
+  Quote,
+  SearchResult,
+} from "./google-finance";
 
 export function useStockSearch(query: string) {
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -30,7 +35,7 @@ export function useStockSearch(query: string) {
               symbol: r.symbol,
               exchange: r.exchange || undefined,
             })),
-            controller.signal
+            controller.signal,
           );
           setQuotes(quoteResults);
         } else {
@@ -49,7 +54,8 @@ export function useStockSearch(query: string) {
   }, [query]);
 
   // Show previous results while loading new ones
-  const displayResults = results.length > 0 ? results : isLoading ? prevResultsRef.current : [];
+  const displayResults =
+    results.length > 0 ? results : isLoading ? prevResultsRef.current : [];
 
   return { results: displayResults, quotes, isLoading };
 }
