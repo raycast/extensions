@@ -6,10 +6,11 @@ import { ListTasksView } from "./views/ListTasksView";
 export default function ViewDefaultList() {
   const { listId } = getPreferenceValues<Preferences>();
 
-  const { isLoading, error, data: list } = useCachedPromise(
-    async (id: string) => getClickUpClient().getList(id),
-    [listId],
-  );
+  const {
+    isLoading,
+    error,
+    data: list,
+  } = useCachedPromise(async (id: string) => getClickUpClient().getList(id), [listId]);
 
   if (error && !isLoading && !list) {
     return (
