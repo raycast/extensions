@@ -1,6 +1,5 @@
-import { Clipboard, Toast, confirmAlert, openExtensionPreferences, showToast } from "@raycast/api";
+import { Clipboard, Toast, confirmAlert, openExtensionPreferences } from "@raycast/api";
 import * as api from "./api.js";
-import { catchError } from "./errors.js";
 import * as git from "./git.js";
 import { getCommitsText } from "./utils.js";
 
@@ -101,44 +100,35 @@ class Operation {
         const { ahead, behind } = await api.compareTwoCommits(forkedRepository);
 
         if (ahead > 0) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Cannot Fork Extension",
-            message: "You have commits ahead of remote on GitHub, please reset them if necessary.",
-          });
-          return;
+          const error = new Error(
+            "You have commits ahead of remote on GitHub, please reset them if necessary.",
+          );
+          error.name = "Cannot Fork Extension";
+          throw error;
         }
 
         if (behind > 0) {
-          return new Promise<void>((resolve, reject) => {
-            confirmAlert({
-              title: "Repository Outdated",
-              message: `Your forked repository on GitHub is ${getCommitsText(behind)} behind the upstream repository. Do you want to sync it now?`,
-              primaryAction: {
-                title: "Sync Now",
-                onAction: catchError(async () => {
-                  // Set `isOperating` to false to allow `sync` to run.
-                  this.isOperating = false;
-                  await this.sync();
-                  // Manually show the toast again because the previous sync operation completed the toast.
-                  await this.showToast({ title: "Forking extension" });
-                  await git.sparseCheckoutAdd([extensionFolder]);
-                  this.completeToast("Forked successfully");
-                  resolve();
-                }),
-              },
-              dismissAction: {
-                title: "Fork Anyway",
-                onAction: catchError(async () => {
-                  await git.sparseCheckoutAdd([extensionFolder]);
-                  resolve();
-                }),
-              },
-            }).catch(reject);
+          const shouldSync = await confirmAlert({
+            title: "Repository Outdated",
+            message: `Your forked repository on GitHub is ${getCommitsText(behind)} behind the upstream repository. Do you want to sync it now?`,
+            primaryAction: {
+              title: "Sync Now",
+            },
+            dismissAction: {
+              title: "Fork Anyway",
+            },
           });
-        } else {
-          await git.sparseCheckoutAdd([extensionFolder]);
+
+          if (shouldSync) {
+            // Set `isOperating` to false to allow `sync` to run.
+            this.isOperating = false;
+            await this.sync();
+            // Manually show the toast again because the previous sync operation completed the toast.
+            await this.showToast({ title: "Forking extension" });
+          }
         }
+
+        await git.sparseCheckoutAdd([extensionFolder]);
       },
       "Forking extension",
       "Forked successfully",
