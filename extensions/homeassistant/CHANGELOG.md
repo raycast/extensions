@@ -2,7 +2,7 @@
 
 ## [Fix] - {PR_MERGE_DATE}
 - use translations for services if available
-  - fallback to service slug when no
+  - fallback to service slug when no translation is available
 
 ## [Fix] - 2026-02-01
 - Improved history chart contrast (axis labels and grid lines) for Raycast light/dark appearance
