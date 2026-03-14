@@ -1,6 +1,6 @@
 # OpenCast Changelog
 
-## [Initial Version] - 2026-03-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add `Message OpenCode` to start and continue local OpenCode sessions from Raycast
 - Add `List Sessions` to browse and reopen recent sessions

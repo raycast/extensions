@@ -1,14 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export type ExtensionPreferences = {
-  serverUrl: string;
-  username?: string;
-  password?: string;
-  defaultDirectory?: string;
-};
-
-export function getPreferences(): ExtensionPreferences {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+export function getPreferences(): Preferences {
+  const preferences = getPreferenceValues<Preferences>();
   return {
     serverUrl: preferences.serverUrl?.trim() || "",
     username: preferences.username?.trim() || undefined,
