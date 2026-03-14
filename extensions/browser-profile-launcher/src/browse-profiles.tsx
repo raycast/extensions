@@ -81,7 +81,7 @@ export default function BrowseProfiles() {
     for (const browser of enabledBrowsers) {
       let windows = await getOpenWindows(browser.name);
       if (windows.length > 0) {
-        windows = await probeWindowProfiles(browser.name, windows);
+        windows = await probeWindowProfiles(browser.name, windows, browser.profileRootPath);
       }
       for (const w of windows) {
         // Find the profile display name for this window
@@ -241,8 +241,8 @@ export default function BrowseProfiles() {
               {openWindows.map((item) => (
                 <List.Item
                   key={`window-${item.window.windowId}`}
-                  title={item.window.firstTabTitle}
-                  subtitle={item.window.firstTabUrl}
+                  title={item.window.title}
+                  subtitle={`${item.window.tabUrls.length} tabs`}
                   icon={Icon.Window}
                   accessories={[...(item.profileName ? [{ tag: item.profileName }] : []), { text: item.browser.name }]}
                   actions={
