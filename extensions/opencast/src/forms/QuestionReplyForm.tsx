@@ -10,10 +10,7 @@ type QuestionReplyFormProps = {
 export function QuestionReplyForm(props: QuestionReplyFormProps) {
   const { pop } = useNavigation();
   const initialState = useMemo(
-    () =>
-      Object.fromEntries(
-        props.request.questions.map((question, index) => [String(index), ""]),
-      ),
+    () => Object.fromEntries(props.request.questions.map((question, index) => [String(index), ""])),
     [props.request.questions],
   );
   const [answers, setAnswers] = useState<Record<string, string>>(initialState);
@@ -43,13 +40,9 @@ export function QuestionReplyForm(props: QuestionReplyFormProps) {
           id={String(index)}
           title={question.header}
           value={answers[String(index)] ?? ""}
-          onChange={(value) =>
-            setAnswers((current) => ({ ...current, [String(index)]: value }))
-          }
+          onChange={(value) => setAnswers((current) => ({ ...current, [String(index)]: value }))}
           placeholder={question.question}
-          info={question.options
-            .map((option) => `${option.label}: ${option.description}`)
-            .join("\n")}
+          info={question.options.map((option) => `${option.label}: ${option.description}`).join("\n")}
         />
       ))}
     </Form>

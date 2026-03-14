@@ -10,18 +10,11 @@ import {
   showToast,
   useNavigation,
 } from "@raycast/api";
-import type {
-  PermissionRequest,
-  QuestionRequest,
-  Session,
-} from "@opencode-ai/sdk/v2";
+import type { PermissionRequest, QuestionRequest, Session } from "@opencode-ai/sdk/v2";
 import { useEffect, useMemo, useState } from "react";
 import { QuestionReplyForm } from "../forms/QuestionReplyForm";
 import { RenameSessionForm } from "../forms/RenameSessionForm";
-import {
-  assistantMessageMarkdown,
-  conversationToDetailMarkdown,
-} from "../lib/format";
+import { assistantMessageMarkdown, conversationToDetailMarkdown } from "../lib/format";
 import {
   abortSession,
   createClient,
@@ -103,21 +96,14 @@ function eventMessageID(event: unknown): string | undefined {
       part?: { messageID?: string };
     };
   };
-  return (
-    candidate.properties?.messageID ?? candidate.properties?.part?.messageID
-  );
+  return candidate.properties?.messageID ?? candidate.properties?.part?.messageID;
 }
 
 export function SessionDetailView(props: SessionDetailViewProps) {
-  const client = useMemo(
-    () => createClient(props.serverUrl),
-    [props.serverUrl],
-  );
+  const client = useMemo(() => createClient(props.serverUrl), [props.serverUrl]);
   const { push } = useNavigation();
   const [session, setSession] = useState<Session>();
-  const [state, setState] = useState(
-    createEmptyTranscriptState(props.sessionID),
-  );
+  const [state, setState] = useState(createEmptyTranscriptState(props.sessionID));
   const [composer, setComposer] = useState<ComposerState>({
     draft: "",
     isSending: false,
@@ -142,12 +128,8 @@ export function SessionDetailView(props: SessionDetailViewProps) {
         ...current,
         messages,
         pending: {
-          permissions: permissions.filter(
-            (item) => item.sessionID === props.sessionID,
-          ),
-          questions: questions.filter(
-            (item) => item.sessionID === props.sessionID,
-          ),
+          permissions: permissions.filter((item) => item.sessionID === props.sessionID),
+          questions: questions.filter((item) => item.sessionID === props.sessionID),
         },
       }));
       await saveRecentTarget(props.target);
@@ -175,10 +157,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
           }
 
           const messageID = eventMessageID(event);
-          if (
-            messageID &&
-            current.messages.some((message) => message.info.id === messageID)
-          ) {
+          if (messageID && current.messages.some((message) => message.info.id === messageID)) {
             return reduceSessionEvent(current, event as never);
           }
 
@@ -196,35 +175,22 @@ export function SessionDetailView(props: SessionDetailViewProps) {
     return () => controller.abort();
   }, [client, props.sessionID, props.target.directory, props.target.workspace]);
 
-  const blocks = useMemo(
-    () => buildConversationBlocks(state.messages),
-    [state.messages],
-  );
+  const blocks = useMemo(() => buildConversationBlocks(state.messages), [state.messages]);
   const latestBlockId = blocks.at(-1)?.id;
-  const latestMessageBlockId =
-    [...blocks].reverse().find((block) => block.kind === "message")?.id ??
-    latestBlockId;
+  const latestMessageBlockId = [...blocks].reverse().find((block) => block.kind === "message")?.id ?? latestBlockId;
   const assistantMarkdownByMessageId = useMemo(
     () =>
       new Map(
         state.messages
-          .map(
-            (message) =>
-              [message.info.id, assistantMessageMarkdown(message)] as const,
-          )
+          .map((message) => [message.info.id, assistantMessageMarkdown(message)] as const)
           .filter((entry) => entry[1]),
       ),
     [state.messages],
   );
   const showSendRow = composer.isSending || composer.draft.trim().length > 0;
-  const isSessionActive =
-    state.status?.type === "busy" || state.status?.type === "retry";
+  const isSessionActive = state.status?.type === "busy" || state.status?.type === "retry";
   const shouldControlSelection =
-    !hasInitializedSelection ||
-    !hasUserSelectedItem ||
-    showSendRow ||
-    followLatest ||
-    isSessionActive;
+    !hasInitializedSelection || !hasUserSelectedItem || showSendRow || followLatest || isSessionActive;
 
   useEffect(() => {
     if (!hasInitializedSelection && !isLoading && latestMessageBlockId) {
@@ -256,9 +222,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
     ? selectedBlock.kind === "message"
       ? selectedBlock.markdown || selectedBlock.subtitle || ""
       : assistantMarkdownByMessageId.get(selectedBlock.messageID) ||
-        ("detailMarkdown" in selectedBlock
-          ? selectedBlock.detailMarkdown
-          : selectedBlock.subtitle || "")
+        ("detailMarkdown" in selectedBlock ? selectedBlock.detailMarkdown : selectedBlock.subtitle || "")
     : conversationToDetailMarkdown(state, session);
 
   async function sendMessage() {
@@ -292,34 +256,24 @@ export function SessionDetailView(props: SessionDetailViewProps) {
     }
   }
 
-  async function handlePermission(
-    request: PermissionRequest,
-    reply: "once" | "always" | "reject",
-  ) {
+  async function handlePermission(request: PermissionRequest, reply: "once" | "always" | "reject") {
     await respondToPermission(client, props.target, request.id, reply);
     setState((current) => ({
       ...current,
       pending: {
         ...current.pending,
-        permissions: current.pending.permissions.filter(
-          (item) => item.id !== request.id,
-        ),
+        permissions: current.pending.permissions.filter((item) => item.id !== request.id),
       },
     }));
   }
 
-  async function handleQuestionReply(
-    request: QuestionRequest,
-    answers: Array<Array<string>>,
-  ) {
+  async function handleQuestionReply(request: QuestionRequest, answers: Array<Array<string>>) {
     await replyToQuestion(client, props.target, request.id, answers);
     setState((current) => ({
       ...current,
       pending: {
         ...current.pending,
-        questions: current.pending.questions.filter(
-          (item) => item.id !== request.id,
-        ),
+        questions: current.pending.questions.filter((item) => item.id !== request.id),
       },
     }));
   }
@@ -336,11 +290,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          <Action
-            title="Send Message"
-            icon={SEND_ICON}
-            onAction={sendMessage}
-          />
+          <Action title="Send Message" icon={SEND_ICON} onAction={sendMessage} />
           <Action
             title="Abort Run"
             icon={Icon.Stop}
@@ -364,11 +314,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
             title="Fork Session"
             icon={Icon.ArrowRightCircle}
             onAction={async () => {
-              const next = await forkSession(
-                client,
-                props.target,
-                props.sessionID,
-              );
+              const next = await forkSession(client, props.target, props.sessionID);
               push(
                 <SessionDetailView
                   serverUrl={props.serverUrl}
@@ -390,12 +336,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
                 <RenameSessionForm
                   initialTitle={session?.title ?? ""}
                   onSubmit={async (title) => {
-                    await renameSession(
-                      client,
-                      props.target,
-                      props.sessionID,
-                      title,
-                    );
+                    await renameSession(client, props.target, props.sessionID, title);
                     await refresh();
                   }}
                 />,
@@ -408,11 +349,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
             shortcut={{ modifiers: ["cmd"], key: "r" }}
             onAction={refresh}
           />
-          <Action
-            title="Copy Session ID"
-            icon={Icon.Clipboard}
-            onAction={() => Clipboard.copy(props.sessionID)}
-          />
+          <Action title="Copy Session ID" icon={Icon.Clipboard} onAction={() => Clipboard.copy(props.sessionID)} />
           {block ? (
             <Action
               title="Copy Selected Content"
@@ -486,9 +423,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
                     ...current,
                     pending: {
                       ...current.pending,
-                      questions: current.pending.questions.filter(
-                        (item) => item.id !== request.id,
-                      ),
+                      questions: current.pending.questions.filter((item) => item.id !== request.id),
                     },
                   }));
                 }}
@@ -507,9 +442,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
       isShowingDetail
       filtering={false}
       searchText={composer.draft}
-      onSearchTextChange={(value) =>
-        setComposer((current) => ({ ...current, draft: value }))
-      }
+      onSearchTextChange={(value) => setComposer((current) => ({ ...current, draft: value }))}
       searchBarPlaceholder={
         composer.isSending
           ? "Sending..."
@@ -541,30 +474,17 @@ export function SessionDetailView(props: SessionDetailViewProps) {
         <List.Section title="Reply">
           <List.Item
             id={SEND_ROW_ID}
-            title={
-              composer.draft.trim()
-                ? `Send: ${composer.draft.trim()}`
-                : "Sending..."
-            }
-            subtitle={
-              composer.draft.trim()
-                ? "Press Enter to send"
-                : "Waiting for response"
-            }
+            title={composer.draft.trim() ? `Send: ${composer.draft.trim()}` : "Sending..."}
+            subtitle={composer.draft.trim() ? "Press Enter to send" : "Waiting for response"}
             icon={composer.isSending ? Icon.Clock : SEND_ICON}
             accessories={lastModel ? [{ text: lastModel }] : undefined}
-            detail={
-              <List.Item.Detail
-                markdown={selectedMarkdown || "_No conversation yet_"}
-              />
-            }
+            detail={<List.Item.Detail markdown={selectedMarkdown || "_No conversation yet_"} />}
             actions={baseActions(selectedBlock)}
           />
         </List.Section>
       ) : null}
 
-      {state.pending.permissions.length > 0 ||
-      state.pending.questions.length > 0 ? (
+      {state.pending.permissions.length > 0 || state.pending.questions.length > 0 ? (
         <List.Section title="Blockers">
           {state.pending.permissions.map((request) => (
             <List.Item
@@ -573,11 +493,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
               title={`Permission: ${request.permission}`}
               subtitle={request.patterns.join(", ")}
               icon={{ source: Icon.Lock, tintColor: Color.Orange }}
-              detail={
-                <List.Item.Detail
-                  markdown={selectedMarkdown || "_No conversation yet_"}
-                />
-              }
+              detail={<List.Item.Detail markdown={selectedMarkdown || "_No conversation yet_"} />}
               actions={baseActions(selectedBlock)}
             />
           ))}
@@ -588,11 +504,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
               title={request.questions[0]?.header ?? "Question"}
               subtitle={request.questions[0]?.question ?? "Needs input"}
               icon={{ source: Icon.QuestionMark, tintColor: Color.Red }}
-              detail={
-                <List.Item.Detail
-                  markdown={selectedMarkdown || "_No conversation yet_"}
-                />
-              }
+              detail={<List.Item.Detail markdown={selectedMarkdown || "_No conversation yet_"} />}
               actions={baseActions(selectedBlock)}
             />
           ))}
@@ -606,11 +518,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
             title="No messages yet"
             subtitle="Send the first message from the search bar above"
             icon={OPENCODE_ICON}
-            detail={
-              <List.Item.Detail
-                markdown={selectedMarkdown || "_No conversation yet_"}
-              />
-            }
+            detail={<List.Item.Detail markdown={selectedMarkdown || "_No conversation yet_"} />}
             actions={baseActions()}
           />
         ) : (
@@ -653,9 +561,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
               block.kind === "message"
                 ? block.markdown || block.subtitle || ""
                 : assistantMarkdownByMessageId.get(block.messageID) ||
-                  ("detailMarkdown" in block
-                    ? block.detailMarkdown
-                    : block.subtitle || "");
+                  ("detailMarkdown" in block ? block.detailMarkdown : block.subtitle || "");
 
             return (
               <List.Item
@@ -664,9 +570,7 @@ export function SessionDetailView(props: SessionDetailViewProps) {
                 title={block.title}
                 subtitle={block.kind === "message" ? block.subtitle : undefined}
                 icon={{ source: icon, tintColor }}
-                detail={
-                  <List.Item.Detail markdown={markdown || "_No content yet_"} />
-                }
+                detail={<List.Item.Detail markdown={markdown || "_No content yet_"} />}
                 actions={baseActions(block)}
               />
             );

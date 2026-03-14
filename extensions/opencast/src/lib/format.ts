@@ -1,9 +1,5 @@
 import type { Part, Session, SessionStatus, Todo } from "@opencode-ai/sdk/v2";
-import type {
-  MessageWithParts,
-  PendingState,
-  SessionTranscriptState,
-} from "./types";
+import type { MessageWithParts, PendingState, SessionTranscriptState } from "./types";
 
 function formatTime(timestamp?: number): string {
   if (!timestamp) {
@@ -22,14 +18,9 @@ function formatStatus(status?: SessionStatus): string {
   return status.type === "busy" ? "Busy" : "Idle";
 }
 
-export function sessionSubtitle(
-  session: Session,
-  status?: SessionStatus,
-): string {
+export function sessionSubtitle(session: Session, status?: SessionStatus): string {
   const statusLabel = formatStatus(status);
-  return [statusLabel, formatTime(session.time.updated)]
-    .filter(Boolean)
-    .join(" • ");
+  return [statusLabel, formatTime(session.time.updated)].filter(Boolean).join(" • ");
 }
 
 export function partToMarkdown(part: Part): string {
@@ -70,14 +61,7 @@ function extractAnswerFromJsonPayload(text: string): string | undefined {
 
   try {
     const parsed = JSON.parse(trimmed) as Record<string, unknown>;
-    const candidateKeys = [
-      "answer",
-      "response",
-      "content",
-      "message",
-      "text",
-      "markdown",
-    ];
+    const candidateKeys = ["answer", "response", "content", "message", "text", "markdown"];
 
     for (const key of candidateKeys) {
       const value = parsed[key];
@@ -103,10 +87,7 @@ export function assistantMessageMarkdown(message: MessageWithParts): string {
   }
 
   return message.parts
-    .filter(
-      (part): part is Extract<Part, { type: "text" }> =>
-        part.type === "text" && !part.synthetic,
-    )
+    .filter((part): part is Extract<Part, { type: "text" }> => part.type === "text" && !part.synthetic)
     .map((part) => normalizeAssistantText(part.text))
     .filter(Boolean)
     .join("\n\n");
@@ -124,9 +105,7 @@ export function messageToMarkdown(message: MessageWithParts): string {
 function conversationMessageMarkdown(message: MessageWithParts): string {
   if (message.info.role === "user") {
     const body = message.parts
-      .filter(
-        (part): part is Extract<Part, { type: "text" }> => part.type === "text",
-      )
+      .filter((part): part is Extract<Part, { type: "text" }> => part.type === "text")
       .map((part) => part.text.trim())
       .filter(Boolean)
       .join("\n\n");
@@ -143,18 +122,14 @@ function pendingToMarkdown(pending: PendingState): string {
   if (pending.permissions.length > 0) {
     lines.push("### Pending Permissions");
     for (const request of pending.permissions) {
-      lines.push(
-        `- \`${request.permission}\` on ${request.patterns.join(", ")}`,
-      );
+      lines.push(`- \`${request.permission}\` on ${request.patterns.join(", ")}`);
     }
   }
   if (pending.questions.length > 0) {
     lines.push("### Pending Questions");
     for (const request of pending.questions) {
       const first = request.questions[0];
-      lines.push(
-        `- ${first?.header ?? "Question"}: ${first?.question ?? "Needs input"}`,
-      );
+      lines.push(`- ${first?.header ?? "Question"}: ${first?.question ?? "Needs input"}`);
     }
   }
   return lines.join("\n");
@@ -166,17 +141,12 @@ function todosToMarkdown(todos: Todo[]): string {
   }
   const lines = ["### Todos"];
   for (const todo of todos) {
-    lines.push(
-      `- [${todo.status === "completed" ? "x" : " "}] ${todo.content} (${todo.priority})`,
-    );
+    lines.push(`- [${todo.status === "completed" ? "x" : " "}] ${todo.content} (${todo.priority})`);
   }
   return lines.join("\n");
 }
 
-export function transcriptToMarkdown(
-  state: SessionTranscriptState,
-  session?: Session,
-): string {
+export function transcriptToMarkdown(state: SessionTranscriptState, session?: Session): string {
   const sections: string[] = [];
   if (session) {
     sections.push(`# ${session.title || "Untitled Session"}`);
@@ -202,10 +172,7 @@ export function transcriptToMarkdown(
   return sections.filter(Boolean).join("\n\n");
 }
 
-export function conversationToDetailMarkdown(
-  state: SessionTranscriptState,
-  session?: Session,
-): string {
+export function conversationToDetailMarkdown(state: SessionTranscriptState, session?: Session): string {
   const sections: string[] = [];
 
   if (state.error) {
@@ -246,10 +213,7 @@ export function previewFromMessages(messages: MessageWithParts[]): string {
       message.info.role === "assistant"
         ? assistantMessageMarkdown(message)
         : message.parts
-            .filter(
-              (part): part is Extract<Part, { type: "text" }> =>
-                part.type === "text",
-            )
+            .filter((part): part is Extract<Part, { type: "text" }> => part.type === "text")
             .map((part) => part.text.trim())
             .join(" ")
             .trim();

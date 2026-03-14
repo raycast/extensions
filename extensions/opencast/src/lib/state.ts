@@ -1,19 +1,7 @@
-import type {
-  Part,
-  PermissionRequest,
-  QuestionRequest,
-  SessionStatus,
-  Todo,
-} from "@opencode-ai/sdk/v2";
-import type {
-  MessageWithParts,
-  PendingState,
-  SessionTranscriptState,
-} from "./types";
+import type { Part, PermissionRequest, QuestionRequest, SessionStatus, Todo } from "@opencode-ai/sdk/v2";
+import type { MessageWithParts, PendingState, SessionTranscriptState } from "./types";
 
-export function createEmptyTranscriptState(
-  sessionID: string,
-): SessionTranscriptState {
+export function createEmptyTranscriptState(sessionID: string): SessionTranscriptState {
   return {
     sessionID,
     messages: [],
@@ -25,10 +13,7 @@ export function createEmptyTranscriptState(
   };
 }
 
-export function upsertMessage(
-  messages: MessageWithParts[],
-  next: MessageWithParts,
-): MessageWithParts[] {
+export function upsertMessage(messages: MessageWithParts[], next: MessageWithParts): MessageWithParts[] {
   const index = messages.findIndex((item) => item.info.id === next.info.id);
   if (index === -1) {
     return [...messages, next];
@@ -60,20 +45,14 @@ function updatePartField(part: Part, field: string, delta: string): Part {
   return part;
 }
 
-function removePendingPermission(
-  pending: PendingState,
-  requestID: string,
-): PendingState {
+function removePendingPermission(pending: PendingState, requestID: string): PendingState {
   return {
     ...pending,
     permissions: pending.permissions.filter((item) => item.id !== requestID),
   };
 }
 
-function removePendingQuestion(
-  pending: PendingState,
-  requestID: string,
-): PendingState {
+function removePendingQuestion(pending: PendingState, requestID: string): PendingState {
   return {
     ...pending,
     questions: pending.questions.filter((item) => item.id !== requestID),
@@ -113,15 +92,10 @@ export type SessionEventLike =
   | { type: "question.replied"; properties: { requestID: string } }
   | { type: "question.rejected"; properties: { requestID: string } };
 
-export function reduceSessionEvent(
-  state: SessionTranscriptState,
-  event: SessionEventLike,
-): SessionTranscriptState {
+export function reduceSessionEvent(state: SessionTranscriptState, event: SessionEventLike): SessionTranscriptState {
   switch (event.type) {
     case "message.updated": {
-      const existing = state.messages.find(
-        (item) => item.info.id === event.properties.info.id,
-      );
+      const existing = state.messages.find((item) => item.info.id === event.properties.info.id);
       return {
         ...state,
         messages: upsertMessage(state.messages, {
@@ -133,9 +107,7 @@ export function reduceSessionEvent(
     case "message.removed":
       return {
         ...state,
-        messages: state.messages.filter(
-          (item) => item.info.id !== event.properties.messageID,
-        ),
+        messages: state.messages.filter((item) => item.info.id !== event.properties.messageID),
       };
     case "message.part.updated":
       return {
@@ -159,11 +131,7 @@ export function reduceSessionEvent(
                 ...message,
                 parts: message.parts.map((part) =>
                   part.id === event.properties.partID
-                    ? updatePartField(
-                        part,
-                        event.properties.field,
-                        event.properties.delta,
-                      )
+                    ? updatePartField(part, event.properties.field, event.properties.delta)
                     : part,
                 ),
               },
@@ -177,9 +145,7 @@ export function reduceSessionEvent(
             ? message
             : {
                 ...message,
-                parts: message.parts.filter(
-                  (part) => part.id !== event.properties.partID,
-                ),
+                parts: message.parts.filter((part) => part.id !== event.properties.partID),
               },
         ),
       };
@@ -209,9 +175,7 @@ export function reduceSessionEvent(
         pending: {
           ...state.pending,
           permissions: [
-            ...state.pending.permissions.filter(
-              (item) => item.id !== event.properties.id,
-            ),
+            ...state.pending.permissions.filter((item) => item.id !== event.properties.id),
             event.properties,
           ],
         },
@@ -219,42 +183,28 @@ export function reduceSessionEvent(
     case "permission.replied":
       return {
         ...state,
-        pending: removePendingPermission(
-          state.pending,
-          event.properties.requestID,
-        ),
+        pending: removePendingPermission(state.pending, event.properties.requestID),
       };
     case "question.asked":
       return {
         ...state,
         pending: {
           ...state.pending,
-          questions: [
-            ...state.pending.questions.filter(
-              (item) => item.id !== event.properties.id,
-            ),
-            event.properties,
-          ],
+          questions: [...state.pending.questions.filter((item) => item.id !== event.properties.id), event.properties],
         },
       };
     case "question.replied":
     case "question.rejected":
       return {
         ...state,
-        pending: removePendingQuestion(
-          state.pending,
-          event.properties.requestID,
-        ),
+        pending: removePendingQuestion(state.pending, event.properties.requestID),
       };
     default:
       return state;
   }
 }
 
-export function seedPendingState(
-  permissions: PermissionRequest[],
-  questions: QuestionRequest[],
-): PendingState {
+export function seedPendingState(permissions: PermissionRequest[], questions: QuestionRequest[]): PendingState {
   return {
     permissions,
     questions,

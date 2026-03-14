@@ -1,11 +1,7 @@
 import { Action, ActionPanel, Form, Toast, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { getPreferences } from "./lib/preferences";
-import {
-  getLastTarget,
-  getRecentTargets,
-  saveRecentTarget,
-} from "./lib/storage";
+import { getLastTarget, getRecentTargets, saveRecentTarget } from "./lib/storage";
 import type { OpencodeTarget, RecentTarget } from "./lib/types";
 
 export default function Command() {
@@ -17,16 +13,10 @@ export default function Command() {
 
   useEffect(() => {
     void (async () => {
-      const [targets, lastTarget] = await Promise.all([
-        getRecentTargets(),
-        getLastTarget(),
-      ]);
+      const [targets, lastTarget] = await Promise.all([getRecentTargets(), getLastTarget()]);
       setRecentTargets(targets);
       const initialTarget =
-        lastTarget ??
-        (preferences.defaultDirectory
-          ? { directory: preferences.defaultDirectory }
-          : undefined);
+        lastTarget ?? (preferences.defaultDirectory ? { directory: preferences.defaultDirectory } : undefined);
       setDirectory(initialTarget?.directory ?? "");
       setWorkspace(initialTarget?.workspace ?? "");
       setIsLoading(false);
@@ -34,12 +24,7 @@ export default function Command() {
   }, [preferences.defaultDirectory]);
 
   const recentByKey = useMemo(() => {
-    return new Map(
-      recentTargets.map((target) => [
-        `${target.directory}::${target.workspace ?? ""}`,
-        target,
-      ]),
-    );
+    return new Map(recentTargets.map((target) => [`${target.directory}::${target.workspace ?? ""}`, target]));
   }, [recentTargets]);
 
   async function submit() {
@@ -60,9 +45,7 @@ export default function Command() {
       style: Toast.Style.Success,
       title: "OpenCode target updated",
     });
-    toast.message = target.workspace
-      ? `${target.directory} (${target.workspace})`
-      : target.directory;
+    toast.message = target.workspace ? `${target.directory} (${target.workspace})` : target.directory;
   }
 
   return (

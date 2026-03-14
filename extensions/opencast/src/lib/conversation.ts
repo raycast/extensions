@@ -45,10 +45,7 @@ function truncate(text: string, max = 160): string {
 }
 
 function toolTitle(part: ToolPart): string {
-  const title =
-    "title" in part.state && typeof part.state.title === "string"
-      ? part.state.title.trim()
-      : "";
+  const title = "title" in part.state && typeof part.state.title === "string" ? part.state.title.trim() : "";
   return title || `Tool: ${part.tool}`;
 }
 
@@ -70,12 +67,7 @@ function toolDetail(part: ToolPart): string {
   if ("time" in part.state && "end" in part.state.time && part.state.time.end) {
     sections.push(`Finished: ${formatTime(part.state.time.end)}`);
   }
-  sections.push(
-    "## Input",
-    "```json",
-    JSON.stringify(part.state.input ?? {}, null, 2),
-    "```",
-  );
+  sections.push("## Input", "```json", JSON.stringify(part.state.input ?? {}, null, 2), "```");
   if (part.state.status === "completed") {
     sections.push("## Output", "```", part.state.output || "", "```");
   }
@@ -98,10 +90,7 @@ function fileDetail(part: FilePart): string {
 
 function assistantMarkdown(parts: Part[]): string {
   return parts
-    .filter(
-      (part): part is Extract<Part, { type: "text" }> =>
-        part.type === "text" && !part.synthetic,
-    )
+    .filter((part): part is Extract<Part, { type: "text" }> => part.type === "text" && !part.synthetic)
     .map((part) => normalizeAssistantText(part.text))
     .filter(Boolean)
     .join("\n\n");
@@ -110,23 +99,15 @@ function assistantMarkdown(parts: Part[]): string {
 function userMarkdown(message: MessageWithParts): string {
   const user = message.info.role === "user" ? message.info : undefined;
   const body = message.parts
-    .filter(
-      (part): part is Extract<Part, { type: "text" }> => part.type === "text",
-    )
+    .filter((part): part is Extract<Part, { type: "text" }> => part.type === "text")
     .map((part) => part.text.trim())
     .filter(Boolean)
     .join("\n\n");
-  const model = user
-    ? `${user.model.providerID}/${user.model.modelID}`
-    : undefined;
-  return [body, model ? `Model: ${model}` : undefined]
-    .filter(Boolean)
-    .join("\n\n");
+  const model = user ? `${user.model.providerID}/${user.model.modelID}` : undefined;
+  return [body, model ? `Model: ${model}` : undefined].filter(Boolean).join("\n\n");
 }
 
-export function buildConversationBlocks(
-  messages: MessageWithParts[],
-): ConversationBlock[] {
+export function buildConversationBlocks(messages: MessageWithParts[]): ConversationBlock[] {
   const blocks: ConversationBlock[] = [];
 
   for (const message of messages) {

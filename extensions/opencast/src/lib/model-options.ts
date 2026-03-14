@@ -1,9 +1,7 @@
 import type { ProviderListResponse } from "@opencode-ai/sdk/v2";
 import type { ModelOption } from "./types";
 
-export function mapProviderResponseToModels(
-  response: ProviderListResponse,
-): ModelOption[] {
+export function mapProviderResponseToModels(response: ProviderListResponse): ModelOption[] {
   const defaults = response.default ?? {};
   const connected = new Set(response.connected ?? []);
 
@@ -30,8 +28,6 @@ export function mapProviderResponseToModels(
       if (diff !== 0) {
         return diff;
       }
-      return `${a.providerTitle}/${a.title}`.localeCompare(
-        `${b.providerTitle}/${b.title}`,
-      );
+      return `${a.providerTitle}/${a.title}`.localeCompare(`${b.providerTitle}/${b.title}`);
     });
 }

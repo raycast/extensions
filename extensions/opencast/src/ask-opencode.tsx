@@ -13,20 +13,10 @@ import { useEffect, useMemo, useState } from "react";
 import { ModelPickerView } from "./components/ModelPickerView";
 import { SessionDetailView } from "./components/SessionDetailView";
 import { TargetForm } from "./components/TargetForm";
-import {
-  createClient,
-  createSession,
-  listModels,
-  listSessions,
-  listWorkspaces,
-  promptSession,
-} from "./lib/opencode";
+import { createClient, createSession, listModels, listSessions, listWorkspaces, promptSession } from "./lib/opencode";
 import { getPreferences } from "./lib/preferences";
 import { SEND_ICON } from "./lib/raycast-icons";
-import {
-  resolveServerCandidates,
-  resolveServerUrl,
-} from "./lib/server-discovery";
+import { resolveServerCandidates, resolveServerUrl } from "./lib/server-discovery";
 import {
   getLastTarget,
   getRecentModels,
@@ -38,23 +28,14 @@ import {
   saveSelectedModel,
 } from "./lib/storage";
 import { targetDropdownTitle } from "./lib/target-display";
-import type {
-  ModelOption,
-  OpencodeTarget,
-  RecentSession,
-  RecentTarget,
-  WorkspaceOption,
-} from "./lib/types";
+import type { ModelOption, OpencodeTarget, RecentSession, RecentTarget, WorkspaceOption } from "./lib/types";
 
 export default function Command() {
   const preferences = useMemo(() => getPreferences(), []);
   const { push } = useNavigation();
   const [serverUrl, setServerUrl] = useState<string>();
   const [serverCandidates, setServerCandidates] = useState<string[]>([]);
-  const client = useMemo(
-    () => (serverUrl ? createClient(serverUrl) : undefined),
-    [serverUrl],
-  );
+  const client = useMemo(() => (serverUrl ? createClient(serverUrl) : undefined), [serverUrl]);
   const [target, setTarget] = useState<OpencodeTarget>();
   const [recentTargets, setRecentTargets] = useState<RecentTarget[]>([]);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
@@ -81,42 +62,27 @@ export default function Command() {
   }
 
   async function refreshRecents(nextTarget?: OpencodeTarget) {
-    const [targets, lastTarget] = await Promise.all([
-      getRecentTargets(),
-      getLastTarget(),
-    ]);
+    const [targets, lastTarget] = await Promise.all([getRecentTargets(), getLastTarget()]);
     const activeTarget =
       nextTarget ??
       lastTarget ??
-      (preferences.defaultDirectory
-        ? { directory: preferences.defaultDirectory }
-        : undefined);
+      (preferences.defaultDirectory ? { directory: preferences.defaultDirectory } : undefined);
     setRecentTargets(targets);
     setTarget(activeTarget);
-    setRecentSessions(
-      activeTarget ? await getRecentSessions(activeTarget) : [],
-    );
+    setRecentSessions(activeTarget ? await getRecentSessions(activeTarget) : []);
     setRecentModels(activeTarget ? await getRecentModels(activeTarget) : []);
-    setSelectedModel(
-      activeTarget ? await getSelectedModel(activeTarget) : undefined,
-    );
+    setSelectedModel(activeTarget ? await getSelectedModel(activeTarget) : undefined);
     return activeTarget;
   }
 
   async function refreshServerDiscovery() {
-    const [resolved, candidates] = await Promise.all([
-      resolveServerUrl(),
-      resolveServerCandidates(),
-    ]);
+    const [resolved, candidates] = await Promise.all([resolveServerUrl(), resolveServerCandidates()]);
     setServerUrl(resolved);
     setServerCandidates(candidates);
     return resolved;
   }
 
-  async function refreshWorkspaces(
-    nextTarget?: OpencodeTarget,
-    nextClient = client,
-  ) {
+  async function refreshWorkspaces(nextTarget?: OpencodeTarget, nextClient = client) {
     const activeTarget = nextTarget ?? target;
     if (!nextClient || !activeTarget?.directory) {
       setWorkspaces([]);
@@ -129,10 +95,7 @@ export default function Command() {
     }
   }
 
-  async function refreshSessions(
-    nextTarget?: OpencodeTarget,
-    nextClient = client,
-  ) {
+  async function refreshSessions(nextTarget?: OpencodeTarget, nextClient = client) {
     const activeTarget = nextTarget ?? target;
     if (!nextClient || !activeTarget?.directory) {
       setSessions([]);
@@ -145,10 +108,7 @@ export default function Command() {
     }
   }
 
-  async function refreshModels(
-    nextTarget?: OpencodeTarget,
-    nextClient = client,
-  ) {
+  async function refreshModels(nextTarget?: OpencodeTarget, nextClient = client) {
     const activeTarget = nextTarget ?? target;
     if (!nextClient || !activeTarget?.directory) {
       setModels([]);
@@ -159,11 +119,7 @@ export default function Command() {
       setModels(nextModels);
       const storedModel = await getSelectedModel(activeTarget);
       const matchedStored = storedModel
-        ? nextModels.find(
-            (item) =>
-              item.providerID === storedModel.providerID &&
-              item.modelID === storedModel.modelID,
-          )
+        ? nextModels.find((item) => item.providerID === storedModel.providerID && item.modelID === storedModel.modelID)
         : undefined;
       const defaultModel =
         nextModels.find((item) => item.isConnected && item.isDefault) ??
@@ -206,10 +162,7 @@ export default function Command() {
     void refreshSessions();
   }, [client, target?.directory, target?.workspace]);
 
-  async function openConversation(
-    sessionID: string,
-    nextTarget: OpencodeTarget,
-  ) {
+  async function openConversation(sessionID: string, nextTarget: OpencodeTarget) {
     if (!serverUrl) {
       return;
     }
@@ -291,17 +244,13 @@ export default function Command() {
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={
-        serverUrl ? "Type a message" : "No OpenCode server detected"
-      }
+      searchBarPlaceholder={serverUrl ? "Type a message" : "No OpenCode server detected"}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Target"
           value={target ? `${target.directory}::${target.workspace ?? ""}` : ""}
           onChange={async (value) => {
-            const match = recentTargets.find(
-              (item) => `${item.directory}::${item.workspace ?? ""}` === value,
-            );
+            const match = recentTargets.find((item) => `${item.directory}::${item.workspace ?? ""}` === value);
             if (!match) {
               return;
             }
@@ -328,11 +277,7 @@ export default function Command() {
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Send Message"
-            icon={SEND_ICON}
-            onAction={sendMessage}
-          />
+          <Action title="Send Message" icon={SEND_ICON} onAction={sendMessage} />
           <Action
             title="Select Model"
             icon={Icon.BulletPoints}
@@ -368,16 +313,8 @@ export default function Command() {
               )
             }
           />
-          <Action
-            title="Refresh Servers"
-            icon={Icon.Network}
-            onAction={initialize}
-          />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Refresh Servers" icon={Icon.Network} onAction={initialize} />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -393,28 +330,14 @@ export default function Command() {
         />
       ) : null}
       {serverUrl ? (
-        <List.Section
-          title={`Ask OpenCode${target ? ` • ${target.directory}` : ""}`}
-        >
+        <List.Section title={`Ask OpenCode${target ? ` • ${target.directory}` : ""}`}>
           <List.Item
-            title={
-              searchText.trim()
-                ? `Send: ${searchText.trim()}`
-                : "Type a message above"
-            }
-            subtitle={
-              selectedModel
-                ? `${selectedModel.providerID}/${selectedModel.modelID}`
-                : "Starts a new session"
-            }
+            title={searchText.trim() ? `Send: ${searchText.trim()}` : "Type a message above"}
+            subtitle={selectedModel ? `${selectedModel.providerID}/${selectedModel.modelID}` : "Starts a new session"}
             icon={SEND_ICON}
             actions={
               <ActionPanel>
-                <Action
-                  title="Send Message"
-                  icon={SEND_ICON}
-                  onAction={sendMessage}
-                />
+                <Action title="Send Message" icon={SEND_ICON} onAction={sendMessage} />
                 <Action
                   title="Select Model"
                   icon={Icon.BulletPoints}
@@ -441,9 +364,7 @@ export default function Command() {
                         initialTarget={target}
                         onSave={async (nextTarget) => {
                           setTarget(nextTarget);
-                          setRecentSessions(
-                            await getRecentSessions(nextTarget),
-                          );
+                          setRecentSessions(await getRecentSessions(nextTarget));
                           await refreshWorkspaces(nextTarget);
                           await refreshModels(nextTarget);
                           await refreshSessions(nextTarget);
@@ -476,11 +397,7 @@ export default function Command() {
                       await openConversation(session.id, target);
                     }}
                   />
-                  <Action
-                    title="New Message"
-                    icon={SEND_ICON}
-                    onAction={sendMessage}
-                  />
+                  <Action title="New Message" icon={SEND_ICON} onAction={sendMessage} />
                 </ActionPanel>
               }
             />

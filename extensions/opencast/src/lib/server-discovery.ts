@@ -9,11 +9,7 @@ import { getPreferences } from "./preferences";
 const execFileAsync = promisify(execFile);
 const DISCOVERED_SERVERS_KEY = "discovered-server-urls";
 const COMMON_PORTS = [3001, 4096, 3000];
-const TAURI_IDS = [
-  "ai.opencode.desktop.dev",
-  "ai.opencode.desktop.beta",
-  "ai.opencode.desktop",
-];
+const TAURI_IDS = ["ai.opencode.desktop.dev", "ai.opencode.desktop.beta", "ai.opencode.desktop"];
 
 function normalizeUrl(raw: string): string | undefined {
   const value = raw.trim();
@@ -40,13 +36,8 @@ async function readStoredDefaultUrls(): Promise<string[]> {
   const supportDir = path.join(os.homedir(), "Library", "Application Support");
   const urls = new Set<string>();
   for (const appId of TAURI_IDS) {
-    const parsed = await readJson<Record<string, unknown>>(
-      path.join(supportDir, appId, "opencode.settings.dat"),
-    );
-    const url =
-      typeof parsed?.defaultServerUrl === "string"
-        ? normalizeUrl(parsed.defaultServerUrl)
-        : undefined;
+    const parsed = await readJson<Record<string, unknown>>(path.join(supportDir, appId, "opencode.settings.dat"));
+    const url = typeof parsed?.defaultServerUrl === "string" ? normalizeUrl(parsed.defaultServerUrl) : undefined;
     if (url) {
       urls.add(url);
     }
@@ -61,27 +52,20 @@ async function readRememberedUrls(): Promise<string[]> {
   }
   try {
     const parsed = JSON.parse(raw) as string[];
-    return parsed
-      .map((item) => normalizeUrl(item))
-      .filter((item): item is string => Boolean(item));
+    return parsed.map((item) => normalizeUrl(item)).filter((item): item is string => Boolean(item));
   } catch {
     return [];
   }
 }
 
 async function saveRememberedUrls(urls: string[]): Promise<void> {
-  await LocalStorage.setItem(
-    DISCOVERED_SERVERS_KEY,
-    JSON.stringify(urls.slice(0, 12)),
-  );
+  await LocalStorage.setItem(DISCOVERED_SERVERS_KEY, JSON.stringify(urls.slice(0, 12)));
 }
 
 export function parseListeningUrls(lsofOutput: string): string[] {
   const urls = new Set<string>();
   for (const line of lsofOutput.split("\n")) {
-    const match = line.match(
-      /(?:127\.0\.0\.1|localhost|\*):(\d+)\s+\(LISTEN\)/,
-    );
+    const match = line.match(/(?:127\.0\.0\.1|localhost|\*):(\d+)\s+\(LISTEN\)/);
     if (!match?.[1]) {
       continue;
     }
@@ -92,11 +76,7 @@ export function parseListeningUrls(lsofOutput: string): string[] {
 
 async function discoverListeningUrls(): Promise<string[]> {
   try {
-    const { stdout } = await execFileAsync("lsof", [
-      "-nP",
-      "-iTCP",
-      "-sTCP:LISTEN",
-    ]);
+    const { stdout } = await execFileAsync("lsof", ["-nP", "-iTCP", "-sTCP:LISTEN"]);
     return parseListeningUrls(stdout);
   } catch {
     return [];
@@ -138,10 +118,7 @@ export async function resolveServerCandidates(): Promise<string[]> {
     ...COMMON_PORTS.map((port) => `http://127.0.0.1:${port}`),
   ]
     .map((item) => normalizeUrl(item ?? ""))
-    .filter(
-      (item, index, array): item is string =>
-        Boolean(item) && array.indexOf(item) === index,
-    );
+    .filter((item, index, array): item is string => Boolean(item) && array.indexOf(item) === index);
 }
 
 export async function resolveServerUrl(): Promise<string | undefined> {

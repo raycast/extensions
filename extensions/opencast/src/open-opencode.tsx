@@ -12,11 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SessionDetailView } from "./components/SessionDetailView";
 import { TargetForm } from "./components/TargetForm";
 import { PromptForm } from "./forms/PromptForm";
-import {
-  previewFromMessages,
-  sessionSubtitle,
-  transcriptToMarkdown,
-} from "./lib/format";
+import { previewFromMessages, sessionSubtitle, transcriptToMarkdown } from "./lib/format";
 import {
   createClient,
   getMessages,
@@ -27,24 +23,10 @@ import {
   listWorkspaces,
 } from "./lib/opencode";
 import { getPreferences } from "./lib/preferences";
-import {
-  resolveServerCandidates,
-  resolveServerUrl,
-} from "./lib/server-discovery";
-import {
-  getLastTarget,
-  getRecentSessions,
-  getRecentTargets,
-  saveRecentTarget,
-} from "./lib/storage";
+import { resolveServerCandidates, resolveServerUrl } from "./lib/server-discovery";
+import { getLastTarget, getRecentSessions, getRecentTargets, saveRecentTarget } from "./lib/storage";
 import { targetDropdownTitle } from "./lib/target-display";
-import type {
-  OpencodeTarget,
-  RecentSession,
-  RecentTarget,
-  SessionSummary,
-  WorkspaceOption,
-} from "./lib/types";
+import type { OpencodeTarget, RecentSession, RecentTarget, SessionSummary, WorkspaceOption } from "./lib/types";
 
 type PendingItem =
   | {
@@ -67,10 +49,7 @@ export default function Command() {
   const { push } = useNavigation();
   const [serverUrl, setServerUrl] = useState<string>();
   const [serverCandidates, setServerCandidates] = useState<string[]>([]);
-  const client = useMemo(
-    () => (serverUrl ? createClient(serverUrl) : undefined),
-    [serverUrl],
-  );
+  const client = useMemo(() => (serverUrl ? createClient(serverUrl) : undefined), [serverUrl]);
   const [target, setTarget] = useState<OpencodeTarget>();
   const [recentTargets, setRecentTargets] = useState<RecentTarget[]>([]);
   const [recentSessions, setRecentSessions] = useState<RecentSession[]>([]);
@@ -78,29 +57,21 @@ export default function Command() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
   const [selectedSessionID, setSelectedSessionID] = useState<string>();
-  const [detailsMarkdown, setDetailsMarkdown] = useState<string>(
-    "Select a session to preview it.",
-  );
+  const [detailsMarkdown, setDetailsMarkdown] = useState<string>("Select a session to preview it.");
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const selectedSessionInfo = useMemo(
-    () =>
-      sessions.find((session) => session.info.id === selectedSessionID)?.info,
+    () => sessions.find((session) => session.info.id === selectedSessionID)?.info,
     [selectedSessionID, sessions],
   );
 
   async function hydrateStorage(targetOverride?: OpencodeTarget) {
-    const [targets, lastTarget] = await Promise.all([
-      getRecentTargets(),
-      getLastTarget(),
-    ]);
+    const [targets, lastTarget] = await Promise.all([getRecentTargets(), getLastTarget()]);
     setRecentTargets(targets);
     const fallbackTarget =
       targetOverride ??
       lastTarget ??
-      (preferences.defaultDirectory
-        ? { directory: preferences.defaultDirectory }
-        : undefined);
+      (preferences.defaultDirectory ? { directory: preferences.defaultDirectory } : undefined);
     if (fallbackTarget) {
       setTarget(fallbackTarget);
       setRecentSessions(await getRecentSessions(fallbackTarget));
@@ -108,10 +79,7 @@ export default function Command() {
   }
 
   async function refreshServerDiscovery() {
-    const [resolved, candidates] = await Promise.all([
-      resolveServerUrl(),
-      resolveServerCandidates(),
-    ]);
+    const [resolved, candidates] = await Promise.all([resolveServerUrl(), resolveServerCandidates()]);
     setServerUrl(resolved);
     setServerCandidates(candidates);
     if (!resolved) {
@@ -136,14 +104,13 @@ export default function Command() {
     }
     setIsLoading(true);
     try {
-      const [sessionList, statuses, permissions, questions, workspaceList] =
-        await Promise.all([
-          listSessions(client, activeTarget, search),
-          listSessionStatuses(client, activeTarget),
-          listPendingPermissions(client, activeTarget),
-          listPendingQuestions(client, activeTarget),
-          listWorkspaces(client, activeTarget),
-        ]);
+      const [sessionList, statuses, permissions, questions, workspaceList] = await Promise.all([
+        listSessions(client, activeTarget, search),
+        listSessionStatuses(client, activeTarget),
+        listPendingPermissions(client, activeTarget),
+        listPendingQuestions(client, activeTarget),
+        listWorkspaces(client, activeTarget),
+      ]);
       setWorkspaces(workspaceList);
       setSessions(
         sessionList.map((session) => ({
@@ -223,9 +190,7 @@ export default function Command() {
               return session;
             }
             const preview = previewFromMessages(messages);
-            return session.preview === preview
-              ? session
-              : { ...session, preview };
+            return session.preview === preview ? session : { ...session, preview };
           }),
         );
       } catch {
@@ -233,20 +198,12 @@ export default function Command() {
       }
     };
     void run();
-  }, [
-    client,
-    selectedSessionID,
-    selectedSessionInfo,
-    target?.directory,
-    target?.workspace,
-  ]);
+  }, [client, selectedSessionID, selectedSessionInfo, target?.directory, target?.workspace]);
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={
-        serverUrl ? "Search sessions" : "No OpenCode server detected"
-      }
+      searchBarPlaceholder={serverUrl ? "Search sessions" : "No OpenCode server detected"}
       onSearchTextChange={setSearchText}
       throttle
       onSelectionChange={(id) => setSelectedSessionID(id ?? undefined)}
@@ -255,9 +212,7 @@ export default function Command() {
           tooltip="Target"
           value={target ? `${target.directory}::${target.workspace ?? ""}` : ""}
           onChange={(value) => {
-            const match = recentTargets.find(
-              (item) => `${item.directory}::${item.workspace ?? ""}` === value,
-            );
+            const match = recentTargets.find((item) => `${item.directory}::${item.workspace ?? ""}` === value);
             if (match) {
               setTarget({
                 directory: match.directory,
@@ -340,16 +295,8 @@ export default function Command() {
               }
             }}
           />
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={() => load()}
-          />
-          <Action
-            title="Open Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => load()} />
+          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -365,9 +312,7 @@ export default function Command() {
         />
       ) : null}
       {serverUrl && pendingItems.length > 0 ? (
-        <List.Section
-          title={`Pending Requests • ${serverUrl.replace("http://", "")}`}
-        >
+        <List.Section title={`Pending Requests • ${serverUrl.replace("http://", "")}`}>
           {pendingItems.map((item) => (
             <List.Item
               key={`${item.kind}-${item.id}`}
@@ -418,11 +363,7 @@ export default function Command() {
               key={session.info.id}
               title={session.info.title || "Untitled Session"}
               subtitle={sessionSubtitle(session.info, session.status)}
-              accessories={
-                session.pendingCount > 0
-                  ? [{ text: `${session.pendingCount} pending` }]
-                  : undefined
-              }
+              accessories={session.pendingCount > 0 ? [{ text: `${session.pendingCount} pending` }] : undefined}
               detail={<List.Item.Detail markdown={detailsMarkdown} />}
               actions={
                 <ActionPanel>

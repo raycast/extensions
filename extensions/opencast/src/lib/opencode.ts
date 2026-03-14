@@ -38,10 +38,7 @@ export type SessionMessageRecord = {
 
 export function buildClientConfig(serverUrl: string) {
   const preferences = getPreferences();
-  const authHeader = buildAuthHeader(
-    preferences.username,
-    preferences.password,
-  );
+  const authHeader = buildAuthHeader(preferences.username, preferences.password);
   return {
     baseUrl: serverUrl,
     responseStyle: "data" as const,
@@ -108,9 +105,10 @@ export async function listSessionStatuses(
   client: OpencodeClientLike,
   target: OpencodeTarget,
 ): Promise<Record<string, SessionStatus>> {
-  return unwrap(
-    await client.session.status(targetParams(target), requestOptions(target)),
-  ) as Record<string, SessionStatus>;
+  return unwrap(await client.session.status(targetParams(target), requestOptions(target))) as Record<
+    string,
+    SessionStatus
+  >;
 }
 
 export async function getMessages(
@@ -146,10 +144,7 @@ export async function getSession(
   ) as Session;
 }
 
-export async function createSession(
-  client: OpencodeClientLike,
-  input: CreateSessionInput,
-): Promise<Session> {
+export async function createSession(client: OpencodeClientLike, input: CreateSessionInput): Promise<Session> {
   return unwrap(
     await client.session.create(
       {
@@ -161,10 +156,7 @@ export async function createSession(
   ) as Session;
 }
 
-export async function promptSession(
-  client: OpencodeClientLike,
-  input: PromptInput,
-): Promise<void> {
+export async function promptSession(client: OpencodeClientLike, input: PromptInput): Promise<void> {
   await client.session.promptAsync(
     {
       ...targetParams(input.target),
@@ -228,9 +220,7 @@ export async function listPendingPermissions(
   client: OpencodeClientLike,
   target: OpencodeTarget,
 ): Promise<PermissionRequest[]> {
-  return unwrap(
-    await client.permission.list(targetParams(target), requestOptions(target)),
-  ) as PermissionRequest[];
+  return unwrap(await client.permission.list(targetParams(target), requestOptions(target))) as PermissionRequest[];
 }
 
 export async function respondToPermission(
@@ -253,9 +243,7 @@ export async function listPendingQuestions(
   client: OpencodeClientLike,
   target: OpencodeTarget,
 ): Promise<QuestionRequest[]> {
-  return unwrap(
-    await client.question.list(targetParams(target), requestOptions(target)),
-  ) as QuestionRequest[];
+  return unwrap(await client.question.list(targetParams(target), requestOptions(target))) as QuestionRequest[];
 }
 
 export async function replyToQuestion(
@@ -288,19 +276,13 @@ export async function rejectQuestion(
   );
 }
 
-export async function listWorkspaces(
-  client: OpencodeClientLike,
-  target: OpencodeTarget,
-): Promise<WorkspaceOption[]> {
+export async function listWorkspaces(client: OpencodeClientLike, target: OpencodeTarget): Promise<WorkspaceOption[]> {
   void client;
   void target;
   return [];
 }
 
-export async function listModels(
-  client: OpencodeClientLike,
-  target: OpencodeTarget,
-): Promise<ModelOption[]> {
+export async function listModels(client: OpencodeClientLike, target: OpencodeTarget): Promise<ModelOption[]> {
   const response = unwrap(
     await client.provider.list(
       {

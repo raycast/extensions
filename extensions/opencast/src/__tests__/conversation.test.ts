@@ -84,12 +84,7 @@ describe("buildConversationBlocks", () => {
       },
     ]);
 
-    expect(blocks.map((item) => item.kind)).toEqual([
-      "message",
-      "reasoning-summary",
-      "tool-call",
-      "message",
-    ]);
+    expect(blocks.map((item) => item.kind)).toEqual(["message", "reasoning-summary", "tool-call", "message"]);
     expect(blocks[1]).toMatchObject({ title: "Considering calendar events" });
     expect(blocks[2]).toMatchObject({
       title: "Tool: openwork_get_status",

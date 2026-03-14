@@ -1,17 +1,12 @@
 import { describe, expect, it } from "vitest";
-import {
-  assistantMessageMarkdown,
-  normalizeAssistantText,
-} from "../lib/format";
+import { assistantMessageMarkdown, normalizeAssistantText } from "../lib/format";
 
 describe("normalizeAssistantText", () => {
   it("extracts the answer field from json payloads", () => {
     const payload =
       '{"answer":"You said you would follow up with Dan.","tool_workflow":["search"],"confidence":"medium"}';
 
-    expect(normalizeAssistantText(payload)).toBe(
-      "You said you would follow up with Dan.",
-    );
+    expect(normalizeAssistantText(payload)).toBe("You said you would follow up with Dan.");
   });
 
   it("leaves normal markdown untouched", () => {

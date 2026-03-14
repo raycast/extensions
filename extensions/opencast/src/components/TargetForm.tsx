@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import type { OpencodeTarget, RecentTarget } from "../lib/types";
 
@@ -17,20 +10,11 @@ type TargetFormProps = {
 
 export function TargetForm(props: TargetFormProps) {
   const { pop } = useNavigation();
-  const [directory, setDirectory] = useState(
-    props.initialTarget?.directory ?? "",
-  );
-  const [workspace, setWorkspace] = useState(
-    props.initialTarget?.workspace ?? "",
-  );
+  const [directory, setDirectory] = useState(props.initialTarget?.directory ?? "");
+  const [workspace, setWorkspace] = useState(props.initialTarget?.workspace ?? "");
 
   const recentByKey = useMemo(() => {
-    return new Map(
-      props.recentTargets.map((target) => [
-        `${target.directory}::${target.workspace ?? ""}`,
-        target,
-      ]),
-    );
+    return new Map(props.recentTargets.map((target) => [`${target.directory}::${target.workspace ?? ""}`, target]));
   }, [props.recentTargets]);
 
   return (

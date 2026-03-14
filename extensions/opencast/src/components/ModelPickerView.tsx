@@ -18,36 +18,20 @@ export function ModelPickerView(props: ModelPickerViewProps) {
       return props.models;
     }
     return props.models.filter((item) =>
-      [
-        item.title,
-        item.providerTitle,
-        item.subtitle,
-        `${item.providerID}/${item.modelID}`,
-      ]
+      [item.title, item.providerTitle, item.subtitle, `${item.providerID}/${item.modelID}`]
         .filter(Boolean)
         .some((value) => value!.toLowerCase().includes(query)),
     );
   }, [props.models, searchText]);
 
-  const recentKeys = new Set(
-    props.recentModels.map((item) => `${item.providerID}/${item.modelID}`),
-  );
+  const recentKeys = new Set(props.recentModels.map((item) => `${item.providerID}/${item.modelID}`));
   const recent = props.recentModels.filter((item) =>
-    props.models.some(
-      (model) =>
-        model.providerID === item.providerID && model.modelID === item.modelID,
-    ),
+    props.models.some((model) => model.providerID === item.providerID && model.modelID === item.modelID),
   );
-  const rest = filtered.filter(
-    (item) => !recentKeys.has(`${item.providerID}/${item.modelID}`),
-  );
+  const rest = filtered.filter((item) => !recentKeys.has(`${item.providerID}/${item.modelID}`));
 
   return (
-    <List
-      searchBarPlaceholder="Search models"
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-    >
+    <List searchBarPlaceholder="Search models" searchText={searchText} onSearchTextChange={setSearchText}>
       {recent.length > 0 && !searchText.trim() ? (
         <List.Section title="Recent Models">
           {recent.map((model) => (
@@ -80,16 +64,12 @@ function ModelItem(props: {
   onSelect: (model: ModelOption) => Promise<void>;
 }) {
   const selected =
-    props.selectedModel?.providerID === props.model.providerID &&
-    props.selectedModel?.modelID === props.model.modelID;
+    props.selectedModel?.providerID === props.model.providerID && props.selectedModel?.modelID === props.model.modelID;
   return (
     <List.Item
       id={`${props.model.providerID}/${props.model.modelID}`}
       title={props.model.title}
-      subtitle={
-        props.model.subtitle ??
-        `${props.model.providerID}/${props.model.modelID}`
-      }
+      subtitle={props.model.subtitle ?? `${props.model.providerID}/${props.model.modelID}`}
       icon={selected ? Icon.CheckCircle : Icon.Circle}
       accessories={[
         { text: props.model.providerTitle },
@@ -98,11 +78,7 @@ function ModelItem(props: {
       ]}
       actions={
         <ActionPanel>
-          <Action
-            title="Select Model"
-            icon={Icon.CheckCircle}
-            onAction={() => props.onSelect(props.model)}
-          />
+          <Action title="Select Model" icon={Icon.CheckCircle} onAction={() => props.onSelect(props.model)} />
         </ActionPanel>
       }
     />

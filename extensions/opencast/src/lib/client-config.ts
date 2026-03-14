@@ -1,7 +1,4 @@
-export function buildAuthHeader(
-  username?: string,
-  password?: string,
-): string | undefined {
+export function buildAuthHeader(username?: string, password?: string): string | undefined {
   if (!username || !password) {
     return undefined;
   }

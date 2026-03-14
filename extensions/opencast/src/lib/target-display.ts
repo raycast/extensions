@@ -6,9 +6,7 @@ function baseDirectoryName(directory: string): string {
   return segments[segments.length - 1] || directory;
 }
 
-export function targetDropdownTitle(
-  target: OpencodeTarget | RecentTarget,
-): string {
+export function targetDropdownTitle(target: OpencodeTarget | RecentTarget): string {
   const base = baseDirectoryName(target.directory);
   return target.workspace ? `${base} (${target.workspace})` : base;
 }

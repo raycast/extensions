@@ -25,12 +25,7 @@ export function RenameSessionForm(props: RenameSessionFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        value={title}
-        onChange={setTitle}
-      />
+      <Form.TextField id="title" title="Title" value={title} onChange={setTitle} />
     </Form>
   );
 }

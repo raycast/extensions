@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { createClient, promptSession } from "../lib/opencode";
 import type { OpencodeTarget } from "../lib/types";
@@ -22,10 +15,7 @@ type ReplyValues = {
 };
 
 export function ReplyForm(props: ReplyFormProps) {
-  const client = useMemo(
-    () => createClient(props.serverUrl),
-    [props.serverUrl],
-  );
+  const client = useMemo(() => createClient(props.serverUrl), [props.serverUrl]);
   const { pop } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -65,8 +55,7 @@ export function ReplyForm(props: ReplyFormProps) {
               } catch (error) {
                 toast.style = Toast.Style.Failure;
                 toast.title = "Failed to send reply";
-                toast.message =
-                  error instanceof Error ? error.message : String(error);
+                toast.message = error instanceof Error ? error.message : String(error);
               } finally {
                 setIsSubmitting(false);
               }
@@ -76,11 +65,7 @@ export function ReplyForm(props: ReplyFormProps) {
       }
     >
       <Form.Description text="Send a follow-up in this conversation." />
-      <Form.TextArea
-        id="prompt"
-        title="Reply"
-        placeholder="Type your follow-up..."
-      />
+      <Form.TextArea id="prompt" title="Reply" placeholder="Type your follow-up..." />
     </Form>
   );
 }

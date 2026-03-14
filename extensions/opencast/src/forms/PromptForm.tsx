@@ -1,24 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import {
-  createClient,
-  createSession,
-  listSessions,
-  promptSession,
-} from "../lib/opencode";
-import type {
-  OpencodeTarget,
-  RecentSession,
-  RecentTarget,
-  SessionSummary,
-} from "../lib/types";
+import { createClient, createSession, listSessions, promptSession } from "../lib/opencode";
+import type { OpencodeTarget, RecentSession, RecentTarget, SessionSummary } from "../lib/types";
 
 type PromptFormProps = {
   serverUrl: string;
@@ -38,17 +21,10 @@ type PromptValues = {
 };
 
 export function PromptForm(props: PromptFormProps) {
-  const client = useMemo(
-    () => createClient(props.serverUrl),
-    [props.serverUrl],
-  );
+  const client = useMemo(() => createClient(props.serverUrl), [props.serverUrl]);
   const { pop } = useNavigation();
-  const [directory, setDirectory] = useState(
-    props.initialTarget?.directory ?? "",
-  );
-  const [workspace, setWorkspace] = useState(
-    props.initialTarget?.workspace ?? "",
-  );
+  const [directory, setDirectory] = useState(props.initialTarget?.directory ?? "");
+  const [workspace, setWorkspace] = useState(props.initialTarget?.workspace ?? "");
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [isLoadingSessions, setIsLoadingSessions] = useState(false);
 
@@ -131,8 +107,7 @@ export function PromptForm(props: PromptFormProps) {
               } catch (error) {
                 toast.style = Toast.Style.Failure;
                 toast.title = "Failed to send prompt";
-                toast.message =
-                  error instanceof Error ? error.message : String(error);
+                toast.message = error instanceof Error ? error.message : String(error);
               }
             }}
           />
@@ -143,9 +118,7 @@ export function PromptForm(props: PromptFormProps) {
         id="recentTarget"
         title="Recent Targets"
         onChange={(value) => {
-          const target = props.recentTargets.find(
-            (item) => `${item.directory}::${item.workspace ?? ""}` === value,
-          );
+          const target = props.recentTargets.find((item) => `${item.directory}::${item.workspace ?? ""}` === value);
           if (!target) {
             return;
           }
@@ -161,12 +134,7 @@ export function PromptForm(props: PromptFormProps) {
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        id="directory"
-        title="Directory"
-        value={directory}
-        onChange={setDirectory}
-      />
+      <Form.TextField id="directory" title="Directory" value={directory} onChange={setDirectory} />
       <Form.TextField
         id="workspace"
         title="Workspace"
@@ -174,18 +142,10 @@ export function PromptForm(props: PromptFormProps) {
         onChange={setWorkspace}
         placeholder="Optional workspace ID"
       />
-      <Form.Dropdown
-        id="sessionID"
-        title="Existing Session"
-        defaultValue={props.initialSessionID ?? ""}
-      >
+      <Form.Dropdown id="sessionID" title="Existing Session" defaultValue={props.initialSessionID ?? ""}>
         <Form.Dropdown.Item value="" title="Create New Session" />
         {props.recentSessions.map((session) => (
-          <Form.Dropdown.Item
-            key={session.id}
-            value={session.id}
-            title={session.title || session.id}
-          />
+          <Form.Dropdown.Item key={session.id} value={session.id} title={session.title || session.id} />
         ))}
         {sessions.map((session) => (
           <Form.Dropdown.Item
@@ -195,16 +155,8 @@ export function PromptForm(props: PromptFormProps) {
           />
         ))}
       </Form.Dropdown>
-      <Form.TextField
-        id="newTitle"
-        title="New Session Title"
-        placeholder="Optional for new sessions"
-      />
-      <Form.TextArea
-        id="prompt"
-        title="Prompt"
-        placeholder="What do you want OpenCode to do?"
-      />
+      <Form.TextField id="newTitle" title="New Session Title" placeholder="Optional for new sessions" />
+      <Form.TextArea id="prompt" title="Prompt" placeholder="What do you want OpenCode to do?" />
     </Form>
   );
 }
