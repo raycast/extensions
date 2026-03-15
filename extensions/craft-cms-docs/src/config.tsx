@@ -7,10 +7,14 @@ export const DeepLink = {
   command: "search-docs",
 };
 
-export function raycastLinkForSlug(slug: string, view?: "detail") {
+export function raycastCommandLink(context: { slug?: string; product?: string; view?: "detail" }) {
   // Use launchContext via the `context` query parameter (JSON, URL-encoded)
-  const context = encodeURIComponent(JSON.stringify({ slug, product: "glossary", view }));
+  const encodedContext = encodeURIComponent(JSON.stringify(context));
   return `raycast://extensions/${encodeURIComponent(DeepLink.publisher)}/${encodeURIComponent(
     DeepLink.extensionName,
-  )}/${encodeURIComponent(DeepLink.command)}?context=${context}`;
+  )}/${encodeURIComponent(DeepLink.command)}?context=${encodedContext}`;
+}
+
+export function raycastLinkForSlug(slug: string, view?: "detail") {
+  return raycastCommandLink({ slug, product: "glossary", view });
 }

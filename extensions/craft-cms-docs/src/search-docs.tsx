@@ -17,6 +17,7 @@ import { useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { extractRelatedTermsFromHtml, searchDocs, searchGlossary, splitAssociatedLinks } from "./api";
 import { usePersistentBookmarks } from "./bookmarks-storage";
+import { raycastCommandLink } from "./config";
 import { summaryHtmlToMarkdown } from "./summary-to-markdown";
 import type { DocsSearchResult, GlossaryTerm } from "./types";
 
@@ -572,7 +573,12 @@ function ResultRow({
               shortcut={{ modifiers: ["cmd"], key: "b" }}
             />
           )}
-          <Action.CopyToClipboard title="Copy URL" content={item.url} icon={ACTION_ICONS.clipboard} />
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={item.url}
+            icon={ACTION_ICONS.clipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
         </ActionPanel>
       }
     />
@@ -586,6 +592,7 @@ function DocsDetailView({
   item: DocsSearchResult;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
+  const [, setSelectedProduct] = useCachedState<DocsProduct>("craft-docs-selected-product");
   const [bookmarks, setBookmarks] = usePersistentBookmarks();
   const isBookmarked = useMemo(
     () => (bookmarks ?? []).some((bookmark) => bookmark.url === item.url),
@@ -602,6 +609,11 @@ function DocsDetailView({
 
   function removeBookmark(detailItem: DocsSearchResult) {
     setBookmarks((current) => (current ?? []).filter((bookmark) => bookmark.url !== detailItem.url));
+  }
+
+  async function backToDocs() {
+    setSelectedProduct("all");
+    await open(raycastCommandLink({ product: "all" }));
   }
 
   return (
@@ -649,7 +661,18 @@ function DocsDetailView({
               shortcut={{ modifiers: ["cmd"], key: "b" }}
             />
           )}
-          <Action.CopyToClipboard title="Copy URL" content={item.url} icon={ACTION_ICONS.clipboard} />
+          <Action.CopyToClipboard
+            title="Copy URL"
+            content={item.url}
+            icon={ACTION_ICONS.clipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          <Action
+            title="Back to Docs"
+            icon={ACTION_ICONS.backToDocs}
+            onAction={backToDocs}
+            shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
+          />
         </ActionPanel>
       }
     />
@@ -1219,6 +1242,7 @@ const ACTION_ICONS = {
   book: { source: `${ASSETS_DIR}/book.svg`, tintColor: Color.SecondaryText },
   clipboard: { source: `${ASSETS_DIR}/clipboard.svg`, tintColor: Color.SecondaryText },
   sidebar: { source: `${ASSETS_DIR}/detail.svg`, tintColor: Color.SecondaryText },
+  backToDocs: { source: Icon.ArrowLeft, tintColor: Color.SecondaryText },
   bookmark: { source: ICONS.bookmarks, tintColor: Color.SecondaryText },
   removeBookmark: { source: ICONS.bookmarkOff, tintColor: Color.SecondaryText },
 } as const;
