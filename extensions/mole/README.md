@@ -16,9 +16,9 @@
 |:---:|:---:|
 | ![System Status](media/mole-1.png) | ![Clean System](media/mole-2.png) |
 
-| Analyze Disk | Purge Dev Artifacts |
+| Analyze Disk | Optimize System |
 |:---:|:---:|
-| ![Analyze Disk](media/mole-3.png) | ![Purge Dev Artifacts](media/mole-4.png) |
+| ![Analyze Disk](media/mole-3.png) | ![Optimize System](media/mole-4.png) |
 
 ## Prerequisites
 
