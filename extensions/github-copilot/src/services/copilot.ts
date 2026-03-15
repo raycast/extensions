@@ -165,12 +165,14 @@ async function createTask(
   const [ownerName, repoName] = repository.split("/");
 
   const body: {
+    event_content: string;
     problem_statement: string;
     create_pull_request: boolean;
     base_ref: string;
     model?: string;
     custom_agent?: string;
   } = {
+    event_content: prompt,
     problem_statement: prompt,
     create_pull_request: true,
     base_ref: branch,
