@@ -24,7 +24,7 @@ export function summaryHtmlToMarkdown(html: string): string {
     const cleanText = stripAllTags(inner).trim();
     if (!cleanText) return "";
     if (!href) return cleanText;
-    return href.startsWith("raycast://") ? `[${cleanText}](${href})` : `[${cleanText} <sup>↗</sup>](${href})`;
+    return `[${cleanText}](${href})`;
   });
 
   s = stripAllTags(s)
