@@ -14,6 +14,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { extractRelatedTermsFromHtml, searchDocs, searchGlossary, splitAssociatedLinks } from "./api";
 import { usePersistentBookmarks } from "./bookmarks-storage";
@@ -357,7 +358,14 @@ export default function Command(props: Props) {
 
   if (deeplinkView === "detail") {
     if (deeplinkDetailItem) {
-      return <DocsDetailView item={deeplinkDetailItem} onOpenItem={recordRecent} />;
+      return (
+        <DocsDetailView
+          item={deeplinkDetailItem}
+          bookmarks={bookmarks}
+          setBookmarks={setBookmarks}
+          onOpenItem={recordRecent}
+        />
+      );
     }
 
     return (
@@ -455,6 +463,8 @@ export default function Command(props: Props) {
               selectedProduct={effectiveSelectedProduct}
               isCompactMode={isCompactMode}
               isBookmarked={bookmarkedUrls.has(item.url)}
+              bookmarks={bookmarks}
+              setBookmarks={setBookmarks}
               onAddBookmark={addBookmark}
               onRemoveBookmark={removeBookmark}
               onOpenItem={recordRecent}
@@ -479,6 +489,8 @@ export default function Command(props: Props) {
                     selectedProduct={effectiveSelectedProduct}
                     isCompactMode={isCompactMode}
                     isBookmarked={bookmarkedUrls.has(item.url)}
+                    bookmarks={bookmarks}
+                    setBookmarks={setBookmarks}
                     onAddBookmark={addBookmark}
                     onRemoveBookmark={removeBookmark}
                     onOpenItem={recordRecent}
@@ -493,6 +505,8 @@ export default function Command(props: Props) {
                 selectedProduct={effectiveSelectedProduct}
                 isCompactMode={isCompactMode}
                 isBookmarked={bookmarkedUrls.has(item.url)}
+                bookmarks={bookmarks}
+                setBookmarks={setBookmarks}
                 onAddBookmark={addBookmark}
                 onRemoveBookmark={removeBookmark}
                 onOpenItem={recordRecent}
@@ -507,6 +521,8 @@ function ResultRow({
   selectedProduct,
   isCompactMode,
   isBookmarked,
+  bookmarks,
+  setBookmarks,
   onAddBookmark,
   onRemoveBookmark,
   onOpenItem,
@@ -515,6 +531,8 @@ function ResultRow({
   selectedProduct: DocsProduct;
   isCompactMode: boolean;
   isBookmarked: boolean;
+  bookmarks: DocsSearchResult[] | undefined;
+  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
   onAddBookmark: (item: DocsSearchResult) => void;
   onRemoveBookmark: (item: DocsSearchResult) => void;
   onOpenItem: (item: DocsSearchResult) => void;
@@ -526,7 +544,11 @@ function ResultRow({
       subtitle={isCompactMode ? buildSubtitle(item) : undefined}
       accessories={buildBookmarkAccessory(isBookmarked, selectedProduct)}
       icon={buildListIcon(item, selectedProduct)}
-      detail={isCompactMode ? undefined : <DocsItemDetail item={item} />}
+      detail={
+        isCompactMode ? undefined : (
+          <DocsItemDetail item={item} bookmarks={bookmarks} setBookmarks={setBookmarks} onOpenItem={onOpenItem} />
+        )
+      }
       actions={
         <ActionPanel>
           <Action
@@ -540,7 +562,9 @@ function ResultRow({
           <Action.Push
             title="View Detail"
             icon={ACTION_ICONS.sidebar}
-            target={<DocsDetailView item={item} onOpenItem={onOpenItem} />}
+            target={
+              <DocsDetailView item={item} bookmarks={bookmarks} setBookmarks={setBookmarks} onOpenItem={onOpenItem} />
+            }
           />
           {(item.docsLinks?.length ?? 0) > 0 && (
             <ActionPanel.Submenu
@@ -587,13 +611,16 @@ function ResultRow({
 
 function DocsDetailView({
   item,
+  bookmarks,
+  setBookmarks,
   onOpenItem,
 }: {
   item: DocsSearchResult;
+  bookmarks: DocsSearchResult[] | undefined;
+  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
   const [, setSelectedProduct] = useCachedState<DocsProduct>("craft-docs-selected-product");
-  const [bookmarks, setBookmarks] = usePersistentBookmarks();
   const isBookmarked = useMemo(
     () => (bookmarks ?? []).some((bookmark) => bookmark.url === item.url),
     [bookmarks, item.url],
@@ -619,7 +646,7 @@ function DocsDetailView({
   return (
     <Detail
       markdown={buildDetailMarkdown(item)}
-      metadata={<DocsMetadata item={item} />}
+      metadata={<DocsMetadata item={item} bookmarks={bookmarks} setBookmarks={setBookmarks} onOpenItem={onOpenItem} />}
       actions={
         <ActionPanel>
           <Action
@@ -679,11 +706,36 @@ function DocsDetailView({
   );
 }
 
-function DocsItemDetail({ item }: { item: DocsSearchResult }) {
-  return <List.Item.Detail markdown={buildDetailMarkdown(item)} metadata={<DocsMetadata item={item} />} />;
+function DocsItemDetail({
+  item,
+  bookmarks,
+  setBookmarks,
+  onOpenItem,
+}: {
+  item: DocsSearchResult;
+  bookmarks: DocsSearchResult[] | undefined;
+  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  onOpenItem: (item: DocsSearchResult) => void;
+}) {
+  return (
+    <List.Item.Detail
+      markdown={buildDetailMarkdown(item)}
+      metadata={<DocsMetadata item={item} bookmarks={bookmarks} setBookmarks={setBookmarks} onOpenItem={onOpenItem} />}
+    />
+  );
 }
 
-function DocsMetadata({ item }: { item: DocsSearchResult }) {
+function DocsMetadata({
+  item,
+  bookmarks,
+  setBookmarks,
+  onOpenItem,
+}: {
+  item: DocsSearchResult;
+  bookmarks: DocsSearchResult[] | undefined;
+  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  onOpenItem: (item: DocsSearchResult) => void;
+}) {
   const { push } = useNavigation();
   const docs = item.docsLinks ?? [];
   const relatedTerms = item.relatedTerms ?? [];
@@ -701,7 +753,14 @@ function DocsMetadata({ item }: { item: DocsSearchResult }) {
                   key={`${item.id}-related-${term.slug}`}
                   text={toTitleCase(term.title)}
                   onAction={() => {
-                    push(<GlossaryTermDetailRoute slug={term.slug} />);
+                    push(
+                      <GlossaryTermDetailRoute
+                        slug={term.slug}
+                        bookmarks={bookmarks}
+                        setBookmarks={setBookmarks}
+                        onOpenItem={onOpenItem}
+                      />,
+                    );
                   }}
                 />
               ))}
@@ -735,7 +794,14 @@ function DocsMetadata({ item }: { item: DocsSearchResult }) {
                   key={`${item.id}-related-${term.slug}`}
                   text={toTitleCase(term.title)}
                   onAction={() => {
-                    push(<GlossaryTermDetailRoute slug={term.slug} />);
+                    push(
+                      <GlossaryTermDetailRoute
+                        slug={term.slug}
+                        bookmarks={bookmarks}
+                        setBookmarks={setBookmarks}
+                        onOpenItem={onOpenItem}
+                      />,
+                    );
                   }}
                 />
               ))}
@@ -747,7 +813,17 @@ function DocsMetadata({ item }: { item: DocsSearchResult }) {
   );
 }
 
-function GlossaryTermDetailRoute({ slug }: { slug: string }) {
+function GlossaryTermDetailRoute({
+  slug,
+  bookmarks,
+  setBookmarks,
+  onOpenItem,
+}: {
+  slug: string;
+  bookmarks: DocsSearchResult[] | undefined;
+  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  onOpenItem: (item: DocsSearchResult) => void;
+}) {
   const [item, setItem] = useState<DocsSearchResult | null>(() => findGlossaryItemBySlug(slug));
   const [isLoading, setIsLoading] = useState(item === null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -797,7 +873,7 @@ function GlossaryTermDetailRoute({ slug }: { slug: string }) {
   }, [slug]);
 
   if (item) {
-    return <DocsDetailView item={item} onOpenItem={() => undefined} />;
+    return <DocsDetailView item={item} bookmarks={bookmarks} setBookmarks={setBookmarks} onOpenItem={onOpenItem} />;
   }
 
   return (
