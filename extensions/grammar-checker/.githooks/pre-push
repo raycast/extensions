@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Only run tests if source files changed compared to remote
+remote_ref=$(git rev-parse @{u} 2>/dev/null || echo "")
+
+if [ -z "$remote_ref" ]; then
+  # New branch with no upstream — check all commits against main
+  remote_ref="main"
+fi
+
+changed=$(git diff --name-only "$remote_ref"...HEAD 2>/dev/null | grep -E '^src/.*\.(ts|tsx)$')
+
+if [ -z "$changed" ]; then
+  exit 0
+fi
+
+echo "Running tests..."
+bun run test

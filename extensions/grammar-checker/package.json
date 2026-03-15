@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grammar-checker",
+  "title": "Grammar Checker",
+  "description": "Grammar check your clipboard text using OpenAI or Gemini",
+  "icon": "icon.png",
+  "author": "riccardo_altieri",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "preferences": [
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "The AI model to use for grammar checking",
+      "type": "dropdown",
+      "required": false,
+      "default": "gpt-5.4",
+      "data": [
+        { "title": "GPT-5.4 (recommended)", "value": "gpt-5.4" },
+        { "title": "GPT-5.3 Codex", "value": "gpt-5.3-codex" },
+        { "title": "GPT-5.2 Codex", "value": "gpt-5.2-codex" },
+        { "title": "GPT-5.2", "value": "gpt-5.2" },
+        { "title": "GPT-5.1 Codex Max", "value": "gpt-5.1-codex-max" },
+        { "title": "GPT-5.1 Codex", "value": "gpt-5.1-codex" },
+        { "title": "GPT-5.1", "value": "gpt-5.1" },
+        { "title": "GPT-5 Codex", "value": "gpt-5-codex" },
+        { "title": "GPT-5", "value": "gpt-5" },
+        { "title": "GPT-5.1 Codex Mini", "value": "gpt-5.1-codex-mini" },
+        { "title": "GPT-5 Codex Mini", "value": "gpt-5-codex-mini" },
+        { "title": "Gemini 2.5 Flash", "value": "gemini-2.5-flash" },
+        { "title": "Gemini 2.5 Pro", "value": "gemini-2.5-pro" }
+      ]
+    },
+    {
+      "name": "prompt",
+      "title": "Grammar Check Prompt",
+      "description": "Custom instruction for the grammar checker. The text to check is sent as the user message.",
+      "type": "textfield",
+      "required": false,
+      "default": "Grammar check. Return only the corrected text, nothing else.",
+      "placeholder": "Grammar check. Return only the corrected text, nothing else."
+    },
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Required for Gemini models. Get a free key at https://aistudio.google.com/apikey",
+      "type": "password",
+      "required": false,
+      "placeholder": "AIza..."
+    }
+  ],
+  "commands": [
+    {
+      "name": "check-grammar",
+      "title": "Check Grammar",
+      "subtitle": "Grammar Checker",
+      "description": "Grammar check text from your clipboard",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "rm -f ~/.config/raycast/extensions/grammar-checker/.mock && ray develop",
+    "dev:mock": "touch ~/.config/raycast/extensions/grammar-checker/.mock && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
