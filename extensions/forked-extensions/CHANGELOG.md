@@ -1,5 +1,10 @@
 # Raycast Fork Extensions Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Fix fork flow not completing git operations when the forked repository is outdated or ahead of upstream
+- Fix potential deadlock when errors occur during fork or sparse-checkout confirmation dialogs
+
 ## [Chore] - 2026-02-24
 
 - Update extension instruction

@@ -5,7 +5,6 @@ import { confirmAlert } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
 import { defaultGitExecutableFilePath } from "./constants.js";
-import { catchError } from "./errors.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
 import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQuotesIfInWindows } from "./utils.js";
@@ -196,24 +195,21 @@ export const checkIfSparseCheckoutEnabled = async () => {
     .then(() => true)
     .catch(() => false);
   if (!isSparseCheckout) {
-    return new Promise<void>((resolve, reject) => {
-      confirmAlert({
-        title: "Sparse Checkout Not Enabled",
-        message: "This operation requires sparse checkout to be enabled. Would you like to enable it now?",
-        primaryAction: {
-          title: "Enable Sparse Checkout",
-          onAction: catchError(async () => {
-            await checkIfStatusClean();
-            await operation.convertFullCheckoutToSparseCheckout();
-            resolve();
-          }),
-        },
-        dismissAction: {
-          title: "Cancel",
-          onAction: resolve,
-        },
-      }).catch(reject);
+    const shouldEnable = await confirmAlert({
+      title: "Sparse Checkout Not Enabled",
+      message: "This operation requires sparse checkout to be enabled. Would you like to enable it now?",
+      primaryAction: {
+        title: "Enable Sparse Checkout",
+      },
+      dismissAction: {
+        title: "Cancel",
+      },
     });
+
+    if (shouldEnable) {
+      await checkIfStatusClean();
+      await operation.convertFullCheckoutToSparseCheckout();
+    }
   }
 };
 
