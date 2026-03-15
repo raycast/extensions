@@ -48,6 +48,7 @@ export default async function main(props: LaunchProps<{ arguments: { text: strin
     await showHUD(`Copied! Expires in ${durationDisplay}. ${destructNote}`);
   } catch (error) {
     console.error("Failed to create secret:", error);
-    await showToast({ style: Toast.Style.Failure, title: "Failed to create secret", message: "Please try again." });
+    const message = error instanceof Error ? error.message : "Please try again.";
+    await showToast({ style: Toast.Style.Failure, title: "Failed to create secret", message });
   }
 }

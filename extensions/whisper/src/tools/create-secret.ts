@@ -16,6 +16,10 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
+  if (!input.secret?.trim()) {
+    throw new Error("Secret cannot be empty.");
+  }
+
   try {
     const durationSeconds = (input.duration ? parseDuration(input.duration) : null) ?? 3600;
     const selfDestruct = input.selfDestruct ?? true;
