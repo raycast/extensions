@@ -31,7 +31,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "secret [1h] [false]",
+          "placeholder": "secret 1h false",
           "type": "text",
           "required": true
         }
