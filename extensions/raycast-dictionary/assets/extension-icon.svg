@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Background with rounded corners -->
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e2b96f"/>
+      <stop offset="100%" style="stop-color:#c9923a"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>
+
+  <!-- Open book body -->
+  <!-- Left page -->
+  <path d="M100 160 C100 148 110 140 122 140 L248 148 L248 372 L122 380 C110 380 100 372 100 360 Z"
+        fill="#2a2a4a" stroke="#3a3a6a" stroke-width="3"/>
+  <!-- Right page -->
+  <path d="M412 160 C412 148 402 140 390 140 L264 148 L264 372 L390 380 C402 380 412 372 412 360 Z"
+        fill="#2a2a4a" stroke="#3a3a6a" stroke-width="3"/>
+
+  <!-- Spine -->
+  <rect x="244" y="140" width="24" height="240" rx="4" fill="url(#accent)"/>
+
+  <!-- Left page lines -->
+  <line x1="130" y1="190" x2="232" y2="190" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="130" y1="218" x2="232" y2="218" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="130" y1="246" x2="232" y2="246" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="130" y1="274" x2="200" y2="274" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Right page lines -->
+  <line x1="280" y1="190" x2="382" y2="190" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="280" y1="218" x2="382" y2="218" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="280" y1="246" x2="382" y2="246" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+  <line x1="280" y1="274" x2="340" y2="274" stroke="#4a4a7a" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- Gold accent dot on spine top -->
+  <circle cx="256" cy="152" r="8" fill="url(#accent)"/>
+  <circle cx="256" cy="368" r="8" fill="url(#accent)"/>
+</svg>

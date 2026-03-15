@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-dictionary",
+  "title": "Dictionary",
+  "description": "Look up English words with AI-powered Cambridge-style definitions",
+  "icon": "extension-icon.png",
+  "author": "kerembozdag",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "look-up",
+      "title": "Look up Word",
+      "description": "Get the definition, examples, and synonyms for any English word",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "e.g. ephemeral",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "Search History",
+      "description": "Browse and revisit previously looked-up words",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "AI API Key",
+      "description": "Paste your API key — the provider is detected automatically.\n• Google Gemini (free tier): get a key at aistudio.google.com → starts with AIza\n• Anthropic Claude: console.anthropic.com → starts with sk-ant-\n• OpenAI: platform.openai.com → starts with sk-",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.40.0",
+    "@google/genai": "^1.0.0",
+    "@raycast/api": "^1.90.0",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
