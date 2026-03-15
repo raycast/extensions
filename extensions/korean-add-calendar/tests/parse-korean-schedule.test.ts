@@ -192,6 +192,261 @@ describe("parseKoreanSchedule", () => {
     const result = parseKoreanSchedule("오늘 오후 13시에 테스트", { now: baseNow });
     expect(result.ok).toBe(false);
   });
+
+  // ── parse.rb 호환 패턴 테스트 ──
+
+  it("parses 모레 (day after tomorrow)", () => {
+    const result = parseKoreanSchedule("모레 오전 10시에 병원", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("병원");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 19, hour: 10, minute: 0 });
+  });
+
+  it("parses 이번달 N일 (this month)", () => {
+    const result = parseKoreanSchedule("이번달 25일 오후 2시에 정기점검", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expectDate(result.value.start, { year: 2026, month: 2, day: 25, hour: 14, minute: 0 });
+  });
+
+  it("parses 이달 N일 (this month alternate)", () => {
+    const result = parseKoreanSchedule("이달 20일 팀 워크숍", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.allDay).toBe(true);
+    expectDate(result.value.start, { year: 2026, month: 2, day: 20, hour: 0, minute: 0 });
+  });
+
+  it("parses 다담주 (2 weeks from now)", () => {
+    const result = parseKoreanSchedule("다담주 수요일 오후 3시에 면접", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("면접");
+    // baseNow is Tue 2/17, 다담주 수요일 = +14 - 2(tue) + 3(wed) = +15 => 3/4
+    expectDate(result.value.start, { year: 2026, month: 3, day: 4, hour: 15, minute: 0 });
+  });
+
+  it("parses 다다음주 (2 weeks from now alternate)", () => {
+    const result = parseKoreanSchedule("다다음주 금요일 오전 9시에 출장", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("출장");
+    // baseNow is Tue 2/17, 다다음주 금요일 = +14 - 2(tue) + 5(fri) = +17 => 3/6
+    expectDate(result.value.start, { year: 2026, month: 3, day: 6, hour: 9, minute: 0 });
+  });
+
+  it("parses 담달 N일 (next month alternate)", () => {
+    const result = parseKoreanSchedule("담달 1일 오후 1시에 월간 보고", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expectDate(result.value.start, { year: 2026, month: 3, day: 1, hour: 13, minute: 0 });
+  });
+
+  it("parses deadline marker '까지' without polluting title", () => {
+    const result = parseKoreanSchedule("내일 오후6시까지 떡뽁이 구매", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("떡뽁이 구매");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 18, minute: 0 });
+  });
+
+  it("parses day-level deadline marker '내일까지'", () => {
+    const result = parseKoreanSchedule("내일까지 보고서 제출", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("보고서 제출");
+    expect(result.value.allDay).toBe(true);
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 0, minute: 0 });
+  });
+
+  it("parses time range with inferred meridiem for end time", () => {
+    const result = parseKoreanSchedule("내일 오후 4시부터 6시까지 회의", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("회의");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 16, minute: 0 });
+    expectDate(result.value.end, { year: 2026, month: 2, day: 18, hour: 18, minute: 0 });
+  });
+
+  it("parses 24-hour time range with location", () => {
+    const result = parseKoreanSchedule("다음주 화요일 14:30부터 16:00까지 강남에서 팀 미팅", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.location).toBe("강남");
+    expect(result.value.title).toBe("팀 미팅");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 24, hour: 14, minute: 30 });
+    expectDate(result.value.end, { year: 2026, month: 2, day: 24, hour: 16, minute: 0 });
+  });
+
+  it("moves end time to next day when range crosses midnight", () => {
+    const result = parseKoreanSchedule("오늘 23:00부터 01:00까지 서버 점검", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("서버 점검");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 23, minute: 0 });
+    expectDate(result.value.end, { year: 2026, month: 2, day: 18, hour: 1, minute: 0 });
+  });
+
+  it("parses '전에' deadline marker without polluting title", () => {
+    const result = parseKoreanSchedule("내일 6시 전에 제출", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("제출");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 6, minute: 0 });
+  });
+
+  it("parses relative deadline with 'N일 안에' as relative day offset", () => {
+    const result = parseKoreanSchedule("3일 안에 계약서 보내기", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("계약서 보내기");
+    expect(result.value.allDay).toBe(true);
+    expect(result.value.intent).toBe("deadline");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 20, hour: 0, minute: 0 });
+  });
+
+  it("parses '이번주 내' as end-of-week deadline", () => {
+    const result = parseKoreanSchedule("이번주 내 정산", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("정산");
+    expect(result.value.allDay).toBe(true);
+    expect(result.value.intent).toBe("deadline");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 22, hour: 0, minute: 0 });
+  });
+
+  it("consumes standalone '부터' and uses default duration", () => {
+    const result = parseKoreanSchedule("내일 오후 4시부터 회의", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.title).toBe("회의");
+    expect(result.value.intent).toBe("event");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 16, minute: 0 });
+    expectDate(result.value.end, { year: 2026, month: 2, day: 18, hour: 17, minute: 0 });
+  });
+
+  it("marks explicit deadline suffix as deadline intent", () => {
+    const result = parseKoreanSchedule("내일 오후 6시까지 제출", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expect(result.value.title).toBe("제출");
+  });
+
+  it("keeps from-to range as event intent even with '까지'", () => {
+    const result = parseKoreanSchedule("내일 오후 4시부터 6시까지 회의", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("event");
+  });
+
+  it("parses '오늘 중' as all-day deadline", () => {
+    const result = parseKoreanSchedule("오늘 중 결재", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expect(result.value.allDay).toBe(true);
+    expect(result.value.title).toBe("결재");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 0, minute: 0 });
+  });
+
+  it("parses '내일중' without whitespace", () => {
+    const result = parseKoreanSchedule("내일중 보고서 제출", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expect(result.value.title).toBe("보고서 제출");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 0, minute: 0 });
+  });
+
+  it("parses '3시간 이내' as time deadline", () => {
+    const result = parseKoreanSchedule("3시간 이내 계약서 회신", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expect(result.value.allDay).toBe(false);
+    expect(result.value.title).toBe("계약서 회신");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 12, minute: 0 });
+  });
+
+  it("fails on invalid relative hour of 0", () => {
+    const result = parseKoreanSchedule("0시간 이내 테스트", { now: baseNow });
+    expect(result.ok).toBe(false);
+  });
+
+  it("parses '이번달 내' as end-of-month deadline", () => {
+    const result = parseKoreanSchedule("이번달 내 정산", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expect(result.value.allDay).toBe(true);
+    expect(result.value.title).toBe("정산");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 28, hour: 0, minute: 0 });
+  });
+
+  it("parses '다음달 내' as next month end deadline", () => {
+    const result = parseKoreanSchedule("다음달 내 월간 결산", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expectDate(result.value.start, { year: 2026, month: 3, day: 31, hour: 0, minute: 0 });
+  });
+
+  it("parses deadline suffix '이전까지'", () => {
+    const result = parseKoreanSchedule("내일 오전 9시 이전까지 보고", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("deadline");
+    expect(result.value.title).toBe("보고");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 9, minute: 0 });
+  });
 });
 
 function expectDate(
