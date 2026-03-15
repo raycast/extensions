@@ -1,4 +1,4 @@
-import { executeAppleScript } from "../utils/apple-script";
+import { runAppleScript } from "@raycast/utils";
 
 import { Account, Mailbox } from "../types";
 import { Cache } from "../utils/cache";
