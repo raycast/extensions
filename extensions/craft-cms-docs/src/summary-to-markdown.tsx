@@ -57,9 +57,9 @@ function stripAllTags(input: string): string {
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
-    .replace(/&mdash;/g, "-")
-    .replace(/&ndash;/g, "-")
-    .replace(/&hellip;/g, "...")
+    .replace(/&mdash;/g, "—")
+    .replace(/&ndash;/g, "–")
+    .replace(/&hellip;/g, "…")
     .replace(/&rsquo;|&lsquo;/g, "'")
     .replace(/&ldquo;|&rdquo;/g, '"')
     .replace(/&#(\d+);/g, (_match, code: string) => String.fromCodePoint(Number(code)));
