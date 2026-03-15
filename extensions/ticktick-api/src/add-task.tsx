@@ -1,7 +1,6 @@
 import { useProjects } from "./hooks/useProjects";
 import { TaskForm } from "./components/TaskForm";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { Preferences } from "./types";
 import { useEffect } from "react";
 
 export default function AddTaskCommand() {

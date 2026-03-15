@@ -39,14 +39,6 @@ export interface ProjectData {
   tasks: Task[];
 }
 
-export interface Preferences {
-  apiToken: string;
-  defaultProject?: string;
-  pomodoroLength?: string;
-  shortBreakLength?: string;
-  longBreakLength?: string;
-}
-
 export interface FocusSession {
   startTime: number;
   duration: number;

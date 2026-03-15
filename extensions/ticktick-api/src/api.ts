@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { API_BASE_URL } from "./constants";
-import { Preferences, Project, ProjectData, Task } from "./types";
+import { Project, ProjectData, Task } from "./types";
 
 function getHeaders(): HeadersInit {
   const { apiToken } = getPreferenceValues<Preferences>();

@@ -6,7 +6,6 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { createTask, getProjects } from "./api";
-import { Preferences } from "./types";
 
 function parsePriority(input?: string): number {
   if (!input) return 0;

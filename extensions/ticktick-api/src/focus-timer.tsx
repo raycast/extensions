@@ -14,7 +14,7 @@ import {
 import { useEffect, useState } from "react";
 import { useAllTasks } from "./hooks/useTasks";
 import { useProjects } from "./hooks/useProjects";
-import { FocusSession, Preferences, Task } from "./types";
+import { FocusSession, Task } from "./types";
 import { SESSION_CONFIG } from "./constants";
 
 const FOCUS_SESSION_KEY = "focus-session";
