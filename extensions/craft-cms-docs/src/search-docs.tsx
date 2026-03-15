@@ -829,6 +829,7 @@ function GlossaryTermDetailRoute({
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
 
     async function loadGlossaryTerm() {
       const cachedItem = findGlossaryItemBySlug(slug);
@@ -842,7 +843,7 @@ function GlossaryTermDetailRoute({
       setErrorMessage(null);
 
       try {
-        const results = (await searchGlossary(slug)).map(mapGlossaryTermToDocsResult);
+        const results = (await searchGlossary(slug, { signal: controller.signal })).map(mapGlossaryTermToDocsResult);
         const match =
           results.find((result) => result.slug === slug) ||
           results.find((result) => result.slug?.toLowerCase() === slug.toLowerCase());
@@ -857,8 +858,9 @@ function GlossaryTermDetailRoute({
 
         setItem(match);
         setIsLoading(false);
-      } catch {
+      } catch (error: unknown) {
         if (cancelled) return;
+        if (error instanceof Error && error.name === "AbortError") return;
         setErrorMessage("Could not fetch glossary term.");
         setIsLoading(false);
       }
@@ -868,6 +870,7 @@ function GlossaryTermDetailRoute({
 
     return () => {
       cancelled = true;
+      controller.abort();
     };
   }, [slug]);
 
@@ -1170,8 +1173,7 @@ function readRecentItems(): DocsSearchResult[] | null {
   try {
     const raw = cache.get(RECENT_ITEMS_CACHE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as { at: number; items: DocsSearchResult[] };
-    if (Date.now() - parsed.at > CACHE_TTL_MS) return null;
+    const parsed = JSON.parse(raw) as { at?: number; items: DocsSearchResult[] };
     return parsed.items ?? null;
   } catch {
     return null;
@@ -1291,9 +1293,7 @@ function mergeRelatedTerms(
 }
 
 function toTitleCase(value: string): string {
-  return value.replace(/\b([A-Za-z])([A-Za-z']*)/g, (_match, first: string, rest: string) => {
-    return `${first.toUpperCase()}${rest.toLowerCase()}`;
-  });
+  return value.length === 0 ? value : value[0].toUpperCase() + value.slice(1);
 }
 
 function groupByLetter(items: DocsSearchResult[]) {
