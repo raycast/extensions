@@ -1,6 +1,6 @@
 # Blip Changelog
 
-## [Initial Version]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add the initial Blip extension
 - Send the current Finder selection to Blip

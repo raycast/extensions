@@ -28,7 +28,7 @@ export async function sendPathToBlip(path: string) {
     }
   } catch (error) {
     const details = error instanceof Error ? error.message : "Unknown AppleScript failure.";
-    throw new Error(buildAccessibilityError(details));
+    throw new Error(buildAppleScriptError(details));
   }
 }
 
@@ -36,7 +36,7 @@ function quoted(value: string) {
   return JSON.stringify(value);
 }
 
-function buildAccessibilityError(details: string) {
+function buildAppleScriptError(details: string) {
   const normalizedDetails = details.toLowerCase();
 
   if (
@@ -47,5 +47,13 @@ function buildAccessibilityError(details: string) {
     return `${ACCESSIBILITY_ERROR_PREFIX} Enable Raycast in ${ACCESSIBILITY_SETTINGS_PATH}.`;
   }
 
-  return `${ACCESSIBILITY_ERROR_PREFIX} Check that Raycast is enabled in ${ACCESSIBILITY_SETTINGS_PATH}. ${details}`;
+  if (
+    normalizedDetails.includes("menu item") &&
+    normalizedDetails.includes("blip") &&
+    normalizedDetails.includes("not found")
+  ) {
+    return "Blip's Finder service was not found. Make sure Blip is installed and its `Services > Blip…` action is available in Finder.";
+  }
+
+  return `Blip could not be triggered from Finder Services. ${details}`;
 }
