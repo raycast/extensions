@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "whisper",
-  "title": "Whisper",
+  "title": "Whisper - Share Secrets",
   "description": "Share passwords, API keys, and private notes securely. Whisper creates encrypted links that expire or self-destruct after viewing.",
   "icon": "whisper-icon.png",
   "author": "quentinved",
