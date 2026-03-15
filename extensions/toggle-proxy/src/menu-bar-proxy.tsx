@@ -1,6 +1,6 @@
 import { MenuBarExtra, getPreferenceValues, showToast, Toast, Icon, Color, environment, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
-import * as execa from "execa";
+import { execaCommand } from "execa";
 import { tmux } from "./utils/exec";
 import * as fs from "fs";
 import * as path from "path";
@@ -189,9 +189,13 @@ export default function MenuBarProxy() {
     });
   }
 
+  function getNetworkInterface(): string {
+    return sanitizeShellArg(prefs.networkInterface || "Wi-Fi");
+  }
+
   async function checkProxy() {
     try {
-      const { stdout } = await execa.execaCommand(`/usr/sbin/networksetup -getsocksfirewallproxy Wi-Fi`);
+      const { stdout } = await execaCommand(`/usr/sbin/networksetup -getsocksfirewallproxy ${getNetworkInterface()}`);
       setIsEnabled(stdout.includes("Yes"));
     } catch {
       setIsEnabled(false);
@@ -306,7 +310,7 @@ export default function MenuBarProxy() {
   async function toggleProxy(configName?: string) {
     if (isEnabled && !configName) {
       try {
-        await execa.execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxystate Wi-Fi off`);
+        await execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxystate ${getNetworkInterface()} off`);
         await stopAllProxySessions();
         showToast(Toast.Style.Success, "Proxy disabled");
         setIsEnabled(false);
@@ -335,8 +339,8 @@ export default function MenuBarProxy() {
           return;
         }
 
-        await execa.execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxy Wi-Fi ${host} ${port}`);
-        await execa.execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxystate Wi-Fi on`);
+        await execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxy ${getNetworkInterface()} ${host} ${port}`);
+        await execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxystate ${getNetworkInterface()} on`);
         showToast(Toast.Style.Success, `Proxy ${host}:${port} enabled with config: ${configToUse}`);
         setIsEnabled(true);
       } catch (e) {

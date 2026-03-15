@@ -89,7 +89,7 @@ function buildSshTunnelCmd(sessionName: string, localPort: number, remotePort: n
   const safeLocalPort = safePort(String(localPort));
   const safeRemotePort = safePort(String(remotePort));
   const safeHost = sanitizeShellArg(host);
-  const logFile = path.join(environment.supportPath, "logs", `tunnel-${safeSession}.log`);
+  const logFile = sanitizeShellArg(path.join(environment.supportPath, "logs", `tunnel-${safeSession}.log`));
 
   return `new-session -d -s ${safeSession} "ssh -L ${safeLocalPort}:127.0.0.1:${safeRemotePort} ${safeHost} -N > ${logFile} 2>&1"`;
 }

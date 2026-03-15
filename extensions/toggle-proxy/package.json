@@ -74,6 +74,14 @@
       "description": "Name of the default Xray configuration file",
       "title": "Default Config",
       "default": "config.json"
+    },
+    {
+      "name": "networkInterface",
+      "required": false,
+      "type": "textfield",
+      "description": "Network interface for proxy settings (e.g. Wi-Fi, Ethernet)",
+      "title": "Network Interface",
+      "default": "Wi-Fi"
     }
   ],
   "dependencies": {
