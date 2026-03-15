@@ -1,0 +1,433 @@
+import { MenuBarExtra, getPreferenceValues, showToast, Toast, Icon, Color, environment, Cache } from "@raycast/api";
+import { useEffect, useState } from "react";
+import * as execa from "execa";
+import { tmux } from "./utils/exec";
+import * as fs from "fs";
+import * as path from "path";
+import * as net from "net";
+import { getXrayPath } from "./utils/xray-config";
+import { loadSubscriptionConfigs, getSubscriptions, updateSubscription } from "./utils/subscription";
+import { Preferences, safePort, sanitizeShellArg, shellEscape } from "./utils/types";
+
+const cache = new Cache({ namespace: "menu-bar-proxy" });
+
+function getProxySessionName(configName: string): string {
+  const encodedName = Buffer.from(configName.replace(/\.json$/i, ""), "utf8").toString("base64url");
+  return `toggle-proxy-${encodedName}`;
+}
+
+function getConfigNameFromSession(sessionName: string): string | null {
+  if (!sessionName.startsWith("toggle-proxy-")) {
+    return null;
+  }
+
+  try {
+    return Buffer.from(sessionName.slice("toggle-proxy-".length), "base64url").toString("utf8");
+  } catch {
+    return null;
+  }
+}
+
+export default function MenuBarProxy() {
+  const prefs = getPreferenceValues<Preferences>();
+  const [isEnabled, setIsEnabled] = useState<boolean | null>(null);
+  const [isTmuxInstalled, setIsTmuxInstalled] = useState<boolean | null>(null);
+  const [currentConfig, setCurrentConfig] = useState<string | null>(null);
+  const [availableConfigs, setAvailableConfigs] = useState<string[]>([]);
+  const [subscriptionConfigs, setSubscriptionConfigs] = useState<
+    Record<string, { displayName: string; relativePath: string }[]>
+  >({});
+
+  useEffect(() => {
+    checkProxy();
+    checkTmuxInstalled();
+    getCurrentConfig();
+    loadAvailableConfigs();
+    autoUpdateSubscriptions();
+  }, []);
+
+  async function autoUpdateSubscriptions() {
+    const SUB_CACHE_KEY = "subscriptions_last_update";
+    const SUB_CACHE_TTL = 15000;
+
+    const lastUpdate = cache.get(SUB_CACHE_KEY);
+    if (lastUpdate && Date.now() - parseInt(lastUpdate) < SUB_CACHE_TTL) {
+      return;
+    }
+
+    try {
+      const subs = await getSubscriptions();
+      for (const sub of subs) {
+        try {
+          await updateSubscription(sub.id, prefs);
+        } catch (e) {
+          console.log(`Auto-update failed for ${sub.name}:`, e);
+        }
+      }
+      cache.set(SUB_CACHE_KEY, String(Date.now()));
+      setSubscriptionConfigs(loadSubscriptionConfigs(prefs.xrayPath));
+    } catch (e) {
+      console.log("Auto-update subscriptions error:", e);
+    }
+  }
+
+  function getXrayPathLocal(): string {
+    return getXrayPath(prefs.xrayPath);
+  }
+
+  function loadAvailableConfigs() {
+    try {
+      const xrayPath = getXrayPathLocal();
+      const cacheKey = `configs_${xrayPath}`;
+
+      const cached = cache.get(cacheKey);
+      if (cached) {
+        try {
+          const cachedData = JSON.parse(cached);
+          const cacheAge = Date.now() - cachedData.timestamp;
+
+          if (cacheAge < 30000) {
+            setAvailableConfigs(cachedData.configs);
+            setSubscriptionConfigs(loadSubscriptionConfigs(prefs.xrayPath));
+            return;
+          }
+        } catch {
+          console.log("Invalid cached data, refreshing...");
+        }
+      }
+
+      const configs: string[] = [];
+
+      if (fs.existsSync(xrayPath)) {
+        const files = fs
+          .readdirSync(xrayPath)
+          .filter((file) => file.endsWith(".json"))
+          .sort();
+
+        configs.push(...files);
+      }
+
+      if (configs.length === 0) {
+        configs.push("config.json");
+      }
+
+      const cacheData = {
+        configs,
+        timestamp: Date.now(),
+      };
+      cache.set(cacheKey, JSON.stringify(cacheData));
+
+      setAvailableConfigs(configs);
+
+      const subConfigs = loadSubscriptionConfigs(prefs.xrayPath);
+      setSubscriptionConfigs(subConfigs);
+    } catch (error) {
+      console.log("Error loading configs:", error);
+      setAvailableConfigs(["config.json"]);
+    }
+  }
+
+  async function getCurrentConfig(): Promise<void> {
+    try {
+      const sessions = await tmux("list-sessions -F '#{session_name}'");
+      const sessionLines = sessions.stdout.split("\n").filter((line) => line.trim());
+
+      for (const sessionName of sessionLines) {
+        const configName = getConfigNameFromSession(sessionName);
+        if (configName) {
+          setCurrentConfig(configName);
+          return;
+        }
+      }
+      setCurrentConfig(null);
+    } catch {
+      setCurrentConfig(null);
+    }
+  }
+
+  async function checkTmuxInstalled() {
+    try {
+      await tmux("has-session -t non-existent-session 2>/dev/null || true");
+      setIsTmuxInstalled(true);
+    } catch (error) {
+      setIsTmuxInstalled(false);
+
+      const logDir = path.join(environment.supportPath, "logs");
+      try {
+        if (!fs.existsSync(logDir)) {
+          fs.mkdirSync(logDir, { recursive: true });
+        }
+        fs.appendFileSync(
+          path.join(logDir, "tmux-check.log"),
+          `${new Date().toISOString()} - Tmux not installed or not in PATH: ${JSON.stringify(error)}\n`,
+        );
+      } catch (e) {
+        console.error("Failed to write to log file:", e);
+      }
+    }
+  }
+
+  async function isPortInUse(host: string, port: string): Promise<boolean> {
+    return await new Promise((resolve) => {
+      const socket = new net.Socket();
+      let settled = false;
+
+      const finish = (result: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        socket.destroy();
+        resolve(result);
+      };
+
+      socket.setTimeout(150);
+      socket.once("connect", () => finish(true));
+      socket.once("timeout", () => finish(false));
+      socket.once("error", () => finish(false));
+      socket.connect(parseInt(safePort(port), 10), host);
+    });
+  }
+
+  async function checkProxy() {
+    try {
+      const { stdout } = await execa.execaCommand(`/usr/sbin/networksetup -getsocksfirewallproxy Wi-Fi`);
+      setIsEnabled(stdout.includes("Yes"));
+    } catch {
+      setIsEnabled(false);
+    }
+  }
+
+  async function waitForPortToOpen(host: string, port: string, maxAttempts = 10, delayMs = 500): Promise<boolean> {
+    for (let i = 0; i < maxAttempts; i++) {
+      if (await isPortInUse(host, port)) {
+        return true;
+      }
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+    }
+    return false;
+  }
+
+  async function stopAllProxySessions() {
+    try {
+      const sessions = await tmux("list-sessions -F '#{session_name}'");
+      const sessionLines = sessions.stdout.split("\n").filter((line) => line.trim());
+
+      for (const sessionName of sessionLines) {
+        if (sessionName.startsWith("toggle-proxy-")) {
+          const safeName = sanitizeShellArg(sessionName);
+          await tmux(`kill-session -t ${safeName}`);
+        }
+      }
+      setCurrentConfig(null);
+    } catch (error) {
+      console.log("No sessions to stop or error stopping:", error);
+    }
+  }
+
+  async function startProxyWithConfig(configName: string) {
+    try {
+      const xrayPath = getXrayPathLocal();
+      const host = sanitizeShellArg(prefs.host || "127.0.0.1");
+      const port = safePort(prefs.port);
+
+      if (!isTmuxInstalled) {
+        showToast(
+          Toast.Style.Failure,
+          "Tmux is not installed or not found in PATH",
+          "Install tmux or add it to your PATH",
+        );
+        return false;
+      }
+
+      if (!fs.existsSync(xrayPath)) {
+        showToast(Toast.Style.Failure, `Xray directory not found: ${xrayPath}`);
+        return false;
+      }
+
+      const configPath = path.join(xrayPath, configName);
+      if (!fs.existsSync(configPath)) {
+        showToast(Toast.Style.Failure, `Config not found: ${configPath}`);
+        return false;
+      }
+
+      await stopAllProxySessions();
+
+      const sessionName = getProxySessionName(configName);
+      const safeConfigName = shellEscape(configName);
+      const safeXrayPath = shellEscape(xrayPath);
+      const cmd = `new-session -d -s ${shellEscape(sessionName)} "cd ${safeXrayPath} && xray -config ${safeConfigName}"`;
+
+      await tmux(cmd);
+
+      const isStarted = await waitForPortToOpen(host, port, 15, 150);
+
+      if (isStarted) {
+        setCurrentConfig(configName.replace(".json", ""));
+        showToast(Toast.Style.Success, `Proxy started with config: ${configName}`);
+        return true;
+      } else {
+        try {
+          const sessionOutput = await tmux(`capture-pane -t ${shellEscape(sessionName)} -p`);
+          const logDir = path.join(environment.supportPath, "logs");
+          if (!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir, { recursive: true });
+          }
+          fs.appendFileSync(
+            path.join(logDir, "proxy-errors.log"),
+            `${new Date().toISOString()} - Failed to start proxy with config ${configName}. Session output:\n${sessionOutput.stdout}\n`,
+          );
+        } catch (captureError) {
+          console.log("Could not capture session output:", captureError);
+        }
+
+        showToast(Toast.Style.Failure, "Failed to start proxy. Check config and logs");
+        return false;
+      }
+    } catch (error) {
+      const logDir = path.join(environment.supportPath, "logs");
+      try {
+        if (!fs.existsSync(logDir)) {
+          fs.mkdirSync(logDir, { recursive: true });
+        }
+        fs.appendFileSync(
+          path.join(logDir, "proxy-errors.log"),
+          `${new Date().toISOString()} - Tmux error: ${JSON.stringify(error)}\n`,
+        );
+      } catch (e) {
+        console.error("Failed to write to log file:", e);
+      }
+
+      showToast(Toast.Style.Failure, "Tmux launch error. Check logs");
+      return false;
+    }
+  }
+
+  async function toggleProxy(configName?: string) {
+    if (isEnabled && !configName) {
+      try {
+        await execa.execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxystate Wi-Fi off`);
+        await stopAllProxySessions();
+        showToast(Toast.Style.Success, "Proxy disabled");
+        setIsEnabled(false);
+      } catch {
+        showToast(Toast.Style.Failure, "Failed to disable proxy");
+      }
+    } else {
+      try {
+        const host = sanitizeShellArg(prefs.host || "127.0.0.1");
+        const port = safePort(prefs.port);
+        const configToUse = configName || prefs.defaultConfig || "config.json";
+
+        if (isEnabled && currentConfig === configToUse.replace(".json", "")) {
+          showToast(Toast.Style.Success, `Config ${configToUse} is already active`);
+          return;
+        }
+
+        const xrayPath = prefs.xrayPath;
+        if (!xrayPath) {
+          showToast(Toast.Style.Failure, "Xray path is not specified");
+          return;
+        }
+
+        const started = await startProxyWithConfig(configToUse);
+        if (!started) {
+          return;
+        }
+
+        await execa.execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxy Wi-Fi ${host} ${port}`);
+        await execa.execaCommand(`/usr/sbin/networksetup -setsocksfirewallproxystate Wi-Fi on`);
+        showToast(Toast.Style.Success, `Proxy ${host}:${port} enabled with config: ${configToUse}`);
+        setIsEnabled(true);
+      } catch (e) {
+        console.log(e);
+        showToast(Toast.Style.Failure, "Failed to enable proxy");
+      }
+    }
+  }
+
+  function isCurrentConfig(configName: string): boolean {
+    return currentConfig === configName.replace(/\.json$/i, "");
+  }
+
+  function renderSubscriptionSections() {
+    return Object.entries(subscriptionConfigs).map(([subName, configs]) => (
+      <MenuBarExtra.Section key={subName} title={subName}>
+        {configs.map((config) => (
+          <MenuBarExtra.Item
+            key={config.relativePath}
+            title={config.displayName}
+            onAction={() => toggleProxy(config.relativePath)}
+            icon={
+              isCurrentConfig(config.relativePath) ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Globe
+            }
+          />
+        ))}
+      </MenuBarExtra.Section>
+    ));
+  }
+
+  return (
+    <MenuBarExtra
+      isLoading={isEnabled === null}
+      icon={isEnabled ? Icon.BullsEyeMissed : Icon.BullsEye}
+      tooltip={
+        isTmuxInstalled === false
+          ? "Tmux is not installed"
+          : currentConfig
+            ? `Active config: ${currentConfig}`
+            : undefined
+      }
+    >
+      {isEnabled ? (
+        <>
+          <MenuBarExtra.Item title="Disable Proxy" onAction={() => toggleProxy()} />
+          <MenuBarExtra.Section title="Switch Config:">
+            {availableConfigs.map((config) => (
+              <MenuBarExtra.Item
+                key={config}
+                title={config}
+                onAction={() => toggleProxy(config)}
+                icon={
+                  isCurrentConfig(config)
+                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                    : config === prefs.defaultConfig
+                      ? Icon.Star
+                      : Icon.Document
+                }
+              />
+            ))}
+          </MenuBarExtra.Section>
+          {renderSubscriptionSections()}
+        </>
+      ) : (
+        <>
+          <MenuBarExtra.Item
+            title="Enable Proxy (Default)"
+            onAction={() => toggleProxy()}
+            tooltip={isTmuxInstalled === false ? "Tmux installation required" : undefined}
+          />
+          {availableConfigs.length > 1 && (
+            <MenuBarExtra.Section title="Select Config:">
+              {availableConfigs.map((config) => (
+                <MenuBarExtra.Item
+                  key={config}
+                  title={config}
+                  onAction={() => toggleProxy(config)}
+                  icon={config === prefs.defaultConfig ? Icon.Star : Icon.Document}
+                />
+              ))}
+            </MenuBarExtra.Section>
+          )}
+          {renderSubscriptionSections()}
+        </>
+      )}
+
+      {isTmuxInstalled === false && (
+        <MenuBarExtra.Section title="Info:">
+          <MenuBarExtra.Item title="Tmux is not installed" tooltip="Install tmux to use the proxy" />
+        </MenuBarExtra.Section>
+      )}
+    </MenuBarExtra>
+  );
+}
