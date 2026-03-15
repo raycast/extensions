@@ -149,7 +149,7 @@ function GetGistDetail({
     async function fetchGist() {
       try {
         const prompt = buildPrompt(word, targetLanguage, enableTranslation);
-        const response = await AI.ask(prompt, { model: "google-gemini-3-flash" as AI.Model });
+        const response = await AI.ask(prompt, { model: AI.Model["Google_Gemini_3_Flash"] });
         const parsed = parseResponse(response);
 
         if (!parsed.word || !parsed.definition) {
@@ -234,7 +234,7 @@ export default function Command() {
         const updatedEntries = await Promise.all(
           history.map(async (entry) => {
             const prompt = buildPrompt(entry.word, targetLanguage, enableTranslation);
-            const response = await AI.ask(prompt, { model: "google-gemini-3-flash" as AI.Model });
+            const response = await AI.ask(prompt, { model: AI.Model["Google_Gemini_3_Flash"] });
             const parsed = parseResponse(response);
 
             if (parsed.word && parsed.definition) {
@@ -317,6 +317,7 @@ export default function Command() {
                 detail={<List.Item.Detail markdown={detailMarkdown} />}
                 actions={
                   <ActionPanel>
+                    <Action.Push title="View Definition" icon={Icon.Book} target={<WordDetail entry={entry} />} />
                     <Action
                       title="Delete Entry"
                       icon={Icon.Trash}
