@@ -1,6 +1,6 @@
 # Recents Changelog
 
-## [Fixes & Improvements] - {PR_MERGE_DATE}
+## [Fixes & Improvements] - 2026-03-15
 
 - Added paste action for recent items
 
