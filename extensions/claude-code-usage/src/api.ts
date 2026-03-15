@@ -1,5 +1,4 @@
 import { LocalStorage } from "@raycast/api";
-import fetch from "node-fetch";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
@@ -18,6 +17,8 @@ export interface UsageResponse {
   five_hour: UsageBucket | null;
   seven_day: UsageBucket | null;
   seven_day_oauth_apps: UsageBucket | null;
+  // API field is "seven_day_opus" but per the Anthropic usage settings page
+  // (claude.ai), this bucket represents "Sonnet only" weekly limits
   seven_day_opus: UsageBucket | null;
 }
 
@@ -52,9 +53,7 @@ function parseOAuthData(data: OAuthData): CredentialInfo {
   }
 
   if (data.expiresAt && Date.now() > data.expiresAt) {
-    throw new Error(
-      "OAuth token has expired. Run 'claude auth login' to re-authenticate.",
-    );
+    throw new Error("OAuth token has expired. Run 'claude auth login' to re-authenticate.");
   }
 
   return {
@@ -107,10 +106,7 @@ async function setCachedUsage(data: UsageResponse): Promise<void> {
   await LocalStorage.setItem(CACHE_KEY, JSON.stringify(cached));
 }
 
-async function fetchWithRetry(
-  token: string,
-  retries = 3,
-): Promise<UsageResponse> {
+async function fetchWithRetry(token: string, retries = 3): Promise<UsageResponse> {
   for (let attempt = 0; attempt < retries; attempt++) {
     const response = await fetch(USAGE_ENDPOINT, {
       method: "GET",
@@ -129,8 +125,7 @@ async function fetchWithRetry(
       return {
         five_hour: (data.five_hour as UsageBucket) || null,
         seven_day: (data.seven_day as UsageBucket) || null,
-        seven_day_oauth_apps:
-          (data.seven_day_oauth_apps as UsageBucket) || null,
+        seven_day_oauth_apps: (data.seven_day_oauth_apps as UsageBucket) || null,
         seven_day_opus: (data.seven_day_opus as UsageBucket) || null,
       };
     }
@@ -138,9 +133,7 @@ async function fetchWithRetry(
     if (response.status === 429) {
       const retryAfter = response.headers.get("retry-after");
       const waitMs =
-        retryAfter && Number(retryAfter) > 0
-          ? Number(retryAfter) * 1000
-          : Math.min(1000 * Math.pow(2, attempt), 8000);
+        retryAfter && Number(retryAfter) > 0 ? Number(retryAfter) * 1000 : Math.min(1000 * Math.pow(2, attempt), 8000);
 
       if (attempt < retries - 1) {
         await new Promise((resolve) => setTimeout(resolve, waitMs));
