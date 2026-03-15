@@ -14,12 +14,7 @@ vi.mock("@raycast/api", () => ({
   },
 }));
 
-import {
-  getHistory,
-  addHistoryEntry,
-  clearHistory,
-  HistoryEntry,
-} from "../history";
+import { getHistory, addHistoryEntry, clearHistory, HistoryEntry } from "../history";
 
 beforeEach(() => {
   for (const key of Object.keys(store)) {

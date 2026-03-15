@@ -3,9 +3,7 @@ import { decodeJwtPayload, extractAccountId, parseSSEStream } from "../api";
 
 // Helper to create a fake JWT with a given payload
 function fakeJwt(payload: Record<string, unknown>): string {
-  const header = Buffer.from(
-    JSON.stringify({ alg: "RS256", typ: "JWT" }),
-  ).toString("base64url");
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   const signature = "fake-signature";
   return `${header}.${body}.${signature}`;
@@ -107,12 +105,9 @@ describe("parseSSEStream", () => {
   });
 
   it("ignores lines without data: prefix", () => {
-    const stream = [
-      ": comment",
-      "",
-      'data: {"type":"response.output_text.delta","delta":"text"}',
-      "data: [DONE]",
-    ].join("\n");
+    const stream = [": comment", "", 'data: {"type":"response.output_text.delta","delta":"text"}', "data: [DONE]"].join(
+      "\n",
+    );
 
     expect(parseSSEStream(stream)).toBe("text");
   });

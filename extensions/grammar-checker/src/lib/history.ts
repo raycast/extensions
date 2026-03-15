@@ -23,10 +23,7 @@ export async function getHistory(): Promise<HistoryEntry[]> {
   }
 }
 
-export async function addHistoryEntry(
-  original: string,
-  corrected: string,
-): Promise<void> {
+export async function addHistoryEntry(original: string, corrected: string): Promise<void> {
   const entries = await getHistory();
 
   const entry: HistoryEntry = {

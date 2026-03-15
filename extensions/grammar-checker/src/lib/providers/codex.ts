@@ -9,14 +9,10 @@ export interface CodexOptions {
   prompt: string;
 }
 
-export async function codexGrammarCheck(
-  options: CodexOptions,
-): Promise<string> {
+export async function codexGrammarCheck(options: CodexOptions): Promise<string> {
   const { text, token, model, prompt } = options;
   const accountId = extractAccountId(token);
-  log(
-    `Calling ChatGPT Codex API... model: ${model}, accountId: ${accountId ?? "not found"}`,
-  );
+  log(`Calling ChatGPT Codex API... model: ${model}, accountId: ${accountId ?? "not found"}`);
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${token}`,

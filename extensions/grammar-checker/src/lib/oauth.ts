@@ -23,19 +23,13 @@ export interface StoredTokens {
 export function generatePKCE() {
   const bytes = crypto.randomBytes(64);
   const verifier = bytes.toString("base64url");
-  const challenge = crypto
-    .createHash("sha256")
-    .update(verifier)
-    .digest("base64url");
+  const challenge = crypto.createHash("sha256").update(verifier).digest("base64url");
   return { verifier, challenge };
 }
 
 // --- Token Exchange ---
 
-async function exchangeCode(
-  code: string,
-  codeVerifier: string,
-): Promise<StoredTokens> {
+async function exchangeCode(code: string, codeVerifier: string): Promise<StoredTokens> {
   const body = new URLSearchParams();
   body.set("grant_type", "authorization_code");
   body.set("code", code);
@@ -51,9 +45,7 @@ async function exchangeCode(
   });
 
   const text = await response.text();
-  log(
-    `Token exchange response (${response.status}): ${text.substring(0, 200)}`,
-  );
+  log(`Token exchange response (${response.status}): ${text.substring(0, 200)}`);
 
   if (!response.ok) {
     throw new Error(`Token exchange failed (${response.status}): ${text}`);
@@ -68,9 +60,7 @@ async function exchangeCode(
   return {
     accessToken: json.access_token,
     refreshToken: json.refresh_token ?? "",
-    expiresAt: json.expires_in
-      ? Date.now() + json.expires_in * 1000
-      : undefined,
+    expiresAt: json.expires_in ? Date.now() + json.expires_in * 1000 : undefined,
   };
 }
 
@@ -101,9 +91,7 @@ async function refreshAccessToken(refreshToken: string): Promise<StoredTokens> {
   return {
     accessToken: json.access_token,
     refreshToken: json.refresh_token ?? refreshToken,
-    expiresAt: json.expires_in
-      ? Date.now() + json.expires_in * 1000
-      : undefined,
+    expiresAt: json.expires_in ? Date.now() + json.expires_in * 1000 : undefined,
   };
 }
 
@@ -113,19 +101,14 @@ export function startOAuthFlow(): Promise<StoredTokens> {
   const { verifier, challenge } = generatePKCE();
   const state = crypto.randomBytes(16).toString("base64url");
 
-  log(
-    `PKCE generated - verifier length: ${verifier.length}, challenge: ${challenge}`,
-  );
+  log(`PKCE generated - verifier length: ${verifier.length}, challenge: ${challenge}`);
   log(`State: ${state}`);
 
   return new Promise((resolve, reject) => {
     const server = http.createServer(async (req, res) => {
       log(`Callback received: ${req.method} ${req.url}`);
       try {
-        const url = new URL(
-          req.url!,
-          `http://localhost:${OPENAI_REDIRECT_PORT}`,
-        );
+        const url = new URL(req.url!, `http://localhost:${OPENAI_REDIRECT_PORT}`);
 
         if (url.pathname === "/cancel") {
           log("Received cancel request");
@@ -146,10 +129,10 @@ export function startOAuthFlow(): Promise<StoredTokens> {
         const errorDesc = url.searchParams.get("error_description");
         if (error) {
           log(`OAuth callback error: ${error} - ${errorDesc}`);
+          const esc = (s: string | null) =>
+            (s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
           res.writeHead(400, { "Content-Type": "text/html" });
-          res.end(
-            `<html><body><h2>Authentication failed</h2><p>${error}: ${errorDesc}</p></body></html>`,
-          );
+          res.end(`<html><body><h2>Authentication failed</h2><p>${esc(error)}: ${esc(errorDesc)}</p></body></html>`);
           server.close();
           reject(new Error(`OAuth error: ${error} - ${errorDesc}`));
           return;
@@ -157,9 +140,7 @@ export function startOAuthFlow(): Promise<StoredTokens> {
 
         const code = url.searchParams.get("code");
         const returnedState = url.searchParams.get("state");
-        log(
-          `Callback: code present=${!!code}, state match=${returnedState === state}`,
-        );
+        log(`Callback: code present=${!!code}, state match=${returnedState === state}`);
 
         if (returnedState !== state || !code) {
           log(`State mismatch - expected: ${state}, got: ${returnedState}`);
@@ -180,9 +161,7 @@ export function startOAuthFlow(): Promise<StoredTokens> {
 
         log("Exchanging code for tokens...");
         const tokens = await exchangeCode(code, verifier);
-        log(
-          `Token exchange success! accessToken length: ${tokens.accessToken.length}`,
-        );
+        log(`Token exchange success! accessToken length: ${tokens.accessToken.length}`);
         resolve(tokens);
       } catch (err) {
         log(`Callback handler error: ${err}`);
@@ -252,6 +231,11 @@ export async function getValidToken(): Promise<string | null> {
       await LocalStorage.removeItem(OPENAI_STORAGE_KEY);
       return null;
     }
+  }
+
+  // No expiry info and no refresh token, return token as-is (server will reject if expired)
+  if (!tokens.expiresAt) {
+    return tokens.accessToken;
   }
 
   return null;

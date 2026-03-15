@@ -67,14 +67,10 @@ export interface CheckGrammarOptions {
   prompt: string;
 }
 
-export async function checkGrammar(
-  options: CheckGrammarOptions,
-): Promise<string> {
+export async function checkGrammar(options: CheckGrammarOptions): Promise<string> {
   if (isGeminiModel(options.model)) {
     if (!options.geminiApiKey) {
-      throw new Error(
-        "Gemini API key required. Set it in Settings (Cmd+Shift+,).",
-      );
+      throw new Error("Gemini API key required. Set it in Settings (Cmd+Shift+,).");
     }
     return geminiGrammarCheck({
       text: options.text,

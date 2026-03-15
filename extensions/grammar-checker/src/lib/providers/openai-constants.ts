@@ -17,5 +17,4 @@ export const OPENAI_REDIRECT_URI = `http://localhost:${OPENAI_REDIRECT_PORT}/aut
 
 export const OPENAI_STORAGE_KEY = "openai_oauth_tokens";
 
-export const CHATGPT_API_URL =
-  "https://chatgpt.com/backend-api/codex/responses";
+export const CHATGPT_API_URL = "https://chatgpt.com/backend-api/codex/responses";

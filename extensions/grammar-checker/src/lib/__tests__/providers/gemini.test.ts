@@ -3,8 +3,7 @@ import { geminiGrammarCheck } from "../../providers/gemini";
 
 function sseBody(textChunks: string[]): string {
   const lines = textChunks.map(
-    (text) =>
-      `data: {"candidates":[{"content":{"parts":[{"text":${JSON.stringify(text)}}]}}]}`,
+    (text) => `data: {"candidates":[{"content":{"parts":[{"text":${JSON.stringify(text)}}]}}]}`,
   );
   return lines.join("\n");
 }
@@ -32,9 +31,7 @@ describe("geminiGrammarCheck", () => {
 
     expect(mockFetch).toHaveBeenCalledOnce();
     const [url, options] = mockFetch.mock.calls[0];
-    expect(url).toContain(
-      "generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent",
-    );
+    expect(url).toContain("generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent");
     expect(url).toContain("alt=sse");
     expect(options.method).toBe("POST");
 
@@ -123,9 +120,7 @@ describe("geminiGrammarCheck", () => {
   });
 
   it("handles multiple candidates parts", async () => {
-    const body = [
-      'data: {"candidates":[{"content":{"parts":[{"text":"Part 1"},{"text":" Part 2"}]}}]}',
-    ].join("\n");
+    const body = ['data: {"candidates":[{"content":{"parts":[{"text":"Part 1"},{"text":" Part 2"}]}}]}'].join("\n");
 
     vi.stubGlobal(
       "fetch",

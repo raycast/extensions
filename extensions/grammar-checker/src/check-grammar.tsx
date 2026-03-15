@@ -14,19 +14,9 @@ import {
 import { useEffect, useState, useCallback, useRef } from "react";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import {
-  startOAuthFlow,
-  storeTokens,
-  clearTokens,
-  getValidToken,
-} from "./lib/oauth";
+import { startOAuthFlow, storeTokens, clearTokens, getValidToken } from "./lib/oauth";
 import { checkGrammar, isGeminiModel } from "./lib/api";
-import {
-  addHistoryEntry,
-  getHistory,
-  clearHistory,
-  HistoryEntry,
-} from "./lib/history";
+import { addHistoryEntry, getHistory, clearHistory, HistoryEntry } from "./lib/history";
 import { log } from "./lib/log";
 
 // --- Mock Mode ---
@@ -70,9 +60,7 @@ function computeDiff(original: string, corrected: string): DiffResult {
   // LCS-based word diff
   const m = oldWords.length;
   const n = newWords.length;
-  const dp: number[][] = Array.from({ length: m + 1 }, () =>
-    Array(n + 1).fill(0),
-  );
+  const dp: number[][] = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
 
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
@@ -185,8 +173,7 @@ function buildMarkdown(
       preview = `\n${top}\n${empty}\n${boxLines.join("\n")}\n${empty}\n${bot}`;
     }
     const timerText = formatDuration(elapsed);
-    const timerPadded =
-      " ".repeat(Math.max(0, BAR_WIDTH - timerText.length)) + timerText;
+    const timerPadded = " ".repeat(Math.max(0, BAR_WIDTH - timerText.length)) + timerText;
     return {
       md: `\`\`\`\n${ASCII_TITLE}\n\n${bar}\n${timerPadded}${preview}\n\`\`\``,
       corrections: 0,
@@ -208,11 +195,7 @@ function buildMarkdown(
   const diff = computeDiff(original, result);
 
   return {
-    md:
-      "### Corrected\n\n" +
-      result +
-      "\n\n---\n\n### Changes\n\n" +
-      diff.markdown,
+    md: "### Corrected\n\n" + result + "\n\n---\n\n### Changes\n\n" + diff.markdown,
     corrections: diff.corrections,
   };
 }
@@ -231,14 +214,6 @@ function timeAgo(timestamp: number): string {
 function truncate(text: string, maxLen: number): string {
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen - 1) + "\u2026";
-}
-
-// --- Preferences ---
-
-interface Preferences {
-  model: string;
-  prompt: string;
-  geminiApiKey?: string;
 }
 
 // --- Component ---
@@ -311,7 +286,8 @@ export default function CheckGrammar() {
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Opening OpenAI login...",
+        title: "Signing in...",
+        message: "Complete login in browser, then return here",
       });
       const tokens = await startOAuthFlow();
       await storeTokens(tokens);
@@ -320,11 +296,20 @@ export default function CheckGrammar() {
       await showToast({ style: Toast.Style.Success, title: "Signed in!" });
     } catch (error) {
       log(`Sign in failed: ${error}`);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sign in failed",
-        message: String(error),
-      });
+      const msg = String(error);
+      if (msg.includes("timed out") || msg.includes("ECONNREFUSED")) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Sign in failed",
+          message: "Try again quickly. Don't close Raycast while signing in.",
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Sign in failed",
+          message: String(error),
+        });
+      }
     } finally {
       setIsAuthenticating(false);
     }
@@ -370,9 +355,7 @@ export default function CheckGrammar() {
         log("Mock mode: returning mock response (1.5s delay)");
         await new Promise((r) => setTimeout(r, 1500));
         corrected =
-          text.charAt(0).toUpperCase() +
-          text.slice(1).replace(/\s+/g, " ").trim() +
-          (text.endsWith(".") ? "" : ".");
+          text.charAt(0).toUpperCase() + text.slice(1).replace(/\s+/g, " ").trim() + (text.endsWith(".") ? "" : ".");
       } else {
         corrected = await checkGrammar({
           text,
@@ -418,7 +401,7 @@ export default function CheckGrammar() {
   // --- Not authenticated ---
   if (authChecked && !token) {
     const loginMarkdown = isAuthenticating
-      ? `# Signing in...\n\nA browser window has opened for you to log in.\n\nReturn here once you've completed the login.`
+      ? `# Signing in...\n\nA browser window has opened for you to log in.\n\nComplete the login quickly and return here.\n\n*Keep Raycast open in the background while signing in.*`
       : useGemini
         ? [
             "# Grammar Checker",
@@ -474,10 +457,7 @@ export default function CheckGrammar() {
   if (selectedEntry) {
     const entry = selectedEntry;
     const entryMarkdown = entry.hadChanges
-      ? "### Corrected\n\n" +
-        entry.corrected +
-        "\n\n---\n\n### Original\n\n" +
-        entry.original
+      ? "### Corrected\n\n" + entry.corrected + "\n\n---\n\n### Original\n\n" + entry.original
       : "### No issues found\n\n" + entry.original;
 
     return (
@@ -487,40 +467,20 @@ export default function CheckGrammar() {
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Status">
               {entry.hadChanges ? (
-                <Detail.Metadata.TagList.Item
-                  text="Corrected"
-                  color={Color.Orange}
-                />
+                <Detail.Metadata.TagList.Item text="Corrected" color={Color.Orange} />
               ) : (
-                <Detail.Metadata.TagList.Item
-                  text="No issues"
-                  color={Color.Green}
-                />
+                <Detail.Metadata.TagList.Item text="No issues" color={Color.Green} />
               )}
             </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Words"
-              text={String(wordCount(entry.original))}
-            />
-            <Detail.Metadata.Label
-              title="When"
-              text={timeAgo(entry.timestamp)}
-            />
+            <Detail.Metadata.Label title="Words" text={String(wordCount(entry.original))} />
+            <Detail.Metadata.Label title="When" text={timeAgo(entry.timestamp)} />
           </Detail.Metadata>
         }
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Corrected Text"
-              content={entry.corrected}
-              icon={Icon.Clipboard}
-            />
-            <Action.Paste
-              title="Paste Corrected Text"
-              content={entry.corrected}
-              icon={Icon.Document}
-            />
+            <Action.CopyToClipboard title="Copy Corrected Text" content={entry.corrected} icon={Icon.Clipboard} />
+            <Action.Paste title="Paste Corrected Text" content={entry.corrected} icon={Icon.Document} />
             <Action
               title="Back to History"
               icon={Icon.ArrowLeft}
@@ -538,11 +498,7 @@ export default function CheckGrammar() {
     return (
       <List>
         {history.length === 0 ? (
-          <List.EmptyView
-            title="No history yet"
-            description="Grammar checks will appear here."
-            icon={Icon.Clock}
-          />
+          <List.EmptyView title="No history yet" description="Grammar checks will appear here." icon={Icon.Clock} />
         ) : (
           history.map((entry) => (
             <List.Item
@@ -556,16 +512,8 @@ export default function CheckGrammar() {
               accessories={[{ text: `${wordCount(entry.original)} words` }]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="View Details"
-                    icon={Icon.Eye}
-                    onAction={() => setSelectedEntry(entry)}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy Corrected Text"
-                    content={entry.corrected}
-                    icon={Icon.Clipboard}
-                  />
+                  <Action title="View Details" icon={Icon.Eye} onAction={() => setSelectedEntry(entry)} />
+                  <Action.CopyToClipboard title="Copy Corrected Text" content={entry.corrected} icon={Icon.Clipboard} />
                   <Action
                     title="Back to Result"
                     icon={Icon.ArrowLeft}
@@ -596,13 +544,7 @@ export default function CheckGrammar() {
   }
 
   // --- Main result view ---
-  const { md: markdown, corrections } = buildMarkdown(
-    original,
-    result,
-    isLoading,
-    spinnerFrame,
-    elapsedMs,
-  );
+  const { md: markdown, corrections } = buildMarkdown(original, result, isLoading, spinnerFrame, elapsedMs);
   const hasChanges = corrections > 0;
 
   return (
@@ -619,27 +561,15 @@ export default function CheckGrammar() {
                   color={Color.Orange}
                 />
               ) : (
-                <Detail.Metadata.TagList.Item
-                  text="No issues"
-                  color={Color.Green}
-                />
+                <Detail.Metadata.TagList.Item text="No issues" color={Color.Green} />
               )}
             </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="Words"
-              text={String(wordCount(original))}
-            />
-            <Detail.Metadata.Label
-              title="Characters"
-              text={String(charCount(original))}
-            />
+            <Detail.Metadata.Label title="Words" text={String(wordCount(original))} />
+            <Detail.Metadata.Label title="Characters" text={String(charCount(original))} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Model" text={prefs.model} />
-            <Detail.Metadata.Label
-              title="Time"
-              text={formatDuration(finalElapsedMs)}
-            />
+            <Detail.Metadata.Label title="Time" text={formatDuration(finalElapsedMs)} />
           </Detail.Metadata>
         ) : undefined
       }
@@ -647,16 +577,8 @@ export default function CheckGrammar() {
         <ActionPanel>
           {!isLoading && result && (
             <>
-              <Action.CopyToClipboard
-                title="Copy Corrected Text"
-                content={result}
-                icon={Icon.Clipboard}
-              />
-              <Action.Paste
-                title="Paste Corrected Text"
-                content={result}
-                icon={Icon.Document}
-              />
+              <Action.CopyToClipboard title="Copy Corrected Text" content={result} icon={Icon.Clipboard} />
+              <Action.Paste title="Paste Corrected Text" content={result} icon={Icon.Document} />
             </>
           )}
           <Action

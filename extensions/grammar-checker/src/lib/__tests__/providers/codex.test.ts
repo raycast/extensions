@@ -3,9 +3,7 @@ import { codexGrammarCheck } from "../../providers/codex";
 
 // Helper to create a fake JWT with a given payload
 function fakeJwt(payload: Record<string, unknown>): string {
-  const header = Buffer.from(
-    JSON.stringify({ alg: "RS256", typ: "JWT" }),
-  ).toString("base64url");
+  const header = Buffer.from(JSON.stringify({ alg: "RS256", typ: "JWT" })).toString("base64url");
   const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
   return `${header}.${body}.fake-sig`;
 }
@@ -15,10 +13,7 @@ const VALID_TOKEN = fakeJwt({
 });
 
 function sseBody(chunks: string[]): string {
-  const lines = chunks.map(
-    (c) =>
-      `data: {"type":"response.output_text.delta","delta":${JSON.stringify(c)}}`,
-  );
+  const lines = chunks.map((c) => `data: {"type":"response.output_text.delta","delta":${JSON.stringify(c)}}`);
   lines.push("data: [DONE]");
   return lines.join("\n");
 }
@@ -74,10 +69,7 @@ describe("codexGrammarCheck", () => {
       prompt: "Fix.",
     });
 
-    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<
-      string,
-      string
-    >;
+    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers["ChatGPT-Account-ID"]).toBe("acc-123");
     expect(headers["Authorization"]).toBe(`Bearer ${VALID_TOKEN}`);
   });
@@ -99,10 +91,7 @@ describe("codexGrammarCheck", () => {
       prompt: "Fix.",
     });
 
-    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<
-      string,
-      string
-    >;
+    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<string, string>;
     expect(headers["ChatGPT-Account-ID"]).toBeUndefined();
   });
 
