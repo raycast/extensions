@@ -1,6 +1,8 @@
+import { STATUS_CODES } from "node:http";
 import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
+import { UsageLimitsError } from "./usage-limits-error";
 
-export const fetchClaudeUsageLimits = async (accessToken: string): Promise<UsageLimitData | null> => {
+const fetchUsageLimitsResponse = async (accessToken: string): Promise<string> => {
   try {
     const response = await fetch("https://api.anthropic.com/api/oauth/usage", {
       headers: {
@@ -11,15 +13,44 @@ export const fetchClaudeUsageLimits = async (accessToken: string): Promise<Usage
       },
     });
 
+    const responseText = await response.text();
+
     if (!response.ok) {
-      return null;
+      const status = response.status;
+      const statusText = response.statusText || STATUS_CODES[status] || "Request Failed";
+
+      throw new UsageLimitsError({
+        kind: "fetch",
+        error: new Error(`Claude API returned ${status} ${statusText} while fetching usage limits.`),
+        status,
+        statusText,
+        responseText,
+      });
     }
 
-    const data = await response.json();
-    const result = UsageLimitDataSchema.safeParse(data);
+    return responseText;
+  } catch (error) {
+    if (error instanceof UsageLimitsError) {
+      throw error;
+    }
 
-    return result.success ? result.data : null;
-  } catch {
-    return null;
+    throw new UsageLimitsError({
+      kind: "fetch",
+      error,
+    });
   }
+};
+
+const parseUsageLimitsResponse = (responseText: string): UsageLimitData => {
+  try {
+    const data = JSON.parse(responseText);
+    return UsageLimitDataSchema.parse(data);
+  } catch (error) {
+    throw new UsageLimitsError({ kind: "parse", error, responseText });
+  }
+};
+
+export const fetchClaudeUsageLimits = async (accessToken: string): Promise<UsageLimitData> => {
+  const responseText = await fetchUsageLimitsResponse(accessToken);
+  return parseUsageLimitsResponse(responseText);
 };
