@@ -55,6 +55,7 @@ export function formatLongDate(value: string): string {
     month: "long",
     day: "numeric",
     year: "numeric",
+    timeZone: "UTC",
   }).format(date);
 }
 

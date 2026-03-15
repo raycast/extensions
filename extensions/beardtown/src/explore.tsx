@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Grid, Icon, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fetchAllEntriesForFilter, fetchPaginatedChallenges } from "./api";
+import { fetchAllEntriesForFilter, fetchPaginatedChallenges, RequestError } from "./api";
 import { RESOURCE_CONFIG } from "./config";
 import { entryActions, tShirtEntryActions } from "./explore-ui";
 import {
@@ -19,6 +19,7 @@ import type { ChallengeEntry, ChallengeFilter } from "./types";
 
 export default function Command() {
   const [entries, setEntries] = useState<ChallengeEntry[]>([]);
+  const [allChallengeEntries, setAllChallengeEntries] = useState<ChallengeEntry[] | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<ChallengeFilter>("challenges");
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,9 +38,37 @@ export default function Command() {
   const hasSearchText = searchText.trim().length > 0;
   const filteredEntries = useMemo(() => filterEntries(entries, searchText), [entries, searchText]);
   const challengeGridSections = useMemo(
-    () => (selectedFilter === "challenges" ? groupChallengeEntriesByYear(filteredEntries) : []),
-    [filteredEntries, selectedFilter],
+    () =>
+      selectedFilter === "challenges"
+        ? groupChallengeEntriesByYear(filteredEntries, allChallengeEntries ?? entries)
+        : [],
+    [allChallengeEntries, entries, filteredEntries, selectedFilter],
   );
+
+  useEffect(() => {
+    if (selectedFilter !== "challenges") {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const loadedEntries = await fetchAllEntriesForFilter("challenges");
+        if (!cancelled) {
+          setAllChallengeEntries(loadedEntries);
+        }
+      } catch {
+        if (!cancelled) {
+          setAllChallengeEntries(null);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedFilter]);
 
   const loadInitial = useCallback(async () => {
     const context = requestContextRef.current + 1;
@@ -49,6 +78,9 @@ export default function Command() {
     setIsLoadingMore(false);
     setError(null);
     setEntries([]);
+    if (selectedFilter === "challenges") {
+      setAllChallengeEntries(null);
+    }
     setSelectedItemId(undefined);
     setNextUrl(null);
     setNextPage(null);
@@ -131,7 +163,7 @@ export default function Command() {
 
       const message =
         loadError instanceof Error ? loadError.message : `Failed to load more ${selectedResource.title.toLowerCase()}`;
-      if (message.includes("status 404")) {
+      if (loadError instanceof RequestError && loadError.status === 404) {
         setNextUrl(null);
         setNextPage(null);
         setHasMore(false);
@@ -291,7 +323,7 @@ export default function Command() {
             <Grid.Section
               key={section.title}
               title={section.title}
-              subtitle={`${section.items.length} ${section.items.length === 1 ? "Challenge" : "Challenges"}`}
+              subtitle={`${section.count} ${section.count === 1 ? "Challenge" : "Challenges"}`}
             >
               {section.items.map((entry) => (
                 <Grid.Item

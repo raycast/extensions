@@ -769,11 +769,18 @@ export function sortEntries(entries: ChallengeEntry[], filter: ChallengeFilter) 
   return [...entries].sort((left, right) => getChallengeCount(right.record) - getChallengeCount(left.record));
 }
 
-export function groupChallengeEntriesByYear(entries: ChallengeEntry[]) {
+export function groupChallengeEntriesByYear(entries: ChallengeEntry[], countEntries: ChallengeEntry[] = entries) {
   const groups = new Map<string, ChallengeEntry[]>();
+  const counts = new Map<string, number>();
+
+  for (const entry of countEntries) {
+    const timestamp = getVideoReleasedTimestamp(entry.record);
+    const year = timestamp ? new Date(timestamp).getUTCFullYear().toString() : "Unknown";
+    counts.set(year, (counts.get(year) ?? 0) + 1);
+  }
 
   for (const entry of entries) {
-    const timestamp = getRecordTimestamp(entry.record);
+    const timestamp = getVideoReleasedTimestamp(entry.record);
     const year = timestamp ? new Date(timestamp).getUTCFullYear().toString() : "Unknown";
     const existing = groups.get(year);
     if (existing) {
@@ -783,7 +790,31 @@ export function groupChallengeEntriesByYear(entries: ChallengeEntry[]) {
     }
   }
 
-  return Array.from(groups.entries()).map(([title, items]) => ({ title, items }));
+  return Array.from(groups.entries())
+    .sort(([left], [right]) => {
+      if (left === "Unknown") return 1;
+      if (right === "Unknown") return -1;
+      return right.localeCompare(left);
+    })
+    .map(([title, items]) => ({ title, items, count: counts.get(title) ?? items.length }));
+}
+
+function getVideoReleasedTimestamp(record: ApiRecord): number | null {
+  const fields = asObject(record.fields);
+  const candidates = [record.videoReleased, record.videoReleaseDate, fields?.videoReleased, fields?.videoReleaseDate];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string" && typeof candidate !== "number") {
+      continue;
+    }
+
+    const timestamp = new Date(candidate).getTime();
+    if (!Number.isNaN(timestamp)) {
+      return timestamp;
+    }
+  }
+
+  return null;
 }
 
 export function getChallengeCount(record: ApiRecord) {

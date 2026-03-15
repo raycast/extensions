@@ -292,7 +292,7 @@ export function RelatedChallengesGrid({
         <Grid.Section
           key={section.title}
           title={section.title}
-          subtitle={`${section.items.length} ${section.items.length === 1 ? "Challenge" : "Challenges"}`}
+          subtitle={`${section.count} ${section.count === 1 ? "Challenge" : "Challenges"}`}
         >
           {section.items.map((relatedEntry) => (
             <Grid.Item

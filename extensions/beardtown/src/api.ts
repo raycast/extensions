@@ -18,6 +18,16 @@ import {
   unwrapRecord,
 } from "./lib/records";
 
+export class RequestError extends Error {
+  status: number;
+
+  constructor(status: number) {
+    super(`Request failed with status ${status}`);
+    this.name = "RequestError";
+    this.status = status;
+  }
+}
+
 export async function requestJson(url: string): Promise<unknown> {
   const cached = readCachedJson(url);
   if (cached !== null) {
@@ -31,7 +41,7 @@ export async function requestJson(url: string): Promise<unknown> {
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new RequestError(response.status);
   }
 
   const parsed = (await response.json()) as unknown;
