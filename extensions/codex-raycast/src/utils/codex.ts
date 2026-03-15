@@ -1,27 +1,32 @@
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
 import { Model } from "./models";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
-export async function runCodexCommand(command: string, args?: string[]): Promise<string> {
-  const isWindows = process.platform === "win32";
-  return isWindows ? runWindowsCommand(command, args) : runUnixCommand(command, args);
+let codexPath: string | undefined;
+
+async function resolveCodexPath(): Promise<string> {
+  if (codexPath) return codexPath;
+  const { stdout } = await execFileAsync("/bin/zsh", ["-lc", "which codex"]);
+  return stdout.trim();
 }
 
-async function runWindowsCommand(command: string, args?: string[]): Promise<string> {
-  const fullCommand = args?.length ? `${command} ${args.join(" ")}` : command;
-  const { stdout, stderr } = await execAsync(fullCommand);
+export async function runCodexCommand(command: string, args: string[] = []): Promise<string> {
+  return process.platform === "win32" ? runWindowsCodexCommand(command, args) : runUnixCodexCommand(command, args);
+}
+
+async function runWindowsCodexCommand(command: string, args: string[] = []): Promise<string> {
+  const { stdout, stderr } = await execFileAsync("cmd.exe", ["/c", "codex", command, ...args]);
   return `${stdout.trim()}\n${stderr.trim()}`;
 }
 
-async function runUnixCommand(command: string, args: string[] = []): Promise<string> {
-  const fullCommand = args?.length ? `${command} ${args.join(" ")}` : command;
-  const unixCommand = `/bin/zsh -lc '${fullCommand}'`;
-  const { stdout, stderr } = await execAsync(unixCommand);
+async function runUnixCodexCommand(command: string, args: string[] = []): Promise<string> {
+  const codexPath = await resolveCodexPath();
+  const { stdout, stderr } = await execFileAsync(codexPath, [command, ...args]);
   return `${stdout.trim()}\n${stderr.trim()}`;
 }
 
@@ -30,14 +35,18 @@ export async function askQuestion(prompt: string, model: Model): Promise<string>
   const outputPath = join(tempDir, "answer.md");
 
   try {
-    await runCodexCommand("codex exec", [
+    await runCodexCommand("exec", [
       "--skip-git-repo-check",
-      "--sandbox read-only",
-      `--model ${model}`,
+      "--sandbox",
+      "read-only",
+      "--model",
+      model,
       "--ephemeral",
-      "--color never",
-      `-o "${outputPath}"`,
-      `"${prompt}"`,
+      "--color",
+      "never",
+      "-o",
+      outputPath,
+      prompt,
     ]);
 
     const answer = (await readFile(outputPath, "utf8")).trim();

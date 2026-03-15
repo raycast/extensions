@@ -42,7 +42,7 @@ export default function Root() {
 
 async function ensureCodexReady(): Promise<CodexStatus> {
   try {
-    await runCodexCommand("codex login status");
+    await runCodexCommand("login", ["status"]);
   } catch (error) {
     if (error && error instanceof Error && error.message.includes("Not logged in")) {
       return CodexStatus.NotLoggedIn;
