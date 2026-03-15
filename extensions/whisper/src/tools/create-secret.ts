@@ -16,11 +16,15 @@ type Input = {
 };
 
 export default async function tool(input: Input) {
-  const durationSeconds = (input.duration ? parseDuration(input.duration) : null) ?? 3600;
-  const selfDestruct = input.selfDestruct ?? true;
-  const expirationTimestamp = Math.floor(Date.now() / 1000) + durationSeconds;
+  try {
+    const durationSeconds = (input.duration ? parseDuration(input.duration) : null) ?? 3600;
+    const selfDestruct = input.selfDestruct ?? true;
+    const expirationTimestamp = Math.floor(Date.now() / 1000) + durationSeconds;
 
-  const shareUrl = await createSecret(input.secret, expirationTimestamp, selfDestruct);
-
-  return shareUrl;
+    const shareUrl = await createSecret(input.secret, expirationTimestamp, selfDestruct);
+    return shareUrl;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Failed to create secret link.";
+    throw new Error(message);
+  }
 }
