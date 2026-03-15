@@ -20,6 +20,7 @@ type AssignIssueToCopilotResult = {
 // Task artifact from Copilot API
 type TaskArtifact = {
   provider: string;
+  type: string;
   data: {
     id: number;
     type: "pull";
