@@ -7,6 +7,7 @@ import {
   filterEntries,
   getChallengeAccessory,
   getDedupKey,
+  groupChallengeEntriesByYear,
   getNonChallengeAccessories,
   getNonChallengeListIcon,
   parsePageNumber,
@@ -35,6 +36,10 @@ export default function Command() {
   const isGridView = selectedFilter === "challenges" || isTShirtsView;
   const hasSearchText = searchText.trim().length > 0;
   const filteredEntries = useMemo(() => filterEntries(entries, searchText), [entries, searchText]);
+  const challengeGridSections = useMemo(
+    () => (selectedFilter === "challenges" ? groupChallengeEntriesByYear(filteredEntries) : []),
+    [filteredEntries, selectedFilter],
+  );
 
   const loadInitial = useCallback(async () => {
     const context = requestContextRef.current + 1;
@@ -281,27 +286,48 @@ export default function Command() {
         <Grid.EmptyView title={emptyView.title} description={emptyView.description} icon={Icon.MagnifyingGlass} />
       ) : null}
 
-      {filteredEntries.map((entry) => (
-        <Grid.Item
-          key={entry.id}
-          id={entry.id}
-          title={isTShirtsView ? "" : entry.title}
-          keywords={entry.keywords}
-          subtitle={isTShirtsView ? undefined : entry.subtitle || undefined}
-          content={
-            entry.thumbnailUrl
-              ? {
-                  source: entry.thumbnailUrl,
-                  ...(isTShirtsView
-                    ? { tooltip: `${entry.title} Challenge${entry.subtitle ? ` at ${entry.subtitle}` : ""}` }
-                    : {}),
-                }
-              : Icon.Image
-          }
-          accessory={isTShirtsView ? undefined : getChallengeAccessory(entry.record)}
-          actions={isTShirtsView ? tShirtEntryActions(entry) : entryActions(entry, "challenges", entries)}
-        />
-      ))}
+      {selectedFilter === "challenges"
+        ? challengeGridSections.map((section) => (
+            <Grid.Section
+              key={section.title}
+              title={section.title}
+              subtitle={`${section.items.length} ${section.items.length === 1 ? "Challenge" : "Challenges"}`}
+            >
+              {section.items.map((entry) => (
+                <Grid.Item
+                  key={entry.id}
+                  id={entry.id}
+                  title={entry.title}
+                  keywords={entry.keywords}
+                  subtitle={entry.subtitle || undefined}
+                  content={entry.thumbnailUrl ? { source: entry.thumbnailUrl } : Icon.Image}
+                  accessory={getChallengeAccessory(entry.record)}
+                  actions={entryActions(entry, "challenges", entries)}
+                />
+              ))}
+            </Grid.Section>
+          ))
+        : filteredEntries.map((entry) => (
+            <Grid.Item
+              key={entry.id}
+              id={entry.id}
+              title={isTShirtsView ? "" : entry.title}
+              keywords={entry.keywords}
+              subtitle={isTShirtsView ? undefined : entry.subtitle || undefined}
+              content={
+                entry.thumbnailUrl
+                  ? {
+                      source: entry.thumbnailUrl,
+                      ...(isTShirtsView
+                        ? { tooltip: `${entry.title} Challenge${entry.subtitle ? ` at ${entry.subtitle}` : ""}` }
+                        : {}),
+                    }
+                  : Icon.Image
+              }
+              accessory={isTShirtsView ? undefined : getChallengeAccessory(entry.record)}
+              actions={isTShirtsView ? tShirtEntryActions(entry) : entryActions(entry, "challenges", entries)}
+            />
+          ))}
     </Grid>
   );
 }

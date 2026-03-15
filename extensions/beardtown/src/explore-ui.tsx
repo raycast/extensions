@@ -18,6 +18,7 @@ import {
   getChallengeAccessory,
   getFilterForRelationSection,
   getFirstRecord,
+  groupChallengeEntriesByYear,
   getLocationMapUrl,
   getLocationTitle,
   getRecordJsonUrl,
@@ -253,6 +254,7 @@ export function RelatedChallengesGrid({
   }, [relatedRecords]);
 
   const entries = toChallengeEntries(resolvedRelatedRecords ?? [], "challenges");
+  const yearSections = useMemo(() => groupChallengeEntriesByYear(entries), [entries]);
   const isResolvingEntries = isLoadingResolvedRecords || resolvedRelatedRecords === null;
 
   return (
@@ -286,17 +288,25 @@ export function RelatedChallengesGrid({
         />
       ) : null}
 
-      {entries.map((relatedEntry) => (
-        <Grid.Item
-          key={relatedEntry.id}
-          id={relatedEntry.id}
-          title={relatedEntry.title}
-          subtitle={relatedEntry.subtitle || undefined}
-          keywords={relatedEntry.keywords}
-          content={relatedEntry.thumbnailUrl ? { source: relatedEntry.thumbnailUrl } : Icon.Image}
-          accessory={getChallengeAccessory(relatedEntry.record)}
-          actions={entryActions(relatedEntry, "challenges")}
-        />
+      {yearSections.map((section) => (
+        <Grid.Section
+          key={section.title}
+          title={section.title}
+          subtitle={`${section.items.length} ${section.items.length === 1 ? "Challenge" : "Challenges"}`}
+        >
+          {section.items.map((relatedEntry) => (
+            <Grid.Item
+              key={relatedEntry.id}
+              id={relatedEntry.id}
+              title={relatedEntry.title}
+              subtitle={relatedEntry.subtitle || undefined}
+              keywords={relatedEntry.keywords}
+              content={relatedEntry.thumbnailUrl ? { source: relatedEntry.thumbnailUrl } : Icon.Image}
+              accessory={getChallengeAccessory(relatedEntry.record)}
+              actions={entryActions(relatedEntry, "challenges")}
+            />
+          ))}
+        </Grid.Section>
       ))}
     </Grid>
   );

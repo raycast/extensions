@@ -769,6 +769,23 @@ export function sortEntries(entries: ChallengeEntry[], filter: ChallengeFilter) 
   return [...entries].sort((left, right) => getChallengeCount(right.record) - getChallengeCount(left.record));
 }
 
+export function groupChallengeEntriesByYear(entries: ChallengeEntry[]) {
+  const groups = new Map<string, ChallengeEntry[]>();
+
+  for (const entry of entries) {
+    const timestamp = getRecordTimestamp(entry.record);
+    const year = timestamp ? new Date(timestamp).getUTCFullYear().toString() : "Unknown";
+    const existing = groups.get(year);
+    if (existing) {
+      existing.push(entry);
+    } else {
+      groups.set(year, [entry]);
+    }
+  }
+
+  return Array.from(groups.entries()).map(([title, items]) => ({ title, items }));
+}
+
 export function getChallengeCount(record: ApiRecord) {
   const value = record.challengeCount ?? record.challenge_count;
   if (typeof value === "number") {
