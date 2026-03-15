@@ -14,11 +14,11 @@
 
 | System Status | Clean System |
 |:---:|:---:|
-| ![System Status](metadata/mole-1.png) | ![Clean System](metadata/mole-2.png) |
+| ![System Status](media/mole-1.png) | ![Clean System](media/mole-2.png) |
 
 | Analyze Disk | Purge Dev Artifacts |
 |:---:|:---:|
-| ![Analyze Disk](metadata/mole-3.png) | ![Purge Dev Artifacts](metadata/mole-4.png) |
+| ![Analyze Disk](media/mole-3.png) | ![Purge Dev Artifacts](media/mole-4.png) |
 
 ## Prerequisites
 
