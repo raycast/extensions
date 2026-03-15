@@ -56,7 +56,7 @@ export default function SeeImportantMail() {
 
       for (let i = 0; i < updatedAccounts.length; i++) {
         const account = updatedAccounts[i];
-        const mailbox = account.mailbox.find(isImportantMailbox);
+        const mailbox = account.mailboxes.find(isImportantMailbox);
         if (!mailbox) continue;
 
         const needsPreview = account.messages?.some(
