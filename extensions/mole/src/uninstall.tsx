@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, showToast, Toast, confirmAlert, trash } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Alert, showToast, Toast, confirmAlert, trash } from "@raycast/api";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
 import { useState, useEffect, useMemo } from "react";
@@ -96,7 +96,7 @@ function UninstallView() {
       await confirmAlert({
         title: `Uninstall ${app.name}?`,
         message: `This will move ${app.name}.app to the Trash.${app.size > 0 ? ` App size: ${formatBytes(app.size)}.` : ""}`,
-        primaryAction: { title: "Move to Trash", style: "destructive" as never },
+        primaryAction: { title: "Move to Trash", style: Alert.ActionStyle.Destructive },
       })
     ) {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Removing ${app.name}...` });

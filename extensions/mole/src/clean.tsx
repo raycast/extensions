@@ -1,7 +1,7 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert } from "@raycast/api";
 import { spawn, type ChildProcess } from "child_process";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
-import { getMolePathSafe, runMole } from "./utils/mole";
+import { getMolePathSafe, runMole, MOLE_ENV } from "./utils/mole";
 import { parseCleanDryRun, type CleanDryRunResult } from "./utils/parsers";
 
 function useStreamingClean(molePath: string) {
@@ -25,7 +25,7 @@ function useStreamingClean(molePath: string) {
     setData({ sections: [], totalSpace: "Scanning...", totalItems: 0 });
     setError(null);
 
-    const proc = spawn(molePath, ["clean", "--dry-run"]);
+    const proc = spawn(molePath, ["clean", "--dry-run"], { env: MOLE_ENV });
     processRef.current = proc;
     let buffer = "";
 

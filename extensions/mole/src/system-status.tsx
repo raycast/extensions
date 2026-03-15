@@ -5,10 +5,6 @@ import { getMolePathSafe } from "./utils/mole";
 import { type MoleStatus, formatBytes, formatPercent, formatRate } from "./utils/parsers";
 import { getHealthIcon, getUsageColor, getBatteryIcon } from "./utils/icons";
 
-interface StatusPreferences {
-  statusRefreshInterval?: string;
-}
-
 export default function SystemStatus() {
   const molePath = useMemo(() => getMolePathSafe(), []);
 
@@ -28,7 +24,7 @@ export default function SystemStatus() {
 }
 
 function StatusView({ molePath }: { molePath: string }) {
-  const { statusRefreshInterval } = getPreferenceValues<StatusPreferences>();
+  const { statusRefreshInterval } = getPreferenceValues<Preferences.SystemStatus>();
   const refreshInterval = parseInt(statusRefreshInterval ?? "5", 10);
 
   const { data, error, isLoading, revalidate } = useExec(molePath, ["status", "--json"], {

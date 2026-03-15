@@ -1,10 +1,6 @@
 import { existsSync } from "fs";
 import { execFile } from "child_process";
-import { getPreferenceValues } from "@raycast/api";
-
-interface ExtensionPreferences {
-  molePath?: string;
-}
+import { getPreferenceValues, Preferences } from "@raycast/api";
 
 const DEFAULT_PATHS = ["/opt/homebrew/bin/mo", "/usr/local/bin/mo"];
 
@@ -16,7 +12,7 @@ export class MoleNotInstalledError extends Error {
 }
 
 export function getMolePath(): string {
-  const { molePath } = getPreferenceValues<ExtensionPreferences>();
+  const { molePath } = getPreferenceValues<Preferences>();
 
   if (molePath && existsSync(molePath)) {
     return molePath;
@@ -60,7 +56,7 @@ export function runMole(args: string[], options?: RunMoleOptions): Promise<strin
       execFile(
         path,
         args,
-        { timeout: options?.timeout ?? 30000, maxBuffer: 10 * 1024 * 1024 },
+        { timeout: options?.timeout ?? 30000, maxBuffer: 10 * 1024 * 1024, env: MOLE_ENV },
         (error, stdout, stderr) => {
           const combined = [stdout, stderr].filter(Boolean).join("\n");
           if (error && !combined) {

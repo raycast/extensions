@@ -16,10 +16,6 @@ interface AnalyzeResult {
   entries: AnalyzeEntry[];
 }
 
-interface AnalyzePreferences {
-  analyzePath?: string;
-}
-
 function useAnalyze(molePath: string, dirPath: string) {
   const [data, setData] = useState<AnalyzeResult | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -66,7 +62,7 @@ export default function AnalyzeDisk() {
     );
   }
 
-  const { analyzePath } = getPreferenceValues<AnalyzePreferences>();
+  const { analyzePath } = getPreferenceValues<Preferences.Analyze>();
   const startPath = analyzePath || process.env.HOME || "/";
 
   return <AnalyzeList molePath={molePath} dirPath={startPath} />;
