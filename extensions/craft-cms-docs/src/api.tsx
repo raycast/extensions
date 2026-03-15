@@ -174,7 +174,7 @@ function getResultRows(payload: unknown): Array<Record<string, unknown>> {
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function normalizeUrl(value?: string): string | undefined {

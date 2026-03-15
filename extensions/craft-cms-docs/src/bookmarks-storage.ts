@@ -2,13 +2,17 @@ import { environment } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { DocsSearchResult } from "./types";
 
 const BOOKMARKS_CACHE_KEY = "craft-docs-bookmarks";
 const BOOKMARKS_FILE_PATH = path.join(environment.supportPath, "bookmarks.json");
 
-export function usePersistentBookmarks() {
+export type BookmarksState = DocsSearchResult[];
+export type BookmarksSetter = Dispatch<SetStateAction<BookmarksState>>;
+
+export function usePersistentBookmarks(): readonly [BookmarksState, BookmarksSetter] {
   const [bookmarks, setBookmarks] = useCachedState<DocsSearchResult[]>(BOOKMARKS_CACHE_KEY, []);
   const [hasHydrated, setHasHydrated] = useState(false);
   const lastSavedRef = useRef<string | null>(null);
@@ -48,7 +52,7 @@ export function usePersistentBookmarks() {
     void writeBookmarksToFile(nextBookmarks);
   }, [bookmarks, hasHydrated]);
 
-  return [bookmarks, setBookmarks] as const;
+  return [bookmarks ?? [], setBookmarks];
 }
 
 async function readBookmarksFromFile(): Promise<DocsSearchResult[]> {

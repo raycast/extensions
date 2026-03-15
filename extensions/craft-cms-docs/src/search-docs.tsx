@@ -14,9 +14,9 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { extractRelatedTermsFromHtml, searchDocs, searchGlossary, splitAssociatedLinks } from "./api";
+import type { BookmarksSetter, BookmarksState } from "./bookmarks-storage";
 import { usePersistentBookmarks } from "./bookmarks-storage";
 import { raycastCommandLink } from "./config";
 import { summaryHtmlToMarkdown } from "./summary-to-markdown";
@@ -438,7 +438,6 @@ export default function Command(props: Props) {
           </List.Dropdown.Section>
         </List.Dropdown>
       }
-      throttle
     >
       {showPlaceholder && (
         <List.EmptyView
@@ -531,8 +530,8 @@ function ResultRow({
   selectedProduct: DocsProduct;
   isCompactMode: boolean;
   isBookmarked: boolean;
-  bookmarks: DocsSearchResult[] | undefined;
-  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  bookmarks: BookmarksState;
+  setBookmarks: BookmarksSetter;
   onAddBookmark: (item: DocsSearchResult) => void;
   onRemoveBookmark: (item: DocsSearchResult) => void;
   onOpenItem: (item: DocsSearchResult) => void;
@@ -616,8 +615,8 @@ function DocsDetailView({
   onOpenItem,
 }: {
   item: DocsSearchResult;
-  bookmarks: DocsSearchResult[] | undefined;
-  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  bookmarks: BookmarksState;
+  setBookmarks: BookmarksSetter;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
   const [, setSelectedProduct] = useCachedState<DocsProduct>("craft-docs-selected-product");
@@ -713,8 +712,8 @@ function DocsItemDetail({
   onOpenItem,
 }: {
   item: DocsSearchResult;
-  bookmarks: DocsSearchResult[] | undefined;
-  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  bookmarks: BookmarksState;
+  setBookmarks: BookmarksSetter;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
   return (
@@ -732,8 +731,8 @@ function DocsMetadata({
   onOpenItem,
 }: {
   item: DocsSearchResult;
-  bookmarks: DocsSearchResult[] | undefined;
-  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  bookmarks: BookmarksState;
+  setBookmarks: BookmarksSetter;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
   const { push } = useNavigation();
@@ -820,8 +819,8 @@ function GlossaryTermDetailRoute({
   onOpenItem,
 }: {
   slug: string;
-  bookmarks: DocsSearchResult[] | undefined;
-  setBookmarks: Dispatch<SetStateAction<DocsSearchResult[] | undefined>>;
+  bookmarks: BookmarksState;
+  setBookmarks: BookmarksSetter;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
   const [item, setItem] = useState<DocsSearchResult | null>(() => findGlossaryItemBySlug(slug));
