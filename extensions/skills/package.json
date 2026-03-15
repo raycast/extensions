@@ -7,7 +7,8 @@
   "author": "keito4",
   "contributors": [
     "DaleSeo",
-    "dominik_lukes"
+    "dominik_lukes",
+    "raulg"
   ],
   "categories": [
     "Developer Tools"
@@ -17,18 +18,21 @@
     {
       "name": "search-skills",
       "title": "Search Skills",
+      "subtitle": "Skills",
       "description": "Search for agent skills",
       "mode": "view"
     },
     {
       "name": "trending-skills",
       "title": "Trending Skills",
+      "subtitle": "Skills",
       "description": "Browse trending skills",
       "mode": "view"
     },
     {
       "name": "manage-skills",
       "title": "Manage Skills",
+      "subtitle": "Skills",
       "description": "View and remove installed skills",
       "mode": "view"
     }
@@ -51,6 +55,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
     "publish": "ray publish"
   },
   "platforms": [

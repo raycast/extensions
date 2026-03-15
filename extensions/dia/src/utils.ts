@@ -48,6 +48,18 @@ export function getAccessories(tab: Tab) {
   return accessories;
 }
 
+/**
+ * Detects if input looks like a URL (has TLD or protocol).
+ * Examples: "github.com", "https://foo.bar", "localhost:3000"
+ */
+export function isLikelyURL(str: string): boolean {
+  const trimmed = str.trim();
+  if (!trimmed || trimmed.includes(" ")) return false;
+  if (/^\S+:\/\//.test(trimmed)) return true;
+  if (/^localhost(:\d+)?/.test(trimmed)) return true;
+  return /^[\w-]+(\.[\w-]+)+/.test(trimmed);
+}
+
 export function filterTabs(tabs: Tab[] | undefined, query: string) {
   if (!query || !tabs) return tabs;
 

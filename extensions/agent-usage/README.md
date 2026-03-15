@@ -7,9 +7,11 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp Code, Claude Code, Codex (OpenAI), Droid (Factory AI), Gemini CLI, and Kimi
-- **Quick Overview** - See remaining quotas and usage at a glance
+- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Droid, Gemini, Kimi, Antigravity, and z.ai(GLM)
+- **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
+- **Menu Bar** - Quick overview from the menu bar with click-to-navigate
+- **Zero Config** - Most agents are auto-detected from local credentials
 - **Refresh & Copy** - Quickly refresh data or copy usage details to clipboard
 - **Customizable** - Show/hide agents, reorder list, and configure display preferences
 
@@ -20,9 +22,11 @@ Track usage across your AI coding agents in one place.
 | **Amp** | Local SQLite database | None (auto-detected) |
 | **Claude** | Anthropic OAuth Usage API | None (auto-detected after `claude` login) |
 | **Codex** | OpenAI API | None (auto-detected after `codex login`) |
-| **Droid** | Factory AI API | Authorization token |
+| **Droid** | Factory AI API | None (auto-detected after `droid` login) |
 | **Gemini** | Local state file | None (auto-detected) |
 | **Kimi** | Moonshot API | Authorization token |
+| **Antigravity** | Local state file | None (auto-detected) |
+| **z.ai (GLM)** | Zhipu API | None (auto-detected from `ZAI_API_KEY` / `GLM_API_KEY` env var) |
 
 ## Configuration
 
@@ -34,14 +38,10 @@ Track usage across your AI coding agents in one place.
 Optional fallback:
 - If auto-detection fails, you can still paste a token manually in extension preferences (`Codex Authorization Token`).
 
-### Droid Token
+### Droid (Zero Config)
 
-1. Open https://app.factory.ai/settings/billing in your browser
-2. Open DevTools (F12) → Network tab
-3. Refresh the page and find any API request
-4. Copy the `Authorization` header value
-5. Paste in extension preferences
-6. Note that the token expiration time is approximately **6 hours**.
+1. Run `droid` in Terminal (if you are not already logged in)
+2. Open Agent Usage in Raycast — Droid usage will be auto-detected from `~/.factory/auth.*`
 
 ## Preferences
 

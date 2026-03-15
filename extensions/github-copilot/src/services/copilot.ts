@@ -43,11 +43,12 @@ type Task = {
   agent_collaborators: TaskCollaborator[];
   owner_id: number;
   repo_id: number;
+  state: string;
   status: string;
   session_count: number;
   artifacts: TaskArtifact[];
   archived_at: string | null;
-  last_updated_at: string;
+  updated_at: string;
   created_at: string;
 };
 
@@ -221,7 +222,7 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
   };
 
   const [listTasksResponse, listSessionsResponse] = await Promise.all([
-    fetch("https://api.githubcopilot.com/agents/tasks?sort=last_updated_at,desc", { headers }),
+    fetch("https://api.githubcopilot.com/agents/tasks?sort=updated_at&direction=desc", { headers }),
     fetch("https://api.githubcopilot.com/agents/sessions", { headers }),
   ]);
 

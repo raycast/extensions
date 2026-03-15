@@ -90,20 +90,7 @@
         { "value": "percentage", "title": "Percentage" }
       ]
     },
-    {
-      "name": "codexAuthToken",
-      "type": "password",
-      "title": "Codex Authorization Token (Optional)",
-      "description": "Optional fallback token. Usually auto-detected from ~/.codex/auth.json after 'codex login'. You can still paste Authorization header value ('Bearer eyJ...' or just 'eyJ...').",
-      "required": false
-    },
-    {
-      "name": "droidAuthToken",
-      "type": "password",
-      "title": "Droid Authorization Token",
-      "description": "From browser DevTools: Authorization header when accessing https://app.factory.ai/settings/billing. Format: 'Bearer eyJ...' or just 'eyJ...'",
-      "required": false
-    },
+
     {
       "name": "kimiAuthToken",
       "type": "password",
@@ -114,8 +101,8 @@
     {
       "name": "zaiApiToken",
       "type": "password",
-      "title": "z.ai API Token",
-      "description": "API token from z.ai(GLM) platform. Set via extension preferences or Z_AI_API_KEY environment variable.",
+      "title": "z.ai API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from ZAI_API_KEY or GLM_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
       "required": false
     }
   ],

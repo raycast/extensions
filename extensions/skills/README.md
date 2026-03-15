@@ -8,6 +8,7 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 - Search for specific skills
 - Filter available skills by owner
 - Install skills for all supported agents
+- View security audit status from `skills.sh` before installing
 - View, update, and remove installed skills
 - Check for skill updates with "Update available" badges
 - Filter installed skills by agent
@@ -20,11 +21,11 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 
 ### Search Skills
 
-Search for agent skills from skills.sh with real-time results. View skill details in the inline panel.
+Search for agent skills from skills.sh with real-time results. View skill details in the inline panel, including security audit status when available.
 
 ### Trending Skills
 
-View the top skills ranked by total installs. Browse skill details without leaving the list.
+View the top skills ranked by total installs. Browse skill details without leaving the list and review audit signals before installing.
 
 ### Manage Skills
 

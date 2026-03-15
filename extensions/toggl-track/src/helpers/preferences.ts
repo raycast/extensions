@@ -8,6 +8,9 @@ export const {
   showTasksInForm,
   showTagsInForm,
   timeEntriesLookbackDays,
+  extensionStartScript,
+  extensionStopScript,
+  extensionUpdateScript,
 } = preferences;
 
 const cacheTtlParsed = parseInt(preferences.cacheTtl ?? "0");

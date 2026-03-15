@@ -2,11 +2,15 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { execSync } from "node:child_process";
 import type { ClaudeUsage, ClaudeError } from "./types";
 
 const CLAUDE_CREDENTIALS_PATH = path.join(os.homedir(), ".claude", ".credentials.json");
 const CLAUDE_USAGE_API = "https://api.anthropic.com/api/oauth/usage";
+const KEYCHAIN_SERVICE = "Claude Code-credentials";
 const REQUEST_TIMEOUT = 10000;
+
+type CredentialSource = "file" | "keychain";
 
 interface ClaudeCredentials {
   accessToken: string;
@@ -15,6 +19,8 @@ interface ClaudeCredentials {
   scopes: string[];
   rateLimitTier?: string;
   subscriptionType?: string;
+  source: CredentialSource;
+  keychainAccount?: string;
   raw: {
     claudeAiOauth?: {
       accessToken?: string;
@@ -115,81 +121,165 @@ function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, Math.round(value)));
 }
 
-function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+interface CredentialsParsed {
+  claudeAiOauth?: {
+    accessToken?: string;
+    refreshToken?: string;
+    expiresAt?: number;
+    scopes?: string[];
+    rateLimitTier?: string;
+    rate_limit_tier?: string;
+    subscriptionType?: string;
+    subscription_type?: string;
+  };
+}
+
+function tryDecodeHexJson(text: string): CredentialsParsed | null {
+  let hex = text.trim();
+  if (hex.startsWith("0x") || hex.startsWith("0X")) hex = hex.slice(2);
+  if (!hex || hex.length % 2 !== 0 || !/^[0-9a-fA-F]+$/.test(hex)) return null;
   try {
-    if (!fs.existsSync(CLAUDE_CREDENTIALS_PATH)) {
-      return {
-        credentials: null,
-        error: {
-          type: "not_configured",
-          message: "Claude CLI not configured. Run 'claude' to authenticate.",
-        },
-      };
+    const bytes = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < hex.length; i += 2) {
+      bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
     }
+    const decoded = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
+    return JSON.parse(decoded) as CredentialsParsed;
+  } catch {
+    return null;
+  }
+}
 
-    const raw = fs.readFileSync(CLAUDE_CREDENTIALS_PATH, "utf-8");
-    const parsed = JSON.parse(raw) as {
-      claudeAiOauth?: {
-        accessToken?: string;
-        refreshToken?: string;
-        expiresAt?: number;
-        scopes?: string[];
-        rateLimitTier?: string;
-        rate_limit_tier?: string;
-        subscriptionType?: string;
-        subscription_type?: string;
-      };
-    };
+function tryParseCredentialJSON(text: string): CredentialsParsed | null {
+  try {
+    return JSON.parse(text) as CredentialsParsed;
+  } catch {
+    return tryDecodeHexJson(text);
+  }
+}
 
-    const oauth = parsed.claudeAiOauth;
-    const accessToken = normalizeAccessToken(oauth?.accessToken || "");
-    const refreshToken = oauth?.refreshToken?.trim() || "";
-    const expiresAt = typeof oauth?.expiresAt === "number" ? oauth.expiresAt : undefined;
+function readKeychainPassword(service: string): string | null {
+  try {
+    const result = execSync(`security find-generic-password -s ${JSON.stringify(service)} -w`, {
+      encoding: "utf-8",
+      timeout: 5000,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return result.trim() || null;
+  } catch {
+    return null;
+  }
+}
 
-    if (!accessToken) {
-      return {
-        credentials: null,
-        error: {
-          type: "not_configured",
-          message: "Claude OAuth token missing. Run 'claude' to authenticate.",
-        },
-      };
-    }
+function readKeychainAccount(service: string): string | null {
+  try {
+    const result = execSync(`security find-generic-password -s ${JSON.stringify(service)} -g 2>&1`, {
+      encoding: "utf-8",
+      timeout: 5000,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    const match = result.match(/"acct"<blob>="([^"\n]*)"/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
 
-    const scopes = Array.isArray(oauth?.scopes) ? oauth.scopes : [];
-    const rateLimitTier = pickString(oauth?.rateLimitTier, oauth?.rate_limit_tier);
-    const subscriptionType = pickString(oauth?.subscriptionType, oauth?.subscription_type);
-    if (!scopes.includes("user:profile")) {
-      return {
-        credentials: null,
-        error: {
-          type: "missing_scope",
-          message: "Claude OAuth token missing 'user:profile' scope. Run 'claude setup-token'.",
-        },
-      };
-    }
-
-    return {
-      credentials: {
-        accessToken,
-        refreshToken: refreshToken || undefined,
-        expiresAt,
-        scopes,
-        rateLimitTier,
-        subscriptionType,
-        raw: parsed,
+function writeKeychainPassword(service: string, account: string, value: string): void {
+  try {
+    execSync(
+      `security add-generic-password -U -a ${JSON.stringify(account)} -s ${JSON.stringify(service)} -w ${JSON.stringify(value)}`,
+      {
+        timeout: 5000,
+        stdio: ["pipe", "pipe", "pipe"],
       },
-      error: null,
-    };
-  } catch (error) {
+    );
+  } catch {
+    // Best effort
+  }
+}
+
+function extractCredentials(
+  parsed: CredentialsParsed,
+  source: CredentialSource,
+  keychainAccount?: string,
+): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+  const oauth = parsed.claudeAiOauth;
+  const accessToken = normalizeAccessToken(oauth?.accessToken || "");
+  const refreshToken = oauth?.refreshToken?.trim() || "";
+  const expiresAt = typeof oauth?.expiresAt === "number" ? oauth.expiresAt : undefined;
+
+  if (!accessToken) {
     return {
       credentials: null,
       error: {
-        type: "parse_error",
-        message: error instanceof Error ? error.message : "Failed to read Claude credentials",
+        type: "not_configured",
+        message: "Claude OAuth token missing. Run 'claude' to authenticate.",
       },
     };
   }
+
+  const scopes = Array.isArray(oauth?.scopes) ? oauth.scopes : [];
+  const rateLimitTier = pickString(oauth?.rateLimitTier, oauth?.rate_limit_tier);
+  const subscriptionType = pickString(oauth?.subscriptionType, oauth?.subscription_type);
+  if (!scopes.includes("user:profile")) {
+    return {
+      credentials: null,
+      error: {
+        type: "missing_scope",
+        message: "Claude OAuth token missing 'user:profile' scope. Run 'claude setup-token'.",
+      },
+    };
+  }
+
+  return {
+    credentials: {
+      accessToken,
+      refreshToken: refreshToken || undefined,
+      expiresAt,
+      scopes,
+      rateLimitTier,
+      subscriptionType,
+      source,
+      keychainAccount,
+      raw: parsed,
+    },
+    error: null,
+  };
+}
+
+function readClaudeCredentials(): { credentials: ClaudeCredentials | null; error: ClaudeError | null } {
+  // Strategy 1: Try credentials file first
+  if (fs.existsSync(CLAUDE_CREDENTIALS_PATH)) {
+    try {
+      const text = fs.readFileSync(CLAUDE_CREDENTIALS_PATH, "utf-8");
+      const parsed = tryParseCredentialJSON(text);
+      if (parsed?.claudeAiOauth?.accessToken) {
+        return extractCredentials(parsed, "file");
+      }
+    } catch {
+      // Fall through to keychain
+    }
+  }
+
+  // Strategy 2: Keychain fallback (macOS)
+  if (process.platform === "darwin") {
+    const keychainValue = readKeychainPassword(KEYCHAIN_SERVICE);
+    if (keychainValue) {
+      const parsed = tryParseCredentialJSON(keychainValue);
+      if (parsed?.claudeAiOauth?.accessToken) {
+        return extractCredentials(parsed, "keychain", readKeychainAccount(KEYCHAIN_SERVICE) ?? undefined);
+      }
+    }
+  }
+
+  return {
+    credentials: null,
+    error: {
+      type: "not_configured",
+      message: "Claude CLI not configured. Run 'claude' to authenticate.",
+    },
+  };
 }
 
 function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: OAuthRefreshResponse) {
@@ -206,10 +296,20 @@ function persistRefreshedCredentials(credentials: ClaudeCredentials, refreshed: 
     },
   };
 
-  try {
-    fs.writeFileSync(CLAUDE_CREDENTIALS_PATH, `${JSON.stringify(next, null, 2)}\n`, "utf-8");
-  } catch {
-    // Best effort; continue with refreshed token in memory
+  if (credentials.source === "keychain") {
+    if (credentials.keychainAccount === undefined) {
+      return;
+    }
+
+    // Minified JSON — macOS `security -w` hex-encodes values with newlines,
+    // which Claude Code can't read back, causing it to invalidate the session.
+    writeKeychainPassword(KEYCHAIN_SERVICE, credentials.keychainAccount, JSON.stringify(next));
+  } else {
+    try {
+      fs.writeFileSync(CLAUDE_CREDENTIALS_PATH, `${JSON.stringify(next, null, 2)}\n`, "utf-8");
+    } catch {
+      // Best effort; continue with refreshed token in memory
+    }
   }
 }
 

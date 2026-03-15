@@ -293,7 +293,7 @@
     {
       "name": "currently-playing-menu-bar",
       "title": "Menu Bar Player",
-      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause. Refreshes every 10 seconds.",
+      "description": "See what's currently playing in your Menu Bar. Click for further actions, such as Play/Pause.",
       "disabledByDefault": true,
       "mode": "menu-bar",
       "interval": "10s",

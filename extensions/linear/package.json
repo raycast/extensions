@@ -16,7 +16,8 @@
     "fil",
     "joeb",
     "itsmingjie",
-    "xmok"
+    "xmok",
+    "0xdhrv"
   ],
   "pastContributors": [
     "mathieudutour",
@@ -1591,7 +1592,7 @@
   "dependencies": {
     "@linear/sdk": "^61.0.0",
     "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "file-type": "^20.4.1",
     "lodash": "^4.17.21",

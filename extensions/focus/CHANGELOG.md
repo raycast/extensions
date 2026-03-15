@@ -1,4 +1,18 @@
 # Focus Changelog
+## [Enhancement] - 2026-03-13
+- Commands now close the Raycast window automatically on success, showing a brief HUD notification instead of keeping the window open.
+
+## [Enhancement] - 2026-03-12
+- Fixed an issue where Focus app icon would appear in the Dock when running commands.
+- Improved profile list loading to use caching, so profiles appear instantly on repeat opens.
+- Fixed a bug where stopping a break with a profile would send the unbreak command twice.
+- Fixed a bug where profile names with spaces could produce a malformed URL when stopping a session.
+- Fixed duplicate app install check in the "Stop Focus Session" command.
+- Profile selection view now closes automatically after starting a session.
+- Animated loading indicator no longer appears before validating that Focus is running.
+- Removed unused imports across several commands.
+- Updated dependencies.
+
 ## [Fix] - 2024-08-27
 - Fixed some bugs where commands would fail on V1 of the Focus app.
 - Updated error handling.
