@@ -172,13 +172,13 @@ export default function Command(props: { scope?: string | undefined }) {
                 />
                 <Action.ShowInFinder
                   icon={Icon.Finder}
-                  title="Show In Finder"
+                  title="Show in Finder"
                   path={kMDItemPath}
                   onShow={() => popToRoot({ clearSearchBar: true })}
                 />
                 <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
                 <Action.OpenWith
-                  title="Open With..."
+                  title="Open with…"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                   path={kMDItemPath}
                   onOpen={() => popToRoot({ clearSearchBar: true })}
