@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { ds, OpenInDocuSeal } from "./docuseal";
+import { GetSubmissionResponse, GetSubmissionsResponse } from "@docuseal/api";
 
 export default function SearchTemplates() {
   const {isLoading, data: templates} = useCachedPromise(() => async (options) => {
@@ -24,8 +25,13 @@ export default function SearchTemplates() {
   </List>
 }
 
+function SubmissionsSection({title, submissions}: {title: string, submissions: GetSubmissionsResponse["data"]}) {
+return <List.Section title={title} subtitle={submissions.length.toString()}>
+  
+</List.Section>
+}
 function Submissions({templateId}: {templateId: number}) {
-  const {isLoading, data: submissions} = useCachedPromise((template_id: number) => async(options) => {
+  const {isLoading, data: submissions, mutate} = useCachedPromise((template_id: number) => async(options) => {
     const result = await ds.listSubmissions({template_id, limit: 20, ...options.cursor && {after: options.cursor}});
     return {
       data: result.data,
@@ -35,8 +41,35 @@ function Submissions({templateId}: {templateId: number}) {
   }, [templateId], {initialData: []})
 
   return <List isLoading={isLoading}>
-    {!isLoading && !submissions.length ? <List.EmptyView title="There are no Submissions" description="Send an invitation to fill and complete the form" /> : submissions.map(submission => <List.Item key={submission.id} icon={{value: {source: Icon.CircleFilled, tintColor: submission.status==="completed" ? Color.Green : undefined}, tooltip: submission.status}} title={submission.name || submission.submitters[0].email || ""} actions={<ActionPanel>
+    {!isLoading && !submissions.length ? <List.EmptyView title="There are no Submissions" description="Send an invitation to fill and complete the form" /> : <>
+    <List.Section>
+    {submissions.filter(submission => !submission.archived_at).map(submission => <List.Item key={submission.id} icon={{value: {source: Icon.CircleFilled, tintColor: submission.status==="completed" ? Color.Green : undefined}, tooltip: submission.status}} title={submission.name || submission.submitters[0].email || ""} actions={<ActionPanel>
+      <OpenInDocuSeal title="View" path={`submissions/${submission.id}`} />
+      <Action icon={Icon.Tray} title="Archive" onAction={async() => {
+        const toast = await showToast(Toast.Style.Animated, "Archiving");
+        try {
+          await mutate(
+            ds.archiveSubmission(1212121), {
+              optimisticUpdate(data) {
+                return data.map(s => s.id===submission.id ? ({...s, archived_at: new Date().toUTCString()}) : s)
+              },
+            }
+          )
+          toast.style = Toast.Style.Success;
+          toast.title = "Archived";
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed";
+          toast.message = `${error}`;
+        }
+      }} />
+    </ActionPanel>} />)}
+    </List.Section>
+    <List.Section title="Archived">
+    {submissions.filter(submission => !!submission.archived_at).map(submission => <List.Item key={submission.id} icon={{value: {source: Icon.CircleFilled, tintColor: submission.status==="completed" ? Color.Green : undefined}, tooltip: submission.status}} title={submission.name || submission.submitters[0].email || ""} actions={<ActionPanel>
       <OpenInDocuSeal title="View" path={`submissions/${submission.id}`} />
     </ActionPanel>} />)}
+    </List.Section>
+    </>}
   </List>
 }
