@@ -3,6 +3,12 @@ export interface DocsLink {
   url: string;
 }
 
+export interface RelatedTerm {
+  title: string;
+  slug: string;
+  url: string;
+}
+
 export interface GlossaryTerm {
   id: number;
   title: string;
@@ -26,5 +32,6 @@ export interface DocsSearchResult {
   section?: string;
   type?: string;
   docsLinks?: DocsLink[];
+  relatedTerms?: RelatedTerm[];
   craftVersion?: "1.x" | "2.x" | "3.x" | "4.x" | "5.x";
 }

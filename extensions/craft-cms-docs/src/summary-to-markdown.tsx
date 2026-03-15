@@ -1,6 +1,3 @@
-// src/summary-to-markdown.ts
-import { raycastLinkForSlug } from "./config";
-
 export function summaryHtmlToMarkdown(html: string): string {
   if (!html) return "";
   let s = html;
@@ -15,9 +12,8 @@ export function summaryHtmlToMarkdown(html: string): string {
   s = s.replace(
     /<a\b[^>]*\bhref\s*=\s*"(?:https?:\/\/(?:www\.)?craftcms\.com)?\/glossary\/([A-Za-z0-9-]+)\/?"[^>]*>([\s\S]*?)<\/a>/g,
     (_m, slug: string, text: string) => {
-      const href = raycastLinkForSlug(slug);
-      const cleanText = stripAllTags(text).trim() || slug;
-      return `[${cleanText}](${href})`;
+      const cleanText = escapeInlineCode(stripAllTags(text).trim() || slug);
+      return `\`${cleanText}\``;
     },
   );
 
@@ -37,6 +33,10 @@ export function summaryHtmlToMarkdown(html: string): string {
     .trim();
 
   return s;
+}
+
+function escapeInlineCode(input: string): string {
+  return input.replace(/`/g, "\\`");
 }
 
 function normalizeHref(href: string | undefined): string | undefined {

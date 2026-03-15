@@ -11,10 +11,12 @@ import {
   environment,
   getPreferenceValues,
   open,
+  useNavigation,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { searchDocs, searchGlossary } from "./api";
+import { extractRelatedTermsFromHtml, searchDocs, searchGlossary, splitAssociatedLinks } from "./api";
+import { usePersistentBookmarks } from "./bookmarks-storage";
 import { summaryHtmlToMarkdown } from "./summary-to-markdown";
 import type { DocsSearchResult, GlossaryTerm } from "./types";
 
@@ -51,7 +53,7 @@ const queryCache = new Map<string, DocsSearchResult[]>();
 
 type Props = LaunchProps<{
   arguments: { term?: string };
-  launchContext?: { slug?: string; product?: DocsProduct };
+  launchContext?: { slug?: string; product?: DocsProduct; view?: "detail" };
 }>;
 
 export default function Command(props: Props) {
@@ -59,6 +61,7 @@ export default function Command(props: Props) {
   const argumentTerm = props.arguments?.term?.trim();
   const deeplinkSlug = props.launchContext?.slug?.trim();
   const deeplinkProduct = props.launchContext?.product;
+  const deeplinkView = props.launchContext?.view;
   const forceAllDocsForArgument = Boolean(argumentTerm);
   const initialSearchText = argumentTerm || "";
   const launchSelectedProduct: DocsProduct | undefined =
@@ -70,7 +73,9 @@ export default function Command(props: Props) {
       : DOC_PRODUCTS[0].value;
   const initialGlossaryItems =
     initialSelectedProduct === "glossary" && !initialSearchText
-      ? (readCached(makeRequestCacheKey({ product: "glossary", query: "", version: undefined, scopes: [] })) ?? [])
+      ? hydrateItems(
+          readCached(makeRequestCacheKey({ product: "glossary", query: "", version: undefined, scopes: [] })) ?? [],
+        )
       : [];
   const initialGlossaryIndex = deeplinkSlug ? readGlossaryIndex() : null;
   const initialShouldSearch = initialSearchText.trim().length > 0 || initialSelectedProduct === "glossary";
@@ -87,7 +92,7 @@ export default function Command(props: Props) {
     forceAllDocsForArgument ? "all" : launchSelectedProduct,
   );
   const effectiveSelectedProduct: DocsProduct = launchProductOverride ?? selectedProduct;
-  const [bookmarks, setBookmarks] = useCachedState<DocsSearchResult[]>("craft-docs-bookmarks", []);
+  const [bookmarks, setBookmarks] = usePersistentBookmarks();
   const [recentItems, setRecentItems] = useCachedState<DocsSearchResult[]>(
     "craft-docs-recent",
     readRecentItems() ?? [],
@@ -168,6 +173,13 @@ export default function Command(props: Props) {
     () => (isGlossaryBrowse ? groupByLetter(visibleItems) : null),
     [isGlossaryBrowse, visibleItems],
   );
+  const deeplinkDetailItem = useMemo(() => {
+    if (deeplinkView !== "detail" || !deeplinkSlug) return undefined;
+    return (
+      visibleItems.find((item) => item.slug === deeplinkSlug) ||
+      visibleItems.find((item) => item.slug?.toLowerCase() === deeplinkSlug.toLowerCase())
+    );
+  }, [deeplinkSlug, deeplinkView, visibleItems]);
   const showRecentHome = effectiveSelectedProduct === "all" && !shouldSearch && (recentItems?.length ?? 0) > 0;
   const showPlaceholder =
     (!shouldSearch && !showRecentHome) ||
@@ -255,7 +267,7 @@ export default function Command(props: Props) {
       );
       if (cachedGlossaryItems) {
         const q = query.trim().toLowerCase();
-        const localMatches = cachedGlossaryItems.filter((item) => {
+        const localMatches = hydrateItems(cachedGlossaryItems).filter((item) => {
           const haystack = `${item.title} ${item.slug ?? ""} ${item.summaryPlain ?? ""}`.toLowerCase();
           return haystack.includes(q);
         });
@@ -265,8 +277,9 @@ export default function Command(props: Props) {
 
     const inMemoryCached = queryCache.get(requestCacheKey);
     if (inMemoryCached) {
-      if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(inMemoryCached);
-      setItems(inMemoryCached);
+      const hydratedItems = hydrateItems(inMemoryCached);
+      if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(hydratedItems);
+      setItems(hydratedItems);
       setErrorMessage(null);
       setIsLoading(false);
       return () => controller.abort();
@@ -274,9 +287,11 @@ export default function Command(props: Props) {
 
     const persistedCached = readCached(requestCacheKey);
     if (persistedCached) {
-      if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(persistedCached);
-      queryCache.set(requestCacheKey, persistedCached);
-      setItems(persistedCached);
+      const hydratedItems = hydrateItems(persistedCached);
+      if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(hydratedItems);
+      queryCache.set(requestCacheKey, hydratedItems);
+      writeCached(requestCacheKey, hydratedItems);
+      setItems(hydratedItems);
       setErrorMessage(null);
       setIsLoading(false);
       return () => controller.abort();
@@ -292,17 +307,19 @@ export default function Command(props: Props) {
 
     run
       .then((results) => {
-        if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(results);
-        queryCache.set(requestCacheKey, results);
-        writeCached(requestCacheKey, results);
-        setItems(results);
+        const hydratedItems = hydrateItems(results);
+        if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(hydratedItems);
+        queryCache.set(requestCacheKey, hydratedItems);
+        writeCached(requestCacheKey, hydratedItems);
+        setItems(hydratedItems);
       })
       .catch((error: unknown) => {
         if (error instanceof Error && error.name === "AbortError") return;
         const staleResults = readCached(requestCacheKey, true);
         if (staleResults) {
-          queryCache.set(requestCacheKey, staleResults);
-          setItems(staleResults);
+          const hydratedItems = hydrateItems(staleResults);
+          queryCache.set(requestCacheKey, hydratedItems);
+          setItems(hydratedItems);
           setErrorMessage(null);
           return;
         }
@@ -335,6 +352,23 @@ export default function Command(props: Props) {
     const nextRecentItems = [item, ...existing].slice(0, RECENT_ITEMS_LIMIT);
     writeRecentItems(nextRecentItems);
     setRecentItems(nextRecentItems);
+  }
+
+  if (deeplinkView === "detail") {
+    if (deeplinkDetailItem) {
+      return <DocsDetailView item={deeplinkDetailItem} onOpenItem={recordRecent} />;
+    }
+
+    return (
+      <Detail
+        isLoading={isLoading}
+        markdown={
+          errorMessage
+            ? `# Could Not Open Term\n\n${errorMessage}`
+            : `# Opening Glossary Term\n\nLoading \`${deeplinkSlug ?? "term"}\`...`
+        }
+      />
+    );
   }
 
   return (
@@ -502,13 +536,11 @@ function ResultRow({
               await open(item.url);
             }}
           />
-          {isCompactMode && (
-            <Action.Push
-              title="View Detail"
-              icon={ACTION_ICONS.sidebar}
-              target={<DocsDetailView item={item} onOpenItem={onOpenItem} />}
-            />
-          )}
+          <Action.Push
+            title="View Detail"
+            icon={ACTION_ICONS.sidebar}
+            target={<DocsDetailView item={item} onOpenItem={onOpenItem} />}
+          />
           {(item.docsLinks?.length ?? 0) > 0 && (
             <ActionPanel.Submenu
               title="In the Docs"
@@ -554,7 +586,7 @@ function DocsDetailView({
   item: DocsSearchResult;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
-  const [bookmarks, setBookmarks] = useCachedState<DocsSearchResult[]>("craft-docs-bookmarks", []);
+  const [bookmarks, setBookmarks] = usePersistentBookmarks();
   const isBookmarked = useMemo(
     () => (bookmarks ?? []).some((bookmark) => bookmark.url === item.url),
     [bookmarks, item.url],
@@ -629,7 +661,9 @@ function DocsItemDetail({ item }: { item: DocsSearchResult }) {
 }
 
 function DocsMetadata({ item }: { item: DocsSearchResult }) {
+  const { push } = useNavigation();
   const docs = item.docsLinks ?? [];
+  const relatedTerms = item.relatedTerms ?? [];
   const isGlossaryItem = linkDestinationForUrl(item.url) === "Glossary";
 
   return (
@@ -637,6 +671,19 @@ function DocsMetadata({ item }: { item: DocsSearchResult }) {
       {isGlossaryItem ? (
         <>
           <List.Item.Detail.Metadata.Link title={linkDestinationForUrl(item.url)} text={item.title} target={item.url} />
+          {relatedTerms.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Related Terms">
+              {relatedTerms.map((term) => (
+                <List.Item.Detail.Metadata.TagList.Item
+                  key={`${item.id}-related-${term.slug}`}
+                  text={toTitleCase(term.title)}
+                  onAction={() => {
+                    push(<GlossaryTermDetailRoute slug={term.slug} />);
+                  }}
+                />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
           {docs.length > 0 && <List.Item.Detail.Metadata.Separator />}
           {docs.map((d, i) => (
             <List.Item.Detail.Metadata.Link
@@ -658,9 +705,85 @@ function DocsMetadata({ item }: { item: DocsSearchResult }) {
             />
           ))}
           <List.Item.Detail.Metadata.Link title={linkDestinationForUrl(item.url)} text={item.title} target={item.url} />
+          {relatedTerms.length > 0 && (
+            <List.Item.Detail.Metadata.TagList title="Related Terms">
+              {relatedTerms.map((term) => (
+                <List.Item.Detail.Metadata.TagList.Item
+                  key={`${item.id}-related-${term.slug}`}
+                  text={toTitleCase(term.title)}
+                  onAction={() => {
+                    push(<GlossaryTermDetailRoute slug={term.slug} />);
+                  }}
+                />
+              ))}
+            </List.Item.Detail.Metadata.TagList>
+          )}
         </>
       )}
     </List.Item.Detail.Metadata>
+  );
+}
+
+function GlossaryTermDetailRoute({ slug }: { slug: string }) {
+  const [item, setItem] = useState<DocsSearchResult | null>(() => findGlossaryItemBySlug(slug));
+  const [isLoading, setIsLoading] = useState(item === null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadGlossaryTerm() {
+      const cachedItem = findGlossaryItemBySlug(slug);
+      if (cachedItem) {
+        setItem(cachedItem);
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const results = (await searchGlossary(slug)).map(mapGlossaryTermToDocsResult);
+        const match =
+          results.find((result) => result.slug === slug) ||
+          results.find((result) => result.slug?.toLowerCase() === slug.toLowerCase());
+
+        if (cancelled) return;
+
+        if (!match) {
+          setErrorMessage("Could not find that glossary term.");
+          setIsLoading(false);
+          return;
+        }
+
+        setItem(match);
+        setIsLoading(false);
+      } catch {
+        if (cancelled) return;
+        setErrorMessage("Could not fetch glossary term.");
+        setIsLoading(false);
+      }
+    }
+
+    void loadGlossaryTerm();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [slug]);
+
+  if (item) {
+    return <DocsDetailView item={item} onOpenItem={() => undefined} />;
+  }
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={
+        errorMessage ? `# Could Not Open Term\n\n${errorMessage}` : `# Opening Glossary Term\n\nLoading \`${slug}\`...`
+      }
+    />
   );
 }
 
@@ -1001,6 +1124,9 @@ function buildSearchPlaceholder(product: DocsProduct, preferences: Preferences.S
 }
 
 function mapGlossaryTermToDocsResult(term: GlossaryTerm): DocsSearchResult {
+  const { docsLinks, relatedTerms: relatedTermsFromLinks } = splitAssociatedLinks(term.docsLinks);
+  const relatedTermsFromHtml = extractRelatedTermsFromHtml(term.summaryHtml);
+  const relatedTerms = mergeRelatedTerms(relatedTermsFromLinks, relatedTermsFromHtml);
   return {
     id: `glossary-${term.id}`,
     title: term.title,
@@ -1009,10 +1135,67 @@ function mapGlossaryTermToDocsResult(term: GlossaryTerm): DocsSearchResult {
     summaryPlain: term.summaryPlain,
     summaryHtml: term.summaryHtml,
     type: term.type,
-    docsLinks: term.docsLinks,
+    docsLinks,
+    relatedTerms,
     section: undefined,
     craftVersion: undefined,
   };
+}
+
+function hydrateItems(items: DocsSearchResult[]): DocsSearchResult[] {
+  return items.map((item) => hydrateItem(item));
+}
+
+function hydrateItem(item: DocsSearchResult): DocsSearchResult {
+  if (linkDestinationForUrl(item.url) !== "Glossary") return item;
+
+  const { docsLinks, relatedTerms: relatedTermsFromLinks } = splitAssociatedLinks(item.docsLinks);
+  const relatedTermsFromHtml = extractRelatedTermsFromHtml(item.summaryHtml);
+  const relatedTerms = mergeRelatedTerms(item.relatedTerms, relatedTermsFromLinks, relatedTermsFromHtml);
+
+  if (docsLinks === item.docsLinks && relatedTerms === item.relatedTerms) return item;
+
+  return {
+    ...item,
+    docsLinks,
+    relatedTerms,
+  };
+}
+
+function findGlossaryItemBySlug(slug: string): DocsSearchResult | null {
+  const cachedGlossaryItems = readCached(
+    makeRequestCacheKey({ product: "glossary", query: "", version: undefined, scopes: [] }),
+    true,
+  );
+  if (!cachedGlossaryItems) return null;
+
+  const hydratedItems = hydrateItems(cachedGlossaryItems);
+  return (
+    hydratedItems.find((item) => item.slug === slug) ||
+    hydratedItems.find((item) => item.slug?.toLowerCase() === slug.toLowerCase()) ||
+    null
+  );
+}
+
+function mergeRelatedTerms(
+  ...groups: Array<DocsSearchResult["relatedTerms"] | undefined>
+): DocsSearchResult["relatedTerms"] | undefined {
+  const relatedTerms = groups.flatMap((group) => group ?? []);
+  if (relatedTerms.length === 0) return undefined;
+
+  const seen = new Set<string>();
+  return relatedTerms.filter((term) => {
+    const key = term.slug.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function toTitleCase(value: string): string {
+  return value.replace(/\b([A-Za-z])([A-Za-z']*)/g, (_match, first: string, rest: string) => {
+    return `${first.toUpperCase()}${rest.toLowerCase()}`;
+  });
 }
 
 function groupByLetter(items: DocsSearchResult[]) {
@@ -1035,7 +1218,7 @@ const ACTION_ICONS = {
   globe: { source: `${ASSETS_DIR}/world.svg`, tintColor: Color.SecondaryText },
   book: { source: `${ASSETS_DIR}/book.svg`, tintColor: Color.SecondaryText },
   clipboard: { source: `${ASSETS_DIR}/clipboard.svg`, tintColor: Color.SecondaryText },
-  sidebar: { source: Icon.Sidebar, tintColor: Color.SecondaryText },
+  sidebar: { source: `${ASSETS_DIR}/detail.svg`, tintColor: Color.SecondaryText },
   bookmark: { source: ICONS.bookmarks, tintColor: Color.SecondaryText },
   removeBookmark: { source: ICONS.bookmarkOff, tintColor: Color.SecondaryText },
 } as const;

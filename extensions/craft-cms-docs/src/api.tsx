@@ -1,4 +1,4 @@
-import type { DocsSearchResult, GlossaryTerm } from "./types";
+import type { DocsLink, DocsSearchResult, GlossaryTerm, RelatedTerm } from "./types";
 
 const BASE = "https://craftcms.com/api/glossary";
 const DOCS_SEARCH_BASE = "https://craftcms.com/api/docs/search";
@@ -128,7 +128,7 @@ function normalizeDocsResults(payload: unknown): DocsSearchResult[] {
       getNestedString(row, ["hierarchy", "lvl1"]),
       getNestedString(row, ["hierarchy", "lvl0"]),
     );
-    const docsLinks = extractDocsLinks(row);
+    const { docsLinks, relatedTerms } = splitAssociatedLinks(extractLinkCandidates(row));
     const key = `${title}|${url}`;
     if (seen.has(key)) continue;
     seen.add(key);
@@ -143,6 +143,7 @@ function normalizeDocsResults(payload: unknown): DocsSearchResult[] {
       section: section?.trim(),
       type: type?.trim(),
       docsLinks,
+      relatedTerms,
       craftVersion: inferCraftVersion(url, type),
     });
   }
@@ -218,7 +219,7 @@ function extractGlossarySlug(url: string): string | undefined {
   return match?.[1];
 }
 
-function extractDocsLinks(row: Record<string, unknown>): DocsSearchResult["docsLinks"] | undefined {
+function extractLinkCandidates(row: Record<string, unknown>): DocsLink[] | undefined {
   const candidates = [row.docsLinks, row.docs_links, row.relatedDocs, row.related_docs];
   for (const candidate of candidates) {
     if (!Array.isArray(candidate)) continue;
@@ -234,4 +235,77 @@ function extractDocsLinks(row: Record<string, unknown>): DocsSearchResult["docsL
     if (links.length > 0) return links;
   }
   return undefined;
+}
+
+export function splitAssociatedLinks(links?: DocsLink[]): {
+  docsLinks?: DocsLink[];
+  relatedTerms?: RelatedTerm[];
+} {
+  if (!links?.length) return {};
+
+  const docsLinks: DocsLink[] = [];
+  const relatedTerms: RelatedTerm[] = [];
+  const seenDocs = new Set<string>();
+  const seenTerms = new Set<string>();
+
+  for (const link of links) {
+    const slug = extractGlossarySlug(link.url);
+    if (slug) {
+      const key = slug.toLowerCase();
+      if (seenTerms.has(key)) continue;
+      seenTerms.add(key);
+      relatedTerms.push({ title: link.title, slug, url: link.url });
+      continue;
+    }
+
+    const key = `${link.title}|${link.url}`;
+    if (seenDocs.has(key)) continue;
+    seenDocs.add(key);
+    docsLinks.push(link);
+  }
+
+  return {
+    docsLinks: docsLinks.length > 0 ? docsLinks : undefined,
+    relatedTerms: relatedTerms.length > 0 ? relatedTerms : undefined,
+  };
+}
+
+export function extractRelatedTermsFromHtml(html?: string): RelatedTerm[] | undefined {
+  if (!html) return undefined;
+
+  const relatedTerms: RelatedTerm[] = [];
+  const seenTerms = new Set<string>();
+  const pattern =
+    /<a\b[^>]*\bhref\s*=\s*"(?:https?:\/\/(?:www\.)?craftcms\.com)?\/glossary\/([A-Za-z0-9-]+)\/?"[^>]*>([\s\S]*?)<\/a>/gi;
+
+  for (const match of html.matchAll(pattern)) {
+    const slug = match[1]?.trim();
+    if (!slug) continue;
+
+    const key = slug.toLowerCase();
+    if (seenTerms.has(key)) continue;
+    seenTerms.add(key);
+
+    const title = firstString(stripTags(match[2])) ?? slug;
+    relatedTerms.push({
+      title: title.trim(),
+      slug,
+      url: `https://craftcms.com/glossary/${slug}`,
+    });
+  }
+
+  return relatedTerms.length > 0 ? relatedTerms : undefined;
+}
+
+function stripTags(input: string | undefined): string | undefined {
+  if (!input) return undefined;
+  return input
+    .replace(/<[^>]+>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim();
 }
