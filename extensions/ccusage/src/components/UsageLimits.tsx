@@ -149,7 +149,11 @@ export function UsageLimits() {
         )}
         <List.Item.Detail.Metadata.Label
           title="Resets in"
-          text={`${formatTimeRemaining(data.five_hour.resets_at ?? "N/A")} || ${new Date(data.five_hour.resets_at ?? "N/A").toLocaleString()}`}
+          text={
+            data.five_hour.resets_at
+              ? `${formatTimeRemaining(data.five_hour.resets_at)} || ${new Date(data.five_hour.resets_at).toLocaleString()}`
+              : "N/A"
+          }
           icon={Icon.ArrowClockwise}
         />
         <List.Item.Detail.Metadata.Separator />
@@ -176,7 +180,11 @@ export function UsageLimits() {
         )}
         <List.Item.Detail.Metadata.Label
           title="Resets in"
-          text={`${formatTimeRemaining(data.seven_day.resets_at ?? "N/A")} || ${new Date(data.seven_day.resets_at ?? "N/A").toLocaleString()}`}
+          text={
+            data.seven_day.resets_at
+              ? `${formatTimeRemaining(data.seven_day.resets_at)} || ${new Date(data.seven_day.resets_at).toLocaleString()}`
+              : "N/A"
+          }
           icon={Icon.ArrowClockwise}
         />
 
