@@ -13,7 +13,8 @@ export default function Command() {
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
   const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
 
-  let errorMarkdown = `# Error Loading Installed Skills
+  if (error && skills.length === 0) {
+    let errorMarkdown = `# Error Loading Installed Skills
 
 **Error:** ${error?.message}
 
@@ -28,8 +29,8 @@ If this persists:
 3. Run \`npx -y skills@latest list -g\` in Terminal to inspect the underlying CLI error.
 `;
 
-  if (hasNpxResolutionError) {
-    errorMarkdown = `# Error Loading Installed Skills
+    if (hasNpxResolutionError) {
+      errorMarkdown = `# Error Loading Installed Skills
 
 **Error:** ${error?.message}
 
@@ -41,9 +42,8 @@ This is an npx resolution issue in the local CLI runtime.
 2. Open Extension Preferences (\`Cmd+Shift+,\`).
 3. Set **Custom npx Path** to the path from step 1, then retry.
 `;
-  }
+    }
 
-  if (error && skills.length === 0) {
     return (
       <Detail
         markdown={errorMarkdown}
