@@ -1,6 +1,6 @@
 import { existsSync } from "fs";
 import { execFile } from "child_process";
-import { getPreferenceValues, Preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 const DEFAULT_PATHS = ["/opt/homebrew/bin/mo", "/usr/local/bin/mo"];
 
@@ -12,10 +12,10 @@ export class MoleNotInstalledError extends Error {
 }
 
 export function getMolePath(): string {
-  const { molePath } = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<{ molePath?: string }>();
 
-  if (molePath && existsSync(molePath)) {
-    return molePath;
+  if (prefs.molePath && existsSync(prefs.molePath)) {
+    return prefs.molePath;
   }
 
   for (const candidate of DEFAULT_PATHS) {
