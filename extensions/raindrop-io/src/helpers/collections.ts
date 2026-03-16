@@ -1,96 +1,54 @@
-import { Collection, CollectionItem, CollectionsResponse, Group, UserResponse } from "../types";
+import { Collection, CollectionItem, CollectionsResponse, UserResponse } from "../types";
 
-const collectionsTree: Collection[] = [];
-const treeFlat: CollectionItem[] = [];
+type CollectionNode = Collection & { children: CollectionNode[] };
 
-function buildCollectionTree(treeObject: Collection[], sourceArray: Collection[], level: number) {
-  const nodes = sourceArray.filter((item) => {
-    return (level == 0 && !item.parent) || (item.parent && item.parent["$id"] == level);
-  });
+function normalizeCollections(collections: Collection[] = []) {
+  const nodes = new Map<number, CollectionNode>();
 
-  for (const node of nodes) {
-    const id = node._id;
-    node.children = [];
-    buildCollectionTree(node.children, sourceArray, id);
-    treeObject.push(node);
-  }
-}
-
-type OrderCollectionItem = [string | null, number];
-type OrderedCollections = [string | null, number, Collection | undefined][];
-
-function buildGroupsAndOrder(groups: Group[]) {
-  const output: OrderCollectionItem[] = [];
-
-  if (groups.length > 1) {
-    groups.forEach((group) => {
-      group.collections?.forEach((coll) => {
-        output.push([group.title, coll]);
-      });
-    });
-  } else {
-    groups[0]?.collections?.forEach((coll) => {
-      output.push([null, coll]);
+  for (const collection of collections) {
+    nodes.set(collection._id, {
+      ...collection,
+      children: [],
     });
   }
-  return output;
-}
 
-function orderCollections(tree: Collection[], orderedCollections: OrderCollectionItem[]) {
-  const mappedCollections: OrderedCollections = [];
-  orderedCollections.forEach((coll) => {
-    const c = tree.find((el) => el._id == coll[1]);
-    mappedCollections.push([...coll, c]);
-  });
-  return mappedCollections;
-}
+  const roots: CollectionNode[] = [];
 
-const flatChildCollections = (childColls: Collection[], prefix = "") => {
-  for (let i = 0; i < childColls.length; i++) {
-    const elem = childColls[i];
-    const title = `${prefix} > ${elem.title}`;
-    treeFlat.push({
-      value: elem._id,
-      label: title,
-      name: elem.title,
-      cover: Array.isArray(elem.cover) && elem.cover.length > 0 ? elem.cover[0] : undefined,
-    });
+  for (const node of nodes.values()) {
+    const parentId = node.parent?.$id;
+    const parent = parentId ? nodes.get(parentId) : undefined;
 
-    if (elem.children) {
-      flatChildCollections(elem.children, title);
+    if (parent) {
+      parent.children.push(node);
+    } else {
+      roots.push(node);
     }
   }
-};
 
-const flatCollections = (sortedColls: OrderedCollections) => {
-  sortedColls.forEach((coll) => {
-    const group = coll[0] ? `${coll[0]} - ` : "";
-    const title = `${group}${coll[2]?.title}`;
+  return roots;
+}
 
-    treeFlat.push({
-      value: coll[2]?._id,
-      label: title,
-      name: coll[2]?.title,
-      cover:
-        Array.isArray(coll[2]?.cover) && (coll[2]?.cover as unknown as string[])?.length > 0
-          ? (coll[2]?.cover as unknown as string[])[0]
-          : undefined,
-    });
+function flattenCollections(collections: CollectionNode[], prefix?: string): CollectionItem[] {
+  return collections.flatMap((collection) => {
+    const label = prefix ? `${prefix} > ${collection.title}` : collection.title;
+    const current: CollectionItem = {
+      value: collection._id,
+      label,
+      name: collection.title,
+      cover: Array.isArray(collection.cover) && collection.cover.length > 0 ? collection.cover[0] : undefined,
+    };
 
-    if (coll[2]?.children) {
-      flatChildCollections(coll[2]?.children, title);
-    }
+    return [current, ...flattenCollections(collection.children, label)];
   });
-};
+}
 
-const buildCollectionsOptions = (userData: UserResponse, collections: CollectionsResponse) => {
-  buildCollectionTree(collectionsTree, collections.items, 0);
-  const groups = buildGroupsAndOrder(userData.user.groups);
-  const orderedCollections = orderCollections(collectionsTree, groups);
-
-  treeFlat.splice(0, treeFlat.length);
-  flatCollections(orderedCollections);
-  return treeFlat;
-};
+function buildCollectionsOptions(
+  userOrCollections: UserResponse | CollectionsResponse,
+  collectionsResponse?: CollectionsResponse,
+) {
+  const collections = collectionsResponse ?? (userOrCollections as CollectionsResponse);
+  const roots = normalizeCollections(collections.items);
+  return flattenCollections(roots);
+}
 
 export { buildCollectionsOptions };

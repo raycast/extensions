@@ -1,5 +1,9 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix loading collections in the Save Browser Tab form by building the dropdown options directly from the collections API response.
+
 ## [Windows/Linux Compatibility] - 2026-01-07
 
 - Add Windows to the list of supported platforms.
