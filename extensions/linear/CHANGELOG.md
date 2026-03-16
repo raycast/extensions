@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Search Custom Views]
+## [Search Custom Views] - {PR_MERGE_DATE}
 
 - Added new "Search Custom Views" command to browse custom views and their issues directly within Raycast
 - Custom Views in Favorites now navigate to issue list instead of opening browser
