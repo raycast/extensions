@@ -4,10 +4,6 @@ import { getAccessToken } from "./oauth";
 import { getDate } from "./utils/datetime";
 import { convertMeters, numberWithCommas } from "./utils/measurement";
 
-interface MenuBarPreferences {
-  showScoresInTitle: boolean;
-}
-
 interface OuraScores {
   readiness: number | null;
   sleep: number | null;
@@ -44,8 +40,16 @@ async function fetchScores(): Promise<OuraScores> {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<MenuBarPreferences>();
+  const preferences = getPreferenceValues<Preferences.MenuBar>();
   const { data, isLoading, revalidate, error } = useCachedPromise(fetchScores);
+
+  const launchCommandSafely = async (name: string) => {
+    try {
+      await launchCommand({ name, type: LaunchType.UserInitiated });
+    } catch (error) {
+      console.error(`Failed to launch command: ${name}`, error);
+    }
+  };
 
   let title: string | undefined;
   if (preferences.showScoresInTitle && data) {
@@ -71,26 +75,23 @@ export default function Command() {
           <MenuBarExtra.Section title="Scores">
             <MenuBarExtra.Item
               title={`Readiness: ${data?.readiness ?? "N/A"}`}
-              onAction={() => launchCommand({ name: "readiness", type: LaunchType.UserInitiated })}
+                onAction={() => launchCommandSafely("readiness")}
             />
-            <MenuBarExtra.Item
-              title={`Sleep: ${data?.sleep ?? "N/A"}`}
-              onAction={() => launchCommand({ name: "sleep", type: LaunchType.UserInitiated })}
-            />
+              <MenuBarExtra.Item title={`Sleep: ${data?.sleep ?? "N/A"}`} onAction={() => launchCommandSafely("sleep")} />
             <MenuBarExtra.Item
               title={`Activity: ${data?.activity ?? "N/A"}`}
-              onAction={() => launchCommand({ name: "activity", type: LaunchType.UserInitiated })}
+                onAction={() => launchCommandSafely("activity")}
             />
           </MenuBarExtra.Section>
 
           <MenuBarExtra.Section title="Activity Details">
             <MenuBarExtra.Item
               title={`Steps: ${data?.steps != null ? numberWithCommas(data.steps) : "N/A"}`}
-              onAction={() => launchCommand({ name: "activity", type: LaunchType.UserInitiated })}
+                onAction={() => launchCommandSafely("activity")}
             />
             <MenuBarExtra.Item
               title={`Distance: ${data?.distance != null ? convertMeters(data.distance) : "N/A"}`}
-              onAction={() => launchCommand({ name: "activity", type: LaunchType.UserInitiated })}
+                onAction={() => launchCommandSafely("activity")}
             />
           </MenuBarExtra.Section>
 
