@@ -23,6 +23,7 @@ import {
   getLocationTitle,
   getRecordJsonUrl,
   getRecordUrl,
+  getDisplayValue,
   relationMatchesRecord,
   toChallengeEntries,
   unwrapRecord,
@@ -84,11 +85,29 @@ export function ChallengeDetail({ entry }: { entry: ChallengeEntry }) {
     [push],
   );
 
+  const handleOpenTShirt = useCallback(() => {
+    const title = getDisplayValue(resolvedRecord, ["title", "name", "challenge_name", "slug"], entry.title);
+    const id = getDisplayValue(resolvedRecord, ["id"], "");
+    const slug = getDisplayValue(resolvedRecord, ["slug"], "");
+    const url = getRecordUrl(resolvedRecord);
+
+    push(
+      <RelatedTShirtScreen
+        relation={{
+          title,
+          ...(id ? { id } : {}),
+          ...(slug ? { slug } : {}),
+          ...(url ? { url } : {}),
+        }}
+      />,
+    );
+  }, [entry.title, push, resolvedRecord]);
+
   return (
     <Detail
       isLoading={isResolvingRecord}
       markdown={buildDetailMarkdown(entry, resolvedRecord)}
-      metadata={buildDetailMetadata(resolvedRecord, handleOpenRelation)}
+      metadata={buildDetailMetadata(resolvedRecord, handleOpenRelation, handleOpenTShirt)}
       actions={
         <ActionPanel>
           {getRecordUrl(resolvedRecord) ? (
@@ -188,6 +207,7 @@ export function tShirtEntryActions(entry: ChallengeEntry) {
 export function TShirtDetail({ entry }: { entry: ChallengeEntry }) {
   return (
     <Detail
+      navigationTitle={RESOURCE_CONFIG.tshirts.title}
       markdown={entry.thumbnailUrl ? `![${entry.title}](${entry.thumbnailUrl})` : `# ${entry.title}`}
       actions={
         <ActionPanel>
@@ -197,6 +217,68 @@ export function TShirtDetail({ entry }: { entry: ChallengeEntry }) {
             icon={CHALLENGES_ACTION_ICON}
           />
         </ActionPanel>
+      }
+    />
+  );
+}
+
+export function RelatedTShirtScreen({ relation }: { relation: RelationItem }) {
+  const [matchedEntry, setMatchedEntry] = useState<ChallengeEntry | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setMatchedEntry(null);
+    setIsLoading(true);
+    setError(null);
+
+    void (async () => {
+      try {
+        const loadedEntries = await fetchAllEntriesForFilter("tshirts");
+        if (cancelled) {
+          return;
+        }
+
+        const nextMatchedEntry = loadedEntries.find((entry) => relationMatchesRecord(relation, entry.record));
+        if (!nextMatchedEntry) {
+          setError(`Couldn't find ${relation.title} in ${RESOURCE_CONFIG.tshirts.title}.`);
+          setIsLoading(false);
+          return;
+        }
+
+        setMatchedEntry(nextMatchedEntry);
+        setIsLoading(false);
+      } catch (loadError) {
+        if (cancelled) {
+          return;
+        }
+
+        setError(loadError instanceof Error ? loadError.message : `Failed to load ${RESOURCE_CONFIG.tshirts.title}.`);
+        setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [relation]);
+
+  if (matchedEntry) {
+    return <TShirtDetail entry={matchedEntry} />;
+  }
+
+  return (
+    <Detail
+      navigationTitle={RESOURCE_CONFIG.tshirts.title}
+      isLoading={isLoading}
+      markdown=""
+      metadata={
+        error ? (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Error" text={error} />
+          </Detail.Metadata>
+        ) : undefined
       }
     />
   );

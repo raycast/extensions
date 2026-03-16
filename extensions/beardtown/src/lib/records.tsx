@@ -479,6 +479,11 @@ export function getTShirtImageUrl(record: ApiRecord): string {
   return "";
 }
 
+export function hasTShirt(record: ApiRecord): boolean {
+  const fields = asObject(record.fields);
+  return normalizeRelationRecords(fields?.tShirt ?? record.tShirt).map(unwrapRecord).length > 0;
+}
+
 export function getNonChallengeListIcon(entry: ChallengeEntry): List.Item.Props["icon"] {
   if (!entry.thumbnailUrl) {
     return undefined;
@@ -927,7 +932,11 @@ export function getDetailTitle(record: ApiRecord, fallbackTitle: string): string
   return `${fallbackTitle} Challenge`;
 }
 
-export function buildDetailMetadata(record: ApiRecord, onOpenRelation: (item: RelationItem) => void) {
+export function buildDetailMetadata(
+  record: ApiRecord,
+  onOpenRelation: (item: RelationItem) => void,
+  onOpenTShirt?: () => void,
+) {
   const locationTitle = getLocationTitle(record);
   const dateValue = formatLongDate(
     getChallengeFieldValue(record, ["videoReleased", "date", "challenge_date", "event_date", "postDate"], ""),
@@ -1066,6 +1075,13 @@ export function buildDetailMetadata(record: ApiRecord, onOpenRelation: (item: Re
             onAction={() => onOpenRelation(item)}
           />
         ))}
+      </Detail.Metadata.TagList>,
+    );
+  }
+  if (onOpenTShirt && hasTShirt(record)) {
+    relationsSection.push(
+      <Detail.Metadata.TagList key="tshirt" title="T-Shirt">
+        <Detail.Metadata.TagList.Item text="View in Gallery" onAction={onOpenTShirt} />
       </Detail.Metadata.TagList>,
     );
   }
