@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snapocr-via-paddle",
   "title": "SnapOCR Via Paddle",
-  "description": "Snap a screenshot and recognize text via Baidu AIStudio PaddleOCR API, optimized for Chinese handwritten and vertical layouts",
+  "description": "Turn screenshots into structured Markdown with PaddleOCR, built for Chinese handwriting, vertical text, and complex documents",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -16,13 +16,13 @@
     {
       "name": "quick-ocr",
       "title": "Quick OCR",
-      "description": "Take a screenshot and copy recognized text to clipboard",
+      "description": "Capture a screenshot and instantly copy structured OCR text",
       "mode": "no-view"
     },
     {
       "name": "preview-ocr",
       "title": "Preview OCR",
-      "description": "Take a screenshot and preview recognized text in a detail view",
+      "description": "Capture a screenshot and review structured OCR output",
       "mode": "view"
     }
   ],
