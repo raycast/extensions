@@ -1,6 +1,6 @@
 # models.dev Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-03-16
 
 ### Changed
 
