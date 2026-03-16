@@ -176,9 +176,10 @@ export default function MenuBarCommand() {
       }))
     : [];
 
-  const allAgents: MenuBarAgent[] = [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents];
-
-  const visibleAgents = useMemo(() => allAgents.filter((a) => a.visible), [allAgents]);
+  const visibleAgents = useMemo(
+    () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
+    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+  );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
   // Auto-refresh when user clicks the menu bar icon (after initial load completes)

@@ -119,12 +119,12 @@ export function useAmpUsage(enabled = true) {
   const isLoading = enabled ? execLoading || !pathDetected || !hasInitialFetch : false;
 
   // 重新验证（手动刷新）
-  const revalidate = useCallback(() => {
+  const revalidate = useCallback(async () => {
     if (!enabled) {
       return;
     }
     setFetchKey((k) => k + 1);
-    void execRevalidate();
+    await execRevalidate();
   }, [enabled, execRevalidate]);
 
   return {
