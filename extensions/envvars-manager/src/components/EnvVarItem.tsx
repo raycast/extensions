@@ -11,7 +11,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { exec } from "node:child_process";
+import { spawn } from "node:child_process";
 import { deleteEnvVar } from "../utils/powershell";
 import {
   EnvVar,
@@ -102,7 +102,7 @@ export function EnvVarItem({ envVar, onRefresh }: EnvVarItemProps) {
     <List.Item
       title={envVar.name}
       icon={isPath ? Icon.Folder : Icon.Key}
-      keywords={[envVar.value, envVar.name, envVar.scope]}
+      keywords={[envVar.name, envVar.scope]}
       accessories={[
         ...(sensitive
           ? [{ tag: { value: "sensitive", color: Color.Red } }]
@@ -160,11 +160,18 @@ export function EnvVarItem({ envVar, onRefresh }: EnvVarItemProps) {
                 title="Edit in Path Editor"
                 icon={Icon.Terminal}
                 shortcut={{ modifiers: ["cmd"], key: "p" }}
-                onAction={() => {
-                  launchCommand({
-                    name: "edit-path",
-                    type: LaunchType.UserInitiated,
-                  });
+                onAction={async () => {
+                  try {
+                    await launchCommand({
+                      name: "edit-path",
+                      type: LaunchType.UserInitiated,
+                    });
+                  } catch {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to open PATH editor",
+                    });
+                  }
                 }}
               />
             )}
@@ -173,7 +180,9 @@ export function EnvVarItem({ envVar, onRefresh }: EnvVarItemProps) {
               icon={Icon.Globe}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               onAction={() =>
-                exec("rundll32 sysdm.cpl,EditEnvironmentVariables")
+                spawn("rundll32", ["sysdm.cpl,EditEnvironmentVariables"], {
+                  detached: true,
+                })
               }
             />
           </ActionPanel.Section>

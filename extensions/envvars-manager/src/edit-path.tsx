@@ -156,7 +156,7 @@ export default function EditPath() {
         title: "Failed to save PATH",
         message,
       });
-      loadPaths();
+      await loadPaths();
     }
   }
 
@@ -238,6 +238,12 @@ export default function EditPath() {
           />
         ))}
       </List.Section>
+      {!isLoading && userEntries.length + machineEntries.length === 0 && (
+        <List.EmptyView
+          title="No PATH entries"
+          description="No PATH entries found"
+        />
+      )}
     </List>
   );
 }

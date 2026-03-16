@@ -13,39 +13,39 @@ A keyboard-first alternative to the Windows Environment Variables dialog. Browse
 
 ## Commands
 
-| Command | Description | Shortcut |
-|---------|-------------|----------|
-| List Environment Variables | Browse and manage all env vars | — |
-| Edit PATH Variable | Dedicated PATH entry editor | — |
-| Add Environment Variable | Create a new variable | — |
+| Command                    | Description                    | Shortcut |
+| -------------------------- | ------------------------------ | -------- |
+| List Environment Variables | Browse and manage all env vars | —        |
+| Edit PATH Variable         | Dedicated PATH entry editor    | —        |
+| Add Environment Variable   | Create a new variable          | —        |
 
 ## Keyboard Shortcuts
 
 ### List Environment Variables
 
-| Action | Shortcut |
-|--------|----------|
-| Copy Value | ↵ |
-| Copy Name | ⌘⇧C |
-| Copy as SET | ⌘⇧E |
-| Edit Variable | ⌘E |
-| Edit in PATH Editor | ⌘P |
-| Open System Dialog | ⌘O |
-| Add New Variable | ⌘N |
-| Delete Variable | ⌃X |
-| Refresh | ⌘R |
+| Action              | Shortcut |
+| ------------------- | -------- |
+| Copy Value          | ↵        |
+| Copy Name           | ⌘⇧C      |
+| Copy as SET         | ⌘⇧E      |
+| Edit Variable       | ⌘E       |
+| Edit in PATH Editor | ⌘P       |
+| Open System Dialog  | ⌘O       |
+| Add New Variable    | ⌘N       |
+| Delete Variable     | ⌃X       |
+| Refresh             | ⌘R       |
 
 ### Edit PATH Variable
 
-| Action | Shortcut |
-|--------|----------|
-| Copy Path | ↵ |
-| Open in Explorer | ⌘O |
-| Move Up | ⌘↑ |
-| Move Down | ⌘↓ |
-| Add New Entry | ⌘N |
-| Remove Entry | ⌃X |
-| Refresh | ⌘R |
+| Action           | Shortcut |
+| ---------------- | -------- |
+| Copy Path        | ↵        |
+| Open in Explorer | ⌘O       |
+| Move Up          | ⌘↑       |
+| Move Down        | ⌘↓       |
+| Add New Entry    | ⌘N       |
+| Remove Entry     | ⌃X       |
+| Refresh          | ⌘R       |
 
 ## Permissions
 

@@ -79,6 +79,12 @@ export default function ListEnvVars() {
           ))}
         </List.Section>
       )}
+      {!isLoading && vars.length === 0 && (
+        <List.EmptyView
+          title="No environment variables"
+          description="No variables found"
+        />
+      )}
     </List>
   );
 }
