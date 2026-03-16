@@ -53,9 +53,16 @@ interface DiffResult {
   corrections: number;
 }
 
-function computeDiff(original: string, corrected: string): DiffResult {
+export const MAX_DIFF_WORDS = 100;
+
+export function computeDiff(original: string, corrected: string): DiffResult {
   const oldWords = original.split(/(\s+)/);
   const newWords = corrected.split(/(\s+)/);
+
+  // Skip diff for very long texts to avoid O(m*n) memory issues
+  if (oldWords.length > MAX_DIFF_WORDS || newWords.length > MAX_DIFF_WORDS) {
+    return { markdown: corrected, corrections: 1 };
+  }
 
   // LCS-based word diff
   const m = oldWords.length;
@@ -396,7 +403,7 @@ export default function CheckGrammar() {
   useEffect(() => {
     if (token && authChecked) run();
     if (!token && authChecked) setIsLoading(false);
-  }, [token, authChecked]);
+  }, [token, authChecked, run]);
 
   // --- Not authenticated ---
   if (authChecked && !token) {
