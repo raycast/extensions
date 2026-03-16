@@ -4,9 +4,9 @@ Turn any screenshot into clean, structured Markdown with [PaddleOCR](https://git
 
 把任意截图快速变成干净、可复制的结构化 Markdown。SnapOCR 是一个基于 Paddle `layout-parsing` 接口的 Raycast OCR 工作流，不是那种“先 OCR 出一坨文字，再自己想办法分块”的方案。它会先理解页面结构，再按标题、正文、表格、公式等版面区域逐块识别，这正是通用 OCR 经常识别不准或直接丢失结构的地方。
 
-Powered by the PaddleOCR-VL model through [Baidu AIStudio](https://aistudio.baidu.com/paddleocr), SnapOCR gives you stronger OCR without local models, native dependencies, or command-line setup. Bring your own free AIStudio account, take a screenshot, and get usable output in seconds.
+Powered by the PaddleOCR-VL model through [Baidu AIStudio](https://aistudio.baidu.com/paddleocr), SnapOCR gives you stronger OCR without local models, native dependencies, or command-line setup. Bring your own free Baidu AIStudio account, take a screenshot, and get usable output in seconds.
 
-文字识别由 PaddleOCR-VL 模型提供支持，通过[百度 AIStudio](https://aistudio.baidu.com/paddleocr) 云端 API 调用。无需本地模型、无需原生依赖，也不用折腾命令行环境；只要准备一个免费的 AIStudio 账号，截一张图，几秒内就能拿到真正可用的结果。
+文字识别由 PaddleOCR-VL 模型提供支持，通过[百度 AIStudio](https://aistudio.baidu.com/paddleocr) 云端 API 调用。无需本地模型、无需原生依赖，也不用折腾命令行环境；只要准备一个免费的百度 AIStudio 账号，截一张图，几秒内就能拿到真正可用的结果。
 
 ## Why It Stands Out | 为什么更值得用
 
@@ -81,9 +81,9 @@ You need a free [Baidu AIStudio](https://aistudio.baidu.com) account to get the 
 
 你需要一个免费的[百度 AIStudio](https://aistudio.baidu.com) 账号来获取 API 凭据。API 由百度 AIStudio 平台提供。
 
-AIStudio also offers a free allowance for PaddleOCR, which is usually enough for personal day-to-day screenshot OCR usage. Check the official PaddleOCR page for the current quota and pricing details.
+Baidu AIStudio also offers a free allowance for PaddleOCR, which is usually enough for personal day-to-day screenshot OCR usage. Check the official PaddleOCR page for the current quota and pricing details.
 
-AIStudio 也提供 PaddleOCR 的免费额度，通常足够覆盖个人日常截图 OCR 使用。具体额度和计费细则请以官方 PaddleOCR 页面当时显示的信息为准。
+百度 AIStudio 也提供 PaddleOCR 的免费额度，通常足够覆盖个人日常截图 OCR 使用。具体额度和计费细则请以官方 PaddleOCR 页面当时显示的信息为准。
 
 ### 1. Get API URL and Access Token | 获取 API URL 和 Access Token
 
