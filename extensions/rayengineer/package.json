@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rayengineer",
+  "title": "RayEngineer",
+  "description": "Jira time tracking - browse tasks, track time, log worklogs",
+  "icon": "rayengineer.png",
+  "author": "franio",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-tasks",
+      "title": "Browse Tasks",
+      "subtitle": "Jira",
+      "description": "Browse active Jira tasks and start/stop time tracking",
+      "mode": "view"
+    },
+    {
+      "name": "quick-start",
+      "title": "Start Timer",
+      "subtitle": "Jira",
+      "description": "Start a timer from a Jira issue key in clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop Timer",
+      "subtitle": "Jira",
+      "description": "Stop running timer, adjust time, log to Jira or discard",
+      "mode": "view"
+    },
+    {
+      "name": "timer-menu",
+      "title": "Menu Bar Timer",
+      "subtitle": "Jira",
+      "description": "Shows running timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jiraUrl",
+      "title": "Jira URL",
+      "description": "Your Jira instance URL (e.g. https://company.atlassian.net)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://company.atlassian.net"
+    },
+    {
+      "name": "jiraEmail",
+      "title": "Jira Email",
+      "description": "Your Jira account email",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "jiraApiToken",
+      "title": "Jira API Token",
+      "description": "Your Jira API token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
