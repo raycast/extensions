@@ -1,0 +1,67 @@
+{
+  "name": "sessiondock-raycast",
+  "title": "SessionDock",
+  "version": "1.0.0",
+  "description": "Raycast extension for SessionDock Local API",
+  "icon": "command-icon.png",
+  "author": "chris-warner",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "main": "src/search-sessions.tsx",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build --environment dist --output .dist",
+    "publish": "ray publish",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.76.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "commands": [
+    {
+      "name": "search-sessions",
+      "title": "Search Sessions",
+      "description": "Search sessions, open in SessionDock, and copy notes",
+      "mode": "view"
+    },
+    {
+      "name": "create-session",
+      "title": "Create New Session",
+      "description": "Create a new SessionDock session",
+      "mode": "view"
+    },
+    {
+      "name": "open-latest-session",
+      "title": "Open Latest Session",
+      "description": "Open the most recently opened session in SessionDock",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "API Base URL",
+      "description": "SessionDock Local API base URL including /api/v1",
+      "default": "http://localhost:18432/api/v1"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "SessionDock Local API bearer token"
+    }
+  ]
+}
