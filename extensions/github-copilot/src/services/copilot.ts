@@ -159,7 +159,7 @@ async function createTask(
   branch: string,
   model: string | null,
   customAgent: string | null,
-): Promise<{ taskUrl: string }> {
+): Promise<{ taskUrl: string; taskId: string }> {
   const { token } = getAccessToken();
 
   // Parse repository into owner and repo name
@@ -213,7 +213,7 @@ async function createTask(
   // URL format: https://github.com/{owner}/{repo}/tasks/{task_id}
   const taskUrl = `https://github.com/${ownerName}/${repoName}/tasks/${createTaskResult.task.id}`;
 
-  return { taskUrl };
+  return { taskUrl, taskId: createTaskResult.task.id };
 }
 
 const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
