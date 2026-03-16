@@ -180,7 +180,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
             <Form.Dropdown.Item
               key={value}
               value={`${value ?? "-1"}`}
-              title={name ?? label}
+              title={name && name !== label ? `${name} (${label})` : label}
               icon={cover ? { source: cover } : { source: Icon.Folder }}
             />
           ))}
