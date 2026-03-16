@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [TypeScript Migration & Model Updates] - {PR_MERGE_DATE}
+## [TypeScript Migration & Model Updates] - 2026-03-16
 
 - 🛠️ Migrated entire codebase from JSX to TypeScript (TSX/TS) for improved type safety.
 - ⬆️ Updated `@google/genai` SDK from ^1.37.0 to ^1.44.0.
