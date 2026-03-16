@@ -18,13 +18,6 @@ import { useEffect, useState } from "react";
 import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
 
-interface GeminiPreferences {
-  apiKey: string;
-  model: string;
-  customModel: string;
-  defaultModel: string;
-}
-
 interface GeminiProps {
   arguments: Record<string, string | undefined>;
   fallbackText?: string;
@@ -48,9 +41,10 @@ export default (
   let { query: argQuery } = props.arguments;
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
-  const { apiKey, model, customModel } = getPreferenceValues<GeminiPreferences>();
-  const isCustomModelValid = Boolean(customModel && customModel.trim().length > 0);
-  const defaultModel = isCustomModelValid ? customModel : getPreferenceValues<GeminiPreferences>().defaultModel;
+  const prefs = getPreferenceValues<Preferences & { model: string }>();
+  const { apiKey, model } = prefs;
+  const isCustomModelValid = Boolean(prefs.customModel && prefs.customModel.trim().length > 0);
+  const defaultModel: string = isCustomModelValid ? prefs.customModel! : prefs.defaultModel;
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);

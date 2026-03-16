@@ -1,11 +1,7 @@
 import { getPreferenceValues, LaunchProps } from "@raycast/api";
 import askScreenshot from "./askScreenshot";
 
-interface CommandPreferences {
-  prompt: string;
-}
-
 export default async function AskAboutScreenContent(props: LaunchProps) {
-  const { prompt } = getPreferenceValues<CommandPreferences>();
+  const { prompt } = getPreferenceValues<Preferences.AskAboutScreen>();
   await askScreenshot(props, prompt, false);
 }

@@ -1,12 +1,8 @@
 import useGemini from "./api/gemini";
 import { getPreferenceValues, LaunchProps } from "@raycast/api";
 
-interface CommandPreferences {
-  prompt: string;
-}
-
 export default function Longer(props: LaunchProps) {
-  const { prompt } = getPreferenceValues<CommandPreferences>();
+  const { prompt } = getPreferenceValues<Preferences.Longer>();
   return useGemini(props, {
     context: prompt,
     allowPaste: true,

@@ -8,12 +8,8 @@ interface AskAILaunchContext {
   useSelected?: boolean;
 }
 
-interface CommandPreferences {
-  prompt: string;
-}
-
 export default function AskAI(props: LaunchProps<{ arguments: { query: string }; launchContext: AskAILaunchContext }>) {
-  const { prompt } = getPreferenceValues<CommandPreferences>();
+  const { prompt } = getPreferenceValues<Preferences.AskAI>();
   if (props?.launchContext?.buffer) {
     return useGemini(
       { ...props, arguments: props?.launchContext?.args ?? props.arguments },

@@ -1,11 +1,7 @@
 import useGemini from "./api/gemini";
 import { getPreferenceValues, LaunchProps } from "@raycast/api";
 
-interface CommandPreferences {
-  prompt: string;
-}
-
 export default function Summarize(props: LaunchProps) {
-  const { prompt } = getPreferenceValues<CommandPreferences>();
+  const { prompt } = getPreferenceValues<Preferences.Summarize>();
   return useGemini(props, { context: prompt, useSelected: true });
 }

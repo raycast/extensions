@@ -43,11 +43,6 @@ interface ChatLaunchContext {
   creationName?: string;
 }
 
-interface ChatPreferences {
-  apiKey: string;
-  defaultModel: string;
-}
-
 export default function Chat({ launchContext }: LaunchProps<{ launchContext: ChatLaunchContext }>) {
   const toast = async (style: Toast.Style, title: string, message?: string) => {
     await showToast({
@@ -66,7 +61,7 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
     });
   }
 
-  const { apiKey, defaultModel } = getPreferenceValues<ChatPreferences>();
+  const { apiKey, defaultModel } = getPreferenceValues<Preferences.AiChat>();
   const genAI = new GoogleGenAI({ apiKey });
   const createNewChatName = (prefix = "New Chat ") => {
     const existingChatNames = chatData!.chats.map((x) => x.name);
