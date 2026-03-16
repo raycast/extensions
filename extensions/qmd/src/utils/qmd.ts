@@ -1,10 +1,18 @@
 import { exec, execSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { homedir, platform } from "node:os";
-import { join, dirname as path_dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
-import type { DependencyStatus, QmdCollection, QmdContext, QmdFileListItem, QmdResult, ScoreColor } from "../types";
+import type {
+  DependencyStatus,
+  QmdCollection,
+  QmdContext,
+  QmdFileListItem,
+  QmdHint,
+  QmdResult,
+  ScoreColor,
+} from "../types";
 import { collectionsLogger, qmdLogger } from "./logger";
 import { parseCollectionList, parseContextList, parseFileList } from "./parsers";
 
@@ -92,16 +100,99 @@ export function getCollectionPaths(): Record<string, string> {
 // ============================================================================
 
 /**
+ * Resolve the bin path for nvm-managed node (reads ~/.nvm/alias/default)
+ */
+function resolveNvmNodePath(home: string): string[] {
+  try {
+    const aliasPath = join(home, ".nvm", "alias", "default");
+    if (!existsSync(aliasPath)) {
+      return [];
+    }
+    const version = readFileSync(aliasPath, "utf-8").trim();
+    if (!version) {
+      return [];
+    }
+    // Handle both "v22.17.0" and "22.17.0" formats
+    const normalizedVersion = version.startsWith("v") ? version : `v${version}`;
+    const binPath = join(home, ".nvm", "versions", "node", normalizedVersion, "bin");
+    if (existsSync(binPath)) {
+      return [binPath];
+    }
+    // Try matching a prefix (e.g., alias says "22" meaning latest v22.x)
+    const versionsDir = join(home, ".nvm", "versions", "node");
+    if (!existsSync(versionsDir)) {
+      return [];
+    }
+    const matched = readdirSync(versionsDir)
+      .filter((d) => d.startsWith(`v${version.replace(/^v/, "")}`))
+      .sort()
+      .pop();
+    if (matched) {
+      const matchedBin = join(versionsDir, matched, "bin");
+      if (existsSync(matchedBin)) {
+        return [matchedBin];
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+/**
+ * Resolve the bin path for fnm-managed node
+ */
+function resolveFnmNodePath(home: string): string[] {
+  try {
+    const currentBin = join(home, ".fnm", "current", "bin");
+    if (existsSync(currentBin)) {
+      return [currentBin];
+    }
+    const xdgBin = join(home, ".local", "share", "fnm", "current", "bin");
+    if (existsSync(xdgBin)) {
+      return [xdgBin];
+    }
+  } catch {
+    // ignore
+  }
+  return [];
+}
+
+/**
  * Get environment with extended PATH for Raycast sandbox
  * Raycast doesn't inherit the user's shell PATH, so we need to add common paths
  */
 function getEnvWithPath(): NodeJS.ProcessEnv {
   const home = homedir();
+  const preferences = getPreferenceValues<Preferences>();
+
+  // If user configured custom executable paths, add their directories to PATH
+  // so the qmd shell script can find the correct runtime
+  const customPaths: string[] = [];
+  if (preferences.bunExecutablePath) {
+    const expanded = expandPath(preferences.bunExecutablePath);
+    if (existsSync(expanded)) {
+      customPaths.push(dirname(expanded));
+    }
+  }
+  if (preferences.qmdExecutablePath) {
+    const expanded = expandPath(preferences.qmdExecutablePath);
+    if (existsSync(expanded)) {
+      customPaths.push(dirname(expanded));
+    }
+  }
+
   const additionalPaths = [
-    join(home, ".bun", "bin"), // Bun default install location
-    join(home, ".local", "bin"), // Common user bin
+    ...customPaths,
+    // Node paths first — npm-installed qmd has working sqlite-vec on macOS,
+    // while bun-installed qmd does not (bun's SQLite disables extension loading)
+    ...resolveNvmNodePath(home), // nvm managed node
+    ...resolveFnmNodePath(home), // fnm managed node
+    join(home, ".volta", "bin"), // Volta
     "/opt/homebrew/bin", // Homebrew on Apple Silicon
     "/usr/local/bin", // Homebrew on Intel Mac / common location
+    join(home, ".bun", "bin"), // Bun default install location
+    join(home, ".local", "bin"), // Common user bin
     "/usr/bin",
     "/bin",
   ];
@@ -172,28 +263,42 @@ function getQmdScript(): string {
     });
   }
 
-  const qmdInHome = join(homedir(), ".bun", "bin", "qmd");
-  if (existsSync(qmdInHome)) {
-    return qmdInHome;
-  }
-
+  // Prefer PATH lookup to respect the user's installed version (npm vs bun)
   const qmdInPath = findInPath("qmd");
   if (qmdInPath) {
     return qmdInPath;
   }
 
+  // Fall back to bun global install location
+  const qmdInHome = join(homedir(), ".bun", "bin", "qmd");
   return qmdInHome;
 }
 
 /**
- * Build a shell command that sets PATH and runs qmd
+ * Get environment for running qmd commands.
+ * Extends PATH for Raycast's sandbox and strips BUN_INSTALL for non-bun
+ * qmd installs to prevent the shell script from incorrectly using bun
+ * (which would cause ABI mismatches with npm-compiled native modules).
+ */
+function getQmdEnv(): NodeJS.ProcessEnv {
+  const env = getEnvWithPath();
+  const qmdPath = getQmdScript();
+  if (!qmdPath.includes("/.bun/")) {
+    env.BUN_INSTALL = undefined;
+  }
+  return env;
+}
+
+/**
+ * Build a shell command to run qmd.
+ * Invokes the qmd shell script directly and lets it handle runtime detection
+ * (bun vs node). The env passed to execAsync includes extended PATH so the
+ * script can find the correct runtime.
  */
 function buildQmdShellCommand(args: string[]): string {
   const qmdPath = getQmdScript();
-  const qmdDir = path_dirname(qmdPath);
-  // Escape single quotes in args for shell safety
   const escapedArgs = args.map((arg) => `'${arg.replace(/'/g, "'\\''")}'`).join(" ");
-  return `export PATH="${qmdDir}:$PATH" && qmd ${escapedArgs}`;
+  return `'${qmdPath.replace(/'/g, "'\\''")}' ${escapedArgs}`;
 }
 
 /**
@@ -303,18 +408,58 @@ export async function checkAllDependencies(): Promise<DependencyStatus> {
     checkSqliteInstalled(),
   ]);
 
+  // Validate custom paths from preferences
+  const preferences = getPreferenceValues<Preferences>();
+  const invalidCustomPaths: string[] = [];
+
+  if (preferences.bunExecutablePath) {
+    const expanded = expandPath(preferences.bunExecutablePath);
+    if (!existsSync(expanded)) {
+      invalidCustomPaths.push(`Bun: ${preferences.bunExecutablePath}`);
+    }
+  }
+  if (preferences.qmdExecutablePath) {
+    const expanded = expandPath(preferences.qmdExecutablePath);
+    if (!existsSync(expanded)) {
+      invalidCustomPaths.push(`QMD: ${preferences.qmdExecutablePath}`);
+    }
+  }
+
   return {
     bunInstalled: bunResult.installed,
     qmdInstalled: qmdResult.installed,
     sqliteInstalled,
     bunVersion: bunResult.version,
     qmdVersion: qmdResult.version,
+    invalidCustomPaths: invalidCustomPaths.length > 0 ? invalidCustomPaths : undefined,
   };
 }
 
 // ============================================================================
 // QMD Command Execution
 // ============================================================================
+
+const STALE_INDEX_PATTERN = /Tip: Index last updated (\d+ \w+) ago/;
+const NEEDS_EMBEDDINGS_PATTERN = /Tip: (\d+) documents? need embeddings/;
+const SQLITE_VEC_UNAVAILABLE_PATTERN = /sqlite-vec is not available/;
+
+/**
+ * Parse qmd stderr/error output for actionable hints
+ */
+function parseQmdHint(text: string): QmdHint | undefined {
+  const staleMatch = text.match(STALE_INDEX_PATTERN);
+  if (staleMatch) {
+    return { type: "stale_index", daysAgo: staleMatch[1] };
+  }
+  const embedMatch = text.match(NEEDS_EMBEDDINGS_PATTERN);
+  if (embedMatch) {
+    return { type: "needs_embeddings", count: Number.parseInt(embedMatch[1], 10) };
+  }
+  if (SQLITE_VEC_UNAVAILABLE_PATTERN.test(text)) {
+    return { type: "sqlite_vec_unavailable" };
+  }
+  return undefined;
+}
 
 /**
  * Execute a QMD command and parse JSON output
@@ -332,6 +477,7 @@ export async function runQmd<T>(
     const { stdout, stderr } = await execAsync(command, {
       timeout,
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large outputs
+      env: getQmdEnv(),
     });
 
     if (includeJson && stdout.trim()) {
@@ -379,10 +525,14 @@ export async function runQmd<T>(
       }
     }
 
+    const errorText = [execError.stderr, execError.message].filter(Boolean).join("\n");
+    const hint = parseQmdHint(errorText);
+
     return {
       success: false,
       error: execError.message || "Command execution failed",
       stderr: execError.stderr,
+      hint,
     };
   }
 }
@@ -398,21 +548,28 @@ export async function runQmdRaw(args: string[], options: { timeout?: number } = 
     const { stdout, stderr } = await execAsync(command, {
       timeout,
       maxBuffer: 10 * 1024 * 1024,
+      env: getQmdEnv(),
     });
 
-    return { success: true, data: stdout, stderr: stderr || undefined };
+    const hint = stderr ? parseQmdHint(stderr) : undefined;
+    return { success: true, data: stdout, stderr: stderr || undefined, hint };
   } catch (error) {
     const execError = error as { stdout?: string; stderr?: string; message?: string };
 
     // Recover stdout from non-zero exit codes
     if (execError.stdout?.trim()) {
-      return { success: true, data: execError.stdout, stderr: execError.stderr };
+      const hint = execError.stderr ? parseQmdHint(execError.stderr) : undefined;
+      return { success: true, data: execError.stdout, stderr: execError.stderr, hint };
     }
+
+    const errorText = [execError.stderr, execError.message].filter(Boolean).join("\n");
+    const hint = parseQmdHint(errorText);
 
     return {
       success: false,
       error: execError.message || "Command execution failed",
       stderr: execError.stderr,
+      hint,
     };
   }
 }

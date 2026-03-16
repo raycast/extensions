@@ -31,7 +31,7 @@ export function useDependencyCheck(): UseDependencyCheckResult {
     keepPreviousData: true,
   });
 
-  const isReady = Boolean(status?.bunInstalled && status?.qmdInstalled && status?.sqliteInstalled);
+  const isReady = Boolean(status?.qmdInstalled && status?.sqliteInstalled);
 
   // Show prompts for missing deps (only once per session)
   useEffect(() => {
@@ -45,13 +45,23 @@ export function useDependencyCheck(): UseDependencyCheckResult {
     promptShownRef.current = true;
 
     const promptForMissing = async () => {
-      if (!status.bunInstalled) {
-        depsLogger.warn("Bun not installed");
-        await promptBunInstall();
-        return;
+      if (status.invalidCustomPaths?.length) {
+        depsLogger.warn("Invalid custom paths", { paths: status.invalidCustomPaths });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid custom path",
+          message: `${status.invalidCustomPaths.join(", ")} — check Extension Settings`,
+        });
       }
+
       if (!status.qmdInstalled) {
         depsLogger.warn("QMD not installed");
+        if (!status.bunInstalled) {
+          // Bun is needed to install qmd via the built-in installer
+          depsLogger.warn("Bun not installed");
+          await promptBunInstall();
+          return;
+        }
         await promptQmdInstall(revalidate);
         return;
       }
