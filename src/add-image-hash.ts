@@ -3,10 +3,6 @@ import { createHash } from "crypto";
 import { readdirSync, readFileSync, renameSync, statSync } from "fs";
 import { extname, join, basename } from "path";
 
-interface Preferences {
-  folder: string;
-}
-
 const IMAGE_EXTENSIONS = new Set([
   ".jpg",
   ".jpeg",
@@ -42,7 +38,7 @@ function alreadyHashed(filename: string): boolean {
 }
 
 export default async function main() {
-  const { folder } = getPreferenceValues<Preferences>();
+  const { folder } = getPreferenceValues<Preferences.AddImageHash>();
 
   const toast = await showToast({
     style: Toast.Style.Animated,
