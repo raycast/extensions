@@ -89,9 +89,10 @@ function buildSshTunnelCmd(sessionName: string, localPort: number, remotePort: n
   const safeLocalPort = safePort(String(localPort));
   const safeRemotePort = safePort(String(remotePort));
   const safeHost = sanitizeShellArg(host);
-  const logFile = sanitizeShellArg(path.join(environment.supportPath, "logs", `tunnel-${safeSession}.log`));
+  const logDir = path.join(environment.supportPath, "logs");
+  const logFile = path.join(logDir, `tunnel-${safeSession}.log`);
 
-  return `new-session -d -s ${safeSession} "ssh -L ${safeLocalPort}:127.0.0.1:${safeRemotePort} ${safeHost} -N > ${logFile} 2>&1"`;
+  return `new-session -d -s ${safeSession} "mkdir -p '${logDir}' && ssh -L ${safeLocalPort}:127.0.0.1:${safeRemotePort} ${safeHost} -N > '${logFile}' 2>&1"`;
 }
 
 export default function SSHTunnelManager() {
@@ -313,7 +314,13 @@ function NewTunnelForm(props: {
 
   useEffect(() => {
     try {
-      const allHosts = loadFullSshConfig();
+      const seen = new Set<string>();
+      const allHosts = loadFullSshConfig().filter((h) => {
+        const name = h.host.trim();
+        if (!name || seen.has(name)) return false;
+        seen.add(name);
+        return true;
+      });
       if (!allHosts.length) {
         setInfo("No hosts found (possibly all commented out or wildcards).");
       }
@@ -385,8 +392,8 @@ function NewTunnelForm(props: {
       {info && <Form.Description title="Info" text={info} />}
 
       <Form.Dropdown id="sshHost" title="Host from ~/.ssh/config" value={selectedHost} onChange={setSelectedHost}>
-        {hosts.map((h) => (
-          <Form.Dropdown.Item key={h.host} value={h.host} title={h.host} />
+        {hosts.map((h, idx) => (
+          <Form.Dropdown.Item key={`${h.host}-${idx}`} value={h.host} title={h.host} />
         ))}
       </Form.Dropdown>
 
