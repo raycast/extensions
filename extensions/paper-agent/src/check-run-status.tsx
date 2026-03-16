@@ -62,7 +62,7 @@ async function isLaunchAgentLoaded(label: string): Promise<boolean> {
     return false;
   }
   try {
-    await execFileAsync("/bin/launchctl", ["print", `gui/${uid}/${label}`], { stdio: "ignore" });
+    await execFileAsync("/bin/launchctl", ["print", `gui/${uid}/${label}`]);
     return true;
   } catch {
     return false;
