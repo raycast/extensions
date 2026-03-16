@@ -1,4 +1,4 @@
-import { exec, execSync, spawn } from "child_process";
+import { exec, spawn } from "child_process";
 import { existsSync } from "fs";
 import { SSHHost, TerminalApp, EditorApp } from "./types";
 
@@ -12,10 +12,20 @@ function runAppleScript(script: string): void {
   child.unref();
 }
 
+function copyToClipboard(input: string): void {
+  const child = spawn("pbcopy", [], {
+    stdio: ["pipe", "ignore", "ignore"],
+    detached: true,
+  });
+  child.stdin.write(input);
+  child.stdin.end();
+  child.unref();
+}
+
 // --------------- Terminal backends ---------------
 
 function openInGhostty(cmd: string): void {
-  execSync("pbcopy", { input: cmd });
+  copyToClipboard(cmd);
 
   const script = `
 tell application "System Events"

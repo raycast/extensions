@@ -213,19 +213,27 @@ export function appendHostToConfig(
   port: number,
   identityFile?: string,
 ): void {
+  const safeAlias = sanitizeAlias(alias);
+  const safeHostname = sanitizeHostName(hostname);
+  const safeUser = sanitizeUser(user);
+  const safePort = sanitizePort(port);
+  const safeIdentityFile = identityFile
+    ? sanitizeIdentityFile(identityFile)
+    : undefined;
+
   const lines = [
     "",
-    `Host ${alias}`,
-    `  HostName ${hostname}`,
-    `  User ${user}`,
-    `  Port ${port}`,
+    `Host ${safeAlias}`,
+    `  HostName ${safeHostname}`,
+    `  User ${safeUser}`,
+    `  Port ${safePort}`,
     `  ForwardAgent yes`,
     `  ServerAliveInterval 60`,
     `  TCPKeepAlive no`,
   ];
-  if (identityFile) {
+  if (safeIdentityFile) {
     lines.push(`  IdentitiesOnly yes`);
-    lines.push(`  IdentityFile ${identityFile}`);
+    lines.push(`  IdentityFile ${safeIdentityFile}`);
   }
   lines.push("");
   const block = lines.join("\n");
@@ -239,6 +247,64 @@ export function appendHostToConfig(
     configContent.trimEnd() + "\n" + block,
     "utf-8",
   );
+}
+
+function rejectUnsafeInput(value: string, label: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    throw new Error(`${label} cannot be empty`);
+  }
+  if (/\r|\n/.test(trimmed)) {
+    throw new Error(`${label} cannot contain newlines`);
+  }
+  if (/\s/.test(trimmed)) {
+    throw new Error(`${label} cannot contain whitespace`);
+  }
+  if (/[#;`$\\]/.test(trimmed)) {
+    throw new Error(`${label} contains unsupported characters`);
+  }
+  return trimmed;
+}
+
+function sanitizeAlias(alias: string): string {
+  const safe = rejectUnsafeInput(alias, "Alias");
+  if (!/^[A-Za-z0-9._-]+$/.test(safe)) {
+    throw new Error(
+      "Alias can only include letters, numbers, '.', '-', and '_'",
+    );
+  }
+  return safe;
+}
+
+function sanitizeHostName(hostname: string): string {
+  const safe = rejectUnsafeInput(hostname, "HostName");
+  if (!/^[A-Za-z0-9._:-]+$/.test(safe)) {
+    throw new Error("HostName contains invalid characters");
+  }
+  return safe;
+}
+
+function sanitizeUser(user: string): string {
+  const safe = rejectUnsafeInput(user, "User");
+  if (!/^[A-Za-z0-9._-]+$/.test(safe)) {
+    throw new Error("User contains invalid characters");
+  }
+  return safe;
+}
+
+function sanitizePort(port: number): number {
+  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+    throw new Error("Port must be an integer between 1 and 65535");
+  }
+  return port;
+}
+
+function sanitizeIdentityFile(identityFile: string): string {
+  const safe = rejectUnsafeInput(identityFile, "IdentityFile");
+  if (!/^[A-Za-z0-9._\-/~+]+$/.test(safe)) {
+    throw new Error("IdentityFile contains invalid characters");
+  }
+  return safe;
 }
 
 export interface ParsedSSHCommand {

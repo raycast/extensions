@@ -18,19 +18,19 @@ The extension reads hosts from your `~/.ssh/config` file. No additional API keys
 
 ### Preferences
 
-| Preference | Description |
-|---|---|
-| **Terminal Application** | Choose between Ghostty, iTerm, or macOS Terminal |
-| **Editor Application** | Choose between Cursor or VS Code |
-| **Work Host Patterns** | Comma-separated glob patterns (e.g. `gpu-*, ml-*`) to classify hosts as work |
-| **Personal Host Patterns** | Glob patterns to classify hosts as personal |
-| **Work Identity Files** | SSH identity file paths (e.g. `~/.ssh/work_key`). Hosts using these keys are classified as work |
-| **Personal Identity Files** | Identity file paths for personal host classification |
-| **Excluded Hosts** | Hostnames to hide from the fleet list (`github.com` is always excluded) |
-| **Default Identity File** | Identity file added to new hosts created via the Add Host command |
-| **Default View** | Show work, personal, or all hosts by default |
-| **SSH Timeout** | Connection timeout in seconds (default: 4) |
-| **Refresh Interval** | How often to re-probe hosts in seconds (default: 10) |
+| Preference                  | Description                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| **Terminal Application**    | Choose between Ghostty, iTerm, or macOS Terminal                                                |
+| **Editor Application**      | Choose between Cursor or VS Code                                                                |
+| **Work Host Patterns**      | Comma-separated glob patterns (e.g. `gpu-*, ml-*`) to classify hosts as work                    |
+| **Personal Host Patterns**  | Glob patterns to classify hosts as personal                                                     |
+| **Work Identity Files**     | SSH identity file paths (e.g. `~/.ssh/work_key`). Hosts using these keys are classified as work |
+| **Personal Identity Files** | Identity file paths for personal host classification                                            |
+| **Excluded Hosts**          | Hostnames to hide from the fleet list (`github.com` is always excluded)                         |
+| **Default Identity File**   | Identity file added to new hosts created via the Add Host command                               |
+| **Default View**            | Show work, personal, or all hosts by default                                                    |
+| **SSH Timeout**             | Connection timeout in seconds (default: 4)                                                      |
+| **Refresh Interval**        | How often to re-probe hosts in seconds (default: 10)                                            |
 
 ### How It Works
 

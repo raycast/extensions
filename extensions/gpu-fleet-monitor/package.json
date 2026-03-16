@@ -6,8 +6,13 @@
   "icon": "command-icon.png",
   "author": "kazzart",
   "license": "MIT",
-  "categories": ["Developer Tools", "Productivity"],
-  "platforms": ["macOS"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "scripts": {
     "dev": "npx @raycast/api@latest develop",
     "build": "npx @raycast/api@latest build",
@@ -16,33 +21,52 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.90.0"
+    "@raycast/api": "^1.104.10"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "typescript": "^5.6.0"
+    "@raycast/eslint-config": "^2.1.1",
+    "typescript": "^5.9.3"
   },
   "commands": [
     {
       "name": "gpu-fleet",
       "title": "GPU Fleet",
+      "subtitle": "Monitor SSH Hosts",
       "description": "Monitor GPU and CPU usage across all SSH hosts",
       "mode": "view",
-      "keywords": ["gpu", "ssh", "monitor", "fleet", "cuda"]
+      "keywords": [
+        "gpu",
+        "ssh",
+        "monitor",
+        "fleet",
+        "cuda"
+      ]
     },
     {
       "name": "add-host",
       "title": "Add Host",
+      "subtitle": "Add SSH Config Entry",
       "description": "Add a new SSH host from a connection string",
       "mode": "view",
-      "keywords": ["ssh", "host", "add", "cloud"]
+      "keywords": [
+        "ssh",
+        "host",
+        "add",
+        "cloud"
+      ]
     },
     {
       "name": "quick-connect",
       "title": "Quick Connect Best GPU",
+      "subtitle": "Connect to Best Host",
       "description": "Connect to the best available free GPU host",
       "mode": "no-view",
-      "keywords": ["gpu", "connect", "best", "free"]
+      "keywords": [
+        "gpu",
+        "connect",
+        "best",
+        "free"
+      ]
     }
   ],
   "preferences": [
@@ -54,9 +78,18 @@
       "required": false,
       "default": "ghostty",
       "data": [
-        { "title": "Ghostty", "value": "ghostty" },
-        { "title": "iTerm", "value": "iterm" },
-        { "title": "Terminal", "value": "terminal" }
+        {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
+          "title": "iTerm",
+          "value": "iterm"
+        },
+        {
+          "title": "Terminal",
+          "value": "terminal"
+        }
       ]
     },
     {
@@ -67,8 +100,14 @@
       "required": false,
       "default": "cursor",
       "data": [
-        { "title": "Cursor", "value": "cursor" },
-        { "title": "VS Code", "value": "vscode" }
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        },
+        {
+          "title": "VS Code",
+          "value": "vscode"
+        }
       ]
     },
     {
@@ -127,9 +166,18 @@
       "required": false,
       "default": "work",
       "data": [
-        { "title": "Work", "value": "work" },
-        { "title": "Personal", "value": "personal" },
-        { "title": "All", "value": "all" }
+        {
+          "title": "Work",
+          "value": "work"
+        },
+        {
+          "title": "Personal",
+          "value": "personal"
+        },
+        {
+          "title": "All",
+          "value": "all"
+        }
       ]
     },
     {

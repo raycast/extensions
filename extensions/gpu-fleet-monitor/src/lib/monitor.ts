@@ -164,74 +164,99 @@ function parseOutput(stdout: string): Omit<HostStatus, "host" | "lastUpdated"> {
   };
 }
 
-export function probeHost(host: SSHHost, timeout: number): Promise<HostStatus> {
-  return new Promise((resolve) => {
-    const args = [...sshOpts(timeout), "-T", host.name];
-    const proc = spawn(SSH_BIN, args, {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+function offlineStatus(host: SSHHost, error?: string): HostStatus {
+  return {
+    host,
+    state: "offline",
+    gpus: [],
+    gpuMemoryUsed: 0,
+    gpuMemoryTotal: 0,
+    gpuUtilization: 0,
+    cpuUtilization: 0,
+    error,
+    lastUpdated: Date.now(),
+  };
+}
 
-    let stdout = "";
-    let stderr = "";
-    proc.stdout.on("data", (d: Buffer) => {
-      stdout += d.toString();
-    });
-    proc.stderr.on("data", (d: Buffer) => {
-      stderr += d.toString();
-    });
+function killProcess(proc: ReturnType<typeof spawn>): void {
+  if (proc.killed) return;
+  proc.kill("SIGKILL");
+}
 
-    proc.stdin.write(REMOTE_SCRIPT + "\nexit\n");
-    proc.stdin.end();
+function probeHostCancelable(
+  host: SSHHost,
+  timeout: number,
+): { promise: Promise<HostStatus>; cancel: () => void } {
+  const args = [...sshOpts(timeout), "-T", host.name];
+  const proc = spawn(SSH_BIN, args, {
+    stdio: ["pipe", "pipe", "pipe"],
+  });
 
-    const timer = setTimeout(
-      () => {
-        proc.kill();
-      },
-      (timeout + 4) * 1000,
-    );
+  let stdout = "";
+  let stderr = "";
+  let settled = false;
+  let resolvePromise: (value: HostStatus) => void;
 
-    proc.on("close", (code) => {
-      clearTimeout(timer);
-      const now = Date.now();
+  const promise = new Promise<HostStatus>((resolve) => {
+    resolvePromise = resolve;
+  });
 
-      if (code !== 0 && code !== null) {
-        resolve({
-          host,
-          state: "offline",
-          gpus: [],
-          gpuMemoryUsed: 0,
-          gpuMemoryTotal: 0,
-          gpuUtilization: 0,
-          cpuUtilization: 0,
-          error: (stderr || `exit code ${code}`).substring(0, 200),
-          lastUpdated: now,
-        });
-        return;
-      }
+  const finish = (status: HostStatus) => {
+    if (settled) return;
+    settled = true;
+    clearTimeout(timer);
+    resolvePromise(status);
+  };
 
-      const parsed = parseOutput(stdout || "");
-      resolve({
-        host,
-        ...parsed,
-        lastUpdated: now,
-      });
-    });
+  proc.stdout.on("data", (d: Buffer) => {
+    stdout += d.toString();
+  });
+  proc.stderr.on("data", (d: Buffer) => {
+    stderr += d.toString();
+  });
 
-    proc.on("error", (err) => {
-      clearTimeout(timer);
-      resolve({
-        host,
-        state: "offline",
-        gpus: [],
-        gpuMemoryUsed: 0,
-        gpuMemoryTotal: 0,
-        gpuUtilization: 0,
-        cpuUtilization: 0,
-        error: err.message.substring(0, 200),
-        lastUpdated: Date.now(),
-      });
+  proc.stdin.write(REMOTE_SCRIPT + "\nexit\n");
+  proc.stdin.end();
+
+  const timer = setTimeout(
+    () => {
+      killProcess(proc);
+    },
+    (timeout + 4) * 1000,
+  );
+
+  proc.on("close", (code) => {
+    if (code !== 0 && code !== null) {
+      finish(
+        offlineStatus(host, (stderr || `exit code ${code}`).substring(0, 200)),
+      );
+      return;
+    }
+
+    const parsed = parseOutput(stdout || "");
+    finish({
+      host,
+      ...parsed,
+      lastUpdated: Date.now(),
     });
   });
+
+  proc.on("error", (err) => {
+    finish(offlineStatus(host, err.message.substring(0, 200)));
+  });
+
+  return {
+    promise,
+    cancel: () => {
+      if (settled) return;
+      killProcess(proc);
+      finish(offlineStatus(host, "probe cancelled"));
+    },
+  };
+}
+
+export function probeHost(host: SSHHost, timeout: number): Promise<HostStatus> {
+  return probeHostCancelable(host, timeout).promise;
 }
 
 /**
@@ -245,8 +270,10 @@ export function probeHostsStreaming(
 ): { promise: Promise<void>; cancel: () => void } {
   let cancelled = false;
 
-  const promises = hosts.map((host) =>
-    probeHost(host, timeout).then((status) => {
+  const probes = hosts.map((host) => probeHostCancelable(host, timeout));
+
+  const promises = probes.map((probe) =>
+    probe.promise.then((status) => {
       if (!cancelled) onResult(status);
     }),
   );
@@ -256,7 +283,9 @@ export function probeHostsStreaming(
   return {
     promise,
     cancel: () => {
+      if (cancelled) return;
       cancelled = true;
+      probes.forEach((probe) => probe.cancel());
     },
   };
 }
@@ -276,6 +305,7 @@ export async function probeHosts(
 export function getTmuxSessions(
   host: SSHHost,
   timeout: number,
+  signal?: AbortSignal,
 ): Promise<string[]> {
   return new Promise((resolve) => {
     const args = [...sshOpts(timeout), "-T", host.name];
@@ -295,13 +325,19 @@ export function getTmuxSessions(
 
     const timer = setTimeout(
       () => {
-        proc.kill();
+        killProcess(proc);
       },
       (timeout + 4) * 1000,
     );
 
+    const abortHandler = () => {
+      killProcess(proc);
+    };
+    signal?.addEventListener("abort", abortHandler, { once: true });
+
     proc.on("close", () => {
       clearTimeout(timer);
+      signal?.removeEventListener("abort", abortHandler);
       const sessions = stdout
         .split("\n")
         .map((s) => s.trim())
@@ -311,6 +347,7 @@ export function getTmuxSessions(
 
     proc.on("error", () => {
       clearTimeout(timer);
+      signal?.removeEventListener("abort", abortHandler);
       resolve([]);
     });
   });

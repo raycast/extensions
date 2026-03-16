@@ -40,13 +40,14 @@ export default function GpuFleet() {
   const [viewFilter, setViewFilter] = useState<string>(
     prefs.defaultView || "work",
   );
+  const [allHosts, setAllHosts] = useState<SSHHost[]>([]);
   const [statuses, setStatuses] = useState<Map<string, HostStatus>>(new Map());
   const [pendingCount, setPendingCount] = useState(0);
   const cancelRef = useRef<(() => void) | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const allHosts = useMemo(
-    () =>
+  useEffect(() => {
+    setAllHosts(
       getHosts({
         workPatterns: prefs.workPatterns,
         personalPatterns: prefs.personalPatterns,
@@ -54,14 +55,14 @@ export default function GpuFleet() {
         personalIdentityFiles: parseIdentityList(prefs.personalIdentityFiles),
         excludedHosts: getExcludedHosts(prefs.excludedHosts),
       }),
-    [
-      prefs.workPatterns,
-      prefs.personalPatterns,
-      prefs.workIdentityFiles,
-      prefs.personalIdentityFiles,
-      prefs.excludedHosts,
-    ],
-  );
+    );
+  }, [
+    prefs.workPatterns,
+    prefs.personalPatterns,
+    prefs.workIdentityFiles,
+    prefs.personalIdentityFiles,
+    prefs.excludedHosts,
+  ]);
 
   const filteredHosts = useMemo(() => {
     if (viewFilter === "all") return allHosts;
@@ -173,7 +174,7 @@ export default function GpuFleet() {
                     }}
                   />
                   <Action.CopyToClipboard
-                    title="Copy Ssh Command"
+                    title="Copy SSH Command"
                     content={sshCommand(host)}
                   />
                 </ActionPanel>
@@ -292,7 +293,7 @@ function detailMarkdown(s: HostStatus): string {
       lines.push("");
     }
     const updated = s.lastUpdated
-      ? new Date(s.lastUpdated).toLocaleTimeString()
+      ? new Date(s.lastUpdated).toLocaleTimeString("en-US")
       : "never";
     lines.push(`---`);
     lines.push(`*${updated}*`);
@@ -340,7 +341,7 @@ function detailMarkdown(s: HostStatus): string {
   }
 
   const updated = s.lastUpdated
-    ? new Date(s.lastUpdated).toLocaleTimeString()
+    ? new Date(s.lastUpdated).toLocaleTimeString("en-US")
     : "never";
   lines.push(`---`);
   lines.push(`*${updated}*`);
@@ -407,7 +408,7 @@ function HostItem({
           </ActionPanel.Section>
           <ActionPanel.Section title="Other">
             <Action.CopyToClipboard
-              title="Copy Ssh Command"
+              title="Copy SSH Command"
               content={sshCommand(s.host)}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -431,15 +432,15 @@ function TmuxSessionList({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let cancelled = false;
-    getTmuxSessions(host, timeout).then((s) => {
-      if (!cancelled) {
+    const controller = new AbortController();
+    getTmuxSessions(host, timeout, controller.signal).then((s) => {
+      if (!controller.signal.aborted) {
         setSessions(s);
         setIsLoading(false);
       }
     });
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [host, timeout]);
 

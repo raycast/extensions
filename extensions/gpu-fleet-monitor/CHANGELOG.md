@@ -1,6 +1,6 @@
-# GPU Fleet Monitor Changelog
+# GPU Fleet Monitor
 
-## [1.0.0] - Initial Release
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Monitor GPU and CPU usage across SSH hosts
 - Quick Connect to best available free GPU host
