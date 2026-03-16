@@ -1,4 +1,9 @@
-import axios, { type AxiosInstance, type AxiosRequestConfig, type AxiosRequestHeaders, type GenericAbortSignal } from "axios";
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosRequestHeaders,
+  type GenericAbortSignal,
+} from "axios";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { login } from "./api";
 import { Preferences } from "./type";
