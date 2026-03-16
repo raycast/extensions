@@ -125,7 +125,15 @@ function resolveNvmNodePath(home: string): string[] {
     }
     const matched = readdirSync(versionsDir)
       .filter((d) => d.startsWith(`v${version.replace(/^v/, "")}`))
-      .sort()
+      .sort((a, b) => {
+        const pa = a.replace(/^v/, "").split(".").map(Number);
+        const pb = b.replace(/^v/, "").split(".").map(Number);
+        for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+          const diff = (pa[i] || 0) - (pb[i] || 0);
+          if (diff !== 0) return diff;
+        }
+        return 0;
+      })
       .pop();
     if (matched) {
       const matchedBin = join(versionsDir, matched, "bin");
