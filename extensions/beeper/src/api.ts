@@ -307,7 +307,7 @@ export const searchContacts = async (accountID: string, query: string) => {
     const q = query.toLowerCase();
     return MOCK_CONTACTS.filter(
       (c) => c.accountID === accountID && [c.fullName, c.username, c.id].some((v) => v?.toLowerCase().includes(q)),
-    ).map(({ accountID: _, ...rest }) => rest as BeeperDesktop.User);
+    ).map((c) => ({ id: c.id, fullName: c.fullName, username: c.username, isSelf: c.isSelf }) as BeeperDesktop.User);
   }
   const response = await getBeeperDesktop().get(`/v1/accounts/${encodeURIComponent(accountID)}/contacts`, {
     query: { query },
@@ -340,7 +340,7 @@ export const searchChats = async (params: {
 }) => {
   if (useMockData()) {
     const requestedInbox = params.inbox ?? "primary";
-    let items = requestedInbox === "primary" ? MOCK_CHATS.map((c) => mockChatToBeeperChat(c, "primary")) : [];
+    let items = requestedInbox === "primary" ? MOCK_CHATS.map((c) => mockChatToBeeperChat(c)) : [];
     if (params.unreadOnly) {
       items = items.filter((c) => (c.unreadCount ?? 0) > 0);
     }

@@ -153,10 +153,7 @@ export const MOCK_MESSAGES: MockMessageResult[] = [
 ];
 
 /** Convert MockChatItem to BeeperDesktop.Chat for view components */
-export function mockChatToBeeperChat(
-  item: MockChatItem,
-  inbox: "primary" | "low-priority" | "archive" = "primary",
-): BeeperDesktop.Chat {
+export function mockChatToBeeperChat(item: MockChatItem): BeeperDesktop.Chat {
   return {
     id: item.id,
     accountID: item.accountId,
