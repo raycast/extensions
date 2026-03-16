@@ -1,6 +1,6 @@
 # Get SSH Key Changelog
 
-## [Updates] - 2026-03-13
+## [Updates] - {PR_MERGE_DATE}
 
 - Add Windows support to the extension.
 - Fix the case of "Ssh".
