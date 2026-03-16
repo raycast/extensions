@@ -38,22 +38,24 @@ export function useDependencyCheck(): UseDependencyCheckResult {
     if (isLoading || !status || promptShownRef.current) {
       return;
     }
+
+    // Always warn about invalid custom paths, even when extension is ready
+    if (status.invalidCustomPaths?.length) {
+      depsLogger.warn("Invalid custom paths", { paths: status.invalidCustomPaths });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid custom path",
+        message: `${status.invalidCustomPaths.join(", ")} — check Extension Settings`,
+      });
+    }
+
     if (isReady) {
-      return; // All deps installed, no prompts needed
+      return; // All deps installed, no further prompts needed
     }
 
     promptShownRef.current = true;
 
     const promptForMissing = async () => {
-      if (status.invalidCustomPaths?.length) {
-        depsLogger.warn("Invalid custom paths", { paths: status.invalidCustomPaths });
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Invalid custom path",
-          message: `${status.invalidCustomPaths.join(", ")} — check Extension Settings`,
-        });
-      }
-
       if (!status.qmdInstalled) {
         depsLogger.warn("QMD not installed");
         if (!status.bunInstalled) {
