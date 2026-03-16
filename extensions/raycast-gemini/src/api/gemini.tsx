@@ -18,18 +18,39 @@ import { useEffect, useState } from "react";
 import { getSafetySettings } from "./safetySettings";
 import { useCommandHistory } from "./useCommandHistory";
 
-export default (props, { context = undefined, allowPaste = false, useSelected = false, buffer = [] }) => {
+interface GeminiPreferences {
+  apiKey: string;
+  model: string;
+  customModel: string;
+  defaultModel: string;
+}
+
+interface GeminiProps {
+  arguments: Record<string, string | undefined>;
+  fallbackText?: string;
+}
+
+interface GeminiOptions {
+  context?: string;
+  allowPaste?: boolean;
+  useSelected?: boolean;
+  buffer?: Buffer[];
+}
+
+export default (
+  props: GeminiProps,
+  { context = undefined, allowPaste = false, useSelected = false, buffer = [] as Buffer[] }: GeminiOptions,
+) => {
   const Pages = {
-    Form: 0,
-    Detail: 1,
+    Form: 0 as number,
+    Detail: 1 as number,
   };
   let { query: argQuery } = props.arguments;
   if (!argQuery) argQuery = props.fallbackText ?? "";
 
-  const { apiKey, model, customModel } = getPreferenceValues();
+  const { apiKey, model, customModel } = getPreferenceValues<GeminiPreferences>();
   const isCustomModelValid = Boolean(customModel && customModel.trim().length > 0);
-  // set defaultModel to customModel if customModel is a non-empty string
-  const defaultModel = isCustomModelValid ? customModel : getPreferenceValues().defaultModel;
+  const defaultModel = isCustomModelValid ? customModel : getPreferenceValues<GeminiPreferences>().defaultModel;
   const [page, setPage] = useState(Pages.Detail);
   const [markdown, setMarkdown] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +60,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
   const [textarea, setTextarea] = useState("");
   const { addToHistory } = useCommandHistory();
 
-  const getResponse = async (query, data) => {
+  const getResponse = async (query: string, data?: Buffer[]) => {
     setLastQuery(query);
     setPage(Pages.Detail);
 
@@ -53,10 +74,9 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
     try {
       const genAI = new GoogleGenAI({ apiKey: apiKey });
       const targetModelName = model === "default" ? defaultModel : model;
-      const promptParts = [];
+      const promptParts: Array<{ text: string } | { inlineData: { data: string; mimeType: string } }> = [];
       const imagesToProcess = data ?? buffer;
 
-      // Convert images to base64 format for the Gemini API
       if (imagesToProcess && imagesToProcess.length > 0) {
         imagesToProcess.forEach((imgBuffer) => {
           promptParts.push({
@@ -96,15 +116,16 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
         title: "Response Finished",
         message: `${((Date.now() - start) / 1000).toFixed(1)} seconds`,
       });
-    } catch (e) {
-      if (e.message.includes("429")) {
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      if (message.includes("429")) {
         await showToast({
           style: Toast.Style.Failure,
           title: "You have been rate-limited.",
           message: "Please slow down.",
         });
         setMarkdown("## Could not access Gemini.\n\nYou have been rate limited. Please slow down and try again later.");
-      } else if (e.message.includes("The model is overloaded")) {
+      } else if (message.includes("The model is overloaded")) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Model Overloaded",
@@ -116,7 +137,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
         await showToast({
           style: Toast.Style.Failure,
           title: "Response Failed",
-          message: e.message, // Display the error message in the toast notification
+          message,
         });
         setMarkdown(
           "## Could not access Gemini.\n\nThis may be because Gemini has decided that your prompt did not comply with its regulations. Please try another prompt, and if it still does not work, create an issue on GitHub.",
@@ -131,7 +152,7 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
     (async () => {
       if (useSelected) {
         try {
-          let selected = await getSelectedText();
+          const selected = await getSelectedText();
           if (argQuery === "") {
             setSelected(selected);
             setPage(Pages.Form);
@@ -200,10 +221,10 @@ export default (props, { context = undefined, allowPaste = false, useSelected = 
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            onSubmit={(values) => {
+            onSubmit={(values: { query: string; files?: string[] }) => {
               setMarkdown("");
 
-              let files = undefined;
+              let files: Buffer[] | undefined = undefined;
               if (values.files) {
                 files = values.files
                   .filter((file) => fs.existsSync(file) && fs.lstatSync(file).isFile())

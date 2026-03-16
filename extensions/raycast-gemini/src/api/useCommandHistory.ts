@@ -2,26 +2,26 @@ import { LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
-/**
- * Custom hook to manage command history with proper React state management
- * @returns {Object} History management functions and state
- */
+export interface HistoryEntry {
+  id: number;
+  timestamp: string;
+  prompt: string;
+  response: string;
+  model: string;
+}
+
 export function useCommandHistory() {
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load history on component mount
   useEffect(() => {
     loadHistory();
   }, []);
 
-  /**
-   * Load command history from LocalStorage
-   */
   const loadHistory = async () => {
     try {
       setIsLoading(true);
-      const storedHistory = await LocalStorage.getItem("gemini_command_history");
+      const storedHistory = await LocalStorage.getItem<string>("gemini_command_history");
       if (storedHistory) {
         setHistory(JSON.parse(storedHistory));
       }
@@ -33,18 +33,12 @@ export function useCommandHistory() {
     }
   };
 
-  /**
-   * Add a new entry to command history
-   * @param {string} prompt - The user's prompt
-   * @param {string} response - Gemini's response
-   * @param {string} modelUsed - The model used for this query
-   */
-  const addToHistory = async (prompt, response, modelUsed) => {
+  const addToHistory = async (prompt: string, response: string, modelUsed: string) => {
     try {
-      const storedHistory = await LocalStorage.getItem("gemini_command_history");
-      let currentHistory = storedHistory ? JSON.parse(storedHistory) : [];
+      const storedHistory = await LocalStorage.getItem<string>("gemini_command_history");
+      const currentHistory: HistoryEntry[] = storedHistory ? JSON.parse(storedHistory) : [];
 
-      const newEntry = {
+      const newEntry: HistoryEntry = {
         id: Date.now(),
         timestamp: new Date().toISOString(),
         prompt,
@@ -52,23 +46,14 @@ export function useCommandHistory() {
         model: modelUsed,
       };
 
-      // only consider duplicate within one second
       const second = new Date(Date.now() - 1000).toISOString();
-      const isDuplicate = currentHistory.some(
-        (entry) =>
-          entry.prompt === prompt &&
-          // Only consider entries from the last 5 minutes as potential duplicates
-          entry.timestamp > second,
-      );
+      const isDuplicate = currentHistory.some((entry) => entry.prompt === prompt && entry.timestamp > second);
 
       if (isDuplicate) {
         return;
       }
-      // Update with new entry
       const updatedHistory = [newEntry, ...currentHistory];
-      // Store in LocalStorage first to ensure persistence
       await LocalStorage.setItem("gemini_command_history", JSON.stringify(updatedHistory));
-      // Then update state to reflect changes
       setHistory(updatedHistory);
     } catch (error) {
       showFailureToast(error);
@@ -76,9 +61,6 @@ export function useCommandHistory() {
     }
   };
 
-  /**
-   * Clear all command history
-   */
   const clearHistory = async () => {
     try {
       setHistory([]);
