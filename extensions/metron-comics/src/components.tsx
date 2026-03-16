@@ -9,26 +9,16 @@ interface IssueListItemProps {
   weekNav?: WeekNav;
 }
 
-export function IssueListItem({
-  issue,
-  showPublisher = true,
-  weekNav,
-}: IssueListItemProps) {
+export function IssueListItem({ issue, showPublisher = true, weekNav }: IssueListItemProps) {
   const title = issueTitle(issue);
-  const subtitle = showPublisher
-    ? (issue.publisher?.name ?? "")
-    : (issue.series?.name ?? "");
+  const subtitle = showPublisher ? (issue.publisher?.name ?? "") : (issue.series?.name ?? "");
   const storeDate = formatDate(issue.store_date ?? issue.cover_date);
   return (
     <List.Item
       title={title}
       subtitle={subtitle}
-      icon={
-        issue.image ? { source: issue.image, fallback: Icon.Book } : Icon.Book
-      }
-      accessories={[
-        { text: storeDate, icon: Icon.Calendar, tooltip: "Store date" },
-      ]}
+      icon={issue.image ? { source: issue.image, fallback: Icon.Book } : Icon.Book}
+      accessories={[{ text: storeDate, icon: Icon.Calendar, tooltip: "Store date" }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -44,11 +34,7 @@ export function IssueListItem({
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Title"
-              content={title}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy Title" content={title} shortcut={{ modifiers: ["cmd"], key: "c" }} />
             <Action.CopyToClipboard
               title="Copy Metron URL"
               content={`https://metron.cloud/issue/${issue.id}/`}

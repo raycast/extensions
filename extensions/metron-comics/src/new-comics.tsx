@@ -1,25 +1,7 @@
-import {
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-  Icon,
-  Action,
-  ActionPanel,
-} from "@raycast/api";
+import { List, showToast, Toast, Icon, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import {
-  fetchWeeklyIssues,
-  formatDate,
-  MetronIssue,
-  thisWednesday,
-  endOfWeek,
-} from "./api";
+import { fetchWeeklyIssues, formatDate, MetronIssue, thisWednesday, endOfWeek } from "./api";
 import { IssueListItem } from "./components";
-
-interface Preferences {
-  defaultPublisher: string;
-}
 
 function offsetWeek(dateStr: string, weeks: number): string {
   const d = new Date(dateStr);
@@ -34,14 +16,12 @@ export interface WeekNav {
 }
 
 export default function NewComicsCommand() {
-  const { defaultPublisher } = getPreferenceValues<Preferences>();
+  const { defaultPublisher } = getPreferenceValues<Preferences.NewComics>();
   const [issues, setIssues] = useState<MetronIssue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
-  const [publisherFilter, setPublisherFilter] = useState(
-    defaultPublisher ?? "",
-  );
+  const [publisherFilter, setPublisherFilter] = useState(defaultPublisher ?? "");
   const [weekStart, setWeekStart] = useState(thisWednesday());
 
   const isCurrentWeek = weekStart === thisWednesday();
@@ -54,21 +34,13 @@ export default function NewComicsCommand() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await fetchWeeklyIssues(
-          weekStart,
-          publisherFilter || undefined,
-        );
+        const data = await fetchWeeklyIssues(weekStart, publisherFilter || undefined);
         if (!cancelled) setIssues(data);
       } catch (err) {
         if (!cancelled) {
-          const message =
-            err instanceof Error ? err.message : "Failed to load.";
+          const message = err instanceof Error ? err.message : "Failed to load.";
           setError(message);
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Error",
-            message,
-          });
+          await showToast({ style: Toast.Style.Failure, title: "Error", message });
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -80,22 +52,19 @@ export default function NewComicsCommand() {
     };
   }, [publisherFilter, weekStart]);
 
+  // Fix: was i.issue (non-existent) — correct field is i.number
   const filtered = searchText
     ? issues.filter(
         (i) =>
-          (i.series?.name ?? "")
-            .toLowerCase()
-            .includes(searchText.toLowerCase()) ||
-          (i.issue ?? "").toLowerCase().includes(searchText.toLowerCase()) ||
+          (i.series?.name ?? "").toLowerCase().includes(searchText.toLowerCase()) ||
+          (i.number ?? "").toLowerCase().includes(searchText.toLowerCase()) ||
           (i.issue_name ?? "").toLowerCase().includes(searchText.toLowerCase()),
       )
     : issues;
 
   const weekNav: WeekNav = {
     onPrevWeek: () => setWeekStart(offsetWeek(weekStart, -1)),
-    onNextWeek: !isCurrentWeek
-      ? () => setWeekStart(offsetWeek(weekStart, 1))
-      : null,
+    onNextWeek: !isCurrentWeek ? () => setWeekStart(offsetWeek(weekStart, 1)) : null,
     onThisWeek: !isCurrentWeek ? () => setWeekStart(thisWednesday()) : null,
   };
 
@@ -136,11 +105,7 @@ export default function NewComicsCommand() {
       onSearchTextChange={setSearchText}
       throttle
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Publisher"
-          value={publisherFilter}
-          onChange={setPublisherFilter}
-        >
+        <List.Dropdown tooltip="Filter by Publisher" value={publisherFilter} onChange={setPublisherFilter}>
           <List.Dropdown.Item title="All Publishers" value="" />
           <List.Dropdown.Section title="Major Publishers">
             <List.Dropdown.Item title="Marvel Comics" value="Marvel" />
@@ -162,21 +127,11 @@ export default function NewComicsCommand() {
           actions={emptyActions}
         />
       ) : issues.length === 0 && !isLoading ? (
-        <List.EmptyView
-          icon="📭"
-          title="No comics found"
-          description="Try a different week."
-          actions={emptyActions}
-        />
+        <List.EmptyView icon="📭" title="No comics found" description="Try a different week." actions={emptyActions} />
       ) : (
         <List.Section title={weekLabel} subtitle={`${filtered.length} issues`}>
           {filtered.map((issue) => (
-            <IssueListItem
-              key={issue.id}
-              issue={issue}
-              showPublisher={false}
-              weekNav={weekNav}
-            />
+            <IssueListItem key={issue.id} issue={issue} showPublisher={false} weekNav={weekNav} />
           ))}
         </List.Section>
       )}

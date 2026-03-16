@@ -44,12 +44,6 @@ export interface MetronListResponse<T> {
   results: T[];
 }
 
-interface Preferences {
-  username: string;
-  password: string;
-  defaultPublisher: string;
-}
-
 function authHeader(): string {
   const { username, password } = getPreferenceValues<Preferences>();
   const encoded = Buffer.from(`${username}:${password}`).toString("base64");
@@ -68,15 +62,9 @@ async function metronFetch<T>(path: string): Promise<T> {
     },
   });
   if (response.status === 401)
-    throw new Error(
-      "Invalid credentials. Check your Metron username and password in Raycast Preferences.",
-    );
-  if (response.status === 429)
-    throw new Error("Rate limit hit. Please wait a moment and try again.");
-  if (!response.ok)
-    throw new Error(
-      `Metron API error: ${response.status} ${response.statusText}`,
-    );
+    throw new Error("Invalid credentials. Check your Metron username and password in Raycast Preferences.");
+  if (response.status === 429) throw new Error("Rate limit hit. Please wait a moment and try again.");
+  if (!response.ok) throw new Error(`Metron API error: ${response.status} ${response.statusText}`);
   return response.json() as Promise<T>;
 }
 
@@ -113,10 +101,7 @@ export function formatDate(raw: string | null | undefined): string {
   }
 }
 
-export async function fetchWeeklyIssues(
-  storeDate: string,
-  publisherName?: string,
-): Promise<MetronIssue[]> {
+export async function fetchWeeklyIssues(storeDate: string, publisherName?: string): Promise<MetronIssue[]> {
   const end = endOfWeek(storeDate);
   const params = new URLSearchParams({
     store_date_range_after: storeDate,
@@ -137,17 +122,12 @@ export async function fetchIssueDetail(id: number): Promise<MetronIssueDetail> {
   return metronFetch<MetronIssueDetail>(`/issue/${id}/`);
 }
 
-export async function searchIssues(
-  seriesName: string,
-  issueNumber?: string,
-): Promise<MetronIssue[]> {
+export async function searchIssues(seriesName: string, issueNumber?: string): Promise<MetronIssue[]> {
   const params = new URLSearchParams({
     series_name: seriesName,
     ...(issueNumber ? { number: issueNumber } : {}),
   });
-  const data = await metronFetch<MetronListResponse<MetronIssue>>(
-    `/issue/?${params.toString()}`,
-  );
+  const data = await metronFetch<MetronListResponse<MetronIssue>>(`/issue/?${params.toString()}`);
   return data.results;
 }
 
@@ -174,9 +154,7 @@ export async function fetchSeriesDetail(id: number): Promise<MetronSeries> {
   return metronFetch<MetronSeries>(`/series/${id}/`);
 }
 
-export async function fetchSeriesIssues(
-  seriesId: number,
-): Promise<MetronIssue[]> {
+export async function fetchSeriesIssues(seriesId: number): Promise<MetronIssue[]> {
   const params = new URLSearchParams({
     series_id: String(seriesId),
     ordering: "store_date",

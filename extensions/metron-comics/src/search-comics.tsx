@@ -60,10 +60,7 @@ export default function SearchComicsCommand() {
           description={`No issues found for "${searchText}". Try a broader search.`}
         />
       ) : (
-        <List.Section
-          title="Results"
-          subtitle={`${issues.length} issue${issues.length !== 1 ? "s" : ""}`}
-        >
+        <List.Section title="Results" subtitle={`${issues.length} issue${issues.length !== 1 ? "s" : ""}`}>
           {issues.map((issue) => (
             <IssueListItem key={issue.id} issue={issue} showPublisher />
           ))}

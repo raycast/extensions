@@ -1,6 +1,6 @@
 # Metron Comics Changelog
 
-## 1.0.0 - 2026-03-16
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - Browse new comic releases by week with cover art, store dates, and publisher info

@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   fetchIssueDetail,
@@ -23,13 +14,7 @@ import {
 
 // ─── Series Detail View ────────────────────────────────────────────────────────
 
-export function SeriesDetailView({
-  seriesId,
-  seriesName,
-}: {
-  seriesId: number;
-  seriesName: string;
-}) {
+export function SeriesDetailView({ seriesId, seriesName }: { seriesId: number; seriesName: string }) {
   const [series, setSeries] = useState<MetronSeries | null>(null);
   const [issues, setIssues] = useState<MetronIssue[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,9 +56,7 @@ export function SeriesDetailView({
       <List.Section
         title={series?.name ?? seriesName}
         subtitle={[
-          issues.length
-            ? `${issues.length} issue${issues.length !== 1 ? "s" : ""}`
-            : null,
+          issues.length ? `${issues.length} issue${issues.length !== 1 ? "s" : ""}` : null,
           yearRange,
           series?.publisher?.name,
         ]
@@ -93,9 +76,7 @@ export function SeriesDetailView({
 export function IssueDetailView({ issue }: { issue: MetronIssue }) {
   const [detail, setDetail] = useState<MetronIssueDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedVariant, setSelectedVariant] = useState<MetronVariant | null>(
-    null,
-  );
+  const [selectedVariant, setSelectedVariant] = useState<MetronVariant | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -122,9 +103,7 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
 
   const activeImage = selectedVariant?.image ?? issue.image;
   const title = issueTitle(issue);
-  const coverMd = activeImage
-    ? `<img src="${activeImage}" width="200" />\n\n`
-    : "";
+  const coverMd = activeImage ? `<img src="${activeImage}" width="200" />\n\n` : "";
   const descMd = detail?.desc ? `${detail.desc}\n\n` : "";
   const markdown = `${coverMd}${descMd}`;
   const publisherName = detail?.publisher?.name ?? issue.publisher?.name ?? "";
@@ -139,20 +118,13 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
             key={i}
             title={v.name || `Variant ${i + 1}`}
             icon={selectedVariant === v ? Icon.CheckCircle : Icon.Image}
-            onAction={() =>
-              setSelectedVariant(selectedVariant === v ? null : v)
-            }
+            onAction={() => setSelectedVariant(selectedVariant === v ? null : v)}
           />
         ))
       : null;
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={title}
-      isShowingDetail
-      searchBarPlaceholder=""
-    >
+    <List isLoading={isLoading} navigationTitle={title} isShowingDetail searchBarPlaceholder="">
       <List.Item
         title={title}
         detail={
@@ -161,42 +133,20 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
             markdown={markdown}
             metadata={
               <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title="Series"
-                  text={issue.series?.name ?? ""}
-                />
-                <List.Item.Detail.Metadata.Label
-                  title="Issue"
-                  text={`#${issue.number}`}
-                />
-                {issue.issue_name ? (
-                  <List.Item.Detail.Metadata.Label
-                    title="Title"
-                    text={issue.issue_name}
-                  />
-                ) : null}
-                {publisherName ? (
-                  <List.Item.Detail.Metadata.Label
-                    title="Publisher"
-                    text={publisherName}
-                  />
-                ) : null}
+                <List.Item.Detail.Metadata.Label title="Series" text={issue.series?.name ?? ""} />
+                <List.Item.Detail.Metadata.Label title="Issue" text={`#${issue.number}`} />
+                {issue.issue_name ? <List.Item.Detail.Metadata.Label title="Title" text={issue.issue_name} /> : null}
+                {publisherName ? <List.Item.Detail.Metadata.Label title="Publisher" text={publisherName} /> : null}
                 <List.Item.Detail.Metadata.Label
                   title="Store Date"
                   text={formatDate(issue.store_date ?? issue.cover_date)}
                   icon={Icon.Calendar}
                 />
                 {detail?.price ? (
-                  <List.Item.Detail.Metadata.Label
-                    title="Cover Price"
-                    text={`$${detail.price}`}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Cover Price" text={`$${detail.price}`} />
                 ) : null}
                 {detail?.page_count ? (
-                  <List.Item.Detail.Metadata.Label
-                    title="Pages"
-                    text={String(detail.page_count)}
-                  />
+                  <List.Item.Detail.Metadata.Label title="Pages" text={String(detail.page_count)} />
                 ) : null}
                 {detail?.variants && detail.variants.length > 0 ? (
                   <>
@@ -206,11 +156,7 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
                         <List.Item.Detail.Metadata.TagList.Item
                           key={i}
                           text={v.name || `Variant ${i + 1}`}
-                          color={
-                            selectedVariant === v
-                              ? Color.Blue
-                              : Color.SecondaryText
-                          }
+                          color={selectedVariant === v ? Color.Blue : Color.SecondaryText}
                         />
                       ))}
                     </List.Item.Detail.Metadata.TagList>
@@ -233,11 +179,7 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.TagList title="Story Arcs">
                       {detail.arcs.map((arc) => (
-                        <List.Item.Detail.Metadata.TagList.Item
-                          key={arc.id}
-                          text={arc.name}
-                          color={Color.Purple}
-                        />
+                        <List.Item.Detail.Metadata.TagList.Item key={arc.id} text={arc.name} color={Color.Purple} />
                       ))}
                     </List.Item.Detail.Metadata.TagList>
                   </>
@@ -264,19 +206,10 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
                 <Action.Push
                   title="View Series"
                   icon={Icon.List}
-                  target={
-                    <SeriesDetailView
-                      seriesId={seriesId}
-                      seriesName={issue.series?.name ?? "Series"}
-                    />
-                  }
+                  target={<SeriesDetailView seriesId={seriesId} seriesName={issue.series?.name ?? "Series"} />}
                 />
               ) : null}
-              <Action.CopyToClipboard
-                title="Copy Title"
-                content={title}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
+              <Action.CopyToClipboard title="Copy Title" content={title} shortcut={{ modifiers: ["cmd"], key: "c" }} />
               <Action.CopyToClipboard
                 title="Copy Metron URL"
                 content={`https://metron.cloud/issue/${issue.id}/`}
@@ -311,9 +244,7 @@ export function IssueListItemInner({ issue }: { issue: MetronIssue }) {
     <List.Item
       title={title}
       subtitle={issue.issue_name ?? ""}
-      icon={
-        issue.image ? { source: issue.image, fallback: Icon.Book } : Icon.Book
-      }
+      icon={issue.image ? { source: issue.image, fallback: Icon.Book } : Icon.Book}
       accessories={[{ text: storeDate, icon: Icon.Calendar }]}
       actions={
         <ActionPanel>
@@ -330,11 +261,7 @@ export function IssueListItemInner({ issue }: { issue: MetronIssue }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              title="Copy Title"
-              content={title}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy Title" content={title} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           </ActionPanel.Section>
         </ActionPanel>
       }
