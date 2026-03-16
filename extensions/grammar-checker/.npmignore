@@ -1,0 +1,5 @@
+CLAUDE.md
+.githooks/
+.claude/
+.mock
+*.log
