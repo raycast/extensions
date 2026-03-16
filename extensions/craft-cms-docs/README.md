@@ -8,9 +8,7 @@ Search the official Craft CMS documentation, knowledge base, and glossary.
 
 This extension uses required Raycast preferences. You will be prompted to set them when you first launch the extension, and can update them from the extension's preferences at any time. No API key or external account is required.
 
-### Required Preferences
-
-#### Craft CMS Version
+### Craft CMS Version
 
 Choose which Craft CMS documentation version to use when searching the `CMS` and `All Docs` sections.
 
@@ -22,7 +20,7 @@ Available values:
 - `2.x`
 - `1.x`
 
-#### Craft Commerce Version
+### Craft Commerce Version
 
 Choose which Craft Commerce documentation version to use when searching the `Commerce` and `All Docs` sections.
 
@@ -34,7 +32,7 @@ Available values:
 - `2.x`
 - `1.x`
 
-#### View Mode
+### View Mode
 
 Choose how search results are displayed:
 
