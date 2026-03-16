@@ -1,6 +1,6 @@
 # Changelog
 
-## [Highlight Outdated Skills] - {PR_MERGE_DATE}
+## [Highlight Outdated Skills] - 2026-03-16
 
 - Highlight outdated skills with an orange hammer icon in the installed skills list
 - Show "Updates Available" section with count when updates exist
