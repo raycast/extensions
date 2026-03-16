@@ -736,9 +736,11 @@ function DocsMetadata({
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
   const { push } = useNavigation();
+  const preferences = getPreferenceValues<Preferences.SearchDocs>();
   const docs = item.docsLinks ?? [];
   const relatedTerms = item.relatedTerms ?? [];
   const isGlossaryItem = linkDestinationForUrl(item.url) === "Glossary";
+  const versionMetadata = getVersionMetadata(item, preferences);
 
   return (
     <List.Item.Detail.Metadata>
@@ -805,6 +807,10 @@ function DocsMetadata({
                 />
               ))}
             </List.Item.Detail.Metadata.TagList>
+          )}
+          {versionMetadata && <List.Item.Detail.Metadata.Separator />}
+          {versionMetadata && (
+            <List.Item.Detail.Metadata.Label title={versionMetadata.title} text={versionMetadata.text} />
           )}
         </>
       )}
@@ -895,6 +901,26 @@ function buildDetailMarkdown(item: DocsSearchResult): string {
   return `# ${item.title}
 
 ${description}`;
+}
+
+function getVersionMetadata(
+  item: DocsSearchResult,
+  preferences: Preferences.SearchDocs,
+): { title: string; text: string } | undefined {
+  const product = getProductType(item.url);
+  if (product === "cms") {
+    return {
+      title: "CMS Version",
+      text: item.craftVersion ?? extractVersionFromUrl(item.url) ?? preferences.cmsVersion,
+    };
+  }
+  if (product === "commerce") {
+    return {
+      title: "Commerce Version",
+      text: item.craftVersion ?? extractVersionFromUrl(item.url) ?? preferences.commerceVersion,
+    };
+  }
+  return undefined;
 }
 
 function buildSubtitle(item: DocsSearchResult): string | undefined {
