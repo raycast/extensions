@@ -4,7 +4,7 @@ import { fetchSessionsForTask, fetchSessionLogs } from "../services/events";
 import { processAndGroupLogs } from "../services/event-grouping";
 import type { SessionLogs } from "../services/events";
 
-export const TERMINAL_SESSION_STATES = new Set(["completed", "failed", "cancelled", "stopped"]);
+const TERMINAL_SESSION_STATES = new Set(["completed", "failed", "cancelled", "stopped"]);
 const POLL_INTERVAL_MS = 5000;
 
 /**
