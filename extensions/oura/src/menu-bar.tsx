@@ -75,23 +75,23 @@ export default function Command() {
           <MenuBarExtra.Section title="Scores">
             <MenuBarExtra.Item
               title={`Readiness: ${data?.readiness ?? "N/A"}`}
-                onAction={() => launchCommandSafely("readiness")}
+              onAction={() => launchCommandSafely("readiness")}
             />
-              <MenuBarExtra.Item title={`Sleep: ${data?.sleep ?? "N/A"}`} onAction={() => launchCommandSafely("sleep")} />
+            <MenuBarExtra.Item title={`Sleep: ${data?.sleep ?? "N/A"}`} onAction={() => launchCommandSafely("sleep")} />
             <MenuBarExtra.Item
               title={`Activity: ${data?.activity ?? "N/A"}`}
-                onAction={() => launchCommandSafely("activity")}
+              onAction={() => launchCommandSafely("activity")}
             />
           </MenuBarExtra.Section>
 
           <MenuBarExtra.Section title="Activity Details">
             <MenuBarExtra.Item
               title={`Steps: ${data?.steps != null ? numberWithCommas(data.steps) : "N/A"}`}
-                onAction={() => launchCommandSafely("activity")}
+              onAction={() => launchCommandSafely("activity")}
             />
             <MenuBarExtra.Item
               title={`Distance: ${data?.distance != null ? convertMeters(data.distance) : "N/A"}`}
-                onAction={() => launchCommandSafely("activity")}
+              onAction={() => launchCommandSafely("activity")}
             />
           </MenuBarExtra.Section>
 
