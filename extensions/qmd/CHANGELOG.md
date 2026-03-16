@@ -1,6 +1,6 @@
 # QMD Changelog
 
-## [Updated QMD] - {PR_MERGE_DATE}
+## [Updated QMD] - 2026-03-16
 
 - Improved runtime detection for npm, nvm, fnm, and Volta-managed Node.js installations
 - Prioritized npm over bun to fix sqlite-vec on macOS
