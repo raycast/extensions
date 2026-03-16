@@ -1,3 +1,3 @@
 # time plus Changelog
 
-## [Initial Version] - 2026-03-09
+## [Initial Version] - {PR_MERGE_DATE}

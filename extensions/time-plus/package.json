@@ -10,105 +10,105 @@
       "name": "clock",
       "title": "Show Time and Date",
       "description": "Shows the current time and date.",
-      "mode": "view",
+      "mode": "no-view",
       "subtitle": "Loading...",
-      "interval": "1m",
-      "preferences": [
-        {
-          "name": "weekday",
-          "title": "Weekday",
-          "description": "Show the day of the week.",
-          "type": "dropdown",
-          "default": "short",
-          "data": [
-            { "title": "Short (Mon)", "value": "short" },
-            { "title": "Long (Monday)", "value": "long" },
-            { "title": "Hidden", "value": "none" }
-          ],
-          "required": true
-        },
-        {
-          "name": "month",
-          "title": "Month",
-          "description": "Show the name of the month.",
-          "type": "dropdown",
-          "default": "short",
-          "data": [
-            { "title": "Short (Mar)", "value": "short" },
-            { "title": "Long (March)", "value": "long" },
-            { "title": "Numeric (3)", "value": "numeric" },
-            { "title": "Hidden", "value": "none" }
-          ],
-          "required": true
-        },
-        {
-          "name": "yearDigits",
-          "title": "Year Digits",
-          "description": "Use 2 or 4 digits for the year.",
-          "type": "dropdown",
-          "default": "4",
-          "data": [
-            { "title": "4 digits (2026)", "value": "4" },
-            { "title": "2 digits (26)", "value": "2" }
-          ],
-          "required": true
-        },
-        {
-          "name": "showSeconds",
-          "title": "Show Seconds",
-          "description": "Include seconds in the time.",
-          "type": "checkbox",
-          "label": "Show seconds",
-          "default": false,
-          "required": true
-        },
-        {
-          "name": "use24Hour",
-          "title": "Time Format",
-          "description": "Use 24-hour or 12-hour time.",
-          "type": "dropdown",
-          "default": "24h",
-          "data": [
-            { "title": "24-hour (13:05)", "value": "24h" },
-            { "title": "12-hour (1:05 PM)", "value": "12h" }
-          ],
-          "required": true
-        },
-        {
-          "name": "showAmPm",
-          "title": "AM/PM",
-          "description": "Show AM/PM in 12-hour format.",
-          "type": "checkbox",
-          "label": "Show AM/PM",
-          "default": true,
-          "required": true
-        },
-        {
-          "name": "dateOrder",
-          "title": "Date Order",
-          "description": "Order of the date elements.",
-          "type": "dropdown",
-          "default": "MDY",
-          "data": [
-            { "title": "Month Day Year (Mar 5 2026)", "value": "MDY" },
-            { "title": "Day Month Year (5 Mar 2026)", "value": "DMY" },
-            { "title": "Year Month Day (2026 Mar 5)", "value": "YMD" }
-          ],
-          "required": true
-        },
-        {
-          "name": "dateTimeOrder",
-          "title": "Date & Time Order",
-          "description": "Order of time and date.",
-          "type": "dropdown",
-          "default": "date-time",
-          "data": [
-            { "title": "Date then Time", "value": "date-time" },
-            { "title": "Time then Date", "value": "time-date" }
-          ],
-          "required": true
-        }
-      ]
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "weekday",
+      "title": "Weekday",
+      "description": "Show the day of the week.",
+      "type": "dropdown",
+      "default": "short",
+      "data": [
+        { "title": "Short (Mon)", "value": "short" },
+        { "title": "Long (Monday)", "value": "long" },
+        { "title": "Hidden", "value": "none" }
+      ],
+      "required": true
+    },
+    {
+      "name": "month",
+      "title": "Month",
+      "description": "Show the name of the month.",
+      "type": "dropdown",
+      "default": "short",
+      "data": [
+        { "title": "Short (Mar)", "value": "short" },
+        { "title": "Long (March)", "value": "long" },
+        { "title": "Numeric (3)", "value": "numeric" },
+        { "title": "Hidden", "value": "none" }
+      ],
+      "required": true
+    },
+    {
+      "name": "yearDigits",
+      "title": "Year Digits",
+      "description": "Use 2 or 4 digits for the year.",
+      "type": "dropdown",
+      "default": "4",
+      "data": [
+        { "title": "4 digits (2026)", "value": "4" },
+        { "title": "2 digits (26)", "value": "2" }
+      ],
+      "required": true
+    },
+    {
+      "name": "showSeconds",
+      "title": "Show Seconds",
+      "description": "Include seconds in the time.",
+      "type": "checkbox",
+      "label": "Show seconds",
+      "default": false,
+      "required": true
+    },
+    {
+      "name": "use24Hour",
+      "title": "Time Format",
+      "description": "Use 24-hour or 12-hour time.",
+      "type": "dropdown",
+      "default": "24h",
+      "data": [
+        { "title": "24-hour (13:05)", "value": "24h" },
+        { "title": "12-hour (1:05 PM)", "value": "12h" }
+      ],
+      "required": true
+    },
+    {
+      "name": "showAmPm",
+      "title": "AM/PM",
+      "description": "Show AM/PM in 12-hour format.",
+      "type": "checkbox",
+      "label": "Show AM/PM",
+      "default": true,
+      "required": true
+    },
+    {
+      "name": "dateOrder",
+      "title": "Date Order",
+      "description": "Order of the date elements.",
+      "type": "dropdown",
+      "default": "MDY",
+      "data": [
+        { "title": "Month Day Year (Mar 5 2026)", "value": "MDY" },
+        { "title": "Day Month Year (5 Mar 2026)", "value": "DMY" },
+        { "title": "Year Month Day (2026 Mar 5)", "value": "YMD" }
+      ],
+      "required": true
+    },
+    {
+      "name": "dateTimeOrder",
+      "title": "Date & Time Order",
+      "description": "Order of time and date.",
+      "type": "dropdown",
+      "default": "date-time",
+      "data": [
+        { "title": "Date then Time", "value": "date-time" },
+        { "title": "Time then Date", "value": "time-date" }
+      ],
+      "required": true
     }
   ],
   "dependencies": {
