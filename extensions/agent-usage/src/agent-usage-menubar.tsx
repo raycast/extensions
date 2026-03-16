@@ -74,107 +74,152 @@ export default function MenuBarCommand() {
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiAccounts = useZaiAccounts(isZaiVisible);
 
-  // Single-account agents
-  const singleAgents: MenuBarAgent[] = [
-    {
-      id: "amp",
-      name: "Amp",
-      icon: "amp-icon.svg",
-      visible: isAmpVisible,
-      isLoading: ampState.isLoading,
-      accessory: getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
-      revalidate: ampState.revalidate,
-    },
-    {
-      id: "claude",
-      name: "Claude",
-      icon: "claude-icon.svg",
-      visible: isClaudeVisible,
-      isLoading: claudeState.isLoading,
-      accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
-      revalidate: claudeState.revalidate,
-    },
-    {
-      id: "droid",
-      name: "Droid",
-      icon: "droid-icon.svg",
-      visible: isDroidVisible,
-      isLoading: droidState.isLoading,
-      accessory: getDroidAccessory(droidState.usage, droidState.error, droidState.isLoading),
-      revalidate: droidState.revalidate,
-    },
-    {
-      id: "gemini",
-      name: "Gemini",
-      icon: "gemini-icon.png",
-      visible: isGeminiVisible,
-      isLoading: geminiState.isLoading,
-      accessory: getGeminiAccessory(geminiState.usage, geminiState.error, geminiState.isLoading),
-      revalidate: geminiState.revalidate,
-    },
-    {
-      id: "antigravity",
-      name: "Antigravity",
-      icon: "antigravity-icon.png",
-      visible: isAntigravityVisible,
-      isLoading: antigravityState.isLoading,
-      accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
-      revalidate: antigravityState.revalidate,
-    },
-  ];
+  // Single-account agents - memoized to prevent unnecessary re-renders
+  const singleAgents = useMemo<MenuBarAgent[]>(
+    () => [
+      {
+        id: "amp",
+        name: "Amp",
+        icon: "amp-icon.svg",
+        visible: isAmpVisible,
+        isLoading: ampState.isLoading,
+        accessory: getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
+        revalidate: ampState.revalidate,
+      },
+      {
+        id: "claude",
+        name: "Claude",
+        icon: "claude-icon.svg",
+        visible: isClaudeVisible,
+        isLoading: claudeState.isLoading,
+        accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
+        revalidate: claudeState.revalidate,
+      },
+      {
+        id: "droid",
+        name: "Droid",
+        icon: "droid-icon.svg",
+        visible: isDroidVisible,
+        isLoading: droidState.isLoading,
+        accessory: getDroidAccessory(droidState.usage, droidState.error, droidState.isLoading),
+        revalidate: droidState.revalidate,
+      },
+      {
+        id: "gemini",
+        name: "Gemini",
+        icon: "gemini-icon.png",
+        visible: isGeminiVisible,
+        isLoading: geminiState.isLoading,
+        accessory: getGeminiAccessory(geminiState.usage, geminiState.error, geminiState.isLoading),
+        revalidate: geminiState.revalidate,
+      },
+      {
+        id: "antigravity",
+        name: "Antigravity",
+        icon: "antigravity-icon.png",
+        visible: isAntigravityVisible,
+        isLoading: antigravityState.isLoading,
+        accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
+        revalidate: antigravityState.revalidate,
+      },
+    ],
+    [
+      isAmpVisible,
+      isClaudeVisible,
+      isDroidVisible,
+      isGeminiVisible,
+      isAntigravityVisible,
+      ampState.isLoading,
+      ampState.usage,
+      ampState.error,
+      ampState.revalidate,
+      claudeState.isLoading,
+      claudeState.usage,
+      claudeState.error,
+      claudeState.revalidate,
+      droidState.isLoading,
+      droidState.usage,
+      droidState.error,
+      droidState.revalidate,
+      geminiState.isLoading,
+      geminiState.usage,
+      geminiState.error,
+      geminiState.revalidate,
+      antigravityState.isLoading,
+      antigravityState.usage,
+      antigravityState.error,
+      antigravityState.revalidate,
+    ],
+  );
 
-  // Multi-account agents - one entry per account
-  const codexAgents: MenuBarAgent[] = isCodexVisible
-    ? codexAccounts.map((account) => ({
-        id: `codex-${account.accountId}` as AgentId,
-        name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
-        icon: "codex-icon.svg",
-        visible: isCodexVisible,
-        isLoading: account.isLoading,
-        accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
-        revalidate: account.revalidate,
-        isOpenCodeActive: account.isOpenCodeActive,
-      }))
-    : [];
+  // Multi-account agents - memoized to prevent unnecessary re-renders
+  const codexAgents = useMemo<MenuBarAgent[]>(
+    () =>
+      isCodexVisible
+        ? codexAccounts.map((account) => ({
+            id: `codex-${account.accountId}` as AgentId,
+            name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
+            icon: "codex-icon.svg",
+            visible: isCodexVisible,
+            isLoading: account.isLoading,
+            accessory: getCodexAccessory(account.usage, account.error, account.isLoading),
+            revalidate: account.revalidate,
+            isOpenCodeActive: account.isOpenCodeActive,
+          }))
+        : [],
+    [isCodexVisible, codexAccounts],
+  );
 
-  const kimiAgents: MenuBarAgent[] = isKimiVisible
-    ? kimiAccounts.map((account) => ({
-        id: `kimi-${account.accountId}` as AgentId,
-        name: account.label === "Default" ? "Kimi" : `Kimi • ${account.label}`,
-        icon: "kimi-icon.ico",
-        visible: isKimiVisible,
-        isLoading: account.isLoading,
-        accessory: getKimiAccessory(account.usage, account.error, account.isLoading),
-        revalidate: account.revalidate,
-        isOpenCodeActive: account.isOpenCodeActive,
-      }))
-    : [];
+  const kimiAgents = useMemo<MenuBarAgent[]>(
+    () =>
+      isKimiVisible
+        ? kimiAccounts.map((account) => ({
+            id: `kimi-${account.accountId}` as AgentId,
+            name: account.label === "Default" ? "Kimi" : `Kimi • ${account.label}`,
+            icon: "kimi-icon.ico",
+            visible: isKimiVisible,
+            isLoading: account.isLoading,
+            accessory: getKimiAccessory(account.usage, account.error, account.isLoading),
+            revalidate: account.revalidate,
+            isOpenCodeActive: account.isOpenCodeActive,
+          }))
+        : [],
+    [isKimiVisible, kimiAccounts],
+  );
 
-  const syntheticAgents: MenuBarAgent[] = isSyntheticVisible
-    ? syntheticAccounts.map((account) => ({
-        id: `synthetic-${account.accountId}` as AgentId,
-        name: account.label === "Default" ? "Synthetic" : `Synthetic • ${account.label}`,
-        icon: "synthetic-icon.png",
-        visible: isSyntheticVisible,
-        isLoading: account.isLoading,
-        accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),
-        revalidate: account.revalidate,
-        isOpenCodeActive: account.isOpenCodeActive,
-      }))
-    : [];
+  const syntheticAgents = useMemo<MenuBarAgent[]>(
+    () =>
+      isSyntheticVisible
+        ? syntheticAccounts.map((account) => ({
+            id: `synthetic-${account.accountId}` as AgentId,
+            name: account.label === "Default" ? "Synthetic" : `Synthetic • ${account.label}`,
+            icon: "synthetic-icon.png",
+            visible: isSyntheticVisible,
+            isLoading: account.isLoading,
+            accessory: getSyntheticAccessory(account.usage, account.error, account.isLoading),
+            revalidate: account.revalidate,
+            isOpenCodeActive: account.isOpenCodeActive,
+          }))
+        : [],
+    [isSyntheticVisible, syntheticAccounts],
+  );
 
-  const zaiAgents: MenuBarAgent[] = isZaiVisible
-    ? zaiAccounts.map((account) => ({
-        id: `zai-${account.accountId}` as AgentId,
-        name: account.label === "Default" ? "z.ai" : `z.ai • ${account.label}`,
-        icon: "zhipu-icon.svg",
-        visible: isZaiVisible,
-        isLoading: account.isLoading,
-        accessory: getZaiAccessory(account.usage, account.error, account.isLoading),
-        revalidate: account.revalidate,
-        isOpenCodeActive: account.isOpenCodeActive,
-      }))
-    : [];
+  const zaiAgents = useMemo<MenuBarAgent[]>(
+    () =>
+      isZaiVisible
+        ? zaiAccounts.map((account) => ({
+            id: `zai-${account.accountId}` as AgentId,
+            name: account.label === "Default" ? "z.ai" : `z.ai • ${account.label}`,
+            icon: "zhipu-icon.svg",
+            visible: isZaiVisible,
+            isLoading: account.isLoading,
+            accessory: getZaiAccessory(account.usage, account.error, account.isLoading),
+            revalidate: account.revalidate,
+            isOpenCodeActive: account.isOpenCodeActive,
+          }))
+        : [],
+    [isZaiVisible, zaiAccounts],
+  );
 
   const visibleAgents = useMemo(
     () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),

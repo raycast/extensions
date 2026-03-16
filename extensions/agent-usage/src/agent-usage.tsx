@@ -11,7 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Accessory, AgentDefinition, AgentId, UsageState } from "./agents/types";
 import { useAmpUsage } from "./amp/fetcher";
 import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer";
@@ -397,26 +397,30 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   // Build a flat list of renderable items — each is either a standard AgentView or an AccountedAgentView
   type ListRow = { kind: "agent"; view: AgentView } | { kind: "accounted"; view: AccountedAgentView };
 
-  const allRows: ListRow[] = agentOrder.flatMap((agentId): ListRow[] => {
-    if (agentId === "codex") {
-      return codexAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
-    }
-    if (agentId === "kimi") {
-      return kimiAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
-    }
-    if (agentId === "synthetic") {
-      return syntheticAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
-    }
-    if (agentId === "zai") {
-      return zaiAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
-    }
-    if (agentId in agentViews) {
-      const view = agentViews[agentId as keyof typeof agentViews];
-      if (!view.isVisible) return [];
-      return [{ kind: "agent", view }];
-    }
-    return [];
-  });
+  const allRows = useMemo<ListRow[]>(
+    () =>
+      agentOrder.flatMap((agentId): ListRow[] => {
+        if (agentId === "codex") {
+          return codexAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
+        if (agentId === "kimi") {
+          return kimiAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
+        if (agentId === "synthetic") {
+          return syntheticAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
+        if (agentId === "zai") {
+          return zaiAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
+        if (agentId in agentViews) {
+          const view = agentViews[agentId as keyof typeof agentViews];
+          if (!view.isVisible) return [];
+          return [{ kind: "agent", view }];
+        }
+        return [];
+      }),
+    [agentOrder, codexAccountedViews, kimiAccountedViews, syntheticAccountedViews, zaiAccountedViews, agentViews],
+  );
 
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
