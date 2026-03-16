@@ -2,38 +2,40 @@
 
 Chinese version: [README.zh.md](README.zh.md)
 
-SnapOCR turns screenshots, PDFs, and images into structured Markdown inside Raycast with [Baidu PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR). It is built on Paddle's `layout-parsing` API, so it does not stop at plain OCR. The model understands page structure first, then reconstructs titles, paragraphs, tables, formulas, and image regions into something you can actually reuse.
+SnapOCR brings [Baidu PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)'s document parsing capabilities into Raycast. PaddleOCR is built to turn documents and images into structured, AI-friendly data such as Markdown and JSON, and SnapOCR packages that power into a lightweight workflow for screenshots, PDFs, and images.
 
-This makes SnapOCR especially strong on the kinds of documents that basic OCR often breaks: handwritten or vertical Chinese text, dense academic pages, mixed-layout reports, tables, and formula-heavy documents. Instead of giving you a flat text dump, it gives you Markdown that is much closer to the original document logic.
+This is not a plain OCR wrapper. SnapOCR is built on Paddle's `layout-parsing` API, so it understands page structure before recognition and reconstructs titles, paragraphs, tables, formulas, charts, and image regions into reusable Markdown. The result is much closer to the logic of the original document than a flat text dump.
 
-## Why It Matters
+## Built for Global Document Workflows
 
-- **Complex Chinese OCR, not just simple text OCR** - SnapOCR is designed for Chinese-first documents, including handwriting, vertical text, academic layouts, and mixed Chinese-English pages.
-- **Tables and formulas are part of the target use case** - Paddle's layout parsing pipeline helps preserve tables, formulas, and other dense regions that plain screenshot OCR usually flattens.
-- **API-powered, so the ceiling is much higher** - Because this extension is backed by the Baidu PaddleOCR API rather than a thin local text grabber, it can handle PDFs, exported Markdown bundles, and more complex page structures.
-- **Structured Markdown output** - Headings, lists, paragraphs, tables, and images are exported in a form that can be pasted into notes, prompts, docs, or knowledge bases.
-- **Practical for individuals** - Baidu AIStudio offers a free PaddleOCR allowance that is usually enough for personal day-to-day use.
+PaddleOCR supports large-scale multilingual document processing, and its latest document parsing stack is designed for real-world content rather than simple clean text screenshots. That makes SnapOCR suitable for users worldwide who work with:
+
+- multilingual documents and mixed-language pages
+- dense reports, academic PDFs, and long-form documents
+- tables, formulas, charts, and other complex layout elements
+- screenshots, scanned pages, exported PDFs, and document images
+
+In other words, SnapOCR is not positioned as a Chinese-only OCR tool. It is a multilingual, layout-aware document parser built on top of PaddleOCR's global language and document understanding capabilities.
 
 ## Why PaddleOCR
 
-PaddleOCR is one of the strongest OCR stacks for Chinese and document understanding. Its advantages are exactly what SnapOCR needs:
+PaddleOCR's own positioning maps directly to what this extension needs:
 
-- **Chinese-first recognition quality** for handwriting, vertical text, and mixed-language pages
-- **Layout parsing** to distinguish titles, body text, tables, formulas, and other semantic regions
-- **Document enhancement options** such as orientation classification and unwarping
-- **API access** that makes advanced OCR features usable inside a lightweight Raycast workflow
+- **Multilingual support at scale** - PaddleOCR supports 100+ languages across global document processing scenarios
+- **Complex element recognition** - the document parsing stack is built to handle text, tables, formulas, charts, and other dense elements
+- **Structured output** - PaddleOCR can restore reading order and convert complex PDFs or document images into Markdown or JSON-like structured results
+- **Deployment flexibility** - its API and service-oriented design make it practical to bring advanced document parsing into a Raycast extension
 
-SnapOCR brings those strengths into Raycast without requiring local models, native dependencies, or command-line setup.
+SnapOCR takes those strengths and turns them into a fast desktop workflow without local models, native OCR dependencies, or command-line setup.
 
-## Why SnapOCR Is Different in Raycast
+## What Makes SnapOCR Valuable
 
-Most OCR-style workflows in Raycast focus on extracting plain text from screenshots. SnapOCR takes a different position: it is built for complex documents and layout-aware Markdown reconstruction.
-
-That means:
-
-- a dense Chinese thesis page is a supported scenario, not an edge case
-- complex tables and formulas are part of the core value proposition
-- the extension can grow beyond screenshot OCR because the API already supports richer parsing workflows
+- **Layout-aware OCR instead of flat OCR** - the extension understands document structure first and only then performs recognition
+- **Complex text recognition for everyone** - users are not limited to one language or one script; the underlying PaddleOCR stack is meant for multilingual usage worldwide
+- **Better support for tables and formulas** - those are part of the core use case, not an afterthought
+- **Structured Markdown output** - more usable for notes, knowledge bases, prompts, and document workflows
+- **API-powered growth path** - because the extension talks to PaddleOCR through API, it can support richer parsing workflows than a local plain-text grabber
+- **Practical cost** - Baidu AIStudio's free PaddleOCR allowance is usually enough for individual day-to-day use
 
 ## Commands
 
@@ -51,7 +53,7 @@ Use **Quick OCR** when you want the fastest workflow for turning a screenshot in
 
 ### 2. Review Rich OCR Output Before Copying
 
-Use **Preview OCR** when you want to inspect the recognized result in Raycast first, especially for complex pages with formulas or structured content.
+Use **Preview OCR** when you want to inspect the recognized result in Raycast first, especially for complex pages with tables, formulas, or dense document structure.
 
 ### 3. Export PDFs and Images as Markdown Bundles
 
@@ -59,7 +61,7 @@ Use **Export OCR Markdown** when you want a real output package:
 
 - a `document.md` file
 - extracted image assets saved alongside it
-- a cleaner handoff into notes, docs, prompts, or knowledge systems
+- a cleaner handoff into notes, docs, prompts, or AI workflows
 
 ## OCR Capabilities
 

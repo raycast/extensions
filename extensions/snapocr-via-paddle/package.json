@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snapocr-via-paddle",
   "title": "SnapOCR Via Paddle",
-  "description": "Layout-aware OCR for complex Chinese documents, tables, and formulas with structured Markdown export via Baidu PaddleOCR",
+  "description": "Layout-aware multilingual OCR for complex documents, tables, and formulas with structured Markdown export via Baidu PaddleOCR",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
