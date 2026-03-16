@@ -81,7 +81,6 @@ function Command() {
           },
           secondaryAction: {
             title: "Open in Browser",
-            shortcut: Keyboard.Shortcut.Common.Copy,
             onAction: () => {
               open(taskUrl);
             },
