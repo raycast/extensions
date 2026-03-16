@@ -11,7 +11,7 @@
     {
       "name": "autoPaste",
       "type": "checkbox",
-      "label": "Paste after squeeze",
+      "label": "Paste After Squeeze",
       "title": "Output Behavior",
       "default": false,
       "required": false,
