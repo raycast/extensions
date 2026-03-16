@@ -1,6 +1,6 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { createHash } from "crypto";
-import { readdirSync, readFileSync, renameSync, statSync } from "fs";
+import { existsSync, readdirSync, readFileSync, renameSync, statSync } from "fs";
 import { extname, join, basename } from "path";
 
 const IMAGE_EXTENSIONS = new Set([
@@ -72,8 +72,13 @@ export default async function main() {
       try {
         const hash = md5Hash(full);
         const newName = `${stem}.${hash}${ext}`;
-        renameSync(full, join(folder, newName));
-        renamed++;
+        const newPath = join(folder, newName);
+        if (existsSync(newPath)) {
+          errors.push(`${filename}: target "${newName}" already exists, skipping`);
+        } else {
+          renameSync(full, newPath);
+          renamed++;
+        }
       } catch (err) {
         errors.push(
           `${filename}: ${err instanceof Error ? err.message : String(err)}`,
