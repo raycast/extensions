@@ -1,6 +1,6 @@
 # firefox-tabs Changelog
 
-## [Added Setup Command and Native Host Bundling] - 2026-03-14
+## [Added Setup Command and Native Host Bundling] - {PR_MERGE_DATE}
 
 - One-command setup: run "Setup Firefox Bridge" to install everything automatically
 - Native host bundled as single file with automatic download from GitHub Releases
