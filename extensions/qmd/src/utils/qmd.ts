@@ -152,13 +152,20 @@ function resolveNvmNodePath(home: string): string[] {
  */
 function resolveFnmNodePath(home: string): string[] {
   try {
+    // ~/.fnm/current/bin — set by fnm when --use-on-cd / shell hook is active
     const currentBin = join(home, ".fnm", "current", "bin");
     if (existsSync(currentBin)) {
       return [currentBin];
     }
-    const xdgBin = join(home, ".local", "share", "fnm", "current", "bin");
-    if (existsSync(xdgBin)) {
-      return [xdgBin];
+    // XDG default alias (~/.local/share/fnm/aliases/default/bin) — fnm's own default
+    const xdgAliasBin = join(home, ".local", "share", "fnm", "aliases", "default", "bin");
+    if (existsSync(xdgAliasBin)) {
+      return [xdgAliasBin];
+    }
+    // Legacy path that was previously checked (kept as a final fallback)
+    const xdgCurrentBin = join(home, ".local", "share", "fnm", "current", "bin");
+    if (existsSync(xdgCurrentBin)) {
+      return [xdgCurrentBin];
     }
   } catch {
     // ignore
@@ -170,21 +177,21 @@ function resolveFnmNodePath(home: string): string[] {
  * Get environment with extended PATH for Raycast sandbox
  * Raycast doesn't inherit the user's shell PATH, so we need to add common paths
  */
-function getEnvWithPath(): NodeJS.ProcessEnv {
+function getEnvWithPath(preferences?: Preferences): NodeJS.ProcessEnv {
   const home = homedir();
-  const preferences = getPreferenceValues<Preferences>();
+  const prefs = preferences ?? getPreferenceValues<Preferences>();
 
   // If user configured custom executable paths, add their directories to PATH
   // so the qmd shell script can find the correct runtime
   const customPaths: string[] = [];
-  if (preferences.bunExecutablePath) {
-    const expanded = expandPath(preferences.bunExecutablePath);
+  if (prefs.bunExecutablePath) {
+    const expanded = expandPath(prefs.bunExecutablePath);
     if (existsSync(expanded)) {
       customPaths.push(dirname(expanded));
     }
   }
-  if (preferences.qmdExecutablePath) {
-    const expanded = expandPath(preferences.qmdExecutablePath);
+  if (prefs.qmdExecutablePath) {
+    const expanded = expandPath(prefs.qmdExecutablePath);
     if (existsSync(expanded)) {
       customPaths.push(dirname(expanded));
     }
@@ -229,11 +236,11 @@ function findInPath(executable: string): string | null {
 /**
  * Get the full path to the bun executable
  */
-function getBunExecutable(): string {
-  const preferences = getPreferenceValues<Preferences>();
+function getBunExecutable(preferences?: Preferences): string {
+  const prefs = preferences ?? getPreferenceValues<Preferences>();
 
-  if (preferences.bunExecutablePath) {
-    const customPath = expandPath(preferences.bunExecutablePath);
+  if (prefs.bunExecutablePath) {
+    const customPath = expandPath(prefs.bunExecutablePath);
     if (existsSync(customPath)) {
       return customPath;
     }
@@ -258,11 +265,11 @@ function getBunExecutable(): string {
 /**
  * Get the full path to the qmd script
  */
-function getQmdScript(): string {
-  const preferences = getPreferenceValues<Preferences>();
+function getQmdScript(preferences?: Preferences): string {
+  const prefs = preferences ?? getPreferenceValues<Preferences>();
 
-  if (preferences.qmdExecutablePath) {
-    const customPath = expandPath(preferences.qmdExecutablePath);
+  if (prefs.qmdExecutablePath) {
+    const customPath = expandPath(prefs.qmdExecutablePath);
     if (existsSync(customPath)) {
       return customPath;
     }
@@ -288,9 +295,10 @@ function getQmdScript(): string {
  * qmd installs to prevent the shell script from incorrectly using bun
  * (which would cause ABI mismatches with npm-compiled native modules).
  */
-function getQmdEnv(): NodeJS.ProcessEnv {
-  const env = getEnvWithPath();
-  const qmdPath = getQmdScript();
+function getQmdEnv(preferences?: Preferences): NodeJS.ProcessEnv {
+  const prefs = preferences ?? getPreferenceValues<Preferences>();
+  const env = getEnvWithPath(prefs);
+  const qmdPath = getQmdScript(prefs);
   if (!qmdPath.includes("/.bun/")) {
     env.BUN_INSTALL = undefined;
   }
@@ -303,8 +311,8 @@ function getQmdEnv(): NodeJS.ProcessEnv {
  * (bun vs node). The env passed to execAsync includes extended PATH so the
  * script can find the correct runtime.
  */
-function buildQmdShellCommand(args: string[]): string {
-  const qmdPath = getQmdScript();
+function buildQmdShellCommand(args: string[], preferences?: Preferences): string {
+  const qmdPath = getQmdScript(preferences);
   const escapedArgs = args.map((arg) => `'${arg.replace(/'/g, "'\\''")}'`).join(" ");
   return `'${qmdPath.replace(/'/g, "'\\''")}' ${escapedArgs}`;
 }
@@ -479,13 +487,14 @@ export async function runQmd<T>(
   const { timeout = 30_000, includeJson = true } = options;
 
   try {
+    const preferences = getPreferenceValues<Preferences>();
     const fullArgs = includeJson ? [...args, "--json"] : args;
-    const command = buildQmdShellCommand(fullArgs);
+    const command = buildQmdShellCommand(fullArgs, preferences);
 
     const { stdout, stderr } = await execAsync(command, {
       timeout,
       maxBuffer: 10 * 1024 * 1024, // 10MB buffer for large outputs
-      env: getQmdEnv(),
+      env: getQmdEnv(preferences),
     });
 
     if (includeJson && stdout.trim()) {
@@ -552,11 +561,12 @@ export async function runQmdRaw(args: string[], options: { timeout?: number } = 
   const { timeout = 30_000 } = options;
 
   try {
-    const command = buildQmdShellCommand(args);
+    const preferences = getPreferenceValues<Preferences>();
+    const command = buildQmdShellCommand(args, preferences);
     const { stdout, stderr } = await execAsync(command, {
       timeout,
       maxBuffer: 10 * 1024 * 1024,
-      env: getQmdEnv(),
+      env: getQmdEnv(preferences),
     });
 
     const hint = stderr ? parseQmdHint(stderr) : undefined;
