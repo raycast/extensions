@@ -88,7 +88,7 @@ calendarApp.activate();
 try {
   calendarApp.switchView({ to: "day view" });
 } catch (_) {
-  // switchView가 실패해도 날짜 이동은 계속 진행한다.
+  // Continue even if switchView fails.
 }
 
 calendarApp.viewCalendar({ at: new Date(payload.startEpochMs) });
@@ -147,9 +147,9 @@ export async function createAppleCalendarEvent(
 
   try {
     const stdout = await runSwiftScript(ADD_EVENT_SCRIPT_PATH, [encodedPayload]);
-    return { calendarName: stdout || "알 수 없음" };
+    return { calendarName: stdout || "Unknown" };
   } catch (error) {
-    throw new Error(`Apple Calendar에 일정을 추가하지 못했습니다: ${toErrorMessage(error)}`);
+    throw new Error(`Failed to create an Apple Calendar event: ${toErrorMessage(error)}`);
   }
 }
 
@@ -161,7 +161,7 @@ export async function createAppleReminder(
     title: reminder.title,
     dueEpochMs: reminder.start.getTime(),
     allDay: reminder.allDay,
-    notes: reminder.location ? `장소: ${reminder.location}` : undefined,
+    notes: reminder.location ? `Location: ${reminder.location}` : undefined,
     preferredReminderCalendarIdentifier: options.preferredReminderCalendarIdentifier,
   };
 
@@ -169,9 +169,9 @@ export async function createAppleReminder(
 
   try {
     const stdout = await runSwiftScript(ADD_REMINDER_SCRIPT_PATH, [encodedPayload]);
-    return { reminderListName: stdout || "알 수 없음" };
+    return { reminderListName: stdout || "Unknown" };
   } catch (error) {
-    throw new Error(`미리알림에 항목을 추가하지 못했습니다: ${toErrorMessage(error)}`);
+    throw new Error(`Failed to create an Apple Reminder: ${toErrorMessage(error)}`);
   }
 }
 
@@ -187,7 +187,7 @@ export async function openCalendarAtDate(date: Date): Promise<void> {
       maxBuffer: 1024 * 1024,
     });
   } catch (error) {
-    throw new Error(`Calendar 앱을 열지 못했습니다: ${toErrorMessage(error)}`);
+    throw new Error(`Failed to open the Calendar app: ${toErrorMessage(error)}`);
   }
 }
 
@@ -272,7 +272,7 @@ function parseListCalendarsOutput(stdout: string): ListCalendarsOutput {
     }
     return parsed;
   } catch (error) {
-    throw new Error(`캘린더 목록 응답을 파싱하지 못했습니다: ${toErrorMessage(error)}`);
+    throw new Error(`Failed to parse calendar list response: ${toErrorMessage(error)}`);
   }
 }
 
@@ -284,7 +284,7 @@ function parseListReminderListsOutput(stdout: string): ListReminderListsOutput {
     }
     return parsed;
   } catch (error) {
-    throw new Error(`미리알림 폴더 목록 응답을 파싱하지 못했습니다: ${toErrorMessage(error)}`);
+    throw new Error(`Failed to parse reminder list response: ${toErrorMessage(error)}`);
   }
 }
 

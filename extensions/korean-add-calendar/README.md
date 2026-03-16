@@ -1,23 +1,21 @@
 # Korean Add Calendar (Raycast)
 
-한국어 자연어 문장을 파싱해서 Apple Calendar 일정 또는 미리알림에 항목을 등록하는 Raycast 익스텐션입니다.
+Create Apple Calendar events or Apple Reminders from Korean schedule sentences.
 
 ![raycast2x](https://github.com/user-attachments/assets/72f3dc0d-e1ec-42d8-809e-b297242b4639)
 
+## Quick Start
 
+1. Run `Create Korean Schedule Item` in Raycast.
+2. Enter a Korean schedule sentence.
+3. Select the target (`Apple Calendar Event` or `Apple Reminder`) and destination list.
+4. Run one of the actions (`Create in Apple Calendar` / `Create in Reminders`).
 
-## 빠른 시작
+For full behavior details and parsing rules, see:
 
-1. Raycast에서 `Create Korean Schedule Item` 실행
-2. `일정 문장` 입력
-3. 등록 대상(`Apple Calendar 일정`/`미리알림 항목`)과 폴더 선택
-4. Action 실행 (`Apple Calendar에 등록` 또는 `미리알림에 등록`)
+- [Usage and Parsing Guide](docs/usage-and-parsing-guide.md)
 
-상세 사용법/파싱 규칙/안내 문구 템플릿은 아래 문서를 참고하세요.
-
-- [사용/파싱 가이드](docs/usage-and-parsing-guide.md)
-
-## 지원 예시
+## Example Inputs
 
 - `내일 오후 3시에 회의`
 - `다음주 화요일 오전 10시 반에 강남에서 팀 미팅`
@@ -31,28 +29,24 @@
 - `오늘 중 결재`
 - `이번달 내 정산`
 
-## 동작 규칙
+## Behavior
 
-- 시간이 없으면 종일 일정으로 생성합니다.
-- 파싱된 시작 시각이 이미 과거인 경우, 요일만 입력한 표현(예: `월요일 3시`)은 다음 주로 보정합니다.
-- 일정 저장은 `assets/add_event.swift`에서 EventKit을 직접 호출합니다.
-- 미리알림 저장은 `assets/add_reminder.swift`에서 EventKit을 직접 호출합니다.
-- 등록 대상을 `캘린더` 또는 `미리알림`으로 선택할 수 있습니다.
-- 캘린더/미리알림 폴더는 EventKit으로 불러온 목록에서 선택합니다.
-- 마지막으로 선택한 캘린더/미리알림 폴더를 저장해 다음 실행 때 자동 복원합니다.
-- 장소는 별도 입력칸으로 직접 지정할 수 있고, 입력 시 문장 파싱 장소보다 우선합니다.
-- 파싱 상태/요약/추천 대상을 입력창 바로 아래에서 바로 확인할 수 있어 스크롤 없이 검토할 수 있습니다.
-- `부터 ~까지` 시간 범위를 입력하면 종료 시각으로 반영합니다.
-- `까지/전에/전까지/이전`, `N일 안에/이내/내`, `이번주 내` 마감 표현을 지원합니다.
-- `N시간 안에/이내/내`, `오늘/내일/모레 중`, `이번달/다음달 내` 표현을 지원합니다.
-- 마감 표현은 `지금~마감시각` 범위가 아니라 `마감 시점`으로 처리합니다(마감성 작업은 미리알림 권장).
-- 시간이 없는 마감 표현(`3일 안에`, `이번주 내`, `이번달 내`)은 종일 마감으로 저장되어 미리보기에서 `시작일~다음날` 형식으로 보일 수 있습니다.
-- 마감 문장은 기본 등록 대상을 `미리알림 항목`으로 자동 전환합니다(수동 변경 시 유지).
-- 액션에서 `등록 후 캘린더 열기`를 선택하면 생성 직후 Calendar 앱을 해당 일정 시각으로 엽니다.
-- 최초 1회 macOS 캘린더/미리알림 권한 허용이 필요합니다.
+- If no time is provided, the item is created as all-day.
+- If a parsed weekday-only expression is in the past (for example, `월요일 3시`), it moves to the next week.
+- Event creation uses EventKit through `assets/add_event.swift`.
+- Reminder creation uses EventKit through `assets/add_reminder.swift`.
+- You can select the destination calendar or reminder list from writable EventKit lists.
+- The last selected target and destination are restored automatically.
+- The optional location field overrides the parsed location when provided.
+- Parse status, summary, and recommended target are shown above destination fields.
+- Time ranges in the form `부터 ~까지` are supported.
+- Deadline patterns such as `까지/전에/전까지/이전`, `N일 안에/이내/내`, `N시간 안에/이내/내`, `오늘/내일/모레 중`, and `이번주/다음주/이번달/다음달 내` are supported.
+- Deadline sentences are interpreted as due points (not duration blocks).
+- Deadline intent defaults to `Apple Reminder` unless manually overridden.
+- You can use `Create and Open Calendar` to jump to the created event time in Calendar.app.
+- macOS Calendar and Reminders permissions are required on first use.
 
-
-Raycast 개발 모드:
+## Development
 
 ```bash
 npx ray develop

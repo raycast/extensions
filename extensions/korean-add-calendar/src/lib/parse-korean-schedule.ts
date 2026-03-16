@@ -37,7 +37,7 @@ const WEEKDAY_TOKENS = ["일", "월", "화", "수", "목", "금", "토"] as cons
 const AM_TOKENS = new Set(["새벽", "아침", "오전"]);
 const PM_TOKENS = new Set(["점심", "오후", "저녁", "밤"]);
 
-// parse.rb의 정규식을 최대한 그대로 유지한다.
+// Keep the parse.rb regular expression behavior as closely as possible.
 const MATCHER =
   /^((이달|이번달|담달|다음달|(내년|[0-9]{4}년){0,1} *[0-9]+월){0,1} *[0-9]+일+(?! *(?:안에|이내|내))|[0-9]+일 *(?:안에|이내|내)|오늘|내일|모레|(?:이번주|담주|다음주|다담주|다다음주) *내|(이번주|담주|다음주|다담주|다다음주){0,1} *([월화수목금토일](요일|욜)))( *(새벽|아침|점심|오전|오후|저녁|밤){0,1} *([0-9]+시|[0-9]+:[0-9]+) *([0-9]+분|반){0,1}){0,1}( *부터 *(?:새벽|아침|점심|오전|오후|저녁|밤){0,1} *(?:[0-9]+시|[0-9]+:[0-9]+) *(?:[0-9]+분|반){0,1} *까지){0,1}(?: *(?:까지|까지는|전까지|전에|전|이전까지|이전)){0,1}(?: *부터){0,1}에{0,1}( *(.+?)에서){0,1} */u;
 const DEADLINE_SUFFIX_PATTERN = /(까지|까지는|전까지|전에|전|이전까지|이전)\s*$/u;
@@ -49,7 +49,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (!input.trim()) {
     return {
       ok: false,
-      error: "일정 문장이 비어 있습니다.",
+      error: "The schedule sentence is empty.",
     };
   }
 
@@ -73,7 +73,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (!match) {
     return {
       ok: false,
-      error: "날짜/시간 패턴을 인식하지 못했습니다. 예) 다음주 화요일 오후 3시에 회의",
+      error: "Could not recognize a date/time pattern. Example: 다음주 화요일 오후 3시에 회의",
     };
   }
 
@@ -176,7 +176,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (hour === undefined || minute === undefined) {
       return {
         ok: false,
-        error: "시간 범위는 시작 시간을 포함해 입력해 주세요. 예) 내일 오후 4시부터 6시까지 회의",
+        error: "Time range expressions must include a start time. Example: 내일 오후 4시부터 6시까지 회의",
       };
     }
 
@@ -205,7 +205,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (relativeWithinDays !== undefined && (Number.isNaN(relativeWithinDays) || relativeWithinDays < 1)) {
     return {
       ok: false,
-      error: "상대 일수는 1일 이상으로 입력해 주세요. 예) 3일 안에",
+      error: "Relative day values must be at least 1. Example: 3일 안에",
     };
   }
 
@@ -232,7 +232,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (!isValidDayOfMonth(shiftedYear, shiftedMonth, day)) {
       return {
         ok: false,
-        error: "유효하지 않은 날짜입니다. 월/일 조합을 확인해 주세요.",
+        error: "Invalid date. Please check the month/day combination.",
       };
     }
 
@@ -257,21 +257,21 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (month !== undefined && (month < 1 || month > 12)) {
     return {
       ok: false,
-      error: "월은 1부터 12 사이로 입력해 주세요.",
+      error: "Month must be between 1 and 12.",
     };
   }
 
   if (day !== undefined && day < 1) {
     return {
       ok: false,
-      error: "일은 1 이상의 값으로 입력해 주세요.",
+      error: "Day must be 1 or greater.",
     };
   }
 
   if (year !== undefined && month !== undefined && day !== undefined && !isValidDayOfMonth(year, month, day)) {
     return {
       ok: false,
-      error: "유효하지 않은 날짜입니다. 월/일 조합을 확인해 주세요.",
+      error: "Invalid date. Please check the month/day combination.",
     };
   }
 
@@ -279,14 +279,14 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (ampm && (hour < 1 || hour > 12)) {
       return {
         ok: false,
-        error: "오전/오후 시간은 1시부터 12시 사이로 입력해 주세요.",
+        error: "AM/PM hours must be between 1 and 12.",
       };
     }
 
     if (!ampm && (hour < 0 || hour > 23)) {
       return {
         ok: false,
-        error: "시간은 0시부터 23시 사이로 입력해 주세요.",
+        error: "Hour must be between 0 and 23.",
       };
     }
   }
@@ -294,7 +294,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (minute !== undefined && (minute < 0 || minute > 59)) {
     return {
       ok: false,
-      error: "분은 0부터 59 사이로 입력해 주세요.",
+      error: "Minute must be between 0 and 59.",
     };
   }
 
@@ -302,14 +302,14 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (endAmpm && (endHour < 1 || endHour > 12)) {
       return {
         ok: false,
-        error: "종료 시간의 오전/오후 표기는 1시부터 12시 사이로 입력해 주세요.",
+        error: "End time with AM/PM must be between 1 and 12.",
       };
     }
 
     if (!endAmpm && (endHour < 0 || endHour > 23)) {
       return {
         ok: false,
-        error: "종료 시간은 0시부터 23시 사이로 입력해 주세요.",
+        error: "End hour must be between 0 and 23.",
       };
     }
   }
@@ -317,7 +317,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (endMinute !== undefined && (endMinute < 0 || endMinute > 59)) {
     return {
       ok: false,
-      error: "종료 분은 0부터 59 사이로 입력해 주세요.",
+      error: "End minute must be between 0 and 59.",
     };
   }
 
@@ -336,11 +336,11 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (year === undefined || month === undefined || day === undefined) {
     return {
       ok: false,
-      error: "날짜를 계산하지 못했습니다. 숫자 날짜(예: 3월 2일) 또는 요일 표현을 확인해 주세요.",
+      error: "Failed to resolve a date. Check numeric dates (e.g. 3월 2일) or weekday expressions.",
     };
   }
 
-  const title = scheduleString.replace(MATCHER, "").trim() || "새 일정";
+  const title = scheduleString.replace(MATCHER, "").trim() || "Untitled";
   const hasTime = hour !== undefined && minute !== undefined;
   const parsedHead = match[0].trim();
   const hasRangeExpression = Boolean(rangeTimeToken);
@@ -411,7 +411,7 @@ function tryParseSpecialDeadlineSchedule({
     if (Number.isNaN(relativeHours) || relativeHours < 1) {
       return {
         ok: false,
-        error: "상대 시간은 1시간 이상으로 입력해 주세요. 예) 3시간 이내",
+        error: "Relative hour values must be at least 1. Example: 3시간 이내",
       };
     }
 
@@ -562,7 +562,7 @@ function parseRangeTimeToken(rangeTimeToken: string):
   if (!rangeMatch) {
     return {
       ok: false,
-      error: "시간 범위를 인식하지 못했습니다. 예) 내일 오후 4시부터 6시까지 회의",
+      error: "Could not recognize a time range. Example: 내일 오후 4시부터 6시까지 회의",
     };
   }
 
@@ -623,13 +623,13 @@ function getMonthModifierDays(token: string | undefined): number | undefined {
 function extractTitleAndLocation(text: string): { title: string; location?: string } {
   const trimmed = text.trim();
   if (!trimmed) {
-    return { title: "새 일정" };
+    return { title: "Untitled" };
   }
 
   const locationMatch = trimmed.match(/^(.+?)에서\s+(.+)$/u);
   if (locationMatch) {
     return {
-      title: locationMatch[2].trim() || "새 일정",
+      title: locationMatch[2].trim() || "Untitled",
       location: locationMatch[1].trim(),
     };
   }
