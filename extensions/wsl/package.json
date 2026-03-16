@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wsl",
+  "title": "WSL",
+  "description": "Execute commands in Windows Subsystem for Linux directly from Raycast",
+  "icon": "wsl-icon.png",
+  "author": "daniel_lankry",
+  "access": "public",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "keywords": ["wsl", "linux", "windows", "terminal", "ubuntu", "command", "shell"],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "execute-command",
+      "title": "Execute WSL Command",
+      "subtitle": "WSL",
+      "description": "Execute a command in WSL with live streaming output",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "command",
+          "type": "text",
+          "required": false,
+          "placeholder": "Command"
+        }
+      ]
+    },
+    {
+      "name": "list-distros",
+      "title": "List WSL Distros",
+      "subtitle": "WSL",
+      "description": "Show installed WSL distributions with status and version",
+      "mode": "view"
+    },
+    {
+      "name": "open-terminal",
+      "title": "Open WSL Terminal",
+      "subtitle": "WSL",
+      "description": "Quick launch Windows Terminal with your default WSL distro",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDistro",
+      "type": "textfield",
+      "required": false,
+      "title": "Default WSL Distro",
+      "description": "Name of the WSL distribution to use (e.g., Ubuntu). Leave empty to use the WSL default.",
+      "placeholder": "Ubuntu"
+    },
+    {
+      "name": "workingDirectory",
+      "type": "textfield",
+      "required": false,
+      "title": "Working Directory",
+      "description": "Default working directory inside WSL (e.g., ~ or /home/user/projects). Defaults to ~ if empty.",
+      "placeholder": "~",
+      "default": "~"
+    },
+    {
+      "name": "shellType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Shell History Source",
+      "description": "Which shell history file to read from WSL",
+      "default": "bash",
+      "data": [
+        {
+          "title": "Bash",
+          "value": "bash"
+        },
+        {
+          "title": "Zsh",
+          "value": "zsh"
+        },
+        {
+          "title": "Fish",
+          "value": "fish"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "raycast-toolkit": "^1.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

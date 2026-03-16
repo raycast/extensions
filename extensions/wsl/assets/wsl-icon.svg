@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Classic Tux penguin - transparent background -->
+  <g transform="translate(256, 250)">
+    <!-- Body -->
+    <ellipse cx="0" cy="30" rx="110" ry="140" fill="#333333"/>
+
+    <!-- Belly -->
+    <ellipse cx="0" cy="50" rx="75" ry="110" fill="#F5F5F5"/>
+
+    <!-- Left flipper -->
+    <path d="M-100,-10 Q-125,-40 -110,-80 Q-100,-50 -80,-25 Z" fill="#333333"/>
+    <!-- Right flipper -->
+    <path d="M100,-10 Q125,-40 110,-80 Q100,-50 80,-25 Z" fill="#333333"/>
+
+    <!-- Head -->
+    <ellipse cx="0" cy="-110" rx="72" ry="68" fill="#333333"/>
+
+    <!-- Face white patches -->
+    <ellipse cx="-25" cy="-115" rx="30" ry="35" fill="#F5F5F5"/>
+    <ellipse cx="25" cy="-115" rx="30" ry="35" fill="#F5F5F5"/>
+
+    <!-- Left eye -->
+    <ellipse cx="-22" cy="-122" rx="11" ry="13" fill="white"/>
+    <ellipse cx="-20" cy="-121" rx="6.5" ry="8" fill="#1a1a1a"/>
+    <circle cx="-18" cy="-123" r="2.5" fill="white"/>
+
+    <!-- Right eye -->
+    <ellipse cx="22" cy="-122" rx="11" ry="13" fill="white"/>
+    <ellipse cx="20" cy="-121" rx="6.5" ry="8" fill="#1a1a1a"/>
+    <circle cx="18" cy="-123" r="2.5" fill="white"/>
+
+    <!-- Beak upper -->
+    <path d="M-16,-98 C-10,-85 10,-85 16,-98 C8,-90 -8,-90 -16,-98Z" fill="#E8A317"/>
+    <!-- Beak lower / mouth line -->
+    <path d="M-12,-95 Q0,-88 12,-95" fill="none" stroke="#C8850F" stroke-width="1.5"/>
+
+    <!-- Left foot -->
+    <path d="M-55,165 Q-70,175 -55,180 Q-40,185 -25,175 Q-15,168 -25,162 Q-40,158 -55,165Z" fill="#E8A317"/>
+    <!-- Right foot -->
+    <path d="M55,165 Q70,175 55,180 Q40,185 25,175 Q15,168 25,162 Q40,158 55,165Z" fill="#E8A317"/>
+  </g>
+</svg>
