@@ -21,7 +21,8 @@ async function checkDependencies(): Promise<DependencyStatus> {
 }
 
 export function useDependencyCheck(): UseDependencyCheckResult {
-  const promptShownRef = useRef(false);
+  const invalidPathShownRef = useRef(false); // gates the invalid-path toast (once per mount)
+  const installPromptShownRef = useRef(false); // gates the install prompts (once per mount)
 
   const {
     data: status,
@@ -33,14 +34,15 @@ export function useDependencyCheck(): UseDependencyCheckResult {
 
   const isReady = Boolean(status?.qmdInstalled && status?.sqliteInstalled);
 
-  // Show prompts for missing deps (only once per session)
+  // Show prompts/toasts for dependency issues (each guarded to fire only once per mount)
   useEffect(() => {
-    if (isLoading || !status || promptShownRef.current) {
+    if (isLoading || !status) {
       return;
     }
 
-    // Always warn about invalid custom paths, even when extension is ready
-    if (status.invalidCustomPaths?.length) {
+    // Warn about invalid custom paths once per mount, even when extension is ready
+    if (status.invalidCustomPaths?.length && !invalidPathShownRef.current) {
+      invalidPathShownRef.current = true;
       depsLogger.warn("Invalid custom paths", { paths: status.invalidCustomPaths });
       showToast({
         style: Toast.Style.Failure,
@@ -49,11 +51,11 @@ export function useDependencyCheck(): UseDependencyCheckResult {
       });
     }
 
-    if (isReady) {
-      return; // All deps installed, no further prompts needed
+    if (isReady || installPromptShownRef.current) {
+      return; // All deps installed, or install prompts already shown
     }
 
-    promptShownRef.current = true;
+    installPromptShownRef.current = true;
 
     const promptForMissing = async () => {
       if (!status.qmdInstalled) {
