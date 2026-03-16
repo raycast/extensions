@@ -264,7 +264,7 @@ export default function CheckGrammar() {
           setAuthChecked(true);
         });
     }
-  }, []);
+  }, [useGemini, prefs.geminiApiKey]);
 
   useEffect(() => {
     if (isLoading) {
