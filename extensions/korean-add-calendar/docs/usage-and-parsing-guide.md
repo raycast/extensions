@@ -47,6 +47,9 @@ This document describes the current implementation behavior.
 
 - AM/PM tokens: `오전 9시`, `오후 3시 반`, `밤 12시`
 - 24-hour format: `14:30`
+- Time-only sentences are allowed: `6시 직장인 미팅`, `14시부터 16시까지 회의`
+  - If date is omitted, parser uses today.
+  - If the parsed time has already passed, it rolls to the next day.
 - If time is omitted, an all-day item is created.
 - Range format: `... 4시부터 6시까지 ...`
   - If start has AM/PM and end omits it, end inherits start meridiem.

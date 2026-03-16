@@ -94,6 +94,38 @@ describe("parseKoreanSchedule", () => {
     expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 14, minute: 30 });
   });
 
+  it("parses time-only sentence as today when time is upcoming", () => {
+    const result = parseKoreanSchedule("6시 직장인 미팅", { now: new Date(2026, 1, 17, 1, 0, 0, 0) });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("event");
+    expect(result.value.title).toBe("직장인 미팅");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 6, minute: 0 });
+  });
+
+  it("moves time-only sentence to tomorrow when time has passed", () => {
+    const result = parseKoreanSchedule("6시 직장인 미팅", { now: new Date(2026, 1, 17, 9, 0, 0, 0) });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expectDate(result.value.start, { year: 2026, month: 2, day: 18, hour: 6, minute: 0 });
+  });
+
+  it("parses time-only range without explicit date", () => {
+    const result = parseKoreanSchedule("14시부터 16시까지 직장인 미팅", { now: baseNow });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+
+    expect(result.value.intent).toBe("event");
+    expect(result.value.title).toBe("직장인 미팅");
+    expectDate(result.value.start, { year: 2026, month: 2, day: 17, hour: 14, minute: 0 });
+    expectDate(result.value.end, { year: 2026, month: 2, day: 17, hour: 16, minute: 0 });
+  });
+
   it("parses explicit year-month-day", () => {
     const result = parseKoreanSchedule("2026년 3월 2일 오후 1시에 분기 리뷰", { now: baseNow });
 

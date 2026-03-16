@@ -39,6 +39,7 @@ For full behavior details and parsing rules, see:
 - The last selected target and destination are restored automatically.
 - The optional location field overrides the parsed location when provided.
 - Parse status, summary, and recommended target are shown above destination fields.
+- If a sentence only contains time (for example, `6시 직장인 미팅`), date defaults to today. If that time has already passed, it rolls to the next day.
 - Time ranges in the form `부터 ~까지` are supported.
 - Deadline patterns such as `까지/전에/전까지/이전`, `N일 안에/이내/내`, `N시간 안에/이내/내`, `오늘/내일/모레 중`, and `이번주/다음주/이번달/다음달 내` are supported.
 - Deadline sentences are interpreted as due points (not duration blocks).

@@ -44,6 +44,10 @@ const DEADLINE_SUFFIX_PATTERN = /(까지|까지는|전까지|전에|전|이전�
 const RELATIVE_HOURS_WITHIN_PATTERN = /^([0-9]+)시간 *(안에|이내|내)\s*/u;
 const DAY_WITHIN_PATTERN = /^(오늘|내일|모레)\s*중\s*/u;
 const MONTH_WITHIN_PATTERN = /^(이달|이번달|담달|다음달)\s*내\s*/u;
+const TIME_ONLY_RANGE_PATTERN =
+  /^\s*(새벽|아침|점심|오전|오후|저녁|밤){0,1}\s*([0-9]+시|[0-9]+:[0-9]+)\s*([0-9]+분|반){0,1}\s*부터\s*(새벽|아침|점심|오전|오후|저녁|밤){0,1}\s*([0-9]+시|[0-9]+:[0-9]+)\s*([0-9]+분|반){0,1}\s*까지(?:\s*에)?\s*(.+){0,1}\s*$/u;
+const TIME_ONLY_SINGLE_PATTERN =
+  /^\s*(새벽|아침|점심|오전|오후|저녁|밤){0,1}\s*([0-9]+시|[0-9]+:[0-9]+)\s*([0-9]+분|반){0,1}\s*((?:까지|까지는|전까지|전에|전|이전까지|이전)|부터){0,1}(?:\s*에)?\s*(.+){0,1}\s*$/u;
 
 export function parseKoreanSchedule(input: string, options: ParseOptions = {}): ParseResult {
   if (!input.trim()) {
@@ -66,6 +70,16 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   });
   if (specialDeadlineResult) {
     return specialDeadlineResult;
+  }
+
+  const timeOnlyResult = tryParseTimeOnlySchedule({
+    scheduleString,
+    now,
+    today,
+    durationMinutes,
+  });
+  if (timeOnlyResult) {
+    return timeOnlyResult;
   }
 
   const match = scheduleString.match(MATCHER);
@@ -476,6 +490,185 @@ function tryParseSpecialDeadlineSchedule({
         location: parsedTail.location,
         source: scheduleString,
         intent: "deadline",
+      },
+    };
+  }
+
+  return null;
+}
+
+function tryParseTimeOnlySchedule({
+  scheduleString,
+  now,
+  today,
+  durationMinutes,
+}: {
+  scheduleString: string;
+  now: Date;
+  today: Date;
+  durationMinutes: number;
+}): ParseResult | null {
+  const rangeMatch = scheduleString.match(TIME_ONLY_RANGE_PATTERN);
+  if (rangeMatch) {
+    const startAmpmToken = rangeMatch[1];
+    const startHourToken = rangeMatch[2];
+    const startMinuteToken = rangeMatch[3] ?? "0";
+    let endAmpmToken = rangeMatch[4];
+    const endHourToken = rangeMatch[5];
+    const endMinuteToken = rangeMatch[6] ?? "0";
+    const tailText = rangeMatch[7] ?? "";
+
+    const startTime = parseTimeTokens(startAmpmToken, startHourToken, startMinuteToken);
+    const endTime = parseTimeTokens(endAmpmToken, endHourToken, endMinuteToken);
+
+    let startHour = startTime.hour;
+    const startMinute = startTime.minute;
+    const startAmpm = startTime.ampm;
+    let endHour = endTime.hour;
+    const endMinute = endTime.minute;
+    let endAmpm = endTime.ampm;
+
+    if (startHour === undefined || startMinute === undefined || endHour === undefined || endMinute === undefined) {
+      return null;
+    }
+
+    if (startAmpm && (startHour < 1 || startHour > 12)) {
+      return {
+        ok: false,
+        error: "AM/PM hours must be between 1 and 12.",
+      };
+    }
+
+    if (!startAmpm && (startHour < 0 || startHour > 23)) {
+      return {
+        ok: false,
+        error: "Hour must be between 0 and 23.",
+      };
+    }
+
+    if (startMinute < 0 || startMinute > 59) {
+      return {
+        ok: false,
+        error: "Minute must be between 0 and 59.",
+      };
+    }
+
+    if (endAmpm && (endHour < 1 || endHour > 12)) {
+      return {
+        ok: false,
+        error: "End time with AM/PM must be between 1 and 12.",
+      };
+    }
+
+    if (!endAmpm && (endHour < 0 || endHour > 23)) {
+      return {
+        ok: false,
+        error: "End hour must be between 0 and 23.",
+      };
+    }
+
+    if (endMinute < 0 || endMinute > 59) {
+      return {
+        ok: false,
+        error: "End minute must be between 0 and 59.",
+      };
+    }
+
+    // If start meridiem is explicit and end meridiem is omitted, inherit start meridiem.
+    if (startAmpm !== undefined && endAmpm === undefined && startAmpmToken !== "밤") {
+      endAmpm = startAmpm;
+      endAmpmToken = startAmpmToken;
+    }
+
+    startHour = normalizeHour(startHour, startAmpm, startAmpmToken);
+    endHour = normalizeHour(endHour, endAmpm, endAmpmToken);
+
+    let start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), startHour, startMinute, 0, 0);
+    let end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute, 0, 0);
+    if (end <= start) {
+      end = addDays(end, 1);
+    }
+
+    // If the whole range is already in the past, move to the next day.
+    if (end <= now) {
+      start = addDays(start, 1);
+      end = addDays(end, 1);
+    }
+
+    const parsedTail = extractTitleAndLocation(tailText);
+    return {
+      ok: true,
+      value: {
+        title: parsedTail.title,
+        start,
+        end,
+        allDay: false,
+        location: parsedTail.location,
+        source: scheduleString,
+        intent: "event",
+      },
+    };
+  }
+
+  const singleMatch = scheduleString.match(TIME_ONLY_SINGLE_PATTERN);
+  if (singleMatch) {
+    const ampmToken = singleMatch[1];
+    const hourToken = singleMatch[2];
+    const minuteToken = singleMatch[3] ?? "0";
+    const suffixToken = singleMatch[4];
+    const tailText = singleMatch[5] ?? "";
+    const parsedTime = parseTimeTokens(ampmToken, hourToken, minuteToken);
+
+    let hour = parsedTime.hour;
+    const minute = parsedTime.minute;
+    const ampm = parsedTime.ampm;
+
+    if (hour === undefined || minute === undefined) {
+      return null;
+    }
+
+    if (ampm && (hour < 1 || hour > 12)) {
+      return {
+        ok: false,
+        error: "AM/PM hours must be between 1 and 12.",
+      };
+    }
+
+    if (!ampm && (hour < 0 || hour > 23)) {
+      return {
+        ok: false,
+        error: "Hour must be between 0 and 23.",
+      };
+    }
+
+    if (minute < 0 || minute > 59) {
+      return {
+        ok: false,
+        error: "Minute must be between 0 and 59.",
+      };
+    }
+
+    hour = normalizeHour(hour, ampm, ampmToken);
+
+    let start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, minute, 0, 0);
+    // With no explicit date, past times are interpreted as the next day.
+    if (start < now) {
+      start = addDays(start, 1);
+    }
+
+    const parsedTail = extractTitleAndLocation(tailText);
+    const isDeadline = suffixToken !== undefined && suffixToken !== "부터" && DEADLINE_SUFFIX_PATTERN.test(suffixToken);
+
+    return {
+      ok: true,
+      value: {
+        title: parsedTail.title,
+        start,
+        end: new Date(start.getTime() + durationMinutes * 60 * 1000),
+        allDay: false,
+        location: parsedTail.location,
+        source: scheduleString,
+        intent: isDeadline ? "deadline" : "event",
       },
     };
   }
