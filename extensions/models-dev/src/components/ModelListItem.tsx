@@ -55,7 +55,7 @@ export const ModelListItem = memo(function ModelListItem({
     }
 
     return acc;
-  }, [model.status, model.cost?.input, model.cost?.output]);
+  }, [model.status, model.reasoning, model.tool_call, model.modalities, model.cost?.input, model.cost?.output]);
 
   // Keywords for search — provider terms only.
   // Model name is already searchable via the title prop (fuzzy matched by Raycast).
