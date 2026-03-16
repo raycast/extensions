@@ -28,7 +28,7 @@ export const ModelActions = memo(function ModelActions({
     push(<ModelDetail model={model} />);
   }, [push, model]);
 
-  const handleCopyJson = useCallback(() => {
+  const handleCopyJson = useCallback(async () => {
     const modelJson = JSON.stringify(
       {
         id: model.id,
