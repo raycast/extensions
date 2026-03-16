@@ -26,7 +26,7 @@ bunx vitest run src/lib/__tests__/api.test.ts
 
 ## Linting
 
-`bun run lint` runs three checks in order: package.json validation, ESLint, and Prettier. `bun run fix-lint` auto-fixes what it can. ESLint config is in `eslint.config.mjs` (flat config using `@raycast/eslint-config`). `raycast-env.d.ts` is excluded from ESLint (auto-generated file).
+`bun run lint` runs three checks in order: package.json validation, ESLint, and Prettier. `bun run fix-lint` auto-fixes what it can. ESLint config is in `eslint.config.js` (flat config using `@raycast/eslint-config`). `raycast-env.d.ts` is excluded from ESLint (auto-generated file).
 
 Git hooks in `.githooks/` (configured via `core.hooksPath`):
 - **pre-commit**: runs ESLint + Prettier on staged files (excludes `raycast-env.d.ts`)
