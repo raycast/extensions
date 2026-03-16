@@ -1,11 +1,13 @@
 import { ActionPanel, Action, Icon, List, Color, useNavigation } from "@raycast/api";
 import { useCallback, useRef, useMemo, useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { useTaskLogs } from "../hooks/useTaskLogs";
 import { LogGroupList } from "./LogGroupList";
 import { LogEntryDetail } from "./LogEntryDetail";
 import { reauthorize } from "../lib/oauth";
 import type { TaskWithPullRequest } from "../services/copilot";
 import type { GroupedLogEntry, LogEntry } from "../services/events";
+import { fetchRepositoryById } from "../services/repositories";
 import { truncate, formatRelativeDate } from "../utils";
 
 function getLogEntryIcon(entry: LogEntry): { source: Icon; tintColor?: Color } {
@@ -350,9 +352,15 @@ export function TaskLogsList({ taskWithPullRequest }: { taskWithPullRequest: Tas
   const { sessionLogs, isLoading } = useTaskLogs(task.id);
   const taskTitle = pullRequest?.title ?? task.name ?? `Task ${task.id}`;
 
+  // If repository wasn't resolved at list-fetch time, look it up by repo_id
+  const { data: fetchedRepository } = useCachedPromise(fetchRepositoryById, [task.repo_id], {
+    execute: !repository,
+  });
+  const effectiveRepository = repository ?? fetchedRepository ?? null;
+
   // Construct the task URL
-  const taskUrl = repository
-    ? `https://github.com/${repository.owner.login}/${repository.name}/tasks/${task.id}`
+  const taskUrl = effectiveRepository
+    ? `https://github.com/${effectiveRepository.owner.login}/${effectiveRepository.name}/tasks/${task.id}`
     : undefined;
 
   // Build a map from original entry key → simple sequential ID (log-0, log-1, ...)
