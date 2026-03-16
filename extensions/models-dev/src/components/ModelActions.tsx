@@ -52,6 +52,8 @@ export const ModelActions = memo(function ModelActions({
       2,
     );
     Clipboard.copy(modelJson);
+    const { showHUD } = await import("@raycast/api");
+    await showHUD("Copied to Clipboard");
   }, [
     model.id,
     model.name,
