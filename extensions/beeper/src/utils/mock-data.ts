@@ -174,10 +174,12 @@ export function mockChatToBeeperChat(item: MockChatItem): BeeperDesktop.Chat {
 export function mockMessageToBeeperMessage(msg: MockMessageResult): BeeperDesktop.Message {
   return {
     id: msg.id,
-    messageID: msg.id,
+    accountID: msg.accountId,
+    chatID: msg.chatId,
+    senderID: msg.senderName,
+    sortKey: msg.timestamp,
     text: msg.text,
     senderName: msg.senderName,
-    chatID: msg.chatId,
     timestamp: msg.timestamp,
     isSender: msg.isSender,
   };
