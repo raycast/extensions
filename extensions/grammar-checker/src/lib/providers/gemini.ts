@@ -51,6 +51,7 @@ export async function geminiGrammarCheck(options: GeminiOptions): Promise<string
       },
       contents: [
         {
+          role: "user",
           parts: [{ text }],
         },
       ],
