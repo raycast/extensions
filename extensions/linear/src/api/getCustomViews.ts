@@ -12,7 +12,7 @@ export type CustomViewResult = Pick<CustomView, "id" | "name" | "icon" | "color"
 export async function getCustomViews(): Promise<CustomViewResult[]> {
   const { graphQLClient } = getLinearClient();
 
-  return getPaginated(
+  const allViews = await getPaginated(
     async (cursor) =>
       graphQLClient.rawRequest<
         { customViews: { nodes: CustomViewResult[]; pageInfo: PageInfo } },
@@ -48,27 +48,44 @@ export async function getCustomViews(): Promise<CustomViewResult[]> {
     [],
     5,
   );
+
+  return allViews.filter((v) => v.modelName === "Issue");
 }
 
 export async function getCustomViewIssues(viewId: string): Promise<IssueResult[]> {
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<
-    { customView?: { issues?: { nodes?: IssueResult[] } | null } | null },
-    { viewId: string }
-  >(
-    `
-      query($viewId: String!) {
-        customView(id: $viewId) {
-          issues {
-            nodes {
-              ${IssueFragment}
+
+  return getPaginated(
+    async (cursor) =>
+      graphQLClient.rawRequest<
+        {
+          customView?: {
+            issues?: { nodes?: IssueResult[]; pageInfo?: PageInfo | null } | null;
+          } | null;
+        },
+        { viewId: string; cursor?: string }
+      >(
+        `
+          query($viewId: String!, $cursor: String) {
+            customView(id: $viewId) {
+              issues(first: 50, after: $cursor) {
+                nodes {
+                  ${IssueFragment}
+                }
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+              }
             }
           }
-        }
-      }
-    `,
-    { viewId },
+        `,
+        { viewId, cursor },
+      ),
+    (r) => r.data?.customView?.issues?.pageInfo ?? undefined,
+    (accumulator: IssueResult[], currentValue) =>
+      accumulator.concat(currentValue.data?.customView?.issues?.nodes ?? []),
+    [],
+    5,
   );
-
-  return data?.customView?.issues?.nodes ?? [];
 }
