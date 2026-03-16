@@ -1,6 +1,6 @@
 # Oura Changelog
 
-## [Added Menu Bar Command] - {PR_MERGE_DATE}
+## [Added Menu Bar Command] - 2026-03-16
 
 - Added Oura Menu Bar command: see Readiness, Sleep, and Activity scores at a glance in the menu bar
 - Added actions to open Readiness, Sleep, and Activity detail views from the menu bar
