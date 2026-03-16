@@ -15,7 +15,12 @@ export default async function main() {
   const isCurrentlyVisible = readCreateDesktopValue();
   const nextValue = isCurrentlyVisible ? "false" : "true";
 
-  execSync(`defaults write com.apple.finder CreateDesktop ${nextValue} && killall Finder`, { stdio: "ignore" });
+  try {
+    execSync(`defaults write com.apple.finder CreateDesktop ${nextValue} && killall Finder`, { stdio: "ignore" });
+    await showHUD(isCurrentlyVisible ? "Desktop icons hidden" : "Desktop icons shown");
+  } catch {
+    await showHUD("Failed to toggle desktop icons");
+  }
 
   await showHUD(isCurrentlyVisible ? "Desktop icons hidden" : "Desktop icons shown");
 }
