@@ -17,7 +17,7 @@
     {
       "name": "configPath",
       "type": "textfield",
-      "title": "Config file path",
+      "title": "Config File Path",
       "description": "Path to the Paper Agent core config.yaml.",
       "placeholder": "/path/to/your/paper-agent/config.yaml",
       "default": "",
@@ -26,7 +26,7 @@
     {
       "name": "paperDir",
       "type": "textfield",
-      "title": "Paper directory",
+      "title": "Paper Directory",
       "description": "Root directory for papers (daily digest and notes). Library is stored under paper_dir/library. Maps to delivery.paper_dir.",
       "placeholder": "/path/to/your/paper/repo",
       "default": "",
@@ -35,7 +35,7 @@
     {
       "name": "pythonPath",
       "type": "textfield",
-      "title": "Python executable",
+      "title": "Python Executable",
       "description": "Optional override for Python binary (defaults to .venv/bin/python3 in the Paper Agent repo).",
       "placeholder": "/Users/you/.venv/bin/python3",
       "default": "",
@@ -44,7 +44,7 @@
     {
       "name": "recentLimit",
       "type": "textfield",
-      "title": "Recent papers limit",
+      "title": "Recent Papers Limit",
       "description": "Maximum number of papers shown in Recent Papers (used as --limit for the list CLI).",
       "placeholder": "30",
       "default": "30",
@@ -53,7 +53,7 @@
     {
       "name": "maxPapersPerDay",
       "type": "textfield",
-      "title": "Max papers per day",
+      "title": "Max Papers Per Day",
       "description": "Maps to direction.max_papers_per_day in config.yaml.",
       "placeholder": "12",
       "default": "12",
@@ -62,7 +62,7 @@
     {
       "name": "lookbackDays",
       "type": "textfield",
-      "title": "Lookback days",
+      "title": "Lookback Days",
       "description": "Maps to direction.lookback_days (catch-up window).",
       "placeholder": "5",
       "default": "5",
@@ -71,7 +71,7 @@
     {
       "name": "keyphrases",
       "type": "textfield",
-      "title": "Required keywords",
+      "title": "Required Keywords",
       "description": "OR match: at least one keyword must appear in title or abstract (not all). Comma-separated; maps to direction.include_keywords.",
       "placeholder": "continual learning, lifelong learning, incremental learning",
       "default": "",
@@ -80,7 +80,7 @@
     {
       "name": "allowCategories",
       "type": "textfield",
-      "title": "Allow categories",
+      "title": "Allow Categories",
       "description": "Comma-separated arXiv categories to include (maps to direction.allow_categories).",
       "placeholder": "cs.LG, cs.AI",
       "default": "cs.LG, cs.AI, cs.CL, stat.ML, cs.CV",
@@ -89,7 +89,7 @@
     {
       "name": "denyCategories",
       "type": "textfield",
-      "title": "Deny categories",
+      "title": "Deny Categories",
       "description": "Comma-separated categories to exclude (maps to direction.deny_categories).",
       "placeholder": "stat.ML",
       "default": "",
@@ -98,7 +98,7 @@
     {
       "name": "excludeKeywords",
       "type": "textfield",
-      "title": "Exclude keywords",
+      "title": "Exclude Keywords",
       "description": "Comma-separated keywords; papers matching these are excluded (maps to direction.exclude_keywords).",
       "placeholder": "survey, tutorial, point cloud",
       "default": "",
@@ -107,7 +107,7 @@
     {
       "name": "policyType",
       "type": "dropdown",
-      "title": "Discovery policy",
+      "title": "Discovery Policy",
       "description": "Off: select by required-keyword match only (title first, then abstract). No scoring policy.",
       "data": [
         {
@@ -121,8 +121,8 @@
     {
       "name": "summarizeEnabled",
       "type": "checkbox",
-      "title": "Enable LLM research summary",
-      "label": "Enable LLM research summary",
+      "title": "Enable LLM Research Summary",
+      "label": "Enable LLM Research Summary",
       "description": "When on, the three options below are used to generate research summaries. When off, they are ignored.",
       "default": true,
       "required": false
@@ -130,7 +130,7 @@
     {
       "name": "summarizeProvider",
       "type": "textfield",
-      "title": "Summary provider",
+      "title": "Summary Provider",
       "description": "Only used when \"Enable LLM research summary\" is on. LLM provider (e.g. openai).",
       "placeholder": "openai",
       "default": "openai",
@@ -139,7 +139,7 @@
     {
       "name": "summarizeModel",
       "type": "textfield",
-      "title": "Summary model",
+      "title": "Summary Model",
       "description": "Only used when \"Enable LLM research summary\" is on. Model name (e.g. gpt-4o-mini).",
       "placeholder": "gpt-4o-mini",
       "default": "gpt-4o-mini",
@@ -148,7 +148,7 @@
     {
       "name": "summarizeLanguage",
       "type": "dropdown",
-      "title": "Summary language",
+      "title": "Summary Language",
       "description": "Only used when \"Enable LLM research summary\" is on. Maps to summarize.language.",
       "data": [
         {
@@ -192,7 +192,7 @@
     {
       "name": "scholarProvider",
       "type": "textfield",
-      "title": "Scholar email provider",
+      "title": "Scholar Email Provider",
       "description": "Email source for extension runs: imap or gmail.",
       "placeholder": "imap",
       "default": "",
@@ -201,7 +201,7 @@
     {
       "name": "scholarImapHost",
       "type": "textfield",
-      "title": "Scholar IMAP host",
+      "title": "Scholar IMAP Host",
       "description": "IMAP host for Scholar Alerts (e.g. imap.gmail.com).",
       "placeholder": "imap.gmail.com",
       "default": "",
@@ -210,7 +210,7 @@
     {
       "name": "scholarImapUser",
       "type": "textfield",
-      "title": "Scholar IMAP user",
+      "title": "Scholar IMAP User",
       "description": "IMAP user / email for Scholar Alerts.",
       "placeholder": "your@gmail.com",
       "default": "",
@@ -219,7 +219,7 @@
     {
       "name": "scholarImapPasswordEnv",
       "type": "textfield",
-      "title": "Scholar IMAP password env var",
+      "title": "Scholar IMAP Password Env Var",
       "description": "Environment variable name for IMAP password (e.g. IMAP_PASSWORD).",
       "placeholder": "IMAP_PASSWORD",
       "default": "IMAP_PASSWORD",
@@ -228,7 +228,7 @@
     {
       "name": "scholarImapPassword",
       "type": "password",
-      "title": "Scholar IMAP password",
+      "title": "Scholar IMAP Password",
       "description": "Optional. If set, used as the IMAP password (env var name above). All whitespace is removed, so Google app passwords work whether pasted with or without spaces. Leave empty to use the value from your environment.",
       "placeholder": "Optional",
       "default": "",
@@ -237,7 +237,7 @@
     {
       "name": "scholarGmailLabel",
       "type": "textfield",
-      "title": "Scholar Gmail label",
+      "title": "Scholar Gmail Label",
       "description": "Gmail label/mailbox to read (e.g. scholar-alerts).",
       "placeholder": "scholar-alerts",
       "default": "",
@@ -246,7 +246,7 @@
     {
       "name": "scholarFromAddresses",
       "type": "textfield",
-      "title": "Scholar from addresses",
+      "title": "Scholar From Addresses",
       "description": "Comma-separated sender addresses to filter (e.g. scholaralerts-noreply@google.com). Empty = no filter.",
       "placeholder": "scholaralerts-noreply@google.com",
       "default": "",

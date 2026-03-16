@@ -15,8 +15,8 @@ A [Raycast](https://www.raycast.com/) extension for the [Paper Agent](https://gi
 ## Requirements
 
 - **Raycast** (macOS)
-- **Paper Agent core** — cloned repo with valid `config.yaml` and `paper_agent` installed (default Python is `<config_dir>/.venv/bin/python3`, or set **Python executable** in Preferences)
-- **Paper directory** — a folder where the core writes notes, daily/weekly digests, and `library/` (JSON outputs)
+- **Paper Agent core** — cloned repo with valid `config.yaml` and `paper_agent` installed (default Python is `<config_dir>/.venv/bin/python3`, or set **Python Executable** in Preferences)
+- **Paper Directory** — a folder where the core writes notes, daily/weekly digests, and `library/` (JSON outputs)
 
 ---
 
@@ -46,11 +46,11 @@ Open **Raycast → Extensions → Paper Agent → Preferences** and set:
 
 | Preference           | Description |
 | -------------------- | ----------- |
-| **Config file path** | Full path to the core `config.yaml` (e.g. `/path/to/paper-agent/config.yaml`). |
-| **Paper directory**  | Your `delivery.paper_dir`: where notes, digests, and `library/` live. |
-| **Python executable**| Optional. Leave empty to use `<config_dir>/.venv/bin/python3`. |
+| **Config File Path** | Full path to the core `config.yaml` (e.g. `/path/to/paper-agent/config.yaml`). |
+| **Paper Directory**  | Your `delivery.paper_dir`: where notes, digests, and `library/` live. |
+| **Python Executable**| Optional. Leave empty to use `<config_dir>/.venv/bin/python3`. |
 
-When you use **Run Paper Agent** or **Install Daily Schedule**, the extension builds runtime config (direction, delivery, summarize, sources, policy) from these preferences; values in `config.yaml` for those sections are overridden. Other sections (e.g. interests, export, prompts) are still read from `config.yaml`.
+When you use **Run Paper Pipeline** or **Install Daily Schedule**, the extension builds runtime config (direction, delivery, summarize, sources, policy) from these preferences; values in `config.yaml` for those sections are overridden. Other sections (e.g. interests, export, prompts) are still read from `config.yaml`.
 
 ---
 
@@ -58,9 +58,9 @@ When you use **Run Paper Agent** or **Install Daily Schedule**, the extension bu
 
 | Command | Description |
 | --------| ----------- |
-| **Run Paper Agent** | Start the full pipeline in background: fetch, filter, summarize, and write local notes/library plus daily/weekly digests. Runtime fields come from Preferences (direction, delivery, summarize, sources); shared sections still come from `config.yaml`. |
+| **Run Paper Pipeline** | Start the full pipeline in background: fetch, filter, summarize, and write local notes/library plus daily/weekly digests. Runtime fields come from Preferences (direction, delivery, summarize, sources); shared sections still come from `config.yaml`. |
 | **Today Papers** | Browse today’s papers from your local library. Detail view: title, authors, abstract, “Why this paper,” optional research summary. Actions: open paper/note, related papers, mark read, favorites, reading queue. |
-| **Recent Papers** | Browse recently added papers (count-based). Same detail and actions as Today Papers. Limit is set in Preferences (Recent papers limit). |
+| **Recent Papers** | Browse recently added papers (count-based). Same detail and actions as Today Papers. Limit is set in Preferences (**Recent Papers Limit**). |
 | **Search Papers** | Search the local library by title, authors, abstract, categories, date. Same list actions as above. |
 | **Favorite Papers** | Papers you’ve added to favorites from any list. Stored locally in the extension. |
 | **Reading Queue** | Papers you’ve queued for reading. Stored locally; same open/read/favorite actions. |
@@ -68,7 +68,7 @@ When you use **Run Paper Agent** or **Install Daily Schedule**, the extension bu
 | **Remove Daily Schedule** | Uninstall the daily `launchd` job. Logs and status history are kept. |
 | **Check Run Status** | View whether the daily schedule is installed, today’s result, last successful day, and last run metadata. Actions: open config directory, log directory, state directory, and last run log (when available). |
 | **Open Paper Directory** | Open the configured paper directory in Finder (notes, `library/`, digests). |
-| **Open Config Directory** | Open the folder that contains your `config.yaml` (core repo root) in Finder. Also available as an action in **Run Paper Agent** (Core not found) and **Check Run Status** when Config file path is set. |
+| **Open Config Directory** | Open the folder that contains your `config.yaml` (core repo root) in Finder. Also available as an action in **Run Paper Pipeline** (Core not found) and **Check Run Status** when **Config File Path** is set. |
 
 ---
 
@@ -78,7 +78,7 @@ If the extension can’t detect the core (missing or invalid config path, missin
 
 - A link to the [core repo](https://github.com/galleonli/paper-agent)
 - **Copy Bootstrap Command** — copies a one-line install command; paste in a terminal to clone and bootstrap the core, then set Preferences again
-- **Open Config Directory** — shown only when **Config file path** is set; opens the folder containing `config.yaml` in Finder
+- **Open Config Directory** — shown only when **Config File Path** is set; opens the folder containing `config.yaml` in Finder
 - **Open GitHub** — opens the core repo in the browser
 
 ---
@@ -101,19 +101,19 @@ npm run build  # Compile extension
 
 ### Core detection and preferences
 
-- **Core not found / Run Paper Agent fails immediately** — Verify **Config file path** points to a real `config.yaml`, and **Python executable** points to a valid interpreter (or leave empty to use `<config_dir>/.venv/bin/python3`).
+- **Core not found / Run Paper Pipeline fails immediately** — Verify **Config File Path** points to a real `config.yaml`, and **Python Executable** points to a valid interpreter (or leave empty to use `<config_dir>/.venv/bin/python3`).
 - **Quick verification command** — In the core repo root, run `python -m paper_agent run --help`. If this fails, fix the core environment first.
-- **Paper directory mismatch** — Ensure Raycast **Paper directory** matches the core runtime output location you expect; list/search commands read from that location.
+- **Paper Directory mismatch** — Ensure Raycast **Paper Directory** matches the core runtime output location you expect; list/search commands read from that location.
 
 ### Empty lists (Today / Recent / Search)
 
 - **No data yet** — Run the core pipeline at least once so `library/` has JSON entries.
-- **Recent is count-based** — **Recent Papers** is controlled by **Recent papers limit** (not by a day window). Increase the limit in Preferences if needed.
+- **Recent is count-based** — **Recent Papers** is controlled by **Recent Papers Limit** (not by a day window). Increase the limit in Preferences if needed.
 - **Source checks** — If data still looks empty, use core CLI checks: `python -m paper_agent today --json --config config.yaml` and `python -m paper_agent list --json --limit 20 --config config.yaml`.
 
 ### Run and schedule behavior
 
-- **Run Paper Agent shows only “Run started in background”** — This is expected: manual runs are detached. Use **Check Run Status** and open run logs from there to inspect final success/failure.
+- **Run Paper Pipeline shows only “Run started in background”** — This is expected: manual runs are detached. Use **Check Run Status** and open run logs from there to inspect final success/failure.
 - **Daily schedule not running** — Re-run **Install Daily Schedule** after changing Preferences that affect runtime config/secrets. Then use **Check Run Status** to confirm install state and latest run metadata.
 - **Launchd scope** — Daily schedule commands are macOS `launchd` automation only.
 

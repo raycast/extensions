@@ -7,36 +7,35 @@ import { withEffectiveConfigPathAsync } from "./config-utils";
 import { type Paper, parseCliPapers } from "./paper-utils";
 import { PaperListView } from "./paper-list";
 
-const prefs = getPreferenceValues<Preferences.SearchPapers>();
-const CONFIG_PATH = prefs.configPath?.trim() ?? "";
-const HAS_CONFIG = CONFIG_PATH.length > 0;
-const PREF_PAPER_DIR = prefs.paperDir?.trim() ?? "";
-const PAPER_DIR = PREF_PAPER_DIR;
-const LIBRARY_DIR = PREF_PAPER_DIR ? path.join(PREF_PAPER_DIR, "library") : "";
-const HAS_PAPER_DIR = PREF_PAPER_DIR.length > 0;
-const AGENT_ROOT = HAS_CONFIG ? path.dirname(CONFIG_PATH) : "";
-const PYTHON_BIN =
-  prefs.pythonPath && prefs.pythonPath.trim().length > 0
-    ? prefs.pythonPath
-    : path.join(AGENT_ROOT, ".venv", "bin", "python3");
-
 const SEARCH_DEBOUNCE_MS = 250;
 
-async function loadSearchResults(query: string): Promise<Paper[]> {
-  if (!HAS_CONFIG || !HAS_PAPER_DIR) {
+async function loadSearchResults(
+  query: string,
+  options: {
+    configPath: string;
+    prefPaperDir: string;
+    paperDir: string;
+    libraryDir: string;
+    pythonBin: string;
+    agentRoot: string;
+  },
+): Promise<Paper[]> {
+  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot } = options;
+
+  if (!configPath || !prefPaperDir) {
     return [];
   }
 
   try {
     const rawJson = await withEffectiveConfigPathAsync(
-      CONFIG_PATH,
-      PREF_PAPER_DIR,
+      configPath,
+      prefPaperDir,
       (effectiveConfigPath) =>
         new Promise<string>((resolve, reject) => {
           execFile(
-            PYTHON_BIN,
+            pythonBin,
             ["-m", "paper_agent", "search", "--query", query, "--json", "--config", effectiveConfigPath],
-            { cwd: AGENT_ROOT, encoding: "utf-8" },
+            { cwd: agentRoot, encoding: "utf-8" },
             (error, stdout) => {
               if (error) {
                 reject(error);
@@ -49,8 +48,8 @@ async function loadSearchResults(query: string): Promise<Paper[]> {
     );
 
     return parseCliPapers(rawJson, {
-      paperDir: PAPER_DIR,
-      libraryDir: LIBRARY_DIR,
+      paperDir,
+      libraryDir,
       fallbackDate: "unknown",
     });
   } catch {
@@ -74,6 +73,19 @@ function CoreNotFoundEmptyView() {
 }
 
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences.SearchPapers>();
+  const configPath = prefs.configPath?.trim() ?? "";
+  const hasConfig = configPath.length > 0;
+  const prefPaperDir = prefs.paperDir?.trim() ?? "";
+  const paperDir = prefPaperDir;
+  const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
+  const hasPaperDir = prefPaperDir.length > 0;
+  const agentRoot = hasConfig ? path.dirname(configPath) : "";
+  const pythonBin =
+    prefs.pythonPath && prefs.pythonPath.trim().length > 0
+      ? prefs.pythonPath
+      : path.join(agentRoot, ".venv", "bin", "python3");
+
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -81,13 +93,13 @@ export default function Command() {
   const [coreOk, setCoreOk] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!HAS_CONFIG || !HAS_PAPER_DIR) return;
+    if (!hasConfig || !hasPaperDir) return;
     checkCoreAvailable({
       configPath: prefs.configPath,
       paperDir: prefs.paperDir,
       pythonPath: prefs.pythonPath,
     }).then((r) => setCoreOk(r.ok));
-  }, []);
+  }, [hasConfig, hasPaperDir, prefs.configPath, prefs.paperDir, prefs.pythonPath]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -97,7 +109,7 @@ export default function Command() {
   }, [searchText]);
 
   useEffect(() => {
-    if (!HAS_CONFIG || !HAS_PAPER_DIR || !coreOk) {
+    if (!hasConfig || !hasPaperDir || !coreOk) {
       setPapers([]);
       setIsSearching(false);
       return;
@@ -106,7 +118,14 @@ export default function Command() {
     let cancelled = false;
     setIsSearching(true);
 
-    void loadSearchResults(debouncedSearchText)
+    void loadSearchResults(debouncedSearchText, {
+      configPath,
+      prefPaperDir,
+      paperDir,
+      libraryDir,
+      pythonBin,
+      agentRoot,
+    })
       .then((results) => {
         if (cancelled) return;
         setPapers(results);
@@ -123,9 +142,20 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [debouncedSearchText, coreOk]);
+  }, [
+    debouncedSearchText,
+    coreOk,
+    hasConfig,
+    hasPaperDir,
+    configPath,
+    prefPaperDir,
+    paperDir,
+    libraryDir,
+    pythonBin,
+    agentRoot,
+  ]);
 
-  if (!HAS_CONFIG || !HAS_PAPER_DIR) {
+  if (!hasConfig || !hasPaperDir) {
     return (
       <List
         isShowingDetail
@@ -134,7 +164,7 @@ export default function Command() {
       >
         <List.EmptyView
           title="Set preferences first"
-          description="Set both 'Config file path' and 'Paper directory' in extension preferences."
+          description="Set both 'Config File Path' and 'Paper Directory' in extension preferences."
         />
       </List>
     );

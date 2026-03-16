@@ -2,20 +2,20 @@ import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-const prefs = getPreferenceValues<Preferences.OpenConfigDirectory>();
-const CONFIG_PATH = prefs.configPath?.trim() ?? "";
-
 export default async function Command() {
-  if (!CONFIG_PATH) {
+  const prefs = getPreferenceValues<Preferences.OpenConfigDirectory>();
+  const configPath = prefs.configPath?.trim() ?? "";
+
+  if (!configPath) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Config path required",
-      message: "Set 'Config file path' in extension preferences.",
+      message: "Set 'Config File Path' in extension preferences.",
     });
     return;
   }
 
-  const configDir = path.dirname(CONFIG_PATH);
+  const configDir = path.dirname(configPath);
   if (!fs.existsSync(configDir)) {
     await showToast({
       style: Toast.Style.Failure,

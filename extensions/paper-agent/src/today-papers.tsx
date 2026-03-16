@@ -1,24 +1,14 @@
 import { Action, ActionPanel, List, getPreferenceValues, open } from "@raycast/api";
 import * as path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { useEffect, useState } from "react";
 import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
-import { withEffectiveConfigPath } from "./config-utils";
+import { withEffectiveConfigPathAsync } from "./config-utils";
 import { type Paper, parseCliPapers } from "./paper-utils";
 import { PaperListView } from "./paper-list";
 
-const prefs = getPreferenceValues<Preferences.TodayPapers>();
-const CONFIG_PATH = prefs.configPath?.trim() ?? "";
-const HAS_CONFIG = CONFIG_PATH.length > 0;
-const PREF_PAPER_DIR = prefs.paperDir?.trim() ?? "";
-const PAPER_DIR = PREF_PAPER_DIR;
-const LIBRARY_DIR = PREF_PAPER_DIR ? path.join(PREF_PAPER_DIR, "library") : "";
-const HAS_PAPER_DIR = PREF_PAPER_DIR.length > 0;
-const AGENT_ROOT = HAS_CONFIG ? path.dirname(CONFIG_PATH) : "";
-const PYTHON_BIN =
-  prefs.pythonPath && prefs.pythonPath.trim().length > 0
-    ? prefs.pythonPath
-    : path.join(AGENT_ROOT, ".venv", "bin", "python3");
+const execFileAsync = promisify(execFile);
 
 function getTodayDateString(): string {
   const now = new Date();
@@ -28,28 +18,41 @@ function getTodayDateString(): string {
   return `${year}-${month}-${day}`;
 }
 
-function loadTodayPapers(): Paper[] {
-  if (!HAS_CONFIG || !HAS_PAPER_DIR) {
+async function loadTodayPapers(options: {
+  configPath: string;
+  prefPaperDir: string;
+  paperDir: string;
+  libraryDir: string;
+  pythonBin: string;
+  agentRoot: string;
+}): Promise<Paper[]> {
+  const { configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot } = options;
+
+  if (!configPath || !prefPaperDir) {
     return [];
   }
 
-  let rawJson = "";
   try {
-    rawJson = withEffectiveConfigPath(CONFIG_PATH, PREF_PAPER_DIR, (effectiveConfigPath) =>
-      execFileSync(PYTHON_BIN, ["-m", "paper_agent", "today", "--json", "--config", effectiveConfigPath], {
-        cwd: AGENT_ROOT,
-        encoding: "utf-8",
-      }),
-    );
+    const rawJson = await withEffectiveConfigPathAsync(configPath, prefPaperDir, async (effectiveConfigPath) => {
+      const result = await execFileAsync(
+        pythonBin,
+        ["-m", "paper_agent", "today", "--json", "--config", effectiveConfigPath],
+        {
+          cwd: agentRoot,
+          encoding: "utf-8",
+        },
+      );
+      return result.stdout;
+    });
+
+    return parseCliPapers(rawJson, {
+      paperDir,
+      libraryDir,
+      fallbackDate: getTodayDateString(),
+    });
   } catch {
     return [];
   }
-
-  return parseCliPapers(rawJson, {
-    paperDir: PAPER_DIR,
-    libraryDir: LIBRARY_DIR,
-    fallbackDate: getTodayDateString(),
-  });
 }
 
 function CoreNotFoundEmptyView() {
@@ -68,23 +71,67 @@ function CoreNotFoundEmptyView() {
 }
 
 export default function Command() {
+  const prefs = getPreferenceValues<Preferences.TodayPapers>();
+  const configPath = prefs.configPath?.trim() ?? "";
+  const hasConfig = configPath.length > 0;
+  const prefPaperDir = prefs.paperDir?.trim() ?? "";
+  const paperDir = prefPaperDir;
+  const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
+  const hasPaperDir = prefPaperDir.length > 0;
+  const agentRoot = hasConfig ? path.dirname(configPath) : "";
+  const pythonBin =
+    prefs.pythonPath && prefs.pythonPath.trim().length > 0
+      ? prefs.pythonPath
+      : path.join(agentRoot, ".venv", "bin", "python3");
+
   const [coreOk, setCoreOk] = useState<boolean | null>(null);
+  const [papers, setPapers] = useState<Paper[]>([]);
+  const [isLoadingPapers, setIsLoadingPapers] = useState(false);
 
   useEffect(() => {
-    if (!HAS_CONFIG || !HAS_PAPER_DIR) return;
+    if (!hasConfig || !hasPaperDir) return;
     checkCoreAvailable({
       configPath: prefs.configPath,
       paperDir: prefs.paperDir,
       pythonPath: prefs.pythonPath,
     }).then((r) => setCoreOk(r.ok));
-  }, []);
+  }, [hasConfig, hasPaperDir, prefs.configPath, prefs.paperDir, prefs.pythonPath]);
 
-  if (!HAS_CONFIG || !HAS_PAPER_DIR) {
+  useEffect(() => {
+    if (!hasConfig || !hasPaperDir || !coreOk) {
+      setPapers([]);
+      setIsLoadingPapers(false);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoadingPapers(true);
+
+    void loadTodayPapers({ configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot })
+      .then((results) => {
+        if (cancelled) return;
+        setPapers(results);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setPapers([]);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setIsLoadingPapers(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [hasConfig, hasPaperDir, coreOk, configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot]);
+
+  if (!hasConfig || !hasPaperDir) {
     return (
       <List>
         <List.EmptyView
           title="Set preferences first"
-          description="Set both 'Config file path' and 'Paper directory' in extension preferences."
+          description="Set both 'Config File Path' and 'Paper Directory' in extension preferences."
         />
       </List>
     );
@@ -106,10 +153,10 @@ export default function Command() {
     );
   }
 
-  const papers = loadTodayPapers();
   return (
     <PaperListView
       papers={papers}
+      isLoading={isLoadingPapers}
       emptyTitle="No papers shown"
       emptyDescription="Config and Paper directory are set but no data came back. Run the pipeline at least once."
       subtitleMode="authors"

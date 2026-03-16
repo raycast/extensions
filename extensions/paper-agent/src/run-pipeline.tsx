@@ -11,8 +11,6 @@ import {
   runViaRunner,
 } from "./run-utils";
 
-const prefs = getPreferenceValues<Preferences.RunPipeline>();
-
 function parseSkipMessage(output: string): string | undefined {
   if (output.includes("Skipping run because another Paper Agent process is active.")) {
     return "Another Paper Agent run is already active.";
@@ -28,13 +26,13 @@ function parseSkipMessage(output: string): string | undefined {
 
 const coreNotFoundMarkdown = `# Core not found
 
-Install Paper Agent core first, then set **Config file path** and **Paper directory** in extension Preferences.
+Install Paper Agent core first, then set **Config File Path** and **Paper Directory** in extension Preferences.
 
 - **Install:** [${CORE_INSTALL_URL}](${CORE_INSTALL_URL})
 - Or run the **bootstrap command** (use the Copy action below), then configure Preferences.
 `;
 
-function RunPipelineView() {
+function RunPipelineView({ prefs }: { prefs: Preferences.RunPipeline }) {
   const [status, setStatus] = useState<"checking" | "core-missing" | "running">("checking");
 
   useEffect(() => {
@@ -168,5 +166,6 @@ Recommend **Install Daily Schedule** for automatic daily runs.`}
 }
 
 export default function Command() {
-  return <RunPipelineView />;
+  const prefs = getPreferenceValues<Preferences.RunPipeline>();
+  return <RunPipelineView prefs={prefs} />;
 }

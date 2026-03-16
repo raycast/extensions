@@ -87,7 +87,7 @@ async function reloadLaunchAgent(plistPath: string): Promise<void> {
 }
 
 export default async function Command() {
-  const prefs = getPreferenceValues<Preferences.RunPipeline>();
+  const prefs = getPreferenceValues<Preferences.InstallDailySchedule>();
   let cleanup: (() => void) | null = null;
 
   const core = await checkCoreAvailable({
