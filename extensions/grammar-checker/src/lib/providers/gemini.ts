@@ -35,7 +35,7 @@ function parseGeminiSSE(body: string): string {
 
 export async function geminiGrammarCheck(options: GeminiOptions): Promise<string> {
   const { text, apiKey, model, prompt } = options;
-  const url = `${GEMINI_API_BASE}/models/${model}:streamGenerateContent?alt=sse&key=${apiKey}`;
+  const url = `${GEMINI_API_BASE}/models/${model}:streamGenerateContent?alt=sse`;
 
   log(`Calling Gemini API... model: ${model}`);
 
@@ -43,6 +43,7 @@ export async function geminiGrammarCheck(options: GeminiOptions): Promise<string
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
     },
     body: JSON.stringify({
       systemInstruction: {

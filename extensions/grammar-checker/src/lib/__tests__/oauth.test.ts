@@ -93,8 +93,6 @@ describe("getValidToken", () => {
 
   it("returns null for corrupted storage", async () => {
     store["openai_oauth_tokens"] = "not valid json{{{";
-    // JSON.parse will throw, but getValidToken doesn't catch it currently
-    // This tests the current behavior
-    await expect(getValidToken()).rejects.toThrow();
+    expect(await getValidToken()).toBeNull();
   });
 });

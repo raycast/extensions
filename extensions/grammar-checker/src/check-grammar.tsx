@@ -253,10 +253,16 @@ export default function CheckGrammar() {
       setToken(prefs.geminiApiKey || null);
       setAuthChecked(true);
     } else {
-      getValidToken().then((t) => {
-        setToken(t);
-        setAuthChecked(true);
-      });
+      getValidToken()
+        .then((t) => {
+          setToken(t);
+        })
+        .catch(() => {
+          setToken(null);
+        })
+        .finally(() => {
+          setAuthChecked(true);
+        });
     }
   }, []);
 
@@ -398,7 +404,7 @@ export default function CheckGrammar() {
     } finally {
       setIsLoading(false);
     }
-  }, [token]);
+  }, [token, prefs.model, prefs.prompt, prefs.geminiApiKey]);
 
   useEffect(() => {
     if (token && authChecked) run();

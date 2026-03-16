@@ -45,7 +45,7 @@ async function exchangeCode(code: string, codeVerifier: string): Promise<StoredT
   });
 
   const text = await response.text();
-  log(`Token exchange response (${response.status}): ${text.substring(0, 200)}`);
+  log(`Token exchange response (${response.status})`);
 
   if (!response.ok) {
     throw new Error(`Token exchange failed (${response.status}): ${text}`);
@@ -101,8 +101,7 @@ export function startOAuthFlow(): Promise<StoredTokens> {
   const { verifier, challenge } = generatePKCE();
   const state = crypto.randomBytes(16).toString("base64url");
 
-  log(`PKCE generated - verifier length: ${verifier.length}, challenge: ${challenge}`);
-  log(`State: ${state}`);
+  log("PKCE generated");
 
   return new Promise((resolve, reject) => {
     const server = http.createServer(async (req, res) => {
@@ -140,10 +139,10 @@ export function startOAuthFlow(): Promise<StoredTokens> {
 
         const code = url.searchParams.get("code");
         const returnedState = url.searchParams.get("state");
-        log(`Callback: code present=${!!code}, state match=${returnedState === state}`);
+        log(`Callback: code present=${!!code}, state valid=${returnedState === state}`);
 
         if (returnedState !== state || !code) {
-          log(`State mismatch - expected: ${state}, got: ${returnedState}`);
+          log("State mismatch in OAuth callback");
           res.writeHead(400, { "Content-Type": "text/html" });
           res.end("<html><body><h2>Invalid callback</h2></body></html>");
           server.close();
@@ -161,7 +160,7 @@ export function startOAuthFlow(): Promise<StoredTokens> {
 
         log("Exchanging code for tokens...");
         const tokens = await exchangeCode(code, verifier);
-        log(`Token exchange success! accessToken length: ${tokens.accessToken.length}`);
+        log("Token exchange success");
         resolve(tokens);
       } catch (err) {
         log(`Callback handler error: ${err}`);
@@ -191,7 +190,7 @@ export function startOAuthFlow(): Promise<StoredTokens> {
       authUrl.searchParams.set("originator", "codex_cli_rs");
 
       const finalUrl = authUrl.toString();
-      log(`Opening auth URL: ${finalUrl}`);
+      log("Opening auth URL");
       open(finalUrl);
     });
 
@@ -216,7 +215,13 @@ export async function clearTokens(): Promise<void> {
 export async function getValidToken(): Promise<string | null> {
   const raw = await LocalStorage.getItem<string>(OPENAI_STORAGE_KEY);
   if (!raw) return null;
-  const tokens = JSON.parse(raw) as StoredTokens;
+  let tokens: StoredTokens;
+  try {
+    tokens = JSON.parse(raw) as StoredTokens;
+  } catch {
+    await LocalStorage.removeItem(OPENAI_STORAGE_KEY);
+    return null;
+  }
 
   if (tokens.expiresAt && tokens.expiresAt > Date.now() + 60_000) {
     return tokens.accessToken;

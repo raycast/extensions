@@ -1,5 +1,9 @@
 // OpenAI OAuth + API constants (matching Codex CLI)
 // Note: OAuth requires a ChatGPT Plus or Pro account.
+//
+// This extension reuses the Codex CLI's public OAuth client ID and the ChatGPT
+// Codex backend API, allowing grammar checking using an existing ChatGPT Plus
+// or Pro subscription without separate API credits.
 
 // Public OAuth client ID from the open-source Codex CLI
 // This is a PKCE public client with no client secret
@@ -17,4 +21,5 @@ export const OPENAI_REDIRECT_URI = `http://localhost:${OPENAI_REDIRECT_PORT}/aut
 
 export const OPENAI_STORAGE_KEY = "openai_oauth_tokens";
 
+// ChatGPT Codex backend endpoint
 export const CHATGPT_API_URL = "https://chatgpt.com/backend-api/codex/responses";

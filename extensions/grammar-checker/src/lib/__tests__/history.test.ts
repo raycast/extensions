@@ -35,6 +35,7 @@ describe("getHistory", () => {
         original: "hello",
         corrected: "Hello.",
         hadChanges: true,
+        truncated: false,
         timestamp: Date.now(),
       },
     ];
@@ -53,6 +54,7 @@ describe("getHistory", () => {
         original: "old",
         corrected: "Old.",
         hadChanges: true,
+        truncated: false,
         timestamp: old,
       },
       {
@@ -60,6 +62,7 @@ describe("getHistory", () => {
         original: "new",
         corrected: "New.",
         hadChanges: true,
+        truncated: false,
         timestamp: Date.now(),
       },
     ];
@@ -76,6 +79,7 @@ describe("getHistory", () => {
       original: `text ${i}`,
       corrected: `Text ${i}.`,
       hadChanges: true,
+      truncated: false,
       timestamp: Date.now(),
     }));
     store["grammar_check_history"] = JSON.stringify(entries);
@@ -120,6 +124,21 @@ describe("addHistoryEntry", () => {
     await addHistoryEntry("b", "B.");
     const history = await getHistory();
     expect(history[0].id).not.toBe(history[1].id);
+  });
+
+  it("truncates large texts and sets truncated flag", async () => {
+    const longText = "x".repeat(10000);
+    await addHistoryEntry(longText, longText);
+    const history = await getHistory();
+    expect(history[0].original.length).toBe(5000);
+    expect(history[0].corrected.length).toBe(5000);
+    expect(history[0].truncated).toBe(true);
+  });
+
+  it("does not set truncated flag for short texts", async () => {
+    await addHistoryEntry("short", "Short.");
+    const history = await getHistory();
+    expect(history[0].truncated).toBe(false);
   });
 });
 

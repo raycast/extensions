@@ -40,7 +40,7 @@ describe("geminiGrammarCheck", () => {
     expect(body.contents[0].parts[0].text).toBe("hello world");
   });
 
-  it("passes API key in URL query parameter", async () => {
+  it("passes API key in x-goog-api-key header", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({
@@ -56,8 +56,8 @@ describe("geminiGrammarCheck", () => {
       prompt: "Fix.",
     });
 
-    const url = vi.mocked(fetch).mock.calls[0][0] as string;
-    expect(url).toContain("key=AIzaTestKey123");
+    const headers = vi.mocked(fetch).mock.calls[0][1]?.headers as Record<string, string>;
+    expect(headers["x-goog-api-key"]).toBe("AIzaTestKey123");
   });
 
   it("throws on non-ok response", async () => {
