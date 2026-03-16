@@ -53,7 +53,7 @@ interface DiffResult {
   corrections: number;
 }
 
-export const MAX_DIFF_WORDS = 100;
+export const MAX_DIFF_WORDS = 2000;
 
 export function computeDiff(original: string, corrected: string): DiffResult {
   const oldWords = original.split(/(\s+)/);

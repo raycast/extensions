@@ -41,7 +41,7 @@ git config core.hooksPath .githooks
 
 Single-command extension (`check-grammar`) with a provider-based architecture:
 
-- **`src/check-grammar.tsx`** — Main React component. Handles all UI states: auth prompt, loading animation (ASCII art + progress bar + timer), result view with inline diff (LCS-based word diff, capped at 100 words), history list/detail views. Reads user preferences for model and prompt. Supports mock mode via `.mock` file. Validates clipboard content before making API calls.
+- **`src/check-grammar.tsx`** — Main React component. Handles all UI states: auth prompt, loading animation (ASCII art + progress bar + timer), result view with inline diff (LCS-based word diff, capped at 2000 tokens), history list/detail views. Reads user preferences for model and prompt. Supports mock mode via `.mock` file. Validates clipboard content before making API calls.
 - **`src/lib/oauth.ts`** — OpenAI OAuth 2.0 PKCE flow against `auth.openai.com`. Spins up a temporary HTTP server on port 1455 (binds to `127.0.0.1`, redirect URI uses `localhost`). Requires ChatGPT Plus or Pro account. Tokens stored in Raycast `LocalStorage` with automatic refresh.
 - **`src/lib/api.ts`** — Shared helpers (JWT decoding, account ID extraction, SSE stream parsing) and unified `checkGrammar()` entry point that routes to the appropriate provider based on model name.
 - **`src/lib/providers/codex.ts`** — ChatGPT Codex backend provider. Calls `chatgpt.com/backend-api/codex/responses` with streaming SSE. Sends `ChatGPT-Account-ID` header extracted from JWT.
