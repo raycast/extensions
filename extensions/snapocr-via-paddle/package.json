@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snapocr-via-paddle",
   "title": "SnapOCR Via Paddle",
-  "description": "Turn screenshots into structured Markdown with PaddleOCR, built for Chinese handwriting, vertical text, and complex documents",
+  "description": "Layout-aware screenshot OCR to structured Markdown with PaddleOCR, built for Chinese handwriting, vertical text, and tables",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
