@@ -15,6 +15,18 @@ Control [Handy](https://handy.computer) — offline speech-to-text — directly 
 | **Select Model** | Switch the active transcription model |
 | **Open Recordings Folder** | Open the recordings directory in Finder |
 
+## Screenshots
+
+![Search Transcripts](https://raw.githubusercontent.com/mattiacolombomc/raycast-handy/main/metadata/handy-1.png)
+
+![Manage Dictionary](https://raw.githubusercontent.com/mattiacolombomc/raycast-handy/main/metadata/handy-2.png)
+
+![Select Model](https://raw.githubusercontent.com/mattiacolombomc/raycast-handy/main/metadata/handy-3.png)
+
+![Add Dictionary Word](https://raw.githubusercontent.com/mattiacolombomc/raycast-handy/main/metadata/handy-4.png)
+
+![Search Transcripts Detail](https://raw.githubusercontent.com/mattiacolombomc/raycast-handy/main/metadata/handy-5.png)
+
 ## Setup
 
 1. Install and launch [Handy](https://handy.computer)

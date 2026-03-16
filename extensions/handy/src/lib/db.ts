@@ -1,5 +1,6 @@
+import { trash } from "@raycast/api";
 import { execFileSync } from "child_process";
-import { existsSync, unlinkSync } from "fs";
+import { existsSync } from "fs";
 import { join } from "path";
 import { DB_PATH, RECORDINGS_DIR } from "./constants";
 
@@ -73,18 +74,18 @@ export function toggleSaved(id: number, dbPath = DB_PATH): void {
   );
 }
 
-export function deleteEntry(
+export async function deleteEntry(
   id: number,
   dbPath = DB_PATH,
   recordingsDir = RECORDINGS_DIR,
-): void {
+): Promise<void> {
   const rows = queryDb<{ file_name: string }>(
     dbPath,
     `SELECT file_name FROM transcription_history WHERE id = ${Number(id)}`,
   );
   if (rows.length > 0) {
     const wav = join(recordingsDir, rows[0].file_name);
-    if (existsSync(wav)) unlinkSync(wav);
+    if (existsSync(wav)) await trash(wav);
   }
   execDb(dbPath, `DELETE FROM transcription_history WHERE id = ${Number(id)}`);
 }

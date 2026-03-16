@@ -1,10 +1,6 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { execa } from "execa";
 
-interface Preferences {
-  handyBinaryPath: string;
-}
-
 export default async function main() {
   const { handyBinaryPath } = getPreferenceValues<Preferences>();
   try {

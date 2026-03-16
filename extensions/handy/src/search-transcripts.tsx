@@ -55,7 +55,7 @@ export default function SearchTranscripts() {
 
   async function handleDelete(entry: HistoryEntry) {
     try {
-      deleteEntry(entry.id);
+      await deleteEntry(entry.id);
       load();
     } catch (err) {
       await showToast({
