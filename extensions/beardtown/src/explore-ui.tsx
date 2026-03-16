@@ -335,7 +335,10 @@ export function RelatedChallengesGrid({
     };
   }, [relatedRecords]);
 
-  const entries = toChallengeEntries(resolvedRelatedRecords ?? [], "challenges");
+  const entries = useMemo(
+    () => toChallengeEntries(resolvedRelatedRecords ?? [], "challenges"),
+    [resolvedRelatedRecords],
+  );
   const yearSections = useMemo(() => groupChallengeEntriesByYear(entries), [entries]);
   const isResolvingEntries = isLoadingResolvedRecords || resolvedRelatedRecords === null;
 
