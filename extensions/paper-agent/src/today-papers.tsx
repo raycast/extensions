@@ -2,7 +2,7 @@ import { Action, ActionPanel, List, getPreferenceValues, open } from "@raycast/a
 import * as path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
 import { withEffectiveConfigPathAsync } from "./config-utils";
 import { type Paper, parseCliPapers } from "./paper-utils";
@@ -72,17 +72,30 @@ function CoreNotFoundEmptyView() {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.TodayPapers>();
-  const configPath = prefs.configPath?.trim() ?? "";
-  const hasConfig = configPath.length > 0;
-  const prefPaperDir = prefs.paperDir?.trim() ?? "";
-  const paperDir = prefPaperDir;
-  const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
-  const hasPaperDir = prefPaperDir.length > 0;
-  const agentRoot = hasConfig ? path.dirname(configPath) : "";
-  const pythonBin =
-    prefs.pythonPath && prefs.pythonPath.trim().length > 0
-      ? prefs.pythonPath
-      : path.join(agentRoot, ".venv", "bin", "python3");
+  const normalized = useMemo(() => {
+    const configPath = prefs.configPath?.trim() ?? "";
+    const hasConfig = configPath.length > 0;
+    const prefPaperDir = prefs.paperDir?.trim() ?? "";
+    const paperDir = prefPaperDir;
+    const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
+    const hasPaperDir = prefPaperDir.length > 0;
+    const agentRoot = hasConfig ? path.dirname(configPath) : "";
+    const pythonBin =
+      prefs.pythonPath && prefs.pythonPath.trim().length > 0
+        ? prefs.pythonPath
+        : path.join(agentRoot, ".venv", "bin", "python3");
+    return {
+      configPath,
+      hasConfig,
+      prefPaperDir,
+      paperDir,
+      libraryDir,
+      hasPaperDir,
+      agentRoot,
+      pythonBin,
+    };
+  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath]);
+  const { configPath, hasConfig, prefPaperDir, paperDir, libraryDir, hasPaperDir, agentRoot, pythonBin } = normalized;
 
   const [coreOk, setCoreOk] = useState<boolean | null>(null);
   const [papers, setPapers] = useState<Paper[]>([]);
@@ -109,7 +122,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [hasConfig, hasPaperDir, prefs.configPath, prefs.paperDir, prefs.pythonPath]);
+  }, [normalized]);
 
   useEffect(() => {
     if (!hasConfig || !hasPaperDir || !coreOk) {
@@ -138,7 +151,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [hasConfig, hasPaperDir, coreOk, configPath, prefPaperDir, paperDir, libraryDir, pythonBin, agentRoot]);
+  }, [normalized, coreOk]);
 
   if (!hasConfig || !hasPaperDir) {
     return (

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List, getPreferenceValues, open } from "@raycast/api";
 import * as path from "node:path";
 import { execFile } from "node:child_process";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
 import { withEffectiveConfigPathAsync } from "./config-utils";
 import { type Paper, parseCliPapers } from "./paper-utils";
@@ -74,17 +74,30 @@ function CoreNotFoundEmptyView() {
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.SearchPapers>();
-  const configPath = prefs.configPath?.trim() ?? "";
-  const hasConfig = configPath.length > 0;
-  const prefPaperDir = prefs.paperDir?.trim() ?? "";
-  const paperDir = prefPaperDir;
-  const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
-  const hasPaperDir = prefPaperDir.length > 0;
-  const agentRoot = hasConfig ? path.dirname(configPath) : "";
-  const pythonBin =
-    prefs.pythonPath && prefs.pythonPath.trim().length > 0
-      ? prefs.pythonPath
-      : path.join(agentRoot, ".venv", "bin", "python3");
+  const normalized = useMemo(() => {
+    const configPath = prefs.configPath?.trim() ?? "";
+    const hasConfig = configPath.length > 0;
+    const prefPaperDir = prefs.paperDir?.trim() ?? "";
+    const paperDir = prefPaperDir;
+    const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
+    const hasPaperDir = prefPaperDir.length > 0;
+    const agentRoot = hasConfig ? path.dirname(configPath) : "";
+    const pythonBin =
+      prefs.pythonPath && prefs.pythonPath.trim().length > 0
+        ? prefs.pythonPath
+        : path.join(agentRoot, ".venv", "bin", "python3");
+    return {
+      configPath,
+      hasConfig,
+      prefPaperDir,
+      paperDir,
+      libraryDir,
+      hasPaperDir,
+      agentRoot,
+      pythonBin,
+    };
+  }, [prefs.configPath, prefs.paperDir, prefs.pythonPath]);
+  const { configPath, hasConfig, prefPaperDir, paperDir, libraryDir, hasPaperDir, agentRoot, pythonBin } = normalized;
 
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
@@ -113,7 +126,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [hasConfig, hasPaperDir, prefs.configPath, prefs.paperDir, prefs.pythonPath]);
+  }, [normalized]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -156,18 +169,7 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [
-    debouncedSearchText,
-    coreOk,
-    hasConfig,
-    hasPaperDir,
-    configPath,
-    prefPaperDir,
-    paperDir,
-    libraryDir,
-    pythonBin,
-    agentRoot,
-  ]);
+  }, [debouncedSearchText, normalized, coreOk]);
 
   if (!hasConfig || !hasPaperDir) {
     return (

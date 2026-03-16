@@ -1,4 +1,4 @@
-import { getPreferenceValues, popToRoot, showToast, Toast, Clipboard } from "@raycast/api";
+import { Clipboard, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { execFile } from "node:child_process";
