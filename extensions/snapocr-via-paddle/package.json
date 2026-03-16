@@ -30,14 +30,14 @@
     {
       "name": "accessToken",
       "title": "Access Token",
-      "description": "AIStudio Access Token. Get it from https://aistudio.baidu.com/paddleocr → click API → copy TOKEN value",
+      "description": "Baidu AIStudio Access Token. Get it from https://aistudio.baidu.com/paddleocr → click API → copy TOKEN value",
       "type": "password",
       "required": true
     },
     {
       "name": "apiUrl",
       "title": "API URL",
-      "description": "PaddleOCR API URL (without path). Get it from https://aistudio.baidu.com/paddleocr → click API → copy the base URL from API_URL",
+      "description": "Baidu AIStudio PaddleOCR API URL (without path). Get it from https://aistudio.baidu.com/paddleocr → click API → copy the base URL from API_URL",
       "type": "textfield",
       "required": true,
       "placeholder": "https://xxx.aistudio-app.com"
