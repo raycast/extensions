@@ -615,12 +615,14 @@ export default function CheckGrammar() {
             onAction={openExtensionPreferences}
             shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
           />
-          <Action
-            title="Sign out"
-            icon={Icon.Logout}
-            onAction={signOut}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-          />
+          {!useGemini && (
+            <Action
+              title="Sign out"
+              icon={Icon.Logout}
+              onAction={signOut}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            />
+          )}
         </ActionPanel>
       }
     />
