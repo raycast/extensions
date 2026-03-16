@@ -8,24 +8,7 @@ import { reauthorize } from "../lib/oauth";
 import type { TaskWithPullRequest } from "../services/copilot";
 import type { GroupedLogEntry, LogEntry } from "../services/events";
 import { fetchRepositoryById } from "../services/repositories";
-import { truncate, formatRelativeDate } from "../utils";
-
-function getLogEntryIcon(entry: LogEntry): { source: Icon; tintColor?: Color } {
-  switch (entry.type) {
-    case "tool_call":
-      return { source: Icon.Terminal, tintColor: Color.Blue };
-    case "user_message":
-      return { source: Icon.Person, tintColor: Color.Green };
-    case "assistant_message":
-      return { source: Icon.Message, tintColor: Color.Purple };
-    case "info":
-      return { source: Icon.Info, tintColor: Color.SecondaryText };
-    case "error":
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
-    default:
-      return { source: Icon.Circle };
-  }
-}
+import { truncate, formatRelativeDate, getLogEntryIcon } from "../utils";
 
 function getGroupedEntryIcon(entry: GroupedLogEntry): { source: Icon; tintColor?: Color } {
   switch (entry.kind) {

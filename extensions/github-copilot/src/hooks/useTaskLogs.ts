@@ -4,7 +4,7 @@ import { fetchSessionsForTask, fetchSessionLogs } from "../services/events";
 import { processAndGroupLogs } from "../services/event-grouping";
 import type { SessionLogs } from "../services/events";
 
-const TERMINAL_SESSION_STATES = new Set(["completed", "failed", "cancelled", "stopped"]);
+export const TERMINAL_SESSION_STATES = new Set(["completed", "failed", "cancelled", "stopped"]);
 const POLL_INTERVAL_MS = 5000;
 
 /**
@@ -19,13 +19,13 @@ async function fetchTaskLogs(taskId: string): Promise<SessionLogs[]> {
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
   );
 
-  const results: SessionLogs[] = [];
-
-  for (const session of sortedSessions) {
-    const rawLogs = await fetchSessionLogs(session.id);
-    const groupedEntries = processAndGroupLogs(rawLogs);
-    results.push({ session, groupedEntries });
-  }
+  const results = await Promise.all(
+    sortedSessions.map(async (session) => {
+      const rawLogs = await fetchSessionLogs(session.id);
+      const groupedEntries = processAndGroupLogs(rawLogs);
+      return { session, groupedEntries } as SessionLogs;
+    }),
+  );
 
   return results;
 }

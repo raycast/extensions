@@ -1,27 +1,10 @@
 import { ActionPanel, Action, Icon, List, Color, useNavigation } from "@raycast/api";
 import { LogEntryDetail } from "./LogEntryDetail";
 import { getToolCallTitle } from "./TaskLogsList";
-import { truncate } from "../utils";
+import { truncate, getLogEntryIcon } from "../utils";
 import type { SubAgentGroup, ToolGroup, LogEntry } from "../services/events";
 import { groupConsecutiveTools } from "../services/event-grouping";
 import type { GroupedLogEntry } from "../services/events";
-
-function getLogEntryIcon(entry: LogEntry): { source: Icon; tintColor?: Color } {
-  switch (entry.type) {
-    case "tool_call":
-      return { source: Icon.Terminal, tintColor: Color.Blue };
-    case "user_message":
-      return { source: Icon.Person, tintColor: Color.Green };
-    case "assistant_message":
-      return { source: Icon.Message, tintColor: Color.Purple };
-    case "info":
-      return { source: Icon.Info, tintColor: Color.SecondaryText };
-    case "error":
-      return { source: Icon.ExclamationMark, tintColor: Color.Red };
-    default:
-      return { source: Icon.Circle };
-  }
-}
 
 function getEntryTitle(entry: LogEntry): string {
   if (entry.type === "tool_call") {

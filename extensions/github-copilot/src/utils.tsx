@@ -1,5 +1,23 @@
-import { Color, Image, Keyboard } from "@raycast/api";
+import { Color, Icon, Image, Keyboard } from "@raycast/api";
 import { TaskWithPullRequest } from "./services/copilot";
+import type { LogEntry } from "./services/events";
+
+export function getLogEntryIcon(entry: LogEntry): { source: Icon; tintColor?: Color } {
+  switch (entry.type) {
+    case "tool_call":
+      return { source: Icon.Terminal, tintColor: Color.Blue };
+    case "user_message":
+      return { source: Icon.Person, tintColor: Color.Green };
+    case "assistant_message":
+      return { source: Icon.Message, tintColor: Color.Purple };
+    case "info":
+      return { source: Icon.Info, tintColor: Color.SecondaryText };
+    case "error":
+      return { source: Icon.ExclamationMark, tintColor: Color.Red };
+    default:
+      return { source: Icon.Circle };
+  }
+}
 
 export function getTaskIcon(taskWithPullRequest: TaskWithPullRequest): Image.ImageLike {
   const source = getTaskIconPath(taskWithPullRequest);
