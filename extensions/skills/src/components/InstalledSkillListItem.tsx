@@ -73,7 +73,7 @@ export function InstalledSkillListItem({
     <List.Item
       title={skill.name}
       subtitle={isShowingDetail ? undefined : agentsText}
-      icon={{ source: Icon.Hammer, tintColor: Color.Purple }}
+      icon={{ source: Icon.Hammer, tintColor: skill.hasUpdate ? Color.Orange : Color.Purple }}
       accessories={
         isShowingDetail
           ? []

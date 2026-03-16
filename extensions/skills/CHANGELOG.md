@@ -1,5 +1,10 @@
 # Changelog
 
+## [Highlight Outdated Skills] - 2026-03-16
+
+- Highlight outdated skills with an orange hammer icon in the installed skills list
+- Show "Updates Available" section with count when updates exist
+
 ## [Fix Duplicate Audit Error Toast] - 2026-03-11
 
 - Fix error toast showing twice when re-selecting a skill with a failed audit fetch

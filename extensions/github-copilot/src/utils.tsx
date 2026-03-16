@@ -8,19 +8,19 @@ export function getTaskIcon(taskWithPullRequest: TaskWithPullRequest): Image.Ima
 }
 
 export function getTaskIconPath(taskWithPullRequest: TaskWithPullRequest): string {
-  const status = taskWithPullRequest.task.status;
+  const state = taskWithPullRequest.task.state;
 
-  if (status === "queued") {
+  if (state === "queued") {
     return "clock.svg";
-  } else if (status === "in_progress") {
+  } else if (state === "in_progress") {
     return "sync.svg";
-  } else if (status === "failed") {
+  } else if (state === "failed") {
     return "stop.svg";
-  } else if (status === "timed_out") {
+  } else if (state === "timed_out") {
     return "stop.svg";
-  } else if (status === "cancelled") {
+  } else if (state === "cancelled") {
     return "skip.svg";
-  } else if (status === "completed") {
+  } else if (state === "completed") {
     return "check-circle-fill.svg";
   } else {
     return "circle.svg";

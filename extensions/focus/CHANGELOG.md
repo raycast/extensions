@@ -1,4 +1,7 @@
 # Focus Changelog
+## [Enhancement] - 2026-03-13
+- Commands now close the Raycast window automatically on success, showing a brief HUD notification instead of keeping the window open.
+
 ## [Enhancement] - 2026-03-12
 - Fixed an issue where Focus app icon would appear in the Dock when running commands.
 - Improved profile list loading to use caching, so profiles appear instantly on repeat opens.

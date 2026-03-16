@@ -1,4 +1,4 @@
-import { Toast, showToast, List, ActionPanel, Action, Icon, popToRoot } from "@raycast/api";
+import { Toast, showToast, showHUD, List, ActionPanel, Action, Icon, closeMainWindow } from "@raycast/api";
 import { getProfileNames, startFocusWithProfile, getActiveProfileName } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
 import { ensureFocusIsRunning } from "./helpers";
@@ -21,10 +21,9 @@ export default function Command() {
       return;
     }
 
-    await showToast({ style: Toast.Style.Animated, title: "Starting focus..." });
     await startFocusWithProfile(profileName);
-    await showToast({ style: Toast.Style.Success, title: `Focus started with profile: ${profileName}` });
-    await popToRoot();
+    await showHUD(`Focus started with profile: ${profileName}`);
+    await closeMainWindow();
   }
 
   return (

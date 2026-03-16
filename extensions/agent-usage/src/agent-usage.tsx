@@ -384,7 +384,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
         } catch {
           // keep default order
         }
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
+            const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
+            setAgentOrder([...validOrder, ...missingIds]);
+          }
+        } catch {
+          // keep default order
+        }
       }
+      setOrderLoaded(true);
       setOrderLoaded(true);
     });
   }, []);
@@ -419,7 +431,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   });
 
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
-  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
+  const launchSelectedId =
     typeof requestedSelectedAgentId === "string" && isAgentId(requestedSelectedAgentId)
       ? requestedSelectedAgentId
       : undefined,
@@ -513,9 +525,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   return (
     <List
       isLoading={!orderLoaded || isLoading}
+      isLoading={!orderLoaded || isLoading}
       isShowingDetail
-      selectedItemId={selectedItemId}
-      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
+      {...(launchSelectedId ? { selectedItemId: launchSelectedId } : {})}
     >
       {orderLoaded &&
         allRows.map((row, index) => {
