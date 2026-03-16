@@ -8,7 +8,13 @@
   "contributors": [
     "DaleSeo",
     "dominik_lukes",
-    "raulg"
+    "raulg",
+    "elwin_liu",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Developer Tools"
@@ -37,9 +43,18 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional token to increase the GitHub API rate limit from 60 to 5,000 requests/hour.",
+      "type": "password",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "1.104.5",
-    "@raycast/utils": "2.2.2",
+    "@raycast/utils": "2.2.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
@@ -57,18 +72,5 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "ray publish"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
-  "preferences": [
-    {
-      "name": "githubToken",
-      "title": "GitHub Personal Access Token",
-      "description": "Optional token to increase the GitHub API rate limit from 60 to 5,000 requests/hour.",
-      "type": "password",
-      "required": false
-    }
-  ]
+  }
 }
