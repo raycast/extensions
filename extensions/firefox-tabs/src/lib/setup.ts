@@ -148,7 +148,9 @@ export function validateManifest(
   } catch (err) {
     return {
       valid: false,
-      error: `Failed to read/parse manifest: ${err instanceof Error ? err.message : String(err)}`,
+      error: `Failed to read/parse manifest: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
     };
   }
 }

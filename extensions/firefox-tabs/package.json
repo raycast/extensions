@@ -11,7 +11,9 @@
   ],
   "version": "1.1.0",
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search-tabs",
@@ -31,9 +33,9 @@
     "@raycast/utils": "^2.2.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.0",
-    "typescript": "^5.0.0",
-    "@types/node": "^22.0.0"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
   },
   "scripts": {
     "dev": "ray develop",

@@ -253,7 +253,9 @@ export async function installNativeHost(
   );
   if (missingAssets.length > 0) {
     throw new Error(
-      `Release is missing required files: ${missingAssets.join(", ")}. Please report this issue.`,
+      `Release is missing required files: ${missingAssets.join(
+        ", ",
+      )}. Please report this issue.`,
     );
   }
 
