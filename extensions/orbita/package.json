@@ -16,8 +16,8 @@
   "commands": [
     {
       "name": "orbita",
-      "title": "Órbita",
-      "subtitle": "Follow the posts in the Órbita",
+      "title": "Read News",
+      "subtitle": "Órbita",
       "description": "All posts from the Órbita, the Brazilian hacker news",
       "mode": "view"
     }
