@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { SyntheticUsage, SyntheticQuotaBucket, SyntheticError } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatResetTime } from "../agents/format";
+import { formatResetTime, getRemainingPercent } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -11,21 +11,15 @@ import {
   generateAsciiBar,
 } from "../agents/ui";
 
-function getRemainingPercent(used: number, limit: number): number {
-  if (limit === 0) return 100;
-  const remaining = limit - used;
-  return Math.max(0, Math.round((remaining / limit) * 100));
-}
-
 function formatQuotaText(used: number, limit: number): string {
   const remaining = limit - used;
-  const pct = getRemainingPercent(used, limit);
+  const pct = Math.round(getRemainingPercent(remaining, limit));
   return `${remaining}/${limit} (${pct}%)`;
 }
 
 function formatQuotaSection(bucket: SyntheticQuotaBucket, name: string): string {
-  const pct = getRemainingPercent(bucket.requests, bucket.limit);
   const remaining = bucket.limit - bucket.requests;
+  const pct = Math.round(getRemainingPercent(remaining, bucket.limit));
   return `${name}: ${remaining}/${bucket.limit} (${pct}%) - Renews: ${formatResetTime(bucket.renewsAt)}`;
 }
 
@@ -34,15 +28,18 @@ export function formatSyntheticUsageText(usage: SyntheticUsage | null, error: Sy
   if (fallback !== null) return fallback;
   const u = usage as SyntheticUsage;
 
-  const subPct = getRemainingPercent(u.subscription.requests, u.subscription.limit);
+  const subRemaining = u.subscription.limit - u.subscription.requests;
+  const subPct = Math.round(getRemainingPercent(subRemaining, u.subscription.limit));
   let text = `Synthetic Usage`;
   text += `\n\nSubscription`;
   text += `\n${generateAsciiBar(subPct)} ${formatQuotaSection(u.subscription, "Remaining")}`;
   text += `\n\nFree Tool Calls`;
-  const toolPct = getRemainingPercent(u.freeToolCalls.requests, u.freeToolCalls.limit);
+  const toolRemaining = u.freeToolCalls.limit - u.freeToolCalls.requests;
+  const toolPct = Math.round(getRemainingPercent(toolRemaining, u.freeToolCalls.limit));
   text += `\n${generateAsciiBar(toolPct)} ${formatQuotaSection(u.freeToolCalls, "Remaining")}`;
   text += `\n\nSearch (Hourly)`;
-  const searchPct = getRemainingPercent(u.search.hourly.requests, u.search.hourly.limit);
+  const searchRemaining = u.search.hourly.limit - u.search.hourly.requests;
+  const searchPct = Math.round(getRemainingPercent(searchRemaining, u.search.hourly.limit));
   text += `\n${generateAsciiBar(searchPct)} ${formatQuotaSection(u.search.hourly, "Remaining")}`;
   return text;
 }
@@ -52,9 +49,12 @@ export function renderSyntheticDetail(usage: SyntheticUsage | null, error: Synth
   if (fallback !== null) return fallback;
   const u = usage as SyntheticUsage;
 
-  const subPct = getRemainingPercent(u.subscription.requests, u.subscription.limit);
-  const toolPct = getRemainingPercent(u.freeToolCalls.requests, u.freeToolCalls.limit);
-  const searchPct = getRemainingPercent(u.search.hourly.requests, u.search.hourly.limit);
+  const subRemaining = u.subscription.limit - u.subscription.requests;
+  const subPct = Math.round(getRemainingPercent(subRemaining, u.subscription.limit));
+  const toolRemaining = u.freeToolCalls.limit - u.freeToolCalls.requests;
+  const toolPct = Math.round(getRemainingPercent(toolRemaining, u.freeToolCalls.limit));
+  const searchRemaining = u.search.hourly.limit - u.search.hourly.requests;
+  const searchPct = Math.round(getRemainingPercent(searchRemaining, u.search.hourly.limit));
 
   return (
     <List.Item.Detail.Metadata>
@@ -102,7 +102,8 @@ export function getSyntheticAccessory(
 
   if (!usage) return getNoDataAccessory();
 
-  const pct = getRemainingPercent(usage.subscription.requests, usage.subscription.limit);
+  const remaining = usage.subscription.limit - usage.subscription.requests;
+  const pct = Math.round(getRemainingPercent(remaining, usage.subscription.limit));
 
   return {
     icon: generatePieIcon(pct),

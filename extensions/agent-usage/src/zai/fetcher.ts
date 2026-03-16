@@ -3,8 +3,11 @@ import { getPreferenceValues } from "@raycast/api";
 import { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types";
 import { httpFetch } from "../agents/http";
 import { resolveZaiAuthTokens } from "./auth";
+import { isOpenCodeActiveToken } from "../agents/opencode-active";
 import { loadAccounts } from "../accounts/storage";
 import type { AccountUsageState } from "../accounts/types";
+
+const ZAI_OPENCODE_KEY = "zai-coding-plan";
 
 type Preferences = Preferences.AgentUsage;
 
@@ -217,12 +220,10 @@ export function useZaiAccounts(enabled = true): AccountUsageState<ZaiUsage, ZaiE
     for (let i = 0; i < autoTokens.length; i++) {
       const token = autoTokens[i];
       if (!accounts.some((a) => a.token === token)) {
-        const source = i === 0 && preferenceToken ? "Manual" : "Auto-detected";
-        accounts.push({
-          id: `auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
-          label: source,
-          token,
-        });
+        const isManualPref = i === 0 && preferenceToken !== "";
+        const id = isManualPref ? "zai-pref" : i === 0 ? "zai-auto" : `zai-auto-${i}`;
+        const label = isManualPref ? "Manual" : "Auto-detected";
+        accounts.push({ id, label, token });
       }
     }
 
@@ -264,6 +265,7 @@ export function useZaiAccounts(enabled = true): AccountUsageState<ZaiUsage, ZaiE
         isLoading: false,
         usage: result.usage,
         error: result.error,
+        isOpenCodeActive: isOpenCodeActiveToken(account.token, ZAI_OPENCODE_KEY),
         revalidate: async () => {
           await fetchAll();
         },

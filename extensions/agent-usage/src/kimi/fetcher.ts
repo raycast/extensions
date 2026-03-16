@@ -4,8 +4,11 @@ import type { UsageState } from "../agents/types";
 import { KimiUsage, KimiError } from "./types";
 import { httpFetch } from "../agents/http";
 import { readOpencodeAuthToken } from "../agents/opencode-auth";
+import { isOpenCodeActiveToken } from "../agents/opencode-active";
 import { loadAccounts } from "../accounts/storage";
 import type { AccountUsageState } from "../accounts/types";
+
+const KIMI_OPENCODE_KEY = "kimi-for-coding";
 
 const KIMI_USAGE_API = "https://api.kimi.com/coding/v1/usages";
 
@@ -98,15 +101,10 @@ async function fetchKimiUsage(token: string): Promise<{ usage: KimiUsage | null;
   return parseKimiApiResponse(data);
 }
 
-function resolveKimiTokens(prefs: AgentUsagePrefs): string[] {
-  const candidates: string[] = [];
-
+function resolveKimiTokens(prefs: AgentUsagePrefs): string {
   // Slot 1: manual preference → OpenCode auto-detect
   const pref1 = (prefs.kimiAuthToken as string | undefined)?.trim() || "";
-  const slot1 = pref1 || readOpencodeAuthToken("kimi-for-coding") || "";
-  if (slot1) candidates.push(slot1);
-
-  return candidates;
+  return pref1 || readOpencodeAuthToken("kimi-for-coding") || "";
 }
 
 // --- Dual-source auth hook ---
@@ -122,9 +120,9 @@ export function useKimiUsage(enabled = true): UsageState<KimiUsage, KimiError> {
     const requestId = ++requestIdRef.current;
 
     const prefs = getPreferenceValues<AgentUsagePrefs>();
-    const tokens = resolveKimiTokens(prefs);
+    const token = resolveKimiTokens(prefs);
 
-    if (tokens.length === 0) {
+    if (!token) {
       setUsage(null);
       setError({
         type: "not_configured",
@@ -138,22 +136,11 @@ export function useKimiUsage(enabled = true): UsageState<KimiUsage, KimiError> {
     setIsLoading(true);
     setError(null);
 
-    let lastError: KimiError | null = null;
-    let successUsage: KimiUsage | null = null;
+    const result = await fetchKimiUsage(token);
+    if (requestId !== requestIdRef.current) return;
 
-    for (const token of tokens) {
-      const result = await fetchKimiUsage(token);
-      if (requestId !== requestIdRef.current) return;
-      if (result.usage) {
-        successUsage = result.usage;
-        lastError = null;
-        break;
-      }
-      lastError = result.error;
-    }
-
-    setUsage(successUsage);
-    setError(lastError);
+    setUsage(result.usage);
+    setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
   }, []);
@@ -214,7 +201,7 @@ export function useKimiAccounts(enabled = true): AccountUsageState<KimiUsage, Ki
     // Add preference token as "Manual" if different from manual accounts
     if (prefToken && !accounts.some((a) => a.token === prefToken)) {
       accounts.push({
-        id: `pref-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        id: "kimi-pref",
         label: "Manual",
         token: prefToken,
       });
@@ -223,7 +210,7 @@ export function useKimiAccounts(enabled = true): AccountUsageState<KimiUsage, Ki
     // Add auto-detected token as "Auto-detected" if different from existing
     if (autoToken && !accounts.some((a) => a.token === autoToken)) {
       accounts.push({
-        id: `auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        id: "kimi-opencode",
         label: "Auto-detected",
         token: autoToken,
       });
@@ -269,6 +256,7 @@ export function useKimiAccounts(enabled = true): AccountUsageState<KimiUsage, Ki
         isLoading: false,
         usage: result.usage,
         error: result.error,
+        isOpenCodeActive: isOpenCodeActiveToken(account.token, KIMI_OPENCODE_KEY),
         revalidate: async () => {
           await fetchAll();
         },

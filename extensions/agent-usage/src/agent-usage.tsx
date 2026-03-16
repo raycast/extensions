@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Color,
   getPreferenceValues,
   Icon,
   List,
@@ -31,7 +32,7 @@ import { useGeminiUsage } from "./gemini/fetcher";
 import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth";
 import { formatGeminiUsageText, getGeminiAccessory, renderGeminiDetail } from "./gemini/renderer";
 import type { GeminiError, GeminiUsage } from "./gemini/types";
-import { useKimiUsage } from "./kimi/fetcher";
+import { useKimiUsage, useKimiAccounts } from "./kimi/fetcher";
 import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/renderer";
 import type { KimiError, KimiUsage } from "./kimi/types";
 import { useSyntheticUsage, useSyntheticAccounts } from "./synthetic/fetcher";
@@ -40,7 +41,6 @@ import type { SyntheticError, SyntheticUsage } from "./synthetic/types";
 import { useZaiUsage, useZaiAccounts } from "./zai/fetcher";
 import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer";
 import type { ZaiError, ZaiUsage } from "./zai/types";
-import { useKimiAccounts } from "./kimi/fetcher";
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm";
 import type { AccountUsageState } from "./accounts/types";
 
@@ -119,6 +119,8 @@ interface AccountedAgentView {
   isSupported: boolean;
   /** The API token for this account (for copying) */
   token: string;
+  /** Whether this account's token matches the one configured in OpenCode */
+  isOpenCodeActive?: boolean;
 }
 
 const AGENT_REGISTRY: AgentRegistry = {
@@ -285,18 +287,8 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
     provider,
     isSupported: true,
     token: state.token,
+    isOpenCodeActive: state.isOpenCodeActive,
   }));
-}
-
-function renderUnsupportedDetail(agent: AgentDefinition): React.ReactNode {
-  return (
-    <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Agent" text={agent.name} />
-      <List.Item.Detail.Metadata.Label title="Status" text="Coming Soon" />
-      <List.Item.Detail.Metadata.Separator />
-      <List.Item.Detail.Metadata.Label title="Description" text={agent.description} />
-    </List.Item.Detail.Metadata>
-  );
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandLaunchContext }>) {
@@ -496,7 +488,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   }, [prefs.showGemini, geminiState.error?.type, handleGeminiReauth]);
 
   const handleRefresh = async () => {
-    await Promise.all(allRows.map((row) => (row.kind === "agent" ? row.view.revalidate() : row.view.revalidate())));
+    await Promise.all(allRows.map((row) => row.view.revalidate()));
     await showToast({
       title: "Refreshed",
       style: Toast.Style.Success,
@@ -530,7 +522,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
           if (row.kind === "agent") {
             const agent = row.view;
             const accessory = agent.getAccessory();
-            const detail = agent.isSupported ? agent.renderDetail() : renderUnsupportedDetail(agent);
+            const detail = agent.renderDetail();
             const canMoveUp = index > 0;
             const canMoveDown = index < allRows.length - 1;
 
@@ -596,7 +588,17 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                 id={view.rowId}
                 icon={view.icon}
                 title={view.title}
-                accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
+                accessories={[
+                  ...(view.isOpenCodeActive
+                    ? [
+                        {
+                          icon: { source: Icon.Bolt, tintColor: Color.Green },
+                          tooltip: "⚡ Currently used in OpenCode",
+                        },
+                      ]
+                    : []),
+                  { icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip },
+                ]}
                 detail={<List.Item.Detail metadata={detail} />}
                 actions={
                   <ActionPanel>

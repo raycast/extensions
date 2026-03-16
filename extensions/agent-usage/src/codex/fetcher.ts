@@ -116,24 +116,7 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
   }
 }
 
-function formatDuration(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  if (seconds < 3600) {
-    return `${Math.floor(seconds / 60)}m`;
-  }
-  if (seconds < 86400) {
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
-}
-
-export { formatDuration };
+export { formatDuration } from "../agents/format";
 
 export function useCodexUsage(enabled = true) {
   const [usage, setUsage] = useState<CodexUsage | null>(null);
@@ -228,7 +211,7 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
     // Add auto-detected token as separate account if not already present
     if (localToken && !accounts.some((a) => a.token === localToken)) {
       accounts.push({
-        id: `auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        id: "codex-auto",
         label: "Auto-detected",
         token: localToken,
       });
@@ -274,6 +257,7 @@ export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, 
         isLoading: false,
         usage: result.usage,
         error: result.error,
+        isOpenCodeActive: false, // Codex uses different auth source
         revalidate: async () => {
           await fetchAll();
         },

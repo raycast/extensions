@@ -8,11 +8,12 @@ Track usage across your AI coding agents in one place.
 ## Features
 
 - **Multi-Agent Support** - View usage for Amp, Claude, Codex, Droid, Gemini, Kimi, Antigravity, Synthetic, and z.ai (GLM)
+- **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
 - **Menu Bar** - Quick overview from the menu bar with click-to-navigate
 - **Zero Config** - Most agents are auto-detected from local credentials
-- **OpenCode Integration** - Auto-detect credentials from OpenCode for supported providers
+- **OpenCode Integration** - Auto-detect credentials from OpenCode for supported providers, with visual indicator showing which account is currently active in OpenCode
 - **Refresh & Copy** - Quickly refresh data or copy usage details to clipboard
 - **Customizable** - Show/hide agents, reorder list, and configure display preferences
 
@@ -36,6 +37,17 @@ Track usage across your AI coding agents in one place.
 - **OpenCode** — Auto-detected from `~/.local/share/opencode/auth.json`
 - **Env Var** — Auto-detected from shell environment variables
 - **Multi-Account** — Support for multiple named accounts via "Manage Accounts" action (⌘M)
+
+## OpenCode Active Indicator
+
+When you have multiple accounts configured for a provider (e.g., multiple Kimi API keys), the extension shows a ⚡ bolt icon next to the account that is currently being used by OpenCode. This helps you identify which account is actively being consumed.
+
+The indicator appears in:
+
+- **List View** — Green bolt icon in the accessory area with tooltip "Currently used in OpenCode"
+- **Menu Bar** — ⚡ prefix before the account name
+
+This works by comparing your stored account tokens with the keys configured in `~/.local/share/opencode/auth.json`.
 
 ## Preferences
 

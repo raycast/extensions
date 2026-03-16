@@ -84,7 +84,7 @@ interface ResolveZaiAuthTokensResult {
 }
 
 export async function resolveZaiAuthTokens(
-  options: { preferenceToken?: string } = {},
+  options: { preferenceToken?: string; preferenceToken2?: string } = {},
 ): Promise<ResolveZaiAuthTokensResult> {
   const candidates: string[] = [];
 
@@ -97,6 +97,12 @@ export async function resolveZaiAuthTokens(
     const envToken = await readEnvToken();
     const localToken = opencodeToken ?? envToken;
     if (localToken) candidates.push(localToken);
+  }
+
+  // Append second preference token if provided and not already present
+  const pref2 = cleanToken(options.preferenceToken2);
+  if (pref2 && !candidates.includes(pref2)) {
+    candidates.push(pref2);
   }
 
   const primaryToken = candidates[0] ?? null;

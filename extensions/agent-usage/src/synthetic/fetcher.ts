@@ -7,6 +7,9 @@ import { httpFetch } from "../agents/http";
 import { loadAccounts } from "../accounts/storage";
 import type { AccountUsageState } from "../accounts/types";
 import { readOpencodeAuthToken } from "../agents/opencode-auth";
+import { isOpenCodeActiveToken } from "../agents/opencode-active";
+
+const SYNTHETIC_OPENCODE_KEY = "synthetic";
 
 const SYNTHETIC_QUOTAS_API = "https://api.synthetic.new/v2/quotas";
 
@@ -188,7 +191,7 @@ export function useSyntheticAccounts(enabled = true): AccountUsageState<Syntheti
     // Add preference token as "Manual" if different from manual accounts
     if (preferenceToken && !accounts.some((a) => a.token === preferenceToken)) {
       accounts.push({
-        id: `pref-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        id: "synthetic-pref",
         label: "Manual",
         token: preferenceToken,
       });
@@ -197,7 +200,7 @@ export function useSyntheticAccounts(enabled = true): AccountUsageState<Syntheti
     // Add OpenCode token as "Auto-detected" if different from existing
     if (opencodeToken && !accounts.some((a) => a.token === opencodeToken)) {
       accounts.push({
-        id: `auto-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`,
+        id: "synthetic-opencode",
         label: "Auto-detected",
         token: opencodeToken,
       });
@@ -242,6 +245,7 @@ export function useSyntheticAccounts(enabled = true): AccountUsageState<Syntheti
         isLoading: false,
         usage: result.usage,
         error: result.error,
+        isOpenCodeActive: isOpenCodeActiveToken(account.token, SYNTHETIC_OPENCODE_KEY),
         revalidate: async () => {
           await fetchAll();
         },

@@ -28,4 +28,6 @@ export interface AccountUsageState<TUsage, TError> extends UsageState<TUsage, TE
   label: string;
   /** The API token for this account */
   token: string;
+  /** True if this account's token matches the one configured in OpenCode */
+  isOpenCodeActive?: boolean;
 }

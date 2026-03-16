@@ -23,3 +23,9 @@ export interface Accessory {
   tooltip?: string;
   icon?: Image.ImageLike;
 }
+
+/** Extended accessory with OpenCode active indicator */
+export interface AccountAccessory extends Accessory {
+  /** True if this account's token matches the one configured in OpenCode */
+  isOpenCodeActive?: boolean;
+}
