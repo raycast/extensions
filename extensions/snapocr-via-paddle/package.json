@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "snapocr-via-paddle",
   "title": "SnapOCR Via Paddle",
-  "description": "Layout-aware screenshot OCR to structured Markdown with PaddleOCR, built for Chinese handwriting, vertical text, and tables",
+  "description": "Layout-aware OCR for complex Chinese documents, tables, and formulas with structured Markdown export via Baidu PaddleOCR",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -24,6 +24,12 @@
       "title": "Preview OCR",
       "description": "Capture a screenshot and review structured OCR output",
       "mode": "view"
+    },
+    {
+      "name": "export-ocr",
+      "title": "Export OCR Markdown",
+      "description": "Choose a PDF or image and export Markdown with extracted images",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -41,6 +47,15 @@
       "type": "textfield",
       "required": true,
       "placeholder": "https://xxx.aistudio-app.com"
+    },
+    {
+      "name": "fastMode",
+      "title": "Fast Mode",
+      "label": "Prefer faster OCR for screenshots and images",
+      "description": "Resize large images before upload and skip slower enhancement passes. This is enabled by default for quicker results.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
     },
     {
       "name": "useDocOrientationClassify",

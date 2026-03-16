@@ -2,89 +2,106 @@
 
 英文版说明见：[README.md](README.md)
 
-把任意截图快速变成干净、可复制的结构化 Markdown。SnapOCR 是一个基于 Paddle `layout-parsing` 接口的 Raycast OCR 工作流，不是那种“先 OCR 出一坨文字，再自己想办法分块”的方案。它会先理解页面结构，再按标题、正文、表格、公式等版面区域逐块识别，这正是通用 OCR 经常识别不准或直接丢失结构的地方。
+SnapOCR 可以把截图、PDF 和图片直接变成结构化 Markdown，并且底层用的不是普通 OCR，而是[百度 PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR) 的 `layout-parsing` 接口。也就是说，它会先理解页面结构，再识别标题、正文、表格、公式和图片区域，最终输出更接近原文逻辑的 Markdown。
 
-文字识别由 PaddleOCR-VL 模型提供支持，通过[百度 AIStudio](https://aistudio.baidu.com/paddleocr) 云端 API 调用。无需本地模型、无需原生依赖，也不用折腾命令行环境；只要准备一个免费的百度 AIStudio 账号，截一张图，几秒内就能拿到真正可用的结果。
+这让它特别适合处理通用 OCR 经常做坏的内容：复杂中文文本、中文手写体、竖排文字、学术论文页面、密集表格、公式较多的文档，以及各种混合版式材料。你拿到的不再是一团扁平纯文本，而是更接近原始排版层次的结果。
 
-## 为什么更值得用
+## 为什么它值得强调
 
-- **不只是 OCR，更是版面理解** - SnapOCR 依赖 Paddle 的版面分析能力，先判断每个区域是什么，再去识别内容；这比“先整体 OCR，再回头猜结构”的传统流程聪明得多。
-- **中文场景优先** - 针对中文手写体、竖排文字和混合版面优化，而不是只擅长干净的拉丁文字。
-- **输出保留结构** - 标题、列表、表格、公式都会尽量保留结构，不再只是杂乱文本堆叠。
-- **两种截图流程** - 既可以一键识别后直接复制，也可以先在 Raycast 里预览再决定复制内容。
-- **无需本地 OCR 环境** - 不用下载本地模型，也不用安装本地 OCR 依赖，复杂识别交给云端处理。
+- **不是简单 OCR，而是复杂中文文档识别** - SnapOCR 面向的不是干净英文段落，而是中文优先的真实文档场景，包括手写体、竖排文本、混合中英页面和复杂排版。
+- **表格和公式是核心亮点，不是附带能力** - 借助 Paddle 的版面解析，SnapOCR 可以更好地处理表格、公式和密集页面区域，而不是把它们压扁成一行行乱码。
+- **API 驱动，能力上限更高** - 这不是一个只会“截图转纯文本”的本地小工具。因为底层走的是百度 PaddleOCR API，所以它可以继续扩展到 PDF、Markdown bundle 导出以及更复杂的文档解析流程。
+- **结构化 Markdown 输出** - 标题、列表、段落、表格和图片资源都可以以更易复用的形式保留下来。
+- **个人用户成本可接受** - 百度 AIStudio 提供 PaddleOCR 免费额度，通常足够个人日常使用。
 
-## 为什么 Layout Analysis 很关键
+## 为什么选百度 PaddleOCR
 
-传统 OCR 往往是更简单的流程：先把文字识别出来，再把“哪里是标题、哪里是表格、哪里是正文”这个问题丢回给用户自己处理。
+PaddleOCR 本身就是很强的中文 OCR 与文档理解方案，而 SnapOCR 恰好把这些优势带进了 Raycast：
 
-SnapOCR 走的是 Paddle 的版面解析接口。也就是说，它先分析整页结构，识别语义区域，再输出带结构的 Markdown。
+- **中文识别能力强**，更适合中文手写体、竖排文字和混合语言页面
+- **版面解析能力强**，能区分标题、正文、表格、公式等语义区域
+- **文档增强能力完整**，支持方向校正、畸变矫正等恢复手段
+- **API 形态易集成**，让复杂 OCR 能以很轻量的方式进入 Raycast 工作流
 
-- 标题仍然是标题
-- 正文仍然是正文
-- 表格能回到 Markdown 表格
-- 公式更不容易被压扁成乱码
+换句话说，SnapOCR 的价值不只是“接了个 OCR”，而是把百度 PaddleOCR 真正擅长的那部分文档理解能力带到了 Raycast。
+
+## 它在 Raycast 里的不同之处
+
+Raycast 里很多 OCR 相关工作流更偏向“截图后提取纯文本”。SnapOCR 的定位不同，它从一开始就面向复杂文档和结构化输出。
+
+这意味着：
+
+- 复杂中文页面不是边缘场景，而是主要场景
+- 表格和公式不是可有可无，而是核心能力
+- 由于底层直接接了 API，后续还能继续扩展更复杂的解析能力
 
 ## 命令
 
-| Command | Description |
-|---------|-------------|
-| **Quick OCR** | 截图识别后立即复制结构化文字结果 |
-| **Preview OCR** | 截图识别后先在 Raycast 中预览，再决定复制内容 |
+| Command                 | Description                                           |
+| ----------------------- | ----------------------------------------------------- |
+| **Quick OCR**           | 截图识别后立即复制结构化文字结果                      |
+| **Preview OCR**         | 截图识别后先在 Raycast 中预览结构化 OCR 结果          |
+| **Export OCR Markdown** | 选择 PDF 或图片文件，导出带图片资源的 Markdown bundle |
 
-## 功能特性
+## 你可以怎么用
 
-### 复杂文档 OCR 能力
+### 1. 快速处理截图中的复杂文本
 
-PaddleOCR-VL 不只是把图片里的字抠出来。在扩展偏好设置中启用这些可选能力后，可以更稳地处理真实世界里的复杂文档：
+用 **Quick OCR**，适合最快把截图里的内容变成可复用文字。
 
-- **Document Orientation Classify** - 自动检测并矫正 0°/90°/180°/270° 旋转的文档，适合拍摄角度不正的文档照片。
-- **Document Unwarping** - 矫正弯曲或倾斜文档的透视畸变，适用于书页、收据和白板照片。
-- **Chart Recognition** - 从图表、表格和图示中提取结构化数据，转换为可读文本和 Markdown 表格。
+### 2. 先看结果，再复制
 
-### Markdown 格式化输出
+用 **Preview OCR**，适合论文页、公式页、复杂排版页这类你想先确认识别效果的场景。
 
-SnapOCR 的目标不是给你一段难以复用的纯文本，而是尽可能输出可以直接粘贴进笔记、文档、提示词或知识库的内容。由于它先做版面分析，再组织结果，最终得到的 Markdown 通常比纯 OCR 输出更接近原始页面结构：
+### 3. 导出真正可落地的 Markdown 包
 
-- 标题、列表和段落保持层级关系
-- 表格转换为 Markdown 表格格式
-- 数学公式得以保留
-- 在预览视图中可复制纯文本或 Markdown
+用 **Export OCR Markdown**，你会得到：
 
-## 为什么选择 SnapOCR？
+- 一个 `document.md`
+- 一组配套导出的图片资源
+- 更适合继续进入笔记、文档、提示词或知识库的结果
 
-| 功能 | SnapOCR via Paddle | macOS Vision (ScreenOCR) |
-|---------|------------------------------|--------------------------|
-| 先做版面理解 | 是 | 否 |
-| 中文手写体 | 优秀 | 有限 |
-| 竖排中文 | 优秀 | 有限 |
-| 文档版面解析 | 表格、公式、图表 | 仅文本 |
-| 输出格式 | 结构化 Markdown | 纯文本 |
-| 方向矫正 | 内置 | 手动 |
-| 畸变矫正 | 内置 | 不支持 |
-| 隐私 | 云端 API | 本地处理 |
-| 需要联网 | 是 | 否 |
+## OCR 能力
+
+### 结构化 Markdown
+
+因为 SnapOCR 走的是 Paddle 的版面解析接口，所以输出会比普通 OCR 更接近原始结构：
+
+- 标题仍然是标题
+- 正文仍然是正文
+- 表格尽量回到结构化形式
+- 公式更不容易被压扁成噪声
+- 导出时还能保留图片资源
+
+### 可选增强能力
+
+在偏好设置中开启这些选项后，可以更稳地处理真实世界文档：
+
+- **Document Orientation Classify** - 自动识别并纠正文档旋转方向
+- **Document Unwarping** - 修正弯曲或倾斜页面的透视畸变
+- **Chart Recognition** - 从图表、表格和图示中提取结构化内容
+- **Fast Mode** - 对大图先压缩并跳过较慢增强流程，换取更快响应
 
 ## 配置
 
-你需要一个免费的[百度 AIStudio](https://aistudio.baidu.com) 账号来获取 API 凭据。API 由百度 AIStudio 平台提供。
+你需要一个免费的[百度 AIStudio](https://aistudio.baidu.com) 账号来获取 API 凭据。OCR 服务由百度 AIStudio 上的 PaddleOCR 平台提供。
 
-百度 AIStudio 也提供 PaddleOCR 的免费额度，通常足够覆盖个人日常截图 OCR 使用。具体额度和计费细则请以官方 PaddleOCR 页面当时显示的信息为准。
+百度 AIStudio 也提供 PaddleOCR 免费额度，通常足够个人使用。具体额度可能会调整，请以官方页面当时显示的信息为准。
 
 ### 1. 获取 API URL 和 Access Token
 
 1. 访问 [https://aistudio.baidu.com/paddleocr](https://aistudio.baidu.com/paddleocr)
 2. 登录百度账号
 3. 点击页面上的 **"API"** 按钮
-4. 在示例代码中找到：
-   - `API_URL` - 复制基础 URL 部分，例如 `https://xxx.aistudio-app.com`，不含 `/layout-parsing`
-   - `TOKEN` - 复制 token 字符串
+4. 复制：
+   - `API_URL` - 基础 URL，例如 `https://xxx.aistudio-app.com`，不含 `/layout-parsing`
+   - `TOKEN` - access token 字符串
 
 ### 2. 配置扩展
 
-打开 Raycast，搜索 "Quick OCR" 或 "Preview OCR"，系统会提示你输入：
+打开 Raycast，搜索任一命令，然后填写：
 
-| 设置 | 值 |
-|---------|-------|
-| **Access Token** | 第 1 步中的 `TOKEN` 值 |
-| **API URL** | `API_URL` 中的基础 URL，例如 `https://xxx.aistudio-app.com` |
+| 设置             | 值                                                          |
+| ---------------- | ----------------------------------------------------------- |
+| **Access Token** | 第 1 步中的 `TOKEN` 值                                      |
+| **API URL**      | `API_URL` 中的基础 URL，例如 `https://xxx.aistudio-app.com` |

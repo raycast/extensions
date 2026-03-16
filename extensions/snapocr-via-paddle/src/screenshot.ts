@@ -14,9 +14,13 @@ export async function takeScreenshot(): Promise<string> {
   const filePath = join(environment.supportPath, `ocr-${Date.now()}.png`);
 
   return new Promise((resolve, reject) => {
-    execFile("/usr/sbin/screencapture", ["-i", filePath], async (error) => {
+    execFile("/usr/sbin/screencapture", ["-i", filePath], async (error, _stdout, stderr) => {
       if (error) {
-        reject(new ScreenshotCancelledError());
+        if (error.code === 1) {
+          reject(new ScreenshotCancelledError());
+          return;
+        }
+        reject(new Error(stderr.trim() || error.message || "Screenshot capture failed"));
         return;
       }
       try {
