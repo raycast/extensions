@@ -87,7 +87,9 @@ export function LogEntryDetail({ entry }: { entry: LogEntry }) {
             title="Copy Content"
             content={
               entry.type === "tool_call"
-                ? (typeof entry.result === "string" ? entry.result : JSON.stringify(entry.result ?? entry.arguments, null, 2))
+                ? typeof entry.result === "string"
+                  ? entry.result
+                  : JSON.stringify(entry.result ?? entry.arguments, null, 2)
                 : (entry.content ?? "")
             }
             icon={Icon.Clipboard}

@@ -286,9 +286,7 @@ function mergeChunks(existing: CompletionChunk, incoming: CompletionChunk): void
       }
     } else if (incomingContent) {
       // Content-only choice (assistant narration) — store in first content-only choice
-      const contentChoice = existing.choices.find(
-        (c) => !c.delta.tool_calls || c.delta.tool_calls.length === 0,
-      );
+      const contentChoice = existing.choices.find((c) => !c.delta.tool_calls || c.delta.tool_calls.length === 0);
       if (contentChoice) {
         contentChoice.delta.content = incomingContent;
       }

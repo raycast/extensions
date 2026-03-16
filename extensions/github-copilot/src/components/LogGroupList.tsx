@@ -71,11 +71,7 @@ function GroupedEntryInGroup({ entry }: { entry: GroupedLogEntry }) {
         icon={{ source: Icon.Layers, tintColor: Color.Blue }}
         actions={
           <ActionPanel>
-            <Action
-              title="View Details"
-              icon={Icon.Eye}
-              onAction={() => push(<LogGroupList group={entry} />)}
-            />
+            <Action title="View Details" icon={Icon.Eye} onAction={() => push(<LogGroupList group={entry} />)} />
           </ActionPanel>
         }
       />
@@ -90,11 +86,7 @@ function GroupedEntryInGroup({ entry }: { entry: GroupedLogEntry }) {
         icon={{ source: Icon.TwoPeople, tintColor: Color.Orange }}
         actions={
           <ActionPanel>
-            <Action
-              title="View Details"
-              icon={Icon.Eye}
-              onAction={() => push(<LogGroupList group={entry} />)}
-            />
+            <Action title="View Details" icon={Icon.Eye} onAction={() => push(<LogGroupList group={entry} />)} />
           </ActionPanel>
         }
       />

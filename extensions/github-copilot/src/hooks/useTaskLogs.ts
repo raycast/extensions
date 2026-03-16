@@ -39,9 +39,7 @@ export function useTaskLogs(taskId: string) {
   const sessionLogs = data ?? [];
 
   // Check if any session is still active (non-terminal state)
-  const hasActiveSession = sessionLogs.some(
-    (se) => !TERMINAL_SESSION_STATES.has(se.session.state),
-  );
+  const hasActiveSession = sessionLogs.some((se) => !TERMINAL_SESSION_STATES.has(se.session.state));
 
   // Poll while any session is still running
   const timerRef = useRef<ReturnType<typeof setInterval>>(null);

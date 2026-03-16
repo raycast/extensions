@@ -47,13 +47,7 @@ export function TaskItem(
               icon={Icon.List}
               onAction={() => push(<TaskLogsList taskWithPullRequest={props.taskWithPullRequest} />)}
             />
-            {taskUrl && (
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                icon={Icon.Globe}
-                url={taskUrl}
-              />
-            )}
+            {taskUrl && <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={taskUrl} />}
             {pullRequest && (
               <Action.OpenInBrowser
                 title="Open Pull Request"
