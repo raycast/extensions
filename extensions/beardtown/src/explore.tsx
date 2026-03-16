@@ -343,21 +343,19 @@ export default function Command() {
             <Grid.Item
               key={entry.id}
               id={entry.id}
-              title={isTShirtsView ? "" : entry.title}
+              title=""
               keywords={entry.keywords}
-              subtitle={isTShirtsView ? undefined : entry.subtitle || undefined}
+              subtitle={undefined}
               content={
                 entry.thumbnailUrl
                   ? {
                       source: entry.thumbnailUrl,
-                      ...(isTShirtsView
-                        ? { tooltip: `${entry.title} Challenge${entry.subtitle ? ` at ${entry.subtitle}` : ""}` }
-                        : {}),
+                      tooltip: `${entry.title} Challenge${entry.subtitle ? ` at ${entry.subtitle}` : ""}`,
                     }
                   : Icon.Image
               }
-              accessory={isTShirtsView ? undefined : getChallengeAccessory(entry.record)}
-              actions={isTShirtsView ? tShirtEntryActions(entry) : entryActions(entry, "challenges", entries)}
+              accessory={undefined}
+              actions={tShirtEntryActions(entry)}
             />
           ))}
     </Grid>
