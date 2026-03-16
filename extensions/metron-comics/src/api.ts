@@ -111,7 +111,7 @@ export async function fetchWeeklyIssues(storeDate: string, publisherName?: strin
   const all: MetronIssue[] = [];
   let path: string | null = `/issue/?${params.toString()}`;
   while (path) {
-    const data = await metronFetch<MetronListResponse<MetronIssue>>(path);
+    const data: MetronListResponse<MetronIssue> = await metronFetch<MetronListResponse<MetronIssue>>(path);
     all.push(...data.results);
     path = data.next ? data.next.replace(BASE, "") : null;
   }
@@ -162,7 +162,7 @@ export async function fetchSeriesIssues(seriesId: number): Promise<MetronIssue[]
   let all: MetronIssue[] = [];
   let url: string | null = `/issue/?${params.toString()}`;
   while (url) {
-    const data = await metronFetch<MetronListResponse<MetronIssue>>(url);
+    const data: MetronListResponse<MetronIssue> = await metronFetch<MetronListResponse<MetronIssue>>(url);
     all = all.concat(data.results);
     url = data.next ? data.next.replace("https://metron.cloud/api", "") : null;
   }
