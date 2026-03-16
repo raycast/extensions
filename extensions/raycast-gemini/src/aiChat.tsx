@@ -6,18 +6,50 @@ import {
   getPreferenceValues,
   getSelectedText,
   Icon,
+  LaunchProps,
   List,
   LocalStorage,
   showToast,
   Toast,
   useNavigation,
+  Alert,
 } from "@raycast/api";
 import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
 import { getSafetySettings } from "./api/safetySettings";
 
-export default function Chat({ launchContext }) {
-  let toast = async (style, title, message) => {
+interface ChatMessage {
+  prompt: string;
+  answer: string;
+  creationDate: string;
+  finished: boolean;
+}
+
+interface ChatEntry {
+  name: string;
+  creationDate: Date | string;
+  messages: ChatMessage[];
+  model?: string;
+}
+
+interface ChatData {
+  currentChat: string;
+  chats: ChatEntry[];
+}
+
+interface ChatLaunchContext {
+  query?: string;
+  response?: string;
+  creationName?: string;
+}
+
+interface ChatPreferences {
+  apiKey: string;
+  defaultModel: string;
+}
+
+export default function Chat({ launchContext }: LaunchProps<{ launchContext: ChatLaunchContext }>) {
+  const toast = async (style: Toast.Style, title: string, message?: string) => {
     await showToast({
       style,
       title,
@@ -25,7 +57,7 @@ export default function Chat({ launchContext }) {
     });
   };
 
-  function showFailureToast(error, options = {}) {
+  function showFailureToast(error: unknown, options: { title?: string; primaryAction?: Toast.ActionOptions } = {}) {
     return showToast({
       style: Toast.Style.Failure,
       title: options.title || "Error",
@@ -34,10 +66,10 @@ export default function Chat({ launchContext }) {
     });
   }
 
-  const { apiKey, defaultModel } = getPreferenceValues();
+  const { apiKey, defaultModel } = getPreferenceValues<ChatPreferences>();
   const genAI = new GoogleGenAI({ apiKey });
-  let createNewChatName = (prefix = "New Chat ") => {
-    const existingChatNames = chatData.chats.map((x) => x.name);
+  const createNewChatName = (prefix = "New Chat ") => {
+    const existingChatNames = chatData!.chats.map((x) => x.name);
     const newChatNumbers = existingChatNames
       .filter((x) => x.match(/^New Chat \d+$/))
       .map((x) => parseInt(x.replace(prefix, "")));
@@ -48,7 +80,7 @@ export default function Chat({ launchContext }) {
     return prefix + lowestAvailableNumber;
   };
 
-  let CreateChat = () => {
+  const CreateChat = () => {
     const { pop } = useNavigation();
 
     return (
@@ -57,14 +89,14 @@ export default function Chat({ launchContext }) {
           <ActionPanel>
             <Action.SubmitForm
               title="Create Chat"
-              onSubmit={(values) => {
-                let newName = values.chatName.trim() || createNewChatName();
-                if (chatData.chats.map((x) => x.name).includes(newName)) {
+              onSubmit={(values: { chatName: string; model: string }) => {
+                const newName = values.chatName.trim() || createNewChatName();
+                if (chatData!.chats.map((x) => x.name).includes(newName)) {
                   showFailureToast("Chat with that name already exists.");
                 } else {
                   pop();
                   setChatData((oldData) => {
-                    let newChatData = structuredClone(oldData);
+                    const newChatData = structuredClone(oldData!);
                     newChatData.chats.push({
                       name: newName,
                       creationDate: new Date(),
@@ -92,32 +124,27 @@ export default function Chat({ launchContext }) {
         />
         <Form.Dropdown id="model" defaultValue="default">
           <Form.Dropdown.Item title="Default" value="default" />
-          <Form.Dropdown.Item title="Gemini 2.0 Flash Experimental" value="gemini-2.0-flash-exp" />
-          <Form.Dropdown.Item title="Gemini Experimental 1206" value="gemini-exp-1206" />
-          <Form.Dropdown.Item
-            title="Gemini 2.0 Flash Thinking Experimental"
-            value="gemini-2.0-flash-thinking-exp-1219"
-          />
+          <Form.Dropdown.Item title="Gemini 2.5 Flash-Lite" value="gemini-2.5-flash-lite" />
+          <Form.Dropdown.Item title="Gemini 2.5 Flash" value="gemini-2.5-flash" />
+          <Form.Dropdown.Item title="Gemini 2.5 Pro" value="gemini-2.5-pro" />
           <Form.Dropdown.Item title="Gemini 3.0 Flash" value="gemini-3-flash-preview" />
-          <Form.Dropdown.Item title="Gemini 3.0 Pro" value="gemini-3-pro-preview" />
+          <Form.Dropdown.Item title="Gemini 3.1 Pro" value="gemini-3.1-pro-preview" />
         </Form.Dropdown>
       </Form>
     );
   };
 
-  // Accept idx so the ActionPanel can target the selected message.
-  let GeminiActionPanel = ({ idx } = {}) => {
+  const GeminiActionPanel = ({ idx }: { idx?: number } = {}) => {
     const currentChatObj = chatData ? getChat(chatData.currentChat) : null;
     const message =
       currentChatObj && typeof idx === "number" && currentChatObj.messages && currentChatObj.messages[idx]
         ? currentChatObj.messages[idx]
         : null;
 
-    // Optional: build a "copy entire chat" payload
     const fullChatText =
       currentChatObj && currentChatObj.messages?.length
         ? currentChatObj.messages
-            .slice() // keep original order shown in UI
+            .slice()
             .map((m) => {
               const p = (m?.prompt ?? "").trim();
               const a = (m?.answer ?? "").trim();
@@ -129,7 +156,6 @@ export default function Chat({ launchContext }) {
 
     return (
       <ActionPanel>
-        {/* NEW: Copy actions for the currently selected message */}
         {message && (
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Answer" content={message.answer ?? ""} />
@@ -141,7 +167,6 @@ export default function Chat({ launchContext }) {
           </ActionPanel.Section>
         )}
 
-        {/* Optional: copy the entire chat transcript */}
         {fullChatText && (
           <ActionPanel.Section title="Export">
             <Action.CopyToClipboard
@@ -162,12 +187,12 @@ export default function Chat({ launchContext }) {
 
             const query = searchText;
             setSearchText("");
-            const currentChatObj = getChat(chatData.currentChat);
+            const currentChatObj = getChat(chatData!.currentChat)!;
             if (currentChatObj.messages.length == 0 || currentChatObj.messages[0].finished) {
               toast(Toast.Style.Animated, "Response Loading", "Please Wait");
               setChatData((x) => {
-                let newChatData = structuredClone(x);
-                let currentChat = getChat(chatData.currentChat, newChatData.chats);
+                const newChatData = structuredClone(x!);
+                const currentChat = getChat(chatData!.currentChat, newChatData.chats)!;
 
                 currentChat.messages.unshift({
                   prompt: query,
@@ -185,8 +210,8 @@ export default function Chat({ launchContext }) {
                     .reverse()
                     .filter((msg) => msg.prompt && msg.prompt.trim() && msg.answer && msg.answer.trim())
                     .map((msg) => [
-                      { role: "user", parts: [{ text: msg.prompt }] },
-                      { role: "model", parts: [{ text: msg.answer }] },
+                      { role: "user" as const, parts: [{ text: msg.prompt }] },
+                      { role: "model" as const, parts: [{ text: msg.answer }] },
                     ])
                     .flat();
 
@@ -207,8 +232,8 @@ export default function Chat({ launchContext }) {
                     const chunkText = chunk.text;
                     if (chunkText) {
                       setChatData((oldData) => {
-                        let newChatData = structuredClone(oldData);
-                        const chatToUpdate = getChat(chatData.currentChat, newChatData.chats);
+                        const newChatData = structuredClone(oldData!);
+                        const chatToUpdate = getChat(chatData!.currentChat, newChatData.chats);
                         if (chatToUpdate && chatToUpdate.messages[0]) {
                           chatToUpdate.messages[0].answer += chunkText;
                         }
@@ -218,23 +243,24 @@ export default function Chat({ launchContext }) {
                   }
 
                   setChatData((oldData) => {
-                    let newChatData = structuredClone(oldData);
-                    getChat(chatData.currentChat, newChatData.chats).messages[0].finished = true;
+                    const newChatData = structuredClone(oldData!);
+                    getChat(chatData!.currentChat, newChatData.chats)!.messages[0].finished = true;
                     return newChatData;
                   });
 
                   toast(Toast.Style.Success, "Response Loaded");
-                } catch (e) {
+                } catch (e: unknown) {
                   setChatData((oldData) => {
-                    let newChatData = structuredClone(oldData);
-                    getChat(chatData.currentChat, newChatData.chats).messages.shift();
+                    const newChatData = structuredClone(oldData!);
+                    getChat(chatData!.currentChat, newChatData.chats)!.messages.shift();
                     return newChatData;
                   });
                   console.error(e);
-                  if (e.message && e.message.includes("429")) {
+                  const message = e instanceof Error ? e.message : String(e);
+                  if (message.includes("429")) {
                     toast(Toast.Style.Failure, "You have been rate-limited.", "Please slow down.");
                   } else {
-                    toast(Toast.Style.Failure, "Gemini cannot process this message.", e.message);
+                    toast(Toast.Style.Failure, "Gemini cannot process this message.", message);
                   }
                 }
               })();
@@ -255,17 +281,17 @@ export default function Chat({ launchContext }) {
             title="Next Chat"
             onAction={() => {
               let chatIdx = 0;
-              for (let i = 0; i < chatData.chats.length; i++) {
-                if (chatData.chats[i].name === chatData.currentChat) {
+              for (let i = 0; i < chatData!.chats.length; i++) {
+                if (chatData!.chats[i].name === chatData!.currentChat) {
                   chatIdx = i;
                   break;
                 }
               }
-              if (chatIdx === chatData.chats.length - 1) toast(Toast.Style.Failure, "No Chats After Current");
+              if (chatIdx === chatData!.chats.length - 1) toast(Toast.Style.Failure, "No Chats After Current");
               else {
                 setChatData((oldData) => ({
-                  ...oldData,
-                  currentChat: chatData.chats[chatIdx + 1].name,
+                  ...oldData!,
+                  currentChat: chatData!.chats[chatIdx + 1].name,
                 }));
               }
             }}
@@ -276,8 +302,8 @@ export default function Chat({ launchContext }) {
             title="Previous Chat"
             onAction={() => {
               let chatIdx = 0;
-              for (let i = 0; i < chatData.chats.length; i++) {
-                if (chatData.chats[i].name === chatData.currentChat) {
+              for (let i = 0; i < chatData!.chats.length; i++) {
+                if (chatData!.chats[i].name === chatData!.currentChat) {
                   chatIdx = i;
                   break;
                 }
@@ -285,8 +311,8 @@ export default function Chat({ launchContext }) {
               if (chatIdx === 0) toast(Toast.Style.Failure, "No Chats Before Current");
               else {
                 setChatData((oldData) => ({
-                  ...oldData,
-                  currentChat: chatData.chats[chatIdx - 1].name,
+                  ...oldData!,
+                  currentChat: chatData!.chats[chatIdx - 1].name,
                 }));
               }
             }}
@@ -317,29 +343,29 @@ export default function Chat({ launchContext }) {
                 icon: Icon.Trash,
                 primaryAction: {
                   title: "Delete Chat Forever",
-                  style: Action.Style.Destructive,
+                  style: Alert.ActionStyle.Destructive,
                   onAction: () => {
                     let chatIdx = 0;
-                    for (let i = 0; i < chatData.chats.length; i++) {
-                      if (chatData.chats[i].name === chatData.currentChat) {
+                    for (let i = 0; i < chatData!.chats.length; i++) {
+                      if (chatData!.chats[i].name === chatData!.currentChat) {
                         chatIdx = i;
                         break;
                       }
                     }
-                    if (chatData.chats.length === 1) {
+                    if (chatData!.chats.length === 1) {
                       toast(Toast.Style.Failure, "Cannot delete only chat");
                       return;
                     }
-                    if (chatIdx === chatData.chats.length - 1) {
+                    if (chatIdx === chatData!.chats.length - 1) {
                       setChatData((oldData) => {
-                        let newChatData = structuredClone(oldData);
+                        const newChatData = structuredClone(oldData!);
                         newChatData.chats.splice(chatIdx);
                         newChatData.currentChat = newChatData.chats[chatIdx - 1].name;
                         return newChatData;
                       });
                     } else {
                       setChatData((oldData) => {
-                        let newChatData = structuredClone(oldData);
+                        const newChatData = structuredClone(oldData!);
                         newChatData.chats.splice(chatIdx, 1);
                         newChatData.currentChat = newChatData.chats[chatIdx].name;
                         return newChatData;
@@ -357,7 +383,7 @@ export default function Chat({ launchContext }) {
     );
   };
 
-  let formatDate = (dateToCheckISO) => {
+  const formatDate = (dateToCheckISO: string) => {
     const dateToCheck = new Date(dateToCheckISO);
     if (dateToCheck.toDateString() === new Date().toDateString()) {
       return `${new Date().getHours()}:${String(new Date().getMinutes()).padStart(2, "0")}`;
@@ -366,23 +392,23 @@ export default function Chat({ launchContext }) {
     }
   };
 
-  let [chatData, setChatData] = useState(null);
+  const [chatData, setChatData] = useState<ChatData | null>(null);
 
   useEffect(() => {
     (async () => {
-      const storedChatData = await LocalStorage.getItem("chatData");
+      const storedChatData = await LocalStorage.getItem<string>("chatData");
       if (storedChatData) {
-        let newData = JSON.parse(storedChatData);
+        const newData: ChatData = JSON.parse(storedChatData);
 
-        if (getChat(newData.currentChat, newData.chats).messages[0]?.finished === false) {
-          let currentChat = getChat(newData.currentChat, newData.chats);
+        if (getChat(newData.currentChat, newData.chats)?.messages[0]?.finished === false) {
+          const currentChat = getChat(newData.currentChat, newData.chats)!;
           const historyMessages = currentChat.messages
             .slice(1)
             .reverse()
             .filter((msg) => msg.prompt && msg.prompt.trim() && msg.answer && msg.answer.trim())
             .map((msg) => [
-              { role: "user", parts: [{ text: msg.prompt }] },
-              { role: "model", parts: [{ text: msg.answer }] },
+              { role: "user" as const, parts: [{ text: msg.prompt }] },
+              { role: "model" as const, parts: [{ text: msg.answer }] },
             ])
             .flat();
 
@@ -402,11 +428,11 @@ export default function Chat({ launchContext }) {
                 message: promptToRegen,
               });
 
-              for await (const chunk of result.stream) {
+              for await (const chunk of result) {
                 const chunkText = chunk.text;
                 if (chunkText) {
                   setChatData((oldData) => {
-                    let newChatData = structuredClone(oldData);
+                    const newChatData = structuredClone(oldData!);
                     const chat = getChat(newData.currentChat, newChatData.chats);
                     if (chat && chat.messages[0]) {
                       chat.messages[0].answer += chunkText;
@@ -417,26 +443,27 @@ export default function Chat({ launchContext }) {
               }
 
               setChatData((oldData) => {
-                let newChatData = structuredClone(oldData);
-                getChat(newData.currentChat, newChatData.chats).messages[0].finished = true;
+                const newChatData = structuredClone(oldData!);
+                getChat(newData.currentChat, newChatData.chats)!.messages[0].finished = true;
                 return newChatData;
               });
 
               toast(Toast.Style.Success, "Response Loaded");
-            } catch (e) {
+            } catch (e: unknown) {
               setChatData((oldData) => {
-                let newChatData = structuredClone(oldData);
-                getChat(newData.currentChat, newChatData.chats).messages.shift();
+                const newChatData = structuredClone(oldData!);
+                getChat(newData.currentChat, newChatData.chats)!.messages.shift();
                 return newChatData;
               });
-              toast(Toast.Style.Failure, "Gemini cannot process this message.", e.message);
+              const message = e instanceof Error ? e.message : String(e);
+              toast(Toast.Style.Failure, "Gemini cannot process this message.", message);
             }
           })();
         }
 
         setChatData(structuredClone(newData));
       } else {
-        const newChatData = {
+        const newChatData: ChatData = {
           currentChat: "New Chat 1",
           chats: [
             {
@@ -453,7 +480,7 @@ export default function Chat({ launchContext }) {
 
       if (launchContext?.query) {
         setChatData((oldData) => {
-          let newChatData = structuredClone(oldData);
+          const newChatData = structuredClone(oldData!);
           newChatData.chats.push({
             name: `Quick AI at ${new Date().toLocaleString("en-US", {
               month: "2-digit",
@@ -465,8 +492,8 @@ export default function Chat({ launchContext }) {
             creationDate: new Date(),
             messages: [
               {
-                prompt: launchContext.query,
-                answer: launchContext.response,
+                prompt: launchContext.query!,
+                answer: launchContext.response ?? "",
                 creationDate: new Date().toISOString(),
                 finished: true,
               },
@@ -495,7 +522,7 @@ export default function Chat({ launchContext }) {
 
   const [searchText, setSearchText] = useState("");
 
-  let getChat = (target, customChat = chatData.chats) => {
+  const getChat = (target: string, customChat: ChatEntry[] = chatData?.chats ?? []): ChatEntry | null => {
     for (const chat of customChat) {
       if (chat.name === target) return chat;
     }
@@ -514,14 +541,14 @@ export default function Chat({ launchContext }) {
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      isShowingDetail={getChat(chatData.currentChat).messages.length > 0}
+      isShowingDetail={getChat(chatData.currentChat)!.messages.length > 0}
       searchBarPlaceholder="Ask Gemini..."
       searchBarAccessory={
         <List.Dropdown
           tooltip="Your Chats"
           onChange={(newValue) => {
             setChatData((oldData) => ({
-              ...oldData,
+              ...oldData!,
               currentChat: newValue,
             }));
           }}
@@ -534,7 +561,7 @@ export default function Chat({ launchContext }) {
       }
     >
       {(() => {
-        let chat = getChat(chatData.currentChat);
+        const chat = getChat(chatData.currentChat);
         if (!chat || !chat.messages.length) {
           return (
             <List.EmptyView
@@ -549,7 +576,7 @@ export default function Chat({ launchContext }) {
             <List.Item
               title={x.prompt}
               subtitle={formatDate(x.creationDate)}
-              detail={<List.Item.Detail markdown={x.answer || ""} />} // Safeguard: x.answer || ""
+              detail={<List.Item.Detail markdown={x.answer || ""} />}
               key={x.prompt + x.creationDate}
               actions={<GeminiActionPanel idx={i} />}
             />
