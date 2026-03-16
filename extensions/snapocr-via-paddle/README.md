@@ -2,40 +2,42 @@
 
 Chinese version: [README.zh.md](README.zh.md)
 
-SnapOCR brings [Baidu PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)'s document parsing capabilities into Raycast. PaddleOCR is built to turn documents and images into structured, AI-friendly data such as Markdown and JSON, and SnapOCR packages that power into a lightweight workflow for screenshots, PDFs, and images.
+SnapOCR brings [Baidu PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)'s document parsing workflow into Raycast.
 
-This is not a plain OCR wrapper. SnapOCR is built on Paddle's `layout-parsing` API, so it understands page structure before recognition and reconstructs titles, paragraphs, tables, formulas, charts, and image regions into reusable Markdown. The result is much closer to the logic of the original document than a flat text dump.
+PaddleOCR positions itself as a toolkit that turns PDF and image documents into structured, AI-friendly data such as Markdown and JSON, with multilingual support for global document workflows. SnapOCR packages that capability into a lightweight desktop workflow for screenshots, PDFs, and images.
 
-## Built for Global Document Workflows
+This is not a plain text OCR wrapper. SnapOCR uses Paddle's `layout-parsing` API to understand document structure before recognition, then reconstructs headings, paragraphs, tables, formulas, charts, and image regions into reusable Markdown. The output is much closer to the original hierarchy of the page than a flat OCR dump.
 
-PaddleOCR supports large-scale multilingual document processing, and its latest document parsing stack is designed for real-world content rather than simple clean text screenshots. That makes SnapOCR suitable for users worldwide who work with:
+## Built for Multilingual, Real-World Documents
 
-- multilingual documents and mixed-language pages
-- dense reports, academic PDFs, and long-form documents
-- tables, formulas, charts, and other complex layout elements
-- screenshots, scanned pages, exported PDFs, and document images
+SnapOCR should not be read as a tool for one language or one region. The underlying PaddleOCR stack is built for multilingual document understanding, and its document parsing pipeline is meant for complex, real-world pages rather than only clean text screenshots.
 
-In other words, SnapOCR is not positioned as a Chinese-only OCR tool. It is a multilingual, layout-aware document parser built on top of PaddleOCR's global language and document understanding capabilities.
+That makes SnapOCR suitable for users worldwide who work with:
 
-## Why PaddleOCR
+- multilingual and mixed-language documents
+- academic papers, research PDFs, reports, manuals, and forms
+- tables, formulas, charts, and dense layout-heavy pages
+- screenshots, scans, exported PDFs, and document images
 
-PaddleOCR's own positioning maps directly to what this extension needs:
+## Why PaddleOCR Fits This Extension
 
-- **Multilingual support at scale** - PaddleOCR supports 100+ languages across global document processing scenarios
-- **Complex element recognition** - the document parsing stack is built to handle text, tables, formulas, charts, and other dense elements
-- **Structured output** - PaddleOCR can restore reading order and convert complex PDFs or document images into Markdown or JSON-like structured results
-- **Deployment flexibility** - its API and service-oriented design make it practical to bring advanced document parsing into a Raycast extension
+PaddleOCR's own product direction maps directly to SnapOCR's value:
 
-SnapOCR takes those strengths and turns them into a fast desktop workflow without local models, native OCR dependencies, or command-line setup.
+- **Multilingual coverage** - PaddleOCR supports large-scale multilingual recognition, making the workflow practical for global users rather than a single-language niche
+- **Complex document parsing** - PP-StructureV3 and related parsing models are designed to improve layout detection, table recognition, formula recognition, chart understanding, and reading-order recovery
+- **Structured output** - PaddleOCR is built to convert complex PDFs and document images into structured Markdown- or JSON-style output instead of raw text only
+- **API-friendly deployment** - its service-oriented design makes advanced document parsing accessible inside Raycast without local model setup
 
-## What Makes SnapOCR Valuable
+SnapOCR turns those capabilities into a fast desktop workflow without requiring local OCR models, native dependencies, or command-line tooling.
 
-- **Layout-aware OCR instead of flat OCR** - the extension understands document structure first and only then performs recognition
-- **Complex text recognition for everyone** - users are not limited to one language or one script; the underlying PaddleOCR stack is meant for multilingual usage worldwide
-- **Better support for tables and formulas** - those are part of the core use case, not an afterthought
-- **Structured Markdown output** - more usable for notes, knowledge bases, prompts, and document workflows
-- **API-powered growth path** - because the extension talks to PaddleOCR through API, it can support richer parsing workflows than a local plain-text grabber
-- **Practical cost** - Baidu AIStudio's free PaddleOCR allowance is usually enough for individual day-to-day use
+## What Makes SnapOCR Useful
+
+- **Layout-aware OCR instead of flat OCR** - recognition follows document structure, not just text extraction
+- **Multilingual complex-text recognition** - the workflow is designed for users worldwide working across different languages and writing systems
+- **Better handling for tables and formulas** - these are first-class parts of the workflow, not side cases
+- **Structured Markdown output** - easier to reuse in notes, prompts, knowledge bases, docs, and AI pipelines
+- **API-powered headroom** - because SnapOCR is built on PaddleOCR's API, it can grow beyond a simple clipboard OCR tool
+- **Practical cost for individuals** - Baidu AIStudio's free PaddleOCR allowance is usually enough for personal day-to-day use
 
 ## Commands
 
