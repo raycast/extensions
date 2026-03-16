@@ -1,8 +1,12 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, open } from "@raycast/api";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { useEffect, useState } from "react";
 import { DAILY_SCHEDULE_LABEL, getSchedulePaths } from "./run-utils";
+
+const execFileAsync = promisify(execFile);
 
 type LastRunStatus = {
   mode?: string;
@@ -13,6 +17,16 @@ type LastRunStatus = {
   started_at?: string;
   finished_at?: string;
   log_path?: string;
+};
+
+type StatusData = {
+  schedulePaths: ReturnType<typeof getSchedulePaths>;
+  plistExists: boolean;
+  launchAgentLoaded: boolean;
+  installed: boolean;
+  lastRun: LastRunStatus | undefined;
+  lastSuccessDate: string | undefined;
+  todaySummary: string;
 };
 
 function todayDateString(): string {
@@ -42,13 +56,13 @@ function readLastSuccessDate(lastSuccessPath: string): string | undefined {
   return value || undefined;
 }
 
-function isLaunchAgentLoaded(label: string): boolean {
+async function isLaunchAgentLoaded(label: string): Promise<boolean> {
   const uid = process.getuid?.();
   if (uid === undefined) {
     return false;
   }
   try {
-    execFileSync("/bin/launchctl", ["print", `gui/${uid}/${label}`], { stdio: "ignore" });
+    await execFileAsync("/bin/launchctl", ["print", `gui/${uid}/${label}`], { stdio: "ignore" });
     return true;
   } catch {
     return false;
@@ -78,13 +92,47 @@ function computeTodaySummary(lastSuccessDate: string | undefined, lastRun: LastR
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.CheckRunStatus>();
-  const schedulePaths = getSchedulePaths();
-  const plistExists = fs.existsSync(schedulePaths.plistPath);
-  const launchAgentLoaded = isLaunchAgentLoaded(DAILY_SCHEDULE_LABEL);
-  const installed = launchAgentLoaded;
-  const lastRun = readLastRunStatus(schedulePaths.statusPath);
-  const lastSuccessDate = readLastSuccessDate(schedulePaths.lastSuccessPath);
-  const todaySummary = computeTodaySummary(lastSuccessDate, lastRun);
+  const [status, setStatus] = useState<StatusData | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadStatus = async () => {
+      const schedulePaths = getSchedulePaths();
+      const plistExists = fs.existsSync(schedulePaths.plistPath);
+      const launchAgentLoaded = await isLaunchAgentLoaded(DAILY_SCHEDULE_LABEL);
+      const installed = launchAgentLoaded;
+      const lastRun = readLastRunStatus(schedulePaths.statusPath);
+      const lastSuccessDate = readLastSuccessDate(schedulePaths.lastSuccessPath);
+      const todaySummary = computeTodaySummary(lastSuccessDate, lastRun);
+
+      if (cancelled) {
+        return;
+      }
+
+      setStatus({
+        schedulePaths,
+        plistExists,
+        launchAgentLoaded,
+        installed,
+        lastRun,
+        lastSuccessDate,
+        todaySummary,
+      });
+    };
+
+    void loadStatus();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!status) {
+    return <Detail isLoading={true} markdown="Loading run status..." navigationTitle="Run Status" />;
+  }
+
+  const { schedulePaths, plistExists, launchAgentLoaded, installed, lastRun, lastSuccessDate, todaySummary } = status;
   const configPath = prefs.configPath?.trim() ?? "";
   const configDir = configPath ? path.dirname(configPath) : "";
 

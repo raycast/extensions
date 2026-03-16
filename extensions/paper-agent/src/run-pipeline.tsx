@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, open, popToRoot, showToast, Toast } from "@raycast/api";
 import * as path from "node:path";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { checkCoreAvailable, CORE_INSTALL_URL, getBootstrapCopyText } from "./core-check";
 import {
   buildRunEnv,
@@ -32,12 +32,14 @@ Install Paper Agent core first, then set **Config File Path** and **Paper Direct
 - Or run the **bootstrap command** (use the Copy action below), then configure Preferences.
 `;
 
-function RunPipelineView({ prefs }: { prefs: Preferences.RunPipeline }) {
+function RunPipelineView() {
+  const prefs = useMemo(() => getPreferenceValues<Preferences.RunPipeline>(), []);
   const [status, setStatus] = useState<"checking" | "core-missing" | "running">("checking");
 
   useEffect(() => {
     let cancelled = false;
     let cleanup: (() => void) | null = null;
+    setStatus("checking");
 
     const run = async () => {
       const core = await checkCoreAvailable({
@@ -128,7 +130,7 @@ function RunPipelineView({ prefs }: { prefs: Preferences.RunPipeline }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [prefs]);
 
   if (status === "checking") {
     return <Detail isLoading={true} markdown="Checking Paper Agent core…" navigationTitle="Run Paper Agent" />;
@@ -166,6 +168,5 @@ Recommend **Install Daily Schedule** for automatic daily runs.`}
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences.RunPipeline>();
-  return <RunPipelineView prefs={prefs} />;
+  return <RunPipelineView />;
 }

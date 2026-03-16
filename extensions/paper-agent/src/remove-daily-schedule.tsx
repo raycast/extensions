@@ -1,4 +1,4 @@
-import { popToRoot, showToast, Toast } from "@raycast/api";
+import { popToRoot, showToast, Toast, trash } from "@raycast/api";
 import * as fs from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
@@ -39,7 +39,7 @@ export default async function Command() {
 
     for (const filePath of [schedulePaths.plistPath, schedulePaths.envFilePath, schedulePaths.mergedConfigPath]) {
       if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+        await trash(filePath);
       }
     }
 

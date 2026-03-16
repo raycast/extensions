@@ -84,11 +84,25 @@ export default function Command() {
 
   useEffect(() => {
     if (!hasConfig || !hasPaperDir) return;
-    checkCoreAvailable({
+
+    let cancelled = false;
+    void checkCoreAvailable({
       configPath: prefs.configPath,
       paperDir: prefs.paperDir,
       pythonPath: prefs.pythonPath,
-    }).then((r) => setCoreOk(r.ok));
+    })
+      .then((r) => {
+        if (cancelled) return;
+        setCoreOk(r.ok);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCoreOk(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [hasConfig, hasPaperDir, prefs.configPath, prefs.paperDir, prefs.pythonPath]);
 
   useEffect(() => {
