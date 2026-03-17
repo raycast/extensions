@@ -20,7 +20,7 @@ export async function shortenWithCuttly(
   url: string,
   apiKey: string,
 ): Promise<string> {
-  const requestUrl = `https://cutt.ly/api/api.php?key=${apiKey}&short=${encodeURIComponent(
+  const requestUrl = `https://cutt.ly/api/api.php?key=${encodeURIComponent(apiKey)}&short=${encodeURIComponent(
     url,
   )}&name=${randomName()}`;
 

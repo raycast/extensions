@@ -43,12 +43,14 @@ export default function ShortenUrl() {
   const prefs = getPreferenceValues<Preferences.ShortenUrl>();
 
   useEffect(() => {
-    Clipboard.readText().then((text) => {
-      if (text && text.trim().startsWith("http")) {
-        setClipboardUrl(text.trim());
-      }
-      setIsLoading(false);
-    });
+    Clipboard.readText()
+      .then((text) => {
+        if (text && text.trim().startsWith("http")) {
+          setClipboardUrl(text.trim());
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
   const activeUrl = url.trim() || clipboardUrl;
