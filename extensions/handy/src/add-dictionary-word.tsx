@@ -8,9 +8,14 @@ export default function AddDictionaryWord() {
       const word = values.word.trim();
       try {
         const s = readSettings();
-        if (!s.custom_words.includes(word)) {
-          writeSettings({ custom_words: [...s.custom_words, word] });
+        if (s.custom_words.includes(word)) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `'${word}' is already in dictionary`,
+          });
+          return;
         }
+        writeSettings({ custom_words: [...s.custom_words, word] });
         reset();
         await showToast({
           style: Toast.Style.Success,

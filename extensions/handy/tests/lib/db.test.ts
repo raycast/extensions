@@ -84,16 +84,16 @@ describe("toggleSaved", () => {
 });
 
 describe("deleteEntry", () => {
-  it("removes the DB row", () => {
+  it("removes the DB row", async () => {
     insert(TMP_DB, { file_name: "a.wav", timestamp: 1, title: "T", transcription_text: "t" });
     const [e] = getHistory(TMP_DB);
-    deleteEntry(e.id, TMP_DB, RECS);
+    await deleteEntry(e.id, TMP_DB, RECS);
     expect(getHistory(TMP_DB)).toHaveLength(0);
   });
-  it("does not throw if WAV is missing", () => {
+  it("does not throw if WAV is missing", async () => {
     insert(TMP_DB, { file_name: "missing.wav", timestamp: 1, title: "T", transcription_text: "t" });
     const [e] = getHistory(TMP_DB);
-    expect(() => deleteEntry(e.id, TMP_DB, RECS)).not.toThrow();
+    await expect(deleteEntry(e.id, TMP_DB, RECS)).resolves.not.toThrow();
   });
 });
 

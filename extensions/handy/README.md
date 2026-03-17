@@ -6,8 +6,7 @@ Control [Handy](https://handy.computer) — offline speech-to-text — directly 
 
 | Command | Description |
 |---|---|
-| **Start Recording** | Toggle Handy's recording on |
-| **Stop Recording** | Toggle Handy's recording off |
+| **Toggle Recording** | Toggle Handy's transcription recording on/off |
 | **Copy Last Transcript** | Copy the most recent transcription to clipboard |
 | **Search Transcripts** | Browse history, copy, save, delete, reveal in Finder |
 | **Add Dictionary Word** | Quickly add a word to Handy's custom dictionary |

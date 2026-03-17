@@ -16,7 +16,7 @@
     {
       "name": "handyBinaryPath",
       "title": "Handy Binary Path",
-      "description": "Path to the Handy binary (used for Start/Stop Recording)",
+      "description": "Path to the Handy binary (used for Toggle Recording)",
       "type": "textfield",
       "default": "/Applications/Handy.app/Contents/MacOS/Handy",
       "required": false
@@ -24,17 +24,10 @@
   ],
   "commands": [
     {
-      "name": "start-recording",
-      "title": "Start Recording",
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
       "subtitle": "Handy",
-      "description": "Start transcription recording",
-      "mode": "no-view"
-    },
-    {
-      "name": "stop-recording",
-      "title": "Stop Recording",
-      "subtitle": "Handy",
-      "description": "Stop transcription recording",
+      "description": "Toggle Handy transcription recording on/off",
       "mode": "no-view"
     },
     {
