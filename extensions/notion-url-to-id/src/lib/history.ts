@@ -9,6 +9,7 @@ export interface NotionIdHistoryEntry {
   notionId: string;
   pageName: string;
   sourceUrl?: string;
+  folder?: string;
   createdAt: string;
   lastCopiedAt: string;
   pinned: boolean;
@@ -30,10 +31,15 @@ function isHistoryEntry(value: unknown): value is NotionIdHistoryEntry {
   return (
     typeof entry.notionId === "string" &&
     typeof entry.pageName === "string" &&
+    (typeof entry.folder === "undefined" || typeof entry.folder === "string") &&
     typeof entry.createdAt === "string" &&
     typeof entry.lastCopiedAt === "string" &&
     typeof entry.pinned === "boolean"
   );
+}
+
+function getEntryActivityDate(entry: NotionIdHistoryEntry): string {
+  return entry.lastCopiedAt || entry.createdAt;
 }
 
 export function sortHistoryEntries(entries: NotionIdHistoryEntry[]): NotionIdHistoryEntry[] {
@@ -42,7 +48,7 @@ export function sortHistoryEntries(entries: NotionIdHistoryEntry[]): NotionIdHis
       return left.pinned ? -1 : 1;
     }
 
-    return right.lastCopiedAt.localeCompare(left.lastCopiedAt);
+    return getEntryActivityDate(right).localeCompare(getEntryActivityDate(left));
   });
 }
 
@@ -52,13 +58,15 @@ function normalizeHistoryEntry(entry: NotionIdHistoryEntry): NotionIdHistoryEntr
     sourceUrl: entry.sourceUrl,
     title: entry.pageName,
   });
+  const folder = entry.folder?.trim() || undefined;
 
-  if (pageName === entry.pageName) {
+  if (pageName === entry.pageName && folder === entry.folder) {
     return entry;
   }
 
   return {
     ...entry,
+    folder,
     pageName,
   };
 }
@@ -108,6 +116,7 @@ export async function recordHistoryEntry(input: RecordHistoryEntryInput): Promis
       notionId: input.notionId,
       pageName: input.pageName,
       sourceUrl: input.sourceUrl ?? undefined,
+      folder: undefined,
       createdAt: now,
       lastCopiedAt: now,
       pinned: false,
@@ -142,4 +151,49 @@ export async function markHistoryEntryCopied(notionId: string): Promise<NotionId
   entry.lastCopiedAt = new Date().toISOString();
   await saveHistoryEntries(entries);
   return sortHistoryEntries(entries);
+}
+
+export async function deleteHistoryEntry(notionId: string): Promise<NotionIdHistoryEntry[]> {
+  const entries = await getHistoryEntries();
+  const updatedEntries = entries.filter((entry) => entry.notionId !== notionId);
+
+  if (updatedEntries.length === entries.length) {
+    return entries;
+  }
+
+  await saveHistoryEntries(updatedEntries);
+  return sortHistoryEntries(updatedEntries);
+}
+
+export async function setHistoryEntryFolder(
+  notionId: string,
+  folder: string | undefined,
+): Promise<NotionIdHistoryEntry[]> {
+  const entries = await getHistoryEntries();
+  const entry = entries.find((item) => item.notionId === notionId);
+
+  if (!entry) {
+    return entries;
+  }
+
+  entry.folder = folder?.trim() || undefined;
+  await saveHistoryEntries(entries);
+  return sortHistoryEntries(entries);
+}
+
+export async function deleteHistoryFolder(folder: string): Promise<NotionIdHistoryEntry[]> {
+  const entries = await getHistoryEntries();
+  const updatedEntries = entries.map((entry) => {
+    if (entry.folder !== folder) {
+      return entry;
+    }
+
+    return {
+      ...entry,
+      folder: undefined,
+    };
+  });
+
+  await saveHistoryEntries(updatedEntries);
+  return sortHistoryEntries(updatedEntries);
 }
