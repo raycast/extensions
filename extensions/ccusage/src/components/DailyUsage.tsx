@@ -1,5 +1,12 @@
-import { List, Icon } from "@raycast/api";
-import { formatTokens, formatCost, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import { List, Icon, Color } from "@raycast/api";
+import {
+  formatTokens,
+  formatCost,
+  formatCostDelta,
+  formatTokenDelta,
+  getTokenEfficiency,
+  getCostPerMTok,
+} from "../utils/data-formatter";
 import { getCurrentLocalDate } from "../utils/date-formatter";
 import { useDailyUsage } from "../hooks/useDailyUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
@@ -13,7 +20,7 @@ const externalLinks: ExternalLink[] = [
 ];
 
 export function DailyUsage() {
-  const { data: dailyUsage, isLoading, error } = useDailyUsage();
+  const { data: dailyUsage, previousDayData, isLoading, error } = useDailyUsage();
   const currentDate = getCurrentLocalDate();
 
   const efficiency = useMemo(
@@ -62,6 +69,25 @@ export function DailyUsage() {
 
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
         <List.Item.Detail.Metadata.Label title="Output/Input Ratio" text={efficiency} />
+
+        {previousDayData && dailyUsage && (
+          <>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label title="Day-over-Day" text={previousDayData.date} />
+            <List.Item.Detail.Metadata.Label
+              title="Cost Delta"
+              text={formatCostDelta(dailyUsage.totalCost, previousDayData.totalCost)}
+              icon={{
+                source: dailyUsage.totalCost >= previousDayData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
+                tintColor: dailyUsage.totalCost >= previousDayData.totalCost ? Color.Red : Color.Green,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Token Delta"
+              text={formatTokenDelta(dailyUsage.totalTokens, previousDayData.totalTokens)}
+            />
+          </>
+        )}
       </List.Item.Detail.Metadata>
     );
   };

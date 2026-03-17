@@ -62,7 +62,7 @@ export const getUtilizationIcon = (utilization: number): string => {
 export const createProgressBar = (percentage: number, width: number = 20): string => {
   const filled = Math.round((percentage / 100) * width);
   const empty = width - filled;
-  return "█".repeat(Math.max(0, filled)) + "░".repeat(Math.max(0, empty));
+  return "▰".repeat(Math.max(0, filled)) + "▱".repeat(Math.max(0, empty));
 };
 
 export const calculateEstimatedUsage = (

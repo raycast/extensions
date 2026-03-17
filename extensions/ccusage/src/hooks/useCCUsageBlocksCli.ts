@@ -1,37 +1,37 @@
 import { useState } from "react";
 import { Cache } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { MonthlyUsageCommandResponse, MonthlyUsageCommandResponseSchema } from "../types/usage-types";
+import { BlocksCommandResponse, BlocksCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 import { preferences } from "../preferences";
 
 const cache = new Cache();
-const CACHE_KEY = "ccusage-monthly";
+const CACHE_KEY = "ccusage-blocks";
 
-export const useCCUsageMonthlyCli = () => {
+export const useCCUsageBlocksCli = () => {
   const useDirectCommand = preferences.useDirectCcusageCommand;
 
-  const [initialData] = useState<MonthlyUsageCommandResponse | undefined>(() => {
+  const [initialData] = useState<BlocksCommandResponse | undefined>(() => {
     const cached = cache.get(CACHE_KEY);
-    return cached ? (JSON.parse(cached) as MonthlyUsageCommandResponse) : undefined;
+    return cached ? (JSON.parse(cached) as BlocksCommandResponse) : undefined;
   });
 
   const command = useDirectCommand ? "ccusage" : "npx";
-  const args = useDirectCommand ? ["monthly", "--json"] : ["ccusage@latest", "monthly", "--json"];
+  const args = useDirectCommand ? ["blocks", "--json"] : ["ccusage@latest", "blocks", "--json"];
 
   const result = useExec(command, args, {
     ...getExecOptions(),
     initialData,
     parseOutput: ({ stdout }) => {
       if (!stdout) {
-        throw new Error("No output received from ccusage monthly command");
+        return { blocks: [] };
       }
 
-      const parseResult = stringToJSON.pipe(MonthlyUsageCommandResponseSchema).safeParse(stdout.toString());
+      const parseResult = stringToJSON.pipe(BlocksCommandResponseSchema).safeParse(stdout.toString());
 
       if (!parseResult.success) {
-        throw new Error(`Invalid monthly usage data: ${parseResult.error.message}`);
+        throw new Error(`Invalid blocks data: ${parseResult.error.message}`);
       }
 
       cache.set(CACHE_KEY, JSON.stringify(parseResult.data));
@@ -39,7 +39,7 @@ export const useCCUsageMonthlyCli = () => {
     },
     keepPreviousData: true,
     failureToastOptions: {
-      title: "Failed to fetch monthly usage data",
+      title: "Failed to fetch blocks data",
       primaryAction: {
         title: "Retry",
         onAction: (toast) => {
