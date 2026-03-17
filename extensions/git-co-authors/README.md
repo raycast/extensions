@@ -26,6 +26,8 @@ Co-authors are automatically deduplicated by email and sorted by frecency (frequ
 
 ## Keyboard Shortcuts
 
+### macOS
+
 | Shortcut                   | Action                          |
 | -------------------------- | ------------------------------- |
 | `Enter`                    | Toggle co-author selection      |
@@ -35,3 +37,15 @@ Co-authors are automatically deduplicated by email and sorted by frecency (frequ
 | `⌘` `E`                   | Edit author                     |
 | `⌘` `⌫`                   | Remove author                   |
 | `⌘` `⌥` `⌫`              | Clear all authors               |
+
+### Windows
+
+| Shortcut                   | Action                          |
+| -------------------------- | ------------------------------- |
+| `Enter`                    | Toggle co-author selection      |
+| `Ctrl` `Enter`             | Copy selected co-authors        |
+| `Ctrl` `Shift` `Enter`     | Paste into active window        |
+| `Ctrl` `N`                 | Add new author                  |
+| `Ctrl` `E`                 | Edit author                     |
+| `Ctrl` `Backspace`         | Remove author                   |
+| `Ctrl` `Alt` `Backspace`   | Clear all authors               |
