@@ -25,7 +25,7 @@ const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
 
 /**
  * Strip ANSI escape codes from CLI output.
- * The skills CLI forces colors with no --no-color or --json option.
+ * Used by checkForUpdates() which does not have a --json option.
  */
 function stripAnsi(str: string): string {
   return str.replace(ANSI_REGEX, "");
@@ -39,62 +39,34 @@ function shellEscape(arg: string): string {
   return `'${arg.replace(/'/g, "'\\''")}'`;
 }
 
-/**
- * Parse `npx skills list -g` output into InstalledSkill[].
- *
- * After stripping ANSI, format is:
- *   Global Skills
- 
- *   skill-name ~/.agents/skills/skill-name
- *   Agents: Claude Code, Cline, Codex, Command Code, Continue +19 more
- */
-function parseSkillsList(raw: string): InstalledSkill[] {
-  const clean = stripAnsi(raw);
-  const skills: InstalledSkill[] = [];
-  const lines = clean.split("\n");
+/** Shape of each entry from `skills list --json` */
+interface SkillsListJsonEntry {
+  name: string;
+  path: string;
+  scope: string;
+  agents: string[];
+}
 
-  for (let i = 0; i < lines.length; i++) {
-    // Matches: "skill-name ~/path" or "skill-name /path" (macOS/Linux)
-    //      or: "skill-name C:\path" (Windows)
-    const skillMatch = lines[i].match(/^(\S+)\s+(~?\/.*|[A-Z]:\\.*)$/);
-    if (!skillMatch) continue;
-
-    const name = skillMatch[1];
-    const rawPath = skillMatch[2].trim();
-    const path = rawPath.startsWith("~") ? rawPath.replace("~", home) : rawPath;
-
-    let agents: string[] = [];
-    let agentCount = 0;
-    const nextLine = lines[i + 1]?.trim();
-    if (nextLine?.startsWith("Agents:")) {
-      agents = nextLine
-        .replace("Agents:", "")
-        .split(",")
-        .map((a) => a.trim())
-        .filter(Boolean);
-
-      // Handle "+N more" truncation from CLI output
-      // e.g. ["Antigravity", "Claude Code", "Continue +16 more"]
-      let extraCount = 0;
-      const last = agents[agents.length - 1];
-      const moreMatch = last?.match(/^(.+?)\s*\+(\d+) more$/);
-      if (moreMatch) {
-        agents[agents.length - 1] = moreMatch[1].trim();
-        extraCount = parseInt(moreMatch[2], 10);
-      }
-
-      agentCount = agents.length + extraCount;
-    }
-
-    skills.push({ name, path, agents, agentCount });
+function parseSkillsListJson(stdout: string): InstalledSkill[] {
+  const entries: unknown = JSON.parse(stdout);
+  if (!Array.isArray(entries)) {
+    throw new Error("Expected JSON array");
   }
-
-  return skills;
+  return (entries as SkillsListJsonEntry[]).map((entry) => ({
+    name: entry.name,
+    path: entry.path.startsWith("~") ? entry.path.replace("~", home) : entry.path,
+    agents: entry.agents,
+    agentCount: entry.agents.length,
+  }));
 }
 
 export async function listInstalledSkills(): Promise<InstalledSkill[]> {
-  const { stdout } = await execWithPath(`${SKILLS_CLI} list -g`);
-  return parseSkillsList(stdout);
+  const { stdout } = await execWithPath(`${SKILLS_CLI} list -g --json`);
+  try {
+    return parseSkillsListJson(stdout);
+  } catch {
+    throw new Error("Failed to parse skills list: unexpected output from `skills list --json`");
+  }
 }
 
 export async function installSkill(skill: Skill): Promise<void> {

@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix Incomplete Agent List] - 2026-03-17
+
+- Use `skills list --json` for structured output instead of parsing ANSI text
+- Show all supported agents in the filter dropdown and detail panel
+
 ## [Highlight Outdated Skills] - 2026-03-16
 
 - Highlight outdated skills with an orange hammer icon in the installed skills list

@@ -32,7 +32,7 @@
   "dependencies": {
     "@raycast/api": "^1.89.0",
     "@raycast/utils": "^1.18.1",
-    "axios": "^0.21.1",
+    "axios": "^0.30.3",
     "bignumber.js": "^9.1.2",
     "cheerio": "^1.0.0-rc.10",
     "dayjs": "^1.10.7",
@@ -44,12 +44,12 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/node": "~16.10.0",
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.1.8",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

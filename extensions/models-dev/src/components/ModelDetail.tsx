@@ -1,4 +1,5 @@
 import { Detail, Icon, Color } from "@raycast/api";
+import { useMemo } from "react";
 import { Model } from "../lib/types";
 import { getCacheTimestamp } from "../lib/api";
 import {
@@ -16,18 +17,30 @@ interface ModelDetailProps {
 
 export function ModelDetail({ model }: ModelDetailProps) {
   const lastUpdated = formatUpdatedAt(getCacheTimestamp());
-  const capabilities: string[] = [];
-  if (model.reasoning) capabilities.push("Reasoning");
-  if (model.tool_call) capabilities.push("Tool Calling");
-  if (model.structured_output) capabilities.push("Structured Output");
-  if (model.attachment) capabilities.push("Attachments");
-  if (model.modalities.input.includes("image")) capabilities.push("Vision");
-  if (model.modalities.input.includes("audio")) capabilities.push("Audio Input");
-  if (model.modalities.output.includes("audio")) capabilities.push("Audio Output");
-  if (model.modalities.input.includes("video")) capabilities.push("Video");
-  if (model.modalities.input.includes("pdf")) capabilities.push("PDF");
 
-  const markdown = `
+  const capabilities = useMemo(() => {
+    const caps: string[] = [];
+    if (model.reasoning) caps.push("Reasoning");
+    if (model.tool_call) caps.push("Tool Calling");
+    if (model.structured_output) caps.push("Structured Output");
+    if (model.attachment) caps.push("Attachments");
+    if (model.modalities.input.includes("image")) caps.push("Vision");
+    if (model.modalities.input.includes("audio")) caps.push("Audio Input");
+    if (model.modalities.output.includes("audio")) caps.push("Audio Output");
+    if (model.modalities.input.includes("video")) caps.push("Video");
+    if (model.modalities.input.includes("pdf")) caps.push("PDF");
+    return caps;
+  }, [
+    model.reasoning,
+    model.tool_call,
+    model.structured_output,
+    model.attachment,
+    model.modalities.input,
+    model.modalities.output,
+  ]);
+
+  const markdown = useMemo(
+    () => `
 # ${model.name}
 
 ${model.status ? `> **Status**: ${model.status.charAt(0).toUpperCase() + model.status.slice(1)}` : ""}
@@ -70,7 +83,9 @@ ${rows.join("\n")}
 
 `;
 })()}
-`;
+`,
+    [model.name, model.status, capabilities, model.modalities, model.cost, model.limit],
+  );
 
   return (
     <Detail

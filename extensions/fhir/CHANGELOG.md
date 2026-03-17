@@ -1,5 +1,9 @@
 # FHIR Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Remove unused `fast-xml-parser` dependency (not imported anywhere; all data flows use JSON)
+
 ## [Search Packages + Pinning] - 2025-07-09
 
 - Add new "Search Packages" command to discover and browse FHIR implementation guides

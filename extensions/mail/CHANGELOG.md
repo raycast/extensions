@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Security] - {PR_MERGE_DATE}
+
+- Upgrade `mailparser` to 3.9.4 to fix DoS via uncontrolled recursion in nodemailer's addressparser (CVE-2025-14874)
+
 ## [Improvement] - 2026-01-19
 
 - Add "Refresh" action to message actions

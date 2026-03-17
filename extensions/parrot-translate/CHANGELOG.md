@@ -1,5 +1,9 @@
 # Parrot Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Adjust Translate Result UI] - 2022-05-23
 
 - Change Icon style and color

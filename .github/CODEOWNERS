@@ -803,6 +803,7 @@
 /extensions/gather                                                  @yannglt
 /extensions/gcp-ip-search                                           @880831ian
 /extensions/geist-ui-components                                     @Rahuls-Coding @xmok
+/extensions/gemini-cli                                              @SandeepBaskaran
 /extensions/genius-lyrics                                           @TKDKid1000 @johnstclair @Rayn322 @jacpd
 /extensions/geoconverter                                            @kylinwowo
 /extensions/geoguesser                                              @Boosteblume
@@ -1510,6 +1511,7 @@
 /extensions/nostr                                                   @saadel
 /extensions/not-diamond                                             @dragos199993
 /extensions/note-in-google-doc                                      @mnttnm
+/extensions/noteman                                                 @oldmarkdesigns
 /extensions/noteplan-3                                              @shakedlokits @lukerandall @pr1mal @JamesDommisse
 /extensions/notilight-controller                                    @shailantani
 /extensions/notion                                                  @HenriChabrand @mathieudutour @metakirby5 @erics118 @AlexIsMaking @Yakitrak @tleo19 @dariuszpaluch @zsidnam @edomora97 @samuelkraft @abesto @xmok @pernielsentikaer @0xdhrv
@@ -1614,6 +1616,8 @@
 /extensions/opera                                                   @crisboarna @xmok
 /extensions/opsgenie                                                @ricoberger @xmok
 /extensions/opslevel                                                @DuckyC
+/extensions/orbit                                                   @michaelheckmann
+/extensions/orbita                                                  @tcelestino
 /extensions/orbstack                                                @nicholasq
 /extensions/origami                                                 @xilopaint
 /extensions/orion                                                   @Plonq @erics118
@@ -1627,7 +1631,7 @@
 /extensions/otp-inbox                                               @chroxify
 /extensions/otter                                                   @mrmartineau
 /extensions/ottomatic                                               @eluce2
-/extensions/oura                                                    @RobErskine
+/extensions/oura                                                    @RobErskine @Menchynskyi
 /extensions/outline-document-search                                 @dnlfrst
 /extensions/outline-page                                            @praveenjuge
 /extensions/ovh                                                     @xmok
@@ -1853,6 +1857,7 @@
 /extensions/quick-toshl                                             @hoandesign
 /extensions/quick-web                                               @Victor-Cooper
 /extensions/quickfile                                               @danielroe
+/extensions/quicklinker                                             @n-winspear
 /extensions/quicksnip                                               @lille-morille
 /extensions/quicktime                                               @pradeepb28 @xmok
 /extensions/quicktype                                               @Aayush9029

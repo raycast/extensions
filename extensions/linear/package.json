@@ -119,6 +119,12 @@
       "mode": "view"
     },
     {
+      "name": "search-custom-views",
+      "title": "Search Custom Views",
+      "description": "Browse custom views and their issues.",
+      "mode": "view"
+    },
+    {
       "name": "search-documents",
       "title": "Search Documents",
       "description": "Explore documents for your Linear team.",
