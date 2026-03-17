@@ -31,7 +31,8 @@ export default function Command() {
     setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Generating key...",
+      title: values.storageMode === "hardware" ? "Waiting for security key..." : "Generating key...",
+      message: values.storageMode === "hardware" ? "Please touch your hardware key" : undefined,
     });
 
     try {

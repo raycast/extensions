@@ -46,7 +46,7 @@ export default function Command() {
     if (
       await confirmAlert({
         title: "Delete SSH Key",
-        message: `Are you sure you want to delete '${key.name}'? This will delete both the public and private files and cannot be undone.`,
+        message: `Are you sure you want to delete '${key.name}'? This will move both the public and private files to the Trash.`,
         primaryAction: {
           title: "Delete",
           style: Alert.ActionStyle.Destructive,
@@ -54,8 +54,9 @@ export default function Command() {
       })
     ) {
       try {
-        const filesToTrash = [key.publicKeyPath, key.privateKeyPath].filter((filePath): filePath is string =>
-          Boolean(filePath),
+        const fs = await import("fs");
+        const filesToTrash = [key.publicKeyPath, key.privateKeyPath].filter(
+          (filePath): filePath is string => Boolean(filePath) && fs.existsSync(filePath),
         );
         await trash(filesToTrash);
         showToast({

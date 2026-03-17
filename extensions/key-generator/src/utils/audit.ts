@@ -39,7 +39,12 @@ export async function auditSSHKeys(): Promise<AuditIssue[]> {
   }
 
   for (const key of keys) {
-    if (key.storageType === "file" && !key.hasPassphrase) {
+    if (
+      key.storageType === "file" &&
+      !key.hasPassphrase &&
+      key.privateKeyPath &&
+      files.includes(path.basename(key.privateKeyPath))
+    ) {
       issues.push({
         title: "Missing Passphrase",
         description: `Key '${key.name}' has no passphrase protecting the private file.`,

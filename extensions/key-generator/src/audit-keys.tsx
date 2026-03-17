@@ -117,7 +117,7 @@ export default function Command() {
                     onAction={async () => {
                       const shouldDelete = await confirmAlert({
                         title: "Delete Orphan File",
-                        message: `Are you sure you want to delete '${issue.filePath}'? This cannot be undone.`,
+                        message: `Are you sure you want to delete '${issue.filePath}'? This will move the file to the Trash.`,
                         primaryAction: {
                           title: "Delete",
                           style: Alert.ActionStyle.Destructive,

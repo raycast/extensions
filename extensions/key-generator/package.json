@@ -23,6 +23,16 @@
         "node": ">=18.0.0"
     },
     "license": "MIT",
+    "preferences": [
+        {
+            "name": "customSshKeygenPath",
+            "type": "textfield",
+            "required": false,
+            "title": "Custom ssh-keygen Path",
+            "description": "Optional absolute path to Homebrew's ssh-keygen. Required for FIDO hardware keys on a custom Homebrew prefix.",
+            "placeholder": "/opt/homebrew/opt/openssh/bin/ssh-keygen"
+        }
+    ],
     "commands": [
         {
             "name": "list-keys",
