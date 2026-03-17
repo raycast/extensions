@@ -13,7 +13,7 @@ const execFileAsync = promisify(execFile);
 
 function toTitleCase(name: string): string {
   return name
-    .split(/[-_\\s]+/)
+    .split(/[-_\s]+/)
     .filter(Boolean)
     .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
     .join(" ");
@@ -21,12 +21,11 @@ function toTitleCase(name: string): string {
 
 export function buildSkillTemplate(name: string, metadata?: SkillMetadata): string {
   const description = metadata?.description ?? "Describe what this skill does.";
-  const shortDescription = metadata?.description ?? description;
   const title = toTitleCase(name);
 
   const formatValue = (value: string) => (value.trim().length > 0 ? value : '""');
 
-  return `---\nname: ${name}\ndescription: ${formatValue(description)}\nmetadata:\n  short-description: ${formatValue(shortDescription)}\n---\n\n# ${title}\n\nDescribe what this skill does...\n`;
+  return `---\nname: ${name}\ndescription: ${formatValue(description)}\nmetadata:\n  short-description: ${formatValue(description)}\n---\n\n# ${title}\n\nDescribe what this skill does...\n`;
 }
 
 function extractFirstHeading(markdown: string): string | undefined {

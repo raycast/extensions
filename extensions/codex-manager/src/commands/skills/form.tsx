@@ -36,6 +36,7 @@ const SKILL_FILE = "SKILL.md";
 
 export default function SkillForm(props: SkillFormProps) {
   const { pop } = useNavigation();
+  const skillPath = props.mode === "edit" ? props.skill.path : null;
 
   const initialValues: SkillFormValues = useMemo(() => {
     if (props.mode === "edit") {
@@ -86,13 +87,13 @@ export default function SkillForm(props: SkillFormProps) {
   }, [contentTouched, contentValue, props.mode]);
 
   useEffect(() => {
-    if (props.mode !== "edit") {
+    if (!skillPath) {
       return;
     }
 
     const loadContent = async () => {
       try {
-        const content = await fs.readFile(path.join(props.skill.path, SKILL_FILE), "utf8");
+        const content = await fs.readFile(path.join(skillPath, SKILL_FILE), "utf8");
         setContentValue(content);
       } catch (error) {
         await showToast({
@@ -106,31 +107,19 @@ export default function SkillForm(props: SkillFormProps) {
     };
 
     void loadContent();
-  }, [props.mode, props.skillsDir]);
+  }, [skillPath]);
 
   async function handleSubmit(values: typeof initialValues) {
     const trimmedName = values.name.trim();
 
-    if (props.mode === "create") {
-      const nextErrors = validateSkillForm(values, {
-        checkDuplicates: true,
-        existingNames: props.existingNames,
-      });
-      setErrors(nextErrors);
-      setShowErrors(true);
-      if (hasErrors(nextErrors)) {
-        return;
-      }
-    } else {
-      const nextErrors = validateSkillForm(values, {
-        checkDuplicates: true,
-        existingNames: props.existingNames,
-      });
-      setErrors(nextErrors);
-      setShowErrors(true);
-      if (hasErrors(nextErrors)) {
-        return;
-      }
+    const nextErrors = validateSkillForm(values, {
+      checkDuplicates: true,
+      existingNames: props.existingNames,
+    });
+    setErrors(nextErrors);
+    setShowErrors(true);
+    if (hasErrors(nextErrors)) {
+      return;
     }
 
     const metadata: SkillMetadata = { name: trimmedName || undefined };
@@ -140,13 +129,13 @@ export default function SkillForm(props: SkillFormProps) {
         await createSkill(props.skillsDir, trimmedName, metadata, values.content);
         await showToast({ style: Toast.Style.Success, title: "Skill created" });
       } else {
-        let skillPath = props.skill.path;
+        let targetSkillPath = props.skill.path;
         if (trimmedName !== props.skill.name) {
           const nextPath = path.join(props.skillsDir, trimmedName);
-          await fs.rename(skillPath, nextPath);
-          skillPath = nextPath;
+          await fs.rename(targetSkillPath, nextPath);
+          targetSkillPath = nextPath;
         }
-        await updateSkillContent(skillPath, values.content ?? "");
+        await updateSkillContent(targetSkillPath, values.content ?? "");
         await showToast({ style: Toast.Style.Success, title: "Skill updated" });
       }
 

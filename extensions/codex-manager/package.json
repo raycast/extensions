@@ -60,7 +60,7 @@
       "name": "editorPreference",
       "title": "Preferred Editor",
       "description": "Open files with the system default or VS Code (code).",
-      "type": "appPicker",
+      "type": "dropdown",
       "default": "default",
       "data": [
         {
