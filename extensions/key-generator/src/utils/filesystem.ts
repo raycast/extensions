@@ -125,7 +125,7 @@ export async function scanSSHDirectory(): Promise<SSHKey[]> {
     try {
       const agentKeys = await listAgentKeys();
       for (const ak of agentKeys) {
-        if (!keys.some((k) => k.fingerprint === ak.fingerprint)) {
+        if (!ak.fingerprint || !keys.some((k) => k.fingerprint && k.fingerprint === ak.fingerprint)) {
           keys.push(ak);
         }
       }

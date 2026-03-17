@@ -58,6 +58,11 @@ export default function Command() {
         const filesToTrash = [key.publicKeyPath, key.privateKeyPath].filter(
           (filePath): filePath is string => Boolean(filePath) && fs.existsSync(filePath),
         );
+
+        if (filesToTrash.length === 0) {
+          throw new Error("No key files were found on disk for this entry.");
+        }
+
         await trash(filesToTrash);
         showToast({
           style: Toast.Style.Success,
@@ -77,9 +82,9 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail} searchBarPlaceholder="Search keys...">
-      {keys.map((key) => (
+      {keys.map((key, index) => (
         <List.Item
-          key={key.name}
+          key={`${key.name}-${key.fingerprint || "no-fingerprint"}-${index}`}
           title={key.name}
           icon={key.storageType === "hardware" ? Icon.MemoryChip : Icon.Hashtag}
           accessories={
@@ -131,33 +136,37 @@ export default function Command() {
                 }}
               />
 
-              <Action
-                title="Rename Key"
-                icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={() => push(<RenameKeyForm keyItem={key} onRename={loadKeys} />)}
-              />
-              <Action
-                title="Reveal in Finder"
-                icon={Icon.Finder}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onAction={async () => {
-                  const { execFile } = await import("child_process");
-                  execFile("open", ["-R", key.publicKeyPath]);
-                }}
-              />
-              <ActionPanel.Section title="Danger Zone">
-                <Action
-                  title="Delete Key"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={{
-                    modifiers: ["ctrl"],
-                    key: "x",
-                  }}
-                  onAction={() => handleDeleteKey(key)}
-                />
-              </ActionPanel.Section>
+              {Boolean(key.publicKeyPath || key.privateKeyPath) && (
+                <>
+                  <Action
+                    title="Rename Key"
+                    icon={Icon.Pencil}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={() => push(<RenameKeyForm keyItem={key} onRename={loadKeys} />)}
+                  />
+                  <Action
+                    title="Reveal in Finder"
+                    icon={Icon.Finder}
+                    shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    onAction={async () => {
+                      const { execFile } = await import("child_process");
+                      execFile("open", ["-R", key.publicKeyPath || key.privateKeyPath]);
+                    }}
+                  />
+                  <ActionPanel.Section title="Danger Zone">
+                    <Action
+                      title="Delete Key"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={{
+                        modifiers: ["ctrl"],
+                        key: "x",
+                      }}
+                      onAction={() => handleDeleteKey(key)}
+                    />
+                  </ActionPanel.Section>
+                </>
+              )}
             </ActionPanel>
           }
         />
@@ -186,9 +195,32 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
       const newPub = path.join(sshDir, `${newName}.pub`);
       const newPriv = path.join(sshDir, newName);
 
-      await fs.rename(props.keyItem.publicKeyPath, newPub);
-      if (props.keyItem.privateKeyPath) {
-        await fs.rename(props.keyItem.privateKeyPath, newPriv);
+      const privatePath = props.keyItem.privateKeyPath;
+      let privateExists = false;
+      if (privatePath) {
+        try {
+          await fs.access(privatePath);
+          privateExists = true;
+        } catch {
+          privateExists = false;
+        }
+      }
+
+      if (privateExists) {
+        await fs.rename(privatePath, newPriv);
+      }
+
+      try {
+        await fs.rename(props.keyItem.publicKeyPath, newPub);
+      } catch (error) {
+        if (privateExists) {
+          try {
+            await fs.rename(newPriv, privatePath);
+          } catch {
+            // Best-effort rollback; keep original error for user context.
+          }
+        }
+        throw error;
       }
       showToast({ style: Toast.Style.Success, title: "Key Renamed" });
       props.onRename();

@@ -15,7 +15,15 @@ export async function auditSSHKeys(): Promise<AuditIssue[]> {
   const issues: AuditIssue[] = [];
   const sshDir = path.join(os.homedir(), ".ssh");
   const keys = await scanSSHDirectory();
-  const files = await fs.readdir(sshDir);
+  let files: string[] = [];
+  try {
+    files = await fs.readdir(sshDir);
+  } catch (error) {
+    if ((error as Error & { code?: string }).code === "ENOENT") {
+      return issues;
+    }
+    throw error;
+  }
 
   const fingerprintCounts: { [key: string]: string[] } = {};
   for (const key of keys) {

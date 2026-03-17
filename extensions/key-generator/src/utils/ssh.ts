@@ -15,6 +15,9 @@ export async function generateSSHKey(options: {
   const sshDir = path.join(os.homedir(), ".ssh");
   const filePath = path.join(sshDir, name);
 
+  const fs = await import("fs/promises");
+  await fs.mkdir(sshDir, { recursive: true });
+
   const args = ["-t", algorithm, "-f", filePath, "-N", passphrase || ""];
 
   if (comment) {
@@ -23,7 +26,6 @@ export async function generateSSHKey(options: {
 
   let sshKeygenPath = "ssh-keygen"; // default
   if (algorithm.endsWith("-sk")) {
-    const fs = await import("fs/promises");
     const { getPreferenceValues } = await import("@raycast/api");
     const prefs = getPreferenceValues<Preferences>();
 
@@ -82,7 +84,8 @@ export async function getFingerprint(filePath: string): Promise<string> {
 export async function checkIfKeyHasPassphrase(privateKeyPath: string): Promise<boolean> {
   try {
     const fs = await import("fs/promises");
-    await fs.access(privateKeyPath);
+    const nodeFs = await import("fs");
+    await fs.access(privateKeyPath, nodeFs.constants.R_OK);
   } catch {
     return false;
   }
@@ -93,8 +96,14 @@ export async function checkIfKeyHasPassphrase(privateKeyPath: string): Promise<b
     await execFileAsync("ssh-keygen", ["-y", "-f", privateKeyPath, "-P", ""]);
     // Succeeds without error -> passphrase is empty (no passphrase)
     return false;
-  } catch {
-    // Errors out with code 1 -> passphrase required (has passphrase)
-    return true;
+  } catch (error) {
+    const errorText =
+      `${(error as Error & { stderr?: string }).message} ${(error as Error & { stderr?: string }).stderr || ""}`.toLowerCase();
+
+    if (errorText.includes("passphrase")) {
+      return true;
+    }
+
+    return false;
   }
 }

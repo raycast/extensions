@@ -11,6 +11,57 @@ export interface SSHHostConfig {
   rawBlock: string;
 }
 
+export function updateRawBlock(rawBlock: string, values: Omit<SSHHostConfig, "rawBlock">): string {
+  const lines = rawBlock.split("\n");
+  const keysToUpdate = [
+    { key: "Host", value: values.host },
+    { key: "HostName", value: values.hostName },
+    { key: "User", value: values.user },
+    { key: "IdentityFile", value: values.identityFile },
+    { key: "Port", value: values.port },
+  ];
+
+  const processedKeys = new Set<string>();
+  const newLines = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#") || trimmed === "") {
+      newLines.push(line);
+      continue;
+    }
+
+    const parts = trimmed.split(/\s+/);
+    const lineKey = parts[0].toLowerCase();
+
+    const updateItem = keysToUpdate.find((k) => k.key.toLowerCase() === lineKey);
+    if (updateItem) {
+      processedKeys.add(updateItem.key);
+      if (updateItem.value && updateItem.value.trim() !== "") {
+        const indentMatch = line.match(/\S/);
+        const indent = indentMatch ? line.substring(0, indentMatch.index) : "";
+        newLines.push(`${indent}${updateItem.key} ${updateItem.value}`);
+      }
+    } else {
+      newLines.push(line);
+    }
+  }
+
+  const hostIndex = newLines.findIndex((line) => line.trim().toLowerCase().startsWith("host "));
+  const actualInsertIndex = hostIndex >= 0 ? hostIndex + 1 : newLines.length;
+
+  const addedLines = [];
+  for (const item of keysToUpdate) {
+    if (item.key !== "Host" && !processedKeys.has(item.key) && item.value && item.value.trim() !== "") {
+      addedLines.push(`  ${item.key} ${item.value}`);
+    }
+  }
+
+  newLines.splice(actualInsertIndex, 0, ...addedLines);
+
+  return newLines.join("\n").trimEnd();
+}
+
 function buildHostBlock(config: SSHHostConfig): string {
   if (config.rawBlock && config.rawBlock.trim() !== "") {
     return config.rawBlock;
@@ -122,6 +173,7 @@ export async function parseSSHConfig(): Promise<SSHHostConfig[]> {
 
 export async function saveSSHConfig(configs: SSHHostConfig[]): Promise<void> {
   const configPath = path.join(os.homedir(), ".ssh", "config");
+  const sshDir = path.dirname(configPath);
   let originalContent = "";
 
   try {
@@ -142,5 +194,6 @@ export async function saveSSHConfig(configs: SSHHostConfig[]): Promise<void> {
   const sections = [nonHostContent, hostContent].filter((section) => section.trim() !== "");
   const nextContent = sections.length > 0 ? `${sections.join("\n\n")}\n` : "";
 
+  await fs.mkdir(sshDir, { recursive: true });
   await fs.writeFile(configPath, nextContent, "utf-8");
 }
