@@ -8,7 +8,7 @@ import { Clipboard, showToast, Toast } from "@raycast/api";
  */
 export default async function convertPath(path: string, prefix: string = "/") {
   // Condition to test if a path is a Windows type path
-  if (/^[A-Za-z]:\\/.test(path) != true) {
+  if (!/^[A-Za-z]:\\/.test(path)) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Path not valid",
@@ -16,17 +16,16 @@ export default async function convertPath(path: string, prefix: string = "/") {
     return;
   }
 
-  // Replace backslashes to slashes
-  const REGEX = /\\/gi;
-  path = path.replace(REGEX, "/");
+  // Replace backslashes with forward slashes
+  const slashed = path.replace(/\\/gi, "/");
 
-  // Add a slash at the beginning, then lower case the first character, and remove the ":"
-  path = prefix + path.substring(0, 1).toLowerCase() + path.substring(2);
+  // Add prefix, lowercase the drive letter, and remove the ":"
+  const converted = prefix + slashed.substring(0, 1).toLowerCase() + slashed.substring(2);
 
-  await Clipboard.copy(path);
+  await Clipboard.copy(converted);
   await showToast({
     style: Toast.Style.Success,
     title: "Copied to clipboard",
-    message: path,
+    message: converted,
   });
 }
