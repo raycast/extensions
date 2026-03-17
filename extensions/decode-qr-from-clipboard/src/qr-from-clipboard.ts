@@ -7,6 +7,8 @@ import { promisify } from "node:util";
 import jsQR from "jsqr";
 import { PNG } from "pngjs";
 
+import { looksLikeJson } from "./json-utils";
+
 const execFileAsync = promisify(execFile);
 
 const swiftClipboardExportScript = String.raw`
@@ -56,6 +58,11 @@ function run(argv) {
 
   const pasteboard = $.NSPasteboard.generalPasteboard;
   const image = $.NSImage.alloc.initWithPasteboard(pasteboard);
+
+  if (!image) {
+    throw new Error("NO_IMAGE");
+  }
+
   const tiffData = image.TIFFRepresentation;
 
   if (!tiffData) {
@@ -184,15 +191,6 @@ function normalizeDecodedPayload(payload: string): string {
   }
 
   return payload.replace(/[“”]/g, '"');
-}
-
-function looksLikeJson(payload: string): boolean {
-  const trimmedPayload = payload.trim();
-
-  return (
-    (trimmedPayload.startsWith("{") && trimmedPayload.endsWith("}")) ||
-    (trimmedPayload.startsWith("[") && trimmedPayload.endsWith("]"))
-  );
 }
 
 function getExecErrorOutput(error: unknown): string {

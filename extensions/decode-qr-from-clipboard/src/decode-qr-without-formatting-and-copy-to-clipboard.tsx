@@ -1,5 +1,6 @@
 import { Clipboard, Toast, closeMainWindow, showToast } from "@raycast/api";
 
+import { looksLikeJson } from "./json-utils";
 import { decodeFirstQrCodeFromClipboard } from "./qr-from-clipboard";
 
 export default async function Command() {
@@ -45,13 +46,4 @@ function getFailureMessage(message: string): string {
   }
 
   return message;
-}
-
-function looksLikeJson(value: string): boolean {
-  const trimmedValue = value.trim();
-
-  return (
-    (trimmedValue.startsWith("{") && trimmedValue.endsWith("}")) ||
-    (trimmedValue.startsWith("[") && trimmedValue.endsWith("]"))
-  );
 }
