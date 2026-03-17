@@ -249,7 +249,7 @@ async function ensureCompiledSwiftBinary(scriptPath: string): Promise<string> {
 
 async function isExecutable(filePath: string): Promise<boolean> {
   try {
-    await access(filePath);
+    await access(filePath, constants.X_OK);
     return true;
   } catch {
     return false;
