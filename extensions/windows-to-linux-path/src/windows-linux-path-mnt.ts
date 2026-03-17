@@ -6,9 +6,9 @@ interface PathArgument {
 }
 
 /**
- * Convert a Windows path into a Linux one with the prefix /
+ * Convert a Windows path into a Linux one with the prefix /mnt/
  * @param props Windows path
  */
 export default async function main(props: LaunchProps<{ arguments: PathArgument }>) {
-  await convertPath(props.arguments.path, "/");
+  await convertPath(props.arguments.path, "/mnt/");
 }
