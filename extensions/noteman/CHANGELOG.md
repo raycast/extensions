@@ -1,6 +1,6 @@
 # Noteman Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-17
 
 - Added Quick Capture, Browse Notes, New Note, and Open Today's Note commands.
 - Added local markdown storage with daily and regular note filename conventions.
