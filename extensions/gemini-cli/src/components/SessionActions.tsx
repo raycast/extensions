@@ -22,9 +22,15 @@ interface SessionActionsProps {
 export function SessionActions({ session, mutate, isDetail }: SessionActionsProps) {
   const { pop } = useNavigation();
 
-  // Escape spaces and special chars in project path
-  const escapedPath = session.projectPath.replace(/(["\s'$`\\])/g, "\\$1");
-  const resumeCommand = `cd ${escapedPath} && gemini --resume ${session.id}`;
+  // Build a shell-safe resume command for copying only.
+  // If you need to execute this command, prefer spawning a process with
+  // an args array (e.g. `spawn("gemini", ["--resume", id], { cwd })`) instead
+  // of interpolating into a shell to avoid injection risks.
+  const escapeShellArg = (s: string) => {
+    return `'${s.replace(/'/g, "'\\''")}'`;
+  };
+
+  const resumeCommand = `cd ${escapeShellArg(session.projectPath)} && gemini --resume ${escapeShellArg(session.id)}`;
 
   async function handleDelete() {
     const confirmed = await confirmAlert({
@@ -59,6 +65,24 @@ export function SessionActions({ session, mutate, isDetail }: SessionActionsProp
     }
   }
 
+  async function handleOpenInVSCode() {
+    if (!existsSync(session.projectPath)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Directory not found",
+        message: session.projectPath,
+      });
+      return;
+    }
+
+    try {
+      await open(session.projectPath, "com.microsoft.VSCode");
+      await showToast({ style: Toast.Style.Success, title: "Opened project in VS Code" });
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "VS Code not found" });
+    }
+  }
+
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -77,17 +101,7 @@ export function SessionActions({ session, mutate, isDetail }: SessionActionsProp
           title="Open Project Directory"
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          onAction={async () => {
-            if (!existsSync(session.projectPath)) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Directory not found",
-                message: session.projectPath,
-              });
-              return;
-            }
-            await open(session.projectPath);
-          }}
+          onAction={handleOpenInVSCode}
         />
       </ActionPanel.Section>
 
