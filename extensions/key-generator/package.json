@@ -4,7 +4,7 @@
     "title": "SSH Key Manager",
     "description": "Manage SSH keys and configurations.",
     "icon": "extension-icon.png",
-    "author": "KaushalrajPuwar",
+    "author": "kaushalrajpuwar",
     "categories": [
         "Developer Tools",
         "Security"
@@ -38,7 +38,7 @@
         },
         {
             "name": "ssh-config",
-            "title": "SSH Config",
+            "title": "Manage SSH Config",
             "description": "Manage ~/.ssh/config",
             "mode": "view",
             "preferences": [
@@ -94,8 +94,8 @@
         }
     ],
     "dependencies": {
-        "@raycast/api": "^1.62.0",
-        "@raycast/utils": "^1.10.0"
+        "@raycast/api": "^1.104.10",
+        "@raycast/utils": "^2.2.3"
     },
     "devDependencies": {
         "@typescript-eslint/eslint-plugin": "^8.30.1",
