@@ -15,6 +15,10 @@ import {
 import { useEffect, useState } from "react";
 import { scanSSHDirectory } from "./utils/filesystem";
 import { SSHKey } from "./types/ssh";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 export default function Command() {
   const [keys, setKeys] = useState<SSHKey[]>([]);
@@ -156,8 +160,15 @@ export default function Command() {
                     icon={Icon.Finder}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     onAction={async () => {
-                      const { execFile } = await import("child_process");
-                      execFile("open", ["-R", key.publicKeyPath || key.privateKeyPath]);
+                      try {
+                        await execFileAsync("open", ["-R", key.publicKeyPath || key.privateKeyPath]);
+                      } catch (error) {
+                        showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to reveal file",
+                          message: (error as Error).message,
+                        });
+                      }
                     }}
                   />
                   <ActionPanel.Section title="Danger Zone">

@@ -15,6 +15,9 @@ import {
 import { useEffect, useState } from "react";
 import { auditSSHKeys, AuditIssue } from "./utils/audit";
 import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 export default function Command() {
   const { push } = useNavigation();
@@ -45,21 +48,12 @@ export default function Command() {
   async function handleFixPermissions(issue: AuditIssue) {
     const targetMode = issue.targetMode || "600";
     try {
-      execFile("chmod", [targetMode, issue.filePath], (error) => {
-        if (error) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Failed to fix",
-            message: error.message,
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Success,
-            title: "Permissions fixed",
-          });
-          loadAudit();
-        }
+      await execFileAsync("chmod", [targetMode, issue.filePath]);
+      showToast({
+        style: Toast.Style.Success,
+        title: "Permissions fixed",
       });
+      loadAudit();
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,
@@ -151,7 +145,15 @@ export default function Command() {
                 icon={Icon.Finder}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={async () => {
-                  execFile("open", ["-R", issue.filePath]);
+                  try {
+                    await execFileAsync("open", ["-R", issue.filePath]);
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to reveal file",
+                      message: (error as Error).message,
+                    });
+                  }
                 }}
               />
             </ActionPanel>
@@ -178,18 +180,11 @@ function SetPassphraseForm(props: { issue: AuditIssue; onFix: () => void }) {
     });
     try {
       // -P "" specifies that the current passphrase is empty
-      execFile("ssh-keygen", ["-p", "-f", props.issue.filePath, "-P", "", "-N", values.passphrase], (error) => {
-        if (error) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Failed to set passphrase";
-          toast.message = error.message;
-        } else {
-          toast.style = Toast.Style.Success;
-          toast.title = "Passphrase set successfully";
-          props.onFix();
-          pop();
-        }
-      });
+      await execFileAsync("ssh-keygen", ["-p", "-f", props.issue.filePath, "-P", "", "-N", values.passphrase]);
+      toast.style = Toast.Style.Success;
+      toast.title = "Passphrase set successfully";
+      props.onFix();
+      pop();
     } catch (e) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error setting passphrase";

@@ -78,7 +78,7 @@ export default function Command() {
     }
   }
 
-  async function handleDelete(configIndex: number, host: string) {
+  async function handleDelete(originalRawBlock: string, host: string) {
     const shouldDelete = await confirmAlert({
       title: "Delete SSH Entry",
       message: `Are you sure you want to delete '${host}' from SSH config? This cannot be undone.`,
@@ -92,8 +92,21 @@ export default function Command() {
       return;
     }
 
-    const updated = configs.filter((_, index) => index !== configIndex);
     try {
+      const currentConfigs = await parseSSHConfig();
+      const matchIndex = currentConfigs.findIndex((config) => config.rawBlock === originalRawBlock);
+
+      if (matchIndex < 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Config changed on disk",
+          message: "Could not find the entry to delete. Please refresh and try again.",
+        });
+        loadConfig();
+        return;
+      }
+
+      const updated = currentConfigs.filter((_, index) => index !== matchIndex);
       await saveSSHConfig(updated);
       showToast({
         style: Toast.Style.Success,
@@ -259,7 +272,7 @@ export default function Command() {
                     modifiers: ["ctrl"],
                     key: "x",
                   }}
-                  onAction={() => handleDelete(index, config.host)}
+                  onAction={() => handleDelete(config.rawBlock, config.host)}
                 />
               </ActionPanel.Section>
             </ActionPanel>

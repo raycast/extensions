@@ -5,6 +5,10 @@ import { generateSSHKey } from "./utils/ssh";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 
 export default function Command() {
   const { push } = useNavigation();
@@ -168,8 +172,15 @@ function ConfirmationView(props: { name: string; pubPath: string; pubContent: st
             icon={Icon.Finder}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => {
-              const { execFile } = await import("child_process");
-              execFile("open", ["-R", props.pubPath]);
+              try {
+                await execFileAsync("open", ["-R", props.pubPath]);
+              } catch (error) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to reveal file",
+                  message: (error as Error).message,
+                });
+              }
             }}
           />
         </ActionPanel>
