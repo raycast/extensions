@@ -1,6 +1,6 @@
 # Notion URL to ID
 
-A Raycast extension to extract a normalized 32-character Notion page ID and browse saved IDs later.
+A Raycast extension to extract a Notion page or database ID from the focused browser tab or clipboard, then save recent IDs for quick reuse.
 
 Built by Sam Dsgn.
 

@@ -2,7 +2,7 @@
   "name": "notion-url-to-id",
   "version": "1.0.0",
   "title": "Notion URL to ID",
-  "description": "Extract a Notion page ID from a Notion URL and copy it.",
+  "description": "Extract a Notion page or database ID from the focused browser tab or clipboard, then save recent IDs for quick reuse.",
   "icon": "icon.png",
   "author": "sam.dsgn",
   "homepage": "https://samdsgn.studio/",
