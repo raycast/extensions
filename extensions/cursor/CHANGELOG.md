@@ -1,6 +1,6 @@
 # Cursor Documentation Changelog
 
-## [New Feature] - 2026-03-12
+## [New Feature] - {PR_MERGE_DATE}
 
 - Add "Show Active Workspaces" command to list and switch between open Cursor windows
 
