@@ -60,9 +60,7 @@ const SUPPORTED_BROWSERS: BrowserSpec[] = [
   },
 ];
 
-function getSupportedBrowser(
-  frontmostApplication: Application,
-): BrowserSpec | undefined {
+function getSupportedBrowser(frontmostApplication: Application): BrowserSpec | undefined {
   return SUPPORTED_BROWSERS.find((browser) => {
     return (
       browser.bundleIds.includes(frontmostApplication.bundleId ?? "") ||
@@ -85,9 +83,7 @@ export interface BrowserTabInfo {
   url: string;
 }
 
-export async function getFrontmostBrowserTab(
-  frontmostApplication: Application,
-): Promise<BrowserTabInfo> {
+export async function getFrontmostBrowserTab(frontmostApplication: Application): Promise<BrowserTabInfo> {
   const browser = getSupportedBrowser(frontmostApplication);
 
   if (!browser) {

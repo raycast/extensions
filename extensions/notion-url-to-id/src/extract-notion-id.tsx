@@ -1,17 +1,8 @@
-import {
-  Clipboard,
-  Toast,
-  getFrontmostApplication,
-  showToast,
-} from "@raycast/api";
+import { Clipboard, Toast, getFrontmostApplication, showToast } from "@raycast/api";
 
 import { getFrontmostBrowserTab, isSupportedBrowser } from "./lib/browser";
 import { recordHistoryEntry } from "./lib/history";
-import {
-  extractNotionId,
-  isNotionUrl,
-  resolveNotionPageName,
-} from "./lib/notion";
+import { extractNotionId, isNotionUrl, resolveNotionPageName } from "./lib/notion";
 
 const FAILURE_TITLE = "No valid Notion ID found - check the URL and try again";
 
@@ -61,9 +52,7 @@ async function getCandidateFromClipboard(): Promise<NotionExtractionCandidate | 
 }
 
 export default async function Command() {
-  const candidate =
-    (await getCandidateFromFocusedBrowser()) ??
-    (await getCandidateFromClipboard());
+  const candidate = (await getCandidateFromFocusedBrowser()) ?? (await getCandidateFromClipboard());
   const notionId = candidate ? extractNotionId(candidate.rawValue) : null;
 
   if (!notionId) {

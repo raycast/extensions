@@ -34,9 +34,7 @@ function isHistoryEntry(value: unknown): value is NotionIdHistoryEntry {
   );
 }
 
-export function sortHistoryEntries(
-  entries: NotionIdHistoryEntry[],
-): NotionIdHistoryEntry[] {
+export function sortHistoryEntries(entries: NotionIdHistoryEntry[]): NotionIdHistoryEntry[] {
   return [...entries].sort((left, right) => {
     if (left.pinned !== right.pinned) {
       return left.pinned ? -1 : 1;
@@ -65,18 +63,11 @@ export async function getHistoryEntries(): Promise<NotionIdHistoryEntry[]> {
   }
 }
 
-async function saveHistoryEntries(
-  entries: NotionIdHistoryEntry[],
-): Promise<void> {
-  await LocalStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(sortHistoryEntries(entries).slice(0, MAX_HISTORY_ITEMS)),
-  );
+async function saveHistoryEntries(entries: NotionIdHistoryEntry[]): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(sortHistoryEntries(entries).slice(0, MAX_HISTORY_ITEMS)));
 }
 
-export async function recordHistoryEntry(
-  input: RecordHistoryEntryInput,
-): Promise<NotionIdHistoryEntry[]> {
+export async function recordHistoryEntry(input: RecordHistoryEntryInput): Promise<NotionIdHistoryEntry[]> {
   const now = new Date().toISOString();
   const entries = await getHistoryEntries();
   const existing = entries.find((entry) => entry.notionId === input.notionId);
@@ -100,9 +91,7 @@ export async function recordHistoryEntry(
   return sortHistoryEntries(entries);
 }
 
-export async function togglePinnedHistoryEntry(
-  notionId: string,
-): Promise<NotionIdHistoryEntry[]> {
+export async function togglePinnedHistoryEntry(notionId: string): Promise<NotionIdHistoryEntry[]> {
   const entries = await getHistoryEntries();
   const entry = entries.find((item) => item.notionId === notionId);
 
@@ -115,9 +104,7 @@ export async function togglePinnedHistoryEntry(
   return sortHistoryEntries(entries);
 }
 
-export async function markHistoryEntryCopied(
-  notionId: string,
-): Promise<NotionIdHistoryEntry[]> {
+export async function markHistoryEntryCopied(notionId: string): Promise<NotionIdHistoryEntry[]> {
   const entries = await getHistoryEntries();
   const entry = entries.find((item) => item.notionId === notionId);
 

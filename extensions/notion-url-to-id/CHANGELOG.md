@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Extract a Notion page ID from the focused browser tab or clipboard.
 - Save copied Notion IDs with page name, source URL, last copied date, and pin state.

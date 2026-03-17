@@ -1,5 +1,4 @@
-const NOTION_ID_PATTERN =
-  /([a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})/i;
+const NOTION_ID_PATTERN = /([a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})/i;
 
 export function extractNotionId(input: string): string | null {
   const value = input.trim();
@@ -43,14 +42,9 @@ export function derivePageNameFromNotionUrl(input: string): string | null {
 
   try {
     const url = new URL(input.trim());
-    const lastSegment = decodeURIComponent(
-      url.pathname.split("/").filter(Boolean).pop() ?? "",
-    );
+    const lastSegment = decodeURIComponent(url.pathname.split("/").filter(Boolean).pop() ?? "");
     const withoutId = lastSegment
-      .replace(
-        /[-_]?(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i,
-        "",
-      )
+      .replace(/[-_]?(?:[a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})$/i, "")
       .trim();
     const pageName = humanizeSlug(withoutId);
     return pageName || null;
@@ -78,16 +72,12 @@ export function resolveNotionPageName(options: {
   sourceUrl?: string | null;
   title?: string | null;
 }): string {
-  const fromTitle = options.title
-    ? normalizeNotionPageTitle(options.title)
-    : null;
+  const fromTitle = options.title ? normalizeNotionPageTitle(options.title) : null;
   if (fromTitle) {
     return fromTitle;
   }
 
-  const fromUrl = options.sourceUrl
-    ? derivePageNameFromNotionUrl(options.sourceUrl)
-    : null;
+  const fromUrl = options.sourceUrl ? derivePageNameFromNotionUrl(options.sourceUrl) : null;
   if (fromUrl) {
     return fromUrl;
   }

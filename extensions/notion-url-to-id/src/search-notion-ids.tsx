@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  Toast,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 
 import {
@@ -71,9 +63,7 @@ export default function Command() {
 
     await showToast({
       style: Toast.Style.Success,
-      title: entry.pinned
-        ? `Unpinned ${entry.notionId}`
-        : `Pinned ${entry.notionId}`,
+      title: entry.pinned ? `Unpinned ${entry.notionId}` : `Pinned ${entry.notionId}`,
     });
   }, []);
 
@@ -126,11 +116,7 @@ export default function Command() {
                 onAction={() => handleTogglePin(entry)}
               />
               {entry.sourceUrl ? (
-                <Action.OpenInBrowser
-                  title="Open Source URL"
-                  url={entry.sourceUrl}
-                  icon={Icon.Globe}
-                />
+                <Action.OpenInBrowser title="Open Source URL" url={entry.sourceUrl} icon={Icon.Globe} />
               ) : null}
             </ActionPanel>
           }
