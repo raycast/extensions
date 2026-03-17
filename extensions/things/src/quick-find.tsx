@@ -10,7 +10,6 @@ interface SearchItem {
   type: 'area' | 'project' | 'todo';
   project?: string;
   area?: string;
-  status?: string;
 }
 
 export default function Command() {
@@ -58,7 +57,6 @@ export default function Command() {
           type: 'todo',
           project: todo.projectName,
           area: todo.areaName,
-          status: todo.status,
         });
       }
     }
@@ -81,7 +79,7 @@ export default function Command() {
           accessories={[{ text: capitalize(item.type) }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open in Things" url={`things:///show?id=${item.id}`} icon={Icon.AppWindow} />
+              <Action.Open title="Open in Things" target={`things:///show?id=${item.id}`} icon={Icon.AppWindow} />
             </ActionPanel>
           }
         />
@@ -97,8 +95,6 @@ function getIcon(item: SearchItem) {
     case 'project':
       return Icon.List;
     case 'todo':
-      if (item.status === 'completed') return Icon.CheckCircle;
-      if (item.status === 'canceled') return Icon.XMarkCircle;
       return Icon.Circle;
     default:
       return Icon.Circle;

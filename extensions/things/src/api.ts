@@ -437,7 +437,9 @@ const getQuickFindDataFromDB = async (): Promise<QuickFindData> => {
   };
 };
 
-// JXA fallback — used only if SQLite access fails (e.g., DB path changed)
+// JXA fallback — used only if SQLite access fails (e.g., DB path changed).
+// Mirrors the SQLite query: all open, non-trashed todos regardless of which
+// list they live in (Inbox, Today, Anytime, Upcoming, Someday, or a project).
 const getQuickFindDataJXA = async (): Promise<QuickFindData> => {
   return executeJxa(
     `
@@ -447,21 +449,13 @@ const getQuickFindDataJXA = async (): Promise<QuickFindData> => {
       id: project.id(), name: project.name(),
       areaName: project.area() && project.area().name(),
     }));
-    const listIds = ['TMInboxListSource','TMTodayListSource','TMNextListSource','TMCalendarListSource','TMSomedayListSource'];
-    const seenIds = {};
-    const todos = [];
-    for (const listId of listIds) {
-      const listTodos = things.lists.byId(listId).toDos();
-      for (const todo of listTodos) {
-        const id = todo.id();
-        if (!seenIds[id]) {
-          seenIds[id] = true;
-          todos.push({ id, name: todo.name(), status: todo.status(),
-            projectName: todo.project() && todo.project().name(),
-            areaName: todo.area() && todo.area().name() });
-        }
-      }
-    }
+    const todos = things.toDos().filter(t => t.status() === 'open').map(todo => ({
+      id: todo.id(),
+      name: todo.name(),
+      status: 'open',
+      projectName: todo.project() && todo.project().name(),
+      areaName: todo.area() && todo.area().name(),
+    }));
     return { areas, projects, todos };
   `,
     'Get quick find data',
