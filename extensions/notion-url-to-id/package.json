@@ -67,7 +67,7 @@
     "typescript": "^5.8.3"
   },
   "scripts": {
-    "build": "npx ray build -e dist",
+    "build": "npx ray build -e dist -o dist",
     "dev": "npx ray develop",
     "fix-lint": "npx ray lint --fix",
     "lint": "npx ray lint",
