@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.
+
 ## [Fix] - 2026-01-27
 
 - Fixed memory leak caused by zombie processes when starting caffeination.

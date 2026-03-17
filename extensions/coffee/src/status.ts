@@ -1,4 +1,5 @@
 import { LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { spawn } from "node:child_process";
 import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
 
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
@@ -56,10 +57,19 @@ export default async function Command() {
 
   let subtitle = "✖ Decaffeinated";
 
-  if (isCaffeinated) {
+  if (isCaffeinated || isScheduled) {
     subtitle = "✔ Caffeinated";
-  } else if (isScheduled) {
-    subtitle = "✔ Caffeinated";
+
+    // Reset the idle timer to prevent display sleep on battery.
+    // On macOS 26+ the system/display sleep timers on battery power can
+    // override caffeinate's -d/-i assertions. Asserting user activity
+    // every 15 seconds (this command's interval) keeps the display awake
+    // without requiring elevated privileges or additional processes.
+    const child = spawn("/usr/bin/caffeinate", ["-u", "-t", "1"], {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
   }
 
   updateCommandMetadata({ subtitle });
