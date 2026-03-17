@@ -212,6 +212,7 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
       const sshDir = path.dirname(props.keyItem.publicKeyPath);
       const newPub = path.join(sshDir, `${newName}.pub`);
       const newPriv = path.join(sshDir, newName);
+      const currentPub = props.keyItem.publicKeyPath;
 
       const privatePath = props.keyItem.privateKeyPath;
       let privateExists = false;
@@ -222,6 +223,40 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
         } catch {
           privateExists = false;
         }
+      }
+
+      if (newName === props.keyItem.name) {
+        showToast({ style: Toast.Style.Success, title: "Key name unchanged" });
+        pop();
+        return;
+      }
+
+      let destinationInUse = false;
+      try {
+        if (newPub !== currentPub) {
+          await fs.access(newPub);
+          destinationInUse = true;
+        }
+      } catch {
+        // Destination does not exist, safe.
+      }
+
+      try {
+        if (newPriv !== privatePath) {
+          await fs.access(newPriv);
+          destinationInUse = true;
+        }
+      } catch {
+        // Destination does not exist, safe.
+      }
+
+      if (destinationInUse) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Name already in use",
+          message: `A key named '${newName}' already exists in ~/.ssh.`,
+        });
+        return;
       }
 
       if (privateExists) {

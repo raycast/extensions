@@ -64,7 +64,7 @@ export function updateRawBlock(rawBlock: string, values: Omit<SSHHostConfig, "ra
 
 function buildHostBlock(config: SSHHostConfig): string {
   if (config.rawBlock && config.rawBlock.trim() !== "") {
-    return config.rawBlock;
+    return config.rawBlock.trimEnd();
   }
 
   let block = `Host ${config.host}\n`;
@@ -73,6 +73,14 @@ function buildHostBlock(config: SSHHostConfig): string {
   if (config.identityFile) block += `  IdentityFile ${config.identityFile}\n`;
   if (config.port) block += `  Port ${config.port}\n`;
   return block.trimEnd();
+}
+
+function normalizeRawBlock(blockLines: string[]): string {
+  const lines = [...blockLines];
+  while (lines.length > 0 && lines[lines.length - 1].trim() === "") {
+    lines.pop();
+  }
+  return lines.join("\n");
 }
 
 function extractNonHostContent(content: string): string {
@@ -137,7 +145,7 @@ export async function parseSSHConfig(): Promise<SSHHostConfig[]> {
             user: currentConfig.user,
             identityFile: currentConfig.identityFile,
             port: currentConfig.port,
-            rawBlock: currentBlock.join("\n"),
+            rawBlock: normalizeRawBlock(currentBlock),
           });
         }
         currentConfig = { host: value };
@@ -158,7 +166,7 @@ export async function parseSSHConfig(): Promise<SSHHostConfig[]> {
         user: currentConfig.user,
         identityFile: currentConfig.identityFile,
         port: currentConfig.port,
-        rawBlock: currentBlock.join("\n"),
+        rawBlock: normalizeRawBlock(currentBlock),
       });
     }
 

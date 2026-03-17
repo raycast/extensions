@@ -78,7 +78,7 @@ export default function Command() {
     }
   }
 
-  async function handleDelete(originalRawBlock: string, host: string) {
+  async function handleDelete(configIndex: number, originalRawBlock: string, host: string) {
     const shouldDelete = await confirmAlert({
       title: "Delete SSH Entry",
       message: `Are you sure you want to delete '${host}' from SSH config? This cannot be undone.`,
@@ -94,7 +94,21 @@ export default function Command() {
 
     try {
       const currentConfigs = await parseSSHConfig();
-      const matchIndex = currentConfigs.findIndex((config) => config.rawBlock === originalRawBlock);
+      let matchIndex = -1;
+
+      const indexedCandidate = currentConfigs[configIndex];
+      if (indexedCandidate && indexedCandidate.rawBlock === originalRawBlock) {
+        matchIndex = configIndex;
+      } else {
+        const rawBlockMatches = currentConfigs
+          .map((config, index) => ({ config, index }))
+          .filter(({ config }) => config.rawBlock === originalRawBlock)
+          .map(({ index }) => index);
+
+        if (rawBlockMatches.length === 1) {
+          matchIndex = rawBlockMatches[0];
+        }
+      }
 
       if (matchIndex < 0) {
         showToast({
@@ -272,7 +286,7 @@ export default function Command() {
                     modifiers: ["ctrl"],
                     key: "x",
                   }}
-                  onAction={() => handleDelete(config.rawBlock, config.host)}
+                  onAction={() => handleDelete(index, config.rawBlock, config.host)}
                 />
               </ActionPanel.Section>
             </ActionPanel>
@@ -312,8 +326,21 @@ function HostForm(props: { config?: SSHHostConfig; configIndex?: number; onSave:
 
       let updatedConfigs: SSHHostConfig[] = [];
       if (props.config && props.configIndex !== undefined) {
-        // Edit: prefer stable identity by original rawBlock to avoid stale-index overwrites
-        const matchIndex = currentConfigs.findIndex((c) => c.rawBlock === props.config!.rawBlock);
+        // Edit: prefer original index if still matching, then unique rawBlock match.
+        let matchIndex = -1;
+        const indexedCandidate = currentConfigs[props.configIndex];
+        if (indexedCandidate && indexedCandidate.rawBlock === props.config.rawBlock) {
+          matchIndex = props.configIndex;
+        } else {
+          const rawBlockMatches = currentConfigs
+            .map((config, index) => ({ config, index }))
+            .filter(({ config }) => config.rawBlock === props.config!.rawBlock)
+            .map(({ index }) => index);
+
+          if (rawBlockMatches.length === 1) {
+            matchIndex = rawBlockMatches[0];
+          }
+        }
 
         if (matchIndex >= 0) {
           updatedConfigs = currentConfigs.map((c, index) => (index === matchIndex ? newConfig : c));
@@ -338,6 +365,11 @@ function HostForm(props: { config?: SSHHostConfig; configIndex?: number; onSave:
         throw new Error("Failed to identify SSH config entry for editing");
       } else {
         // New
+        const duplicate = currentConfigs.find((config) => config.host === host);
+        if (duplicate) {
+          throw new Error(`Host alias '${host}' already exists in SSH config.`);
+        }
+
         updatedConfigs = [...currentConfigs, newConfig];
       }
 

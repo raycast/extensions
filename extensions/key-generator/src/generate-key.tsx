@@ -68,6 +68,34 @@ export default function Command() {
       return;
     }
 
+    const sshDir = path.join(os.homedir(), ".ssh");
+    const privPath = path.join(sshDir, filename);
+    const pubPath = path.join(sshDir, `${filename}.pub`);
+
+    let privExists = false;
+    let pubExists = false;
+    try {
+      await fs.access(privPath);
+      privExists = true;
+    } catch {
+      // file does not exist
+    }
+    try {
+      await fs.access(pubPath);
+      pubExists = true;
+    } catch {
+      // file does not exist
+    }
+
+    if (privExists || pubExists) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Name already in use",
+        message: `A key named '${filename}' already exists in ~/.ssh.`,
+      });
+      return;
+    }
+
     setIsLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -76,9 +104,6 @@ export default function Command() {
     });
 
     try {
-      const sshDir = path.join(os.homedir(), ".ssh");
-      const pubPath = path.join(sshDir, `${filename}.pub`);
-
       let publicKeyContent = "";
 
       await generateSSHKey({

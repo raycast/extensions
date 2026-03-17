@@ -65,6 +65,10 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search issues...">
+      {!isLoading && issues.length === 0 && (
+        <List.EmptyView title="No Issues Found" description="Your SSH keys and ~/.ssh directory look good." />
+      )}
+
       {issues.map((issue: AuditIssue, index: number) => (
         <List.Item
           key={`${issue.type}-${issue.filePath}-${index}`}
