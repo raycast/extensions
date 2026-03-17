@@ -83,35 +83,73 @@ function normalizeRawBlock(blockLines: string[]): string {
   return lines.join("\n");
 }
 
-function extractNonHostContent(content: string): string {
-  const lines = content.split("\n");
-  const preserved: string[] = [];
-  let inHostBlock = false;
+function findHostBlockRanges(lines: string[]): Array<{ start: number; end: number }> {
+  const ranges: Array<{ start: number; end: number }> = [];
+  let index = 0;
 
-  for (const line of lines) {
-    if (inHostBlock) {
+  while (index < lines.length) {
+    if (!/^Host\s+/i.test(lines[index])) {
+      index += 1;
+      continue;
+    }
+
+    const start = index;
+    index += 1;
+
+    while (index < lines.length) {
+      const line = lines[index];
       if (/^Host\s+/i.test(line)) {
-        continue;
+        break;
       }
 
       if (/^[^\s#]/.test(line)) {
-        inHostBlock = false;
-        preserved.push(line);
-        continue;
+        break;
       }
 
-      continue;
+      index += 1;
     }
 
-    if (/^Host\s+/i.test(line)) {
-      inHostBlock = true;
-      continue;
-    }
-
-    preserved.push(line);
+    ranges.push({ start, end: index });
   }
 
-  return preserved.join("\n").trim();
+  return ranges;
+}
+
+function mergeHostBlocksPreservingOrder(originalContent: string, hostBlocks: string[]): string {
+  const lines = originalContent.split("\n");
+  const ranges = findHostBlockRanges(lines);
+
+  if (ranges.length === 0) {
+    const sections = [originalContent.trim(), hostBlocks.join("\n\n").trim()].filter((section) => section !== "");
+    return sections.length > 0 ? `${sections.join("\n\n")}\n` : "";
+  }
+
+  const outputLines: string[] = [];
+  let cursor = 0;
+
+  for (let rangeIndex = 0; rangeIndex < ranges.length; rangeIndex += 1) {
+    const range = ranges[rangeIndex];
+    outputLines.push(...lines.slice(cursor, range.start));
+
+    if (rangeIndex < hostBlocks.length) {
+      outputLines.push(...hostBlocks[rangeIndex].split("\n"));
+    }
+
+    cursor = range.end;
+  }
+
+  outputLines.push(...lines.slice(cursor));
+
+  if (hostBlocks.length > ranges.length) {
+    const extraBlocks = hostBlocks.slice(ranges.length).join("\n\n");
+    if (outputLines.length > 0 && outputLines[outputLines.length - 1].trim() !== "") {
+      outputLines.push("");
+    }
+    outputLines.push(...extraBlocks.split("\n"));
+  }
+
+  const merged = outputLines.join("\n").trimEnd();
+  return merged !== "" ? `${merged}\n` : "";
 }
 
 export async function parseSSHConfig(): Promise<SSHHostConfig[]> {
@@ -192,15 +230,9 @@ export async function saveSSHConfig(configs: SSHHostConfig[]): Promise<void> {
     }
   }
 
-  const nonHostContent = extractNonHostContent(originalContent);
-  const hostContent = configs
-    .map((config) => buildHostBlock(config))
-    .filter((block) => block.trim() !== "")
-    .join("\n\n")
-    .trim();
+  const hostBlocks = configs.map((config) => buildHostBlock(config)).filter((block) => block.trim() !== "");
 
-  const sections = [nonHostContent, hostContent].filter((section) => section.trim() !== "");
-  const nextContent = sections.length > 0 ? `${sections.join("\n\n")}\n` : "";
+  const nextContent = mergeHostBlocksPreservingOrder(originalContent, hostBlocks);
 
   await fs.mkdir(sshDir, { recursive: true });
   await fs.writeFile(configPath, nextContent, "utf-8");
