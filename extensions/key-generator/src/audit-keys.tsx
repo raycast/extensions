@@ -43,7 +43,7 @@ export default function Command() {
   }
 
   async function handleFixPermissions(issue: AuditIssue) {
-    const targetMode = issue.title.includes("Directory") ? "700" : "600";
+    const targetMode = issue.targetMode || "600";
     try {
       execFile("chmod", [targetMode, issue.filePath], (error) => {
         if (error) {

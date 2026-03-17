@@ -25,7 +25,7 @@ export async function generateSSHKey(options: {
   if (algorithm.endsWith("-sk")) {
     const fs = await import("fs/promises");
     const { getPreferenceValues } = await import("@raycast/api");
-    const prefs = getPreferenceValues<{ customSshKeygenPath?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
 
     const testPaths = [];
     if (prefs.customSshKeygenPath) {

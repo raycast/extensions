@@ -8,6 +8,7 @@ export interface AuditIssue {
   description: string;
   filePath: string;
   type: "permission" | "orphan" | "weak" | "duplicate" | "passphrase";
+  targetMode?: string;
 }
 
 export async function auditSSHKeys(): Promise<AuditIssue[]> {
@@ -63,6 +64,7 @@ export async function auditSSHKeys(): Promise<AuditIssue[]> {
         description: `~/.ssh permissions are ${mode.toString(8)}, should be 700.`,
         filePath: sshDir,
         type: "permission",
+        targetMode: "700",
       });
     }
   }
@@ -84,6 +86,7 @@ export async function auditSSHKeys(): Promise<AuditIssue[]> {
         description: `${key.name} permissions are ${mode.toString(8)}, should be 600.`,
         filePath: key.privateKeyPath,
         type: "permission",
+        targetMode: "600",
       });
     }
   }
