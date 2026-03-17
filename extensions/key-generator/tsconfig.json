@@ -15,6 +15,7 @@
         "outDir": "dist"
     },
     "include": [
-        "src/**/*"
+        "src/**/*",
+        "raycast-env.d.ts"
     ]
 }
