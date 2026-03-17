@@ -1,6 +1,7 @@
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
+import { constants } from "node:fs";
 import { access, chmod, mkdir, readFile, rename, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
