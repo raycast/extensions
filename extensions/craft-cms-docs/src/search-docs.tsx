@@ -298,7 +298,6 @@ export default function Command(props: Props) {
       const hydratedItems = hydrateItems(persistedCached);
       if (effectiveSelectedProduct === "glossary") writeGlossaryIndex(hydratedItems);
       queryCache.set(requestCacheKey, hydratedItems);
-      writeCached(requestCacheKey, hydratedItems);
       setItems(hydratedItems);
       setErrorMessage(null);
       setIsLoading(false);
