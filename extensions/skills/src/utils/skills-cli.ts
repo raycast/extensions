@@ -31,8 +31,8 @@ function buildSkillsCliCommand(npxCommand: string, args: string[]): string {
 async function runSkillsCli(args: string[]): Promise<string> {
   const npxCommand = getCustomNpxPath() ?? "npx";
   try {
-    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), getExecOptions());
-    return stdout.toString();
+    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), await getExecOptions());
+    return stdout;
   } catch (error) {
     throw normalizeCliError(error, npxCommand);
   }

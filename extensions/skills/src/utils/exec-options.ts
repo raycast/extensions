@@ -1,13 +1,13 @@
 import { dirname } from "node:path";
 import { getCustomNpxPath } from "../preferences";
-import { getEnhancedNodePaths, resolveFnmBaseDir } from "./node-path-resolver";
+import { getEnhancedNodePaths, pathExists, resolveFnmBaseDir } from "./node-path-resolver";
 
 const isWindows = process.platform === "win32";
 
-export const getExecOptions = () => {
+export const getExecOptions = async () => {
   const env: Record<string, string> = {
     ...process.env,
-    PATH: getEnhancedNodePaths(),
+    PATH: await getEnhancedNodePaths(),
   };
 
   const customNpxPath = getCustomNpxPath();
@@ -19,19 +19,21 @@ export const getExecOptions = () => {
   if (!isWindows && process.env.HOME) {
     const home = process.env.HOME;
 
-    if (!process.env.NVM_DIR) {
-      env.NVM_DIR = `${home}/.nvm`;
+    const nvmDir = `${home}/.nvm`;
+    if (!process.env.NVM_DIR && (await pathExists(nvmDir))) {
+      env.NVM_DIR = nvmDir;
     }
 
     if (!process.env.FNM_DIR) {
-      const fnmBaseDir = resolveFnmBaseDir(home);
-      if (fnmBaseDir) {
+      const fnmBaseDir = await resolveFnmBaseDir(home);
+      if (fnmBaseDir && (await pathExists(fnmBaseDir))) {
         env.FNM_DIR = fnmBaseDir;
       }
     }
 
-    if (!process.env.npm_config_prefix) {
-      env.npm_config_prefix = `${home}/.npm-global`;
+    const npmGlobalDir = `${home}/.npm-global`;
+    if (!process.env.npm_config_prefix && (await pathExists(npmGlobalDir))) {
+      env.npm_config_prefix = npmGlobalDir;
     }
   }
 
