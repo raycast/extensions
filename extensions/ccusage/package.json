@@ -90,6 +90,28 @@
               "value": "consumed"
             }
           ]
+        },
+        {
+          "name": "progressBarStyle",
+          "type": "dropdown",
+          "required": false,
+          "title": "Progress Bar Style",
+          "description": "Visual style for rate limit progress bars",
+          "default": "solid",
+          "data": [
+            {
+              "title": "Solid (█░)",
+              "value": "solid"
+            },
+            {
+              "title": "Blocks (▰▱)",
+              "value": "blocks"
+            },
+            {
+              "title": "ASCII (#-)",
+              "value": "ascii"
+            }
+          ]
         }
       ]
     },

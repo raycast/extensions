@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 import { sep } from "path";
+import type { ProgressBarStyle } from "./utils/usage-limits-formatter";
 
 export const preferences = getPreferenceValues<Preferences>();
 const menuBarPreferences = getPreferenceValues<Preferences.MenubarCcusage>();
@@ -25,6 +26,9 @@ export const getMenuBarTitle = ():
     | "sevenDay"
     | "utilization"
     | "none") ?? "todayUsage";
+
+export const getProgressBarStyle = (): ProgressBarStyle =>
+  (menuBarPreferences.progressBarStyle as ProgressBarStyle) ?? "solid";
 
 export const getCustomNpxPath = (): string | undefined => {
   const customPath = preferences.customNpxPath?.trim();

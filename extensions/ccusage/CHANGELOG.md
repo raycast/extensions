@@ -18,6 +18,8 @@
 - Menu bar command-specific preferences (via "Configure Command" item at bottom of dropdown):
   - **Menu Bar Status**: choose what appears next to the icon — Today's Usage (Cost + Tokens), Today's Cost, Monthly Cost, Today's Tokens, 5-Hour Limit %, 7-Day Limit %, Highest Utilization, or None
   - **Progress Bar Mode**: Remaining or Consumed
+  - **Progress Bar Style**: Solid (`█░`), Blocks (`▰▱`), or ASCII (`#-`)
+- Rate Limits section is hidden when authenticated via API key — it is only meaningful for OAuth (Claude Max plan) users
 - "Configure Command" item at the bottom of the menu bar dropdown opens command preferences directly
 
 ### Fixed

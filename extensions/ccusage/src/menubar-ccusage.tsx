@@ -7,7 +7,7 @@ import { useClaudeUsageLimits } from "./hooks/useClaudeUsageLimits";
 import { useWorkingTime } from "./hooks/useWorkingTime";
 import { formatCost, formatCostDelta, formatDuration, formatTokensAsMTok } from "./utils/data-formatter";
 import { formatTimeRemaining, createProgressBar } from "./utils/usage-limits-formatter";
-import { showRemainingUsage, getMenuBarTitle } from "./preferences";
+import { showRemainingUsage, getMenuBarTitle, getProgressBarStyle } from "./preferences";
 import { TotalUsageData } from "./types/usage-types";
 
 const MOCK_LIMITS_ENABLED = false;
@@ -80,16 +80,17 @@ export default function MenuBarccusage() {
   };
 
   const preferRemaining = showRemainingUsage();
+  const progressBarStyle = getProgressBarStyle();
 
   const rateLimitsSectionTitle = `Rate Limits · ${preferRemaining ? "Remaining" : "Consumed"}`;
 
-  const limitInfo = (utilization: number, resetsAt: string): string => {
+  const limitInfo = (utilization: number, resetsAt: string | null): string => {
     const value = preferRemaining ? 100 - utilization : utilization;
-    return `${value.toFixed(0)}%  ↻ ${formatTimeRemaining(resetsAt)}`;
+    return `${value.toFixed(0)}%  ↻ ${resetsAt ? formatTimeRemaining(resetsAt) : "N/A"}`;
   };
 
   const limitBar = (utilization: number): string =>
-    createProgressBar(preferRemaining ? 100 - utilization : utilization, 22);
+    createProgressBar(preferRemaining ? 100 - utilization : utilization, 22, progressBarStyle);
 
   const limitTitle = (label: string, utilization: number): string => `${label.padEnd(6)}  ${limitBar(utilization)}`;
 
