@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.1.4] - {PR_MERGE_DATE}
+## [1.1.4] - 2026-03-17
 
 - Add Windows support for opening projects in editor and terminal
 
