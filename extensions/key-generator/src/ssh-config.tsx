@@ -308,7 +308,6 @@ function HostForm(props: { config?: SSHHostConfig; configIndex?: number; onSave:
         title="Host Alias"
         defaultValue={props.config?.host || ""}
         placeholder="e.g. myserver"
-        required
       />
       <Form.TextField
         id="hostName"
