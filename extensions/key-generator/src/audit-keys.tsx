@@ -73,7 +73,7 @@ export default function Command() {
     <List isLoading={isLoading} searchBarPlaceholder="Search issues...">
       {issues.map((issue: AuditIssue, index: number) => (
         <List.Item
-          key={`${issue.type}-${index}`}
+          key={`${issue.type}-${issue.filePath}-${index}`}
           title={issue.title}
           subtitle={issue.description}
           icon={

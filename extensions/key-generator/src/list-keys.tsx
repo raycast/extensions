@@ -82,6 +82,13 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail} searchBarPlaceholder="Search keys...">
+      {!isLoading && keys.length === 0 && (
+        <List.EmptyView
+          title="No SSH Keys"
+          description="No keys were found in ~/.ssh. Generate a key to get started."
+        />
+      )}
+
       {keys.map((key, index) => (
         <List.Item
           key={`${key.name}-${key.fingerprint || "no-fingerprint"}-${index}`}
