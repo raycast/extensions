@@ -33,6 +33,7 @@ A no-view command for maximum speed. Type a shortcut name and it opens immediate
 Browse and search all your shortcuts with Raycast's fuzzy filtering. Results are cached locally for 5 minutes so repeated searches are instant.
 
 **Actions:**
+
 - **Enter** — Open URL in browser
 - **Cmd+Shift+C** — Copy URL
 - **Cmd+Shift+N** — Copy shortcut name
@@ -40,7 +41,7 @@ Browse and search all your shortcuts with Raycast's fuzzy filtering. Results are
 
 ## Preferences
 
-| Preference | Type | Required | Description |
-|---|---|---|---|
-| Magic Key | Password | Yes | Your QuickLinker magic key (`ql_...`) from Dashboard > Settings > Advanced |
-| API Token | Password | No | Your QuickLinker API token (`qlapi_...`) from Dashboard > Settings > Advanced > Enable API Access |
+| Preference | Type     | Required | Description                                                                                       |
+| ---------- | -------- | -------- | ------------------------------------------------------------------------------------------------- |
+| Magic Key  | Password | Yes      | Your QuickLinker magic key (`ql_...`) from Dashboard > Settings > Advanced                        |
+| API Token  | Password | No       | Your QuickLinker API token (`qlapi_...`) from Dashboard > Settings > Advanced > Enable API Access |

@@ -50,6 +50,15 @@ function getUserFriendlyError(error: unknown): string {
   return "An unexpected error occurred";
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error as { name?: unknown }).name === "AbortError"
+  );
+}
+
 async function showErrorToast(error: unknown) {
   const message = getUserFriendlyError(error);
 
@@ -79,12 +88,12 @@ async function showErrorToast(error: unknown) {
 export default function SearchShortcuts() {
   const [shortcuts, setShortcuts] = useState<Shortcut[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { apiToken } = getPreferenceValues<Preferences>();
+  const { apiToken } = getPreferenceValues();
 
   const tokenValid = !!apiToken && API_TOKEN_REGEX.test(apiToken);
 
   const loadShortcuts = useCallback(
-    async (forceRefresh = false) => {
+    async (forceRefresh = false, signal?: AbortSignal) => {
       if (!tokenValid || !apiToken) {
         setIsLoading(false);
         return;
@@ -104,12 +113,17 @@ export default function SearchShortcuts() {
           case "stale":
             setShortcuts(cacheState.shortcuts);
             setIsLoading(false);
-            fetchShortcuts(apiToken)
+            fetchShortcuts(apiToken, signal)
               .then(async (fresh) => {
-                setShortcuts(fresh);
-                await setCache(fresh);
+                if (!signal || !signal.aborted) {
+                  setShortcuts(fresh);
+                  await setCache(fresh);
+                }
               })
               .catch(async (error) => {
+                if (isAbortError(error)) {
+                  return;
+                }
                 await showToast({
                   style: Toast.Style.Failure,
                   title: "Using cached data",
@@ -124,10 +138,15 @@ export default function SearchShortcuts() {
               await clearCache();
             }
             try {
-              const fresh = await fetchShortcuts(apiToken);
-              setShortcuts(fresh);
-              await setCache(fresh);
+              const fresh = await fetchShortcuts(apiToken, signal);
+              if (!signal || !signal.aborted) {
+                setShortcuts(fresh);
+                await setCache(fresh);
+              }
             } catch (error) {
+              if (isAbortError(error)) {
+                return;
+              }
               await showErrorToast(error);
             } finally {
               setIsLoading(false);
@@ -143,12 +162,14 @@ export default function SearchShortcuts() {
   );
 
   useEffect(() => {
-    loadShortcuts();
+    const controller = new AbortController();
+    loadShortcuts(false, controller.signal);
+    return () => controller.abort();
   }, [loadShortcuts]);
 
   if (!tokenValid) {
     return (
-      <List>
+      <List isLoading={false}>
         <List.EmptyView
           icon={Icon.Key}
           title="API Token Required"
@@ -177,7 +198,7 @@ export default function SearchShortcuts() {
 
   if (!isLoading && shortcuts.length === 0) {
     return (
-      <List>
+      <List isLoading={false}>
         <List.EmptyView
           icon={Icon.Stars}
           title="No Shortcuts Found"

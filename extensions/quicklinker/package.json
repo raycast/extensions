@@ -5,7 +5,10 @@
   "description": "Resolve your QuickLinker shortcuts directly from Raycast",
   "icon": "extension-icon.png",
   "author": "n-winspear",
-  "categories": ["Productivity", "Web"],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,7 +17,12 @@
       "subtitle": "QuickLinker",
       "description": "Open a QuickLinker shortcut by name. Tip: set \"gl\" as an alias for this command for even faster access.",
       "mode": "no-view",
-      "keywords": ["ql", "quicklinker", "shortcut", "link"],
+      "keywords": [
+        "ql",
+        "quicklinker",
+        "shortcut",
+        "link"
+      ],
       "arguments": [
         {
           "name": "shortcut",
@@ -30,7 +38,13 @@
       "subtitle": "QuickLinker",
       "description": "Search and open your QuickLinker shortcuts. Requires an optional API token — enable API access in your QuickLinker dashboard to use this command.",
       "mode": "view",
-      "keywords": ["ql", "quicklinker", "shortcut", "link", "search"]
+      "keywords": [
+        "ql",
+        "quicklinker",
+        "shortcut",
+        "link",
+        "search"
+      ]
     }
   ],
   "preferences": [
@@ -40,7 +54,7 @@
       "description": "Paste your magic key from quicklinker.app — go to Dashboard > Settings > Advanced to copy it",
       "type": "password",
       "placeholder": "ql_0e4f8a1b2c3d5f6a7890abcdef123456",
-      "required": true
+      "required": false
     },
     {
       "name": "apiToken",

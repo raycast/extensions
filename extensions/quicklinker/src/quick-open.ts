@@ -18,7 +18,7 @@ export default async function Command(
   const { magicKey } = getPreferenceValues<Preferences>();
   const shortcut = props.arguments.shortcut.trim();
 
-  if (!MAGIC_KEY_REGEX.test(magicKey)) {
+  if (!magicKey || !MAGIC_KEY_REGEX.test(magicKey)) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Invalid magic key",

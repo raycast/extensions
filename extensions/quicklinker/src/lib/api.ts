@@ -16,12 +16,16 @@ export class ApiError extends Error {
   }
 }
 
-export async function fetchShortcuts(apiToken: string): Promise<Shortcut[]> {
+export async function fetchShortcuts(
+  apiToken: string,
+  signal?: AbortSignal,
+): Promise<Shortcut[]> {
   if (!API_TOKEN_REGEX.test(apiToken)) {
     throw new ApiError("Invalid API token format", 401);
   }
 
   const response = await fetch(`${API_BASE_URL}/api/shortcuts`, {
+    signal,
     headers: {
       Authorization: `Bearer ${apiToken}`,
       Accept: "application/json",
