@@ -27,6 +27,8 @@ export function usePersistentBookmarks(): readonly [BookmarksState, BookmarksSet
       const serializedFileBookmarks = serializeBookmarks(fileBookmarks);
       lastSavedRef.current = serializedFileBookmarks;
 
+      // The file is the single source of truth for bookmarks.
+      // useCachedState is only a fast-access layer, so a missing file resets cached state to [].
       if (serializedFileBookmarks && serializedFileBookmarks !== serializeBookmarks(bookmarks ?? [])) {
         setBookmarks(fileBookmarks);
       }

@@ -747,7 +747,7 @@ function DocsMetadata({
   const docs = item.docsLinks ?? [];
   const relatedTerms = item.relatedTerms ?? [];
   const isGlossaryItem = linkDestinationForUrl(item.url) === "Glossary";
-  const category = item.category ?? deriveDocsCategoryFromUrl(item.url);
+  const category = getCategoryMetadataText(item);
   const versionMetadata = getVersionMetadata(item, preferences);
 
   return (
@@ -1068,6 +1068,17 @@ function getSourceTooltip(source: "CMS" | "Commerce" | "Cloud" | "KB" | "Term"):
   return undefined;
 }
 
+function getCategoryMetadataText(item: DocsSearchResult): string | undefined {
+  const category = item.category ?? deriveDocsCategoryFromUrl(item.url);
+  if (!category) return undefined;
+
+  const product = getProductType(item.url);
+  if (product === "cms") return `CMS -> ${category}`;
+  if (product === "commerce") return `Commerce -> ${category}`;
+  if (product === "cloud") return `Cloud -> ${category}`;
+  return category;
+}
+
 function tintListIcon(source: string): { source: string; tintColor: string } {
   return { source, tintColor: LIST_ICON_TINT };
 }
@@ -1238,6 +1249,7 @@ function buildScopes({
   }
   if (selectedProduct === "commerce") return ["docs/commerce"];
   if (selectedProduct === "cloud") return ["docs/cloud"];
+  // Knowledge Base results are identified by API result type, not a documented scope value.
   return [];
 }
 
