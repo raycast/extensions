@@ -56,7 +56,7 @@ export default function Command() {
             <SessionActions
               session={session}
               mutate={async () => {
-                revalidateSessions();
+                await revalidateSessions();
               }}
             />
           }
