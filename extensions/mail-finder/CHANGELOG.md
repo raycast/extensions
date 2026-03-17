@@ -1,6 +1,5 @@
 # Mail Finder Changelog
 
-
 ## [Refactor & Bug Fixes] - {PR_MERGE_DATE}
 
 TL;DR

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ResultsView } from "./mail-finder";
 import { AuthGate } from "./auth";
 import { searchPerson, enrichPerson, mapEnrichResponseToData, SearchPersonResponse } from "./backend";
@@ -15,10 +15,6 @@ import type { EnrichedData } from "./types";
 import { getErrorMessage } from "./utils";
 
 // * Types
-interface Arguments {
-  domain?: string;
-}
-
 interface Employee {
   id: string;
   firstName: string;
@@ -72,12 +68,18 @@ function toCachedEmployee(e: Employee): CachedEmployee {
   };
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.CompanyEmployees }>) {
   return <AuthGate>{(signOut) => <CompanyEmployeesEntry signOut={signOut} arguments={props.arguments} />}</AuthGate>;
 }
 
 // * Entry point - decides which view to show based on arguments
-function CompanyEmployeesEntry({ signOut, arguments: args }: { signOut: () => Promise<void>; arguments: Arguments }) {
+function CompanyEmployeesEntry({
+  signOut,
+  arguments: args,
+}: {
+  signOut: () => Promise<void>;
+  arguments: Arguments.CompanyEmployees;
+}) {
   const { domain: argDomain } = args;
 
   if (argDomain) {
@@ -172,12 +174,14 @@ function EmployeeListView({
   const [filterText, setFilterText] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [historyEntryId, setHistoryEntryId] = useState<string | null>(null);
+  const hasAutoSearchedRef = useRef(false);
 
   useEffect(() => {
-    if (autoSearch && !hasSearched && !isLoading) {
+    if (autoSearch && !hasAutoSearchedRef.current) {
+      hasAutoSearchedRef.current = true;
       searchCompany(initialDomain, companyInfo);
     }
-  }, [autoSearch, hasSearched, isLoading]);
+  }, []);
 
   const filteredEmployees =
     departmentFilter === "all" ? employees : employees.filter((e) => e.departments.includes(departmentFilter));
@@ -304,12 +308,14 @@ function EmployeeListView({
         setTotalResults(updatedEmployees.length);
       }
 
+      const newTotalResults = totalPagesFromResponse ? (totalCountFromResponse ?? 0) : updatedEmployees.length;
+
       showToast({
         style: Toast.Style.Success,
         title: "Loaded",
         message:
-          totalResults > 0
-            ? `Now showing ${updatedEmployees.length} of ${totalResults} total employees`
+          newTotalResults > 0
+            ? `Now showing ${updatedEmployees.length} of ${newTotalResults} total employees`
             : `Now showing ${updatedEmployees.length} employees`,
       });
 
@@ -318,7 +324,7 @@ function EmployeeListView({
           employees: updatedEmployees.map(toCachedEmployee),
           currentPage: newPage,
           totalPages: totalPagesFromResponse ?? undefined,
-          totalEmployees: totalCountFromResponse ?? totalResults,
+          totalEmployees: totalCountFromResponse ?? newTotalResults,
         });
       }
     } catch (err) {

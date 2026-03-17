@@ -41,18 +41,18 @@ function formatJobPeriod(job: JobHistory): string {
   return end ? `${start} - ${end}` : start;
 }
 
-interface Arguments {
-  firstName?: string;
-  lastName?: string;
-  domain?: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.MailFinder }>) {
   return <AuthGate>{(signOut) => <MailFinderEntry signOut={signOut} arguments={props.arguments} />}</AuthGate>;
 }
 
 // * Entry point - decides which view to show based on arguments
-function MailFinderEntry({ signOut, arguments: args }: { signOut: () => Promise<void>; arguments: Arguments }) {
+function MailFinderEntry({
+  signOut,
+  arguments: args,
+}: {
+  signOut: () => Promise<void>;
+  arguments: Arguments.MailFinder;
+}) {
   const { firstName: argFirstName, lastName: argLastName, domain: argDomain } = args;
 
   if (argDomain) {
@@ -105,12 +105,20 @@ export function MailFinderFormView({
   const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    let cancelled = false;
     fetchCredits()
-      .then(setCredits)
+      .then((c) => {
+        if (!cancelled) setCredits(c);
+      })
       .catch((err) => {
-        console.error("Failed to fetch credits:", err);
-        setCredits(-1);
+        if (!cancelled) {
+          console.error("Failed to fetch credits:", err);
+          setCredits(-1);
+        }
       });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // * Determine which field to auto-focus (first empty one)
@@ -136,6 +144,12 @@ export function MailFinderFormView({
 
   async function handleSubmit(values: { firstName: string; lastName: string; domain: string }) {
     const { firstName, lastName, domain } = values;
+
+    if (!firstName.trim() || !lastName.trim() || !domain.trim()) {
+      setError("First name, last name, and domain are all required.");
+      return;
+    }
+
     setIsLoading(true);
     setError(undefined);
 

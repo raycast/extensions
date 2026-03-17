@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mail-finder",
-  "title": "Mail-Finder.org",
+  "title": "Mail Finder",
   "description": "Find the verified email address of any professional.",
   "icon": "extension-icon-2.png",
   "author": "morrissimons",
@@ -18,7 +18,7 @@
     {
       "name": "mail-finder",
       "title": "Find Email",
-      "subtitle": "Mail-Finder.org",
+      "subtitle": "Mail Finder",
       "description": "Search for name and domain to find an email",
       "mode": "view",
       "file": "mail-finder.tsx",
@@ -46,7 +46,7 @@
     {
       "name": "search-history",
       "title": "Search History",
-      "subtitle": "Mail-Finder.org",
+      "subtitle": "Mail Finder",
       "description": "Browse past email searches, rerun them, or clear history",
       "mode": "view",
       "file": "search-history.tsx"
@@ -54,7 +54,7 @@
     {
       "name": "company-employees",
       "title": "Browse Employees",
-      "subtitle": "Mail-Finder.org",
+      "subtitle": "Mail Finder",
       "description": "Search by company domain to list employees grouped by department",
       "mode": "view",
       "file": "company-employees.tsx",
@@ -79,8 +79,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^1.17.0",
-    "@supabase/supabase-js": "^2.49.4"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

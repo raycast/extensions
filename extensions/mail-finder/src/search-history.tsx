@@ -92,15 +92,19 @@ function HistoryResultView({ entry }: { entry: SearchHistoryEntry }) {
             title="Run Search"
             icon={Icon.MagnifyingGlass}
             onAction={async () => {
-              await launchCommand({
-                name: "mail-finder",
-                type: LaunchType.UserInitiated,
-                arguments: {
-                  firstName: entry.firstName,
-                  lastName: entry.lastName,
-                  domain: entry.domain,
-                },
-              });
+              try {
+                await launchCommand({
+                  name: "mail-finder",
+                  type: LaunchType.UserInitiated,
+                  arguments: {
+                    firstName: entry.firstName,
+                    lastName: entry.lastName,
+                    domain: entry.domain,
+                  },
+                });
+              } catch (err) {
+                console.error("Failed to launch command:", err);
+              }
             }}
           />
           {entry.email && (
@@ -183,11 +187,15 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
               title="Search Again"
               icon={Icon.MagnifyingGlass}
               onAction={async () => {
-                await launchCommand({
-                  name: "company-employees",
-                  type: LaunchType.UserInitiated,
-                  arguments: { domain: entry.domain },
-                });
+                try {
+                  await launchCommand({
+                    name: "company-employees",
+                    type: LaunchType.UserInitiated,
+                    arguments: { domain: entry.domain },
+                  });
+                } catch (err) {
+                  console.error("Failed to launch command:", err);
+                }
               }}
             />
           </ActionPanel>
@@ -241,11 +249,15 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
                 title="Search Again"
                 icon={Icon.MagnifyingGlass}
                 onAction={async () => {
-                  await launchCommand({
-                    name: "company-employees",
-                    type: LaunchType.UserInitiated,
-                    arguments: { domain: entry.domain },
-                  });
+                  try {
+                    await launchCommand({
+                      name: "company-employees",
+                      type: LaunchType.UserInitiated,
+                      arguments: { domain: entry.domain },
+                    });
+                  } catch (err) {
+                    console.error("Failed to launch command:", err);
+                  }
                 }}
               />
             </ActionPanel>
@@ -272,15 +284,19 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
                     title="Reveal Profile"
                     icon={Icon.Person}
                     onAction={async () => {
-                      await launchCommand({
-                        name: "mail-finder",
-                        type: LaunchType.UserInitiated,
-                        arguments: {
-                          firstName: employee.firstName,
-                          lastName: employee.lastName,
-                          domain: entry.domain,
-                        },
-                      });
+                      try {
+                        await launchCommand({
+                          name: "mail-finder",
+                          type: LaunchType.UserInitiated,
+                          arguments: {
+                            firstName: employee.firstName,
+                            lastName: employee.lastName,
+                            domain: entry.domain,
+                          },
+                        });
+                      } catch (err) {
+                        console.error("Failed to launch command:", err);
+                      }
                     }}
                   />
                   {employee.linkedinUrl && (
@@ -317,11 +333,15 @@ function CachedCompanyEmployeesView({ entry }: { entry: CompanySearchHistoryEntr
                   title="Continue Search"
                   icon={Icon.MagnifyingGlass}
                   onAction={async () => {
-                    await launchCommand({
-                      name: "company-employees",
-                      type: LaunchType.UserInitiated,
-                      arguments: { domain: entry.domain },
-                    });
+                    try {
+                      await launchCommand({
+                        name: "company-employees",
+                        type: LaunchType.UserInitiated,
+                        arguments: { domain: entry.domain },
+                      });
+                    } catch (err) {
+                      console.error("Failed to launch command:", err);
+                    }
                   }}
                 />
               </ActionPanel>
@@ -350,15 +370,19 @@ export default function Command() {
   });
 
   async function handleRunSearch(entry: SearchHistoryEntry) {
-    await launchCommand({
-      name: "mail-finder",
-      type: LaunchType.UserInitiated,
-      arguments: {
-        firstName: entry.firstName,
-        lastName: entry.lastName,
-        domain: entry.domain,
-      },
-    });
+    try {
+      await launchCommand({
+        name: "mail-finder",
+        type: LaunchType.UserInitiated,
+        arguments: {
+          firstName: entry.firstName,
+          lastName: entry.lastName,
+          domain: entry.domain,
+        },
+      });
+    } catch (err) {
+      console.error("Failed to launch command:", err);
+    }
   }
 
   async function handleRemove(entry: HistoryEntry) {
@@ -414,7 +438,7 @@ export default function Command() {
                 : getFavicon(`https://${entry.domain}`, { fallback: Icon.Building })
             }
             accessories={[
-              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString() },
+              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString("en-US") },
             ]}
             actions={
               <ActionPanel>
@@ -428,11 +452,15 @@ export default function Command() {
                   icon={Icon.ArrowClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={async () => {
-                    await launchCommand({
-                      name: "company-employees",
-                      type: LaunchType.UserInitiated,
-                      arguments: { domain: entry.domain },
-                    });
+                    try {
+                      await launchCommand({
+                        name: "company-employees",
+                        type: LaunchType.UserInitiated,
+                        arguments: { domain: entry.domain },
+                      });
+                    } catch (err) {
+                      console.error("Failed to launch command:", err);
+                    }
                   }}
                 />
                 <Action.CopyToClipboard
@@ -471,7 +499,7 @@ export default function Command() {
               entry.email
                 ? { text: entry.email, icon: Icon.Envelope }
                 : { text: entry.error ?? "Failed", icon: Icon.ExclamationMark },
-              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString() },
+              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString("en-US") },
             ]}
             actions={
               <ActionPanel>
