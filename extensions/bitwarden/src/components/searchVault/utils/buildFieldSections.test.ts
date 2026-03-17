@@ -79,16 +79,16 @@ describe("buildFieldSections", () => {
       expect(sections[0]!.title).toBe("Login");
       expect(sections[0]!.fields).toHaveLength(3);
       expect(sections[0]!.fields[0]).toMatchObject({
-        type: "text",
-        id: "login.username",
-        label: "Username",
-        value: "u1",
-      });
-      expect(sections[0]!.fields[1]).toMatchObject({
         type: "hidden",
         id: "login.password",
         label: "Password",
         value: "p1",
+      });
+      expect(sections[0]!.fields[1]).toMatchObject({
+        type: "text",
+        id: "login.username",
+        label: "Username",
+        value: "u1",
       });
       expect(sections[0]!.fields[2]).toMatchObject({
         type: "totp",
