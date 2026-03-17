@@ -38,7 +38,7 @@ export async function listAgentKeys(): Promise<SSHKey[]> {
         algorithm: algorithmL,
         fingerprint: fingerprint,
         comment: commentL,
-        storageType: "hardware",
+        storageType: algorithmL.endsWith("-sk") ? "hardware" : "file",
         hasPassphrase: false,
         createdAt: new Date(),
       });

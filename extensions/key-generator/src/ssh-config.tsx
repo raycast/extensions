@@ -139,6 +139,17 @@ export default function Command() {
 
   async function handleConnect(config: SSHHostConfig) {
     try {
+      const hostPattern = config.host?.trim() || "";
+      const hostName = config.hostName?.trim() || "";
+      if (/[*?]/.test(hostPattern) && (hostName === "" || hostName === hostPattern)) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot connect wildcard host",
+          message: "Select a concrete host entry instead of a wildcard Host pattern.",
+        });
+        return;
+      }
+
       const sshCommand = buildSshCommand(config);
       const escapedCommand = escapeAppleScriptString(sshCommand);
       const { execFile } = await import("child_process");
