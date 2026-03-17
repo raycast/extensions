@@ -8,6 +8,7 @@ export default function LoadCoAuthorsFromFolder() {
   const nav = useNavigation();
   const [authors, setAuthors] = useState<AuthorMap>(new Map());
   const scanIdRef = useRef(0);
+  const isScanningRef = useRef(false);
 
   return (
     <Form
@@ -38,12 +39,15 @@ export default function LoadCoAuthorsFromFolder() {
         canChooseFiles={false}
         onChange={async (selection) => {
           if (selection.length === 0) {
+            const wasScanning = isScanningRef.current;
+            isScanningRef.current = false;
             ++scanIdRef.current; // invalidate any in-flight scan
             setAuthors(new Map());
-            await showToast({ style: Toast.Style.Failure, title: "Scan cancelled" });
+            if (wasScanning) await showToast({ style: Toast.Style.Failure, title: "Scan cancelled" });
             return;
           }
 
+          isScanningRef.current = true;
           const currentScanId = ++scanIdRef.current;
 
           try {
@@ -54,6 +58,7 @@ export default function LoadCoAuthorsFromFolder() {
             if (currentScanId !== scanIdRef.current) return;
 
             if (repos.length === 0) {
+              isScanningRef.current = false;
               await showToast(Toast.Style.Failure, "No git repositories found in folder");
               return;
             }
@@ -70,9 +75,11 @@ export default function LoadCoAuthorsFromFolder() {
             }
             setAuthors(newAuthors);
 
+            isScanningRef.current = false;
             await showToast(Toast.Style.Success, `Found authors in ${repos.length} repos`);
           } catch (e) {
             if (currentScanId !== scanIdRef.current) return;
+            isScanningRef.current = false;
             await showToast(Toast.Style.Failure, "Failed to scan folder");
             console.error(e);
           }
