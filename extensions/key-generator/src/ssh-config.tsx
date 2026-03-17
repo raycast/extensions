@@ -185,6 +185,23 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search hosts...">
+      {!isLoading && configs.length === 0 && (
+        <List.EmptyView
+          title="No SSH Hosts"
+          description="Create your first SSH config entry to get started."
+          actions={
+            <ActionPanel>
+              <Action
+                title="New Host Entry"
+                icon={Icon.Plus}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                onAction={() => push(<HostForm onSave={loadConfig} />)}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
+
       {configs.map((config: SSHHostConfig, index: number) => (
         <List.Item
           key={`${config.host}-${index}`}
