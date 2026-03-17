@@ -9,7 +9,43 @@ import os from "os";
 export default function Command() {
   const { push } = useNavigation();
   const [storageMode, setStorageMode] = useState<string>("file");
+  const [algorithm, setAlgorithm] = useState<string>("ed25519");
+  const [filename, setFilename] = useState<string>("id_ed25519");
   const [isLoading, setIsLoading] = useState(false);
+
+  function getDefaultAlgorithm(mode: string) {
+    return mode === "hardware" ? "ed25519-sk" : "ed25519";
+  }
+
+  function getDefaultFilename(selectedAlgorithm: string) {
+    if (selectedAlgorithm === "ed25519") return "id_ed25519";
+    if (selectedAlgorithm === "ecdsa") return "id_ecdsa";
+    if (selectedAlgorithm === "ed25519-sk") return "id_ed25519_sk";
+    if (selectedAlgorithm === "ecdsa-sk") return "id_ecdsa_sk";
+    return `id_${selectedAlgorithm.replace(/-/g, "_")}`;
+  }
+
+  function handleStorageModeChange(nextStorageMode: string) {
+    const nextAlgorithm = getDefaultAlgorithm(nextStorageMode);
+    const previousDefaultFilename = getDefaultFilename(algorithm);
+    const nextDefaultFilename = getDefaultFilename(nextAlgorithm);
+
+    setStorageMode(nextStorageMode);
+    setAlgorithm(nextAlgorithm);
+    setFilename((currentFilename) =>
+      currentFilename === previousDefaultFilename ? nextDefaultFilename : currentFilename,
+    );
+  }
+
+  function handleAlgorithmChange(nextAlgorithm: string) {
+    const previousDefaultFilename = getDefaultFilename(algorithm);
+    const nextDefaultFilename = getDefaultFilename(nextAlgorithm);
+
+    setAlgorithm(nextAlgorithm);
+    setFilename((currentFilename) =>
+      currentFilename === previousDefaultFilename ? nextDefaultFilename : currentFilename,
+    );
+  }
 
   async function handleSubmit(values: {
     algorithm?: string;
@@ -79,15 +115,17 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="storageMode" title="Storage Mode" defaultValue="file" onChange={setStorageMode}>
+      <Form.Dropdown id="storageMode" title="Storage Mode" value={storageMode} onChange={handleStorageModeChange}>
         <Form.Dropdown.Item value="file" title="📁 Direct File (Standard)" />
         <Form.Dropdown.Item value="hardware" title="🔑 Hardware Security Key (FIDO)" />
       </Form.Dropdown>
 
       <Form.Dropdown
+        key={storageMode}
         id="algorithm"
         title="Algorithm"
-        defaultValue={storageMode === "hardware" ? "ed25519-sk" : "ed25519"}
+        value={algorithm}
+        onChange={handleAlgorithmChange}
       >
         {storageMode === "hardware" ? (
           <>
@@ -102,7 +140,7 @@ export default function Command() {
         )}
       </Form.Dropdown>
 
-      <Form.TextField id="filename" title="Filename" placeholder="id_ed25519" defaultValue={`id_ed25519`} />
+      <Form.TextField id="filename" title="Filename" placeholder="id_ed25519" value={filename} onChange={setFilename} />
 
       <Form.TextField id="comment" title="Comment" placeholder="Optional comment" />
 
