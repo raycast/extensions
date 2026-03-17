@@ -15,7 +15,13 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { extractRelatedTermsFromHtml, searchDocs, searchGlossary, splitAssociatedLinks } from "./api";
+import {
+  deriveDocsCategoryFromUrl,
+  extractRelatedTermsFromHtml,
+  searchDocs,
+  searchGlossary,
+  splitAssociatedLinks,
+} from "./api";
 import type { BookmarksSetter, BookmarksState } from "./bookmarks-storage";
 import { usePersistentBookmarks } from "./bookmarks-storage";
 import { raycastCommandLink } from "./config";
@@ -619,11 +625,13 @@ function DocsDetailView({
   setBookmarks: BookmarksSetter;
   onOpenItem: (item: DocsSearchResult) => void;
 }) {
-  const [, setSelectedProduct] = useCachedState<DocsProduct>("craft-docs-selected-product");
+  const preferences = getPreferenceValues<Preferences.SearchDocs>();
+  const [selectedProduct] = useCachedState<DocsProduct>("craft-docs-selected-product", DOC_PRODUCTS[0].value);
   const isBookmarked = useMemo(
     () => (bookmarks ?? []).some((bookmark) => bookmark.url === item.url),
     [bookmarks, item.url],
   );
+  const backToDocsTitle = getBackToDocsTitle(selectedProduct, preferences);
 
   function addBookmark(detailItem: DocsSearchResult) {
     setBookmarks((current) => {
@@ -638,8 +646,7 @@ function DocsDetailView({
   }
 
   async function backToDocs() {
-    setSelectedProduct("all");
-    await open(raycastCommandLink({ product: "all" }));
+    await open(raycastCommandLink({}));
   }
 
   return (
@@ -694,7 +701,7 @@ function DocsDetailView({
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action
-            title="Back to Docs"
+            title={backToDocsTitle}
             icon={ACTION_ICONS.backToDocs}
             onAction={backToDocs}
             shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
@@ -740,6 +747,7 @@ function DocsMetadata({
   const docs = item.docsLinks ?? [];
   const relatedTerms = item.relatedTerms ?? [];
   const isGlossaryItem = linkDestinationForUrl(item.url) === "Glossary";
+  const category = item.category ?? deriveDocsCategoryFromUrl(item.url);
   const versionMetadata = getVersionMetadata(item, preferences);
 
   return (
@@ -808,7 +816,8 @@ function DocsMetadata({
               ))}
             </List.Item.Detail.Metadata.TagList>
           )}
-          {versionMetadata && <List.Item.Detail.Metadata.Separator />}
+          {(category || versionMetadata) && <List.Item.Detail.Metadata.Separator />}
+          {category && <List.Item.Detail.Metadata.Label title="Category" text={category} />}
           {versionMetadata && (
             <List.Item.Detail.Metadata.Label title={versionMetadata.title} text={versionMetadata.text} />
           )}
@@ -1237,6 +1246,15 @@ function getDropdownTitle(product: DocsProduct, preferences: Preferences.SearchD
   if (product === "commerce") return `Commerce (${preferences.commerceVersion})`;
   const base = DOC_PRODUCTS.find((item) => item.value === product);
   return base?.title ?? product;
+}
+
+function getBackToDocsTitle(product: DocsProduct, preferences: Preferences.SearchDocs): string {
+  if (product === "bookmarks") return "Back to Bookmarks";
+  const title = getDropdownTitle(product, preferences).replace(/ \([^)]*\)$/, "");
+  if (product === "cms" || product === "commerce" || product === "cloud") {
+    return `Back to ${title} Docs`;
+  }
+  return `Back to ${title}`;
 }
 
 function buildSearchPlaceholder(product: DocsProduct, preferences: Preferences.SearchDocs): string {

@@ -30,6 +30,7 @@ export interface DocsSearchResult {
   summaryPlain?: string;
   summaryHtml?: string;
   section?: string;
+  category?: string;
   type?: string;
   docsLinks?: DocsLink[];
   relatedTerms?: RelatedTerm[];

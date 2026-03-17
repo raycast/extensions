@@ -55,6 +55,37 @@ export async function searchDocs(
   return normalizeDocsResults(data);
 }
 
+export function deriveDocsCategoryFromUrl(url: string): string | undefined {
+  let pathname: string;
+  try {
+    pathname = new URL(url).pathname;
+  } catch {
+    return undefined;
+  }
+
+  const segments = pathname
+    .split("/")
+    .filter(Boolean)
+    .map((segment) => decodeURIComponent(segment).replace(/\.html$/i, ""));
+
+  if (segments[0] !== "docs") return undefined;
+
+  let docsSegments = segments.slice(1);
+  if (docsSegments[0] === "commerce" || docsSegments[0] === "cloud") {
+    docsSegments = docsSegments.slice(1);
+  }
+
+  if (docsSegments.length === 0) return undefined;
+  if (/^[1-5]\.x$/i.test(docsSegments[0])) {
+    docsSegments = docsSegments.slice(1);
+  }
+
+  if (docsSegments.length === 1) return "Getting Started";
+  if (docsSegments.length === 0) return undefined;
+
+  return docsSegments.slice(0, -1).map(formatCategorySegment).join(" -> ");
+}
+
 async function fetchWithTimeout(input: string | URL, init: RequestInit = {}, timeoutMs: number) {
   if (!timeoutMs || timeoutMs <= 0) return fetch(input, init);
 
@@ -141,6 +172,7 @@ function normalizeDocsResults(payload: unknown): DocsSearchResult[] {
       summaryPlain: summaryPlain?.trim(),
       summaryHtml,
       section: section?.trim(),
+      category: deriveDocsCategoryFromUrl(url),
       type: type?.trim(),
       docsLinks,
       relatedTerms,
@@ -217,6 +249,25 @@ function isVersionNumber(value: string): value is "1" | "2" | "3" | "4" | "5" {
 function extractGlossarySlug(url: string): string | undefined {
   const match = url.toLowerCase().match(/\/glossary\/([a-z0-9-]+)(?:\/|$|[?#])/);
   return match?.[1];
+}
+
+function formatCategorySegment(segment: string): string {
+  const withSpaces = segment
+    .replace(/[-_]+/g, " ")
+    .replace(/\band\b/gi, "and")
+    .trim();
+
+  if (!withSpaces) return segment;
+
+  return withSpaces
+    .split(/\s+/)
+    .map((word) => {
+      if (word.toUpperCase() === "API") return "API";
+      if (word.toUpperCase() === "CMS") return "CMS";
+      if (word.toUpperCase() === "DB") return "DB";
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
 }
 
 function extractLinkCandidates(row: Record<string, unknown>): DocsLink[] | undefined {
