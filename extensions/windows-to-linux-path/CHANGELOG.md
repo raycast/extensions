@@ -1,6 +1,6 @@
 # Windows To Linux Path
 
-## [v1.1.0 mnt prefix] - {PR_MERGE_DATE}
+## [v1.1.0 mnt prefix] - 2026-03-17
 
 Add `/mnt/` prefix
 
