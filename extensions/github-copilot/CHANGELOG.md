@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [View live agent logs] - {PR_MERGE_DATE}
+## [View live agent logs] - 2026-03-17
 
 - Allow viewing the live agent logs for a task with the "View Tasks" command
 
