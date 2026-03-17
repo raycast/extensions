@@ -1,6 +1,6 @@
 # Orbit Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-17
 
 - Added AI extension tools:
   - Search Orbit: Opens Orbit Search with a provided query.
