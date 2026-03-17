@@ -1,6 +1,6 @@
 # Weather Changelog
 
-## [Fix wttr.in API compatibility] - {PR_MERGE_DATE}
+## [Fix wttr.in API compatibility] - 2026-03-17
 
 - Handle new `data` wrapper in wttr.in JSON response.
 - Handle removed `nearest_area` field with coordinate display fallback.
