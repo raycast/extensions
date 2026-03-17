@@ -6,6 +6,14 @@ function buildLoginSections(login: Login): FieldSection[] {
   const sections: FieldSection[] = [];
   const mainLoginFields: ItemField[] = [];
 
+  if (login.password) {
+    mainLoginFields.push({
+      type: "hidden",
+      id: "login.password",
+      label: "Password",
+      value: login.password,
+    });
+  }
   if (login.username) {
     mainLoginFields.push({
       type: "text",
@@ -13,14 +21,6 @@ function buildLoginSections(login: Login): FieldSection[] {
       label: "Username",
       value: login.username,
       icon: Icon.PersonCircle,
-    });
-  }
-  if (login.password) {
-    mainLoginFields.push({
-      type: "hidden",
-      id: "login.password",
-      label: "Password",
-      value: login.password,
     });
   }
   if (login.totp) {
@@ -239,19 +239,27 @@ export function buildFieldSections(item: Item): FieldSection[] {
 
   switch (item.type) {
     case ItemType.LOGIN:
-      sections.push(...buildLoginSections(item.login!));
+      if (item.login) {
+        sections.push(...buildLoginSections(item.login));
+      }
       break;
 
     case ItemType.CARD:
-      sections.push(...buildCardSections(item.card!));
+      if (item.card) {
+        sections.push(...buildCardSections(item.card));
+      }
       break;
 
     case ItemType.IDENTITY:
-      sections.push(...buildIdentitySections(item.identity!));
+      if (item.identity) {
+        sections.push(...buildIdentitySections(item.identity));
+      }
       break;
 
     case ItemType.SSH_KEY:
-      sections.push(...buildSshKeySections(item.sshKey!));
+      if (item.sshKey) {
+        sections.push(...buildSshKeySections(item.sshKey));
+      }
       break;
   }
 
