@@ -48,6 +48,14 @@ export async function ensureUniqueFilename(
   let candidate = filename;
   let counter = 2;
 
+  // Note: This function performs an existence check loop using `access`.
+  // Between the existence check and a subsequent caller write/rename there
+  // is a theoretical TOCTOU race where another process could create the
+  // file. In practice this helper is only used from
+  // `renameNoteFromTitleIfNeeded` immediately before a `rename()` call,
+  // which minimizes the window. If stricter atomic guarantees are
+  // required, this helper would need to be reworked to acquire a unique
+  // path using an exclusive create or a centralized lock.
   while (true) {
     try {
       await access(path.join(dir, candidate), constants.F_OK);

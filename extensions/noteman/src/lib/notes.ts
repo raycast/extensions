@@ -158,6 +158,15 @@ export async function listMarkdownFileMetadata(
 
       try {
         const fileStats = await stat(filePath);
+        // Title resolution strategy:
+        // - For filenames that match the extension's own created pattern
+        //   (e.g. "YYYY-MM-DD HHmm - slug.md"), we derive the visible
+        //   title from the slug rather than reading the file's H1 heading.
+        //   This keeps the Browse Notes list stable when users rename the
+        //   note via the UI. The tradeoff is that if a user edits the
+        //   H1 heading in an external editor, the list will not reflect
+        //   that change — the title remains derived from the filename's
+        //   slug. This is an intentional design decision and not a bug.
         const shouldReadForTitle =
           !isDailyFilename(entry.name) &&
           !/^\d{4}-\d{2}-\d{2}\s\d{4}\s-\s.+\.md$/i.test(entry.name);
