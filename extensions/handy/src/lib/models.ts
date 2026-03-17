@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from "fs";
+import { existsSync, readdirSync, statSync } from "fs";
 import { join } from "path";
 import { MODELS_DIR } from "./constants";
 
@@ -117,14 +117,19 @@ export function getDownloadedModels(modelsDir = MODELS_DIR): ModelInfo[] {
   let custom: ModelInfo[] = [];
   try {
     custom = readdirSync(modelsDir)
-      .filter((f) => f.endsWith(".bin") && !knownFilenames.has(f))
-      .map((f) => ({
-        id: f,
-        name: f,
-        description: "Custom model",
-        filename: f,
-        isDirectory: false,
-      }));
+      .filter((f) => !knownFilenames.has(f))
+      .map((f) => {
+        const isDir = statSync(join(modelsDir, f)).isDirectory();
+        if (!isDir && !f.endsWith(".bin")) return null;
+        return {
+          id: f,
+          name: f,
+          description: "Custom model",
+          filename: f,
+          isDirectory: isDir,
+        };
+      })
+      .filter(Boolean) as ModelInfo[];
   } catch {
     /* models dir not created yet */
   }
