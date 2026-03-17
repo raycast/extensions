@@ -10,7 +10,7 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
   const isOnThisDay = categoryId === "onthisday";
   const isChaosIndex = categoryId === "chaos";
   const [batchId, setBatchId] = useState<string | null>(providedBatchId || null);
-  const [isLoadingBatch, setIsLoadingBatch] = useState(!providedBatchId);
+  const [isLoadingBatch, setIsLoadingBatch] = useState(!providedBatchId && !isChaosIndex);
   const [batchError, setBatchError] = useState<string | null>(null);
 
   useEffect(() => {
