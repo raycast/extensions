@@ -1,6 +1,6 @@
 # Easy New File Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-03-17
 
 - Fix incorrect file extension and file content when entering a plain filename with custom content
 
