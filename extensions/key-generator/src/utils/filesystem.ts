@@ -5,12 +5,12 @@ import { SSHKey, StorageType } from "../types/ssh";
 import { getFingerprint } from "./ssh";
 
 export async function listAgentKeys(): Promise<SSHKey[]> {
-  const { exec } = await import("child_process");
+  const { execFile } = await import("child_process");
   const { promisify } = await import("util");
-  const execAsync = promisify(exec);
+  const execFileAsync = promisify(execFile);
   try {
-    const { stdout: lOut } = await execAsync("ssh-add -l");
-    const { stdout: LOut } = await execAsync("ssh-add -L");
+    const { stdout: lOut } = await execFileAsync("ssh-add", ["-l"]);
+    const { stdout: LOut } = await execFileAsync("ssh-add", ["-L"]);
 
     const lLines = lOut.trim().split("\n");
     const LLines = LOut.trim().split("\n");

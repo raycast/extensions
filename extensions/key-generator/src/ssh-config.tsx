@@ -201,9 +201,21 @@ export default function Command() {
                 icon={Icon.Document}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={async () => {
-                  import("child_process").then(({ exec }) => {
-                    exec(`open -e ~/.ssh/config`);
-                  });
+                  try {
+                    const { execFile } = await import("child_process");
+                    const { promisify } = await import("util");
+                    const execFileAsync = promisify(execFile);
+                    const path = await import("path");
+                    const os = await import("os");
+
+                    await execFileAsync("open", ["-e", path.join(os.homedir(), ".ssh", "config")]);
+                  } catch (error) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Failed to open config",
+                      message: String(error),
+                    });
+                  }
                 }}
               />
               <Action
