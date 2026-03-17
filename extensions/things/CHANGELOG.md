@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Quick Find] - {PR_MERGE_DATE}
+## [Quick Find] - 2026-03-17
 
 - Added a new command "Quick Find" to search across all areas, projects, and to-dos.
 
