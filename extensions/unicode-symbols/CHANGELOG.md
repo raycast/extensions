@@ -1,5 +1,14 @@
 # Unicode Symbols
 
+## [Add README] - 2026-02-10
+
+- Add README to explain to users how to configure the extension, in order to prevent unnecessary issues to be opened.
+
+## [Update Keyboard Shortcuts] - 2025-12-18
+
+- Update keyboard shortcuts for Windows compatibility
+- Change the "copy" and "paste" shortcuts to not clash with native shortcuts (ref: [Issue #23441](https://github.com/raycast/extensions/issues/23441))
+
 ## [Bugfix] - 2025-10-30
 
 - Fixing an issue where it is filtered out characters because of improper search logic (ref: [#22508](https://github.com/raycast/extensions/issues/22508))

@@ -1,5 +1,20 @@
 # Zeabur Changelog
 
+## [Feature] - 2026-03-01
+
+- Added the send email command to send emails through Zeabur Email API.
+
+## [Feature] - 2026-01-16
+
+- Added the AI Hub command to view your AI Hub balance and usage.
+
+## [Feature] - 2025-12-17
+
+- Added the manage servers command to manage the servers on Zeabur.
+- Added deploy template action, service count, and deployment count information to the template list.
+- Added the menu bar deployment command to see your Zeabur deployments at a glance.
+- Updated the menu bar projects command script.
+
 ## [Feature] - 2025-10-10
 
 - Added the menu bar projects command to see your Zeabur projects at a glance.

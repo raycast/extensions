@@ -10,6 +10,7 @@ import {
   getDocumentFolderOrganization,
   calculateETA,
 } from "./exportHelpers";
+import { toErrorMessage } from "./errorUtils";
 
 export interface ExportResult {
   noteId: string;
@@ -58,10 +59,10 @@ export class ExportService {
     tempDir: string;
     documentToFolders: Record<string, string>;
   }> {
-    const { maxItems = 500, includeOrganization = true } = options;
+    const { maxItems, includeOrganization = true } = options;
 
     // Validate parameters
-    const isValid = await validateExportParameters(items.length, { maxItems });
+    const isValid = await validateExportParameters(items.length, maxItems ? { maxItems } : {});
     if (!isValid) {
       throw new Error("Export validation failed");
     }
@@ -118,7 +119,7 @@ export class ExportService {
               };
             }
           } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
+            const errorMessage = toErrorMessage(error);
             const resultIndex = results.findIndex((r) => r.noteId === item.id);
             if (resultIndex !== -1) {
               results[resultIndex] = {
@@ -141,9 +142,9 @@ export class ExportService {
         onProgress(processedCount, items.length, eta);
       }
 
-      // Brief pause between batches
+      // Minimal pause between batches
       if (i + batchSize < items.length) {
-        const pauseTime = Math.max(50, Math.min(200, batchSize * 10));
+        const pauseTime = Math.max(25, Math.min(75, batchSize * 5));
         await new Promise((resolve) => setTimeout(resolve, pauseTime));
       }
     }
@@ -168,13 +169,12 @@ export class ExportService {
     try {
       await createZipArchive(tempDir, zipFileName);
       cleanupTempDirectory(tempDir);
-
-      await showExportSuccessToast(zipFileName);
+      await showExportSuccessToast();
     } catch (error) {
       cleanupTempDirectory(tempDir);
       toast.style = Toast.Style.Failure;
       toast.title = "Export failed";
-      toast.message = String(error);
+      toast.message = toErrorMessage(error);
       throw error;
     }
   }

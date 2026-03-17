@@ -21,24 +21,26 @@ function Devices() {
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   if (myDevicesError) {
-    <List isLoading={myDevicesIsLoading}>
-      <List.EmptyView
-        title="Unable to load devices"
-        description={getErrorMessage(myDevicesError)}
-        actions={
-          <ActionPanel>
-            <Action
-              icon={Icon.Repeat}
-              title="Refresh"
-              onAction={async () => {
-                myDevicesRevalidate();
-              }}
-              shortcut={Keyboard.Shortcut.Common.Refresh}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>;
+    return (
+      <List isLoading={myDevicesIsLoading}>
+        <List.EmptyView
+          title="Unable to load devices"
+          description={getErrorMessage(myDevicesError)}
+          actions={
+            <ActionPanel>
+              <Action
+                icon={Icon.Repeat}
+                title="Refresh"
+                onAction={async () => {
+                  myDevicesRevalidate();
+                }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
   }
 
   if (!Array.isArray(myDevicesData?.devices)) {

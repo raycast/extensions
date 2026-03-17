@@ -5,6 +5,9 @@
   "description": "Self-hosted photo and video management solution",
   "icon": "immich_new.png",
   "author": "xmok",
+  "contributors": [
+    "julien-wff"
+  ],
   "platforms": [
     "macOS",
     "Windows"

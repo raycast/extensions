@@ -46,10 +46,10 @@ export const sanitizeFileName = (fileName: string): string => {
  * Calculates dynamic batch size based on total number of items
  */
 export const getDynamicBatchSize = (totalItems: number): number => {
-  if (totalItems <= 10) return Math.min(5, totalItems);
-  if (totalItems <= 50) return Math.min(10, totalItems);
-  if (totalItems <= 150) return Math.min(15, totalItems);
-  return Math.min(20, totalItems);
+  if (totalItems <= 10) return Math.min(10, totalItems);
+  if (totalItems <= 50) return Math.min(15, totalItems);
+  if (totalItems <= 150) return Math.min(25, totalItems);
+  return Math.min(30, totalItems);
 };
 
 /**
@@ -57,17 +57,16 @@ export const getDynamicBatchSize = (totalItems: number): number => {
  */
 export const calculateETA = (remainingItems: number, batchSize: number): string => {
   const remainingBatches = Math.ceil(remainingItems / batchSize);
-  const etaSeconds = remainingBatches * (batchSize * 0.5 + 0.1);
+  // Faster estimate with optimized batch sizes and reduced delays
+  const etaSeconds = remainingBatches * (batchSize * 0.25 + 0.05);
   return etaSeconds > 60 ? `${Math.ceil(etaSeconds / 60)}m` : `${Math.ceil(etaSeconds)}s`;
 };
 
 /**
- * Formats progress message with percentage and ETA
+ * Formats progress message with ETA
  */
 export const formatProgressMessage = (processed: number, total: number, eta?: string): string => {
-  const progressPercent = Math.round((processed / total) * 100);
-  const baseMessage = `${processed}/${total} (${progressPercent}%)`;
-  return eta ? `${baseMessage} - ETA: ${eta}` : baseMessage;
+  return eta ? `${processed}/${total} • ~${eta}` : `${processed}/${total}`;
 };
 
 /**
@@ -183,7 +182,7 @@ export const createZipArchive = async (tempDir: string, zipFileName: string): Pr
     // Create a file to stream archive data to
     const output = createWriteStream(zipPath);
     const archive = archiver("zip", {
-      zlib: { level: 9 }, // Maximum compression
+      zlib: { level: 6 }, // Balanced compression (faster than level 9, still good ratio)
     });
 
     // Handle stream events
@@ -237,15 +236,20 @@ export const openDownloadsFolder = (): void => {
 };
 
 /**
- * Shows final export success toast with option to open Downloads folder
+ * Shows export completion toast (auto-falls back to HUD if window closed)
  */
-export const showExportSuccessToast = async (zipFileName: string): Promise<void> => {
+export const showExportSuccessToast = async (countOrName?: number | string): Promise<void> => {
+  let message = "Exported to Downloads";
+  if (typeof countOrName === "number") {
+    message = `Exported ${countOrName} ${countOrName === 1 ? "item" : "items"} to Downloads`;
+  } else if (typeof countOrName === "string" && countOrName.trim()) {
+    message = `Exported ${countOrName.trim()} to Downloads`;
+  }
   await showToast({
     style: Toast.Style.Success,
-    title: "Export complete!",
-    message: `Saved to Downloads/${zipFileName}`,
+    title: message,
     primaryAction: {
-      title: "Open Downloads Folder",
+      title: "Open Downloads",
       onAction: openDownloadsFolder,
     },
   });
@@ -255,8 +259,6 @@ export const showExportSuccessToast = async (zipFileName: string): Promise<void>
  * Validates export parameters and shows appropriate error messages
  */
 export const validateExportParameters = async (itemCount: number, options: ExportOptions = {}): Promise<boolean> => {
-  const maxItems = options.maxItems || 500;
-
   if (itemCount === 0) {
     await showToast({
       style: Toast.Style.Failure,
@@ -266,11 +268,12 @@ export const validateExportParameters = async (itemCount: number, options: Expor
     return false;
   }
 
-  if (itemCount > maxItems) {
+  // Only enforce maxItems limit if explicitly provided
+  if (options.maxItems && itemCount > options.maxItems) {
     await showToast({
       style: Toast.Style.Failure,
       title: "Too many items",
-      message: `Please select ${maxItems} or fewer items for export.`,
+      message: `Please select ${options.maxItems} or fewer items for export.`,
     });
     return false;
   }
@@ -316,9 +319,9 @@ export const processBatchWithProgress = async <T>(
 
     processedCount += batch.length;
 
-    // Brief pause between batches for cleanup
+    // Minimal pause between batches for cleanup
     if (i + batchSize < items.length) {
-      const pauseTime = Math.max(50, Math.min(200, batchSize * 10));
+      const pauseTime = Math.max(25, Math.min(75, batchSize * 5));
       await new Promise((resolve) => setTimeout(resolve, pauseTime));
     }
   }

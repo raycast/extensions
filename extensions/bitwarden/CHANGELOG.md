@@ -1,5 +1,26 @@
 # Bitwarden Changelog
 
+## [Fix Password Generation] - 2026-02-18
+
+- Fix password generation failing due to false boolean options
+
+## [Fix & Improvements] - 2026-02-17
+
+- Fix potential stale session token issue
+- Small feedback improvements
+
+## [Fix & Feature] - 2026-02-16
+
+- Fix unhandled error when unlocking vault
+- Fix mismatched Windows CLI binary hash
+- Add support for Steam Guard TOTP
+
+## [Fix Password Generation] - 2026-02-11
+
+- Fix password generation failing due to values passed to boolean options
+
+## [Added PasteUsernameAction] - 2026-01-01
+
 ## [Added support for Windows] - 2025-10-15
 
 ## [New Command] - 2025-10-07

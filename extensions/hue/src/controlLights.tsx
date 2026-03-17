@@ -108,7 +108,9 @@ function Light(props: {
             {props.light.dimming !== undefined && (
               <SetBrightnessAction
                 light={props.light}
-                onSet={(percentage: number) => handleSetBrightness(props.useHue, props.light, percentage)}
+                onSet={(percentage: number) =>
+                  handleSetBrightness(props.useHue, props.rateLimiter, props.light, percentage)
+                }
               />
             )}
             {props.light.dimming !== undefined && (
@@ -129,7 +131,7 @@ function Light(props: {
             {props.light.color !== undefined && (
               <SetColorAction
                 light={props.light}
-                onSet={(color: CssColor) => handleSetColor(props.useHue, props.light, color)}
+                onSet={(color: CssColor) => handleSetColor(props.useHue, props.rateLimiter, props.light, color)}
               />
             )}
             {props.light.color_temperature !== undefined && (
@@ -177,7 +179,10 @@ function SetBrightnessAction(props: { light: Light; onSet: (percentage: number) 
         (props.light.dimming?.brightness ?? 0) / 100,
         environment.appearance === "light" ? "#000" : "#fff",
       )}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "b" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+      }}
     >
       {BRIGHTNESSES.map((brightness) => (
         <Action key={brightness} title={`${brightness}% Brightness`} onAction={() => props.onSet(brightness)} />
@@ -194,7 +199,10 @@ function IncreaseBrightnessAction(props: { light: Light; onIncrease: () => void 
   return (
     <Action
       title="Increase Brightness"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowUp" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowUp" },
+      }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
@@ -209,7 +217,10 @@ function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void 
   return (
     <Action
       title="Decrease Brightness"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowDown" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowDown" },
+      }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
@@ -218,7 +229,14 @@ function DecreaseBrightnessAction(props: { light: Light; onDecrease: () => void 
 
 function SetColorAction(props: { light: Light; onSet: (color: CssColor) => void }) {
   return (
-    <ActionPanel.Submenu title="Set Color" icon={Icon.Swatch} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
+    <ActionPanel.Submenu
+      title="Set Color"
+      icon={Icon.Swatch}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+    >
       {COLORS.map((color) => (
         <Action key={color.name} title={color.name} icon={getIconForColor(color)} onAction={() => props.onSet(color)} />
       ))}
@@ -234,7 +252,10 @@ function IncreaseColorTemperatureAction(props: { light: Light; onIncrease?: () =
   return (
     <Action
       title="Increase Color Temperature"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowRight" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowRight" },
+      }}
       icon={Icon.Plus}
       onAction={props.onIncrease}
     />
@@ -249,7 +270,10 @@ function DecreaseColorTemperatureAction(props: { light: Light; onDecrease?: () =
   return (
     <Action
       title="Decrease Color Temperature"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "arrowLeft" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "arrowLeft" },
+      }}
       icon={Icon.Minus}
       onAction={props.onDecrease}
     />
@@ -280,14 +304,12 @@ async function handleToggle(
     });
 
     toast.style = Style.Success;
-    toast.title = light.on.on ? `Turned ${light.metadata.name} off` : `Turned ${light.metadata.name} on`;
+    toast.title = `Turned ${light?.on?.on ? "off" : "on"} ${light.metadata.name}`;
     await toast.show();
   } catch (error) {
     console.error(error);
     toast.style = Style.Failure;
-    toast.title = light.on.on
-      ? `Failed turning ${light.metadata.name} off`
-      : `Failed turning ${light.metadata.name} on`;
+    toast.title = `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
@@ -295,6 +317,7 @@ async function handleToggle(
 
 async function handleSetBrightness(
   { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
   light: Light,
   brightness: number,
 ) {
@@ -302,6 +325,8 @@ async function handleSetBrightness(
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
+    if (light.dimming === undefined) throw new Error("Light does not support dimming.");
+    if (!rateLimiter.canExecute()) return;
 
     const changes = {
       on: { on: true },
@@ -316,9 +341,7 @@ async function handleSetBrightness(
     });
 
     toast.style = Style.Success;
-    toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", {
-      style: "percent",
-    })}`;
+    toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`;
     await toast.show();
   } catch (error) {
     console.error(error);
@@ -358,28 +381,28 @@ async function handleBrightnessChange(
     });
 
     toast.style = Style.Success;
-    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(
-      adjustedBrightness / 100
-    ).toLocaleString("en", {
-      style: "percent",
-    })}`;
+    toast.title = `${direction === "increase" ? "Increased" : "Decreased"} brightness of ${light.metadata.name} to ${(adjustedBrightness / 100).toLocaleString("en", { style: "percent" })}`;
     await toast.show();
   } catch (error) {
     toast.style = Style.Failure;
-    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${
-      light.metadata.name
-    }`;
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} brightness of ${light.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }
 }
 
-async function handleSetColor({ hueBridgeState, setLights }: ReturnType<typeof useHue>, light: Light, color: CssColor) {
+async function handleSetColor(
+  { hueBridgeState, setLights }: ReturnType<typeof useHue>,
+  rateLimiter: ReturnType<typeof useInputRateLimiter>,
+  light: Light,
+  color: CssColor,
+) {
   const toast = new Toast({ title: "" });
 
   try {
     if (hueBridgeState.context.hueClient === undefined) throw new Error("Not connected to Hue Bridge.");
     if (light.color === undefined) throw new Error("Light does not support colors.");
+    if (!rateLimiter.canExecute()) return;
 
     const { xy, brightness } = hexToXy(color.value);
 
@@ -441,9 +464,7 @@ async function handleColorTemperatureChange(
     await toast.show();
   } catch (error) {
     toast.style = Style.Failure;
-    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${
-      light.metadata.name
-    }`;
+    toast.title = `Failed ${direction === "increase" ? "increasing" : "decreasing"} color temperature of ${light.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
     await toast.show();
   }

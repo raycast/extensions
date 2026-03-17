@@ -1,5 +1,6 @@
 import { promises as fs } from "fs";
 import { getSupabaseConfigPath } from "./granolaConfig";
+import { toErrorMessage } from "./errorUtils";
 
 interface UserInfo {
   id: string;
@@ -31,8 +32,7 @@ export async function getUserInfo(): Promise<UserInfo> {
       }
     } catch (error) {
       // Ensure error is treated as an Error object with a message property
-      const parseError = error instanceof Error ? error : new Error(String(error));
-      throw new Error(`Failed to parse user_info: ${parseError.message}`);
+      throw new Error(`Failed to parse user_info: ${toErrorMessage(error)}`);
     }
 
     // Extract user information
@@ -57,7 +57,7 @@ export async function getUserInfo(): Promise<UserInfo> {
     };
   } catch (error) {
     throw new Error(
-      `Failed to get Granola user info: ${error}. Please make sure Granola is installed, running, and that you are logged in to the application. Attempted to read from: ${filePath} (Platform: ${process.platform})`,
+      `Failed to get Granola user info: ${toErrorMessage(error)}. Please make sure Granola is installed, running, and that you are logged in to the application. Attempted to read from: ${filePath} (Platform: ${process.platform})`,
       { cause: error },
     );
   }

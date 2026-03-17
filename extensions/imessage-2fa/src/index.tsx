@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useMessages } from "./messages";
 import { useEmails } from "./emails";
 import { Message, SearchType, MessageSource, Preferences, VerificationLink } from "./types";
-import { extractCode, formatDate, extractVerificationLink } from "./utils";
+import { extractCode, formatDate, extractVerificationLink, extractTextFromBinaryData } from "./utils";
 // import applescript from "applescript"; // Unused import
 // import { promisify } from "util"; // Unused import
 import { runAppleScript } from "@raycast/utils";
@@ -56,7 +56,11 @@ export default function Command() {
   const data =
     messageSource === "imessage"
       ? preferences.enabledSources !== "email"
-        ? messageData?.map((m) => ({ ...m, source: "imessage" as const, displayText: m.text })) || []
+        ? messageData?.map((m) => ({
+            ...m,
+            source: "imessage" as const,
+            displayText: extractTextFromBinaryData(m.text),
+          })) || []
         : []
       : messageSource === "email"
       ? preferences.enabledSources !== "imessage"
@@ -65,7 +69,11 @@ export default function Command() {
       : [
           // When showing all sources, combine and sort by date
           ...(preferences.enabledSources !== "email"
-            ? messageData?.map((m) => ({ ...m, source: "imessage" as const, displayText: m.text })) || []
+            ? messageData?.map((m) => ({
+                ...m,
+                source: "imessage" as const,
+                displayText: extractTextFromBinaryData(m.text),
+              })) || []
             : []),
           ...(preferences.enabledSources !== "imessage"
             ? emailData?.map((m) => ({ ...m, source: "email" as const })) || []

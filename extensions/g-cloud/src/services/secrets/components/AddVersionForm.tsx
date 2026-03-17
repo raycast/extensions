@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { SecretManagerService } from "../SecretManagerService";
 
@@ -25,7 +24,8 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
 
   async function handleSubmit(values: { value: string }) {
     if (!values.value.trim()) {
-      showFailureToast("Validation Error", {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid Secret Value",
         message: "Secret value cannot be empty",
       });
@@ -36,27 +36,21 @@ export default function AddVersionForm({ secretId, projectId, gcloudPath, onVers
 
     try {
       const service = new SecretManagerService(gcloudPath, projectId);
-      const success = await service.addVersion(secretId, values.value);
+      await service.addVersion(secretId, values.value);
 
-      if (success) {
-        showToast({
-          style: Toast.Style.Success,
-          title: "Version added",
-          message: `New version has been added to secret "${secretId}"`,
-        });
-        onVersionAdded();
-        pop();
-      } else {
-        showFailureToast({
-          title: "Failed to add version",
-          message: "Version creation failed. Please check your permissions and try again.",
-        });
-      }
+      showToast({
+        style: Toast.Style.Success,
+        title: "Version added",
+        message: `New version has been added to secret "${secretId}"`,
+      });
+      onVersionAdded();
+      pop();
     } catch (error) {
       console.error("Failed to add version:", error);
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to add version",
-        message: error instanceof Error ? error.message : "Unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSubmitting(false);

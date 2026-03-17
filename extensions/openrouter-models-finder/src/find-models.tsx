@@ -8,7 +8,7 @@ import {
   Icon,
   Keyboard,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   fetchOpenRouterModels,
   OpenRouterModel,
@@ -108,16 +108,40 @@ export default function FindModels() {
     loadModels();
   }, []);
 
-  const filteredModels = models
-    .filter(
-      (model) =>
-        model.id.toLowerCase().includes(searchText.toLowerCase()) ||
-        model.name.toLowerCase().includes(searchText.toLowerCase()),
-    )
-    .sort((a, b) => {
-      // Sort by release date, newest first
-      return b.created - a.created;
+  const fuzzyMatch = (text: string, query: string): boolean => {
+    let queryIndex = 0;
+    for (let i = 0; i < text.length && queryIndex < query.length; i++) {
+      if (text[i] === query[queryIndex]) {
+        queryIndex++;
+      }
+    }
+    return queryIndex === query.length;
+  };
+
+  // Multi-term fuzzy search
+  const filteredModels = useMemo(() => {
+    if (!searchText.trim()) {
+      return [...models].sort((a, b) => b.created - a.created);
+    }
+
+    const searchTerms = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+
+    const filtered = models.filter((model) => {
+      const idLower = model.id.toLowerCase();
+      const nameLower = (model.name || "").toLowerCase();
+
+      // All search terms must fuzzy match in id or name
+      for (const term of searchTerms) {
+        if (!fuzzyMatch(idLower, term) && !fuzzyMatch(nameLower, term)) {
+          return false;
+        }
+      }
+
+      return true;
     });
+
+    return filtered.sort((a, b) => b.created - a.created);
+  }, [searchText, models]);
 
   async function copyToClipboard(modelId: string) {
     try {
@@ -166,8 +190,6 @@ export default function FindModels() {
                 onAction={() => copyToClipboard(model.name)}
               />
               <Action.OpenInBrowser
-                // Preserve brand capitalization; ignore title-case rule for brand names
-                // eslint-disable-next-line @raycast/prefer-title-case
                 title="View on OpenRouter"
                 shortcut={Keyboard.Shortcut.Common.Open}
                 url={`https://openrouter.ai/models/${model.id}`}

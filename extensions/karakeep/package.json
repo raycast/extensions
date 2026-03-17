@@ -13,73 +13,20 @@
   "categories": [
     "Web"
   ],
-  "license": "MIT",
-  "commands": [
-    {
-      "name": "bookmarks",
-      "title": "Bookmarks",
-      "subtitle": "Karakeep",
-      "description": "List all your bookmarks",
-      "mode": "view"
-    },
-    {
-      "name": "lists",
-      "title": "Lists",
-      "subtitle": "Karakeep",
-      "description": "List all your lists",
-      "mode": "view"
-    },
-    {
-      "name": "tags",
-      "title": "Tags",
-      "subtitle": "Karakeep",
-      "description": "List all your tags",
-      "mode": "view"
-    },
-    {
-      "name": "createBookmark",
-      "title": "Create Bookmark",
-      "subtitle": "Karakeep",
-      "description": "Create a new bookmark",
-      "mode": "view"
-    },
-    {
-      "name": "createNote",
-      "title": "Create Note",
-      "subtitle": "Karakeep",
-      "description": "Create a new note",
-      "mode": "view"
-    },
-    {
-      "name": "quickBookmark",
-      "title": "Quick Bookmark",
-      "subtitle": "Karakeep",
-      "description": "Quickly bookmark the current browser tab",
-      "mode": "no-view"
-    }
+  "keywords": [
+    "bookmark",
+    "link",
+    "note",
+    "image",
+    "ai",
+    "tag",
+    "search"
   ],
-  "dependencies": {
-    "@chrismessina/raycast-logger": "^1.0.0",
-    "@raycast/api": "^1.93.1",
-    "@raycast/utils": "^1.18.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "20.8.10",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "eslint": "^9.35.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
-  },
-  "scripts": {
-    "build": "ray build -e dist -o dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
-  },
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "preferences": [
     {
       "name": "language",
@@ -120,10 +67,10 @@
     {
       "name": "linkMainAction",
       "type": "dropdown",
-      "label": "default link action",
+      "label": "Default Link Action",
       "title": "Default Link Action",
       "required": false,
-      "description": "Select the default action when you click on a link",
+      "description": "Select the default action when opening a bookmark link",
       "data": [
         {
           "title": "Open in Browser",
@@ -142,10 +89,10 @@
     {
       "name": "textMainAction",
       "type": "dropdown",
-      "label": "default text action",
-      "title": "Default Text Action",
+      "label": "Default Note Action",
+      "title": "Default Note Action",
       "required": false,
-      "description": "Select the default action when you click on a text",
+      "description": "Select the default action when opening a note",
       "data": [
         {
           "title": "View Details",
@@ -235,9 +182,116 @@
       "description": "Display summary in the list",
       "default": false,
       "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Verbose Logging",
+      "label": "Enable detailed logging",
+      "description": "Show detailed logs in the Raycast console for debugging",
+      "default": false
     }
   ],
-  "platforms": [
-    "macOS"
-  ]
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Karakeep",
+      "description": "List all your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "Search Lists",
+      "subtitle": "Karakeep",
+      "description": "List all your lists",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Search Tags",
+      "subtitle": "Karakeep",
+      "description": "List all your tags",
+      "mode": "view"
+    },
+    {
+      "name": "createBookmark",
+      "title": "Create Bookmark",
+      "subtitle": "Karakeep",
+      "description": "Create a new bookmark",
+      "mode": "view"
+    },
+    {
+      "name": "createNote",
+      "title": "Create Note",
+      "subtitle": "Karakeep",
+      "description": "Create a new note",
+      "mode": "view"
+    },
+    {
+      "name": "createList",
+      "title": "Create List",
+      "subtitle": "Karakeep",
+      "description": "Create a new list",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Search Notes",
+      "subtitle": "Karakeep",
+      "description": "List all your notes",
+      "mode": "view"
+    },
+    {
+      "name": "highlights",
+      "title": "View Highlights",
+      "subtitle": "Karakeep",
+      "description": "View and manage your highlights",
+      "mode": "view"
+    },
+    {
+      "name": "stats",
+      "title": "My Stats",
+      "subtitle": "Karakeep",
+      "description": "View your Karakeep usage statistics",
+      "mode": "view"
+    },
+    {
+      "name": "backups",
+      "title": "List Backups",
+      "subtitle": "Karakeep",
+      "description": "Create, download, and delete account backups",
+      "mode": "view"
+    },
+    {
+      "name": "quickBookmark",
+      "title": "Quick Bookmark",
+      "subtitle": "Karakeep",
+      "description": "Quickly bookmark the current browser tab",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.35.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

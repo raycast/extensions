@@ -1,11 +1,12 @@
 import { List } from "@raycast/api";
 import json2md from "json2md";
 import groupBy from "lodash.groupby";
-import { PokemonV2Flavortext } from "../types";
+import { FlavorText } from "../types";
+import { fixFlavorText } from "../utils";
 
 export default function Descriptions(props: {
   name: string;
-  entries: PokemonV2Flavortext[];
+  entries: FlavorText[];
 }) {
   return (
     <List
@@ -16,16 +17,14 @@ export default function Descriptions(props: {
       {Object.entries(
         groupBy(
           props.entries,
-          (e) =>
-            e.pokemon_v2_versiongroup.pokemon_v2_generation
-              .pokemon_v2_generationnames[0].name,
+          (e) => e.versiongroup.generation.generationnames[0].name,
         ),
       ).map(([generation, groups]) => {
         return (
           <List.Section title={generation} key={generation}>
             {groups.map((entry, idx) => {
-              const title = entry.pokemon_v2_versiongroup.pokemon_v2_versions
-                .map((v) => v.pokemon_v2_versionnames[0].name)
+              const title = entry.versiongroup.versions
+                .map((v) => v.versionnames[0].name)
                 .join(" & ");
               return (
                 <List.Item
@@ -38,11 +37,7 @@ export default function Descriptions(props: {
                           h1: title,
                         },
                         {
-                          p: entry.flavor_text
-                            .split("\n")
-                            .join(" ")
-                            .split("")
-                            .join(" "),
+                          p: fixFlavorText(entry.flavor_text),
                         },
                       ])}
                     />

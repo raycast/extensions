@@ -41,9 +41,16 @@ const extendedAnimeBody = animeBody.extend({
       season: z.string(),
     })
     .optional(),
+  broadcast: z
+    .object({
+      day_of_the_week: z.string(),
+      start_time: z.string().optional(),
+    })
+    .optional(),
+  source: z.string().optional(),
   average_episode_duration: z.number(),
   rating: z.string().optional(),
-  studios: z.array(z.any()),
+  studios: z.array(z.object({ id: z.number(), name: z.string() })),
 });
 
 const animelistBody = z.object({

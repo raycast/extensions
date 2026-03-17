@@ -1,26 +1,29 @@
 import { List } from "@raycast/api";
 import groupBy from "lodash.groupby";
 import uniqBy from "lodash.uniqby";
-import { PokemonV2Encounter } from "../types";
+import { PokemonEncounter } from "../types";
 
 export default function PokemonEncounters(props: {
   name: string;
-  encounters: PokemonV2Encounter[];
+  encounters: PokemonEncounter[];
 }) {
   const generations = groupBy(
-    props.encounters,
-    (e) =>
-      e.pokemon_v2_version.pokemon_v2_versiongroup.pokemon_v2_generation
-        .pokemon_v2_generationnames[0].name,
+    props.encounters.filter(
+      (e) => e.version?.versiongroup?.generation?.generationnames?.[0]?.name,
+    ),
+    (e) => e.version.versiongroup.generation.generationnames[0].name,
   );
 
   return (
     <List throttle navigationTitle={`${props.name} | Where to find`}>
       {Object.entries(generations).map(([generation, groups]) => {
-        const locations = uniqBy(groups, (l) => l.pokemon_v2_locationarea.name);
+        const locations = uniqBy(
+          groups.filter((l) => l.locationarea),
+          (l) => l.locationarea.name,
+        );
         const versions = groupBy(
           locations,
-          (l) => l.pokemon_v2_version.pokemon_v2_versionnames[0].name,
+          (l) => l.version.versionnames[0]?.name || l.version.name,
         );
 
         return (
@@ -35,8 +38,8 @@ export default function PokemonEncounters(props: {
                       text: encounters
                         .map(
                           (e) =>
-                            e.pokemon_v2_locationarea
-                              .pokemon_v2_locationareanames[0]?.name || "",
+                            e.locationarea.locationareanames[0]?.name ||
+                            e.locationarea.name,
                         )
                         .filter((x) => !!x)
                         .join(", "),

@@ -1,5 +1,25 @@
 # GitHub Changelog
 
+## [Improve Auto-Merge Support] - 2026-03-05
+
+- Pull Requests: Fix auto-merge actions not appearing due to inverted condition
+- Pull Requests: Add merge method selection when enabling auto-merge
+- Pull Requests: Show "Auto-merge" tag in list and detail views
+- Create Pull Request: Add auto-merge option with merge method picker
+- Added AI tools to enable and disable auto-merge on pull requests
+
+## [Add Pagination Support to My Starred Repositories] - 2026-01-24
+
+- My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
+- My Starred Repositories: Added pagination to load all starred repositories beyond initial fetch limit
+- My Starred Repositories: Improved loading states with skeleton items during pagination
+- Enhanced type safety across repository components with generic types
+
+## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
+
+* Fix the clone command to append the target directory only when it exists
+* Always show the "Clone with Options" action instead of conditionally
+
 ## [Moved Contributor] - 2025-12-10
 
 ## [Fix filter visited repositories] - 2025-12-09

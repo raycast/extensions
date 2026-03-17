@@ -13,7 +13,6 @@ import {
 } from "@raycast/api";
 import { ComputeService, ComputeInstance } from "./ComputeService";
 import { useMemo, useCallback } from "react";
-import { showFailureToast } from "@raycast/utils";
 import { useStreamerMode } from "../../utils/useStreamerMode";
 import { maskIPIfEnabled, maskEmailIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
@@ -284,11 +283,13 @@ export default function ComputeInstanceDetailView({
       await onRefresh();
       popToRoot();
     } catch (error) {
-      showFailureToast(error, {
+      showToast({
+        style: Toast.Style.Failure,
         title: `Failed to Start ${instance.name}`,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  }, [instance.name, zone, service, onRefresh]);
+  }, [instance.name, zone, service, onRefresh, projectId]);
 
   const handleStopInstance = useCallback(async () => {
     const shouldProceed = await confirmAlert({
@@ -312,33 +313,27 @@ export default function ComputeInstanceDetailView({
       const result = await service.stopInstance(instance.name, zone);
       loadingToast.hide();
 
-      if (result.success) {
-        if (result.isTimedOut) {
-          showToast({
-            style: Toast.Style.Success,
-            title: `Stopping ${instance.name}`,
-            message: "The instance is in the process of stopping. This may take several minutes to complete.",
-          });
-        } else {
-          showToast({
-            style: Toast.Style.Success,
-            title: `Stopped ${instance.name}`,
-            message: "The instance has been stopped",
-          });
-        }
-
-        await onRefresh();
-        popToRoot();
+      if (result.isTimedOut) {
+        showToast({
+          style: Toast.Style.Success,
+          title: `Stopping ${instance.name}`,
+          message: "The instance is in the process of stopping. This may take several minutes to complete.",
+        });
       } else {
         showToast({
-          style: Toast.Style.Failure,
-          title: `Failed to Stop ${instance.name}`,
-          message: "An error occurred while trying to stop the VM",
+          style: Toast.Style.Success,
+          title: `Stopped ${instance.name}`,
+          message: "The instance has been stopped",
         });
       }
+
+      await onRefresh();
+      popToRoot();
     } catch (error) {
-      showFailureToast(error, {
+      showToast({
+        style: Toast.Style.Failure,
         title: `Failed to Stop ${instance.name}`,
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   }, [instance.name, zone, service, onRefresh]);

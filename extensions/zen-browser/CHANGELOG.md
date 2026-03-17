@@ -1,5 +1,9 @@
 # Zen Changelog
 
+## [Add Kagi Search Engine] - {PR-MERGE-DATE}
+
+- Added Kagi as a search engine option in the extension preferences.
+
 ## [Improved Bookmarks Search] - 2025-12-03
 
 - Enhanced bookmark search to also match URLs, not just bookmark titles.

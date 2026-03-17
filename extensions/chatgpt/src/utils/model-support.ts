@@ -69,6 +69,8 @@ export function filterModelsForAuth(models: Model[], authProvider: AuthProvider)
           prompt: "You are a helpful assistant.",
           option: DEFAULT_CHATGPT_CODEX_MODEL,
           temperature: "1",
+          enableReasoningEffortChange: false,
+          reasoningEffort: "medium",
           pinned: false,
           vision: false,
         };

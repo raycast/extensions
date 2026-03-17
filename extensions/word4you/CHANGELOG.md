@@ -1,5 +1,11 @@
 # Word4you Changelog
 
+## [Bump default model version] - 2026-01-06
+
+- Bump default model version to use more recent LLM models as default for better performance
+- Bump to use CLI version of 1.2.1
+- Show error detail message when LLM provider returns error, eg: invalid API key, quota exceeded, etc.
+
 ## [Add compose command] - 2025-12-05
 
 - Add a new command "Compose" to generate sentences with random 2 words using LLM providers

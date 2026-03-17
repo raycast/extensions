@@ -3,7 +3,7 @@ import { CacheKey, RAYCAST_WALLPAPER_LIST_URL } from "./utils/constants";
 import { RaycastWallpaper, RaycastWallpaperWithInfo } from "./types/types";
 import { captureException, closeMainWindow, environment, LaunchType, showHUD } from "@raycast/api";
 import axios from "axios";
-import { autoSetWallpaper, getSystemAppearance } from "./utils/applescript-utils";
+import { autoSetWallpaper, getSystemAppearance } from "./utils/platform-utils";
 import { refreshIntervalSeconds, respectAppearance } from "./types/preferences";
 import { getAppearanceByTitle } from "./utils/appearance-utils";
 import { showFailureToast } from "@raycast/utils";

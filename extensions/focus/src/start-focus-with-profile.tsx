@@ -1,26 +1,10 @@
-import { Toast, showToast, List, ActionPanel, Action, Icon } from "@raycast/api";
+import { Toast, showToast, showHUD, List, ActionPanel, Action, Icon, closeMainWindow } from "@raycast/api";
 import { getProfileNames, startFocusWithProfile, getActiveProfileName } from "./utils";
-import { useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { ensureFocusIsRunning } from "./helpers";
 
 export default function Command() {
-  const [profiles, setProfiles] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function fetchProfiles() {
-      if (!(await ensureFocusIsRunning())) {
-        setIsLoading(false);
-        return;
-      }
-
-      const fetchedProfiles = await getProfileNames();
-      setProfiles(fetchedProfiles);
-      setIsLoading(false);
-    }
-
-    fetchProfiles();
-  }, []);
+  const { data: profiles = [], isLoading } = useCachedPromise(getProfileNames);
 
   async function handleProfileSelection(profileName: string) {
     if (!(await ensureFocusIsRunning())) {
@@ -37,9 +21,9 @@ export default function Command() {
       return;
     }
 
-    await showToast({ style: Toast.Style.Animated, title: "Starting focus..." });
     await startFocusWithProfile(profileName);
-    await showToast({ style: Toast.Style.Success, title: `Focus started with profile: ${profileName}` });
+    await showHUD(`Focus started with profile: ${profileName}`);
+    await closeMainWindow();
   }
 
   return (

@@ -30,11 +30,10 @@ export function extractCode(original: string): string | null {
   if ((m = /^(\d{4,8})(\sis your.*code)/.exec(message)) !== null) {
     code = m[1];
   } else if (
-    // Look for the last occurrence of "code: DIGITS" pattern (including Japanese and full-width colons)
+    // Look for the last occurrence of "code: DIGITS" pattern
     // This helps with cases like "test code: test code: 883848" where we want the last match
-    // Supports: code:, is:, 码 (with or without colon), use code, passcode:, autorização:, código:, パスワード： (Japanese password)
     (m =
-      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
         message
       )) !== null
   ) {
@@ -42,12 +41,12 @@ export function extractCode(original: string): string | null {
     code = findLastMatchingCode(
       message,
       m,
-      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*(\d{4,8})($|\s|\\R|\t|\b|\.|,)/i
     );
   } else if (
-    // Modified to match alphanumeric codes (including Japanese and full-width colons)
+    // Modified to match alphanumeric codes
     (m =
-      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i.exec(
         message
       )) !== null
   ) {
@@ -55,7 +54,7 @@ export function extractCode(original: string): string | null {
     code = findLastMatchingCode(
       message,
       m,
-      /(code\s*[：:]|is\s*[：:]|码[：:]?|use code|passcode\s*[：:]|autoriza(?:ca|çã)o\s*[：:]|c(?:o|ó)digo\s*[：:]|パスワード[：:])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
+      /(code\s*[:：]|is\s*[:：]|码|use code|passcode\s*[:：]|autoriza(?:ca|çã)o\s*[:：]|c(?:o|ó)digo\s*[:：])\s*([A-Z0-9]{4,8})($|\s|\\R|\t|\b|\.|,)/i
     );
   } else {
     // more generic, brute force patterns
@@ -66,15 +65,15 @@ export function extractCode(original: string): string | null {
 
     message = message.replaceAll(phoneRegex, "");
 
-    if ((m = /(^|\s|\\R|\t|\b|G-|[：:])(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
+    if ((m = /(^|\s|\\R|\t|\b|G-|[:：])(\d{5,8})($|\s|\\R|\t|\b|\.|,)/.exec(message)) !== null) {
       code = m[2];
     } else if ((m = /\b(?=[A-Z]*[0-9])(?=[0-9]*[A-Z])[0-9A-Z]{3,8}\b/.exec(message)) !== null) {
       code = m[0];
-    } else if ((m = /(^|code[：:]|is[：:]|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    } else if ((m = /(^|code[:：]|is[:：]|\b)\s*(\d{3})-(\d{3})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       const first = m[2];
       const second = m[3];
       code = `${first}${second}`;
-    } else if ((m = /(code|is)[：:]?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
+    } else if ((m = /(code|is)[:：]?\s*(\d{3,8})($|\s|\\R|\t|\b|\.|,)/i.exec(message)) !== null) {
       code = m[2];
     }
   }
@@ -131,9 +130,20 @@ function fixQuotedPrintableUrl(url: string): string {
   }
 
   // Fix URLs with embedded quoted-printable encoding
-  return url.replace(/=([0-9A-Fa-f]{2})/g, (_, hex) => {
+  // Only process =XX patterns that are clearly quoted-printable line breaks:
+  // - Followed by whitespace or newline (quoted-printable soft line breaks)
+  // - At the very end of the URL (before any trailing =)
+  // We do NOT process =XX when followed by alphanumeric characters,
+  // as those are regular URL query parameters (e.g., token=abc123)
+  return url.replace(/=([0-9A-Fa-f]{2})(?=[\s\r\n]|$)/g, (_, hex) => {
     try {
-      return String.fromCharCode(parseInt(hex, 16));
+      const charCode = parseInt(hex, 16);
+      // Only decode if it results in a printable ASCII character (32-126)
+      // This ensures we're decoding quoted-printable, not corrupting URL params
+      if (charCode >= 32 && charCode <= 126) {
+        return String.fromCharCode(charCode);
+      }
+      return `=${hex}`; // Keep original if not a valid printable char
     } catch (e) {
       return `=${hex}`; // Keep original if parsing fails
     }
@@ -213,6 +223,9 @@ export function extractVerificationLink(message: string): { url: string; type: "
     "one-time link",
     "passwordless",
     "access account",
+    "temporary access",
+    "temp-access",
+    "temporary",
     // Spanish
     "iniciar sesión",
     "entrar",
@@ -331,8 +344,20 @@ export function extractVerificationLink(message: string): { url: string; type: "
     // Check for verification/sign-in keywords *within the URL itself*
     let type: "verification" | "sign-in" | "unknown" = "unknown";
 
-    // Check verification keywords in URL
-    if (verificationKeywords.some((keyword) => lowerUrl.includes(keyword))) {
+    // Check sign-in keywords first (they take priority when both are present)
+    if (signInKeywords.some((keyword) => lowerUrl.includes(keyword))) {
+      // Refine Google link detection
+      if (
+        lowerUrl.includes("accounts.google.com") &&
+        !(lowerUrl.includes("token=") || lowerUrl.includes("/signin") || lowerUrl.includes("challenge"))
+      ) {
+        // Skip generic google links
+      } else {
+        type = "sign-in";
+      }
+    }
+    // Check verification keywords in URL if not already classified
+    else if (verificationKeywords.some((keyword) => lowerUrl.includes(keyword))) {
       // Refine Google link detection
       if (
         lowerUrl.includes("accounts.google.com") &&
@@ -346,18 +371,6 @@ export function extractVerificationLink(message: string): { url: string; type: "
         // Skip generic google links
       } else {
         type = "verification";
-      }
-    }
-    // Check sign-in keywords in URL if not already classified
-    else if (signInKeywords.some((keyword) => lowerUrl.includes(keyword))) {
-      // Refine Google link detection
-      if (
-        lowerUrl.includes("accounts.google.com") &&
-        !(lowerUrl.includes("token=") || lowerUrl.includes("/signin") || lowerUrl.includes("challenge"))
-      ) {
-        // Skip generic google links
-      } else {
-        type = "sign-in";
       }
     }
 
@@ -404,6 +417,127 @@ export function formatDate(date: Date): string {
 }
 
 /**
+ * Extract plain text from iMessage NSArchiver/NSKeyedArchiver binary format
+ *
+ * When iMessage stores rich text messages (especially with 2FA codes), it uses
+ * NSAttributedString serialized in binary format. This function extracts the
+ * readable text portion from that binary data.
+ *
+ * @param data - The raw text field from iMessage database (may be binary or plain text)
+ * @returns Clean, readable text string
+ */
+export function extractTextFromBinaryData(data: string): string {
+  if (!data) return "";
+
+  // Check if this is binary NSArchiver data (starts with specific markers)
+  // NSKeyedArchiver typically starts with bytes like \x04\x0B or contains "streamtyped"
+  // Also check for common class name markers that indicate binary data
+  // But be careful not to misidentify plain text that mentions these class names
+  const hasBinaryMarkers =
+    data.includes("streamtyped") ||
+    data.includes("\x04\x0B") ||
+    (data.includes("\x00") && /NS(?:Keyed|Mutable)?Archiver/.test(data)) ||
+    (data.includes("\x00") && /NS(?:Mutable|Attributed)String/.test(data));
+
+  if (!hasBinaryMarkers) {
+    // Already plain text, return as-is
+    return data;
+  }
+
+  // Extract printable text from the binary data
+  // The actual message text is embedded as readable ASCII/UTF-8 within the binary stream
+  // We use a regex to extract sequences of printable characters (including Unicode)
+  // Match printable ASCII, Latin-1, and Unicode characters (excluding control chars)
+  const printableTextRegex = /[\x20-\x7E\xA0-\uFFFF]{10,}/g;
+  const matches = data.match(printableTextRegex);
+
+  if (!matches || matches.length === 0) {
+    return "";
+  }
+
+  // Find the longest match that looks like a real message (not just binary artifacts)
+  // Filter out strings that are mostly special characters or look like class names
+  const filtered = matches
+    .filter((match) => {
+      // Remove strings that are just class names or binary artifacts
+      if (
+        match.includes("NSMutable") ||
+        match.includes("NSAttributed") ||
+        match.includes("NSKeyedArchiver") ||
+        match.includes("NSArchiver") ||
+        match.includes("NSMutableString") ||
+        match.includes("NSString") ||
+        match.includes("__kIM") ||
+        match.match(/^NS[A-Z][a-zA-Z]*$/) || // NS class names
+        match.match(/^[A-Z][a-z]+([A-Z][a-z]+)+$/) // CamelCase class names
+      ) {
+        return false;
+      }
+      // Keep strings that have spaces (likely to be real sentences)
+      // OR strings that look like codes (alphanumeric with digits)
+      return match.includes(" ") || /\d/.test(match);
+    })
+    .sort((a, b) => {
+      // Prefer strings with spaces, then by length
+      const aHasSpaces = a.includes(" ");
+      const bHasSpaces = b.includes(" ");
+      if (aHasSpaces && !bHasSpaces) return -1;
+      if (!aHasSpaces && bHasSpaces) return 1;
+      return b.length - a.length;
+    });
+
+  if (filtered.length > 0) {
+    // Return the longest filtered string, trimmed
+    return filtered[0].trim();
+  }
+
+  // Fallback: if no good filtered results, filter out class names from longest match
+  const longest = matches.reduce((a, b) => (a.length > b.length ? a : b));
+  // Check if the longest match contains class names - if so, try to extract just the message part
+  if (
+    longest.includes("NSMutable") ||
+    longest.includes("NSAttributed") ||
+    longest.includes("NSKeyedArchiver") ||
+    longest.includes("NSArchiver") ||
+    longest.includes("__kIM")
+  ) {
+    // Try to find a substring that doesn't contain class names
+    const withoutClassNames = longest
+      .split(/\s*(?:NS(?:Mutable|Attributed|KeyedArchiver|Archiver|MutableString|String)|__kIM)\s*/)
+      .filter((part) => part.length > 0 && (part.includes(" ") || /\d/.test(part)))
+      .sort((a, b) => {
+        const aHasSpaces = a.includes(" ");
+        const bHasSpaces = b.includes(" ");
+        if (aHasSpaces && !bHasSpaces) return -1;
+        if (!aHasSpaces && bHasSpaces) return 1;
+        return b.length - a.length;
+      });
+    if (withoutClassNames.length > 0) {
+      return withoutClassNames[0].trim();
+    }
+  }
+  return longest.trim();
+}
+
+/**
+ * Escapes special characters in a string for safe use in SQL LIKE patterns
+ * Prevents SQL injection by escaping single quotes (SQL standard)
+ *
+ * Note: This escapes single quotes which is the main security concern.
+ * LIKE wildcards (% and _) are intentionally left unescaped to allow
+ * users to use them as search patterns if desired.
+ *
+ * @param text - The text to escape
+ * @returns Escaped text safe for use in SQL LIKE patterns
+ */
+export function escapeSqlLikePattern(text: string): string {
+  if (!text) return "";
+  // Escape single quotes by doubling them (SQL standard)
+  // This prevents SQL injection while preserving LIKE wildcard functionality
+  return text.replace(/'/g, "''");
+}
+
+/**
  * Helper function to find the last matching code in a message
  * @param message - The message to search in
  * @param initialMatch - The initial regex match
@@ -417,7 +551,6 @@ function findLastMatchingCode(
   pattern: RegExp,
   digitValidator?: (match: string) => boolean
 ): string {
-  let lastMatch = initialMatch;
   // Get initial code from the match
   let code = initialMatch[2];
   let lastIndex = initialMatch.index + initialMatch[0].length; // Fix: Use full match length instead of just +1
@@ -427,7 +560,6 @@ function findLastMatchingCode(
     (nextMatch = pattern.exec(message.substring(lastIndex))) !== null &&
     (!digitValidator || digitValidator(nextMatch[2]))
   ) {
-    lastMatch = nextMatch;
     code = nextMatch[2]; // Update code with each new match
     lastIndex += nextMatch.index + nextMatch[0].length; // Fix: Use full match length instead of just +1
   }

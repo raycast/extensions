@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import * as bplist from "bplist-parser";
 import * as fs from "fs";
 import { executeCommand } from "./cached-command";
@@ -14,6 +15,7 @@ export class RepositoryList {
   }
 
   getFolderTree(root: any, parent: any): string[] {
+    // console.log("getFolderTree", root, parent);
     const uid = parent.UID;
     const obj = root[uid];
 
@@ -35,14 +37,12 @@ export class RepositoryList {
       throw new PlistMissingError();
     }
 
-    return bplist.parseFile(plist).then((result: any) => {
+    return bplist.parseFile(plist).then((result: [PlistRepository]) => {
       const root = result[0].$objects;
 
       const meta = root
-        .filter((g: any) => {
-          if (typeof g === "object" && g["path"]) {
-            return true;
-          }
+        .filter((g) => {
+          return typeof g === "object" && "path" in g;
         })
         .map((meta: any) => {
           meta.isLeaf = root[meta.isLeaf.UID];
@@ -110,3 +110,24 @@ export interface Repository {
 }
 
 export class PlistMissingError extends Error {}
+
+interface PlistRepositoryObject {
+  isLeaf: { UID: number };
+  parent: { UID: number };
+  $class: { UID: number };
+  children: { UID: number };
+  path: { UID: number };
+  repositoryType: { UID: number };
+  hashValue: { UID: number };
+  name: { UID: number };
+}
+interface PlistRepository {
+  $version: number;
+  $archiver: string;
+  $top: {
+    root: {
+      UID: number;
+    };
+  };
+  $objects: Array<string | object | PlistRepositoryObject | boolean | number | bigint>;
+}

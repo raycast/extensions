@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "archisteamfarm",
+  "title": "ArchiSteamFarm",
+  "description": "Interact with your locally hosted ASF instance via Raycast!",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "Manage bots and ASF instance.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-2fa",
+      "title": "Copy 2FA",
+      "description": "Copy a 2FA code from one of your ASF bots.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "asfUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "ASF URL",
+      "description": "The URL of your ASF instance (e.g. http://localhost:1242)",
+      "default": "http://localhost:1242"
+    },
+    {
+      "name": "ipcPassword",
+      "type": "password",
+      "required": false,
+      "title": "IPC Password",
+      "description": "The IPC password defined in ASF, if any."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "nazzy_wazzy_lu",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}

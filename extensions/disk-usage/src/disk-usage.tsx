@@ -14,6 +14,7 @@ export default function Command() {
   const [state, send] = useMachine(diskUsageMachine);
 
   const selection = useSelection();
+
   const navTitle = selection.size > 0 ? `${homeDir} — ${selection.size} selected` : "Disk Space Explorer";
 
   const isLoading = state.matches("scanning") || state.matches("loadingUsage");

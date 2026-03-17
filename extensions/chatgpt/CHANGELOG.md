@@ -1,5 +1,18 @@
 # Changelog
 
+## [Feature] - 2026-03-17
+
+- Feature: Add dual authentication support for API key and ChatGPT codexauth sign-in, with auth-gated command views and codex-backed chat responses for ChatGPT sessions.
+- Feature: Filter model options for ChatGPT codexauth sessions, add compatibility fallback for unsupported selections, and keep image understanding commands restricted to API key auth.
+- Feature: Set `gpt-5.2` as the default model for models and AI commands, including migration from legacy `gpt-4o-mini` defaults.
+
+## [Feature] - 2026-03-09
+
+- Feature: Added a per-model `Reasoning` toggle with an `Effort` selector (`none`, `low`, `medium`, `high`) in the model form.
+- Feature: Added support for passing `reasoning_effort` in Chat Completions requests only when the reasoning override is enabled.
+- Fix: Added automatic one-time retry without `reasoning_effort` when OpenAI-compatible providers do not support that parameter.
+- Feature: Change all occurence of `gpt-4o-mini` and the like to `gpt-5-nano`, as the latter is cheaper, more capable and more efficient.
+
 ## [Added Windows Support] - 2025-12-16
 
 ## [Feature] - 2025-12-08

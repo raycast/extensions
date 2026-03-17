@@ -9,6 +9,10 @@
     "bchopson",
     "mrpunkin"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -142,6 +146,15 @@
       "type": "checkbox"
     },
     {
+      "name": "showClientInProject",
+      "title": "Project Dropdown",
+      "description": "Show client name alongside project name in the project dropdown for easier filtering",
+      "required": false,
+      "label": "Show Client Name in Project Dropdown",
+      "type": "checkbox",
+      "default": false
+    },
+    {
       "name": "timeFormat",
       "title": "Time Format",
       "required": false,
@@ -197,15 +210,15 @@
     "eslint": "^7.32.0",
     "prettier": "^2.8.7",
     "react": "19.0.0",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "vitest": "^4.0.17"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+    "publish": "npm run test:run && npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:run": "vitest run"
+  }
 }

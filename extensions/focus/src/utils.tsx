@@ -33,17 +33,17 @@ export async function getActiveProfileName() {
 
 export async function startFocus() {
   if (!(await isFocusRunning())) return;
-  await runAppleScript('do shell script "open focus://focus"');
+  await runAppleScript('do shell script "open -g focus://focus"');
 }
 
 export async function startFocus25(): Promise<void> {
   if (!(await isFocusRunning())) return;
-  await runAppleScript('do shell script "open focus://focus?minutes=25"');
+  await runAppleScript('do shell script "open -g focus://focus?minutes=25"');
 }
 
 export async function startFocusWithProfile25(profile: string): Promise<void> {
   if (!(await isFocusRunning())) return;
-  await runAppleScript(`do shell script "open 'focus://focus?profile=${encodeURIComponent(profile)}&minutes=25'"`);
+  await runAppleScript(`do shell script "open -g 'focus://focus?profile=${encodeURIComponent(profile)}&minutes=25'"`);
 }
 
 export async function startFocusCustom(hours?: number, minutes?: number, profile?: string): Promise<boolean> {
@@ -67,25 +67,25 @@ export async function startFocusCustom(hours?: number, minutes?: number, profile
     url += `&profile=${encodeURIComponent(profile)}`;
   }
 
-  await runAppleScript(`do shell script "open '${url}'"`);
+  await runAppleScript(`do shell script "open -g '${url}'"`);
   return true;
 }
 
 export async function takeBreak5() {
   if (!(await isFocusRunning())) return;
-  await runAppleScript('do shell script "open focus://break?minutes=5"');
+  await runAppleScript('do shell script "open -g focus://break?minutes=5"');
 }
 
 export async function takeBreakWithProfile5(profile: string) {
   if (!(await isFocusRunning())) return;
-  await runAppleScript(`do shell script "open 'focus://break?profile=${encodeURIComponent(profile)}&minutes=5'"`);
+  await runAppleScript(`do shell script "open -g 'focus://break?profile=${encodeURIComponent(profile)}&minutes=5'"`);
 }
 
 export async function takeBreakCustom(minutes?: number): Promise<boolean> {
   if (!(await isFocusRunning())) return false;
   if (minutes === undefined || minutes <= 0) return false;
   const url = `focus://break?minutes=${minutes}`;
-  await runAppleScript(`do shell script "open '${url}'"`);
+  await runAppleScript(`do shell script "open -g '${url}'"`);
   return true;
 }
 
@@ -93,34 +93,33 @@ export async function takeBreakWithProfileCustom(profile: string, minutes?: numb
   if (!(await isFocusRunning())) return false;
   if (minutes === undefined || minutes <= 0) return false;
   const url = `focus://break?profile=${encodeURIComponent(profile)}&minutes=${minutes}`;
-  await runAppleScript(`do shell script "open '${url}'"`);
+  await runAppleScript(`do shell script "open -g '${url}'"`);
   return true;
 }
 
 export async function stopBreak() {
   if (!(await isFocusRunning())) return;
-  await runAppleScript('do shell script "open focus://unbreak"');
+  await runAppleScript('do shell script "open -g focus://unbreak"');
 }
 
 export async function stopBreakWithProfile(profile: string) {
   if (!(await isFocusRunning())) return;
-  await runAppleScript(`do shell script "open 'focus://unbreak?profile=${encodeURIComponent(profile)}'"`);
-  await stopBreak();
+  await runAppleScript(`do shell script "open -g 'focus://unbreak?profile=${encodeURIComponent(profile)}'"`);
 }
 
 export async function stopFocus() {
   if (!(await isFocusRunning())) return;
   const activeProfile = await getActiveProfileName();
   if (activeProfile) {
-    await runAppleScript(`do shell script "open 'focus://unfocus?profile=${activeProfile}'"`);
+    await runAppleScript(`do shell script "open -g 'focus://unfocus?profile=${encodeURIComponent(activeProfile)}'"`);
   } else {
-    await runAppleScript('do shell script "open focus://unfocus"');
+    await runAppleScript('do shell script "open -g focus://unfocus"');
   }
 }
 
 export async function openPreferences() {
   if (!(await isFocusRunning())) return;
-  await runAppleScript('do shell script "open focus://preferences"');
+  await runAppleScript('do shell script "open -g focus://preferences"');
 }
 
 export async function getProfileNames() {
@@ -150,7 +149,7 @@ export async function getProfileNames() {
 
 export async function startFocusWithProfile(profileName: string) {
   if (!(await isFocusRunning())) return;
-  await runAppleScript(`do shell script "open 'focus://focus?profile=${encodeURIComponent(profileName)}'"`);
+  await runAppleScript(`do shell script "open -g 'focus://focus?profile=${encodeURIComponent(profileName)}'"`);
 }
 
 export async function isFocusRunning() {

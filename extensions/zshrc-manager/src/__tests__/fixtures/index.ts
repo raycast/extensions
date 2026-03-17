@@ -5,6 +5,7 @@
  */
 
 export * from "./sections";
+export * from "./realistic-zshrc";
 
 /**
  * Helper to create zshrc content from sections

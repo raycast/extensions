@@ -1,8 +1,9 @@
 import { useFetch } from "@raycast/utils";
-import { ENDPOINTS, HEADERS, APIKEY } from "./constants/prefrences";
-import Apod from "./componenets/apod";
-import ErrorDetail from "./componenets/error";
-import { ApodResponse } from "./types/apod";
+
+import { ApodResponse } from "@/types";
+import { APIKEY, ENDPOINTS, HEADERS } from "@/constants/preferences";
+import Apod from "@/components/apod";
+import ErrorDetail from "@/components/error";
 
 export default function APOD() {
   const { isLoading, data, error } = useFetch(`${ENDPOINTS.APOD.replace("APIKEY", APIKEY)}`, {

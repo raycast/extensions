@@ -14,6 +14,20 @@ import { useProxy } from "./useProxy";
 import { ChatCompletion, ChatCompletionChunk } from "openai/resources/chat/completions";
 import { Stream } from "openai/streaming";
 
+function hasUnsupportedReasoningEffortError(error: unknown): boolean {
+  const message = (error instanceof Error ? error.message : String(error)).toLowerCase();
+  if (!message.includes("reasoning_effort")) {
+    return false;
+  }
+  return (
+    message.includes("unknown") ||
+    message.includes("unsupported") ||
+    message.includes("not allowed") ||
+    message.includes("not permitted") ||
+    message.includes("unrecognized")
+  );
+}
+
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -78,6 +92,19 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
     abortControllerRef.current = new AbortController();
     const { signal: abortSignal } = abortControllerRef.current;
+    const headers = getHeaders();
+    const requestOptions = {
+      httpAgent: proxy,
+      // https://github.com/openai/openai-node/blob/master/examples/azure.ts
+      // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
+      query: { ...headers.params },
+      headers: { ...headers.apiKey },
+      signal: abortSignal,
+    };
+    const selectedReasoningEffort =
+      model.enableReasoningEffortChange && model.reasoningEffort !== "none" ? model.reasoningEffort : undefined;
+
+    let retriedWithoutReasoningEffort = false;
 
     try {
       const auth = await resolveAuthStatus();
@@ -127,31 +154,59 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           throw new Error("OpenAI API key is missing. Add it in extension preferences.");
         }
 
-        const response = await chatGPT.chat.completions.create(
-          {
-            model: modelOption,
-            temperature: Number(model.temperature),
-            messages,
-            stream: useStream,
-          },
-          {
-            httpAgent: proxy,
-            // https://github.com/openai/openai-node/blob/master/examples/azure.ts
-            // Azure OpenAI requires a custom baseURL, api-version query param, and api-key header.
-            query: { ...getHeaders().params },
-            headers: { ...getHeaders().apiKey },
-            signal: abortSignal,
-          },
-        );
+        const createCompletion = (includeReasoningEffort: boolean) =>
+          chatGPT.chat.completions.create(
+            {
+              model: modelOption,
+              temperature: Number(model.temperature),
+              ...(includeReasoningEffort && selectedReasoningEffort
+                ? { reasoning_effort: selectedReasoningEffort }
+                : {}),
+              messages,
+              stream: useStream,
+            },
+            requestOptions,
+          );
+
+        let response: ChatCompletion | Stream<ChatCompletionChunk>;
+        try {
+          response = await createCompletion(Boolean(selectedReasoningEffort));
+        } catch (error) {
+          if (selectedReasoningEffort && hasUnsupportedReasoningEffortError(error)) {
+            retriedWithoutReasoningEffort = true;
+            toast.title = "Reasoning effort not supported";
+            toast.message = "Retrying without effort setting...";
+            toast.style = Toast.Style.Animated;
+            response = await createCompletion(false);
+          } else {
+            throw error;
+          }
+        }
 
         if (useStream) {
           const stream = response as Stream<ChatCompletionChunk>;
 
           for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content;
-            if (content) {
-              chat.answer += content;
-              setStreamData({ ...chat, answer: chat.answer });
+            try {
+              const content = chunk.choices[0]?.delta?.content;
+
+              if (content) {
+                chat.answer += content;
+                setStreamData({ ...chat, answer: chat.answer });
+              }
+            } catch (error) {
+              if (abortSignal.aborted) {
+                toast.title = "Request canceled";
+                toast.message = undefined;
+                setIsAborted(true);
+              } else {
+                const message = `Couldn't stream message: ${error}`;
+                toast.title = "Error";
+                toast.message = message;
+                setErrorMsg(message);
+              }
+              toast.style = Toast.Style.Failure;
+              setLoading(false);
             }
           }
 
@@ -168,9 +223,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         say.stop();
         say.speak(chat.answer);
       }
-
       setLoading(false);
-
       if (abortSignal.aborted) {
         toast.title = "Request canceled";
         toast.message = undefined;
@@ -178,7 +231,9 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         setIsAborted(true);
       } else {
         toast.title = "Got your answer!";
-        toast.message = undefined;
+        toast.message = retriedWithoutReasoningEffort
+          ? "Provider ignored the reasoning effort setting for this response."
+          : undefined;
         toast.style = Toast.Style.Success;
       }
 
@@ -190,7 +245,6 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           return a;
         });
       });
-
       if (!isHistoryPaused) {
         await history.add(chat);
       }

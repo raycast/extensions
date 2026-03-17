@@ -46,8 +46,8 @@ interface ReadingModes {
   image: boolean;
 }
 interface PanelizationSummary {
-  containsEpubBubbles: boolean;
-  containsImageBubbles: boolean;
+  containsEpubBubbles?: boolean;
+  containsImageBubbles?: boolean;
 }
 interface ImageLinks {
   smallThumbnail: string;
@@ -99,5 +99,5 @@ interface Pdf {
   acsTokenLink?: string;
 }
 interface SearchInfo {
-  textSnippet: string;
+  textSnippet?: string;
 }

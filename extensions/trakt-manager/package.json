@@ -86,5 +86,11 @@
     "publish": "ray publish",
     "pull": "ray pull-contributions"
   },
-  "title": "Trakt Manager"
+  "contributors": [
+    "vishalbalaji3"
+  ],
+  "title": "Trakt Manager",
+  "platforms": [
+    "macOS"
+  ]
 }

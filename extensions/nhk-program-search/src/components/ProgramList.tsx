@@ -2,7 +2,7 @@ import { Action, ActionPanel, Cache, launchCommand, LaunchType, List } from "@ra
 import React, { useEffect, useState } from "react";
 import { preferences } from "../preferences";
 import { Program, ServiceId } from "../types";
-import { getFormattedDate } from "../utils";
+import { getFormattedDate, normalizeImageUrl } from "../utils";
 import { ProgramDetail } from "./ProgramDetail";
 import { SearchBarDropdown } from "./ServiceSelectSearchBar";
 
@@ -52,7 +52,7 @@ export function ProgramList({ customFilters = [], canSelectAll = false }: Props)
             return (
               <List.Item
                 key={`${p.service.id}:${p.id}`} // When "all" is selected, ids might duplicate, so use "service" as a prefix.
-                icon={{ source: `https:${p.service.logo_s.url}` }}
+                icon={{ source: normalizeImageUrl(p.service.logo_s.url) }}
                 title={p.title}
                 accessories={[
                   {

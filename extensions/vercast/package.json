@@ -15,7 +15,8 @@
     "xmok",
     "ridemountainpig",
     "sebdanielsson",
-    "1weiho"
+    "1weiho",
+    "thomas-forbes"
   ],
   "commands": [
     {
@@ -73,6 +74,44 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "open-latest-deployment",
+      "title": "Open Latest Deployment",
+      "description": "Open your latest deployment in the browser",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "openTarget",
+          "title": "Open Target",
+          "description": "Choose where to open the latest deployment",
+          "type": "dropdown",
+          "required": false,
+          "default": "vercel",
+          "data": [
+            {
+              "title": "Vercel Dashboard",
+              "value": "vercel"
+            },
+            {
+              "title": "Deploy URL",
+              "value": "deployUrl"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-ai-gateway-models",
+      "title": "Search AI Gateway Models",
+      "description": "Search for AI models available in the Vercel AI Gateway",
+      "mode": "view"
+    },
+    {
+      "name": "search-ai-gateway-logs",
+      "title": "Search AI Gateway Logs",
+      "description": "View AI Gateway inference request logs from the past 12 hours",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -387,8 +426,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "~1.102.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.0",
+    "node-html-parser": "^7.0.2",
     "swr": "^2.3.4"
   },
   "devDependencies": {

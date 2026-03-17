@@ -1,4 +1,4 @@
-import { Note } from "@hackmd/api/dist/type";
+import type { Note } from "@hackmd/api/dist/type";
 import { Action, ActionPanel, Icon, confirmAlert, Alert, showToast, Toast, useNavigation } from "@raycast/api";
 
 import api from "../lib/api";
@@ -6,6 +6,7 @@ import NoteForm from "./NoteForm";
 import { useCachedPromise } from "@raycast/utils";
 import { getNoteUrl } from "../helpers/noteHelper";
 import CreateNote from "../create-note";
+import { usePinnedNotes } from "../hooks/usePinnedNotes";
 
 export default function NoteActions({
   note,
@@ -21,11 +22,22 @@ export default function NoteActions({
 
   const { data: singleNoteData } = useCachedPromise((noteId) => api.getNote(noteId), [note.id]);
   const { pop } = useNavigation();
+  const { isPinned, togglePin } = usePinnedNotes();
+  const pinned = isPinned(note);
 
   return (
     <>
       <Action.OpenInBrowser title="Open in Browser" url={noteUrl} />
       <Action.CopyToClipboard title="Copy Note Link" content={noteUrl} />
+      <Action
+        title={pinned ? "Unpin Note" : "Pin Note"}
+        icon={pinned ? Icon.PinDisabled : Icon.Pin}
+        shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
+        onAction={async () => {
+          await togglePin(note);
+          if (mutate) mutate();
+        }}
+      />
 
       <ActionPanel.Section>
         {singleNoteData && (

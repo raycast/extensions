@@ -1,3 +1,12 @@
+export type CannedResponse = {
+  id: number;
+  account_id: number;
+  short_code: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Contact = {
   additional_attributes: {
     company_name: string;
@@ -87,6 +96,15 @@ export type Portal = {
   logo?: {
     file_url: string;
   };
+};
+
+export type Team = {
+  id: number;
+  name: string;
+  description: string;
+  allow_auto_assign: boolean;
+  account_id: number;
+  is_member: boolean;
 };
 
 export type ListResult<T> = {

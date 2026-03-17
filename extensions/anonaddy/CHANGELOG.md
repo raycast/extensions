@@ -1,5 +1,10 @@
 # Addy Changelog
 
+## [Self-hosted Support] - 2026-01-15
+
+### Added
+- Support for self-hosted Addy instances via the Custom URL preference
+
 ## [Send Email from Alias & Improvements] - 2025-12-09
 
 ### Added

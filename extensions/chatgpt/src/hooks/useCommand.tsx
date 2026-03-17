@@ -196,6 +196,8 @@ export function mapCommandToModel(command: Command): Model {
     option: command.model,
     prompt: command.prompt,
     temperature: command.temperature,
+    enableReasoningEffortChange: false,
+    reasoningEffort: "medium",
     pinned: false,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

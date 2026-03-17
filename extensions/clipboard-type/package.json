@@ -5,6 +5,9 @@
   "description": "Clipboard Type allows you to paste values of your clipboard, in the places where direct pasting is not allowed, like many web forms or RDP where clipboard is not synced. With Clipboard Type first value of clipboard is typed using internal api rather using OS pasting command",
   "icon": "extension-icon.png",
   "author": "krishna_bhanushali",
+  "contributors": [
+    "itninja04"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -24,44 +27,44 @@
   ],
   "preferences": [
     {
-      "name": "delay",
-      "type": "dropdown",
-      "title": "Typing Speed",
+      "name": "humanCadence",
+      "type": "checkbox",
+      "label": "Human Cadence",
       "required": false,
-      "description": "Choose how quickly characters are typed",
-      "default": "0.002",
+      "description": "Enable to add random delay between keystrokes to mimic human typing.",
+      "default": true
+    },
+    {
+      "name": "humanCadenceSpeed",
+      "type": "dropdown",
+      "title": "Human Cadence Speed",
+      "required": false,
+      "description": "Choose the speed of the random delay when Human Cadence is enabled",
+      "default": "average",
       "data": [
         {
-          "title": "Slowest (1 s)",
-          "value": "1"
-        },
-        {
           "title": "Very Slow (200 ms)",
-          "value": "0.2"
+          "value": "very-slow"
         },
         {
           "title": "Slow (100 ms)",
-          "value": "0.1"
+          "value": "slow"
         },
         {
-          "title": "Leisurely (50 ms)",
-          "value": "0.05"
+          "title": "Average (50 ms)",
+          "value": "average"
         },
         {
-          "title": "Moderate (20 ms)",
-          "value": "0.02"
+          "title": "Fast (20 ms)",
+          "value": "fast"
         },
         {
-          "title": "Normal (2 ms)",
-          "value": "0.002"
+          "title": "Very Fast (5 ms)",
+          "value": "very-fast"
         },
         {
-          "title": "Fast (1 ms)",
-          "value": "0.001"
-        },
-        {
-          "title": "Ultra Fast (0.5 ms)",
-          "value": "0.0005"
+          "title": "Super Human (0 ms)",
+          "value": "super-human"
         }
       ]
     }

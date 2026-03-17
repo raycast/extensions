@@ -6,7 +6,8 @@ import {
   type MovieStatistics,
 } from "./types";
 import { parse } from "./parser";
-import { Element, load } from "cheerio";
+import type { Element } from "domhandler";
+import { load } from "cheerio";
 import { fetchWithRetry } from "./utils";
 
 const cache = new Cache();

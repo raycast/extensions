@@ -11,7 +11,7 @@ Please enter something like:
 
 - Name: `awork Extension for Raycast`
 - Client ID: `raycast-awork-extension`
-- Redirect URI: `https://raycast.com/redirect?packageName=Extension` (hit the "+")
+- Redirect URI: `https://raycast.com/redirect?packageName=awork` (hit the "+")
 
 Then copy/save the generated new client secret.
 
@@ -31,7 +31,7 @@ The following actions are available:
 - Copy to Clipboard `⌘⏎`
 - Copy Project Mail Address `⌃E`
 - Log Time `⌃⌘⏎`
-- Show Tasks `⌃Space`
+- Show Tasks `⌃⏎`
 
 
 ### Tasks

@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { environment, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, CachedPromiseOptions } from "@raycast/utils";
 import { FunctionReturningPromise } from "@raycast/utils/dist/types";
 
@@ -23,8 +23,9 @@ const useHandleError =
     if (error.message.endsWith("Incorrect username and/or password")) {
       setTokenValidity(false);
     } else {
-      const toast = await showToast(Toast.Style.Failure, "Something went wrong!");
-      toast.message = error.message;
+      const { message } = error;
+      if (environment.launchType === LaunchType.Background) await showHUD(`Toggl 🚨: ${message}`);
+      else await showToast(Toast.Style.Failure, "Something went wrong!", message);
       console.error(error);
     }
   };

@@ -1,13 +1,28 @@
 # Google Chrome Profiles Changelog
 
+## [Feature] - 2026-03-12
+
+- Add Google Chrome Canary support via a new Browser preference dropdown
+- Show informative toast when "Open Profile with Context" is launched without a quicklink context
+
+## [Feature] - 2026-01-23
+
+- Bring the profile window to front instead of adding a new tab
+- Simplify deeplink integration
+- Improve bookmark favicon display
+- Support opening chrome://, chrome-extension://, about:, and view-source: URLs from bookmarks
+- Improve URL detection to directly open valid URLs
+
 ## [Refactor] - 2025-09-03
 
 - Refactor the extension to use the new `open-profile` and `open-profile-url` commands.
 
 ## [Quicklinks] - 2024-07-29
+
 - Add support for quicklinks to open a chosen profile in a specific url.
 
 ## [Quicklinks] - 2023-09-22
+
 - Support quicklinks to open a chosen profile.
 
 ## [Update] - 2023-02-13

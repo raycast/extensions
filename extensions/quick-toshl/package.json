@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-toshl",
+  "title": "Quick Toshl",
+  "description": "Add expense and income to your Toshl account",
+  "version": "1.1.2",
+  "icon": "extension-icon.png",
+  "author": "hoando",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "expense",
+      "title": "Add Expense",
+      "description": "Add a new expense transaction to Toshl",
+      "mode": "view"
+    },
+    {
+      "name": "income",
+      "title": "Add Income",
+      "description": "Add a new income transaction to Toshl",
+      "mode": "view"
+    },
+    {
+      "name": "recent-transactions",
+      "title": "View Transactions",
+      "description": "View and manage recent Toshl transactions",
+      "mode": "view"
+    },
+    {
+      "name": "transfer",
+      "title": "Add Transfer",
+      "description": "Move money from one account to another",
+      "mode": "view"
+    },
+    {
+      "name": "budgets",
+      "title": "View Budgets",
+      "description": "View your budget progress and spending",
+      "mode": "view"
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "description": "Search and filter all entries by date range, category, tags, account, and more",
+      "mode": "view"
+    },
+    {
+      "name": "planning",
+      "title": "View Planning",
+      "description": "View your spending plan and predictions for this month or year (Pro feature)",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-expense",
+      "title": "Add Expense",
+      "description": "Add a new expense to Toshl. Requires amount and description. The tool will automatically match category, tags, and account names to the user's existing Toshl data. Supports Vietnamese amount shortcuts (50k, 3 triệu) and flexible dates (DD/MM, yesterday, today)."
+    },
+    {
+      "name": "add-income",
+      "title": "Add Income",
+      "description": "Add a new income to Toshl. Requires amount and description. The tool will automatically match category, tags, and account names to the user's existing Toshl data. Supports Vietnamese amount shortcuts (50k, 3 triệu) and flexible dates."
+    },
+    {
+      "name": "get-budgets",
+      "title": "Get Budgets",
+      "description": "Get current budget status from Toshl. Shows active budgets with their limits, spending, and remaining amounts. Use when the user asks about budget progress or spending limits."
+    },
+    {
+      "name": "list-categories-tags",
+      "title": "List Categories and Tags",
+      "description": "List the user's available categories, tags, and accounts from Toshl. Use this when the user asks 'what categories do I have?', 'show my tags', or 'list my accounts'. Can filter by type (categories/tags/accounts) and entry type (expense/income)."
+    },
+    {
+      "name": "search-entries",
+      "title": "Search Entries",
+      "description": "Advanced search for Toshl entries with filtering. Supports date ranges (today, last_7_days, last_30_days, this_month, custom), entry type (expense/income/transfer/all), category names, tag names, account names, and description search. Returns entries with summary statistics. Use when user asks about spending history, transaction summary, or to find specific transactions."
+    },
+    {
+      "name": "get-planning",
+      "title": "Get Planning",
+      "description": "Get spending plan and predictions for this month or this year. Shows average expenses, incomes, balance, and period details with actual vs planned vs predicted values. Use when user asks about spending predictions, monthly plan, or financial outlook. Pro feature - free accounts will get 403."
+    }
+  ],
+  "ai": {
+    "instructions": "You are a financial assistant for Toshl expense tracking. Follow these rules strictly:\n\n**CRITICAL - USE IDs, NOT NAMES:**\n- User's categories/tags may have creative names (e.g., 'Có thực mới vực được đạo' for Food, emojis like '🍔 Eating')\n- ALWAYS call list-categories-tags FIRST to get the ID mappings\n- Use categoryId, tagIds, accountId parameters with exact IDs from the list\n- Never guess category/tag names - always look them up first\n\n**WORKFLOW:**\n1. User says 'add 50k cơm trưa'\n2. You call list-categories-tags to get {id: '123', name: '🍔 Có thực...'}\n3. You determine which category fits (food-related)\n4. You call add-expense with categoryId='123'\n\n**AMOUNT PARSING:**\n- 'k' or 'K' = 1,000 (e.g., '50k' = 50,000)\n- 'triệu' or 'tr' = 1,000,000 (e.g., '3 triệu' = 3,000,000)\n- Currency: Uses user's default from Toshl settings (auto-detected from /me API)\n\n**DATE PARSING:**\n- 'DD/MM', 'DD/MM/YYYY', 'yesterday', 'today' supported\n- Default to today if no date specified\n\n**LOANS & DEBTS:**\n- 'cho vay' (lend) = expense, 'vay' (borrow) = income\n- 'trả nợ' (repay) = expense, 'đòi nợ' (collect) = income\n\n**LANGUAGE:**\n- Respond in user's language (Vietnamese or English)\n- Use friendly, concise messages"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Toshl API Key",
+      "description": "Your Toshl API Personal Token",
+      "placeholder": "Enter your Personal Token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "forceRefreshCache",
+      "title": "Force Refresh Cache",
+      "description": "Enable this, run any command, then disable it. This will refresh cached categories, tags, and accounts.",
+      "type": "checkbox",
+      "label": "Clear cache on next run",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "demoData",
+      "title": "Demo Data",
+      "description": "Use fake data for demonstration purposes (useful for screenshots).",
+      "type": "checkbox",
+      "label": "Enable Demo Data",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.2",
+    "date-fns": "^4.1.0",
+    "react": "^19.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.9",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

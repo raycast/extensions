@@ -53,3 +53,18 @@ export function optimisticUpdates<T extends HasId>(
     setState(undoState);
   };
 }
+
+export function optimisticGroupUpdate<TGroupedLight extends HasId, TLight extends HasId>(
+  changesToLights: Map<Id, Partial<TLight>>,
+  changesToGroupedLights: Map<Id, Partial<TGroupedLight>>,
+  setLights: React.Dispatch<React.SetStateAction<TLight[]>>,
+  setGroupedLights: React.Dispatch<React.SetStateAction<TGroupedLight[]>>,
+): () => void {
+  const undoGroupedLights = optimisticUpdates(changesToGroupedLights, setGroupedLights);
+  const undoLights = optimisticUpdates(changesToLights, setLights);
+
+  return (): void => {
+    undoGroupedLights();
+    undoLights();
+  };
+}

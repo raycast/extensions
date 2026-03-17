@@ -1,4 +1,4 @@
-import { Toast, showToast, LaunchProps } from "@raycast/api";
+import { Toast, showToast, showHUD, LaunchProps } from "@raycast/api";
 import { getProfileNames, startFocusCustom, getActiveProfileName } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
@@ -46,12 +46,11 @@ export default async function Command(props: LaunchProps<{ arguments: FocusArgum
     const success = await startFocusCustom(hours, minutes, firstProfile);
     await toast.hide();
     if (success) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: firstProfile
+      await showHUD(
+        firstProfile
           ? `Focus started with profile: ${firstProfile} (${formatDuration(hours, minutes)})`
-          : `Focus started (${formatDuration(hours, minutes)})`,
-      });
+          : `Focus started (${formatDuration(hours, minutes)})`
+      );
     } else {
       await showToast({
         style: Toast.Style.Failure,

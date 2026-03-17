@@ -1,5 +1,26 @@
 # Vercast Changelog
 
+## [2.17] - 2026-02-20
+
+- Added `Cancel Deployment` action to deployments
+## [2.16] - 2026-02-15
+
+- Added `Search AI Gateway Logs` command
+
+## [2.15] - 2026-01-29
+
+- Added `Search AI Gateway Models` command
+
+## [2.14] - 2026-01-20
+
+- Removed token length validation as vercel tokens can now be longer
+- Update `Check Domain Availability` command to use the new Vercel API
+- Added `Visit on Vercel` action to projects and domains lists
+
+## [2.13] - 2026-01-05
+
+- Added `Open Latest Deployment` command to open the latest deployment target or the Vercel dashboard
+
 ## [2.12] - 2025-12-12
 
 - Added Recent Deployments Menu Bar

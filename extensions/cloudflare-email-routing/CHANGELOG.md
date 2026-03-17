@@ -1,5 +1,12 @@
 # Cloudflare Email Routing Changelog
 
+## Editable Alias Defaults - 2026-02-06
+
+- Add configurable alias preface and default label preferences
+- Allow editing the alias slug when creating new aliases
+- Show all Cloudflare Email Routing aliases for the zone
+- Copies the new alias email address to the clipboard when created
+
 ## [Update README + Use SDK for List Aliases] - 2025-12-01
 
 - Update README to clarify which permissions are required

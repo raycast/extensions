@@ -25,7 +25,7 @@ export function SwitchToLastBranch({ checkBranches }: Props) {
       title="Switch to Your Last Branch"
       icon={Icon.Replace}
       onAction={revalidate}
-      shortcut={{ key: "-", modifiers: ["cmd"] }}
+      shortcut={{ macOS: { key: "-", modifiers: ["cmd"] }, Windows: { key: "-", modifiers: ["ctrl"] } }}
     />
   );
 }

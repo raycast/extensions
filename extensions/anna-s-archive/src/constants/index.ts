@@ -64,12 +64,13 @@ export const DOC_TYPES = [
 ];
 
 export const MIRROR_LIST = [
-  "https://annas-archive.org",
-  "https://annas-archive.se",
-  "https://annas-archive.li",
+  "https://annas-archive.gl",
+  "https://annas-archive.pk",
+  "https://annas-archive.vg",
+  "https://annas-archive.gd",
 ] as const;
 
-export const DEFAULT_MIRROR = "https://annas-archive.org";
+export const DEFAULT_MIRROR = "https://annas-archive.gl";
 
 export const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36";

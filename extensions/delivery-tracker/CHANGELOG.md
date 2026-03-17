@@ -1,5 +1,10 @@
 # Delivery Tracker Changelog
 
+## [Cleanup and Fix Regression] – 2026-01-04
+
+- Added back the sorting by delivery date feature.
+- Updated a previous changelog entry to remove an AI hallucinated feature.
+
 ## [Major Refactor and Feature Additions] - 2025-11-04
 
 ### New Features
@@ -7,7 +12,6 @@
 - **Archive Functionality**: Archive delivered packages instead of deleting them with a dedicated "View Archived Deliveries" command and unarchive capability
 - **Menu Bar Extra**: New menu bar command showing delivery count badge, quick status overview of arriving today and in-transit packages, and auto-refresh every 30 minutes
 - **Background Refresh**: Automatic tracking updates every 30 minutes with silent operation and HUD notifications for delivered packages
-- **Auto-Carrier Detection**: Automatically detects and selects carrier based on tracking number patterns (UPS: 1Z format, FedEx: 12-14 or 20 digits, USPS: 20-22 digits)
 - **Carrier Icons**: Display carrier-specific favicons (USPS, UPS, FedEx) throughout the UI with themed fallback icons for visual identification
 - **List Sections**: Deliveries are now organized into intuitive sections (Arriving Today, In Transit, Delivered, Unknown Status) with item counts
 - **Filtering & Search**: Filter by carrier and search by delivery name or tracking number in real-time with color-coded carrier icons in dropdown
