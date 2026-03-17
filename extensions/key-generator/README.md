@@ -1,6 +1,6 @@
 # SSH Key Manager
 
-Manage your local SSH keys and `~/.ssh/config` directly from Raycast.
+Generate, audit, and manage your local SSH keys and `~/.ssh/config` directly from Raycast.
 
 ## Features
 
@@ -19,7 +19,7 @@ Manage your local SSH keys and `~/.ssh/config` directly from Raycast.
 ### List SSH Keys
 
 - View detected SSH keys
-- Copy public key or fingerprint
+- Copy public keys and fingerprints
 - Rename keys
 - Reveal key files in Finder
 - Delete keys (with confirmation, under Danger Zone)
@@ -28,7 +28,7 @@ Manage your local SSH keys and `~/.ssh/config` directly from Raycast.
 
 - Choose storage mode and algorithm
 - Set filename, comment, and optional passphrase
-- Copy generated public key
+- Copy the generated public key
 - Reveal generated key in Finder
 
 ### Manage SSH Config
@@ -36,7 +36,7 @@ Manage your local SSH keys and `~/.ssh/config` directly from Raycast.
 - View and edit `~/.ssh/config` host entries
 - Create new host entries
 - Connect to hosts directly from Raycast
-- Open config file in editor
+- Open `~/.ssh/config` in your editor
 - Delete entries (with confirmation, under Danger Zone)
 
 ### Audit SSH Keys
