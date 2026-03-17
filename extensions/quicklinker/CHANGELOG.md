@@ -1,6 +1,6 @@
 # QuickLinker
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-17
 
 - Quick Open command: open any shortcut by name instantly via Raycast
 - Search Shortcuts command: browse and search all shortcuts with fuzzy filtering
