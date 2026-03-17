@@ -1,4 +1,5 @@
 const NOTION_ID_PATTERN = /([a-f0-9]{32}|[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12})/i;
+const GENERIC_NOTION_TITLE_PATTERNS = [/workspace that works for you\.?$/i, /with ai at your side\.?$/i];
 
 export function extractNotionId(input: string): string | null {
   const value = input.trim();
@@ -60,7 +61,12 @@ export function normalizeNotionPageTitle(title: string): string | null {
     .replace(/\s+[|:-]\s+Private$/i, "")
     .trim();
 
-  if (!cleaned || /^notion$/i.test(cleaned)) {
+  if (
+    !cleaned ||
+    /^notion$/i.test(cleaned) ||
+    /^notion page [a-f0-9]{8}$/i.test(cleaned) ||
+    GENERIC_NOTION_TITLE_PATTERNS.some((pattern) => pattern.test(cleaned))
+  ) {
     return null;
   }
 

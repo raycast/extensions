@@ -1,5 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 
+import { resolveNotionPageName } from "./notion";
+
 const STORAGE_KEY = "notion-id-history";
 const MAX_HISTORY_ITEMS = 250;
 
@@ -44,6 +46,23 @@ export function sortHistoryEntries(entries: NotionIdHistoryEntry[]): NotionIdHis
   });
 }
 
+function normalizeHistoryEntry(entry: NotionIdHistoryEntry): NotionIdHistoryEntry {
+  const pageName = resolveNotionPageName({
+    notionId: entry.notionId,
+    sourceUrl: entry.sourceUrl,
+    title: entry.pageName,
+  });
+
+  if (pageName === entry.pageName) {
+    return entry;
+  }
+
+  return {
+    ...entry,
+    pageName,
+  };
+}
+
 export async function getHistoryEntries(): Promise<NotionIdHistoryEntry[]> {
   const rawEntries = await LocalStorage.getItem<string>(STORAGE_KEY);
 
@@ -57,7 +76,15 @@ export async function getHistoryEntries(): Promise<NotionIdHistoryEntry[]> {
       return [];
     }
 
-    return sortHistoryEntries(parsed.filter(isHistoryEntry));
+    const filteredEntries = parsed.filter(isHistoryEntry);
+    const entries = filteredEntries.map(normalizeHistoryEntry);
+    const didNormalize = entries.some((entry, index) => entry.pageName !== filteredEntries[index].pageName);
+
+    if (didNormalize) {
+      await saveHistoryEntries(entries);
+    }
+
+    return sortHistoryEntries(entries);
   } catch {
     return [];
   }
