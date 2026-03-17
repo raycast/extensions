@@ -299,8 +299,28 @@ function HostForm(props: { config?: SSHHostConfig; configIndex?: number; onSave:
 
       let updatedConfigs: SSHHostConfig[] = [];
       if (props.config && props.configIndex !== undefined) {
-        // Edit
-        updatedConfigs = currentConfigs.map((c, index) => (index === props.configIndex ? newConfig : c));
+        // Edit: prefer stable identity by original rawBlock to avoid stale-index overwrites
+        const matchIndex = currentConfigs.findIndex((c) => c.rawBlock === props.config!.rawBlock);
+
+        if (matchIndex >= 0) {
+          updatedConfigs = currentConfigs.map((c, index) => (index === matchIndex ? newConfig : c));
+        } else {
+          // Fallback to index only if entry shape still matches what user opened
+          const candidate = currentConfigs[props.configIndex];
+          const sameEntry =
+            candidate &&
+            candidate.host === props.config.host &&
+            (candidate.hostName || "") === (props.config.hostName || "") &&
+            (candidate.user || "") === (props.config.user || "") &&
+            (candidate.identityFile || "") === (props.config.identityFile || "") &&
+            (candidate.port || "") === (props.config.port || "");
+
+          if (!sameEntry) {
+            throw new Error("SSH config changed on disk. Please reopen the entry and try again.");
+          }
+
+          updatedConfigs = currentConfigs.map((c, index) => (index === props.configIndex ? newConfig : c));
+        }
       } else if (props.config) {
         throw new Error("Failed to identify SSH config entry for editing");
       } else {
