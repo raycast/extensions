@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-17
 
 - Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.
 
