@@ -168,12 +168,22 @@ export default function Command() {
 function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
   const { pop } = useNavigation();
   async function handleSubmit(values: { newName: string }) {
+    const newName = values.newName.trim();
+    if (newName === "" || newName.includes("/") || newName.includes("\\") || newName.includes("..")) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid filename",
+        message: "Name must not be empty or contain path separators/traversal.",
+      });
+      return;
+    }
+
     try {
       const fs = await import("fs/promises");
       const path = await import("path");
       const sshDir = path.dirname(props.keyItem.publicKeyPath);
-      const newPub = path.join(sshDir, `${values.newName}.pub`);
-      const newPriv = path.join(sshDir, values.newName);
+      const newPub = path.join(sshDir, `${newName}.pub`);
+      const newPriv = path.join(sshDir, newName);
 
       await fs.rename(props.keyItem.publicKeyPath, newPub);
       if (props.keyItem.privateKeyPath) {
