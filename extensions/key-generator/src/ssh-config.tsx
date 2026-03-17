@@ -131,12 +131,21 @@ export default function Command() {
       }
 
       if (terminalApp === "iterm2") {
-        await execFileAsync("osascript", [
-          "-e",
-          `tell application "iTerm" to create window with default profile command "${escapedCommand}"`,
-          "-e",
-          'tell application "iTerm" to activate',
-        ]);
+        try {
+          await execFileAsync("osascript", [
+            "-e",
+            `tell application "iTerm2" to create window with default profile command "${escapedCommand}"`,
+            "-e",
+            'tell application "iTerm2" to activate',
+          ]);
+        } catch {
+          await execFileAsync("osascript", [
+            "-e",
+            `tell application "iTerm" to create window with default profile command "${escapedCommand}"`,
+            "-e",
+            'tell application "iTerm" to activate',
+          ]);
+        }
         return;
       }
 
