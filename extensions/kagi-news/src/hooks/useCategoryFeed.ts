@@ -63,6 +63,9 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
     score?: number;
     description?: string;
     timestamp?: number;
+    chaosIndex?: number;
+    chaosDescription?: string;
+    chaosLastUpdated?: string;
   }>(contentUrl, {
     parseResponse: async (
       response,
@@ -72,6 +75,9 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
       score?: number;
       description?: string;
       timestamp?: number;
+      chaosIndex?: number;
+      chaosDescription?: string;
+      chaosLastUpdated?: string;
     }> => {
       if (!response.ok) {
         throw new Error(`Failed to fetch content: ${response.status}`);
@@ -82,6 +88,9 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
         score?: number;
         description?: string;
         timestamp?: number;
+        chaosIndex?: number;
+        chaosDescription?: string;
+        chaosLastUpdated?: string;
       }>;
     },
     execute: contentUrl !== "",
