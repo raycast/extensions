@@ -1,3 +1,4 @@
+// useCategories.ts
 // Hook to fetch news categories from the latest batch (used for the daily news command)
 
 import { useFetch } from "@raycast/utils";
@@ -30,6 +31,11 @@ export function useCategories() {
           id: "onthisday",
         });
       }
+
+      categories.push({
+        name: "Chaos Index",
+        id: "chaos",
+      });
 
       return categories;
     },

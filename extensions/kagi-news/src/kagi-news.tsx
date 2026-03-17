@@ -1,7 +1,7 @@
 // kagi-news.tsx
 // Daily News command - browse today's categories and articles with favorites
 
-import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useCategories } from "./hooks/useCategories";
@@ -9,6 +9,7 @@ import { useFavoriteCategories } from "./hooks/useFavoriteCategories";
 import { stripHtml } from "./utils";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
+import { ChaosIndexDetail } from "./views/ChaosIndexDetail";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -20,9 +21,11 @@ export default function Command() {
   const {
     articles,
     events,
+    chaosIndex,
     isLoading: loadingContent,
     error: contentError,
     isOnThisDay,
+    isChaosIndex,
   } = useCategoryFeed(selectedCategory, preferences.language);
 
   // Sort categories: favorites first (alphabetically), then others (alphabetically)
@@ -46,7 +49,8 @@ export default function Command() {
           {sortedCategories.map((category) => (
             <List.Dropdown.Item
               key={category.id}
-              title={`${isFavorite(category.id) ? "★ " : ""}${category.name}`}
+              title={category.name}
+              icon={isFavorite(category.id) ? { source: Icon.Star, tintColor: Color.Yellow } : Icon.StarDisabled}
               value={category.id}
             />
           ))}
@@ -61,6 +65,37 @@ export default function Command() {
         />
       ) : contentError ? (
         <List.EmptyView icon={Icon.ExclamationMark} title="Failed to Load Content" description={contentError} />
+      ) : isChaosIndex ? (
+        chaosIndex ? (
+          <List.Item
+            key="chaos-index"
+            icon="🌍"
+            title="Global Chaos Index"
+            subtitle={`Score: ${chaosIndex.score}/100`}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="View Details"
+                  icon={Icon.Eye}
+                  target={<ChaosIndexDetail score={chaosIndex.score} description={chaosIndex.description} />}
+                />
+                {currentCategory && (
+                  <Action
+                    title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
+                    icon={
+                      isFavorite(currentCategory.id)
+                        ? Icon.StarDisabled
+                        : { source: Icon.Star, tintColor: Color.Yellow }
+                    }
+                    onAction={() => toggleFavorite(currentCategory.id)}
+                  />
+                )}
+              </ActionPanel>
+            }
+          />
+        ) : (
+          <List.EmptyView icon={Icon.ExclamationMark} title="No Chaos Index Data" />
+        )
       ) : isOnThisDay ? (
         events.length === 0 && !loadingContent ? (
           <List.EmptyView icon={Icon.Calendar} title="No Events Found" />
@@ -77,6 +112,17 @@ export default function Command() {
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
+                        {currentCategory && (
+                          <Action
+                            title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
+                            icon={
+                              isFavorite(currentCategory.id)
+                                ? Icon.StarDisabled
+                                : { source: Icon.Star, tintColor: Color.Yellow }
+                            }
+                            onAction={() => toggleFavorite(currentCategory.id)}
+                          />
+                        )}
                       </ActionPanel>
                     }
                   />
@@ -93,6 +139,17 @@ export default function Command() {
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
+                        {currentCategory && (
+                          <Action
+                            title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
+                            icon={
+                              isFavorite(currentCategory.id)
+                                ? Icon.StarDisabled
+                                : { source: Icon.Star, tintColor: Color.Yellow }
+                            }
+                            onAction={() => toggleFavorite(currentCategory.id)}
+                          />
+                        )}
                       </ActionPanel>
                     }
                   />
@@ -115,7 +172,11 @@ export default function Command() {
                 {currentCategory && (
                   <Action
                     title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
-                    icon={isFavorite(currentCategory.id) ? Icon.Star : Icon.CircleProgress}
+                    icon={
+                      isFavorite(currentCategory.id)
+                        ? Icon.StarDisabled
+                        : { source: Icon.Star, tintColor: Color.Yellow }
+                    }
                     onAction={() => toggleFavorite(currentCategory.id)}
                   />
                 )}
