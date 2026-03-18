@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-03-18
 
 - Added Windows support using rust implementation
 - Updated dependencies
