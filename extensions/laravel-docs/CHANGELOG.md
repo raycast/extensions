@@ -1,6 +1,6 @@
 # Laravel Documentation Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-03-18
 
 - Add support for Laravel v13
 - Update master and 12.x docs
