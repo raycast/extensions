@@ -132,7 +132,6 @@ export default function Command() {
           <ActionPanel>
             <Action.CopyToClipboard title="Copy Text" content={text} />
             <Action.Paste title="Paste Text" content={text} />
-            <Action.CopyToClipboard title="Copy Markdown" content={text} />
             <Action title="Export Markdown Bundle" onAction={handleExport} />
           </ActionPanel>
         ) : undefined
