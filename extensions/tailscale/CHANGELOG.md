@@ -1,6 +1,6 @@
 # Tailscale Changelog
 
-## [Better Status Command] - {PR_MERGE_DATE}
+## [Better Status Command] - 2026-03-18
 
 - Optionally show hostname, tailnet name, and IP in the status command
 
