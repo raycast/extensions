@@ -1,13 +1,9 @@
 export async function shortenWithVgd(url: string): Promise<string> {
-  const requestUrl = `https://v.gd/create.php?format=json&url=${encodeURIComponent(
-    url,
-  )}`;
+  const requestUrl = `https://v.gd/create.php?format=json&url=${encodeURIComponent(url)}`;
 
   const response = await fetch(requestUrl);
   if (!response.ok) {
-    throw new Error(
-      `v.gd API error: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`v.gd API error: ${response.status} ${response.statusText}`);
   }
 
   const data = (await response.json()) as {

@@ -29,11 +29,7 @@ describe("shortenUrl dispatcher", () => {
         json: () => Promise.resolve({ link: "https://bit.ly/abc123" }),
       });
 
-      const result = await shortenUrl(
-        "bitly",
-        "https://example.com",
-        "test-key",
-      );
+      const result = await shortenUrl("bitly", "https://example.com", "test-key");
 
       expect(result.service).toBe("bitly");
       expect(result.shortUrl).toBe("https://bit.ly/abc123");
@@ -48,11 +44,7 @@ describe("shortenUrl dispatcher", () => {
           }),
       });
 
-      const result = await shortenUrl(
-        "cuttly",
-        "https://example.com",
-        "test-key",
-      );
+      const result = await shortenUrl("cuttly", "https://example.com", "test-key");
 
       expect(result.service).toBe("cuttly");
       expect(result.shortUrl).toBe("https://cutt.ly/abc123");
@@ -128,21 +120,15 @@ describe("shortenUrl dispatcher", () => {
 
   describe("error cases", () => {
     it("throws 'Unknown service' for unrecognized service id", async () => {
-      await expect(
-        shortenUrl("unknown", "https://example.com"),
-      ).rejects.toThrow("Unknown service");
+      await expect(shortenUrl("unknown", "https://example.com")).rejects.toThrow("Unknown service");
     });
 
     it("throws 'requires an API key' for bitly without API key", async () => {
-      await expect(shortenUrl("bitly", "https://example.com")).rejects.toThrow(
-        "requires an API key",
-      );
+      await expect(shortenUrl("bitly", "https://example.com")).rejects.toThrow("requires an API key");
     });
 
     it("throws 'requires an API key' for cuttly without API key", async () => {
-      await expect(shortenUrl("cuttly", "https://example.com")).rejects.toThrow(
-        "requires an API key",
-      );
+      await expect(shortenUrl("cuttly", "https://example.com")).rejects.toThrow("requires an API key");
     });
   });
 });

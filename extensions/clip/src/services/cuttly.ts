@@ -8,27 +8,18 @@ const statusMessages: Record<number, string> = {
 };
 
 function randomName(): string {
-  const chars =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  return Array.from(
-    { length: 7 },
-    () => chars[Math.floor(Math.random() * chars.length)],
-  ).join("");
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  return Array.from({ length: 7 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
 }
 
-export async function shortenWithCuttly(
-  url: string,
-  apiKey: string,
-): Promise<string> {
+export async function shortenWithCuttly(url: string, apiKey: string): Promise<string> {
   const requestUrl = `https://cutt.ly/api/api.php?key=${encodeURIComponent(apiKey)}&short=${encodeURIComponent(
     url,
   )}&name=${randomName()}`;
 
   const response = await fetch(requestUrl);
   if (!response.ok) {
-    throw new Error(
-      `cutt.ly API error: ${response.status} ${response.statusText}`,
-    );
+    throw new Error(`cutt.ly API error: ${response.status} ${response.statusText}`);
   }
 
   const data = (await response.json()) as {

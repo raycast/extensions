@@ -3,12 +3,12 @@
   "compilerOptions": {
     "allowJs": true,
     "jsx": "react-jsx",
-    "lib": ["ES2021"],
+    "lib": ["ES2021", "DOM"],
     "module": "CommonJS",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    "strict": true,
+    "strict": true
   },
   "include": ["src/**/*", "raycast-env.d.ts"],
-  "exclude": ["src/__tests__", "src/__mocks__"],
+  "exclude": ["src/__tests__", "src/__mocks__"]
 }

@@ -17,19 +17,12 @@ import { shortenUrl } from "./services/shorten";
 import { addToHistory } from "./storage/history";
 import { ShorteningService } from "./types";
 
-function getApiKey(
-  service: ShorteningService,
-  prefs: Preferences.ShortenUrl,
-): string | undefined {
-  if (!service.requiresApiKey || !service.apiKeyPreferenceName)
-    return undefined;
+function getApiKey(service: ShorteningService, prefs: Preferences.ShortenUrl): string | undefined {
+  if (!service.requiresApiKey || !service.apiKeyPreferenceName) return undefined;
   return prefs[service.apiKeyPreferenceName as keyof Preferences.ShortenUrl];
 }
 
-function isServiceConfigured(
-  service: ShorteningService,
-  prefs: Preferences.ShortenUrl,
-): boolean {
+function isServiceConfigured(service: ShorteningService, prefs: Preferences.ShortenUrl): boolean {
   if (!service.requiresApiKey) return true;
   const key = getApiKey(service, prefs);
   return !!key && key.trim().length > 0;
@@ -95,25 +88,14 @@ export default function ShortenUrl() {
 
   if (!isLoading && !activeUrl) {
     return (
-      <List
-        searchBarPlaceholder="Enter or paste a URL to shorten"
-        onSearchTextChange={setUrl}
-      >
-        <List.EmptyView
-          icon={Icon.Link}
-          title="No URL found"
-          description="Copy a URL to clipboard or type one above"
-        />
+      <List searchBarPlaceholder="Enter or paste a URL to shorten" onSearchTextChange={setUrl}>
+        <List.EmptyView icon={Icon.Link} title="No URL found" description="Copy a URL to clipboard or type one above" />
       </List>
     );
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Enter or paste a URL to shorten"
-      onSearchTextChange={setUrl}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Enter or paste a URL to shorten" onSearchTextChange={setUrl}>
       {services.map((service) => {
         const configured = isServiceConfigured(service, prefs);
 
@@ -143,11 +125,7 @@ export default function ShortenUrl() {
                     onAction={() => handleShorten(service)}
                   />
                 ) : (
-                  <Action
-                    title="Configure Api Key"
-                    icon={Icon.Gear}
-                    onAction={() => openExtensionPreferences()}
-                  />
+                  <Action title="Configure Api Key" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
                 )}
               </ActionPanel>
             }

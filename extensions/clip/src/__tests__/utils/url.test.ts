@@ -14,9 +14,7 @@ describe("ensureProtocol", () => {
   });
 
   it("trims whitespace from input", () => {
-    expect(ensureProtocol("  https://example.com  ")).toBe(
-      "https://example.com",
-    );
+    expect(ensureProtocol("  https://example.com  ")).toBe("https://example.com");
   });
 
   it("handles URL with leading/trailing spaces and no protocol", () => {

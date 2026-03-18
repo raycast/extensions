@@ -1,11 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LocalStorage } from "@raycast/api";
-import {
-  addToHistory,
-  getHistory,
-  removeFromHistory,
-  clearHistory,
-} from "../../storage/history";
+import { addToHistory, getHistory, removeFromHistory, clearHistory } from "../../storage/history";
 import { ShortenResult } from "../../types";
 
 function makeResult(shortUrl: string): ShortenResult {
@@ -29,10 +24,7 @@ describe("getHistory", () => {
   });
 
   it("returns parsed array when valid JSON stored", async () => {
-    const entries = [
-      makeResult("https://tinyurl.com/abc"),
-      makeResult("https://tinyurl.com/xyz"),
-    ];
+    const entries = [makeResult("https://tinyurl.com/abc"), makeResult("https://tinyurl.com/xyz")];
     vi.mocked(LocalStorage.getItem).mockResolvedValue(JSON.stringify(entries));
     const result = await getHistory();
     expect(result).toEqual(entries);
@@ -51,10 +43,7 @@ describe("addToHistory", () => {
     vi.mocked(LocalStorage.setItem).mockResolvedValue(undefined);
     const entry = makeResult("https://tinyurl.com/new");
     await addToHistory(entry);
-    expect(LocalStorage.setItem).toHaveBeenCalledWith(
-      "shorten-history",
-      JSON.stringify([entry]),
-    );
+    expect(LocalStorage.setItem).toHaveBeenCalledWith("shorten-history", JSON.stringify([entry]));
   });
 
   it("prepends new entry to existing history", async () => {
@@ -63,16 +52,11 @@ describe("addToHistory", () => {
     vi.mocked(LocalStorage.setItem).mockResolvedValue(undefined);
     const newEntry = makeResult("https://tinyurl.com/new");
     await addToHistory(newEntry);
-    expect(LocalStorage.setItem).toHaveBeenCalledWith(
-      "shorten-history",
-      JSON.stringify([newEntry, ...existing]),
-    );
+    expect(LocalStorage.setItem).toHaveBeenCalledWith("shorten-history", JSON.stringify([newEntry, ...existing]));
   });
 
   it("caps at 100 entries when history is full", async () => {
-    const existing = Array.from({ length: 100 }, (_, i) =>
-      makeResult(`https://tinyurl.com/${i}`),
-    );
+    const existing = Array.from({ length: 100 }, (_, i) => makeResult(`https://tinyurl.com/${i}`));
     vi.mocked(LocalStorage.getItem).mockResolvedValue(JSON.stringify(existing));
     vi.mocked(LocalStorage.setItem).mockResolvedValue(undefined);
     const newEntry = makeResult("https://tinyurl.com/newest");
@@ -88,22 +72,14 @@ describe("removeFromHistory", () => {
   it("removes entry matching shortUrl", async () => {
     const entryA = makeResult("https://tinyurl.com/a");
     const entryB = makeResult("https://tinyurl.com/b");
-    vi.mocked(LocalStorage.getItem).mockResolvedValue(
-      JSON.stringify([entryA, entryB]),
-    );
+    vi.mocked(LocalStorage.getItem).mockResolvedValue(JSON.stringify([entryA, entryB]));
     vi.mocked(LocalStorage.setItem).mockResolvedValue(undefined);
     await removeFromHistory("https://tinyurl.com/a");
-    expect(LocalStorage.setItem).toHaveBeenCalledWith(
-      "shorten-history",
-      JSON.stringify([entryB]),
-    );
+    expect(LocalStorage.setItem).toHaveBeenCalledWith("shorten-history", JSON.stringify([entryB]));
   });
 
   it("leaves other entries intact", async () => {
-    const entries = [
-      makeResult("https://tinyurl.com/a"),
-      makeResult("https://tinyurl.com/b"),
-    ];
+    const entries = [makeResult("https://tinyurl.com/a"), makeResult("https://tinyurl.com/b")];
     vi.mocked(LocalStorage.getItem).mockResolvedValue(JSON.stringify(entries));
     vi.mocked(LocalStorage.setItem).mockResolvedValue(undefined);
     await removeFromHistory("https://tinyurl.com/a");
@@ -118,10 +94,7 @@ describe("removeFromHistory", () => {
     vi.mocked(LocalStorage.getItem).mockResolvedValue(JSON.stringify(entries));
     vi.mocked(LocalStorage.setItem).mockResolvedValue(undefined);
     await removeFromHistory("https://tinyurl.com/notexist");
-    expect(LocalStorage.setItem).toHaveBeenCalledWith(
-      "shorten-history",
-      JSON.stringify(entries),
-    );
+    expect(LocalStorage.setItem).toHaveBeenCalledWith("shorten-history", JSON.stringify(entries));
   });
 });
 

@@ -110,9 +110,7 @@ describe("shortenWithBitly", () => {
       statusText: "Forbidden",
     });
 
-    await expect(
-      shortenWithBitly("https://example.com", "bad-key"),
-    ).rejects.toThrow("403");
+    await expect(shortenWithBitly("https://example.com", "bad-key")).rejects.toThrow("403");
   });
 });
 
@@ -140,9 +138,7 @@ describe("shortenWithCuttly", () => {
       json: () => Promise.resolve({ url: { status: 1, shortLink: "" } }),
     });
 
-    await expect(
-      shortenWithCuttly("https://example.com", "api-key"),
-    ).rejects.toThrow(
+    await expect(shortenWithCuttly("https://example.com", "api-key")).rejects.toThrow(
       "The shortened link comes from the domain that shortens the link",
     );
   });
@@ -155,9 +151,7 @@ describe("shortenWithCuttly", () => {
       json: () => Promise.resolve({ url: { status: 4, shortLink: "" } }),
     });
 
-    await expect(
-      shortenWithCuttly("https://example.com", "bad-key"),
-    ).rejects.toThrow("Invalid API key");
+    await expect(shortenWithCuttly("https://example.com", "bad-key")).rejects.toThrow("Invalid API key");
   });
 
   it("throws when the url field is missing from the response", async () => {
@@ -168,9 +162,9 @@ describe("shortenWithCuttly", () => {
       json: () => Promise.resolve({}),
     });
 
-    await expect(
-      shortenWithCuttly("https://example.com", "api-key"),
-    ).rejects.toThrow("cutt.ly API returned an unexpected response");
+    await expect(shortenWithCuttly("https://example.com", "api-key")).rejects.toThrow(
+      "cutt.ly API returned an unexpected response",
+    );
   });
 
   it("includes a 7-character alphanumeric name parameter in the request URL", async () => {
@@ -212,9 +206,7 @@ describe("shortenWithTinyurl", () => {
       statusText: "Internal Server Error",
     });
 
-    await expect(shortenWithTinyurl("https://example.com")).rejects.toThrow(
-      "500",
-    );
+    await expect(shortenWithTinyurl("https://example.com")).rejects.toThrow("500");
   });
 });
 
@@ -239,9 +231,7 @@ describe("shortenWithIsgd", () => {
       json: () => Promise.resolve({ errorcode: 1, errormessage: "some error" }),
     });
 
-    await expect(shortenWithIsgd("https://example.com")).rejects.toThrow(
-      "some error",
-    );
+    await expect(shortenWithIsgd("https://example.com")).rejects.toThrow("some error");
   });
 
   it("throws when shorturl is missing from response", async () => {
@@ -252,9 +242,7 @@ describe("shortenWithIsgd", () => {
       json: () => Promise.resolve({}),
     });
 
-    await expect(shortenWithIsgd("https://example.com")).rejects.toThrow(
-      "is.gd API returned an unexpected response",
-    );
+    await expect(shortenWithIsgd("https://example.com")).rejects.toThrow("is.gd API returned an unexpected response");
   });
 });
 
@@ -279,8 +267,6 @@ describe("shortenWithVgd", () => {
       json: () => Promise.resolve({ errorcode: 2, errormessage: "bad url" }),
     });
 
-    await expect(shortenWithVgd("https://example.com")).rejects.toThrow(
-      "bad url",
-    );
+    await expect(shortenWithVgd("https://example.com")).rejects.toThrow("bad url");
   });
 });

@@ -6,11 +6,7 @@ import { shortenWithIsgd } from "./isgd";
 import { shortenWithTinyurl } from "./tinyurl";
 import { shortenWithVgd } from "./vgd";
 
-export async function shortenUrl(
-  serviceId: string,
-  url: string,
-  apiKey?: string,
-): Promise<ShortenResult> {
+export async function shortenUrl(serviceId: string, url: string, apiKey?: string): Promise<ShortenResult> {
   const normalizedUrl = ensureProtocol(url);
   let shortUrl: string;
 

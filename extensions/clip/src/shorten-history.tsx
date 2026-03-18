@@ -1,13 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  confirmAlert,
-  Alert,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { ShortenResult } from "./types";
 import { getHistory, removeFromHistory, clearHistory } from "./storage/history";
@@ -51,10 +42,7 @@ export default function ShortenHistory() {
   return (
     <List isLoading={isLoading}>
       {history.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No shortened URLs yet"
-          description="Use the Shorten URL command to get started"
-        />
+        <List.EmptyView title="No shortened URLs yet" description="Use the Shorten URL command to get started" />
       ) : (
         history.map((entry) => (
           <List.Item
@@ -62,26 +50,13 @@ export default function ShortenHistory() {
             title={entry.originalUrl}
             subtitle={entry.shortUrl}
             icon={Icon.Link}
-            accessories={[
-              { text: entry.service },
-              { date: new Date(entry.createdAt) },
-            ]}
+            accessories={[{ text: entry.service }, { date: new Date(entry.createdAt) }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Short URL"
-                  content={entry.shortUrl}
-                />
+                <Action.CopyToClipboard title="Copy Short URL" content={entry.shortUrl} />
                 <Action.OpenInBrowser url={entry.shortUrl} />
-                <Action.CopyToClipboard
-                  title="Copy Original URL"
-                  content={entry.originalUrl}
-                />
-                <Action
-                  title="Delete Entry"
-                  icon={Icon.Trash}
-                  onAction={() => handleDelete(entry.shortUrl)}
-                />
+                <Action.CopyToClipboard title="Copy Original URL" content={entry.originalUrl} />
+                <Action title="Delete Entry" icon={Icon.Trash} onAction={() => handleDelete(entry.shortUrl)} />
                 <Action
                   title="Clear All History"
                   icon={Icon.Trash}
