@@ -126,31 +126,42 @@ export default async function Command() {
     fs.writeFileSync(schedulePaths.envFilePath, `${envLines.join("\n")}\n`, { encoding: "utf-8", mode: 0o600 });
     fs.chmodSync(schedulePaths.envFilePath, 0o600);
 
-    const runnerPath = path.join(prepared.agentRoot, "scripts", "run_paper_agent.sh");
-    const programArguments = [
-      "/bin/zsh",
-      runnerPath,
-      "--mode",
-      "daily-launchd",
-      "--run-hour",
-      String(DAILY_SCHEDULE_HOUR),
-      "--agent-root",
-      prepared.agentRoot,
-      "--python",
-      prepared.pythonBin,
-      "--config",
-      schedulePaths.mergedConfigPath,
-      "--state-dir",
-      schedulePaths.stateDir,
-      "--log-dir",
-      schedulePaths.logDir,
-      "--env-file",
-      schedulePaths.envFilePath,
+    const launchEnvPath = path.join(schedulePaths.launchdDir, "launch_env.sh");
+    const launchEnvLines = [
+      `export AGENT_ROOT=${shellQuote(prepared.agentRoot)}`,
+      `export CONFIG_PATH=${shellQuote(schedulePaths.mergedConfigPath)}`,
+      `export PYTHON_BIN=${shellQuote(prepared.pythonBin)}`,
+      `export STATE_DIR=${shellQuote(schedulePaths.stateDir)}`,
+      `export LOG_DIR=${shellQuote(schedulePaths.logDir)}`,
+      `export ENV_FILE=${shellQuote(schedulePaths.envFilePath)}`,
+      `export RUN_HOUR=${DAILY_SCHEDULE_HOUR}`,
     ];
+    fs.writeFileSync(launchEnvPath, `${launchEnvLines.join("\n")}\n`, { encoding: "utf-8", mode: 0o644 });
+
+    const runDailyPath = path.join(schedulePaths.launchdDir, "run_daily.sh");
+    const runDailyScript = `#!/bin/zsh
+set -u
+LAUNCHD_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$LAUNCHD_DIR/launch_env.sh"
+RUNNER="$AGENT_ROOT/scripts/run_paper_agent.sh"
+if [ ! -f "$RUNNER" ]; then
+  STATUS_FILE="$STATE_DIR/last_run_status.json"
+  mkdir -p "$STATE_DIR"
+  NOW="$(date '+%Y-%m-%d %H:%M:%S')"
+  DATE="$(date +%F)"
+  printf '%s\\n' "{\\"mode\\":\\"daily-launchd\\",\\"date\\":\\"\${DATE}\\",\\"status\\":\\"skipped\\",\\"reason\\":\\"agent-root-unavailable\\",\\"exit_code\\":\\"0\\",\\"started_at\\":\\"\${NOW}\\",\\"finished_at\\":\\"\${NOW}\\",\\"log_path\\":\\"\\",\\"config_path\\":\\"\\",\\"agent_root\\":\\"\\"}" > "$STATUS_FILE"
+  exit 0
+fi
+exec /bin/zsh "$RUNNER" --mode daily-launchd --run-hour "$RUN_HOUR" --agent-root "$AGENT_ROOT" --python "$PYTHON_BIN" --config "$CONFIG_PATH" --state-dir "$STATE_DIR" --log-dir "$LOG_DIR" --env-file "$ENV_FILE"
+`;
+    fs.writeFileSync(runDailyPath, runDailyScript, { encoding: "utf-8", mode: 0o755 });
+
+    const programArguments = ["/bin/zsh", runDailyPath];
+    const workingDirectory = schedulePaths.launchdDir;
 
     fs.writeFileSync(
       schedulePaths.plistPath,
-      renderPlist(programArguments, prepared.agentRoot, schedulePaths.stdoutPath, schedulePaths.stderrPath),
+      renderPlist(programArguments, workingDirectory, schedulePaths.stdoutPath, schedulePaths.stderrPath),
       "utf-8",
     );
 

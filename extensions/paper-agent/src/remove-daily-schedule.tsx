@@ -1,5 +1,6 @@
 import { popToRoot, showToast, Toast, trash } from "@raycast/api";
 import * as fs from "node:fs";
+import * as path from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { DAILY_SCHEDULE_LABEL, getSchedulePaths } from "./run-utils";
@@ -37,7 +38,14 @@ export default async function Command() {
     const schedulePaths = getSchedulePaths();
     await unloadLaunchAgent(schedulePaths.plistPath);
 
-    for (const filePath of [schedulePaths.plistPath, schedulePaths.envFilePath, schedulePaths.mergedConfigPath]) {
+    const filesToRemove = [
+      schedulePaths.plistPath,
+      schedulePaths.envFilePath,
+      schedulePaths.mergedConfigPath,
+      path.join(schedulePaths.launchdDir, "run_daily.sh"),
+      path.join(schedulePaths.launchdDir, "launch_env.sh"),
+    ];
+    for (const filePath of filesToRemove) {
       if (fs.existsSync(filePath)) {
         await trash(filePath);
       }

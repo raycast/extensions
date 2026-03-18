@@ -114,6 +114,7 @@ npm run build  # Compile extension
 ### Run and schedule behavior
 
 - **Run Paper Pipeline shows only “Run started in background”** — This is expected: manual runs are detached. Use **Check Run Status** and open run logs from there to inspect final success/failure.
+- **Last run failed / pipeline exit nonzero?** — In **Check Run Status**, use **Open Last Run Log** to see the error. A common cause is **arXiv 429** (rate limit): wait 15–30 minutes and run again; the pipeline also retries automatically. For other errors, see the core [Troubleshooting](https://github.com/galleonli/paper-agent#troubleshooting).
 - **Daily schedule not running** — Re-run **Install Daily Schedule** after changing Preferences that affect runtime config/secrets. Then use **Check Run Status** to confirm install state and latest run metadata.
 - **Launchd scope** — Daily schedule commands are macOS `launchd` automation only.
 

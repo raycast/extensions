@@ -74,14 +74,34 @@ function formatReason(reason: string | undefined): string {
   return reason.replace(/-/g, " ");
 }
 
+/** Date (YYYY-MM-DD) when the run finished; falls back to lastRun.date for old status files. */
+function runFinishDate(lastRun: LastRunStatus | undefined): string | undefined {
+  if (!lastRun) return undefined;
+  const finished = lastRun.finished_at?.trim();
+  if (finished && /^\d{4}-\d{2}-\d{2}/.test(finished)) {
+    return finished.slice(0, 10);
+  }
+  return lastRun.date;
+}
+
+/** If both started_at and finished_at are valid, return approximate duration in hours; else undefined. */
+function runDurationHours(lastRun: LastRunStatus | undefined): number | undefined {
+  const started = lastRun?.started_at?.trim();
+  const finished = lastRun?.finished_at?.trim();
+  if (!started || !finished) return undefined;
+  const startMs = new Date(started.replace(" ", "T")).getTime();
+  const finishMs = new Date(finished.replace(" ", "T")).getTime();
+  if (Number.isNaN(startMs) || Number.isNaN(finishMs) || finishMs < startMs) return undefined;
+  return (finishMs - startMs) / (1000 * 60 * 60);
+}
+
 function computeTodaySummary(lastSuccessDate: string | undefined, lastRun: LastRunStatus | undefined): string {
   const today = todayDateString();
-  // Prefer the most recent run for today so summary matches "Last Run" (e.g. scheduled success then manual fail → show Failed).
-  if (lastRun?.date === today) {
+  const runDate = runFinishDate(lastRun);
+  if (lastRun && runDate === today) {
     if (lastRun.status === "success") return "Success";
     if (lastRun.status === "failed") return "Failed";
     if (lastRun.status === "skipped") return `Skipped (${formatReason(lastRun.reason)})`;
-    // Unknown or other status: show it instead of falling through to lastSuccessDate.
     return lastRun.status ?? "Unknown";
   }
   if (lastSuccessDate === today) {
@@ -135,6 +155,10 @@ export default function Command() {
   const { schedulePaths, plistExists, launchAgentLoaded, installed, lastRun, lastSuccessDate, todaySummary } = status;
   const configPath = prefs.configPath?.trim() ?? "";
   const configDir = configPath ? path.dirname(configPath) : "";
+  const lastRunDate = runFinishDate(lastRun);
+  const durationHours = runDurationHours(lastRun);
+  const durationNote =
+    durationHours !== undefined && durationHours >= 24 ? ` _(run took ${Math.round(durationHours)} hours)_` : "";
 
   const markdown = [
     "# Run Status",
@@ -150,15 +174,17 @@ export default function Command() {
     `- Today's result: ${todaySummary}`,
     `- Last successful day: ${lastSuccessDate ?? "Never"}`,
     "",
+    "_The 04:00 run is skipped if today already succeeded, another run is still in progress, or the agent root path is not available (e.g. external disk not mounted)._",
+    "",
     "## Last Run (scheduled or manual)",
     "",
     `- Status: ${lastRun?.status ?? "Unknown"}`,
     `- Mode: ${lastRun?.mode ?? "Unknown"}`,
-    `- Date: ${lastRun?.date ?? "Unknown"}`,
+    `- Date: ${lastRunDate ?? "Unknown"} _(finish date)_`,
     `- Reason: ${formatReason(lastRun?.reason)}`,
     `- Exit code: ${lastRun?.exit_code ?? "Unknown"}`,
     `- Started at: ${lastRun?.started_at ?? "Unknown"}`,
-    `- Finished at: ${lastRun?.finished_at ?? "Unknown"}`,
+    `- Finished at: ${lastRun?.finished_at ?? "Unknown"}${durationNote}`,
     `- Log path: ${lastRun?.log_path ?? schedulePaths.logDir}`,
     "",
     "## Paths",
