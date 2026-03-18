@@ -67,11 +67,11 @@ export default function NatureCommand(props: {
         const natureName = getLocalizedName(nature.naturenames, nature.name);
         const increasedStat = getLocalizedName(
           nature.increased_stat?.statnames,
-          nature.increased_stat?.name || "None",
+          nature.increased_stat?.name || "",
         );
         const decreasedStat = getLocalizedName(
           nature.decreased_stat?.statnames,
-          nature.decreased_stat?.name || "None",
+          nature.decreased_stat?.name || "",
         );
 
         const isNeutral = !increasedStat && !decreasedStat;

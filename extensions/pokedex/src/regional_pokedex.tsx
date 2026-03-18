@@ -22,9 +22,12 @@ export default function RegionalPokedex(props: {
     if (selectedPokedex) {
       setIsLoading(true);
       (async () => {
-        const pokemon = await fetchPokedexPokemon(selectedPokedex);
-        setPokemonList(pokemon || []);
-        setIsLoading(false);
+        try {
+          const pokemon = await fetchPokedexPokemon(selectedPokedex);
+          setPokemonList(pokemon || []);
+        } finally {
+          setIsLoading(false);
+        }
       })();
     }
   }, [selectedPokedex]);
