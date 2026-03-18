@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keep",
+  "title": "Keep",
+  "description": "Search, save, and manage links in Keep. Save the current tab, save from the clipboard, mark links read or unread, and track unread count in the menu bar.",
+  "icon": "keep-icon.png",
+  "author": "iannuttall",
+  "version": "0.1.0",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "keep",
+    "links",
+    "bookmarks",
+    "read-it-later",
+    "reading list"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Keep API key. Create one in Keep Settings → API."
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Base URL",
+      "placeholder": "https://keep.md",
+      "description": "Optional custom Keep URL for self-hosted installs."
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-links",
+      "title": "Search Links",
+      "description": "Browse, filter, and manage your saved Keep links",
+      "mode": "view",
+      "keywords": [
+        "keep",
+        "links",
+        "saved",
+        "search",
+        "bookmarks"
+      ]
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "description": "Save a URL to Keep",
+      "mode": "no-view",
+      "keywords": [
+        "keep",
+        "save",
+        "bookmark",
+        "add"
+      ],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": true,
+          "placeholder": "https://example.com"
+        },
+        {
+          "name": "title",
+          "type": "text",
+          "required": false,
+          "placeholder": "Custom title (optional)"
+        }
+      ]
+    },
+    {
+      "name": "save-clipboard",
+      "title": "Save Link from Clipboard",
+      "description": "Save the current clipboard URL to Keep",
+      "mode": "no-view",
+      "keywords": [
+        "keep",
+        "clipboard",
+        "save",
+        "bookmark"
+      ]
+    },
+    {
+      "name": "save-tab",
+      "title": "Save Current Tab",
+      "description": "Save the active browser tab to Keep",
+      "mode": "no-view",
+      "keywords": [
+        "keep",
+        "browser",
+        "tab",
+        "page",
+        "save"
+      ]
+    },
+    {
+      "name": "menu-bar",
+      "title": "Unread Links",
+      "description": "Show unread Keep links in the menu bar",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.8",
+    "@types/react": "^19.2.10",
+    "eslint": "^10.0.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "typecheck": "tsc --noEmit",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "lock": "npm install --package-lock-only",
+    "submit:prepare": "npm run lock && ray build",
+    "prepublishOnly": "echo \"\\n\\nIt looks like you are trying to publish this extension to npm.\\n\\nIf you actually want npm publish, remove the prepublishOnly script and run npm publish again.\\nIf you want the Raycast Store, run npm run publish instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
