@@ -2,21 +2,17 @@ import { getPreferenceValues } from "@raycast/api";
 
 import { discoverTailscalePath } from "./lib/tailscale-path";
 
-export interface ExtensionPreferences {
-  tailscalePath?: string;
-  refreshIntervalSeconds: string;
-  showOfflinePeers: boolean;
+type TailscalePreferences = Preferences.Tailscale;
+
+export function getExtensionPreferences(): TailscalePreferences {
+  return getPreferenceValues<TailscalePreferences>();
 }
 
-export function getExtensionPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
-}
-
-export function resolveTailscalePath(preferences: ExtensionPreferences): string {
+export function resolveTailscalePath(preferences: TailscalePreferences): string {
   return preferences.tailscalePath?.trim() || discoverTailscalePath();
 }
 
-export function resolveRefreshInterval(preferences: ExtensionPreferences): number {
+export function resolveRefreshInterval(preferences: TailscalePreferences): number {
   const parsed = Number.parseInt(preferences.refreshIntervalSeconds, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 30;
 }
