@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  List,
-  open,
-  PopToRootType,
-  showHUD,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, List, open, PopToRootType, showHUD, useNavigation } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { Project, Service } from "clockodo";
 import { clockodo, getServices } from "./clockodo";
@@ -17,13 +8,7 @@ type Values = {
   text: string;
 };
 
-const Details = ({
-  project,
-  service,
-}: {
-  project: Project;
-  service: Service;
-}) => {
+const Details = ({ project, service }: { project: Project; service: Service }) => {
   async function handleSubmit(values: Values) {
     await clockodo.startClock({
       projectsId: project.id,
@@ -44,13 +29,7 @@ const Details = ({
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="text"
-        autoFocus
-        title="Text"
-        placeholder="I'm working on"
-        info="You can share a GitHub URL"
-      />
+      <Form.TextArea id="text" autoFocus title="Text" placeholder="I'm working on" info="You can share a GitHub URL" />
     </Form>
   );
 };
@@ -105,15 +84,10 @@ export default function Command() {
                 keywords={[customerName]}
                 actions={
                   <ActionPanel>
-                    <Action
-                      title="Select Service"
-                      onAction={() => push(<SelectService project={project} />)}
-                    />
+                    <Action title="Select Service" onAction={() => push(<SelectService project={project} />)} />
                     <Action
                       title="Open Project Report"
-                      onAction={() =>
-                        open(`https://my.clockodo.com/projects/${project.id}/`)
-                      }
+                      onAction={() => open(`https://my.clockodo.com/projects/${project.id}/`)}
                     />
                   </ActionPanel>
                 }

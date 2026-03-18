@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  launchCommand,
-  LaunchType,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, launchCommand, LaunchType, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useWeekOverview } from "./hooks";
 import { dayjs, formatDuration } from "./lib";

@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  PopToRootType,
-  showHUD,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, PopToRootType, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { Billability, EntryType } from "clockodo";
 import { useEffect, useState } from "react";
@@ -55,9 +48,7 @@ export default function Command() {
             accessories={[
               { text: entry.customerName ?? "Unknown Customer" },
               {
-                text: formatDuration(
-                  entry.duration ?? dayjs().diff(entry.timeSince, "seconds"),
-                ),
+                text: formatDuration(entry.duration ?? dayjs().diff(entry.timeSince, "seconds")),
               },
             ]}
             actions={
@@ -71,10 +62,7 @@ export default function Command() {
                         customersId: entry.customersId,
                         servicesId: entry.servicesId,
                         text: entry.text,
-                        billable:
-                          entry.billable === Billability.Billed
-                            ? Billability.Billable
-                            : entry.billable,
+                        billable: entry.billable === Billability.Billed ? Billability.Billable : entry.billable,
                       }),
                     );
                     await showHUD("Clock started", {

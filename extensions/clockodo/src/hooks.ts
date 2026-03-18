@@ -1,13 +1,6 @@
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useRef } from "react";
-import {
-  clockodo,
-  formatDate,
-  getCustomer,
-  getMe,
-  getProject,
-  getProjects,
-} from "./clockodo";
+import { clockodo, formatDate, getCustomer, getMe, getProject, getProjects } from "./clockodo";
 import { dayjs } from "./lib";
 
 export const useRecentEntries = () => {
@@ -23,18 +16,13 @@ export const useRecentEntries = () => {
         },
       });
       const sortedEntries = entries.toSorted(
-        (a, b) =>
-          new Date(b.timeSince).getTime() - new Date(a.timeSince).getTime(),
+        (a, b) => new Date(b.timeSince).getTime() - new Date(a.timeSince).getTime(),
       );
       return Promise.all(
         sortedEntries.map(async (entry) => ({
           ...entry,
-          projectName: entry.projectsId
-            ? (await getProject(entry.projectsId))?.name
-            : null,
-          customerName: entry.customersId
-            ? (await getCustomer(entry.customersId))?.name
-            : null,
+          projectName: entry.projectsId ? (await getProject(entry.projectsId))?.name : null,
+          customerName: entry.customersId ? (await getCustomer(entry.customersId))?.name : null,
         })),
       );
     },
@@ -58,9 +46,7 @@ export const useWeekOverview = () => {
           usersId: user.data.id,
         },
       });
-      const sortedGroups = groups.toSorted(
-        (a, b) => new Date(a.name).getTime() - new Date(b.name).getTime(),
-      );
+      const sortedGroups = groups.toSorted((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime());
       return { groups: sortedGroups };
     },
     [],
@@ -73,9 +59,7 @@ export const useWeekOverview = () => {
 export const useGroupedProjects = () => {
   return usePromise(async () => {
     const projects = await getProjects();
-    const sortedProjects = projects.data.sort((a, b) =>
-      a.name.localeCompare(b.name),
-    );
+    const sortedProjects = projects.data.sort((a, b) => a.name.localeCompare(b.name));
     const projectsWithCustomerName = await Promise.all(
       sortedProjects.map(async (project) => {
         const customer = await getCustomer(project.customersId);
@@ -85,10 +69,7 @@ export const useGroupedProjects = () => {
         };
       }),
     );
-    const groupedProjects = Object.groupBy(
-      projectsWithCustomerName,
-      (project) => project.customerName,
-    );
+    const groupedProjects = Object.groupBy(projectsWithCustomerName, (project) => project.customerName);
 
     return groupedProjects;
   });

@@ -21,8 +21,7 @@ export const clockodo = new Clockodo({
  * @param date Date
  * @returns string
  */
-export const formatDate = (date: Date) =>
-  date.toISOString().split(".")[0] + "Z";
+export const formatDate = (date: Date) => date.toISOString().split(".")[0] + "Z";
 
 const DEFAULT_CACHE_AGE = 12 * 60 * 60 * 1000; // 12 hours
 
@@ -63,19 +62,13 @@ export const getCustomers = withCache(
 );
 
 export const getCustomer = (customerId: number) =>
-  getCustomers().then((customers) =>
-    customers.data.find((customer) => customer.id === customerId),
-  );
+  getCustomers().then((customers) => customers.data.find((customer) => customer.id === customerId));
 
 export const getProject = (projectId: number) =>
-  getProjects().then((projects) =>
-    projects.data.find((project) => project.id === projectId),
-  );
+  getProjects().then((projects) => projects.data.find((project) => project.id === projectId));
 
 export const getService = (serviceId: number) =>
-  getServices().then((services) =>
-    services.data.find((service) => service.id === serviceId),
-  );
+  getServices().then((services) => services.data.find((service) => service.id === serviceId));
 
 export const getMe = withCache(() => clockodo.getMe(), {
   maxAge: DEFAULT_CACHE_AGE,
