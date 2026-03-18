@@ -61,15 +61,15 @@ describe("vault", () => {
       console.log(vaults);
     });
 
-    it("should not throw when vaultPath preference is undefined (first install)", () => {
-      vi.mocked(getPreferenceValues).mockReturnValueOnce({
+    it("should not throw and return empty array when vaultPath preference is undefined (first install)", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
         vaultPath: undefined as unknown as string,
         excludedFolders: "",
         configFileName: ".obsidian",
       });
       expect(() => getVaultsFromPreferences()).not.toThrow();
-      const vaults = getVaultsFromPreferences();
-      expect(vaults).toEqual([]);
+      expect(getVaultsFromPreferences()).toEqual([]);
+      vi.mocked(getPreferenceValues).mockRestore();
     });
   });
 
