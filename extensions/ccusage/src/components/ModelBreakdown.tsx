@@ -1,5 +1,5 @@
 import React, { ReactNode, useMemo } from "react";
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon, Color, ActionPanel } from "@raycast/api";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import {
   getTopModels,
@@ -133,7 +133,11 @@ export function ModelBreakdown() {
       icon={{ source: Icon.BarChart, tintColor: Color.SecondaryText }}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
-      actions={<StandardActions externalLinks={externalLinks} />}
+      actions={
+        <ActionPanel>
+          <StandardActions externalLinks={externalLinks} />
+        </ActionPanel>
+      }
     />
   );
 }

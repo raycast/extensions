@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon, Color, ActionPanel } from "@raycast/api";
 import { ReactNode, useMemo } from "react";
 import { formatTokens, formatCost, getCostPerMTok } from "../utils/data-formatter";
 import {
@@ -143,7 +143,11 @@ export function CostAnalysis() {
       icon={{ source: Icon.Coins, tintColor: Color.SecondaryText }}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
-      actions={<StandardActions externalLinks={externalLinks} />}
+      actions={
+        <ActionPanel>
+          <StandardActions externalLinks={externalLinks} />
+        </ActionPanel>
+      }
     />
   );
 }

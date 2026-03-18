@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon, Color, ActionPanel } from "@raycast/api";
 import { ReactNode, useMemo } from "react";
 import { formatTokens, formatCost } from "../utils/data-formatter";
 import { formatDistanceToNow } from "date-fns";
@@ -94,7 +94,11 @@ export function SessionUsage() {
       icon={{ source: Icon.List, tintColor: Color.SecondaryText }}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
-      actions={<StandardActions />}
+      actions={
+        <ActionPanel>
+          <StandardActions />
+        </ActionPanel>
+      }
     />
   );
 }
