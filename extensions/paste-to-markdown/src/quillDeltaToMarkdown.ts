@@ -7,6 +7,12 @@ interface QuillDelta {
   ops: DeltaOp[];
 }
 
+interface DeltaFormatOptions {
+  strongDelimiter: string;
+  emDelimiter: string;
+  bulletListMarker: string;
+}
+
 function longestBacktickRun(text: string): number {
   let max = 0;
   let current = 0;
@@ -45,7 +51,7 @@ function escapeLinkUrl(url: string): string {
   return url.replace(/\(/g, "%28").replace(/\)/g, "%29");
 }
 
-function applyInlineFormatting(text: string, attributes: Record<string, unknown>): string {
+function applyInlineFormatting(text: string, attributes: Record<string, unknown>, options: DeltaFormatOptions): string {
   if (!text) return text;
 
   if (attributes.code) {
@@ -60,15 +66,15 @@ function applyInlineFormatting(text: string, attributes: Record<string, unknown>
   } else {
     text = escapeMarkdown(text);
   }
-  if (attributes.bold) text = `**${text}**`;
-  if (attributes.italic) text = `_${text}_`;
+  if (attributes.bold) text = `${options.strongDelimiter}${text}${options.strongDelimiter}`;
+  if (attributes.italic) text = `${options.emDelimiter}${text}${options.emDelimiter}`;
   if (attributes.strike) text = `~~${text}~~`;
   if (attributes.underline) text = `<u>${text}</u>`;
 
   return text;
 }
 
-export function quillDeltaToMarkdown(delta: QuillDelta): string {
+export function quillDeltaToMarkdown(delta: QuillDelta, options: DeltaFormatOptions): string {
   const lines: string[] = [];
   let currentLine = "";
   let listCounter = 0;
@@ -102,7 +108,7 @@ export function quillDeltaToMarkdown(delta: QuillDelta): string {
       }
       const indent = "    ".repeat(Number(attrs.indent ?? 0));
       if (attrs.list === "bullet") {
-        lines.push(`${indent}- ${currentLine}`);
+        lines.push(`${indent}${options.bulletListMarker} ${currentLine}`);
         listCounter = 0;
       } else if (attrs.list === "ordered") {
         listCounter++;
@@ -136,7 +142,7 @@ export function quillDeltaToMarkdown(delta: QuillDelta): string {
         currentLine = "";
       }
       const skipFormatting = codeBlockLines || (nextIsCodeBlock && i === parts.length - 1);
-      currentLine += skipFormatting ? parts[i] : applyInlineFormatting(parts[i], attrs);
+      currentLine += skipFormatting ? parts[i] : applyInlineFormatting(parts[i], attrs, options);
     }
   }
 

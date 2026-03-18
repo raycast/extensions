@@ -65,11 +65,24 @@ export default async function Command() {
           const entries = parseWebCustomData(blob);
           const slackTexty = entries?.get("slack/texty");
           if (slackTexty) {
-            markdown = quillDeltaToMarkdown(JSON.parse(slackTexty));
+            markdown = quillDeltaToMarkdown(JSON.parse(slackTexty), {
+              strongDelimiter: preferences.strongDelimiter,
+              emDelimiter: preferences.emDelimiter,
+              bulletListMarker: preferences.bulletListMarker,
+            });
           }
         }
       } catch (error) {
         console.error("Failed to parse Slack clipboard data:", error);
+      }
+    }
+
+    // Fallback: plain text from clipboard
+    if (!markdown) {
+      try {
+        markdown = (await Clipboard.readText()) ?? "";
+      } catch (error) {
+        console.error("Failed to get plain text from clipboard:", error);
       }
     }
 
