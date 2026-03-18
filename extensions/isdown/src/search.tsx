@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { List, Icon, Color, Action, ActionPanel } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
 const BASE_URL = "https://isdown.app";
 
@@ -59,6 +59,9 @@ export default function Command() {
       return { data: result.data };
     },
     keepPreviousData: true,
+    onError(error) {
+      showFailureToast(error, { title: "Failed to load services" });
+    },
   });
 
   const {
