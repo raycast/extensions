@@ -396,7 +396,7 @@
     },
     {
       "name": "volumeUp",
-      "title": "Turn Volume up",
+      "title": "Turn Volume Up",
       "subtitle": "Spotify",
       "description": "Turn the volume up by 10%.",
       "mode": "no-view",
