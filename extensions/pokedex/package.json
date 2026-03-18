@@ -21,7 +21,7 @@
   ],
   "commands": [
     {
-      "name": "pokedex",
+      "name": "pokemon",
       "title": "Pokédex",
       "subtitle": "Pokémon",
       "description": "Explore detailed Pokémon profiles with stats, abilities, moves, evolution chains, encounters, and Pokédex entries.",
