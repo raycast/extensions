@@ -1,6 +1,6 @@
 # AI Agency Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-18
 
 - Added the main AI Agency browser for exploring agents by division
 - Added agent previews, full prompt view, and quick copy actions
