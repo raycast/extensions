@@ -1,8 +1,9 @@
 # Focus Changelog
+
 ## [Fix] - {PR_MERGE_DATE}
 - Fixed a timeout error when opening Focus preferences from the "No profiles found" state.
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-03-16
 - Commands now close the Raycast window automatically on success, showing a brief HUD notification instead of keeping the window open.
 
 ## [Enhancement] - 2026-03-12
