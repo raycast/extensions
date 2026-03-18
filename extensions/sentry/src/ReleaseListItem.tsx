@@ -19,11 +19,15 @@ export function ReleaseListItem(props: ReleaseListItemProps) {
       accessories={getReleaseAccessories(release)}
       actions={
         <ActionPanel>
+          {url ? (
+            <ActionPanel.Section>
+              <Action.OpenInBrowser url={url} />
+            </ActionPanel.Section>
+          ) : null}
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={url} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Link" content={url} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            {url ? (
+              <Action.CopyToClipboard title="Copy Link" content={url} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            ) : null}
             <Action.CopyToClipboard
               title="Copy Version"
               content={release.version}

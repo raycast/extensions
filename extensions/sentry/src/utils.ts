@@ -133,6 +133,9 @@ export function getReleaseAccessories(release: Release): List.Item.Accessory[] {
 }
 
 export function getReleaseUrl(release: Release, orgSlug?: string): string {
+  if (!orgSlug) {
+    return "";
+  }
   const baseUrl = release.baseUrl || "https://sentry.io";
   const projectSlug = release.projects?.[0]?.slug;
   const version = encodeURIComponent(release.version);
