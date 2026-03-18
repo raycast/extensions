@@ -11,15 +11,7 @@ import type { Strategy } from "../types";
 import type { Metrics } from "../models/Metrics";
 
 /** Supported Core Web Vital metric names for threshold checks. */
-export type MetricName =
-  | "fcp"
-  | "lcp"
-  | "cls"
-  | "ttfb"
-  | "tti"
-  | "tbt"
-  | "inp"
-  | "speedIndex";
+export type MetricName = "fcp" | "lcp" | "cls" | "ttfb" | "tti" | "tbt" | "inp" | "speedIndex";
 
 /**
  * Official Lighthouse thresholds: [good, needsImprovement].
@@ -59,8 +51,7 @@ export class Formatter {
   }
 
   static toScoreIcon(score: number): Image {
-    if (score >= 90)
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    if (score >= 90) return { source: Icon.CheckCircle, tintColor: Color.Green };
     if (score >= 50) return { source: Icon.Warning, tintColor: Color.Yellow };
     return { source: Icon.XMarkCircle, tintColor: Color.Red };
   }
@@ -69,8 +60,7 @@ export class Formatter {
 
   static toMetricIcon(metric: MetricName, value: number): Image {
     const [good, mid] = METRIC_THRESHOLDS[metric];
-    if (value <= good)
-      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    if (value <= good) return { source: Icon.CheckCircle, tintColor: Color.Green };
     if (value <= mid) return { source: Icon.Warning, tintColor: Color.Yellow };
     return { source: Icon.XMarkCircle, tintColor: Color.Red };
   }
@@ -155,11 +145,7 @@ export class Formatter {
 
   // ── Markdown report ────────────────────────────────────────────
 
-  static toMarkdownReport(
-    metrics: Metrics,
-    url: string,
-    strategy: Strategy,
-  ): string {
+  static toMarkdownReport(metrics: Metrics, url: string, strategy: Strategy): string {
     const strategyLabel = strategy === "mobile" ? "Mobile" : "Desktop";
     const now = new Date().toLocaleString();
 
@@ -195,9 +181,7 @@ export class Formatter {
     ];
 
     if (metrics.inp > 0) {
-      lines.push(
-        `| Interaction to Next Paint (INP) | ${this.toReadableTime(metrics.inp)} |`,
-      );
+      lines.push(`| Interaction to Next Paint (INP) | ${this.toReadableTime(metrics.inp)} |`);
     }
 
     lines.push(
@@ -212,41 +196,27 @@ export class Formatter {
     );
 
     if (metrics.renderBlockingCount > 0) {
-      lines.push(
-        `| Render-Blocking Resources | ${metrics.renderBlockingCount} |`,
-      );
+      lines.push(`| Render-Blocking Resources | ${metrics.renderBlockingCount} |`);
     }
 
     if (metrics.resourceBreakdown.length > 0) {
-      lines.push(
-        "",
-        "## Resource Breakdown",
-        "",
-        "| Type | Requests | Transfer Size |",
-        "|---|---|---|",
-      );
+      lines.push("", "## Resource Breakdown", "", "| Type | Requests | Transfer Size |", "|---|---|---|");
       for (const r of metrics.resourceBreakdown) {
-        lines.push(
-          `| ${r.resourceType} | ${r.requestCount} | ${this.toReadableSize(r.transferSize)} |`,
-        );
+        lines.push(`| ${r.resourceType} | ${r.requestCount} | ${this.toReadableSize(r.transferSize)} |`);
       }
     }
 
     if (metrics.opportunities.length > 0) {
       lines.push("", "## Opportunities", "");
       for (const o of metrics.opportunities) {
-        lines.push(
-          `- **${o.title}**${o.displayValue ? ` — ${o.displayValue}` : ""}`,
-        );
+        lines.push(`- **${o.title}**${o.displayValue ? ` — ${o.displayValue}` : ""}`);
       }
     }
 
     if (metrics.diagnostics.length > 0) {
       lines.push("", "## Diagnostics", "");
       for (const d of metrics.diagnostics) {
-        lines.push(
-          `- **${d.title}**${d.displayValue ? ` — ${d.displayValue}` : ""}`,
-        );
+        lines.push(`- **${d.title}**${d.displayValue ? ` — ${d.displayValue}` : ""}`);
       }
     }
 

@@ -29,10 +29,7 @@ export class HistoryService {
   async save(url: string, strategy: Strategy): Promise<void> {
     const history = await this.getAll();
     const filtered = history.filter((e) => e.url !== url);
-    const updated: HistoryEntry[] = [
-      { url, strategy, timestamp: Date.now() },
-      ...filtered,
-    ].slice(0, this.MAX_HISTORY);
+    const updated: HistoryEntry[] = [{ url, strategy, timestamp: Date.now() }, ...filtered].slice(0, this.MAX_HISTORY);
     await LocalStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
   }
 

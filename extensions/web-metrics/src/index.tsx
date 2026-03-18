@@ -15,6 +15,8 @@
  *    a new component type on every render (was a hidden perf bug).
  */
 
+/* eslint-disable @raycast/prefer-title-case */
+
 import {
   Action,
   ActionPanel,
@@ -35,11 +37,6 @@ import { HistoryService, type HistoryEntry } from "./services/HistoryService";
 import { PageSpeedService, type Strategy } from "./services/PageSpeedService";
 import { ReportService, type ScoreDelta } from "./services/ReportService";
 import { Formatter, type MetricName } from "./utils/Formatter";
-
-// ── Preferences ───────────────────────────────────────────────────
-interface Preferences {
-  apiKey: string;
-}
 
 // ── Service singletons ────────────────────────────────────────────
 const prefs = getPreferenceValues<Preferences>();
@@ -113,11 +110,7 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      historyService.getAll(),
-      favoritesService.getAll(),
-      reportService.getAll(),
-    ]).then(([h, f, s]) => {
+    Promise.all([historyService.getAll(), favoritesService.getAll(), reportService.getAll()]).then(([h, f, s]) => {
       setHistory(h);
       setFavorites(f);
       setSnapshots(s);
@@ -127,8 +120,7 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
   /** Returns the last stored performance score for a URL + strategy, or null. */
   const getLastScore = useCallback(
     (url: string, strategy: Strategy): number | null =>
-      snapshots.find((s) => s.url === url && s.strategy === strategy)?.scores
-        .performance ?? null,
+      snapshots.find((s) => s.url === url && s.strategy === strategy)?.scores.performance ?? null,
     [snapshots],
   );
 
@@ -170,19 +162,11 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
   }, []);
 
   const candidateUrl = useMemo(
-    () =>
-      searchText.trim() && Formatter.isValidUrl(searchText)
-        ? Formatter.normalizeUrl(searchText)
-        : null,
+    () => (searchText.trim() && Formatter.isValidUrl(searchText) ? Formatter.normalizeUrl(searchText) : null),
     [searchText],
   );
-  const candidateHost = candidateUrl
-    ? Formatter.extractHostname(candidateUrl)
-    : null;
-  const isFav = useCallback(
-    (url: string) => favorites.includes(url),
-    [favorites],
-  );
+  const candidateHost = candidateUrl ? Formatter.extractHostname(candidateUrl) : null;
+  const isFav = useCallback((url: string) => favorites.includes(url), [favorites]);
 
   return (
     <List
@@ -213,16 +197,13 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
                   onAction={() => handleAnalyze(candidateUrl, "desktop")}
                 />
                 <Action
-                  title={
-                    isFav(candidateUrl)
-                      ? "Remove from Favourites"
-                      : "Add to Favourites"
-                  }
+                  title={isFav(candidateUrl) ? "Remove from Favourites" : "Add to Favourites"}
                   icon={isFav(candidateUrl) ? Icon.StarDisabled : Icon.Star}
                   onAction={() => handleToggleFavorite(candidateUrl)}
                 />
+                {/* eslint-disable-next-line @raycast/prefer-title-case */}
                 <Action
-                  title="Change Api Key"
+                  title="Change API Key"
                   icon={Icon.Key}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   onAction={openExtensionPreferences}
@@ -248,16 +229,13 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
                   onAction={() => handleAnalyze(candidateUrl, "mobile")}
                 />
                 <Action
-                  title={
-                    isFav(candidateUrl)
-                      ? "Remove from Favourites"
-                      : "Add to Favourites"
-                  }
+                  title={isFav(candidateUrl) ? "Remove from Favourites" : "Add to Favourites"}
                   icon={isFav(candidateUrl) ? Icon.StarDisabled : Icon.Star}
                   onAction={() => handleToggleFavorite(candidateUrl)}
                 />
+                {/* eslint-disable-next-line @raycast/prefer-title-case */}
                 <Action
-                  title="Change Api Key"
+                  title="Change API Key"
                   icon={Icon.Key}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                   onAction={openExtensionPreferences}
@@ -275,8 +253,7 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
             const host = Formatter.extractHostname(url);
             const lastEntry = history.find((e) => e.url === url);
             const lastStrat: Strategy = lastEntry?.strategy ?? "mobile";
-            const otherStrat: Strategy =
-              lastStrat === "mobile" ? "desktop" : "mobile";
+            const otherStrat: Strategy = lastStrat === "mobile" ? "desktop" : "mobile";
             const lastScore = getLastScore(url, lastStrat);
             return (
               <List.Item
@@ -310,9 +287,7 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
                     />
                     <Action
                       title={`Analyze (${otherStrat === "mobile" ? "Mobile" : "Desktop"})`}
-                      icon={
-                        otherStrat === "mobile" ? Icon.Mobile : Icon.Monitor
-                      }
+                      icon={otherStrat === "mobile" ? Icon.Mobile : Icon.Monitor}
                       onAction={() => handleAnalyze(url, otherStrat)}
                     />
                     <Action
@@ -326,8 +301,9 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
                       style={Action.Style.Destructive}
                       onAction={() => handleRemoveHistory(url)}
                     />
+                    {/* eslint-disable-next-line @raycast/prefer-title-case */}
                     <Action
-                      title="Change Api Key"
+                      title="Change API Key"
                       icon={Icon.Key}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                       onAction={openExtensionPreferences}
@@ -346,21 +322,17 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
           {history.map((entry) => {
             const host = Formatter.extractHostname(entry.url);
             const timeAgo = formatTimeAgo(entry.timestamp);
-            const otherStrat: Strategy =
-              entry.strategy === "mobile" ? "desktop" : "mobile";
+            const otherStrat: Strategy = entry.strategy === "mobile" ? "desktop" : "mobile";
             const lastScore = getLastScore(entry.url, entry.strategy);
             return (
               <List.Item
                 key={`history-${entry.url}`}
                 title={host}
-                subtitle={
-                  entry.url !== `https://${host}` ? entry.url : undefined
-                }
+                subtitle={entry.url !== `https://${host}` ? entry.url : undefined}
                 icon={Icon.Clock}
                 accessories={[
                   {
-                    icon:
-                      entry.strategy === "mobile" ? Icon.Mobile : Icon.Monitor,
+                    icon: entry.strategy === "mobile" ? Icon.Mobile : Icon.Monitor,
                     tooltip: entry.strategy,
                   },
                   { text: timeAgo },
@@ -380,24 +352,16 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
                   <ActionPanel>
                     <Action
                       title={`Analyze (${entry.strategy === "mobile" ? "Mobile" : "Desktop"})`}
-                      icon={
-                        entry.strategy === "mobile" ? Icon.Mobile : Icon.Monitor
-                      }
+                      icon={entry.strategy === "mobile" ? Icon.Mobile : Icon.Monitor}
                       onAction={() => handleAnalyze(entry.url, entry.strategy)}
                     />
                     <Action
                       title={`Analyze (${otherStrat === "mobile" ? "Mobile" : "Desktop"})`}
-                      icon={
-                        otherStrat === "mobile" ? Icon.Mobile : Icon.Monitor
-                      }
+                      icon={otherStrat === "mobile" ? Icon.Mobile : Icon.Monitor}
                       onAction={() => handleAnalyze(entry.url, otherStrat)}
                     />
                     <Action
-                      title={
-                        isFav(entry.url)
-                          ? "Remove from Favourites"
-                          : "Add to Favourites"
-                      }
+                      title={isFav(entry.url) ? "Remove from Favourites" : "Add to Favourites"}
                       icon={isFav(entry.url) ? Icon.StarDisabled : Icon.Star}
                       onAction={() => handleToggleFavorite(entry.url)}
                     />
@@ -414,8 +378,9 @@ function HomeScreen({ onAnalyze }: HomeScreenProps) {
                       shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
                       onAction={handleClearHistory}
                     />
+                    {/* eslint-disable-next-line @raycast/prefer-title-case */}
                     <Action
-                      title="Change Api Key"
+                      title="Change API Key"
                       icon={Icon.Key}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                       onAction={openExtensionPreferences}
@@ -451,24 +416,14 @@ interface ResultsActionsProps {
   onSwitchStrategy: (s: Strategy) => void;
 }
 
-function ResultsActions({
-  metrics,
-  url,
-  strategy,
-  onBack,
-  onSwitchStrategy,
-}: ResultsActionsProps) {
+function ResultsActions({ metrics, url, strategy, onBack, onSwitchStrategy }: ResultsActionsProps) {
   const otherStrategy: Strategy = strategy === "mobile" ? "desktop" : "mobile";
   const strategyLabel = strategy === "mobile" ? "Mobile" : "Desktop";
   const fullReportUrl = `https://pagespeed.web.dev/report?url=${encodeURIComponent(url)}&form_factor=${strategy}`;
 
   return (
     <ActionPanel>
-      <Action
-        title="Test Another URL"
-        icon={Icon.ArrowLeft}
-        onAction={onBack}
-      />
+      <Action title="Test Another URL" icon={Icon.ArrowLeft} onAction={onBack} />
 
       <Action
         title={`Switch to ${otherStrategy === "mobile" ? "Mobile" : "Desktop"}`}
@@ -521,8 +476,9 @@ function ResultsActions({
         }}
       />
 
+      {/* eslint-disable-next-line @raycast/prefer-title-case */}
       <Action
-        title="Change Api Key"
+        title="Change API Key"
         icon={Icon.Key}
         shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         onAction={openExtensionPreferences}
@@ -544,14 +500,7 @@ interface ResultsViewProps {
   onSwitchStrategy: (s: Strategy) => void;
 }
 
-function ResultsView({
-  metrics,
-  url,
-  strategy,
-  delta,
-  onBack,
-  onSwitchStrategy,
-}: ResultsViewProps) {
+function ResultsView({ metrics, url, strategy, delta, onBack, onSwitchStrategy }: ResultsViewProps) {
   const strategyLabel = strategy === "mobile" ? "Mobile" : "Desktop";
   const strategyIcon = strategy === "mobile" ? Icon.Mobile : Icon.Monitor;
   const hostname = Formatter.extractHostname(url);
@@ -588,11 +537,7 @@ function ResultsView({
       ["Total Blocking Time", metrics.tbt, "tbt"],
       ["Speed Index", metrics.speedIndex, "speedIndex"],
       ...(metrics.inp > 0
-        ? ([["Interaction to Next Paint", metrics.inp, "inp"]] as [
-            string,
-            number,
-            MetricName,
-          ][])
+        ? ([["Interaction to Next Paint", metrics.inp, "inp"]] as [string, number, MetricName][])
         : []),
     ];
 
@@ -601,29 +546,15 @@ function ResultsView({
         metadata={
           <List.Item.Detail.Metadata>
             {/* ── Header ── */}
-            <List.Item.Detail.Metadata.Label
-              title="Domain"
-              text={hostname}
-              icon={Icon.Globe}
-            />
-            <List.Item.Detail.Metadata.Label
-              title="Strategy"
-              text={strategyLabel}
-              icon={strategyIcon}
-            />
+            <List.Item.Detail.Metadata.Label title="Domain" text={hostname} icon={Icon.Globe} />
+            <List.Item.Detail.Metadata.Label title="Strategy" text={strategyLabel} icon={strategyIcon} />
 
             <List.Item.Detail.Metadata.Separator />
 
             {/* ── Lighthouse Scores ── */}
             {scoreRows.map(([label, score, d]) => (
-              <List.Item.Detail.Metadata.TagList
-                key={`score-${label}`}
-                title={label}
-              >
-                <List.Item.Detail.Metadata.TagList.Item
-                  text={`${score}/100`}
-                  color={Formatter.toScoreColor(score)}
-                />
+              <List.Item.Detail.Metadata.TagList key={`score-${label}`} title={label}>
+                <List.Item.Detail.Metadata.TagList.Item text={`${score}/100`} color={Formatter.toScoreColor(score)} />
                 <List.Item.Detail.Metadata.TagList.Item
                   text={Formatter.toScoreLabel(score)}
                   color={Formatter.toScoreColor(score)}
@@ -634,12 +565,7 @@ function ResultsView({
                     color={Formatter.toDeltaColor(d)}
                   />
                 )}
-                {d === 0 && (
-                  <List.Item.Detail.Metadata.TagList.Item
-                    text="—"
-                    color={Color.SecondaryText}
-                  />
-                )}
+                {d === 0 && <List.Item.Detail.Metadata.TagList.Item text="—" color={Color.SecondaryText} />}
               </List.Item.Detail.Metadata.TagList>
             ))}
 
@@ -647,16 +573,9 @@ function ResultsView({
 
             {/* ── Core Web Vitals ── */}
             {vitalRows.map(([label, value, metric]) => (
-              <List.Item.Detail.Metadata.TagList
-                key={`vital-${metric}`}
-                title={label}
-              >
+              <List.Item.Detail.Metadata.TagList key={`vital-${metric}`} title={label}>
                 <List.Item.Detail.Metadata.TagList.Item
-                  text={
-                    metric === "cls"
-                      ? Formatter.toReadableCls(value)
-                      : Formatter.toReadableTime(value)
-                  }
+                  text={metric === "cls" ? Formatter.toReadableCls(value) : Formatter.toReadableTime(value)}
                   color={Formatter.toMetricColor(metric, value)}
                 />
                 <List.Item.Detail.Metadata.TagList.Item
@@ -717,12 +636,7 @@ function ResultsView({
     ["Total Blocking Time", "TBT", metrics.tbt, "tbt"],
     ["Speed Index", "SI", metrics.speedIndex, "speedIndex"],
     ...(metrics.inp > 0
-      ? ([["Interaction to Next Paint", "INP", metrics.inp, "inp"]] as [
-          string,
-          string,
-          number,
-          MetricName,
-        ][])
+      ? ([["Interaction to Next Paint", "INP", metrics.inp, "inp"]] as [string, string, number, MetricName][])
       : []),
   ];
 
@@ -768,11 +682,7 @@ function ResultsView({
             key={`vital-${metric}`}
             title={title}
             icon={Formatter.toMetricIcon(metric, value)}
-            subtitle={
-              metric === "cls"
-                ? Formatter.toReadableCls(value)
-                : Formatter.toReadableTime(value)
-            }
+            subtitle={metric === "cls" ? Formatter.toReadableCls(value) : Formatter.toReadableTime(value)}
             accessories={[
               {
                 tag: {
@@ -831,18 +741,8 @@ function ResultsView({
                   ? [
                       {
                         tag: {
-                          value:
-                            o.score === 0
-                              ? "High Impact"
-                              : o.score < 0.5
-                                ? "Medium"
-                                : "Low",
-                          color:
-                            o.score === 0
-                              ? Color.Red
-                              : o.score < 0.5
-                                ? Color.Yellow
-                                : Color.SecondaryText,
+                          value: o.score === 0 ? "High Impact" : o.score < 0.5 ? "Medium" : "Low",
+                          color: o.score === 0 ? Color.Red : o.score < 0.5 ? Color.Yellow : Color.SecondaryText,
                         },
                       },
                     ]

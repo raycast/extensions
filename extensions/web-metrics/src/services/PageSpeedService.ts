@@ -12,12 +12,7 @@
  *  - Strategy imported from shared types.ts and re-exported
  */
 
-import {
-  Metrics,
-  type MetricsData,
-  type AuditItem,
-  type ResourceBreakdownItem,
-} from "../models/Metrics";
+import { Metrics, type MetricsData, type AuditItem, type ResourceBreakdownItem } from "../models/Metrics";
 import type { Strategy } from "../types";
 
 // Re-export so existing callers keep working without import changes.
@@ -64,8 +59,7 @@ interface PageSpeedApiResponse {
 // ── Service ───────────────────────────────────────────────────────
 
 export class PageSpeedService {
-  private static readonly BASE_URL =
-    "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
+  private static readonly BASE_URL = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
 
   /** Max opportunities / diagnostics surfaced per section. */
   private static readonly MAX_AUDITS = 5;
@@ -93,10 +87,7 @@ export class PageSpeedService {
   /** Single fetch attempt with AbortController timeout. */
   private async doFetch(url: string, strategy: Strategy): Promise<Metrics> {
     const controller = new AbortController();
-    const timer = setTimeout(
-      () => controller.abort(),
-      PageSpeedService.TIMEOUT_MS,
-    );
+    const timer = setTimeout(() => controller.abort(), PageSpeedService.TIMEOUT_MS);
     try {
       const response = await fetch(this.buildEndpoint(url, strategy), {
         signal: controller.signal,
@@ -112,9 +103,7 @@ export class PageSpeedService {
       return this.parseResponse(data);
     } catch (err) {
       if ((err as Error).name === "AbortError") {
-        throw new Error(
-          "Request timed out after 30 s — check your connection and try again.",
-        );
+        throw new Error("Request timed out after 30 s — check your connection and try again.");
       }
       throw err;
     } finally {
@@ -133,12 +122,9 @@ export class PageSpeedService {
       const msg = (err as Error).message ?? "";
       const name = (err as Error).name ?? "";
       const isTransient =
-        (name === "TypeError" && msg.toLowerCase().includes("fetch")) ||
-        /\b(500|502|503|504)\b/.test(msg);
+        (name === "TypeError" && msg.toLowerCase().includes("fetch")) || /\b(500|502|503|504)\b/.test(msg);
       if (isTransient) {
-        await new Promise((r) =>
-          setTimeout(r, PageSpeedService.RETRY_DELAY_MS),
-        );
+        await new Promise((r) => setTimeout(r, PageSpeedService.RETRY_DELAY_MS));
         return fn();
       }
       throw err;
@@ -147,12 +133,7 @@ export class PageSpeedService {
 
   private buildEndpoint(url: string, strategy: Strategy): string {
     const params = new URLSearchParams({ url, key: this.apiKey, strategy });
-    for (const cat of [
-      "performance",
-      "accessibility",
-      "best-practices",
-      "seo",
-    ]) {
+    for (const cat of ["performance", "accessibility", "best-practices", "seo"]) {
       params.append("category", cat);
     }
     return `${PageSpeedService.BASE_URL}?${params.toString()}`;
@@ -170,8 +151,7 @@ export class PageSpeedService {
     const numericAudit = (id: string): number => audits[id]?.numericValue ?? 0;
 
     // Resource summary
-    const resourceItems = (audits["resource-summary"]?.details?.items ??
-      []) as Array<{
+    const resourceItems = (audits["resource-summary"]?.details?.items ?? []) as Array<{
       label?: string;
       resourceType?: string;
       requestCount?: number;
@@ -187,8 +167,7 @@ export class PageSpeedService {
         transferSize: item.transferSize ?? 0,
       }));
 
-    const renderBlockingItems = (audits["render-blocking-resources"]?.details
-      ?.items ?? []) as unknown[];
+    const renderBlockingItems = (audits["render-blocking-resources"]?.details?.items ?? []) as unknown[];
 
     const metricsData: MetricsData = {
       performanceScore: categories.performance?.score ?? 0,

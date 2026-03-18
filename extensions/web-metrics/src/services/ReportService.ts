@@ -31,9 +31,7 @@ export class ReportService {
    */
   async save(snapshot: ReportSnapshot): Promise<void> {
     const all = await this.getAll();
-    const filtered = all.filter(
-      (s) => !(s.url === snapshot.url && s.strategy === snapshot.strategy),
-    );
+    const filtered = all.filter((s) => !(s.url === snapshot.url && s.strategy === snapshot.strategy));
     const updated = [snapshot, ...filtered].slice(0, this.MAX_SNAPSHOTS);
     await LocalStorage.setItem(this.STORAGE_KEY, JSON.stringify(updated));
   }
@@ -42,10 +40,7 @@ export class ReportService {
    * Returns the most-recently saved snapshot for the given
    * URL + strategy, or null if no previous run exists.
    */
-  async getLast(
-    url: string,
-    strategy: Strategy,
-  ): Promise<ReportSnapshot | null> {
+  async getLast(url: string, strategy: Strategy): Promise<ReportSnapshot | null> {
     const all = await this.getAll();
     return all.find((s) => s.url === url && s.strategy === strategy) ?? null;
   }
@@ -72,16 +67,11 @@ export class ReportService {
    * Computes the signed delta between current and previous scores.
    * Positive = improved, negative = regressed.
    */
-  static computeDelta(
-    current: ReportSnapshot,
-    previous: ReportSnapshot,
-  ): ScoreDelta {
+  static computeDelta(current: ReportSnapshot, previous: ReportSnapshot): ScoreDelta {
     return {
       performance: current.scores.performance - previous.scores.performance,
-      accessibility:
-        current.scores.accessibility - previous.scores.accessibility,
-      bestPractices:
-        current.scores.bestPractices - previous.scores.bestPractices,
+      accessibility: current.scores.accessibility - previous.scores.accessibility,
+      bestPractices: current.scores.bestPractices - previous.scores.bestPractices,
       seo: current.scores.seo - previous.scores.seo,
     };
   }
