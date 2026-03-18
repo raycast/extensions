@@ -22,8 +22,13 @@ export function StandardActions({ customActions, externalLinks }: StandardAction
 
       {externalLinks && externalLinks.length > 0 && (
         <>
-          {externalLinks.map((link) => (
-            <Action.OpenInBrowser key={link.url} title={link.title} url={link.url} icon={link.icon} />
+          {externalLinks.map((link, idx) => (
+            <Action.OpenInBrowser
+              key={`${link.url}-${link.title}-${idx}`}
+              title={link.title}
+              url={link.url}
+              icon={link.icon}
+            />
           ))}
         </>
       )}
