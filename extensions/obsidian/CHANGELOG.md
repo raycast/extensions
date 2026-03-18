@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fixes a bug where the extension was failing after initial install
+
 ## [AI Search Tool Content Search Parameter] - 2026-02-16
 
 - Add searchContent parameter to searchNote AI tool for controlling search mode
