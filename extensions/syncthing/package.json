@@ -1,0 +1,99 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "syncthing",
+    "title": "Syncthing",
+    "description": "Deep integration of Raycast into Syncthing - monitor and control your Syncthing instance directly from Raycast.",
+    "icon": "extension-icon.png",
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "list-devices",
+            "title": "List Devices",
+            "description": "Lists all currently available Syncthing devices, along with their connection status.",
+            "mode": "view",
+            "subtitle": "Syncthing"
+        },
+        {
+            "name": "list-folders",
+            "title": "List Folders",
+            "description": "Lists all currently available Syncthing folders, along with their synchronization status.",
+            "mode": "view",
+            "subtitle": "Syncthing"
+        },
+        {
+            "name": "recent-errors",
+            "title": "Show Recent Errors",
+            "description": "Displays recent errors from Syncthing",
+            "mode": "view",
+            "subtitle": "Syncthing"
+        },
+        {
+            "name": "recent-logs",
+            "title": "Show Recent Logs",
+            "description": "Displays recent logs from Syncthing",
+            "mode": "view",
+            "subtitle": "Syncthing"
+        }, 
+        {
+            "name": "restart-syncthing",
+            "title": "Restart Syncthing",
+            "description": "Restarts the Syncthing service",
+            "mode": "no-view",
+            "subtitle": "Syncthing"
+        },
+        {
+            "name": "update-syncthing",
+            "title": "Update Syncthing",
+            "description": "Checks for Syncthing updates and applies them if available",
+            "mode": "view", 
+            "subtitle": "Syncthing"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "base_url",
+            "title": "Syncthing Rest API Base URL",
+            "required": false,
+            "type": "textfield",
+            "description": "Base URL for Syncthing REST API.",
+            "placeholder": "http://localhost:8384/rest",
+            "default": "http://localhost:8384/rest"
+        },
+        {
+            "name": "api_key",
+            "title": "Syncthing API Key",
+            "required": true,
+            "type": "password",
+            "description": "API key required for interacting with Syncthing."
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.103.0",
+        "@raycast/utils": "^2.2.1"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "typescript": "^5.8.2"
+    },
+    "scripts": {
+        "dev": "ray develop",
+        "lint": "ray lint",
+        "fix-lint": "ray lint --fix",
+        "build": "ray build",
+        "publish": "npx @raycast/api@latest publish",
+        "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+    },
+    "author": "shashank_prasanna",
+    "platforms": [
+        "macOS",
+        "Windows"
+    ],
+    "categories": [
+        "Developer Tools",
+        "Productivity"
+    ]
+}
