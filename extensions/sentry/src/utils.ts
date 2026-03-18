@@ -93,7 +93,7 @@ export function formatPercent(value: number): string {
 }
 
 export function getCrashFreeRate(release: Release): number | undefined {
-  return release.projects?.[0]?.healthData?.crashFreeSessions;
+  return release.projects?.[0]?.healthData?.crashFreeSessions ?? undefined;
 }
 
 export function getCrashFreeIcon(rate?: number): { source: Icon; tintColor: Color } {
@@ -121,7 +121,7 @@ export function getReleaseAccessories(release: Release): List.Item.Accessory[] {
           tooltip: `New Issues: ${release.newGroups}`,
         }
       : null,
-    crashFreeRate
+    crashFreeRate !== undefined
       ? {
           icon: getCrashFreeIcon(crashFreeRate),
           text: formatPercent(crashFreeRate),
