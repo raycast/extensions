@@ -19,14 +19,15 @@ function AddWordForm({ onAdd }: { onAdd: () => void }) {
       const word = values.word.trim();
       try {
         const s = readSettings();
-        if (s.custom_words.includes(word)) {
+        const customWords = s.custom_words ?? [];
+        if (customWords.includes(word)) {
           await showToast({
             style: Toast.Style.Failure,
             title: `'${word}' is already in dictionary`,
           });
           return;
         }
-        writeSettings({ custom_words: [...s.custom_words, word] });
+        writeSettings({ custom_words: [...customWords, word] });
         onAdd();
         pop();
         await showToast({
@@ -89,7 +90,9 @@ export default function ManageDictionary() {
   async function handleDelete(word: string) {
     try {
       const s = readSettings();
-      writeSettings({ custom_words: s.custom_words.filter((w) => w !== word) });
+      writeSettings({
+        custom_words: (s.custom_words ?? []).filter((w) => w !== word),
+      });
       load();
     } catch (err) {
       await showToast({
