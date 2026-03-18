@@ -21,10 +21,6 @@ async function getRecentErrors(
   API_KEY: string,
   BASE_URL: string,
 ): Promise<Error[] | void> {
-  console.log(
-    "Fetching recent errors from " + BASE_URL + " with API key " + API_KEY,
-  );
-
   const headers = {
     "X-API-Key": API_KEY,
     Accept: "application/json",

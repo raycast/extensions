@@ -26,12 +26,6 @@ async function checkForUpdates(): Promise<UpdateInfo | undefined> {
   // Check if an update is available
   const API_KEY = getPreferenceValues().api_key;
   const BASE_URL = getPreferenceValues().base_url;
-  console.log(
-    "Checking for Syncthing updates at " +
-      BASE_URL +
-      " with API key " +
-      API_KEY,
-  );
 
   const headers = {
     "X-API-Key": API_KEY,
@@ -64,9 +58,6 @@ async function applyUpdate() {
   // Apply the update
   const API_KEY = getPreferenceValues().api_key;
   const BASE_URL = getPreferenceValues().base_url;
-  console.log(
-    "Applying Syncthing update at " + BASE_URL + " with API key " + API_KEY,
-  );
   const headers = {
     "X-API-Key": API_KEY,
     Accept: "application/json",
@@ -142,8 +133,8 @@ export default function Command() {
         <ActionPanel>
           <Action
             title="Update Syncthing"
-            onAction={() => {
-              applyUpdate();
+            onAction={async () => {
+              await applyUpdate();
             }}
           />
         </ActionPanel>

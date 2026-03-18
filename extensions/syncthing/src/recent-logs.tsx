@@ -32,9 +32,6 @@ async function getRecentLogs(
   API_KEY: string,
   BASE_URL: string,
 ): Promise<Log[] | void> {
-  console.log(
-    "Fetching recent logs from " + BASE_URL + " with API key " + API_KEY,
-  );
   const headers = {
     "X-API-Key": API_KEY,
     Accept: "application/json",

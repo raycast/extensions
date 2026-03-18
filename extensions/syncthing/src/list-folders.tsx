@@ -49,7 +49,6 @@ async function getFolders(
   BASE_URL: string,
 ): Promise<Folder[] | void> {
   // Call Syncthing API to get folders
-  console.log("Fetching folders from " + BASE_URL + " with API key " + API_KEY);
 
   const headers = {
     "X-API-Key": API_KEY,
@@ -178,10 +177,12 @@ function generateDetailMarkdown(folder: Folder): string {
 
 export default function Command() {
   const [folders, setFolders] = useState<Folder[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
     const API_KEY = getPreferenceValues().api_key;
     const BASE_URL = getPreferenceValues().base_url;
     getFolders(API_KEY, BASE_URL).then((fetchedFolders) => {
+      setIsLoading(false);
       if (fetchedFolders) {
         setFolders(fetchedFolders);
       } else {
@@ -192,7 +193,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={folders.length === 0}
+      isLoading={isLoading}
       searchBarPlaceholder="Search folders..."
       isShowingDetail
     >

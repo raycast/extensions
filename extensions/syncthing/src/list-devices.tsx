@@ -43,7 +43,6 @@ async function getDevices(
   BASE_URL: string,
 ): Promise<Device[] | void> {
   // Call Syncthing API to get devices
-  console.log("Fetching devices from " + BASE_URL + " with API key " + API_KEY);
 
   const headers = {
     "X-API-Key": API_KEY,
@@ -117,10 +116,12 @@ function generateDetailMarkdown(device: Device): string {
 
 export default function Command() {
   const [devices, setDevices] = useState<Device[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   useEffect(() => {
     const API_KEY = getPreferenceValues().api_key;
     const BASE_URL = getPreferenceValues().base_url;
     getDevices(API_KEY, BASE_URL).then((fetchedDevices) => {
+      setIsLoading(false);
       if (fetchedDevices) {
         setDevices(fetchedDevices);
       } else {
@@ -130,7 +131,7 @@ export default function Command() {
   }, []);
   return (
     <List
-      isLoading={devices.length === 0}
+      isLoading={isLoading}
       searchBarPlaceholder="Search devices..."
       isShowingDetail
     >

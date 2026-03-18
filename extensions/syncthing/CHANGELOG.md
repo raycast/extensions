@@ -1,5 +1,5 @@
 # Syncthing Changelog
 
 
-## [Hello World] - 2026-3-17
+## [Initial Release] -{PR_MERGE_DATE}
 Initial features and functionality added
