@@ -10,15 +10,19 @@ type Values = {
 
 const Details = ({ project, service }: { project: Project; service: Service }) => {
   async function handleSubmit(values: Values) {
-    await clockodo.startClock({
-      projectsId: project.id,
-      customersId: project.customersId,
-      servicesId: service.id,
-      text: values.text,
-    });
-    await showHUD("Clock started", {
-      popToRootType: PopToRootType.Immediate,
-    });
+    try {
+      await clockodo.startClock({
+        projectsId: project.id,
+        customersId: project.customersId,
+        servicesId: service.id,
+        text: values.text,
+      });
+      await showHUD("Clock started", {
+        popToRootType: PopToRootType.Immediate,
+      });
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to start clock" });
+    }
   }
 
   return (
