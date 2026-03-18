@@ -5,6 +5,9 @@
   "description": "Toggles mirroring of external displays quickly",
   "icon": "extension_icon.png",
   "author": "yonbergman",
+  "contributors": [
+    "leodbrs"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -12,9 +15,9 @@
   "commands": [
     {
       "name": "mirror-displays",
-      "title": "Toggle Mirror Displays",
-      "description": "Toggle the mirroring of external displays on and off",
-      "mode": "no-view"
+      "title": "Mirror Displays",
+      "description": "Choose which display to mirror, or turn off mirroring.",
+      "mode": "view"
     }
   ],
   "dependencies": {
