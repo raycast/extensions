@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
@@ -70,8 +70,8 @@ export default function SearchWaste() {
 
   const { data, isLoading, error } = useFetch<WasteItem[]>(WASTE_JSON_URL, {
     keepPreviousData: true,
-    onError: () => {
-      // Fall through to browser fallback
+    onError: async (err) => {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to load BSR data", message: String(err) });
     },
   });
 

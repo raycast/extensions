@@ -2,11 +2,6 @@ import { Action, ActionPanel, Icon, List, getPreferenceValues, openExtensionPref
 import { useEffect, useState } from "react";
 import { CollectionEvent, formatDate, getAddressId, getCalendarICS, parseICS } from "./api";
 
-interface Preferences {
-  street: string;
-  houseNumber: string;
-}
-
 const BSR_CALENDAR_URL = "https://www.bsr.de/abfuhrkalender";
 
 type LoadState = "idle" | "loading" | "done" | "error";
@@ -33,7 +28,7 @@ function groupByDate(events: CollectionEvent[]): Map<string, CollectionEvent[]> 
 }
 
 export default function CollectionCalendar() {
-  const { street, houseNumber } = getPreferenceValues<Preferences>();
+  const { street, houseNumber } = getPreferenceValues<Preferences.CollectionCalendar>();
   const [state, setState] = useState<LoadState>("idle");
   const [events, setEvents] = useState<CollectionEvent[]>([]);
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -42,11 +37,15 @@ export default function CollectionCalendar() {
     if (!street || !houseNumber) return;
     setState("loading");
 
+    const controller = new AbortController();
+
     async function load() {
       try {
-        const addressId = await getAddressId(street, houseNumber);
+        const addressId = await getAddressId(street!, houseNumber!, controller.signal);
         const months = getUpcomingMonths();
-        const icsResults = await Promise.all(months.map(({ year, month }) => getCalendarICS(addressId, year, month)));
+        const icsResults = await Promise.all(
+          months.map(({ year, month }) => getCalendarICS(addressId, year, month, controller.signal)),
+        );
         const allEvents = icsResults.flatMap(parseICS);
         // Only show future events (from today)
         const today = new Date().toISOString().slice(0, 10);
@@ -54,12 +53,16 @@ export default function CollectionCalendar() {
         setEvents(upcoming);
         setState("done");
       } catch (err) {
+        // Ignore abort errors triggered by cleanup
+        if (err instanceof Error && err.name === "AbortError") return;
         setErrorMsg(err instanceof Error ? err.message : String(err));
         setState("error");
       }
     }
 
     load();
+
+    return () => controller.abort();
   }, [street, houseNumber]);
 
   // No address configured
@@ -129,12 +132,12 @@ export default function CollectionCalendar() {
               icon={Icon.Calendar}
               actions={
                 <ActionPanel>
+                  <Action.OpenInBrowser title="Open BSR Calendar" url={BSR_CALENDAR_URL} icon={Icon.Globe} />
                   <Action.CopyToClipboard
                     title="Copy Date"
                     content={`${label}: ${summaries}`}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
-                  <Action.OpenInBrowser title="Open BSR Calendar" url={BSR_CALENDAR_URL} icon={Icon.Globe} />
                   <Action
                     title="Open Preferences"
                     icon={Icon.Gear}

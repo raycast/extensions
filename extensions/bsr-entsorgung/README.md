@@ -8,7 +8,7 @@ Quickly look up which bin to use for any type of waste, and check upcoming colle
 
 Search the BSR waste database to find out which bin a specific item belongs in.
 
-- Type any waste item (e.g. *Pfanne*, *Batterie*, *Joghurtbecher*)
+- Type any waste item (e.g. _Pfanne_, _Batterie_, _Joghurtbecher_)
 - Results show the item name, waste fraction, and the corresponding bin color
 - Open the BSR detail page for full disposal instructions
 - Copy the disposal tip to your clipboard with `⌘C`
@@ -16,14 +16,14 @@ Search the BSR waste database to find out which bin a specific item belongs in.
 
 **Bin colors:**
 
-| Icon | Color | Fraction |
-|------|-------|----------|
-| ⚫ | Grey | Restmüll (residual waste) |
-| 🟤 | Brown | Biogut (organic waste) |
-| 🔵 | Blue | Papier (paper) |
-| 🟡 | Yellow | Wertstoffe / Gelbe Tonne (recyclables) |
-| 🟢 | Green | Glas (glass) |
-| ♻️ | — | Recycling |
+| Icon | Color  | Fraction                               |
+| ---- | ------ | -------------------------------------- |
+| ⚫   | Grey   | Restmüll (residual waste)              |
+| 🟤   | Brown  | Biogut (organic waste)                 |
+| 🔵   | Blue   | Papier (paper)                         |
+| 🟡   | Yellow | Wertstoffe / Gelbe Tonne (recyclables) |
+| 🟢   | Green  | Glas (glass)                           |
+| ♻️   | —      | Recycling                              |
 
 ### Collection Calendar
 

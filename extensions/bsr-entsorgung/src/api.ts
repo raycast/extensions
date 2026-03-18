@@ -1,36 +1,29 @@
 export const BSR_BASE = "https://umnewforms.bsr.de/p/de.bsr.adressen.app";
 
-export interface Street {
-  value: string;
-  label: string;
-}
-
 export interface CollectionEvent {
   date: string; // YYYY-MM-DD
   summary: string;
   icon: string;
 }
 
-export async function searchStreets(q: string): Promise<Street[]> {
-  const url = `${BSR_BASE}/streetNames?q=${encodeURIComponent(q)}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Street search failed: ${res.status}`);
-  return res.json() as Promise<Street[]>;
-}
-
-export async function getAddressId(street: string, houseNumber: string): Promise<string> {
+export async function getAddressId(street: string, houseNumber: string, signal?: AbortSignal): Promise<string> {
   const searchQuery = `${street}:::${houseNumber}`;
   const url = `${BSR_BASE}/plzSet/plzSet?searchQuery=${encodeURIComponent(searchQuery)}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal });
   if (!res.ok) throw new Error(`Address lookup failed: ${res.status}`);
   const data = (await res.json()) as Array<{ value: string; label: string }>;
   if (!Array.isArray(data) || data.length === 0) throw new Error("Address not found");
   return data[0].value;
 }
 
-export async function getCalendarICS(addressId: string, year: number, month: number): Promise<string> {
+export async function getCalendarICS(
+  addressId: string,
+  year: number,
+  month: number,
+  signal?: AbortSignal,
+): Promise<string> {
   const url = `${BSR_BASE}/abfuhr/kalender/ics/${addressId}?year=${year}&month=${month}`;
-  const res = await fetch(url);
+  const res = await fetch(url, { signal });
   if (!res.ok) throw new Error(`Calendar fetch failed: ${res.status}`);
   return res.text();
 }
@@ -58,20 +51,21 @@ export function parseICS(ics: string): CollectionEvent[] {
 
 export function getBinIcon(summary: string): string {
   const lower = summary.toLowerCase();
-  if (lower.includes("hausmüll") || lower.includes("restmüll") || lower.includes("rest")) return "⚫";
-  if (lower.includes("biogut") || lower.includes("bio")) return "🟤";
-  if (lower.includes("papier")) return "🔵";
-  if (lower.includes("wertstoff") || lower.includes("gelb")) return "🟡";
-  if (lower.includes("glas")) return "🟢";
-  if (lower.includes("sperr")) return "🔴";
-  if (lower.includes("recycling")) return "♻️";
+  const restMatch = /\b(restm(ü|u)ll|hausm(ü|u)ll|hausmuell|restmull)\b/;
+  if (restMatch.test(lower)) return "⚫";
+  if (/\b(biogut|bio)\b/.test(lower)) return "🟤";
+  if (/\b(papier)\b/.test(lower)) return "🔵";
+  if (/\b(wertstoff|gelb)\b/.test(lower)) return "🟡";
+  if (/\b(glas)\b/.test(lower)) return "🟢";
+  if (/\b(sperr)\b/.test(lower)) return "🔴";
+  if (/\b(recycling)\b/.test(lower)) return "♻️";
   return "🗑️";
 }
 
 export function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split("-").map(Number);
   const date = new Date(year, month - 1, day);
-  return date.toLocaleDateString("de-DE", {
+  return date.toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
     month: "long",
