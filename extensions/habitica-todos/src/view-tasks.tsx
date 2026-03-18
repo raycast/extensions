@@ -11,14 +11,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
-import {
-  getTasks,
-  getTags,
-  scoreTask,
-  deleteTask,
-  HabiticaTask,
-  HabiticaTag,
-} from "./api";
+import { getTasks, getTags, scoreTask, deleteTask, HabiticaTask, HabiticaTag } from "./api";
 import EditTaskForm from "./edit-task";
 
 const PRIORITY_LABELS: Record<number, string> = {
@@ -50,8 +43,7 @@ function formatTaskDate(date: string | null): string | undefined {
 }
 
 function taskIcon(task: HabiticaTask): { source: Icon; tintColor?: Color } {
-  if (task.completed)
-    return { source: Icon.CheckCircle, tintColor: Color.Green };
+  if (task.completed) return { source: Icon.CheckCircle, tintColor: Color.Green };
   if (isTaskExpired(task)) return { source: Icon.Circle, tintColor: Color.Red };
   return { source: Icon.Circle };
 }
@@ -66,10 +58,7 @@ export default function Command() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [taskData, tagData] = await Promise.all([
-        getTasks("todos"),
-        getTags(),
-      ]);
+      const [taskData, tagData] = await Promise.all([getTasks("todos"), getTags()]);
       setTasks(taskData);
       setTags(tagData);
     } catch (error) {
@@ -87,10 +76,7 @@ export default function Command() {
     fetchData();
   }, [fetchData]);
 
-  const filteredTasks =
-    tagFilter === "all"
-      ? tasks
-      : tasks.filter((t) => t.tags.includes(tagFilter));
+  const filteredTasks = tagFilter === "all" ? tasks : tasks.filter((t) => t.tags.includes(tagFilter));
 
   async function handleScore(task: HabiticaTask) {
     const direction = task.completed ? "down" : "up";
@@ -147,11 +133,7 @@ export default function Command() {
       navigationTitle="Habitica To-Dos"
       searchBarPlaceholder="Search to-dos…"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by tag"
-          onChange={setTagFilter}
-          value={tagFilter}
-        >
+        <List.Dropdown tooltip="Filter by tag" onChange={setTagFilter} value={tagFilter}>
           <List.Dropdown.Item title="All Tags" value="all" />
           {tags.map((tag) => (
             <List.Dropdown.Item key={tag.id} title={tag.name} value={tag.id} />
@@ -160,19 +142,14 @@ export default function Command() {
       }
     >
       {filteredTasks.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No to-dos found"
-          description="Create a new to-do to get started!"
-        />
+        <List.EmptyView title="No to-dos found" description="Create a new to-do to get started!" />
       ) : (
         filteredTasks.map((task) => {
           const icon = taskIcon(task);
           const formattedDate = formatTaskDate(task.date);
 
           // Resolve tag names for this task
-          const taskTagNames = task.tags
-            .map((tid) => tagNameMap.get(tid))
-            .filter(Boolean) as string[];
+          const taskTagNames = task.tags.map((tid) => tagNameMap.get(tid)).filter(Boolean) as string[];
 
           const difficultyLabel = PRIORITY_LABELS[task.priority] || "Unknown";
 
@@ -189,39 +166,22 @@ export default function Command() {
               key={task.id}
               icon={icon}
               title={task.text}
-              accessories={
-                formattedDate ? [{ text: formattedDate }] : undefined
-              }
+              accessories={formattedDate ? [{ text: formattedDate }] : undefined}
               detail={
                 <List.Item.Detail
                   markdown={detailParts.join("\n\n")}
                   metadata={
                     <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Difficulty"
-                        text={difficultyLabel}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Difficulty" text={difficultyLabel} />
                       <List.Item.Detail.Metadata.Separator />
-                      {task.date && (
-                        <List.Item.Detail.Metadata.Label
-                          title="Due Date"
-                          text={formattedDate}
-                        />
-                      )}
+                      {task.date && <List.Item.Detail.Metadata.Label title="Due Date" text={formattedDate} />}
                       <List.Item.Detail.Metadata.TagList title="Tags">
                         {taskTagNames.length > 0 ? (
                           taskTagNames.map((name) => (
-                            <List.Item.Detail.Metadata.TagList.Item
-                              key={name}
-                              text={name}
-                              color={Color.Blue}
-                            />
+                            <List.Item.Detail.Metadata.TagList.Item key={name} text={name} color={Color.Blue} />
                           ))
                         ) : (
-                          <List.Item.Detail.Metadata.TagList.Item
-                            text="No tags"
-                            color={Color.SecondaryText}
-                          />
+                          <List.Item.Detail.Metadata.TagList.Item text="No tags" color={Color.SecondaryText} />
                         )}
                       </List.Item.Detail.Metadata.TagList>
                       <List.Item.Detail.Metadata.Separator />
@@ -246,9 +206,7 @@ export default function Command() {
                       title="Edit Task"
                       icon={Icon.Pencil}
                       shortcut={{ modifiers: ["cmd"], key: "e" }}
-                      onAction={() =>
-                        push(<EditTaskForm task={task} onUpdated={fetchData} />)
-                      }
+                      onAction={() => push(<EditTaskForm task={task} onUpdated={fetchData} />)}
                     />
                     <Action
                       title="Delete Task"

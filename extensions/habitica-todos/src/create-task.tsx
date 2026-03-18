@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { createTask, getTags, CreateTaskBody, HabiticaTag } from "./api";
 
@@ -91,17 +83,8 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="text"
-        title="Title"
-        placeholder="What do you need to do?"
-        autoFocus
-      />
-      <Form.TextArea
-        id="notes"
-        title="Notes"
-        placeholder="Additional details (optional)"
-      />
+      <Form.TextField id="text" title="Title" placeholder="What do you need to do?" autoFocus />
+      <Form.TextArea id="notes" title="Notes" placeholder="Additional details (optional)" />
 
       <Form.Separator />
 
@@ -112,19 +95,11 @@ export default function Command() {
         <Form.Dropdown.Item value="2" title="Hard" />
       </Form.Dropdown>
 
-      <Form.DatePicker
-        id="date"
-        title="Due Date"
-        type={Form.DatePicker.Type.Date}
-      />
+      <Form.DatePicker id="date" title="Due Date" type={Form.DatePicker.Type.Date} />
 
       <Form.Separator />
 
-      <Form.TagPicker
-        id="tags"
-        title="Tags"
-        placeholder={isLoadingTags ? "Loading tags…" : "Select tags"}
-      >
+      <Form.TagPicker id="tags" title="Tags" placeholder={isLoadingTags ? "Loading tags…" : "Select tags"}>
         {tags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.name} />
         ))}

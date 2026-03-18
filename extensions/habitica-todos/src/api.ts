@@ -44,6 +44,7 @@ export interface UpdateTaskBody {
 interface HabiticaResponse<T> {
   success: boolean;
   data: T;
+  message?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -53,7 +54,7 @@ interface HabiticaResponse<T> {
 const BASE_URL = "https://habitica.com";
 
 function getHeaders(): Record<string, string> {
-  const { apiUserId, apiToken } = getPreferenceValues<Preferences.ViewTasks>();
+  const { apiUserId, apiToken } = getPreferenceValues<Preferences>();
   return {
     "Content-Type": "application/json",
     "x-api-user": apiUserId,
@@ -62,10 +63,7 @@ function getHeaders(): Record<string, string> {
   };
 }
 
-async function habiticaFetch<T>(
-  path: string,
-  options: RequestInit = {},
-): Promise<T> {
+async function habiticaFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
     headers: {
@@ -77,7 +75,7 @@ async function habiticaFetch<T>(
   const json = (await res.json()) as HabiticaResponse<T>;
 
   if (!json.success) {
-    throw new Error(`Habitica API error on ${path}`);
+    throw new Error(json.message || `Habitica API error on ${path}`);
   }
 
   return json.data;
@@ -103,20 +101,14 @@ export async function createTask(body: CreateTaskBody): Promise<HabiticaTask> {
   });
 }
 
-export async function updateTask(
-  taskId: string,
-  body: UpdateTaskBody,
-): Promise<HabiticaTask> {
+export async function updateTask(taskId: string, body: UpdateTaskBody): Promise<HabiticaTask> {
   return habiticaFetch<HabiticaTask>(`/api/v3/tasks/${taskId}`, {
     method: "PUT",
     body: JSON.stringify(body),
   });
 }
 
-export async function scoreTask(
-  taskId: string,
-  direction: "up" | "down",
-): Promise<unknown> {
+export async function scoreTask(taskId: string, direction: "up" | "down"): Promise<unknown> {
   return habiticaFetch(`/api/v3/tasks/${taskId}/score/${direction}`, {
     method: "POST",
   });
