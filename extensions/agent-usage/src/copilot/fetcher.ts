@@ -188,7 +188,11 @@ export function useCopilotUsage(enabled = true) {
 
     const preferences = getPreferenceValues<Preferences>();
     const preferenceToken = preferences.copilotAuthToken?.trim() || "";
-    const { primaryToken, localToken, preferenceToken: cleanedPreferenceToken } = await resolveCopilotAuthTokens({
+    const {
+      primaryToken,
+      localToken,
+      preferenceToken: cleanedPreferenceToken,
+    } = await resolveCopilotAuthTokens({
       preferenceToken,
     });
 
