@@ -1,6 +1,6 @@
 # Focus Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-18
 - Fixed a timeout error when opening Focus preferences from the "No profiles found" state.
 
 ## [Enhancement] - 2026-03-16
