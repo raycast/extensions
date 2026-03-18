@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clockodo",
+  "description": "Your Clockodo entries in your Raycast",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "leomelzer",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "npm run test:format",
+    "test:format": "prettier --check ."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3",
+    "clockodo": "^28.1.0",
+    "dayjs": "^1.11.20"
+  },
+  "devDependencies": {
+    "@peerigon/configs": "^14.9.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "ai": {
+    "instructions": "If you only have a number id for a project or customer, use the get-project or get-customer tool to retrieve the entity, they have a name property. If you have the name, you can directly return it."
+  },
+  "commands": [
+    {
+      "name": "start-clock",
+      "title": "Start Clock",
+      "subtitle": "Start new tracking",
+      "description": "Start new tracking",
+      "mode": "view"
+    },
+    {
+      "name": "stop-clock",
+      "title": "Stop Clock",
+      "subtitle": "Stop your current tracking",
+      "description": "Stop your current tracking",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-recent-entries",
+      "title": "Get Recent Entries",
+      "subtitle": "List your recent tracking entries",
+      "description": "List your recent tracking entries",
+      "mode": "view"
+    },
+    {
+      "name": "week-overview",
+      "title": "Week Overview",
+      "subtitle": "View your daily tracking total for the week",
+      "description": "View your daily tracking total for the week",
+      "mode": "view"
+    },
+    {
+      "name": "open-reports",
+      "title": "Open Project Reports",
+      "subtitle": "Open the Clockodo Project Reports in the browser",
+      "description": "Open the Clockodo Project Reports in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-my-timetable",
+      "title": "Open My Timetable",
+      "subtitle": "Open your Clockodo Timetable in the browser",
+      "description": "Open your Clockodo Timetable in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-my-report",
+      "title": "Open My Report",
+      "subtitle": "Open your Clockodo Report in the browser",
+      "description": "Open your Clockodo Report in the browser",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "accountEmail",
+      "type": "textfield",
+      "title": "Account Email",
+      "placeholder": "Your Clockodo Account Email",
+      "description": "The email address associated with your Clockodo account.",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "You can find your API Token in your Clockodo account settings: https://my.clockodo.com/users/editself/",
+      "placeholder": "Your Clockodo API Token",
+      "required": true
+    }
+  ],
+  "title": "Clockodo",
+  "tools": [
+    {
+      "name": "get-my-entries",
+      "title": "Get My Entries",
+      "description": "Retrieves your recent tracking entries"
+    },
+    {
+      "name": "get-project",
+      "title": "Get Project",
+      "description": "Retrieves the project by its ID"
+    },
+    {
+      "name": "get-customer",
+      "title": "Get Customer",
+      "description": "Retrieves the customer by its ID"
+    }
+  ]
+}
