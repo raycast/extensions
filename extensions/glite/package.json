@@ -1,0 +1,108 @@
+{
+  "name": "glite",
+  "title": "Glite",
+  "description": "Run Glite just tasks and open Glite links from Raycast.",
+  "icon": "icon.png",
+  "author": "igor",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "glite",
+    "just",
+    "ios",
+    "admin",
+    "repo",
+    "deploy"
+  ],
+  "preferences": [
+    {
+      "name": "gliteRoot",
+      "type": "directory",
+      "required": true,
+      "title": "Glite Root",
+      "description": "Directory where `just` should run.",
+      "placeholder": "/path/to/glite"
+    }
+  ],
+  "commands": [
+    {
+      "name": "glite-just",
+      "title": "Glite Just",
+      "subtitle": "Run inline just command",
+      "description": "Run an inline just command in the configured Glite root.",
+      "mode": "no-view",
+      "keywords": [
+        "just",
+        "task",
+        "ios"
+      ],
+      "arguments": [
+        {
+          "name": "command",
+          "type": "text",
+          "placeholder": "recipe: ios, aws...",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "glite-admin",
+      "title": "Glite Admin",
+      "subtitle": "Open localhost admin",
+      "description": "Open the local Django admin for Glite.",
+      "mode": "no-view",
+      "keywords": [
+        "admin",
+        "django",
+        "localhost"
+      ]
+    },
+    {
+      "name": "glite-repo",
+      "title": "Glite Repo",
+      "subtitle": "Open GitHub repository",
+      "description": "Open the Glite GitHub repository.",
+      "mode": "no-view",
+      "keywords": [
+        "github",
+        "repo",
+        "source"
+      ]
+    },
+    {
+      "name": "glite-deploy",
+      "title": "Glite Deploy",
+      "subtitle": "Open deploy workflow",
+      "description": "Open the backend deploy GitHub Actions workflow.",
+      "mode": "no-view",
+      "keywords": [
+        "deploy",
+        "actions",
+        "workflow"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.0",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  }
+}
