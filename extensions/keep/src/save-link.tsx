@@ -1,13 +1,8 @@
 import { type LaunchProps, showToast, Toast } from "@raycast/api";
 import { saveLink } from "./api";
 
-type Arguments = {
-  url: string;
-  title?: string;
-};
-
 export default async function SaveLink(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.SaveLink }>,
 ) {
   const { url, title } = props.arguments;
 

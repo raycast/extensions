@@ -58,9 +58,4 @@ export type KeepDeleteResponse = {
   deleted: number;
 };
 
-export type KeepPreferences = {
-  apiKey: string;
-  baseUrl?: string;
-};
-
 export type LinkFilter = "all" | "unread" | "read";

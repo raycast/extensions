@@ -4,7 +4,6 @@ import type {
   KeepIngestResponse,
   KeepItem,
   KeepItemsResponse,
-  KeepPreferences,
   LinkFilter,
 } from "./types";
 
@@ -20,7 +19,7 @@ const FRONTMATTER_IMAGE_KEYS = [
   "twitter:image",
 ] as const;
 
-const getPreferences = () => getPreferenceValues<KeepPreferences>();
+const getPreferences = () => getPreferenceValues<Preferences>();
 
 const normalizeBaseUrl = (input?: string) => {
   const value = input?.trim() || DEFAULT_BASE_URL;
@@ -46,6 +45,7 @@ const buildUrl = (
 };
 
 const readApiError = async (response: Response) => {
+  const fallbackResponse = response.clone();
   const body = await response.json().catch(() => null);
 
   if (body && typeof body === "object") {
@@ -58,7 +58,7 @@ const readApiError = async (response: Response) => {
     if (error) return error;
   }
 
-  const fallback = await response.text().catch(() => "");
+  const fallback = await fallbackResponse.text().catch(() => "");
   return fallback || `Request failed (${response.status})`;
 };
 
