@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fantastical-ai",
+  "title": "Fantastical Entry",
+  "description": "Create Fantastical events from free-form text using AI",
+  "icon": "extension-icon.png",
+  "author": "user",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-add-event",
+      "title": "Quick Add Event",
+      "subtitle": "Fantastical",
+      "description": "Quickly create a Fantastical event from free-form text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "e.g. Lunch tomorrow at noon",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "addDirectly",
+      "title": "Add Directly",
+      "description": "Add events directly to Fantastical without opening the app's parsing window",
+      "type": "checkbox",
+      "default": false,
+      "required": false,
+      "label": "Skip Fantastical's parsing UI and add events directly"
+    },
+    {
+      "name": "googleClientId",
+      "title": "Google Client ID",
+      "description": "OAuth Client ID from Google Cloud Console (required for contact lookup and calendar availability). Create one at console.cloud.google.com with People API and Google Calendar API enabled.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "googleClientSecret",
+      "title": "Google Client Secret",
+      "description": "OAuth Client Secret from Google Cloud Console. Found alongside your Client ID in the Credentials page.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-event",
+      "title": "Create Event",
+      "description": "Create a calendar event in Fantastical from a natural language description. The AI parses the user's free-form text into a Fantastical-compatible sentence including the event title, date, time, duration, and location. Optionally specify a calendar name and invitee email addresses."
+    },
+    {
+      "name": "lookup-contacts",
+      "title": "Lookup Contacts",
+      "description": "Search Google Workspace contacts and directory by name to find email addresses. Use this when the user mentions people by name as invitees so you can resolve their names to email addresses before creating the event."
+    },
+    {
+      "name": "find-available-slots",
+      "title": "Find Available Slots",
+      "description": "Query Google Calendar to find time slots when all specified people (and the user) are free. Use this when the user asks to find a time that works for everyone, or wants to schedule something without specifying an exact time. Requires duration in minutes, a date range, and optionally attendee email addresses."
+    },
+    {
+      "name": "list-calendars",
+      "title": "List Calendars",
+      "description": "List all available calendars from the user's macOS calendar accounts (Google, iCloud, Exchange, etc.). Use this when the user doesn't specify which calendar to use, or when you need to know the exact calendar names available. Call this before create-event if the user hasn't specified a calendar."
+    }
+  ],
+  "ai": {
+    "instructions": "You help users create calendar events in Fantastical. FIRST TIME or when no calendar is specified: call list-calendars to discover available calendars, then ask which one to use (or remember from previous conversations). When the user describes an event, provide these fields: 'title' (event name), 'start' (in yyyy-MM-dd HH:mm format, e.g. '2026-03-20 14:00'), 'end' (in yyyy-MM-dd HH:mm format, e.g. '2026-03-20 16:00'). Optionally include 'location', 'calendarName', 'invitees' (array of emails), and 'notes'. IMPORTANT: 'start' and 'end' MUST be in yyyy-MM-dd HH:mm format. If the user says a duration, calculate end time. Default to 1 hour if unspecified. If the user mentions a specific calendar, pass calendarName. IMPORTANT: If the calendar name contains '@' (email format like user@company.com), strip the @domain part and pass only the username (e.g. 'user') because Fantastical's URL scheme breaks with @ characters. The list-calendars tool shows the correct Fantastical name in brackets. If the user mentions people by name AND the chosen calendar belongs to a Google Workspace account, FIRST call lookup-contacts to resolve names to emails. Do NOT use lookup-contacts for personal/non-Google calendars. If the user asks to 'find a time', 'find a slot', 'when are we free', or wants to schedule without specifying an exact time, call find-available-slots with the duration, date range, and attendee emails. If people are mentioned by name, resolve them with lookup-contacts first to get emails, then pass those to find-available-slots. Present the available slots and let the user pick one, then create the event at that time. If the user doesn't specify a date or time and isn't asking to find a slot, ask for clarification. If the user declines confirmation, ask what to change and retry. After success, do NOT call create-event again."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/node-fetch": "^2.6.13",
+    "@types/react": "19.0.12",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^9.23.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
