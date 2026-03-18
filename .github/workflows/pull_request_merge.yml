@@ -1,5 +1,9 @@
 name: Pull Request - Merge
 
+permissions:
+  contents: read
+  pull-requests: read
+
 concurrency:
   group: pull_request_merge_queue
   cancel-in-progress: false
@@ -12,7 +16,63 @@ on:
         required: true
 
 jobs:
+  require_admin_or_write_approval:
+    runs-on: ubuntu-latest
+    name: Require admin/write approval
+    env:
+      GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    outputs:
+      approved_by: ${{ steps.check.outputs.approved_by }}
+    steps:
+      - name: Verify PR has admin/write approval
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          pr_number="${{ inputs.pr_number }}"
+          repo="${{ github.repository }}"
+
+          echo "Checking reviews for PR #$pr_number in $repo"
+
+          reviews_json=$(gh api "repos/$repo/pulls/$pr_number/reviews?per_page=100")
+
+          approved_users=$(echo "$reviews_json" | jq -r '
+            sort_by(.submitted_at)
+            | group_by(.user.login)
+            | map(last)
+            | map(select(.state == "APPROVED"))
+            | .[].user.login
+          ')
+
+          if [[ -z "$approved_users" ]]; then
+            echo "No effective approvals found."
+            exit 1
+          fi
+
+          qualified_approver=""
+          while IFS= read -r user; do
+            [[ -z "$user" ]] && continue
+
+            permission=$(gh api "repos/$repo/collaborators/$user/permission" --jq '.permission')
+            echo "$user has permission: $permission"
+
+            if [[ "$permission" == "admin" || "$permission" == "write" ]]; then
+              qualified_approver="$user"
+              break
+            fi
+          done <<< "$approved_users"
+
+          if [[ -z "$qualified_approver" ]]; then
+            echo "PR must be approved by at least one user with admin or write access."
+            exit 1
+          fi
+
+          echo "approved_by=$qualified_approver" >> "$GITHUB_OUTPUT"
+          echo "Approval requirement satisfied by: $qualified_approver"
+
   merge:
+    needs: require_admin_or_write_approval
     runs-on: macos-14
     name: Merge PR
     env:
@@ -39,9 +99,9 @@ jobs:
             if [[ -f "$changelog" ]]; then
               pattern="{PR_MERGE_DATE}"
               replacement=$(date '+%Y-%m-%d')
-              if grep -q $pattern $changelog; then
+              if grep -q "$pattern" "$changelog"; then
                 echo "  pattern found"
-                sed -i "" "s/$pattern/$replacement/g" $changelog
+                sed -i "" "s/$pattern/$replacement/g" "$changelog"
                 # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
                 echo "  updated to $replacement"
                 updated_count=$((updated_count+1))
