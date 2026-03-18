@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Weekly Usage & Session Blocks] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-03-18
 
 ### Added
 

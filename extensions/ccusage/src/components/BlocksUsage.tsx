@@ -124,18 +124,21 @@ export function BlocksUsage() {
     );
   }
 
+  const accessories: List.Item.Accessory[] = [];
+
+  accessories.push({ text: formatCost(activeBlock.costUSD), icon: Icon.Coins });
+  accessories.push({ text: formatNumber(activeBlock.totalTokens), icon: Icon.Terminal, tooltip: "Total Tokens" });
+
+  if (activeBlock.isActive) {
+    accessories.push({ icon: { source: Icon.CircleFilled, tintColor: Color.Green }, tooltip: "Active" });
+  }
+
   return (
     <List.Item
       title="Session Blocks"
       subtitle={activeBlock.isActive ? "Active Session" : "Recent Session"}
       icon={{ source: Icon.Stopwatch, tintColor: Color.SecondaryText }}
-      accessories={[
-        { text: formatCost(activeBlock.costUSD), icon: Icon.Coins },
-        { text: formatNumber(activeBlock.totalTokens), icon: Icon.Terminal, tooltip: "Total Tokens" },
-        ...(activeBlock.isActive
-          ? [{ icon: { source: Icon.CircleFilled, tintColor: Color.Green }, tooltip: "Active" }]
-          : []),
-      ]}
+      accessories={accessories}
       detail={<List.Item.Detail metadata={renderDetailMetadata(activeBlock)} />}
       actions={
         <ActionPanel>

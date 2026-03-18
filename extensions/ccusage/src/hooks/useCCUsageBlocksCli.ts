@@ -5,12 +5,18 @@ import { stringToJSON } from "../utils/string-to-json-schema";
 import { preferences } from "../preferences";
 
 type Input = {
-  /** When true, filters to show only recent blocks */
+  /**
+   * When true, requests only recent session blocks from the `ccusage` CLI.
+   * This is a boolean toggle that maps to the CLI's `--recent` flag (does not accept a numeric value).
+   */
   recent?: boolean;
 };
 
 /**
- * Hook for executing `ccusage blocks --json` command
+ * Hook for executing `ccusage blocks --json` command.
+ *
+ * The optional `input.recent` boolean maps to the CLI `--recent` flag and limits
+ * the response to recent session blocks.
  */
 export const useCCUsageBlocksCli = (input?: Input) => {
   const useDirectCommand = preferences.useDirectCcusageCommand;
