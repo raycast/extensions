@@ -11,7 +11,12 @@ import json2md from "json2md";
 import { useMemo } from "react";
 import { fetchPokemon } from "../api";
 import { PokemonSpeciesName, Pokemon, EvolutionSpecies } from "../types";
-import { fixFlavorText, getPokemonImageTag, nationalDexNumber } from "../utils";
+import {
+  fixFlavorText,
+  getLocalizedName,
+  getPokemonImageTag,
+  nationalDexNumber,
+} from "../utils";
 import PokemonEncounters from "./encounter";
 import PokedexEntries from "./entry";
 import PokemonForms from "./form";
@@ -30,7 +35,7 @@ enum GrowthRate {
   "Fluctuating" = 6,
 }
 
-export default function PokeProfile(props: { id: number }) {
+export default function PokemonDetail(props: { id: number }) {
   const { data: pokemon, isLoading } = usePromise(fetchPokemon, [props.id]);
 
   const nameByLang = useMemo(() => {
@@ -123,7 +128,9 @@ export default function PokeProfile(props: { id: number }) {
       },
       {
         p: `_Egg groups:_ ${pokemonegggroups
-          .map((g) => g.egggroup.egggroupnames[0]?.name || g.egggroup.name)
+          .map((g) =>
+            getLocalizedName(g.egggroup.egggroupnames, g.egggroup.name),
+          )
           .join(", ")}`,
       },
       {
@@ -208,7 +215,7 @@ export default function PokeProfile(props: { id: number }) {
               {pokemon.pokemonstats.map((stat, idx) => (
                 <Detail.Metadata.TagList.Item
                   key={idx}
-                  text={`${stat.stat.statnames[0].name}: ${stat.base_stat}`}
+                  text={`${getLocalizedName(stat.stat.statnames, stat.stat.name)}: ${stat.base_stat}`}
                   color={
                     stat.stat.name.startsWith("special")
                       ? Color.Green
@@ -276,9 +283,12 @@ export default function PokeProfile(props: { id: number }) {
                     return (
                       <Action.Push
                         key={specy.id}
-                        title={specy.pokemonspeciesnames[0].name}
+                        title={getLocalizedName(
+                          specy.pokemonspeciesnames,
+                          specy.name,
+                        )}
                         icon="pokeball.svg"
-                        target={<PokeProfile id={specy.id} />}
+                        target={<PokemonDetail id={specy.id} />}
                       />
                     );
                   },

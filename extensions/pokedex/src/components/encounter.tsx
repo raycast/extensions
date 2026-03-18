@@ -1,17 +1,20 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import groupBy from "lodash.groupby";
 import uniqBy from "lodash.uniqby";
 import { PokemonEncounter } from "../types";
+import { getLocalizedName } from "../utils";
 
 export default function PokemonEncounters(props: {
   name: string;
   encounters: PokemonEncounter[];
 }) {
   const generations = groupBy(
-    props.encounters.filter(
-      (e) => e.version?.versiongroup?.generation?.generationnames?.[0]?.name,
-    ),
-    (e) => e.version.versiongroup.generation.generationnames[0].name,
+    props.encounters.filter((e) => e.version?.versiongroup?.generation),
+    (e) =>
+      getLocalizedName(
+        e.version.versiongroup.generation.generationnames,
+        e.version.versiongroup.generation.name,
+      ),
   );
 
   return (
@@ -21,9 +24,8 @@ export default function PokemonEncounters(props: {
           groups.filter((l) => l.locationarea),
           (l) => l.locationarea.name,
         );
-        const versions = groupBy(
-          locations,
-          (l) => l.version.versionnames[0]?.name || l.version.name,
+        const versions = groupBy(locations, (l) =>
+          getLocalizedName(l.version.versionnames, l.version.name),
         );
 
         return (
@@ -36,10 +38,11 @@ export default function PokemonEncounters(props: {
                   accessories={[
                     {
                       text: encounters
-                        .map(
-                          (e) =>
-                            e.locationarea.locationareanames[0]?.name ||
+                        .map((e) =>
+                          getLocalizedName(
+                            e.locationarea.locationareanames,
                             e.locationarea.name,
+                          ),
                         )
                         .filter((x) => !!x)
                         .join(", "),
@@ -51,6 +54,7 @@ export default function PokemonEncounters(props: {
           </List.Section>
         );
       })}
+      <List.EmptyView icon={Icon.Map} title="No Encounters Found" />
     </List>
   );
 }

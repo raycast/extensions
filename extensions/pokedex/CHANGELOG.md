@@ -1,5 +1,10 @@
 # Pokédex Changelog
 
+## [Regional Pokédex] - {PR_MERGE_DATE}
+
+- Added **Regional Pokédex** command to browse Pokémon by regional dex with quick profile navigation.
+- Added a shared localized name helper to standardize fallback behavior when translations are missing.
+
 ## [Terastal Expansion] - 2026-03-03
 
 - Added support for Scarlet & Violet–style sprite artwork.
