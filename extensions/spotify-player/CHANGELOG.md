@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Reduce API Rate Limiting] - {PR_MERGE_DATE}
+## [Reduce API Rate Limiting] - 2026-03-18
 
 - Added tiered API-level caching (short/medium/long TTL) to reduce redundant Spotify API calls
 - Removed cascading background command launches from playback commands (next, previous, like, dislike, skip15, back15)
