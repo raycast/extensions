@@ -54,21 +54,22 @@ export default function BrowseAgents({ division, agents, subgroup }: BrowseAgent
   const divisionIcon = getDivisionIcon(division, agents.find((agent) => agent.divisionEmoji)?.divisionEmoji);
   const rootAgents = agents
     .filter((agent) => !agent.subgroup)
-    .sort((left, right) => left.name.localeCompare(right.name, undefined, { sensitivity: "base" }));
+    .sort((left, right) => left.name.localeCompare(right.name, "en-US", { sensitivity: "base" }));
   const subgroups = Array.from(
     new Set(agents.map((agent) => agent.subgroup).filter((value): value is string => Boolean(value))),
   ).sort((left, right) =>
-    getGameDevelopmentSubgroupLabel(left).localeCompare(getGameDevelopmentSubgroupLabel(right), undefined, {
+    getGameDevelopmentSubgroupLabel(left).localeCompare(getGameDevelopmentSubgroupLabel(right), "en-US", {
       sensitivity: "base",
     }),
   );
   const sortedAgents = [...agents].sort((left, right) =>
-    left.name.localeCompare(right.name, undefined, { sensitivity: "base" }),
+    left.name.localeCompare(right.name, "en-US", { sensitivity: "base" }),
   );
 
   if (division === "game-development" && !subgroup && subgroups.length > 0) {
     return (
       <List
+        isLoading={false}
         isShowingDetail
         navigationTitle={`${divisionIcon} ${divisionLabel}`}
         searchBarPlaceholder="Browse game development"
@@ -132,6 +133,7 @@ export default function BrowseAgents({ division, agents, subgroup }: BrowseAgent
 
   return (
     <List
+      isLoading={false}
       isShowingDetail
       navigationTitle={
         subgroup

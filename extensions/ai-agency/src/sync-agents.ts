@@ -47,7 +47,20 @@ async function fetchJson<T>(url: string): Promise<T> {
     },
   });
 
+  const remaining = response.headers.get("x-ratelimit-remaining");
+  if (remaining !== null && Number(remaining) <= 0) {
+    const reset = response.headers.get("x-ratelimit-reset");
+    const resetAt = reset ? new Date(Number(reset) * 1000).toUTCString() : "unknown";
+    throw new Error(`GitHub rate limit exceeded for ${url}. Reset at ${resetAt}. Consider authenticating.`);
+  }
+
   if (!response.ok) {
+    if (response.status === 403 && remaining !== null && Number(remaining) <= 0) {
+      const reset = response.headers.get("x-ratelimit-reset");
+      const resetAt = reset ? new Date(Number(reset) * 1000).toUTCString() : "unknown";
+      throw new Error(`GitHub rate limit exceeded for ${url}. Reset at ${resetAt}. Consider authenticating.`);
+    }
+
     throw new Error(`Request failed (${response.status}) for ${url}`);
   }
 
@@ -61,7 +74,20 @@ async function fetchText(url: string): Promise<string> {
     },
   });
 
+  const remaining = response.headers.get("x-ratelimit-remaining");
+  if (remaining !== null && Number(remaining) <= 0) {
+    const reset = response.headers.get("x-ratelimit-reset");
+    const resetAt = reset ? new Date(Number(reset) * 1000).toUTCString() : "unknown";
+    throw new Error(`GitHub rate limit exceeded for ${url}. Reset at ${resetAt}. Consider authenticating.`);
+  }
+
   if (!response.ok) {
+    if (response.status === 403 && remaining !== null && Number(remaining) <= 0) {
+      const reset = response.headers.get("x-ratelimit-reset");
+      const resetAt = reset ? new Date(Number(reset) * 1000).toUTCString() : "unknown";
+      throw new Error(`GitHub rate limit exceeded for ${url}. Reset at ${resetAt}. Consider authenticating.`);
+    }
+
     throw new Error(`Request failed (${response.status}) for ${url}`);
   }
 
@@ -107,10 +133,13 @@ export async function syncAgentsFromGitHub(options?: { force?: boolean }) {
   await fs.mkdir(temporaryDirectory, { recursive: true });
 
   try {
-    for (const entry of filesToSync) {
-      const content = await fetchText(getRawFileUrl(entry.path));
-      await writeRepoFile(temporaryDirectory, entry.path, content);
-    }
+    // Parallelize downloads to speed up syncs. Keep writes safe by ensuring directories are created per file.
+    await Promise.all(
+      filesToSync.map(async (entry) => {
+        const content = await fetchText(getRawFileUrl(entry.path));
+        await writeRepoFile(temporaryDirectory, entry.path, content);
+      }),
+    );
 
     await fs.rm(AGENTS_DIR, { recursive: true, force: true });
     await fs.rename(temporaryDirectory, AGENTS_DIR);

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import BrowseAgents from "./browse-agents";
 import { getDivisionIcon } from "./icons";
@@ -20,8 +20,10 @@ export default function Command() {
     try {
       const result = force ? await syncAgentsFromGitHub({ force: true }) : await ensureAgentsAvailable();
       const nextAgents = loadAgents();
-      setAgents(nextAgents);
-      setError(null);
+      if (mountedRef.current) {
+        setAgents(nextAgents);
+        setError(null);
+      }
       toast.style = Toast.Style.Success;
       toast.title = force ? "Agents updated" : "Agents ready";
       toast.message =
@@ -34,21 +36,27 @@ export default function Command() {
             : "Already up to date";
     } catch (syncError) {
       const message = syncError instanceof Error ? syncError.message : "Unknown sync error";
-      setError(message);
+      if (mountedRef.current) setError(message);
       toast.style = Toast.Style.Failure;
       toast.title = force ? "Update failed" : "Unable to load agents";
       toast.message = message;
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) setIsLoading(false);
     }
   }
 
+  const mountedRef = useRef(true);
+
   useEffect(() => {
     void refreshAgents(false);
+
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const divisions = Array.from(new Set(agents.map((agent) => agent.division))).sort((left, right) =>
-    getDivisionLabel(left).localeCompare(getDivisionLabel(right), undefined, { sensitivity: "base" }),
+    getDivisionLabel(left).localeCompare(getDivisionLabel(right), "en-US", { sensitivity: "base" }),
   );
 
   return (

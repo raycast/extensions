@@ -227,6 +227,36 @@ export function getGameDevelopmentSubgroupLabel(subgroup: string): string {
   return gameDevelopmentSubgroupLabels[subgroup] ?? formatSlug(subgroup);
 }
 
+function buildAgent(opts: {
+  slug: string;
+  name: string;
+  division: string;
+  file: string;
+  content: string;
+  frontmatter: Frontmatter;
+  rosterEntry?: RosterEntry | undefined;
+  subgroup?: string | undefined;
+}): Agent {
+  return {
+    slug: opts.slug,
+    name: opts.name,
+    division: opts.division,
+    ...(opts.subgroup ? { subgroup: opts.subgroup } : {}),
+    file: opts.file,
+    specialty: extractSection(opts.content, "Specialty"),
+    when: extractSection(opts.content, "When to Use"),
+    content: opts.content,
+    emoji: opts.frontmatter.emoji,
+    description: opts.frontmatter.description,
+    vibe: opts.frontmatter.vibe,
+    divisionDescription: opts.rosterEntry?.divisionDescription,
+    rosterSpecialty: opts.rosterEntry?.specialty,
+    rosterWhen: opts.rosterEntry?.when,
+    rosterEmoji: opts.rosterEntry?.emoji,
+    divisionEmoji: opts.rosterEntry?.divisionEmoji,
+  };
+}
+
 export function loadAgents(): Agent[] {
   if (!fs.existsSync(AGENTS_DIR)) return [];
   const rosterEntries = parseRosterFromReadme();
@@ -259,24 +289,17 @@ export function loadAgents(): Agent[] {
         const rosterEntry =
           rosterEntries.get(normalizeAgentKey(frontmatter.name ?? formatSlug(slug))) ??
           rosterEntries.get(normalizeAgentKey(file));
-
-        agents.push({
-          slug,
-          name: frontmatter.name ?? formatSlug(slug),
-          division,
-          file: fullPath,
-          specialty: extractSection(content, "Specialty"),
-          when: extractSection(content, "When to Use"),
-          content,
-          emoji: frontmatter.emoji,
-          description: frontmatter.description,
-          vibe: frontmatter.vibe,
-          divisionDescription: rosterEntry?.divisionDescription,
-          rosterSpecialty: rosterEntry?.specialty,
-          rosterWhen: rosterEntry?.when,
-          rosterEmoji: rosterEntry?.emoji,
-          divisionEmoji: rosterEntry?.divisionEmoji,
-        });
+        agents.push(
+          buildAgent({
+            slug,
+            name: frontmatter.name ?? formatSlug(slug),
+            division,
+            file: fullPath,
+            content,
+            frontmatter,
+            rosterEntry,
+          }),
+        );
       }
 
       const subgroups = fs
@@ -305,25 +328,18 @@ export function loadAgents(): Agent[] {
           const rosterEntry =
             rosterEntries.get(normalizeAgentKey(frontmatter.name ?? formatSlug(slug))) ??
             rosterEntries.get(normalizeAgentKey(file));
-
-          agents.push({
-            slug,
-            name: frontmatter.name ?? formatSlug(slug),
-            division,
-            subgroup,
-            file: fullPath,
-            specialty: extractSection(content, "Specialty"),
-            when: extractSection(content, "When to Use"),
-            content,
-            emoji: frontmatter.emoji,
-            description: frontmatter.description,
-            vibe: frontmatter.vibe,
-            divisionDescription: rosterEntry?.divisionDescription,
-            rosterSpecialty: rosterEntry?.specialty,
-            rosterWhen: rosterEntry?.when,
-            rosterEmoji: rosterEntry?.emoji,
-            divisionEmoji: rosterEntry?.divisionEmoji,
-          });
+          agents.push(
+            buildAgent({
+              slug,
+              name: frontmatter.name ?? formatSlug(slug),
+              division,
+              subgroup,
+              file: fullPath,
+              content,
+              frontmatter,
+              rosterEntry,
+            }),
+          );
         }
       }
 
@@ -344,24 +360,17 @@ export function loadAgents(): Agent[] {
       const rosterEntry =
         rosterEntries.get(normalizeAgentKey(frontmatter.name ?? formatSlug(slug))) ??
         rosterEntries.get(normalizeAgentKey(file));
-
-      agents.push({
-        slug,
-        name: frontmatter.name ?? formatSlug(slug),
-        division,
-        file: fullPath,
-        specialty: extractSection(content, "Specialty"),
-        when: extractSection(content, "When to Use"),
-        content,
-        emoji: frontmatter.emoji,
-        description: frontmatter.description,
-        vibe: frontmatter.vibe,
-        divisionDescription: rosterEntry?.divisionDescription,
-        rosterSpecialty: rosterEntry?.specialty,
-        rosterWhen: rosterEntry?.when,
-        rosterEmoji: rosterEntry?.emoji,
-        divisionEmoji: rosterEntry?.divisionEmoji,
-      });
+      agents.push(
+        buildAgent({
+          slug,
+          name: frontmatter.name ?? formatSlug(slug),
+          division,
+          file: fullPath,
+          content,
+          frontmatter,
+          rosterEntry,
+        }),
+      );
     }
   }
 
