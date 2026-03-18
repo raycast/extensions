@@ -1,4 +1,4 @@
-import { fetchBootstrapData, fetchPlaceEvents } from "../utils";
+import { fetchBootstrapData, fetchPlaceEvents, getEventUrl } from "../utils";
 
 type Input = {
   /**
@@ -45,7 +45,7 @@ export default async function getPlaceEvents(input: Input): Promise<string> {
       total: events.length,
       events: events.map((entry) => ({
         name: entry.event.name,
-        url: `https://luma.com/${entry.event.url}`,
+        url: getEventUrl(entry),
         startAt: entry.event.start_at,
         timezone: entry.event.timezone,
         locationType: entry.event.location_type,
