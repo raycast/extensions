@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-03-18
 
 - Fixes a bug where the extension was failing after initial install
 
