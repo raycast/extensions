@@ -1,6 +1,6 @@
 # Tailscale Control Changelog
 
-## [Initial Version]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added a Raycast extension for local Tailscale control
 - Added peer, exit node, diagnostics, Taildrop, advanced settings, and Serve/Funnel support
