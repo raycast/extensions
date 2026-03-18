@@ -1,6 +1,6 @@
 # Luma Changelog
 
-## [Add AI Command] - {PR_MERGE_DATE}
+## [Add AI Command] - 2026-03-18
 
 - Add AI command to discover events on Luma
 
