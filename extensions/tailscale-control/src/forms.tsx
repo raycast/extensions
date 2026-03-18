@@ -34,8 +34,13 @@ interface ConfigureServiceFormProps extends SharedFormProps {
   kind: ServiceKind;
 }
 
-async function runFormAction(task: () => Promise<void>, successTitle: string, failureTitle: string) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: successTitle.replace("ed", "ing") });
+async function runFormAction(
+  task: () => Promise<void>,
+  loadingTitle: string,
+  successTitle: string,
+  failureTitle: string,
+) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: loadingTitle });
 
   try {
     await task();
@@ -62,6 +67,7 @@ export function SendFilesForm({ client, onSuccess, peers }: SendFilesFormProps) 
             onSubmit={async (values: SendFilesFormValues) => {
               await runFormAction(
                 () => client.sendFiles(values.target, values.files),
+                "Sending Taildrop files",
                 "Sent Taildrop files",
                 "Could Not Send Taildrop Files",
               );
@@ -102,6 +108,7 @@ export function ReceiveFilesForm({ client, onSuccess }: SharedFormProps) {
               const directory = values.directory[0] ?? defaultDirectory;
               await runFormAction(
                 () => client.receiveFiles(directory, values.conflict),
+                "Receiving Taildrop files",
                 "Received Taildrop files",
                 "Could Not Receive Taildrop Files",
               );
@@ -147,6 +154,7 @@ export function ConfigureServiceForm({ client, onSuccess, kind }: ConfigureServi
                   kind === "serve"
                     ? client.configureServe(values.target, values.path)
                     : client.configureFunnel(values.target, values.path),
+                `Updating ${label}`,
                 `Updated ${label}`,
                 `Could Not Update ${label}`,
               );
