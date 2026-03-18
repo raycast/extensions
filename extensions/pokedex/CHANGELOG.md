@@ -1,6 +1,6 @@
 # Pokédex Changelog
 
-## [Regional Pokédex] - {PR_MERGE_DATE}
+## [Regional Pokédex] - 2026-03-18
 
 - Added **Regional Pokédex** command to browse Pokémon by regional dex with quick profile navigation.
 - Added a shared localized name helper to standardize fallback behavior when translations are missing.
