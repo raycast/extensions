@@ -1,5 +1,9 @@
 # Render Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Add Configurable Default Action] - 2026-01-21
 
 - Added preference to configure the default action when pressing Enter on a service

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { SkillListItem } from "./components/SkillListItem";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
-import { buildIssueUrl } from "./shared";
+import { buildGithubIssueUrl } from "./shared";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -25,7 +25,16 @@ export default function Command() {
             <Action title="Clear Cache & Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
             <Action.OpenInBrowser
               title="Report Issue on GitHub"
-              url={buildIssueUrl(searchUrl, error)}
+              url={buildGithubIssueUrl({
+                title: "API Error",
+                description: `Failed to fetch data from the Skills API: ${searchUrl}`,
+                error,
+                reproductionSteps: [
+                  "Open Raycast and run the 'Search Skills' command.",
+                  `Search for skills with the search query "${searchText}".`,
+                  "Observe the resulting error.",
+                ],
+              })}
               icon={Icon.Bug}
             />
           </ActionPanel>

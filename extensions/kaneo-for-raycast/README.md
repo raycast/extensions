@@ -1,13 +1,21 @@
 <div align="center">
-   <img
-      src="assets/kaneo.png"
-      alt="Kaneo for Raycast"
-      width="128"
-   />
+<img
+   src="./assets/kaneo.png"
+   alt="Kaneo for Raycast"
+   width="128"
+/>
+
+# Kaneo For Raycast
 
 ⚠️ **This extension is not created by Kaneo developers.**
 
-A Raycast extension for managing your [Kaneo](https://kaneo.app/) projects and tasks directly from Raycast.
+
+<a href="https://www.raycast.com/Baldy/kaneo-for-raycast" title="Install kaneo-for-raycast Raycast Extension"><img src="https://www.raycast.com/Baldy/kaneo-for-raycast/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt="" /></a>
+
+[![Raycast](https://img.shields.io/raycast/dt/Baldy/kaneo-for-raycast?color=%23FF6363&logo=raycast)](https://www.raycast.com/Baldy/kaneo-for-raycast)
+
+***"All you need. Nothing you don't."***<br>
+***[Kaneo](https://kaneo.app) is project management that stays out of your way.***
 </div>
 
 ## Features

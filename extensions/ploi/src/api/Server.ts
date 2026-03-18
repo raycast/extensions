@@ -43,7 +43,7 @@ export const Server = {
       await axios.post(`${PLOI_API_URL}/servers/${serverId}/refresh-opcache`);
       await showToast(Toast.Style.Success, `Refreshing OPcache...`);
     } catch (error) {
-      const axiosError = (error as AxiosError).response;
+      const axiosError = (error as AxiosError<{ errors: string[] }>).response;
 
       if (axiosError && axiosError.status === 422 && axiosError.data && axiosError.data.errors[0]) {
         await showToast(Toast.Style.Failure, "Error", axiosError.data.errors[0]);

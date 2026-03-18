@@ -1,44 +1,29 @@
 import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { readWorkingMemory } from "./api";
-import { homedir } from "os";
-import { join } from "path";
-import { statSync } from "fs";
-
-const WM_PATH = join(homedir(), "ai-now", "memory.md");
-
-function getFileModified(): string {
-  try {
-    const stats = statSync(WM_PATH);
-    return stats.mtime.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
+import { getConnectionConfig, readWorkingMemory } from "./api";
 
 export default function WorkingMemory() {
-  const { isLoading, data: content } = useCachedPromise(readWorkingMemory);
+  const { isLoading, data } = useCachedPromise(readWorkingMemory);
+  const { baseUrl } = getConnectionConfig();
 
-  if (!content) {
+  if (!data?.exists) {
     return (
       <Detail
         isLoading={isLoading}
         markdown={
           isLoading
             ? "Loading Working Memory..."
-            : "# Working Memory Not Available\n\nEnsure Nowledge Mem is running with Background Intelligence enabled.\n\nThe daily briefing is generated each morning and saved to `~/ai-now/memory.md`."
+            : `# Working Memory Not Available
+
+Ensure Nowledge Mem is running and reachable from Raycast.
+
+The Working Memory API is the source of truth for this command.`
         }
       />
     );
   }
 
-  const modified = getFileModified();
+  const content = data.content || "";
   const lineCount = content.split("\n").length;
   const wordCount = content.split(/\s+/).filter(Boolean).length;
 
@@ -48,11 +33,16 @@ export default function WorkingMemory() {
       markdown={content}
       metadata={
         <Detail.Metadata>
-          {modified && (
+          <Detail.Metadata.Label
+            title="Connection"
+            text={baseUrl}
+            icon={Icon.Network}
+          />
+          {data.date && (
             <Detail.Metadata.Label
-              title="Last Updated"
-              text={modified}
-              icon={Icon.Clock}
+              title="Date"
+              text={data.date}
+              icon={Icon.Calendar}
             />
           )}
           <Detail.Metadata.Label
@@ -60,12 +50,14 @@ export default function WorkingMemory() {
             text={`${wordCount} words · ${lineCount} lines`}
             icon={Icon.Document}
           />
+          {data.file_path && (
+            <Detail.Metadata.Label
+              title="Source File"
+              text={data.file_path}
+              icon={Icon.Folder}
+            />
+          )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Location"
-            text="~/ai-now/memory.md"
-            icon={Icon.Folder}
-          />
           <Detail.Metadata.Link
             title="Open in App"
             text="Nowledge Mem"
@@ -75,11 +67,6 @@ export default function WorkingMemory() {
       }
       actions={
         <ActionPanel>
-          <Action.Open
-            title="Edit in Default Editor"
-            target={WM_PATH}
-            icon={Icon.Pencil}
-          />
           <Action.CopyToClipboard
             title="Copy Working Memory"
             content={content}

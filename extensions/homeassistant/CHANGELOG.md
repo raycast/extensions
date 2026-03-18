@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Fix] - 2026-03-15
+- use translations for services if available
+  - fallback to service slug when no translation is available
+
 ## [Fix] - 2026-02-01
 - Improved history chart contrast (axis labels and grid lines) for Raycast light/dark appearance
 

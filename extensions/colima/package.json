@@ -1,0 +1,102 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "colima",
+  "title": "Colima",
+  "description": "Manage Colima virtual machine instances and Docker environments directly from Raycast",
+  "icon": "icon.png",
+  "author": "MiskaMyasa",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-instances",
+      "title": "List Colima Instances",
+      "subtitle": "Colima",
+      "description": "View and manage Colima VM instances",
+      "keywords": [
+        "colima",
+        "vm",
+        "virtual machine",
+        "instance",
+        "profile"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "list-containers",
+      "title": "List Docker Containers",
+      "subtitle": "Docker",
+      "description": "View and manage Docker containers",
+      "keywords": [
+        "docker",
+        "container",
+        "ps"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "list-images",
+      "title": "List Docker Images",
+      "subtitle": "Docker",
+      "description": "View and manage Docker images",
+      "keywords": [
+        "docker",
+        "image",
+        "registry"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "pull-image",
+      "title": "Pull Docker Image",
+      "subtitle": "Docker",
+      "description": "Pull a Docker image from a registry",
+      "keywords": [
+        "docker",
+        "pull",
+        "download",
+        "registry"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "run-container",
+      "title": "Run Docker Container",
+      "subtitle": "Docker",
+      "description": "Run a new Docker container",
+      "keywords": [
+        "docker",
+        "run",
+        "container",
+        "start"
+      ],
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "js-yaml": "4.1.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  }
+}

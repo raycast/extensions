@@ -67,9 +67,11 @@ export const createProgressBar = (percentage: number, width: number = 20): strin
 
 export const calculateEstimatedUsage = (
   currentUtilization: number,
-  resetTimeStr: string,
+  resetTimeStr: string | null,
   windowDurationHours: number,
 ): number | null => {
+  if (!resetTimeStr) return null;
+
   try {
     const resetTime = new Date(resetTimeStr);
     const now = new Date();
@@ -97,7 +99,9 @@ export const calculateEstimatedUsage = (
   }
 };
 
-export const calculateAverageUsage = (resetTimeStr: string, windowDurationHours: number): number | null => {
+export const calculateAverageUsage = (resetTimeStr: string | null, windowDurationHours: number): number | null => {
+  if (!resetTimeStr) return null;
+
   try {
     const resetTime = new Date(resetTimeStr);
     const now = new Date();

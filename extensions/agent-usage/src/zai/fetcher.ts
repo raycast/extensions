@@ -1,6 +1,10 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import { getPreferenceValues } from "@raycast/api";
 import { ZaiUsage, ZaiError, ZaiLimitEntry, ZaiUsageDetail } from "./types";
 import { httpFetch } from "../agents/http";
-import { createTokenBasedHook } from "../agents/hooks";
+import { resolveZaiAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
+
+type Preferences = Preferences.AgentUsage;
 
 const ZAI_USAGE_API = "https://api.z.ai/api/monitor/usage/quota/limit";
 
@@ -111,8 +115,90 @@ function parseZaiApiResponse(data: unknown): { usage: ZaiUsage | null; error: Za
   }
 }
 
-export const useZaiUsage = createTokenBasedHook<ZaiUsage, ZaiError>({
-  preferenceKey: "zaiApiToken",
-  agentName: "z.ai",
-  fetcher: fetchZaiUsage,
-});
+export function useZaiUsage(enabled = true) {
+  const [usage, setUsage] = useState<ZaiUsage | null>(null);
+  const [error, setError] = useState<ZaiError | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const requestIdRef = useRef(0);
+
+  const fetchData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    setIsLoading(true);
+    setError(null);
+
+    const preferences = getPreferenceValues<Preferences>();
+    const preferenceToken = preferences.zaiApiToken?.trim() || "";
+    const {
+      primaryToken,
+      localToken,
+      preferenceToken: cleanedPreferenceToken,
+    } = await resolveZaiAuthTokens({ preferenceToken });
+
+    if (!primaryToken) {
+      setUsage(null);
+      setError({
+        type: "not_configured",
+        message: "z.ai token not configured. Add it in extension settings (Cmd+,) or set up via CLI.",
+      });
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
+    let result = await fetchZaiUsage(primaryToken);
+    if (requestId !== requestIdRef.current) {
+      return;
+    }
+
+    if (
+      cleanedPreferenceToken &&
+      shouldFallbackToPreferenceToken({
+        localToken,
+        preferenceToken: cleanedPreferenceToken,
+        errorType: result.error?.type,
+      })
+    ) {
+      result = await fetchZaiUsage(cleanedPreferenceToken);
+      if (requestId !== requestIdRef.current) {
+        return;
+      }
+    }
+
+    setUsage(result.usage);
+    setError(result.error);
+    setIsLoading(false);
+    setHasInitialFetch(true);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
+    }
+
+    if (!hasInitialFetch) {
+      void fetchData();
+    }
+  }, [enabled, hasInitialFetch, fetchData]);
+
+  const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
+    await fetchData();
+  }, [enabled, fetchData]);
+
+  return {
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
+    revalidate,
+  };
+}

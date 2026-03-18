@@ -1,5 +1,19 @@
 # System Monitor Changelog
 
+## [Fix Stale Menubar Readings] - 2026-03-16
+
+- Enable background refresh for the menubar command so pinned stats stay up to date
+
+## [Fix Temperature Polling] - 2026-03-16
+
+- Moved temperature sensor polling to a dedicated 3s interval to prevent stale readings
+
+## [Added Menubar Pin-to-Display] - 2026-03-04
+
+- Click any stat in the menubar dropdown to pin it as persistent text next to the icon
+- Supports CPU, temperature, memory, battery, network, and storage
+- Click again to unpin
+
 ## [Added Temperature Monitoring] - 2026-02-19
 
 - Added temperature view under CPU section

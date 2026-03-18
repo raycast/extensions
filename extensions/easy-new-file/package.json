@@ -5,6 +5,9 @@
   "description": "Quickly create file in the open Finder window.",
   "icon": "easy-new-file-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -372,5 +375,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -33,7 +33,8 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
-  const updatableCount = filteredSkills.filter((s) => s.hasUpdate).length;
+  // Global count — "Update All" applies to all agents regardless of filter
+  const updatableCount = skills.filter((s) => s.hasUpdate).length;
 
   return (
     <List
@@ -63,13 +64,16 @@ export default function Command() {
       ) : (
         <>
           {updatableCount > 0 && (
-            <List.Section title="Updates Available">
+            <List.Section
+              title="Updates Available"
+              subtitle={`${updatableCount} skill${updatableCount > 1 ? "s" : ""}`}
+            >
               <List.Item
-                title={`${updatableCount} skill${updatableCount > 1 ? "s" : ""} can be updated`}
+                title="Update All"
                 icon={{ source: Icon.ArrowClockwise, tintColor: Color.Orange }}
                 detail={
                   <List.Item.Detail
-                    markdown={`# Updates Available\n\n**${updatableCount}** skill${updatableCount > 1 ? "s have" : " has"} updates available.\n\nPress **Enter** to update all skills.`}
+                    markdown={`# Update All Skills\n\nPress **Enter** to update all **${updatableCount}** outdated skill${updatableCount > 1 ? "s" : ""} at once.`}
                   />
                 }
                 actions={
