@@ -154,11 +154,12 @@ function getErrorMetadata(error: unknown): { title: string; description: string;
 
 async function performMutation(
   task: () => Promise<void>,
+  loadingTitle: string,
   successTitle: string,
   failureTitle: string,
   refresh: () => Promise<unknown>,
 ) {
-  const toast = await showToast({ style: Toast.Style.Animated, title: successTitle.replace("ed", "ing") });
+  const toast = await showToast({ style: Toast.Style.Animated, title: loadingTitle });
 
   try {
     await task();
@@ -221,7 +222,13 @@ export default function Command() {
   };
 
   const handleConnect = async () => {
-    await performMutation(() => client.connect(), "Connected to Tailscale", "Could Not Connect", mutationRefresh);
+    await performMutation(
+      () => client.connect(),
+      "Connecting to Tailscale",
+      "Connected to Tailscale",
+      "Could Not Connect",
+      mutationRefresh,
+    );
   };
 
   const handleDisconnect = async () => {
@@ -240,6 +247,7 @@ export default function Command() {
 
     await performMutation(
       () => client.disconnect(),
+      "Disconnecting Tailscale",
       "Disconnected from Tailscale",
       "Could Not Disconnect",
       mutationRefresh,
@@ -261,6 +269,7 @@ export default function Command() {
 
     await performMutation(
       () => client.setExitNode(exitNode.id),
+      `Setting exit node to ${exitNode.title}`,
       `Using ${exitNode.title}`,
       "Could Not Set Exit Node",
       mutationRefresh,
@@ -282,6 +291,7 @@ export default function Command() {
 
     await performMutation(
       () => client.clearExitNode(),
+      "Clearing exit node",
       "Cleared exit node",
       "Could Not Clear Exit Node",
       mutationRefresh,
@@ -335,6 +345,7 @@ export default function Command() {
 
     await performMutation(
       () => toggleActions[key](enabled),
+      `${enabled ? "Enabling" : "Disabling"} ${setting?.title ?? "setting"}`,
       `${verb} ${setting?.title ?? "setting"}`,
       `Could Not Update ${setting?.title ?? "setting"}`,
       mutationRefresh,
@@ -356,6 +367,7 @@ export default function Command() {
 
     await performMutation(
       () => (kind === "serve" ? client.resetServe() : client.resetFunnel()),
+      `Resetting ${kind === "serve" ? "Serve" : "Funnel"}`,
       `Reset ${kind === "serve" ? "Serve" : "Funnel"}`,
       `Could Not Reset ${kind === "serve" ? "Serve" : "Funnel"}`,
       mutationRefresh,
