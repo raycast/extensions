@@ -1,5 +1,10 @@
 # Laravel Documentation Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add support for Laravel v13
+- Update master and 12.x docs
+
 ## [Update] - 2026-02-05
 
 - Added support for Windows
