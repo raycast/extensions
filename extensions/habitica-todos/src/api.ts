@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -47,11 +46,6 @@ interface HabiticaResponse<T> {
   data: T;
 }
 
-interface Preferences {
-  apiUserId: string;
-  apiToken: string;
-}
-
 // ---------------------------------------------------------------------------
 // HTTP helper
 // ---------------------------------------------------------------------------
@@ -59,7 +53,7 @@ interface Preferences {
 const BASE_URL = "https://habitica.com";
 
 function getHeaders(): Record<string, string> {
-  const { apiUserId, apiToken } = getPreferenceValues<Preferences>();
+  const { apiUserId, apiToken } = getPreferenceValues<Preferences.ViewTasks>();
   return {
     "Content-Type": "application/json",
     "x-api-user": apiUserId,
@@ -78,7 +72,7 @@ async function habiticaFetch<T>(
       ...getHeaders(),
       ...(options.headers as Record<string, string>),
     },
-  } as Parameters<typeof fetch>[1]);
+  });
 
   const json = (await res.json()) as HabiticaResponse<T>;
 

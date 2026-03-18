@@ -42,7 +42,7 @@ function formatTaskDate(date: string | null): string | undefined {
   const taskDate = new Date(date);
   const now = new Date();
   const isCurrentYear = taskDate.getFullYear() === now.getFullYear();
-  return taskDate.toLocaleDateString(undefined, {
+  return taskDate.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     ...(isCurrentYear ? {} : { year: "numeric" }),

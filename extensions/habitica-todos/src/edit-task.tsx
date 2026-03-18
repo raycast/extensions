@@ -46,6 +46,9 @@ export default function EditTaskForm({ task, onUpdated }: EditTaskFormProps) {
 
     if (values.date) {
       body.date = values.date.toISOString().split("T")[0];
+    } else if (task.date) {
+      // Explicitly clear the date if the user removed it
+      body.date = "";
     }
 
     try {

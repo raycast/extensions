@@ -13,3 +13,5 @@ compiled_raycast_rust
 # misc
 .DS_Store
 bun.lock
+
+.agent/
