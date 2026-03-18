@@ -84,7 +84,7 @@
           "type": "checkbox",
           "required": false,
           "title": "Status Display",
-          "label": "Show hostname",
+          "label": "Show Hostname",
           "description": "Show the device hostname in the status bar",
           "default": true
         },
@@ -92,7 +92,7 @@
           "name": "showIP",
           "type": "checkbox",
           "required": false,
-          "label": "Show IP address",
+          "label": "Show IP Address",
           "description": "Show the Tailscale IP address in the status bar",
           "default": true
         },
@@ -100,9 +100,7 @@
           "name": "showTailnetName",
           "type": "checkbox",
           "required": false,
-          "label": "Show tailnet name",
-          "description": "Show the tailnet name in the status bar",
-          "default": true
+          "label": "Show Tailnet Name",
         }
       ]
     },
