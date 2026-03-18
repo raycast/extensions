@@ -101,6 +101,8 @@
           "type": "checkbox",
           "required": false,
           "label": "Show Tailnet Name",
+          "description": "Show the tailnet name in the status bar",
+          "default": true
         }
       ]
     },
