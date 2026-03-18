@@ -1,0 +1,52 @@
+{
+  "name": "web-metrics",
+  "title": "Web Metrics",
+  "description": "Fetch and display website performance metrics using Google PageSpeed Insights API",
+  "icon": "icon.png",
+  "author": "qubitabhay",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Check Web Metrics",
+      "description": "Analyze website performance using Google PageSpeed Insights",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Google API Key",
+      "description": "Your Google PageSpeed Insights API key. Stored securely in Raycast's encrypted preferences. Get one free at https://developers.google.com/speed/docs/insights/v5/get-started",
+      "placeholder": "Enter your Google API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.4",
+    "@eslint/js": "^10.0.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
