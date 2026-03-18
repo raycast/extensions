@@ -1,0 +1,2 @@
+* 100.100.100.2 iPhone London Online
+  100.100.100.4 Router Paris Offline

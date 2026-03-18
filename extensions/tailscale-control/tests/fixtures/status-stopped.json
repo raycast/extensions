@@ -1,0 +1,20 @@
+{
+  "Version": "1.95.0",
+  "ClientVersion": null,
+  "BackendState": "Stopped",
+  "AuthURL": "https://login.tailscale.example/auth",
+  "MagicDNSSuffix": "tail.example.ts.net",
+  "CurrentTailnet": {
+    "Name": "example@example.com"
+  },
+  "Health": [],
+  "Self": {
+    "ID": "self-node",
+    "HostName": "Callum MacBook Pro",
+    "DNSName": "callum-macbook-pro.tail.example.ts.net.",
+    "TailscaleIPs": [],
+    "Relay": "lhr",
+    "Online": false
+  },
+  "Peer": {}
+}

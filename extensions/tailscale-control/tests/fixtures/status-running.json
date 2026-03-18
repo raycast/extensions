@@ -1,0 +1,54 @@
+{
+  "Version": "1.95.0",
+  "ClientVersion": "1.94.2",
+  "BackendState": "Running",
+  "AuthURL": "",
+  "MagicDNSSuffix": "tail.example.ts.net",
+  "CurrentTailnet": {
+    "Name": "example@example.com"
+  },
+  "Health": [
+    "This is an unstable version of Tailscale meant for testing and development purposes."
+  ],
+  "Self": {
+    "ID": "self-node",
+    "HostName": "Callum MacBook Pro",
+    "DNSName": "callum-macbook-pro.tail.example.ts.net.",
+    "TailscaleIPs": ["100.100.100.1", "fd7a:115c:a1e0::1"],
+    "Relay": "lhr",
+    "Online": true,
+    "KeyExpiry": "2026-09-01T10:00:00Z"
+  },
+  "Peer": {
+    "peer-online": {
+      "ID": "peer-online",
+      "HostName": "iPhone",
+      "DNSName": "iphone.tail.example.ts.net.",
+      "OS": "iOS",
+      "TailscaleIPs": ["100.100.100.2"],
+      "Relay": "lhr",
+      "Online": true,
+      "ExitNode": true,
+      "ExitNodeOption": true,
+      "Active": true,
+      "LastSeen": "2026-03-17T12:00:00Z",
+      "TaildropTarget": 5,
+      "NoFileSharingReason": ""
+    },
+    "peer-offline": {
+      "ID": "peer-offline",
+      "HostName": "Windows PC",
+      "DNSName": "windows-pc.tail.example.ts.net.",
+      "OS": "windows",
+      "TailscaleIPs": ["100.100.100.3"],
+      "Relay": "nyc",
+      "Online": false,
+      "ExitNode": false,
+      "ExitNodeOption": false,
+      "Active": false,
+      "LastSeen": "2026-03-16T12:00:00Z",
+      "TaildropTarget": 0,
+      "NoFileSharingReason": "File sharing disabled"
+    }
+  }
+}

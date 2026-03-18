@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tailscale-control",
+  "title": "Tailscale Control",
+  "description": "Control and inspect your local Tailscale node from Raycast.",
+  "icon": "tailscale-extension-icon.png",
+  "author": "acxtrila",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "System"
+  ],
+  "keywords": [
+    "tailscale",
+    "network",
+    "vpn",
+    "tailnet",
+    "peer",
+    "exit node"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "tailscalePath",
+      "title": "Tailscale Path",
+      "description": "Optional absolute path to the tailscale CLI binary. Leave blank to use PATH lookup.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "refreshIntervalSeconds",
+      "title": "Refresh Interval",
+      "description": "How often the dashboard refreshes automatically.",
+      "type": "dropdown",
+      "required": true,
+      "default": "30",
+      "data": [
+        {
+          "title": "15 seconds",
+          "value": "15"
+        },
+        {
+          "title": "30 seconds",
+          "value": "30"
+        },
+        {
+          "title": "60 seconds",
+          "value": "60"
+        },
+        {
+          "title": "120 seconds",
+          "value": "120"
+        }
+      ]
+    },
+    {
+      "name": "showOfflinePeers",
+      "title": "Peers",
+      "label": "Show offline peers",
+      "description": "Include offline devices in the peer list.",
+      "type": "checkbox",
+      "required": true,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "tailscale",
+      "title": "Tailscale Control",
+      "description": "Inspect peers, health, and local Tailscale controls.",
+      "icon": "tailscale-command-icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
