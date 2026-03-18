@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Better Status Command] - PR_MERGE_DATE
+
+- Optionally show hostname, tailnet name, and IP in the status command
+
 ## [Show User Login Name] - 2026-02-09
 
 - Shows the user's login name as an accessory in the All Devices command
