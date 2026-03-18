@@ -35,7 +35,7 @@ jobs:
 
           echo "Checking reviews for PR #$pr_number in $repo"
 
-          reviews_json=$(gh api "repos/$repo/pulls/$pr_number/reviews?per_page=100")
+          reviews_json=$(gh api --paginate "repos/$repo/pulls/$pr_number/reviews" | jq -s 'add')
 
           approved_users=$(echo "$reviews_json" | jq -r '
             sort_by(.submitted_at)
@@ -54,7 +54,11 @@ jobs:
           while IFS= read -r user; do
             [[ -z "$user" ]] && continue
 
-            permission=$(gh api "repos/$repo/collaborators/$user/permission" --jq '.permission')
+            if ! permission=$(gh api "repos/$repo/collaborators/$user/permission" --jq '.permission' 2>/dev/null); then
+              echo "$user is not a collaborator, skipping"
+              continue
+            fi
+
             echo "$user has permission: $permission"
 
             if [[ "$permission" == "admin" || "$permission" == "write" ]]; then
@@ -102,7 +106,6 @@ jobs:
               if grep -q "$pattern" "$changelog"; then
                 echo "  pattern found"
                 sed -i "" "s/$pattern/$replacement/g" "$changelog"
-                # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
                 echo "  updated to $replacement"
                 updated_count=$((updated_count+1))
               else
