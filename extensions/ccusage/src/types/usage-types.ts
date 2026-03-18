@@ -89,8 +89,8 @@ export const BlocksUsageResponseSchema = z.object({
       tokenCounts: z.object({
         inputTokens: z.number(),
         outputTokens: z.number(),
-        cacheCreationTokens: z.number(),
-        cacheReadTokens: z.number(),
+        cacheCreationTokens: z.number().optional().default(0),
+        cacheReadTokens: z.number().optional().default(0),
       }),
       totalTokens: z.number(),
       costUSD: z.number(),
