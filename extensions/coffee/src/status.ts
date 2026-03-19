@@ -1,5 +1,5 @@
 import { LocalStorage, updateCommandMetadata } from "@raycast/api";
-import { spawn } from "node:child_process";
+import { execFile } from "node:child_process";
 import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
 
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
@@ -65,11 +65,9 @@ export default async function Command() {
     // override caffeinate's -d/-i assertions. Asserting user activity
     // every 15 seconds (this command's interval) keeps the display awake
     // without requiring elevated privileges or additional processes.
-    const child = spawn("/usr/bin/caffeinate", ["-u", "-t", "1"], {
-      stdio: "ignore",
-    });
-    child.on("exit", () => {});
-    child.unref();
+    // Uses execFile (not spawn+unref) to guarantee the child is reaped
+    // and doesn't become a zombie in the persistent extension daemon.
+    execFile("/usr/bin/caffeinate", ["-u", "-t", "1"], () => {});
   }
 
   updateCommandMetadata({ subtitle });
