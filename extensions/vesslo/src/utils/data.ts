@@ -69,6 +69,9 @@ export function loadVessloData(): VessloData | null {
         sources: Array.isArray(app.sources) ? app.sources : [],
         appStoreId: app.appStoreId ?? null,
         homebrewCask: app.homebrewCask ?? null,
+        isDeleted: app.isDeleted === true,
+        isSkipped: app.isSkipped === true,
+        isIgnored: app.isIgnored === true,
       }));
 
     return {

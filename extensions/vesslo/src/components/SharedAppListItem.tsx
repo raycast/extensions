@@ -142,7 +142,7 @@ export function SharedAppListItem({
                 <Action
                   title="Update Via Terminal (Mas)"
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                   onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
                 />
               )}

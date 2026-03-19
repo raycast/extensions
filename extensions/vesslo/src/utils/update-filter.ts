@@ -11,6 +11,12 @@ export function hasValidTargetVersion(
   return normalized !== "" && normalized !== "undefined";
 }
 
-export function isUpdatableApp(app: Pick<VessloApp, "targetVersion">): boolean {
+export function isUpdatableApp(
+  app: Pick<
+    VessloApp,
+    "targetVersion" | "isDeleted" | "isSkipped" | "isIgnored"
+  >,
+): boolean {
+  if (app.isDeleted || app.isSkipped || app.isIgnored) return false;
   return hasValidTargetVersion(app.targetVersion);
 }

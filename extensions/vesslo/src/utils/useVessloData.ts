@@ -50,5 +50,5 @@ export function useVessloData() {
     return () => clearInterval(interval);
   }, []); // Empty dependency array - run only once
 
-  return { data, isLoading, setData };
+  return { data, isLoading };
 }

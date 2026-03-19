@@ -203,7 +203,7 @@ function UpdateListItem({ app }: { app: VessloApp }) {
               <Action.OpenInBrowser
                 title="Open in App Store"
                 icon={Icon.AppWindowList}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 url={`macappstore://apps.apple.com/app/id${app.appStoreId}`}
               />
             )}
@@ -211,7 +211,7 @@ function UpdateListItem({ app }: { app: VessloApp }) {
               <Action
                 title="Update Via Terminal (Mas)"
                 icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                 onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
               />
             )}

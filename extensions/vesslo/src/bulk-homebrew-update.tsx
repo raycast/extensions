@@ -12,7 +12,7 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { loadVessloData } from "./utils/data";
+
 import { exec } from "child_process";
 import { promisify } from "util";
 import { getBrewPath } from "./utils/brew";
@@ -23,7 +23,7 @@ import { hasValidTargetVersion } from "./utils/update-filter";
 const execAsync = promisify(exec);
 
 export default function BulkHomebrewUpdate() {
-  const { data, isLoading, setData } = useVessloData();
+  const { data, isLoading } = useVessloData();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const homebrewAppsWithUpdates = useMemo(() => {
@@ -72,7 +72,9 @@ export default function BulkHomebrewUpdate() {
       });
 
       const brewPath = getBrewPath();
-      const { stdout } = await execAsync(`${brewPath} upgrade --cask`);
+      const { stdout } = await execAsync(`${brewPath} upgrade --cask`, {
+        maxBuffer: 1024 * 1024 * 50,
+      });
 
       await showToast({
         style: Toast.Style.Success,
@@ -89,8 +91,6 @@ export default function BulkHomebrewUpdate() {
       });
     } finally {
       setIsUpdating(false);
-      const refreshed = loadVessloData();
-      if (refreshed) setData(refreshed);
     }
   }
 
