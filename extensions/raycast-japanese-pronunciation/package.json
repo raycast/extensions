@@ -1,0 +1,60 @@
+{
+  "name": "raycast-japanese-pronunciation",
+  "title": "Japanese Pronunciation",
+  "description": "Convert Japanese words, kanji, or short sentences into hiragana and katakana pronunciation from Raycast.",
+  "icon": "icon.png",
+  "author": "tatuan19",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tatuan19/raycast-japanese-pronunciation.git"
+  },
+  "homepage": "https://github.com/tatuan19/raycast-japanese-pronunciation",
+  "bugs": {
+    "url": "https://github.com/tatuan19/raycast-japanese-pronunciation/issues"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "japanese",
+    "pronunciation",
+    "kana",
+    "hiragana",
+    "katakana",
+    "language-learning"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-kana",
+      "title": "Convert to Kana",
+      "subtitle": "Japanese text to hiragana and katakana",
+      "description": "Convert Japanese words, kanji, or short sentences into hiragana and katakana",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "kuromoji": "^0.1.2",
+    "kuroshiro": "^1.2.0",
+    "kuroshiro-analyzer-kuromoji": "^1.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "^22.13.10",
+    "@types/react": "^18.3.18",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
