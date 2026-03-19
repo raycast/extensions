@@ -2,6 +2,7 @@ import { readFileSync, writeFileSync, existsSync, globSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { SSHHost } from "./types";
+import { HostGroup, HostGroupOverrides, classifyHostGroups } from "./groups";
 
 const SSH_CONFIG_PATH = join(homedir(), ".ssh", "config");
 
@@ -121,28 +122,9 @@ export function parseSSHConfig(configPath = SSH_CONFIG_PATH): RawHostEntry[] {
   return entries;
 }
 
-function normalizeIdentityPath(p: string): string {
-  return p.replace(/^~\//, "").replace(/^\.ssh\//, "");
-}
-
-function matchPatterns(name: string, patterns: string): boolean {
-  return patterns
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .some((pattern) => {
-      const re = new RegExp(
-        "^" + pattern.replace(/\*/g, ".*").replace(/\?/g, ".") + "$",
-      );
-      return re.test(name);
-    });
-}
-
 export interface ClassifyOptions {
-  workPatterns?: string;
-  personalPatterns?: string;
-  workIdentityFiles?: string[];
-  personalIdentityFiles?: string[];
+  groups: HostGroup[];
+  overrides: HostGroupOverrides;
   excludedHosts: Set<string>;
 }
 
@@ -150,46 +132,19 @@ export function classifyHosts(
   entries: RawHostEntry[],
   opts: ClassifyOptions,
 ): SSHHost[] {
-  const {
-    workPatterns,
-    personalPatterns,
-    workIdentityFiles = [],
-    personalIdentityFiles = [],
-    excludedHosts,
-  } = opts;
+  const { groups, overrides, excludedHosts } = opts;
 
   return entries
     .filter((e) => !excludedHosts.has(e.name) && e.name.length > 0)
     .filter((e) => !excludedHosts.has(e.hostname.toLowerCase()))
-    .map((e) => {
-      let category: "work" | "personal" = "work";
-
-      if (workPatterns && matchPatterns(e.name, workPatterns)) {
-        category = "work";
-      } else if (personalPatterns && matchPatterns(e.name, personalPatterns)) {
-        category = "personal";
-      } else if (e.identityFile) {
-        const norm = normalizeIdentityPath(e.identityFile);
-        if (
-          personalIdentityFiles.some((p) => normalizeIdentityPath(p) === norm)
-        ) {
-          category = "personal";
-        } else if (
-          workIdentityFiles.some((p) => normalizeIdentityPath(p) === norm)
-        ) {
-          category = "work";
-        }
-      }
-
-      return {
-        name: e.name,
-        hostname: e.hostname,
-        user: e.user,
-        port: e.port,
-        identityFile: e.identityFile,
-        category,
-      };
-    });
+    .map((e) => ({
+      name: e.name,
+      hostname: e.hostname,
+      user: e.user,
+      port: e.port,
+      identityFile: e.identityFile,
+      groups: classifyHostGroups(e.name, e.identityFile, groups, overrides),
+    }));
 }
 
 export function getHosts(opts: ClassifyOptions): SSHHost[] {
@@ -213,27 +168,19 @@ export function appendHostToConfig(
   port: number,
   identityFile?: string,
 ): void {
-  const safeAlias = sanitizeAlias(alias);
-  const safeHostname = sanitizeHostName(hostname);
-  const safeUser = sanitizeUser(user);
-  const safePort = sanitizePort(port);
-  const safeIdentityFile = identityFile
-    ? sanitizeIdentityFile(identityFile)
-    : undefined;
-
   const lines = [
     "",
-    `Host ${safeAlias}`,
-    `  HostName ${safeHostname}`,
-    `  User ${safeUser}`,
-    `  Port ${safePort}`,
+    `Host ${alias}`,
+    `  HostName ${hostname}`,
+    `  User ${user}`,
+    `  Port ${port}`,
     `  ForwardAgent yes`,
     `  ServerAliveInterval 60`,
     `  TCPKeepAlive no`,
   ];
-  if (safeIdentityFile) {
+  if (identityFile) {
     lines.push(`  IdentitiesOnly yes`);
-    lines.push(`  IdentityFile ${safeIdentityFile}`);
+    lines.push(`  IdentityFile ${identityFile}`);
   }
   lines.push("");
   const block = lines.join("\n");
@@ -249,69 +196,12 @@ export function appendHostToConfig(
   );
 }
 
-function rejectUnsafeInput(value: string, label: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) {
-    throw new Error(`${label} cannot be empty`);
-  }
-  if (/\r|\n/.test(trimmed)) {
-    throw new Error(`${label} cannot contain newlines`);
-  }
-  if (/\s/.test(trimmed)) {
-    throw new Error(`${label} cannot contain whitespace`);
-  }
-  if (/[#;`$\\]/.test(trimmed)) {
-    throw new Error(`${label} contains unsupported characters`);
-  }
-  return trimmed;
-}
-
-function sanitizeAlias(alias: string): string {
-  const safe = rejectUnsafeInput(alias, "Alias");
-  if (!/^[A-Za-z0-9._-]+$/.test(safe)) {
-    throw new Error(
-      "Alias can only include letters, numbers, '.', '-', and '_'",
-    );
-  }
-  return safe;
-}
-
-function sanitizeHostName(hostname: string): string {
-  const safe = rejectUnsafeInput(hostname, "HostName");
-  if (!/^[A-Za-z0-9._:-]+$/.test(safe)) {
-    throw new Error("HostName contains invalid characters");
-  }
-  return safe;
-}
-
-function sanitizeUser(user: string): string {
-  const safe = rejectUnsafeInput(user, "User");
-  if (!/^[A-Za-z0-9._-]+$/.test(safe)) {
-    throw new Error("User contains invalid characters");
-  }
-  return safe;
-}
-
-function sanitizePort(port: number): number {
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error("Port must be an integer between 1 and 65535");
-  }
-  return port;
-}
-
-function sanitizeIdentityFile(identityFile: string): string {
-  const safe = rejectUnsafeInput(identityFile, "IdentityFile");
-  if (!/^[A-Za-z0-9._\-/~+]+$/.test(safe)) {
-    throw new Error("IdentityFile contains invalid characters");
-  }
-  return safe;
-}
-
 export interface ParsedSSHCommand {
   user: string;
   hostname: string;
   port: number;
   alias: string;
+  identityFile?: string;
 }
 
 export function parseSSHConnectionString(cmd: string): ParsedSSHCommand | null {
@@ -320,6 +210,7 @@ export function parseSSHConnectionString(cmd: string): ParsedSSHCommand | null {
   let user = "";
   let hostname = "";
   let port = 22;
+  let identityFile: string | undefined;
 
   const parts = trimmed.split(/\s+/);
   for (let i = 0; i < parts.length; i++) {
@@ -327,7 +218,7 @@ export function parseSSHConnectionString(cmd: string): ParsedSSHCommand | null {
     if (part === "-p" && i + 1 < parts.length) {
       port = parseInt(parts[++i], 10) || 22;
     } else if (part === "-i" && i + 1 < parts.length) {
-      i++; // skip identity path, we use mlspace key
+      identityFile = parts[++i];
     } else if (part.includes("@") && !user) {
       const [u, h] = part.split("@");
       user = u;
@@ -340,5 +231,5 @@ export function parseSSHConnectionString(cmd: string): ParsedSSHCommand | null {
   const dotIdx = user.indexOf(".");
   const alias = dotIdx > 0 ? user.substring(0, dotIdx) : user;
 
-  return { user, hostname, port, alias };
+  return { user, hostname, port, alias, identityFile };
 }

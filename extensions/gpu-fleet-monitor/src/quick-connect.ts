@@ -1,39 +1,25 @@
-import {
-  closeMainWindow,
-  getPreferenceValues,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { getHosts } from "./lib/ssh-config";
+import { closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
 import { probeHosts } from "./lib/monitor";
 import { connectTerminal, TERMINAL_LABELS } from "./lib/actions";
-import { TerminalApp, getExcludedHosts, parseIdentityList } from "./lib/types";
+import { SSHHost, TerminalApp } from "./lib/types";
 
-export default async function QuickConnectBestGPU() {
-  const prefs = getPreferenceValues<Preferences>();
-  const timeout = parseInt(prefs.sshTimeout || "6", 10) || 6;
-
-  const hosts = getHosts({
-    workPatterns: prefs.workPatterns,
-    personalPatterns: prefs.personalPatterns,
-    workIdentityFiles: parseIdentityList(prefs.workIdentityFiles),
-    personalIdentityFiles: parseIdentityList(prefs.personalIdentityFiles),
-    excludedHosts: getExcludedHosts(prefs.excludedHosts),
-  }).filter((h) => h.category === "work");
-
+export async function quickConnect(
+  hosts: SSHHost[],
+  terminal: TerminalApp,
+  timeout: number,
+): Promise<void> {
   if (hosts.length === 0) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "No work hosts found",
-      message: "Check your SSH config or preferences",
+      title: "No hosts to scan",
+      message: "No hosts in current view",
     });
     return;
   }
 
   await showToast({
     style: Toast.Style.Animated,
-    title: "Scanning work hosts...",
+    title: "Scanning hosts...",
     message: `Probing ${hosts.length} hosts`,
   });
 
@@ -44,7 +30,7 @@ export default async function QuickConnectBestGPU() {
     await showToast({
       style: Toast.Style.Failure,
       title: "No free GPU hosts",
-      message: "All work hosts are busy or offline",
+      message: "All hosts are busy or offline",
     });
     return;
   }
@@ -60,7 +46,6 @@ export default async function QuickConnectBestGPU() {
       ? `${best.gpus.length}x ${best.gpus[0].name}, ${Math.round(best.gpuMemoryTotal / 1024)}GB`
       : "GPU";
 
-  const terminal: TerminalApp = prefs.terminalApp || "ghostty";
   await closeMainWindow();
   connectTerminal(terminal, best.host);
   await showHUD(

@@ -5,7 +5,7 @@ import {
   getPreferenceValues,
   showToast,
   Toast,
-  popToRoot,
+  useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
 import {
@@ -13,7 +13,15 @@ import {
   hostExistsByUser,
   appendHostToConfig,
 } from "./lib/ssh-config";
-export default function AddHost() {
+import { HostGroup, setHostGroups } from "./lib/groups";
+
+interface AddHostFormProps {
+  groups: HostGroup[];
+  onHostAdded: () => void;
+}
+
+export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
+  const { pop } = useNavigation();
   const prefs = getPreferenceValues<Preferences>();
   const defaultIdentity = prefs.defaultIdentityFile || "";
 
@@ -23,8 +31,10 @@ export default function AddHost() {
     user: string;
     hostname: string;
     port: number;
+    identityFile?: string;
   } | null>(null);
   const [error, setError] = useState<string | undefined>();
+  const [selectedGroups, setSelectedGroups] = useState<string[]>([]);
 
   function handleCommandChange(value: string) {
     setSSHCommand(value);
@@ -36,6 +46,7 @@ export default function AddHost() {
         user: result.user,
         hostname: result.hostname,
         port: result.port,
+        identityFile: result.identityFile,
       });
       if (!alias || alias === "") {
         setAlias(result.alias);
@@ -78,20 +89,28 @@ export default function AddHost() {
       return;
     }
 
+    const identityFile = parsed.identityFile || defaultIdentity || undefined;
+
     try {
       appendHostToConfig(
         finalAlias,
         parsed.hostname,
         parsed.user,
         parsed.port,
-        defaultIdentity || undefined,
+        identityFile,
       );
+
+      if (selectedGroups.length > 0) {
+        await setHostGroups(finalAlias, selectedGroups);
+      }
+
       await showToast({
         style: Toast.Style.Success,
         title: "Host added",
         message: `Added "${finalAlias}" to ~/.ssh/config`,
       });
-      await popToRoot();
+      onHostAdded();
+      pop();
     } catch (e: unknown) {
       await showToast({
         style: Toast.Style.Failure,
@@ -101,9 +120,11 @@ export default function AddHost() {
     }
   }
 
-  const identityHint = defaultIdentity
-    ? `Identity file: ${defaultIdentity} (set in extension preferences)`
-    : "No default identity file configured. Set one in extension preferences if needed.";
+  const identitySource = parsed?.identityFile
+    ? `Identity file: ${parsed.identityFile} (from SSH command)`
+    : defaultIdentity
+      ? `Identity file: ${defaultIdentity} (from preferences)`
+      : "No identity file specified.";
 
   return (
     <Form
@@ -117,11 +138,11 @@ export default function AddHost() {
       <Form.TextArea
         id="sshCommand"
         title="SSH Command"
-        placeholder="ssh user@hostname -p 22"
+        placeholder="ssh user@hostname -p 22 -i ~/.ssh/key"
         value={sshCommand}
         onChange={handleCommandChange}
         error={error}
-        info="Paste the SSH connection string. The host will be added to ~/.ssh/config."
+        info="Paste the SSH connection string. Supports -p (port) and -i (identity file)."
       />
       <Form.TextField
         id="alias"
@@ -131,10 +152,23 @@ export default function AddHost() {
         onChange={setAlias}
         info="Short name used in SSH config and shown in the fleet list."
       />
+      {groups.length > 0 && (
+        <Form.TagPicker
+          id="groups"
+          title="Groups"
+          value={selectedGroups}
+          onChange={setSelectedGroups}
+          info="Assign this host to one or more groups."
+        >
+          {groups.map((g) => (
+            <Form.TagPicker.Item key={g.id} value={g.id} title={g.name} />
+          ))}
+        </Form.TagPicker>
+      )}
       {parsed && (
         <Form.Description
           title="Parsed"
-          text={`User: ${parsed.user}\nHost: ${parsed.hostname}\nPort: ${parsed.port}\n${identityHint}`}
+          text={`User: ${parsed.user}\nHost: ${parsed.hostname}\nPort: ${parsed.port}\n${identitySource}`}
         />
       )}
     </Form>

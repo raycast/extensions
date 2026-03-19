@@ -27,8 +27,19 @@ import {
   TerminalApp,
   EditorApp,
   getExcludedHosts,
-  parseIdentityList,
 } from "./lib/types";
+import {
+  HostGroup,
+  HostGroupOverrides,
+  getGroups,
+  getHostOverrides,
+  getLastFilter,
+  setLastFilter,
+  setHostGroups,
+} from "./lib/groups";
+import { AddHostForm } from "./add-host";
+import { ManageGroupsView } from "./manage-groups";
+import { quickConnect } from "./quick-connect";
 
 export default function GpuFleet() {
   const prefs = getPreferenceValues<Preferences>();
@@ -37,36 +48,49 @@ export default function GpuFleet() {
   const terminal: TerminalApp = prefs.terminalApp || "ghostty";
   const editor: EditorApp = prefs.editorApp || "cursor";
 
-  const [viewFilter, setViewFilter] = useState<string>(
-    prefs.defaultView || "work",
-  );
-  const [allHosts, setAllHosts] = useState<SSHHost[]>([]);
+  const [groups, setGroups] = useState<HostGroup[]>([]);
+  const [overrides, setOverrides] = useState<HostGroupOverrides>({});
+  const [viewFilter, setViewFilter] = useState<string>("all");
+  const [dataLoaded, setDataLoaded] = useState(false);
   const [statuses, setStatuses] = useState<Map<string, HostStatus>>(new Map());
   const [pendingCount, setPendingCount] = useState(0);
   const cancelRef = useRef<(() => void) | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const reloadGroupData = useCallback(async () => {
+    const [g, o] = await Promise.all([getGroups(), getHostOverrides()]);
+    setGroups(g);
+    setOverrides(o);
+  }, []);
+
   useEffect(() => {
-    setAllHosts(
-      getHosts({
-        workPatterns: prefs.workPatterns,
-        personalPatterns: prefs.personalPatterns,
-        workIdentityFiles: parseIdentityList(prefs.workIdentityFiles),
-        personalIdentityFiles: parseIdentityList(prefs.personalIdentityFiles),
-        excludedHosts: getExcludedHosts(prefs.excludedHosts),
-      }),
+    Promise.all([getGroups(), getHostOverrides(), getLastFilter()]).then(
+      ([g, o, f]) => {
+        setGroups(g);
+        setOverrides(o);
+        setViewFilter(f);
+        setDataLoaded(true);
+      },
     );
-  }, [
-    prefs.workPatterns,
-    prefs.personalPatterns,
-    prefs.workIdentityFiles,
-    prefs.personalIdentityFiles,
-    prefs.excludedHosts,
-  ]);
+  }, []);
+
+  const allHosts = useMemo(() => {
+    if (!dataLoaded) return [];
+    try {
+      return getHosts({
+        groups,
+        overrides,
+        excludedHosts: getExcludedHosts(prefs.excludedHosts),
+      });
+    } catch (err) {
+      console.error("getHosts failed:", err);
+      return [];
+    }
+  }, [groups, overrides, dataLoaded, prefs.excludedHosts]);
 
   const filteredHosts = useMemo(() => {
     if (viewFilter === "all") return allHosts;
-    return allHosts.filter((h) => h.category === viewFilter);
+    return allHosts.filter((h) => h.groups.includes(viewFilter));
   }, [allHosts, viewFilter]);
 
   const startProbing = useCallback(() => {
@@ -94,12 +118,18 @@ export default function GpuFleet() {
   }, [filteredHosts, timeout, refreshSec]);
 
   useEffect(() => {
+    if (!dataLoaded) return;
     startProbing();
     return () => {
       if (cancelRef.current) cancelRef.current();
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [startProbing]);
+  }, [startProbing, dataLoaded]);
+
+  const handleFilterChange = useCallback((v: string) => {
+    setViewFilter(v);
+    setLastFilter(v);
+  }, []);
 
   const { free, busy, noGpu, offline, scanning } = useMemo(() => {
     const free: HostStatus[] = [];
@@ -132,7 +162,47 @@ export default function GpuFleet() {
     return { free, busy, noGpu, offline, scanning };
   }, [filteredHosts, statuses]);
 
-  const isLoading = pendingCount > 0;
+  const isLoading = !dataLoaded || pendingCount > 0;
+
+  const { push } = useNavigation();
+
+  const globalActions = (
+    <ActionPanel.Section title="Fleet">
+      <Action
+        title="Add Host"
+        icon={Icon.Plus}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        onAction={() =>
+          push(<AddHostForm groups={groups} onHostAdded={reloadGroupData} />)
+        }
+      />
+      <Action
+        title="Quick Connect Best Gpu"
+        icon={Icon.Bolt}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+        onAction={() => quickConnect(filteredHosts, terminal, timeout)}
+      />
+      <Action
+        title="Manage Groups"
+        icon={Icon.Tag}
+        shortcut={{ modifiers: ["cmd"], key: "g" }}
+        onAction={() =>
+          push(
+            <ManageGroupsView
+              groups={groups}
+              onGroupsChanged={reloadGroupData}
+            />,
+          )
+        }
+      />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={startProbing}
+      />
+    </ActionPanel.Section>
+  );
 
   return (
     <List
@@ -142,16 +212,90 @@ export default function GpuFleet() {
         <List.Dropdown
           tooltip="Filter hosts"
           value={viewFilter}
-          onChange={(v) => {
-            setViewFilter(v);
-          }}
+          onChange={handleFilterChange}
         >
-          <List.Dropdown.Item title="Work" value="work" />
-          <List.Dropdown.Item title="Personal" value="personal" />
           <List.Dropdown.Item title="All" value="all" />
+          {groups.map((g) => (
+            <List.Dropdown.Item key={g.id} title={g.name} value={g.id} />
+          ))}
         </List.Dropdown>
       }
     >
+      <List.Section title="Quick Actions">
+        <List.Item
+          key="__add-host"
+          icon={Icon.Plus}
+          title="Add Host"
+          subtitle="Add a new SSH host"
+          detail={
+            <List.Item.Detail markdown="## Add Host\n\nPaste an SSH connection string to add a new host to your fleet." />
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Add Host"
+                icon={Icon.Plus}
+                onAction={() =>
+                  push(
+                    <AddHostForm
+                      groups={groups}
+                      onHostAdded={reloadGroupData}
+                    />,
+                  )
+                }
+              />
+              {globalActions}
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          key="__manage-groups"
+          icon={Icon.Tag}
+          title="Manage Groups"
+          subtitle={`${groups.length} group${groups.length !== 1 ? "s" : ""}`}
+          detail={
+            <List.Item.Detail
+              markdown={`## Manage Groups\n\nCreate, edit, or delete host groups.\n\n${groups.map((g) => `- **${g.name}**${g.patterns.length > 0 ? ` (${g.patterns.join(", ")})` : ""}`).join("\n") || "No groups yet."}`}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Manage Groups"
+                icon={Icon.Tag}
+                onAction={() =>
+                  push(
+                    <ManageGroupsView
+                      groups={groups}
+                      onGroupsChanged={reloadGroupData}
+                    />,
+                  )
+                }
+              />
+              {globalActions}
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          key="__quick-connect"
+          icon={Icon.Bolt}
+          title="Quick Connect Best GPU"
+          subtitle={`Scan ${filteredHosts.length} hosts`}
+          detail={
+            <List.Item.Detail markdown="## Quick Connect\n\nScan all hosts in the current view and connect to the best available free GPU." />
+          }
+          actions={
+            <ActionPanel>
+              <Action
+                title="Quick Connect Best Gpu"
+                icon={Icon.Bolt}
+                onAction={() => quickConnect(filteredHosts, terminal, timeout)}
+              />
+              {globalActions}
+            </ActionPanel>
+          }
+        />
+      </List.Section>
       {scanning.length > 0 && (
         <List.Section title={`Scanning (${scanning.length})`}>
           {scanning.map((host) => (
@@ -177,6 +321,7 @@ export default function GpuFleet() {
                     title="Copy SSH Command"
                     content={sshCommand(host)}
                   />
+                  {globalActions}
                 </ActionPanel>
               }
             />
@@ -192,6 +337,10 @@ export default function GpuFleet() {
               timeout={timeout}
               terminal={terminal}
               editor={editor}
+              groups={groups}
+              overrides={overrides}
+              onGroupsChanged={reloadGroupData}
+              globalActions={globalActions}
             />
           ))}
         </List.Section>
@@ -205,6 +354,10 @@ export default function GpuFleet() {
               timeout={timeout}
               terminal={terminal}
               editor={editor}
+              groups={groups}
+              overrides={overrides}
+              onGroupsChanged={reloadGroupData}
+              globalActions={globalActions}
             />
           ))}
         </List.Section>
@@ -218,6 +371,10 @@ export default function GpuFleet() {
               timeout={timeout}
               terminal={terminal}
               editor={editor}
+              groups={groups}
+              overrides={overrides}
+              onGroupsChanged={reloadGroupData}
+              globalActions={globalActions}
             />
           ))}
         </List.Section>
@@ -231,15 +388,27 @@ export default function GpuFleet() {
               timeout={timeout}
               terminal={terminal}
               editor={editor}
+              groups={groups}
+              overrides={overrides}
+              onGroupsChanged={reloadGroupData}
+              globalActions={globalActions}
             />
           ))}
         </List.Section>
       )}
-      {filteredHosts.length === 0 && (
-        <List.EmptyView
-          title="No hosts found"
-          description="Check your SSH config or adjust host patterns in preferences."
-        />
+      {dataLoaded && filteredHosts.length === 0 && (
+        <List.Section title="Hosts">
+          <List.Item
+            key="__no-hosts"
+            icon={Icon.ExclamationMark}
+            title="No hosts found"
+            subtitle="Check your SSH config or group settings"
+            detail={
+              <List.Item.Detail markdown="## No Hosts Found\n\nNo SSH hosts matched the current filter. Try:\n- Switching to **All** in the dropdown\n- Adding hosts via **Add Host**\n- Adjusting group patterns in **Manage Groups**" />
+            }
+            actions={<ActionPanel>{globalActions}</ActionPanel>}
+          />
+        </List.Section>
       )}
     </List>
   );
@@ -354,14 +523,34 @@ function HostItem({
   timeout,
   terminal,
   editor,
+  groups,
+  overrides,
+  onGroupsChanged,
+  globalActions,
 }: {
   status: HostStatus;
   timeout: number;
   terminal: TerminalApp;
   editor: EditorApp;
+  groups: HostGroup[];
+  overrides: HostGroupOverrides;
+  onGroupsChanged: () => void;
+  globalActions: React.ReactNode;
 }) {
   const { push } = useNavigation();
   const s = status;
+  const hostOverrides = overrides[s.host.name] || [];
+
+  async function toggleGroup(groupId: string) {
+    const current = new Set(hostOverrides);
+    if (current.has(groupId)) {
+      current.delete(groupId);
+    } else {
+      current.add(groupId);
+    }
+    await setHostGroups(s.host.name, Array.from(current));
+    onGroupsChanged();
+  }
 
   return (
     <List.Item
@@ -394,7 +583,7 @@ function HostItem({
             <Action
               title="Tmux Sessions"
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
               onAction={() => {
                 push(
                   <TmuxSessionList
@@ -406,6 +595,26 @@ function HostItem({
               }}
             />
           </ActionPanel.Section>
+          <ActionPanel.Section title="Groups">
+            <ActionPanel.Submenu
+              title="Assign to Group"
+              icon={Icon.Tag}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+            >
+              {groups.map((g) => (
+                <Action
+                  key={g.id}
+                  title={g.name}
+                  icon={
+                    hostOverrides.includes(g.id)
+                      ? Icon.CheckCircle
+                      : Icon.Circle
+                  }
+                  onAction={() => toggleGroup(g.id)}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          </ActionPanel.Section>
           <ActionPanel.Section title="Other">
             <Action.CopyToClipboard
               title="Copy SSH Command"
@@ -413,6 +622,7 @@ function HostItem({
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           </ActionPanel.Section>
+          {globalActions}
         </ActionPanel>
       }
     />
@@ -432,15 +642,15 @@ function TmuxSessionList({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const controller = new AbortController();
-    getTmuxSessions(host, timeout, controller.signal).then((s) => {
-      if (!controller.signal.aborted) {
+    let cancelled = false;
+    getTmuxSessions(host, timeout).then((s) => {
+      if (!cancelled) {
         setSessions(s);
         setIsLoading(false);
       }
     });
     return () => {
-      controller.abort();
+      cancelled = true;
     };
   }, [host, timeout]);
 

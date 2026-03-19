@@ -4,7 +4,7 @@ export interface SSHHost {
   user: string;
   port: number;
   identityFile?: string;
-  category: "work" | "personal";
+  groups: string[];
 }
 
 export interface GpuInfo {
@@ -44,11 +44,4 @@ export function getExcludedHosts(pref?: string): Set<string> {
     .map((s) => s.trim())
     .filter(Boolean);
   return new Set([...DEFAULT_EXCLUDED, ...extra]);
-}
-
-export function parseIdentityList(pref?: string): string[] {
-  return (pref || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
 }

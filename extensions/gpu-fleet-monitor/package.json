@@ -2,7 +2,7 @@
   "name": "gpu-fleet-monitor",
   "title": "GPU Fleet Monitor",
   "description": "Monitor GPU/CPU usage across SSH hosts. Connect via Ghostty, Cursor, or tmux.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "icon": "command-icon.png",
   "author": "kazzart",
   "license": "MIT",
@@ -39,33 +39,9 @@
         "ssh",
         "monitor",
         "fleet",
-        "cuda"
-      ]
-    },
-    {
-      "name": "add-host",
-      "title": "Add Host",
-      "subtitle": "Add SSH Config Entry",
-      "description": "Add a new SSH host from a connection string",
-      "mode": "view",
-      "keywords": [
-        "ssh",
-        "host",
-        "add",
-        "cloud"
-      ]
-    },
-    {
-      "name": "quick-connect",
-      "title": "Quick Connect Best GPU",
-      "subtitle": "Connect to Best Host",
-      "description": "Connect to the best available free GPU host",
-      "mode": "no-view",
-      "keywords": [
-        "gpu",
+        "cuda",
         "connect",
-        "best",
-        "free"
+        "host"
       ]
     }
   ],
@@ -111,38 +87,6 @@
       ]
     },
     {
-      "name": "workPatterns",
-      "title": "Work Host Patterns",
-      "description": "Comma-separated glob patterns to classify hosts as work (e.g. gpu-*, ml-server-*). Leave empty to use identity file matching.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "gpu-*, ml-*"
-    },
-    {
-      "name": "personalPatterns",
-      "title": "Personal Host Patterns",
-      "description": "Comma-separated glob patterns to classify hosts as personal. Leave empty to use identity file matching.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "home-server, pi-*"
-    },
-    {
-      "name": "workIdentityFiles",
-      "title": "Work Identity Files",
-      "description": "Comma-separated SSH identity file paths. Hosts using these keys are classified as work.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "~/.ssh/work_key"
-    },
-    {
-      "name": "personalIdentityFiles",
-      "title": "Personal Identity Files",
-      "description": "Comma-separated SSH identity file paths. Hosts using these keys are classified as personal.",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "~/.ssh/personal_key"
-    },
-    {
       "name": "excludedHosts",
       "title": "Excluded Hosts",
       "description": "Comma-separated hostnames to exclude from the fleet list (github.com and * are always excluded).",
@@ -153,32 +97,10 @@
     {
       "name": "defaultIdentityFile",
       "title": "Default Identity File for New Hosts",
-      "description": "Identity file path to use when adding new hosts via the Add Host command. Leave empty to omit.",
+      "description": "Identity file path to use when adding new hosts (if not specified in the SSH command). Leave empty to omit.",
       "type": "textfield",
       "required": false,
       "placeholder": "~/.ssh/my_key"
-    },
-    {
-      "name": "defaultView",
-      "title": "Default View",
-      "description": "Which hosts to show by default",
-      "type": "dropdown",
-      "required": false,
-      "default": "work",
-      "data": [
-        {
-          "title": "Work",
-          "value": "work"
-        },
-        {
-          "title": "Personal",
-          "value": "personal"
-        },
-        {
-          "title": "All",
-          "value": "all"
-        }
-      ]
     },
     {
       "name": "sshTimeout",
