@@ -136,14 +136,13 @@ export function SharedAppListItem({
                 <Action.OpenInBrowser
                   title="Open in App Store"
                   url={getAppStoreUrl(app.appStoreId)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 />
               )}
               {app.sources.includes("App Store") && app.appStoreId && (
                 <Action
                   title="Update Via Terminal (Mas)"
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
                   onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
                 />
               )}

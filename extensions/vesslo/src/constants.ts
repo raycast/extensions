@@ -26,10 +26,3 @@ export type SortOption = keyof typeof SORT_LABELS;
 export function getSourceColor(source: string): Color {
   return SOURCE_COLORS[source] ?? Color.SecondaryText;
 }
-
-// Tag colors
-export const TAG_COLORS = {
-  update: Color.Green,
-  brew: Color.Orange,
-  bulk: Color.Green,
-} as const;

@@ -32,16 +32,8 @@ Quickly find apps in your Vesslo library with flexible filtering options.
 
 ### 🔄 View Updates
 Check all available updates across different sources with Vesslo integration.
-- **Sources**: Homebrew, Sparkle, App Store, Manual
-- **Source Priority** (grouped view): Homebrew > Sparkle > App Store > Manual
+- **Sources**: Homebrew, Sparkle, App Store
 - **Actions**: Update via Vesslo Deep Link (Recommended), Direct execution, or Terminal
-
-| Action | Shortcut |
-|--------|----------|
-| Homebrew Quick Update | `⌘⇧↩` |
-| Homebrew Update via Terminal | `⌘⇧T` |
-| Open in App Store | `⌘⇧O` |
-| App Store Update via Terminal (mas) | `⌘⇧M` |
 
 ### 🏷️ Browse by Tag
 Organize and explore your app collection by custom tags.

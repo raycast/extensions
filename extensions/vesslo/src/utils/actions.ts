@@ -85,6 +85,7 @@ export async function runBrewUpgrade(caskName: string, appName: string) {
 
     const { stdout, stderr } = await execAsync(
       `${brewPath} upgrade --cask ${quotedCaskName} 2>&1`,
+      { maxBuffer: 1024 * 1024 * 10 },
     );
 
     const output = stdout + stderr;
