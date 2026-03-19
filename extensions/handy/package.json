@@ -66,6 +66,13 @@
       "mode": "view"
     },
     {
+      "name": "select-language",
+      "title": "Select Language",
+      "subtitle": "Handy",
+      "description": "Set the transcription language for the active model",
+      "mode": "view"
+    },
+    {
       "name": "open-recordings-folder",
       "title": "Open Recordings Folder",
       "subtitle": "Handy",

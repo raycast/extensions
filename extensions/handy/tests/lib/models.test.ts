@@ -9,7 +9,7 @@ beforeEach(() => mkdirSync(TMP, { recursive: true }));
 afterEach(() => rmSync(TMP, { recursive: true, force: true }));
 
 describe("MODEL_REGISTRY", () => {
-  it("has 13 known models", () => expect(MODEL_REGISTRY).toHaveLength(13));
+  it("has 15 known models", () => expect(MODEL_REGISTRY).toHaveLength(15));
   it("Whisper Medium filename is whisper-medium-q4_1.bin, file type", () => {
     const m = MODEL_REGISTRY.find(m => m.id === "medium")!;
     expect(m.filename).toBe("whisper-medium-q4_1.bin");
@@ -33,14 +33,14 @@ describe("MODEL_REGISTRY", () => {
 
 describe("isDownloaded", () => {
   it("returns false when file absent", () =>
-    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "no.bin", isDirectory: false }, TMP)).toBe(false));
+    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "no.bin", isDirectory: false, supportsLanguageSelection: false }, TMP)).toBe(false));
   it("returns true when file present", () => {
     writeFileSync(join(TMP, "test.bin"), "");
-    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "test.bin", isDirectory: false }, TMP)).toBe(true);
+    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "test.bin", isDirectory: false, supportsLanguageSelection: false }, TMP)).toBe(true);
   });
   it("returns true when dir present", () => {
     mkdirSync(join(TMP, "model-dir"));
-    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "model-dir", isDirectory: true }, TMP)).toBe(true);
+    expect(isDownloaded({ id: "x", name: "X", description: "", filename: "model-dir", isDirectory: true, supportsLanguageSelection: false }, TMP)).toBe(true);
   });
 });
 
@@ -61,4 +61,62 @@ describe("getDownloadedModels", () => {
   });
   it("returns [] when models dir missing", () =>
     expect(getDownloadedModels("/nonexistent/path")).toEqual([]));
+});
+
+describe("MODEL_REGISTRY language selection fields", () => {
+  it("Whisper models support language selection with no language filter", () => {
+    for (const id of ["small", "medium", "turbo", "large"]) {
+      const m = MODEL_REGISTRY.find(m => m.id === id)!;
+      expect(m.supportsLanguageSelection).toBe(true);
+      expect(m.supportedLanguages).toBeUndefined();
+    }
+  });
+
+  it("Breeze ASR supports language selection with no language filter", () => {
+    const m = MODEL_REGISTRY.find(m => m.id === "breeze-asr")!;
+    expect(m.supportsLanguageSelection).toBe(true);
+    expect(m.supportedLanguages).toBeUndefined();
+  });
+
+  it("SenseVoice supports language selection with 7 languages including zh", () => {
+    const m = MODEL_REGISTRY.find(m => m.id === "sense-voice-int8")!;
+    expect(m.supportsLanguageSelection).toBe(true);
+    expect(m.supportedLanguages).toEqual(
+      expect.arrayContaining(["zh", "zh-Hans", "zh-Hant", "en", "yue", "ja", "ko"])
+    );
+    expect(m.supportedLanguages).toHaveLength(7);
+  });
+
+  it("Canary 180M Flash supports language selection with en/de/es/fr", () => {
+    const m = MODEL_REGISTRY.find(m => m.id === "canary-180m-flash")!;
+    expect(m).toBeDefined();
+    expect(m.supportsLanguageSelection).toBe(true);
+    expect(m.supportedLanguages).toEqual(
+      expect.arrayContaining(["en", "de", "es", "fr"])
+    );
+    expect(m.supportedLanguages).toHaveLength(4);
+  });
+
+  it("Canary 1B v2 supports language selection with 25 languages", () => {
+    const m = MODEL_REGISTRY.find(m => m.id === "canary-1b-v2")!;
+    expect(m).toBeDefined();
+    expect(m.supportsLanguageSelection).toBe(true);
+    expect(m.supportedLanguages).toHaveLength(25);
+  });
+
+  it("Parakeet models do not support language selection", () => {
+    for (const id of ["parakeet-tdt-0.6b-v2", "parakeet-tdt-0.6b-v3"]) {
+      expect(MODEL_REGISTRY.find(m => m.id === id)!.supportsLanguageSelection).toBe(false);
+    }
+  });
+
+  it("Moonshine models do not support language selection", () => {
+    for (const id of ["moonshine-base", "moonshine-tiny-streaming-en", "moonshine-small-streaming-en", "moonshine-medium-streaming-en"]) {
+      expect(MODEL_REGISTRY.find(m => m.id === id)!.supportsLanguageSelection).toBe(false);
+    }
+  });
+
+  it("GigaAM does not support language selection", () => {
+    expect(MODEL_REGISTRY.find(m => m.id === "gigaam-v3-e2e-ctc")!.supportsLanguageSelection).toBe(false);
+  });
 });
