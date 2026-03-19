@@ -1345,7 +1345,7 @@
     "@alicloud/pop-core": "^1.7.12",
     "@raycast/api": "^1.44.0",
     "@vitalets/google-translate-api": "^8.0.0",
-    "axios": "^0.25.0",
+    "axios": "^0.30.3",
     "form-data": "^4.0.0",
     "markdown-escape": "^1.1.0",
     "raycast-toolkit": "^1.0.6"

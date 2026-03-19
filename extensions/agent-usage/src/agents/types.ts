@@ -1,6 +1,6 @@
 import type { Image } from "@raycast/api";
 
-export type AgentId = "amp" | "codex" | "droid" | "gemini" | "kimi" | "antigravity" | "zai";
+export type AgentId = "amp" | "claude" | "codex" | "droid" | "gemini" | "kimi" | "antigravity" | "zai";
 
 export interface AgentDefinition {
   id: AgentId;

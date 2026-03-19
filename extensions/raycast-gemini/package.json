@@ -56,26 +56,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -92,8 +72,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -144,38 +124,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 1.5 Flash (Deprecated Sep25)",
-              "value": "gemini-1.5-flash-latest"
-            },
-            {
-              "title": "Gemini 1.5 Pro (Deprecated Sep25)",
-              "value": "gemini-1.5-pro-latest"
-            },
-            {
-              "title": "LearnLM 1.5 Pro Experimental",
-              "value": "learnlm-1.5-pro-experimental"
-            },
-            {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -192,8 +140,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -236,26 +184,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -272,8 +200,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -316,26 +244,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -352,8 +260,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -387,26 +295,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -423,8 +311,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -458,26 +346,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -494,8 +362,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -529,26 +397,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -565,8 +413,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -600,26 +448,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -636,8 +464,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -671,26 +499,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -707,8 +515,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -742,26 +550,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -778,8 +566,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -813,26 +601,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -849,8 +617,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -884,26 +652,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -920,8 +668,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -955,26 +703,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -991,8 +719,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -1034,26 +762,6 @@
               "value": "default"
             },
             {
-              "title": "Gemini 2.0 Flash-Lite",
-              "value": "gemini-2.0-flash-lite"
-            },
-            {
-              "title": "Gemini 2.0 Flash",
-              "value": "gemini-2.0-flash"
-            },
-            {
-              "title": "Gemini 2.0 Flash Thinking Experimental",
-              "value": "gemini-2.0-flash-thinking-exp"
-            },
-            {
-              "title": "Gemini Experimental 1206",
-              "value": "gemini-exp-1206"
-            },
-            {
-              "title": "Gemini 2.0 Pro Experimental",
-              "value": "gemini-2.0-pro-exp"
-            },
-            {
               "title": "Gemini 2.5 Flash-Lite",
               "value": "gemini-2.5-flash-lite"
             },
@@ -1070,8 +778,8 @@
               "value": "gemini-3-flash-preview"
             },
             {
-              "title": "Gemini 3.0 Pro",
-              "value": "gemini-3-pro-preview"
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro-preview"
             }
           ]
         },
@@ -1116,28 +824,8 @@
       "title": "Model",
       "type": "dropdown",
       "required": false,
-      "default": "gemini-3-flash-preview",
+      "default": "gemini-2.5-flash",
       "data": [
-        {
-          "title": "Gemini 2.0 Flash-Lite",
-          "value": "gemini-2.0-flash-lite"
-        },
-        {
-          "title": "Gemini 2.0 Flash",
-          "value": "gemini-2.0-flash"
-        },
-        {
-          "title": "Gemini 2.0 Flash Thinking Experimental",
-          "value": "gemini-2.0-flash-thinking-exp"
-        },
-        {
-          "title": "Gemini Experimental 1206",
-          "value": "gemini-exp-1206"
-        },
-        {
-          "title": "Gemini 2.0 Pro Experimental",
-          "value": "gemini-2.0-pro-exp"
-        },
         {
           "title": "Gemini 2.5 Flash-Lite",
           "value": "gemini-2.5-flash-lite"
@@ -1155,8 +843,8 @@
           "value": "gemini-3-flash-preview"
         },
         {
-          "title": "Gemini 3.0 Pro",
-          "value": "gemini-3-pro-preview"
+          "title": "Gemini 3.1 Pro",
+          "value": "gemini-3.1-pro-preview"
         }
       ]
     },
@@ -1195,7 +883,7 @@
     }
   ],
   "dependencies": {
-    "@google/genai": "^1.37.0",
+    "@google/genai": "^1.44.0",
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
     "jimp": "^1.6.0",

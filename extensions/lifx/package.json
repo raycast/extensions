@@ -70,7 +70,7 @@
   "dependencies": {
     "@raycast/api": "^1.38.3",
     "@raycast/utils": "^1.1.0",
-    "axios": "^0.27.2",
+    "axios": "^0.30.3",
     "hex-to-hsl": "^1.0.2",
     "hsl-to-hex": "^1.0.0",
     "kelvin-to-rgb": "^1.0.2"

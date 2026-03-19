@@ -5,6 +5,7 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 import { AntigravityError, AntigravityUsage } from "./types";
 import type { Accessory } from "../agents/types";
@@ -106,8 +107,11 @@ function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["prima
   return (
     <>
       <List.Item.Detail.Metadata.Label title={`${labelPrefix} Model`} text={model.label} />
-      <List.Item.Detail.Metadata.Label title={`${labelPrefix} Remaining`} text={`${model.percentLeft}%`} />
-      <List.Item.Detail.Metadata.Label title={`${labelPrefix} Resets In`} text={model.resetsIn} />
+      <List.Item.Detail.Metadata.Label
+        title="Remaining"
+        text={`${generateAsciiBar(model.percentLeft)} ${model.percentLeft}% remaining`}
+      />
+      <List.Item.Detail.Metadata.Label title="Resets In" text={model.resetsIn} />
     </>
   );
 }
@@ -120,6 +124,7 @@ function appendModel(lines: string[], title: string, model: AntigravityUsage["pr
 
   lines.push("");
   lines.push(`${title}: ${model.label}`);
-  lines.push(`Remaining: ${model.percentLeft}%`);
+  lines.push(`Remaining: ${model.percentLeft}% remaining`);
+  lines.push(generateAsciiBar(model.percentLeft));
   lines.push(`Resets In: ${model.resetsIn}`);
 }

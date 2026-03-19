@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useFetch } from "@raycast/utils";
 import { SkillListItem } from "./components/SkillListItem";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
-import { type SearchResponse, API_BASE_URL, buildIssueUrl, deduplicateSkills } from "./shared";
+import { type SearchResponse, API_BASE_URL, buildGithubIssueUrl, deduplicateSkills } from "./shared";
 
 const BROWSE_URL = `${API_BASE_URL}/search?q=skill&limit=100`;
 
@@ -27,7 +27,15 @@ export default function Command() {
             <Action title="Clear Cache & Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
             <Action.OpenInBrowser
               title="Report Issue on GitHub"
-              url={buildIssueUrl(BROWSE_URL, error)}
+              url={buildGithubIssueUrl({
+                title: "API Error",
+                description: `Failed to fetch data from the Skills API: ${BROWSE_URL}`,
+                error,
+                reproductionSteps: [
+                  "Open Raycast and run the 'Trending Skills' command.",
+                  "Observe the resulting error.",
+                ],
+              })}
               icon={Icon.Bug}
             />
           </ActionPanel>
@@ -53,18 +61,26 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Popular Skills" subtitle={`${skills.length} skills`}>
-        {skills.map((skill, index) => (
-          <SkillListItem
-            key={skill.id}
-            skill={skill}
-            rank={index + 1}
-            isSelected={selectedId === skill.id}
-            isShowingDetail={isShowingDetail}
-            onToggleDetail={toggleDetail}
-          />
-        ))}
-      </List.Section>
+      {skills.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Skills Found"
+          description="No trending skills are available right now"
+          icon={Icon.Trophy}
+        />
+      ) : (
+        <List.Section title="Popular Skills" subtitle={`${skills.length} skills`}>
+          {skills.map((skill, index) => (
+            <SkillListItem
+              key={skill.id}
+              skill={skill}
+              rank={index + 1}
+              isSelected={selectedId === skill.id}
+              isShowingDetail={isShowingDetail}
+              onToggleDetail={toggleDetail}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

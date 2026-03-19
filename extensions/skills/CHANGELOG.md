@@ -1,5 +1,30 @@
 # Changelog
 
+## [Fix Incomplete Agent List] - 2026-03-17
+
+- Use `skills list --json` for structured output instead of parsing ANSI text
+- Show all supported agents in the filter dropdown and detail panel
+
+## [Highlight Outdated Skills] - 2026-03-16
+
+- Highlight outdated skills with an orange hammer icon in the installed skills list
+- Show "Updates Available" section with count when updates exist
+
+## [Fix Duplicate Audit Error Toast] - 2026-03-11
+
+- Fix error toast showing twice when re-selecting a skill with a failed audit fetch
+
+## [Security Audits Data] - 2026-03-11
+
+- Parse security audit data from skills.sh and show their status in the skill's details
+- Warn before installing skills with failed security audits
+- Added actions to open the security audit links
+
+## [Fix allowed-tools TypeError] - 2026-03-09
+
+- Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
+- Normalize allowed-tools to array before rendering
+
 ## [Rich Skill Metadata] - 2026-03-07
 
 - Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel

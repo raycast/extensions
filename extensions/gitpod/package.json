@@ -139,7 +139,7 @@
     "@raycast/utils": "^1.9.1",
     "date-fns": "^2.29.3",
     "graphql-request": "^5.1.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "node-fetch": "^3.3.0",
     "octokit": "^2.0.10",
     "ws": "^8.11.0"

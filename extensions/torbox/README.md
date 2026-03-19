@@ -10,6 +10,8 @@ Control your TorBox downloads from Raycast.
 
 ## Features
 
+- Stream video files in VLC, IINA, Infuse, or mpv — automatically detects installed players
+- Set your preferred default player
 - Auto-detect magnet links and URLs from clipboard
 - Auto-detect .torrent files selected in Finder
 - Filter web URLs by supported hosters

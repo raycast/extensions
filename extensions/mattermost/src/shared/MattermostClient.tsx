@@ -65,7 +65,7 @@ export class MattermostClient {
       }),
       MattermostClient.config(),
     );
-    const token = response.headers["token"];
+    const token = response.headers["token"] ?? "";
     console.log(response.statusText);
     MattermostClient.token = token;
     console.log("successfull login");

@@ -1,5 +1,23 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.2.4] - 2026-03-16
+
+### Changed
+
+- Usage Limits errors now open a dedicated detail view with clearer fetch/parse diagnostics and a quick action to copy the error log
+- Usage limit refresh failures now show actionable toasts with retry and copy-log actions while keeping previously fetched data available when possible
+
+### Fixed
+
+- Prevent runtime errors when the Claude usage limits API returns a `null` `resets_at` value
+- Improved consistency of usage limit error handling across the UI and the `get-usage-limits` too
+
+## [v2.2.3] - 2026-03-16
+
+### Fixed
+
+- Persisted usage limits availability between refreshes so the "Usage Limits" section does not flicker or disappear while OAuth authentication is being rechecked
+
 ## [v2.2.2] - 2026-03-04
 
 ### Fixed

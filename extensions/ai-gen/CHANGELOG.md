@@ -1,5 +1,9 @@
 # OpenAI Generator Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [AbortController fix] - 2023-08-10
 
 - Updated the API calls to OpenAI to use AbortController signals

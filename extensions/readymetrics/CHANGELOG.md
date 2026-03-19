@@ -1,5 +1,9 @@
 # Readymetrics Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Updated Ready extension images] - 2022-11-10
 Updates for Ready.app extension check-in images.
 

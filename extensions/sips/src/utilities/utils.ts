@@ -35,6 +35,7 @@ import {
   getNeoFinderSelection,
   getPathFinderSelection,
   getQSpaceSelection,
+  splitPaths,
 } from "./scripts/file-selection";
 
 /**
@@ -43,7 +44,7 @@ import {
  */
 export const addItemToRemove = async (item: string) => {
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  await LocalStorage.setItem("itemsToRemove", itemsToRemove + ", " + item);
+  await LocalStorage.setItem("itemsToRemove", itemsToRemove + "\n" + item);
 };
 
 /**
@@ -87,7 +88,7 @@ export const getScopedTempDirectory = async (name: string) => {
  */
 export const cleanup = async () => {
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  const itemsToRemoveArray = itemsToRemove.toString().split(", ");
+  const itemsToRemoveArray = itemsToRemove.toString().split("\n").filter(Boolean);
   for (const item of itemsToRemoveArray) {
     if (fs.existsSync(item)) {
       await fs.promises.rm(item, { recursive: true });
@@ -112,15 +113,8 @@ export const getSelectedImages = async (): Promise<string[]> => {
   if (inputMethod == "Clipboard") {
     // Extract images from clipboard
     try {
-      const clipboardImages = (await getClipboardImages()).split(", ").reduce((acc, curr, index) => {
-        if (index == 0 || curr.startsWith("/")) {
-          acc.push(curr);
-        } else {
-          acc[acc.length - 1] = `${acc.at(-1) ?? ""}${curr}`;
-        }
-        return acc;
-      }, [] as string[]);
-      await LocalStorage.setItem("itemsToRemove", clipboardImages.join(", "));
+      const clipboardImages = splitPaths(await getClipboardImages());
+      await LocalStorage.setItem("itemsToRemove", clipboardImages.join("\n"));
       if (clipboardImages.filter((i) => i.trim().length > 0).length > 0) {
         return clipboardImages;
       }

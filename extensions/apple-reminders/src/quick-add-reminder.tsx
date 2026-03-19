@@ -36,7 +36,19 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       if (dateMatch && dateMatch.length > 0) {
         const chronoDate = dateMatch[0].start;
         isDateTime = chronoDate.isCertain("hour") || chronoDate.isCertain("minute") || chronoDate.isCertain("second");
-        const date = chronoDate.date();
+        let date = chronoDate.date();
+
+        const hasExplicitDate =
+          chronoDate.isCertain("weekday") ||
+          chronoDate.isCertain("day") ||
+          chronoDate.isCertain("month") ||
+          chronoDate.isCertain("year");
+
+        // If the user only specified a time and it already passed today, schedule it for tomorrow.
+        if (isDateTime && !hasExplicitDate && date.getTime() < Date.now()) {
+          date = addDays(date, 1);
+        }
+
         dueDate = isDateTime ? date.toISOString() : format(date, "yyyy-MM-dd");
       }
 
