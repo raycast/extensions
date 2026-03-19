@@ -50,8 +50,11 @@ export default function Updates() {
   const sparkleApps = sortedApps.filter(
     (app) => app.sources.includes("Sparkle") && !app.sources.includes("Brew"),
   );
-  const appStoreApps = sortedApps.filter((app) =>
-    app.sources.includes("App Store"),
+  const appStoreApps = sortedApps.filter(
+    (app) =>
+      app.sources.includes("App Store") &&
+      !app.sources.includes("Brew") &&
+      !app.sources.includes("Sparkle"),
   );
   const otherApps = sortedApps.filter(
     (app) =>
