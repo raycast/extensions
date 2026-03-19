@@ -18,7 +18,7 @@ export default function Portfolio() {
     title: string;
     icon: Icon;
     value: string;
-    detail: React.ReactNode;
+    detail: React.JSX.Element;
   }> = [];
 
   if (data) {
@@ -90,7 +90,7 @@ export default function Portfolio() {
 
     items.push({
       title: "Unrealized P&L",
-      icon: Icon.ArrowUpDown,
+      icon: Icon.LineChart,
       value: `${formatCurrency(data.totalUnrealizedGainLoss, cur)} (${formatPercent(data.totalUnrealizedGainLossPercent)})`,
       detail: (
         <List.Item.Detail
