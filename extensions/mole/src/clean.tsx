@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { spawn, type ChildProcess } from "child_process";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { getMolePathSafe, runMole, MOLE_ENV } from "./utils/mole";
@@ -129,9 +130,7 @@ function CleanView({ molePath }: { molePath: string }) {
           itemsCount: preCleanItems,
         });
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Clean failed";
-        toast.message = err instanceof Error ? err.message : String(err);
+        await showFailureToast(err, { title: "Clean failed" });
       }
     }
   }

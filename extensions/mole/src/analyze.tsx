@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action, getPreferenceValues, trash, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getMolePathSafe, MOLE_ENV } from "./utils/mole";
@@ -115,11 +116,7 @@ function AnalyzeList({ molePath, dirPath }: { molePath: string; dirPath: string 
                     await showToast({ style: Toast.Style.Success, title: `${entry.name} trashed` });
                     revalidate();
                   } catch (err) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed",
-                      message: err instanceof Error ? err.message : String(err),
-                    });
+                    await showFailureToast(err, { title: "Move to Trash failed" });
                   }
                 }}
               />

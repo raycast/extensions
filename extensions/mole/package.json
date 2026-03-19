@@ -67,7 +67,7 @@
       "name": "uninstall",
       "title": "Uninstall App",
       "subtitle": "Mole",
-      "description": "Browse installed applications and move them to the Trash",
+      "description": "Uninstall apps and clean residual files from Library, Caches, and Preferences",
       "mode": "view",
       "keywords": ["uninstall", "remove", "delete", "app", "application"]
     },

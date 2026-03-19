@@ -1,5 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { useMemo } from "react";
 import { getMolePathSafe, runMole } from "./utils/mole";
 import { parseOptimizeDryRun } from "./utils/parsers";
@@ -43,9 +43,7 @@ function OptimizeView() {
         toast.title = "System optimized successfully";
         revalidate();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Optimization failed";
-        toast.message = error instanceof Error ? error.message : String(error);
+        await showFailureToast(error, { title: "Optimization failed" });
       }
     }
   }

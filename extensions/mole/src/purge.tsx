@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert, trash } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getMolePathSafe, getMolePath, runMole, MOLE_ENV } from "./utils/mole";
@@ -85,9 +86,7 @@ function PurgeView() {
         toast.message = `${data?.totalSpace ?? ""} recovered`;
         revalidate();
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Purge failed";
-        toast.message = err instanceof Error ? err.message : String(err);
+        await showFailureToast(err, { title: "Purge failed" });
       }
     }
   }
@@ -161,9 +160,7 @@ function PurgeView() {
                           t.message = `${item.size} freed from ${item.projectName}`;
                           revalidate();
                         } catch (err) {
-                          t.style = Toast.Style.Failure;
-                          t.title = "Remove failed";
-                          t.message = err instanceof Error ? err.message : String(err);
+                          await showFailureToast(err, { title: "Remove failed" });
                         }
                       }
                     }}

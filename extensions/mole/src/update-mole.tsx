@@ -1,4 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { runMole } from "./utils/mole";
 
 export default async function UpdateMole() {
@@ -8,8 +9,6 @@ export default async function UpdateMole() {
     toast.style = Toast.Style.Success;
     toast.title = output.includes("already") ? "Already up to date" : "Mole updated successfully";
   } catch (err) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Update failed";
-    toast.message = err instanceof Error ? err.message : String(err);
+    await showFailureToast(err, { title: "Update failed" });
   }
 }

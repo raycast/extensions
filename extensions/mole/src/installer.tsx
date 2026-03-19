@@ -1,4 +1,5 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert, trash } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
 import { useState, useEffect, useMemo } from "react";
@@ -104,9 +105,7 @@ function InstallerView() {
         toast.message = `${formatBytes(totalSize)} freed`;
         revalidate();
       } catch (err) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Remove failed";
-        toast.message = err instanceof Error ? err.message : String(err);
+        await showFailureToast(err, { title: "Remove failed" });
       }
     }
   }
@@ -173,11 +172,7 @@ function InstallerView() {
                           await showToast({ style: Toast.Style.Success, title: `${file.name} removed` });
                           revalidate();
                         } catch (err) {
-                          await showToast({
-                            style: Toast.Style.Failure,
-                            title: "Failed",
-                            message: err instanceof Error ? err.message : String(err),
-                          });
+                          await showFailureToast(err, { title: "Remove failed" });
                         }
                       }
                     }}
