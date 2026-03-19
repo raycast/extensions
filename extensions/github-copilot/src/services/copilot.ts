@@ -59,11 +59,6 @@ type ListTasksResponse = {
   has_next_page: boolean;
 };
 
-// Response from creating a task
-type CreateTaskResponse = {
-  task: Task;
-};
-
 // A pull request returned from the GitHub GraphQL API
 type PullRequest = {
   globalId: string;
@@ -208,12 +203,12 @@ async function createTask(
     }
   }
 
-  const createTaskResult = (await createTaskResponse.json()) as CreateTaskResponse;
+  const task = (await createTaskResponse.json()) as Task;
 
   // URL format: https://github.com/{owner}/{repo}/tasks/{task_id}
-  const taskUrl = `https://github.com/${ownerName}/${repoName}/tasks/${createTaskResult.task.id}`;
+  const taskUrl = `https://github.com/${ownerName}/${repoName}/tasks/${task.id}`;
 
-  return { taskUrl, taskId: createTaskResult.task.id };
+  return { taskUrl, taskId: task.id };
 }
 
 const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
