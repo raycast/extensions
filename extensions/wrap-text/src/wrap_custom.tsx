@@ -1,10 +1,6 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { wrapSelectedText } from "./utils";
 
-interface Arguments {
-  wrapper: string;
-}
-
 // Known bracket/quote pairs: opening → closing
 const PAIRS: Record<string, string> = {
   "(": ")",
@@ -20,10 +16,14 @@ const PAIRS: Record<string, string> = {
 /**
  * Build the reverse map (closing → opening) so we can detect
  * inputs given as the closing character too, e.g. "}" → wrap with { }
+ *
+ * Note: if a character were ever used as both an opening and closing pair
+ * (i.e. symmetric, like " in some locales), Object.fromEntries would silently
+ * overwrite the earlier entry. All current pairs are asymmetric, so this is safe.
  */
 const REVERSE_PAIRS: Record<string, string> = Object.fromEntries(Object.entries(PAIRS).map(([k, v]) => [v, k]));
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.WrapCustom }>) {
   const input = props.arguments.wrapper.trim();
 
   if (input.length === 0) {
