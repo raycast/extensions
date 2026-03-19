@@ -1,6 +1,6 @@
 # Todo List Changelog
 
-## [Clear search bar not text after adding todo on Windows] - {PR_MERGE_DATE}
+## [Clear search bar not text after adding todo on Windows] - 2026-03-19
 
 - When pressing enter to add a todo, clear the search bar text (text was not cleared on Windows)
 
