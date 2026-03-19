@@ -264,7 +264,7 @@ export default function Command() {
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action.CopyToClipboard
-                    title="Copy Base Iso"
+                    title="Copy Base ISO"
                     content={base.toISO() ?? ""}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />

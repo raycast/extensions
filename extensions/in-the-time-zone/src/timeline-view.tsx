@@ -64,9 +64,9 @@ export function TimelineView(props: TimelineViewProps) {
 
       if (city && city.lat && city.lng) {
         const sunTimes = getSunTimes(city.lat, city.lng, date, timezone);
-        return { cityName, sunrise: sunTimes.sunrise, sunset: sunTimes.sunset };
+        return { zoneId, cityName, sunrise: sunTimes.sunrise, sunset: sunTimes.sunset };
       }
-      return { cityName, sunrise: "—", sunset: "—" };
+      return { zoneId, cityName, sunrise: "—", sunset: "—" };
     });
   }, [baseISO, selectedZoneIds]);
 
@@ -85,7 +85,7 @@ export function TimelineView(props: TimelineViewProps) {
           <Detail.Metadata.Separator />
           {citySunTimes.map((city) => (
             <Detail.Metadata.Label
-              key={city.cityName}
+              key={city.zoneId}
               title={city.cityName}
               text={`↑☀️ ${city.sunrise} ↓☀️ ${city.sunset}`}
             />
@@ -149,7 +149,7 @@ export function TimelineView(props: TimelineViewProps) {
           )}
           <ActionPanel.Section>
             <Action.CopyToClipboard
-              title="Copy Base Iso"
+              title="Copy Base ISO"
               content={baseTime.toISO() ?? ""}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />

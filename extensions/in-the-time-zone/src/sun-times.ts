@@ -13,7 +13,7 @@ export function getSunTimes(lat: number, lng: number, date: Date, timezone: stri
   const sunset = DateTime.fromJSDate(times.sunset).setZone(timezone);
 
   return {
-    sunrise: sunrise.toFormat("h:mm a"),
-    sunset: sunset.toFormat("h:mm a"),
+    sunrise: sunrise.isValid ? sunrise.toFormat("h:mm a") : "—",
+    sunset: sunset.isValid ? sunset.toFormat("h:mm a") : "—",
   };
 }
