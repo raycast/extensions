@@ -21,13 +21,7 @@ import {
   TERMINAL_LABELS,
   EDITOR_LABELS,
 } from "./lib/actions";
-import {
-  HostStatus,
-  SSHHost,
-  TerminalApp,
-  EditorApp,
-  getExcludedHosts,
-} from "./lib/types";
+import { HostStatus, SSHHost, TerminalApp, EditorApp, getExcludedHosts } from "./lib/types";
 import {
   HostGroup,
   HostGroupOverrides,
@@ -64,14 +58,12 @@ export default function GpuFleet() {
   }, []);
 
   useEffect(() => {
-    Promise.all([getGroups(), getHostOverrides(), getLastFilter()]).then(
-      ([g, o, f]) => {
-        setGroups(g);
-        setOverrides(o);
-        setViewFilter(f);
-        setDataLoaded(true);
-      },
-    );
+    Promise.all([getGroups(), getHostOverrides(), getLastFilter()]).then(([g, o, f]) => {
+      setGroups(g);
+      setOverrides(o);
+      setViewFilter(f);
+      setDataLoaded(true);
+    });
   }, []);
 
   const allHosts = useMemo(() => {
@@ -172,9 +164,7 @@ export default function GpuFleet() {
         title="Add Host"
         icon={Icon.Plus}
         shortcut={{ modifiers: ["cmd"], key: "n" }}
-        onAction={() =>
-          push(<AddHostForm groups={groups} onHostAdded={reloadGroupData} />)
-        }
+        onAction={() => push(<AddHostForm groups={groups} onHostAdded={reloadGroupData} />)}
       />
       <Action
         title="Quick Connect Best Gpu"
@@ -186,14 +176,7 @@ export default function GpuFleet() {
         title="Manage Groups"
         icon={Icon.Tag}
         shortcut={{ modifiers: ["cmd"], key: "g" }}
-        onAction={() =>
-          push(
-            <ManageGroupsView
-              groups={groups}
-              onGroupsChanged={reloadGroupData}
-            />,
-          )
-        }
+        onAction={() => push(<ManageGroupsView groups={groups} onGroupsChanged={reloadGroupData} />)}
       />
       <Action
         title="Refresh"
@@ -209,11 +192,7 @@ export default function GpuFleet() {
       isLoading={isLoading}
       isShowingDetail
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter hosts"
-          value={viewFilter}
-          onChange={handleFilterChange}
-        >
+        <List.Dropdown tooltip="Filter hosts" value={viewFilter} onChange={handleFilterChange}>
           <List.Dropdown.Item title="All" value="all" />
           {groups.map((g) => (
             <List.Dropdown.Item key={g.id} title={g.name} value={g.id} />
@@ -229,11 +208,9 @@ export default function GpuFleet() {
           subtitle="Add a new SSH host"
           detail={
             <List.Item.Detail
-              markdown={[
-                "## Add Host",
-                "",
-                "Paste an SSH connection string to add a new host to your fleet.",
-              ].join("\n")}
+              markdown={["## Add Host", "", "Paste an SSH connection string to add a new host to your fleet."].join(
+                "\n",
+              )}
             />
           }
           actions={
@@ -241,14 +218,7 @@ export default function GpuFleet() {
               <Action
                 title="Add Host"
                 icon={Icon.Plus}
-                onAction={() =>
-                  push(
-                    <AddHostForm
-                      groups={groups}
-                      onHostAdded={reloadGroupData}
-                    />,
-                  )
-                }
+                onAction={() => push(<AddHostForm groups={groups} onHostAdded={reloadGroupData} />)}
               />
               {globalActions}
             </ActionPanel>
@@ -267,10 +237,7 @@ export default function GpuFleet() {
                 "Create, edit, or delete host groups.",
                 "",
                 groups
-                  .map(
-                    (g) =>
-                      `- **${g.name}**${g.patterns.length > 0 ? ` (${g.patterns.join(", ")})` : ""}`,
-                  )
+                  .map((g) => `- **${g.name}**${g.patterns.length > 0 ? ` (${g.patterns.join(", ")})` : ""}`)
                   .join("\n") || "No groups yet.",
               ].join("\n")}
             />
@@ -280,14 +247,7 @@ export default function GpuFleet() {
               <Action
                 title="Manage Groups"
                 icon={Icon.Tag}
-                onAction={() =>
-                  push(
-                    <ManageGroupsView
-                      groups={groups}
-                      onGroupsChanged={reloadGroupData}
-                    />,
-                  )
-                }
+                onAction={() => push(<ManageGroupsView groups={groups} onGroupsChanged={reloadGroupData} />)}
               />
               {globalActions}
             </ActionPanel>
@@ -327,11 +287,7 @@ export default function GpuFleet() {
               icon={{ source: Icon.CircleProgress, tintColor: Color.Blue }}
               title={host.name}
               subtitle="connecting..."
-              detail={
-                <List.Item.Detail
-                  markdown={["## " + host.name, "", "Scanning..."].join("\n")}
-                />
-              }
+              detail={<List.Item.Detail markdown={["## " + host.name, "", "Scanning..."].join("\n")} />}
               actions={
                 <ActionPanel>
                   <Action
@@ -342,10 +298,7 @@ export default function GpuFleet() {
                       connectTerminal(terminal, host);
                     }}
                   />
-                  <Action.CopyToClipboard
-                    title="Copy SSH Command"
-                    content={sshCommand(host)}
-                  />
+                  <Action.CopyToClipboard title="Copy Ssh Command" content={sshCommand(host)} />
                   {globalActions}
                 </ActionPanel>
               }
@@ -499,9 +452,7 @@ function detailMarkdown(s: HostStatus): string {
       lines.push(`\`${s.topCpuCwd}\``);
       lines.push("");
     }
-    const updated = s.lastUpdated
-      ? new Date(s.lastUpdated).toLocaleTimeString("en-US")
-      : "never";
+    const updated = s.lastUpdated ? new Date(s.lastUpdated).toLocaleTimeString() : "never";
     lines.push(`---`);
     lines.push(`*${updated}*`);
     return lines.join("\n");
@@ -536,10 +487,7 @@ function detailMarkdown(s: HostStatus): string {
     lines.push("| # | Model | Mem | Util |");
     lines.push("|---|-------|-----|------|");
     s.gpus.forEach((g, i) => {
-      const memPct =
-        g.memoryTotal > 0
-          ? Math.round((g.memoryUsed / g.memoryTotal) * 100)
-          : 0;
+      const memPct = g.memoryTotal > 0 ? Math.round((g.memoryUsed / g.memoryTotal) * 100) : 0;
       lines.push(
         `| ${i} | ${g.name} | ${formatMB(g.memoryUsed)}/${formatMB(g.memoryTotal)} (${memPct}%) | ${Math.round(g.utilization)}% |`,
       );
@@ -547,9 +495,7 @@ function detailMarkdown(s: HostStatus): string {
     lines.push("");
   }
 
-  const updated = s.lastUpdated
-    ? new Date(s.lastUpdated).toLocaleTimeString("en-US")
-    : "never";
+  const updated = s.lastUpdated ? new Date(s.lastUpdated).toLocaleTimeString() : "never";
   lines.push(`---`);
   lines.push(`*${updated}*`);
 
@@ -623,13 +569,7 @@ function HostItem({
               icon={Icon.List}
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
               onAction={() => {
-                push(
-                  <TmuxSessionList
-                    host={s.host}
-                    timeout={timeout}
-                    terminal={terminal}
-                  />,
-                );
+                push(<TmuxSessionList host={s.host} timeout={timeout} terminal={terminal} />);
               }}
             />
           </ActionPanel.Section>
@@ -643,11 +583,7 @@ function HostItem({
                 <Action
                   key={g.id}
                   title={g.name}
-                  icon={
-                    hostOverrides.includes(g.id)
-                      ? Icon.CheckCircle
-                      : Icon.Circle
-                  }
+                  icon={hostOverrides.includes(g.id) ? Icon.CheckCircle : Icon.Circle}
                   onAction={() => toggleGroup(g.id)}
                 />
               ))}
@@ -655,7 +591,7 @@ function HostItem({
           </ActionPanel.Section>
           <ActionPanel.Section title="Other">
             <Action.CopyToClipboard
-              title="Copy SSH Command"
+              title="Copy Ssh Command"
               content={sshCommand(s.host)}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -667,15 +603,7 @@ function HostItem({
   );
 }
 
-function TmuxSessionList({
-  host,
-  timeout,
-  terminal,
-}: {
-  host: SSHHost;
-  timeout: number;
-  terminal: TerminalApp;
-}) {
+function TmuxSessionList({ host, timeout, terminal }: { host: SSHHost; timeout: number; terminal: TerminalApp }) {
   const [sessions, setSessions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -693,15 +621,9 @@ function TmuxSessionList({
   }, [host, timeout]);
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={`Tmux sessions on ${host.name}`}
-    >
+    <List isLoading={isLoading} navigationTitle={`Tmux sessions on ${host.name}`}>
       {sessions.length === 0 && !isLoading && (
-        <List.EmptyView
-          title="No tmux sessions"
-          description={`No active tmux sessions on ${host.name}`}
-        />
+        <List.EmptyView title="No tmux sessions" description={`No active tmux sessions on ${host.name}`} />
       )}
       {sessions.map((session) => (
         <List.Item
@@ -718,10 +640,7 @@ function TmuxSessionList({
                   connectTerminalTmux(terminal, host, session);
                 }}
               />
-              <Action.CopyToClipboard
-                title="Copy Tmux Attach Command"
-                content={sshTmuxCommand(host, session)}
-              />
+              <Action.CopyToClipboard title="Copy Tmux Attach Command" content={sshTmuxCommand(host, session)} />
             </ActionPanel>
           }
         />

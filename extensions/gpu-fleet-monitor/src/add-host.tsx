@@ -1,25 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
-import {
-  parseSSHConnectionString,
-  hostExistsByUser,
-  appendHostToConfig,
-} from "./lib/ssh-config";
-import {
-  HostGroup,
-  setHostGroups,
-  addGroup,
-  generateGroupId,
-} from "./lib/groups";
+import { parseSSHConnectionString, hostExistsByUser, appendHostToConfig } from "./lib/ssh-config";
+import { HostGroup, setHostGroups, addGroup, generateGroupId } from "./lib/groups";
 
 interface DraftGroup {
   id: string;
@@ -55,20 +37,14 @@ export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
   ];
 
   const selectedItems = allItems.filter((g) => selectedGroups.includes(g.id));
-  const unselectedItems = allItems.filter(
-    (g) => !selectedGroups.includes(g.id),
-  );
+  const unselectedItems = allItems.filter((g) => !selectedGroups.includes(g.id));
 
   const trimmedSearch = groupSearch.trim().toLowerCase();
-  const showCreate =
-    trimmedSearch.length > 0 &&
-    !allItems.some((g) => g.name.toLowerCase() === trimmedSearch);
+  const showCreate = trimmedSearch.length > 0 && !allItems.some((g) => g.name.toLowerCase() === trimmedSearch);
 
   const filteredUnselected =
     trimmedSearch.length > 0
-      ? unselectedItems.filter((g) =>
-          g.name.toLowerCase().includes(trimmedSearch),
-        )
+      ? unselectedItems.filter((g) => g.name.toLowerCase().includes(trimmedSearch))
       : unselectedItems;
 
   function handleCommandChange(value: string) {
@@ -88,9 +64,7 @@ export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
       }
     } else if (value.trim().length > 0) {
       setParsed(null);
-      setError(
-        "Could not parse SSH command. Expected format: ssh user@host -p port",
-      );
+      setError("Could not parse SSH command. Expected format: ssh user@host -p port");
     }
   }
 
@@ -146,13 +120,7 @@ export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
     const identityFile = parsed.identityFile || defaultIdentity || undefined;
 
     try {
-      appendHostToConfig(
-        finalAlias,
-        parsed.hostname,
-        parsed.user,
-        parsed.port,
-        identityFile,
-      );
+      appendHostToConfig(finalAlias, parsed.hostname, parsed.user, parsed.port, identityFile);
 
       const finalGroupIds: string[] = [];
       for (const id of selectedGroups) {
@@ -197,10 +165,7 @@ export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
       ? `Identity file: ${defaultIdentity} (from preferences)`
       : "No identity file specified.";
 
-  const groupLabel =
-    selectedItems.length > 0
-      ? selectedItems.map((g) => g.name).join(", ")
-      : "None";
+  const groupLabel = selectedItems.length > 0 ? selectedItems.map((g) => g.name).join(", ") : "None";
 
   return (
     <Form
@@ -237,41 +202,21 @@ export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
         filtering={false}
         info="Select groups or type a new name to create one. Tap a selected group to remove it."
       >
-        <Form.Dropdown.Item
-          value="__none"
-          title="Search or create group..."
-          icon={Icon.MagnifyingGlass}
-        />
+        <Form.Dropdown.Item value="__none" title="Search or create group..." icon={Icon.MagnifyingGlass} />
         {showCreate && (
-          <Form.Dropdown.Item
-            value="__create"
-            title={`Create "${groupSearch.trim()}"`}
-            icon={Icon.PlusCircle}
-          />
+          <Form.Dropdown.Item value="__create" title={`Create "${groupSearch.trim()}"`} icon={Icon.PlusCircle} />
         )}
         {selectedItems.length > 0 && (
           <Form.Dropdown.Section title="Selected">
             {selectedItems.map((g) => (
-              <Form.Dropdown.Item
-                key={g.id}
-                value={g.id}
-                title={g.name}
-                icon={Icon.CheckCircle}
-              />
+              <Form.Dropdown.Item key={g.id} value={g.id} title={g.name} icon={Icon.CheckCircle} />
             ))}
           </Form.Dropdown.Section>
         )}
         {filteredUnselected.length > 0 && (
-          <Form.Dropdown.Section
-            title={selectedItems.length > 0 ? "Available" : undefined}
-          >
+          <Form.Dropdown.Section title={selectedItems.length > 0 ? "Available" : undefined}>
             {filteredUnselected.map((g) => (
-              <Form.Dropdown.Item
-                key={g.id}
-                value={g.id}
-                title={g.name}
-                icon={Icon.Circle}
-              />
+              <Form.Dropdown.Item key={g.id} value={g.id} title={g.name} icon={Icon.Circle} />
             ))}
           </Form.Dropdown.Section>
         )}
@@ -279,12 +224,7 @@ export function AddHostForm({ groups, onHostAdded }: AddHostFormProps) {
       {parsed && (
         <Form.Description
           title="Parsed"
-          text={[
-            `User: ${parsed.user}`,
-            `Host: ${parsed.hostname}`,
-            `Port: ${parsed.port}`,
-            identitySource,
-          ].join("\n")}
+          text={[`User: ${parsed.user}`, `Host: ${parsed.hostname}`, `Port: ${parsed.port}`, identitySource].join("\n")}
         />
       )}
     </Form>

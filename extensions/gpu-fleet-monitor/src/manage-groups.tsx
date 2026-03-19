@@ -11,23 +11,14 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
-import {
-  HostGroup,
-  addGroup,
-  updateGroup,
-  deleteGroup,
-  generateGroupId,
-} from "./lib/groups";
+import { HostGroup, addGroup, updateGroup, deleteGroup, generateGroupId } from "./lib/groups";
 
 interface ManageGroupsProps {
   groups: HostGroup[];
   onGroupsChanged: () => void;
 }
 
-export function ManageGroupsView({
-  groups,
-  onGroupsChanged,
-}: ManageGroupsProps) {
+export function ManageGroupsView({ groups, onGroupsChanged }: ManageGroupsProps) {
   const { push } = useNavigation();
 
   return (
@@ -103,8 +94,7 @@ export function ManageGroupsView({
                   if (
                     await confirmAlert({
                       title: `Delete "${group.name}"?`,
-                      message:
-                        "Hosts will not be deleted, only the group assignment.",
+                      message: "Hosts will not be deleted, only the group assignment.",
                       primaryAction: {
                         title: "Delete",
                         style: Alert.ActionStyle.Destructive,
@@ -131,14 +121,10 @@ export function ManageGroupsView({
 function groupSubtitle(group: HostGroup): string {
   const parts: string[] = [];
   if (group.patterns.length > 0) {
-    parts.push(
-      `${group.patterns.length} pattern${group.patterns.length > 1 ? "s" : ""}`,
-    );
+    parts.push(`${group.patterns.length} pattern${group.patterns.length > 1 ? "s" : ""}`);
   }
   if (group.identityFiles.length > 0) {
-    parts.push(
-      `${group.identityFiles.length} identity file${group.identityFiles.length > 1 ? "s" : ""}`,
-    );
+    parts.push(`${group.identityFiles.length} identity file${group.identityFiles.length > 1 ? "s" : ""}`);
   }
   return parts.length > 0 ? parts.join(", ") : "No rules";
 }
@@ -152,9 +138,7 @@ function GroupForm({ initial, onSave }: GroupFormProps) {
   const { pop } = useNavigation();
   const [name, setName] = useState(initial?.name || "");
   const [patterns, setPatterns] = useState(initial?.patterns.join(", ") || "");
-  const [identityFiles, setIdentityFiles] = useState(
-    initial?.identityFiles.join(", ") || "",
-  );
+  const [identityFiles, setIdentityFiles] = useState(initial?.identityFiles.join(", ") || "");
 
   async function handleSubmit() {
     const trimmedName = name.trim();
@@ -192,20 +176,11 @@ function GroupForm({ initial, onSave }: GroupFormProps) {
       navigationTitle={initial ? `Edit ${initial.name}` : "Create Group"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={initial ? "Save Changes" : "Create Group"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={initial ? "Save Changes" : "Create Group"} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Group Name"
-        placeholder="My Group"
-        value={name}
-        onChange={setName}
-      />
+      <Form.TextField id="name" title="Group Name" placeholder="My Group" value={name} onChange={setName} />
       <Form.TextField
         id="patterns"
         title="Host Patterns"

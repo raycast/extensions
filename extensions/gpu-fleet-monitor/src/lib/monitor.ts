@@ -143,10 +143,8 @@ function parseOutput(stdout: string): Omit<HostStatus, "host" | "lastUpdated"> {
   } else if (gpuCount === 0) {
     state = "no-gpu";
   } else {
-    const memPct =
-      gpuMemoryTotal > 0 ? (gpuMemoryUsed / gpuMemoryTotal) * 100 : 0;
-    const isFree =
-      Math.round(gpuUtilization) <= IDLE_UTIL && memPct <= IDLE_MEM_PCT;
+    const memPct = gpuMemoryTotal > 0 ? (gpuMemoryUsed / gpuMemoryTotal) * 100 : 0;
+    const isFree = Math.round(gpuUtilization) <= IDLE_UTIL && memPct <= IDLE_MEM_PCT;
     state = isFree ? "free" : "busy";
   }
 
@@ -264,19 +262,13 @@ export function probeHostsStreaming(
 /**
  * Batch probe (kept for quick-connect which needs all results).
  */
-export async function probeHosts(
-  hosts: SSHHost[],
-  timeout: number,
-): Promise<HostStatus[]> {
+export async function probeHosts(hosts: SSHHost[], timeout: number): Promise<HostStatus[]> {
   const results: HostStatus[] = [];
   await probeHostsStreaming(hosts, timeout, (s) => results.push(s)).promise;
   return results;
 }
 
-export function getTmuxSessions(
-  host: SSHHost,
-  timeout: number,
-): Promise<string[]> {
+export function getTmuxSessions(host: SSHHost, timeout: number): Promise<string[]> {
   return new Promise((resolve) => {
     const args = [...sshOpts(timeout), "-T", host.name];
     const proc = spawn(SSH_BIN, args, {
@@ -288,9 +280,7 @@ export function getTmuxSessions(
       stdout += d.toString();
     });
 
-    proc.stdin.write(
-      "tmux list-sessions -F '#{session_name}' 2>/dev/null\nexit\n",
-    );
+    proc.stdin.write("tmux list-sessions -F '#{session_name}' 2>/dev/null\nexit\n");
     proc.stdin.end();
 
     const timer = setTimeout(

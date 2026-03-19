@@ -69,16 +69,11 @@ export async function getHostOverrides(): Promise<HostGroupOverrides> {
   }
 }
 
-export async function saveHostOverrides(
-  overrides: HostGroupOverrides,
-): Promise<void> {
+export async function saveHostOverrides(overrides: HostGroupOverrides): Promise<void> {
   await LocalStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
 }
 
-export async function setHostGroups(
-  hostName: string,
-  groupIds: string[],
-): Promise<void> {
+export async function setHostGroups(hostName: string, groupIds: string[]): Promise<void> {
   const overrides = await getHostOverrides();
   if (groupIds.length === 0) {
     delete overrides[hostName];
@@ -132,18 +127,13 @@ export function classifyHostGroups(
     }
 
     for (const group of groups) {
-      if (
-        group.patterns?.length > 0 &&
-        group.patterns.some((p) => matchPattern(hostName, p))
-      ) {
+      if (group.patterns?.length > 0 && group.patterns.some((p) => matchPattern(hostName, p))) {
         matched.add(group.id);
       }
 
       if (identityFile && group.identityFiles?.length > 0) {
         const norm = normalizeIdentityPath(identityFile);
-        if (
-          group.identityFiles.some((f) => normalizeIdentityPath(f) === norm)
-        ) {
+        if (group.identityFiles.some((f) => normalizeIdentityPath(f) === norm)) {
           matched.add(group.id);
         }
       }

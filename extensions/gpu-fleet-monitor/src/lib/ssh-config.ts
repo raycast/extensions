@@ -64,11 +64,7 @@ export function parseSSHConfig(configPath = SSH_CONFIG_PATH): RawHostEntry[] {
         }
         const hostPatterns = line.split(/\s+/).slice(1);
         const hostName = hostPatterns[0] || "";
-        if (
-          hostName === "*" ||
-          hostName.includes("*") ||
-          hostName.includes("?")
-        ) {
+        if (hostName === "*" || hostName.includes("*") || hostName.includes("?")) {
           current = null;
           continue;
         }
@@ -128,10 +124,7 @@ export interface ClassifyOptions {
   excludedHosts: Set<string>;
 }
 
-export function classifyHosts(
-  entries: RawHostEntry[],
-  opts: ClassifyOptions,
-): SSHHost[] {
+export function classifyHosts(entries: RawHostEntry[], opts: ClassifyOptions): SSHHost[] {
   const { groups, overrides, excludedHosts } = opts;
 
   return entries
@@ -152,10 +145,7 @@ export function getHosts(opts: ClassifyOptions): SSHHost[] {
   return classifyHosts(raw, opts);
 }
 
-export function hostExistsByUser(
-  user: string,
-  hostname: string,
-): string | null {
+export function hostExistsByUser(user: string, hostname: string): string | null {
   const entries = parseSSHConfig();
   const match = entries.find((e) => e.user === user && e.hostname === hostname);
   return match ? match.name : null;
@@ -185,15 +175,9 @@ export function appendHostToConfig(
   lines.push("");
   const block = lines.join("\n");
 
-  const configContent = existsSync(SSH_CONFIG_PATH)
-    ? readFileSync(SSH_CONFIG_PATH, "utf-8")
-    : "";
+  const configContent = existsSync(SSH_CONFIG_PATH) ? readFileSync(SSH_CONFIG_PATH, "utf-8") : "";
 
-  writeFileSync(
-    SSH_CONFIG_PATH,
-    configContent.trimEnd() + "\n" + block,
-    "utf-8",
-  );
+  writeFileSync(SSH_CONFIG_PATH, configContent.trimEnd() + "\n" + block, "utf-8");
 }
 
 export interface ParsedSSHCommand {

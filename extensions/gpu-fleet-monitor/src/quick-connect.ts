@@ -3,11 +3,7 @@ import { probeHosts } from "./lib/monitor";
 import { connectTerminal, TERMINAL_LABELS } from "./lib/actions";
 import { SSHHost, TerminalApp } from "./lib/types";
 
-export async function quickConnect(
-  hosts: SSHHost[],
-  terminal: TerminalApp,
-  timeout: number,
-): Promise<void> {
+export async function quickConnect(hosts: SSHHost[], terminal: TerminalApp, timeout: number): Promise<void> {
   if (hosts.length === 0) {
     await showToast({
       style: Toast.Style.Failure,
@@ -48,7 +44,5 @@ export async function quickConnect(
 
   await closeMainWindow();
   connectTerminal(terminal, best.host);
-  await showHUD(
-    `Connecting to ${best.host.name} (${gpuDesc}) via ${TERMINAL_LABELS[terminal]}`,
-  );
+  await showHUD(`Connecting to ${best.host.name} (${gpuDesc}) via ${TERMINAL_LABELS[terminal]}`);
 }

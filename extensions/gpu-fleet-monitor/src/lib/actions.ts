@@ -1,4 +1,4 @@
-import { exec, spawn } from "child_process";
+import { exec, execSync, spawn } from "child_process";
 import { existsSync } from "fs";
 import { SSHHost, TerminalApp, EditorApp } from "./types";
 
@@ -12,20 +12,17 @@ function runAppleScript(script: string): void {
   child.unref();
 }
 
-function copyToClipboard(input: string): void {
-  const child = spawn("pbcopy", [], {
-    stdio: ["pipe", "ignore", "ignore"],
-    detached: true,
-  });
-  child.stdin.write(input);
-  child.stdin.end();
-  child.unref();
-}
-
 // --------------- Terminal backends ---------------
 
 function openInGhostty(cmd: string): void {
-  copyToClipboard(cmd);
+  let savedClipboard = "";
+  try {
+    savedClipboard = execSync("pbpaste", { encoding: "utf-8" });
+  } catch {
+    /* clipboard may be empty or contain non-text data */
+  }
+
+  execSync("pbcopy", { input: cmd });
 
   const script = `
 tell application "System Events"
@@ -52,6 +49,17 @@ else
   end tell
 end if`;
   runAppleScript(script);
+
+  // Ghostty lacks a proper AppleScript `do script` command, so we inject via
+  // clipboard paste. Restore the previous clipboard contents after a delay to
+  // minimise the side-effect on the user.
+  setTimeout(() => {
+    try {
+      execSync("pbcopy", { input: savedClipboard });
+    } catch {
+      /* best-effort restore */
+    }
+  }, 3000);
 }
 
 function openInITerm(cmd: string): void {
@@ -128,16 +136,9 @@ export function connectTerminal(terminal: TerminalApp, host: SSHHost): void {
   openInTerminalApp(terminal, `ssh ${host.name}`);
 }
 
-export function connectTerminalTmux(
-  terminal: TerminalApp,
-  host: SSHHost,
-  session: string,
-): void {
+export function connectTerminalTmux(terminal: TerminalApp, host: SSHHost, session: string): void {
   const escaped = session.replace(/'/g, "'\\''");
-  openInTerminalApp(
-    terminal,
-    `ssh -t ${host.name} tmux attach -t '${escaped}'`,
-  );
+  openInTerminalApp(terminal, `ssh -t ${host.name} tmux attach -t '${escaped}'`);
 }
 
 export function connectEditor(editor: EditorApp, host: SSHHost): void {
