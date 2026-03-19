@@ -4,7 +4,7 @@
   "title": "Sonar Portfolio",
   "description": "View your investment portfolio, search instruments, and get market signals",
   "icon": "command-icon.png",
-  "author": "MatiasVoldbyDrejer",
+  "author": "matias_v_drejer",
   "categories": ["Finance"],
   "license": "MIT",
   "commands": [

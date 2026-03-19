@@ -1,4 +1,11 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { api } from "./api";
 import { signalIcon } from "./utils";
@@ -15,7 +22,11 @@ export default function Pulse() {
       const result = await api.pulse();
       setData(result);
     } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to load pulse", message: String(e) });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load pulse",
+        message: String(e),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -33,13 +44,22 @@ export default function Pulse() {
       setData(result);
       showToast({ style: Toast.Style.Success, title: "Pulse generated" });
     } catch (e) {
-      showToast({ style: Toast.Style.Failure, title: "Failed to generate pulse", message: String(e) });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to generate pulse",
+        message: String(e),
+      });
     } finally {
       setGenerating(false);
     }
   };
 
-  const isEmpty = !isLoading && (!data || data.status === "empty" || data.status === "expired" || !(data.items?.length));
+  const isEmpty =
+    !isLoading &&
+    (!data ||
+      data.status === "empty" ||
+      data.status === "expired" ||
+      !data.items?.length);
 
   if (isEmpty) {
     return (
@@ -79,7 +99,11 @@ export default function Pulse() {
           }
           actions={
             <ActionPanel>
-              <Action title="Regenerate" icon={Icon.ArrowClockwise} onAction={handleGenerate} />
+              <Action
+                title="Regenerate"
+                icon={Icon.ArrowClockwise}
+                onAction={handleGenerate}
+              />
             </ActionPanel>
           }
         />
