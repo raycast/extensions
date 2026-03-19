@@ -177,7 +177,7 @@ export default function Command() {
     const transactionFee = val * feePct + route.fixedFee;
     const amountAfterTransactionFee = val - transactionFee;
     const fxFee = amountAfterTransactionFee > 0 ? amountAfterTransactionFee * fxPct : 0;
-    
+
     const standardFee = transactionFee + fxFee;
     const standardGet = val - standardFee;
 
