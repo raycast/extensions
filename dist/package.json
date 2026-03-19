@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "karabiner-elements",
-  "title": "Karabiner Elements",
+  "name": "toggle-karabiner-complex-modification",
+  "title": "Toggle Karabiner Elements Complex Modification",
   "description": "Toggle Karabiner-Elements complex modifications",
-  "icon": "vim-logo.png",
+  "icon": "karabiner-elements-logo.png",
   "author": "julian67",
   "platforms": [
     "macOS"
