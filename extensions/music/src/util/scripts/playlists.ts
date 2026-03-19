@@ -21,7 +21,7 @@ const loopThroughPlaylists = (kind: PlaylistKind) => `
 		set pDuration to the duration of selectedPlaylist
 		set pCount to count (tracks of selectedPlaylist)
 		set pKind to the class of selectedPlaylist
-		set output to output & "id=" & pId & "$BREAKname=" & pName & "$BREAKduration=" & pDuration & "$BREAKcount=" & pCount & "$BREAKkind=" & pKind & "\\n"
+		set output to output & "id=" & pId & "$BREAKname=" & pName & "$BREAKduration=" & pDuration & "$BREAKcount=" & pCount & "$BREAKkind=" & pKind & "\n"
 	end repeat
 `;
 

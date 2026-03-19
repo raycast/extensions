@@ -44,7 +44,7 @@ export const getAll: TE.TaskEither<Error, ReadonlyArray<Album>> = pipe(
 			set aName to item i of allAlbums
 			if seenAlbums does not contain aName then
 				set end of seenAlbums to aName
-				set output to output & "id=" & (item i of allIds) & "$BREAKname=" & aName & "$BREAKartist=" & (item i of allArtists) & "\\n"
+				set output to output & "id=" & (item i of allIds) & "$BREAKname=" & aName & "$BREAKartist=" & (item i of allArtists) & "\n"
 			end if
 		end repeat
 	end tell
@@ -60,7 +60,7 @@ export const search = (term: string): TE.TaskEither<Error, ReadonlyArray<Album>>
 	tell application "Music"
 		set results to (search (library playlist 1) for "${term}")
 		repeat with aTrack in results
-			set output to output & "id=" & (id of aTrack) & "$BREAKname=" & (album of aTrack) & "$BREAKartist=" & (artist of aTrack) & "\\n"
+			set output to output & "id=" & (id of aTrack) & "$BREAKname=" & (album of aTrack) & "$BREAKartist=" & (artist of aTrack) & "\n"
 		end repeat
 	end tell
 	return output

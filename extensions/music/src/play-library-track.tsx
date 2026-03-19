@@ -27,6 +27,7 @@ export default function PlayLibraryTrack() {
   const onSearch = useCallback(async (next: string) => {
     if (!next || next.length < 1) {
       setTracks([]);
+      setIsSearching(false);
       return;
     }
 

@@ -6,7 +6,7 @@ export const search = (search: string) =>
 			tell application "Music"
 				set results to (search (library playlist 1) for "${search}")
 				repeat with selectedTrack in results
-					set output to output & "id=" & (id of selectedTrack) & "$BREAKname=" & (name of selectedTrack) & "$BREAKartist=" & (artist of selectedTrack) & "$BREAKalbum=" & (album of selectedTrack) & "$BREAKduration=" & (duration of selectedTrack) & "\\n"
+					set output to output & "id=" & (id of selectedTrack) & "$BREAKname=" & (name of selectedTrack) & "$BREAKartist=" & (artist of selectedTrack) & "$BREAKalbum=" & (album of selectedTrack) & "$BREAKduration=" & (duration of selectedTrack) & "\n"
 				end repeat
 			end tell
 		return output
@@ -23,7 +23,7 @@ export const getAll = () =>
       set allDurations to duration of every track of (library playlist 1)
       set trackCount to count of allIds
       repeat with i from 1 to trackCount
-        set output to output & "id=" & (item i of allIds) & "$BREAKname=" & (item i of allNames) & "$BREAKartist=" & (item i of allArtists) & "$BREAKalbum=" & (item i of allAlbums) & "$BREAKduration=" & (item i of allDurations) & "\\n"
+        set output to output & "id=" & (item i of allIds) & "$BREAKname=" & (item i of allNames) & "$BREAKartist=" & (item i of allArtists) & "$BREAKalbum=" & (item i of allAlbums) & "$BREAKduration=" & (item i of allDurations) & "\n"
       end repeat
     end tell
     return output
