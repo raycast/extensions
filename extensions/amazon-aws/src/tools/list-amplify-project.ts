@@ -1,11 +1,12 @@
-import { AmplifyClient, App, ListAppsCommand } from "@aws-sdk/client-amplify";
+import { App, ListAppsCommand } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Lists all Amplify projects (apps) in the current AWS account and region
  * @returns Promise<App[]> Array of Amplify apps
  */
 export default async function listAmplifyProjects(): Promise<App[]> {
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const amplifyApps: App[] = [];
   let nextToken: string | undefined;

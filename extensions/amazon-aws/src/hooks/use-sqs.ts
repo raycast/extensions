@@ -1,6 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
-import { GetQueueAttributesCommand, ListQueuesCommand, SQSClient } from "@aws-sdk/client-sqs";
+import { GetQueueAttributesCommand, ListQueuesCommand } from "@aws-sdk/client-sqs";
+import { getSQSClient } from "../services/clients/sqs";
 import { Queue } from "../sqs";
 
 export const useQueues = (prefixQuery: string) => {
@@ -11,7 +12,7 @@ export const useQueues = (prefixQuery: string) => {
     mutate,
   } = useCachedPromise(
     async (prefix: string) => {
-      const { QueueUrls } = await new SQSClient({}).send(
+      const { QueueUrls } = await getSQSClient().send(
         new ListQueuesCommand({
           MaxResults: 25,
           ...(prefix.trim().length > 2 && { QueueNamePrefix: prefix }),
@@ -20,7 +21,7 @@ export const useQueues = (prefixQuery: string) => {
 
       const queues = await Promise.all(
         (QueueUrls ?? []).map(async (queueUrl) => {
-          const { Attributes: attributes } = await new SQSClient({}).send(
+          const { Attributes: attributes } = await getSQSClient().send(
             new GetQueueAttributesCommand({ QueueUrl: queueUrl, AttributeNames: ["All"] }),
           );
 

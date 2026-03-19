@@ -14,9 +14,10 @@ import {
   Clipboard,
   Keyboard,
 } from "@raycast/api";
-import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DeleteItemCommand, DeleteItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { getDynamoDBClient } from "../../services/clients/dynamodb";
 import { getErrorMessage } from "../../util";
 
 interface DeleteItemFormValues {
@@ -77,7 +78,7 @@ export const DeleteItemForm = ({
               title: `❗Deleting item in ${table.TableName}`,
             });
 
-            mutate(new DynamoDBClient({}).send(new DeleteItemCommand(input)), {
+            mutate(getDynamoDBClient().send(new DeleteItemCommand(input)), {
               optimisticUpdate: (tables) => {
                 if (!tables) return undefined;
                 return tables.map((t) =>

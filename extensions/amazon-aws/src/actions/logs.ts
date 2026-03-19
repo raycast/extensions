@@ -1,14 +1,12 @@
 import {
-  CloudWatchLogsClient,
   DescribeLogStreamsCommand,
   FilteredLogEvent,
   FilterLogEventsCommand,
   LogStream,
 } from "@aws-sdk/client-cloudwatch-logs";
 import { LogStartTimes } from "../interfaces";
+import { getCloudWatchLogsClient } from "../services/clients/cloudwatch-logs";
 import { isReadyToFetch } from "../util";
-
-const cloudWatchLogsClient = new CloudWatchLogsClient({});
 export async function fetchLogs(
   logGroupName: string,
   startTime: LogStartTimes,
@@ -22,24 +20,24 @@ export async function fetchLogs(
 export async function fetchLogStreams(
   logGroupName: string,
   token?: string,
-  accEvents?: LogStream[],
+  accStreams?: LogStream[],
 ): Promise<LogStream[]> {
   if (!isReadyToFetch()) return [];
-  const { logStreams, nextToken } = await cloudWatchLogsClient.send(
-    new DescribeLogStreamsCommand({ logGroupName, nextToken: token }),
+  const { logStreams, nextToken } = await getCloudWatchLogsClient().send(
+    new DescribeLogStreamsCommand({
+      logGroupName,
+      nextToken: token,
+      limit: 50,
+    }),
   );
 
-  const combinedEvents = [...(accEvents || []), ...(logStreams || [])];
-
-  if (combinedEvents.length > 300) {
-    return combinedEvents;
-  }
+  const combinedStreams = [...(accStreams || []), ...(logStreams || [])];
 
   if (nextToken) {
-    return fetchLogStreams(logGroupName, nextToken, combinedEvents);
+    return fetchLogStreams(logGroupName, nextToken, combinedStreams);
   }
 
-  return combinedEvents;
+  return combinedStreams;
 }
 
 async function fetchAllLogs(
@@ -52,7 +50,7 @@ async function fetchAllLogs(
 ): Promise<FilteredLogEvent[]> {
   const secondsSinceEpoch = getMiliSecondsSinceEpoch(startTime);
 
-  const { events, nextToken } = await cloudWatchLogsClient.send(
+  const { events, nextToken } = await getCloudWatchLogsClient().send(
     new FilterLogEventsCommand({
       logGroupName,
       logStreamNamePrefix,

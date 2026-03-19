@@ -56,6 +56,7 @@ function DeploymentItem({ deployment, apiId, isLatest }: { deployment: Deploymen
             {deployment.description && (
               <Action.CopyToClipboard title="Copy Description" content={deployment.description} />
             )}
+            <AwsAction.ExportResponse response={deployment} />
           </ActionPanel.Section>
         </ActionPanel>
       }

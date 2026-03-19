@@ -1,9 +1,10 @@
-import { DescribeInstancesCommand, EC2Client, Instance } from "@aws-sdk/client-ec2";
+import { DescribeInstancesCommand, Instance } from "@aws-sdk/client-ec2";
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { getEC2Client } from "./services/clients/ec2";
 
 export default function EC2() {
   const { data: instances, error, isLoading, revalidate } = useCachedPromise(fetchEC2Instances);
@@ -34,13 +35,16 @@ function EC2Instance({ instance }: { instance: Instance }) {
       actions={
         <ActionPanel>
           <AwsAction.Console url={resourceToConsoleLink(instance.InstanceId, "AWS::EC2::Instance")} />
-          <Action.CopyToClipboard title="Copy Instance ID" content={instance.InstanceId || ""} />
-          {instance.PrivateIpAddress && (
-            <Action.CopyToClipboard title="Copy Private IP" content={instance.PrivateIpAddress} />
-          )}
-          {instance.PublicIpAddress && (
-            <Action.CopyToClipboard title="Copy Public IP" content={instance.PublicIpAddress} />
-          )}
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Instance ID" content={instance.InstanceId || ""} />
+            {instance.PrivateIpAddress && (
+              <Action.CopyToClipboard title="Copy Private IP" content={instance.PrivateIpAddress} />
+            )}
+            {instance.PublicIpAddress && (
+              <Action.CopyToClipboard title="Copy Public IP" content={instance.PublicIpAddress} />
+            )}
+            <AwsAction.ExportResponse response={instance} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[{ text: instance.InstanceType }]}
@@ -50,7 +54,7 @@ function EC2Instance({ instance }: { instance: Instance }) {
 
 async function fetchEC2Instances(token?: string, accInstances?: Instance[]): Promise<Instance[]> {
   if (!isReadyToFetch()) return [];
-  const { NextToken, Reservations } = await new EC2Client({}).send(new DescribeInstancesCommand({ NextToken: token }));
+  const { NextToken, Reservations } = await getEC2Client().send(new DescribeInstancesCommand({ NextToken: token }));
   const instances = (Reservations || []).reduce<Instance[]>(
     (acc, reservation) => [...acc, ...(reservation.Instances || [])],
     [],

@@ -44,6 +44,7 @@ function ECRRepository({ repository }: { repository: Repository }) {
               content={repository.repositoryUri || ""}
               shortcut={{ modifiers: ["opt"], key: "c" }}
             />
+            <AwsAction.ExportResponse response={repository} />
           </ActionPanel.Section>
         </ActionPanel>
       }

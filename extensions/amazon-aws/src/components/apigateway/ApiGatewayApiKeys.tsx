@@ -65,6 +65,7 @@ function ApiKeyItem({ apiKey, apiId }: { apiKey: ApiKey & { isAssociated?: boole
             <Action.CopyToClipboard title="Copy API Key ID" content={apiKey.id || ""} />
             <Action.CopyToClipboard title="Copy API Key Name" content={apiKey.name || ""} />
             {apiKey.value && <Action.CopyToClipboard title="Copy API Key Value" content={apiKey.value} />}
+            <AwsAction.ExportResponse response={apiKey} />
           </ActionPanel.Section>
         </ActionPanel>
       }

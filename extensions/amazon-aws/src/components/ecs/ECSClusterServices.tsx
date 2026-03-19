@@ -1,10 +1,11 @@
-import { ECSClient, Service, UpdateServiceCommand } from "@aws-sdk/client-ecs";
+import { Service, UpdateServiceCommand } from "@aws-sdk/client-ecs";
 import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchServices, getServiceUrl } from "../../actions";
 import { getFilterPlaceholder } from "../../util";
 import ECSClusterServiceTasks from "./ECSClusterServiceTasks";
 import { AwsAction } from "../common/action";
+import { getECSClient } from "../../services/clients/ecs";
 
 function ECSClusterServices({ clusterArn }: { clusterArn: string }) {
   const { data: services, isLoading } = useCachedPromise(fetchServices, [clusterArn], { keepPreviousData: true });
@@ -92,7 +93,7 @@ function forceNewDeployment(service: Service) {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Force deploying..." });
 
         try {
-          await new ECSClient({}).send(
+          await getECSClient().send(
             new UpdateServiceCommand({
               cluster: service.clusterArn,
               service: service.serviceName,

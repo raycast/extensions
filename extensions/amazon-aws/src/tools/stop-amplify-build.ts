@@ -1,4 +1,5 @@
-import { AmplifyClient, StopJobCommand, JobSummary } from "@aws-sdk/client-amplify";
+import { StopJobCommand, JobSummary } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Stops a running build job for an Amplify app branch
@@ -22,7 +23,7 @@ export default async function stopAmplifyBuild(options: {
     throw new Error("Job ID is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const command = new StopJobCommand({
     appId,

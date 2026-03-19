@@ -1,6 +1,7 @@
 import { ApiKey } from "@aws-sdk/client-appsync";
 import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
 import { useAppSyncApiKeys } from "../../hooks/use-appsync";
+import { AwsAction } from "../common/action";
 
 export default function AppSyncApiKeys({ apiId, apiName }: { apiId: string; apiName: string }) {
   const { apiKeys, error, isLoading } = useAppSyncApiKeys(apiId);
@@ -37,6 +38,7 @@ function ApiKeyItem({ apiKey }: { apiKey: ApiKey }) {
         <ActionPanel>
           <Action.CopyToClipboard title="Copy API Key ID" content={apiKey.id || ""} />
           {apiKey.description && <Action.CopyToClipboard title="Copy Description" content={apiKey.description} />}
+          <AwsAction.ExportResponse response={apiKey} />
         </ActionPanel>
       }
       accessories={[

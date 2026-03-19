@@ -1,8 +1,20 @@
 # Amazon AWS Changelog
 
+## [Athena, QuickSight, AI Tools & More] - {PR_MERGE_DATE}
+
+- Browse and manage Athena work groups, named queries, and query executions
+- Browse QuickSight dashboards, analyses, and datasets with region override support
+- Search and list Cognito user pool users
+- Ask Raycast AI about your Lambda functions, S3 buckets, DynamoDB tables, secrets, pipelines, log groups, and QuickSight dashboards
+- Improved Amplify build view with status icons, duration, job type, and one-click log downloads
+- Copy and export raw API responses for any Amplify resource
+- Fixed large accounts causing out-of-memory errors when loading paginated resources
+- Fixed Lambda log groups pointing to wrong CloudWatch group name
+- Clearer error messages across all services
+
 ## [Bug fix for Amplify] - 2025-09-30
 
-- Replace '/' in branch name with '-' when building branch url 
+- Replace '/' in branch name with '-' when building branch url
 
 ## [API Gateway, AppSync & Amplify Enhancements] - 2025-08-25
 

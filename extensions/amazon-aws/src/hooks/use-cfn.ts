@@ -1,7 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
 import {
-  CloudFormationClient,
   Export,
   ListExportsCommand,
   ListStackResourcesCommand,
@@ -10,6 +9,7 @@ import {
   StackSummary,
 } from "@aws-sdk/client-cloudformation";
 import { showToast, Toast } from "@raycast/api";
+import { getCloudFormationClient } from "../services/clients/cloudformation";
 
 export const useStacks = () => {
   const {
@@ -29,24 +29,27 @@ export const useStacks = () => {
   return { stacks, error, isLoading: (!stacks && !error) || isLoading, mutate };
 };
 
-const fetchStacks = async (toast: Toast, nextToken?: string, aggregate?: StackSummary[]): Promise<StackSummary[]> => {
-  const { NextToken: cursor, StackSummaries } = await new CloudFormationClient({}).send(
-    new ListStacksCommand({ NextToken: nextToken }),
-  );
+async function fetchStacks(toast: Toast, maxResults = 500): Promise<StackSummary[]> {
+  const stacks: StackSummary[] = [];
+  let nextToken: string | undefined;
 
-  const stacks = (StackSummaries ?? []).filter((s) => s.StackStatus !== "DELETE_COMPLETE");
+  do {
+    const { NextToken: cursor, StackSummaries } = await getCloudFormationClient().send(
+      new ListStacksCommand({ NextToken: nextToken }),
+    );
 
-  const agg = [...(aggregate ?? []), ...stacks];
-  toast.message = `${agg.length} stacks`;
-  if (cursor) {
-    return await fetchStacks(toast, cursor, agg);
-  }
+    const filteredStacks = (StackSummaries ?? []).filter((s) => s.StackStatus !== "DELETE_COMPLETE");
+    stacks.push(...filteredStacks);
+
+    toast.message = `${stacks.length} stacks`;
+    nextToken = cursor;
+  } while (nextToken && stacks.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded stacks";
-  toast.message = `${agg.length} stacks`;
-  return agg;
-};
+  toast.message = `${stacks.length} stacks`;
+  return stacks;
+}
 
 export const useExports = () => {
   const {
@@ -66,24 +69,27 @@ export const useExports = () => {
   return { exports, error, isLoading: (!exports && !error) || isLoading, mutate };
 };
 
-const fetchExports = async (toast: Toast, nextToken?: string, aggregate?: Export[]): Promise<Export[]> => {
-  const { NextToken: cursor, Exports } = await new CloudFormationClient({}).send(
-    new ListExportsCommand({ NextToken: nextToken }),
-  );
+async function fetchExports(toast: Toast, maxResults = 500): Promise<Export[]> {
+  const exports: Export[] = [];
+  let nextToken: string | undefined;
 
-  const exports = (Exports ?? []).filter((e) => e.Name && e.Value);
+  do {
+    const { NextToken: cursor, Exports } = await getCloudFormationClient().send(
+      new ListExportsCommand({ NextToken: nextToken }),
+    );
 
-  const agg = [...(aggregate ?? []), ...exports];
-  toast.message = `${agg.length} exports`;
-  if (cursor) {
-    return await fetchExports(toast, cursor, agg);
-  }
+    const filteredExports = (Exports ?? []).filter((e) => e.Name && e.Value);
+    exports.push(...filteredExports);
+
+    toast.message = `${exports.length} exports`;
+    nextToken = cursor;
+  } while (nextToken && exports.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded exports";
-  toast.message = `${agg.length} exports`;
-  return agg;
-};
+  toast.message = `${exports.length} exports`;
+  return exports;
+}
 
 export const useStackResources = (stackName: string) => {
   const {
@@ -102,26 +108,24 @@ export const useStackResources = (stackName: string) => {
   return { resources, error, isLoading: (!resources && !error) || isLoading };
 };
 
-const fetchStackResources = async (
-  stack: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: StackResourceSummary[],
-): Promise<StackResourceSummary[]> => {
-  const { NextToken: cursor, StackResourceSummaries } = await new CloudFormationClient({}).send(
-    new ListStackResourcesCommand({ NextToken: nextToken, StackName: stack }),
-  );
+async function fetchStackResources(stack: string, toast: Toast, maxResults = 500): Promise<StackResourceSummary[]> {
+  const resources: StackResourceSummary[] = [];
+  let nextToken: string | undefined;
 
-  const resources = (StackResourceSummaries ?? []).filter((r) => r.PhysicalResourceId);
+  do {
+    const { NextToken: cursor, StackResourceSummaries } = await getCloudFormationClient().send(
+      new ListStackResourcesCommand({ NextToken: nextToken, StackName: stack }),
+    );
 
-  const agg = [...(aggregate ?? []), ...resources];
-  toast.message = `${agg.length} resource`;
-  if (cursor) {
-    return await fetchStackResources(stack, toast, cursor, agg);
-  }
+    const filteredResources = (StackResourceSummaries ?? []).filter((r) => r.PhysicalResourceId);
+    resources.push(...filteredResources);
+
+    toast.message = `${resources.length} resources`;
+    nextToken = cursor;
+  } while (nextToken && resources.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded resources";
-  toast.message = `${agg.length} resources`;
-  return agg;
-};
+  toast.message = `${resources.length} resources`;
+  return resources;
+}

@@ -1,13 +1,13 @@
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
 import {
-  CodePipelineClient,
   GetPipelineStateCommand,
   ListPipelineExecutionsCommand,
   ListPipelinesCommand,
 } from "@aws-sdk/client-codepipeline";
 import { Pipeline, PipelineStage } from "../codepipeline";
 import { showToast, Toast } from "@raycast/api";
+import { getCodePipelineClient } from "../services/clients/codepipeline";
 
 export const usePipelines = () => {
   const {
@@ -35,7 +35,7 @@ export const usePipelineState = (pipelineName: string) => {
     mutate,
   } = useCachedPromise(
     async (name: string) => {
-      const { stageStates } = await new CodePipelineClient({}).send(new GetPipelineStateCommand({ name }));
+      const { stageStates } = await getCodePipelineClient().send(new GetPipelineStateCommand({ name }));
       const definedStages = (stageStates ?? []).filter((s) => !!s.stageName);
       return definedStages.map((s, i) => {
         let nextStage = undefined;
@@ -60,7 +60,7 @@ export const usePipelineExecutions = (pipelineName: string) => {
     mutate,
   } = useCachedPromise(
     async (name: string) => {
-      const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
+      const { pipelineExecutionSummaries } = await getCodePipelineClient().send(
         new ListPipelineExecutionsCommand({ pipelineName: name }),
       );
       return (pipelineExecutionSummaries ?? []).filter((e) => !!e.pipelineExecutionId);
@@ -72,32 +72,35 @@ export const usePipelineExecutions = (pipelineName: string) => {
   return { executions, isLoading: (!executions && !error) || isLoading, mutate };
 };
 
-const fetchPipelines = async (toast: Toast, nextToken?: string, aggregate?: Pipeline[]): Promise<Pipeline[]> => {
-  const { pipelines: pipelineSummaries, nextToken: cursor } = await new CodePipelineClient({}).send(
-    new ListPipelinesCommand({ nextToken, maxResults: 5 }),
-  );
+async function fetchPipelines(toast: Toast, maxResults = 100): Promise<Pipeline[]> {
+  const allPipelines: Pipeline[] = [];
+  let nextToken: string | undefined;
 
-  const pipelines = await Promise.all(
-    (pipelineSummaries ?? [])
-      .filter((p) => !!p.name)
-      .map(async (p) => {
-        const { pipelineExecutionSummaries } = await new CodePipelineClient({}).send(
-          new ListPipelineExecutionsCommand({ pipelineName: p.name }),
-        );
+  do {
+    const { pipelines: pipelineSummaries, nextToken: cursor } = await getCodePipelineClient().send(
+      new ListPipelinesCommand({ nextToken, maxResults: Math.min(maxResults - allPipelines.length, 25) }),
+    );
 
-        const executions = (pipelineExecutionSummaries ?? []).filter((e) => !!e.pipelineExecutionId);
-        return { ...p, ...(executions.length > 0 && { latestExecution: executions[0] }) } as Pipeline;
-      }),
-  );
+    const pipelines = await Promise.all(
+      (pipelineSummaries ?? [])
+        .filter((p) => !!p.name)
+        .map(async (p) => {
+          const { pipelineExecutionSummaries } = await getCodePipelineClient().send(
+            new ListPipelineExecutionsCommand({ pipelineName: p.name }),
+          );
 
-  const agg = [...(aggregate ?? []), ...pipelines];
-  toast.message = `${agg.length} pipelines`;
-  if (cursor) {
-    return await fetchPipelines(toast, cursor, agg);
-  }
+          const executions = (pipelineExecutionSummaries ?? []).filter((e) => !!e.pipelineExecutionId);
+          return { ...p, ...(executions.length > 0 && { latestExecution: executions[0] }) } as Pipeline;
+        }),
+    );
+
+    allPipelines.push(...pipelines);
+    toast.message = `${allPipelines.length} pipelines`;
+    nextToken = cursor;
+  } while (nextToken && allPipelines.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded pipelines";
-  toast.message = `${agg.length} pipelines`;
-  return agg;
-};
+  toast.message = `${allPipelines.length} pipelines`;
+  return allPipelines;
+}

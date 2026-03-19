@@ -1,11 +1,7 @@
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
-import {
-  GetResourcePolicyCommand,
-  GetSecretValueCommand,
-  ListSecretsCommand,
-  SecretsManagerClient,
-} from "@aws-sdk/client-secrets-manager";
+import { GetResourcePolicyCommand, GetSecretValueCommand, ListSecretsCommand } from "@aws-sdk/client-secrets-manager";
+import { getSecretsManagerClient } from "../services/clients/secrets-manager";
 
 export const useSecrets = (search: string) => {
   const {
@@ -15,7 +11,7 @@ export const useSecrets = (search: string) => {
     mutate,
   } = useCachedPromise(
     async (query: string) => {
-      const { SecretList } = await new SecretsManagerClient({}).send(
+      const { SecretList } = await getSecretsManagerClient().send(
         new ListSecretsCommand({
           MaxResults: 50,
           ...(query.trim().length > 2 && { Filters: [{ Key: "all", Values: [search] }] }),
@@ -37,7 +33,7 @@ export const useSecretValue = (secretId: string) => {
     isLoading,
   } = useCachedPromise(
     async (id: string) => {
-      const { SecretString } = await new SecretsManagerClient({}).send(new GetSecretValueCommand({ SecretId: id }));
+      const { SecretString } = await getSecretsManagerClient().send(new GetSecretValueCommand({ SecretId: id }));
 
       let md = "## Secret Value\n\n```";
       let value = SecretString;
@@ -67,7 +63,7 @@ export const useSecretPolicy = (secretId: string) => {
     isLoading,
   } = useCachedPromise(
     async (id: string) => {
-      const { ResourcePolicy = "❗Not Yet Defined" } = await new SecretsManagerClient({}).send(
+      const { ResourcePolicy = "❗Not Yet Defined" } = await getSecretsManagerClient().send(
         new GetResourcePolicyCommand({ SecretId: id }),
       );
 

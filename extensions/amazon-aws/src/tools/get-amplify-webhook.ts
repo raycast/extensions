@@ -1,4 +1,5 @@
-import { AmplifyClient, GetWebhookCommand, Webhook } from "@aws-sdk/client-amplify";
+import { GetWebhookCommand, Webhook } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Gets detailed information for a specific Amplify webhook
@@ -12,7 +13,7 @@ export default async function getAmplifyWebhook(options: { webhookId: string }):
     throw new Error("Webhook ID is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   try {
     const command = new GetWebhookCommand({ webhookId });

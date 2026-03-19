@@ -26,6 +26,7 @@ export const SecretValueDetails = ({ secret }: SecretProps) => {
           )}
           <ActionPanel.Section title={"Secret Actions"}>
             <SecretCopyActions {...{ secret }} />
+            <AwsAction.ExportResponse response={sec} />
           </ActionPanel.Section>
         </ActionPanel>
       }

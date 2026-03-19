@@ -2,7 +2,8 @@ import { Icon, Color, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
 
-import { GlueClient, GetJobRunsCommand, ListJobsCommand } from "@aws-sdk/client-glue";
+import { GetJobRunsCommand, ListJobsCommand } from "@aws-sdk/client-glue";
+import { getGlueClient } from "../services/clients/glue";
 import { GlueJobRun } from "../glue";
 
 export const useGlueJobs = () => {
@@ -31,7 +32,7 @@ export const useGlueJobRuns = (jobName: string) => {
     mutate,
   } = useCachedPromise(
     async (name: string) => {
-      const { JobRuns } = await new GlueClient({}).send(new GetJobRunsCommand({ JobName: name }));
+      const { JobRuns } = await getGlueClient().send(new GetJobRunsCommand({ JobName: name }));
       return (JobRuns ?? []).map((run) => {
         const jobRunResponse = {
           ...run,
@@ -52,35 +53,38 @@ export const useGlueJobRuns = (jobName: string) => {
   return { jobRuns, isLoading: (!jobRuns && !error) || isLoading, mutate };
 };
 
-const fetchGlueJobs = async (toast: Toast, nextToken?: string, aggregate?: GlueJobRun[]): Promise<GlueJobRun[]> => {
-  const { JobNames: jobNames, NextToken: cursor } = await new GlueClient({}).send(
-    new ListJobsCommand({ NextToken: nextToken, MaxResults: 25 }),
-  );
+async function fetchGlueJobs(toast: Toast, maxResults = 100): Promise<GlueJobRun[]> {
+  const allJobs: GlueJobRun[] = [];
+  let nextToken: string | undefined;
 
-  const jobs = await Promise.all(
-    (jobNames ?? []).map(async (jobName) => {
-      const { JobRuns } = await new GlueClient({}).send(new GetJobRunsCommand({ JobName: jobName, MaxResults: 1 }));
+  do {
+    const { JobNames: jobNames, NextToken: cursor } = await getGlueClient().send(
+      new ListJobsCommand({ NextToken: nextToken, MaxResults: Math.min(maxResults - allJobs.length, 25) }),
+    );
 
-      const latestRun = JobRuns && JobRuns.length > 0 ? JobRuns[0] : undefined;
-      const jobRunResponse = latestRun as GlueJobRun;
-      if (jobRunResponse) {
-        setJobRunIcon(jobRunResponse);
-      }
-      return jobRunResponse;
-    }),
-  );
+    const jobs = await Promise.all(
+      (jobNames ?? []).map(async (jobName) => {
+        const { JobRuns } = await getGlueClient().send(new GetJobRunsCommand({ JobName: jobName, MaxResults: 1 }));
 
-  const agg = [...(aggregate ?? []), ...jobs];
-  toast.message = `${agg.length} Glue jobs`;
-  if (cursor) {
-    return await fetchGlueJobs(toast, cursor, agg);
-  }
+        const latestRun = JobRuns && JobRuns.length > 0 ? JobRuns[0] : undefined;
+        const jobRunResponse = latestRun as GlueJobRun;
+        if (jobRunResponse) {
+          setJobRunIcon(jobRunResponse);
+        }
+        return jobRunResponse;
+      }),
+    );
+
+    allJobs.push(...jobs);
+    toast.message = `${allJobs.length} Glue jobs`;
+    nextToken = cursor;
+  } while (nextToken && allJobs.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded Glue jobs";
-  toast.message = `${agg.length} Glue jobs`;
-  return agg;
-};
+  toast.message = `${allJobs.length} Glue jobs`;
+  return allJobs;
+}
 
 const setJobRunIcon = (jobRun: GlueJobRun) => {
   switch (jobRun.JobRunState) {

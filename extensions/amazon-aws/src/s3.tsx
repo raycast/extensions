@@ -17,6 +17,7 @@ import {
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { getS3Client } from "./services/clients/s3";
 
 export default function S3() {
   const { data: buckets, error, isLoading, revalidate } = useCachedPromise(fetchBuckets);
@@ -47,8 +48,11 @@ function S3Bucket({ bucket }: { bucket: Bucket }) {
           <Action.Push target={<S3BucketObjects bucket={bucket} />} title="List Objects" icon={Icon.Document} />
           <Action.Push target={<S3BucketPolicy bucket={bucket} />} title="Show Bucket Policy" icon={Icon.Key} />{" "}
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::Bucket")} />
-          <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
-          <Action.CopyToClipboard title="Copy ARN" content={"arn:aws:s3:::" + bucket.Name || ""} />
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Name" content={bucket.Name || ""} />
+            <Action.CopyToClipboard title="Copy ARN" content={"arn:aws:s3:::" + bucket.Name || ""} />
+            <AwsAction.ExportResponse response={bucket} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -92,12 +96,15 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                   <AwsAction.Console
                     url={resourceToConsoleLink(`${bucket.Name}/${commonPrefix.Prefix}`, "AWS::S3::Bucket")}
                   />
-                  <Action.CopyToClipboard title="Copy Prefix" content={commonPrefix.Prefix || ""} />
-                  <Action.CopyToClipboard
-                    title="Copy S3 URI"
-                    content={"s3://" + bucket.Name + "/" + (commonPrefix.Prefix || "")}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                  />
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard title="Copy Prefix" content={commonPrefix.Prefix || ""} />
+                    <Action.CopyToClipboard
+                      title="Copy S3 URI"
+                      content={"s3://" + bucket.Name + "/" + (commonPrefix.Prefix || "")}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    />
+                    <AwsAction.ExportResponse response={commonPrefix} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
@@ -117,7 +124,7 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                       const toast = await showToast({ style: Toast.Style.Animated, title: "Downloading..." });
 
                       try {
-                        const data = await new S3Client({}).send(
+                        const data = await getS3Client().send(
                           new GetObjectCommand({ Bucket: bucket.Name, Key: object.Key || "" }),
                         );
                         if (data.Body instanceof Readable) {
@@ -135,12 +142,15 @@ function S3BucketObjects({ bucket, prefix = "" }: { bucket: Bucket; prefix?: str
                       }
                     }}
                   />
-                  <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
-                  <Action.CopyToClipboard
-                    title="Copy S3 URI"
-                    content={"s3://" + bucket.Name + "/" + (object.Key || "")}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                  />
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard title="Copy Key" content={object.Key || ""} />
+                    <Action.CopyToClipboard
+                      title="Copy S3 URI"
+                      content={"s3://" + bucket.Name + "/" + (object.Key || "")}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    />
+                    <AwsAction.ExportResponse response={object} />
+                  </ActionPanel.Section>
                   <Action
                     title={`${isReversedOrder ? "Standard" : "Reversed"} Order`}
                     onAction={() => setReversedOrder(!isReversedOrder)}
@@ -169,6 +179,9 @@ function S3BucketPolicy({ bucket }: { bucket: Bucket }) {
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Policy" content={policy?.value || ""} />
           <AwsAction.Console url={resourceToConsoleLink(bucket.Name, "AWS::S3::BucketPolicy")} />
+          <ActionPanel.Section title="Copy">
+            <AwsAction.ExportResponse response={policy} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
@@ -176,7 +189,7 @@ function S3BucketPolicy({ bucket }: { bucket: Bucket }) {
 }
 async function fetchBuckets() {
   if (!isReadyToFetch()) return [];
-  const { Buckets } = await new S3Client({}).send(new ListBucketsCommand({}));
+  const { Buckets } = await getS3Client().send(new ListBucketsCommand({}));
 
   return Buckets;
 }
@@ -191,7 +204,7 @@ async function fetchBucketObjects(
   prefixes: CommonPrefix[] = [],
 ): Promise<{ objects: _Object[]; prefixes: CommonPrefix[] }> {
   const region =
-    _region || (await new S3Client({}).send(new GetBucketLocationCommand({ Bucket: bucket }))).LocationConstraint;
+    _region || (await getS3Client().send(new GetBucketLocationCommand({ Bucket: bucket }))).LocationConstraint;
   const { Contents, CommonPrefixes, NextContinuationToken } = await new S3Client({ region }).send(
     new ListObjectsV2Command({ Bucket: bucket, ContinuationToken: continuationToken, Delimiter: "/", Prefix: prefix }),
   );
@@ -237,9 +250,7 @@ export const fetchBucketPolicy = (bucket: string) => {
     isLoading,
   } = useCachedPromise(
     async (bucket: string) => {
-      const { Policy = "❗Not Yet Defined" } = await new S3Client({}).send(
-        new GetBucketPolicyCommand({ Bucket: bucket }),
-      );
+      const { Policy = "❗Not Yet Defined" } = await getS3Client().send(new GetBucketPolicyCommand({ Bucket: bucket }));
       let md = "## Bucket Policy\n\n```";
       let value = Policy;
 

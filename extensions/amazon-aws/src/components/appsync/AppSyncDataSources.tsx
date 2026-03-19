@@ -48,6 +48,7 @@ function DataSourceItem({ dataSource, apiId }: { dataSource: DataSource; apiId: 
             {dataSource.httpConfig?.endpoint && (
               <Action.CopyToClipboard title="Copy HTTP Endpoint" content={dataSource.httpConfig.endpoint} />
             )}
+            <AwsAction.ExportResponse response={dataSource} />
           </ActionPanel.Section>
         </ActionPanel>
       }

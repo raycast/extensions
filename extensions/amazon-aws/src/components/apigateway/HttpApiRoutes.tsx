@@ -54,6 +54,7 @@ function RouteItem({ route, apiId }: { route: Route; apiId: string }) {
             <Action.CopyToClipboard title="Copy Route Key" content={route.RouteKey || ""} />
             <Action.CopyToClipboard title="Copy Route ID" content={route.RouteId || ""} />
             {route.Target && <Action.CopyToClipboard title="Copy Integration Target" content={route.Target} />}
+            <AwsAction.ExportResponse response={route} />
           </ActionPanel.Section>
         </ActionPanel>
       }

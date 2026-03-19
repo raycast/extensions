@@ -2,7 +2,9 @@ import { RestApi } from "@aws-sdk/client-api-gateway";
 import { Api } from "@aws-sdk/client-apigatewayv2";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import ApiGatewayApiKeys from "./components/apigateway/ApiGatewayApiKeys";
+import ApiGatewayAuthorizers from "./components/apigateway/ApiGatewayAuthorizers";
 import ApiGatewayDeployments from "./components/apigateway/ApiGatewayDeployments";
+import ApiGatewayDomains from "./components/apigateway/ApiGatewayDomains";
 import ApiGatewayResources from "./components/apigateway/ApiGatewayResources";
 import ApiGatewayStages from "./components/apigateway/ApiGatewayStages";
 import ApiGatewayUsagePlans from "./components/apigateway/ApiGatewayUsagePlans";
@@ -100,18 +102,31 @@ function RestApiItem({ api }: { api: RestApi }) {
             shortcut={{ modifiers: ["cmd"], key: "u" }}
             target={<ApiGatewayUsagePlans apiId={api.id || ""} apiName={api.name || ""} />}
           />
+          <Action.Push
+            title="View Authorizers"
+            icon={Icon.Shield}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            target={<ApiGatewayAuthorizers apiId={api.id || ""} apiName={api.name || ""} />}
+          />
+          <Action.Push
+            title="View Custom Domains"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            target={<ApiGatewayDomains />}
+          />
           <ActionPanel.Section>
             <AwsAction.Console url={resourceToConsoleLink(api.id, "AWS::ApiGateway::RestApi")} />
             <Action.OpenInBrowser
               icon={Icon.Document}
               title="Open API Documentation"
               url={resourceToConsoleLink(api.id, "AWS::ApiGateway::RestApi::Documentation")}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy API ID" content={api.id || ""} />
             <Action.CopyToClipboard title="Copy API Name" content={api.name || ""} />
+            <AwsAction.ExportResponse response={api} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -171,6 +186,7 @@ function HttpApiItem({ api }: { api: Api }) {
             <Action.CopyToClipboard title="Copy API ID" content={api.ApiId || ""} />
             <Action.CopyToClipboard title="Copy API Name" content={api.Name || ""} />
             {api.ApiEndpoint && <Action.CopyToClipboard title="Copy API Endpoint" content={api.ApiEndpoint} />}
+            <AwsAction.ExportResponse response={api} />
           </ActionPanel.Section>
         </ActionPanel>
       }

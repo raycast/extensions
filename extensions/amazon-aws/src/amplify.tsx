@@ -1,8 +1,10 @@
 import { App, Branch, CustomRule, JobStatus, JobSummary, Webhook } from "@aws-sdk/client-amplify";
 import { Action, ActionPanel, Color, Form, Icon, Image, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 import { useCallback, useState } from "react";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { getAWSErrorMessage } from "./errors";
 import {
   downloadAmplifyBuildLogs,
   startAmplifyBuild,
@@ -11,8 +13,8 @@ import {
   updateAmplifyEnvironmentVariables,
   useAmplifyAppDetails,
   useAmplifyApps,
-  useAmplifyArtifacts,
   useAmplifyBranches,
+  useAmplifyJobDetails,
   useAmplifyJobs,
   useAmplifyWebhooks,
 } from "./hooks/use-amplify";
@@ -96,9 +98,12 @@ function AmplifyApp({ app }: { app: App }) {
             />
             <Action.OpenInBrowser title="Metrics" url={monitoringUrls.metrics} icon={Icon.LineChart} />
           </ActionPanel.Submenu>
-          <Action.CopyToClipboard title="Copy App ID" content={app.appId || ""} />
-          <Action.CopyToClipboard title="Copy App URL" content={appUrl} />
-          {app.repository && <Action.CopyToClipboard title="Copy Repository" content={app.repository} />}
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy App ID" content={app.appId || ""} />
+            <Action.CopyToClipboard title="Copy App URL" content={appUrl} />
+            {app.repository && <Action.CopyToClipboard title="Copy Repository" content={app.repository} />}
+            <AwsAction.ExportResponse response={app} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
@@ -174,7 +179,7 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "❌ Failed to trigger webhook";
-      toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+      toast.message = getAWSErrorMessage(error);
     }
   }, []);
 
@@ -213,8 +218,11 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
             />
             <Action.OpenInBrowser title="Access Logs" url={branchMonitoringUrls.accessLogs} icon={Icon.Document} />
           </ActionPanel.Submenu>
-          <Action.CopyToClipboard title="Copy Branch Name" content={branch.branchName || ""} />
-          <Action.CopyToClipboard title="Copy Branch URL" content={branchUrl} />
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Branch Name" content={branch.branchName || ""} />
+            <Action.CopyToClipboard title="Copy Branch URL" content={branchUrl} />
+            <AwsAction.ExportResponse response={branch} />
+          </ActionPanel.Section>
           {branchWebhooks.length > 0 && (
             <ActionPanel.Submenu title="Webhooks" icon={Icon.Link}>
               {branchWebhooks.flatMap((webhook) => [
@@ -255,15 +263,49 @@ function AmplifyBranch({ branch, app, webhooks }: { branch: Branch; app: App; we
   );
 }
 
+/**
+ * Patterns that indicate a sensitive environment variable
+ */
+const SENSITIVE_PATTERNS = ["API_KEY", "SECRET", "PASSWORD", "TOKEN", "KEY", "CREDENTIAL", "AUTH", "PRIVATE"];
+
+/**
+ * Checks if an environment variable key indicates sensitive data
+ */
+function isSensitiveKey(key: string): boolean {
+  const upperKey = key.toUpperCase();
+  return SENSITIVE_PATTERNS.some((pattern) => upperKey.includes(pattern));
+}
+
+/**
+ * Masks a sensitive value for display, showing only first and last 4 characters
+ */
+function maskValue(value: string): string {
+  if (value.length <= 8) {
+    return "••••••••";
+  }
+  return `${value.substring(0, 4)}${"•".repeat(Math.min(value.length - 8, 16))}${value.substring(value.length - 4)}`;
+}
+
 function AmplifyEnvironmentVariables({ appId }: { appId: string }) {
   const { app, error, isLoading } = useAmplifyAppDetails(appId);
+  const [showSensitiveValues, setShowSensitiveValues] = useState(false);
 
-  const environmentVariables = app?.environmentVariables || {};
-  const envVarEntries = Object.entries(environmentVariables);
+  const environmentVariables: Record<string, string> = app?.environmentVariables ?? {};
+  const envVarEntries: [string, string][] = Object.entries(environmentVariables);
 
   // Direct console link to environment variables page (without home and hash routing)
   const AWS_REGION = process.env.AWS_REGION;
   const envVarsConsoleUrl = `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${appId}/variables`;
+
+  /**
+   * Gets the display value for an environment variable, masking if sensitive
+   */
+  function getDisplayValue(key: string, value: string): string {
+    if (showSensitiveValues || !isSensitiveKey(key)) {
+      return value;
+    }
+    return maskValue(value);
+  }
 
   return (
     <List
@@ -294,11 +336,19 @@ function AmplifyEnvironmentVariables({ appId }: { appId: string }) {
           <List.Item
             key={key}
             title={key}
-            subtitle={value}
-            icon={Icon.Code}
+            subtitle={getDisplayValue(key, value)}
+            icon={isSensitiveKey(key) ? Icon.Lock : Icon.Code}
             actions={
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy Value" content={value} />
+                {isSensitiveKey(key) && (
+                  <Action
+                    title={showSensitiveValues ? "Hide Sensitive Values" : "Show Sensitive Values"}
+                    icon={showSensitiveValues ? Icon.EyeDisabled : Icon.Eye}
+                    onAction={() => setShowSensitiveValues(!showSensitiveValues)}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  />
+                )}
                 <Action.Push
                   title="Edit Variable"
                   icon={Icon.Pencil}
@@ -341,7 +391,10 @@ function AmplifyEnvironmentVariables({ appId }: { appId: string }) {
                 <Action.OpenInBrowser title="Open in AWS Console" url={envVarsConsoleUrl} icon={Icon.Globe} />
               </ActionPanel>
             }
-            accessories={[{ text: `${value.length} chars` }]}
+            accessories={[
+              ...(isSensitiveKey(key) ? [{ icon: Icon.Lock, tooltip: "Sensitive value" }] : []),
+              { text: `${value.length} chars` },
+            ]}
           />
         ))
       )}
@@ -474,6 +527,57 @@ function EditEnvironmentVariable({
   );
 }
 
+function getJobStatusIcon(status?: JobStatus): { source: Icon; tintColor: Color } {
+  switch (status) {
+    case "PENDING":
+      return { source: Icon.Clock, tintColor: Color.Yellow };
+    case "PROVISIONING":
+      return { source: Icon.Cog, tintColor: Color.Blue };
+    case "RUNNING":
+      return { source: Icon.Play, tintColor: Color.Blue };
+    case "SUCCEED":
+      return { source: Icon.CheckCircle, tintColor: Color.Green };
+    case "FAILED":
+      return { source: Icon.XMarkCircle, tintColor: Color.Red };
+    case "CANCELLING":
+      return { source: Icon.Stop, tintColor: Color.Orange };
+    case "CANCELLED":
+      return { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
+    default:
+      return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
+  }
+}
+
+function formatDuration(startTime?: Date, endTime?: Date): string {
+  if (!startTime) return "";
+  const start = new Date(startTime).getTime();
+  const end = endTime ? new Date(endTime).getTime() : Date.now();
+  const duration = Math.floor((end - start) / 1000);
+
+  if (duration < 60) return `${duration}s`;
+  const minutes = Math.floor(duration / 60);
+  const seconds = duration % 60;
+  if (minutes < 60) return `${minutes}m ${seconds}s`;
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return `${hours}h ${remainingMinutes}m`;
+}
+
+function getJobTypeTag(jobType?: string): { value: string; color: Color } | undefined {
+  switch (jobType) {
+    case "RELEASE":
+      return { value: "Release", color: Color.Green };
+    case "RETRY":
+      return { value: "Retry", color: Color.Orange };
+    case "WEB_HOOK":
+      return { value: "Webhook", color: Color.Purple };
+    case "MANUAL":
+      return { value: "Manual", color: Color.Blue };
+    default:
+      return undefined;
+  }
+}
+
 function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
   if (!app.appId || !branch.branchName) {
     return (
@@ -484,42 +588,6 @@ function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
   }
 
   const { jobs, error, isLoading, revalidate } = useAmplifyJobs(app.appId, branch.branchName);
-
-  function getJobStatusIcon(status?: JobStatus): { source: Icon; tintColor: Color } {
-    switch (status) {
-      case "PENDING":
-        return { source: Icon.Clock, tintColor: Color.Yellow };
-      case "PROVISIONING":
-        return { source: Icon.Cog, tintColor: Color.Blue };
-      case "RUNNING":
-        return { source: Icon.Play, tintColor: Color.Blue };
-      case "SUCCEED":
-        return { source: Icon.CheckCircle, tintColor: Color.Green };
-      case "FAILED":
-        return { source: Icon.XMarkCircle, tintColor: Color.Red };
-      case "CANCELLING":
-        return { source: Icon.Stop, tintColor: Color.Orange };
-      case "CANCELLED":
-        return { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
-      default:
-        return { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
-    }
-  }
-
-  function formatDuration(startTime?: Date, endTime?: Date): string {
-    if (!startTime) return "";
-    const start = new Date(startTime).getTime();
-    const end = endTime ? new Date(endTime).getTime() : Date.now();
-    const duration = Math.floor((end - start) / 1000);
-
-    if (duration < 60) return `${duration}s`;
-    const minutes = Math.floor(duration / 60);
-    const seconds = duration % 60;
-    if (minutes < 60) return `${minutes}m ${seconds}s`;
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}m`;
-  }
 
   const handleRetryBuild = useCallback(
     async (job: JobSummary) => {
@@ -578,8 +646,6 @@ function AmplifyBuildHistory({ app, branch }: { app: App; branch: Branch }) {
             branch={branch}
             onRetry={() => handleRetryBuild(job)}
             onCancel={() => handleCancelBuild(job)}
-            getJobStatusIcon={getJobStatusIcon}
-            formatDuration={formatDuration}
           />
         ))
       )}
@@ -593,23 +659,25 @@ function AmplifyBuildJob({
   branch,
   onRetry,
   onCancel,
-  getJobStatusIcon,
-  formatDuration,
 }: {
   job: JobSummary;
   app: App;
   branch: Branch;
   onRetry: () => Promise<void>;
   onCancel: () => Promise<void>;
-  getJobStatusIcon: (status?: JobStatus) => { source: Icon; tintColor: Color };
-  formatDuration: (startTime?: Date, endTime?: Date) => string;
 }) {
   const AWS_REGION = process.env.AWS_REGION;
   const isRunning = job.status === "RUNNING" || job.status === "PROVISIONING" || job.status === "PENDING";
   const isFailed = job.status === "FAILED";
   const buildLogUrl = `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/branches/${branch.branchName}/deployments/${job.jobId}`;
 
+  const logGroupName = `/aws/amplify/${app.appId}`;
+  const liveTailUrl = `https://${AWS_REGION}.console.aws.amazon.com/cloudwatch/home?region=${AWS_REGION}#logsV2:live-tail$3FlogGroupArns$3D${encodeURIComponent(`arn:aws:logs:${AWS_REGION}:*:log-group:${logGroupName}`)}`;
+  const tailCommand = `aws logs tail "${logGroupName}" --follow`;
+
   const statusIcon = getJobStatusIcon(job.status);
+  const jobTypeTag = getJobTypeTag(job.jobType);
+  const duration = formatDuration(job.startTime, job.endTime);
 
   return (
     <List.Item
@@ -625,6 +693,12 @@ function AmplifyBuildJob({
             target={<AmplifyBuildDetails job={job} app={app} branch={branch} />}
           />
           <Action.OpenInBrowser title="View Build Logs" url={buildLogUrl} icon={Icon.Terminal} />
+          <Action.OpenInBrowser
+            title="Tail Logs in Console"
+            url={liveTailUrl}
+            icon={Icon.Livestream}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          />
           <Action
             title="Download Build Logs"
             icon={Icon.Download}
@@ -672,20 +746,107 @@ function AmplifyBuildJob({
             }}
             shortcut={{ modifiers: ["cmd"], key: "b" }}
           />
-          <ActionPanel.Section>
+          <Action
+            title="Run Tail Command in Terminal"
+            icon={Icon.Terminal}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            onAction={async () => {
+              const escapedCommand = tailCommand.replace(/"/g, '\\"');
+              const appleScript = `
+                tell application "Terminal"
+                  do script "${escapedCommand}"
+                  activate
+                end tell
+              `;
+              try {
+                await runAppleScript(appleScript);
+                await showToast({ style: Toast.Style.Success, title: "Opened in Terminal" });
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to open Terminal",
+                  message: getAWSErrorMessage(error),
+                });
+              }
+            }}
+          />
+          <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Job ID" content={job.jobId || ""} />
             {job.commitId && <Action.CopyToClipboard title="Copy Commit ID" content={job.commitId} />}
+            <Action.CopyToClipboard
+              title="Copy Tail Command"
+              content={tailCommand}
+              icon={Icon.Terminal}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <AwsAction.ExportResponse response={job} />
           </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[
-        { text: job.status },
-        { text: formatDuration(job.startTime, job.endTime) },
+        ...(jobTypeTag ? [{ tag: jobTypeTag }] : []),
+        { icon: statusIcon, tooltip: job.status },
+        ...(duration ? [{ text: duration, tooltip: "Duration" }] : []),
         ...(job.commitId ? [{ text: job.commitId.substring(0, 7), tooltip: job.commitId }] : []),
         ...(job.startTime ? [{ date: new Date(job.startTime) }] : []),
       ]}
     />
   );
+}
+
+function buildDetailMarkdown(
+  job: JobSummary,
+  steps?: { stepName?: string; status?: string; startTime?: Date; endTime?: Date; statusReason?: string }[],
+): string {
+  const lines: string[] = [];
+
+  lines.push(`## Build #${job.jobId}`);
+  lines.push("");
+
+  const statusEmoji =
+    job.status === "SUCCEED" ? "✅" : job.status === "FAILED" ? "❌" : job.status === "RUNNING" ? "🔄" : "⏳";
+  lines.push(`**Status:** ${statusEmoji} ${job.status}`);
+  lines.push(`**Type:** ${job.jobType ?? "Unknown"}`);
+  if (job.commitId) {
+    lines.push(`**Commit:** \`${job.commitId.substring(0, 7)}\` ${job.commitMessage ?? ""}`);
+  }
+  if (job.startTime) {
+    lines.push(`**Started:** ${new Date(job.startTime).toLocaleString()}`);
+  }
+  if (job.endTime) {
+    lines.push(`**Completed:** ${new Date(job.endTime).toLocaleString()}`);
+  }
+  const duration = formatDuration(job.startTime, job.endTime);
+  if (duration) {
+    lines.push(`**Duration:** ${duration}`);
+  }
+
+  if (steps && steps.length > 0) {
+    lines.push("");
+    lines.push("---");
+    lines.push("");
+    lines.push("### Build Steps");
+    lines.push("");
+    lines.push("| Step | Status | Duration |");
+    lines.push("|------|--------|----------|");
+    for (const step of steps) {
+      const stepStatus =
+        step.status === "SUCCEED" ? "✅" : step.status === "FAILED" ? "❌" : step.status === "RUNNING" ? "🔄" : "⏳";
+      const stepDuration = formatDuration(step.startTime, step.endTime);
+      lines.push(`| ${step.stepName ?? "Unknown"} | ${stepStatus} ${step.status ?? ""} | ${stepDuration} |`);
+    }
+
+    const failedSteps = steps.filter((s) => s.status === "FAILED" && s.statusReason);
+    if (failedSteps.length > 0) {
+      lines.push("");
+      lines.push("### Failure Details");
+      for (const step of failedSteps) {
+        lines.push(`- **${step.stepName}:** ${step.statusReason}`);
+      }
+    }
+  }
+
+  return lines.join("\n");
 }
 
 function AmplifyBuildDetails({ job, app, branch }: { job: JobSummary; app: App; branch: Branch }) {
@@ -697,96 +858,84 @@ function AmplifyBuildDetails({ job, app, branch }: { job: JobSummary; app: App; 
     );
   }
 
-  const { artifacts, isLoading } = useAmplifyArtifacts(app.appId, branch.branchName, job.jobId);
+  const { job: jobDetails, isLoading } = useAmplifyJobDetails(app.appId, branch.branchName, job.jobId);
   const AWS_REGION = process.env.AWS_REGION;
   const buildLogUrl = `https://${AWS_REGION}.console.aws.amazon.com/amplify/apps/${app.appId}/branches/${branch.branchName}/deployments/${job.jobId}`;
+
+  const steps = jobDetails?.steps ?? [];
+  const markdown = buildDetailMarkdown(job, steps);
 
   return (
     <List
       isLoading={isLoading}
       navigationTitle={`Build #${job.jobId} Details`}
-      searchBarPlaceholder="Filter artifacts..."
+      searchBarPlaceholder="Filter steps..."
+      isShowingDetail
     >
-      <List.Section title="Build Information">
-        <List.Item
-          title="Status"
-          subtitle={job.status}
-          icon={Icon.Info}
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="View Build Logs" url={buildLogUrl} icon={Icon.Terminal} />
-              <Action
-                title="Download Build Logs"
-                icon={Icon.Download}
-                onAction={async () => {
-                  if (!app.appId || !branch.branchName || !job.jobId) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Cannot download logs",
-                      message: "Missing required parameters",
-                    });
-                    return;
-                  }
-                  try {
-                    await downloadAmplifyBuildLogs(app.appId, branch.branchName, job.jobId);
-                  } catch (error) {
-                    // Error is already handled in downloadAmplifyBuildLogs
-                  }
-                }}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
-              />
-            </ActionPanel>
-          }
-          accessories={[{ text: job.status }]}
-        />
-        {job.commitId && (
+      <List.Section title="Build Steps">
+        {steps.length === 0 && !isLoading && (
           <List.Item
-            title="Commit"
-            subtitle={job.commitMessage || "No message"}
-            icon={Icon.Code}
+            title="No steps available"
+            icon={Icon.Info}
+            detail={<List.Item.Detail markdown={markdown} />}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Commit ID" content={job.commitId} />
+                <Action.OpenInBrowser title="View Build Logs" url={buildLogUrl} icon={Icon.Terminal} />
               </ActionPanel>
             }
-            accessories={[{ text: job.commitId.substring(0, 7) }]}
           />
         )}
-        {job.startTime && (
-          <List.Item
-            title="Started"
-            subtitle={new Date(job.startTime).toLocaleString()}
-            icon={Icon.Clock}
-            accessories={[{ date: new Date(job.startTime) }]}
-          />
-        )}
-        {job.endTime && (
-          <List.Item
-            title="Completed"
-            subtitle={new Date(job.endTime).toLocaleString()}
-            icon={Icon.CheckCircle}
-            accessories={[{ date: new Date(job.endTime) }]}
-          />
-        )}
-      </List.Section>
+        {steps.map((step, index) => {
+          const stepIcon = getJobStatusIcon(step.status as JobStatus);
+          const stepDuration = formatDuration(step.startTime, step.endTime);
 
-      {artifacts && artifacts.length > 0 && (
-        <List.Section title="Build Artifacts">
-          {artifacts.map((artifact) => (
+          return (
             <List.Item
-              key={artifact.artifactId}
-              title={artifact.artifactFileName || "Unnamed artifact"}
-              subtitle={artifact.artifactId}
-              icon={Icon.Document}
+              key={`${step.stepName}-${index}`}
+              title={step.stepName ?? `Step ${index + 1}`}
+              icon={stepIcon}
+              detail={<List.Item.Detail markdown={markdown} />}
+              accessories={[
+                { icon: stepIcon, tooltip: step.status },
+                ...(stepDuration ? [{ text: stepDuration }] : []),
+              ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Artifact ID" content={artifact.artifactId || ""} />
+                  <Action.OpenInBrowser title="View Build Logs" url={buildLogUrl} icon={Icon.Terminal} />
+                  <Action
+                    title="Download Build Logs"
+                    icon={Icon.Download}
+                    onAction={async () => {
+                      try {
+                        await downloadAmplifyBuildLogs(app.appId!, branch.branchName!, job.jobId!);
+                      } catch (error) {
+                        // Error is already handled in downloadAmplifyBuildLogs
+                      }
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                  />
+                  {step.logUrl && (
+                    <Action.OpenInBrowser
+                      title="Open Step Log"
+                      url={step.logUrl}
+                      icon={Icon.Document}
+                      shortcut={{ modifiers: ["cmd"], key: "l" }}
+                    />
+                  )}
+                  <ActionPanel.Section title="Copy">
+                    <Action.CopyToClipboard title="Copy Job ID" content={job.jobId ?? ""} />
+                    {job.commitId && <Action.CopyToClipboard title="Copy Commit ID" content={job.commitId} />}
+                    {step.statusReason && (
+                      <Action.CopyToClipboard title="Copy Failure Reason" content={step.statusReason} />
+                    )}
+                    <AwsAction.ExportResponse response={jobDetails ?? job} />
+                  </ActionPanel.Section>
                 </ActionPanel>
               }
             />
-          ))}
-        </List.Section>
-      )}
+          );
+        })}
+      </List.Section>
     </List>
   );
 }
@@ -831,7 +980,7 @@ function AmplifyCustomHeaders({ app }: { app: App }) {
           }
         />
       ) : (
-        customRules.map((rule, index) => (
+        customRules.map((rule: CustomRule, index: number) => (
           <List.Item
             key={index}
             title={rule.source || "No source"}

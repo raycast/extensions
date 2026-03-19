@@ -45,6 +45,7 @@ export default function ApiGatewayMethodDetail({
             {method.methodIntegration?.uri && (
               <Action.CopyToClipboard title="Copy Integration URI" content={method.methodIntegration.uri} />
             )}
+            <AwsAction.ExportResponse response={method} />
           </ActionPanel.Section>
         </ActionPanel>
       }

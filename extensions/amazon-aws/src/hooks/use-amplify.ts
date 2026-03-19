@@ -1,5 +1,4 @@
 import {
-  AmplifyClient,
   App,
   Branch,
   CustomRule,
@@ -12,12 +11,15 @@ import {
   ListJobsCommand,
   ListWebhooksCommand,
   StartJobCommand,
+  Step,
   StopJobCommand,
   UpdateAppCommand,
   Webhook,
 } from "@aws-sdk/client-amplify";
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { getAWSErrorMessage } from "../errors";
+import { getAmplifyClient } from "../services/clients/amplify";
 import { isReadyToFetch } from "../util";
 
 /**
@@ -46,23 +48,26 @@ export function useAmplifyApps() {
   return { apps, error, isLoading: (!apps && !error) || isLoading, revalidate };
 }
 
-async function fetchAmplifyApps(toast: Toast, nextToken?: string, aggregate?: App[]): Promise<App[]> {
-  const client = new AmplifyClient({});
-  const { apps, nextToken: cursor } = await client.send(new ListAppsCommand({ nextToken }));
+async function fetchAmplifyApps(toast: Toast, maxResults = 100): Promise<App[]> {
+  const client = getAmplifyClient();
+  const apps: App[] = [];
+  let nextToken: string | undefined;
 
-  const filteredApps = apps ?? [];
-  const agg = [...(aggregate ?? []), ...filteredApps];
+  do {
+    const { apps: appsList, nextToken: cursor } = await client.send(new ListAppsCommand({ nextToken }));
 
-  toast.message = `${agg.length} apps`;
+    if (appsList) {
+      apps.push(...appsList);
+    }
 
-  if (cursor) {
-    return await fetchAmplifyApps(toast, cursor, agg);
-  }
+    toast.message = `${apps.length} apps`;
+    nextToken = cursor;
+  } while (nextToken && apps.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded Amplify apps";
-  toast.message = `${agg.length} apps`;
-  return agg;
+  toast.message = `${apps.length} apps`;
+  return apps;
 }
 
 /**
@@ -91,28 +96,28 @@ export function useAmplifyBranches(appId: string) {
   return { branches, error, isLoading: (!branches && !error) || isLoading };
 }
 
-async function fetchAmplifyBranches(
-  appId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: Branch[],
-): Promise<Branch[]> {
-  const client = new AmplifyClient({});
-  const { branches, nextToken: cursor } = await client.send(new ListBranchesCommand({ appId, nextToken }));
+async function fetchAmplifyBranches(appId: string, toast: Toast, maxResults = 100): Promise<Branch[]> {
+  const client = getAmplifyClient();
+  const branches: Branch[] = [];
+  let nextToken: string | undefined;
 
-  const filteredBranches = branches ?? [];
-  const agg = [...(aggregate ?? []), ...filteredBranches];
+  do {
+    const { branches: branchList, nextToken: cursor } = await client.send(
+      new ListBranchesCommand({ appId, nextToken }),
+    );
 
-  toast.message = `${agg.length} branches`;
+    if (branchList) {
+      branches.push(...branchList);
+    }
 
-  if (cursor) {
-    return await fetchAmplifyBranches(appId, toast, cursor, agg);
-  }
+    toast.message = `${branches.length} branches`;
+    nextToken = cursor;
+  } while (nextToken && branches.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded branches";
-  toast.message = `${agg.length} branches`;
-  return agg;
+  toast.message = `${branches.length} branches`;
+  return branches;
 }
 
 /**
@@ -131,7 +136,7 @@ export function useAmplifyAppDetails(appId: string) {
     isLoading,
   } = useCachedPromise(
     async (id: string) => {
-      const client = new AmplifyClient({});
+      const client = getAmplifyClient();
       const { app } = await client.send(new GetAppCommand({ appId: id }));
       return app;
     },
@@ -168,28 +173,28 @@ export function useAmplifyWebhooks(appId: string) {
   return { webhooks, error, isLoading: (!webhooks && !error) || isLoading };
 }
 
-async function fetchAmplifyWebhooks(
-  appId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: Webhook[],
-): Promise<Webhook[]> {
-  const client = new AmplifyClient({});
-  const { webhooks, nextToken: cursor } = await client.send(new ListWebhooksCommand({ appId, nextToken }));
+async function fetchAmplifyWebhooks(appId: string, toast: Toast, maxResults = 100): Promise<Webhook[]> {
+  const client = getAmplifyClient();
+  const webhooks: Webhook[] = [];
+  let nextToken: string | undefined;
 
-  const filteredWebhooks = webhooks ?? [];
-  const agg = [...(aggregate ?? []), ...filteredWebhooks];
+  do {
+    const { webhooks: webhookList, nextToken: cursor } = await client.send(
+      new ListWebhooksCommand({ appId, nextToken }),
+    );
 
-  toast.message = `${agg.length} webhooks`;
+    if (webhookList) {
+      webhooks.push(...webhookList);
+    }
 
-  if (cursor) {
-    return await fetchAmplifyWebhooks(appId, toast, cursor, agg);
-  }
+    toast.message = `${webhooks.length} webhooks`;
+    nextToken = cursor;
+  } while (nextToken && webhooks.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded webhooks";
-  toast.message = `${agg.length} webhooks`;
-  return agg;
+  toast.message = `${webhooks.length} webhooks`;
+  return webhooks;
 }
 
 /**
@@ -227,27 +232,34 @@ async function fetchAmplifyJobs(
   appId: string,
   branchName: string,
   toast: Toast,
-  nextToken?: string,
-  aggregate?: JobSummary[],
+  maxResults = 100,
 ): Promise<JobSummary[]> {
-  const client = new AmplifyClient({});
-  const { jobSummaries, nextToken: cursor } = await client.send(
-    new ListJobsCommand({ appId, branchName, nextToken, maxResults: 50 }),
-  );
+  const client = getAmplifyClient();
+  const jobs: JobSummary[] = [];
+  let nextToken: string | undefined;
 
-  const filteredJobs = jobSummaries ?? [];
-  const agg = [...(aggregate ?? []), ...filteredJobs];
+  do {
+    const { jobSummaries, nextToken: cursor } = await client.send(
+      new ListJobsCommand({
+        appId,
+        branchName,
+        nextToken,
+        maxResults: Math.min(maxResults - jobs.length, 50),
+      }),
+    );
 
-  toast.message = `${agg.length} builds`;
+    if (jobSummaries) {
+      jobs.push(...jobSummaries);
+    }
 
-  if (cursor) {
-    return await fetchAmplifyJobs(appId, branchName, toast, cursor, agg);
-  }
+    toast.message = `${jobs.length} builds`;
+    nextToken = cursor;
+  } while (nextToken && jobs.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded build history";
-  toast.message = `${agg.length} builds`;
-  return agg;
+  toast.message = `${jobs.length} builds`;
+  return jobs;
 }
 
 /**
@@ -268,7 +280,7 @@ export function useAmplifyArtifacts(appId: string, branchName: string, jobId: st
     isLoading,
   } = useCachedPromise(
     async (appId: string, branchName: string, jobId: string) => {
-      const client = new AmplifyClient({});
+      const client = getAmplifyClient();
       const { artifacts } = await client.send(new ListArtifactsCommand({ appId, branchName, jobId }));
       return artifacts;
     },
@@ -280,6 +292,34 @@ export function useAmplifyArtifacts(appId: string, branchName: string, jobId: st
   );
 
   return { artifacts, error, isLoading: (!artifacts && !error) || isLoading };
+}
+
+/**
+ * Hook to fetch full job details including build steps
+ * @param appId - The Amplify app ID
+ * @param branchName - The branch name
+ * @param jobId - The job ID
+ * @returns Object containing the full job with steps, error state, and loading state
+ */
+export function useAmplifyJobDetails(appId: string, branchName: string, jobId: string) {
+  const {
+    data: job,
+    error,
+    isLoading,
+  } = useCachedPromise(
+    async (appId: string, branchName: string, jobId: string) => {
+      const client = getAmplifyClient();
+      const { job } = await client.send(new GetJobCommand({ appId, branchName, jobId }));
+      return job;
+    },
+    [appId, branchName, jobId],
+    {
+      execute: isReadyToFetch() && !!appId && !!branchName && !!jobId,
+      failureToastOptions: { title: "❌ Failed to load job details" },
+    },
+  );
+
+  return { job, error, isLoading: (!job && !error) || isLoading };
 }
 
 /**
@@ -311,7 +351,7 @@ export async function startAmplifyBuild(
   });
 
   try {
-    const client = new AmplifyClient({});
+    const client = getAmplifyClient();
     const { jobSummary } = await client.send(
       new StartJobCommand({
         appId,
@@ -330,7 +370,7 @@ export async function startAmplifyBuild(
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "❌ Failed to start build";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getAWSErrorMessage(error);
     throw error;
   }
 }
@@ -359,7 +399,7 @@ export async function stopAmplifyBuild(
   });
 
   try {
-    const client = new AmplifyClient({});
+    const client = getAmplifyClient();
     const { jobSummary } = await client.send(
       new StopJobCommand({
         appId,
@@ -375,7 +415,7 @@ export async function stopAmplifyBuild(
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "❌ Failed to cancel build";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getAWSErrorMessage(error);
     throw error;
   }
 }
@@ -399,7 +439,7 @@ export async function updateAmplifyCustomRules(appId: string, customRules: Custo
   });
 
   try {
-    const client = new AmplifyClient({});
+    const client = getAmplifyClient();
     const { app } = await client.send(
       new UpdateAppCommand({
         appId,
@@ -413,7 +453,7 @@ export async function updateAmplifyCustomRules(appId: string, customRules: Custo
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "❌ Failed to update custom rules";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getAWSErrorMessage(error);
     throw error;
   }
 }
@@ -440,7 +480,7 @@ export async function updateAmplifyEnvironmentVariables(
   });
 
   try {
-    const client = new AmplifyClient({});
+    const client = getAmplifyClient();
     const { app } = await client.send(
       new UpdateAppCommand({
         appId,
@@ -454,7 +494,7 @@ export async function updateAmplifyEnvironmentVariables(
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "❌ Failed to update environment variables";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getAWSErrorMessage(error);
     throw error;
   }
 }
@@ -479,7 +519,7 @@ export async function downloadAmplifyBuildLogs(appId: string, branchName: string
   });
 
   try {
-    const client = new AmplifyClient({});
+    const client = getAmplifyClient();
     const { job } = await client.send(
       new GetJobCommand({
         appId,
@@ -494,8 +534,8 @@ export async function downloadAmplifyBuildLogs(appId: string, branchName: string
 
     // Extract log URLs from execution steps
     const logUrls = job.steps
-      .filter((step) => step.logUrl)
-      .map((step, index) => ({
+      .filter((step: Step) => step.logUrl)
+      .map((step: Step, index: number) => ({
         stepName: step.stepName || `step-${index}`,
         logUrl: step.logUrl as string, // Safe since we filtered for step.logUrl above
         status: step.status,
@@ -514,14 +554,13 @@ export async function downloadAmplifyBuildLogs(appId: string, branchName: string
     const logsDir = join(homedir(), "Downloads", "amplify-logs");
     await mkdir(logsDir, { recursive: true });
 
-    // Download each log file
-    for (const logInfo of logUrls) {
-      try {
+    // Download all log files in parallel for better performance
+    const downloadResults = await Promise.allSettled(
+      logUrls.map(async (logInfo) => {
         const response = await fetch(logInfo.logUrl);
 
         if (!response.ok) {
-          console.warn(`Failed to download log for ${logInfo.stepName}: ${response.status}`);
-          continue;
+          throw new Error(`HTTP ${response.status}`);
         }
 
         const logContent = await response.text();
@@ -529,10 +568,17 @@ export async function downloadAmplifyBuildLogs(appId: string, branchName: string
         const filePath = join(logsDir, fileName);
 
         await writeFile(filePath, logContent);
-      } catch (error) {
-        // Log download failed for this step, continue with others
-      }
+        return logInfo.stepName;
+      }),
+    );
+
+    // Log any failures
+    const failures = downloadResults.filter((result): result is PromiseRejectedResult => result.status === "rejected");
+    if (failures.length > 0) {
+      console.warn(`Failed to download ${failures.length} log files`);
     }
+
+    const successCount = downloadResults.filter((r) => r.status === "fulfilled").length;
 
     // Show logs directory in Finder
     const { showInFinder } = await import("@raycast/api");
@@ -540,11 +586,11 @@ export async function downloadAmplifyBuildLogs(appId: string, branchName: string
 
     toast.style = Toast.Style.Success;
     toast.title = "✅ Build logs downloaded";
-    toast.message = `${logUrls.length} log files saved`;
+    toast.message = `${successCount} of ${logUrls.length} log files saved`;
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "❌ Failed to download build logs";
-    toast.message = error instanceof Error ? error.message : "Unknown error";
+    toast.message = getAWSErrorMessage(error);
     throw error;
   }
 }

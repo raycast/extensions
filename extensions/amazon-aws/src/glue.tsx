@@ -1,10 +1,11 @@
-import { GlueClient, JobRun, GetJobCommand, StartJobRunCommand, GetJobCommandOutput } from "@aws-sdk/client-glue";
+import { JobRun, GetJobCommand, StartJobRunCommand, GetJobCommandOutput } from "@aws-sdk/client-glue";
 import { Action, ActionPanel, Icon, List, Image, Color, Detail, showToast, Toast } from "@raycast/api";
 import { MutatePromise, showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import { useGlueJobRuns, useGlueJobs } from "./hooks/use-glue";
+import { getGlueClient } from "./services/clients/glue";
 
 export interface GlueJobRun extends JobRun {
   accessoriesText?: string;
@@ -92,6 +93,7 @@ function GlueJob({
           <AwsAction.Console url={resourceToConsoleLink(glueJobRun.JobName, "AWS::Glue::JobRuns")} />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Job Name" content={glueJobRun.JobName || ""} />
+            <AwsAction.ExportResponse response={glueJobRun} />
           </ActionPanel.Section>
           <Action
             title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
@@ -135,6 +137,7 @@ function GlueJobRuns({ glueJobName: glueJobName }: { glueJobName: string }) {
               <AwsAction.Console url={resourceToConsoleLink(jobRun.JobName, "AWS::Glue::JobRun", jobRun.Id)} />
               <ActionPanel.Section title={"Copy"}>
                 <Action.CopyToClipboard title="Copy Job Run Id" content={jobRun.Id || ""} />
+                <AwsAction.ExportResponse response={jobRun} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -201,7 +204,7 @@ function GlueJobRunDetails({ jobRun: glueJobRun }: { jobRun: GlueJobRun }) {
 }
 
 async function RunGlueJob(glueJobName: string, mutate: MutatePromise<GlueJobRun[] | undefined>) {
-  mutate(new GlueClient({}).send(new StartJobRunCommand({ JobName: glueJobName })), {
+  mutate(getGlueClient().send(new StartJobRunCommand({ JobName: glueJobName })), {
     optimisticUpdate(data) {
       return data;
     },
@@ -237,12 +240,15 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
       actions={
         <ActionPanel title="title">
           <AwsAction.Console url={resourceToConsoleLink(glueJobDetails?.Job?.Name, "AWS::Glue::JobRuns")} />
-          <Action.CopyToClipboard content={JSON.stringify(glueJobDetails?.Job?.Name)} title="Copy Job Name" />
-          <Action.CopyToClipboard
-            content={JSON.stringify(glueJobDetails?.Job?.DefaultArguments)}
-            title="Copy Default Arguments"
-          />
-          <Action.CopyToClipboard content={JSON.stringify(glueJobDetails?.Job)} title="Copy Job Definition" />
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard content={JSON.stringify(glueJobDetails?.Job?.Name)} title="Copy Job Name" />
+            <Action.CopyToClipboard
+              content={JSON.stringify(glueJobDetails?.Job?.DefaultArguments)}
+              title="Copy Default Arguments"
+            />
+            <Action.CopyToClipboard content={JSON.stringify(glueJobDetails?.Job)} title="Copy Job Definition" />
+            <AwsAction.ExportResponse response={glueJobDetails} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       metadata={
@@ -287,7 +293,7 @@ function GlueJobDefinition({ glueJobName: glueJobName }: { glueJobName: string }
 }
 
 async function fetchJobDetails(glueJobName: string): Promise<GetJobCommandOutput> {
-  const client = new GlueClient({});
+  const client = getGlueClient();
   const input = {
     JobName: glueJobName, // required
   };

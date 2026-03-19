@@ -38,9 +38,9 @@ export function resourceToConsoleLink(
     case "AWS::Lambda::Function":
       return `${AWS_URL_BASE}/lambda/home?region=${AWS_REGION}#/functions/${resourceId}?tab=monitoring`;
     case "AWS::Glue::JobRun":
-      return `${AWS_URL_BASE}/gluestudio/home?region=eu-central-1#/job/${resourceId}/run/${runId}`;
+      return `${AWS_URL_BASE}/gluestudio/home?region=${AWS_REGION}#/job/${resourceId}/run/${runId}`;
     case "AWS::Glue::JobRuns":
-      return `${AWS_URL_BASE}/gluestudio/home?region=eu-central-1#/editor/job/${resourceId}/runs`;
+      return `${AWS_URL_BASE}/gluestudio/home?region=${AWS_REGION}#/editor/job/${resourceId}/runs`;
     case "AWS::CodePipeline::Pipeline":
       return `${AWS_URL_BASE}/codesuite/codepipeline/pipelines/${resourceId}/view?region=${AWS_REGION}`;
     case "AWS::S3::Bucket":
@@ -120,6 +120,14 @@ export function resourceToConsoleLink(
       const method = parts[parts.length - 1];
       return `https://${AWS_REGION}.console.aws.amazon.com/apigateway/home?region=${AWS_REGION}#/apis/${apiId}/resources/${resourcePath}/methods/${method}`;
     }
+    case "AWS::ApiGateway::Authorizer": {
+      const parts = resourceId.split("/authorizers/");
+      const apiId = parts[0];
+      const authorizerId = parts[1];
+      return `https://${AWS_REGION}.console.aws.amazon.com/apigateway/home?region=${AWS_REGION}#/apis/${apiId}/authorizers/${authorizerId}`;
+    }
+    case "AWS::ApiGateway::DomainName":
+      return `https://${AWS_REGION}.console.aws.amazon.com/apigateway/main/publish/domain-names?region=${AWS_REGION}`;
     case "AWS::ApiGatewayV2::Api":
       return `https://${AWS_REGION}.console.aws.amazon.com/apigateway/main/apis/${resourceId}?region=${AWS_REGION}`;
     case "AWS::ApiGatewayV2::Route": {
@@ -134,14 +142,42 @@ export function resourceToConsoleLink(
       const stageName = parts[1];
       return `https://${AWS_REGION}.console.aws.amazon.com/apigateway/main/apis/${apiId}/stages/${stageName}?region=${AWS_REGION}`;
     }
+    case "AWS::Cognito::UserPool":
+      return `https://${AWS_REGION}.console.aws.amazon.com/cognito/v2/idp/user-pools/${resourceId}/users?region=${AWS_REGION}`;
+    case "AWS::Cognito::User": {
+      const [poolId, username] = resourceId.split("/");
+      return `https://${AWS_REGION}.console.aws.amazon.com/cognito/v2/idp/user-pools/${poolId}/users/${encodeURIComponent(username)}?region=${AWS_REGION}`;
+    }
+    case "AWS::Cognito::UserPoolGroups":
+      return `https://${AWS_REGION}.console.aws.amazon.com/cognito/v2/idp/user-pools/${resourceId}/groups?region=${AWS_REGION}`;
+    case "AWS::Athena::WorkGroup":
+      return `${AWS_URL_BASE}/athena/home?region=${AWS_REGION}#/workgroups/${resourceId}`;
+    case "AWS::Athena::NamedQuery":
+      return `${AWS_URL_BASE}/athena/home?region=${AWS_REGION}#/query-editor/saved-queries/${resourceId}`;
+    case "AWS::Athena::QueryExecution":
+      return `${AWS_URL_BASE}/athena/home?region=${AWS_REGION}#/query-editor/history/${resourceId}`;
+    case "AWS::QuickSight::Dashboard":
+      return `https://${AWS_REGION}.quicksight.aws.amazon.com/sn/dashboards/${resourceId}`;
+    case "AWS::QuickSight::Analysis":
+      return `https://${AWS_REGION}.quicksight.aws.amazon.com/sn/analyses/${resourceId}`;
+    case "AWS::QuickSight::DataSet":
+      return `https://${AWS_REGION}.quicksight.aws.amazon.com/sn/data-sets/${resourceId}`;
     default:
       return "";
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const sortRecord = (record: Record<string, any>): Record<string, any> =>
-  Object.fromEntries(Object.entries(record).sort(([keyA], [keyB]) => keyA.localeCompare(keyB)));
+/**
+ * Sorts a record by its keys alphabetically
+ * @param record - The record to sort
+ * @returns A new record with keys sorted alphabetically
+ */
+export function sortRecord<T>(record: Record<string, T>): Record<string, T> {
+  return Object.fromEntries(Object.entries(record).sort(([keyA], [keyB]) => keyA.localeCompare(keyB))) as Record<
+    string,
+    T
+  >;
+}
 
 export const getErrorMessage = (error: unknown) => {
   if (error instanceof Error) {

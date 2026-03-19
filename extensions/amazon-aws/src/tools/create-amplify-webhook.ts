@@ -1,4 +1,5 @@
-import { AmplifyClient, CreateWebhookCommand, Webhook } from "@aws-sdk/client-amplify";
+import { CreateWebhookCommand, Webhook } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Creates a new webhook for an Amplify app
@@ -19,7 +20,7 @@ export default async function createAmplifyWebhook(options: {
     throw new Error("Branch name is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const command = new CreateWebhookCommand({
     appId,

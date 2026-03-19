@@ -55,6 +55,7 @@ function ECRImage({ repository }: { repository: Repository }) {
                     content={repository.repositoryUri || ""}
                     shortcut={{ modifiers: ["opt"], key: "c" }}
                   />
+                  <AwsAction.ExportResponse response={image} />
                 </ActionPanel.Section>
               </ActionPanel>
             }

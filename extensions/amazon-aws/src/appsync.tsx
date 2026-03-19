@@ -78,6 +78,7 @@ function AppSyncApi({ api }: { api: GraphqlApi }) {
             <Action.CopyToClipboard title="Copy GraphQL Endpoint" content={apiEndpoint} />
             <Action.CopyToClipboard title="Copy API ID" content={api.apiId || ""} />
             <Action.CopyToClipboard title="Copy API ARN" content={api.arn || ""} />
+            <AwsAction.ExportResponse response={api} />
           </ActionPanel.Section>
         </ActionPanel>
       }

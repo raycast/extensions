@@ -1,4 +1,5 @@
-import { PurgeQueueCommand, QueueAttributeName, SQSClient } from "@aws-sdk/client-sqs";
+import { PurgeQueueCommand, QueueAttributeName } from "@aws-sdk/client-sqs";
+import { getSQSClient } from "./services/clients/sqs";
 import {
   Action,
   ActionPanel,
@@ -182,6 +183,7 @@ export default function SQS() {
                   onAction={() => setDetailsEnabled(!isDetailsEnabled)}
                   icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
                 />
+                <AwsAction.ExportResponse response={queue} />
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(queue)} />
               </ActionPanel.Section>
             </ActionPanel>
@@ -218,7 +220,7 @@ const purgeQueue = async (queue: Queue, mutate: MutatePromise<Queue[] | undefine
 
 const tryPurgeQueue = async (queue: Queue, mutate: MutatePromise<Queue[] | undefined>) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: "🗑️ Purging queue..." });
-  mutate(new SQSClient({}).send(new PurgeQueueCommand({ QueueUrl: queue.queueUrl })), {
+  mutate(getSQSClient().send(new PurgeQueueCommand({ QueueUrl: queue.queueUrl })), {
     optimisticUpdate: (queues) => {
       if (!queues) {
         return;

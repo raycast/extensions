@@ -31,8 +31,11 @@ ${schemaString}
       actions={
         <ActionPanel>
           <AwsAction.Console url={resourceToConsoleLink(apiId, "AWS::AppSync::Schema")} />
-          <Action.CopyToClipboard title="Copy Schema" content={schemaString} />
-          <Action.Paste title="Paste Schema" content={schemaString} />
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Schema" content={schemaString} />
+            <Action.Paste title="Paste Schema" content={schemaString} />
+            <AwsAction.ExportResponse response={schema} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

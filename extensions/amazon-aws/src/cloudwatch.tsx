@@ -1,18 +1,47 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { useState } from "react";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { runAppleScript, useCachedState, useFrecencySorting } from "@raycast/utils";
+import { LogGroup } from "@aws-sdk/client-cloudwatch-logs";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { getAWSErrorMessage } from "./errors";
 import { useLogGroups } from "./hooks/use-logs";
 import { formatBytes, resourceToConsoleLink } from "./util";
-import { useCachedState, useFrecencySorting } from "@raycast/utils";
-import { LogGroup } from "@aws-sdk/client-cloudwatch-logs";
+
+function getLiveTailUrl(logGroupName: string) {
+  const region = process.env.AWS_REGION;
+  return `https://${region}.console.aws.amazon.com/cloudwatch/home?region=${region}#logsV2:live-tail$3FlogGroupArns$3D${encodeURIComponent(`arn:aws:logs:${region}:*:log-group:${logGroupName}`)}`;
+}
+
+function getTailCommand(logGroupName: string) {
+  return `aws logs tail "${logGroupName}" --follow`;
+}
+
+async function runTailInTerminal(logGroupName: string) {
+  const tailCommand = getTailCommand(logGroupName);
+  const escapedCommand = tailCommand.replace(/"/g, '\\"');
+  const appleScript = `
+    tell application "Terminal"
+      do script "${escapedCommand}"
+      activate
+    end tell
+  `;
+  try {
+    await runAppleScript(appleScript);
+    await showToast({ style: Toast.Style.Success, title: "Opened in Terminal" });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to open Terminal",
+      message: getAWSErrorMessage(error),
+    });
+  }
+}
 
 export default function CloudWatch() {
-  const [prefixQuery, setPrefixQuery] = useState<string>("");
   const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
     cacheNamespace: "aws-logs",
   });
-  const { logGroups, error, isLoading, mutate } = useLogGroups(prefixQuery);
+  const { logGroups, error, isLoading, mutate } = useLogGroups();
 
   const {
     data: sortedLogGroups,
@@ -27,11 +56,9 @@ export default function CloudWatch() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search log group by name prefix (>2 characters)"
+      searchBarPlaceholder="Filter log groups..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
-      onSearchTextChange={setPrefixQuery}
       isShowingDetail={!isLoading && !error && (logGroups || []).length > 0 && isDetailsEnabled}
-      throttle
     >
       {error && (
         <List.EmptyView
@@ -100,7 +127,27 @@ export default function CloudWatch() {
                 url={resourceToConsoleLink(logGroup.logGroupName, "AWS::Logs::LogGroup")}
                 onAction={() => visit(logGroup)}
               />
-              <ActionPanel.Section title={"Logs Actions"}>
+              <ActionPanel.Section title="Tail Logs">
+                <Action.OpenInBrowser
+                  icon={Icon.Livestream}
+                  title="Tail Logs in Console"
+                  url={getLiveTailUrl(logGroup.logGroupName!)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                />
+                <Action
+                  title="Run Tail Command in Terminal"
+                  icon={Icon.Terminal}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  onAction={() => runTailInTerminal(logGroup.logGroupName!)}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Tail Command"
+                  content={getTailCommand(logGroup.logGroupName!)}
+                  icon={Icon.Terminal}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Logs Actions">
                 <Action.CopyToClipboard
                   title="Copy Log Group Name"
                   content={logGroup.logGroupName || ""}

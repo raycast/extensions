@@ -43,6 +43,7 @@ function ResolverItem({ resolver, apiId }: { resolver: Resolver; apiId: string }
             <Action.CopyToClipboard title="Copy Type Name" content={resolver.typeName || ""} />
             <Action.CopyToClipboard title="Copy Field Name" content={resolver.fieldName || ""} />
             <Action.CopyToClipboard title="Copy Data Source Name" content={resolver.dataSourceName || ""} />
+            <AwsAction.ExportResponse response={resolver} />
           </ActionPanel.Section>
         </ActionPanel>
       }

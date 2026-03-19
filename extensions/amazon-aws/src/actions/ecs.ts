@@ -5,7 +5,6 @@ import {
   DescribeServicesCommand,
   DescribeTaskDefinitionCommand,
   DescribeTasksCommand,
-  ECSClient,
   ListClustersCommand,
   ListServicesCommand,
   ListTasksCommand,
@@ -14,14 +13,13 @@ import {
 } from "@aws-sdk/client-ecs";
 import { AWS_URL_BASE } from "../constants";
 import { isReadyToFetch } from "../util";
-
-const ecsClient = new ECSClient({});
+import { getECSClient } from "../services/clients/ecs";
 
 export async function fetchClusters(): Promise<Cluster[]> {
   if (!isReadyToFetch()) return [];
   const clustersArns = await fetchClusterArns();
 
-  const { clusters } = await ecsClient.send(new DescribeClustersCommand({ clusters: clustersArns }));
+  const { clusters } = await getECSClient().send(new DescribeClustersCommand({ clusters: clustersArns }));
   return clusters || [];
 }
 
@@ -32,7 +30,9 @@ export async function fetchServices(clusterArn: string): Promise<Service[]> {
   const serviceChunks: string[][] = getChunks(servicesArns, 10);
 
   const services = await Promise.all(
-    serviceChunks.map((chunk) => ecsClient.send(new DescribeServicesCommand({ cluster: clusterArn, services: chunk }))),
+    serviceChunks.map((chunk) =>
+      getECSClient().send(new DescribeServicesCommand({ cluster: clusterArn, services: chunk })),
+    ),
   );
 
   return services.map((entry) => entry.services || []).flat(2);
@@ -45,7 +45,7 @@ export async function fetchTasks(clusterArn: string, serviceName: string): Promi
   const taskChunks: string[][] = getChunks(taskArns, 100);
 
   const tasks = await Promise.all(
-    taskChunks.map((chunk) => ecsClient.send(new DescribeTasksCommand({ cluster: clusterArn, tasks: chunk }))),
+    taskChunks.map((chunk) => getECSClient().send(new DescribeTasksCommand({ cluster: clusterArn, tasks: chunk }))),
   );
 
   return tasks.map((entry) => entry.tasks || []).flat(2);
@@ -54,7 +54,9 @@ export async function fetchTasks(clusterArn: string, serviceName: string): Promi
 export async function fetchTaskContainers(taskDefArn: string): Promise<ContainerDefinition[]> {
   if (!isReadyToFetch()) return [];
 
-  const { taskDefinition } = await ecsClient.send(new DescribeTaskDefinitionCommand({ taskDefinition: taskDefArn }));
+  const { taskDefinition } = await getECSClient().send(
+    new DescribeTaskDefinitionCommand({ taskDefinition: taskDefArn }),
+  );
 
   return taskDefinition?.containerDefinitions || [];
 }
@@ -71,7 +73,7 @@ function getChunks(arr: string[], chunkSize: number): string[][] {
 }
 
 async function fetchClusterArns(token?: string, accClusters?: string[]): Promise<string[]> {
-  const { clusterArns, nextToken } = await ecsClient.send(new ListClustersCommand({ nextToken: token }));
+  const { clusterArns, nextToken } = await getECSClient().send(new ListClustersCommand({ nextToken: token }));
   const combinedClusters = [...(accClusters || []), ...(clusterArns || [])];
 
   if (nextToken) {
@@ -82,7 +84,7 @@ async function fetchClusterArns(token?: string, accClusters?: string[]): Promise
 }
 
 async function fetchServiceArns(clusterArn: string, token?: string, accServices?: string[]): Promise<string[]> {
-  const { serviceArns, nextToken } = await ecsClient.send(
+  const { serviceArns, nextToken } = await getECSClient().send(
     new ListServicesCommand({ cluster: clusterArn, nextToken: token }),
   );
 
@@ -101,7 +103,7 @@ async function fetchTasksArns(
   token?: string,
   accTasks?: string[],
 ): Promise<string[]> {
-  const { taskArns, nextToken } = await ecsClient.send(
+  const { taskArns, nextToken } = await getECSClient().send(
     new ListTasksCommand({ cluster: clusterArn, serviceName, nextToken: token }),
   );
 

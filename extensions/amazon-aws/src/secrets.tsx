@@ -173,6 +173,7 @@ export default function Secrets() {
                   icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
                 />
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(secret)} />
+                <AwsAction.ExportResponse response={secret} />
               </ActionPanel.Section>
             </ActionPanel>
           }

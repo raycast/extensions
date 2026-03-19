@@ -12,9 +12,10 @@ import {
   Clipboard,
   Keyboard,
 } from "@raycast/api";
-import { DynamoDBClient, UpdateItemCommand, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
+import { UpdateItemCommand, UpdateItemCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
+import { getDynamoDBClient } from "../../services/clients/dynamodb";
 import { getErrorMessage } from "../../util";
 
 interface UpdateItemFormValues {
@@ -69,7 +70,7 @@ export const UpdateItemForm = ({
         title: `🚀 Updating item in table ${table.TableName}`,
       });
 
-      mutate(new DynamoDBClient({}).send(new UpdateItemCommand(input)), {
+      mutate(getDynamoDBClient().send(new UpdateItemCommand(input)), {
         optimisticUpdate: (tables) => {
           if (!tables) return undefined;
           return tables.map((t) => (t.TableName !== table.TableName ? t : { ...t, ItemCount: (t.ItemCount ?? 0) + 1 }));

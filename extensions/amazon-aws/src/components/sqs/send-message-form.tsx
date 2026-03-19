@@ -12,9 +12,10 @@ import {
   captureException,
   Keyboard,
 } from "@raycast/api";
-import { MessageAttributeValue, SendMessageCommand, SendMessageCommandInput, SQSClient } from "@aws-sdk/client-sqs";
+import { MessageAttributeValue, SendMessageCommand, SendMessageCommandInput } from "@aws-sdk/client-sqs";
 import { Queue } from "../../sqs";
 import Style = Toast.Style;
+import { getSQSClient } from "../../services/clients/sqs";
 import { getErrorMessage } from "../../util";
 
 interface SendMessageFormValues {
@@ -62,7 +63,7 @@ export const SendMessageForm = ({
             };
 
             const toast = await showToast({ style: Style.Animated, title: "🚧 Sending message..." });
-            mutate(new SQSClient({}).send(new SendMessageCommand(input)), {
+            mutate(getSQSClient().send(new SendMessageCommand(input)), {
               optimisticUpdate: (queues) => {
                 if (!queues) {
                   return;

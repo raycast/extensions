@@ -1,5 +1,4 @@
 import {
-  APIGatewayClient,
   RestApi,
   GetRestApisCommand,
   GetResourcesCommand,
@@ -13,9 +12,14 @@ import {
   GetMethodCommand,
   GetDeploymentsCommand,
   Deployment,
+  GetAuthorizersCommand,
+  Authorizer,
+  GetDomainNamesCommand,
+  DomainName,
+  GetBasePathMappingsCommand,
+  BasePathMapping,
 } from "@aws-sdk/client-api-gateway";
 import {
-  ApiGatewayV2Client,
   GetApisCommand,
   Api,
   GetStagesCommand as GetStagesV2Command,
@@ -26,6 +30,7 @@ import {
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
+import { getApiGatewayClient, getApiGatewayV2Client } from "../services/clients/api-gateway";
 
 /**
  * Hook to fetch and manage API Gateway REST APIs
@@ -48,23 +53,28 @@ export function useApiGatewayAPIs() {
   return { apis, error, isLoading: (!apis && !error) || isLoading, revalidate };
 }
 
-async function fetchApiGatewayAPIs(toast: Toast, position?: string, aggregate?: RestApi[]): Promise<RestApi[]> {
-  const client = new APIGatewayClient({});
-  const { items, position: nextPosition } = await client.send(new GetRestApisCommand({ position, limit: 500 }));
+async function fetchApiGatewayAPIs(toast: Toast, maxResults = 500): Promise<RestApi[]> {
+  const client = getApiGatewayClient();
+  const apis: RestApi[] = [];
+  let position: string | undefined;
 
-  const filteredApis = items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredApis];
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetRestApisCommand({ position, limit: Math.min(maxResults - apis.length, 500) }),
+    );
 
-  toast.message = `${agg.length} APIs`;
+    if (items) {
+      apis.push(...items);
+    }
 
-  if (nextPosition) {
-    return await fetchApiGatewayAPIs(toast, nextPosition, agg);
-  }
+    toast.message = `${apis.length} APIs`;
+    position = nextPosition;
+  } while (position && apis.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded REST APIs";
-  toast.message = `${agg.length} APIs`;
-  return agg;
+  toast.message = `${apis.length} APIs`;
+  return apis;
 }
 
 /**
@@ -88,30 +98,28 @@ export function useApiGatewayResources(apiId: string) {
   return { resources, error, isLoading: (!resources && !error) || isLoading, revalidate };
 }
 
-async function fetchApiGatewayResources(
-  apiId: string,
-  toast: Toast,
-  position?: string,
-  aggregate?: Resource[],
-): Promise<Resource[]> {
-  const client = new APIGatewayClient({});
-  const { items, position: nextPosition } = await client.send(
-    new GetResourcesCommand({ restApiId: apiId, position, limit: 500 }),
-  );
+async function fetchApiGatewayResources(apiId: string, toast: Toast, maxResults = 500): Promise<Resource[]> {
+  const client = getApiGatewayClient();
+  const resources: Resource[] = [];
+  let position: string | undefined;
 
-  const filteredResources = items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredResources];
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetResourcesCommand({ restApiId: apiId, position, limit: Math.min(maxResults - resources.length, 500) }),
+    );
 
-  toast.message = `${agg.length} resources`;
+    if (items) {
+      resources.push(...items);
+    }
 
-  if (nextPosition) {
-    return await fetchApiGatewayResources(apiId, toast, nextPosition, agg);
-  }
+    toast.message = `${resources.length} resources`;
+    position = nextPosition;
+  } while (position && resources.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded resources";
-  toast.message = `${agg.length} resources`;
-  return agg;
+  toast.message = `${resources.length} resources`;
+  return resources;
 }
 
 /**
@@ -136,7 +144,7 @@ export function useApiGatewayStages(apiId: string) {
 }
 
 async function fetchApiGatewayStages(apiId: string, toast: Toast): Promise<Stage[]> {
-  const client = new APIGatewayClient({});
+  const client = getApiGatewayClient();
   const { item: stages } = await client.send(new GetStagesCommand({ restApiId: apiId }));
 
   const filteredStages = stages ?? [];
@@ -168,23 +176,28 @@ export function useApiGatewayApiKeys() {
   return { apiKeys, error, isLoading: (!apiKeys && !error) || isLoading, revalidate };
 }
 
-async function fetchApiGatewayApiKeys(toast: Toast, position?: string, aggregate?: ApiKey[]): Promise<ApiKey[]> {
-  const client = new APIGatewayClient({});
-  const { items, position: nextPosition } = await client.send(new GetApiKeysCommand({ position, limit: 500 }));
+async function fetchApiGatewayApiKeys(toast: Toast, maxResults = 500): Promise<ApiKey[]> {
+  const client = getApiGatewayClient();
+  const apiKeys: ApiKey[] = [];
+  let position: string | undefined;
 
-  const filteredApiKeys = items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredApiKeys];
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetApiKeysCommand({ position, limit: Math.min(maxResults - apiKeys.length, 500) }),
+    );
 
-  toast.message = `${agg.length} API keys`;
+    if (items) {
+      apiKeys.push(...items);
+    }
 
-  if (nextPosition) {
-    return await fetchApiGatewayApiKeys(toast, nextPosition, agg);
-  }
+    toast.message = `${apiKeys.length} API keys`;
+    position = nextPosition;
+  } while (position && apiKeys.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded API keys";
-  toast.message = `${agg.length} API keys`;
-  return agg;
+  toast.message = `${apiKeys.length} API keys`;
+  return apiKeys;
 }
 
 /**
@@ -208,27 +221,28 @@ export function useApiGatewayUsagePlans() {
   return { usagePlans, error, isLoading: (!usagePlans && !error) || isLoading, revalidate };
 }
 
-async function fetchApiGatewayUsagePlans(
-  toast: Toast,
-  position?: string,
-  aggregate?: UsagePlan[],
-): Promise<UsagePlan[]> {
-  const client = new APIGatewayClient({});
-  const { items, position: nextPosition } = await client.send(new GetUsagePlansCommand({ position, limit: 500 }));
+async function fetchApiGatewayUsagePlans(toast: Toast, maxResults = 500): Promise<UsagePlan[]> {
+  const client = getApiGatewayClient();
+  const usagePlans: UsagePlan[] = [];
+  let position: string | undefined;
 
-  const filteredUsagePlans = items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredUsagePlans];
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetUsagePlansCommand({ position, limit: Math.min(maxResults - usagePlans.length, 500) }),
+    );
 
-  toast.message = `${agg.length} usage plans`;
+    if (items) {
+      usagePlans.push(...items);
+    }
 
-  if (nextPosition) {
-    return await fetchApiGatewayUsagePlans(toast, nextPosition, agg);
-  }
+    toast.message = `${usagePlans.length} usage plans`;
+    position = nextPosition;
+  } while (position && usagePlans.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded usage plans";
-  toast.message = `${agg.length} usage plans`;
-  return agg;
+  toast.message = `${usagePlans.length} usage plans`;
+  return usagePlans;
 }
 
 /**
@@ -241,7 +255,7 @@ export function useApiGatewayMethod(apiId: string, resourceId: string, httpMetho
     isLoading,
   } = useCachedPromise(
     async (restApiId: string, resId: string, method: string) => {
-      const client = new APIGatewayClient({});
+      const client = getApiGatewayClient();
       const response = await client.send(
         new GetMethodCommand({
           restApiId,
@@ -282,23 +296,28 @@ export function useHttpAPIs() {
   return { apis, error, isLoading: (!apis && !error) || isLoading, revalidate };
 }
 
-async function fetchHttpAPIs(toast: Toast, nextToken?: string, aggregate?: Api[]): Promise<Api[]> {
-  const client = new ApiGatewayV2Client({});
-  const { Items, NextToken } = await client.send(new GetApisCommand({ NextToken: nextToken, MaxResults: "100" }));
+async function fetchHttpAPIs(toast: Toast, maxResults = 500): Promise<Api[]> {
+  const client = getApiGatewayV2Client();
+  const apis: Api[] = [];
+  let nextToken: string | undefined;
 
-  const filteredApis = Items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredApis];
+  do {
+    const { Items, NextToken } = await client.send(
+      new GetApisCommand({ NextToken: nextToken, MaxResults: String(Math.min(maxResults - apis.length, 100)) }),
+    );
 
-  toast.message = `${agg.length} HTTP APIs`;
+    if (Items) {
+      apis.push(...Items);
+    }
 
-  if (NextToken) {
-    return await fetchHttpAPIs(toast, NextToken, agg);
-  }
+    toast.message = `${apis.length} HTTP APIs`;
+    nextToken = NextToken;
+  } while (nextToken && apis.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded HTTP APIs";
-  toast.message = `${agg.length} HTTP APIs`;
-  return agg;
+  toast.message = `${apis.length} HTTP APIs`;
+  return apis;
 }
 
 /**
@@ -322,30 +341,28 @@ export function useApiGatewayDeployments(apiId: string) {
   return { deployments, error, isLoading: (!deployments && !error) || isLoading, revalidate };
 }
 
-async function fetchApiGatewayDeployments(
-  apiId: string,
-  toast: Toast,
-  position?: string,
-  aggregate?: Deployment[],
-): Promise<Deployment[]> {
-  const client = new APIGatewayClient({});
-  const { items, position: nextPosition } = await client.send(
-    new GetDeploymentsCommand({ restApiId: apiId, position, limit: 500 }),
-  );
+async function fetchApiGatewayDeployments(apiId: string, toast: Toast, maxResults = 500): Promise<Deployment[]> {
+  const client = getApiGatewayClient();
+  const deployments: Deployment[] = [];
+  let position: string | undefined;
 
-  const filteredDeployments = items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredDeployments];
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetDeploymentsCommand({ restApiId: apiId, position, limit: Math.min(maxResults - deployments.length, 500) }),
+    );
 
-  toast.message = `${agg.length} deployments`;
+    if (items) {
+      deployments.push(...items);
+    }
 
-  if (nextPosition) {
-    return await fetchApiGatewayDeployments(apiId, toast, nextPosition, agg);
-  }
+    toast.message = `${deployments.length} deployments`;
+    position = nextPosition;
+  } while (position && deployments.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded deployments";
-  toast.message = `${agg.length} deployments`;
-  return agg;
+  toast.message = `${deployments.length} deployments`;
+  return deployments;
 }
 
 /**
@@ -369,30 +386,32 @@ export function useHttpApiRoutes(apiId: string) {
   return { routes, error, isLoading: (!routes && !error) || isLoading, revalidate };
 }
 
-async function fetchHttpApiRoutes(
-  apiId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: Route[],
-): Promise<Route[]> {
-  const client = new ApiGatewayV2Client({});
-  const { Items, NextToken } = await client.send(
-    new GetRoutesCommand({ ApiId: apiId, NextToken: nextToken, MaxResults: "100" }),
-  );
+async function fetchHttpApiRoutes(apiId: string, toast: Toast, maxResults = 500): Promise<Route[]> {
+  const client = getApiGatewayV2Client();
+  const routes: Route[] = [];
+  let nextToken: string | undefined;
 
-  const filteredRoutes = Items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredRoutes];
+  do {
+    const { Items, NextToken } = await client.send(
+      new GetRoutesCommand({
+        ApiId: apiId,
+        NextToken: nextToken,
+        MaxResults: String(Math.min(maxResults - routes.length, 100)),
+      }),
+    );
 
-  toast.message = `${agg.length} routes`;
+    if (Items) {
+      routes.push(...Items);
+    }
 
-  if (NextToken) {
-    return await fetchHttpApiRoutes(apiId, toast, NextToken, agg);
-  }
+    toast.message = `${routes.length} routes`;
+    nextToken = NextToken;
+  } while (nextToken && routes.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded routes";
-  toast.message = `${agg.length} routes`;
-  return agg;
+  toast.message = `${routes.length} routes`;
+  return routes;
 }
 
 /**
@@ -416,28 +435,176 @@ export function useHttpApiStages(apiId: string) {
   return { stages, error, isLoading: (!stages && !error) || isLoading, revalidate };
 }
 
-async function fetchHttpApiStages(
-  apiId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: StageV2[],
-): Promise<StageV2[]> {
-  const client = new ApiGatewayV2Client({});
-  const { Items, NextToken } = await client.send(
-    new GetStagesV2Command({ ApiId: apiId, NextToken: nextToken, MaxResults: "100" }),
-  );
+async function fetchHttpApiStages(apiId: string, toast: Toast, maxResults = 500): Promise<StageV2[]> {
+  const client = getApiGatewayV2Client();
+  const stages: StageV2[] = [];
+  let nextToken: string | undefined;
 
-  const filteredStages = Items ?? [];
-  const agg = [...(aggregate ?? []), ...filteredStages];
+  do {
+    const { Items, NextToken } = await client.send(
+      new GetStagesV2Command({
+        ApiId: apiId,
+        NextToken: nextToken,
+        MaxResults: String(Math.min(maxResults - stages.length, 100)),
+      }),
+    );
 
-  toast.message = `${agg.length} stages`;
+    if (Items) {
+      stages.push(...Items);
+    }
 
-  if (NextToken) {
-    return await fetchHttpApiStages(apiId, toast, NextToken, agg);
-  }
+    toast.message = `${stages.length} stages`;
+    nextToken = NextToken;
+  } while (nextToken && stages.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded stages";
-  toast.message = `${agg.length} stages`;
-  return agg;
+  toast.message = `${stages.length} stages`;
+  return stages;
+}
+
+/**
+ * Hook to fetch authorizers for a specific API Gateway REST API
+ */
+export function useApiGatewayAuthorizers(apiId: string) {
+  const {
+    data: authorizers,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async (id: string) => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Loading authorizers" });
+      return await fetchApiGatewayAuthorizers(id, toast);
+    },
+    [apiId],
+    { execute: isReadyToFetch() && !!apiId, failureToastOptions: { title: "❌ Failed to load authorizers" } },
+  );
+
+  return { authorizers, error, isLoading: (!authorizers && !error) || isLoading, revalidate };
+}
+
+async function fetchApiGatewayAuthorizers(apiId: string, toast: Toast, maxResults = 500): Promise<Authorizer[]> {
+  const client = getApiGatewayClient();
+  const authorizers: Authorizer[] = [];
+  let position: string | undefined;
+
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetAuthorizersCommand({
+        restApiId: apiId,
+        position,
+        limit: Math.min(maxResults - authorizers.length, 500),
+      }),
+    );
+
+    if (items) {
+      authorizers.push(...items);
+    }
+
+    toast.message = `${authorizers.length} authorizers`;
+    position = nextPosition;
+  } while (position && authorizers.length < maxResults);
+
+  toast.style = Toast.Style.Success;
+  toast.title = "✅ Loaded authorizers";
+  toast.message = `${authorizers.length} authorizers`;
+  return authorizers;
+}
+
+/**
+ * Hook to fetch custom domain names for API Gateway
+ */
+export function useApiGatewayDomainNames() {
+  const {
+    data: domainNames,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async () => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Loading domain names" });
+      return await fetchApiGatewayDomainNames(toast);
+    },
+    [],
+    { execute: isReadyToFetch(), failureToastOptions: { title: "❌ Failed to load domain names" } },
+  );
+
+  return { domainNames, error, isLoading: (!domainNames && !error) || isLoading, revalidate };
+}
+
+async function fetchApiGatewayDomainNames(toast: Toast, maxResults = 500): Promise<DomainName[]> {
+  const client = getApiGatewayClient();
+  const domainNames: DomainName[] = [];
+  let position: string | undefined;
+
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetDomainNamesCommand({ position, limit: Math.min(maxResults - domainNames.length, 500) }),
+    );
+
+    if (items) {
+      domainNames.push(...items);
+    }
+
+    toast.message = `${domainNames.length} domain names`;
+    position = nextPosition;
+  } while (position && domainNames.length < maxResults);
+
+  toast.style = Toast.Style.Success;
+  toast.title = "✅ Loaded domain names";
+  toast.message = `${domainNames.length} domain names`;
+  return domainNames;
+}
+
+/**
+ * Hook to fetch base path mappings for a custom domain
+ */
+export function useApiGatewayBasePathMappings(domainName: string) {
+  const {
+    data: basePathMappings,
+    error,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async (domain: string) => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Loading base path mappings" });
+      return await fetchApiGatewayBasePathMappings(domain, toast);
+    },
+    [domainName],
+    {
+      execute: isReadyToFetch() && !!domainName,
+      failureToastOptions: { title: "❌ Failed to load base path mappings" },
+    },
+  );
+
+  return { basePathMappings, error, isLoading: (!basePathMappings && !error) || isLoading, revalidate };
+}
+
+async function fetchApiGatewayBasePathMappings(
+  domainName: string,
+  toast: Toast,
+  maxResults = 500,
+): Promise<BasePathMapping[]> {
+  const client = getApiGatewayClient();
+  const mappings: BasePathMapping[] = [];
+  let position: string | undefined;
+
+  do {
+    const { items, position: nextPosition } = await client.send(
+      new GetBasePathMappingsCommand({ domainName, position, limit: Math.min(maxResults - mappings.length, 500) }),
+    );
+
+    if (items) {
+      mappings.push(...items);
+    }
+
+    toast.message = `${mappings.length} mappings`;
+    position = nextPosition;
+  } while (position && mappings.length < maxResults);
+
+  toast.style = Toast.Style.Success;
+  toast.title = "✅ Loaded base path mappings";
+  toast.message = `${mappings.length} mappings`;
+  return mappings;
 }

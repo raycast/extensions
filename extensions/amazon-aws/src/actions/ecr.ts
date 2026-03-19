@@ -1,14 +1,7 @@
-import {
-  ECRClient,
-  DescribeRepositoriesCommand,
-  Repository,
-  ListImagesCommand,
-  ImageIdentifier,
-} from "@aws-sdk/client-ecr";
+import { DescribeRepositoriesCommand, Repository, ListImagesCommand, ImageIdentifier } from "@aws-sdk/client-ecr";
 import { AWS_URL_BASE } from "../constants";
 import { isReadyToFetch } from "../util";
-
-const ecrClient = new ECRClient({});
+import { getECRClient } from "../services/clients/ecr";
 
 export async function fetchRepositories(): Promise<Repository[]> {
   if (!isReadyToFetch()) return [];
@@ -25,7 +18,7 @@ export async function fetchImages(registryId: string, repositoryName: string): P
 }
 
 async function fetchAllRepositories(token?: string, accRepositories?: Repository[]): Promise<Repository[]> {
-  const { repositories, nextToken } = await ecrClient.send(new DescribeRepositoriesCommand({ nextToken: token }));
+  const { repositories, nextToken } = await getECRClient().send(new DescribeRepositoriesCommand({ nextToken: token }));
   const combinedRepositories = [...(accRepositories || []), ...(repositories || [])];
 
   if (nextToken) {
@@ -41,7 +34,7 @@ async function fetchRepositoryImages(
   token?: string,
   accImages?: ImageIdentifier[],
 ): Promise<ImageIdentifier[]> {
-  const { imageIds, nextToken } = await ecrClient.send(
+  const { imageIds, nextToken } = await getECRClient().send(
     new ListImagesCommand({ registryId, repositoryName, nextToken: token }),
   );
 

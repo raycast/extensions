@@ -1,5 +1,4 @@
 import {
-  AppSyncClient,
   GraphqlApi,
   DataSource,
   Resolver,
@@ -16,6 +15,7 @@ import {
 import { showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isReadyToFetch } from "../util";
+import { getAppSyncClient } from "../services/clients/appsync";
 
 /**
  * Hook to fetch and manage AppSync GraphQL APIs
@@ -38,23 +38,26 @@ export function useAppSyncAPIs() {
   return { apis, error, isLoading: (!apis && !error) || isLoading, revalidate };
 }
 
-async function fetchAppSyncAPIs(toast: Toast, nextToken?: string, aggregate?: GraphqlApi[]): Promise<GraphqlApi[]> {
-  const client = new AppSyncClient({});
-  const { graphqlApis, nextToken: cursor } = await client.send(new ListGraphqlApisCommand({ nextToken }));
+async function fetchAppSyncAPIs(toast: Toast, maxResults = 100): Promise<GraphqlApi[]> {
+  const client = getAppSyncClient();
+  const apis: GraphqlApi[] = [];
+  let nextToken: string | undefined;
 
-  const filteredApis = graphqlApis ?? [];
-  const agg = [...(aggregate ?? []), ...filteredApis];
+  do {
+    const { graphqlApis, nextToken: cursor } = await client.send(new ListGraphqlApisCommand({ nextToken }));
 
-  toast.message = `${agg.length} APIs`;
+    if (graphqlApis) {
+      apis.push(...graphqlApis);
+    }
 
-  if (cursor) {
-    return await fetchAppSyncAPIs(toast, cursor, agg);
-  }
+    toast.message = `${apis.length} APIs`;
+    nextToken = cursor;
+  } while (nextToken && apis.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded GraphQL APIs";
-  toast.message = `${agg.length} APIs`;
-  return agg;
+  toast.message = `${apis.length} APIs`;
+  return apis;
 }
 
 /**
@@ -78,28 +81,28 @@ export function useAppSyncDataSources(apiId: string) {
   return { dataSources, error, isLoading: (!dataSources && !error) || isLoading, revalidate };
 }
 
-async function fetchAppSyncDataSources(
-  apiId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: DataSource[],
-): Promise<DataSource[]> {
-  const client = new AppSyncClient({});
-  const { dataSources, nextToken: cursor } = await client.send(new ListDataSourcesCommand({ apiId, nextToken }));
+async function fetchAppSyncDataSources(apiId: string, toast: Toast, maxResults = 100): Promise<DataSource[]> {
+  const client = getAppSyncClient();
+  const dataSources: DataSource[] = [];
+  let nextToken: string | undefined;
 
-  const filteredDataSources = dataSources ?? [];
-  const agg = [...(aggregate ?? []), ...filteredDataSources];
+  do {
+    const { dataSources: dataSourceList, nextToken: cursor } = await client.send(
+      new ListDataSourcesCommand({ apiId, nextToken }),
+    );
 
-  toast.message = `${agg.length} data sources`;
+    if (dataSourceList) {
+      dataSources.push(...dataSourceList);
+    }
 
-  if (cursor) {
-    return await fetchAppSyncDataSources(apiId, toast, cursor, agg);
-  }
+    toast.message = `${dataSources.length} data sources`;
+    nextToken = cursor;
+  } while (nextToken && dataSources.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded data sources";
-  toast.message = `${agg.length} data sources`;
-  return agg;
+  toast.message = `${dataSources.length} data sources`;
+  return dataSources;
 }
 
 /**
@@ -134,9 +137,8 @@ async function fetchAllResolvers(apiId: string, toast: Toast): Promise<Resolver[
     try {
       const resolversForType = await fetchResolversForType(apiId, typeName, toast);
       allResolvers.push(...resolversForType);
-    } catch (error) {
-      // Type might not exist, continue with others
-      console.log(`No ${typeName} type found`);
+    } catch {
+      // Type might not exist in this API, continue with other types
     }
   }
 
@@ -150,30 +152,31 @@ async function fetchResolversForType(
   apiId: string,
   typeName: string,
   toast: Toast,
-  nextToken?: string,
-  aggregate?: Resolver[],
+  maxResults = 100,
 ): Promise<Resolver[]> {
-  const client = new AppSyncClient({});
+  const client = getAppSyncClient();
+  const resolvers: Resolver[] = [];
+  let nextToken: string | undefined;
 
-  const { resolvers, nextToken: cursor } = await client.send(
-    new ListResolversCommand({
-      apiId,
-      typeName,
-      nextToken,
-      maxResults: 25,
-    }),
-  );
+  do {
+    const { resolvers: resolverList, nextToken: cursor } = await client.send(
+      new ListResolversCommand({
+        apiId,
+        typeName,
+        nextToken,
+        maxResults: Math.min(maxResults - resolvers.length, 25),
+      }),
+    );
 
-  const filteredResolvers = resolvers ?? [];
-  const agg = [...(aggregate ?? []), ...filteredResolvers];
+    if (resolverList) {
+      resolvers.push(...resolverList);
+    }
 
-  toast.message = `Loading ${typeName} resolvers... ${agg.length} found`;
+    toast.message = `Loading ${typeName} resolvers... ${resolvers.length} found`;
+    nextToken = cursor;
+  } while (nextToken && resolvers.length < maxResults);
 
-  if (cursor) {
-    return await fetchResolversForType(apiId, typeName, toast, cursor, agg);
-  }
-
-  return agg;
+  return resolvers;
 }
 
 /**
@@ -197,28 +200,26 @@ export function useAppSyncApiKeys(apiId: string) {
   return { apiKeys, error, isLoading: (!apiKeys && !error) || isLoading, revalidate };
 }
 
-async function fetchAppSyncApiKeys(
-  apiId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: ApiKey[],
-): Promise<ApiKey[]> {
-  const client = new AppSyncClient({});
-  const { apiKeys, nextToken: cursor } = await client.send(new ListApiKeysCommand({ apiId, nextToken }));
+async function fetchAppSyncApiKeys(apiId: string, toast: Toast, maxResults = 100): Promise<ApiKey[]> {
+  const client = getAppSyncClient();
+  const apiKeys: ApiKey[] = [];
+  let nextToken: string | undefined;
 
-  const filteredApiKeys = apiKeys ?? [];
-  const agg = [...(aggregate ?? []), ...filteredApiKeys];
+  do {
+    const { apiKeys: apiKeyList, nextToken: cursor } = await client.send(new ListApiKeysCommand({ apiId, nextToken }));
 
-  toast.message = `${agg.length} API keys`;
+    if (apiKeyList) {
+      apiKeys.push(...apiKeyList);
+    }
 
-  if (cursor) {
-    return await fetchAppSyncApiKeys(apiId, toast, cursor, agg);
-  }
+    toast.message = `${apiKeys.length} API keys`;
+    nextToken = cursor;
+  } while (nextToken && apiKeys.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded API keys";
-  toast.message = `${agg.length} API keys`;
-  return agg;
+  toast.message = `${apiKeys.length} API keys`;
+  return apiKeys;
 }
 
 /**
@@ -231,7 +232,7 @@ export function useAppSyncApiDetails(apiId: string) {
     isLoading,
   } = useCachedPromise(
     async (id: string) => {
-      const client = new AppSyncClient({});
+      const client = getAppSyncClient();
       const { graphqlApi } = await client.send(new GetGraphqlApiCommand({ apiId: id }));
       return graphqlApi;
     },
@@ -252,7 +253,7 @@ export function useAppSyncSchema(apiId: string, format: "SDL" | "JSON" = "SDL") 
     isLoading,
   } = useCachedPromise(
     async (id: string, schemaFormat: "SDL" | "JSON") => {
-      const client = new AppSyncClient({});
+      const client = getAppSyncClient();
       const { schema } = await client.send(new GetIntrospectionSchemaCommand({ apiId: id, format: schemaFormat }));
       return schema;
     },
@@ -284,26 +285,26 @@ export function useAppSyncFunctions(apiId: string) {
   return { functions, error, isLoading: (!functions && !error) || isLoading, revalidate };
 }
 
-async function fetchAppSyncFunctions(
-  apiId: string,
-  toast: Toast,
-  nextToken?: string,
-  aggregate?: FunctionConfiguration[],
-): Promise<FunctionConfiguration[]> {
-  const client = new AppSyncClient({});
-  const { functions, nextToken: cursor } = await client.send(new ListFunctionsCommand({ apiId, nextToken }));
+async function fetchAppSyncFunctions(apiId: string, toast: Toast, maxResults = 100): Promise<FunctionConfiguration[]> {
+  const client = getAppSyncClient();
+  const functions: FunctionConfiguration[] = [];
+  let nextToken: string | undefined;
 
-  const filteredFunctions = functions ?? [];
-  const agg = [...(aggregate ?? []), ...filteredFunctions];
+  do {
+    const { functions: functionList, nextToken: cursor } = await client.send(
+      new ListFunctionsCommand({ apiId, nextToken }),
+    );
 
-  toast.message = `${agg.length} functions`;
+    if (functionList) {
+      functions.push(...functionList);
+    }
 
-  if (cursor) {
-    return await fetchAppSyncFunctions(apiId, toast, cursor, agg);
-  }
+    toast.message = `${functions.length} functions`;
+    nextToken = cursor;
+  } while (nextToken && functions.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded functions";
-  toast.message = `${agg.length} functions`;
-  return agg;
+  toast.message = `${functions.length} functions`;
+  return functions;
 }

@@ -1,4 +1,5 @@
-import { AmplifyClient, ListJobsCommand, JobSummary } from "@aws-sdk/client-amplify";
+import { ListJobsCommand, JobSummary } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Lists build jobs for a specific Amplify app branch
@@ -19,7 +20,7 @@ export default async function listAmplifyJobs(options: {
     throw new Error("Branch name is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const jobs: JobSummary[] = [];
   let nextToken: string | undefined;

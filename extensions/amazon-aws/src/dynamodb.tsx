@@ -17,7 +17,8 @@ import { MutatePromise, useCachedState, useFrecencySorting } from "@raycast/util
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { getErrorMessage, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
-import { DynamoDBClient, TableDescription, UpdateTableCommand } from "@aws-sdk/client-dynamodb";
+import { TableDescription, UpdateTableCommand } from "@aws-sdk/client-dynamodb";
+import { getDynamoDBClient } from "./services/clients/dynamodb";
 import { DeleteItemForm } from "./components/dynamodb/delete-item-form";
 import { UpdateItemForm } from "./components/dynamodb/update-item-form";
 import { QueryForm } from "./components/dynamodb/query-form";
@@ -272,6 +273,7 @@ export default function DynamoDb() {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
+                <AwsAction.ExportResponse response={table} />
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(table)} />
               </ActionPanel.Section>
             </ActionPanel>
@@ -323,7 +325,7 @@ const tryUpdateDeletionProtection = async ({
   });
 
   mutate(
-    new DynamoDBClient({}).send(
+    getDynamoDBClient().send(
       new UpdateTableCommand({ TableName, DeletionProtectionEnabled: !DeletionProtectionEnabled }),
     ),
     {

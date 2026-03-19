@@ -1,6 +1,9 @@
-import { useState, useEffect } from "react";
-import { Action, ActionPanel, Form, useNavigation, showToast, Toast, Clipboard, LocalStorage } from "@raycast/api";
-import { LambdaClient, InvokeCommand, InvokeCommandInput } from "@aws-sdk/client-lambda";
+import { InvokeCommand, InvokeCommandInput } from "@aws-sdk/client-lambda";
+import { Action, ActionPanel, Clipboard, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
+import { useState } from "react";
+import { getLambdaClient } from "../../services/clients/lambda";
+import { getAWSErrorMessage } from "../../errors";
 
 interface InvokeLambdaFunctionProps {
   functionName: string;
@@ -12,28 +15,36 @@ interface SavedPayload {
 }
 
 export default function InvokeLambdaFunction({ functionName }: InvokeLambdaFunctionProps) {
-  const [payload, setPayload] = useState("{}");
-  const [savedPayloads, setSavedPayloads] = useState<SavedPayload[]>([]);
+  const {
+    value: lastPayload,
+    setValue: setLastPayload,
+    isLoading: isLoadingPayload,
+  } = useLocalStorage<string>(`lastPayload_${functionName}`, "{}");
+
+  const {
+    value: savedPayloads,
+    setValue: setSavedPayloads,
+    isLoading: isLoadingSavedPayloads,
+  } = useLocalStorage<SavedPayload[]>(`savedPayloads_${functionName}`, []);
+
+  const [payload, setPayload] = useState<string | null>(null);
   const [saveName, setSaveName] = useState("");
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    LocalStorage.getItem<string>(`lastPayload_${functionName}`).then((lastPayload) => {
-      if (lastPayload) {
-        setPayload(lastPayload);
-      }
-    });
+  const isLoading = isLoadingPayload || isLoadingSavedPayloads;
 
-    LocalStorage.getItem<string>(`savedPayloads_${functionName}`).then((savedPayloadsString) => {
-      if (savedPayloadsString) {
-        setSavedPayloads(JSON.parse(savedPayloadsString));
-      }
-    });
-  }, [functionName]);
+  // Return loading form until LocalStorage data is ready
+  if (isLoading) {
+    return <Form isLoading={true} />;
+  }
 
-  const handleSubmit = async (values: { payload: string }) => {
+  // Use local state if user has edited, otherwise use stored value
+  const currentPayload = payload ?? lastPayload ?? "{}";
+  const currentSavedPayloads = savedPayloads ?? [];
+
+  async function handleSubmit(values: { payload: string }) {
     try {
-      const client = new LambdaClient({});
+      const client = getLambdaClient();
       const input: InvokeCommandInput = {
         FunctionName: functionName,
         Payload: values.payload,
@@ -67,32 +78,31 @@ export default function InvokeLambdaFunction({ functionName }: InvokeLambdaFunct
       }
 
       // Save the last invoked payload
-      await LocalStorage.setItem(`lastPayload_${functionName}`, values.payload);
+      await setLastPayload(values.payload);
 
       pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Error Invoking Function",
-        message: error instanceof Error ? error.message : String(error),
+        message: getAWSErrorMessage(error),
       });
     }
-  };
+  }
 
-  const handleSavePayload = async () => {
+  async function handleSavePayload() {
     const trimmedName = saveName.trim();
-    const trimmedPayload = payload.trim();
+    const trimmedPayload = currentPayload.trim();
     if (trimmedName && trimmedPayload) {
-      const existingIndex = savedPayloads.findIndex((sp) => sp.name === trimmedName);
+      const existingIndex = currentSavedPayloads.findIndex((sp) => sp.name === trimmedName);
       let newSavedPayloads;
       if (existingIndex !== -1) {
-        newSavedPayloads = [...savedPayloads];
+        newSavedPayloads = [...currentSavedPayloads];
         newSavedPayloads[existingIndex] = { name: trimmedName, payload: trimmedPayload };
       } else {
-        newSavedPayloads = [...savedPayloads, { name: trimmedName, payload: trimmedPayload }];
+        newSavedPayloads = [...currentSavedPayloads, { name: trimmedName, payload: trimmedPayload }];
       }
-      setSavedPayloads(newSavedPayloads);
-      await LocalStorage.setItem(`savedPayloads_${functionName}`, JSON.stringify(newSavedPayloads));
+      await setSavedPayloads(newSavedPayloads);
       setSaveName("");
       await showToast({
         style: Toast.Style.Success,
@@ -100,22 +110,21 @@ export default function InvokeLambdaFunction({ functionName }: InvokeLambdaFunct
         message: `Saved as "${trimmedName}"`,
       });
     }
-  };
+  }
 
-  const handleDeletePayload = async (nameToDelete: string) => {
-    const newSavedPayloads = savedPayloads.filter((sp) => sp.name !== nameToDelete);
-    setSavedPayloads(newSavedPayloads);
-    await LocalStorage.setItem(`savedPayloads_${functionName}`, JSON.stringify(newSavedPayloads));
+  async function handleDeletePayload(nameToDelete: string) {
+    const newSavedPayloads = currentSavedPayloads.filter((sp) => sp.name !== nameToDelete);
+    await setSavedPayloads(newSavedPayloads);
     await showToast({
       style: Toast.Style.Success,
       title: "Payload Deleted",
       message: `Deleted "${nameToDelete}"`,
     });
-  };
+  }
 
-  const handleLoadPayload = (savedPayload: SavedPayload) => {
+  function handleLoadPayload(savedPayload: SavedPayload) {
     setPayload(savedPayload.payload);
-  };
+  }
 
   return (
     <Form
@@ -124,7 +133,7 @@ export default function InvokeLambdaFunction({ functionName }: InvokeLambdaFunct
           <Action.SubmitForm title="Invoke" onSubmit={handleSubmit} />
           <Action title="Save Payload" onAction={handleSavePayload} shortcut={{ modifiers: ["cmd"], key: "s" }} />
           <ActionPanel.Submenu title="Load Payload" shortcut={{ modifiers: ["cmd"], key: "l" }}>
-            {savedPayloads.map((savedPayload) => (
+            {currentSavedPayloads.map((savedPayload) => (
               <Action
                 key={savedPayload.name}
                 title={savedPayload.name}
@@ -133,7 +142,7 @@ export default function InvokeLambdaFunction({ functionName }: InvokeLambdaFunct
             ))}
           </ActionPanel.Submenu>
           <ActionPanel.Submenu title="Delete Payload" shortcut={{ modifiers: ["cmd"], key: "d" }}>
-            {savedPayloads.map((savedPayload) => (
+            {currentSavedPayloads.map((savedPayload) => (
               <Action
                 key={savedPayload.name}
                 title={savedPayload.name}
@@ -148,7 +157,7 @@ export default function InvokeLambdaFunction({ functionName }: InvokeLambdaFunct
         id="payload"
         title="Payload"
         placeholder='Enter JSON payload, e.g., {"key": "value"}'
-        value={payload}
+        value={currentPayload}
         onChange={setPayload}
       />
       <Form.TextField

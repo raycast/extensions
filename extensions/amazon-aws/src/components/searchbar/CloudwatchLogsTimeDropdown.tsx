@@ -1,5 +1,5 @@
-import { LogStartTimes } from "../../interfaces";
 import { List } from "@raycast/api";
+import { LogStartTimes } from "../../interfaces";
 
 function CloudwatchLogsTimeDropdown({
   logStartTime,

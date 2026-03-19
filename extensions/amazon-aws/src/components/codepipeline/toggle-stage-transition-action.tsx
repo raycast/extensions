@@ -1,11 +1,11 @@
 import { Action, ActionPanel, captureException, Color, Icon, showToast, Toast } from "@raycast/api";
 import {
-  CodePipelineClient,
   DisableStageTransitionCommand,
   EnableStageTransitionCommand,
   PipelineExecutionStatus,
   StageTransitionType,
 } from "@aws-sdk/client-codepipeline";
+import { getCodePipelineClient } from "../../services/clients/codepipeline";
 import { getErrorMessage } from "../../util";
 import { MutatePromise } from "@raycast/utils";
 import { Pipeline, PipelineStage } from "../../codepipeline";
@@ -67,7 +67,7 @@ const toggleStageTransition = async (
     `between ${stage.stageName} -> ${stage.nextStage!.stageName}`,
   );
 
-  const client = new CodePipelineClient({});
+  const client = getCodePipelineClient();
   const promise = transitionEnabled
     ? client.send(
         new DisableStageTransitionCommand({

@@ -51,6 +51,7 @@ function StageItem({ stage, apiId, region }: { stage: Stage; apiId: string; regi
             <Action.CopyToClipboard title="Copy Invoke URL" content={invokeUrl} />
             <Action.CopyToClipboard title="Copy Stage Name" content={stage.StageName || ""} />
             {stage.DeploymentId && <Action.CopyToClipboard title="Copy Deployment ID" content={stage.DeploymentId} />}
+            <AwsAction.ExportResponse response={stage} />
           </ActionPanel.Section>
         </ActionPanel>
       }

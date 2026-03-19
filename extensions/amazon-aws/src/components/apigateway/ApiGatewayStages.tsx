@@ -4,6 +4,7 @@ import { useApiGatewayStages } from "../../hooks/use-apigateway";
 import AWSProfileDropdown from "../searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "../../util";
 import { AwsAction } from "../common/action";
+import ApiGatewayLogs from "./ApiGatewayLogs";
 
 export default function ApiGatewayStages({ apiId, apiName }: { apiId: string; apiName: string }) {
   const { stages, error, isLoading, revalidate } = useApiGatewayStages(apiId);
@@ -40,6 +41,12 @@ function StageItem({ stage, apiId, region }: { stage: Stage; apiId: string; regi
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open Invoke URL" url={invokeUrl} icon={Icon.Globe} />
+          <Action.Push
+            title="View Logs"
+            icon={Icon.Terminal}
+            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            target={<ApiGatewayLogs apiId={apiId} stageName={stage.stageName || ""} />}
+          />
           <AwsAction.Console
             url={resourceToConsoleLink(`${apiId}/stages/${stage.stageName}`, "AWS::ApiGateway::Stage")}
           />
@@ -47,6 +54,7 @@ function StageItem({ stage, apiId, region }: { stage: Stage; apiId: string; regi
             <Action.CopyToClipboard title="Copy Invoke URL" content={invokeUrl} />
             <Action.CopyToClipboard title="Copy Stage Name" content={stage.stageName || ""} />
             <Action.CopyToClipboard title="Copy Deployment ID" content={stage.deploymentId || ""} />
+            <AwsAction.ExportResponse response={stage} />
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -13,11 +13,11 @@ import {
   Keyboard,
 } from "@raycast/api";
 import {
-  CloudFormationClient,
   DescribeStacksCommand,
   StackSummary,
   UpdateTerminationProtectionCommand,
 } from "@aws-sdk/client-cloudformation";
+import { getCloudFormationClient } from "./services/clients/cloudformation";
 import { useCachedState, useFrecencySorting } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { getErrorMessage, resourceToConsoleLink } from "./util";
@@ -104,6 +104,7 @@ const CloudFormationStacks = ({ setResourceType }: SetResourceType) => {
                 />
                 <Action.CopyToClipboard title="Copy Stack ID" content={s.StackId || ""} onCopy={() => visit(s)} />
                 <Action.CopyToClipboard title="Copy Stack Name" content={s.StackName || ""} onCopy={() => visit(s)} />
+                <AwsAction.ExportResponse response={s} />
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(s)} />
               </ActionPanel.Section>
               <AwsAction.SwitchResourceType
@@ -155,7 +156,10 @@ const CloudFormationStackResources = ({ stack }: { stack: StackSummary }) => {
             actions={
               <ActionPanel>
                 {consoleLink && <AwsAction.Console url={consoleLink} />}
-                <Action.CopyToClipboard title="Copy Resource ID" content={r.PhysicalResourceId || ""} />
+                <ActionPanel.Section title="Copy">
+                  <Action.CopyToClipboard title="Copy Resource ID" content={r.PhysicalResourceId || ""} />
+                  <AwsAction.ExportResponse response={r} />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -209,6 +213,7 @@ const CloudFormationExports = ({ setResourceType }: SetResourceType) => {
               <ActionPanel.Section>
                 <Action.CopyToClipboard title="Copy Export Name" content={e.Name || ""} onCopy={() => visit(e)} />
                 <Action.CopyToClipboard title="Copy Export Value" content={e.Value || ""} onCopy={() => visit(e)} />
+                <AwsAction.ExportResponse response={e} />
                 <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(e)} />
               </ActionPanel.Section>
               <AwsAction.SwitchResourceType
@@ -224,7 +229,7 @@ const CloudFormationExports = ({ setResourceType }: SetResourceType) => {
 
 const updateTerminationProtection = async (stackName: string) => {
   const toast = await showToast({ style: Toast.Style.Animated, title: `⏳ Getting stack details for ${stackName}` });
-  new CloudFormationClient({})
+  getCloudFormationClient()
     .send(new DescribeStacksCommand({ StackName: stackName }))
     .then(async ({ Stacks }) => {
       const terminationProtection = !Stacks![0].EnableTerminationProtection;
@@ -237,7 +242,7 @@ const updateTerminationProtection = async (stackName: string) => {
           style: terminationProtection ? Alert.ActionStyle.Default : Alert.ActionStyle.Destructive,
           onAction: async () => {
             toast.title = `⏳ ${terminationProtection ? "Enabling" : "Disabling"} Termination Protection`;
-            new CloudFormationClient({})
+            getCloudFormationClient()
               .send(
                 new UpdateTerminationProtectionCommand({
                   EnableTerminationProtection: terminationProtection,

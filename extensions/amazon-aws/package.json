@@ -89,6 +89,12 @@
       "mode": "view"
     },
     {
+      "name": "cognito",
+      "title": "Cognito User Pools",
+      "description": "Manage Cognito user pools, users, and groups",
+      "mode": "view"
+    },
+    {
       "name": "lambda",
       "title": "Lambda Functions",
       "description": "Find and open a function",
@@ -169,6 +175,28 @@
       "title": "API Gateway",
       "description": "Manage REST APIs, resources, stages, and API keys",
       "mode": "view"
+    },
+    {
+      "name": "athena",
+      "title": "Athena",
+      "description": "Manage Athena work groups, named queries, and query executions",
+      "mode": "view"
+    },
+    {
+      "name": "quicksight",
+      "title": "QuickSight",
+      "description": "Manage QuickSight dashboards, analyses, and datasets",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "quicksightRegion",
+          "type": "textfield",
+          "required": false,
+          "title": "QuickSight Region",
+          "description": "Override region for QuickSight (e.g., us-east-1). Leave empty to use the profile's default region.",
+          "placeholder": "us-east-1"
+        }
+      ]
     }
   ],
   "tools": [
@@ -221,6 +249,61 @@
       "name": "get-amplify-webhook",
       "title": "Get Amplify Webhook",
       "description": "Gets detailed information for an Amplify webhook"
+    },
+    {
+      "name": "list-lambda-functions",
+      "title": "List Lambda Functions",
+      "description": "Lists all Lambda functions in the current account and region"
+    },
+    {
+      "name": "get-lambda-function-details",
+      "title": "Get Lambda Function Details",
+      "description": "Gets detailed information for a specific Lambda function"
+    },
+    {
+      "name": "invoke-lambda-function",
+      "title": "Invoke Lambda Function",
+      "description": "Invokes a Lambda function with an optional payload"
+    },
+    {
+      "name": "list-s3-buckets",
+      "title": "List S3 Buckets",
+      "description": "Lists all S3 buckets in the current account"
+    },
+    {
+      "name": "list-s3-objects",
+      "title": "List S3 Objects",
+      "description": "Lists objects in an S3 bucket with optional prefix filter"
+    },
+    {
+      "name": "list-dynamodb-tables",
+      "title": "List DynamoDB Tables",
+      "description": "Lists all DynamoDB table names in the current account and region"
+    },
+    {
+      "name": "describe-dynamodb-table",
+      "title": "Describe DynamoDB Table",
+      "description": "Gets detailed information for a specific DynamoDB table"
+    },
+    {
+      "name": "list-secrets",
+      "title": "List Secrets",
+      "description": "Lists secrets in AWS Secrets Manager"
+    },
+    {
+      "name": "list-codepipeline-pipelines",
+      "title": "List CodePipeline Pipelines",
+      "description": "Lists all CodePipeline pipelines in the current account and region"
+    },
+    {
+      "name": "list-cloudwatch-log-groups",
+      "title": "List CloudWatch Log Groups",
+      "description": "Lists CloudWatch log groups in the current account and region"
+    },
+    {
+      "name": "list-quicksight-dashboards",
+      "title": "List QuickSight Dashboards",
+      "description": "Lists all QuickSight dashboards in the current account"
     }
   ],
   "ai": {
@@ -323,41 +406,133 @@
           "list-amplify-project",
           "start-amplify-build"
         ]
+      },
+      {
+        "input": "What Lambda functions do I have?",
+        "output": "I'll list all your Lambda functions for you.",
+        "tools": [
+          "list-lambda-functions"
+        ]
+      },
+      {
+        "input": "Show me details about my auth function",
+        "output": "I'll help you find your auth function. Let me first list your Lambda functions to identify the right one.",
+        "tools": [
+          "list-lambda-functions",
+          "get-lambda-function-details"
+        ]
+      },
+      {
+        "input": "Invoke my data-processor Lambda with a test event",
+        "output": "I'll help you invoke the data-processor function. Let me first list your functions to identify it, then invoke it with your test payload.",
+        "tools": [
+          "list-lambda-functions",
+          "invoke-lambda-function"
+        ]
+      },
+      {
+        "input": "List my S3 buckets",
+        "output": "I'll list all your S3 buckets for you.",
+        "tools": [
+          "list-s3-buckets"
+        ]
+      },
+      {
+        "input": "What files are in my uploads bucket?",
+        "output": "I'll help you browse your uploads bucket. Let me first list your buckets to identify it, then show its contents.",
+        "tools": [
+          "list-s3-buckets",
+          "list-s3-objects"
+        ]
+      },
+      {
+        "input": "What DynamoDB tables do I have?",
+        "output": "I'll list all your DynamoDB tables for you.",
+        "tools": [
+          "list-dynamodb-tables"
+        ]
+      },
+      {
+        "input": "Show me the schema for my users table",
+        "output": "I'll help you get the details of your users table. Let me first list your tables to identify it.",
+        "tools": [
+          "list-dynamodb-tables",
+          "describe-dynamodb-table"
+        ]
+      },
+      {
+        "input": "What secrets do I have stored?",
+        "output": "I'll list all your secrets in AWS Secrets Manager.",
+        "tools": [
+          "list-secrets"
+        ]
+      },
+      {
+        "input": "Show me my CodePipeline pipelines",
+        "output": "I'll list all your CodePipeline pipelines for you.",
+        "tools": [
+          "list-codepipeline-pipelines"
+        ]
+      },
+      {
+        "input": "What log groups do I have in CloudWatch?",
+        "output": "I'll list all your CloudWatch log groups for you.",
+        "tools": [
+          "list-cloudwatch-log-groups"
+        ]
+      },
+      {
+        "input": "What QuickSight dashboards do I have?",
+        "output": "I'll list all your QuickSight dashboards for you.",
+        "tools": [
+          "list-quicksight-dashboards"
+        ]
+      },
+      {
+        "input": "Show me my BI dashboards",
+        "output": "I'll list your QuickSight dashboards to show your BI resources.",
+        "tools": [
+          "list-quicksight-dashboards"
+        ]
       }
     ]
   },
   "dependencies": {
-    "@aws-sdk/client-amplify": "^3.864.0",
-    "@aws-sdk/client-api-gateway": "^3.864.0",
-    "@aws-sdk/client-apigatewayv2": "^3.864.0",
-    "@aws-sdk/client-appsync": "^3.859.0",
-    "@aws-sdk/client-cloudformation": "^3.864.0",
-    "@aws-sdk/client-cloudwatch-logs": "^3.864.0",
-    "@aws-sdk/client-codeartifact": "^3.864.0",
-    "@aws-sdk/client-codepipeline": "^3.864.0",
-    "@aws-sdk/client-dynamodb": "^3.868.0",
-    "@aws-sdk/client-ec2": "^3.868.0",
-    "@aws-sdk/client-ecr": "^3.864.0",
-    "@aws-sdk/client-ecs": "^3.864.0",
-    "@aws-sdk/client-glue": "^3.868.0",
-    "@aws-sdk/client-lambda": "^3.865.0",
-    "@aws-sdk/client-s3": "^3.864.0",
-    "@aws-sdk/client-secrets-manager": "^3.864.0",
-    "@aws-sdk/client-sfn": "^3.864.0",
-    "@aws-sdk/client-sqs": "^3.864.0",
-    "@aws-sdk/client-ssm": "^3.864.0",
+    "@aws-sdk/client-amplify": "^3.940.0",
+    "@aws-sdk/client-api-gateway": "^3.940.0",
+    "@aws-sdk/client-apigatewayv2": "^3.940.0",
+    "@aws-sdk/client-appsync": "^3.940.0",
+    "@aws-sdk/client-athena": "^3.940.0",
+    "@aws-sdk/client-cloudformation": "^3.940.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.940.0",
+    "@aws-sdk/client-codeartifact": "^3.940.0",
+    "@aws-sdk/client-codepipeline": "^3.940.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.953.0",
+    "@aws-sdk/client-dynamodb": "^3.940.0",
+    "@aws-sdk/client-ec2": "^3.940.0",
+    "@aws-sdk/client-ecr": "^3.940.0",
+    "@aws-sdk/client-ecs": "^3.940.0",
+    "@aws-sdk/client-glue": "^3.942.0",
+    "@aws-sdk/client-lambda": "^3.942.0",
+    "@aws-sdk/client-quicksight": "^3.940.0",
+    "@aws-sdk/client-s3": "^3.940.0",
+    "@aws-sdk/client-secrets-manager": "^3.940.0",
+    "@aws-sdk/client-sfn": "^3.940.0",
+    "@aws-sdk/client-sqs": "^3.940.0",
+    "@aws-sdk/client-ssm": "^3.940.0",
+    "@aws-sdk/client-sts": "^3.940.0",
     "@aws-sdk/shared-ini-file-loader": "^3.374.0",
-    "@aws-sdk/util-dynamodb": "^3.868.0",
-    "@raycast/api": "^1.102.4",
-    "@raycast/utils": "^2.2.0",
+    "@aws-sdk/util-dynamodb": "^3.940.0",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "util": "^0.12.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/react": "^19.1.10",
-    "eslint": "^9.33.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

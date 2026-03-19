@@ -59,6 +59,7 @@ function UsagePlanItem({ usagePlan, apiId }: { usagePlan: UsagePlan; apiId: stri
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Usage Plan ID" content={usagePlan.id || ""} />
             <Action.CopyToClipboard title="Copy Usage Plan Name" content={usagePlan.name || ""} />
+            <AwsAction.ExportResponse response={usagePlan} />
           </ActionPanel.Section>
         </ActionPanel>
       }

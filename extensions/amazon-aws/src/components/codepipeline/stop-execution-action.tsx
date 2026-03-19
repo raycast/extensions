@@ -1,11 +1,11 @@
 import { Action, ActionPanel, captureException, Color, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import {
-  CodePipelineClient,
   PipelineExecutionStatus,
   PipelineExecutionSummary,
   StopPipelineExecutionCommand,
   StopPipelineExecutionCommandInput,
 } from "@aws-sdk/client-codepipeline";
+import { getCodePipelineClient } from "../../services/clients/codepipeline";
 import { getErrorMessage } from "../../util";
 import { Pipeline } from "../../codepipeline";
 import { MutatePromise } from "@raycast/utils";
@@ -82,7 +82,7 @@ const stop = async (
     `Execution ID: ${execution.pipelineExecutionId}`,
   );
 
-  mutate(new CodePipelineClient({}).send(new StopPipelineExecutionCommand(input)), {
+  mutate(getCodePipelineClient().send(new StopPipelineExecutionCommand(input)), {
     optimisticUpdate: (pipelines) => {
       if (!pipelines) {
         return;

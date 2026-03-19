@@ -1,4 +1,5 @@
-import { AmplifyClient, DeleteWebhookCommand } from "@aws-sdk/client-amplify";
+import { DeleteWebhookCommand } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Deletes a webhook for an Amplify app
@@ -12,7 +13,7 @@ export default async function deleteAmplifyWebhook(options: { webhookId: string 
     throw new Error("Webhook ID is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const command = new DeleteWebhookCommand({
     webhookId,

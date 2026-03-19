@@ -1,12 +1,12 @@
 import { Action, ActionPanel, captureException, Color, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import {
-  CodePipelineClient,
   PipelineExecutionStatus,
   RetryStageExecutionCommand,
   RetryStageExecutionCommandInput,
   StageExecutionStatus,
   StageRetryMode,
 } from "@aws-sdk/client-codepipeline";
+import { getCodePipelineClient } from "../../services/clients/codepipeline";
 import { getErrorMessage } from "../../util";
 import { Pipeline, PipelineStage } from "../../codepipeline";
 import { MutatePromise } from "@raycast/utils";
@@ -101,7 +101,7 @@ const retry = async (
     `Retrying ${stage.retryMode === StageRetryMode.ALL_ACTIONS ? "all actions" : "failed actions"} in ${stage.stageName}`,
   );
 
-  mutate(new CodePipelineClient({}).send(new RetryStageExecutionCommand(input)), {
+  mutate(getCodePipelineClient().send(new RetryStageExecutionCommand(input)), {
     optimisticUpdate: (pipelines) => {
       if (!pipelines) {
         return;

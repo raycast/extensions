@@ -13,9 +13,10 @@ import {
   Clipboard,
   Keyboard,
 } from "@raycast/api";
-import { DynamoDBClient, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
+import { type DynamoDBClient, QueryCommand, QueryCommandInput } from "@aws-sdk/client-dynamodb";
 import { Table } from "../../dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
+import { getDynamoDBClient } from "../../services/clients/dynamodb";
 import React from "react";
 import { getErrorMessage, sortRecord } from "../../util";
 
@@ -41,7 +42,7 @@ export const QueryForm = ({ table }: { table: Table }) => {
   const { push, pop } = useNavigation();
   const { values, handleSubmit, itemProps } = useForm<QueryFormValues>({
     onSubmit: async (values) => {
-      const client = new DynamoDBClient({});
+      const client = getDynamoDBClient();
       const hasRangeKey = table.keys[values.indexName].rangeKey !== undefined;
       const primaryKey = table.keys[values.indexName];
       const input: QueryCommandInput = {

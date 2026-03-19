@@ -1,4 +1,5 @@
-import { DescribeTableCommand, DynamoDBClient, ListTablesCommand, TableDescription } from "@aws-sdk/client-dynamodb";
+import { DescribeTableCommand, ListTablesCommand, TableDescription } from "@aws-sdk/client-dynamodb";
+import { getDynamoDBClient } from "../services/clients/dynamodb";
 import { useCachedPromise } from "@raycast/utils";
 import { PrimaryKey, Table } from "../dynamodb";
 import { isReadyToFetch } from "../util";
@@ -22,29 +23,32 @@ export const useTables = () => {
   return { tables, error, isLoading: (!tables && !error) || isLoading, mutate };
 };
 
-const fetchTables = async (toast: Toast, nextToken?: string, aggregate?: Table[]): Promise<Table[]> => {
-  const { LastEvaluatedTableName: cursor, TableNames } = await new DynamoDBClient({}).send(
-    new ListTablesCommand({ ExclusiveStartTableName: nextToken, Limit: 50 }),
-  );
+async function fetchTables(toast: Toast, maxResults = 200): Promise<Table[]> {
+  const allTables: Table[] = [];
+  let nextToken: string | undefined;
 
-  const tables = await Promise.all(
-    (TableNames || []).map(async (t) => {
-      const { Table } = await new DynamoDBClient({}).send(new DescribeTableCommand({ TableName: t }));
-      return { ...Table, keys: fetchKeys(Table!) } as Table;
-    }),
-  );
+  do {
+    const { LastEvaluatedTableName: cursor, TableNames } = await getDynamoDBClient().send(
+      new ListTablesCommand({ ExclusiveStartTableName: nextToken, Limit: Math.min(maxResults - allTables.length, 50) }),
+    );
 
-  const agg = [...(aggregate ?? []), ...tables];
-  toast.message = `${agg.length} tables`;
-  if (cursor) {
-    return await fetchTables(toast, cursor, agg);
-  }
+    const tables = await Promise.all(
+      (TableNames || []).map(async (t) => {
+        const { Table } = await getDynamoDBClient().send(new DescribeTableCommand({ TableName: t }));
+        return { ...Table, keys: fetchKeys(Table!) } as Table;
+      }),
+    );
+
+    allTables.push(...tables);
+    toast.message = `${allTables.length} tables`;
+    nextToken = cursor;
+  } while (nextToken && allTables.length < maxResults);
 
   toast.style = Toast.Style.Success;
   toast.title = "✅ Loaded tables";
-  toast.message = `${agg.length} tables`;
-  return agg;
-};
+  toast.message = `${allTables.length} tables`;
+  return allTables;
+}
 
 const fetchKeys = (table: TableDescription): Record<string, PrimaryKey> => {
   const keys: Record<string, PrimaryKey> = {};

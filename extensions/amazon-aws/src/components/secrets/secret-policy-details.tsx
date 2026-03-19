@@ -19,6 +19,7 @@ export const SecretPolicyDetails = ({ secret }: SecretProps) => {
           <AwsAction.Console url={resourceToConsoleLink(secret.Name, "AWS::SecretsManager::Secret")} />
           <ActionPanel.Section title={"Secret Actions"}>
             <SecretCopyActions {...{ secret }} />
+            <AwsAction.ExportResponse response={policy} />
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -4,9 +4,15 @@ import { useApiGatewayResources } from "../../hooks/use-apigateway";
 import AWSProfileDropdown from "../searchbar/aws-profile-dropdown";
 import { resourceToConsoleLink } from "../../util";
 import { AwsAction } from "../common/action";
+import ApiGatewayInvoke from "./ApiGatewayInvoke";
 import ApiGatewayMethodDetail from "./ApiGatewayMethodDetail";
 
-export default function ApiGatewayResources({ apiId, apiName }: { apiId: string; apiName: string }) {
+interface ApiGatewayResourcesProps {
+  apiId: string;
+  apiName: string;
+}
+
+export default function ApiGatewayResources({ apiId, apiName }: ApiGatewayResourcesProps) {
   const { resources, error, isLoading, revalidate } = useApiGatewayResources(apiId);
 
   const navigationTitle = `Resources for ${apiName}`;
@@ -21,13 +27,21 @@ export default function ApiGatewayResources({ apiId, apiName }: { apiId: string;
       {error ? (
         <List.EmptyView title={error.name} description={error.message} icon={Icon.Warning} />
       ) : (
-        resources?.map((resource) => <ResourceItem key={resource.id} resource={resource} apiId={apiId} />)
+        resources?.map((resource) => (
+          <ResourceItem key={resource.id} resource={resource} apiId={apiId} apiName={apiName} />
+        ))
       )}
     </List>
   );
 }
 
-function ResourceItem({ resource, apiId }: { resource: Resource; apiId: string }) {
+interface ResourceItemProps {
+  resource: Resource;
+  apiId: string;
+  apiName: string;
+}
+
+function ResourceItem({ resource, apiId, apiName }: ResourceItemProps) {
   const methods = Object.keys(resource.resourceMethods || {});
   const methodsText = methods.join(", ") || "No methods";
 
@@ -40,10 +54,10 @@ function ResourceItem({ resource, apiId }: { resource: Resource; apiId: string }
       actions={
         <ActionPanel>
           {methods.length > 0 && (
-            <ActionPanel.Section title="Methods">
+            <ActionPanel.Section title="View Details">
               {methods.map((method) => (
                 <Action.Push
-                  key={method}
+                  key={`view-${method}`}
                   title={`View ${method} Details`}
                   icon={Icon.Eye}
                   target={
@@ -58,6 +72,27 @@ function ResourceItem({ resource, apiId }: { resource: Resource; apiId: string }
               ))}
             </ActionPanel.Section>
           )}
+          {methods.length > 0 && (
+            <ActionPanel.Section title="Test Invoke">
+              {methods.map((method) => (
+                <Action.Push
+                  key={`test-${method}`}
+                  title={`Test ${method}`}
+                  icon={Icon.Play}
+                  shortcut={method === "GET" ? { modifiers: ["cmd"], key: "t" } : undefined}
+                  target={
+                    <ApiGatewayInvoke
+                      apiId={apiId}
+                      apiName={apiName}
+                      resourceId={resource.id || ""}
+                      resourcePath={resource.path || "/"}
+                      httpMethod={method}
+                    />
+                  }
+                />
+              ))}
+            </ActionPanel.Section>
+          )}
           <AwsAction.Console
             url={resourceToConsoleLink(`${apiId}/resources/${resource.id}`, "AWS::ApiGateway::Resource")}
           />
@@ -65,6 +100,7 @@ function ResourceItem({ resource, apiId }: { resource: Resource; apiId: string }
             <Action.CopyToClipboard title="Copy Resource Path" content={resource.path || "/"} />
             <Action.CopyToClipboard title="Copy Resource ID" content={resource.id || ""} />
             <Action.CopyToClipboard title="Copy Parent ID" content={resource.parentId || ""} />
+            <AwsAction.ExportResponse response={resource} />
           </ActionPanel.Section>
         </ActionPanel>
       }

@@ -1,4 +1,5 @@
-import { AmplifyClient, ListWebhooksCommand, Webhook } from "@aws-sdk/client-amplify";
+import { ListWebhooksCommand, Webhook } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Lists all webhooks for a specific Amplify app
@@ -12,7 +13,7 @@ export default async function listAmplifyWebhooks(options: { appId: string }): P
     throw new Error("App ID is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const webhooks: Webhook[] = [];
   let nextToken: string | undefined;

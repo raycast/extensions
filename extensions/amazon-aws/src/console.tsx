@@ -5,6 +5,15 @@ import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { AWS_URL_BASE } from "./constants";
 
+function isValidUrl(arg: string): boolean {
+  try {
+    new URL(arg);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export default function Console() {
   const { data: services, isLoading, revalidate } = useCachedPromise(loadJSON);
   const {
@@ -16,21 +25,13 @@ export default function Console() {
     sortUnvisited: (a, b) => a.title.localeCompare(b.title),
   });
 
-  const isValidUrl = (arg: string) => {
-    try {
-      new URL(arg);
-      return true;
-    } catch {
-      return false;
-    }
-  };
-
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter services by name..."
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={revalidate} />}
     >
+      <List.EmptyView title="No Services Found" description="No AWS services match your search" icon={Icon.Cloud} />
       {sortedServices?.map((service) => {
         const consoleUrl = isValidUrl(service.arg) ? service.arg : `${AWS_URL_BASE}${service.arg}`;
         return (

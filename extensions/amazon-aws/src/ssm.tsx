@@ -3,7 +3,6 @@ import {
   GetParameterCommand,
   Parameter as SSMParameter,
   ParameterMetadata,
-  SSMClient,
 } from "@aws-sdk/client-ssm";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
@@ -11,6 +10,7 @@ import { useState } from "react";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
+import { getSSMClient } from "./services/clients/ssm";
 
 export default function SSM() {
   const [search, setSearch] = useState<string>("");
@@ -59,7 +59,10 @@ function Parameter({ parameter }: { parameter: ParameterMetadata }) {
           <Action title={showValue ? "Hide Value" : "Show Value"} onAction={() => setShowValue(!showValue)} />
           <Action.CopyToClipboard title="Copy Value" content={parameterDetails?.Value || ""} />
           <AwsAction.Console url={resourceToConsoleLink(parameter.Name, "AWS::SSM::Parameter")} />
-          <Action.CopyToClipboard title="Copy Name" content={parameter.Name || ""} />
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard title="Copy Name" content={parameter.Name || ""} />
+            <AwsAction.ExportResponse response={parameter} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       accessories={[{ icon: showValue ? Icon.Eye : Icon.EyeDisabled }]}
@@ -76,7 +79,7 @@ async function fetchParameters(
   if (search.length < threshold) return [];
   if (!isReadyToFetch()) return [];
 
-  const { NextToken, Parameters } = await new SSMClient({}).send(
+  const { NextToken, Parameters } = await getSSMClient().send(
     new DescribeParametersCommand({
       NextToken: token,
       ParameterFilters: search ? [{ Key: "Name", Option: "Contains", Values: [search] }] : undefined,
@@ -94,7 +97,7 @@ async function fetchParameters(
 
 async function fetchParameter(name?: string): Promise<SSMParameter | undefined> {
   if (!name) return;
-  const { Parameter } = await new SSMClient({}).send(new GetParameterCommand({ Name: name, WithDecryption: true }));
+  const { Parameter } = await getSSMClient().send(new GetParameterCommand({ Name: name, WithDecryption: true }));
 
   return Parameter;
 }

@@ -87,6 +87,7 @@ export default function CodePipeline() {
                   icon={Icon.ArrowCounterClockwise}
                   onAction={() => resetRanking(pipeline)}
                 />
+                <AwsAction.ExportResponse response={pipeline} />
               </ActionPanel.Section>
             </ActionPanel>
           }

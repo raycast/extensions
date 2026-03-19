@@ -1,4 +1,5 @@
-import { AmplifyClient, GetAppCommand, App } from "@aws-sdk/client-amplify";
+import { GetAppCommand, App } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Gets detailed information for a specific Amplify app
@@ -12,7 +13,7 @@ export default async function getAmplifyAppDetails(options: { appId: string }): 
     throw new Error("App ID is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   try {
     const command = new GetAppCommand({ appId });

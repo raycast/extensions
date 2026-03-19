@@ -1,4 +1,5 @@
-import { AmplifyClient, StartJobCommand, JobSummary } from "@aws-sdk/client-amplify";
+import { StartJobCommand, JobSummary } from "@aws-sdk/client-amplify";
+import { getAmplifyClient } from "../services/clients/amplify";
 
 /**
  * Starts a new build job for an Amplify app branch
@@ -21,7 +22,7 @@ export default async function startAmplifyBuild(options: {
     throw new Error("Branch name is required");
   }
 
-  const client = new AmplifyClient({});
+  const client = getAmplifyClient();
 
   const command = new StartJobCommand({
     appId,

@@ -1,4 +1,5 @@
-import { ListStateMachinesCommand, SFNClient, StateMachineListItem, StateMachineType } from "@aws-sdk/client-sfn"; // ES Modules import
+import { ListStateMachinesCommand, StateMachineListItem, StateMachineType } from "@aws-sdk/client-sfn";
+import { getSFNClient } from "./services/clients/sfn";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
@@ -36,6 +37,7 @@ function StateMachine({ item }: { item: StateMachineListItem }) {
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy State Machine ARN" content={item.stateMachineArn || ""} />
             <Action.CopyToClipboard title="Copy State Machine Name" content={item.name || ""} />
+            <AwsAction.ExportResponse response={item} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -47,7 +49,7 @@ async function fetchStateMachines(
   nextMarker?: string,
   aggregatedStateMachines?: StateMachineListItem[],
 ): Promise<StateMachineListItem[]> {
-  const client = new SFNClient({});
+  const client = getSFNClient();
   const command = new ListStateMachinesCommand({ nextToken: nextMarker });
   const { nextToken, stateMachines } = await client.send(command);
   const combinedStateMachines = [...(aggregatedStateMachines || []), ...(stateMachines || [])];

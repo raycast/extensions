@@ -1,11 +1,13 @@
-import { FunctionConfiguration, LambdaClient, ListFunctionsCommand } from "@aws-sdk/client-lambda";
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { FunctionConfiguration, ListFunctionsCommand } from "@aws-sdk/client-lambda";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { runAppleScript, useCachedPromise } from "@raycast/utils";
 import CloudwatchLogStreams from "./components/cloudwatch/CloudwatchLogStreams";
-import { isReadyToFetch, resourceToConsoleLink } from "./util";
 import { AwsAction } from "./components/common/action";
 import InvokeLambdaFunction from "./components/lambda/InvokeLambdaFunction";
+import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
+import { getAWSErrorMessage } from "./errors";
+import { getLambdaClient } from "./services/clients/lambda";
+import { isReadyToFetch, resourceToConsoleLink } from "./util";
 
 export default function Lambda() {
   const { data: functions, error, isLoading, revalidate } = useCachedPromise(fetchFunctions);
@@ -26,6 +28,15 @@ export default function Lambda() {
 }
 
 function LambdaFunction({ func }: { func: FunctionConfiguration }) {
+  const AWS_REGION = process.env.AWS_REGION;
+  const logGroupName = func.LoggingConfig?.LogGroup ?? `/aws/lambda/${func.FunctionName}`;
+
+  // CloudWatch Logs Live Tail URL (opens console with live tailing)
+  const liveTailUrl = `https://${AWS_REGION}.console.aws.amazon.com/cloudwatch/home?region=${AWS_REGION}#logsV2:live-tail$3FlogGroupArns$3D${encodeURIComponent(`arn:aws:logs:${AWS_REGION}:*:log-group:${logGroupName}`)}`;
+
+  // AWS CLI command to tail logs in terminal
+  const tailCommand = `aws logs tail "${logGroupName}" --follow`;
+
   return (
     <List.Item
       key={func.FunctionArn}
@@ -37,14 +48,20 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
           <Action.OpenInBrowser
             icon={Icon.Document}
             title="Open CloudWatch Log Group"
-            url={resourceToConsoleLink(`/aws/lambda/${func.FunctionName}`, "AWS::Logs::LogGroup")}
+            url={resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup")}
             shortcut={{ modifiers: ["cmd"], key: "l" }}
+          />
+          <Action.OpenInBrowser
+            icon={Icon.Livestream}
+            title="Tail Logs in Console"
+            url={liveTailUrl}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
           />
           <Action.Push
             title={"View Log Streams"}
             icon={Icon.Eye}
             shortcut={{ modifiers: ["opt"], key: "l" }}
-            target={<CloudwatchLogStreams logGroupName={`/aws/lambda/${func.FunctionName}`}></CloudwatchLogStreams>}
+            target={<CloudwatchLogStreams logGroupName={logGroupName}></CloudwatchLogStreams>}
           />
           <Action.Push
             title="Invoke Function"
@@ -52,9 +69,40 @@ function LambdaFunction({ func }: { func: FunctionConfiguration }) {
             shortcut={{ modifiers: ["cmd"], key: "i" }}
             target={<InvokeLambdaFunction functionName={func.FunctionName || ""} />}
           />
+          <Action
+            title="Run Tail Command in Terminal"
+            icon={Icon.Terminal}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            onAction={async () => {
+              const escapedCommand = tailCommand.replace(/"/g, '\\"');
+              const appleScript = `
+                tell application "Terminal"
+                  do script "${escapedCommand}"
+                  activate
+                end tell
+              `;
+              try {
+                await runAppleScript(appleScript);
+                await showToast({ style: Toast.Style.Success, title: "Opened in Terminal" });
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to open Terminal",
+                  message: getAWSErrorMessage(error),
+                });
+              }
+            }}
+          />
           <ActionPanel.Section title={"Copy"}>
             <Action.CopyToClipboard title="Copy Function ARN" content={func.FunctionArn || ""} />
             <Action.CopyToClipboard title="Copy Function Name" content={func.FunctionName || ""} />
+            <Action.CopyToClipboard
+              title="Copy Tail Command"
+              content={tailCommand}
+              icon={Icon.Terminal}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
+            <AwsAction.ExportResponse response={func} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -68,7 +116,7 @@ async function fetchFunctions(
   functions?: FunctionConfiguration[],
 ): Promise<FunctionConfiguration[]> {
   if (!isReadyToFetch()) return [];
-  const { NextMarker, Functions } = await new LambdaClient({}).send(new ListFunctionsCommand({ Marker: nextMarker }));
+  const { NextMarker, Functions } = await getLambdaClient().send(new ListFunctionsCommand({ Marker: nextMarker }));
 
   const combinedFunctions = [...(functions || []), ...(Functions || [])];
 
