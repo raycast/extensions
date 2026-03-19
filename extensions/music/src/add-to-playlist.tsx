@@ -1,8 +1,8 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
-import { useEffect, useState } from "react";
 
 import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
@@ -10,9 +10,8 @@ import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
 
 enum PlaylistKind {
-  ALL = "all",
-  USER = "user",
   SUBSCRIPTION = "subscription",
+  USER = "user",
 }
 
 type PlaylistSections = Readonly<Record<string, A.ReadonlyNonEmptyArray<Playlist>>>;
@@ -29,33 +28,32 @@ const kindToString = (kind: PlaylistKind) => {
 };
 
 export default function AddToPlaylist() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [playlists, setPlaylists] = useState<PlaylistSections | null>(null);
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    pipe(
-      music.playlists.getPlaylists(PlaylistKind.USER),
-      TE.mapLeft((e) => {
-        console.error(e);
-        showToast(Toast.Style.Failure, "Could not get your playlists");
-        setIsLoading(false);
-      }),
-      TE.map(
-        flow(
-          parseResult<Playlist>(),
-          (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
-          (data) => {
-            setPlaylists(data);
-            setIsLoading(false);
-          },
+  const { isLoading, data: playlists } = useCachedPromise(
+    () =>
+      pipe(
+        music.playlists.getPlaylists(PlaylistKind.USER),
+        TE.map(
+          flow(parseResult<Playlist>(), (data) =>
+            A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
+          ),
         ),
-      ),
-    )();
-  }, []);
+        TE.matchW(
+          (e) => {
+            console.error(e);
+            showToast(Toast.Style.Failure, "Could not get your playlists");
+            return {} as PlaylistSections;
+          },
+          (data) => data,
+        ),
+      )(),
+    [],
+    { keepPreviousData: true },
+  );
 
   return (
-    <List isLoading={playlists === null || isLoading} searchBarPlaceholder="Search A Playlist">
+    <List isLoading={isLoading} searchBarPlaceholder="Search A Playlist">
       {Object.entries(playlists ?? {})
         .filter(([section]) => section !== "library")
         .map(([section, data]) => (

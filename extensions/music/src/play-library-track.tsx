@@ -4,7 +4,7 @@ import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Track } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
@@ -14,7 +14,7 @@ import * as music from "./util/scripts";
 const EMPTY_TEXT = " "; // Visually empty but non-empty to prevent jumping around
 
 export default function PlayLibraryTrack() {
-  const [tracks, setTracks] = useState<readonly Track[] | null>([]);
+  const [tracks, setTracks] = useState<readonly Track[]>([]);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const { pop } = useNavigation();
 
@@ -22,48 +22,48 @@ export default function PlayLibraryTrack() {
     pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))();
   }, []);
 
-  const onSearch = useCallback(
-    async (next: string) => {
-      setTracks(null); // start loading
+  const [isSearching, setIsSearching] = useState(false);
 
-      if (!next || next?.length < 1) {
-        setTracks([]);
-        return;
-      }
+  const onSearch = useCallback(async (next: string) => {
+    if (!next || next.length < 1) {
+      setTracks([]);
+      return;
+    }
 
-      await pipe(
-        next,
-        S.trim,
-        music.track.search,
-        TE.matchW(
-          () => {
-            showToast(Toast.Style.Failure, "Could not get tracks");
-            return [] as ReadonlyArray<Track>;
-          },
-          (tracks) =>
-            pipe(
-              tracks,
-              fromEmptyOrNullable,
-              O.matchW(() => [] as ReadonlyArray<Track>, parseResult<Track>()),
-            ),
-        ),
-        T.map(setTracks),
-      )();
-    },
-    [setTracks],
-  );
+    setIsSearching(true);
 
-  const trackList = tracks ?? [];
+    await pipe(
+      next,
+      S.trim,
+      music.track.search,
+      TE.matchW(
+        () => {
+          showToast(Toast.Style.Failure, "Could not get tracks");
+          return [] as ReadonlyArray<Track>;
+        },
+        (tracks) =>
+          pipe(
+            tracks,
+            fromEmptyOrNullable,
+            O.matchW(() => [] as ReadonlyArray<Track>, parseResult<Track>()),
+          ),
+      ),
+      T.map((result) => {
+        setTracks(result);
+        setIsSearching(false);
+      }),
+    )();
+  }, []);
 
   return (
     <List
-      isLoading={tracks === null || currentTrack === null}
+      isLoading={isSearching || currentTrack === null}
       searchBarPlaceholder="Search A Song By Title Or Artist"
       onSearchTextChange={onSearch}
       throttle
     >
-      {trackList.length > 0 ? (
-        trackList.map(({ id, name, artist, album }) => (
+      {tracks.length > 0 ? (
+        tracks.map(({ id, name, artist, album }) => (
           <List.Item
             key={id}
             title={name}

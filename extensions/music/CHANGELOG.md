@@ -1,5 +1,15 @@
 # Apple Music Changelog
 
+## [Performance Optimization] - {PR_MERGE_DATE}
+
+- Faster library browsing — fetching all tracks and albums from your library is significantly faster for large collections.
+- "Play Library Album" now opens instantly and only searches when you type, instead of loading your entire library upfront.
+- Playlists are now cached — reopening "Start Playlist" or "Add to Playlist" is instant after the first load.
+- Switching the playlist filter dropdown (All/User/Apple Music) no longer re-fetches data.
+- Favoriting a track now confirms within 3 seconds instead of up to 10 seconds.
+- Menu bar scroll animation uses less energy with fewer screen updates.
+- Fixed a bug where the `ScriptError` type guard never matched due to a typo.
+
 ## [Menu Bar Energy Optimization] - 2026-03-12
 
 - Consolidated menu bar polling into a single AppleScript snapshot that checks whether Music is running, reads player state, and fetches current track metadata in one call — reducing subprocess count from 3 to 1 per refresh.

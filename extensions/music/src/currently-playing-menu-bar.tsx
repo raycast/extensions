@@ -2,15 +2,18 @@ import { getPreferenceValues, Icon, Keyboard, MenuBarExtra, open, openCommandPre
 import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import * as music from "./util/scripts";
 import { PlayerState } from "./util/models";
+import * as music from "./util/scripts";
 import { formatTitle } from "./util/track";
 import { handleTaskEitherError } from "./util/utils";
 
 const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
+
+const DROPDOWN_MAX = 40;
+const SEPARATOR = "   ·   ";
 
 function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
   const handledTask = pipe(
@@ -57,7 +60,6 @@ export default function CurrentlyPlayingMenuBarCommand() {
       })
     : "";
 
-  const DROPDOWN_MAX = 40;
   const fullTitle = currentTrack
     ? formatTitle({
         name: currentTrack.name,
@@ -68,8 +70,9 @@ export default function CurrentlyPlayingMenuBarCommand() {
       })
     : "";
   const needsScroll = fullTitle.length > DROPDOWN_MAX;
-  const SEPARATOR = "   ·   ";
   const paddedTitle = needsScroll ? fullTitle + SEPARATOR : fullTitle;
+
+  const doubledTitle = useMemo(() => paddedTitle + paddedTitle, [paddedTitle]);
 
   const [scrollOffset, setScrollOffset] = useState(0);
 
@@ -82,14 +85,12 @@ export default function CurrentlyPlayingMenuBarCommand() {
 
     const interval = setInterval(() => {
       setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
-    }, 200);
+    }, 400);
 
     return () => clearInterval(interval);
   }, [needsScroll, paddedTitle.length]);
 
-  const dropdownTitle = needsScroll
-    ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
-    : fullTitle;
+  const dropdownTitle = needsScroll ? doubledTitle.substring(scrollOffset, scrollOffset + DROPDOWN_MAX) : fullTitle;
 
   if (!snapshot || snapshot.kind === "not-running") {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;

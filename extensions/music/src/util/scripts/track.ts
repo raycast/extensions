@@ -1,43 +1,30 @@
-import { createQueryString, runScript, tell } from "../apple-script";
+import { runScript, tell } from "../apple-script";
 
-export const search = (search: string) => {
-  const outputQuery = createQueryString({
-    id: "trackId",
-    name: "trackName",
-    artist: "artistName",
-    album: "albumName",
-    duration: "trackDuration",
-  });
-
-  return runScript(`
+export const search = (search: string) =>
+  runScript(`
 		set output to ""
 			tell application "Music"
 				set results to (search (library playlist 1) for "${search}")
 				repeat with selectedTrack in results
-					set trackId to the id of selectedTrack
-					set trackName to the name of selectedTrack
-					set albumName to the album of selectedTrack
-					set artistName to the artist of selectedTrack
-					set trackDuration to the duration of selectedTrack
-					set output to output & ${outputQuery} & "\n"
+					set output to output & "id=" & (id of selectedTrack) & "$BREAKname=" & (name of selectedTrack) & "$BREAKartist=" & (artist of selectedTrack) & "$BREAKalbum=" & (album of selectedTrack) & "$BREAKduration=" & (duration of selectedTrack) & "\\n"
 				end repeat
 			end tell
 		return output
 	`);
-};
 
 export const getAll = () =>
   runScript(`
     set output to ""
     tell application "Music"
-      set results to (every track of (library playlist 1))
-      repeat with selectedTrack in results
-        set trackId to the id of selectedTrack
-        set trackName to the name of selectedTrack
-        set albumName to the album of selectedTrack
-        set artistName to the artist of selectedTrack
-        set trackDuration to the duration of selectedTrack
-        set output to output & "id=" & trackId & "$BREAKname=" & trackName & "$BREAKartist=" & artistName & "$BREAKalbum=" & albumName & "$BREAKduration=" & trackDuration & "\n"
+      set allTracks to every track of (library playlist 1)
+      set allIds to id of allTracks
+      set allNames to name of allTracks
+      set allAlbums to album of allTracks
+      set allArtists to artist of allTracks
+      set allDurations to duration of allTracks
+      set trackCount to count of allIds
+      repeat with i from 1 to trackCount
+        set output to output & "id=" & (item i of allIds) & "$BREAKname=" & (item i of allNames) & "$BREAKartist=" & (item i of allArtists) & "$BREAKalbum=" & (item i of allAlbums) & "$BREAKduration=" & (item i of allDurations) & "\\n"
       end repeat
     end tell
     return output

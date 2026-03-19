@@ -1,54 +1,32 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { flow, pipe } from "fp-ts/lib/function";
-import * as O from "fp-ts/Option";
+import { pipe } from "fp-ts/lib/function";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Album, Track } from "./util/models";
-import { fromEmptyOrNullable } from "./util/option";
-import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
-import { usePromise } from "@raycast/utils";
 
 const EMPTY_TEXT = " "; // Visually empty but non-empty to prevent jumping around
 
 export default function PlayLibraryAlbum() {
-  const [albums, setAlbums] = useState<readonly Album[] | null>(null);
+  const [albums, setAlbums] = useState<readonly Album[]>([]);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const { pop } = useNavigation();
 
-  const loadAll = pipe(
-    music.albums.getAll,
-    TE.map(parseResult<Album>()),
-    TE.matchW(
-      () => {
-        showToast(Toast.Style.Failure, "Could not get albums");
-        return [] as ReadonlyArray<Album>;
-      },
-      flow(
-        fromEmptyOrNullable,
-        O.matchW(() => setAlbums([]), setAlbums),
-      ),
-    ),
-  );
+  useEffect(() => {
+    pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))();
+  }, []);
 
-  const { isLoading: isLoadingAll, revalidate: revalidateAll } = usePromise(loadAll);
-
-  const { isLoading: isLoadingCurrentTrack } = usePromise(() =>
-    pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))(),
-  );
-
-  const onSearch = async (next: string) => {
-    setAlbums(null); // start loading
-
-    if (!next || next?.length < 1) {
-      setAlbums(null);
-      await revalidateAll();
+  const onSearch = useCallback(async (next: string) => {
+    if (!next || next.length < 1) {
+      setAlbums([]);
       return;
     }
+
+    setAlbums([]); // clear previous results
 
     await pipe(
       next,
@@ -59,28 +37,21 @@ export default function PlayLibraryAlbum() {
           showToast(Toast.Style.Failure, "Could not get albums");
           return [] as ReadonlyArray<Album>;
         },
-        (tracks) =>
-          pipe(
-            tracks,
-            fromEmptyOrNullable,
-            O.matchW(() => [] as ReadonlyArray<Album>, parseResult<Album>()),
-          ),
+        (albums) => albums,
       ),
       T.map(setAlbums),
     )();
-  };
-
-  const albumList = albums ?? [];
+  }, []);
 
   return (
     <List
-      isLoading={isLoadingAll || isLoadingCurrentTrack}
+      isLoading={false}
       searchBarPlaceholder="Search A Song By Album Or Artist"
       onSearchTextChange={onSearch}
       throttle
     >
-      {albumList.length > 0 ? (
-        albumList.map(({ id, name, artist, count }) => (
+      {albums.length > 0 ? (
+        albums.map(({ id, name, artist, count }) => (
           <List.Item
             key={id}
             title={name ?? "--"}

@@ -1,18 +1,14 @@
-import { Action, Icon, ActionPanel, closeMainWindow, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as A from "fp-ts/ReadonlyNonEmptyArray";
 import * as TE from "fp-ts/TaskEither";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Playlist } from "./util/models";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
-
-enum PlaylistKind {
-  ALL = "all",
-  USER = "user",
-  SUBSCRIPTION = "subscription",
-}
+import { PlaylistKind } from "./util/scripts/playlists";
 
 type PlaylistSections = Readonly<Record<string, A.ReadonlyNonEmptyArray<Playlist>>>;
 
@@ -27,32 +23,51 @@ const kindToString = (kind: PlaylistKind) => {
   }
 };
 
+const kindToPlaylistClass: Record<PlaylistKind, string | null> = {
+  [PlaylistKind.ALL]: null,
+  [PlaylistKind.USER]: "user",
+  [PlaylistKind.SUBSCRIPTION]: "subscription",
+};
+
 export default function PlaySelected() {
   const [playlistKind, setPlaylistKind] = useState<PlaylistKind>(PlaylistKind.ALL);
-  const [playlists, setPlaylists] = useState<PlaylistSections | null>(null);
   const { pop } = useNavigation();
 
-  useEffect(() => {
-    pipe(
-      playlistKind,
-      music.playlists.getPlaylists,
-      TE.mapLeft((e) => {
-        console.error(e);
-        showToast(Toast.Style.Failure, "Could not get your playlists");
-      }),
-      TE.map(
-        flow(
-          parseResult<Playlist>(),
-          (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
-          setPlaylists,
+  const { isLoading, data: allPlaylists } = useCachedPromise(
+    () =>
+      pipe(
+        music.playlists.getPlaylists(PlaylistKind.ALL),
+        TE.map(
+          flow(parseResult<Playlist>(), (data) =>
+            A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
+          ),
         ),
-      ),
-    )();
-  }, [playlistKind]);
+        TE.matchW(
+          (e) => {
+            console.error(e);
+            showToast(Toast.Style.Failure, "Could not get your playlists");
+            return {} as PlaylistSections;
+          },
+          (data) => data,
+        ),
+      )(),
+    [],
+    { keepPreviousData: true },
+  );
+
+  const filteredPlaylists = useMemo(() => {
+    if (!allPlaylists) return {};
+    const filterClass = kindToPlaylistClass[playlistKind];
+    if (!filterClass) return allPlaylists;
+
+    return Object.fromEntries(
+      Object.entries(allPlaylists).filter(([section]) => section === filterClass),
+    ) as PlaylistSections;
+  }, [allPlaylists, playlistKind]);
 
   return (
     <List
-      isLoading={playlists === null}
+      isLoading={isLoading}
       searchBarPlaceholder="Search A Playlist"
       searchBarAccessory={
         <List.Dropdown
@@ -67,7 +82,7 @@ export default function PlaySelected() {
         </List.Dropdown>
       }
     >
-      {Object.entries(playlists ?? {})
+      {Object.entries(filteredPlaylists)
         .filter(([section]) => section !== "library")
         .map(([section, data]) => (
           <List.Section title={kindToString(section as PlaylistKind)} key={section}>
@@ -75,9 +90,7 @@ export default function PlaySelected() {
               <List.Item
                 key={playlist.id}
                 title={playlist.name ?? "Unknown Playlist"}
-                accessories={[
-                  { text: `${playlist.count} songs ·` + ` ${Math.floor(Number(playlist.duration) / 60)} min` },
-                ]}
+                accessories={[{ text: `${playlist.count} songs · ${Math.floor(Number(playlist.duration) / 60)} min` }]}
                 icon={{ source: "../assets/icon.png" }}
                 actions={<Actions playlist={playlist} pop={pop} />}
               />

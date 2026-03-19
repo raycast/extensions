@@ -5,11 +5,8 @@
  */
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
-import * as O from "fp-ts/Option";
-import { parseResult } from "../util/parser";
-import { fromEmptyOrNullable } from "../util/option";
-import * as music from "../util/scripts";
 import { Album } from "../util/models";
+import * as music from "../util/scripts";
 
 type Input = {
   /**
@@ -21,32 +18,10 @@ type Input = {
 export default async function getLibraryAlbums(input?: Input) {
   const searchTerm = input?.search?.trim();
 
-  const albumsTE = searchTerm
-    ? pipe(
-        searchTerm,
-        music.albums.search,
-        TE.map((albumsString) =>
-          pipe(
-            albumsString,
-            fromEmptyOrNullable,
-            O.getOrElse(() => ""),
-          ),
-        ),
-      )
-    : music.albums.getAll;
+  const albumsTE = searchTerm ? music.albums.search(searchTerm) : music.albums.getAll;
 
   return await pipe(
     albumsTE,
-    TE.map(parseResult<Album>()),
-    TE.map((albums) =>
-      pipe(
-        albums,
-        fromEmptyOrNullable,
-        O.getOrElse(() => [] as readonly Album[]),
-      ),
-    ),
-    TE.mapLeft((error) => {
-      throw new Error(`Could not retrieve albums: ${error}`);
-    }),
+    TE.getOrElse(() => async () => [] as readonly Album[]),
   )();
 }

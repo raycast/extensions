@@ -24,9 +24,6 @@ export interface Playlist {
   name: string;
   duration: string;
   count: string;
-
-  time: string;
-  description: string;
   kind: `${"subscription" | "user" | "library"} playlist`;
 }
 
@@ -44,7 +41,7 @@ export interface ScriptError extends Error {
 }
 
 export const ScriptError = {
-  is: (error: Error): error is ScriptError => "shortMessaage" in error,
+  is: (error: Error): error is ScriptError => "shortMessage" in error,
 };
 
 export interface Preferences {

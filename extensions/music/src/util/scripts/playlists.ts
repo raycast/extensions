@@ -1,38 +1,28 @@
 import { pipe } from "fp-ts/lib/function";
 import * as TE from "fp-ts/TaskEither";
 
-import { tell, runScript, createQueryString } from "../apple-script";
+import { runScript, tell } from "../apple-script";
 import { ScriptError } from "../models";
 
 import { general } from ".";
 
-const outputQuery = createQueryString({
-  id: "pId",
-  name: "pName",
-  duration: "pDuration",
-  count: "pCount",
-  time: "pTime",
-  kind: "pKind",
-});
-
-enum PlaylistKind {
+export enum PlaylistKind {
   ALL = "all",
   USER = "user",
   SUBSCRIPTION = "subscription",
 }
 
-const playListKindToString = (kind: PlaylistKind) => (kind === PlaylistKind.ALL ? "" : kind);
+const playlistRef = (kind: PlaylistKind) => (kind === PlaylistKind.ALL ? "" : kind);
 
 const loopThroughPlaylists = (kind: PlaylistKind) => `
-	repeat with selectedPlaylist in ${playListKindToString(kind)} playlists
+	repeat with selectedPlaylist in ${playlistRef(kind)} playlists
 		set pId to the id of selectedPlaylist
 		set pName to the name of selectedPlaylist
 		set pDuration to the duration of selectedPlaylist
 		set pCount to count (tracks of selectedPlaylist)
-		set pTime to the time of selectedPlaylist
 		set pKind to the class of selectedPlaylist
-		set output to output & ${outputQuery} & "\n"
-    end repeat
+		set output to output & "id=" & pId & "$BREAKname=" & pName & "$BREAKduration=" & pDuration & "$BREAKcount=" & pCount & "$BREAKkind=" & pKind & "\\n"
+	end repeat
 `;
 
 export const play =
@@ -56,8 +46,8 @@ export const getPlaylistId = (name: string) => tell("Music", `get id of playlist
 export const getPlaylists = (kind: PlaylistKind): TE.TaskEither<Error, string> =>
   runScript(`
 	set output to ""
-        tell application "Music"
-			${kind === PlaylistKind.ALL ? loopThroughPlaylists(PlaylistKind.ALL) : loopThroughPlaylists(kind)}
-        end tell
+	tell application "Music"
+		${loopThroughPlaylists(kind)}
+	end tell
 	return output
 `);

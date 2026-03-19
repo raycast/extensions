@@ -5,14 +5,14 @@ import * as RTE from "fp-ts/ReaderTaskEither";
 import * as TE from "fp-ts/TaskEither";
 import { match } from "ts-pattern";
 
-import { getLibraryName } from "./general";
 import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../constants";
 import { getMacosVersion } from "../get-macos-version";
 import { MenuBarSnapshot, PlayerState, ScriptError, Track } from "../models";
+import { getLibraryName } from "./general";
 
-const FAVORITE_CONFIRMATION_TIMEOUT_MS = 10_000;
-const FAVORITE_POLL_INTERVAL_MS = 250;
+const FAVORITE_CONFIRMATION_TIMEOUT_MS = 3_000;
+const FAVORITE_POLL_INTERVAL_MS = 500;
 const FAVORITE_TRACK_ID_MISMATCH = "__TRACK_ID_MISMATCH__";
 
 const isSonomaOrNewer = (versionMajor: number) => versionMajor >= 14;
