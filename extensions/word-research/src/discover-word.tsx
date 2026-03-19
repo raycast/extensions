@@ -3,9 +3,10 @@ import { usePromise } from "@raycast/utils";
 
 import { checkWord, formatDate } from "./api";
 
-export default function Command({ arguments: args }: { arguments: { word: string } }) {
+export default function Command({ arguments: args }: { arguments: Arguments.DiscoverWord }) {
   const input = args.word.trim();
-  const isValid = /^[a-zA-Z]+$/.test(input);
+  // Allow Unicode letters, hyphens, and apostrophes to support words like "café", "co-operate", "it's"
+  const isValid = /^[\p{L}'-]+$/u.test(input);
   const {
     data: result,
     isLoading,
@@ -14,17 +15,17 @@ export default function Command({ arguments: args }: { arguments: { word: string
     execute: isValid,
   });
 
-  const error = !isValid ? "Please enter a valid word using letters only" : fetchError?.message;
+  const error = !isValid ? "Please enter a valid word (letters, hyphens, and apostrophes only)" : fetchError?.message;
 
   if (isLoading) {
     return (
       <Detail
         isLoading
-        markdown={`# Checking \`${input}\`\n\nLooking for this word in Word Research.`}
+        markdown={`# Checking \`${input}\`\n\nSolving proof-of-work, then looking up this word in Word Research.`}
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label title="Word" text={input} />
-            <Detail.Metadata.Label title="Status" text="Checking" />
+            <Detail.Metadata.Label title="Status" text="Computing…" />
           </Detail.Metadata>
         }
       />

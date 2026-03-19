@@ -17,6 +17,7 @@
     {
       "name": "discover-word",
       "title": "Discover Word",
+      "subtitle": "Word Research",
       "description": "Check if a word has been discovered before",
       "mode": "view",
       "arguments": [
@@ -31,6 +32,7 @@
     {
       "name": "view-stats",
       "title": "Word Stats",
+      "subtitle": "Word Research",
       "description": "View top words and stats from Word Research",
       "mode": "view"
     }

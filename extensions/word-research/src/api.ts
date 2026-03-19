@@ -3,8 +3,15 @@ import { webcrypto } from "node:crypto";
 const API_BASE = "https://wordresearch.xyz/api";
 const PROOF_OF_WORK_PREFIX = "0000";
 const RECENT_CHECK_TTL_MS = 5000;
+const MAX_POW_ITERATIONS = 500_000;
 
-const recentChecks = new Map<string, { result: CheckResult; expiresAt: number }>();
+interface CacheEntry {
+  result: CheckResult;
+  expiresAt: number;
+  timeoutId: ReturnType<typeof setTimeout>;
+}
+
+const recentChecks = new Map<string, CacheEntry>();
 
 export interface CheckResult {
   is_new: boolean;
@@ -40,7 +47,7 @@ export async function solveProofOfWork(
   const normalizedWord = word.toLowerCase();
   const timestamp = Date.now();
 
-  for (let nonce = 0; ; nonce += 1) {
+  for (let nonce = 0; nonce < MAX_POW_ITERATIONS; nonce += 1) {
     signal?.throwIfAborted();
     const hash = await sha256Hex(`${normalizedWord}|${timestamp}|${nonce}`);
 
@@ -48,6 +55,8 @@ export async function solveProofOfWork(
       return { nonce: String(nonce), timestamp };
     }
   }
+
+  throw new Error(`Proof-of-work did not converge within ${MAX_POW_ITERATIONS.toLocaleString()} iterations`);
 }
 
 export async function checkWord(word: string, signal?: AbortSignal): Promise<CheckResult> {
@@ -66,17 +75,26 @@ export async function checkWord(word: string, signal?: AbortSignal): Promise<Che
     body: JSON.stringify({ word: normalizedWord, nonce, timestamp }),
     signal,
   });
-  const data = (await res.json()) as CheckResult | { error?: string };
 
   if (!res.ok) {
-    throw new Error(("error" in data && data.error) || `Request failed (${res.status})`);
+    let errorMessage = `Request failed (${res.status})`;
+    try {
+      const errData = (await res.json()) as { error?: string };
+      if (errData.error) errorMessage = errData.error;
+    } catch {
+      // Response body was not JSON (e.g. HTML 502 gateway error) — use status-based message
+    }
+    throw new Error(errorMessage);
   }
 
-  const result = data as CheckResult;
-  recentChecks.set(normalizedWord, {
-    result,
-    expiresAt: Date.now() + RECENT_CHECK_TTL_MS,
-  });
+  const result = (await res.json()) as CheckResult;
+
+  // Cancel any previously scheduled expiry for this word before setting a fresh entry
+  const existing = recentChecks.get(normalizedWord);
+  if (existing) clearTimeout(existing.timeoutId);
+
+  const timeoutId = setTimeout(() => recentChecks.delete(normalizedWord), RECENT_CHECK_TTL_MS);
+  recentChecks.set(normalizedWord, { result, expiresAt: Date.now() + RECENT_CHECK_TTL_MS, timeoutId });
 
   return result;
 }
