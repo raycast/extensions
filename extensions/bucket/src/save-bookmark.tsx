@@ -70,7 +70,6 @@ export default function SaveBookmark() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Save Bookmark"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Bookmark" icon={Icon.Bookmark} onSubmit={handleSubmit} />

@@ -5,6 +5,9 @@
   "description": "Search, save, and organize your Bucket bookmarks with powerful search and AI organization",
   "icon": "icon.png",
   "author": "miracleio",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity",
     "Web"

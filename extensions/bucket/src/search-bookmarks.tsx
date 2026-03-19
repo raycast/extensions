@@ -19,7 +19,14 @@ import EditBookmarkForm from "./components/EditBookmarkForm";
 
 export default function SearchBookmarks() {
   const [searchText, setSearchText] = useState("");
-  const { data: bookmarks, isLoading, revalidate } = useCachedPromise(getBookmarks, [], { keepPreviousData: true });
+  const {
+    data: bookmarks,
+    isLoading,
+    error,
+    revalidate,
+  } = useCachedPromise(getBookmarks, [], {
+    keepPreviousData: true,
+  });
 
   const filtered = (bookmarks ?? []).filter((b) => {
     const q = searchText.toLowerCase();
@@ -96,7 +103,12 @@ export default function SearchBookmarks() {
       searchBarPlaceholder="Search bookmarks by title, URL, or tag…"
       throttle
     >
-      {filtered.length === 0 && !isLoading ? (
+      {error ? (
+        <List.EmptyView
+          title="Couldn't load bookmarks"
+          description={error instanceof Error ? error.message : String(error)}
+        />
+      ) : filtered.length === 0 && !isLoading ? (
         <List.EmptyView title="No bookmarks found" description="Try a different search or save a new bookmark." />
       ) : (
         filtered.map((bookmark) => (

@@ -71,7 +71,9 @@ export default function ConnectDevice() {
   }
 
   async function pollDeviceStatus(linkCode: string) {
-    const maxAttempts = 60; // Poll for 5 minutes (every 5 seconds)
+    const pollIntervalMs = 5000;
+    // Pairing codes expire after 15 minutes; keep polling through that window (plus one interval slack).
+    const maxAttempts = Math.ceil((15 * 60 * 1000) / pollIntervalMs) + 1;
     let attempts = 0;
 
     const poll = async () => {
@@ -132,11 +134,11 @@ export default function ConnectDevice() {
 
         // Still pending, continue polling
         attempts++;
-        timerRef.current = setTimeout(poll, 5000);
+        timerRef.current = setTimeout(poll, pollIntervalMs);
       } catch (err) {
         console.error("Polling error:", err);
         attempts++;
-        timerRef.current = setTimeout(poll, 5000);
+        timerRef.current = setTimeout(poll, pollIntervalMs);
       }
     };
 

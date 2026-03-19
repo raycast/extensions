@@ -1,21 +1,35 @@
 import React from "react";
-import { Icon, launchCommand, LaunchType, MenuBarExtra, open, showHUD } from "@raycast/api";
+import { Icon, launchCommand, LaunchType, MenuBarExtra, open, showHUD, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getBookmarks, Bookmark } from "./lib/api";
 
 const MAX_ITEMS = 10;
 
+async function launchCommandSafe(options: { name: string; type: LaunchType }) {
+  try {
+    await launchCommand(options);
+  } catch (e) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't open command",
+      message: e instanceof Error ? e.message : String(e),
+    });
+  }
+}
+
 export default function BucketMenuBar() {
   const {
     data: bookmarks,
     isLoading,
+    error,
     revalidate,
   } = useCachedPromise(getBookmarks, [], {
     keepPreviousData: true,
   });
 
-  const recent = (bookmarks ?? []).slice(0, MAX_ITEMS);
-  const featured = (bookmarks ?? []).filter((b) => b.featured).slice(0, MAX_ITEMS);
+  const safeBookmarks = error ? [] : (bookmarks ?? []);
+  const recent = safeBookmarks.slice(0, MAX_ITEMS);
+  const featured = safeBookmarks.filter((b) => b.featured).slice(0, MAX_ITEMS);
 
   return (
     <MenuBarExtra icon={Icon.Bookmark} tooltip="Bucket Bookmarks" isLoading={isLoading}>
@@ -23,7 +37,7 @@ export default function BucketMenuBar() {
         title="Save from Clipboard"
         icon={Icon.Plus}
         onAction={() =>
-          launchCommand({
+          launchCommandSafe({
             name: "save-bookmark",
             type: LaunchType.UserInitiated,
           })
@@ -34,7 +48,7 @@ export default function BucketMenuBar() {
         title="Search Bookmarks"
         icon={Icon.MagnifyingGlass}
         onAction={() =>
-          launchCommand({
+          launchCommandSafe({
             name: "search-bookmarks",
             type: LaunchType.UserInitiated,
           })
@@ -54,7 +68,12 @@ export default function BucketMenuBar() {
       )}
 
       <MenuBarExtra.Section title="Recent">
-        {recent.length === 0 && !isLoading ? (
+        {error ? (
+          <MenuBarExtra.Item
+            title="Couldn't load bookmarks"
+            subtitle={error instanceof Error ? error.message : String(error)}
+          />
+        ) : recent.length === 0 && !isLoading ? (
           <MenuBarExtra.Item title="No bookmarks yet" />
         ) : (
           recent.map((b) => <BookmarkMenuItem bookmark={b} key={b._id} />)
