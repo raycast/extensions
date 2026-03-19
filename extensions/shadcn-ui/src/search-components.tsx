@@ -75,7 +75,7 @@ export default function SearchComponents() {
 
   return (
     <List
-      isLoading={isLoading || isDetailLoading}
+      isLoading={isLoading}
       searchBarPlaceholder="Search components..."
       isShowingDetail
       selectedItemId={selectedItemId}
