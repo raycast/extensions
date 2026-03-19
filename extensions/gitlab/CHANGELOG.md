@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Fix "Mark All as Done" error] - {PR_MERGE_DATE}
+## [Fix "Mark All as Done" error] - 2026-03-19
 
 - Fix JSON parse error when marking all todos as done (HTTP 204 No Content)
 
