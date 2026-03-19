@@ -1,6 +1,6 @@
 # Handy Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-03-19
 
 ### Added
 - **Select Language** — set the transcription language for the active model; the list is automatically filtered to languages supported by the selected model (e.g. 4 languages for Canary 180M Flash, 7 for SenseVoice), with an error shown for models that don't support language selection (Parakeet, Moonshine, GigaAM)
