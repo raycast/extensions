@@ -1,6 +1,6 @@
 # Caaals Food Tracker Changelog
 
-## [Initial Version] - 2026-03-13
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Log food using AI text analysis
 - Browse diary entries from the past 7 days
