@@ -4,3 +4,4 @@ dist/
 *.js.map
 raycast-env.d.ts
 .DS_Store
+docs/pr-*.md

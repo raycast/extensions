@@ -31,19 +31,19 @@ export default function SelectLanguage() {
           title: `${model.name} does not support language selection`,
         });
         void closeMainWindow(); // closeMainWindow returns Promise<void>; void to avoid floating promise in sync callback
-        return;
+        return; // leave isLoading=true so no empty view renders before close
       }
 
       setLanguages(getLanguagesForModel(model?.supportedLanguages));
       setCurrentCode(settings.selected_language ?? "auto");
+      setIsLoading(false);
     } catch (err) {
-      showToast({
+      setIsLoading(false);
+      void showToast({
         style: Toast.Style.Failure,
         title: "Could not load language settings",
         message: err instanceof Error ? err.message : String(err),
       });
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
