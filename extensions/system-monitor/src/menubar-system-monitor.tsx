@@ -162,19 +162,19 @@ export default function Command() {
     ]).finally(() => {
       isRevalidating.current = false;
     });
-  }, 1000);
+  }, 3000);
 
   // Temperature reads from an external binary (IOKit HID sensors) which is
-  // slower than the in-process stats above. Polling it on its own 3s interval
+  // slower than the in-process stats above. Polling it on its own 5s interval
   // prevents revalidation calls from stacking up and producing stale readings.
   const isRevalidatingTemp = useRef(false);
   useInterval(() => {
     if (isRevalidatingTemp.current) return;
     isRevalidatingTemp.current = true;
-    Promise.resolve(revalidateTemperature()).finally(() => {
+    revalidateTemperature().finally(() => {
       isRevalidatingTemp.current = false;
     });
-  }, 3000);
+  }, 5000);
 
   const getPinnedTitle = (): string | undefined => {
     switch (pinnedStat) {
