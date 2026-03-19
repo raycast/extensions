@@ -1,4 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
@@ -12,9 +13,25 @@ import { handleTaskEitherError } from "./util/utils";
 const EMPTY_TEXT = " "; // Visually empty but non-empty to prevent jumping around
 
 export default function PlayLibraryAlbum() {
-  const [albums, setAlbums] = useState<readonly Album[]>([]);
+  const [searchResults, setSearchResults] = useState<readonly Album[] | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const { pop } = useNavigation();
+
+  const { isLoading: isLoadingAll, data: allAlbums } = useCachedPromise(
+    () =>
+      pipe(
+        music.albums.getAll,
+        TE.matchW(
+          () => {
+            showToast(Toast.Style.Failure, "Could not get albums");
+            return [] as ReadonlyArray<Album>;
+          },
+          (albums) => albums,
+        ),
+      )(),
+    [],
+    { keepPreviousData: true },
+  );
 
   useEffect(() => {
     pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))();
@@ -22,11 +39,9 @@ export default function PlayLibraryAlbum() {
 
   const onSearch = useCallback(async (next: string) => {
     if (!next || next.length < 1) {
-      setAlbums([]);
+      setSearchResults(null); // back to showing all albums
       return;
     }
-
-    setAlbums([]); // clear previous results
 
     await pipe(
       next,
@@ -39,13 +54,15 @@ export default function PlayLibraryAlbum() {
         },
         (albums) => albums,
       ),
-      T.map(setAlbums),
+      T.map((results) => setSearchResults(results)),
     )();
   }, []);
 
+  const albums = searchResults ?? allAlbums ?? [];
+
   return (
     <List
-      isLoading={false}
+      isLoading={isLoadingAll}
       searchBarPlaceholder="Search A Song By Album Or Artist"
       onSearchTextChange={onSearch}
       throttle
