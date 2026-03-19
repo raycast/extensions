@@ -130,6 +130,18 @@ const feesJSON: Record<string, Record<string, RouteInfo>> = {
     CHF: { canHold: false, percentage: 4.4, fixedFee: 0.3, fxSpread: 3.5 },
     HKD: { canHold: true, percentage: 2.9, fixedFee: 2.35, fxSpread: 0 },
   },
+  CNY: {
+    USD: { canHold: false, percentage: 4.4, fixedFee: 0.3, fxSpread: 3.5 },
+    EUR: { canHold: false, percentage: 4.4, fixedFee: 0.35, fxSpread: 3.5 },
+    GBP: { canHold: false, percentage: 4.4, fixedFee: 0.2, fxSpread: 3.5 },
+    INR: { canHold: false, percentage: 4.4, fixedFee: 3, fxSpread: 3.5 },
+    AUD: { canHold: false, percentage: 4.4, fixedFee: 0.3, fxSpread: 3.5 },
+    CAD: { canHold: false, percentage: 4.4, fixedFee: 0.3, fxSpread: 3.5 },
+    JPY: { canHold: false, percentage: 4.4, fixedFee: 40, fxSpread: 3.5 },
+    SGD: { canHold: false, percentage: 4.4, fixedFee: 0.3, fxSpread: 3.5 },
+    CHF: { canHold: false, percentage: 4.4, fixedFee: 0.3, fxSpread: 3.5 },
+    HKD: { canHold: false, percentage: 4.4, fixedFee: 2.35, fxSpread: 3.5 },
+  },
 };
 
 interface FormValues {
@@ -159,12 +171,17 @@ export default function Command() {
       fxSpread: 3.5,
     };
 
-    const totalPct = (route.percentage + route.fxSpread) / 100;
+    const feePct = route.percentage / 100;
+    const fxPct = route.fxSpread / 100;
 
-    const standardFee = val * totalPct + route.fixedFee;
+    const transactionFee = val * feePct + route.fixedFee;
+    const amountAfterTransactionFee = val - transactionFee;
+    const fxFee = amountAfterTransactionFee > 0 ? amountAfterTransactionFee * fxPct : 0;
+    
+    const standardFee = transactionFee + fxFee;
     const standardGet = val - standardFee;
 
-    const grossAmount = (val + route.fixedFee) / (1 - totalPct);
+    const grossAmount = (val / (1 - fxPct) + route.fixedFee) / (1 - feePct);
 
     return {
       fee: standardFee.toFixed(2),
