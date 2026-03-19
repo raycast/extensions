@@ -10,7 +10,8 @@
     "Olivier-OG",
     "ridemountainpig",
     "siddharth-2382",
-    "1weiho"
+    "1weiho",
+    "carlesandres"
   ],
   "categories": [
     "Documentation",
@@ -60,8 +61,8 @@
   "dependencies": {
     "@octokit/rest": "^22.0.1",
     "@octokit/types": "^16.0.0",
-    "@raycast/api": "^1.104.10",
-    "@raycast/utils": "^2.2.3",
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2",
     "js-yaml": "^4.1.1",
     "node-fetch": "^3.3.2",
     "octokit": "^5.0.5"
@@ -69,9 +70,9 @@
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "25.5.0",
+    "@types/node": "25.3.3",
     "@types/react": "19.2.14",
-    "eslint": "^10.0.3",
+    "eslint": "^10.0.2",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },
