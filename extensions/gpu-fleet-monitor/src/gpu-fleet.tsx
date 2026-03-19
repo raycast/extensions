@@ -228,7 +228,13 @@ export default function GpuFleet() {
           title="Add Host"
           subtitle="Add a new SSH host"
           detail={
-            <List.Item.Detail markdown="## Add Host\n\nPaste an SSH connection string to add a new host to your fleet." />
+            <List.Item.Detail
+              markdown={[
+                "## Add Host",
+                "",
+                "Paste an SSH connection string to add a new host to your fleet.",
+              ].join("\n")}
+            />
           }
           actions={
             <ActionPanel>
@@ -255,7 +261,18 @@ export default function GpuFleet() {
           subtitle={`${groups.length} group${groups.length !== 1 ? "s" : ""}`}
           detail={
             <List.Item.Detail
-              markdown={`## Manage Groups\n\nCreate, edit, or delete host groups.\n\n${groups.map((g) => `- **${g.name}**${g.patterns.length > 0 ? ` (${g.patterns.join(", ")})` : ""}`).join("\n") || "No groups yet."}`}
+              markdown={[
+                "## Manage Groups",
+                "",
+                "Create, edit, or delete host groups.",
+                "",
+                groups
+                  .map(
+                    (g) =>
+                      `- **${g.name}**${g.patterns.length > 0 ? ` (${g.patterns.join(", ")})` : ""}`,
+                  )
+                  .join("\n") || "No groups yet.",
+              ].join("\n")}
             />
           }
           actions={
@@ -282,7 +299,13 @@ export default function GpuFleet() {
           title="Quick Connect Best GPU"
           subtitle={`Scan ${filteredHosts.length} hosts`}
           detail={
-            <List.Item.Detail markdown="## Quick Connect\n\nScan all hosts in the current view and connect to the best available free GPU." />
+            <List.Item.Detail
+              markdown={[
+                "## Quick Connect",
+                "",
+                "Scan all hosts in the current view and connect to the best available free GPU.",
+              ].join("\n")}
+            />
           }
           actions={
             <ActionPanel>
@@ -305,7 +328,9 @@ export default function GpuFleet() {
               title={host.name}
               subtitle="connecting..."
               detail={
-                <List.Item.Detail markdown={`## ${host.name}\n\nScanning...`} />
+                <List.Item.Detail
+                  markdown={["## " + host.name, "", "Scanning..."].join("\n")}
+                />
               }
               actions={
                 <ActionPanel>
@@ -404,7 +429,16 @@ export default function GpuFleet() {
             title="No hosts found"
             subtitle="Check your SSH config or group settings"
             detail={
-              <List.Item.Detail markdown="## No Hosts Found\n\nNo SSH hosts matched the current filter. Try:\n- Switching to **All** in the dropdown\n- Adding hosts via **Add Host**\n- Adjusting group patterns in **Manage Groups**" />
+              <List.Item.Detail
+                markdown={[
+                  "## No Hosts Found",
+                  "",
+                  "No SSH hosts matched the current filter. Try:",
+                  "- Switching to **All** in the dropdown",
+                  "- Adding hosts via **Add Host**",
+                  "- Adjusting group patterns in **Manage Groups**",
+                ].join("\n")}
+              />
             }
             actions={<ActionPanel>{globalActions}</ActionPanel>}
           />
@@ -443,7 +477,11 @@ function formatMB(mb: number): string {
 
 function detailMarkdown(s: HostStatus): string {
   if (s.state === "offline") {
-    return `## ${s.host.name}\n\n**Status:** Offline\n\n${s.error ? `\`\`\`\n${s.error}\n\`\`\`` : ""}`;
+    const lines = [`## ${s.host.name}`, "", "**Status:** Offline"];
+    if (s.error) {
+      lines.push("", "```", s.error, "```");
+    }
+    return lines.join("\n");
   }
 
   if (s.state === "no-gpu") {
