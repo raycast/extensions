@@ -41,16 +41,13 @@ export default function BrowseDiary() {
     setIsLoading(true);
     try {
       const dates = getDatesForLastNDays(7);
-      const results = await Promise.allSettled(
-        dates.map((d) => getDiaryByDate(d, { quiet: true })),
-      );
+      const results = await Promise.allSettled(dates.map((d) => getDiaryByDate(d, { quiet: true })));
       const fulfilled = results
         .filter((r): r is PromiseFulfilledResult<DailySummary> => r.status === "fulfilled")
         .map((r) => r.value);
 
       if (fulfilled.length === 0 && results.some((r) => r.status === "rejected")) {
-        const firstErr = (results.find((r) => r.status === "rejected") as PromiseRejectedResult)
-          .reason;
+        const firstErr = (results.find((r) => r.status === "rejected") as PromiseRejectedResult).reason;
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to Load Diary",
@@ -130,11 +127,7 @@ export default function BrowseDiary() {
                 ]}
                 actions={
                   <ActionPanel>
-                    <Action.Push
-                      title="View Details"
-                      icon={Icon.Eye}
-                      target={<EntryDetail entry={entry} />}
-                    />
+                    <Action.Push title="View Details" icon={Icon.Eye} target={<EntryDetail entry={entry} />} />
                     <Action
                       title="Copy Nutrition"
                       icon={Icon.Clipboard}

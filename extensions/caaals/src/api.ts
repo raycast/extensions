@@ -1,10 +1,5 @@
 import { getPreferenceValues, openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import type {
-  AIFoodAnalysisResult,
-  DailySummary,
-  DiaryEntry,
-  DiaryEntryFromSnapshotInput,
-} from "./types";
+import type { AIFoodAnalysisResult, DailySummary, DiaryEntry, DiaryEntryFromSnapshotInput } from "./types";
 
 const API_BASE_PATH = "/api/v1";
 
@@ -89,20 +84,12 @@ export async function analyzeText(description: string): Promise<AIFoodAnalysisRe
   return result.data;
 }
 
-export async function getDiaryByDate(
-  date: string,
-  opts?: { quiet?: boolean },
-): Promise<DailySummary> {
-  const result = await apiFetch<{ data: DailySummary }>(
-    `/diary?date=${encodeURIComponent(date)}`,
-    opts,
-  );
+export async function getDiaryByDate(date: string, opts?: { quiet?: boolean }): Promise<DailySummary> {
+  const result = await apiFetch<{ data: DailySummary }>(`/diary?date=${encodeURIComponent(date)}`, opts);
   return result.data;
 }
 
-export async function createDiaryFromSnapshot(
-  data: DiaryEntryFromSnapshotInput,
-): Promise<DiaryEntry> {
+export async function createDiaryFromSnapshot(data: DiaryEntryFromSnapshotInput): Promise<DiaryEntry> {
   const result = await apiFetch<{ data: DiaryEntry }>("/diary/from-snapshot", {
     method: "POST",
     body: {

@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Form,
-  popToRoot,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, popToRoot, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { analyzeText, createDiaryFromSnapshot } from "./api";
 import type { AIFoodAnalysisResult, MealType } from "./types";

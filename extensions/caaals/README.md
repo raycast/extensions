@@ -9,7 +9,7 @@ Log food with AI and browse your diary — all from Raycast.
 1. Install the extension from the Raycast Store.
 2. Generate an API token from **Settings > Integrations** in the Caaals mobile or web app.
 3. Open any command — Raycast will prompt you to fill in your preferences:
-   - **API URL** — The base URL of your Caaals instance (defaults to `https://api.caaals.com`).
+   - **API URL** — The base URL of your Caaals instance (defaults to `https://caaals.onrender.com`).
    - **API Token** — The personal API token you generated in step 2.
 4. You're all set.
 
