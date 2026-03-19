@@ -13,25 +13,21 @@ import { GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getQuickSightClient as getQuickSightClientBase, getSTSClient } from "../services/clients/quicksight";
 
-let cachedAccountId: string | undefined;
+const accountIdCache = new Map<string, string>();
 
 async function getAwsAccountId(): Promise<string> {
-  if (cachedAccountId) return cachedAccountId;
+  const profile = process.env.AWS_PROFILE ?? process.env.AWS_VAULT ?? "default";
+  if (accountIdCache.has(profile)) return accountIdCache.get(profile)!;
 
-  if (process.env.AWS_SSO_ACCOUNT_ID) {
-    cachedAccountId = process.env.AWS_SSO_ACCOUNT_ID;
-    return cachedAccountId;
-  }
-
-  const sts = getSTSClient();
-  const { Account } = await sts.send(new GetCallerIdentityCommand({}));
-  if (!Account) throw new Error("Could not determine AWS account ID");
-  cachedAccountId = Account;
-  return cachedAccountId;
+  const accountId =
+    process.env.AWS_SSO_ACCOUNT_ID ?? (await getSTSClient().send(new GetCallerIdentityCommand({}))).Account;
+  if (!accountId) throw new Error("Could not determine AWS account ID");
+  accountIdCache.set(profile, accountId);
+  return accountId;
 }
 
 function getQuickSightClient(): QuickSightClient {
-  const { quicksightRegion } = getPreferenceValues<{ quicksightRegion?: string }>();
+  const { quicksightRegion } = getPreferenceValues<Preferences.Quicksight>();
   const region = quicksightRegion?.trim() || undefined;
   return getQuickSightClientBase(region);
 }

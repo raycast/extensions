@@ -47,16 +47,16 @@ export function useAmplifyApps() {
 
 ### AWS Client Factory
 
-Use `AWSClients` from `src/services/aws-clients.ts` for all AWS SDK client instances:
+Each AWS service has a dedicated client module in `src/services/clients/` for tree-shaking. Import only the client you need:
 
 ```typescript
-import { AWSClients } from "../services/aws-clients";
+import { getAmplifyClient } from "../services/clients/amplify";
 
-const client = AWSClients.amplify(); // Returns cached AmplifyClient
+const client = getAmplifyClient(); // Returns cached AmplifyClient
 const response = await client.send(new ListAppsCommand({}));
 ```
 
-Clients are cached per profile/region combination for better performance.
+Clients are cached per profile/region combination via the shared `ClientCache` in `src/services/client-cache.ts`.
 
 ### AWS Profile Management
 

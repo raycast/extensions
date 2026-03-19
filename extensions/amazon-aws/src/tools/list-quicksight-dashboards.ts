@@ -1,4 +1,5 @@
 import { DashboardSummary, ListDashboardsCommand } from "@aws-sdk/client-quicksight";
+import { getPreferenceValues } from "@raycast/api";
 import { getAwsAccountId } from "../hooks/use-quicksight";
 import { getQuickSightClient } from "../services/clients/quicksight";
 
@@ -8,7 +9,8 @@ import { getQuickSightClient } from "../services/clients/quicksight";
  */
 export default async function listQuickSightDashboards(): Promise<DashboardSummary[]> {
   const accountId = await getAwsAccountId();
-  const client = getQuickSightClient();
+  const { quicksightRegion } = getPreferenceValues<Preferences.Quicksight>();
+  const client = getQuickSightClient(quicksightRegion?.trim() || undefined);
 
   const command = new ListDashboardsCommand({
     AwsAccountId: accountId,
