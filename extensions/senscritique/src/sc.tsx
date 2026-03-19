@@ -1,5 +1,15 @@
-import { Action, ActionPanel, Color, Detail, Icon, LaunchProps, List } from "@raycast/api";
-import React, { useEffect, useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  LaunchProps,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 
 const GRAPHQL_ENDPOINT = "https://apollo.senscritique.com/graphql";
 const AUTOCOMPLETE_DEBOUNCE_MS = 80;
@@ -64,12 +74,9 @@ const SEARCH_PRODUCTS_QUERY = `
   }
 `;
 
-type Arguments = {
-  title?: string;
-};
-
 type ContentType = "film" | "serie" | "livre" | "jeu";
 type FilterType = "all" | ContentType;
+type CommandArguments = { title: string };
 
 type SearchResult = {
   id: string;
@@ -117,7 +124,9 @@ type SearchProductsResponse = {
   errors?: Array<{ message?: string }>;
 };
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(
+  props: LaunchProps<{ arguments: CommandArguments }>,
+) {
   const initialText = props.arguments.title?.trim() ?? "";
   const [searchText, setSearchText] = useState(initialText);
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -128,7 +137,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const trimmedQuery = useMemo(() => searchText.trim(), [searchText]);
 
   const visibleResults = useMemo(() => {
-    const filtered = selectedFilter === "all" ? results : results.filter((result) => result.type === selectedFilter);
+    const filtered =
+      selectedFilter === "all"
+        ? results
+        : results.filter((result) => result.type === selectedFilter);
     return [...filtered].sort(sortByRatingCountDesc);
   }, [results, selectedFilter]);
 
@@ -141,32 +153,48 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     }
 
     const controller = new AbortController();
-    setResults([]);
     setErrorMessage(undefined);
     setIsLoading(true);
 
     const autocompleteTimer = setTimeout(async () => {
       try {
-        const quickResults = await fetchAutocompleteResults(trimmedQuery, controller.signal);
+        const quickResults = await fetchAutocompleteResults(
+          trimmedQuery,
+          controller.signal,
+        );
         if (!controller.signal.aborted && quickResults.length > 0) {
           setResults((prev) => mergeResults(quickResults, prev));
         }
-      } catch {
+      } catch (error) {
         // Autocomplete failure is non-blocking. Full search still runs.
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("SensCritique autocomplete failed", {
+            message: error.message,
+          });
+        }
       }
     }, AUTOCOMPLETE_DEBOUNCE_MS);
 
     const fullTimer = setTimeout(async () => {
       try {
-        const fullResults = await fetchFullResults(trimmedQuery, controller.signal);
+        const fullResults = await fetchFullResults(
+          trimmedQuery,
+          controller.signal,
+        );
         if (!controller.signal.aborted) {
           // Full search contains ratings/review counts. Replace autocomplete-only results.
           setResults(fullResults);
         }
       } catch (error) {
         if (!controller.signal.aborted) {
-          const message = error instanceof Error ? error.message : "Unknown error";
+          const message =
+            error instanceof Error ? error.message : "Unknown error";
           setErrorMessage(message);
+          void showToast({
+            style: Toast.Style.Failure,
+            title: "Search failed",
+            message,
+          });
           console.error("SensCritique full search failed", { message });
         }
       } finally {
@@ -189,6 +217,31 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search movies, TV shows, books, games... (Enter: details, Shift+Enter: open)"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by media type"
+          value={selectedFilter}
+          onChange={(newValue) => setSelectedFilter(newValue as FilterType)}
+        >
+          <List.Dropdown.Item title={`All (${results.length})`} value="all" />
+          <List.Dropdown.Item
+            title={`Movie (${countByType(results, "film")})`}
+            value="film"
+          />
+          <List.Dropdown.Item
+            title={`TV Show (${countByType(results, "serie")})`}
+            value="serie"
+          />
+          <List.Dropdown.Item
+            title={`Book (${countByType(results, "livre")})`}
+            value="livre"
+          />
+          <List.Dropdown.Item
+            title={`Game (${countByType(results, "jeu")})`}
+            value="jeu"
+          />
+        </List.Dropdown>
+      }
       throttle
     >
       {!trimmedQuery && (
@@ -200,50 +253,23 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       )}
 
       {!!trimmedQuery && !!errorMessage && visibleResults.length === 0 && (
-        <List.EmptyView icon={Icon.ExclamationMark} title="Search failed" description={errorMessage} />
-      )}
-
-      {!!trimmedQuery && !isLoading && visibleResults.length === 0 && !errorMessage && (
         <List.EmptyView
-          icon={Icon.Document}
-          title="No results found"
-          description="Try another title or change the filter."
+          icon={Icon.ExclamationMark}
+          title="Search failed"
+          description={errorMessage}
         />
       )}
 
-      {!!trimmedQuery && (
-        <List.Item
-          id="filters-row"
-          icon={Icon.Filter}
-          title={buildFilterChips(results, selectedFilter)}
-          accessories={[{ text: `${visibleResults.length} results` }]}
-          actions={
-            <ActionPanel>
-              <Action title="Next Filter" onAction={() => setSelectedFilter(nextFilter(selectedFilter, results))} />
-              <Action
-                title="Filter: All"
-                onAction={() => setSelectedFilter("all")}
-              />
-              <Action
-                title="Filter: Movie"
-                onAction={() => setSelectedFilter("film")}
-              />
-              <Action
-                title="Filter: TV Show"
-                onAction={() => setSelectedFilter("serie")}
-              />
-              <Action
-                title="Filter: Book"
-                onAction={() => setSelectedFilter("livre")}
-              />
-              <Action
-                title="Filter: Game"
-                onAction={() => setSelectedFilter("jeu")}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
+      {!!trimmedQuery &&
+        !isLoading &&
+        visibleResults.length === 0 &&
+        !errorMessage && (
+          <List.EmptyView
+            icon={Icon.Document}
+            title="No results found"
+            description="Try another title or change the filter."
+          />
+        )}
 
       {visibleResults.map((result) => (
         <List.Item
@@ -254,33 +280,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
           accessories={buildAccessories(result)}
           actions={
             <ActionPanel>
-              <Action.Push title="Show Details" target={<ResultDetail result={result} />} />
+              <Action.Push
+                title="Show Details"
+                target={<ResultDetail result={result} />}
+              />
               <Action.OpenInBrowser
-                title="Open in Browser ⇧↩"
+                title="Open in Browser"
                 url={result.url}
                 shortcut={{ modifiers: ["shift"], key: "enter" }}
               />
               <Action.CopyToClipboard title="Copy URL" content={result.url} />
-              <Action
-                title="Filter: All"
-                onAction={() => setSelectedFilter("all")}
-              />
-              <Action
-                title="Filter: Movie"
-                onAction={() => setSelectedFilter("film")}
-              />
-              <Action
-                title="Filter: TV Show"
-                onAction={() => setSelectedFilter("serie")}
-              />
-              <Action
-                title="Filter: Book"
-                onAction={() => setSelectedFilter("livre")}
-              />
-              <Action
-                title="Filter: Game"
-                onAction={() => setSelectedFilter("jeu")}
-              />
             </ActionPanel>
           }
         />
@@ -296,7 +305,11 @@ function ResultDetail({ result }: { result: SearchResult }) {
       metadata={buildDetailMetadata(result)}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser ⇧↩" url={result.url} />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={result.url}
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+          />
           <Action.CopyToClipboard title="Copy URL" content={result.url} />
         </ActionPanel>
       }
@@ -307,7 +320,10 @@ function ResultDetail({ result }: { result: SearchResult }) {
 function buildDetailMetadata(result: SearchResult) {
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Label title="Type" text={{ value: labelForType(result.type), color: Color.PrimaryText }} />
+      <Detail.Metadata.Label
+        title="Type"
+        text={{ value: labelForType(result.type), color: Color.PrimaryText }}
+      />
       <Detail.Metadata.Label
         title="Year"
         text={
@@ -331,19 +347,32 @@ function buildDetailMetadata(result: SearchResult) {
         title="Ratings Count"
         text={
           result.ratingCount
-            ? { value: formatCount(result.ratingCount), color: Color.PrimaryText }
+            ? {
+                value: formatCount(result.ratingCount),
+                color: Color.PrimaryText,
+              }
             : { value: "No ratings", color: Color.SecondaryText }
         }
       />
       {!!result.originalTitle && result.originalTitle !== result.title && (
-        <Detail.Metadata.Label title="Original Title" text={{ value: result.originalTitle, color: Color.PrimaryText }} />
+        <Detail.Metadata.Label
+          title="Original Title"
+          text={{ value: result.originalTitle, color: Color.PrimaryText }}
+        />
       )}
-      <Detail.Metadata.Link title="SensCritique" text="Open Page" target={result.url} />
+      <Detail.Metadata.Link
+        title="SensCritique"
+        text="Open Page"
+        target={result.url}
+      />
     </Detail.Metadata>
   );
 }
 
-async function fetchAutocompleteResults(query: string, signal: AbortSignal): Promise<SearchResult[]> {
+async function fetchAutocompleteResults(
+  query: string,
+  signal: AbortSignal,
+): Promise<SearchResult[]> {
   const payload = await postGraphQL<SearchAutocompleteResponse>(
     "SearchAutocomplete",
     {
@@ -365,14 +394,22 @@ async function fetchAutocompleteResults(query: string, signal: AbortSignal): Pro
   );
 }
 
-async function fetchFullResults(query: string, signal: AbortSignal): Promise<SearchResult[]> {
+async function fetchFullResults(
+  query: string,
+  signal: AbortSignal,
+): Promise<SearchResult[]> {
   const payload = await postGraphQL<SearchProductsResponse>(
     "SearchProductExplorer",
     {
       query,
       offset: 0,
       limit: FULL_SEARCH_LIMIT,
-      filters: [{ identifier: "universe", termValues: ["movie", "tvShow", "book", "game"] }],
+      filters: [
+        {
+          identifier: "universe",
+          termValues: ["movie", "tvShow", "book", "game"],
+        },
+      ],
       sortBy: "RELEVANCE",
     },
     SEARCH_PRODUCTS_QUERY,
@@ -407,16 +444,24 @@ async function postGraphQL<T>(
     throw new Error(`HTTP ${response.status}`);
   }
 
-  const payload = (await response.json()) as { errors?: Array<{ message?: string }> };
+  const payload = (await response.json()) as {
+    errors?: Array<{ message?: string }>;
+  };
   if (payload.errors && payload.errors.length > 0) {
-    const message = payload.errors.map((error) => error.message).filter(Boolean).join(" | ");
+    const message = payload.errors
+      .map((error) => error.message)
+      .filter(Boolean)
+      .join(" | ");
     throw new Error(message || "GraphQL error");
   }
 
   return payload as T;
 }
 
-function mergeResults(primary: SearchResult[], secondary: SearchResult[]): SearchResult[] {
+function mergeResults(
+  primary: SearchResult[],
+  secondary: SearchResult[],
+): SearchResult[] {
   const byUrl = new Map<string, SearchResult>();
 
   for (const item of primary) {
@@ -491,7 +536,10 @@ function extractYear(item: SearchProductItem): number | undefined {
   return undefined;
 }
 
-function inferTypeFromUrl(url: string | undefined, universe?: number): ContentType | undefined {
+function inferTypeFromUrl(
+  url: string | undefined,
+  universe?: number,
+): ContentType | undefined {
   if (url) {
     const lower = url.toLowerCase();
     if (lower.includes("/film/") || lower.includes("/movie/")) {
@@ -590,7 +638,10 @@ function buildAccessories(result: SearchResult): List.Item.Accessory[] {
   accessories.push({
     text:
       result.ratingCount && result.ratingCount > 0
-        ? { value: `${formatCount(result.ratingCount)} ratings`, color: Color.SecondaryText }
+        ? {
+            value: `${formatCount(result.ratingCount)} ratings`,
+            color: Color.SecondaryText,
+          }
         : { value: "No ratings", color: Color.SecondaryText },
     tooltip: "Number of community ratings",
   });
@@ -602,7 +653,9 @@ function buildDetailMarkdown(result: SearchResult): string {
   const lines: string[] = [];
 
   lines.push(`# ${result.title}`);
-  lines.push(`${labelForType(result.type)}${result.year ? ` · ${result.year}` : ""}`);
+  lines.push(
+    `${labelForType(result.type)}${result.year ? ` · ${result.year}` : ""}`,
+  );
 
   if (result.originalTitle && result.originalTitle !== result.title) {
     lines.push(`*${result.originalTitle}*`);
@@ -643,50 +696,6 @@ function iconForType(type: ContentType): Icon {
 
 function countByType(results: SearchResult[], type: ContentType): number {
   return results.filter((result) => result.type === type).length;
-}
-
-function countForFilter(results: SearchResult[], filter: FilterType): number {
-  if (filter === "all") {
-    return results.length;
-  }
-  return countByType(results, filter);
-}
-
-function buildFilterChips(results: SearchResult[], selectedFilter: FilterType): string {
-  const order: FilterType[] = ["all", ...orderedCategoryFilters(results)];
-  return order
-    .map((filter) => {
-      const marker = filter === selectedFilter ? "●" : "○";
-      return `${marker} ${labelForFilter(filter).toUpperCase()} (${countForFilter(results, filter)})`;
-    })
-    .join(" · ");
-}
-
-function orderedCategoryFilters(results: SearchResult[]): ContentType[] {
-  const baseOrder: ContentType[] = ["film", "serie", "livre", "jeu"];
-  return [...baseOrder].sort((a, b) => {
-    const diff = countByType(results, b) - countByType(results, a);
-    if (diff !== 0) {
-      return diff;
-    }
-    return baseOrder.indexOf(a) - baseOrder.indexOf(b);
-  });
-}
-
-function nextFilter(current: FilterType, results: SearchResult[]): FilterType {
-  const order: FilterType[] = ["all", ...orderedCategoryFilters(results)];
-  const index = order.indexOf(current);
-  if (index < 0) {
-    return "all";
-  }
-  return order[(index + 1) % order.length];
-}
-
-function labelForFilter(filter: FilterType): string {
-  if (filter === "all") {
-    return "All";
-  }
-  return labelForType(filter);
 }
 
 function sortByRatingCountDesc(a: SearchResult, b: SearchResult): number {

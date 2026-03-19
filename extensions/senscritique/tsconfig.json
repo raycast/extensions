@@ -3,16 +3,12 @@
     "target": "ES2023",
     "module": "commonjs",
     "moduleResolution": "node",
-    "lib": [
-      "ES2023"
-    ],
+    "lib": ["ES2023"],
     "jsx": "react-jsx",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src"
-  ]
+  "include": ["src"]
 }
