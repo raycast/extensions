@@ -84,6 +84,13 @@
       "subtitle": "Open your Clockodo Report in the browser",
       "description": "Open your Clockodo Report in the browser",
       "mode": "no-view"
+    },
+    {
+      "name": "clear-caches",
+      "title": "Clear Caches",
+      "subtitle": "Clear all cached data",
+      "description": "Clear all cached data",
+      "mode": "no-view"
     }
   ],
   "platforms": [

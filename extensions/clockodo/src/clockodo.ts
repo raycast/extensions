@@ -73,3 +73,9 @@ export const getService = (serviceId: number) =>
 export const getMe = withCache(() => clockodo.getMe(), {
   maxAge: DEFAULT_CACHE_AGE,
 });
+
+const cachedEntities = [getProjects, getServices, getCustomers, getMe];
+
+export const clearAllCaches = () => {
+  cachedEntities.forEach((entity) => entity.clearCache());
+};
