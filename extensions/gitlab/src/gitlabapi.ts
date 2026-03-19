@@ -501,12 +501,12 @@ export class GitLab {
       });
       const s = response.status;
       logAPI(`status code: ${s}`);
+      if (s === 204 || s === 304) {
+        return;
+      }
       if (s >= 200 && s < 300) {
         const json = await response.json();
         return json;
-      } else if (s === 304) {
-        // Not Modified
-        // ignored
       } else if (s == 401) {
         throw Error("Unauthorized");
       } else if (s == 403) {
