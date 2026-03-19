@@ -1,6 +1,6 @@
 # SnapOCR Via Paddle Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-19
 
 - Layout-aware OCR powered by Baidu PaddleOCR via Baidu AIStudio
 - Stronger recognition for complex Chinese documents, handwriting, vertical text, tables, and formulas
