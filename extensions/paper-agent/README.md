@@ -70,6 +70,20 @@ When you use **Run Paper Pipeline** or **Install Daily Schedule**, the extension
 | **Open Paper Directory** | Open the configured paper directory in Finder (notes, `library/`, digests). |
 | **Open Config Directory** | Open the folder that contains your `config.yaml` (core repo root) in Finder. Also available as an action in **Run Paper Pipeline** (Core not found) and **Check Run Status** when **Config File Path** is set. |
 
+### Daily schedule: when does the LaunchAgent run?
+
+The daily job is a macOS LaunchAgent. It is **loaded** only in two cases:
+
+1. **User login** — When you log in to the Mac (e.g. after reboot or logout/login), launchd loads all jobs in `~/Library/LaunchAgents/`, including the Paper Agent daily job. If the plist has `RunAtLoad = true`, that triggers one run at load time (the "catch-up" run).
+2. **Running Install Daily Schedule** — The command runs `launchctl bootstrap`, which loads (or reloads) the job and triggers `RunAtLoad` once.
+
+**Opening Raycast or the extension does not load the LaunchAgent.** So opening the plugin, running **Check Run Status**, or browsing papers does not cause a catch-up run.
+
+- **04:00 run** — Fires only if the Mac is **awake** at 04:00. If the Mac is off or asleep, that run is skipped; the next run is the next calendar 04:00 (or a catch-up run when the job is loaded).
+- **Catch-up** — Runs only when the job is loaded (login or Install Daily Schedule). It does **not** run when you wake the Mac from sleep.
+
+**Agent root on Desktop / iCloud / external drive:** When the job runs, the agent root path (where `run_paper_agent.sh` lives) must be readable. Right after login, iCloud Drive (e.g. Desktop & Documents) or an external disk may not be mounted or ready yet, so the script can be temporarily unavailable. The wrapper **waits up to 2 minutes** (checking every 15 seconds) for the path to become readable before giving up and writing "agent-root-unavailable". So placing the repo on Desktop or an external drive is supported as long as the volume is available within that window (e.g. after login). If the path is still unavailable after 2 minutes (e.g. external drive not connected at 04:00), run manually or move the repo to a path that is always present (e.g. `~/paper-agent`).
+
 ---
 
 ## Core not found
@@ -115,7 +129,7 @@ npm run build  # Compile extension
 
 - **Run Paper Pipeline shows only “Run started in background”** — This is expected: manual runs are detached. Use **Check Run Status** and open run logs from there to inspect final success/failure.
 - **Last run failed / pipeline exit nonzero?** — In **Check Run Status**, use **Open Last Run Log** to see the error. A common cause is **arXiv 429** (rate limit): wait 15–30 minutes and run again; the pipeline also retries automatically. For other errors, see the core [Troubleshooting](https://github.com/galleonli/paper-agent#troubleshooting).
-- **Daily schedule not running** — Re-run **Install Daily Schedule** after changing Preferences that affect runtime config/secrets. Then use **Check Run Status** to confirm install state and latest run metadata.
+- **Daily schedule not running / today's 04:00 didn't run** — The 04:00 run only fires if the Mac is **awake** at 04:00. If the Mac was off or asleep, no run occurs. Catch-up runs only when the LaunchAgent is **loaded**: at **user login** (after reboot or logout/login) or when you run **Install Daily Schedule**. Opening Raycast or the extension does **not** load the agent, so it does not trigger a catch-up. If "Today's result" is still "Not run yet", run **Run Paper Pipeline** manually for today, or log out and back in / re-run **Install Daily Schedule** to trigger a catch-up. After changing Preferences that affect the pipeline, re-run **Install Daily Schedule** and use **Check Run Status** to confirm install state and latest run metadata. To verify whether launchd ever started the job today, check `~/Library/Logs/PaperAgent/launchd.stdout.log` and `launchd.stderr.log` for today's date.
 - **Launchd scope** — Daily schedule commands are macOS `launchd` automation only.
 
 ### Scholar Inbox via Raycast

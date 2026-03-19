@@ -144,7 +144,18 @@ set -u
 LAUNCHD_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$LAUNCHD_DIR/launch_env.sh"
 RUNNER="$AGENT_ROOT/scripts/run_paper_agent.sh"
-if [ ! -f "$RUNNER" ]; then
+# Wait for agent root to become available (e.g. iCloud Desktop / external drive after login). Retry every 15s for up to 2 minutes.
+WAIT_MAX=8
+WAIT_SEC=15
+n=0
+while [ $n -le $WAIT_MAX ]; do
+  [ $n -gt 0 ] && sleep $WAIT_SEC
+  if [ -f "$RUNNER" ] && [ -r "$RUNNER" ]; then
+    break
+  fi
+  n=$((n + 1))
+done
+if [ ! -f "$RUNNER" ] || [ ! -r "$RUNNER" ]; then
   STATUS_FILE="$STATE_DIR/last_run_status.json"
   mkdir -p "$STATE_DIR"
   NOW="$(date '+%Y-%m-%d %H:%M:%S')"
@@ -152,7 +163,18 @@ if [ ! -f "$RUNNER" ]; then
   printf '%s\\n' "{\\"mode\\":\\"daily-launchd\\",\\"date\\":\\"\${DATE}\\",\\"status\\":\\"skipped\\",\\"reason\\":\\"agent-root-unavailable\\",\\"exit_code\\":\\"0\\",\\"started_at\\":\\"\${NOW}\\",\\"finished_at\\":\\"\${NOW}\\",\\"log_path\\":\\"\\",\\"config_path\\":\\"\\",\\"agent_root\\":\\"\\"}" > "$STATUS_FILE"
   exit 0
 fi
-exec /bin/zsh "$RUNNER" --mode daily-launchd --run-hour "$RUN_HOUR" --agent-root "$AGENT_ROOT" --python "$PYTHON_BIN" --config "$CONFIG_PATH" --state-dir "$STATE_DIR" --log-dir "$LOG_DIR" --env-file "$ENV_FILE"
+# Copy runner to LaunchAgent dir and run the copy so launchd can execute it (avoids "can't open input file" when agent root is on Desktop/iCloud/external).
+RUNNER_COPY="$LAUNCHD_DIR/run_paper_agent_exec.sh"
+if ! cp "$RUNNER" "$RUNNER_COPY"; then
+  STATUS_FILE="$STATE_DIR/last_run_status.json"
+  mkdir -p "$STATE_DIR"
+  NOW="$(date '+%Y-%m-%d %H:%M:%S')"
+  DATE="$(date +%F)"
+  printf '%s\\n' "{\\"mode\\":\\"daily-launchd\\",\\"date\\":\\"\${DATE}\\",\\"status\\":\\"skipped\\",\\"reason\\":\\"agent-root-permission-denied\\",\\"exit_code\\":\\"0\\",\\"started_at\\":\\"\${NOW}\\",\\"finished_at\\":\\"\${NOW}\\",\\"log_path\\":\\"\\",\\"config_path\\":\\"\\",\\"agent_root\\":\\"\\"}" > "$STATUS_FILE"
+  exit 0
+fi
+chmod 755 "$RUNNER_COPY"
+exec /bin/zsh "$RUNNER_COPY" --mode daily-launchd --run-hour "$RUN_HOUR" --agent-root "$AGENT_ROOT" --python "$PYTHON_BIN" --config "$CONFIG_PATH" --state-dir "$STATE_DIR" --log-dir "$LOG_DIR" --env-file "$ENV_FILE"
 `;
     fs.writeFileSync(runDailyPath, runDailyScript, { encoding: "utf-8", mode: 0o755 });
 
