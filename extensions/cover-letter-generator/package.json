@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cover-letter-generator",
+  "title": "Cover Letter Generator",
+  "description": "This extension helps create cover letters for job applications instantly based on the job description from the selection using the Gemini API.",
+  "icon": "extension-icon.png",
+  "author": "sunny_george",
+  "categories": [
+    "Productivity",
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cover-letter-maker",
+      "title": "Create Cover Letter",
+      "description": "Generates a cover letter based on the job description in the selected text.",
+      "mode": "view"
+    },
+    {
+      "name": "cover-letter-history",
+      "title": "View Cover Letter History",
+      "description": "Provide a comprehensive historical timeline of the generated cover letters.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "@raycast/api": "^1.87.4",
+    "@raycast/utils": "^1.17.0",
+    "google-auth-library": "^9.15.0",
+    "node-fetch": "^3.3.2",
+    "node-html-markdown": "^1.3.0",
+    "pdfkit": "^0.15.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Gemini API Key",
+      "description": "Gemini API key.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "description": "Which model this command uses.",
+      "name": "model",
+      "title": "Model",
+      "type": "dropdown",
+      "required": false,
+      "default": "gemini-2.5-flash",
+      "data": [
+        {
+          "title": "Gemini 2.5 Flash-Lite",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Gemini 2.5 Flash",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Pro",
+          "value": "gemini-2.5-pro"
+        },
+        {
+          "title": "Gemini 3.0 Flash",
+          "value": "gemini-3-flash-preview"
+        },
+        {
+          "title": "Gemini 3.1 Pro",
+          "value": "gemini-3.1-pro-preview"
+        }
+      ]
+    }
+  ]
+}
