@@ -5,25 +5,25 @@ import { join } from "path";
 
 const execAsync = promisify(exec);
 
-export default function Command() {
-  async function handleAction(source: "mac" | "external" | "off") {
-    try {
-      const scriptPath = join(environment.assetsPath, "mirror.swift");
-      await execAsync(`swift "${scriptPath}" ${source}`);
-      await showToast({ title: "Display mirroring configured", style: Toast.Style.Success });
-      await closeMainWindow();
-    } catch (error: unknown) {
-      console.error(error);
-      const e = error as { stdout?: string; stderr?: string; toString: () => string };
-      const output = (e.stdout || "") + "\n" + (e.stderr || "");
-      if (output.includes("No external displays detected")) {
-        await showToast({ title: "No external display found", style: Toast.Style.Failure });
-      } else {
-        await showToast({ title: "Failed to configure mirroring", message: String(e), style: Toast.Style.Failure });
-      }
+async function handleAction(source: "mac" | "external" | "off") {
+  try {
+    const scriptPath = join(environment.assetsPath, "mirror.swift");
+    await execAsync(`swift "${scriptPath}" ${source}`);
+    await showToast({ title: "Display mirroring configured", style: Toast.Style.Success });
+    await closeMainWindow();
+  } catch (error: unknown) {
+    console.error(error);
+    const e = error as { stdout?: string; stderr?: string; toString: () => string };
+    const output = (e.stdout || "") + "\n" + (e.stderr || "");
+    if (output.includes("No external displays detected")) {
+      await showToast({ title: "No external display found", style: Toast.Style.Failure });
+    } else {
+      await showToast({ title: "Failed to configure mirroring", message: String(e), style: Toast.Style.Failure });
     }
   }
+}
 
+export default function Command() {
   return (
     <List>
       <List.Item

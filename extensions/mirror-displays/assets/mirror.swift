@@ -10,6 +10,12 @@ func getDisplays() -> [CGDirectDisplayID] {
     return Array(displays.prefix(Int(activeCount)))
 }
 
+let args = CommandLine.arguments
+if args.count < 2 {
+    print("Usage: swift mirror.swift [mac|external|off]")
+    exit(1)
+}
+
 let displays = getDisplays()
 
 func isBuiltIn(_ display: CGDirectDisplayID) -> Bool {
@@ -35,12 +41,6 @@ guard let mac = macDisplay else {
 if extDisplays.isEmpty {
     print("No external displays detected.")
     exit(2)
-}
-
-let args = CommandLine.arguments
-if args.count < 2 {
-    print("Usage: swift mirror.swift [mac|external|off]")
-    exit(1)
 }
 
 let mode = args[1]
