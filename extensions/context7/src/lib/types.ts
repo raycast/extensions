@@ -44,10 +44,6 @@ export interface ContextInfoSnippet {
 
 export type FavoriteLibrary = LibrarySummary;
 
-export interface SearchContextArguments {
-  libraryId: string;
-}
-
 export interface Context7ErrorPayload {
   error?: string;
   message?: string;

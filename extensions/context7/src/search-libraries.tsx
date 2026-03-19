@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 
 import { searchLibraries } from "./lib/context7";
 import { createSearchContextDeeplink } from "./lib/deeplink";
+import { isAbortError, toErrorMessage } from "./lib/error-utils";
 import { getFavoriteLibraries, toggleFavoriteLibrary } from "./lib/favorites";
 import { SearchDocumentationView } from "./search-documentation";
 import type { FavoriteLibrary, LibrarySummary } from "./lib/types";
@@ -173,7 +174,7 @@ function buildLibraryAccessories(library: LibrarySummary) {
     accessories.push({
       icon: Icon.CodeBlock,
       text: formatCompactNumber(library.totalSnippets),
-      tooltip: `${library.totalSnippets.toLocaleString()} snippets`,
+      tooltip: `${library.totalSnippets.toLocaleString("en-US")} snippets`,
     });
   }
 
@@ -197,7 +198,7 @@ function buildUpdatedAtAccessory(lastUpdateDate?: string): List.Item.Accessory |
 
   return {
     date: parsedDate,
-    tooltip: `Updated: ${new Intl.DateTimeFormat(undefined, {
+    tooltip: `Updated: ${new Intl.DateTimeFormat("en-US", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -223,7 +224,7 @@ function buildTrustScoreAccessory(trustScore?: number): List.Item.Accessory | un
 }
 
 function formatCompactNumber(value: number) {
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat("en-US", {
     notation: value >= 1000 ? "compact" : "standard",
     maximumFractionDigits: 1,
   }).format(value);
@@ -291,14 +292,6 @@ function getEmptyDescription(showingFavorites: boolean, errorMessage?: string) {
   }
 
   return "Try a more specific library name.";
-}
-
-function isAbortError(error: unknown) {
-  return error instanceof Error && error.name === "AbortError";
-}
-
-function toErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
 }
 
 async function showFailureToast(title: string, message: string) {

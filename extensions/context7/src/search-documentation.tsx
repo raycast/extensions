@@ -2,11 +2,12 @@ import { Action, ActionPanel, Icon, LaunchProps, List, showToast, Toast } from "
 import { useEffect, useState } from "react";
 
 import { searchContext } from "./lib/context7";
-import type { ContextSnippet, SearchContextArguments } from "./lib/types";
+import { isAbortError, toErrorMessage } from "./lib/error-utils";
+import type { ContextSnippet } from "./lib/types";
 
 const SEARCH_DEBOUNCE_MS = 250;
 
-type SearchContextProps = LaunchProps<{ arguments: SearchContextArguments }>;
+type SearchContextProps = LaunchProps<{ arguments: Arguments.SearchDocumentation }>;
 
 export default function SearchDocumentationCommand(props: SearchContextProps) {
   return <SearchDocumentationView libraryId={props.arguments.libraryId} />;
@@ -171,12 +172,4 @@ function formatLibraryLabel(libraryId: string) {
   const rawLabel = segments.at(-1) ?? libraryId;
 
   return rawLabel.replace(/[._-]+/g, " ").replace(/\b\w/g, (character) => character.toUpperCase());
-}
-
-function isAbortError(error: unknown) {
-  return error instanceof Error && error.name === "AbortError";
-}
-
-function toErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Unknown error";
 }
