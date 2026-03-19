@@ -1,27 +1,26 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, LocalStorage } from "@raycast/api";
-
-interface Preferences {
-  defaultScrubMinutes: string;
-  optionScrubMinutes: string;
-}
+import {
+  Action,
+  ActionPanel,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { DateTime } from "luxon";
 import { useEffect, useMemo, useState } from "react";
 import { searchCities } from "./citySearch";
+import { formatDelta, formatGmtOffset, getCurrentTimeISO } from "./time-utils";
 import { TimelineView } from "./timeline-view";
 import { DEFAULT_TIME_ZONES, getCityName, getTimezone } from "./timezones";
 
 const STORAGE_KEY = "selectedTimeZones";
 const BASE_CITY_KEY = "baseCityId";
 
-function getNextHour(): string {
-  const now = new Date();
-  now.setMinutes(0, 0, 0);
-  now.setHours(now.getHours() + 1);
-  return now.toISOString();
-}
-
 export default function Command() {
-  const [baseISO, setBaseISO] = useState<string>(() => getNextHour());
+  const [baseISO, setBaseISO] = useState<string>(() => getCurrentTimeISO());
   const [selectedZoneIds, setSelectedZoneIds] = useState<string[] | null>(null);
   const [baseCityId, setBaseCityId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,21 +33,33 @@ export default function Command() {
 
   useEffect(() => {
     const load = async () => {
-      const [stored, storedBase] = await Promise.all([
-        LocalStorage.getItem<string>(STORAGE_KEY),
-        LocalStorage.getItem<string>(BASE_CITY_KEY),
-      ]);
+      try {
+        const [stored, storedBase] = await Promise.all([
+          LocalStorage.getItem<string>(STORAGE_KEY),
+          LocalStorage.getItem<string>(BASE_CITY_KEY),
+        ]);
 
-      if (stored) {
-        const parsed = stored.split("\n").filter(Boolean);
-        setSelectedZoneIds(parsed.length > 0 ? parsed : DEFAULT_TIME_ZONES.map((zone) => zone.id));
-      } else {
+        if (stored) {
+          const parsed = stored.split("\n").filter(Boolean);
+          setSelectedZoneIds(parsed.length > 0 ? parsed : DEFAULT_TIME_ZONES.map((zone) => zone.id));
+        } else {
+          setSelectedZoneIds(DEFAULT_TIME_ZONES.map((zone) => zone.id));
+        }
+
+        setBaseCityId(storedBase ?? null);
+      } catch (error) {
         setSelectedZoneIds(DEFAULT_TIME_ZONES.map((zone) => zone.id));
+        setBaseCityId(null);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not load saved timezones",
+          message: error instanceof Error ? error.message : "Using defaults instead",
+        });
+      } finally {
+        setIsLoading(false);
       }
-
-      setBaseCityId(storedBase ?? null);
-      setIsLoading(false);
     };
+
     void load();
   }, []);
 
@@ -118,7 +129,7 @@ export default function Command() {
         key: zoneId,
         title: `${paddedTime}  ${cityName}`,
         subtitle: formatGmtOffset(dt.offset),
-        deltaText: formatDelta(diffMinutes),
+        deltaText: formatDelta(diffMinutes, "clock"),
         deltaColor: getTimeColor(dt.hour),
         dateText: dt.toFormat("ccc, LLL d"),
       };
@@ -218,7 +229,7 @@ export default function Command() {
                 <Action
                   title="Reset to Now"
                   icon={Icon.Clock}
-                  onAction={() => setBaseISO(getNextHour())}
+                  onAction={() => setBaseISO(getCurrentTimeISO())}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
                 {!baseRow.isSystemTz && (
@@ -288,7 +299,7 @@ export default function Command() {
                     <Action
                       title="Reset to Now"
                       icon={Icon.Clock}
-                      onAction={() => setBaseISO(getNextHour())}
+                      onAction={() => setBaseISO(getCurrentTimeISO())}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
                     />
                     <Action
@@ -339,29 +350,6 @@ export default function Command() {
       )}
     </List>
   );
-}
-
-function formatGmtOffset(offsetMinutes: number): string {
-  const sign = offsetMinutes >= 0 ? "+" : "-";
-  const abs = Math.abs(offsetMinutes);
-  const hours = Math.floor(abs / 60);
-  const minutes = abs % 60;
-  if (minutes === 0) {
-    return `GMT${sign}${hours}`;
-  }
-  return `GMT${sign}${hours}:${String(minutes).padStart(2, "0")}`;
-}
-
-function formatDelta(diffMinutes: number): string {
-  if (diffMinutes === 0) return "same";
-  const sign = diffMinutes > 0 ? "+" : "-";
-  const abs = Math.abs(diffMinutes);
-  const hours = Math.floor(abs / 60);
-  const minutes = abs % 60;
-  if (minutes === 0) {
-    return `${sign}${hours} hr${hours !== 1 ? "s" : ""}`;
-  }
-  return `${sign}${hours}:${String(minutes).padStart(2, "0")}`;
 }
 
 function padTime(time: string): string {

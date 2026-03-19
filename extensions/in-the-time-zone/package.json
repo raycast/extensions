@@ -1,10 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "in-the-time-zone",
-  "title": "In The (Time) Zone",
+  "title": "In the (Time) Zone",
   "description": "Visualize and scrub time across multiple time zones",
   "icon": "icon.png",
   "author": "i_idz",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -12,7 +15,7 @@
   "commands": [
     {
       "name": "in-the-time-zone",
-      "title": "In The (Time) Zone",
+      "title": "In the (Time) Zone",
       "description": "Scrub time across time zones",
       "mode": "view",
       "src": "src/in-the-time-zone.tsx"
@@ -26,23 +29,23 @@
       "description": "Arrow keys (← →) scrub this many minutes.",
       "data": [
         {
-          "title": "5 minutes",
+          "title": "5 Minutes",
           "value": "5"
         },
         {
-          "title": "10 minutes",
+          "title": "10 Minutes",
           "value": "10"
         },
         {
-          "title": "15 minutes",
+          "title": "15 Minutes",
           "value": "15"
         },
         {
-          "title": "30 minutes",
+          "title": "30 Minutes",
           "value": "30"
         },
         {
-          "title": "60 minutes",
+          "title": "60 Minutes",
           "value": "60"
         }
       ],
@@ -56,23 +59,23 @@
       "description": "Option+Arrow keys (⌥← ⌥→) scrub this many minutes.",
       "data": [
         {
-          "title": "5 minutes",
+          "title": "5 Minutes",
           "value": "5"
         },
         {
-          "title": "10 minutes",
+          "title": "10 Minutes",
           "value": "10"
         },
         {
-          "title": "15 minutes",
+          "title": "15 Minutes",
           "value": "15"
         },
         {
-          "title": "30 minutes",
+          "title": "30 Minutes",
           "value": "30"
         },
         {
-          "title": "60 minutes",
+          "title": "60 Minutes",
           "value": "60"
         }
       ],
@@ -81,17 +84,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "latest",
+    "@raycast/api": "1.104.10",
     "city-timezones": "^1.3.3",
     "luxon": "^3.0.0",
     "suncalc": "^1.9.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/luxon": "^3.7.1",
     "@types/node": "18.18.4",
     "@types/suncalc": "^1.8.3",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.4",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

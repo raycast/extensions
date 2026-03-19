@@ -4,14 +4,8 @@ import { useMemo } from "react";
 import { lookupCity } from "./citySearch";
 import { generateCompactTimelineMarkdown } from "./timeline-renderer";
 import { getSunTimes } from "./sun-times";
+import { getCurrentTimeISO } from "./time-utils";
 import { getCityName, getTimezone } from "./timezones";
-
-function getNextHour(): string {
-  const now = new Date();
-  now.setMinutes(0, 0, 0);
-  now.setHours(now.getHours() + 1);
-  return now.toISOString();
-}
 
 export interface TimelineViewProps {
   baseISO: string;
@@ -89,7 +83,6 @@ export function TimelineView(props: TimelineViewProps) {
             <Detail.Metadata.TagList.Item text="😴 12-7" color={Color.Red} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
-          {/* <Detail.Metadata.Label title="Cities" text="Sunrise → Sunset" /> */}
           {citySunTimes.map((city) => (
             <Detail.Metadata.Label
               key={city.cityName}
@@ -115,7 +108,7 @@ export function TimelineView(props: TimelineViewProps) {
           <Action
             title="Reset to Now"
             icon={Icon.Clock}
-            onAction={() => onSetBaseISO(getNextHour())}
+            onAction={() => onSetBaseISO(getCurrentTimeISO())}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
           />
           <ActionPanel.Section title="Scrub Time">

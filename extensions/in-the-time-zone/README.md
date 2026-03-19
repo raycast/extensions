@@ -14,16 +14,16 @@ Visualize and scrub time across multiple time zones. Perfect for coordinating me
 
 1. Open "In The (Time) Zone" from Raycast
 2. Use `Cmd+E` to add/remove cities
-3. Use `←` / `→` to shift time by 1 hour
-4. Use `Option+←` / `Option+→` to shift by 30 minutes
+3. Use `←` / `→` to shift time by your configured Arrow Key Scrub Minutes
+4. Use `Option+←` / `Option+→` to shift by your configured Option+Arrow Key Scrub Minutes
 5. Use `Cmd+N` to reset to current time
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `←` / `→` | Shift time ±1 hour |
-| `Option+←` / `Option+→` | Shift time ±30 minutes |
-| `Cmd+E` | Edit cities |
-| `Cmd+N` | Reset to now |
-| `Cmd+L` | Timeline view |
+| Shortcut                | Action                                                  |
+| ----------------------- | ------------------------------------------------------- |
+| `←` / `→`               | Shift time by configured Arrow Key Scrub Minutes        |
+| `Option+←` / `Option+→` | Shift time by configured Option+Arrow Key Scrub Minutes |
+| `Cmd+E`                 | Edit cities                                             |
+| `Cmd+N`                 | Reset to now                                            |
+| `Cmd+L`                 | Timeline view                                           |

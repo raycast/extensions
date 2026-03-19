@@ -16,17 +16,6 @@ export function getTimezone(id: string): string {
   return parseCityId(id).timezone;
 }
 
-export function getTimeZoneLabel(id: string): string {
-  const city = lookupCity(id);
-  if (city) {
-    return city.province && city.province !== city.city
-      ? `${city.city}, ${city.province}, ${city.country}`
-      : `${city.city}, ${city.country}`;
-  }
-  // Fallback: use the city name from the ID
-  return parseCityId(id).cityName;
-}
-
 export function getCityName(id: string): string {
   const city = lookupCity(id);
   if (city) {

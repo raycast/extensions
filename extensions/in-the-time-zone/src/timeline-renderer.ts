@@ -1,18 +1,11 @@
 import { DateTime } from "luxon";
+import { formatDelta, formatGmtOffset } from "./time-utils";
 import { getCityName, getTimezone } from "./timezones";
 
 export interface TimelineConfig {
   baseISO: string;
   baseCityId: string | null;
   selectedZoneIds: string[];
-}
-
-interface TimelineRow {
-  cityName: string;
-  localTime: DateTime;
-  blocks: string;
-  timeStr: string;
-  dayDiff: string;
 }
 
 type HourType = "work" | "sleep" | "marginal";
@@ -34,89 +27,15 @@ function getBlockChar(hour: number): string {
   return BLOCK_CHARS[getHourType(hour)];
 }
 
-function generateHourBlocks(startHour: number): string {
-  // Generate 12 blocks representing 2-hour windows starting from the given hour
-  let blocks = "";
-  for (let i = 0; i < 12; i++) {
-    const hour = (startHour + i * 2) % 24;
-    blocks += getBlockChar(hour);
-  }
-  return blocks;
-}
-
 function getDayDiff(localTime: DateTime, baseTime: DateTime): string {
-  // Compare calendar dates in their respective timezones
-  // Using ordinal (day-of-year) ensures we compare calendar days, not absolute timestamps
-  const localDays = localTime.year * 365 + localTime.ordinal;
-  const baseDays = baseTime.year * 365 + baseTime.ordinal;
-  const diff = localDays - baseDays;
+  // Compare date-only values so leap years are handled correctly.
+  const localDay = DateTime.utc(localTime.year, localTime.month, localTime.day).startOf("day").toMillis();
+  const baseDay = DateTime.utc(baseTime.year, baseTime.month, baseTime.day).startOf("day").toMillis();
+  const diff = Math.round((localDay - baseDay) / (24 * 60 * 60 * 1000));
 
   if (diff === 0) return "";
   if (diff > 0) return ` +${diff}`;
   return ` ${diff}`;
-}
-
-export function generateTimelineMarkdown(config: TimelineConfig): string {
-  const { baseISO, baseCityId, selectedZoneIds } = config;
-
-  const baseZoneId = baseCityId ? getTimezone(baseCityId) : Intl.DateTimeFormat().resolvedOptions().timeZone;
-  const baseTime = DateTime.fromISO(baseISO).setZone(baseZoneId);
-
-  // Build all timezone rows including the base
-  const allZoneIds = baseCityId ? [baseCityId, ...selectedZoneIds.filter((id) => id !== baseCityId)] : selectedZoneIds;
-
-  const rows: TimelineRow[] = allZoneIds.map((zoneId) => {
-    const tz = getTimezone(zoneId);
-    const localTime = DateTime.fromISO(baseISO).setZone(tz);
-    const cityName = getCityName(zoneId);
-
-    // Calculate which hour starts the day for this timezone
-    // We show 24 hours starting from midnight (hour 0) of that timezone
-    const startHour = 0;
-
-    return {
-      cityName,
-      localTime,
-      blocks: generateHourBlocks(startHour),
-      timeStr: localTime.toFormat("h:mm a"),
-      dayDiff: getDayDiff(localTime, baseTime),
-    };
-  });
-
-  // Find max city name length for alignment
-  const maxCityLen = Math.max(...rows.map((r) => r.cityName.length), 6);
-
-  // Build the markdown
-  let md = "# Timeline\n\n";
-  md += "```\n";
-
-  // Header row with hour labels
-  const header = " ".repeat(maxCityLen + 2) + "00  02  04  06  08  10  12  14  16  18  20  22";
-  md += header + "\n";
-
-  // Separator row
-  const separator = " ".repeat(maxCityLen + 2) + "|   |   |   |   |   |   |   |   |   |   |   |";
-  md += separator + "\n";
-
-  // Timezone rows
-  for (const row of rows) {
-    const cityPadded = row.cityName.padEnd(maxCityLen);
-    const timeWithDay = row.timeStr + (row.dayDiff ? row.dayDiff : "");
-    md += `${cityPadded}  ${row.blocks}  ${timeWithDay}\n`;
-  }
-
-  // Current time marker row - find position based on base time hour
-  const currentHour = baseTime.hour;
-  const markerPosition = Math.floor(currentHour / 2); // Which 2-hour block
-  const markerSpaces = maxCityLen + 2 + markerPosition * 2;
-  md += " ".repeat(markerSpaces) + "▼\n";
-
-  md += "```\n";
-
-  // Add helpful text below
-  md += "\n*Use ← → to scrub time, Cmd+L to switch views*";
-
-  return md;
 }
 
 export function generateCompactTimelineMarkdown(config: TimelineConfig): string {
@@ -139,6 +58,7 @@ export function generateCompactTimelineMarkdown(config: TimelineConfig): string 
     const paddedTime = rawTime.padStart(8, " ");
 
     return {
+      zoneId,
       cityName,
       localTime,
       offsetMinutes: offsetFromBase,
@@ -172,8 +92,8 @@ export function generateCompactTimelineMarkdown(config: TimelineConfig): string 
     const isLast = rowIndex === rows.length - 1;
 
     // Build label: CityName [padded] TimeLabel [padded] GMT Delta
-    const isBase = row.offsetMinutes === 0;
-    const deltaStr = isBase ? "(base)" : formatDelta(row.offsetMinutes);
+    const isBase = !!baseCityId && row.zoneId === baseCityId;
+    const deltaStr = isBase ? "(base)" : formatDelta(row.offsetMinutes, "text");
     const gmtStr = formatGmtOffset(row.localTime.offset);
     const rightInfo = `${gmtStr}  ${deltaStr}`;
 
@@ -219,27 +139,4 @@ export function generateCompactTimelineMarkdown(config: TimelineConfig): string 
   md += "```";
 
   return md;
-}
-
-function formatGmtOffset(offsetMinutes: number): string {
-  const sign = offsetMinutes >= 0 ? "+" : "-";
-  const abs = Math.abs(offsetMinutes);
-  const hours = Math.floor(abs / 60);
-  const minutes = abs % 60;
-  if (minutes === 0) {
-    return `GMT${sign}${hours}`;
-  }
-  return `GMT${sign}${hours}:${String(minutes).padStart(2, "0")}`;
-}
-
-function formatDelta(diffMinutes: number): string {
-  if (diffMinutes === 0) return "same";
-  const sign = diffMinutes > 0 ? "+" : "-";
-  const abs = Math.abs(diffMinutes);
-  const hours = Math.floor(abs / 60);
-  const minutes = abs % 60;
-  if (minutes === 0) {
-    return `${sign}${hours} hr${hours !== 1 ? "s" : ""}`;
-  }
-  return `${sign}${hours}h ${minutes}m`;
 }
