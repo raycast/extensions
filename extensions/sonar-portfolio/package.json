@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sonar-portfolio",
+  "title": "Sonar Portfolio",
+  "description": "View your investment portfolio, search instruments, and get market signals",
+  "icon": "command-icon.png",
+  "author": "MatiasVoldbyDrejer",
+  "categories": ["Finance"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "portfolio",
+      "title": "Portfolio",
+      "subtitle": "Sonar",
+      "description": "Portfolio summary with key metrics, holdings, and allocation",
+      "mode": "view"
+    },
+    {
+      "name": "pulse",
+      "title": "Portfolio Pulse",
+      "subtitle": "Sonar",
+      "description": "Get AI-generated market signals for your holdings",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "type": "password",
+      "required": true,
+      "description": "Generate in Sonar → Settings → Connections → Raycast"
+    },
+    {
+      "name": "baseUrl",
+      "title": "Sonar URL",
+      "type": "textfield",
+      "required": true,
+      "default": "https://sonar-mvd.vercel.app",
+      "description": "Base URL of your Sonar instance"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.0",
+    "@raycast/utils": "^1.19.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
