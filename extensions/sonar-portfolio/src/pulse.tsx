@@ -2,31 +2,17 @@ import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api"
 import { useState, useEffect, useCallback } from "react";
 import { api } from "./api";
 import { signalIcon } from "./utils";
-interface PulseItem {
-  type: string;
-  headline: string;
-  instrument?: string;
-  isin?: string;
-  explanation: string;
-  suggestedAction?: string;
-}
-
-interface PulseResult {
-  status: "ok" | "empty" | "expired";
-  summary?: string;
-  items?: PulseItem[];
-  createdAt?: string;
-}
+import type { PulseData } from "./types";
 
 export default function Pulse() {
-  const [data, setData] = useState<PulseResult | null>(null);
+  const [data, setData] = useState<PulseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
   const fetchPulse = useCallback(async () => {
     setIsLoading(true);
     try {
-      const result = await api.pulse() as PulseResult;
+      const result = await api.pulse();
       setData(result);
     } catch (e) {
       showToast({ style: Toast.Style.Failure, title: "Failed to load pulse", message: String(e) });
@@ -43,7 +29,7 @@ export default function Pulse() {
     setGenerating(true);
     try {
       showToast({ style: Toast.Style.Animated, title: "Generating pulse..." });
-      const result = await api.generatePulse() as PulseResult;
+      const result = await api.generatePulse();
       setData(result);
       showToast({ style: Toast.Style.Success, title: "Pulse generated" });
     } catch (e) {
@@ -80,9 +66,9 @@ export default function Pulse() {
 
   return (
     <List isLoading={isLoading || generating} isShowingDetail>
-      {items.map((item, i) => (
+      {items.map((item) => (
         <List.Item
-          key={i}
+          key={`${item.headline}-${item.isin ?? item.instrument ?? ""}`}
           icon={signalIcon(item.type)}
           title={item.headline}
           accessories={[{ tag: item.type }]}

@@ -3,12 +3,7 @@ import type { Position, Account, DeepDiveData, PulseData, SearchResult, Quote } 
 
 const cache = new Cache();
 
-interface Preferences {
-  apiToken: string;
-  baseUrl: string;
-}
-
-function getPrefs(): Preferences {
+function getPrefs() {
   return getPreferenceValues<Preferences>();
 }
 

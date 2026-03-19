@@ -125,7 +125,7 @@ export default function Portfolio() {
     });
   }
 
-  const baseUrl = getPreferenceValues<{ baseUrl: string }>().baseUrl.replace(/\/$/, "");
+  const baseUrl = getPreferenceValues<Preferences>().baseUrl.replace(/\/$/, "");
 
   return (
     <List isLoading={isLoading} isShowingDetail>
