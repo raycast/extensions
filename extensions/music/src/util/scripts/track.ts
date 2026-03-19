@@ -16,12 +16,11 @@ export const getAll = () =>
   runScript(`
     set output to ""
     tell application "Music"
-      set allTracks to every track of (library playlist 1)
-      set allIds to id of allTracks
-      set allNames to name of allTracks
-      set allAlbums to album of allTracks
-      set allArtists to artist of allTracks
-      set allDurations to duration of allTracks
+      set allIds to id of every track of (library playlist 1)
+      set allNames to name of every track of (library playlist 1)
+      set allAlbums to album of every track of (library playlist 1)
+      set allArtists to artist of every track of (library playlist 1)
+      set allDurations to duration of every track of (library playlist 1)
       set trackCount to count of allIds
       repeat with i from 1 to trackCount
         set output to output & "id=" & (item i of allIds) & "$BREAKname=" & (item i of allNames) & "$BREAKartist=" & (item i of allArtists) & "$BREAKalbum=" & (item i of allAlbums) & "$BREAKduration=" & (item i of allDurations) & "\\n"

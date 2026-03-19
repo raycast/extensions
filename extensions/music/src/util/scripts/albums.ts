@@ -34,14 +34,18 @@ function groupTracksByAlbum(raw: string): ReadonlyArray<Album> {
 export const getAll: TE.TaskEither<Error, ReadonlyArray<Album>> = pipe(
   runScript(`
 	set output to ""
+	set seenAlbums to {}
 	tell application "Music"
-		set allTracks to every track of playlist 1
-		set allIds to id of allTracks
-		set allAlbums to album of allTracks
-		set allArtists to artist of allTracks
-		set trackCount to count of allIds
+		set allAlbums to album of every track of (library playlist 1)
+		set allIds to id of every track of (library playlist 1)
+		set allArtists to artist of every track of (library playlist 1)
+		set trackCount to count of allAlbums
 		repeat with i from 1 to trackCount
-			set output to output & "id=" & (item i of allIds) & "$BREAKname=" & (item i of allAlbums) & "$BREAKartist=" & (item i of allArtists) & "\\n"
+			set aName to item i of allAlbums
+			if seenAlbums does not contain aName then
+				set end of seenAlbums to aName
+				set output to output & "id=" & (item i of allIds) & "$BREAKname=" & aName & "$BREAKartist=" & (item i of allArtists) & "\\n"
+			end if
 		end repeat
 	end tell
 	return output

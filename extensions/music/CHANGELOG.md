@@ -2,8 +2,8 @@
 
 ## [Performance Optimization] - {PR_MERGE_DATE}
 
-- Faster library browsing — fetching all tracks and albums from your library is significantly faster for large collections.
-- "Play Library Album" now opens instantly and only searches when you type, instead of loading your entire library upfront.
+- "Play Library Album" now opens instantly and searches on demand, instead of loading your entire library upfront — fixing out-of-memory crashes for large libraries.
+- "Play Library Track" search is faster thanks to optimized data fetching.
 - Playlists are now cached — reopening "Start Playlist" or "Add to Playlist" is instant after the first load.
 - Switching the playlist filter dropdown (All/User/Apple Music) no longer re-fetches data.
 - Favoriting a track now confirms within 3 seconds instead of up to 10 seconds.
