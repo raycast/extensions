@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.
+
 ## [Fix] - 2026-03-17
 
 - Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.

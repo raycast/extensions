@@ -66,9 +66,9 @@ export default async function Command() {
     // every 15 seconds (this command's interval) keeps the display awake
     // without requiring elevated privileges or additional processes.
     const child = spawn("/usr/bin/caffeinate", ["-u", "-t", "1"], {
-      detached: true,
       stdio: "ignore",
     });
+    child.on("exit", () => {});
     child.unref();
   }
 
