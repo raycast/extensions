@@ -143,3 +143,48 @@ export async function getAllPinnedVolumes(type: IOType): Promise<Map<string, num
   }
   return map;
 }
+
+// --- One-time migration from old priority-ordering system ---
+
+const ORPHANED_KEYS = [
+  "autoSwitchInputEnabled",
+  "autoSwitchOutputEnabled",
+  "autoSwitchLastRunInput",
+  "autoSwitchLastRunOutput",
+  "deviceOrderInput",
+  "deviceOrderOutput",
+];
+const MIGRATION_SENTINEL = "_migrated_v3";
+
+export async function migrateFromPriorityOrder(
+  getInputDevicesFn: () => Promise<{ uid: string; name: string }[]>,
+  getOutputDevicesFn: () => Promise<{ uid: string; name: string }[]>,
+) {
+  const sentinel = await LocalStorage.getItem<string>(MIGRATION_SENTINEL);
+  if (sentinel) return;
+
+  // Migrate: pick first device from old priority list as new default
+  for (const ioType of ["input", "output"] as const) {
+    const existingDefault = await getDefaultDeviceUid(ioType);
+    if (existingDefault) continue; // User already set a default, don't overwrite
+
+    const orderKey = ioType === "input" ? "deviceOrderInput" : "deviceOrderOutput";
+    const orderRaw = await LocalStorage.getItem<string>(orderKey);
+    const order = parseStoredList(orderRaw);
+    if (order.length === 0) continue;
+
+    const firstUid = order[0];
+    const getDevices = ioType === "input" ? getInputDevicesFn : getOutputDevicesFn;
+    const devices = await getDevices();
+    const device = devices.find((d) => d.uid === firstUid);
+    if (device) {
+      await setDefaultDevicePreference(ioType, device.uid, device.name);
+    }
+  }
+
+  // Clean up all orphaned keys
+  for (const key of ORPHANED_KEYS) {
+    await LocalStorage.removeItem(key);
+  }
+  await LocalStorage.setItem(MIGRATION_SENTINEL, "true");
+}

@@ -12,7 +12,12 @@ import {
   setInputDeviceVolume,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
-import { getDefaultDeviceUid, getDefaultDeviceName, getAllPinnedVolumes } from "./device-preferences";
+import {
+  getDefaultDeviceUid,
+  getDefaultDeviceName,
+  getAllPinnedVolumes,
+  migrateFromPriorityOrder,
+} from "./device-preferences";
 
 async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
   const defaultUid = await getDefaultDeviceUid(type);
@@ -69,10 +74,11 @@ async function buildSubtitle(type: IOType): Promise<string> {
   const details: string[] = [];
   if (defaultName) details.push(`Default: ${defaultName}`);
   if (pinnedCount > 0) details.push(`${pinnedCount} pinned`);
-  return details.length > 0 ? details.join(" | ") : "No rules set";
+  return details.length > 0 ? details.join(" | ") : "No default device or pinned volumes";
 }
 
 export async function runAutoSwitch(type: IOType) {
+  await migrateFromPriorityOrder(getInputDevices, getOutputDevices);
   await updateCommandMetadata({ subtitle: await buildSubtitle(type) });
 
   try {
@@ -81,5 +87,3 @@ export async function runAutoSwitch(type: IOType) {
     // Silently ignore errors in background
   }
 }
-
-export { runEnforcement as applyAutoSwitchIfEnabled };

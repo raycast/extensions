@@ -62,7 +62,7 @@
       "name": "auto-switch-input",
       "title": "Enforce Input Device",
       "subtitle": "Audio Device",
-      "description": "Automatically enforces your default input device and pinned volumes every 10s.",
+      "description": "Keeps your default input device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
       "mode": "no-view",
       "interval": "10s"
     },
@@ -70,7 +70,7 @@
       "name": "auto-switch-output",
       "title": "Enforce Output Device",
       "subtitle": "Audio Device",
-      "description": "Automatically enforces your default output device and pinned volumes every 10s.",
+      "description": "Keeps your default output device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
       "mode": "no-view",
       "interval": "10s"
     },

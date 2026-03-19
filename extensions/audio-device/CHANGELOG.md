@@ -2,28 +2,24 @@
 
 ## [Major Update] - {PR_MERGE_DATE}
 
-### Merged Sound Control features
-- Volume control: see current volume level for each device in the list
-- Toggle Mute action (Cmd+M) directly from the device list
-- New standalone commands: Set Output Volume, Set Input Volume
-- Full input volume and mute support via integrated sound-control binary
+### Stop macOS from changing your audio settings
+- **Default device** — press Cmd+Shift+D on any device. If macOS switches away after sleep or Bluetooth reconnect, the extension switches back within 10 seconds.
+- **Pinned volumes** — press Cmd+Shift+V on any device. If macOS resets the volume, the extension restores it. Changes under 2% are ignored.
+- Enforcement runs automatically in the background every 10 seconds. No manual toggle.
 
-### Pinned Volume Levels
-- Pin any device's volume to prevent macOS from resetting it (Cmd+Shift+V)
-- "Pinned: X%" tag shown on devices with pinned volumes
-- Background enforcer automatically resets volume if macOS changes it
+### Volume control (merged from Sound Control extension)
+- See current volume level for each device in the list
+- Mute/unmute any device with Cmd+M
+- Set Output Volume / Set Input Volume commands for precise control (0-100)
 
-### Default device
-- Default (sticky) device: set any device as your default (Cmd+Shift+D)
-- Default device is pinned to the top of the list
-- Always-on background enforcement every 10s -- no manual toggle needed
-- If default device is connected, always use it
-- Removed separate "Toggle Auto Switch" and "Customize Order" commands
+### Breaking change: priority ordering removed
+The old system where you ranked multiple devices as fallbacks is gone. Replaced by a single default device per direction.
+
+On first run, your top-priority device is automatically migrated to the new default. If that's not the device you want, press Cmd+Shift+D on your preferred device.
 
 ### New icons
-- All device icons replaced with clean 512x512 monoline icons
-- New headphones icon for wired headphones
-- Icons work properly with Raycast's tint system
+- Clean 512x512 monoline icons for all device types
+- Works properly with Raycast's tint system
 
 ## [Update] - 2026-02-17
 - Improve binary download for windows (downloads and checks if binary exists at runtime)
