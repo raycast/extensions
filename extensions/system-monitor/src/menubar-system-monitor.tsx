@@ -145,18 +145,36 @@ export default function Command() {
 
   const { data: temperatureData, revalidate: revalidateTemperature } = usePromise(getTemperatureData);
 
+  // Guard against overlapping revalidation cycles. Without this, slow commands
+  // (e.g. system_profiler ~2s) cause callbacks to pile up faster than Node's
+  // event loop can call waitpid(), leaking zombie processes (~5k/day).
+  // See: https://github.com/raycast/extensions/issues/26420
+  const isRevalidating = useRef(false);
   useInterval(() => {
-    revalidateSystem();
-    revalidateCpu();
-    revalidateMemory();
-    revalidateNetwork();
-    revalidateBattery();
+    if (isRevalidating.current) return;
+    isRevalidating.current = true;
+    Promise.all([
+      revalidateSystem(),
+      revalidateCpu(),
+      revalidateMemory(),
+      revalidateNetwork(),
+      revalidateBattery(),
+    ]).finally(() => {
+      isRevalidating.current = false;
+    });
   }, 1000);
 
   // Temperature reads from an external binary (IOKit HID sensors) which is
   // slower than the in-process stats above. Polling it on its own 3s interval
   // prevents revalidation calls from stacking up and producing stale readings.
-  useInterval(revalidateTemperature, 3000);
+  const isRevalidatingTemp = useRef(false);
+  useInterval(() => {
+    if (isRevalidatingTemp.current) return;
+    isRevalidatingTemp.current = true;
+    Promise.resolve(revalidateTemperature()).finally(() => {
+      isRevalidatingTemp.current = false;
+    });
+  }, 3000);
 
   const getPinnedTitle = (): string | undefined => {
     switch (pinnedStat) {
