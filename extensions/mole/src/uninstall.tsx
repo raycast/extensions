@@ -1,5 +1,5 @@
 import { List, Icon, ActionPanel, Action, Alert, showToast, Toast, confirmAlert, trash } from "@raycast/api";
-import { readdirSync, statSync, existsSync, readFileSync, writeFileSync, unlinkSync } from "fs";
+import { readdirSync, statSync, existsSync, readFileSync } from "fs";
 import { join, basename } from "path";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
@@ -130,26 +130,6 @@ const SKIP_DEEP_SEARCH = new Set([
   "trial",
   "weather",
 ]);
-
-function trashWithAdmin(paths: string[]): Promise<void> {
-  const trashDir = join(HOME, ".Trash");
-  const scriptPath = join(process.env.TMPDIR || "/tmp", `mole-trash-${Date.now()}.sh`);
-  const lines = paths.map((p) => `mv '${p.replace(/'/g, "'\\''")}' '${trashDir}/'`);
-  writeFileSync(scriptPath, lines.join("\n"), { mode: 0o755 });
-
-  const appleScript = `do shell script "${scriptPath}" with administrator privileges`;
-  return new Promise((resolve, reject) => {
-    execFile("/usr/bin/osascript", ["-e", appleScript], (err) => {
-      try {
-        unlinkSync(scriptPath);
-      } catch {
-        /* ignore */
-      }
-      if (err) return reject(err);
-      resolve();
-    });
-  });
-}
 
 function normalize(str: string): string {
   return str.replace(/[^a-z0-9]/gi, "").toLowerCase();
@@ -493,19 +473,20 @@ function UninstallView() {
           }
         }
 
-        if (failedPaths.length > 0) {
-          progressToast.title = "Requesting admin privileges...";
-          await trashWithAdmin(failedPaths);
-        }
-
+        const removedCount = allPaths.length - failedPaths.length;
         setRemovedPaths((prev) => new Set([...prev, app.path]));
-        const residualsRemoved = allPaths.length - 1;
         progressToast.style = Toast.Style.Success;
         progressToast.title = `${app.name} moved to Trash`;
-        progressToast.message =
-          residualsRemoved > 0
-            ? `App + ${residualsRemoved} residual item${residualsRemoved > 1 ? "s" : ""} moved to Trash`
-            : "No residual files removed";
+
+        if (failedPaths.length > 0) {
+          progressToast.message = `${removedCount} item${removedCount > 1 ? "s" : ""} removed, ${failedPaths.length} skipped (permission denied)`;
+        } else {
+          const residualsRemoved = removedCount - 1;
+          progressToast.message =
+            residualsRemoved > 0
+              ? `App + ${residualsRemoved} residual item${residualsRemoved > 1 ? "s" : ""} moved to Trash`
+              : undefined;
+        }
       } catch (err) {
         await showFailureToast(err, { title: "Uninstall failed" });
       }
