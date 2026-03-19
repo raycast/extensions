@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "toggle-karabiner-complex-modification",
+  "title": "Toggle Karabiner Elements Complex Modification",
+  "description": "Toggle Karabiner-Elements complex modifications",
+  "icon": "karabiner-elements-logo.png",
+  "author": "julian67",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-vim-ctrl-hjkl-keys",
+      "title": "Toggle Vim Ctrl + HJKL Keys",
+      "description": "Toggles Vim Ctrl+hjkl navigation keys in Karabiner (enabled <==> disabled)",
+      "mode": "no-view",
+      "keywords": [
+        "karabiner",
+        "keyboard",
+        "vim",
+        "toggle",
+        "hjkl"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ruleTitle",
+      "type": "textfield",
+      "required": true,
+      "title": "Rule Title",
+      "description": "Exact title of the complex modification rule to toggle",
+      "default": "Left ctrl + hjkl to arrow keys Vim",
+      "placeholder": "Enter rule description from karabiner.json"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
