@@ -57,17 +57,12 @@ async function fetchArtworksBatch(ids: number[]): Promise<Artwork[]> {
   return results
     .filter(
       (r): r is PromiseFulfilledResult<Artwork> =>
-        r.status === "fulfilled" &&
-        r.value !== null &&
-        !!r.value.primaryImageSmall,
+        r.status === "fulfilled" && r.value !== null && !!r.value.primaryImageSmall,
     )
     .map((r) => r.value);
 }
 
-export async function searchArtworks(
-  query: string,
-  limit = 20,
-): Promise<Artwork[]> {
+export async function searchArtworks(query: string, limit = 20): Promise<Artwork[]> {
   const cacheKey = `search:${query}:${limit}`;
   const cached = await getCached(cacheKey);
   if (cached) return cached;

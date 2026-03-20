@@ -1,25 +1,8 @@
-import {
-  ActionPanel,
-  Action,
-  Form,
-  showToast,
-  Toast,
-  Icon,
-  LocalStorage,
-} from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
-import {
-  STORAGE_KEY,
-  DEFAULTS,
-  type AutoWallpaperSettings,
-} from "./auto-settings";
+import { STORAGE_KEY, DEFAULTS, type AutoWallpaperSettings } from "./auto-settings";
 import { fetchFeatured, getImageUrl } from "./api";
-import {
-  imageToAscii,
-  generateWallpaper,
-  computeFillRows,
-  getScreenResolution,
-} from "./ascii";
+import { imageToAscii, generateWallpaper, computeFillRows, getScreenResolution } from "./ascii";
 import { setWallpaper } from "./wallpaper";
 
 export default function AutoWallpaper() {
@@ -75,19 +58,13 @@ export default function AutoWallpaper() {
       const imageBuffer = Buffer.from(await response.arrayBuffer());
 
       toast.title = "Converting to ASCII...";
-      const screen = getScreenResolution();
+      const screen = await getScreenResolution();
       const density = parseInt(values.density, 10);
       const screenRows = computeFillRows(density, screen.width, screen.height);
-      const result = imageToAscii(
-        imageBuffer,
-        density,
-        screenRows,
-        screen.width,
-        screen.height,
-      );
+      const result = await imageToAscii(imageBuffer, density, screenRows, screen.width, screen.height);
 
       toast.title = "Rendering wallpaper...";
-      const wallpaperPath = generateWallpaper(result.ascii, result.colorGrid, {
+      const wallpaperPath = await generateWallpaper(result.ascii, result.colorGrid, {
         backgroundColor: values.backgroundColor,
         textColor: values.textColor,
         colorMode: values.colorMode,
@@ -96,7 +73,7 @@ export default function AutoWallpaper() {
       });
 
       toast.title = "Applying wallpaper...";
-      setWallpaper(wallpaperPath);
+      await setWallpaper(wallpaperPath);
 
       toast.style = Toast.Style.Success;
       toast.title = "Wallpaper set!";
@@ -116,32 +93,16 @@ export default function AutoWallpaper() {
       navigationTitle="Auto ASCII Wallpaper"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Settings"
-            icon={Icon.Check}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Save Settings" icon={Icon.Check} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown
-        id="colorMode"
-        title="Color Mode"
-        defaultValue={settings.colorMode}
-      >
+      <Form.Dropdown id="colorMode" title="Color Mode" defaultValue={settings.colorMode}>
         <Form.Dropdown.Item value="mono" title="Monochrome" icon={Icon.Eye} />
-        <Form.Dropdown.Item
-          value="color"
-          title="Original Colors"
-          icon={Icon.EyeDropper}
-        />
+        <Form.Dropdown.Item value="color" title="Original Colors" icon={Icon.EyeDropper} />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="backgroundColor"
-        title="Background"
-        defaultValue={settings.backgroundColor}
-      >
+      <Form.Dropdown id="backgroundColor" title="Background" defaultValue={settings.backgroundColor}>
         <Form.Dropdown.Item value="#000000" title="Black" />
         <Form.Dropdown.Item value="#1a1a1a" title="Dark Gray" />
         <Form.Dropdown.Item value="#0a0a2e" title="Navy" />
@@ -149,11 +110,7 @@ export default function AutoWallpaper() {
         <Form.Dropdown.Item value="#ffffff" title="White" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="textColor"
-        title="Text Color"
-        defaultValue={settings.textColor}
-      >
+      <Form.Dropdown id="textColor" title="Text Color" defaultValue={settings.textColor}>
         <Form.Dropdown.Item value="#ffffff" title="White" />
         <Form.Dropdown.Item value="#00ff00" title="Green (Matrix)" />
         <Form.Dropdown.Item value="#ffbf00" title="Amber" />
@@ -161,11 +118,7 @@ export default function AutoWallpaper() {
         <Form.Dropdown.Item value="#ff3333" title="Red" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="density"
-        title="Density"
-        defaultValue={settings.density}
-      >
+      <Form.Dropdown id="density" title="Density" defaultValue={settings.density}>
         <Form.Dropdown.Item value="100" title="Low — 100 chars/row" />
         <Form.Dropdown.Item value="200" title="Medium — 200 chars/row" />
         <Form.Dropdown.Item value="300" title="High — 300 chars/row" />

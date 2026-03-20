@@ -1,18 +1,7 @@
-import {
-  showToast,
-  Toast,
-  updateCommandMetadata,
-  environment,
-  LaunchType,
-} from "@raycast/api";
+import { showToast, Toast, updateCommandMetadata, environment, LaunchType } from "@raycast/api";
 import { getAutoSettings } from "./auto-settings";
 import { fetchFeatured, getImageUrl } from "./api";
-import {
-  imageToAscii,
-  generateWallpaper,
-  computeFillRows,
-  getScreenResolution,
-} from "./ascii";
+import { imageToAscii, generateWallpaper, computeFillRows, getScreenResolution } from "./ascii";
 import { setWallpaper } from "./wallpaper";
 
 export default async function Command() {
@@ -38,18 +27,12 @@ export default async function Command() {
     if (!response.ok) throw new Error("Failed to fetch image");
     const imageBuffer = Buffer.from(await response.arrayBuffer());
 
-    const screen = getScreenResolution();
+    const screen = await getScreenResolution();
     const density = parseInt(settings.density, 10);
     const screenRows = computeFillRows(density, screen.width, screen.height);
-    const result = imageToAscii(
-      imageBuffer,
-      density,
-      screenRows,
-      screen.width,
-      screen.height,
-    );
+    const result = await imageToAscii(imageBuffer, density, screenRows, screen.width, screen.height);
 
-    const wallpaperPath = generateWallpaper(result.ascii, result.colorGrid, {
+    const wallpaperPath = await generateWallpaper(result.ascii, result.colorGrid, {
       backgroundColor: settings.backgroundColor,
       textColor: settings.textColor,
       colorMode: settings.colorMode,
@@ -57,7 +40,7 @@ export default async function Command() {
       height: screen.height,
     });
 
-    setWallpaper(wallpaperPath);
+    await setWallpaper(wallpaperPath);
 
     await updateCommandMetadata({
       subtitle: `${artwork.title} — ${artwork.artistDisplayName}`,

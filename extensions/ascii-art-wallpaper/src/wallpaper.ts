@@ -1,6 +1,6 @@
-import { execFileSync } from "child_process";
+import { execFile } from "./exec-file-async";
 
-export function setWallpaper(imagePath: string): void {
+export async function setWallpaper(imagePath: string): Promise<void> {
   const safePath = imagePath.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
   // Use NSWorkspace with fill + clipping = CSS object-fit: cover
   const jxa = [
@@ -18,7 +18,7 @@ export function setWallpaper(imagePath: string): void {
     "}",
   ].join("\n");
 
-  execFileSync("osascript", ["-l", "JavaScript", "-e", jxa], {
+  await execFile("osascript", ["-l", "JavaScript", "-e", jxa], {
     timeout: 10000,
     stdio: ["pipe", "pipe", "ignore"],
   });

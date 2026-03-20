@@ -1,5 +1,6 @@
-import { execFileSync } from "child_process";
+import { createHash } from "crypto";
 import fs from "fs";
+import { execFile } from "./exec-file-async";
 import path from "path";
 import { environment } from "@raycast/api";
 
@@ -8,11 +9,14 @@ const ASCII_CHARS = " .',:;clodxkO0KX@";
 
 let _cachedScreen: { width: number; height: number } | null = null;
 
-export function getScreenResolution(): { width: number; height: number } {
+export async function getScreenResolution(): Promise<{
+  width: number;
+  height: number;
+}> {
   if (_cachedScreen) return _cachedScreen;
   try {
     // Use NSScreen via JXA to get the actual backing pixel resolution
-    const json = execFileSync(
+    const { stdout } = await execFile(
       "osascript",
       [
         "-l",
@@ -31,9 +35,8 @@ export function getScreenResolution(): { width: number; height: number } {
           "JSON.stringify(best);",
       ],
       { stdio: ["pipe", "pipe", "ignore"], timeout: 5000 },
-    )
-      .toString()
-      .trim();
+    );
+    const json = stdout.toString().trim();
     const parsed = JSON.parse(json);
     if (parsed.w > 0 && parsed.h > 0) {
       _cachedScreen = { width: parsed.w, height: parsed.h };
@@ -59,26 +62,23 @@ function tmpPath(name: string): string {
   return path.join(dir, name);
 }
 
-function getPixels(
+async function getPixels(
   imageBuffer: Buffer,
   cols: number,
   rows: number,
   screenW = 3840,
   screenH = 2160,
-): RGBPixel[][] {
+): Promise<RGBPixel[][]> {
   const jpgPath = tmpPath("input.jpg");
   const bmpPath = tmpPath("input.bmp");
 
   fs.writeFileSync(jpgPath, imageBuffer);
 
   // Get source image dimensions
-  const info = execFileSync(
-    "sips",
-    ["-g", "pixelWidth", "-g", "pixelHeight", jpgPath],
-    {
-      stdio: ["pipe", "pipe", "ignore"],
-    },
-  ).toString();
+  const { stdout: infoBuf } = await execFile("sips", ["-g", "pixelWidth", "-g", "pixelHeight", jpgPath], {
+    stdio: ["pipe", "pipe", "ignore"],
+  });
+  const info = infoBuf.toString();
   const wMatch = info.match(/pixelWidth:\s*(\d+)/);
   const hMatch = info.match(/pixelHeight:\s*(\d+)/);
   const imgW = wMatch ? parseInt(wMatch[1]) : screenW;
@@ -91,23 +91,9 @@ function getPixels(
   const coverW = Math.ceil(imgW * scale);
   const coverH = Math.ceil(imgH * scale);
 
-  execFileSync(
-    "sips",
-    [
-      "-z",
-      String(coverH),
-      String(coverW),
-      "-s",
-      "format",
-      "bmp",
-      jpgPath,
-      "--out",
-      bmpPath,
-    ],
-    {
-      stdio: ["pipe", "pipe", "ignore"],
-    },
-  );
+  await execFile("sips", ["-z", String(coverH), String(coverW), "-s", "format", "bmp", jpgPath, "--out", bmpPath], {
+    stdio: ["pipe", "pipe", "ignore"],
+  });
 
   const bmp = fs.readFileSync(bmpPath);
 
@@ -132,9 +118,7 @@ function getPixels(
   for (let i = 0; i < rows; i++) {
     // Sample at the center of each cell in screen space
     const screenY = Math.floor(i * cellH + cellH / 2);
-    const rawSrcRow = topDown
-      ? cropOffsetY + screenY
-      : height - 1 - (cropOffsetY + screenY);
+    const rawSrcRow = topDown ? cropOffsetY + screenY : height - 1 - (cropOffsetY + screenY);
     const srcRow = Math.max(0, Math.min(height - 1, rawSrcRow));
     const row: RGBPixel[] = [];
     for (let j = 0; j < cols; j++) {
@@ -173,60 +157,43 @@ const LINE_HEIGHT_RATIO = 1.2;
  * The Swift renderer uses actual font metrics to force-fill,
  * so we match the grid to those dimensions.
  */
-export function computeFillRows(
-  cols: number,
-  screenW = 3840,
-  screenH = 2160,
-): number {
+export function computeFillRows(cols: number, screenW = 3840, screenH = 2160): number {
   const fontSize = screenW / (cols * ADVANCE_RATIO);
   const lineHeight = fontSize * LINE_HEIGHT_RATIO;
   return Math.ceil(screenH / lineHeight);
 }
 
-export function imageToAscii(
+export async function imageToAscii(
   imageBuffer: Buffer,
   cols: number,
   forceRows?: number,
   screenW = 3840,
   screenH = 2160,
-): { ascii: string; colorGrid: RGBPixel[][] } {
+): Promise<{ ascii: string; colorGrid: RGBPixel[][] }> {
   let rows: number;
   if (forceRows) {
     rows = forceRows;
   } else {
     const jpgPath = tmpPath("dim.jpg");
     fs.writeFileSync(jpgPath, imageBuffer);
-    const info = execFileSync(
-      "sips",
-      ["-g", "pixelWidth", "-g", "pixelHeight", jpgPath],
-      {
-        stdio: ["pipe", "pipe", "ignore"],
-      },
-    ).toString();
+    const { stdout: dimInfoBuf } = await execFile("sips", ["-g", "pixelWidth", "-g", "pixelHeight", jpgPath], {
+      stdio: ["pipe", "pipe", "ignore"],
+    });
     try {
       fs.unlinkSync(jpgPath);
     } catch {
       /* ignore */
     }
-    const wMatch = info.match(/pixelWidth:\s*(\d+)/);
-    const hMatch = info.match(/pixelHeight:\s*(\d+)/);
+    const dimInfo = dimInfoBuf.toString();
+    const wMatch = dimInfo.match(/pixelWidth:\s*(\d+)/);
+    const hMatch = dimInfo.match(/pixelHeight:\s*(\d+)/);
     const imgW = wMatch ? parseInt(wMatch[1]) : 800;
     const imgH = hMatch ? parseInt(hMatch[1]) : 600;
     rows = Math.floor(cols * (imgH / imgW) * 0.5);
   }
 
-  const pixels = getPixels(imageBuffer, cols, rows, screenW, screenH);
+  const pixels = await getPixels(imageBuffer, cols, rows, screenW, screenH);
 
-  // Auto-contrast: find actual brightness range of this image
-  let minB = 255;
-  let maxB = 0;
-  for (const row of pixels) {
-    for (const pixel of row) {
-      const b = brightness(pixel);
-      if (b < minB) minB = b;
-      if (b > maxB) maxB = b;
-    }
-  }
   // Use 2nd/98th percentile for robustness against outliers
   const allBright: number[] = [];
   for (const row of pixels) {
@@ -248,10 +215,7 @@ export function imageToAscii(
       const normalized = Math.max(0, Math.min(1, (b - lo) / range));
       // Mild gamma to boost midtones
       const corrected = Math.pow(normalized, 0.8);
-      const charIndex = Math.min(
-        ASCII_CHARS.length - 1,
-        Math.floor(corrected * ASCII_CHARS.length),
-      );
+      const charIndex = Math.min(ASCII_CHARS.length - 1, Math.floor(corrected * ASCII_CHARS.length));
       line += ASCII_CHARS[charIndex];
     }
     lines.push(line);
@@ -370,18 +334,22 @@ guard let png = rep.representation(using: .png, properties: [:]) else { exit(1) 
 try! png.write(to: URL(fileURLWithPath: outputPath))
 `;
 
-function getRendererBinary(): string {
+function swiftSourceContentHash(): string {
+  return createHash("sha256").update(SWIFT_SOURCE).digest("hex");
+}
+
+async function getRendererBinary(): Promise<string> {
   const binPath = tmpPath("ascii-renderer");
   const srcPath = tmpPath("ascii-renderer.swift");
 
   const srcHash = tmpPath("ascii-renderer.hash");
-  const currentHash = Buffer.from(SWIFT_SOURCE).toString("base64").slice(0, 32);
-  const existingHash = fs.existsSync(srcHash)
-    ? fs.readFileSync(srcHash, "utf-8")
-    : "";
+  const currentHash = swiftSourceContentHash();
+  const existingHash = fs.existsSync(srcHash) ? fs.readFileSync(srcHash, "utf-8") : "";
   if (!fs.existsSync(binPath) || currentHash !== existingHash) {
     fs.writeFileSync(srcPath, SWIFT_SOURCE);
-    execFileSync("swiftc", ["-O", "-o", binPath, srcPath]);
+    await execFile("swiftc", ["-O", "-o", binPath, srcPath], {
+      stdio: ["pipe", "pipe", "ignore"],
+    });
     fs.writeFileSync(srcHash, currentHash);
     try {
       fs.unlinkSync(srcPath);
@@ -393,7 +361,7 @@ function getRendererBinary(): string {
   return binPath;
 }
 
-export function generateWallpaper(
+export async function generateWallpaper(
   asciiText: string,
   colorGrid: RGBPixel[][],
   options: {
@@ -403,8 +371,8 @@ export function generateWallpaper(
     width?: number;
     height?: number;
   },
-): string {
-  const renderer = getRendererBinary();
+): Promise<string> {
+  const renderer = await getRendererBinary();
   const textPath = tmpPath("ascii-text.txt");
   // Clean up old wallpapers
   const dir = environment.supportPath;
@@ -446,15 +414,11 @@ export function generateWallpaper(
     colorMapArg = colorMapPath;
   }
 
-  execFileSync(renderer, [
-    textPath,
-    colorMapArg,
-    options.backgroundColor,
-    options.textColor,
-    outputPath,
-    String(W),
-    String(H),
-  ]);
+  await execFile(
+    renderer,
+    [textPath, colorMapArg, options.backgroundColor, options.textColor, outputPath, String(W), String(H)],
+    { stdio: ["pipe", "pipe", "ignore"] },
+  );
 
   try {
     fs.unlinkSync(textPath);

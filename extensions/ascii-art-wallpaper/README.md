@@ -19,11 +19,11 @@ The extension fetches artwork images from the Met Museum's public API, converts 
 
 ## Settings
 
-| Setting | Description |
-|---------|-------------|
-| Color Mode | Monochrome or original artwork colors |
-| Background | Wallpaper background color |
+| Setting    | Description                             |
+| ---------- | --------------------------------------- |
+| Color Mode | Monochrome or original artwork colors   |
+| Background | Wallpaper background color              |
 | Text Color | ASCII character color (monochrome mode) |
-| Density | Number of characters per row (100–400) |
+| Density    | Number of characters per row (100–400)  |
 
 The wallpaper is rendered at 3840x2160 (4K) resolution by default.

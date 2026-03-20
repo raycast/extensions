@@ -1,34 +1,9 @@
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  Form,
-  showToast,
-  Toast,
-  Icon,
-  LocalStorage,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Action, Grid, Form, showToast, Toast, Icon, LocalStorage, useNavigation } from "@raycast/api";
 import { useState, useCallback, useEffect, useRef } from "react";
-import {
-  searchArtworks,
-  fetchFeatured,
-  getThumbnailUrl,
-  getImageUrl,
-  type Artwork,
-} from "./api";
-import {
-  imageToAscii,
-  generateWallpaper,
-  computeFillRows,
-  getScreenResolution,
-} from "./ascii";
+import { searchArtworks, fetchFeatured, getThumbnailUrl, getImageUrl, type Artwork } from "./api";
+import { imageToAscii, generateWallpaper, computeFillRows, getScreenResolution } from "./ascii";
 import { setWallpaper } from "./wallpaper";
-import {
-  STORAGE_KEY,
-  DEFAULTS,
-  type AutoWallpaperSettings,
-} from "./auto-settings";
+import { STORAGE_KEY, DEFAULTS, type AutoWallpaperSettings } from "./auto-settings";
 
 export default function SearchArtworks() {
   const [artworks, setArtworks] = useState<Artwork[]>([]);
@@ -90,10 +65,7 @@ export default function SearchArtworks() {
       searchBarPlaceholder="Search artworks... (e.g. Monet, Van Gogh, starry night)"
       throttle
     >
-      <Grid.EmptyView
-        title="No Artworks Found"
-        description="Try a different search term"
-      />
+      <Grid.EmptyView title="No Artworks Found" description="Try a different search term" />
       {artworks.map((artwork) => (
         <Grid.Item
           key={artwork.objectID}
@@ -187,21 +159,15 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
     try {
       if (!imageBufferRef.current) throw new Error("Image not loaded yet");
 
-      const screen = getScreenResolution();
+      const screen = await getScreenResolution();
       const density = parseInt(values.density, 10);
       const screenRows = computeFillRows(density, screen.width, screen.height);
 
       toast.title = "Converting to ASCII...";
-      const result = imageToAscii(
-        imageBufferRef.current,
-        density,
-        screenRows,
-        screen.width,
-        screen.height,
-      );
+      const result = await imageToAscii(imageBufferRef.current, density, screenRows, screen.width, screen.height);
 
       toast.title = "Rendering characters...";
-      const wallpaperPath = generateWallpaper(result.ascii, result.colorGrid, {
+      const wallpaperPath = await generateWallpaper(result.ascii, result.colorGrid, {
         backgroundColor: values.backgroundColor,
         textColor: values.textColor,
         colorMode: values.colorMode,
@@ -210,7 +176,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
       });
 
       toast.title = "Applying wallpaper...";
-      setWallpaper(wallpaperPath);
+      await setWallpaper(wallpaperPath);
 
       toast.style = Toast.Style.Success;
       toast.title = "Wallpaper set!";
@@ -228,39 +194,20 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
       navigationTitle={artwork.title}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Set as Wallpaper"
-            icon={Icon.Desktop}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Set as Wallpaper" icon={Icon.Desktop} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description
-        title="Artwork"
-        text={`${artwork.title} — ${artwork.artistDisplayName}`}
-      />
+      <Form.Description title="Artwork" text={`${artwork.title} — ${artwork.artistDisplayName}`} />
 
       <Form.Separator />
 
-      <Form.Dropdown
-        id="colorMode"
-        title="Color Mode"
-        defaultValue={settings.colorMode}
-      >
+      <Form.Dropdown id="colorMode" title="Color Mode" defaultValue={settings.colorMode}>
         <Form.Dropdown.Item value="mono" title="Monochrome" icon={Icon.Eye} />
-        <Form.Dropdown.Item
-          value="color"
-          title="Original Colors"
-          icon={Icon.EyeDropper}
-        />
+        <Form.Dropdown.Item value="color" title="Original Colors" icon={Icon.EyeDropper} />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="backgroundColor"
-        title="Background"
-        defaultValue={settings.backgroundColor}
-      >
+      <Form.Dropdown id="backgroundColor" title="Background" defaultValue={settings.backgroundColor}>
         <Form.Dropdown.Item value="#000000" title="Black" />
         <Form.Dropdown.Item value="#1a1a1a" title="Dark Gray" />
         <Form.Dropdown.Item value="#0a0a2e" title="Navy" />
@@ -268,11 +215,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
         <Form.Dropdown.Item value="#ffffff" title="White" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="textColor"
-        title="Text Color"
-        defaultValue={settings.textColor}
-      >
+      <Form.Dropdown id="textColor" title="Text Color" defaultValue={settings.textColor}>
         <Form.Dropdown.Item value="#ffffff" title="White" />
         <Form.Dropdown.Item value="#00ff00" title="Green (Matrix)" />
         <Form.Dropdown.Item value="#ffbf00" title="Amber" />
@@ -280,11 +223,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
         <Form.Dropdown.Item value="#ff3333" title="Red" />
       </Form.Dropdown>
 
-      <Form.Dropdown
-        id="density"
-        title="Density"
-        defaultValue={settings.density}
-      >
+      <Form.Dropdown id="density" title="Density" defaultValue={settings.density}>
         <Form.Dropdown.Item value="100" title="Low — 100 chars/row" />
         <Form.Dropdown.Item value="200" title="Medium — 200 chars/row" />
         <Form.Dropdown.Item value="300" title="High — 300 chars/row" />
