@@ -1,11 +1,19 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { runAppleScript, useCachedState, useFrecencySorting } from "@raycast/utils";
 import { LogGroup } from "@aws-sdk/client-cloudwatch-logs";
+import { DashboardEntry } from "@aws-sdk/client-cloudwatch";
 import { AwsAction } from "./components/common/action";
 import AWSProfileDropdown from "./components/searchbar/aws-profile-dropdown";
 import { getAWSErrorMessage } from "./errors";
 import { useLogGroups } from "./hooks/use-logs";
+import { useDashboards } from "./hooks/use-cloudwatch-dashboards";
 import { formatBytes, resourceToConsoleLink } from "./util";
+
+enum ResourceType {
+  LogGroups = "LogGroups",
+  Dashboards = "Dashboards",
+}
+type SetResourceType = { setResourceType: (value: ResourceType) => void };
 
 function getLiveTailUrl(logGroupName: string) {
   const region = process.env.AWS_REGION;
@@ -38,6 +46,17 @@ async function runTailInTerminal(logGroupName: string) {
 }
 
 export default function CloudWatch() {
+  const [resourceType, setResourceType] = useCachedState<ResourceType>("resource-type", ResourceType.LogGroups, {
+    cacheNamespace: "aws-cloudwatch",
+  });
+
+  if (resourceType === ResourceType.Dashboards) {
+    return <CloudWatchDashboards {...{ setResourceType }} />;
+  }
+  return <CloudWatchLogGroups {...{ setResourceType }} />;
+}
+
+const CloudWatchLogGroups = ({ setResourceType }: SetResourceType) => {
   const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
     cacheNamespace: "aws-logs",
   });
@@ -57,6 +76,7 @@ export default function CloudWatch() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Filter log groups..."
+      navigationTitle="CloudWatch Log Groups"
       searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
       isShowingDetail={!isLoading && !error && (logGroups || []).length > 0 && isDetailsEnabled}
     >
@@ -68,7 +88,7 @@ export default function CloudWatch() {
         />
       )}
       {!error && logGroups?.length === 0 && (
-        <List.EmptyView title="No queues found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
+        <List.EmptyView title="No log groups found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
       )}
       {sortedLogGroups.map((logGroup) => (
         <List.Item
@@ -147,7 +167,7 @@ export default function CloudWatch() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
               </ActionPanel.Section>
-              <ActionPanel.Section title="Logs Actions">
+              <ActionPanel.Section title="Log Group Actions">
                 <Action.CopyToClipboard
                   title="Copy Log Group Name"
                   content={logGroup.logGroupName || ""}
@@ -164,10 +184,131 @@ export default function CloudWatch() {
                   onAction={() => resetRanking(logGroup)}
                 />
               </ActionPanel.Section>
+              <AwsAction.SwitchResourceType
+                {...{ setResourceType, current: ResourceType.LogGroups, enumType: ResourceType }}
+              />
             </ActionPanel>
           }
         />
       ))}
     </List>
   );
-}
+};
+
+const CloudWatchDashboards = ({ setResourceType }: SetResourceType) => {
+  const [isDetailsEnabled, setDetailsEnabled] = useCachedState<boolean>("show-details", false, {
+    cacheNamespace: "aws-cloudwatch-dashboards",
+  });
+  const { dashboards, error, isLoading, mutate } = useDashboards();
+
+  const {
+    data: sortedDashboards,
+    resetRanking,
+    visitItem: visit,
+  } = useFrecencySorting(dashboards, {
+    namespace: "aws-cloudwatch-dashboards-sort",
+    key: (dashboard: DashboardEntry) => dashboard.DashboardName!,
+    sortUnvisited: (a, b) => (a.DashboardName ?? "").localeCompare(b.DashboardName ?? ""),
+  });
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Filter dashboards by name..."
+      filtering
+      navigationTitle="CloudWatch Dashboards"
+      searchBarAccessory={<AWSProfileDropdown onProfileSelected={mutate} />}
+      isShowingDetail={!isLoading && !error && (dashboards || []).length > 0 && isDetailsEnabled}
+    >
+      {error && (
+        <List.EmptyView
+          title={error.name}
+          description={error.message}
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+        />
+      )}
+      {!error && dashboards?.length === 0 && (
+        <List.EmptyView title="No dashboards found!" icon={{ source: Icon.Warning, tintColor: Color.Orange }} />
+      )}
+      {sortedDashboards.map((dashboard) => (
+        <List.Item
+          key={dashboard.DashboardArn!}
+          icon="aws-icons/cw/logs.png"
+          title={dashboard.DashboardName ?? ""}
+          keywords={[dashboard.DashboardName ?? ""]}
+          accessories={
+            isDetailsEnabled
+              ? []
+              : [
+                  ...(dashboard.LastModified
+                    ? [{ date: dashboard.LastModified, icon: Icon.Calendar, tooltip: "Last Modified" }]
+                    : []),
+                  ...(dashboard.Size
+                    ? [
+                        {
+                          tag: { value: formatBytes(dashboard.Size), color: Color.Blue },
+                          tooltip: "Size",
+                          icon: Icon.Document,
+                        },
+                      ]
+                    : []),
+                ]
+          }
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Label title="Dashboard Name" text={dashboard.DashboardName} />
+                  <List.Item.Detail.Metadata.Label title="Dashboard ARN" text={dashboard.DashboardArn} />
+                  {dashboard.LastModified && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Last Modified"
+                      text={dashboard.LastModified.toISOString()}
+                      icon={Icon.Calendar}
+                    />
+                  )}
+                  <List.Item.Detail.Metadata.Separator />
+                  {dashboard.Size && (
+                    <List.Item.Detail.Metadata.Label
+                      title="Size"
+                      text={formatBytes(dashboard.Size)}
+                      icon={{ source: Icon.Document, tintColor: Color.Blue }}
+                    />
+                  )}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
+          actions={
+            <ActionPanel>
+              <AwsAction.Console
+                url={resourceToConsoleLink(dashboard.DashboardName, "AWS::CloudWatch::Dashboard")}
+                onAction={() => visit(dashboard)}
+              />
+              <ActionPanel.Section title="Dashboard Actions">
+                <Action.CopyToClipboard
+                  title="Copy Dashboard Name"
+                  content={dashboard.DashboardName ?? ""}
+                  onCopy={() => visit(dashboard)}
+                />
+                <Action
+                  title={`${isDetailsEnabled ? "Hide" : "Show"} Details`}
+                  onAction={() => setDetailsEnabled(!isDetailsEnabled)}
+                  icon={isDetailsEnabled ? Icon.EyeDisabled : Icon.Eye}
+                />
+                <Action
+                  title="Reset Ranking"
+                  icon={Icon.ArrowCounterClockwise}
+                  onAction={() => resetRanking(dashboard)}
+                />
+              </ActionPanel.Section>
+              <AwsAction.SwitchResourceType
+                {...{ setResourceType, current: ResourceType.Dashboards, enumType: ResourceType }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+};

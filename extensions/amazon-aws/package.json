@@ -120,8 +120,8 @@
     },
     {
       "name": "cloudwatch",
-      "title": "CloudWatch Log Groups",
-      "description": "Find and open a log group",
+      "title": "CloudWatch",
+      "description": "Browse CloudWatch log groups and dashboards",
       "mode": "view"
     },
     {
@@ -299,6 +299,11 @@
       "name": "list-cloudwatch-log-groups",
       "title": "List CloudWatch Log Groups",
       "description": "Lists CloudWatch log groups in the current account and region"
+    },
+    {
+      "name": "list-cloudwatch-dashboards",
+      "title": "List CloudWatch Dashboards",
+      "description": "Lists CloudWatch dashboards in the current account and region"
     },
     {
       "name": "list-quicksight-dashboards",
@@ -482,6 +487,13 @@
         ]
       },
       {
+        "input": "What CloudWatch dashboards do I have?",
+        "output": "I'll list all your CloudWatch dashboards for you.",
+        "tools": [
+          "list-cloudwatch-dashboards"
+        ]
+      },
+      {
         "input": "What QuickSight dashboards do I have?",
         "output": "I'll list all your QuickSight dashboards for you.",
         "tools": [
@@ -504,6 +516,7 @@
     "@aws-sdk/client-appsync": "^3.940.0",
     "@aws-sdk/client-athena": "^3.940.0",
     "@aws-sdk/client-cloudformation": "^3.940.0",
+    "@aws-sdk/client-cloudwatch": "^3.940.0",
     "@aws-sdk/client-cloudwatch-logs": "^3.940.0",
     "@aws-sdk/client-codeartifact": "^3.940.0",
     "@aws-sdk/client-codepipeline": "^3.940.0",

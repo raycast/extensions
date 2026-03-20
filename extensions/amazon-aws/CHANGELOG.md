@@ -5,7 +5,8 @@
 - Browse and manage Athena work groups, named queries, and query executions
 - Browse QuickSight dashboards, analyses, and datasets with region override support
 - Search and list Cognito user pool users
-- Ask Raycast AI about your Lambda functions, S3 buckets, DynamoDB tables, secrets, pipelines, log groups, and QuickSight dashboards
+- Browse CloudWatch dashboards with name, ARN, last modified date, and size
+- Ask Raycast AI about your Lambda functions, S3 buckets, DynamoDB tables, secrets, pipelines, log groups, QuickSight dashboards, and CloudWatch dashboards
 - Improved Amplify build view with status icons, duration, job type, and one-click log downloads
 - Copy and export raw API responses for any Amplify resource
 - Fixed large accounts causing out-of-memory errors when loading paginated resources

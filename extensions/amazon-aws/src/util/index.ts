@@ -156,6 +156,8 @@ export function resourceToConsoleLink(
       return `${AWS_URL_BASE}/athena/home?region=${AWS_REGION}#/query-editor/saved-queries/${resourceId}`;
     case "AWS::Athena::QueryExecution":
       return `${AWS_URL_BASE}/athena/home?region=${AWS_REGION}#/query-editor/history/${resourceId}`;
+    case "AWS::CloudWatch::Dashboard":
+      return `https://${AWS_REGION}.console.aws.amazon.com/cloudwatch/home?region=${AWS_REGION}#dashboards/dashboard/${resourceId}`;
     case "AWS::QuickSight::Dashboard":
       return `https://${AWS_REGION}.quicksight.aws.amazon.com/sn/dashboards/${resourceId}`;
     case "AWS::QuickSight::Analysis":
