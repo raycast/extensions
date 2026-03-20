@@ -371,13 +371,30 @@ async function fetchFolderContents(folderPath: string, token?: string): Promise<
 
 // Detail view for markdown files
 function DocsDetailView({ path, title }: { path: string; title: string }) {
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const { data, isLoading, revalidate, error } = useCachedPromise(
     async (p: string) => fixMarkdown(await fetchRawMarkdown(p), p),
     [path],
     { keepPreviousData: true },
   );
 
   const websiteUrl = pathToWebsiteUrl(path);
+  const isEmpty = !isLoading && !data;
+
+  if (error && isEmpty) {
+    return (
+      <Detail
+        markdown="## Failed to Load Documentation\n\nUnable to fetch the documentation. Please try again."
+        isLoading={false}
+        navigationTitle={title}
+        actions={
+          <ActionPanel>
+            <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
+            <Action.OpenInBrowser url={websiteUrl} title={`Open ${title} on Devenv.sh`} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
 
   return (
     <Detail
@@ -434,7 +451,7 @@ function SectionedDocsList({ path, title }: { path: string; title: string }) {
 
   return (
     <List navigationTitle={title} isLoading={isLoading} searchBarPlaceholder="Search options...">
-      {(error || isEmpty) && (
+      {isEmpty && (
         <List.EmptyView
           title={error ? "Failed to Load Options" : "No Options Found"}
           description={
@@ -504,11 +521,13 @@ function DocsList({
   title,
   revalidate,
   isLoading,
+  error,
 }: {
   items: DocItem[];
   title?: string;
   revalidate?: () => void;
   isLoading?: boolean;
+  error?: Error;
 }) {
   const isEmpty = !isLoading && items.length === 0;
 
@@ -516,8 +535,10 @@ function DocsList({
     <List navigationTitle={title} isLoading={isLoading}>
       {isEmpty && (
         <List.EmptyView
-          title="No Documentation Found"
-          description="Unable to load documentation items."
+          title={error ? "Failed to Load Documentation" : "No Documentation Found"}
+          description={
+            error ? "Unable to fetch the documentation. Please try again." : "Unable to load documentation items."
+          }
           actions={
             revalidate ? (
               <ActionPanel>
@@ -557,8 +578,10 @@ function FolderDocsList({ folderPath, title }: { folderPath: string; title: stri
     keepPreviousData: true,
   });
 
+  const isEmpty = !isLoading && (!items || items.length === 0);
+
   // Show rate limit message with action to open preferences
-  if (error?.name === "RateLimitError") {
+  if (error?.name === "RateLimitError" && isEmpty) {
     return (
       <List navigationTitle={title}>
         <List.EmptyView
@@ -567,6 +590,22 @@ function FolderDocsList({ folderPath, title }: { folderPath: string; title: stri
           actions={
             <ActionPanel>
               <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
+  if (error && isEmpty) {
+    return (
+      <List navigationTitle={title}>
+        <List.EmptyView
+          title="Failed to Load Documentation"
+          description="Unable to fetch the documentation. Please try again."
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
             </ActionPanel>
           }
         />
@@ -586,104 +625,59 @@ function FolderDocsList({ folderPath, title }: { folderPath: string; title: stri
 // Individual list item component
 function DocListItem({ item, revalidate }: { item: DocItem; revalidate?: () => void }) {
   const icon = item.isFolder ? Icon.Folder : Icon.Document;
-
-  if (item.isFolder && item.children) {
-    // Folder with known children - push to nested list
-    return (
-      <List.Item
-        title={item.title}
-        icon={icon}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Open"
-              target={<DocsList items={item.children} title={item.title} revalidate={revalidate} />}
-            />
-            {revalidate && (
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Refresh Cache"
-                onAction={revalidate}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            )}
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  if (item.isFolder && item.path) {
-    // Folder without predefined children - fetch contents dynamically
-    return (
-      <List.Item
-        title={item.title}
-        icon={icon}
-        actions={
-          <ActionPanel>
-            <Action.Push title="Open" target={<FolderDocsList folderPath={item.path} title={item.title} />} />
-            {revalidate && (
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Refresh Cache"
-                onAction={revalidate}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            )}
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  // Markdown file
   const websiteUrl = pathToWebsiteUrl(item.path);
-
-  // Use sectioned view for files in special folders
-  if (isSectionedPath(item.path)) {
-    return (
-      <List.Item
-        title={item.title}
-        icon={icon}
-        actions={
-          <ActionPanel>
-            <Action.Push title="View Options" target={<SectionedDocsList path={item.path} title={item.title} />} />
-            <Action.OpenInBrowser url={websiteUrl} title="Open on Devenv.sh" />
-            {revalidate && (
-              <Action
-                icon={Icon.ArrowClockwise}
-                title="Refresh Cache"
-                onAction={revalidate}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-              />
-            )}
-          </ActionPanel>
-        }
-      />
-    );
-  }
-
-  // Regular markdown file - push to detail view
-  return (
-    <List.Item
-      title={item.title}
-      icon={icon}
-      actions={
-        <ActionPanel>
-          <Action.Push title="View" target={<DocsDetailView path={item.path} title={item.title} />} />
-          <Action.OpenInBrowser url={websiteUrl} title="Open on Devenv.sh" />
-          {revalidate && (
-            <Action
-              icon={Icon.ArrowClockwise}
-              title="Refresh Cache"
-              onAction={revalidate}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
-          )}
-        </ActionPanel>
-      }
+  const refreshCacheAction = (
+    <Action
+      icon={Icon.ArrowClockwise}
+      title="Refresh Cache"
+      onAction={revalidate}
+      shortcut={{ modifiers: ["cmd"], key: "r" }}
     />
   );
+
+  let actions = undefined;
+  if (item.isFolder && item.children) {
+    // Folder with known children - push to nested list
+    actions = (
+      <ActionPanel>
+        <Action.Push
+          title="Open"
+          target={<DocsList items={item.children} title={item.title} revalidate={revalidate} />}
+        />
+        {revalidate && refreshCacheAction}
+      </ActionPanel>
+    );
+  } else if (item.isFolder && item.path) {
+    // Folder without predefined children - fetch contents dynamically
+    actions = (
+      <ActionPanel>
+        <Action.Push title="Open" target={<FolderDocsList folderPath={item.path} title={item.title} />} />
+        {revalidate && refreshCacheAction}
+      </ActionPanel>
+    );
+  } else if (isSectionedPath(item.path)) {
+    // Markdown file
+    // Use sectioned view for files in special folders
+    actions = (
+      <ActionPanel>
+        <Action.Push title="View Options" target={<SectionedDocsList path={item.path} title={item.title} />} />
+        <Action.OpenInBrowser url={websiteUrl} title="Open on Devenv.sh" />
+        {revalidate && refreshCacheAction}
+      </ActionPanel>
+    );
+  } else {
+    // Markdown file
+    // Regular markdown file - push to detail view
+    actions = (
+      <ActionPanel>
+        <Action.Push title="View" target={<DocsDetailView path={item.path} title={item.title} />} />
+        <Action.OpenInBrowser url={websiteUrl} title="Open on Devenv.sh" />
+        {revalidate && refreshCacheAction}
+      </ActionPanel>
+    );
+  }
+
+  return <List.Item title={item.title} icon={icon} actions={actions} />;
 }
 
 export default function Command() {
@@ -696,7 +690,7 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  if (error) {
+  if (error && (!items || items.length === 0)) {
     return (
       <List navigationTitle="DevEnv Docs">
         <List.EmptyView
@@ -712,5 +706,13 @@ export default function Command() {
     );
   }
 
-  return <DocsList items={items || []} title="DevEnv Docs" revalidate={revalidate} isLoading={isLoading} />;
+  return (
+    <DocsList
+      items={items || []}
+      title="DevEnv Docs"
+      revalidate={revalidate}
+      isLoading={isLoading}
+      error={error as Error | undefined}
+    />
+  );
 }
