@@ -130,7 +130,7 @@ export default function Command() {
               />
               <Action title="Copy Notes" onAction={() => copyNotes(session)} />
               <Action.CopyToClipboard
-                title="Copy Session Dd"
+                title="Copy Session Id"
                 content={session.id}
               />
             </ActionPanel>
