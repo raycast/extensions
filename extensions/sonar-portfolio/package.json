@@ -36,7 +36,7 @@
       "title": "Sonar URL",
       "type": "textfield",
       "required": true,
-      "default": "https://sonar-mvd.vercel.app",
+      "default": "https://sonar.financial",
       "description": "Base URL of your Sonar instance"
     }
   ],
