@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, showToast, Toast, confirmAlert, Alert, Icon, trash } from "@raycast/api";
 import { execFile } from "child_process";
 import { useCachedPromise } from "@raycast/utils";
-import { GitRepo, GitRepoService, tildifyPath } from "./utils";
+import { GitRepo, GitRepoService, GitRepoType, tildifyPath } from "./utils";
 
 function updateToast(toast: Toast, style: Toast.Style, title: string, message?: string) {
   toast.style = style;
@@ -40,7 +40,12 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
   try {
     const statusOutput = await git(["status", "--porcelain"], repo.fullPath);
     if (statusOutput.trim().length > 0) {
-      updateToast(toast, Toast.Style.Failure, "Cannot remove repository", "There are uncommitted changes");
+      updateToast(
+        toast,
+        Toast.Style.Failure,
+        "Cannot remove repository",
+        "There are uncommitted changes or untracked files"
+      );
       return;
     }
 
@@ -100,6 +105,7 @@ async function forceRemoveRepo(repo: GitRepo, revalidate: () => void) {
 
 export default function RemoveRepo() {
   const { data: repos, isLoading, revalidate } = useCachedPromise(GitRepoService.gitRepos);
+  const removableRepos = repos?.filter((repo) => repo.repoType !== GitRepoType.Worktree);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search repositories...">
@@ -107,7 +113,7 @@ export default function RemoveRepo() {
         title="No Repositories Found"
         description="Make sure the scan path is configured in preferences."
       />
-      {repos?.map((repo) => (
+      {removableRepos?.map((repo) => (
         <List.Item
           key={repo.fullPath}
           title={repo.name}
