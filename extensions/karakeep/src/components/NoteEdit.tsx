@@ -1,13 +1,12 @@
 // src/components/NoteEdit.tsx
 
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchAttachTagsToBookmark, fetchDetachTagsFromBookmark, fetchUpdateBookmark } from "../apis";
 import { useGetAllTags } from "../hooks/useGetAllTags";
 import { TAG_PICKER_NOOP_VALUE, useTagPicker } from "../hooks/useTagPicker";
 import { useTranslation } from "../hooks/useTranslation";
-import { runWithToast } from "../utils/toast";
 import { Bookmark } from "../types";
 
 const log = logger.child("[NoteEdit]");
@@ -57,30 +56,26 @@ export function NoteEdit({ bookmark, onRefresh }: NoteEditProps) {
     },
     async onSubmit(values) {
       log.info("Updating note", { bookmarkId: bookmark.id });
-      await runWithToast({
-        loading: { title: t("bookmark.updating") },
-        success: { title: t("bookmark.updateSuccess") },
-        failure: { title: t("bookmark.updateFailed") },
-        action: async () => {
-          await fetchUpdateBookmark(bookmark.id, {
-            title: values.title.trim(),
-            text: values.content.trim(),
-          });
-
-          await Promise.all([
-            addedTagIds.length > 0 ? fetchAttachTagsToBookmark(bookmark.id, buildTagsToAttach()) : undefined,
-            removedTagIds.length > 0 ? fetchDetachTagsFromBookmark(bookmark.id, buildTagsToDetach()) : undefined,
-          ]);
-        },
-      });
-
-      // onRefresh and pop run after runWithToast resolves. runWithToast catches
-      // API errors and shows a failure toast without re-throwing, so these lines
-      // run whether the update succeeded or failed. If strictly on-success-only
-      // behaviour is needed, replace runWithToast with a manual try/catch.
-      log.info("Note updated", { bookmarkId: bookmark.id });
-      await onRefresh?.();
-      pop();
+      const toast = await showToast({ title: t("bookmark.updating"), style: Toast.Style.Animated });
+      try {
+        await fetchUpdateBookmark(bookmark.id, {
+          title: values.title.trim(),
+          text: values.content.trim(),
+        });
+        await Promise.all([
+          addedTagIds.length > 0 ? fetchAttachTagsToBookmark(bookmark.id, buildTagsToAttach()) : undefined,
+          removedTagIds.length > 0 ? fetchDetachTagsFromBookmark(bookmark.id, buildTagsToDetach()) : undefined,
+        ]);
+        toast.style = Toast.Style.Success;
+        toast.title = t("bookmark.updateSuccess");
+        log.info("Note updated", { bookmarkId: bookmark.id });
+        await onRefresh?.();
+        pop();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = t("bookmark.updateFailed");
+        toast.message = String(error);
+      }
     },
   });
 

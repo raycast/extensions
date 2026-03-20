@@ -96,7 +96,7 @@ export function useTagPicker({ tags, initialTagIds = [] }: UseTagPickerOptions):
     commitPendingTag,
     addedTagIds,
     removedTagIds,
-    buildTagsToAttach: () => buildTagsToAttach(selectedTagIds, newTagItems),
+    buildTagsToAttach: () => buildTagsToAttach(addedTagIds, newTagItems),
     buildTagsToDetach: () => removedTagIds.map((tagId) => ({ tagId })),
     reset: () => {
       setSelectedTagIds([]);
