@@ -1,6 +1,6 @@
 # Changelog
 
-## [Improve macOS `npx` Path Resolution] - {PR_MERGE_DATE}
+## [Improve macOS `npx` Path Resolution] - 2026-03-20
 
 - Run the Skills CLI without spawning a login shell by building an explicit PATH for Homebrew and common Node.js version-manager installs
 - Add a custom `npx` path preference for non-standard setups
