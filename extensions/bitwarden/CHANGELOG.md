@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Unified Item Detail View] - {PR_MERGE_DATE}
+## [Unified Item Detail View] - 2026-03-20
 
 - Add unified detail screen for all vault item types (login, card, identity, note, SSH key)
 - Add field-type components with copy, paste, reveal/hide, and open-in-browser actions
