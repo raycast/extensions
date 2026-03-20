@@ -15,10 +15,11 @@
   - Fixed logic to properly detect current state and toggle between On/Off
 - **Type Safety**: Fixed airpodsIndex type handling where textfield preference returns string but was incorrectly typed as number
   - Added explicit string-to-number conversion using parseInt() in both command files
-  - Created separate ExecPrefs interface for proper type safety in execAirPodsMenu function
+  - Uses Raycast's built-in `Preferences` type for preference access with `ExecPrefs` for parsed values
+  - Added input validation to reject non-positive airpodsIndex values
 
 ### Added
-- **Intelligent Retry Logic**: Up to 3 attempts to open Control Center window with proper state cleanup between retries
+- **Intelligent Retry Logic**: Up to 2 attempts to open Control Center window with proper state cleanup between retries
 - **Detailed Error Messages**: 8 specific error codes for better debugging and user feedback
   - `error-control-center-not-found`: Control Center icon not found in menu bar
   - `error-control-center-window-not-found`: Control Center window failed to open after retries
@@ -66,7 +67,7 @@
 - **Architecture Changes**:
   - Removed helper functions: `getMaxOptionIndex()`, `getProOptionIndex()` (replaced with dynamic detection)
   - Mode detection based on actual checkbox count rather than pre-calculated static indices
-  - Created `ExecPrefs` interface with parsed number type for `airpodsIndex` parameter
+  - Uses Raycast's built-in `Preferences` type with `ExecPrefs` interface for parsed `airpodsIndex` parameter
   - Conversation Awareness offset calculation accounts for Spatial Audio checkbox in sequence
   - Both scripts share same toggle logic and offset calculation
 - **Backward Compatibility**: Maintains legacy SystemUIServer script for pre-Sequoia macOS versions

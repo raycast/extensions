@@ -136,20 +136,20 @@
     },
     {
       "name": "showHudNC",
-      "title": "Show HUD For Noise Control",
+      "title": "Show HUD for Noise Control",
       "description": "Show heads-up display when switching noise control modes",
       "type": "checkbox",
       "label": "Show HUD",
-      "default": true,
+      "default": false,
       "required": false
     },
     {
       "name": "showHudCA",
-      "title": "Show HUD For Conversation Awareness",
+      "title": "Show HUD for Conversation Awareness",
       "description": "Show heads-up display when toggling conversation awareness",
       "type": "checkbox",
       "label": "Show HUD",
-      "default": true,
+      "default": false,
       "required": false
     }
   ],

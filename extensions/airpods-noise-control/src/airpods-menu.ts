@@ -1,15 +1,6 @@
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { updateCommandMetadata } from "@raycast/api";
-
-interface ExecPrefs {
-  airpodsIndex: number;
-  airpodsType: "pro" | "max";
-  soundLoc: string;
-  optionOne: string;
-  optionTwo: string;
-  showHudNC: boolean;
-  showHudCA: boolean;
-}
+import { ExecPrefs } from "./type";
 
 export async function execAirPodsMenu(
   { airpodsIndex, airpodsType, soundLoc, optionOne, optionTwo }: ExecPrefs,
@@ -207,7 +198,7 @@ tell application "System Events"
 						set output to "🔵 " & OptionOne
 					end if
 				end if
-			else
+			else if ToggleOption is "conversation-awareness" then
 				-- Conversation Awareness Toggle
 				set caOffset to 5 -- After Off, Trans, NC, SpatialAudio (for 3-mode)
 				if layoutType is "4-mode" then
@@ -233,6 +224,9 @@ tell application "System Events"
 					key code 53 -- ESC
 					return "conversation-awareness-not-supported"
 				end if
+			else
+				key code 53 -- ESC
+				return "error-unknown-toggle-option"
 			end if
 
 			key code 53 -- ESC
@@ -530,7 +524,7 @@ tell application "System Events"
 						set output to "🔵 " & OptionOne
 					end if
 				end if
-			else
+			else if ToggleOption is "conversation-awareness" then
 				-- Conversation Awareness Toggle
 				set caOffset to 5 -- After Off, Trans, NC, SpatialAudio (for 3-mode)
 				if layoutType is "4-mode" then
@@ -556,6 +550,9 @@ tell application "System Events"
 					key code 53 -- ESC
 					return "conversation-awareness-not-supported"
 				end if
+			else
+				key code 53 -- ESC
+				return "error-unknown-toggle-option"
 			end if
 
 			-- Close and return
@@ -659,6 +656,12 @@ end tell
     case "adaptive-not-supported-on-max": {
       await showFailureToast("", {
         title: "Adaptive mode not available on AirPods Max",
+      });
+      return null;
+    }
+    case "error-unknown-toggle-option": {
+      await showFailureToast("", {
+        title: "Unknown toggle option",
       });
       return null;
     }

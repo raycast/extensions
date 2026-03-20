@@ -1,5 +1,6 @@
-export interface Prefs {
-  airpodsIndex: string; // textfield returns string, will be parsed to number
+/** Parsed preferences with airpodsIndex converted to number for AppleScript execution */
+export interface ExecPrefs {
+  airpodsIndex: number;
   airpodsType: "pro" | "max";
   soundLoc: string;
   optionOne: string;
