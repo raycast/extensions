@@ -2,7 +2,7 @@
   "name": "sessiondock-raycast",
   "title": "SessionDock",
   "version": "1.0.0",
-  "description": "Raycast extension for SessionDock Local API",
+  "description": "Search and open your music production sessions directly from Raycast",
   "icon": "command-icon.png",
   "author": "chris-warner",
   "categories": ["Developer Tools", "Productivity"],
@@ -36,7 +36,7 @@
     },
     {
       "name": "create-session",
-      "title": "Create New Session",
+      "title": "Create Session",
       "description": "Create a new SessionDock session",
       "mode": "view"
     },
