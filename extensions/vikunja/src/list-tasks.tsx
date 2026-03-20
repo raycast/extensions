@@ -12,7 +12,7 @@ import {
   LaunchProps,
   useNavigation,
 } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getProjects,
   getProjectTasks,
@@ -76,12 +76,15 @@ export default function ListTasks(
   const [selectedProject, setSelectedProject] = useState<string>("all");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [projectsError, setProjectsError] = useState<string | null>(null);
+  const [tasksError, setTasksError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadProjects() {
       try {
         const p = await getProjects();
         setProjects(p);
+        setProjectsError(null);
         // Set project after dropdown items are available
         if (
           initialProjectId &&
@@ -90,10 +93,13 @@ export default function ListTasks(
           setSelectedProject(String(initialProjectId));
         }
       } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Unknown error";
+        setProjectsError(message);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to load projects",
-          message: error instanceof Error ? error.message : "Unknown error",
+          message,
         });
       }
     }
@@ -109,11 +115,15 @@ export default function ListTasks(
           ? await getAllTasks()
           : await getProjectTasks(parseInt(projectId));
       setTasks(t);
+      setTasksError(null);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      setTasks([]);
+      setTasksError(message);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load tasks",
-        message: error instanceof Error ? error.message : "Unknown error",
+        message,
       });
     } finally {
       setIsLoading(false);
@@ -164,11 +174,29 @@ export default function ListTasks(
     }
   }
 
-  const { apiUrl } = getPreferenceValues<Preferences>();
-  const baseUrl = apiUrl.replace(/\/+$/, "");
+  const baseUrl = useMemo(() => {
+    const { apiUrl } = getPreferenceValues<Preferences>();
+    return apiUrl.replace(/\/+$/, "");
+  }, []);
 
   const openTasks = tasks.filter((t) => !t.done);
   const doneTasks = tasks.filter((t) => t.done);
+
+  const showEmptyView =
+    !isLoading && (tasksError !== null || tasks.length === 0);
+
+  let emptyTitle = "No tasks";
+  let emptyDescription =
+    selectedProject === "all"
+      ? "There are no tasks in your Vikunja instance yet."
+      : "There are no tasks in this project. Try another project or create tasks in Vikunja.";
+  if (tasksError) {
+    emptyTitle = "Failed to load tasks";
+    emptyDescription = tasksError;
+  } else if (projectsError && tasks.length === 0) {
+    emptyTitle = "Failed to load projects";
+    emptyDescription = projectsError;
+  }
 
   return (
     <List
@@ -190,33 +218,43 @@ export default function ListTasks(
         </List.Dropdown>
       }
     >
-      <List.Section title="Open" subtitle={`${openTasks.length} tasks`}>
-        {openTasks.map((task) => (
-          <TaskListItem
-            key={task.id}
-            task={task}
-            baseUrl={baseUrl}
-            projects={projects}
-            onToggleDone={handleToggleDone}
-            onDelete={handleDelete}
-            onRefresh={() => loadTasks(selectedProject)}
-          />
-        ))}
-      </List.Section>
-      {doneTasks.length > 0 && (
-        <List.Section title="Done" subtitle={`${doneTasks.length} tasks`}>
-          {doneTasks.map((task) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              baseUrl={baseUrl}
-              projects={projects}
-              onToggleDone={handleToggleDone}
-              onDelete={handleDelete}
-              onRefresh={() => loadTasks(selectedProject)}
-            />
-          ))}
-        </List.Section>
+      {showEmptyView ? (
+        <List.EmptyView
+          title={emptyTitle}
+          description={emptyDescription}
+          icon={tasksError || projectsError ? Icon.Warning : Icon.Tray}
+        />
+      ) : (
+        <>
+          <List.Section title="Open" subtitle={`${openTasks.length} tasks`}>
+            {openTasks.map((task) => (
+              <TaskListItem
+                key={task.id}
+                task={task}
+                baseUrl={baseUrl}
+                projects={projects}
+                onToggleDone={handleToggleDone}
+                onDelete={handleDelete}
+                onRefresh={() => loadTasks(selectedProject)}
+              />
+            ))}
+          </List.Section>
+          {doneTasks.length > 0 && (
+            <List.Section title="Done" subtitle={`${doneTasks.length} tasks`}>
+              {doneTasks.map((task) => (
+                <TaskListItem
+                  key={task.id}
+                  task={task}
+                  baseUrl={baseUrl}
+                  projects={projects}
+                  onToggleDone={handleToggleDone}
+                  onDelete={handleDelete}
+                  onRefresh={() => loadTasks(selectedProject)}
+                />
+              ))}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );
@@ -298,7 +336,7 @@ function TaskListItem({
           </ActionPanel.Section>
           <ActionPanel.Section title="Quick Actions">
             <ActionPanel.Submenu
-              title="Set Priority"
+              title="Set Priority…"
               icon={Icon.Signal3}
               shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
             >
@@ -358,7 +396,7 @@ function TaskListItem({
               }}
             />
             <ActionPanel.Submenu
-              title="Move to Project"
+              title="Move to Project…"
               icon={Icon.ArrowRight}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
             >

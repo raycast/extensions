@@ -13,16 +13,15 @@ import {
   launchCommand,
   LaunchType,
 } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   getProjects,
-  getProjectTasks,
+  getAllTasks,
   createProject,
   updateProject,
   deleteProject,
   Project,
   ProjectInput,
-  Task,
 } from "./api";
 
 function projectIcon(project: Project): { source: Icon; tintColor?: Color } {
@@ -36,6 +35,7 @@ export default function ListProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [taskCounts, setTaskCounts] = useState<Record<number, number>>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { push } = useNavigation();
 
   const loadProjects = useCallback(async () => {
@@ -43,29 +43,33 @@ export default function ListProjects() {
     try {
       const p = await getProjects();
       setProjects(p);
+      setLoadError(null);
 
-      // Load task counts in parallel
-      const counts: Record<number, number> = {};
-      const results = await Promise.allSettled(
-        p.map(async (proj) => {
-          const tasks = await getProjectTasks(proj.id);
-          return {
-            id: proj.id,
-            count: tasks.filter((t: Task) => !t.done).length,
-          };
-        }),
-      );
-      for (const result of results) {
-        if (result.status === "fulfilled") {
-          counts[result.value.id] = result.value.count;
+      try {
+        const allTasks = await getAllTasks();
+        const counts: Record<number, number> = {};
+        for (const t of allTasks) {
+          if (t.done) continue;
+          counts[t.project_id] = (counts[t.project_id] ?? 0) + 1;
         }
+        setTaskCounts(counts);
+      } catch (error) {
+        setTaskCounts({});
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load task counts",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       }
-      setTaskCounts(counts);
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      setLoadError(message);
+      setProjects([]);
+      setTaskCounts({});
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to load projects",
-        message: error instanceof Error ? error.message : "Unknown error",
+        message,
       });
     } finally {
       setIsLoading(false);
@@ -76,13 +80,25 @@ export default function ListProjects() {
     loadProjects();
   }, [loadProjects]);
 
-  const { apiUrl } = getPreferenceValues<Preferences>();
-  const baseUrl = apiUrl.replace(/\/+$/, "");
+  const baseUrl = useMemo(() => {
+    const { apiUrl } = getPreferenceValues<Preferences>();
+    return apiUrl.replace(/\/+$/, "");
+  }, []);
 
   const topLevel = projects.filter((p) => !p.parent_project_id);
   const subProjects = projects.filter((p) => p.parent_project_id);
 
   const parentMap = new Map(projects.map((p) => [p.id, p]));
+
+  const showEmptyView =
+    !isLoading && (loadError !== null || projects.length === 0);
+  let emptyTitle = "No projects";
+  let emptyDescription =
+    "Create a project in Vikunja or use Create Project here (⌘N).";
+  if (loadError) {
+    emptyTitle = "Failed to load projects";
+    emptyDescription = loadError;
+  }
 
   async function handleArchiveToggle(project: Project) {
     try {
@@ -259,16 +275,29 @@ export default function ListProjects() {
         </ActionPanel>
       }
     >
-      <List.Section title="Projects" subtitle={`${topLevel.length} projects`}>
-        {topLevel.map(renderProjectItem)}
-      </List.Section>
-      {subProjects.length > 0 && (
-        <List.Section
-          title="Sub-Projects"
-          subtitle={`${subProjects.length} projects`}
-        >
-          {subProjects.map(renderProjectItem)}
-        </List.Section>
+      {showEmptyView ? (
+        <List.EmptyView
+          title={emptyTitle}
+          description={emptyDescription}
+          icon={loadError ? Icon.Warning : Icon.Folder}
+        />
+      ) : (
+        <>
+          <List.Section
+            title="Projects"
+            subtitle={`${topLevel.length} projects`}
+          >
+            {topLevel.map(renderProjectItem)}
+          </List.Section>
+          {subProjects.length > 0 && (
+            <List.Section
+              title="Sub-Projects"
+              subtitle={`${subProjects.length} projects`}
+            >
+              {subProjects.map(renderProjectItem)}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );

@@ -22,10 +22,6 @@ import {
   Label,
 } from "./api";
 
-interface CreateTaskArguments {
-  title?: string;
-}
-
 const PRIORITIES = [
   { value: "0", title: "Unset" },
   { value: "1", title: "Low" },
@@ -36,15 +32,14 @@ const PRIORITIES = [
 ];
 
 export default function CreateTask(
-  props: LaunchProps<{ arguments: CreateTaskArguments }>,
+  props: LaunchProps<{ arguments: Arguments.CreateTask }>,
 ) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [labels, setLabels] = useState<Label[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [prefillTitle, setPrefillTitle] = useState(
-    props.arguments?.title ?? "",
-  );
-  const [prefillReady, setPrefillReady] = useState(!!props.arguments?.title);
+  const argTitle = props.arguments.title?.trim() ?? "";
+  const [prefillTitle, setPrefillTitle] = useState(argTitle);
+  const [prefillReady, setPrefillReady] = useState(!!argTitle);
 
   useEffect(() => {
     async function loadData() {
@@ -64,7 +59,7 @@ export default function CreateTask(
     }
     loadData();
 
-    if (!props.arguments?.title) {
+    if (!argTitle) {
       getSelectedText()
         .then((text) => {
           if (text.trim()) setPrefillTitle(text.trim());
@@ -147,12 +142,19 @@ export default function CreateTask(
             <Action
               title="List Tasks"
               shortcut={{ modifiers: ["cmd"], key: "l" }}
-              onAction={() =>
-                launchCommand({
-                  name: "list-tasks",
-                  type: LaunchType.UserInitiated,
-                })
-              }
+              onAction={async () => {
+                try {
+                  await launchCommand({
+                    name: "list-tasks",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to launch List Tasks",
+                  });
+                }
+              }}
             />
             <Action.OpenInBrowser
               title="Open Vikunja"
