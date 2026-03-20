@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "Node16",
+    "target": "ES2022",
+    "moduleResolution": "node16",
+    "strict": true,
+    "jsx": "react-jsx",
+    "skipLibCheck": true,
+    "declaration": true
+  },
+  "include": ["src/**/*", "raycast-env.d.ts"]
+}
