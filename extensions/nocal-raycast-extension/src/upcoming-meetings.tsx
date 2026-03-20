@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List, open } from '@raycast/api'
-import { useEffect, useState } from 'react'
-import { listUpcomingMeetings, type Event } from './api'
+import { Action, ActionPanel, Color, Icon, List, open } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { listUpcomingMeetings, type Event } from "./api";
 import {
   ErrorState,
   formatDateTime,
@@ -9,135 +9,107 @@ import {
   getSelfRsvpStatus,
   meetingIcon,
   noteSnippetMarkdown,
-  openNocalDeepLink
-} from './components'
+  openNocalDeepLink,
+} from "./components";
 
 function sortMeetingsByStartTime(meetings: Event[]) {
   return [...meetings].sort(
-    (left, right) =>
-      new Date(left.start_time).getTime() - new Date(right.start_time).getTime()
-  )
+    (left, right) => new Date(left.start_time).getTime() - new Date(right.start_time).getTime(),
+  );
 }
 
 function isMeetingActive(meeting: Event) {
   if (meeting.is_all_day) {
-    return false
+    return false;
   }
 
-  const now = Date.now()
-  const start = new Date(meeting.start_time).getTime()
-  const end = new Date(meeting.end_time).getTime()
+  const now = Date.now();
+  const start = new Date(meeting.start_time).getTime();
+  const end = new Date(meeting.end_time).getTime();
 
-  return start <= now && now <= end
+  return start <= now && now <= end;
 }
 
 export default function UpcomingMeetingsCommand() {
-  const [meetings, setMeetings] = useState<Event[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<unknown>(null)
+  const [meetings, setMeetings] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<unknown>(null);
 
   const loadMeetings = async () => {
     try {
-      setIsLoading(true)
-      setError(null)
-      const response = await listUpcomingMeetings()
-      setMeetings(sortMeetingsByStartTime(response.results))
+      setIsLoading(true);
+      setError(null);
+      const response = await listUpcomingMeetings();
+      setMeetings(sortMeetingsByStartTime(response.results));
     } catch (newError) {
-      setError(newError)
+      setError(newError);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    void loadMeetings()
-  }, [])
+    void loadMeetings();
+  }, []);
 
   return (
     <List isLoading={isLoading}>
-      {error ? (
-        <ErrorState
-          title="Couldn’t Load Meetings"
-          error={error}
-          onRetry={() => void loadMeetings()}
-        />
-      ) : null}
+      {error ? <ErrorState title="Couldn’t Load Meetings" error={error} onRetry={() => void loadMeetings()} /> : null}
       {!error && !isLoading && meetings.length === 0 ? (
-        <List.EmptyView
-          title="No Upcoming Meetings"
-          description="Nothing is scheduled in the next 3 days."
-        />
+        <List.EmptyView title="No Upcoming Meetings" description="Nothing is scheduled in the next 3 days." />
       ) : null}
       {meetings.map((meeting) =>
         (() => {
-          const selfRsvpStatus = getSelfRsvpStatus(meeting.attendees)
-          const isActive = isMeetingActive(meeting)
+          const selfRsvpStatus = getSelfRsvpStatus(meeting.attendees);
+          const isActive = isMeetingActive(meeting);
           const accessories = getMeetingAccessories(
             meeting.start_time,
             meeting.is_all_day,
-            meetingIcon(selfRsvpStatus, meeting.status)
-          )
+            meetingIcon(selfRsvpStatus, meeting.status),
+          );
 
-          const hasVideo = Boolean(meeting.conferencing_details?.join_url)
+          const hasVideo = Boolean(meeting.conferencing_details?.join_url);
 
           if (isActive) {
             const nowTag = hasVideo
               ? {
-                  tag: { value: '▶ Join Now', color: Color.Green },
-                  tooltip: 'Press ↵ to join the video call'
+                  tag: { value: "▶ Join Now", color: Color.Green },
+                  tooltip: "Press ↵ to join the video call",
                 }
               : {
-                  tag: { value: 'Now' },
-                  tooltip: 'This meeting is happening now'
-                }
-            accessories.unshift(nowTag)
+                  tag: { value: "Now" },
+                  tooltip: "This meeting is happening now",
+                };
+            accessories.unshift(nowTag);
           }
 
           return (
             <List.Item
               key={meeting.id}
-              icon={
-                isActive && hasVideo
-                  ? { source: Icon.Video, tintColor: Color.Green }
-                  : Icon.Calendar
-              }
-              title={meeting.title || 'Untitled Meeting'}
+              icon={isActive && hasVideo ? { source: Icon.Video, tintColor: Color.Green } : Icon.Calendar}
+              title={meeting.title || "Untitled Meeting"}
               subtitle={meeting.location || undefined}
               accessories={accessories}
               detail={
                 <List.Item.Detail
-                  markdown={`# ${meeting.title || 'Untitled Meeting'}\n\n${noteSnippetMarkdown(meeting.description)}${
-                    meeting.recurrence_summary
-                      ? `\n\n**Recurs:** ${meeting.recurrence_summary}`
-                      : ''
+                  markdown={`# ${meeting.title || "Untitled Meeting"}\n\n${noteSnippetMarkdown(meeting.description)}${
+                    meeting.recurrence_summary ? `\n\n**Recurs:** ${meeting.recurrence_summary}` : ""
                   }`}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
                         title="Starts"
-                        text={formatDateTime(
-                          meeting.start_time,
-                          meeting.is_all_day
-                        )}
+                        text={formatDateTime(meeting.start_time, meeting.is_all_day)}
                       />
                       <List.Item.Detail.Metadata.Label
                         title="Ends"
-                        text={formatDateTime(
-                          meeting.end_time,
-                          meeting.is_all_day
-                        )}
+                        text={formatDateTime(meeting.end_time, meeting.is_all_day)}
                       />
                       {selfRsvpStatus ? (
-                        <List.Item.Detail.Metadata.Label
-                          title="Your RSVP"
-                          text={formatRsvpStatus(selfRsvpStatus)}
-                        />
+                        <List.Item.Detail.Metadata.Label title="Your RSVP" text={formatRsvpStatus(selfRsvpStatus)} />
                       ) : null}
                       {meeting.location ? (
-                        <List.Item.Detail.Metadata.Label
-                          title="Location"
-                          text={meeting.location}
-                        />
+                        <List.Item.Detail.Metadata.Label title="Location" text={meeting.location} />
                       ) : null}
                       {meeting.conferencing_details?.platform ? (
                         <List.Item.Detail.Metadata.Label
@@ -155,16 +127,14 @@ export default function UpcomingMeetingsCommand() {
                     <Action
                       title="Join Video Call"
                       icon={{ source: Icon.Video, tintColor: Color.Green }}
-                      onAction={() =>
-                        open(meeting.conferencing_details!.join_url!)
-                      }
+                      onAction={() => open(meeting.conferencing_details!.join_url!)}
                     />
                   ) : (
                     <Action
                       title="Open in nocal"
                       onAction={() =>
                         openNocalDeepLink(
-                          `event?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`
+                          `event?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`,
                         )
                       }
                     />
@@ -173,10 +143,8 @@ export default function UpcomingMeetingsCommand() {
                     <Action
                       title="Join Video Call"
                       icon={Icon.Video}
-                      onAction={() =>
-                        open(meeting.conferencing_details!.join_url!)
-                      }
-                      shortcut={{ modifiers: ['shift'], key: 'enter' }}
+                      onAction={() => open(meeting.conferencing_details!.join_url!)}
+                      shortcut={{ modifiers: ["shift"], key: "enter" }}
                     />
                   ) : null}
                   {isActive ? (
@@ -184,7 +152,7 @@ export default function UpcomingMeetingsCommand() {
                       title="Open in nocal"
                       onAction={() =>
                         openNocalDeepLink(
-                          `event?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`
+                          `event?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`,
                         )
                       }
                     />
@@ -193,20 +161,17 @@ export default function UpcomingMeetingsCommand() {
                     title="Open Meeting Note"
                     onAction={() =>
                       openNocalDeepLink(
-                        `event-note?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`
+                        `event-note?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`,
                       )
                     }
                   />
-                  <Action
-                    title="Refresh"
-                    onAction={() => void loadMeetings()}
-                  />
+                  <Action title="Refresh" onAction={() => void loadMeetings()} />
                 </ActionPanel>
               }
             />
-          )
-        })()
+          );
+        })(),
       )}
     </List>
-  )
+  );
 }

@@ -1,15 +1,4 @@
-const js = require('@eslint/js')
-const tseslint = require('typescript-eslint')
+const { defineConfig } = require("eslint/config");
+const raycastConfig = require("@raycast/eslint-config");
 
-module.exports = tseslint.config(js.configs.recommended, ...tseslint.configs.recommended, {
-  ignores: ['dist/**', 'node_modules/**'],
-  languageOptions: {
-    parserOptions: {
-      project: './tsconfig.json'
-    }
-  },
-  rules: {
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
-  }
-})
-
+module.exports = defineConfig([...raycastConfig]);

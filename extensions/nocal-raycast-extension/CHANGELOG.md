@@ -1,6 +1,6 @@
 # nocal Changelog
 
-## 1.0.0 - 2026-03-19
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
