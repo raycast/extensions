@@ -15,5 +15,5 @@
       "@raycast/api": ["node_modules/@raycast/api"]
     }
   },
-  "include": ["src"]
+  "include": ["src", "raycast-env.d.ts"]
 }

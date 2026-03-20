@@ -5,9 +5,6 @@ import type { FigmaShortcut } from "./data/shortcuts";
 
 type Platform = "mac" | "windows" | "linux";
 
-interface Preferences {
-  platform: Platform;
-}
 
 const PLATFORMS: { value: Platform; label: string }[] = [
   { value: "mac", label: "macOS" },
@@ -20,7 +17,7 @@ function getKeys(shortcut: FigmaShortcut, platform: Platform): string {
 }
 
 export default function Command() {
-  const { platform: defaultPlatform } = getPreferenceValues<Preferences>();
+  const { platform: defaultPlatform } = getPreferenceValues<Preferences.SearchShortcuts>();
   const [platform, setPlatform] = useState<Platform>(defaultPlatform);
 
   const platformDropdown = (

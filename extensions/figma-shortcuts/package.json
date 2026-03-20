@@ -13,32 +13,32 @@
       "name": "search-shortcuts",
       "title": "Search Figma Shortcuts",
       "description": "Search Figma keyboard shortcuts and copy them to the clipboard",
-      "mode": "view"
-    }
-  ],
-  "preferences": [
-    {
-      "name": "platform",
-      "type": "dropdown",
-      "title": "Platform",
-      "description": "Which OS shortcut format to display and copy",
-      "data": [
-        { "value": "mac", "title": "macOS" },
-        { "value": "windows", "title": "Windows" },
-        { "value": "linux", "title": "Linux" }
-      ],
-      "default": "mac",
-      "required": false
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "platform",
+          "type": "dropdown",
+          "title": "Platform",
+          "description": "Which OS shortcut format to display and copy",
+          "data": [
+            { "value": "mac", "title": "macOS" },
+            { "value": "windows", "title": "Windows" },
+            { "value": "linux", "title": "Linux" }
+          ],
+          "default": "mac",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.83.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
+    "eslint": "^9.8.0",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4"
   },
