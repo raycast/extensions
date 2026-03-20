@@ -1,5 +1,15 @@
 # Colima Changelog
 
+## [Save Template Defaults] - {PR_MERGE_DATE}
+
+### Added
+
+- Action to save Create Instance form values as default Colima template
+
+### Fixed
+
+- Default values now correctly load from environment and template
+
 ## [Initial Version] - 2026-03-12
 
 - Manage Colima VM instances (start, stop, delete, create)

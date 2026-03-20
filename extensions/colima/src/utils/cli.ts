@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { readFile, access } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -361,7 +361,7 @@ async function fileExists(path: string): Promise<boolean> {
   }
 }
 
-async function resolveColimaConfigHome(): Promise<string | null> {
+async function colimaConfigHomeCandidates(): Promise<string[]> {
   const home = homedir();
   const shellEnv = await resolveShellEnv();
   const candidates: string[] = [];
@@ -379,6 +379,12 @@ async function resolveColimaConfigHome(): Promise<string | null> {
   // Legacy ~/.colima
   candidates.push(join(home, ".colima"));
 
+  return candidates;
+}
+
+async function resolveColimaConfigHome(): Promise<string | null> {
+  const candidates = await colimaConfigHomeCandidates();
+
   for (const candidate of candidates) {
     if (await fileExists(candidate)) {
       return candidate;
@@ -386,6 +392,16 @@ async function resolveColimaConfigHome(): Promise<string | null> {
   }
 
   return null;
+}
+
+async function resolveColimaConfigHomeForWrite(): Promise<string> {
+  const existingHome = await resolveColimaConfigHome();
+  if (existingHome) {
+    return existingHome;
+  }
+
+  const candidates = await colimaConfigHomeCandidates();
+  return candidates[0];
 }
 
 function parseColimaConfig(parsed: RawColimaTemplate): ColimaTemplateDefaults {
@@ -425,14 +441,7 @@ export async function colimaTemplateDefaults(): Promise<ColimaTemplateDefaults> 
       return COLIMA_DEFAULTS;
     }
 
-    // 1. Try per-profile config (default profile) — reflects actual instance settings
-    const profileConfig = join(configHome, "default", "colima.yaml");
-    const fromProfile = await readColimaYaml(profileConfig);
-    if (fromProfile) {
-      return fromProfile;
-    }
-
-    // 2. Fall back to the template for new instances
+    // Read from the template for new instances (survives instance deletion)
     const templateConfig = join(configHome, "_templates", "default.yaml");
     const fromTemplate = await readColimaYaml(templateConfig);
     if (fromTemplate) {
@@ -443,4 +452,24 @@ export async function colimaTemplateDefaults(): Promise<ColimaTemplateDefaults> 
   } catch {
     return COLIMA_DEFAULTS;
   }
+}
+
+export async function colimaSaveTemplateDefaults(defaults: ColimaTemplateDefaults): Promise<void> {
+  const configHome = await resolveColimaConfigHomeForWrite();
+  const templateDirectory = join(configHome, "_templates");
+  const templatePath = join(templateDirectory, "default.yaml");
+
+  const content = yaml.dump({
+    cpu: defaults.cpus,
+    memory: defaults.memory,
+    disk: defaults.disk,
+    runtime: defaults.runtime,
+    vmType: defaults.vmType,
+    kubernetes: {
+      enabled: defaults.kubernetes,
+    },
+  });
+
+  await mkdir(templateDirectory, { recursive: true });
+  await writeFile(templatePath, content, "utf-8");
 }
