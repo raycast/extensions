@@ -21,6 +21,7 @@ import { getBatteryData } from "./Power/PowerUtils";
 import { getTemperatureData, formatTemperature } from "./Temperature/TemperatureUtils";
 
 import { formatBytes, isObjectEmpty, openActivityMonitorAppleScript } from "./utils";
+import { DiskInterface } from "./Interfaces";
 
 type PinnedStat = "cpu" | "temperature" | "memory" | "battery" | "network" | "storage" | "none";
 
@@ -99,73 +100,69 @@ export default function Command() {
     data: freshData,
     isLoading,
     revalidate,
-  } = usePromise(
-    async () => {
-      const [osInfo, storage, memoryUsage, networkData, batteryData, temperatureData] = await Promise.all([
-        getOSInfo(),
-        calculateDiskStorage(),
-        getMemoryUsage(),
-        getNetworkData(),
-        getBatteryData(),
-        getTemperatureData(),
-      ]);
+  } = usePromise(async () => {
+    const [osInfo, storage, memoryUsage, networkData, batteryData, temperatureData] = await Promise.all([
+      getOSInfo(),
+      calculateDiskStorage(),
+      getMemoryUsage(),
+      getNetworkData(),
+      getBatteryData(),
+      getTemperatureData(),
+    ]);
 
-      // CPU usage from os.cpus() delta
-      let idle = 0;
-      let total = 0;
-      for (const core of cpus()) {
-        const { user, nice, sys, irq, idle: coreIdle } = core.times;
-        idle += coreIdle;
-        total += user + nice + sys + irq + coreIdle;
+    // CPU usage from os.cpus() delta
+    let idle = 0;
+    let total = 0;
+    for (const core of cpus()) {
+      const { user, nice, sys, irq, idle: coreIdle } = core.times;
+      idle += coreIdle;
+      total += user + nice + sys + irq + coreIdle;
+    }
+    const dIdle = idle - prevCpuIdle;
+    const dTotal = total - prevCpuTotal;
+    prevCpuIdle = idle;
+    prevCpuTotal = total;
+    const cpuUsage = dTotal === 0 ? "0" : Math.round((1 - dIdle / dTotal) * 100).toString();
+
+    // Memory
+    const memTotal = memoryUsage.memTotal;
+    const memUsed = memoryUsage.memUsed;
+    const freeMem = memTotal - memUsed;
+    const memory = {
+      totalMem: Math.round(memTotal / 1024).toString(),
+      freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
+      freeMem: Math.round(freeMem / 1024).toString(),
+    };
+
+    // Battery
+    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
+
+    // Network delta
+    let upload = 0;
+    let download = 0;
+    if (!isObjectEmpty(prevNetProcess)) {
+      for (const key in networkData) {
+        let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
+        if (down < 0) down = 0;
+        let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
+        if (up < 0) up = 0;
+        download += down;
+        upload += up;
       }
-      const dIdle = idle - prevCpuIdle;
-      const dTotal = total - prevCpuTotal;
-      prevCpuIdle = idle;
-      prevCpuTotal = total;
-      const cpuUsage = dTotal === 0 ? "0" : Math.round((1 - dIdle / dTotal) * 100).toString();
+    }
+    prevNetProcess = networkData;
 
-      // Memory
-      const memTotal = memoryUsage.memTotal;
-      const memUsed = memoryUsage.memUsed;
-      const freeMem = memTotal - memUsed;
-      const memory = {
-        totalMem: Math.round(memTotal / 1024).toString(),
-        freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-        freeMem: Math.round(freeMem / 1024).toString(),
-      };
-
-      // Battery
-      const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
-
-      // Network delta
-      let upload = 0;
-      let download = 0;
-      if (!isObjectEmpty(prevNetProcess)) {
-        for (const key in networkData) {
-          let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
-          if (down < 0) down = 0;
-          let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
-          if (up < 0) up = 0;
-          download += down;
-          upload += up;
-        }
-      }
-      prevNetProcess = networkData;
-
-      return {
-        osInfo,
-        storage,
-        cpuUsage,
-        memory,
-        networkUsage: { upload, download },
-        batteryData,
-        isOnAC,
-        temperatureData,
-      };
-    },
-    [],
-    { keepPreviousData: true },
-  );
+    return {
+      osInfo,
+      storage,
+      cpuUsage,
+      memory,
+      networkUsage: { upload, download },
+      batteryData,
+      isOnAC,
+      temperatureData,
+    };
+  }, []);
 
   const data = freshData ?? cached;
 
@@ -258,7 +255,7 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Storage">
-        {data?.storage?.map((disk, index) => (
+        {data?.storage?.map((disk: DiskInterface, index: number) => (
           <MenuBarExtra.Item
             key={index}
             title={disk.diskName}
