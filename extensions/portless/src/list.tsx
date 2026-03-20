@@ -49,10 +49,10 @@ export default function Command() {
   const urls = data ?? [];
 
   return (
-    <List isLoading={isLoading}>
+    <List searchBarPlaceholder="Search active routes..." isLoading={isLoading}>
       {urls.length === 0 && !isLoading ? (
         <List.EmptyView
-          icon={Icon.Globe}
+          icon={Icon.Plug}
           title="No active routes"
           description="Start an app with: portless <name> <command>"
         />

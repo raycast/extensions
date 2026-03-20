@@ -1,21 +1,23 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "portless",
-  "title": "Portless",
-  "description": "Manage your Portless (Vercel) routes from Raycast. Instantly view active routes and their assigned ports.",
-  "icon": "extension-icon.png",
+  "title": "Portless Active Routes",
+  "description": "Instantly view active routes and their assigned ports.",
+  "icon": "extension_icon.png",
   "author": "nbaglivo",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "list",
-      "title": "List",
-      "subtitle": "List active routes.",
-      "description": "List active routes and their assigned ports.",
+      "title": "List Active Routes",
+      "description": "List active routes created by Portless",
       "mode": "view"
     }
   ],
