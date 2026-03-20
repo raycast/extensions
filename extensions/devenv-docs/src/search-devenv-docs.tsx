@@ -1,4 +1,13 @@
-import { ActionPanel, Detail, List, Action, Icon, Cache, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
+import {
+  ActionPanel,
+  Detail,
+  List,
+  Action,
+  Icon,
+  Cache,
+  getPreferenceValues,
+  openExtensionPreferences,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import yaml from "js-yaml";
 
@@ -319,7 +328,9 @@ async function fetchFolderContents(folderPath: string, token?: string): Promise<
   if (response.status === 403 || response.status === 429) {
     if (!token) {
       // Not authenticated - throw special error to prompt for token
-      const error = new Error("GitHub API rate limit exceeded. Add a Personal Access Token in preferences to continue.");
+      const error = new Error(
+        "GitHub API rate limit exceeded. Add a Personal Access Token in preferences to continue.",
+      );
       error.name = "RateLimitError";
       throw error;
     }
@@ -363,7 +374,7 @@ function DocsDetailView({ path, title }: { path: string; title: string }) {
   const { data, isLoading, revalidate } = useCachedPromise(
     async (p: string) => fixMarkdown(await fetchRawMarkdown(p), p),
     [path],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const websiteUrl = pathToWebsiteUrl(path);
@@ -426,7 +437,11 @@ function SectionedDocsList({ path, title }: { path: string; title: string }) {
       {(error || isEmpty) && (
         <List.EmptyView
           title={error ? "Failed to Load Options" : "No Options Found"}
-          description={error ? "Unable to fetch the documentation. Please try again." : "This document has no configuration options."}
+          description={
+            error
+              ? "Unable to fetch the documentation. Please try again."
+              : "This document has no configuration options."
+          }
           actions={
             <ActionPanel>
               <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
@@ -484,7 +499,17 @@ function SectionedDocsList({ path, title }: { path: string; title: string }) {
 }
 
 // List component for doc items (reusable for nested navigation)
-function DocsList({ items, title, revalidate, isLoading }: { items: DocItem[]; title?: string; revalidate?: () => void; isLoading?: boolean }) {
+function DocsList({
+  items,
+  title,
+  revalidate,
+  isLoading,
+}: {
+  items: DocItem[];
+  title?: string;
+  revalidate?: () => void;
+  isLoading?: boolean;
+}) {
   const isEmpty = !isLoading && items.length === 0;
 
   return (
@@ -528,11 +553,9 @@ function FolderDocsList({ folderPath, title }: { folderPath: string; title: stri
     isLoading,
     revalidate,
     error,
-  } = useCachedPromise(
-    (path: string, token?: string) => fetchFolderContents(path, token),
-    [folderPath, githubToken],
-    { keepPreviousData: true }
-  );
+  } = useCachedPromise((path: string, token?: string) => fetchFolderContents(path, token), [folderPath, githubToken], {
+    keepPreviousData: true,
+  });
 
   // Show rate limit message with action to open preferences
   if (error?.name === "RateLimitError") {
