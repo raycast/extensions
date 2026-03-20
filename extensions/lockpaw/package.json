@@ -8,7 +8,7 @@
   "author": "eriknielsen",
   "homepage": "https://getlockpaw.com",
   "repository": "https://github.com/sorkila/lockpaw",
-  "categories": ["Productivity", "System"],
+  "categories": ["Security", "System"],
   "license": "MIT",
   "platforms": ["macOS"],
   "commands": [
