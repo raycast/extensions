@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Fix "Create Task" command error on successful creation] - {PR_MERGE_DATE}
+## [Fix "Create Task" command error on successful creation] - 2026-03-20
 
 - Fix error when a task is created successfully with the "Create Task" command
 
