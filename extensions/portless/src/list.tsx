@@ -25,7 +25,14 @@ function getExtendedPath(): string {
   const nvmDir = join(home, ".nvm", "versions", "node");
   if (existsSync(nvmDir)) {
     try {
-      const versions = readdirSync(nvmDir).sort().reverse().slice(0, 5);
+      const versions = readdirSync(nvmDir)
+        .filter((v) => /^v\d+/.test(v))
+        .sort((a, b) => {
+          const numA = parseInt(a.replace(/^v/, "").split(".")[0], 10);
+          const numB = parseInt(b.replace(/^v/, "").split(".")[0], 10);
+          return numB - numA;
+        })
+        .slice(0, 5);
       for (const ver of versions) {
         const nodeBin = join(nvmDir, ver, "bin");
         if (existsSync(nodeBin)) {
