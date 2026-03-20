@@ -1,0 +1,41 @@
+{
+  "name": "type-paste",
+  "version": "1.0.0",
+  "title": "Clipboard Typer",
+  "description": "Auto-Type clipboard contents into the focused field",
+  "icon": "icon.png",
+  "author": "bbunks",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "type-clipboard",
+      "title": "Type Clipboard",
+      "description": "Type clipboard text into the selected text input",
+      "icon": "icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "schemaVersion": 1,
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "keywords": [
+    "raycast"
+  ],
+  "type": "module",
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3"
+  }
+}
