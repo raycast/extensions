@@ -161,7 +161,7 @@ async function getAppIdentifiers(appPath: string): Promise<AppIdentifiers> {
 
 function getDirSize(dirPath: string): Promise<number> {
   return new Promise((resolve) => {
-    execFile("du", ["-sk", dirPath], (err, stdout) => {
+    execFile("/usr/bin/du", ["-sk", dirPath], (err, stdout) => {
       if (err) return resolve(0);
       resolve(parseInt(stdout.split("\t")[0] || "0") * 1024);
     });
@@ -469,7 +469,9 @@ function UninstallView() {
         }
 
         const removedCount = allPaths.length - failedPaths.length;
-        setRemovedPaths((prev) => new Set([...prev, app.path]));
+        if (!failedPaths.includes(app.path)) {
+          setRemovedPaths((prev) => new Set([...prev, app.path]));
+        }
         progressToast.style = Toast.Style.Success;
         progressToast.title = `${app.name} moved to Trash`;
 
