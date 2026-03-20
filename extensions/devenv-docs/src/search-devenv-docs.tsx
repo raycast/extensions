@@ -202,17 +202,6 @@ async function fetchNavYaml(): Promise<DocItem[]> {
   return extractGuideSection(parsed);
 }
 
-// Fetch markdown content for a doc
-async function fetchMarkdown(path: string): Promise<string> {
-  const url = `${DOCS_BASE_URL}/${path}`;
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${path}: ${response.statusText}`);
-  }
-  const text = await response.text();
-  return fixMarkdown(text, path);
-}
-
 // Extract type from section content
 function extractType(content: string): string | undefined {
   const match = content.match(/\*Type:\*\s*(.+?)(?:\n|$)/);
@@ -353,9 +342,11 @@ async function fetchFolderContents(folderPath: string): Promise<DocItem[]> {
 
 // Detail view for markdown files
 function DocsDetailView({ path, title }: { path: string; title: string }) {
-  const { data, isLoading, revalidate } = useCachedPromise((p: string) => fetchMarkdown(p), [path], {
-    keepPreviousData: true,
-  });
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async (p: string) => fixMarkdown(await fetchRawMarkdown(p), p),
+    [path],
+    { keepPreviousData: true }
+  );
 
   const websiteUrl = pathToWebsiteUrl(path);
 
