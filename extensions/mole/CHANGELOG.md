@@ -1,6 +1,6 @@
 # Mole Changelog
 
-## [Uninstall Residual Cleanup] - {PR_MERGE_DATE}
+## [Uninstall Residual Cleanup] - 2026-03-20
 
 - Added deep residual file scanning when uninstalling apps (searches ~/Library, /Library, containers, and vendor directories)
 - Shows a confirmation dialog listing all found residuals with sizes before removal
