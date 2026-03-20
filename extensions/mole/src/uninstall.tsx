@@ -1,5 +1,5 @@
 import { List, Icon, ActionPanel, Action, Alert, showToast, Toast, confirmAlert, trash } from "@raycast/api";
-import { readdirSync, statSync, existsSync, readFileSync } from "fs";
+import { readdirSync, statSync, existsSync } from "fs";
 import { join, basename } from "path";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
@@ -69,7 +69,6 @@ const EXTRA_SEARCH_PATHS = [
   join(HOME, ".config"),
   "/private/var/db/receipts",
   "/private/tmp",
-  "/usr/local/bin",
   "/usr/local/etc",
   "/usr/local/opt",
   "/usr/local/share",
@@ -215,7 +214,7 @@ function matchesApp(entry: string, searchTerms: string[], bundleId: string | nul
 
   for (const term of searchTerms) {
     if (entryNormalized === term) return true;
-    if (term.length >= 5 && entryNormalized.includes(term)) return true;
+    if (term.length >= 8 && entryNormalized.includes(term)) return true;
   }
 
   if (bundleId) {
@@ -265,7 +264,7 @@ function scanDeep(dirPath: string, searchTerms: string[], bundleId: string | nul
   return results;
 }
 
-function scanContainersByBundleId(bundleId: string): string[] {
+async function scanContainersByBundleId(bundleId: string): Promise<string[]> {
   const containersDir = join(HOME, "Library", "Containers");
   if (!existsSync(containersDir)) return [];
   const results: string[] = [];
@@ -274,13 +273,9 @@ function scanContainersByBundleId(bundleId: string): string[] {
     if (/^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$/i.test(entry)) {
       const metadataPath = join(containersDir, entry, ".com.apple.containermanagerd.metadata.plist");
       if (!existsSync(metadataPath)) continue;
-      try {
-        const content = readFileSync(metadataPath, "utf-8");
-        if (content.includes(bundleId)) {
-          results.push(join(containersDir, entry));
-        }
-      } catch {
-        continue;
+      const metaId = await readPlistKey(metadataPath, "MCMMetadataIdentifier");
+      if (metaId && metaId === bundleId) {
+        results.push(join(containersDir, entry));
       }
     }
   }
@@ -356,7 +351,7 @@ async function findResidualFiles(appName: string, identifiers: AppIdentifiers): 
       }
     }
 
-    const containerMatches = scanContainersByBundleId(identifiers.bundleId);
+    const containerMatches = await scanContainersByBundleId(identifiers.bundleId);
     for (const match of containerMatches) await addMatch(match, "Containers");
   }
 

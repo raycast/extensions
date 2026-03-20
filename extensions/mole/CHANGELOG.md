@@ -8,7 +8,7 @@
 - Migrated error handling to `showFailureToast` from `@raycast/utils`
 - Replaced manual Preferences type with auto-generated `ExtensionPreferences`
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-03-18
 
 - Added System Status command with real-time health monitoring
 - Added Clean System command with streaming scan progress
