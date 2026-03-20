@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openoats",
+  "title": "OpenOats",
+  "description": "Create, search, and export meeting notes from OpenOats.",
+  "version": "0.1.0",
+  "author": "neerav",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Documentation",
+    "Communication"
+  ],
+  "keywords": [
+    "meeting notes",
+    "transcript",
+    "transcription",
+    "recording",
+    "notes"
+  ],
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "create-note",
+      "title": "Start Recording",
+      "subtitle": "OpenOats",
+      "description": "Start recording in OpenOats and create a new note",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "OpenOats",
+      "description": "Stop the active OpenOats recording session",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "OpenOats",
+      "description": "Browse OpenOats sessions, notes, and transcripts",
+      "mode": "view"
+    },
+    {
+      "name": "export-transcripts",
+      "title": "Export Transcripts",
+      "subtitle": "OpenOats",
+      "description": "Export OpenOats transcripts to Downloads",
+      "mode": "view"
+    },
+    {
+      "name": "export-notes",
+      "title": "Export Notes",
+      "subtitle": "OpenOats",
+      "description": "Export generated OpenOats notes to Downloads",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIf you want to publish this Raycast extension, use npm run publish instead of npm publish.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "react": "^19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3"
+  }
+}
