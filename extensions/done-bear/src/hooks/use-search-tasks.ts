@@ -39,7 +39,7 @@ export function useSearchTasks(workspaceId: string | null, searchText: string, a
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (key: string, query: string) => {
       if (isAll) {
-        return searchTasksAll(allWorkspaceIds, query);
+        return searchTasksAll(allWorkspaceIds ?? [], query);
       }
       return searchTasks(key, query);
     },
