@@ -1,3 +1,5 @@
+// src/components/NoteEdit.tsx
+
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
@@ -8,19 +10,21 @@ import { useTranslation } from "../hooks/useTranslation";
 import { runWithToast } from "../utils/toast";
 import { Bookmark } from "../types";
 
-const log = logger.child("[BookmarkEdit]");
+const log = logger.child("[NoteEdit]");
 
-interface FormValues {
-  title: string;
-  note: string;
-}
+const MAX_NOTE_LENGTH = 2500;
 
-interface BookmarkDetailProps {
+interface NoteEditProps {
   bookmark: Bookmark;
   onRefresh?: () => void;
 }
 
-export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
+interface FormValues {
+  content: string;
+  title: string;
+}
+
+export function NoteEdit({ bookmark, onRefresh }: NoteEditProps) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
   const { tags } = useGetAllTags();
@@ -35,36 +39,24 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
     removedTagIds,
     buildTagsToAttach,
     buildTagsToDetach,
-  } = useTagPicker({ tags, initialTagIds: bookmark.tags.map((t) => t.id) });
-
-  const getDefaultTitle = (bookmark: Bookmark): string => {
-    if (bookmark.title) {
-      return bookmark.title;
-    }
-    switch (bookmark.content.type) {
-      case "link":
-        return bookmark.content.title || t("bookmark.untitled");
-      case "text":
-        return "";
-      case "asset":
-        if (bookmark.content.assetType === "image") {
-          return bookmark.content.fileName || t("bookmark.untitledImage");
-        } else if (bookmark.content.assetType === "pdf") {
-          return bookmark.content.fileName || t("bookmark.untitled");
-        }
-        return t("bookmark.untitled");
-      default:
-        return t("bookmark.untitled");
-    }
-  };
+  } = useTagPicker({ tags, initialTagIds: bookmark.tags.map((tag) => tag.id) });
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     initialValues: {
-      title: getDefaultTitle(bookmark),
-      note: bookmark.note || "",
+      // BookmarkContent has text?: string as an optional field on a flat interface
+      // (not a discriminated union), so this access is safe without a cast.
+      content: bookmark.content.text ?? "",
+      title: bookmark.title ?? "",
+    },
+    validation: {
+      content: (value) => {
+        if (!value || value.trim().length === 0) return t("bookmark.contentRequired");
+        if (value.length > MAX_NOTE_LENGTH) return t("bookmark.contentTooLong");
+        return undefined;
+      },
     },
     async onSubmit(values) {
-      log.info("Submitting bookmark update", { bookmarkId: bookmark.id });
+      log.info("Updating note", { bookmarkId: bookmark.id });
       await runWithToast({
         loading: { title: t("bookmark.updating") },
         success: { title: t("bookmark.updateSuccess") },
@@ -72,7 +64,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         action: async () => {
           await fetchUpdateBookmark(bookmark.id, {
             title: values.title.trim(),
-            note: values.note.trim(),
+            text: values.content.trim(),
           });
 
           await Promise.all([
@@ -82,7 +74,11 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         },
       });
 
-      log.info("Bookmark updated", { bookmarkId: bookmark.id });
+      // onRefresh and pop run after runWithToast resolves. runWithToast catches
+      // API errors and shows a failure toast without re-throwing, so these lines
+      // run whether the update succeeded or failed. If strictly on-success-only
+      // behaviour is needed, replace runWithToast with a manual try/catch.
+      log.info("Note updated", { bookmarkId: bookmark.id });
       await onRefresh?.();
       pop();
     },
@@ -96,17 +92,17 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         </ActionPanel>
       }
     >
+      <Form.TextArea
+        {...itemProps.content}
+        title={t("bookmark.content")}
+        placeholder={t("bookmark.contentPlaceholder")}
+        enableMarkdown
+      />
+
       <Form.TextField
         {...itemProps.title}
         title={t("bookmark.customTitle")}
         placeholder={t("bookmark.titlePlaceholder")}
-      />
-
-      <Form.TextArea
-        {...itemProps.note}
-        title={t("bookmark.note")}
-        placeholder={t("bookmark.notePlaceholder")}
-        enableMarkdown
       />
 
       <Form.TagPicker
