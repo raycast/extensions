@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "downloads-cleaner",
+  "title": "Downloads Cleaner",
+  "version": "1.0.0",
+  "description": "Tag outdated files in a folder with Finder labels.",
+  "icon": "extension-icon.png",
+  "author": "wybxc",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tag-outdated-downloads",
+      "title": "Tag Outdated Downloads",
+      "description": "Tag files older than a threshold based on access time.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "downloadFolderPath",
+          "title": "Download Folder Path",
+          "description": "Folder to scan. Supports ~ for home directory.",
+          "type": "directory",
+          "required": false,
+          "default": "~/Downloads"
+        },
+        {
+          "name": "timeThresholdDays",
+          "title": "Time Threshold (Days)",
+          "description": "Files older than this value will be tagged.",
+          "type": "textfield",
+          "required": false,
+          "default": "14"
+        },
+        {
+          "name": "finderTagColor",
+          "title": "Finder Tag Color",
+          "description": "Tag color applied to outdated files.",
+          "type": "dropdown",
+          "required": false,
+          "default": "red",
+          "data": [
+            {
+              "title": "Red",
+              "value": "red"
+            },
+            {
+              "title": "Orange",
+              "value": "orange"
+            },
+            {
+              "title": "Yellow",
+              "value": "yellow"
+            },
+            {
+              "title": "Green",
+              "value": "green"
+            },
+            {
+              "title": "Blue",
+              "value": "blue"
+            },
+            {
+              "title": "Purple",
+              "value": "purple"
+            },
+            {
+              "title": "Gray",
+              "value": "gray"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
