@@ -1,13 +1,3 @@
-export type TaskPlanDetails = {
-  id: string;
-  userId: string;
-  title: string;
-  due?: string;
-  durationTimeChunks: number;
-  personal: boolean;
-  snoozeUntil?: string;
-};
-
 export type SchedulingLinkPlanDetails = {
   id: string;
   title: string;
@@ -17,7 +7,7 @@ export type SchedulingLinkPlanDetails = {
   durations: number[];
 };
 
-export interface Plan<PlanType extends TaskPlanDetails | SchedulingLinkPlanDetails> {
+export interface Plan<PlanType extends SchedulingLinkPlanDetails> {
   planType: string;
   id: string;
   planDetails: PlanType;

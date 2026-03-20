@@ -71,7 +71,6 @@ export interface UserFeatures {
     personalSyncNotifyDeleted: boolean;
     personalSyncNotificationsIncludingSelf: boolean;
     habitNotifyUpcoming: boolean;
-    taskNotifyUpcoming: boolean;
     travelNotify: boolean;
     outsideHoursMigrated: boolean;
     statusSync: string;
@@ -84,24 +83,6 @@ export interface UserFeatures {
     };
 
     statusEnabled: boolean;
-  };
-  taskSettings: {
-    enabled: boolean;
-    googleTasks: boolean;
-    defaults: {
-      timeChunksRequired: number;
-      commsTimeChunksRequired: number;
-      delayedStartInMinutes: number;
-      dueInDays: number;
-      category: string;
-      alwaysPrivate: boolean;
-      minChunkSize: number;
-      maxChunkSize: number;
-      onDeck: boolean;
-    };
-    autoWorkflowSettings: {
-      category: string;
-    };
   };
   priorities: {
     enabled: boolean;
@@ -148,7 +129,6 @@ export interface UserFeatures {
     enabled: boolean;
   };
   interests: {
-    tasks: boolean;
     priorities: boolean;
     office365: boolean;
     calendar: boolean;
@@ -162,12 +142,9 @@ export interface UserFeatures {
   };
   onboard: {
     habits: boolean;
-    tasks: boolean;
-    googleTasks: boolean;
     planItemPrioritized: boolean;
     smartOneOnOnes: boolean;
     bufferTime: boolean;
-    tasksReindex: boolean;
     googleAddOn: boolean;
     schedulingLinks: boolean;
   };

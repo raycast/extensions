@@ -3,7 +3,6 @@ export type TimePolicy = {
   userId: string;
   policyType: string;
   policy: unknown;
-  taskCategory: string;
   title: string;
   description: string;
   features: Array<string>;

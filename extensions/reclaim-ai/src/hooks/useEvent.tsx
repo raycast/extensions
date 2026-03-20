@@ -12,7 +12,6 @@ import useApi, { UseApiError } from "./useApi";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseEvents, EventActions } from "./useEvent.types";
 import { useSmartHabits } from "./useSmartHabits";
-import { useTaskActions } from "./useTask";
 import { useUser } from "./useUser";
 
 export class UseEventsError extends UseApiError {}
@@ -48,7 +47,6 @@ export const useEvents = ({ start, end }: { readonly start: Date; readonly end: 
 
 export const useEventActions = () => {
   const { currentUser } = useUser();
-  const { startTask, restartTask, stopTask } = useTaskActions();
   const { apiUrl } = getPreferenceValues<NativePreferences>();
 
   const { smartHabitsByLineageIdsMap } = useSmartHabits();
@@ -175,44 +173,6 @@ export const useEventActions = () => {
     }
 
     switch (event.assist?.eventType) {
-      case "TASK_ASSIGNMENT":
-        if (showStart)
-          eventActions.push({
-            icon: Icon.Play,
-            title: "Start",
-            action: async () => {
-              if (event.assist?.taskId) await startTask(String(event.assist.taskId));
-            },
-          });
-
-        if (showRestartStop)
-          eventActions.push(
-            {
-              icon: Icon.Rewind,
-              title: "Restart",
-              action: async () => {
-                if (event.assist?.taskId) await restartTask(String(event.assist.taskId));
-              },
-            },
-            {
-              icon: Icon.Stop,
-              title: "Stop",
-              action: async () => {
-                if (event.assist?.taskId) await stopTask(String(event.assist.taskId));
-              },
-            }
-          );
-
-        eventActions.push({
-          icon: Icon.Calendar,
-          title: "Open in Planner",
-          action: () => {
-            open(
-              `https://app.reclaim.ai/planner?eventId=${event.eventId}&type=task&assignmentId=${event.assist?.taskId}`
-            );
-          },
-        });
-        break;
       case "ONE_ON_ONE_ASSIGNMENT":
         eventActions.push({
           icon: Icon.Calendar,
