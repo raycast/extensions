@@ -414,12 +414,27 @@ function SectionedDocsList({ path, title }: { path: string; title: string }) {
     data: sections,
     isLoading,
     revalidate,
+    error,
   } = useCachedPromise((p: string) => fetchMarkdownSections(p), [path], { keepPreviousData: true });
 
   const websiteUrl = pathToWebsiteUrl(path);
 
+  const isEmpty = !isLoading && (!sections || sections.length === 0);
+
   return (
     <List navigationTitle={title} isLoading={isLoading} searchBarPlaceholder="Search options...">
+      {(error || isEmpty) && (
+        <List.EmptyView
+          title={error ? "Failed to Load Options" : "No Options Found"}
+          description={error ? "Unable to fetch the documentation. Please try again." : "This document has no configuration options."}
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
+              <Action.OpenInBrowser url={websiteUrl} title={`Open ${title} on Devenv.sh`} />
+            </ActionPanel>
+          }
+        />
+      )}
       {(sections || []).map((section, index) => {
         const unescapedTitle = section.title.replace(/\\\./g, ".").replace(/\\</g, "<").replace(/\\>/g, ">");
         const accessories: List.Item.Accessory[] = [];
@@ -470,8 +485,23 @@ function SectionedDocsList({ path, title }: { path: string; title: string }) {
 
 // List component for doc items (reusable for nested navigation)
 function DocsList({ items, title, revalidate, isLoading }: { items: DocItem[]; title?: string; revalidate?: () => void; isLoading?: boolean }) {
+  const isEmpty = !isLoading && items.length === 0;
+
   return (
     <List navigationTitle={title} isLoading={isLoading}>
+      {isEmpty && (
+        <List.EmptyView
+          title="No Documentation Found"
+          description="Unable to load documentation items."
+          actions={
+            revalidate ? (
+              <ActionPanel>
+                <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
+              </ActionPanel>
+            ) : undefined
+          }
+        />
+      )}
       {items.map((item, index) => {
         if (item.children && item.children.length > 0) {
           // Section with children
@@ -638,9 +668,26 @@ export default function Command() {
     data: items,
     isLoading,
     revalidate,
+    error,
   } = useCachedPromise(fetchNavYaml, [], {
     keepPreviousData: true,
   });
+
+  if (error) {
+    return (
+      <List navigationTitle="DevEnv Docs">
+        <List.EmptyView
+          title="Failed to Load Documentation"
+          description="Unable to fetch the documentation index. Please try again."
+          actions={
+            <ActionPanel>
+              <Action icon={Icon.ArrowClockwise} title="Retry" onAction={() => revalidate()} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return <DocsList items={items || []} title="DevEnv Docs" revalidate={revalidate} isLoading={isLoading} />;
 }
