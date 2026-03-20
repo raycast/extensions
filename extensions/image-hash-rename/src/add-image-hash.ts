@@ -53,7 +53,7 @@ export default async function main() {
 
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Processing images\u2026",
+    title: "Processing images…",
     message: folder,
   });
 
@@ -107,7 +107,7 @@ export default async function main() {
       });
     } else {
       await toast.hide();
-      await showHUD(`\u2705 Renamed ${renamed} image${renamed === 1 ? "" : "s"}`);
+      await showHUD(`✅ Renamed ${renamed} image${renamed === 1 ? "" : "s"}`);
     }
   } catch (err) {
     await showToast({
