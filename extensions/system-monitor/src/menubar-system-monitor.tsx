@@ -229,13 +229,13 @@ export default function Command() {
       <MenuBarExtra.Section title="System Info">
         <MenuBarExtra.Item
           title="macOS"
-          subtitle={`${data?.osInfo.release}` || "Loading..."}
+          subtitle={`${data?.osInfo?.release}` || "Loading..."}
           icon={Icon.Finder}
         />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Storage">
-        {data?.storage.map((disk, index) => (
+        {data?.storage?.map((disk, index) => (
           <MenuBarExtra.Item
             key={index}
             title={disk.diskName}
