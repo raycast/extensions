@@ -275,15 +275,15 @@ function safeFileName(value: string) {
 }
 
 function formatDateTime(date: Date) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
 }
 
-function formatTime(value: string) {
-  const date = new Date(value);
-  return new Intl.DateTimeFormat(undefined, {
+function formatTime(value: string | Date) {
+  const date = new Date(value instanceof Date ? value.toISOString() : value);
+  return new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",

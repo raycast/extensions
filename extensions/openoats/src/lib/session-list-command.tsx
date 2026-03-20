@@ -288,7 +288,7 @@ function SessionActions({
           <Action
             title="Copy Notes"
             icon={Icon.Document}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             onAction={() => void handleCopyNotes(session, details?.notes?.markdown)}
           />
         </>
@@ -345,7 +345,7 @@ async function handleExportNotes(session: SessionSummary) {
 }
 
 function formatSessionSubtitle(session: SessionSummary) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(session.startedAt);
