@@ -2,7 +2,7 @@
 
 ## [Revert Previous Update] - {PR_MERGE_DATE}
 
-- Revert previous change from 2026-03-16 because it was spawning infinite processes
+- Revert previous change from 2026-03-16 because it was spawning infinite processes(thank you @FelipeCooper!)
 
 ## [Fix Stale Menubar Readings] - 2026-03-16
 
