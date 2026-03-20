@@ -5,7 +5,10 @@
   "description": "Search and open your music production sessions directly from Raycast",
   "icon": "command-icon.png",
   "author": "chris-warner",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
   "license": "MIT",
   "main": "src/search-sessions.tsx",
   "scripts": {
@@ -16,14 +19,14 @@
     "fix-lint": "ray lint --fix"
   },
   "dependencies": {
-    "@raycast/api": "^1.76.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
+    "eslint": "^9.36.0",
     "prettier": "^3.2.5",
     "typescript": "^5.4.5"
   },

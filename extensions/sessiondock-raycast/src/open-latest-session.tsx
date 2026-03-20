@@ -8,7 +8,7 @@ export default async function Command() {
   });
 
   try {
-    const sessions = await listSessions({ limit: 1 });
+    const sessions = await listSessions({ limit: 1, sort: "-lastOpened" });
     const latest = sessions[0];
 
     if (!latest) {

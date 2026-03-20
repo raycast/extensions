@@ -6,11 +6,6 @@ import type {
   SessionDockError,
 } from "./types";
 
-type Preferences = {
-  apiBaseUrl: string;
-  apiToken: string;
-};
-
 type RequestOptions = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;

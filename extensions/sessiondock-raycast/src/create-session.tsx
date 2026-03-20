@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast } from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
 import { useState } from "react";
 import { createSession } from "./api";
 
@@ -54,100 +55,116 @@ function inferMimeFromPath(path: string): string | undefined {
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    initialValues: {
+      kind: "Ableton",
+      status: "draft",
+      location: [],
+      previewSource: [],
+      tags: "",
+      notes: "",
+    },
+    validation: {
+      title: (value) => (value?.trim() ? undefined : FormValidation.Required),
+      previewSource: (value) => {
+        const previewAudioPath = value?.[0]?.trim();
 
-  async function onSubmit(values: FormValues) {
-    setIsLoading(true);
+        if (!previewAudioPath) {
+          return "Choose Preview Source to set preview.";
+        }
 
-    try {
-      const selectedLocation = values.location?.[0]?.trim();
-      const selectedPreviewSource = values.previewSource?.[0]?.trim();
-      const tags = values.tags
-        .split(",")
-        .map((tag) => tag.trim())
-        .filter(Boolean);
+        if (!inferMimeFromPath(previewAudioPath)) {
+          return "Preview Source must be a supported audio file type.";
+        }
+      },
+    },
+    async onSubmit(values) {
+      setIsLoading(true);
 
-      const normalizedTitle = values.title.trim();
-      const normalizedKind = values.kind.trim() || "Ableton";
-      const previewAudioPath = selectedPreviewSource || undefined;
-      const previewAudioMime = previewAudioPath
-        ? inferMimeFromPath(previewAudioPath)
-        : undefined;
+      try {
+        const selectedLocation = values.location?.[0]?.trim();
+        const previewAudioPath = values.previewSource[0].trim();
+        const tags = values.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean);
 
-      if (!normalizedTitle) {
-        throw new Error("Title is required.");
+        const created = await createSession({
+          title: values.title.trim(),
+          kind: values.kind.trim() || "Ableton",
+          status: values.status.trim() || undefined,
+          projectPath: selectedLocation || undefined,
+          previewAudioPath,
+          previewAudioMime: inferMimeFromPath(previewAudioPath),
+          tags: tags.length ? tags : undefined,
+          notes: values.notes.trim() || undefined,
+        });
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Created ${created.title} with preview`,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title:
+            error instanceof Error ? error.message : "Failed to create session",
+        });
+      } finally {
+        setIsLoading(false);
       }
-
-      if (!previewAudioPath) {
-        throw new Error("Choose Preview Source to set preview.");
-      }
-
-      if (!previewAudioMime) {
-        throw new Error("Preview Source must be a supported audio file type.");
-      }
-
-      const created = await createSession({
-        title: normalizedTitle,
-        kind: normalizedKind,
-        status: values.status.trim() || undefined,
-        projectPath: selectedLocation || undefined,
-        previewAudioPath,
-        previewAudioMime,
-        tags: tags.length ? tags : undefined,
-        notes: values.notes.trim() || undefined,
-      });
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Created ${created.title} with preview`,
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title:
-          error instanceof Error ? error.message : "Failed to create session",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+    },
+  });
 
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Session" onSubmit={onSubmit} />
+          <Action.SubmitForm title="Create Session" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Launch cue prep" />
-      <Form.Dropdown id="kind" title="Kind" defaultValue="Ableton">
+      <Form.TextField
+        title="Title"
+        placeholder="Launch cue prep"
+        {...itemProps.title}
+      />
+      <Form.Dropdown title="Kind" {...itemProps.kind}>
         {SESSION_KINDS.map((kind) => (
           <Form.Dropdown.Item key={kind} value={kind} title={kind} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="status" title="Status" defaultValue="draft">
+      <Form.Dropdown title="Status" {...itemProps.status}>
         {SESSION_STATUSES.map((status) => (
           <Form.Dropdown.Item key={status} value={status} title={status} />
         ))}
       </Form.Dropdown>
       <Form.FilePicker
-        id="location"
         title="Location"
         allowMultipleSelection={false}
         canChooseDirectories
         canChooseFiles
+        {...itemProps.location}
       />
       <Form.FilePicker
-        id="previewSource"
         title="Preview Source"
         info="Select the preview audio file to attach to the session."
         allowMultipleSelection={false}
         canChooseDirectories={false}
         canChooseFiles
+        {...itemProps.previewSource}
       />
-      <Form.TextField id="tags" title="Tags" placeholder="mix,priority" />
-      <Form.TextArea id="notes" title="Notes" placeholder="Session notes" />
+      <Form.TextField
+        title="Tags"
+        placeholder="mix,priority"
+        {...itemProps.tags}
+      />
+      <Form.TextArea
+        title="Notes"
+        placeholder="Session notes"
+        {...itemProps.notes}
+      />
     </Form>
   );
 }
