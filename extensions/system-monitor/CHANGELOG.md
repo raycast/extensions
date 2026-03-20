@@ -1,5 +1,9 @@
 # System Monitor Changelog
 
+## [Revert Previous Update] - {PR_MERGE_DATE}
+
+- Revert previous change from 2026-03-16 because it was spawning infinite processes
+
 ## [Fix Stale Menubar Readings] - 2026-03-16
 
 - Enable background refresh for the menubar command so pinned stats stay up to date
