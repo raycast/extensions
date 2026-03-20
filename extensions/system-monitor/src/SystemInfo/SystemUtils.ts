@@ -38,8 +38,12 @@ export async function getOSInfo() {
   const release = versionMatch ? versionMatch[1].trim() : "Unknown";
   const major = parseInt(release.split(".")[0], 10);
   const codenames: Record<number, string> = {
-    15: "Sequoia", 14: "Sonoma", 13: "Ventura", 12: "Monterey",
-    11: "Big Sur", 10: "Catalina",
+    15: "Sequoia",
+    14: "Sonoma",
+    13: "Ventura",
+    12: "Monterey",
+    11: "Big Sur",
+    10: "Catalina",
   };
   return { codename: codenames[major] ?? release, release };
 }

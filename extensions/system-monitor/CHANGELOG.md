@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Eliminate Zombie Processes] - {PR_MERGE_DATE}
+## [Eliminate Zombie Processes] - 2026-03-20
 
 - Replace all `exec()` calls with `execFile()` to avoid spawning shell processes
 - Remove `systeminformation` and `os-utils` dependencies (both spawn child processes internally)
