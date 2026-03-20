@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Feature] - {PR_MERGE_DATE}
+
+- Add "Pull to Current Workspace" action to window switcher (Shift+Enter)
+
 ## [Improvement] - 2026-01-22
 
 - Add LaunchContext support for programmatic integration
