@@ -1,5 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, confirmAlert, Alert, Icon } from "@raycast/api";
-import * as fs from "fs";
+import { List, ActionPanel, Action, showToast, Toast, confirmAlert, Alert, Icon, trash } from "@raycast/api";
 import { execFile } from "child_process";
 import { useCachedPromise } from "@raycast/utils";
 import { GitRepo, GitRepoService, tildifyPath } from "./utils";
@@ -22,7 +21,7 @@ function git(args: string[], cwd: string): Promise<string> {
 async function deleteFromDisk(repo: GitRepo, revalidate: () => void) {
   const removeToast = await showToast({ style: Toast.Style.Animated, title: "Removing repository…" });
   try {
-    fs.rmSync(repo.fullPath, { recursive: true, force: true });
+    await trash(repo.fullPath);
     updateToast(removeToast, Toast.Style.Success, "Repository removed");
     revalidate();
   } catch (err) {
@@ -69,7 +68,7 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
 
   const confirmed = await confirmAlert({
     title: `Remove "${repo.name}"?`,
-    message: "This will permanently delete the repository from your filesystem. This action cannot be undone.",
+    message: "This will move the repository to the Trash.",
     primaryAction: {
       title: "Remove",
       style: Alert.ActionStyle.Destructive,
@@ -84,8 +83,7 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
 async function forceRemoveRepo(repo: GitRepo, revalidate: () => void) {
   const confirmed = await confirmAlert({
     title: `Force remove "${repo.name}"?`,
-    message:
-      "This will permanently delete the repository including any uncommitted changes or unpushed commits. This action cannot be undone.",
+    message: "This will move the repository to the Trash, including any uncommitted changes or unpushed commits.",
     primaryAction: {
       title: "Force Remove",
       style: Alert.ActionStyle.Destructive,
