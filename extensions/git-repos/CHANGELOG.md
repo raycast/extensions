@@ -2,7 +2,7 @@
 
 ## [Added Command] - {PR_MERGE_DATE}
 
-- Added a new `Remove Repo` command that lets you remove a local repo. In order to delete it, you cannot have local commits or uncommitted changes. There is an action that allows user to force delete even with uncommited changes.
+- Added a new `Remove Repo` command to move a local repository to the Trash. The default action prevents removal if there are uncommitted changes or unpushed commits. A force remove option is available to bypass these checks.
 
 ## [Bug Fix] - 2026-02-25
 

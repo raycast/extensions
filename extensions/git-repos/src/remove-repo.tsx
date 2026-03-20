@@ -44,15 +44,18 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
       return;
     }
 
-    const localCommitsOutput = await git(["log", "--oneline", "--branches", "--not", "--remotes"], repo.fullPath);
-    if (localCommitsOutput.trim().length > 0) {
-      updateToast(
-        toast,
-        Toast.Style.Failure,
-        "Cannot remove repository",
-        "There are local commits that haven't been pushed"
-      );
-      return;
+    const remotesOutput = await git(["remote"], repo.fullPath);
+    if (remotesOutput.trim().length > 0) {
+      const localCommitsOutput = await git(["log", "--oneline", "--branches", "--not", "--remotes"], repo.fullPath);
+      if (localCommitsOutput.trim().length > 0) {
+        updateToast(
+          toast,
+          Toast.Style.Failure,
+          "Cannot remove repository",
+          "There are local commits that haven't been pushed"
+        );
+        return;
+      }
     }
 
     await toast.hide();
