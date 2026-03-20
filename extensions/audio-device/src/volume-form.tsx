@@ -1,15 +1,4 @@
-import {
-  showToast,
-  Toast,
-  showHUD,
-  Form,
-  ActionPanel,
-  Action,
-  Icon,
-  useNavigation,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { showToast, Toast, Form, ActionPanel, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
 import {
   type AudioDevice,
@@ -26,7 +15,7 @@ import {
   setInputDeviceMute,
 } from "./audio-device";
 import { getPinnedVolume, setPinnedVolume, clearPinnedVolume } from "./device-preferences";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const ioConfig = {
   output: {
@@ -65,9 +54,9 @@ interface VolumeFormValues {
 
 export function VolumeForm({ ioType }: { ioType: IOType }) {
   const config = ioConfig[ioType];
-  const { pop } = useNavigation();
   const devicesRef = useRef<AudioDevice[]>([]);
   const currentVolumeRef = useRef<number | null>(null);
+  const [currentVolume, setCurrentVolume] = useState<number | null>(null);
   const pinnedLevelRef = useRef<number | undefined>(undefined);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<VolumeFormValues>({
@@ -97,7 +86,10 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
 
         const old = currentVolumeRef.current != null ? `${currentVolumeRef.current}%` : "?";
         const pinSuffix = formValues.pinVolume ? " (pinned)" : pinnedLevelRef.current != null ? " (unpinned)" : "";
-        await showHUD(`${name}: ${old} -> ${clamped}%${pinSuffix}`);
+        currentVolumeRef.current = clamped;
+        setCurrentVolume(clamped);
+        pinnedLevelRef.current = formValues.pinVolume ? clamped : undefined;
+        await showToast(Toast.Style.Success, `${name}: ${old} -> ${clamped}%${pinSuffix}`);
 
         if (formValues.pinVolume) {
           try {
@@ -110,8 +102,6 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
             );
           }
         }
-
-        pop();
       } catch (error) {
         await showToast(Toast.Style.Failure, `Failed to set ${ioType} volume`, String(error));
       }
@@ -130,6 +120,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
     const vol = await config.getVolume(current.id);
     const volPct = vol != null ? Math.round(vol * 100) : null;
     currentVolumeRef.current = volPct;
+    setCurrentVolume(volPct);
 
     const device = devices.find((d) => String(d.id) === String(current.id));
     const pinned = device ? await getPinnedVolume(ioType, device.uid) : undefined;
@@ -147,9 +138,11 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       const vol = await config.getVolume(deviceId);
       const volPct = vol != null ? Math.round(vol * 100) : null;
       currentVolumeRef.current = volPct;
+      setCurrentVolume(volPct);
       if (volPct != null) setValue("level", String(volPct));
     } catch {
       currentVolumeRef.current = null;
+      setCurrentVolume(null);
     }
 
     const device = devicesRef.current.find((d) => String(d.id) === deviceId);
@@ -158,11 +151,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
     setValue("pinVolume", pinned != null);
   }
 
-  const volText = isLoading
-    ? "Loading..."
-    : currentVolumeRef.current != null
-      ? `${currentVolumeRef.current}%`
-      : "Unknown";
+  const volText = isLoading ? "Loading..." : currentVolume != null ? `${currentVolume}%` : "Unknown";
 
   return (
     <Form

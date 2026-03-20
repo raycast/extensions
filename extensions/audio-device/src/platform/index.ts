@@ -63,6 +63,8 @@ export interface PlatformAudioAPI {
   getInputDeviceMute?(deviceId: string): Promise<boolean | undefined>;
   setInputDeviceMute?(deviceId: string, muted: boolean): Promise<void>;
   toggleInputDeviceMute?(deviceId: string): Promise<boolean>;
+  getAllOutputVolumeInfo?(): Promise<Record<string, { volume?: number; muted?: boolean }>>;
+  getAllInputVolumeInfo?(): Promise<Record<string, { volume?: number; muted?: boolean }>>;
   createAggregateDevice?: (
     name: string,
     mainDeviceId: string,

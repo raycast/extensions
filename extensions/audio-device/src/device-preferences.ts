@@ -144,6 +144,22 @@ export async function getAllPinnedVolumes(type: IOType): Promise<Map<string, num
   return map;
 }
 
+// --- Grace period (skip enforcement after manual switch) ---
+
+const GRACE_KEYS = {
+  input: "graceUntil_input",
+  output: "graceUntil_output",
+} as const;
+
+export async function setGraceUntil(type: IOType, until: number) {
+  await LocalStorage.setItem(GRACE_KEYS[type], String(until));
+}
+
+export async function getGraceUntil(type: IOType): Promise<number> {
+  const raw = await LocalStorage.getItem<string>(GRACE_KEYS[type]);
+  return raw ? Number(raw) : 0;
+}
+
 // --- One-time migration from old priority-ordering system ---
 
 const ORPHANED_KEYS = [
@@ -155,13 +171,18 @@ const ORPHANED_KEYS = [
   "deviceOrderOutput",
 ];
 const MIGRATION_SENTINEL = "_migrated_v3";
+let migrationDone = false;
 
 export async function migrateFromPriorityOrder(
   getInputDevicesFn: () => Promise<{ uid: string; name: string }[]>,
   getOutputDevicesFn: () => Promise<{ uid: string; name: string }[]>,
 ) {
+  if (migrationDone) return;
   const sentinel = await LocalStorage.getItem<string>(MIGRATION_SENTINEL);
-  if (sentinel) return;
+  if (sentinel) {
+    migrationDone = true;
+    return;
+  }
 
   // Migrate: pick first device from old priority list as new default
   for (const ioType of ["input", "output"] as const) {
@@ -177,9 +198,7 @@ export async function migrateFromPriorityOrder(
     const getDevices = ioType === "input" ? getInputDevicesFn : getOutputDevicesFn;
     const devices = await getDevices();
     const device = devices.find((d) => d.uid === firstUid);
-    if (device) {
-      await setDefaultDevicePreference(ioType, device.uid, device.name);
-    }
+    await setDefaultDevicePreference(ioType, firstUid, device?.name ?? firstUid);
   }
 
   // Clean up all orphaned keys
@@ -187,4 +206,5 @@ export async function migrateFromPriorityOrder(
     await LocalStorage.removeItem(key);
   }
   await LocalStorage.setItem(MIGRATION_SENTINEL, "true");
+  migrationDone = true;
 }

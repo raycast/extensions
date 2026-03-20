@@ -6,6 +6,7 @@
 - **Default device** — press Cmd+Shift+D on any device. If macOS switches away after sleep or Bluetooth reconnect, the extension switches back within 10 seconds.
 - **Pinned volumes** — press Cmd+Shift+V on any device. If macOS resets the volume, the extension restores it. Changes under 2% are ignored.
 - Enforcement runs automatically in the background every 10 seconds. No manual toggle.
+- **Grace period** — manually switching a device pauses enforcement for 1 minute so you can temporarily use another device without clearing the default.
 
 ### Volume control (merged from Sound Control extension)
 - See current volume level for each device in the list

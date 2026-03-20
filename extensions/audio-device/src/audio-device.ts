@@ -129,6 +129,14 @@ export async function toggleInputDeviceMute(deviceId: string) {
   return false;
 }
 
+export async function getAllVolumeInfo(
+  type: "input" | "output",
+): Promise<Record<string, { volume?: number; muted?: boolean }>> {
+  const api = await getAudioAPI();
+  const fn = type === "output" ? api.getAllOutputVolumeInfo : api.getAllInputVolumeInfo;
+  return fn ? fn.call(api) : {};
+}
+
 export async function createAggregateDevice(
   name: string,
   mainDeviceId: string,

@@ -42,6 +42,8 @@ export function getAccessories(
       accessories.push({ icon: Icon.SpeakerOff, tooltip: "Muted" });
     } else if (volumeInfo.volume != null) {
       accessories.push({ text: `${Math.round(volumeInfo.volume * 100)}%`, tooltip: "Volume" });
+    } else {
+      accessories.push({ text: "Volume controlled by device" });
     }
   }
 

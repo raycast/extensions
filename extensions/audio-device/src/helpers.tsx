@@ -1,20 +1,18 @@
 import {
   Action,
   ActionPanel,
+  Cache,
   Color,
-  closeMainWindow,
   Icon,
   Keyboard,
   launchCommand,
   LaunchType,
   List,
-  popToRoot,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   type AudioDevice,
   type IOType,
@@ -22,10 +20,7 @@ import {
   getDefaultOutputDevice,
   getInputDevices,
   getOutputDevices,
-  getOutputDeviceVolume,
-  getInputDeviceVolume,
-  getOutputDeviceMute,
-  getInputDeviceMute,
+  getAllVolumeInfo,
   toggleOutputDeviceMute,
   toggleInputDeviceMute,
   setDefaultInputDevice,
@@ -44,6 +39,7 @@ import {
   getPinnedVolume,
   setPinnedVolume,
   clearPinnedVolume,
+  setGraceUntil,
 } from "./device-preferences";
 import { getTransportTypeLabel } from "./device-labels";
 import { getIcon } from "./device-icons";
@@ -57,7 +53,14 @@ type DeviceListProps = {
 };
 
 export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
-  const { isLoading, data, revalidate: refetchDevices } = useAudioDevices(ioType);
+  const { isLoading, data, revalidateDevices } = useAudioDevices(ioType);
+  const [currentOverride, setCurrentOverride] = useState<string | null>(null);
+  const [volumeOverrides, setVolumeOverrides] = useState<Record<string, Partial<VolumeInfo>>>({});
+  const updateVolume = useCallback(
+    (deviceUid: string, update: Partial<VolumeInfo>) =>
+      setVolumeOverrides((prev) => ({ ...prev, [deviceUid]: { ...prev[deviceUid], ...update } })),
+    [],
+  );
   const {
     data: hiddenDevices,
     isLoading: isHiddenLoading,
@@ -82,15 +85,18 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     [ioType, data?.devices ?? []],
   );
 
+  const effectiveCurrentUid = currentOverride ?? data?.current?.uid;
+
   const sortedDevices = (() => {
-    const currentUid = data?.current?.uid;
     const devices = [...(data?.devices ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-    const pinned = new Set<string>();
-    if (currentUid) pinned.add(currentUid);
-    if (defaultDeviceUid) pinned.add(defaultDeviceUid);
-    const top = devices.filter((d) => pinned.has(d.uid));
-    const rest = devices.filter((d) => !pinned.has(d.uid));
-    return [...top, ...rest];
+    const current = effectiveCurrentUid ? devices.find((d) => d.uid === effectiveCurrentUid) : undefined;
+    const defaultDev =
+      defaultDeviceUid && defaultDeviceUid !== effectiveCurrentUid
+        ? devices.find((d) => d.uid === defaultDeviceUid)
+        : undefined;
+    const topUids = new Set([effectiveCurrentUid, defaultDeviceUid].filter(Boolean));
+    const rest = devices.filter((d) => !topUids.has(d.uid));
+    return [...(current ? [current] : []), ...(defaultDev ? [defaultDev] : []), ...rest];
   })();
 
   useEffect(() => {
@@ -110,9 +116,8 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
     (async () => {
       try {
         await (ioType === "input" ? setDefaultInputDevice(target.id) : setOutputAndSystemDevice(target.id));
-        closeMainWindow({ clearRootSearch: true });
-        popToRoot({ clearSearchBar: true });
-        showHUD(`Active ${ioType} audio device set to ${target.name}`);
+        await setGraceUntil(ioType, Date.now() + 60_000);
+        await showToast(Toast.Style.Success, `Set "${target.name}" as ${ioType} device`);
       } catch (e) {
         console.error(e);
         showToast(
@@ -132,7 +137,7 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
   const showEmptyView = !loading && visibleDevices.length === 0;
 
   return (
-    <List isLoading={loading} searchBarPlaceholder="Search devices...">
+    <List isLoading={loading} searchBarPlaceholder={`Search ${ioType} devices...`}>
       {showEmptyView ? (
         <List.EmptyView
           title={shouldShowHidden ? "No devices found" : "No visible devices"}
@@ -150,17 +155,18 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
       ) : (
         data &&
         visibleDevices.map((d) => {
-          const isCurrent = d.uid === data.current.uid;
+          const isCurrent = d.uid === effectiveCurrentUid;
           const isHidden = hiddenSet.has(d.uid);
           const isDefault = d.uid === defaultDeviceUid;
-          const volInfo = data.volumes[d.uid];
+          const baseVol = data.volumes[d.uid];
+          const volInfo = volumeOverrides[d.uid] ? { ...baseVol, ...volumeOverrides[d.uid] } : baseVol;
           const pinnedLevel = pinnedVolumeCache.data?.[d.uid];
           return (
             <List.Item
               key={d.uid}
               title={d.name}
               subtitle={getTransportTypeLabel(d)}
-              icon={getIcon(d, d.uid === data.current.uid)}
+              icon={getIcon(d, d.uid === effectiveCurrentUid)}
               actions={
                 <ActionPanel>
                   <DeviceActions
@@ -171,11 +177,15 @@ export function DeviceList({ ioType, deviceId, deviceName }: DeviceListProps) {
                     isShowingHidden={shouldShowHidden}
                     volumeInfo={volInfo}
                     pinnedLevel={pinnedLevel}
-                    onSelection={() => void refetchDevices()}
+                    onSelection={(uid) => {
+                      setCurrentOverride(uid);
+                      void revalidateDevices();
+                    }}
                     onHiddenChange={() => void refetchHiddenDevices()}
                     onShowHiddenChange={() => void refetchShowHiddenDevices()}
                     onDefaultChange={() => void refetchDefaultDevice()}
                     onPinnedChange={() => void pinnedVolumeCache.revalidate()}
+                    onVolumeUpdate={updateVolume}
                   />
                 </ActionPanel>
               }
@@ -201,6 +211,7 @@ function DeviceActions({
   onShowHiddenChange,
   onDefaultChange,
   onPinnedChange,
+  onVolumeUpdate,
 }: {
   ioType: IOType;
   device: AudioDevice;
@@ -209,17 +220,18 @@ function DeviceActions({
   isShowingHidden: boolean;
   volumeInfo?: VolumeInfo;
   pinnedLevel?: number;
-  onSelection: () => void;
+  onSelection: (uid: string) => void;
   onHiddenChange: () => void;
   onShowHiddenChange: () => void;
   onDefaultChange: () => void;
   onPinnedChange: () => void;
+  onVolumeUpdate: (deviceUid: string, update: Partial<VolumeInfo>) => void;
 }) {
   return (
     <>
       <SetAudioDeviceAction device={device} type={ioType} onSelection={onSelection} />
       {isWindows && <SetCommunicationDeviceAction device={device} type={ioType} onSelection={onSelection} />}
-      <ToggleMuteAction device={device} ioType={ioType} volumeInfo={volumeInfo} />
+      <ToggleMuteAction device={device} ioType={ioType} volumeInfo={volumeInfo} onVolumeUpdate={onVolumeUpdate} />
       <PinVolumeAction
         device={device}
         ioType={ioType}
@@ -232,7 +244,7 @@ function DeviceActions({
         ioType={ioType}
         isDefault={isDefault}
         onAction={onDefaultChange}
-        onEnforced={onSelection}
+        onSelection={onSelection}
       />
       <ActionPanel.Section>
         <Action.CreateQuicklink
@@ -256,36 +268,73 @@ function DeviceActions({
   );
 }
 
+const deviceCache = new Cache();
+
+type DeviceData = { devices: AudioDevice[]; current: AudioDevice; volumes: Record<string, VolumeInfo> };
+
+function readCached<T>(key: string): T | undefined {
+  const raw = deviceCache.get(key);
+  if (!raw) return undefined;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+}
+
 function useAudioDevices(type: IOType) {
-  return usePromise(
-    async (type) => {
-      const devices = await (type === "input" ? getInputDevices() : getOutputDevices());
-      const current = await (type === "input" ? getDefaultInputDevice() : getDefaultOutputDevice());
+  type DeviceInfo = { devices: AudioDevice[]; current: AudioDevice };
 
-      const getVol = type === "input" ? getInputDeviceVolume : getOutputDeviceVolume;
-      const getMute = type === "input" ? getInputDeviceMute : getOutputDeviceMute;
+  const [cachedDevices] = useState(() => readCached<DeviceInfo>(`devices_${type}`));
+  const [cachedVolumes] = useState(
+    () => readCached<Record<string, { volume?: number; muted?: boolean }>>(`volumes_${type}`) ?? {},
+  );
 
-      const volumes: Record<string, VolumeInfo> = {};
-      await Promise.all(
-        devices.map(async (d) => {
-          const [volume, muted] = await Promise.all([
-            getVol(d.id).catch(() => undefined),
-            getMute(d.id).catch(() => undefined),
-          ]);
-          volumes[d.uid] = { volume, muted };
-        }),
-      );
-
-      return { devices, current, volumes };
+  const deviceInfo = usePromise(
+    async (ioType: IOType) => {
+      const [devices, current] = await Promise.all([
+        ioType === "input" ? getInputDevices() : getOutputDevices(),
+        ioType === "input" ? getDefaultInputDevice() : getDefaultOutputDevice(),
+      ]);
+      deviceCache.set(`devices_${ioType}`, JSON.stringify({ devices, current }));
+      return { devices, current };
     },
     [type],
   );
+
+  const devices = deviceInfo.data ?? cachedDevices;
+
+  const volumeInfo = usePromise(
+    async (ioType: IOType) => {
+      const batch = await getAllVolumeInfo(ioType);
+      deviceCache.set(`volumes_${ioType}`, JSON.stringify(batch));
+      return batch;
+    },
+    [type],
+  );
+
+  const rawVolumes = volumeInfo.data ?? cachedVolumes;
+  const mappedVolumes: Record<string, VolumeInfo> = {};
+  if (devices) {
+    for (const d of devices.devices) {
+      const info = rawVolumes[d.id] ?? rawVolumes[d.uid];
+      if (info) mappedVolumes[d.uid] = { volume: info.volume, muted: info.muted };
+    }
+  }
+
+  const data: DeviceData | undefined = devices ? { ...devices, volumes: mappedVolumes } : undefined;
+
+  return {
+    isLoading: !data,
+    data,
+    revalidateDevices: deviceInfo.revalidate,
+  };
 }
 
 type SetAudioDeviceActionProps = {
   device: AudioDevice;
   type: IOType;
-  onSelection?: () => void;
+  onSelection?: (uid: string) => void;
 };
 
 function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActionProps) {
@@ -299,10 +348,9 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
       onAction={async () => {
         try {
           await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
-          onSelection?.();
-          closeMainWindow({ clearRootSearch: true });
-          popToRoot({ clearSearchBar: true });
-          showHUD(`Set "${device.name}" as ${type} device`);
+          await setGraceUntil(type, Date.now() + 60_000);
+          onSelection?.(device.uid);
+          await showToast(Toast.Style.Success, `Set "${device.name}" as ${type} device`);
         } catch (e) {
           console.error(e);
           showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} device`);
@@ -327,10 +375,8 @@ function SetCommunicationDeviceAction({ device, type, onSelection }: SetAudioDev
             } else {
               await api.setDefaultCommunicationOutputDevice(device.id);
             }
-            onSelection?.();
-            closeMainWindow({ clearRootSearch: true });
-            popToRoot({ clearSearchBar: true });
-            showHUD(`Set "${device.name}" as ${type} communication device`);
+            onSelection?.(device.uid);
+            await showToast(Toast.Style.Success, `Set "${device.name}" as ${type} communication device`);
           }
         } catch (e) {
           console.error(e);
@@ -394,13 +440,13 @@ function SetDefaultDeviceAction({
   ioType,
   isDefault,
   onAction,
-  onEnforced,
+  onSelection,
 }: {
   device: AudioDevice;
   ioType: IOType;
   isDefault: boolean;
   onAction: () => void;
-  onEnforced?: () => void;
+  onSelection?: (uid: string) => void;
 }) {
   if (isDefault) {
     return (
@@ -424,12 +470,13 @@ function SetDefaultDeviceAction({
       shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
       onAction={async () => {
         await setDefaultDevicePreference(ioType, device.uid, device.name);
+        await (ioType === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
         onAction();
+        onSelection?.(device.uid);
         await showToast(Toast.Style.Success, `Set "${device.name}" as default ${ioType} device`);
         const enforceCmd = ioType === "input" ? "auto-switch-input" : "auto-switch-output";
         try {
           await launchCommand({ name: enforceCmd, type: LaunchType.Background });
-          onEnforced?.();
         } catch {
           const label = ioType === "input" ? "Enforce Input Device" : "Enforce Output Device";
           await showToast(
@@ -447,12 +494,15 @@ function ToggleMuteAction({
   device,
   ioType,
   volumeInfo,
+  onVolumeUpdate,
 }: {
   device: AudioDevice;
   ioType: IOType;
   volumeInfo?: VolumeInfo;
+  onVolumeUpdate: (deviceUid: string, update: Partial<VolumeInfo>) => void;
 }) {
-  const isMuted = volumeInfo?.muted === true;
+  if (volumeInfo?.muted == null) return null;
+  const isMuted = volumeInfo.muted === true;
   const toggleFn = ioType === "input" ? toggleInputDeviceMute : toggleOutputDeviceMute;
 
   return (
@@ -463,13 +513,15 @@ function ToggleMuteAction({
       onAction={async () => {
         try {
           const nowMuted = await toggleFn(device.id);
+          onVolumeUpdate(device.uid, { muted: nowMuted });
           const vol = volumeInfo?.volume != null ? Math.round(volumeInfo.volume * 100) : "?";
           if (nowMuted) {
-            await showHUD(`Muted ${device.name}`);
+            await showToast(Toast.Style.Success, `Muted ${device.name}`);
           } else {
-            await showHUD(`Unmuted ${device.name} (${vol}%)`);
+            await showToast(Toast.Style.Success, `Unmuted ${device.name} (${vol}%)`);
           }
-        } catch {
+        } catch (e) {
+          console.error(e);
           await showToast(Toast.Style.Failure, `Failed to toggle mute for ${device.name}`);
         }
       }}

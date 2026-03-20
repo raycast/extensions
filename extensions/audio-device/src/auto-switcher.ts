@@ -6,9 +6,8 @@ import {
   getInputDevices,
   getOutputDevices,
   setDefaultInputDevice,
-  getOutputDeviceVolume,
+  getAllVolumeInfo,
   setOutputDeviceVolume,
-  getInputDeviceVolume,
   setInputDeviceVolume,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
@@ -16,10 +15,14 @@ import {
   getDefaultDeviceUid,
   getDefaultDeviceName,
   getAllPinnedVolumes,
+  getGraceUntil,
   migrateFromPriorityOrder,
 } from "./device-preferences";
 
 async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
+  const graceUntil = await getGraceUntil(type);
+  if (Date.now() < graceUntil) return false;
+
   const defaultUid = await getDefaultDeviceUid(type);
   if (!defaultUid) return false;
 
@@ -43,7 +46,7 @@ async function enforcePinnedVolumes(type: IOType) {
   if (pinnedMap.size === 0) return;
 
   const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
-  const getVol = type === "input" ? getInputDeviceVolume : getOutputDeviceVolume;
+  const allVolumes = await getAllVolumeInfo(type);
   const setVol = type === "input" ? setInputDeviceVolume : setOutputDeviceVolume;
 
   for (const device of devices) {
@@ -51,9 +54,9 @@ async function enforcePinnedVolumes(type: IOType) {
     if (targetPct == null) continue;
 
     try {
-      const currentVol = await getVol(device.id);
-      if (currentVol == null) continue;
-      const currentPct = Math.round(currentVol * 100);
+      const info = allVolumes[device.id];
+      if (info?.volume == null) continue;
+      const currentPct = Math.round(info.volume * 100);
       if (Math.abs(currentPct - targetPct) >= 2) {
         await setVol(device.id, targetPct / 100);
       }

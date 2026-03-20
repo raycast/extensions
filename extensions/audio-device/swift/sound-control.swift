@@ -301,6 +301,16 @@ func main() {
         printDevicesJSON(getInputDevices())
         exit(0)
     }
+
+    if command == "get-all" {
+        printVolumeInfoJSON(getAllOutputVolumeInfo())
+        exit(0)
+    }
+
+    if command == "get-all-input" {
+        printVolumeInfoJSON(getAllInputVolumeInfo())
+        exit(0)
+    }
     
     // Determine if this is an input command
     let isInputCommand = command.hasSuffix("-input") || command == "mute-input"
@@ -492,6 +502,53 @@ func main() {
     }
 }
 
+struct VolumeInfoEntry: Encodable {
+    let name: String
+    let volume: Int?
+    let muted: Bool?
+    let isDefault: Bool
+}
+
+func getAllOutputVolumeInfo() -> [String: VolumeInfoEntry] {
+    var result: [String: VolumeInfoEntry] = [:]
+    for device in getOutputDevices() {
+        let vol = getDeviceVolume(deviceID: device.id)
+        let mute = getDeviceMute(deviceID: device.id)
+        result[String(device.id)] = VolumeInfoEntry(
+            name: device.name,
+            volume: vol != nil ? Int(round(vol! * 100)) : nil,
+            muted: mute,
+            isDefault: device.isDefault
+        )
+    }
+    return result
+}
+
+func getAllInputVolumeInfo() -> [String: VolumeInfoEntry] {
+    var result: [String: VolumeInfoEntry] = [:]
+    for device in getInputDevices() {
+        let vol = getInputDeviceVolume(deviceID: device.id)
+        let mute = getInputDeviceMute(deviceID: device.id)
+        result[String(device.id)] = VolumeInfoEntry(
+            name: device.name,
+            volume: vol != nil ? Int(round(vol! * 100)) : nil,
+            muted: mute,
+            isDefault: device.isDefault
+        )
+    }
+    return result
+}
+
+func printVolumeInfoJSON(_ info: [String: VolumeInfoEntry]) {
+    let encoder = JSONEncoder()
+    if let data = try? encoder.encode(info),
+       let json = String(data: data, encoding: .utf8) {
+        print(json)
+    } else {
+        print("{}")
+    }
+}
+
 func printUsage() {
     print("""
     Usage:
@@ -502,6 +559,9 @@ func printUsage() {
       sound-control mute on [deviceID]          Mute
       sound-control mute off [deviceID]         Unmute
       sound-control mute toggle [deviceID]      Toggle mute
+
+      sound-control get-all                      Get volume+mute for all output devices (JSON)
+      sound-control get-all-input                Get volume+mute for all input devices (JSON)
 
       sound-control list-input                  List input devices (JSON)
       sound-control get-input [deviceID]        Get input volume (0-100)
