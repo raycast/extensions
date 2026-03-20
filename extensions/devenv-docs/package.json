@@ -13,6 +13,15 @@
     "Documentation"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "githubToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional: Add a GitHub PAT to increase API rate limits. Create one at github.com/settings/tokens (no scopes needed).",
+      "type": "password",
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "search-devenv-docs",

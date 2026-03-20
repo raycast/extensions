@@ -1,6 +1,10 @@
-import { ActionPanel, Detail, List, Action, Icon, Cache } from "@raycast/api";
+import { ActionPanel, Detail, List, Action, Icon, Cache, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import yaml from "js-yaml";
+
+interface Preferences {
+  githubToken?: string;
+}
 
 // Cache for GitHub API responses (24 hour TTL)
 const cache = new Cache();
@@ -289,7 +293,7 @@ function isSectionedPath(path: string): boolean {
 }
 
 // Fetch folder contents from GitHub API with caching
-async function fetchFolderContents(folderPath: string): Promise<DocItem[]> {
+async function fetchFolderContents(folderPath: string, token?: string): Promise<DocItem[]> {
   const cacheKey = `folder:${folderPath}`;
 
   // Check cache first
@@ -302,10 +306,24 @@ async function fetchFolderContents(folderPath: string): Promise<DocItem[]> {
   }
 
   const url = `${GITHUB_API_BASE}/${folderPath}`;
-  const response = await fetch(url);
 
-  // Handle rate limiting - return cached data if available
+  // Build headers - add auth token if provided
+  const headers: HeadersInit = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(url, { headers });
+
+  // Handle rate limiting
   if (response.status === 403 || response.status === 429) {
+    if (!token) {
+      // Not authenticated - throw special error to prompt for token
+      const error = new Error("GitHub API rate limit exceeded. Add a Personal Access Token in preferences to continue.");
+      error.name = "RateLimitError";
+      throw error;
+    }
+    // Authenticated but still rate limited
     if (cached) {
       const { data } = JSON.parse(cached);
       return data;
@@ -473,11 +491,35 @@ function DocsList({ items, title, revalidate }: { items: DocItem[]; title?: stri
 
 // List component for dynamically loaded folder contents
 function FolderDocsList({ folderPath, title }: { folderPath: string; title: string }) {
+  const { githubToken } = getPreferenceValues<Preferences>();
+
   const {
     data: items,
     isLoading,
     revalidate,
-  } = useCachedPromise((path: string) => fetchFolderContents(path), [folderPath], { keepPreviousData: true });
+    error,
+  } = useCachedPromise(
+    (path: string, token?: string) => fetchFolderContents(path, token),
+    [folderPath, githubToken],
+    { keepPreviousData: true }
+  );
+
+  // Show rate limit message with action to open preferences
+  if (error?.name === "RateLimitError") {
+    return (
+      <List navigationTitle={title}>
+        <List.EmptyView
+          title="GitHub Rate Limit Reached"
+          description="Add a Personal Access Token in preferences to continue browsing. Create one at github.com/settings/tokens (no scopes needed)."
+          actions={
+            <ActionPanel>
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   return (
     <List navigationTitle={title} isLoading={isLoading}>
