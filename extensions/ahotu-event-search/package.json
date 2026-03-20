@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ahotu-event-search",
+  "title": "Ahotu Event Search",
+  "description": "Search and browse sports events from Ahotu",
+  "icon": "command-icon.png",
+  "author": "jules_anthonioz",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-events",
+      "title": "Search Events",
+      "description": "Search for sports events in the Ahotu database",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API Base URL",
+      "description": "Base URL for the Ahotu API",
+      "default": "https://core.ahotu.com",
+      "placeholder": "https://core.ahotu.com"
+    },
+    {
+      "name": "userEmail",
+      "type": "textfield",
+      "required": true,
+      "title": "User Email",
+      "description": "Your Ahotu user email",
+      "placeholder": "user@example.com"
+    },
+    {
+      "name": "userToken",
+      "type": "password",
+      "required": true,
+      "title": "User Token",
+      "description": "Your Ahotu user authentication token",
+      "placeholder": "Enter your user token"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Ahotu API key",
+      "placeholder": "Enter your API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.67.0",
+    "@raycast/utils": "^1.12.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "pnpm dlx @raycast/api@latest publish"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@10.29.3"
+}
