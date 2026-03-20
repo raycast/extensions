@@ -23,9 +23,3 @@ Rename every image in a folder by appending an 8-character MD5 content hash to i
 | Name | Description | Required |
 |------|-------------|----------|
 | Image Folder | The folder containing images to rename | ✅ |
-
-## Changelog
-
-### [1.0.0] - 2026-02-28
-
-- Initial release

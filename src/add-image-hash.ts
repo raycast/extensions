@@ -1,6 +1,12 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { createHash } from "crypto";
-import { existsSync, readdirSync, readFileSync, renameSync, statSync } from "fs";
+import {
+  createReadStream,
+  existsSync,
+  readdirSync,
+  renameSync,
+  statSync,
+} from "fs";
 import { extname, join, basename } from "path";
 
 const IMAGE_EXTENSIONS = new Set([
@@ -17,9 +23,14 @@ const IMAGE_EXTENSIONS = new Set([
   ".avif",
 ]);
 
-function md5Hash(filePath: string): string {
-  const content = readFileSync(filePath);
-  return createHash("md5").update(content).digest("hex").slice(0, 8);
+function md5Hash(filePath: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const hash = createHash("md5");
+    const stream = createReadStream(filePath);
+    stream.on("data", (chunk) => hash.update(chunk));
+    stream.on("end", () => resolve(hash.digest("hex").slice(0, 8)));
+    stream.on("error", reject);
+  });
 }
 
 function isImage(filePath: string): boolean {
@@ -38,7 +49,7 @@ function alreadyHashed(filename: string): boolean {
 }
 
 export default async function main() {
-  const { folder } = getPreferenceValues<Preferences.AddImageHash>();
+  const { folder } = getPreferenceValues<ExtensionPreferences>();
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -70,11 +81,13 @@ export default async function main() {
       const ext = extname(filename);
       const stem = basename(filename, ext);
       try {
-        const hash = md5Hash(full);
+        const hash = await md5Hash(full);
         const newName = `${stem}.${hash}${ext}`;
         const newPath = join(folder, newName);
         if (existsSync(newPath)) {
-          errors.push(`${filename}: target "${newName}" already exists, skipping`);
+          errors.push(
+            `${filename}: target "${newName}" already exists, skipping`,
+          );
         } else {
           renameSync(full, newPath);
           renamed++;
@@ -93,7 +106,7 @@ export default async function main() {
         message: errors.slice(0, 3).join("\n"),
       });
     } else {
-      toast.hide();
+      await toast.hide();
       await showHUD(`✅ Renamed ${renamed} image${renamed === 1 ? "" : "s"}`);
     }
   } catch (err) {

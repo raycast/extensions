@@ -7,22 +7,21 @@
   "author": "saury",
   "categories": ["Developer Tools", "Media"],
   "license": "MIT",
-  "platforms": ["macOS"],
   "commands": [
     {
       "name": "add-image-hash",
       "title": "Add Hash to Images",
       "description": "Renames all images in the chosen folder to [name].[hash8].[ext] using MD5 content hash.",
-      "mode": "no-view",
-      "preferences": [
-        {
-          "name": "folder",
-          "title": "Image Folder",
-          "description": "The folder containing images to rename.",
-          "type": "directory",
-          "required": true
-        }
-      ]
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "folder",
+      "title": "Image Folder",
+      "description": "The folder containing images to rename.",
+      "type": "directory",
+      "required": true
     }
   ],
   "dependencies": {
@@ -32,8 +31,7 @@
     "@raycast/utils": "^1.19.1",
     "@types/node": "^22.13.5",
     "@types/react": "^19.0.8",
-    "eslint": "^8.57.1",
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.0.4",
     "typescript": "^5.7.3",
     "react": "^19.0.0"
   },
@@ -42,6 +40,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   }
 }
