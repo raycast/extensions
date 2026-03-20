@@ -2,6 +2,9 @@
 
 Read and compose Microsoft 365 emails directly from Raycast, powered by [CLI for Microsoft 365](https://pnp.github.io/cli-microsoft365/).
 
+## Requirements
+This extension requires [CLI for Microsoft 365](https://www.topoffunnel.com/resources/ms365-cli) to be installed and authenticated. Run `m365 login` once in your terminal to authenticate before using the extension.
+
 ## Commands
 
 | Command | Description |
