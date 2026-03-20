@@ -4,6 +4,12 @@ import { execFile } from "child_process";
 import { useCachedPromise } from "@raycast/utils";
 import { GitRepo, GitRepoService, tildifyPath } from "./utils";
 
+function updateToast(toast: Toast, style: Toast.Style, title: string, message?: string) {
+  toast.style = style;
+  toast.title = title;
+  toast.message = message;
+}
+
 function git(args: string[], cwd: string): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile("git", args, { cwd }, (err, stdout) => {
@@ -17,13 +23,15 @@ async function deleteFromDisk(repo: GitRepo, revalidate: () => void) {
   const removeToast = await showToast({ style: Toast.Style.Animated, title: "Removing repository…" });
   try {
     fs.rmSync(repo.fullPath, { recursive: true, force: true });
-    removeToast.style = Toast.Style.Success;
-    removeToast.title = "Repository removed";
+    updateToast(removeToast, Toast.Style.Success, "Repository removed");
     revalidate();
   } catch (err) {
-    removeToast.style = Toast.Style.Failure;
-    removeToast.title = "Failed to remove repository";
-    removeToast.message = err instanceof Error ? err.message : String(err);
+    updateToast(
+      removeToast,
+      Toast.Style.Failure,
+      "Failed to remove repository",
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }
 
@@ -33,25 +41,29 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
   try {
     const statusOutput = await git(["status", "--porcelain"], repo.fullPath);
     if (statusOutput.trim().length > 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Cannot remove repository";
-      toast.message = "There are uncommitted changes";
+      updateToast(toast, Toast.Style.Failure, "Cannot remove repository", "There are uncommitted changes");
       return;
     }
 
     const localCommitsOutput = await git(["log", "--oneline", "--branches", "--not", "--remotes"], repo.fullPath);
     if (localCommitsOutput.trim().length > 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Cannot remove repository";
-      toast.message = "There are local commits that haven't been pushed";
+      updateToast(
+        toast,
+        Toast.Style.Failure,
+        "Cannot remove repository",
+        "There are local commits that haven't been pushed"
+      );
       return;
     }
 
     await toast.hide();
   } catch (err) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Failed to check repository";
-    toast.message = err instanceof Error ? err.message : String(err);
+    updateToast(
+      toast,
+      Toast.Style.Failure,
+      "Failed to check repository",
+      err instanceof Error ? err.message : String(err)
+    );
     return;
   }
 
