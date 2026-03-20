@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lockpaw",
+  "version": "1.0.0",
+  "title": "Lockpaw",
+  "description": "Lock your Mac screen with a hotkey while AI agents keep running. Touch ID to unlock.",
+  "icon": "extension-icon.png",
+  "author": "eriknielsen",
+  "homepage": "https://getlockpaw.com",
+  "repository": "https://github.com/sorkila/lockpaw",
+  "categories": ["Productivity", "System"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "lock",
+      "title": "Lock Screen",
+      "subtitle": "Lockpaw",
+      "description": "Lock your screen while background tasks keep running",
+      "mode": "no-view",
+      "keywords": ["lockpaw", "lock", "screen", "guard", "privacy", "agents", "background"]
+    },
+    {
+      "name": "unlock",
+      "title": "Unlock with Touch ID",
+      "subtitle": "Lockpaw",
+      "description": "Unlock with Touch ID",
+      "mode": "no-view",
+      "keywords": ["lockpaw", "unlock", "touchid", "biometric", "authentication"]
+    },
+    {
+      "name": "unlock-password",
+      "title": "Unlock with Password",
+      "subtitle": "Lockpaw",
+      "description": "Unlock with your Mac password",
+      "mode": "no-view",
+      "keywords": ["lockpaw", "unlock", "password", "authentication"]
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle Lock",
+      "subtitle": "Lockpaw",
+      "description": "Toggle the screen lock on or off",
+      "mode": "no-view",
+      "keywords": ["lockpaw", "toggle", "lock", "enable", "disable"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
