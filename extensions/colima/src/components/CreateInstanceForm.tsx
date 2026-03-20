@@ -62,15 +62,7 @@ async function handleSaveTemplate(formValues: CreateInstanceFormValues) {
 
 async function handleSubmit(values: CreateInstanceFormValues, onCreated: () => void) {
   const { profile, cpus, memory, disk, runtime, vmType, kubernetes } = values;
-  const trimmedProfile = profile.trim();
-
-  if (!trimmedProfile) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Profile name is required",
-    });
-    return;
-  }
+  const trimmedProfile = profile.trim() || "default";
 
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -161,7 +153,13 @@ export function CreateInstanceForm({ onCreated }: CreateInstanceFormProps) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="profile" title="Profile Name" placeholder="e.g. default, dev, test" />
+      <Form.TextField
+        id="profile"
+        title="Profile Name"
+        value={formValues.profile}
+        placeholder="e.g. default, dev, test"
+        onChange={(v) => setFormValues({ profile: v })}
+      />
       <Form.TextField
         id="cpus"
         title="CPUs"
