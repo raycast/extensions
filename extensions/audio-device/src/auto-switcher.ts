@@ -54,7 +54,7 @@ async function enforcePinnedVolumes(type: IOType) {
     if (targetPct == null) continue;
 
     try {
-      const info = allVolumes[device.id];
+      const info = allVolumes[device.id] ?? allVolumes[device.uid];
       if (info?.volume == null) continue;
       const currentPct = Math.round(info.volume * 100);
       if (Math.abs(currentPct - targetPct) >= 2) {
