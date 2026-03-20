@@ -1,5 +1,15 @@
 import { useRef, useCallback } from "react";
-import { Cache, MenuBarExtra, Icon, getPreferenceValues, Image, LocalStorage, showHUD, environment, LaunchType } from "@raycast/api";
+import {
+  Cache,
+  MenuBarExtra,
+  Icon,
+  getPreferenceValues,
+  Image,
+  LocalStorage,
+  showHUD,
+  environment,
+  LaunchType,
+} from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 import { cpus } from "os";
@@ -85,75 +95,87 @@ export default function Command() {
   // they load, render, and unload once isLoading becomes false.
   // Raycast's "interval": "10s" in package.json re-launches the command
   // every 10 seconds for background updates — no in-process polling needed.
-  const { data: freshData, isLoading, revalidate } = usePromise(async () => {
-    const [osInfo, storage, memoryUsage, networkData, batteryData, temperatureData] = await Promise.all([
-      getOSInfo(),
-      calculateDiskStorage(),
-      getMemoryUsage(),
-      getNetworkData(),
-      getBatteryData(),
-      getTemperatureData(),
-    ]);
+  const {
+    data: freshData,
+    isLoading,
+    revalidate,
+  } = usePromise(
+    async () => {
+      const [osInfo, storage, memoryUsage, networkData, batteryData, temperatureData] = await Promise.all([
+        getOSInfo(),
+        calculateDiskStorage(),
+        getMemoryUsage(),
+        getNetworkData(),
+        getBatteryData(),
+        getTemperatureData(),
+      ]);
 
-    // CPU usage from os.cpus() delta
-    let idle = 0;
-    let total = 0;
-    for (const core of cpus()) {
-      const { user, nice, sys, irq, idle: coreIdle } = core.times;
-      idle += coreIdle;
-      total += user + nice + sys + irq + coreIdle;
-    }
-    const dIdle = idle - prevCpuIdle;
-    const dTotal = total - prevCpuTotal;
-    prevCpuIdle = idle;
-    prevCpuTotal = total;
-    const cpuUsage = dTotal === 0 ? "0" : Math.round((1 - dIdle / dTotal) * 100).toString();
-
-    // Memory
-    const memTotal = memoryUsage.memTotal;
-    const memUsed = memoryUsage.memUsed;
-    const freeMem = memTotal - memUsed;
-    const memory = {
-      totalMem: Math.round(memTotal / 1024).toString(),
-      freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-      freeMem: Math.round(freeMem / 1024).toString(),
-    };
-
-    // Battery
-    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
-
-    // Network delta
-    let upload = 0;
-    let download = 0;
-    if (!isObjectEmpty(prevNetProcess)) {
-      for (const key in networkData) {
-        let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
-        if (down < 0) down = 0;
-        let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
-        if (up < 0) up = 0;
-        download += down;
-        upload += up;
+      // CPU usage from os.cpus() delta
+      let idle = 0;
+      let total = 0;
+      for (const core of cpus()) {
+        const { user, nice, sys, irq, idle: coreIdle } = core.times;
+        idle += coreIdle;
+        total += user + nice + sys + irq + coreIdle;
       }
-    }
-    prevNetProcess = networkData;
+      const dIdle = idle - prevCpuIdle;
+      const dTotal = total - prevCpuTotal;
+      prevCpuIdle = idle;
+      prevCpuTotal = total;
+      const cpuUsage = dTotal === 0 ? "0" : Math.round((1 - dIdle / dTotal) * 100).toString();
 
-    return {
-      osInfo,
-      storage,
-      cpuUsage,
-      memory,
-      networkUsage: { upload, download },
-      batteryData,
-      isOnAC,
-      temperatureData,
-    };
-  }, [], { keepPreviousData: true });
+      // Memory
+      const memTotal = memoryUsage.memTotal;
+      const memUsed = memoryUsage.memUsed;
+      const freeMem = memTotal - memUsed;
+      const memory = {
+        totalMem: Math.round(memTotal / 1024).toString(),
+        freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
+        freeMem: Math.round(freeMem / 1024).toString(),
+      };
+
+      // Battery
+      const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
+
+      // Network delta
+      let upload = 0;
+      let download = 0;
+      if (!isObjectEmpty(prevNetProcess)) {
+        for (const key in networkData) {
+          let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
+          if (down < 0) down = 0;
+          let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
+          if (up < 0) up = 0;
+          download += down;
+          upload += up;
+        }
+      }
+      prevNetProcess = networkData;
+
+      return {
+        osInfo,
+        storage,
+        cpuUsage,
+        memory,
+        networkUsage: { upload, download },
+        batteryData,
+        isOnAC,
+        temperatureData,
+      };
+    },
+    [],
+    { keepPreviousData: true },
+  );
 
   const data = freshData ?? cached;
 
   // Persist to disk cache so next interval restart has instant data
   if (freshData) {
-    try { cache.set(CACHE_KEY, JSON.stringify(freshData)); } catch { /* ignore */ }
+    try {
+      cache.set(CACHE_KEY, JSON.stringify(freshData));
+    } catch {
+      /* ignore */
+    }
   }
 
   // When the user clicks the menubar icon, the command stays in memory
@@ -161,11 +183,16 @@ export default function Command() {
   // Background interval launches should finish fast and unload.
   const isUserLaunch = environment.launchType === LaunchType.UserInitiated;
   const isRevalidating = useRef(false);
-  useInterval(() => {
-    if (!isUserLaunch || isRevalidating.current) return;
-    isRevalidating.current = true;
-    revalidate().finally(() => { isRevalidating.current = false; });
-  }, isUserLaunch ? 2000 : null);
+  useInterval(
+    () => {
+      if (!isUserLaunch || isRevalidating.current) return;
+      isRevalidating.current = true;
+      revalidate().finally(() => {
+        isRevalidating.current = false;
+      });
+    },
+    isUserLaunch ? 2000 : null,
+  );
 
   const formatTags = (
     formatString: string,
@@ -227,11 +254,7 @@ export default function Command() {
       isLoading={isLoading}
     >
       <MenuBarExtra.Section title="System Info">
-        <MenuBarExtra.Item
-          title="macOS"
-          subtitle={`${data?.osInfo?.release}` || "Loading..."}
-          icon={Icon.Finder}
-        />
+        <MenuBarExtra.Item title="macOS" subtitle={`${data?.osInfo?.release}` || "Loading..."} icon={Icon.Finder} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Storage">
