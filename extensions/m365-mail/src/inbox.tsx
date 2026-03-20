@@ -56,7 +56,7 @@ export default function Inbox() {
     } catch (err) {
       const msg = String(err);
       setError(msg);
-      showToast({ title: "Failed to load inbox", description: msg, style: Toast.Style.Failure });
+      showToast({ title: "Failed to load inbox", message: msg, style: Toast.Style.Failure });
     } finally {
       setIsLoading(false);
     }
@@ -106,7 +106,7 @@ export default function Inbox() {
       setMessages((prev) => prev.filter((m) => m.id !== id));
       showToast({ title: "Email deleted", style: Toast.Style.Success });
     } catch (err) {
-      showToast({ title: "Failed to delete", description: String(err), style: Toast.Style.Failure });
+      showToast({ title: "Failed to delete", message: String(err), style: Toast.Style.Failure });
     }
   }
 

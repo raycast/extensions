@@ -35,7 +35,7 @@ export default function ComposeView({ replyTo }: ComposeProps) {
       showToast({ title: "Email sent!", style: Toast.Style.Success });
       pop();
     } catch (err) {
-      showToast({ title: "Failed to send", description: String(err), style: Toast.Style.Failure });
+      showToast({ title: "Failed to send", message: String(err), style: Toast.Style.Failure });
     } finally {
       setIsLoading(false);
     }
