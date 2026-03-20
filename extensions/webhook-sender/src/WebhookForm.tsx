@@ -275,7 +275,6 @@ export function WebhookForm({ initial, onSent }: Props) {
                   key={field.id}
                   field={field}
                   onChange={(patch) => updateField(field.id, patch)}
-                  onRemove={() => removeField(field.id)}
                   canRemove={fields.length > 1}
                 />
               ))}
