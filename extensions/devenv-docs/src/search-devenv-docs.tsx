@@ -469,9 +469,9 @@ function SectionedDocsList({ path, title }: { path: string; title: string }) {
 }
 
 // List component for doc items (reusable for nested navigation)
-function DocsList({ items, title, revalidate }: { items: DocItem[]; title?: string; revalidate?: () => void }) {
+function DocsList({ items, title, revalidate, isLoading }: { items: DocItem[]; title?: string; revalidate?: () => void; isLoading?: boolean }) {
   return (
-    <List navigationTitle={title}>
+    <List navigationTitle={title} isLoading={isLoading}>
       {items.map((item, index) => {
         if (item.children && item.children.length > 0) {
           // Section with children
@@ -642,9 +642,5 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  if (isLoading && !items) {
-    return <List isLoading={true} />;
-  }
-
-  return <DocsList items={items || []} title="DevEnv Docs" revalidate={revalidate} />;
+  return <DocsList items={items || []} title="DevEnv Docs" revalidate={revalidate} isLoading={isLoading} />;
 }
