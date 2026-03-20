@@ -267,5 +267,5 @@ function isDisconnectLabel(value: string): boolean {
 }
 
 function isConnectLabel(value: string): boolean {
-  return value.includes("connect") || value.includes("连接");
+  return (value.includes("connect") && !value.includes("disconnect")) || value.includes("连接");
 }
