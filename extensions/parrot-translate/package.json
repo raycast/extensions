@@ -307,7 +307,7 @@
     ],
     "dependencies": {
         "@raycast/api": "^1.31.0",
-        "axios": "^0.25.0"
+        "axios": "^0.30.3"
     },
     "devDependencies": {
         "@types/node": "~16.10.0",

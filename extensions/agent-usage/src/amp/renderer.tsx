@@ -7,6 +7,7 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 type Preferences = Preferences.AgentUsage;
@@ -16,13 +17,13 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
-  const { email, nickname, ampFree, individualCredits } = u;
+  const { ampFree, individualCredits } = u;
   const ampFreeRemaining = ampFree.total - ampFree.used;
   const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
-  let text = `Amp Usage\nEmail: ${email}`;
-  if (nickname) text += `\nNickname: ${nickname}`;
+  let text = `Amp Usage`;
   text += `\n\nAmp Free: ${ampFree.unit}${ampFreeRemaining.toFixed(2)} / ${ampFree.unit}${ampFree.total.toFixed(2)} (${ampFreePercent.toFixed(1)}%)`;
+  text += `\n${generateAsciiBar(ampFreePercent)}`;
   if (ampFree.replenishRate) {
     text += `\nReplenish Rate: +${ampFree.replenishRate}`;
     const replenishValue = parseFloat(ampFree.replenishRate.replace(/[^0-9.]/g, ""));
@@ -36,11 +37,11 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
         let timeText = "";
         if (hours > 0) timeText += `${hours}h `;
         if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-        text += `\nReset In: ${timeText.trim()}`;
+        text += `\nResets In: ${timeText.trim()}`;
       }
     }
   }
-  if (ampFree.bonus) text += `\nBonus: ${ampFree.bonus}`;
+  if (ampFree.bonus) text += `\nBonus: ${ampFree.bonus.replace(/\s+more\s+days?/, "d")}`;
   text += `\n\nIndividual Credits: ${individualCredits.unit}${individualCredits.remaining.toFixed(2)}`;
 
   return text;
@@ -51,22 +52,17 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
   if (fallback !== null) return fallback;
   const u = usage as AmpUsage;
 
-  const { email, nickname, ampFree, individualCredits } = u;
+  const { ampFree, individualCredits } = u;
   const ampFreeRemaining = ampFree.total - ampFree.used;
   const ampFreePercent = ampFree.total > 0 ? (ampFreeRemaining / ampFree.total) * 100 : 0;
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Email" text={email} />
-      {nickname && <List.Item.Detail.Metadata.Label title="Nickname" text={nickname} />}
-
-      <List.Item.Detail.Metadata.Separator />
-
       <List.Item.Detail.Metadata.Label title="Amp Free Used" text={`${ampFree.unit}${ampFree.used.toFixed(2)}`} />
       <List.Item.Detail.Metadata.Label title="Amp Free Total" text={`${ampFree.unit}${ampFree.total.toFixed(2)}`} />
       <List.Item.Detail.Metadata.Label
         title="Amp Free Remaining"
-        text={`${ampFree.unit}${ampFreeRemaining.toFixed(2)} (${ampFreePercent.toFixed(1)}%)`}
+        text={`${generateAsciiBar(ampFreePercent)} ${ampFree.unit}${ampFreeRemaining.toFixed(2)} (${ampFreePercent.toFixed(1)}%) remaining`}
       />
       {ampFree.replenishRate && (
         <List.Item.Detail.Metadata.Label title="Replenish Rate" text={`+${ampFree.replenishRate}`} />
@@ -83,9 +79,11 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
         let timeText = "";
         if (hours > 0) timeText += `${hours}h `;
         if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-        return <List.Item.Detail.Metadata.Label title="Reset In" text={timeText.trim()} />;
+        return <List.Item.Detail.Metadata.Label title="Resets In" text={timeText.trim()} />;
       })()}
-      {ampFree.bonus && <List.Item.Detail.Metadata.Label title="Bonus" text={ampFree.bonus} />}
+      {ampFree.bonus && (
+        <List.Item.Detail.Metadata.Label title="Bonus" text={ampFree.bonus.replace(/\s+more\s+days?/, "d")} />
+      )}
 
       <List.Item.Detail.Metadata.Separator />
 

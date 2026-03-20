@@ -1,5 +1,13 @@
 # Coffee Changelog
 
+## [Fix] - 2026-03-19
+
+- Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.
+
+## [Fix] - 2026-03-17
+
+- Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.
+
 ## [Fix] - 2026-01-27
 
 - Fixed memory leak caused by zombie processes when starting caffeination.

@@ -68,7 +68,7 @@
   "dependencies": {
     "@raycast/api": "^1.40.1",
     "@raycast/utils": "^1.4.8",
-    "axios": "^0.27.2",
+    "axios": "^0.30.3",
     "node-fetch": "^3.2.10",
     "node-html-parser": "^6.1.1",
     "redis": "^4.3.1"

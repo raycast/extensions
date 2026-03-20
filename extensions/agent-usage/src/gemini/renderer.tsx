@@ -7,6 +7,7 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiError | null): string {
@@ -14,11 +15,12 @@ export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiEr
   if (fallback !== null) return fallback;
   const u = usage as GeminiUsage;
 
-  let text = `Gemini Usage\nEmail: ${u.email}\nTier: ${u.tier}`;
+  let text = `Gemini Usage`;
 
   if (u.proModel) {
     text += `\n\nPro Model: ${u.proModel.modelId}`;
-    text += `\nRemaining: ${u.proModel.percentLeft}%`;
+    text += `\nRemaining: ${u.proModel.percentLeft}% remaining`;
+    text += `\n${generateAsciiBar(u.proModel.percentLeft)}`;
     text += `\nResets In: ${u.proModel.resetsIn}`;
   } else {
     text += `\n\nPro Model: No quota data`;
@@ -26,7 +28,8 @@ export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiEr
 
   if (u.flashModel) {
     text += `\n\nFlash Model: ${u.flashModel.modelId}`;
-    text += `\nRemaining: ${u.flashModel.percentLeft}%`;
+    text += `\nRemaining: ${u.flashModel.percentLeft}% remaining`;
+    text += `\n${generateAsciiBar(u.flashModel.percentLeft)}`;
     text += `\nResets In: ${u.flashModel.resetsIn}`;
   } else {
     text += `\n\nFlash Model: No quota data`;
@@ -42,14 +45,13 @@ export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title="Email" text={u.email} />
-      <List.Item.Detail.Metadata.Label title="Tier" text={u.tier} />
-      <List.Item.Detail.Metadata.Separator />
-
       {u.proModel ? (
         <>
           <List.Item.Detail.Metadata.Label title="Pro Model" text={u.proModel.modelId} />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={`${u.proModel.percentLeft}%`} />
+          <List.Item.Detail.Metadata.Label
+            title="Remaining"
+            text={`${generateAsciiBar(u.proModel.percentLeft)} ${u.proModel.percentLeft}% remaining`}
+          />
           <List.Item.Detail.Metadata.Label title="Resets In" text={u.proModel.resetsIn} />
         </>
       ) : (
@@ -61,7 +63,10 @@ export function renderGeminiDetail(usage: GeminiUsage | null, error: GeminiError
       {u.flashModel ? (
         <>
           <List.Item.Detail.Metadata.Label title="Flash Model" text={u.flashModel.modelId} />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={`${u.flashModel.percentLeft}%`} />
+          <List.Item.Detail.Metadata.Label
+            title="Remaining"
+            text={`${generateAsciiBar(u.flashModel.percentLeft)} ${u.flashModel.percentLeft}% remaining`}
+          />
           <List.Item.Detail.Metadata.Label title="Resets In" text={u.flashModel.resetsIn} />
         </>
       ) : (

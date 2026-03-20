@@ -1,0 +1,184 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laravel-cloud",
+  "title": "Laravel Cloud",
+  "description": "Manage your Laravel Cloud applications, deployments, logs, and more directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "1weiho",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Laravel Cloud API token. Generate one at cloud.laravel.com.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-applications",
+      "title": "Search Applications",
+      "description": "Search and browse your Laravel Cloud applications",
+      "mode": "view"
+    },
+    {
+      "name": "view-deployments",
+      "title": "View Deployments",
+      "description": "View recent deployments across your applications",
+      "mode": "view"
+    },
+    {
+      "name": "view-logs",
+      "title": "View Logs",
+      "description": "View application logs from your environments",
+      "mode": "view"
+    },
+    {
+      "name": "run-command",
+      "title": "Run Command",
+      "description": "Run a command on a Laravel Cloud environment",
+      "mode": "view"
+    },
+    {
+      "name": "manage-domains",
+      "title": "Manage Domains",
+      "description": "Manage domains for your environments",
+      "mode": "view"
+    },
+    {
+      "name": "manage-env-vars",
+      "title": "Manage Environment Variables",
+      "description": "Manage environment variables for your environments",
+      "mode": "view"
+    },
+    {
+      "name": "manage-databases",
+      "title": "Manage Databases",
+      "description": "Manage database clusters, schemas, and snapshots",
+      "mode": "view"
+    },
+    {
+      "name": "manage-caches",
+      "title": "Manage Caches",
+      "description": "Manage caches for your applications",
+      "mode": "view"
+    },
+    {
+      "name": "manage-background-processes",
+      "title": "Manage Background Processes",
+      "description": "Manage background processes for your instances",
+      "mode": "view"
+    },
+    {
+      "name": "manage-buckets",
+      "title": "Manage Buckets",
+      "description": "Manage object storage buckets and keys",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-applications",
+      "title": "List Applications",
+      "description": "List all Laravel Cloud applications with their name, region, and repository"
+    },
+    {
+      "name": "get-application",
+      "title": "Get Application",
+      "description": "Get details of a specific Laravel Cloud application by ID, including its environments"
+    },
+    {
+      "name": "list-environments",
+      "title": "List Environments",
+      "description": "List all environments for a given application, showing status, domain, and PHP version"
+    },
+    {
+      "name": "get-environment",
+      "title": "Get Environment",
+      "description": "Get detailed configuration of an environment including deploy settings and current deployment"
+    },
+    {
+      "name": "list-deployments",
+      "title": "List Deployments",
+      "description": "List recent deployments for an environment with status, branch, and commit info"
+    },
+    {
+      "name": "get-deployment-logs",
+      "title": "Get Deployment Logs",
+      "description": "Get the build and deploy logs for a specific deployment"
+    },
+    {
+      "name": "get-environment-logs",
+      "title": "Get Environment Logs",
+      "description": "Get application logs from an environment, optionally filtered by query or log type"
+    },
+    {
+      "name": "list-environment-variables",
+      "title": "List Environment Variables",
+      "description": "List all environment variables set on a specific environment"
+    },
+    {
+      "name": "list-databases",
+      "title": "List Databases",
+      "description": "List all database clusters with their type, status, and region"
+    },
+    {
+      "name": "list-domains",
+      "title": "List Domains",
+      "description": "List all domains configured for an environment with their verification status"
+    },
+    {
+      "name": "trigger-deployment",
+      "title": "Trigger Deployment",
+      "description": "Trigger a new deployment for an environment"
+    },
+    {
+      "name": "run-command",
+      "title": "Run Command",
+      "description": "Run an artisan or shell command on an environment (e.g. php artisan migrate:status)"
+    },
+    {
+      "name": "set-environment-variables",
+      "title": "Set Environment Variables",
+      "description": "Set one or more environment variables on an environment"
+    },
+    {
+      "name": "start-environment",
+      "title": "Start Environment",
+      "description": "Start a stopped or hibernating environment"
+    },
+    {
+      "name": "stop-environment",
+      "title": "Stop Environment",
+      "description": "Stop a running environment"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

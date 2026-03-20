@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { UsageLimitData } from "../types/usage-types";
 import { subscribeToUsageLimits, getUsageLimitsState, revalidateUsageLimits } from "../utils/usage-limits-cache";
+import { UsageLimitsError } from "../utils/usage-limits-error";
 
-export interface UsageLimitsState {
+interface UsageLimitsState {
   data: UsageLimitData | null;
+  error: UsageLimitsError | null;
   isLoading: boolean;
-  error: Error | null;
   isStale: boolean;
+  isUsageLimitsAvailable: boolean;
   lastFetched: Date | null;
   revalidate: () => void;
 }

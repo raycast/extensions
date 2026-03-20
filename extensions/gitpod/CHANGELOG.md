@@ -1,5 +1,9 @@
 # Gitpod Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Maintenance] - 2025-02-12
 
 - Remove unused `.github` files
@@ -49,4 +53,3 @@
 * @henit-chobisa made their first contribution in https://github.com/gitpod-samples/Gitpod-Raycast-Extension/pull/2
 
 **Full Changelog**: https://github.com/gitpod-samples/Gitpod-Raycast-Extension/commits/v1.0.0
-

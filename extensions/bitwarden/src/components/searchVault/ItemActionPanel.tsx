@@ -8,15 +8,14 @@ import {
   OpenUrlInBrowserAction,
   PastePasswordAction,
   PasteUsernameAction,
-  ShowCardDetailsAction,
   ShowNotesAction,
-  ShowIdentityDetailsAction,
   CopyCardFieldsActions,
   CopyIdentityFieldsActions,
   CopyLoginUrisActions,
   CopyCustomFieldsActions,
   PasteTotpAction,
   CopyPublicKeyAction,
+  ShowItemDetailsAction,
 } from "~/components/searchVault/actions";
 import { ItemType } from "~/types/vault";
 import FavoriteItemActions from "~/components/searchVault/actions/FavoriteItemActions";
@@ -32,6 +31,9 @@ const VaultItemActionPanel = () => {
 
   return (
     <ActionPanel>
+      <ActionPanel.Section>
+        <ShowItemDetailsAction />
+      </ActionPanel.Section>
       {type === ItemType.LOGIN && (
         <ActionPanel.Section>
           <ComponentReverser reverse={primaryAction === "paste"}>
@@ -49,9 +51,6 @@ const VaultItemActionPanel = () => {
       )}
       {type === ItemType.CARD && (
         <>
-          <ActionPanel.Section>
-            <ShowCardDetailsAction />
-          </ActionPanel.Section>
           <ActionPanel.Section title="Card Fields">
             <CopyCardFieldsActions />
           </ActionPanel.Section>
@@ -62,9 +61,6 @@ const VaultItemActionPanel = () => {
       )}
       {type === ItemType.IDENTITY && (
         <>
-          <ActionPanel.Section>
-            <ShowIdentityDetailsAction />
-          </ActionPanel.Section>
           <ActionPanel.Section title="Identity Fields">
             <CopyIdentityFieldsActions />
           </ActionPanel.Section>

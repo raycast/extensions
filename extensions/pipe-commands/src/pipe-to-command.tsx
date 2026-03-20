@@ -24,7 +24,7 @@ import untildify from "untildify";
 import { ScriptCommand, InputType } from "./types";
 import { getActiveTabUrl, InvalidCommand, parseScriptCommands, sortByAccessTime } from "./utils";
 
-export function PipeCommands(props: { inputType?: InputType }): JSX.Element {
+export function PipeCommands(props: { inputType?: InputType }): React.ReactNode {
   const [state, setState] = useState<{ commands: ScriptCommand[]; invalid: InvalidCommand[] }>();
 
   const refreshCommands = async () => {
@@ -145,7 +145,7 @@ async function getInput(inputType: InputType) {
 
 const { primaryAction } = getPreferenceValues<{ primaryAction: "copy" | "paste" }>();
 
-function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onTrash: () => void }): JSX.Element {
+function PipeCommand(props: { command: ScriptCommand; inputFrom?: InputType; onTrash: () => void }): React.ReactNode {
   const { command, inputFrom, onTrash } = props;
 
   return (

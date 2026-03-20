@@ -1,6 +1,7 @@
-import { List, Icon, Detail, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Icon, Detail, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
+import { isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
@@ -10,14 +11,46 @@ export default function Command() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
+  const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
 
   if (error && skills.length === 0) {
+    let errorMarkdown = `# Error Loading Installed Skills
+
+**Error:** ${error?.message}
+
+---
+
+This is a local skills CLI execution failure.
+
+If this persists:
+
+1. Retry the command.
+2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.
+3. Run \`npx -y skills@latest list -g\` in Terminal to inspect the underlying CLI error.
+`;
+
+    if (hasNpxResolutionError) {
+      errorMarkdown = `# Error Loading Installed Skills
+
+**Error:** ${error?.message}
+
+---
+
+This is an npx resolution issue in the local CLI runtime.
+
+1. Run \`which npx\` in Terminal.
+2. Open Extension Preferences (\`Cmd+Shift+,\`).
+3. Set **Custom npx Path** to the path from step 1, then retry.
+`;
+    }
+
     return (
       <Detail
-        markdown={`# Error Loading Installed Skills\n\n**Error:** ${error.message}\n\n---\n\nMake sure you have the skills CLI available: \`npx skills list -g\``}
+        markdown={errorMarkdown}
         actions={
           <ActionPanel>
             <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
           </ActionPanel>
         }
       />
@@ -33,7 +66,8 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
-  const updatableCount = filteredSkills.filter((s) => s.hasUpdate).length;
+  // Global count — "Update All" applies to all agents regardless of filter
+  const updatableCount = skills.filter((s) => s.hasUpdate).length;
 
   return (
     <List
@@ -63,13 +97,16 @@ export default function Command() {
       ) : (
         <>
           {updatableCount > 0 && (
-            <List.Section title="Updates Available">
+            <List.Section
+              title="Updates Available"
+              subtitle={`${updatableCount} skill${updatableCount > 1 ? "s" : ""}`}
+            >
               <List.Item
-                title={`${updatableCount} skill${updatableCount > 1 ? "s" : ""} can be updated`}
+                title="Update All"
                 icon={{ source: Icon.ArrowClockwise, tintColor: Color.Orange }}
                 detail={
                   <List.Item.Detail
-                    markdown={`# Updates Available\n\n**${updatableCount}** skill${updatableCount > 1 ? "s have" : " has"} updates available.\n\nPress **Enter** to update all skills.`}
+                    markdown={`# Update All Skills\n\nPress **Enter** to update all **${updatableCount}** outdated skill${updatableCount > 1 ? "s" : ""} at once.`}
                   />
                 }
                 actions={

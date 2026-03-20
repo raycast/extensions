@@ -1,5 +1,42 @@
 # Changelog
 
+## [Improve macOS `npx` Path Resolution] - 2026-03-20
+
+- Run the Skills CLI without spawning a login shell by building an explicit PATH for Homebrew and common Node.js version-manager installs
+- Add a custom `npx` path preference for non-standard setups
+- Show clearer recovery guidance for `npx` and Skills CLI failures, including a shortcut to open Extension Preference
+
+## [Fix Incomplete Agent List] - 2026-03-17
+
+- Use `skills list --json` for structured output instead of parsing ANSI text
+- Show all supported agents in the filter dropdown and detail panel
+
+## [Highlight Outdated Skills] - 2026-03-16
+
+- Highlight outdated skills with an orange hammer icon in the installed skills list
+- Show "Updates Available" section with count when updates exist
+
+## [Fix Duplicate Audit Error Toast] - 2026-03-11
+
+- Fix error toast showing twice when re-selecting a skill with a failed audit fetch
+
+## [Security Audits Data] - 2026-03-11
+
+- Parse security audit data from skills.sh and show their status in the skill's details
+- Warn before installing skills with failed security audits
+- Added actions to open the security audit links
+
+## [Fix allowed-tools TypeError] - 2026-03-09
+
+- Fix crash when SKILL.md contains single-value allowed-tools (e.g., `allowed-tools: Bash`)
+- Normalize allowed-tools to array before rendering
+
+## [Rich Skill Metadata] - 2026-03-07
+
+- Display description, license, compatibility, and allowed tools from SKILL.md frontmatter in the detail panel
+- Show GitHub star count alongside install count
+- Show skill description as list item subtitle when the detail panel is hidden
+
 ## [Update Skills] - 2026-03-01
 
 - Check for available skill updates on launch

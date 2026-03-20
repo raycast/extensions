@@ -3,7 +3,7 @@ import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api
 import * as utils from "./utils";
 import { existsSync, readFileSync } from "fs";
 import Fuse from "fuse.js";
-import initSqlJs from "sql.js";
+import initSqlJs, { Database as SqlJsDatabase } from "sql.js";
 import path = require("path");
 
 export interface Preferences {
@@ -156,7 +156,7 @@ WHERE itemNotes.parentItemID = :id
 `;
 
 const cachePath = utils.cachePath("zotero.json");
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 3;
 
 export function resolveHome(filepath: string): string {
   if (filepath[0] === "~") {
@@ -191,7 +191,11 @@ async function openDb() {
 }
 
 async function getBibtexKey(key: string, library: string): Promise<string> {
-  const [db, isBBTUpdated] = await openBibtexDb();
+  const bibtexDb = await openBibtexDb();
+  if (!bibtexDb) {
+    return "";
+  }
+  const [db, isBBTUpdated] = bibtexDb;
   const st = db.prepare(isBBTUpdated ? BIBTEX_SQL : BIBTEX_SQL_OLD);
   st.bind({ ":key": key, ":lib": library });
   st.step();
@@ -199,26 +203,40 @@ async function getBibtexKey(key: string, library: string): Promise<string> {
   st.free();
   db.close();
 
-  if (res) {
-    return res.citekey;
+  if (res && res.citekey) {
+    return res.citekey as string;
   } else {
     return "";
   }
 }
 
-async function openBibtexDb() {
+async function openBibtexDb(): Promise<[SqlJsDatabase, boolean] | null> {
   const preferences: Preferences = getPreferenceValues();
   const f_path = resolveHome(preferences.zotero_path);
-  let new_fPath = f_path.replace("zotero.sqlite", "better-bibtex.sqlite");
-  let isBBTUpdated = true;
-  if (!existsSync(new_fPath)) {
-    new_fPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+  const newPath = f_path.replace("zotero.sqlite", "better-bibtex.sqlite");
+  const migratedPath = f_path.replace("zotero.sqlite", "better-bibtex.migrated");
+  const oldPath = f_path.replace("zotero.sqlite", "better-bibtex-search.sqlite");
+
+  let dbPath: string;
+  let isBBTUpdated: boolean;
+
+  if (existsSync(newPath)) {
+    dbPath = newPath;
+    isBBTUpdated = true;
+  } else if (existsSync(migratedPath)) {
+    // Zotero 7+ renames better-bibtex.sqlite to better-bibtex.migrated
+    dbPath = migratedPath;
+    isBBTUpdated = true;
+  } else if (existsSync(oldPath)) {
+    dbPath = oldPath;
     isBBTUpdated = false;
+  } else {
+    return null;
   }
 
   const wasmBinary = readFileSync(path.join(environment.assetsPath, "sql-wasm.wasm"));
   const SQL = await initSqlJs({ wasmBinary });
-  const db = readFileSync(new_fPath);
+  const db = readFileSync(dbPath);
   return [new SQL.Database(db), isBBTUpdated];
 }
 
@@ -316,13 +334,13 @@ async function getData(): Promise<RefData[]> {
     const st4 = db.prepare(ATTACHMENTS_SQL);
     st4.bind({ ":id": row.id });
 
-    st4.step();
-    const at = st4.getAsObject();
-    st4.free();
-
-    if (at) {
-      row.attachment = at;
+    if (st4.step()) {
+      const at = st4.getAsObject();
+      if (at.key) {
+        row.attachment = at;
+      }
     }
+    st4.free();
 
     const stNotes = db.prepare(NOTES_SQL);
     stNotes.bind({ ":id": row.id });
@@ -455,11 +473,11 @@ export const searchResources = async (q: string): Promise<RefData[]> => {
   } catch {
     try {
       ret = await updateCache();
-    } catch {
+    } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Corrupt sqlite db!",
-        message: "Referred sqlite db appears to be corrupt or not from Zotero!",
+        title: "Failed to read Zotero database",
+        message: err instanceof Error ? err.message : String(err),
       });
     }
   }

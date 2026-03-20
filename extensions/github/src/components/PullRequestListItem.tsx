@@ -1,4 +1,4 @@
-import { Action, Icon, List } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
@@ -57,6 +57,10 @@ export default function PullRequestListItem({
       text: `${numberOfComments}`,
       icon: Icon.Bubble,
     });
+  }
+
+  if (pullRequest.repository.autoMergeAllowed && pullRequest.autoMergeRequest) {
+    accessories.unshift({ tag: { value: "Auto-merge", color: Color.Yellow } });
   }
 
   if (pullRequest.commits.nodes) {

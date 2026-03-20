@@ -120,7 +120,7 @@ export const SessionUsageCommandResponseSchema = z.object({
 
 export const LimitWindowSchema = z.object({
   utilization: z.number(),
-  resets_at: z.string(),
+  resets_at: z.string().nullable(),
 });
 
 export const UsageLimitDataSchema = z.object({

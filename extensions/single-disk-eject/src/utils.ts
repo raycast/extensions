@@ -33,11 +33,12 @@ async function listVolumesMac(): Promise<Volume[]> {
 
   let volumes: Volume[] = [];
   try {
-    const { stderr, stdout } = await exec(exePath, options);
+    const { stdout } = await exec(exePath, options);
     volumes = getVolumesFromLsCommandMac(stdout);
-  } catch (e: any) {
-    console.log(e.message);
-    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: e.message });
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.log(error.message);
+    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: error.message });
   }
 
   return volumes;
@@ -74,9 +75,10 @@ async function listVolumesWindows(): Promise<Volume[]> {
     });
 
     volumes = getVolumesFromWmicWindows(stdout);
-  } catch (e: any) {
-    console.log(e.message);
-    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: e.message });
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.log(error.message);
+    showToast({ style: Toast.Style.Failure, title: "Error listing volumes", message: error.message });
   }
 
   return volumes;
@@ -120,8 +122,9 @@ function getVolumesFromWmicWindows(raw: string): Volume[] {
     }
 
     return volumes;
-  } catch (e: any) {
-    console.log("Error parsing wmic output:", e.message);
+  } catch (e) {
+    const error = e instanceof Error ? e : new Error(String(e));
+    console.log("Error parsing wmic output:", error.message);
     return [];
   }
 }

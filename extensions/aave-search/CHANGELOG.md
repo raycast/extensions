@@ -1,5 +1,11 @@
 # Aave Search Changelog
 
+## [1.1.6] - 2026-03-04
+
+### Maintenance
+
+- Update source url to use new aave-dao repo
+
 ## [1.1.5] - 2026-02-06
 
 ### Maintenance

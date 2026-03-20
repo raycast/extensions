@@ -1,5 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
   "name": "kagi-news",
   "title": "Kagi News",
   "description": "Read and explore Kagi News articles and sources seamlessly in Raycast",
@@ -21,7 +22,14 @@
       "name": "kagi-news",
       "title": "Daily News",
       "subtitle": "Kagi News",
-      "description": "Read and explore Kagi News articles and sources seamlessly in Raycast",
+      "description": "Browse today's Kagi News categories and stories",
+      "mode": "view"
+    },
+    {
+      "name": "time-travel",
+      "title": "Time Travel",
+      "subtitle": "Kagi News",
+      "description": "Browse the Kagi News archives for a specific date",
       "mode": "view"
     }
   ],
@@ -73,6 +81,10 @@
         {
           "title": "한국어",
           "value": "ko"
+        },
+        {
+          "title": "中文",
+          "value": "zh"
         },
         {
           "title": "中文 (简体)",
@@ -192,7 +204,7 @@
       "title": "",
       "label": "Show Did You Know",
       "description": "Display the 'Did You Know' section",
-      "default": true
+      "default": false
     },
     {
       "name": "showDiyTips",
@@ -327,7 +339,7 @@
       "title": "",
       "label": "Show Perspectives",
       "description": "Display different perspectives on the story",
-      "default": false
+      "default": true
     },
     {
       "name": "showPrimaryImage",
@@ -430,8 +442,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

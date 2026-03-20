@@ -1,5 +1,9 @@
 # Ploi Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Paginated Servers] - 2024-07-24
 
 - You can now view Servers even if they are > 50 (Pagination for Sites will come later)

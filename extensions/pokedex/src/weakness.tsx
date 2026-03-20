@@ -12,15 +12,11 @@ import groupBy from "lodash.groupby";
 import { useCallback, useMemo, useState } from "react";
 import { fetchPokemon } from "./api";
 import WeaknessMetadata from "./components/metadata/weakness";
-import PokeProfile from "./components/profile";
+import Pokemon from "./components/pokemon";
 import TypeDropdown from "./components/type_dropdown";
 import pokedex from "./statics/pokedex.json";
 import { PokemonSpeciesName } from "./types";
-import {
-  getMarkdownPokemonImage,
-  localeName,
-  nationalDexNumber,
-} from "./utils";
+import { getPokemonImageTag, localeName, nationalDexNumber } from "./utils";
 import TypeMetadata from "./components/metadata/type";
 
 const { language } = getPreferenceValues();
@@ -93,7 +89,7 @@ export default function PokeWeaknesses(props: {
                   <List.Item.Detail
                     markdown={json2md([
                       {
-                        p: getMarkdownPokemonImage(poke.id),
+                        p: getPokemonImageTag(poke.id),
                       },
                     ])}
                     metadata={
@@ -119,7 +115,7 @@ export default function PokeWeaknesses(props: {
                       <Action.Push
                         title="Pokémon Profile"
                         icon={Icon.Sidebar}
-                        target={<PokeProfile id={poke.id} />}
+                        target={<Pokemon id={poke.id} />}
                       />
                     </ActionPanel.Section>
                   </ActionPanel>

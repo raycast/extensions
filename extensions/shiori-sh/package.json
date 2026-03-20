@@ -5,6 +5,11 @@
   "description": "Search, save, and manage your Shiori bookmarks. Mark links as read, delete them, save from clipboard, and track unread count in the menu bar.",
   "icon": "extension-icon.png",
   "author": "0xdhrv",
+  "version": "0.1.2",
+  "contributors": [
+    "alexs",
+    "brianlovin"
+  ],
   "platforms": [
     "macOS",
     "Windows"
