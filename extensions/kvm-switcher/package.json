@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kvm-switcher",
+  "title": "KVM Switcher",
+  "description": "Cross-platform KVM switcher for displays with built-in KVM and DDC/CI support. Supports HDMI, DisplayPort, and Type-C inputs.",
+  "icon": "extension-icon.png",
+  "author": "farizio_kautsar",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "switch-to-hdmi1",
+      "title": "Switch to HDMI 1",
+      "description": "Sets monitor input to HDMI 1 (VCP Code 17)",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-hdmi2",
+      "title": "Switch to HDMI 2",
+      "description": "Sets monitor input to HDMI 2 (VCP Code 18)",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-dp1",
+      "title": "Switch to DisplayPort 1",
+      "description": "Sets monitor input to DisplayPort 1 (VCP Code 15)",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-dp2",
+      "title": "Switch to DisplayPort 2",
+      "description": "Sets monitor input to DisplayPort 2 (VCP Code 16)",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-vga1",
+      "title": "Switch to VGA",
+      "description": "Sets monitor input to VGA 1 (VCP Code 1)",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-dvi1",
+      "title": "Switch to DVI",
+      "description": "Sets monitor input to DVI 1 (VCP Code 3)",
+      "mode": "no-view"
+    },
+    {
+      "name": "switch-to-custom",
+      "title": "Switch to Custom Input",
+      "description": "Enter a manual VCP code to switch to a specific monitor input.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "customCode",
+          "type": "textfield",
+          "required": true,
+          "title": "DDC Input Code",
+          "description": "The numeric VCP code for the input",
+          "default": "15"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
