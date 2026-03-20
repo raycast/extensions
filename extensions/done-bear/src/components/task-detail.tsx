@@ -37,16 +37,24 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
             <Action
               icon={Icon.CheckCircle}
               onAction={async () => {
-                await showToast({
-                  style: Toast.Style.Animated,
-                  title: "Completing task...",
-                });
-                await completeTask(task.id);
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Task completed",
-                });
-                revalidate();
+                try {
+                  await showToast({
+                    style: Toast.Style.Animated,
+                    title: "Completing task...",
+                  });
+                  await completeTask(task.id);
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Task completed",
+                  });
+                  revalidate();
+                } catch (error) {
+                  await showToast({
+                    message: error instanceof Error ? error.message : "Unknown error",
+                    style: Toast.Style.Failure,
+                    title: "Failed to complete task",
+                  });
+                }
               }}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               title="Mark as Completed"
@@ -56,16 +64,24 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
             <Action
               icon={Icon.ArrowCounterClockwise}
               onAction={async () => {
-                await showToast({
-                  style: Toast.Style.Animated,
-                  title: "Reopening task...",
-                });
-                await reopenTask(task.id);
-                await showToast({
-                  style: Toast.Style.Success,
-                  title: "Task reopened",
-                });
-                revalidate();
+                try {
+                  await showToast({
+                    style: Toast.Style.Animated,
+                    title: "Reopening task...",
+                  });
+                  await reopenTask(task.id);
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Task reopened",
+                  });
+                  revalidate();
+                } catch (error) {
+                  await showToast({
+                    message: error instanceof Error ? error.message : "Unknown error",
+                    style: Toast.Style.Failure,
+                    title: "Failed to reopen task",
+                  });
+                }
               }}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               title="Reopen Task"

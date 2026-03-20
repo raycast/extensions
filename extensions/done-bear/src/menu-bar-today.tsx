@@ -20,16 +20,24 @@ function MenuBarToday() {
             icon={Icon.Circle}
             key={task.id}
             onAction={async () => {
-              await showToast({
-                style: Toast.Style.Animated,
-                title: "Completing task...",
-              });
-              await completeTask(task.id);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Task completed",
-              });
-              revalidate();
+              try {
+                await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Completing task...",
+                });
+                await completeTask(task.id);
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Task completed",
+                });
+                revalidate();
+              } catch (error) {
+                await showToast({
+                  message: error instanceof Error ? error.message : "Unknown error",
+                  style: Toast.Style.Failure,
+                  title: "Failed to complete task",
+                });
+              }
             }}
             title={task.title}
           />
