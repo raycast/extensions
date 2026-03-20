@@ -5,6 +5,4 @@ export interface ExecPrefs {
   soundLoc: string;
   optionOne: string;
   optionTwo: string;
-  showHudNC: boolean;
-  showHudCA: boolean;
 }

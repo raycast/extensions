@@ -6,7 +6,9 @@ export default async function main() {
   const prefs = getPreferenceValues<Preferences>();
   const airpodsIndex = Number.parseInt(prefs.airpodsIndex, 10);
   if (!Number.isFinite(airpodsIndex) || airpodsIndex < 1) {
-    await showFailureToast("", { title: "AirPods List Position must be a positive number" });
+    await showFailureToast("", {
+      title: "AirPods List Position must be a positive number",
+    });
     return;
   }
   await closeMainWindow();

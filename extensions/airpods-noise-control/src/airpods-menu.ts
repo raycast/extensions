@@ -152,6 +152,14 @@ tell application "System Events"
 				set layoutType to "4-mode"
 			end if
 
+			-- Validate Adaptive not selected for AirPods Max (3-mode)
+			if isAirPodsMax and ToggleOption is "noise-control" then
+				if OptionOne is "Adaptive" or OptionTwo is "Adaptive" then
+					key code 53 -- ESC
+					return "adaptive-not-supported-on-max"
+				end if
+			end if
+
 			-- Toggle between modes
 			if ToggleOption is "noise-control" then
 				set activeIndex to -1
@@ -471,6 +479,14 @@ tell application "System Events"
 			-- Override detection: if we have 6+ candidates, likely 4-mode + CA
 			if candidateCount >= 6 then
 				set layoutType to "4-mode"
+			end if
+
+			-- Validate Adaptive not selected for AirPods Max (3-mode)
+			if isAirPodsMax and ToggleOption is "noise-control" then
+				if OptionOne is "Adaptive" or OptionTwo is "Adaptive" then
+					key code 53 -- ESC
+					return "adaptive-not-supported-on-max"
+				end if
 			end if
 
 			-- STEP 10: Toggle between modes
