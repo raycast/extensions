@@ -20,6 +20,6 @@ Rename every image in a folder by appending an 8-character MD5 content hash to i
 
 ## Preferences
 
-| Name | Description | Required |
-|------|-------------|----------|
-| Image Folder | The folder containing images to rename | ✅ |
+| Name         | Description                            | Required |
+| ------------ | -------------------------------------- | -------- |
+| Image Folder | The folder containing images to rename | ✅       |
