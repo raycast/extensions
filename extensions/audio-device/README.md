@@ -4,11 +4,17 @@ Switch audio devices, lock volumes, and stop macOS from changing your sound sett
 
 ## What you can do
 
-**Switch devices.** Open "Set Output Device" or "Set Input Device". Press Enter to switch.
+**Switch devices.** Open "Set Output Device" or "Set Input Device". Press Enter to switch. The window stays open so you can keep working.
 
-**Lock a device in place.** Press Cmd+Shift+D on any device to make it your default. If macOS switches away (after sleep, Bluetooth reconnect, plugging in a monitor), the extension switches back within 10 seconds. Manually switching a device gives you a 1-minute grace period before enforcement resumes.
+**Lock a device in place.** Press Cmd+Shift+D on any device to make it your default. If macOS switches away (after sleep, Bluetooth reconnect, plugging in a monitor), the extension switches back within 10 seconds. Manually switching gives you a 1-minute grace period before enforcement resumes.
 
 **Lock a volume level.** Press Cmd+Shift+V on any device to pin its volume. If macOS resets it, the extension restores it within 10 seconds. Changes under 2% are ignored so minor system adjustments don't trigger a reset.
+
+**See volume levels.** Each device shows its current volume percentage. HDMI/DisplayPort devices that don't support software volume control show "Volume controlled by device".
+
+**Mute/unmute.** Press Cmd+M on any device that supports mute.
+
+**Set exact volume.** "Set Output Volume" and "Set Input Volume" commands let you enter a specific volume (0-100) and optionally pin it.
 
 **Switch entire setups at once.** Combo commands let you switch input and output together — e.g., "desk" vs "meeting" vs "headphones". Disabled by default; enable in Raycast preferences.
 

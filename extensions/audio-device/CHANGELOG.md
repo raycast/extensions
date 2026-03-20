@@ -1,26 +1,24 @@
 # Audio Device Changelog
 
-## [Major Update] - {PR_MERGE_DATE}
+## [Major Update] - Mar 2026
 
-### Stop macOS from changing your audio settings
-- **Default device** — press Cmd+Shift+D on any device. If macOS switches away after sleep or Bluetooth reconnect, the extension switches back within 10 seconds.
-- **Pinned volumes** — press Cmd+Shift+V on any device. If macOS resets the volume, the extension restores it. Changes under 2% are ignored.
-- Enforcement runs automatically in the background every 10 seconds. No manual toggle.
-- **Grace period** — manually switching a device pauses enforcement for 1 minute so you can temporarily use another device without clearing the default.
+### Default device enforcement
+Press Cmd+Shift+D on any device to make it your default. If macOS switches away after sleep or Bluetooth reconnect, the extension switches back within 10 seconds. Manually switching gives you a 1-minute grace period before enforcement resumes.
 
-### Volume control (merged from Sound Control extension)
-- See current volume level for each device in the list
-- Mute/unmute any device with Cmd+M
-- Set Output Volume / Set Input Volume commands for precise control (0-100)
+### Pinned volumes
+Press Cmd+Shift+V on any device to pin its volume. If macOS resets it, the extension restores it within 10 seconds. Changes under 2% are ignored.
+
+### Volume control
+See current volume level for each device in the list. Mute/unmute with Cmd+M. Set exact volume (0-100) via Set Output Volume / Set Input Volume commands. Devices that don't support volume control (HDMI monitors) show "Volume controlled by device".
+
+### Performance
+Device list loads instantly from cache on repeat opens. Volume data for all devices is fetched in a single call (~500ms) instead of per-device queries.
 
 ### Breaking change: priority ordering removed
-The old system where you ranked multiple devices as fallbacks is gone. Replaced by a single default device per direction.
-
-On first run, your top-priority device is automatically migrated to the new default. If that's not the device you want, press Cmd+Shift+D on your preferred device.
+The old system where you ranked multiple devices as fallbacks is gone. Replaced by a single default device per direction. On first run, your top-priority device is automatically migrated to the new default.
 
 ### New icons
-- Clean 512x512 monoline icons for all device types
-- Works properly with Raycast's tint system
+Clean 512x512 monoline icons for all device types. Works properly with Raycast's tint system.
 
 ## [Update] - 2026-02-17
 - Improve binary download for windows (downloads and checks if binary exists at runtime)
