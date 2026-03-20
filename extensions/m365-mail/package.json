@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "m365-mail",
+  "title": "M365 Mail",
+  "description": "Read and compose emails via CLI for Microsoft 365",
+  "icon": "extension-icon.png",
+  "author": "poul_rasmus_brusgaard_madsen",
+  "categories": ["Productivity", "Communication"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "m365Path",
+      "title": "m365 CLI Path",
+      "description": "Full path to the m365 executable (leave empty to auto-detect)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "M365 Mail",
+      "description": "Browse your Microsoft 365 inbox",
+      "mode": "view"
+    },
+    {
+      "name": "compose",
+      "title": "Compose",
+      "subtitle": "M365 Mail",
+      "description": "Compose a new email",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo 'Publish via Raycast Store'",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
