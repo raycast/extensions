@@ -8,7 +8,7 @@ const execFileP = promisify(execFile);
  *  See: https://github.com/raycast/extensions/issues/26480 */
 export const execf = async (file: string, args: string[] = [], maxBuffer?: number): Promise<string> => {
   const { stdout } = await execFileP(file, args, maxBuffer ? { maxBuffer } : undefined);
-  return stdout.trim();
+  return String(stdout).trim();
 };
 
 export const formatBytes = (bytes: number): string => {
