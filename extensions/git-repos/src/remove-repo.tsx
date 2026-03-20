@@ -1,0 +1,124 @@
+import { List, ActionPanel, Action, showToast, Toast, confirmAlert, Alert, Icon } from "@raycast/api";
+import * as fs from "fs";
+import { execFile } from "child_process";
+import { useCachedPromise } from "@raycast/utils";
+import { GitRepo, GitRepoService, tildifyPath } from "./utils";
+
+function git(args: string[], cwd: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execFile("git", args, { cwd }, (err, stdout) => {
+      if (err) reject(err);
+      else resolve(stdout);
+    });
+  });
+}
+
+async function deleteFromDisk(repo: GitRepo, revalidate: () => void) {
+  const removeToast = await showToast({ style: Toast.Style.Animated, title: "Removing repository…" });
+  try {
+    fs.rmSync(repo.fullPath, { recursive: true, force: true });
+    removeToast.style = Toast.Style.Success;
+    removeToast.title = "Repository removed";
+    revalidate();
+  } catch (err) {
+    removeToast.style = Toast.Style.Failure;
+    removeToast.title = "Failed to remove repository";
+    removeToast.message = err instanceof Error ? err.message : String(err);
+  }
+}
+
+async function removeRepo(repo: GitRepo, revalidate: () => void) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: "Checking repository…" });
+
+  try {
+    const statusOutput = await git(["status", "--porcelain"], repo.fullPath);
+    if (statusOutput.trim().length > 0) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Cannot remove repository";
+      toast.message = "There are uncommitted changes";
+      return;
+    }
+
+    const localCommitsOutput = await git(["log", "--oneline", "--branches", "--not", "--remotes"], repo.fullPath);
+    if (localCommitsOutput.trim().length > 0) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Cannot remove repository";
+      toast.message = "There are local commits that haven't been pushed";
+      return;
+    }
+
+    await toast.hide();
+  } catch (err) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Failed to check repository";
+    toast.message = err instanceof Error ? err.message : String(err);
+    return;
+  }
+
+  const confirmed = await confirmAlert({
+    title: `Remove "${repo.name}"?`,
+    message: "This will permanently delete the repository from your filesystem. This action cannot be undone.",
+    primaryAction: {
+      title: "Remove",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+
+  if (!confirmed) return;
+
+  await deleteFromDisk(repo, revalidate);
+}
+
+async function forceRemoveRepo(repo: GitRepo, revalidate: () => void) {
+  const confirmed = await confirmAlert({
+    title: `Force remove "${repo.name}"?`,
+    message:
+      "This will permanently delete the repository including any uncommitted changes or unpushed commits. This action cannot be undone.",
+    primaryAction: {
+      title: "Force Remove",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+
+  if (!confirmed) return;
+
+  await deleteFromDisk(repo, revalidate);
+}
+
+export default function RemoveRepo() {
+  const { data: repos, isLoading, revalidate } = useCachedPromise(GitRepoService.gitRepos);
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search repositories...">
+      <List.EmptyView
+        title="No Repositories Found"
+        description="Make sure the scan path is configured in preferences."
+      />
+      {repos?.map((repo) => (
+        <List.Item
+          key={repo.fullPath}
+          title={repo.name}
+          icon={repo.icon}
+          accessories={[{ text: tildifyPath(repo.fullPath) }]}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Remove Repository"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => removeRepo(repo, revalidate)}
+              />
+              <Action
+                title="Force Remove Repository"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                onAction={() => forceRemoveRepo(repo, revalidate)}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}

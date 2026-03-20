@@ -11,7 +11,8 @@
     "cameronsstone",
     "hacdias",
     "AaronMoat",
-    "shkreios"
+    "shkreios",
+    "nikord"
   ],
   "categories": [
     "Developer Tools",
@@ -24,6 +25,12 @@
       "name": "list",
       "title": "List Repos",
       "description": "Quickly access your local git repositories and open them in your favorite editor or any app",
+      "mode": "view"
+    },
+    {
+      "name": "remove-repo",
+      "title": "Remove Repo",
+      "description": "Safely remove a local git repository from your filesystem",
       "mode": "view"
     }
   ],

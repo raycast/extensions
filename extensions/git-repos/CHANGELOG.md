@@ -1,5 +1,9 @@
 # Git Repos Changelog
 
+## [Added Command] - {PR_MERGE_DATE}
+
+- Added a new `Remove Repo` command that lets you remove a local repo. In order to delete it, you cannot have local commits or uncommitted changes. There is an action that allows user to force delete even with uncommited changes.
+
 ## [Bug Fix] - 2026-02-25
 
 - Prevent crashes when `Open with` app preferences are missing or invalid.
@@ -22,8 +26,8 @@
 ## [Bug Fix] - 2024-02-10
 
 - Make find command handle errors better
-    - Changed exit code to be always zero so execp doesn't throw
-    - Filter out error commands due to unreadable directories in the path
+  - Changed exit code to be always zero so execp doesn't throw
+  - Filter out error commands due to unreadable directories in the path
 
 ## [Enhancement] - 2023-12-07
 
@@ -56,23 +60,29 @@
 - Added a new action for List Repos command to open in all assigned applications at once.
 
 ## [Bug Fix] - 2022-03-31
+
 - Resolved issue due to cache schema changes
 
 ## [New Additions] - 2022-03-30
+
 - Open the action's app with the repo remote URL if it has one and the app's bundle id matches the system default browser's bundle id; otherwise, use the repo path.
 - Update to latest Raycast API
 
 ## [Store Updates] - 2022-03-14
+
 - Add categories and screenshots for the store
 - Update to latest Raycast API
 
 ## [New Additions] - 2022-02-10
+
 - Add Open with preferences
 - Update to latest Raycast API
 
 ## [New Additions] - 2021-10-18
+
 - Add support for Git Worktrees
 - Add additional actions
 
 ## Added [Git Repos] - 2021-10-15
+
 - Initial version
