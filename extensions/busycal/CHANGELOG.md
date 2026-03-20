@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial public release of the BusyCal Raycast extension
 - Add structured event and task creation commands
