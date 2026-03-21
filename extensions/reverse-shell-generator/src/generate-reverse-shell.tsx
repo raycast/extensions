@@ -3,43 +3,24 @@ import { useState, useEffect } from "react";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
 import { join } from "path";
+import {
+  getFileExtension,
+  isValidIP,
+  isValidPort,
+  urlEncode,
+  base64Encode,
+  groupBySubcategory,
+  getOSTagColor,
+  type ShellTemplate,
+} from "./utils";
 
 // ============================================================================
 // Type Definitions
 // ============================================================================
 
-interface ShellTemplate {
-  type: string;
-  name: string;
-  icon: string;
-  command: string;
-  description: string;
-  category: "reverse" | "bind" | "msfvenom";
-  subcategory: string;
-  os: ("linux" | "windows" | "mac")[];
-  listener?: string;
-}
-
 interface Config {
   ip: string;
   port: string;
-}
-
-// Get file extension based on shell type
-function getFileExtension(type: string): string {
-  if (type.startsWith("powershell")) return ".ps1";
-  if (type.startsWith("python")) return ".py";
-  if (type.startsWith("php")) return ".php";
-  if (type.startsWith("perl")) return ".pl";
-  if (type.startsWith("ruby")) return ".rb";
-  if (type.startsWith("nodejs")) return ".js";
-  if (type.startsWith("lua")) return ".lua";
-  if (type.startsWith("golang")) return ".go";
-  if (type.startsWith("rust")) return ".rs";
-  if (type.startsWith("java")) return ".java";
-  if (type.startsWith("csharp")) return ".cs";
-  if (type.startsWith("msfvenom")) return "";
-  return ".sh";
 }
 
 // ============================================================================
@@ -919,71 +900,16 @@ function generateAllCommands(ip: string, port: string): ShellTemplate[] {
   });
 }
 
-// Validate IPv4 address
-function isValidIPv4(ip: string): boolean {
-  const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-  if (!ipRegex.test(ip)) return false;
-  const parts = ip.split(".");
-  return parts.every((part) => parseInt(part) >= 0 && parseInt(part) <= 255);
-}
-
-// Validate IPv6 address
-function isValidIPv6(ip: string): boolean {
-  const ipv6Regex =
-    /^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$|^([0-9a-fA-F]{1,4}:){1,7}:$|^([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}$|^([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}$|^([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}$|^([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}$|^([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}$|^[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})$|^:((:[0-9a-fA-F]{1,4}){1,7}|:)$/;
-  return ipv6Regex.test(ip);
-}
-
-// Validate hostname (domain name)
-function isValidHostname(hostname: string): boolean {
-  const hostnameRegex =
-    /^[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-  return hostnameRegex.test(hostname) && hostname.length <= 253;
-}
-
-// Validate IP address (IPv4, IPv6, or hostname)
-function isValidIP(ip: string): boolean {
-  return isValidIPv4(ip) || isValidIPv6(ip) || isValidHostname(ip);
-}
-
-// Validate port number
-function isValidPort(port: string): boolean {
-  if (!/^\d+$/.test(port)) return false;
-  const portNum = Number(port);
-  return Number.isInteger(portNum) && portNum >= 1 && portNum <= 65535;
-}
-
-// URL encoding
-function urlEncode(str: string): string {
-  return encodeURIComponent(str);
-}
-
-// Base64 encoding
-function base64Encode(str: string): string {
-  return Buffer.from(str).toString("base64");
-}
-
-// Group by subcategory
-function groupBySubcategory(commands: ShellTemplate[]): Record<string, ShellTemplate[]> {
-  const groups: Record<string, ShellTemplate[]> = {};
-  commands.forEach((cmd) => {
-    if (!groups[cmd.subcategory]) {
-      groups[cmd.subcategory] = [];
-    }
-    groups[cmd.subcategory].push(cmd);
-  });
-  return groups;
-}
-
 // Group by OS
 function groupByOS(commands: ShellTemplate[]): Record<string, ShellTemplate[]> {
   const groups: Record<string, ShellTemplate[]> = {};
   commands.forEach((cmd) => {
-    const osKey = cmd.os[0];
-    if (!groups[osKey]) {
-      groups[osKey] = [];
-    }
-    groups[osKey].push(cmd);
+    cmd.os.forEach((osKey) => {
+      if (!groups[osKey]) {
+        groups[osKey] = [];
+      }
+      groups[osKey].push(cmd);
+    });
   });
   const sortedGroups: Record<string, ShellTemplate[]> = {};
   const osOrder = ["linux", "mac", "windows"];
@@ -998,20 +924,6 @@ function groupByOS(commands: ShellTemplate[]): Record<string, ShellTemplate[]> {
     }
   });
   return sortedGroups;
-}
-
-// Get OS tag color
-function getOSTagColor(os: string): string {
-  switch (os) {
-    case "linux":
-      return "#FFA500";
-    case "windows":
-      return "#0078D4";
-    case "mac":
-      return "#000000";
-    default:
-      return "#808080";
-  }
 }
 
 // ============================================================================
@@ -1229,7 +1141,7 @@ ${cmd.listener ? `## Listener Command\n\n\`\`\`bash\n${cmd.listener}\n\`\`\`` : 
                       />
                     </ActionPanel.Section>
                     <Action
-                      title="Re-enter Ip/port"
+                      title="Re-enter IP/Port"
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={pop}
