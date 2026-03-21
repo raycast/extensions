@@ -4,6 +4,7 @@ import { join } from "node:path";
 import semver from "semver";
 
 const isWindows = process.platform === "win32";
+const isMacOS = process.platform === "darwin";
 
 let cachedPaths: string | null = null;
 let cachedPathsPromise: Promise<string> | null = null;
@@ -65,14 +66,23 @@ const scanVersionedNodePaths = async (
 export const resolveFnmBaseDir = async (home = process.env.HOME): Promise<string | null> => {
   if (!home) return null;
 
-  const legacyFnmPath = join(home, ".fnm");
-  if (await pathExists(legacyFnmPath)) {
-    // Older fnm installs keep everything under ~/.fnm instead of XDG data directories
-    return legacyFnmPath;
+  const fnmBaseDirCandidates = process.env.FNM_DIR ? [process.env.FNM_DIR] : [];
+  fnmBaseDirCandidates.push(join(home, ".fnm"));
+  if (process.env.XDG_DATA_HOME) {
+    fnmBaseDirCandidates.push(join(process.env.XDG_DATA_HOME, "fnm"));
+  }
+  if (isMacOS) {
+    fnmBaseDirCandidates.push(join(home, "Library", "Application Support", "fnm"));
+  }
+  fnmBaseDirCandidates.push(join(home, ".local", "share", "fnm"));
+
+  for (const dir of fnmBaseDirCandidates) {
+    if (await pathExists(dir)) {
+      return dir;
+    }
   }
 
-  const xdgDataHome = process.env.XDG_DATA_HOME || join(home, ".local", "share");
-  return join(xdgDataHome, "fnm");
+  return null;
 };
 
 export const resolveVersionManagerPaths = async (): Promise<string[]> => {

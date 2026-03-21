@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix `fnm` macOS Path Resolution] - {PR_MERGE_DATE}
+
+- Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
+- Match the official `fnm` directory resolution preference order when resolving `fnm` paths.
+
 ## [Agent-Specific Skill Removal] - 2026-03-27
 
 - Support removing skills from specific agents instead of all agents at once
