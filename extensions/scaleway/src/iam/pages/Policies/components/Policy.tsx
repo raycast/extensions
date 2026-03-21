@@ -1,8 +1,8 @@
 import { List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 
 type PolicyProps = {
-  policy: IAM.v1alpha1.Policy
+  policy: Iamv1alpha1.Policy
 }
 
 export const Policy = ({ policy }: PolicyProps) => (

@@ -21,15 +21,15 @@ interface FormValues {
   taskId: string;
   typeOfWorkId: string;
   date: Date | null;
-  startTime: string;
+  startTime?: string;
   duration: string;
   isBillable: boolean;
 }
 
-const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
+export const logTime = async (token: string, values: FormValues, tasks: task[] | string) => {
   values.date = values.date ? values.date : new Date();
   if (!Array.isArray(tasks)) {
-    return;
+    return false;
   }
   const task = tasks.filter((value) => value.id === values.taskId)[0];
   const body = JSON.stringify({
@@ -61,13 +61,15 @@ const logTime = async (token: string, values: FormValues, tasks: task[] | string
     });
     if (!response.ok) {
       showFailureToast("Couldn't log time");
+      return false;
     } else {
       await showHUD("Successfully logged time");
+      return true;
     }
   } catch (error) {
     showFailureToast(error as Error);
     console.error(error);
-    return;
+    return false;
   }
 };
 
@@ -77,69 +79,6 @@ export default function Command(props: LaunchProps) {
       if (!data || data.isExpired()) {
         revalidate();
       }
-    },
-  });
-  const {
-    data: projects,
-    isLoading: isLoadingProjects,
-    revalidate: revalidateProjects,
-  } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
-    execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!data || data.length === 0) {
-        revalidateProjects();
-      }
-      if (props.launchContext?.projectId) {
-        setValue("projectId", props.launchContext.projectId);
-      }
-      if (props.draftValues?.projectId) {
-        setValue("projectId", props.draftValues.projectId);
-      }
-    },
-    onError: () => {
-      revalidateProjects();
-    },
-  });
-  const {
-    data: tasks,
-    isLoading: isLoadingTasks,
-    revalidate: revalidateTasks,
-  } = useCachedPromise(getTasks, [token?.accessToken as string, "", 1000], {
-    execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!data || data.length === 0) {
-        revalidateTasks();
-      }
-      if (props.launchContext?.taskId) {
-        setValue("taskId", props.launchContext.taskId);
-      }
-      if (props.draftValues?.taskId) {
-        setValue("taskId", props.draftValues.taskId);
-      }
-    },
-    onError: () => {
-      revalidateTasks();
-    },
-  });
-  const {
-    data: typesOfWork,
-    isLoading: isLoadingTypesOwWork,
-    revalidate: revalidateTypesOfWork,
-  } = useCachedPromise(getTypesOfWork, [token?.accessToken as string], {
-    execute: !!token?.accessToken && !token.isExpired(),
-    onData: (data) => {
-      if (!Array.isArray(data)) {
-        revalidateTypesOfWork();
-      }
-      if (props.launchContext?.typeOfWorkId) {
-        setValue("typeOfWorkId", props.launchContext.typeOfWorkId);
-      }
-      if (props.draftValues?.typeOfWorkId) {
-        setValue("typeOfWorkId", props.draftValues.typeOfWorkId);
-      }
-    },
-    onError: () => {
-      revalidateTypesOfWork();
     },
   });
   const { pop } = useNavigation();
@@ -183,6 +122,73 @@ export default function Command(props: LaunchProps) {
       },
     },
   });
+  const {
+    data: projects,
+    isLoading: isLoadingProjects,
+    revalidate: revalidateProjects,
+  } = useCachedPromise(getProjects, [token?.accessToken as string, "", 1000], {
+    execute: !!token?.accessToken && !token.isExpired(),
+    onData: (data) => {
+      if (!data || data.length === 0) {
+        revalidateProjects();
+      }
+      if (props.launchContext?.projectId) {
+        setValue("projectId", props.launchContext.projectId);
+      }
+      if (props.draftValues?.projectId) {
+        setValue("projectId", props.draftValues.projectId);
+      }
+    },
+    onError: () => {
+      revalidateProjects();
+    },
+  });
+  const {
+    data: tasks,
+    isLoading: isLoadingTasks,
+    revalidate: revalidateTasks,
+  } = useCachedPromise(
+    getTasks,
+    [token?.accessToken as string, "", 1000, values.projectId === "none" ? undefined : values.projectId],
+    {
+      execute: !!token?.accessToken && !token.isExpired(),
+      onData: (data) => {
+        if (!data || data.length === 0) {
+          revalidateTasks();
+        }
+        if (props.launchContext?.taskId) {
+          setValue("taskId", props.launchContext.taskId);
+        }
+        if (props.draftValues?.taskId) {
+          setValue("taskId", props.draftValues.taskId);
+        }
+      },
+      onError: () => {
+        revalidateTasks();
+      },
+    },
+  );
+  const {
+    data: typesOfWork,
+    isLoading: isLoadingTypesOwWork,
+    revalidate: revalidateTypesOfWork,
+  } = useCachedPromise(getTypesOfWork, [token?.accessToken as string], {
+    execute: !!token?.accessToken && !token.isExpired(),
+    onData: (data) => {
+      if (!Array.isArray(data)) {
+        revalidateTypesOfWork();
+      }
+      if (props.launchContext?.typeOfWorkId) {
+        setValue("typeOfWorkId", props.launchContext.typeOfWorkId);
+      }
+      if (props.draftValues?.typeOfWorkId) {
+        setValue("typeOfWorkId", props.draftValues.typeOfWorkId);
+      }
+    },
+    onError: () => {
+      revalidateTypesOfWork();
+    },
+  });
 
   return (
     <Form
@@ -212,7 +218,14 @@ export default function Command(props: LaunchProps) {
         <Form.Dropdown.Item key={"none"} title={"No Project"} value={"none"} />
         {projects &&
           Array.isArray(projects) &&
-          projects.map((project) => <Form.Dropdown.Item key={project.id} title={project.name} value={project.id} />)}
+          projects.map((project) => (
+            <Form.Dropdown.Item
+              key={project.id}
+              title={project.name}
+              value={project.id}
+              keywords={[project.projectKey ?? ""]}
+            />
+          ))}
       </Form.Dropdown>
       <Form.Dropdown
         title={"Task"}
@@ -242,7 +255,14 @@ export default function Command(props: LaunchProps) {
                 itemProps.projectId.value === "none" ||
                 task.projectId.includes(itemProps.projectId.value || ""),
             )
-            .map((task) => <Form.Dropdown.Item key={task.id} title={task.name} value={task.id} />)}
+            .map((task) => (
+              <Form.Dropdown.Item
+                key={task.id}
+                title={task.name}
+                value={task.id}
+                keywords={[task.taskIdentifier ?? ""]}
+              />
+            ))}
       </Form.Dropdown>
       <Form.Dropdown title={"Type of work"} {...itemProps.typeOfWorkId}>
         {typesOfWork &&

@@ -1,6 +1,5 @@
 import { ActionPanel, List, Action, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import fetch from "node-fetch";
 import * as cheerio from "cheerio";
 
 import { headers } from "./util";
@@ -11,7 +10,7 @@ export default function Torrent({ ip }: { ip: string }) {
   const { pop } = useNavigation();
 
   const { isLoading, data } = useCachedPromise(
-    async (ip_addr: string) => {
+    async (ip_addr: string): Promise<Torrent[]> => {
       const res = await fetch(`https://iknowwhatyoudownload.com/en/peer/?ip=${ip_addr}`, {
         headers: headers as Record<string, string>,
       });
@@ -19,7 +18,6 @@ export default function Torrent({ ip }: { ip: string }) {
       const $ = cheerio.load(html);
 
       const temp: Torrent[] = [];
-
       $("tbody tr").each(function (index, item) {
         const tempArr = $("td", item).toArray();
         temp.push({
@@ -35,9 +33,8 @@ export default function Torrent({ ip }: { ip: string }) {
       return temp;
     },
     [ip],
-    { keepPreviousData: true, initialData: [] },
+    { keepPreviousData: true, initialData: [] as Torrent[] },
   );
-
   return (
     <List
       isLoading={isLoading}

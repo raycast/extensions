@@ -41,7 +41,9 @@
     "nebbles",
     "alanxmay",
     "gdsmith",
-    "tama_harrison"
+    "tama_harrison",
+    "pavelas",
+    "mchoun"
   ],
   "pastContributors": [
     "pomdtr",
@@ -162,6 +164,13 @@
       "title": "Search Tabs",
       "subtitle": "Arc",
       "description": "Search and select your tabs",
+      "mode": "view"
+    },
+    {
+      "name": "search-space-tabs",
+      "title": "Search Space Tabs",
+      "subtitle": "Arc",
+      "description": "Search and select tabs in your current space",
       "mode": "view"
     },
     {
@@ -1190,7 +1199,7 @@
     "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "nanoid": "^4.0.0",
     "pinyin-pro": "^3.25.0",
     "semver": "^7.3.8"

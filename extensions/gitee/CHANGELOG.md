@@ -1,5 +1,9 @@
 # Gitee Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Update Raycast API] - 2022-11-30
 
 - Update Raycast API version to 1.44.0

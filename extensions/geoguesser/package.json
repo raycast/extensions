@@ -1,0 +1,135 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "geoguesser",
+  "title": "Geoguesser",
+  "description": "Allow you to check your profile, ranking and show you the current daily mission",
+  "icon": "gg-icon.png",
+  "author": "boosteblume",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-profile",
+      "title": "Get Your Profile",
+      "subtitle": "Geoguesser",
+      "description": "Show you your current profile including stats",
+      "mode": "view"
+    },
+    {
+      "name": "daily-challenge",
+      "title": "Daily Challenge",
+      "subtitle": "Geoguesser",
+      "description": "Show today's GeoGuessr daily challenge",
+      "mode": "view"
+    },
+    {
+      "name": "last-games",
+      "title": "Show Your Recent Games",
+      "subtitle": "Geoguesser",
+      "description": "Show your recent GeoGuessr game history",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ncfaToken",
+      "type": "password",
+      "required": true,
+      "title": "NCFA Token",
+      "description": "Your GeoGuessr _ncfa cookie value (valid for 1 year)",
+      "placeholder": "Paste your _ncfa cookie value here"
+    },
+    {
+      "name": "countryCode",
+      "type": "textfield",
+      "required": false,
+      "title": "Your Country Code",
+      "description": "Your 2-letter country code (e.g., DE, US, FR)",
+      "default": "de",
+      "placeholder": "de"
+    },
+    {
+      "name": "locale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Number & Date Format",
+      "description": "Choose your preferred locale for formatting numbers and dates",
+      "default": "de-DE",
+      "data": [
+        {
+          "title": "German (Germany)",
+          "value": "de-DE"
+        },
+        {
+          "title": "English (US)",
+          "value": "en-US"
+        },
+        {
+          "title": "English (UK)",
+          "value": "en-GB"
+        },
+        {
+          "title": "French (France)",
+          "value": "fr-FR"
+        },
+        {
+          "title": "Spanish (Spain)",
+          "value": "es-ES"
+        },
+        {
+          "title": "Italian (Italy)",
+          "value": "it-IT"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "pt-BR"
+        },
+        {
+          "title": "Dutch (Netherlands)",
+          "value": "nl-NL"
+        },
+        {
+          "title": "Swedish (Sweden)",
+          "value": "sv-SE"
+        },
+        {
+          "title": "Norwegian (Norway)",
+          "value": "nb-NO"
+        },
+        {
+          "title": "Danish (Denmark)",
+          "value": "da-DK"
+        },
+        {
+          "title": "Finnish (Finland)",
+          "value": "fi-FI"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

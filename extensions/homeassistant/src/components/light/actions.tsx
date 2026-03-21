@@ -1,11 +1,17 @@
 import { EntityStandardActionSections } from "@components/entity";
-import { KtoColorLike, RGB, RGBtoColorLike, miredToK } from "@lib/color";
+import { KtoColorLike, type RGB, RGBtoColorLike } from "@lib/color";
 import { ha } from "@lib/common";
 import { lightRGBColors } from "@lib/constants";
-import { State } from "@lib/haapi";
-import { Action, ActionPanel, Color, Icon, Keyboard } from "@raycast/api";
+import type { State } from "@lib/haapi";
+import { Action, ActionPanel, Color, Icon, type Keyboard } from "@raycast/api";
 import React from "react";
-import { ceilRound50, getLightBrightnessValues, getLightMinMaxK, hasLightBrightnessSupport } from "./utils";
+import {
+  ceilRound50,
+  floorRound50,
+  getLightBrightnessValues,
+  getLightMinMaxK,
+  hasLightBrightnessSupport,
+} from "./utils";
 
 export function BrightnessControlAction(props: { state: State }): React.ReactElement | null {
   const state = props.state;
@@ -77,7 +83,10 @@ export function ColorTempControlAction(props: { state: State }): React.ReactElem
   const modes = state.attributes.supported_color_modes;
 
   const handle = async (K: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, kelvin: `${K}` });
+    await ha.callService("light", "turn_on", {
+      entity_id: state.entity_id,
+      color_temp_kelvin: `${K}`,
+    });
   };
 
   const getKTempValues = (): number[] | undefined => {
@@ -85,14 +94,14 @@ export function ColorTempControlAction(props: { state: State }): React.ReactElem
     if (minK && maxK) {
       const result: number[] = [];
       const minK50 = ceilRound50(minK);
+      const maxK50 = floorRound50(maxK);
       if (minK50 > minK) {
         result.push(minK);
       }
-      const maxK50 = ceilRound50(maxK);
-      for (let i = minK50; i <= maxK50; i = i + 50) {
+      for (let i = minK50; i <= maxK50; i += 50) {
         result.push(i);
       }
-      if (maxK < maxK) {
+      if (maxK50 < maxK) {
         result.push(maxK);
       }
       return result;
@@ -135,29 +144,29 @@ function ColorTempControlAddAction(props: {
   const add = props.add;
 
   const handle = async (K: number) => {
-    await ha.callService("light", "turn_on", { entity_id: state.entity_id, kelvin: `${K}` });
+    await ha.callService("light", "turn_on", { entity_id: state.entity_id, color_temp_kelvin: `${K}` });
   };
 
   if (modes && Array.isArray(modes) && modes.includes("color_temp")) {
-    const mired = state.attributes.color_temp as number | undefined;
-    if (mired === undefined) {
+    const currentK = state.attributes.color_temp_kelvin as number | undefined;
+    if (currentK === undefined) {
       return null;
     }
     const [minK, maxK] = getLightMinMaxK(state);
     if (minK === undefined || maxK === undefined) {
       return null;
     }
-    const k = Math.round(miredToK(mired));
-    let nextK = k + add;
-    if (nextK === k) {
-      nextK = k + add;
-    }
-    if (nextK === maxK || nextK === minK) {
-      return null;
-    } else if (nextK > maxK) {
+
+    let nextK = currentK + add;
+
+    if (nextK > maxK) {
       nextK = maxK;
-    } else if (nextK < minK) {
+    }
+    if (nextK < minK) {
       nextK = minK;
+    }
+    if (currentK === nextK) {
+      return null;
     }
 
     return (

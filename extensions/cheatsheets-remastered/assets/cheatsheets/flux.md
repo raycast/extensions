@@ -1,6 +1,9 @@
 ---
 title: Flux architecture
 category: React
+tech: flux
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## About

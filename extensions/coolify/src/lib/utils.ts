@@ -1,6 +1,6 @@
 import { Color } from "@raycast/api";
 import { COOLIFY_URL } from "./config";
-import { DatabaseType, Resource, ResourceDetails } from "./types";
+import { DatabaseType, ErrorResult, Resource, ResourceDetails } from "./types";
 import { showFailureToast } from "@raycast/utils";
 
 export function generateCoolifyUrl(url = "") {
@@ -40,4 +40,14 @@ export function getResourceTypeEndpoint(type: ResourceDetails["type"]) {
     default:
       return type;
   }
+}
+
+export async function parseCoolifyResponse<T>(response: Response) {
+  if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error(response.statusText);
+  const result = await response.json();
+  if (!response.ok) {
+    const err = result as ErrorResult;
+    throw new Error(err.errors ? Object.values(err.errors)[0][0] : err.message);
+  }
+  return result as T;
 }

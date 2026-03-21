@@ -1,6 +1,9 @@
 ---
 title: Immutable.js
 category: JavaScript libraries
+tech: immutable.js
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Maps

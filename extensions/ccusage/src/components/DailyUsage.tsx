@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List, Icon } from "@raycast/api";
 import { formatTokens, formatCost, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
 import { getCurrentLocalDate } from "../utils/date-formatter";
 import { useDailyUsage } from "../hooks/useDailyUsage";
@@ -70,7 +70,7 @@ export function DailyUsage() {
     <List.Item
       id="today"
       title="Today"
-      icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
+      icon={Icon.Calendar}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}

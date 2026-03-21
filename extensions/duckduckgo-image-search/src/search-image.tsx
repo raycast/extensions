@@ -1,10 +1,10 @@
-import React, { useRef, useState } from "react";
 import { Action, ActionPanel, closeMainWindow, Grid, Icon, Image, PopToRootType, showHUD } from "@raycast/api";
+import { useRef, useState } from "react";
 
 import { useCachedPromise } from "@raycast/utils";
 import { PaginationOptions } from "@raycast/utils/dist/types";
-import { copyImageToClipboard, pasteImage, searchImage } from "../utils/helpers";
 import { ImageLayout, ImageLayouts } from "../utils/consts";
+import { copyImageToClipboard, pasteImage, saveImage, searchImage } from "../utils/helpers";
 import { DuckDuckGoImage } from "../utils/search";
 
 const QUERY_EXAMPLES: string[] = [
@@ -36,8 +36,14 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       <Action
         title="Paste Image"
         shortcut={{
-          modifiers: ["cmd", "shift"],
-          key: "enter",
+          macOS: {
+            modifiers: ["cmd", "shift"],
+            key: "enter",
+          },
+          windows: {
+            modifiers: ["ctrl", "shift"],
+            key: "enter",
+          },
         }}
         icon={Icon.Clipboard}
         onAction={() =>
@@ -59,8 +65,14 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
       <Action
         title="Copy Image"
         shortcut={{
-          modifiers: ["cmd", "shift"],
-          key: "c",
+          macOS: {
+            modifiers: ["cmd", "shift"],
+            key: "c",
+          },
+          windows: {
+            modifiers: ["ctrl", "shift"],
+            key: "c",
+          },
         }}
         icon={Icon.Clipboard}
         onAction={() =>
@@ -72,20 +84,47 @@ function ActionsPanel({ item }: { item: DuckDuckGoImage }) {
           })
         }
       />
+      <Action
+        title="Save Image"
+        shortcut={{
+          macOS: {
+            modifiers: ["cmd"],
+            key: "s",
+          },
+          windows: {
+            modifiers: ["ctrl"],
+            key: "s",
+          },
+        }}
+        icon={Icon.Download}
+        onAction={() => saveImage(item)}
+      />
       <Action.CopyToClipboard
         title="Copy Image URL"
         content={item.image}
         shortcut={{
-          modifiers: ["cmd", "opt"],
-          key: "c",
+          macOS: {
+            modifiers: ["cmd", "opt"],
+            key: "c",
+          },
+          windows: {
+            modifiers: ["ctrl", "alt"],
+            key: "c",
+          },
         }}
       />
       <Action.CopyToClipboard
         title="Copy Site URL"
         content={item.url}
         shortcut={{
-          modifiers: ["cmd", "shift", "opt"],
-          key: "c",
+          macOS: {
+            modifiers: ["cmd", "shift", "opt"],
+            key: "c",
+          },
+          windows: {
+            modifiers: ["ctrl", "shift", "alt"],
+            key: "c",
+          },
         }}
       />
     </ActionPanel>

@@ -1,6 +1,9 @@
 ---
 title: Pass
 category: CLI
+tech: pass
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Reference

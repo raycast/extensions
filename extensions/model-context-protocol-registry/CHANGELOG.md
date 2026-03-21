@@ -1,5 +1,37 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Sanity MCP Server] - 2026-03-07
+
+Add official Sanity MCP Server to registry for direct access to Sanity projects.
+
+## [Add RouteMesh MCP Server] - 2026-03-05
+
+Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
+
+## [Add Razuna MCP Server] - 2026-02-03
+
+Add official Razuna MCP Server to registry.
+
+## [Update Anytype MCP Server] - 2026-01-13
+
+Update Anytype MCP Server to use the latest version of the Anytype API.
+
+## [Add Circleback MCP Server] - 2026-01-13
+
+Add official Circleback MCP Server to registry.
+
+## [Add Atono MCP Server] - 2025-12-08
+
+Add official Atono MCP Server to registry to manage projects
+
+## [Update Nuxt MCP Server URL] - 2025-11-17
+
+## [Update Nuxt UI MCP Server URL] - 2025-09-23
+
+## [Add Nuxt UI MCP Server] - 2025-09-10
+
+Add official Nuxt UI MCP Server to registry
+
 ## [Add Rube MCP Server] - 2025-08-26
 
 Add official Rube MCP Server to registry to connect AI tools to 500+ apps

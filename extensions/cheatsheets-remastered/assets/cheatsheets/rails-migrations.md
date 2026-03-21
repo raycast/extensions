@@ -1,6 +1,9 @@
 ---
 title: Rails migrations
 category: Rails
+tech: rails-migrations
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Automatically make migrations

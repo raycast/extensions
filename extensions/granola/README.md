@@ -14,22 +14,29 @@ If you run into any issues, please verify the following:
 ## Granola Commands
 - **Create Note** - Start a new note and recording immediately in Granola
 - **Search Notes** - View your notes in a list, see their details (including transcript), copy their links, or copy their contents as HTML or Markdown
-- **Browse Folders** - Navigate your folders and view notes within them with folder icons
-- **Export Transcripts** - Select multiple notes and export their transcripts in bulk
-- **Export Notes** - Select multiple notes and export them in bulk
+- **Search People** - Browse and search people from your Granola meetings, view their company affiliations and meeting history
+- **Search Companies** - Explore companies from your meetings, see associated people and meeting details
+- **Export Transcripts** - Select multiple notes and export their transcripts in bulk with folder-aware filtering
+- **Export Notes** - Select multiple notes and export them in bulk with folder-aware filtering
 - **Create Note from Transcript** - Create a new note from text transcripts or YouTube videos with AI-powered summaries
 
 ## AI Tools
-- **AI Notes** - Use Raycast AI on top of Granola and other AI extensions
+- **List Meetings** - Get meeting metadata (title, date, folders) with optional source filtering (`my-notes`, `shared`, or `all`)
+- **Get Note Content** - Retrieve note content (original, enhanced, or auto-selected)
 - **Get Transcript** - Retrieve the full transcript for any specific note
-- **Save to Notion** - Export one or more notes to Notion
+- **List Folders** - Get folder metadata, note counts, and sharing info (`isShared`, `userRole`, `memberCount`)
+- **Recipes** - Search and use Granola recipes within Raycast AI
+- **Save to Notion** - Export one or more notes to Notion with batch processing
 
 ## Features
+- **Shared Documents** - View and query notes shared with you from teammates and collaborators (both in UI and via AI)
+- **Open in Granola** - Open any note directly in the Granola app with ⌘O
 - **YouTube Integration** - Extract transcripts directly from YouTube URLs
-- **Folder Organization** - Browse and filter notes by folders with visual icons
-- **Batch Operations** - Process multiple notes simultaneously
+- **Folder Organization** - Browse and filter notes by folders with visual icons and note counts
+- **Batch Operations** - Process multiple notes simultaneously with streaming exports
 - **Cross-platform Support** - Works on both macOS and Windows
 - **Notion Export** - Save notes and transcripts to Notion with one click
+- **ZIP Exports** - Export multiple notes as organized ZIP files grouped by folder
 
 ## Developer Notes / Privacy
 *How does this extension work?*

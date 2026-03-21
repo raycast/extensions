@@ -15,21 +15,21 @@
   "commands": [
     {
       "name": "query-rae-word",
-      "title": "Query Word In RAE",
+      "title": "Query Word in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query a word in the RAE dictionary",
       "mode": "view"
     },
     {
       "name": "query-rae-daily-word",
-      "title": "Query Word Of The Day In RAE",
+      "title": "Query Word of the Day in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query the RAE word of the day",
       "mode": "view"
     },
     {
       "name": "query-rae-random-word",
-      "title": "Query Random Word In RAE",
+      "title": "Query Random Word in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query a random word from the RAE dictionary",
       "mode": "view"
@@ -65,5 +65,8 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch --config jest.config.ts",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --config jest.config.ts",
     "test:updateSnapshots": "NODE_OPTIONS=--experimental-vm-modules jest --updateSnapshot --config jest.config.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

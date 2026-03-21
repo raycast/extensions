@@ -1,5 +1,8 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
+import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[BookmarkEdit]");
 import { fetchUpdateBookmark } from "../apis";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
@@ -45,6 +48,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
       note: bookmark.note || "",
     },
     async onSubmit(values) {
+      log.info("Submitting bookmark update", { bookmarkId: bookmark.id });
       const toast = await showToast({
         title: t("bookmark.updating"),
         style: Toast.Style.Animated,
@@ -58,6 +62,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
 
         await fetchUpdateBookmark(bookmark.id, payload);
 
+        log.info("Bookmark updated", { bookmarkId: bookmark.id });
         toast.style = Toast.Style.Success;
         toast.title = t("bookmark.updateSuccess");
 
@@ -66,6 +71,7 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         }
         pop();
       } catch (error) {
+        log.error("Failed to update bookmark", { bookmarkId: bookmark.id, error });
         toast.style = Toast.Style.Failure;
         toast.title = t("bookmark.updateFailed");
         toast.message = String(error);

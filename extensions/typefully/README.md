@@ -1,15 +1,36 @@
+<p align="center">
+  <img src="assets/icon.png" width="128" height="128" />
+</p>
+
 # Typefully
 
-The Typefully Raycast extension allows you to create drafts, schedule tweets, and see your publishing queue and notifications.
+Create and manage social media drafts with [Typefully](https://typefully.com), directly from Raycast.
 
-## Requirements
+## Setup
 
-To use the extension you'll need a free Typefully account and a personal Typefully API key.
+This extension requires a Typefully API key. Get yours at [typefully.com → Settings → API](https://typefully.com/?settings=api), then paste it in the extension preferences.
 
-## Getting your personal API key
+## Commands
 
-1. Go to [Typefully](https://typefully.com/) and open **Settings** by clicking on the gear icon in the bottom left-hand corner of the screen.
-2. Next, select the **API & Integrations** menu item.
-3. Under the API Keys section, copy your **API Key**. If you do not have a key yet, generate one and then copy it.
+| Command | Description |
+| --- | --- |
+| New Draft | Create a draft for X, LinkedIn, Threads, Bluesky, or Mastodon |
+| View Drafts | Browse your unpublished drafts |
+| View Scheduled | Browse your scheduled drafts |
+| View Published | Browse your published drafts |
+| Search Social Sets | Browse your social sets and set a default |
 
-You will need this key to use the Typefully Raycast extension.
+## AI Tools
+
+This extension includes AI tools for Raycast AI Chat:
+
+- **Create Draft** — Create a draft from content or a prompt
+- **List Drafts** — List drafts by status
+- **List Social Sets** — List available social sets
+- **Schedule Draft** — Schedule an existing draft
+
+## Tips
+
+- Use `---` on its own line to split content into a thread
+- Set a default social set via **Search Social Sets** to skip the picker when creating drafts
+- Platform selections are remembered per social set

@@ -161,7 +161,7 @@ export function useEventTypes(): { eventTypes: CalendlyEventType[]; isLoading: b
       return data.data.collection.filter((e) => e.active);
     },
     [],
-    { initialData: [], execute: !!user }
+    { initialData: [], execute: !!user },
   );
   return { eventTypes: data, isLoading, revalidate };
 }

@@ -2,13 +2,17 @@
 title: Factory Bot
 category: Ruby libraries
 weight: -3
-updated: 2020-07-06
+updated: 2020-07-06T00:00:00.000Z
 keywords:
-  - "FactoryBot.define do"
-  - "factory :user"
-  - "first_name 'John'"
-  - "sequence(:username) { |n| \"user#{n}\" }"
-tags: [Featurable]
+  - FactoryBot.define do
+  - 'factory :user'
+  - first_name 'John'
+  - 'sequence(:username) { |n| "user#{n}" }'
+tags:
+  - Featurable
+tech: factory_bot
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Factories

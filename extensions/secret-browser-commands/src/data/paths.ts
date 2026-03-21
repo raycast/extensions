@@ -1,5 +1,9 @@
 import { BrowserCommand } from "../types/types";
 
+// Browser compatibility constants
+const ALL_CHROMIUM = ["chrome", "edge", "brave", "arc", "vivaldi", "opera", "comet", "dia"];
+const BASIC_ONLY = ["chrome", "edge", "brave", "arc", "vivaldi", "opera", "comet", "dia", "atlas"];
+
 export const browserCommands: BrowserCommand[] = [
   {
     id: "about",
@@ -7,6 +11,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "about",
     description: (preferredBrowser: { title: string }) =>
       `Provides a list of all ${preferredBrowser.title} URLs, including ones for troubleshooting and debugging.`,
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -14,6 +19,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Access Code Cast",
     path: "access-code-cast",
     description: "Provides an interface for casting content using access codes to supported devices.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -22,6 +28,24 @@ export const browserCommands: BrowserCommand[] = [
     path: "accessibility",
     description:
       "Displays accessibility information for each tab and allows global toggling of accessibility features.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "actor-internals",
+    name: "Actor Internals",
+    path: "actor-internals",
+    isInternalDebugging: true,
+    description: "Debug information for the actor component system.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "actor-overlay",
+    name: "Actor Overlay",
+    path: "actor-overlay",
+    description: "Displays the actor overlay interface for debugging actor-based features.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -29,6 +53,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "App Service Internals",
     path: "app-service-internals",
     description: "Displays debug information for the App Service.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -37,6 +62,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "app-settings",
     description:
       "Provides a settings page for managing Chrome apps and extensions, including advanced configuration options.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -44,6 +70,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "AppCache Internals",
     path: "appcache-internals",
     description: "Displays Application Cache (AppCache) internal status and debugging information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -52,6 +79,16 @@ export const browserCommands: BrowserCommand[] = [
     path: "apps",
     description: (preferredBrowser: { title: string }) =>
       `Displays the applications that are installed in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "assistant",
+    name: "Assistant",
+    path: "assistant",
+    description: (preferredBrowser: { title: string }) =>
+      `Interface for ${preferredBrowser.title}'s built-in virtual assistant features.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   // Start of newly added URLs from Chromium source
@@ -61,6 +98,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "assistant-optin",
     description: (preferredBrowser: { title: string }) =>
       `Opt-in page for ${preferredBrowser.title}'s built-in virtual assistant features.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -68,6 +106,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Attribution Internals",
     path: "attribution-internals",
     description: "Displays debug information for the Attribution Reporting API, used for ad conversion measurement.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -75,6 +114,16 @@ export const browserCommands: BrowserCommand[] = [
     name: "Autofill Internals",
     path: "autofill-internals",
     description: "Displays internal logs and debug data for the browser's autofill feature.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "autofill-ml-internals",
+    name: "Autofill ML Internals",
+    path: "autofill-ml-internals",
+    isInternalDebugging: true,
+    description: "Debug information for machine learning features used in autofill predictions.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -82,6 +131,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Batch Upload",
     path: "batch-upload",
     description: "Provides an interface for uploading multiple files in a single batch operation.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -89,6 +139,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Blob Internals",
     path: "blob-internals",
     description: "Displays all Binary Large Object (BLOB) data currently stored by the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -96,6 +147,8 @@ export const browserCommands: BrowserCommand[] = [
     name: "Bluetooth Internals",
     path: "bluetooth-internals",
     description: "Displays detailed information about Bluetooth adapters, connections, and paired devices.",
+    supportedBrowsers: ALL_CHROMIUM,
+    excludedPlatforms: ["mac"],
   },
 
   {
@@ -103,6 +156,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Bookmarks",
     path: "bookmarks",
     description: "Opens the bookmark manager.",
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -110,6 +164,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Bookmarks Side Panel Top Chrome",
     path: "bookmarks-side-panel.top-chrome",
     description: "Opens the bookmarks side panel directly in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -117,6 +172,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Browser Switch",
     path: "browser-switch",
     description: "Provides an interface for switching between different browser profiles or instances.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -124,6 +180,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Certificate Manager",
     path: "certificate-manager",
     description: "Manages SSL/TLS certificates, allowing users to view, import, and export them.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -132,6 +189,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "chrome",
     description: (preferredBrowser: { title: string }) =>
       `Main internal page for ${preferredBrowser.title} browser information.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -140,6 +198,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "chrome-signin",
     description: (preferredBrowser: { title: string }) =>
       `Sign-in page for ${preferredBrowser.title} accounts and profiles.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -148,6 +207,32 @@ export const browserCommands: BrowserCommand[] = [
     path: "chrome-urls",
     description: (preferredBrowser: { title: string }) =>
       `Lists all internal ${preferredBrowser.title} URLs (similar to about page but with a different format).`,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "color-pipeline-internals",
+    name: "Color Pipeline Internals",
+    path: "color-pipeline-internals",
+    isInternalDebugging: true,
+    description: "Debug information for the browser's color pipeline and color management system.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "comments-side-panel-top-chrome",
+    name: "Comments Side Panel Top Chrome",
+    path: "comments-side-panel.top-chrome",
+    description: "Opens the comments side panel directly in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "compare",
+    name: "Compare",
+    path: "compare",
+    description: "Interface for comparing products, prices, or other items.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -156,6 +241,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "commerce-internals",
     isInternalDebugging: true,
     description: "Displays debug information for commerce-related features, such as price tracking and shopping.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -164,6 +250,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "components",
     description: (preferredBrowser: { title: string }) =>
       `Lists all components installed in ${preferredBrowser.title} and allows you to check for updates.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -171,6 +258,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Connection Help",
     path: "connection-help",
     description: "Provides troubleshooting information for network connection issues.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -178,6 +266,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Connection Monitoring Detected",
     path: "connection-monitoring-detected",
     description: "Shows a warning page when the browser detects that your connection is being monitored or modified.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -185,6 +274,16 @@ export const browserCommands: BrowserCommand[] = [
     name: "Connectors Internals",
     path: "connectors-internals",
     description: "Debug information for browser connectors and integrations.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "conflicts",
+    name: "Conflicts",
+    path: "conflicts",
+    description: "Displays information about software conflicts that may affect browser stability.",
+    supportedBrowsers: ALL_CHROMIUM,
+    platforms: ["windows"],
   },
 
   {
@@ -192,6 +291,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Conversion Internals",
     path: "conversion-internals",
     description: "Displays information about conversion tracking and measurement.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -200,6 +300,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "crashes",
     description: (preferredBrowser: { title: string }) =>
       `Displays information about ${preferredBrowser.title} crashes if crash reporting is enabled.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -208,6 +309,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "credits",
     description: (preferredBrowser: { title: string }) =>
       `Displays the credits for all open source software used in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -216,6 +318,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "customize-chrome-side-panel.top-chrome",
     description: (preferredBrowser: { title: string }) =>
       `Opens the customization interface for ${preferredBrowser.title}'s side panel in the top chrome UI.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -224,6 +327,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "data-sharing-internals",
     isInternalDebugging: true,
     description: "Debug information for data sharing features and synchronization.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -231,6 +335,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Debug Webuis Disabled",
     path: "debug-webuis-disabled",
     description: "Displays information about debug UI pages that are currently disabled.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -238,6 +343,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Device Log",
     path: "device-log",
     description: "Displays device-related logs.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -246,6 +352,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "devices",
     description: (preferredBrowser: { title: string }) =>
       `Lists physical and virtual devices connected to ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -253,6 +360,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Dino Game",
     path: "dino",
     description: "Play the hidden dinosaur game (usually shown when offline).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -261,6 +369,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "discards",
     isInternalDebugging: true,
     description: "Lists tabs that have been discarded to save memory, and allows manual discarding.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -269,6 +378,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "download-internals",
     isInternalDebugging: true,
     description: "View information about active downloads.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -276,6 +386,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Downloads",
     path: "downloads",
     description: "Displays the list of downloaded files.",
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -283,6 +394,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Extensions",
     path: "extensions",
     description: "Lists all installed extensions and allows you to manage them.",
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -290,6 +402,15 @@ export const browserCommands: BrowserCommand[] = [
     name: "Extensions Internals",
     path: "extensions-internals",
     description: "Advanced debugging interface for browser extensions, showing detailed technical information.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "extensions-zero-state",
+    name: "Extensions Zero State",
+    path: "extensions-zero-state",
+    description: "Displays the extensions page in its initial/empty state when no extensions are installed.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -298,6 +419,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "family-link-user-internals",
     isInternalDebugging: true,
     description: "Debug information for Family Link user accounts and restrictions.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -306,6 +428,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "feedback",
     description: (preferredBrowser: { title: string }) =>
       `Submit feedback and bug reports to ${preferredBrowser.title} developers.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -313,6 +436,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Flags",
     path: "flags",
     description: "Access experimental browser features. Be careful, these can break things!",
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -320,6 +444,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "GCM Internals",
     path: "gcm-internals",
     description: "Google Cloud Messaging internal information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -327,6 +452,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "GPU",
     path: "gpu",
     description: "Shows detailed information about the GPU hardware, drivers, and feature status.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -335,6 +461,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "help",
     description: (preferredBrowser: { title: string }) =>
       `Displays ${preferredBrowser.title} version information and about page.`,
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -342,6 +469,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Histograms",
     path: "histograms",
     description: (preferredBrowser: { title: string }) => `View histograms collected by ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -349,6 +477,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "History",
     path: "history",
     description: "Opens the browser history page.",
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -357,6 +486,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "history-clusters-internals",
     isInternalDebugging: true,
     description: "Debug information for the history clustering feature that groups related pages.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -364,6 +494,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "History Clusters Side Panel Top Chrome",
     path: "history-clusters-side-panel.top-chrome",
     description: "Opens the browsing history organized in clusters within the side panel of the browser UI.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -371,6 +502,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "History Side Panel Top Chrome",
     path: "history-side-panel.top-chrome",
     description: "Access browsing history directly from the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -378,6 +510,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "History Sync Opt-in",
     path: "history-sync-optin",
     description: "Page to opt into history synchronization across devices.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -385,6 +518,16 @@ export const browserCommands: BrowserCommand[] = [
     name: "IndexedDB Internals",
     path: "indexeddb-internals",
     description: "Displays detailed information about IndexedDB databases and their contents.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "infobar-internals",
+    name: "Infobar Internals",
+    path: "infobar-internals",
+    isInternalDebugging: true,
+    description: "Debug information for browser infobars (notification bars at the top of pages).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -392,6 +535,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Inspect",
     path: "inspect",
     description: "Inspect elements, network activity, and more for web pages and extensions.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -399,6 +543,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Internals",
     path: "internals",
     description: "Gateway page to various internal debugging tools and information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -406,6 +551,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Internals GPU",
     path: "internals/gpu",
     description: "Detailed graphics processing unit information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -413,6 +559,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Internals Media",
     path: "internals/media",
     description: "View media playback information and debug media issues.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -420,6 +567,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Internals Query Tiles",
     path: "internals/query-tiles",
     description: "Debug information for query tiles.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -427,6 +575,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Internals Session Service",
     path: "internals/session-service",
     description: "Provides diagnostic information about the browser's session service.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -435,6 +584,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "interstitials",
     isInternalDebugging: true,
     description: "Debug interface for various interstitial pages shown by the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -442,6 +592,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Interstitials SSL",
     path: "interstitials/ssl",
     description: "Shows examples of SSL certificate warning pages for testing and debugging purposes.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -450,6 +601,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "intro",
     description: (preferredBrowser: { title: string }) =>
       `Introduction and onboarding experience for new ${preferredBrowser.title} users.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -457,6 +609,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Invalidations",
     path: "invalidations",
     description: "View invalidation debug information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -466,6 +619,7 @@ export const browserCommands: BrowserCommand[] = [
     isInternalDebugging: true,
     description: (preferredBrowser: { title: string }) =>
       `Shows a JSON representation of ${preferredBrowser.title}'s local state file.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -474,6 +628,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "location-internals",
     isInternalDebugging: true,
     description: "Debug information for geolocation services and permissions.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -481,6 +636,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Managed User Profile Notice",
     path: "managed-user-profile-notice",
     description: "Notification page for users with managed/supervised profiles.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -488,6 +644,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Management",
     path: "management",
     description: "Displays policies set by enterprise administrators (if any).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -495,6 +652,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Media Engagement",
     path: "media-engagement",
     description: "View engagement scores for media playback.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -502,6 +660,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Media Internals",
     path: "media-internals",
     description: "Detailed information about media playback and audio/video components.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -510,6 +669,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "media-router-internals",
     isInternalDebugging: true,
     description: "Debug information for media casting and routing features (like Chromecast functionality).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -518,6 +678,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "memory-internals",
     isInternalDebugging: true,
     description: "Detailed memory usage information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -526,6 +687,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "metrics-internals",
     description: (preferredBrowser: { title: string }) =>
       `Shows internal metrics and usage statistics collected by ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -533,6 +695,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Net Export",
     path: "net-export",
     description: "Capture network logs for debugging network issues.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -540,6 +703,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Net Internals",
     path: "net-internals",
     description: "View detailed network information, including events, DNS, Sockets, etc.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -548,6 +712,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "network-errors",
     isInternalDebugging: true,
     description: "View network errors and debugging information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -555,6 +720,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "New Tab Page",
     path: "new-tab-page",
     description: "Opens the customized new tab page (may differ from chrome://newtab in some browsers).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -562,6 +728,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "New Tab Page Third Party",
     path: "new-tab-page-third-party",
     description: "Displays the new tab page with third-party content modules.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -569,6 +736,15 @@ export const browserCommands: BrowserCommand[] = [
     name: "New Tab",
     path: "newtab",
     description: "Opens a new tab page.",
+    supportedBrowsers: BASIC_ONLY,
+  },
+
+  {
+    id: "newtab-footer",
+    name: "New Tab Footer",
+    path: "newtab-footer",
+    description: "Displays the footer section of the new tab page.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -577,6 +753,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "ntp-tiles-internals",
     description:
       "Debug information for the tiles shown on the New Tab Page, including suggestions and most visited sites.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -585,6 +762,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "omnibox",
     isInternalDebugging: true,
     description: "Debug and test the Omnibox (address bar) functionality.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -592,6 +770,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Omnibox Popup Top Chrome",
     path: "omnibox-popup.top-chrome",
     description: "Debug view of the omnibox (address bar) popup UI in the top chrome area.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -600,6 +779,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "on-device-internals",
     isInternalDebugging: true,
     description: "Debug information for on-device features and machine learning models.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -607,6 +787,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "On-Device Translation Internals",
     path: "on-device-translation-internals",
     description: "Debug information for the browser's on-device translation feature.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -615,6 +796,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "optimization-guide-internals",
     isInternalDebugging: true,
     description: "Debug interface for the optimization guide that provides hints for browser optimizations.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -623,6 +805,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "password-manager",
     description: (preferredBrowser: { title: string }) =>
       `Interface for viewing and managing passwords saved in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -630,6 +813,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Password Manager Internals",
     path: "password-manager-internals",
     description: "Debug information for the password manager.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -637,6 +821,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Policy",
     path: "policy",
     description: "Displays all policies currently in effect.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -645,6 +830,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "predictors",
     description: (preferredBrowser: { title: string }) =>
       `View information about ${preferredBrowser.title}'s network and resource predictors.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -653,6 +839,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "prefs-internals",
     description: (preferredBrowser: { title: string }) =>
       `Shows all internal preferences and settings for ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -660,6 +847,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Print",
     path: "print",
     description: "Opens the print preview dialog (usually requires a page to be active).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -667,6 +855,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Privacy Sandbox Dialog",
     path: "privacy-sandbox-dialog",
     description: "Interface for Privacy Sandbox settings and controls.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -674,6 +863,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Privacy Sandbox Dialog Debug",
     path: "privacy-sandbox-dialog/?debug",
     description: "Debugging interface for the Privacy Sandbox dialog, showing technical details and state information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -681,6 +871,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Privacy Sandbox Internals",
     path: "privacy-sandbox-internals",
     description: "Debug information for the Privacy Sandbox features and APIs.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -688,6 +879,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Private Aggregation Internals",
     path: "private-aggregation-internals",
     description: "Debug information for the Private Aggregation API, part of the Privacy Sandbox.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -695,6 +887,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Process Internals",
     path: "process-internals",
     description: "View information about site isolation and process models.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -702,6 +895,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Profile Customization",
     path: "profile-customization",
     description: "Interface for customizing browser profile appearance and settings.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -710,6 +904,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "profile-internals",
     isInternalDebugging: true,
     description: "Detailed debug information about the browser's profile and user data.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -717,6 +912,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Profile Picker",
     path: "profile-picker",
     description: "Interface for selecting and managing different browser profiles.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -724,6 +920,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Quota Internals",
     path: "quota-internals",
     description: "View information about disk space quotas for websites.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -731,6 +928,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Read Later Top Chrome",
     path: "read-later.top-chrome",
     description: "Opens the Read Later feature directly in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -739,6 +937,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "reset-password",
     description: (preferredBrowser: { title: string }) =>
       `Interface for resetting passwords for ${preferredBrowser.title} accounts.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -747,6 +946,16 @@ export const browserCommands: BrowserCommand[] = [
     path: "safe-browsing",
     isInternalDebugging: true,
     description: "View Safe Browsing information and debug data.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "sandbox",
+    name: "Sandbox",
+    path: "sandbox",
+    description: "Displays information about the browser's sandbox security implementation.",
+    supportedBrowsers: ALL_CHROMIUM,
+    excludedPlatforms: ["mac"],
   },
 
   {
@@ -754,6 +963,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Saved Tab Groups Unsupported",
     path: "saved-tab-groups-unsupported",
     description: "Shows information page when tab groups feature is unavailable or not supported.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -761,6 +971,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Search Engine Choice",
     path: "search-engine-choice",
     description: "Interface for selecting and managing your default search engine.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -768,6 +979,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Segmentation Internals",
     path: "segmentation-internals",
     description: "Debug information for Chrome's user segmentation system used for targeted features.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -775,6 +987,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "ServiceWorker Internals",
     path: "serviceworker-internals",
     description: "View information about Service Workers and manage them.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -782,6 +995,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Settings",
     path: "settings",
     description: (preferredBrowser: { title: string }) => `Opens the ${preferredBrowser.title} settings page.`,
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -789,6 +1003,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Shopping Insights Side Panel Top Chrome",
     path: "shopping-insights-side-panel.top-chrome",
     description: "Shopping comparison and price tracking tools in the browser's side panel.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -796,6 +1011,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Sign-in Dice Web Intercept Top Chrome",
     path: "signin-dice-web-intercept.top-chrome",
     description: "Sign-in interception dialog in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -803,6 +1019,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Sign-in Email Confirmation",
     path: "signin-email-confirmation",
     description: "Email confirmation page for browser account sign-in process.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -810,6 +1027,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Sign-in Error",
     path: "signin-error",
     description: "Error page displayed when sign-in to browser accounts fails.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -818,6 +1036,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "signin-internals",
     description: (preferredBrowser: { title: string }) =>
       `View information about ${preferredBrowser.title} sign-in status and accounts.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -825,6 +1044,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Sign-out Confirmation",
     path: "signout-confirmation",
     description: "Confirmation page when signing out of browser accounts.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -832,6 +1052,23 @@ export const browserCommands: BrowserCommand[] = [
     name: "Site Engagement",
     path: "site-engagement",
     description: "View engagement scores for websites you visit.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "skills-manager",
+    name: "Skills Manager",
+    path: "skills-manager",
+    description: "Interface for managing browser skills and capabilities.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "start-page",
+    name: "Start Page",
+    path: "start-page",
+    description: "Displays the browser's start page shown when first opening the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -839,6 +1076,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Suggest Internals",
     path: "suggest-internals",
     description: "Debug information for the browser's suggestion systems (search, URL, etc.).",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -846,6 +1084,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Suggestions",
     path: "suggestions",
     description: "Content suggestions for the New Tab Page.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -854,6 +1093,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "support-tool",
     description: (preferredBrowser: { title: string }) =>
       `Troubleshooting and diagnostic tool for ${preferredBrowser.title} problems.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -861,6 +1101,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Sync Confirmation",
     path: "sync-confirmation",
     description: "Confirmation page for enabling browser data synchronization.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -869,6 +1110,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "sync-internals",
     description: (preferredBrowser: { title: string }) =>
       `View detailed information about ${preferredBrowser.title} Sync.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -877,6 +1119,15 @@ export const browserCommands: BrowserCommand[] = [
     path: "system",
     description: (preferredBrowser: { title: string }) =>
       `Provides system information relevant to ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "tab-group-home",
+    name: "Tab Group Home",
+    path: "tab-group-home",
+    description: "Home page for managing and organizing tab groups.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -884,6 +1135,16 @@ export const browserCommands: BrowserCommand[] = [
     name: "Tab Search Top Chrome",
     path: "tab-search.top-chrome",
     description: "Opens the tab search interface directly in the browser's top chrome UI area.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "tab-strip-internals",
+    name: "Tab Strip Internals",
+    path: "tab-strip-internals",
+    isInternalDebugging: true,
+    description: "Debug information for the browser's tab strip UI component.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -891,6 +1152,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Terms",
     path: "terms",
     description: (preferredBrowser: { title: string }) => `Displays the ${preferredBrowser.title} Terms of Service.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -898,6 +1160,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "Topics Internals",
     path: "topics-internals",
     description: "Debug information for the Topics API, part of the Privacy Sandbox for interest-based advertising.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -906,6 +1169,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "traces",
     isInternalDebugging: true,
     description: "Interface for viewing and analyzing browser performance traces.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -914,6 +1178,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "traces-internals",
     isInternalDebugging: true,
     description: "Detailed debug information about browser tracing functionality.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -923,6 +1188,7 @@ export const browserCommands: BrowserCommand[] = [
     description: (preferredBrowser: { title: string }) =>
       `Record performance traces for debugging ${preferredBrowser.title} performance issues.`,
     isInternalDebugging: true,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -931,6 +1197,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "translate-internals",
     description: (preferredBrowser: { title: string }) =>
       `Displays information about ${preferredBrowser.title}'s translation feature.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -939,6 +1206,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "ukm",
     isInternalDebugging: true,
     description: "Debug information for the Unified Keyed Metrics system that collects browser usage data.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -946,6 +1214,7 @@ export const browserCommands: BrowserCommand[] = [
     name: "USB Internals",
     path: "usb-internals",
     description: "Displays information about connected USB devices and their properties.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -954,6 +1223,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "user-actions",
     isInternalDebugging: true,
     description: "Displays user action metrics and debugging information for browser interactions.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -962,6 +1232,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "user-education-internals",
     isInternalDebugging: true,
     description: "Debug information for the browser's user education features like tutorials and tooltips.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -970,6 +1241,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "version",
     description: (preferredBrowser: { title: string }) =>
       `Displays ${preferredBrowser.title} version information and links to copy details.`,
+    supportedBrowsers: BASIC_ONLY,
   },
 
   {
@@ -977,6 +1249,15 @@ export const browserCommands: BrowserCommand[] = [
     name: "View Certificate",
     path: "view-cert",
     description: "Detailed view of SSL/TLS certificates for websites.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "watermark",
+    name: "Watermark",
+    path: "watermark",
+    description: "Displays watermark-related functionality for the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -985,6 +1266,15 @@ export const browserCommands: BrowserCommand[] = [
     path: "web-app-internals",
     description: (preferredBrowser: { title: string }) =>
       `Displays debug information for Progressive Web Apps (PWAs) installed in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "webrtc-internals",
+    name: "WebRTC Internals",
+    path: "webrtc-internals",
+    description: "Detailed information about WebRTC connections, peer connections, and media streams.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -993,6 +1283,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "webrtc-logs",
     isInternalDebugging: true,
     description: "Displays WebRTC debug logs and connection information.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -1002,6 +1293,7 @@ export const browserCommands: BrowserCommand[] = [
     isInternalDebugging: true,
     description: (preferredBrowser: { title: string }) =>
       `Gallery of ${preferredBrowser.title}'s UI components and design system elements.`,
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -1010,6 +1302,7 @@ export const browserCommands: BrowserCommand[] = [
     path: "webuijserror",
     isInternalDebugging: true,
     description: "Debug interface for WebUI JavaScript errors and diagnostics.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 
   {
@@ -1018,6 +1311,226 @@ export const browserCommands: BrowserCommand[] = [
     path: "whats-new",
     description: (preferredBrowser: { title: string }) =>
       `Displays a page highlighting new features in ${preferredBrowser.title}.`,
+    supportedBrowsers: ALL_CHROMIUM,
+    platforms: ["windows", "mac", "linux"],
+  },
+
+  // Chrome-untrusted URLs
+  // These URLs run in isolated security contexts with limited privileges.
+  // They are used for features that handle untrusted content or require additional sandboxing.
+  // Accessing these URLs directly may cause unexpected behavior or browser instability.
+  {
+    id: "compose-untrusted",
+    name: "Compose (Untrusted)",
+    path: "chrome-untrusted://compose",
+    description:
+      "ADVANCED: Isolated security context for the AI compose feature. Runs with limited privileges to handle potentially untrusted content. Not intended for direct user access.",
+    isUntrusted: true,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "data-sharing-untrusted",
+    name: "Data Sharing (Untrusted)",
+    path: "chrome-untrusted://data-sharing",
+    description:
+      "ADVANCED: Isolated security context for data sharing features. Runs in a sandboxed environment to protect user data. May not function correctly when accessed directly.",
+    isUntrusted: true,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "ntp-microsoft-auth-untrusted",
+    name: "NTP Microsoft Auth (Untrusted)",
+    path: "chrome-untrusted://ntp-microsoft-auth",
+    description:
+      "ADVANCED: Isolated security context for New Tab Page Microsoft authentication. Handles third-party authentication in a restricted environment. Direct access may cause authentication errors.",
+    isUntrusted: true,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "print-untrusted",
+    name: "Print (Untrusted)",
+    path: "chrome-untrusted://print",
+    description:
+      "ADVANCED: Isolated security context for print preview functionality. Renders print content in a sandboxed environment. May not display correctly when accessed directly.",
+    isUntrusted: true,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "privacy-sandbox-dialog-untrusted",
+    name: "Privacy Sandbox Dialog (Untrusted)",
+    path: "chrome-untrusted://privacy-sandbox-dialog",
+    description:
+      "ADVANCED: Isolated security context for Privacy Sandbox settings dialog. Runs with restricted permissions for enhanced security. Direct access may not function properly.",
+    isUntrusted: true,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "read-anything-side-panel-untrusted",
+    name: "Read Anything Side Panel (Untrusted)",
+    path: "chrome-untrusted://read-anything-side-panel.top-chrome",
+    description:
+      "ADVANCED: Isolated security context for the Read Anything accessibility feature. Processes web content in a sandboxed environment. May cause errors when accessed directly.",
+    isUntrusted: true,
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  // Debug/Crash commands (for debugging purposes only)
+  {
+    id: "badcastcrash",
+    name: "Bad Cast Crash",
+    path: "badcastcrash",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a bad cast crash for testing crash reporting.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "crash",
+    name: "Crash",
+    path: "crash",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Crashes the current renderer process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "crash-rust",
+    name: "Crash Rust",
+    path: "crash/rust",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a crash in Rust code for testing.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "crashdump",
+    name: "Crash Dump",
+    path: "crashdump",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Forces a crash dump.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "gpuclean",
+    name: "GPU Clean",
+    path: "gpuclean",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a clean GPU process termination.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "gpucrash",
+    name: "GPU Crash",
+    path: "gpucrash",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Crashes the GPU process for testing.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "gpuhang",
+    name: "GPU Hang",
+    path: "gpuhang",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Causes the GPU process to hang.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "hang",
+    name: "Hang",
+    path: "hang",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Causes the renderer to hang indefinitely.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "inducebrowsercrashforrealz",
+    name: "Induce Browser Crash For Realz",
+    path: "inducebrowsercrashforrealz",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Crashes the entire browser process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "inducebrowserdcheckforrealz",
+    name: "Induce Browser DCHECK For Realz",
+    path: "inducebrowserdcheckforrealz",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Triggers a DCHECK failure in the browser process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "kill",
+    name: "Kill",
+    path: "kill",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Immediately kills the current renderer process.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "memory-exhaust",
+    name: "Memory Exhaust",
+    path: "memory-exhaust",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Attempts to exhaust available memory.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "memory-pressure-critical",
+    name: "Memory Pressure Critical",
+    path: "memory-pressure-critical",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Simulates critical memory pressure.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "memory-pressure-moderate",
+    name: "Memory Pressure Moderate",
+    path: "memory-pressure-moderate",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Simulates moderate memory pressure.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "quit",
+    name: "Quit",
+    path: "quit",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Immediately quits the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "restart",
+    name: "Restart",
+    path: "restart",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Restarts the browser.",
+    supportedBrowsers: ALL_CHROMIUM,
+  },
+
+  {
+    id: "shorthang",
+    name: "Short Hang",
+    path: "shorthang",
+    isInternalDebugging: true,
+    description: "DEBUG ONLY: Causes a brief hang in the renderer.",
+    supportedBrowsers: ALL_CHROMIUM,
   },
 ];
 

@@ -1,7 +1,11 @@
 ---
 title: Divshot
-tags: [Archived]
+tags:
+  - Archived
 archived: Divshot is no longer in operation.
+tech: divshot
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

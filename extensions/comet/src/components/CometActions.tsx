@@ -3,6 +3,13 @@ import { Action, ActionPanel, closeMainWindow, Icon } from "@raycast/api";
 import { closeActiveTab, createNewTabToWebsite, createNewTabWithProfile, setActiveTab } from "../actions";
 import { Tab } from "../interfaces";
 import { checkCometInstallation } from "../util";
+import {
+  COMET_BOOKMARK_SORT_ORDER,
+  COMET_BOOKMARK_SORT_ORDERS,
+  COMET_ICON,
+  DEFAULT_COMET_BOOKMARK_SORT_ORDER,
+} from "../constants";
+import { useCachedState } from "@raycast/utils";
 
 export class CometActions {
   public static NewTab = NewTabActions;
@@ -68,6 +75,7 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
 }
 
 function HistoryItemActions({ title, url }: { title: string; url: string }): ReactElement {
+  const [sortOrder, setSortOrder] = useCachedState(COMET_BOOKMARK_SORT_ORDER, DEFAULT_COMET_BOOKMARK_SORT_ORDER);
   const handleAction = async () => {
     const isInstalled = await checkCometInstallation();
     if (!isInstalled) {
@@ -78,8 +86,18 @@ function HistoryItemActions({ title, url }: { title: string; url: string }): Rea
 
   return (
     <ActionPanel title={title}>
-      <Action onAction={handleAction} title={"Open"} />
+      <Action icon={COMET_ICON} onAction={handleAction} title={"Open"} />
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+      <ActionPanel.Submenu icon={Icon.NumberList} title="Sort by">
+        {Object.entries(COMET_BOOKMARK_SORT_ORDERS).map(([key, val]) => (
+          <Action
+            key={key}
+            icon={sortOrder === key ? Icon.CheckCircle : Icon.Circle}
+            title={val}
+            onAction={() => setSortOrder(key)}
+          />
+        ))}
+      </ActionPanel.Submenu>
     </ActionPanel>
   );
 }

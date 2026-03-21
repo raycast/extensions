@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, Detail, Image } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { getGitLabGQL, gitlab } from "../common";
@@ -6,6 +6,7 @@ import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
   capitalizeFirstLetter,
+  formatDate,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -105,13 +106,15 @@ export function IssueDetail(props: { issue: Issue }) {
               <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
             </Detail.Metadata.TagList>
           )}
-          {issue.assignees.length > 0 && (
-            <Detail.Metadata.TagList title="Assignee">
-              {issue.assignees.map((a) => (
-                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
-              ))}
-            </Detail.Metadata.TagList>
-          )}
+          <Detail.Metadata.TagList title="Assignee">
+            {issue.assignees.length > 0 ? (
+              issue.assignees.map((a) => <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />)
+            ) : (
+              <Detail.Metadata.TagList.Item text="-" />
+            )}
+          </Detail.Metadata.TagList>
+          {issue.created_at && <Detail.Metadata.Label title="Created" text={formatDate(issue.created_at)} />}
+          {issue.updated_at && <Detail.Metadata.Label title="Updated" text={formatDate(issue.updated_at)} />}
           {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
           {issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
@@ -207,6 +210,18 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }) 
         tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
       }}
       accessories={[
+        {
+          text: issue.merge_requests_count > 0 ? `${issue.merge_requests_count}` : undefined,
+          icon: issue.merge_requests_count > 0 ? { source: "branch.png", tintColor: Color.PrimaryText } : undefined,
+        },
+        {
+          icon: issue.user_notes_count && issue.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
+          text: issue.user_notes_count && issue.user_notes_count > 0 ? issue.user_notes_count.toString() : undefined,
+          tooltip:
+            issue.user_notes_count && issue.user_notes_count > 0
+              ? `Number of Comments ${issue.user_notes_count}`
+              : undefined,
+        },
         {
           tag: issue.milestone ? issue.milestone.title : "",
           tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,

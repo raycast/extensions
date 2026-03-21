@@ -1,5 +1,9 @@
 # monse Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [New command to list your bank accounts] -- 2023-02-22
 
 - New command to list your bank accounts and update current balance

@@ -1,7 +1,11 @@
 ---
 title: Inkscape
 category: Apps
-tags: [WIP]
+tags:
+  - WIP
+tech: inkscape
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### All

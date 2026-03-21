@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeActiveTab, openNewTab, reloadTab, setActiveTab } from "../actions";
+import { closeActiveTab, openNewTab, reloadTab, setActiveTab, createNewGuestWindowToWebsite } from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
@@ -34,6 +34,19 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
     <ActionPanel title={tab.title}>
       <GoToTab tab={tab} />
       <ReloadTab tab={tab} />
+      <Action
+        title="Open in Guest Window"
+        icon={{ source: Icon.Person }}
+        onAction={async () => {
+          try {
+            await createNewGuestWindowToWebsite(tab.url);
+            await closeMainWindow();
+          } catch (e) {
+            if (e instanceof Error) throw new Error(e.message);
+            throw e;
+          }
+        }}
+      />
       <Action.CopyToClipboard title="Copy URL" content={tab.url} />
       <Action.CopyToClipboard
         title="Copy Title"
@@ -66,6 +79,14 @@ function HistoryItemActions({
   return (
     <ActionPanel title={title}>
       <Action onAction={() => openNewTab({ url, profileOriginal, profileCurrent, openTabInProfile })} title={"Open"} />
+      <Action
+        title="Open in Guest Window"
+        icon={{ source: Icon.Person }}
+        onAction={async () => {
+          await createNewGuestWindowToWebsite(url);
+          await closeMainWindow();
+        }}
+      />
       <ActionPanel.Section title={"Open in profile"}>
         <Action
           onAction={() =>
@@ -76,7 +97,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileCurrent,
             })
           }
-          title={"Open in current profile"}
+          title={"Open in Current Profile"}
         />
         <Action
           onAction={() =>
@@ -87,7 +108,7 @@ function HistoryItemActions({
               openTabInProfile: SettingsProfileOpenBehaviour.ProfileOriginal,
             })
           }
-          title={"Open in original profile"}
+          title={"Open in Original Profile"}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />

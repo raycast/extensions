@@ -1,5 +1,4 @@
 import { ActionPanel, Action, Form, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { IAMService } from "../IAMService";
 
@@ -90,8 +89,10 @@ export default function IAMRoleForm({ iamService, rolesByService, onRoleAdded, o
 
       loadingToast.hide();
 
-      showFailureToast(error, {
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to add role",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
       setIsSubmitting(false);

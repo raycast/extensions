@@ -1,5 +1,5 @@
 import { Action, ActionPanel, List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { useReducer, useState } from 'react'
 import { useAllPoliciesQuery } from '../../queries'
 import { DropDownOrderBy, Policy } from './components'
@@ -7,7 +7,7 @@ import { DropDownOrderBy, Policy } from './components'
 export const Policies = () => {
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, false)
 
-  const [orderBy, setOrderBy] = useState<IAM.v1alpha1.ListPoliciesRequestOrderBy>('policy_name_asc')
+  const [orderBy, setOrderBy] = useState<Iamv1alpha1.ListPoliciesRequestOrderBy>('policy_name_asc')
 
   const { data: policies = [], isLoading } = useAllPoliciesQuery({
     orderBy,
@@ -22,7 +22,7 @@ export const Policies = () => {
       searchBarPlaceholder="Search Policies Keys …"
       searchBarAccessory={
         <DropDownOrderBy
-          setOrderBy={(str) => setOrderBy(str as IAM.v1alpha1.ListPoliciesRequestOrderBy)}
+          setOrderBy={(str) => setOrderBy(str as Iamv1alpha1.ListPoliciesRequestOrderBy)}
         />
       }
     >

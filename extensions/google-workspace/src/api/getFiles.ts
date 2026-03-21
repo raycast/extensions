@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import { getOAuthToken } from "./googleAuth";
 
 export enum QueryTypes {
@@ -13,6 +12,29 @@ export enum ScopeTypes {
   allDrives = "allDrives",
 }
 
+export type User = {
+  displayName: string;
+  emailAddress: string;
+};
+
+export type ImageMediaMetadata = {
+  width: number;
+  height: number;
+  cameraMake?: string;
+  cameraModel?: string;
+  time?: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+  };
+};
+
+export type VideoMediaMetadata = {
+  width: number;
+  height: number;
+  durationMillis: number;
+};
+
 export type File = {
   id: string;
   name: string;
@@ -21,6 +43,17 @@ export type File = {
   webContentLink?: string;
   size?: string;
   modifiedTime: string;
+  createdTime?: string;
+  modifiedByMeTime?: string;
+  viewedByMeTime?: string;
+  sharedWithMeTime?: string;
+  lastModifyingUser?: User;
+  owners?: User[];
+  shared?: boolean;
+  copyRequiresWriterPermission?: boolean;
+  imageMediaMetadata?: ImageMediaMetadata;
+  videoMediaMetadata?: VideoMediaMetadata;
+  thumbnailLink?: string;
   starred: boolean;
   parents?: string[];
   filePath?: string;
@@ -38,7 +71,7 @@ type FileData = {
 // For the whole list of properties, look at: https://developers.google.com/drive/api/reference/rest/v3/files
 
 const EXTENSION_SEARCH_PARAMS =
-  "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents)";
+  "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, createdTime, modifiedByMeTime, viewedByMeTime, sharedWithMeTime, lastModifyingUser(displayName,emailAddress), owners(displayName,emailAddress), shared, copyRequiresWriterPermission, imageMediaMetadata(width,height,cameraMake,cameraModel,time,location), videoMediaMetadata(width,height,durationMillis), thumbnailLink, starred, capabilities(canTrash), parents)";
 
 const AI_EXTENSION_SEARCH_PARAMS =
   "files(id, name, mimeType, webViewLink, webContentLink, size, modifiedTime, thumbnailLink, starred, capabilities(canTrash), parents, " +
@@ -47,7 +80,7 @@ const AI_EXTENSION_SEARCH_PARAMS =
   "createdTime, modifiedTime, modifiedByMeTime, viewedByMeTime, sharedWithMeTime, " +
   "lastModifyingUser(displayName,emailAddress), " +
   "owners(displayName,emailAddress), " +
-  "shared, viewersCanCopyContent, " +
+  "shared, copyRequiresWriterPermission, " +
   "spaces, folderColorRgb, " +
   "trashed, explicitlyTrashed, trashedTime, " +
   "properties, appProperties, " +
@@ -65,6 +98,7 @@ interface BaseGetFilesParams {
 interface StandardGetFilesParams extends BaseGetFilesParams {
   queryType: QueryTypes;
   queryText?: string;
+  parentId?: string;
 }
 
 interface AIGetFilesParams extends BaseGetFilesParams {
@@ -77,16 +111,38 @@ function getSearchParams({ scope, useAIParams = false, ...params }: StandardGetF
   // Build the query string
   if ("queryType" in params) {
     const escapedText = params.queryText?.replace(/[\\']/g, "\\$&") ?? "";
+    const hasSearchText = escapedText.length > 0;
+
+    // When navigating (has parentId), always filter by parent
+    // When searching (has query text), search everywhere
+    // When neither, show only root files
+    const parentClause =
+      "parentId" in params && params.parentId
+        ? `'${params.parentId}' in parents`
+        : !hasSearchText && params.queryType !== QueryTypes.starred
+          ? "'root' in parents"
+          : null;
+
+    // Default query
+    let q = "trashed = false";
 
     if (params.queryType === QueryTypes.fileName) {
-      urlParams.append("q", `name contains '${escapedText}' and trashed = false`);
+      q = escapedText ? `name contains '${escapedText}' and trashed = false` : "trashed = false";
     } else if (params.queryType === QueryTypes.fullText) {
-      urlParams.append("q", `name contains '${escapedText}' or fullText contains '${escapedText}' and trashed = false`);
+      q = escapedText
+        ? `(name contains '${escapedText}' or fullText contains '${escapedText}') and trashed = false`
+        : "trashed = false";
     } else if (params.queryType === QueryTypes.starred) {
-      urlParams.append("q", "starred and trashed = false");
+      q = "starred and trashed = false";
     } else {
-      urlParams.append("q", "trashed = false");
+      q = "trashed = false";
     }
+
+    if (parentClause) {
+      q = `${parentClause} and ${q}`;
+    }
+
+    urlParams.append("q", q);
 
     // Add sorting for specific query types
     if (params.queryType === QueryTypes.fileName || params.queryType === QueryTypes.starred) {
@@ -161,7 +217,28 @@ async function getFilePath(fileId: string): Promise<string> {
     return `${parentPath}/${fileData.name}`;
   };
 
-  return await getParentPath(fileId);
+  // Get the file's parent folder ID first
+  const fileData = (await getFileParents(fileId)) as FileData;
+
+  // If file has no parent, return "My Drive"
+  if (!fileData.parents || fileData.parents.length === 0) {
+    return "My Drive";
+  }
+
+  // Build path for parent folder only (excluding the file itself)
+  return await getParentPath(fileData.parents[0]);
+}
+
+export async function getFileParentsById(fileId: string): Promise<string[]> {
+  const getFileUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`;
+  const response = await fetch(getFileUrl, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getOAuthToken()}`,
+    },
+  });
+  const data = (await response.json()) as { parents?: string[] };
+  return data.parents ?? [];
 }
 
 export function getStarredFiles() {

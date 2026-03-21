@@ -1,6 +1,9 @@
 ---
 title: Virtual-dom
 category: JavaScript libraries
+tech: virtual-dom
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

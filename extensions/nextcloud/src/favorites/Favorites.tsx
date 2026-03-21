@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import path from "path";
-import { getPreferences } from "../preferences";
 import { Favorite, useFavorites } from "./hooks";
+import { BASE_URL } from "../config";
 
 export function Favorites() {
   const { favorites, isLoading } = useFavorites();
@@ -18,16 +18,14 @@ export function Favorites() {
 }
 
 function Item({ result }: { result: Favorite }) {
-  const { hostname } = getPreferences();
-
   const url = path.extname(result.filename)
-    ? `https://${hostname}/apps/files/?dir=${encodeURI(result.dirname)}&view=files`
-    : `https://${hostname}/apps/files/?dir=${encodeURI(result.fullpath)}&view=files`;
+    ? `${BASE_URL}/apps/files/?dir=${encodeURI(result.dirname)}&view=files`
+    : `${BASE_URL}/apps/files/?dir=${encodeURI(result.fullpath)}&view=files`;
 
   return (
     <List.Item
       title={result.filename}
-      accessoryTitle={result.dirname}
+      accessories={[{ text: result.dirname }]}
       icon={{ source: Icon.Star, tintColor: Color.Orange }}
       actions={
         <ActionPanel title={result.filename}>

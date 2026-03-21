@@ -1,8 +1,12 @@
 ---
 title: Slim
 category: Ruby libraries
-prism_languages: [jade]
+prism_languages:
+  - jade
 weight: -1
+tech: slim
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example

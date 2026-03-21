@@ -1,6 +1,9 @@
 ---
 title: process
 category: Node.js
+tech: nodejs-process
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Streams

@@ -2,7 +2,10 @@
 title: Phoenix
 category: Elixir
 weight: -1
-updated: 2018-03-06
+updated: 2018-03-06T00:00:00.000Z
+tech: phoenix
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Quick start

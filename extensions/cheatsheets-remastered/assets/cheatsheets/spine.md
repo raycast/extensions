@@ -1,7 +1,11 @@
 ---
 title: Spine
 category: JavaScript libraries
-tags: [Outdated]
+tags:
+  - Outdated
+tech: spine
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Models

@@ -1,4 +1,4 @@
-import { GetExpenses, Expense } from "../types/get_expenses.types"; // Types
+import { GetExpenses, Expense, GetCategories, Category } from "../types/get_expenses.types"; // Types
 import { showToast, Toast } from "@raycast/api";
 import { HEADER } from "./userPreferences";
 import { useFetch } from "@raycast/utils";
@@ -19,6 +19,22 @@ export function GetExpense(limit: string): [Expense[], boolean, any, any] {
     console.log(`Error while fetching expenses: \n ${error}`);
   }
   return [fetchedExpenses, isLoading, revalidate, mutate];
+}
+
+export function getCategories(): [Category[], boolean] {
+  const { isLoading, data, error } = useFetch<GetCategories>("https://secure.splitwise.com/api/v3.0/get_categories", {
+    method: "GET",
+    ...HEADER,
+    keepPreviousData: true,
+  });
+
+  const categories = data?.categories || [];
+
+  if (error) {
+    console.error(`Error while fetching categories: \n ${error}`);
+  }
+
+  return [categories, isLoading];
 }
 
 export const DeleteExpense = async (id: number, mutate: any) => {

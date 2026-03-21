@@ -17,7 +17,6 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy",
     "lin",
     "marcotf",
     "qeude",
@@ -38,7 +37,16 @@
     "nicolas-marien",
     "iontea",
     "ridemountainpig",
-    "kud"
+    "kud",
+    "MartinGonzalez",
+    "brndnly",
+    "oscmarb",
+    "emergerrrd",
+    "ryo."
+  ],
+  "pastContributors": [
+    "Lemon",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -92,6 +100,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the list."
         }
       ]
     },
@@ -418,6 +434,14 @@
           "description": "Includes pull request you recently closed in the menu list."
         },
         {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the menu list."
+        },
+        {
           "name": "maxitems",
           "description": "Maximum pull requests shown per category.",
           "type": "textfield",
@@ -448,6 +472,16 @@
       "name": "search-repositories",
       "title": "Search Repositories",
       "description": "Search github repositories"
+    },
+    {
+      "name": "enable-auto-merge",
+      "title": "Enable Auto-Merge",
+      "description": "Enable auto-merge on a pull request"
+    },
+    {
+      "name": "disable-auto-merge",
+      "title": "Disable Auto-Merge",
+      "description": "Disable auto-merge on a pull request"
     },
     {
       "name": "merge-pull-request",
@@ -728,6 +762,93 @@
         ]
       },
       {
+        "input": "@github enable auto-merge on the release PR in macos repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/macos"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "enable-auto-merge",
+              "arguments": {
+                "pullRequestId": "pr_123"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/macos",
+              "nameWithOwner": "org/macos",
+              "name": "macos",
+              "id": "REPO_123"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Release",
+              "id": "pr_123"
+            }
+          ],
+          "enable-auto-merge": {}
+        }
+      },
+      {
+        "input": "@github disable auto-merge on the bugfix PR in backend repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/backend"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "disable-auto-merge",
+              "arguments": {
+                "pullRequestId": "pr_456"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/backend",
+              "nameWithOwner": "org/backend",
+              "name": "backend",
+              "id": "REPO_456"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Fix timeout error",
+              "id": "pr_456",
+              "number": 42
+            }
+          ],
+          "disable-auto-merge": {}
+        }
+      },
+      {
         "input": "@github run release.yml in raycast-macos",
         "mocks": {
           "search-repositories": [
@@ -868,7 +989,7 @@
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

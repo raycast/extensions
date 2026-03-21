@@ -9,5 +9,33 @@ raycast-env.d.ts
 .swiftpm
 compiled_raycast_swift
 
+# build output
+/dist
+/build
+
+# Claude Code
+.claude/
+CLAUDE.md
+
 # misc
 .DS_Store
+
+# environment variables
+.env
+.env.local
+.env.*.local
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

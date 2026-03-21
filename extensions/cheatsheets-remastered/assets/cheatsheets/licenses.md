@@ -1,7 +1,10 @@
 ---
 title: Licenses
 section: Development
-updated: 2017-08-30
+updated: 2017-08-30T00:00:00.000Z
+tech: licenses
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Licenses

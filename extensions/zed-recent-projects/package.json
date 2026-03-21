@@ -11,10 +11,15 @@
     "pernielsentikaer",
     "tm.wrnr",
     "true-real-michael",
-    "xmorse"
+    "xmorse",
+    "ivens_joris"
   ],
   "categories": [
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -71,29 +76,58 @@
       "label": "Show Git Branch",
       "default": true,
       "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "projectIconStyle",
+      "type": "dropdown",
+      "title": "Visual Customization",
+      "required": false,
+      "default": "icon",
+      "description": "Choose how project icons are displayed",
+      "data": [
+        {
+          "value": "icon",
+          "title": "Icons"
+        },
+        {
+          "value": "colored-dot",
+          "title": "Colored Dots"
+        }
+      ]
+    },
+    {
+      "name": "showOpenStatus",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Open Status",
+      "default": false,
+      "description": "Display an 'Open' tag for projects currently open in Zed"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "color-hash": "^2.0.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.0.4",
+    "@types/color-hash": "^2.0.0",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.6"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
+    "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
+  }
 }

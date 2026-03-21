@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, useNavigation, getPreferenceValues, Action } from "@raycast/api";
+import { ActionPanel, Icon, getPreferenceValues, Action } from "@raycast/api";
 import { likeOrDislike } from "@/functions/utils";
 import { useState } from "react";
 
@@ -25,7 +25,6 @@ export const Actions = ({ details, item, unlike }: BaseProps) => (
 );
 
 export const Sections = ({ details = false, item, unlike }: BaseProps) => {
-  const { push } = useNavigation();
   const { downloadSize } = getPreferenceValues<Preferences>();
   const [liked, setLiked] = useState(item.liked_by_user);
 
@@ -46,7 +45,7 @@ export const Sections = ({ details = false, item, unlike }: BaseProps) => {
   return (
     <>
       <ActionPanel.Section>
-        {details && <Action title="Show Details" icon={Icon.List} onAction={() => push(<Details result={item} />)} />}
+        {details && <Action.Push title="Show Details" icon={Icon.List} target={<Details result={item} />} />}
 
         <Action
           title={`${liked ? "Unlike" : "Like"} Photo`}

@@ -1,8 +1,12 @@
 ---
 title: Moment.js
 category: JavaScript libraries
-updated: 2018-09-15
-tags: [Featurable]
+updated: 2018-09-15T00:00:00.000Z
+tags:
+  - Featurable
+tech: moment
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Parsing

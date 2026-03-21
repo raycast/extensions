@@ -1,5 +1,6 @@
 import { vCenter } from "./api/vCenter";
 import { GetServer, GetServerLocalStorage, GetSelectedServer } from "./api/function";
+import { Shortcut } from "./api/shortcut";
 import { Network } from "./api/types";
 import * as React from "react";
 import {
@@ -154,12 +155,7 @@ export default function Command(): JSX.Element {
     return (
       <ActionPanel title="vCenter Network">
         {!IsLoadingNetworks && (
-          <Action
-            title="Refresh"
-            icon={Icon.Repeat}
-            onAction={GetNetworks}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          <Action title="Refresh" icon={Icon.Repeat} onAction={GetNetworks} shortcut={Shortcut.Refresh} />
         )}
         <ActionPanel.Section title="vCenter Server">
           {!IsLoadingServerLocalStorage && (

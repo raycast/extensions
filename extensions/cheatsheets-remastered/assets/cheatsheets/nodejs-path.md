@@ -3,6 +3,9 @@ title: Node.js path API
 category: Node.js
 intro: |
   Quick reference to the [Node.js path API](https://nodejs.org/api/path.html).
+tech: nodejs-path
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Functions

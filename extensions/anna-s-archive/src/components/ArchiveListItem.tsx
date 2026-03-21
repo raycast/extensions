@@ -1,18 +1,16 @@
-import { memo, useMemo } from "react";
-
-import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
-
-import type { ArchiveItem } from "@/api/archive";
-
-import ArchiveListItemDetail from "./ArchiveListItemDetail";
+import { type ComponentType, memo, useMemo } from "react";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import type { ArchiveItem } from "@/api";
+import { useMirrorDomain } from "@/hooks/use-mirror-domain";
+import { ArchiveListItemDetail } from "@/components/ArchiveListItemDetail";
+import { TestMirrorsAction } from "@/components/TestMirrorsAction";
 
 interface ArchiveListItemProps {
   item: ArchiveItem;
 }
 
-const mirror = getPreferenceValues<Preferences>().mirror ?? "https://annas-archive.org";
-
 const ArchiveListItemF = ({ item }: ArchiveListItemProps) => {
+  const { url: mirror } = useMirrorDomain();
   const icon = useMemo(() => {
     if (item.cover !== null) {
       return { source: item.cover };
@@ -26,14 +24,21 @@ const ArchiveListItemF = ({ item }: ArchiveListItemProps) => {
       detail={<ArchiveListItemDetail item={item} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`${mirror}/md5/${item.id}`} />
-          <Action.CopyToClipboard title="Copy URL to Clipboard" content={`${mirror}/md5/${item.id}`} />
+          <ActionPanel.Section title="Actions">
+            <Action.OpenInBrowser title="Open in Browser" url={`${mirror}/md5/${item.id}`} icon={Icon.Globe} />
+            <Action.CopyToClipboard
+              title="Copy URL to Clipboard"
+              content={`${mirror}/md5/${item.id}`}
+              icon={Icon.Clipboard}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section title="Mirrors">
+            <TestMirrorsAction />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 };
 
-const ArchiveListItem = memo(ArchiveListItemF);
-
-export default ArchiveListItem;
+export const ArchiveListItem = memo(ArchiveListItemF) as ComponentType<ArchiveListItemProps>;

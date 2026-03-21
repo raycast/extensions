@@ -1,0 +1,155 @@
+---
+alwaysApply: false
+description: Creating a new Feature-View for `open-repository.tsx`
+---
+Goal: To quickly and consistently add a new View to the Raycast Git Client, preserving the existing architecture, UX, and keeping the context minimal.
+
+# 1. View File Structure
+- Location: `src/commands/views/<Name>View.tsx`
+- A View is a single React component with the full UI (List/Detail/ActionPanel).
+- Data is passed via `RepositoryContext & NavigationContext` from `open-repository.tsx`.
+- Local subcomponents (e.g., `List.Item`) are only allowed as details of the current View.
+- Reusable `Action`/`ActionPanel.Section` should be taken from `src/components/actions/*`.
+
+Basic Skeleton:
+```tsx
+// src/commands/views/TagsView.tsx
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { NavigationContext, RepositoryContext } from "../../open-repository";
+import { WorkspaceNavigationActions, WorkspaceNavigationDropdown } from "../../components/actions/WorkspaceNavigationActions";
+
+export default function TagsView(context: RepositoryContext & NavigationContext) {
+  return (
+    <List
+      isLoading={context.tags?.isLoading}
+      navigationTitle="<Feature name>"
+      searchBarPlaceholder="Search <feature entity> by <search criteria>..."
+      searchBarAccessory={WorkspaceNavigationDropdown(context)}
+      actions={
+        <ActionPanel>
+          <Refresh<Feature>Action {...context} />
+          <WorkspaceNavigationActions {...context} />
+        </ActionPanel>
+      }
+    >
+      {context.tags?.error ? (
+        <List.EmptyView
+          title="Error loading <feature entity>"
+          description={context.tags.error.message}
+          icon={Icon.ExclamationMark}
+          actions={
+            <same actions as in the basic skeleton>
+          }
+        />
+      ) : (context.tags?.data?.length ?? 0) === 0 ? (
+        <List.EmptyView
+          title="No <feature entity>"
+          description="No <feature entity> found in the repository."
+          icon={Icon.Tag}
+          actions={
+            <same actions as in the basic skeleton>
+          }
+        />
+      ) : (
+        context.<feature entity>!.data.map((<feature entity>) => (
+          <FeatureListItem
+            key={tag.name}
+            <feature entity>={<feature entity>}
+            {...context}
+          />
+        ))
+      )}
+    </List>
+  );
+}
+
+function FeatureListItem(context: RepositoryContext & NavigationContext & {
+  <feature entity>: <feature entity>;
+}) {
+  return (
+    <List.Item
+      title={<feature entity>.primaryProperty}
+      subtitle={<feature entity>.secondaryProperty}
+      keywords=[<extra keywords that can be extracted from the <feature entity>]>
+      accessories={[<extra accessories that can be extracted from the <feature entity>]>}
+      actions={
+        <ActionPanel>
+          <FeatureActionA {...context} />
+          <FeatureActionB {...context} />
+          <FeatureActionC {...context} />
+
+          <Refresh<Feature>Action {...context} />
+          <WorkspaceNavigationActions {...context} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function Refresh<Feature>Action(context: RepositoryContext & NavigationContext) {
+  return (
+    <Action
+      title="Refresh"
+      icon={Icon.ArrowClockwise}
+      onAction={context.<feature entity>.revalidate}
+    />
+  );
+}
+
+```
+
+# 2. Entity Naming Conventions
+- Views: `PascalCase` + `View` suffix (e.g., `FeatureView.tsx`).
+- Actions: `PascalCase` + `Action(s)` suffix (e.g., `FeatureActions.tsx`).
+- Hooks: `use` prefix + `camelCase` (e.g., `useGit<Feature>.ts`).
+- Types: `PascalCase` (e.g., `Tag`, `FeatureEntity`).
+- Constants: `UPPER_SNAKE_CASE`.
+- In `src/types/index.ts`, add a new value to the `GitView` type (e.g., `"<feature entity>"`).
+
+# 3. Responsibilities and Relationships
+- View: Handles rendering and `ActionPanel` composition; calls `revalidate`/navigation from the context; business logic resides in `gitManager`.
+- Actions (`src/components/actions/...`): Encapsulate operations (create/delete/rename/push/pull…); use `gitManager` and call `revalidate` on the relevant parts of the context (`status`, `branches`, `remotes`, `commits`, `<feature entity>`, …).
+- Hooks (`src/hooks/...`): Load and cache data using `useCachedPromise`; accept `GitManager`, depend on `gitManager.repoPath`, and return `{ data, isLoading, error, revalidate }`.
+- Types (`src/types/...`): Define entities and their states, plus update the `GitView` union type.
+
+# 4. Connecting a new View in `open-repository.tsx`
+- In `src/types/index.ts`: add the new value to `GitView` (e.g., `"<feature entity>"`).
+- Import the View: `import TagsView from "./commands/views/<Feature>View";`.
+- Instantiate the hook at the top level alongside existing ones (see `useGitBranches`, `useGitStatus`, `useGitRemotes`): `const <feature entity>Context = useGit<Feature>(gitManager);`.
+- Include it in `rootContext` (e.g., `<feature entity>: <feature entity>Context`).
+- In the `switch (currentView)` block: add a case for `"<feature entity>"` that returns `<TagsView {...rootContext} />`.
+
+# 5. General Requirements for all Views (aligned with project style)
+- Errors/Toasts: Use direct calls to `showToast()` from `@raycast/api` within Actions; the View should display a `List.EmptyView` on error and allow for a `Refresh`.
+- Destructive Actions: Confirm via `confirmAlert()` with `Alert.ActionStyle.Destructive`.
+- Icons: Use built-in `Icon`s or project SVGs (from `assets/`), not emojis.
+- Shortcuts: Do not assign a shortcut to the first Action; do not use `cmd+enter`, `cmd+k`, or `cmd+p`.
+- Performance: Use `useCachedPromise` with a dependency on `[gitManager.repoPath]`; lazy-load heavy details (see `StatusView` with on-focus diff loading); limit the amount of data in large lists.
+- Navigation: Add `WorkspaceNavigationDropdown(context)` to `searchBarAccessory` and `WorkspaceNavigationActions` to the `ActionPanel`.
+- Empty Lists: Duplicate basic actions in `List.actions` and `List.Item.actions`, as the top-level `List.actions` is only visible when the list is empty.
+
+# 6. Mini-Template for a New Resource (Abstract Example: <Feature>)
+- Types: `src/types/git-types.ts`
+```ts
+export interface FeatureEntity { name: string; commitHash: string; createdAt?: string }
+```
+- Hook: `src/hooks/useGit<Feature>s.ts`
+```ts
+import { useCachedPromise } from "@raycast/utils";
+import { GitManager } from "../utils/git-manager";
+import { RepositoryContext } from "../open-repository";
+
+export function useGit<Feature>(gitManager: GitManager): RepositoryContext["<feature entity>"] {
+  return useCachedPromise(async () => {
+    const <feature entity> = await gitManager.get<Feature>();
+    return <feature entity>;
+  },
+  [gitManager.repoPath],
+  {
+    initialData: []
+  }) as RepositoryContext["<feature entity>"];
+}
+```
+- Actions: `src/components/actions/<Feature>Actions.tsx` — create/delete <feature entity>, copy name, open page on provider; use `confirmAlert()` and `showToast()`.
+- View: `src/commands/views/<Feature>View.tsx` — list of <feature entity>, `EmptyView`, sections, actions, `WorkspaceNavigation*`.
+- Connection: Update `GitView`, instantiate `useGit<Feature>`, add it to `rootContext`, and extend the `switch` to render `TagsView`.

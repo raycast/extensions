@@ -1,9 +1,13 @@
 ---
 title: Fish shell
 category: CLI
-prism_languages: [fish]
-updated: 2018-01-31
+prism_languages:
+  - fish
+updated: 2018-01-31T00:00:00.000Z
 weight: -1
+tech: fish-shell
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Keys

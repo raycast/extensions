@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import PullRequestDetail from "./components/PullRequestDetail";
+import { PullRequestMergeMethod } from "./generated/graphql";
 import { getErrorMessage } from "./helpers/errors";
+import { getMergeMethodTitle } from "./helpers/pull-request";
 import { getGitHubUser } from "./helpers/users";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
@@ -14,6 +16,8 @@ type PullRequestFormValues = {
   from: string;
   into: string;
   draft: boolean;
+  autoMerge: boolean;
+  autoMergeMethod: string;
   title: string;
   description: string;
   reviewers: string[];
@@ -25,6 +29,51 @@ type PullRequestFormValues = {
 
 type PullRequestFormProps = {
   draftValues?: PullRequestFormValues;
+};
+
+type BranchOption = {
+  id: string;
+  name: string;
+};
+
+type BranchNodesInput = ReadonlyArray<{ id?: string; name?: string | null } | null> | null | undefined;
+
+const normalizeBranches = (nodes: BranchNodesInput): BranchOption[] => {
+  if (!nodes) {
+    return [];
+  }
+
+  return nodes.reduce<BranchOption[]>((acc, node) => {
+    if (node?.id && node?.name) {
+      acc.push({ id: node.id, name: node.name });
+    }
+
+    return acc;
+  }, []);
+};
+
+const ensureBranchPresence = (
+  branches: BranchOption[],
+  fallbackBranches: BranchOption[],
+  currentValue: string,
+): BranchOption[] => {
+  if (!currentValue) {
+    return branches;
+  }
+
+  const alreadyPresent = branches.some((branch) => branch.name === currentValue);
+
+  if (alreadyPresent) {
+    return branches;
+  }
+
+  const fallbackBranch = fallbackBranches.find((branch) => branch.name === currentValue);
+
+  if (fallbackBranch) {
+    return [...branches, fallbackBranch];
+  }
+
+  return [...branches, { id: `virtual-${currentValue}`, name: currentValue }];
 };
 
 export function PullRequestForm({ draftValues }: PullRequestFormProps) {
@@ -69,6 +118,19 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           toast.style = Toast.Style.Success;
           toast.title = "Created pull request";
 
+          if (values.autoMerge) {
+            try {
+              await github.enablePullRequestAutoMerge({
+                nodeId: pullRequestId,
+                mergeMethod: (values.autoMergeMethod as PullRequestMergeMethod) || allowedMergeMethods[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Success;
+              toast.title = "Created pull request, but auto-merge failed";
+              toast.message = getErrorMessage(error);
+            }
+          }
+
           if (pullRequest) {
             toast.primaryAction = {
               title: "Open Pull Request",
@@ -89,6 +151,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           from: "",
           into: "",
           draft: false,
+          autoMerge: false,
+          autoMergeMethod: "",
           description: "",
           reviewers: [],
           assignees: [],
@@ -109,6 +173,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       from: draftValues?.from ?? "",
       into: draftValues?.into ?? "",
       draft: draftValues?.draft ?? false,
+      autoMerge: draftValues?.autoMerge ?? false,
+      autoMergeMethod: draftValues?.autoMergeMethod ?? "",
       title: draftValues?.title ?? "",
       description: draftValues?.description ?? "",
       reviewers: draftValues?.reviewers ?? [],
@@ -139,7 +205,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     { execute: !!values.repository },
   );
 
+  const selectedRepository = repositories?.find((r) => r.id === values.repository);
+  const autoMergeAllowed = selectedRepository?.autoMergeAllowed ?? false;
+  const allowedMergeMethods = [
+    selectedRepository?.mergeCommitAllowed && PullRequestMergeMethod.Merge,
+    selectedRepository?.squashMergeAllowed && PullRequestMergeMethod.Squash,
+    selectedRepository?.rebaseMergeAllowed && PullRequestMergeMethod.Rebase,
+  ].filter(Boolean) as PullRequestMergeMethod[];
+
   const defaultBranch = data?.repository?.defaultBranchRef;
+  const defaultBranchName = defaultBranch?.name ?? "";
 
   const collaborators = data?.repository?.collaborators?.nodes;
 
@@ -177,12 +252,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     { execute: !!values.repository && intoQuery.trim().length > 0 },
   );
 
-  const fromBranches = (fromData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes)?.filter(
-    (node) => defaultBranch?.id !== node?.id && !!node?.name,
-  );
+  const repositoryBranches = normalizeBranches(data?.repository?.refs?.nodes);
 
-  const intoBranches = (intoData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes)?.filter(
-    (node) => node?.name !== values.from,
+  const fromBranchResults = normalizeBranches(fromData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes);
+  const fromBranches = ensureBranchPresence(fromBranchResults, repositoryBranches, values.from);
+
+  const intoBranchResults = normalizeBranches(intoData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes);
+  const intoBranches = ensureBranchPresence(
+    intoBranchResults.filter((branch) => branch.name !== values.from),
+    repositoryBranches,
+    values.into,
   );
 
   useEffect(() => {
@@ -196,6 +275,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       setValue("into", defaultBranch.name);
     }
   }, [data]);
+
+  useEffect(() => {
+    if (values.from && values.into && values.from === values.into) {
+      if (defaultBranchName && defaultBranchName !== values.from) {
+        setValue("into", defaultBranchName);
+      } else {
+        setValue("into", "");
+      }
+    }
+  }, [values.from, values.into, defaultBranchName]);
 
   useEffect(() => {
     setValue("from", "");
@@ -269,6 +358,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       </Form.Dropdown>
 
       <Form.Checkbox {...itemProps.draft} label="As draft" />
+
+      {autoMergeAllowed && <Form.Checkbox {...itemProps.autoMerge} label="Enable auto-merge" />}
+
+      {autoMergeAllowed && values.autoMerge && allowedMergeMethods.length > 1 && (
+        <Form.Dropdown {...itemProps.autoMergeMethod} title="Auto-Merge Method">
+          {allowedMergeMethods.map((method) => (
+            <Form.Dropdown.Item key={method} title={getMergeMethodTitle(method)} value={method} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       <Form.Separator />
 

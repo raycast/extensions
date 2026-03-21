@@ -3,6 +3,7 @@ import { FormValidation, useForm } from "@raycast/utils";
 import { format } from "date-fns";
 import { createScheduledMeeting } from "../api/meetings";
 import { getErrorMessage } from "../helpers/errors";
+import { getZoomUrlForPlatform } from "../helpers/meetings";
 
 export type MeetingFormValues = {
   start_time: Date | null;
@@ -39,7 +40,7 @@ export default function MeetingForm({ enableDrafts = false, draftValues }: Meeti
           title: "Open Meeting",
           shortcut: { modifiers: ["cmd", "shift"], key: "o" },
           onAction: () => {
-            open(meeting.join_url);
+            open(getZoomUrlForPlatform(meeting.join_url));
             return toast.hide();
           },
         };

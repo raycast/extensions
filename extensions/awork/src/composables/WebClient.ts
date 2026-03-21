@@ -36,7 +36,7 @@ const getRequestOptions = (body: URLSearchParams): RequestInit => ({
 const authorizeClient = async () => {
   if (await client.getTokens()) {
     console.log("Already logged in!");
-    return;
+    return await client.getTokens();
   }
 
   const authRequest = await client.authorizationRequest({
@@ -64,7 +64,7 @@ const authorizeClient = async () => {
       const newTokens = <OAuth.TokenResponse>JSON.parse(result);
       try {
         await client.setTokens(newTokens);
-      } catch (_) {
+      } catch {
         confirmAlert({
           title: "Something went wrong",
           message: "Please try again.",
@@ -132,7 +132,7 @@ export const refreshToken = async () => {
         const newTokens = <OAuth.TokenResponse>JSON.parse(result);
         try {
           await client.setTokens(newTokens);
-        } catch (_) {
+        } catch {
           confirmAlert({
             title: "Couldn't refresh token",
             message: "To continue using this extension please re-authorize.",

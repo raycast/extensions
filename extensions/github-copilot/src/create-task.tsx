@@ -1,22 +1,39 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, open, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, RepositoryDropdown } from "./components";
+import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown } from "./components";
 import { useViewer } from "./hooks/useViewer";
-import { provider } from "./lib/oauth";
+import { provider, reauthorize } from "./lib/oauth";
 import { createTask } from "./services/copilot";
+import { ModelDropdown } from "./components/ModelDropdown";
 
 type FormValues = {
   prompt: string;
   repository: string;
   branch: string;
+  model: string;
+  customAgent: string;
 };
 
 function Command() {
   const [isRepositoryLoading, setIsRepositoryLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [isCreatingTaskLoading, setIsCreatingTaskLoading] = useState(false);
+  const [isCustomAgentsLoading, setIsCustomAgentsLoading] = useState(false);
 
   const { itemProps, handleSubmit } = useForm<FormValues>({
     validation: {
@@ -36,27 +53,36 @@ function Command() {
       });
 
       try {
-        const response = await createTask(values.repository, values.prompt, values.branch);
+        const { taskUrl, taskId } = await createTask(
+          values.repository,
+          values.prompt,
+          values.branch,
+          values.model,
+          values.customAgent,
+        );
 
         await showToast({
           style: Toast.Style.Success,
           title: "Created task",
           primaryAction: {
-            title: "Open in Browser",
+            title: "View Task",
             shortcut: Keyboard.Shortcut.Common.Open,
-            onAction: () => {
-              open(response.pull_request.html_url);
+            onAction: async () => {
+              try {
+                await launchCommand({
+                  name: "view-tasks",
+                  type: LaunchType.UserInitiated,
+                  context: { taskId },
+                });
+              } catch {
+                open(taskUrl);
+              }
             },
           },
           secondaryAction: {
-            title: "Copy URL",
-            shortcut: Keyboard.Shortcut.Common.Copy,
-            onAction: async () => {
-              await Clipboard.copy(response.pull_request.html_url);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Copied URL to Clipboard",
-              });
+            title: "Open in Browser",
+            onAction: () => {
+              open(taskUrl);
             },
           },
         });
@@ -71,13 +97,20 @@ function Command() {
   const { data, isLoading: isViewerLoading } = useViewer();
 
   // Combine all loading states
-  const isLoading = isViewerLoading || isRepositoryLoading || isBranchLoading || isCreatingTaskLoading;
+  const isLoading =
+    isViewerLoading ||
+    isRepositoryLoading ||
+    isBranchLoading ||
+    isCreatingTaskLoading ||
+    isModelLoading ||
+    isCustomAgentsLoading;
 
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" icon={Icon.NewDocument} onSubmit={handleSubmit} />
+          <Action title="Log out" icon={Icon.Logout} onAction={reauthorize} />
         </ActionPanel>
       }
       isLoading={isLoading}
@@ -93,6 +126,12 @@ function Command() {
         itemProps={itemProps.branch}
         onLoadingChange={setIsBranchLoading}
       />
+      <CustomAgentsDropdown
+        repository={itemProps.repository.value}
+        itemProps={itemProps.customAgent}
+        onLoadingChange={setIsCustomAgentsLoading}
+      />
+      <ModelDropdown itemProps={itemProps.model} onLoadingChange={setIsModelLoading} />
     </Form>
   );
 }

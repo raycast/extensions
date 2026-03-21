@@ -1,5 +1,15 @@
 # Exif Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improvements] - 2025-11-01
+
+- Updated (dev) dependencies
+- Update JSON stringify generation in order for it to fit better on the screen
+- On TagsScreen, tags are now shown in the metadata details section
+
 ## [Add Browser Extension launch] - 2024-04-30
 
 - Add command that will get the url from the current open tab in your browser and open the `Show Metadata for Image` command with this url

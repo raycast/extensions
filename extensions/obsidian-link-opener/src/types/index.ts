@@ -14,6 +14,7 @@ export interface ObsidianNote {
   vault: string;
   frontmatter: Record<string, FrontmatterValue>;
   lastModified: Date;
+  aliases?: string[];
 }
 
 export interface NoteWithUrl extends ObsidianNote {
@@ -28,6 +29,7 @@ export interface GroupedNote {
   vault: string;
   frontmatter: Record<string, FrontmatterValue>;
   lastModified: Date;
+  aliases?: string[];
   urls: Array<{
     url: string;
     source: string;
@@ -39,8 +41,8 @@ export interface GroupedNote {
 export interface Preferences {
   urlProperties: string[]; // Array of frontmatter properties to check for URLs
   scanInterval: number; // How often to scan for changes (in minutes)
-  excludeFolders: string[]; // Folders to exclude from scanning
   useFrecency?: boolean; // Use frecency-based sorting instead of alphabetical
+  cacheTTL?: number; // Cache time-to-live in minutes
 }
 
 export interface CommandProps {

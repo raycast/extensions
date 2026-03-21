@@ -1,18 +1,22 @@
 ---
 title: Stencil
 category: JavaScript libraries
-updated: 2019-05-08
+updated: 2019-05-08T00:00:00.000Z
 keywords:
-  - "@Component"
-  - "@Prop()"
-  - "@State()"
-  - "render()"
-  - "componentWillLoad()"
-  - "componentWillUpdate()"
-  - "Templating"
-  - "Lifecycle"
-intro: |
-  [Stencil](https://github.com/ionic-team/stencil) is a compiler for web components made by the Ionic team. This guide targets Stencil v0.0.5.
+  - '@Component'
+  - '@Prop()'
+  - '@State()'
+  - render()
+  - componentWillLoad()
+  - componentWillUpdate()
+  - Templating
+  - Lifecycle
+intro: >
+  [Stencil](https://github.com/ionic-team/stencil) is a compiler for web
+  components made by the Ionic team. This guide targets Stencil v0.0.5.
+tech: stencil
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Quick-start guide

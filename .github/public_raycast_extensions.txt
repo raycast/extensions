@@ -17,8 +17,10 @@ vercast
 ohdear
 devutils
 arc
+dia
 netlify
 pinata
+plane
 grafbase
 tailscale
 todoist
@@ -63,4 +65,8 @@ kaleidoscope
 exa
 v0-by-vercel
 github-copilot
+cursor-agents
+circleback
+sound-search
+linkinize
 pieces-raycast

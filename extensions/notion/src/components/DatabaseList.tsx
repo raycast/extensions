@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 
@@ -82,7 +82,7 @@ export function DatabaseList({ databasePage, setRecentPage, removeRecentPage, us
             <Action.Push
               title="Create New Page"
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
               target={<CreatePageForm defaults={{ database: databaseId }} mutate={mutate} />}
             />
           </ActionPanel>

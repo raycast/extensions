@@ -1,8 +1,12 @@
 ---
 title: jQuery
 category: JavaScript libraries
-tags: [WIP]
+tags:
+  - WIP
 weight: -1
+tech: jquery
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Traversing

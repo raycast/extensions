@@ -1,6 +1,9 @@
 ---
 title: Rails i18n
 category: Rails
+tech: rails-i18n
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### References

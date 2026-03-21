@@ -12,21 +12,12 @@ import {
 } from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
-import {
-  CommandListName,
-  Todo,
-  setTodoProperty,
-  deleteTodo,
-  updateTodo,
-  updateProject,
-  handleError,
-  List as TList,
-  TodoParams,
-} from '../api';
+import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
 import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
+import { Todo, List as TList, CommandListName, UpdateTodoParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
@@ -55,7 +46,7 @@ export default function TodoListItemActions({
 
   const notesURL = todo.notes.match(URL_REGEX)?.[0];
 
-  async function updateAction(args: TodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
     try {
       if (todo.isProject) {
         await updateProject(todo.id, args);
@@ -151,18 +142,29 @@ New title:
     await updateAction({ deadline }, { title });
   }
 
-  async function deleteToDo() {
+  async function deleteToDoOrProject() {
+    const isProject = todo.isProject;
+
+    let title = isProject ? 'Delete Project' : 'Delete To-Do';
+    const message = isProject
+      ? 'Are you sure you want to delete this project?'
+      : 'Are you sure you want to delete this to-do?';
+    const deleteFunction = isProject ? deleteProject : deleteTodo;
+
     if (
       await confirmAlert({
-        title: 'Delete To-Do',
-        message: 'Are you sure you want to delete this to-do?',
+        title,
+        message,
         icon: { source: Icon.Trash, tintColor: Color.Red },
       })
     ) {
-      await deleteTodo(todo.id);
+      await deleteFunction(todo.id);
+
+      title = isProject ? 'Deleted project' : 'Deleted to-do';
+
       await showToast({
         style: Toast.Style.Success,
-        title: 'Deleted to-do',
+        title,
         message: todo.name,
       });
       refreshTodos();
@@ -190,7 +192,7 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        <Action.OpenInBrowser title="Open in Things" icon="things-flat.png" url={`things:///show?id=${todo.id}`} />
+        <Action.Open title="Open in Things" icon="things-flat.png" target={`things:///show?id=${todo.id}`} />
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
@@ -248,7 +250,7 @@ New title:
 
         {lists && lists.length > 0 ? (
           <ActionPanel.Submenu
-            title="Move To"
+            title="Move to"
             icon={Icon.ArrowRight}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
           >
@@ -305,18 +307,18 @@ New title:
           icon={Icon.Trash}
           style={Action.Style.Destructive}
           shortcut={Keyboard.Shortcut.Common.Remove}
-          onAction={deleteToDo}
+          onAction={deleteToDoOrProject}
         />
       </ActionPanel.Section>
 
       {notesURL && (
         <ActionPanel.Section>
           <Action.OpenInBrowser
-            title="Open URL From Notes"
+            title="Open URL from Notes"
             url={notesURL}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
           />
-          <Action.CopyToClipboard title="Copy URL From Notes" content={notesURL} />
+          <Action.CopyToClipboard title="Copy URL from Notes" content={notesURL} />
         </ActionPanel.Section>
       )}
 
@@ -340,22 +342,22 @@ New title:
 
       {todo.project && (
         <ActionPanel.Section title={todo.project.name}>
-          <Action.OpenInBrowser
+          <Action.Open
             title="Open Project in Things"
             icon="things-flat.png"
             shortcut={{ modifiers: ['cmd'], key: 'o' }}
-            url={`things:///show?id=${todo.project.id}`}
+            target={`things:///show?id=${todo.project.id}`}
           />
           <Action.CopyToClipboard title="Copy Project URL" content={`things:///show?id=${todo.project.id}`} />
         </ActionPanel.Section>
       )}
       {area && (
         <ActionPanel.Section title={area.name}>
-          <Action.OpenInBrowser
+          <Action.Open
             title="Open Area in Things"
             icon="things-flat.png"
             shortcut={{ modifiers: ['opt'], key: 'o' }}
-            url={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
+            target={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
           />
           <Action.CopyToClipboard
             title="Copy Area URL"
@@ -364,11 +366,11 @@ New title:
         </ActionPanel.Section>
       )}
       <ActionPanel.Section title={`${capitalize(commandListName)} List`}>
-        <Action.OpenInBrowser
+        <Action.Open
           title={`Open ${capitalize(commandListName)} List in Things`}
           icon="things-flat.png"
           shortcut={{ modifiers: ['ctrl'], key: 'o' }}
-          url={`things:///show?id=${commandListName.toLowerCase()}`}
+          target={`things:///show?id=${commandListName.toLowerCase()}`}
         />
         <Action.Push
           title="Add New To-Do"

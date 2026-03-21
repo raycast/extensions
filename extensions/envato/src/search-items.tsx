@@ -24,7 +24,7 @@ export default function SearchItems() {
     [searchText, filter],
     {
       initialData: [],
-    }
+    },
   );
 
   return (

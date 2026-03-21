@@ -1,5 +1,49 @@
 # Bitwarden Changelog
 
+## [Fix] - 2026-03-20
+
+- Fix custom server URL "Restart Required" alert loop after CLI binary update
+- Fix reverting to default server when custom server URL preference is removed
+
+## [Unified Item Detail View] - 2026-03-20
+
+- Add unified detail screen for all vault item types (login, card, identity, note, SSH key)
+- Add field-type components with copy, paste, reveal/hide, and open-in-browser actions
+- Add keyboard shortcuts for copy/paste password and TOTP actions
+- Remove separate card and identity detail screens in favor of the unified view
+
+## [Fix Password Generation] - 2026-02-18
+
+- Fix password generation failing due to false boolean options
+
+## [Fix & Improvements] - 2026-02-17
+
+- Fix potential stale session token issue
+- Small feedback improvements
+
+## [Fix & Feature] - 2026-02-16
+
+- Fix unhandled error when unlocking vault
+- Fix mismatched Windows CLI binary hash
+- Add support for Steam Guard TOTP
+
+## [Fix Password Generation] - 2026-02-11
+
+- Fix password generation failing due to values passed to boolean options
+
+## [Added PasteUsernameAction] - 2026-01-01
+
+## [Added support for Windows] - 2025-10-15
+
+## [New Command] - 2025-10-07
+
+- Add Create Login command to create new login items
+
+## [Improvements] - 2025-09-02
+
+- Sync vault on command launch
+- Reorganize preferences
+
 ## [Fix] - 2025-06-26
 
 - Catch any errors caused by `OTPAuth.TOTP` constructor

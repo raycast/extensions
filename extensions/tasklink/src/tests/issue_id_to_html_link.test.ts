@@ -40,6 +40,21 @@ describe("Issue ID to HTML Links", () => {
     });
   });
 
+  it("Handles Windows line breaks", async () => {
+    getPreferenceValues.mockReturnValue({ url: "https://example.com/$1", format: "JIRA_STYLE" });
+    getSelectedText.mockResolvedValue(
+      "- RAY-123: First\r\n" +
+      "- RAY-456: Second\r\n" +
+      "- RAY-789: Third");
+    await Command();
+    expect(Clipboard.paste).toHaveBeenCalledWith({
+      html:
+        `- <a href="https://example.com/RAY-123">RAY-123</a>: First<br />` +
+        `- <a href="https://example.com/RAY-456">RAY-456</a>: Second<br />` +
+        `- <a href="https://example.com/RAY-789">RAY-789</a>: Third`,
+    });
+  });
+
   it("Shows an error toast when there is no selected text", async () => {
     getSelectedText.mockRejectedValue(new Error());
     await Command();

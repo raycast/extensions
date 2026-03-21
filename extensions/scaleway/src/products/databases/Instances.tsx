@@ -10,7 +10,7 @@ export const Instances = () => {
   const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: instances = [], isLoading } = useAllRegionInstancesQuery({
+  const { data: instances, isLoading } = useAllRegionInstancesQuery({
     orderBy: 'created_at_desc',
     organizationId: clientSetting.defaultOrganizationId,
   })
@@ -23,7 +23,7 @@ export const Instances = () => {
       isShowingDetail={isDetailOpen}
       searchBarPlaceholder="Search Instances …"
     >
-      {instances.map((instance) => (
+      {instances?.map((instance) => (
         <List.Item
           key={instance.id}
           title={instance.name}

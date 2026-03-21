@@ -1,6 +1,9 @@
 ---
 title: React-router
 category: React
+tech: react-router
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

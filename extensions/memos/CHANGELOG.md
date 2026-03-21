@@ -1,5 +1,15 @@
 # Send To Memos Changelog
 
+## [Update] - 2025-12-07
+
+- update dependencies and improve type safety.
+- fix: correct indentation in `filterList` mapping.
+- fix: handle user data safely in `MemosListCommand`.
+
+## [Update & Breaking Change] - 2025-09-03
+
+- support memos@0.25.0. 
+
 ## [Update] - 2025-03-31
 
 - support memos@0.24.0.

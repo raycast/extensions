@@ -2,10 +2,13 @@ import { execa } from "execa";
 import fs from "node:fs";
 import path from "path";
 import { Video } from "./types.js";
-import { downloadPath, ffmpegPath, forceIpv4, ytdlPath } from "./utils.js";
+import { downloadPath, forceIpv4, getffmpegPath, getytdlPath, sanitizeVideoTitle } from "./utils.js";
 import SRTParser from "srt-parser-2";
 
 export default async function extractTranscript(url: string, language: string = "en") {
+  const ytdlPath = getytdlPath();
+  const ffmpegPath = getffmpegPath();
+
   // Validate yt-dlp exists
   if (!fs.existsSync(ytdlPath)) {
     throw new Error("yt-dlp is not installed");
@@ -70,7 +73,7 @@ export default async function extractTranscript(url: string, language: string = 
 
     return {
       transcript,
-      title: video.title,
+      title: sanitizeVideoTitle(video.title),
     };
   } catch (error) {
     // Clean up on error

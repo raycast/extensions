@@ -1055,3 +1055,30 @@ export interface Domain {
   renew?: boolean;
   transferStartedAt?: number;
 }
+
+export interface AIGatewayLogItem {
+  timestamp: string;
+  projectId: string;
+  keyId: string;
+  environment: string;
+  deploymentId: string;
+  aiGatewayModelId: string;
+  aiModel: string;
+  aiModelType: string;
+  aiProvider: string;
+  httpStatus: number;
+  cost: number;
+  marketCost: number;
+  inputTokens: number;
+  outputTokens: number;
+  cachedInputTokens: number;
+  cacheCreationInputTokens: number;
+  reasoningTokens: number;
+  aiRequestDurationMs: number;
+  timeToFirstTokenMs: number;
+  tokensPerSecond: number;
+}
+
+export interface AICreditsBalance {
+  cumulativeBalance: string;
+}

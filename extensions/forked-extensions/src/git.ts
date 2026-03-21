@@ -1,12 +1,14 @@
 import fs from "node:fs/promises";
-import os from "node:os";
 import path from "node:path";
 import process from "node:process";
+import { confirmAlert } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
 import { defaultGitExecutableFilePath } from "./constants.js";
+import { catchError } from "./errors.js";
+import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from "./utils.js";
+import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQuotesIfInWindows } from "./utils.js";
 
 /**
  * The path to the Git executable file.
@@ -14,12 +16,7 @@ import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath } from
  * Windows does not support paths with spaces without quotes, like `C:\Program Files\Git\cmd\git.exe`.
  * So we need to add quotes around the path if it contains spaces and is not already quoted.
  */
-const gitFilePath =
-  os.platform() === "win32" &&
-  gitExecutableFilePath?.includes(" ") &&
-  !(gitExecutableFilePath?.startsWith('"') && gitExecutableFilePath?.endsWith('"'))
-    ? `"${gitExecutableFilePath}"`
-    : gitExecutableFilePath || defaultGitExecutableFilePath;
+const gitFilePath = addQuotesIfInWindows(gitExecutableFilePath || defaultGitExecutableFilePath);
 
 /**
  * Resolves the path to the repository configuration.
@@ -59,6 +56,7 @@ export const getExtensionList = async () => {
   if (!extensionsFolderExists) return [];
 
   const files = await fs.readdir(extensionsFolder, { withFileTypes: true });
+
   const extensionFolders = files
     .filter((file) => file.isDirectory())
     .map((file) => ({ path: path.join(repositoryPath, "extensions", file.name), name: file.name }));
@@ -72,13 +70,21 @@ export const getExtensionList = async () => {
     }),
   );
 
-  return allExtension.filter((extension) => Boolean(extension.name));
+  const validExtensions = allExtension.filter((extension) => Boolean(extension.name));
+  const sparseCheckoutExtensions = await sparseCheckoutList();
+  if (!sparseCheckoutExtensions) return [];
+  const untrackedExtensions = validExtensions.filter(
+    (x) => !sparseCheckoutExtensions.includes(`extensions/${x.folderName}`),
+  );
+  if (untrackedExtensions.length > 0)
+    await sparseCheckoutAdd(untrackedExtensions.map((x) => `extensions/${x.folderName}`));
+  return validExtensions;
 };
 
 /**
  * Executes a git command in the repository root directory.
  * @param args The arguments to pass to the git command.
- * @return The subprocess result of the git command execution.
+ * @returns The subprocess result of the git command execution.
  */
 export const git = async (args: string[]) => spawn(gitFilePath, args, { cwd: repositoryPath, shell: true });
 
@@ -96,10 +102,21 @@ export const checkIfGitIsValid = async () => {
 };
 
 /**
+ * Gets the name of the current branch.
+ * @returns The name of the current branch as a string.
+ */
+export const getCurrentBranch = async () => {
+  const { output } = await git(["branch", "--show-current"]);
+  return output.trim();
+};
+
+/**
  * Gets the last full commit hash of the current branch.
+ * @remarks Returns an empty string if the repository is not initialized.
+ * @returns The last commit hash as a string.
  */
 export const getLastCommitHash = async () => {
-  const { output } = await git(["rev-parse", "HEAD"]);
+  const { output } = await git(["rev-parse", "HEAD"]).catch(() => ({ output: "" }));
   return output.trim();
 };
 
@@ -109,14 +126,20 @@ export const getLastCommitHash = async () => {
  */
 export const getForkedRepository = async () => {
   const gitExists = await fileExists(path.join(repositoryPath, ".git"));
-  if (gitExists) {
-    const { output } = await git(["remote", "get-url", "origin"]);
-    const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
-    return { forkedRepository: existingRepository, isNew: false };
-  }
+  if (!gitExists) return "";
+  const { output } = await git(["remote", "get-url", "origin"]);
+  const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
+  return existingRepository;
+};
 
-  const forkedRepository = await api.getForkedRepository();
-  return { forkedRepository, isNew: true };
+/**
+ * Converts a full checkout to a sparse checkout with cone mode.
+ */
+export const convertFullCheckoutToSparseCheckout = async () => {
+  await git(["config", "remote.origin.promisor", "true"]);
+  await git(["config", "remote.origin.partialclonefilter", "blob:none"]);
+  await git(["sparse-checkout", "set", "--cone"]);
+  await git(["checkout", "main"]);
 };
 
 /**
@@ -124,18 +147,23 @@ export const getForkedRepository = async () => {
  * @returns The full name of the forked repository.
  */
 export const initRepository = async () => {
-  const { forkedRepository, isNew } = await getForkedRepository();
-  if (!isNew) return forkedRepository;
-
+  const localForkedRepository = await getForkedRepository();
+  if (localForkedRepository) return localForkedRepository;
+  const forkedRepository = await api.getForkedRepository();
   await spawn(
     gitFilePath,
-    ["clone", "--filter=blob:none", "--no-checkout", getRemoteUrl(forkedRepository), repositoryPath],
+    [
+      "clone",
+      "--filter=blob:none",
+      "--no-checkout",
+      getRemoteUrl(forkedRepository),
+      addQuotesIfInWindows(repositoryPath),
+    ],
     {
       shell: true,
     },
   );
-  await git(["sparse-checkout", "set", "--cone"]);
-  await git(["checkout", "main"]);
+  await convertFullCheckoutToSparseCheckout();
   return forkedRepository;
 };
 
@@ -154,9 +182,49 @@ export const setUpstream = async (forkedRepository: string) => {
 /**
  * Checks if the current working directory is in clean status.
  */
-export const isStatusClean = async () => {
+export const checkIfStatusClean = async () => {
   const { output } = await git(["status", "--porcelain"]);
-  return output.trim() === "";
+  if (output.trim() === "") return;
+  throw new Error("The repository is not clean. Please commit or stash your changes before proceeding.");
+};
+
+/**
+ * Checks if the repository enabled sparse-checkout.
+ */
+export const checkIfSparseCheckoutEnabled = async () => {
+  const isSparseCheckout = await git(["sparse-checkout", "list"])
+    .then(() => true)
+    .catch(() => false);
+  if (!isSparseCheckout) {
+    return new Promise<void>((resolve, reject) => {
+      confirmAlert({
+        title: "Sparse Checkout Not Enabled",
+        message: "This operation requires sparse checkout to be enabled. Would you like to enable it now?",
+        primaryAction: {
+          title: "Enable Sparse Checkout",
+          onAction: catchError(async () => {
+            await checkIfStatusClean();
+            await operation.convertFullCheckoutToSparseCheckout();
+            resolve();
+          }),
+        },
+        dismissAction: {
+          title: "Cancel",
+          onAction: resolve,
+        },
+      }).catch(reject);
+    });
+  }
+};
+
+/**
+ * Gets the number of commits the current branch is ahead and behind the upstream branch.
+ * @returns An object containing the number of commits ahead and behind.
+ */
+export const getAheadBehindCommits = async () => {
+  const { output } = await git(["rev-list", "--left-right", "--count", "HEAD..@{u}"]);
+  const [ahead, behind] = output.split("\t").map(Number);
+  return { ahead, behind };
 };
 
 /**
@@ -167,44 +235,42 @@ export const isStatusClean = async () => {
 export const syncFork = async () => {
   const { output } = await git(["branch", "--show-current"]);
   const currentBranch = output.trim();
-  await git(["fetch", "upstream"]);
+  await git(["fetch", "--prune", "--filter=tree:0", "upstream"]);
   if (currentBranch !== "main") await git(["checkout", "main"]);
   await git(["merge", "--ff-only", "upstream/main"]);
   if (currentBranch !== "main") await git(["checkout", currentBranch]);
 };
 
 /**
- * Pulls the latest changes from the upstream repository.
- *
- * [TODO] We should check if the repository is clean before pulling
- *
- * @remarks
- *
- * - If the local branch is outdated, fast-forward it;
- * - If the local branch contains unpushed work, warn about it;
- * - If the branch seems merged and its upstream branch was deleted, delete it.
+ * Lists the folders in the sparse-checkout list.
+ * @returns An array of folder names in the sparse-checkout list.
  */
-export const pull = async () => {
-  await git(["pull"]);
+export const sparseCheckoutList = async () => {
+  const { output } = await git(["sparse-checkout", "list"]);
+  return output
+    .split("\n")
+    .map((x) => x.trim())
+    .filter(Boolean);
 };
 
 /**
- * Adds an extension folder to the sparse-checkout list.
- * @param extensionFolder The target extension folder name. The value should be folder name only, without the `extensions/` prefix and slashes.
+ * Adds extension folders to the sparse-checkout list.
+ * @param pattern The target pattern names.
  */
-export const sparseCheckoutAdd = async (extensionFolder: string) => {
-  await git(["sparse-checkout", "add", path.join("extensions", extensionFolder)]);
+export const sparseCheckoutAdd = async (pattern: string[]) => {
+  await git(["sparse-checkout", "add", ...pattern]);
 };
 
 /**
- * Removes an extension folder from the sparse-checkout list.
- * @param extensionFolder The target extension folder name. The value should be folder name only, without the `extensions/` prefix and slashes.
+ * Removes extension folders from the sparse-checkout list.
+ * @param pattern The target pattern names.
  */
-export const sparseCheckoutRemove = async (extensionFolder: string) => {
+export const sparseCheckoutRemove = async (pattern: string[]) => {
   const sparseCheckoutInfoPath = path.join(repositoryPath, ".git", "info", "sparse-checkout");
   const sparseCheckoutInfo = await fs.readFile(sparseCheckoutInfoPath, "utf-8");
   const lines = sparseCheckoutInfo.split("\n");
-  const updatedInfo = lines.filter((x) => x !== `/extensions/${extensionFolder}/`).join("\n");
+  const toBeRemovedFolders = new Set(pattern.map((x) => `/${x}/`));
+  const updatedInfo = lines.filter((x) => !toBeRemovedFolders.has(x)).join("\n");
   await fs.writeFile(sparseCheckoutInfoPath, updatedInfo, "utf-8");
   await git(["sparse-checkout", "reapply"]);
 };

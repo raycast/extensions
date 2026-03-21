@@ -1,4 +1,11 @@
-# regex Changelog
+# Regex Tester Changelog
+
+## [Modernize] - 2026-01-04
+
+- add icons
+- update `metadata` images
+- make keyboard shortcut cross-platform
+- modernize to use latest Raycast configuration
 
 ## [Initial Version] - 2022-06-22
 

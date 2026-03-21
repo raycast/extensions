@@ -1,6 +1,5 @@
 // src/utils/kagiSearchApi.ts
-import fetch from "node-fetch";
-import { randomId } from "@raycast/api";
+import { nanoid } from "nanoid";
 import { SearchResult } from "./types";
 
 interface KagiSearchResponse {
@@ -46,7 +45,7 @@ export async function searchWithKagiAPI(query: string, apiKey: string, signal: A
   data.data.forEach((item) => {
     if (item.t === 0) {
       results.push({
-        id: randomId(),
+        id: nanoid(),
         query: item.title,
         description: item.snippet || "",
         url: item.url,
@@ -97,7 +96,7 @@ export async function searchWithFastGPT(
 
     // Create a result for the FastGPT answer
     return {
-      id: randomId(),
+      id: nanoid(),
       query: query,
       description: "FastGPT Answer",
       url: `https://kagi.com/search?q=${encodeURIComponent(query)}`,

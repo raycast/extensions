@@ -12,6 +12,7 @@ import {
   LaunchProps,
   openCommandPreferences,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { pause } from "./api/pause";
@@ -42,12 +43,15 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     getPreferenceValues<Preferences.NowPlayingMenuBar>();
 
   const [uriFromSpotify, setUriFromSpotify] = useCachedState<string | undefined>("currentlyPlayingUri", undefined);
-  const shouldExecute = React.useRef<boolean>(false);
 
   const { spotifyAppData, spotifyAppDataIsLoading, spotifyAppDataRevalidate } = useSpotifyAppData();
 
+  // Determine if we should fetch from API based on spotify app state
+  const isSpotifyActive = spotifyAppData?.state !== "NOT_RUNNING" && spotifyAppData?.state !== "NOT_PLAYING";
+  const uriChanged = isSpotifyActive && uriFromSpotify !== spotifyAppData?.uri;
+
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying({
-    options: { execute: shouldExecute.current },
+    options: { execute: isSpotifyActive && (uriChanged || !!uriFromSpotify) },
   });
 
   // The hooks below will only execute when the Menu Bar is opened
@@ -59,18 +63,29 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
     options: { execute: launchType === LaunchType.UserInitiated },
   });
 
+  // Sync URI from Spotify app data
   React.useEffect(() => {
-    if (spotifyAppData?.state === "NOT_RUNNING" || spotifyAppData?.state === "NOT_PLAYING") {
-      setUriFromSpotify(undefined);
-      shouldExecute.current = false;
+    if (!isSpotifyActive) {
+      if (uriFromSpotify !== undefined) {
+        setUriFromSpotify(undefined);
+      }
       return;
     }
 
     if (uriFromSpotify !== spotifyAppData?.uri) {
       setUriFromSpotify(spotifyAppData?.uri);
-      shouldExecute.current = true;
     }
-  }, [uriFromSpotify, shouldExecute, spotifyAppData]);
+  }, [isSpotifyActive, spotifyAppData?.uri, uriFromSpotify, setUriFromSpotify]);
+
+  // We have to ensure that the Spotify App Data is loaded before we can display the correct UI
+  if (spotifyAppDataIsLoading || currentlyPlayingIsLoading) {
+    // putting is Loading to true ensure we don't unload the menu bar when the data is loading (null unloads the menu bar)
+    return <MenuBarExtra isLoading={true} />;
+  }
+
+  if (!isSpotifyActive) {
+    return <OpenSpotify isLoading={false} />;
+  }
 
   const isPlaying = spotifyAppData?.state === "PLAYING";
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
@@ -80,12 +95,6 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
   const twoHoursInMilliseconds = 2 * 60 * 60 * 1000;
   const dataIsOld =
     currentlyPlayingData?.timestamp && currentTime - currentlyPlayingData.timestamp > twoHoursInMilliseconds;
-
-  if (spotifyAppData?.state === "NOT_RUNNING") {
-    return (
-      <OpenSpotify isLoading={spotifyAppDataIsLoading || currentlyPlayingIsLoading || currentlyPlayingIsLoading} />
-    );
-  }
 
   if ((dataIsOld && !isPlaying) || !currentlyPlayingData?.item) {
     return (
@@ -201,7 +210,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           onAction={async () => {
             try {
               const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
-              await seek(currentPositionSeconds + 15);
+              await seek(currentPositionSeconds + 15, currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
@@ -215,7 +224,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
           onAction={async () => {
             try {
               const currentPositionSeconds = (currentlyPlayingData?.progress_ms || 0) / 1000;
-              await seek(currentPositionSeconds - 15);
+              await seek(currentPositionSeconds - 15, currentlyPlayingData?.item?.duration_ms);
               await currentlyPlayingRevalidate();
             } catch (err) {
               const error = getErrorMessage(err);
@@ -272,12 +281,12 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       <MenuBarExtra.Submenu icon={Icon.List} title="Add to Playlist">
         {myPlaylistsData?.items
           ?.filter((playlist) => playlist.owner?.id === meData?.id)
-          .map((playlist) => {
+          .map((playlist, index) => {
             return (
               playlist.name &&
               playlist.id && (
                 <MenuBarExtra.Item
-                  key={playlist.id}
+                  key={`${playlist.id}-${index}`}
                   title={playlist.name}
                   onAction={async () => {
                     try {
@@ -340,7 +349,10 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           title="Copy URL"
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "c" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+          }}
           onAction={async () => {
             await Clipboard.copy({
               html: `<a href=${external_urls?.spotify}>${title}</a>`,
@@ -352,7 +364,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
         <MenuBarExtra.Item
           icon="spotify-icon.svg"
           title="Open on Spotify"
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() =>
             isSpotifyInstalled ? open(uri || "spotify") : open(external_urls?.spotify || "https://play.spotify.com")
           }
@@ -361,7 +373,7 @@ function NowPlayingMenuBarCommand({ launchType }: LaunchProps) {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
@@ -387,7 +399,7 @@ function OpenSpotify({ isLoading }: { title?: string; isLoading: boolean }) {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>
@@ -424,7 +436,7 @@ function NothingPlaying({ title = "Nothing is playing right now", isLoading }: {
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
           title="Configure Command"
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "," }, Windows: { modifiers: ["ctrl"], key: "," } }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>

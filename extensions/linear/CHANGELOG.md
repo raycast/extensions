@@ -1,5 +1,41 @@
 # Linear Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Search Custom Views] - 2026-03-16
+
+- Added new "Search Custom Views" command to browse custom views and their issues directly within Raycast
+- Custom Views in Favorites now navigate to issue list instead of opening browser
+- Paginated custom view fetching (up to 250 views)
+
+## [Auth fixes and toolbar icon] - 2026-03-12
+
+- Fix authentication errors during sign-in that could show "Something went wrong" or fail with "invalid_grant"/"fetch failed", preventing issue creation. See <https://github.com/raycast/extensions/issues/23050> and <https://github.com/raycast/extensions/issues/26174>
+- Fix red triangle icon appearing in the toolbar/menubar caused by background auth failures. See <https://github.com/raycast/extensions/issues/24993>
+
+## [Update Shortcuts] - 2026-01-06
+
+- Updated shortcuts to make them cross-platform
+- Updated README with information
+
+## [Notification improvements] - 2025-10-29
+
+- Improved notification display to support all notification types by reading directly from the API
+- Added "Mark all as read" action to notifications command and menu bar extension
+- Bumped `@linear/sdk` to v61.0.0
+
+## [Schema deprecation and update SDK] - 2025-10-13
+
+- Bumped `@linear/sdk` to v60.0.0
+- Removed references to "roadmap" which was [deprecated](https://linear.app/changelog/2024-07-25-priority-for-projects-and-micro-adjust) July 2024
+- Corrected project list empty state message
+
+## [Status Preference] - 2025-10-09
+
+- Added "Preferred Status" preference to "Create Issue for Myself" command to specify the initial status for new issues
+
 ## [Update API and bug fixes] - 2025-04-15
 
 - Updated dependencies

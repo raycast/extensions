@@ -1,5 +1,23 @@
 # Swift Command Changelog
 
+## [Fix Windows Compatibility] - 2026-02-03
+
+### Fixed
+
+- Fix TypeError when preferences.datasourcePath returns undefined on Windows
+
+## [Add Clipboard Placeholder and Shortcuts] - 2025-11-03
+
+### Added
+
+- Add clipboard placeholder
+- Add shortcut key to insert placeholder
+- Run command on multiple terminals
+
+### Changed
+
+- Remove the display of Arguments
+
 ## [Add Import Alias Command] - 2025-04-29
 
 ### Added

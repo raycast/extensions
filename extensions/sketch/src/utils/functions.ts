@@ -46,7 +46,7 @@ export async function login(email: string, password: string): Promise<string> {
 export async function getShares(
   token: string,
   selectedWorkspace: SelectedWorkspace,
-  name?: string
+  name?: string,
 ): Promise<Share[] | undefined> {
   try {
     const resp = await fetch("https://graphql.sketch.cloud/api", {
@@ -94,7 +94,7 @@ export async function getShares(
 export async function getProjectShares(
   token: string,
   shortId: string,
-  name?: string
+  name?: string,
 ): Promise<EntriesEntity[] | undefined> {
   try {
     const resp = await fetch("https://graphql.sketch.cloud/api", {

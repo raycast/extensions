@@ -1,12 +1,15 @@
 ---
 title: Mouse Acceleration
 category: macOS
-updated: 2018-03-20
+updated: 2018-03-20T00:00:00.000Z
 weight: -1
 keywords:
-  - "defaults write .GlobalPreferences com.apple.mouse.scaling -1"
+  - defaults write .GlobalPreferences com.apple.mouse.scaling -1
 intro: |
   Disable mouse acceleration with this one weird trick.
+tech: macos-mouse-acceleration
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Acceleration

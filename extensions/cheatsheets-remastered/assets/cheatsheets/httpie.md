@@ -2,9 +2,13 @@
 title: httpie
 category: CLI
 weight: -3
-updated: 2020-07-05
-description: |
-  $ http POST http://example.com name="John" Host:example.com — JSON, cookies, files, auth, and other httpie examples.
+updated: 2020-07-05T00:00:00.000Z
+description: >
+  $ http POST http://example.com name="John" Host:example.com — JSON, cookies,
+  files, auth, and other httpie examples.
+tech: httpie
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Introduction

@@ -1,12 +1,5 @@
-import { showToast, Toast, Clipboard, getPreferenceValues } from "@raycast/api";
+import { showToast, Toast, Clipboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-
-/**
- * Get the preferences for the extension
- */
-export function getExtensionPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
 
 /**
  * Show a success toast with a message

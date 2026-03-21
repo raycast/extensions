@@ -1,10 +1,15 @@
 ---
 title: Org Mode
-tags: [WIP]
+tags:
+  - WIP
 category: Apps
-updated: 2018-02-19
-intro: |
-  [Org mode](https://orgmode.org/) is for keeping hierarchal notes (and more) in Emacs.
+updated: 2018-02-19T00:00:00.000Z
+intro: >
+  [Org mode](https://orgmode.org/) is for keeping hierarchal notes (and more) in
+  Emacs.
+tech: org-mode
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Syntax

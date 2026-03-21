@@ -1,12 +1,16 @@
 # Quick Notes Changelog
 
+## [Windows Compatibility] - 2025-12-10
+
+- Normalize path handling with `path.join` so Quick Notes works on macOS and Windows Raycast.
+
 ## [Bugfix] - 2025-08-04
 
 - Fix note opening externally if note title contains space
 
 ## [New Command] - 2025-06-26
 
--  Open Note Externally
+- Open Note Externally
 
 ## [New Commands] - 2025-04-08
 

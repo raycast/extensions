@@ -3,15 +3,14 @@ import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
 
-import { getExtensionConfig, updateProjectLastUsedAt } from "../utils/config";
-import { generateProjectKeywords } from "../utils/pinyin";
-import { getRepositoryBranch } from "../utils/command";
-import ConfigureProjects from "../configure-projects";
-import ReadmeView from "../readme-view";
-import { ExtensionConfig, Project } from "../types";
+import ConfigureProjects from "@/configure-projects";
+import { ReadmeView } from "@/pages";
+import { IS_WINDOWS } from "@/constants";
+import { getExtensionConfig, updateProjectLastUsedAt, generateProjectKeywords, getRepositoryBranch } from "@/utils";
+import type { ExtensionConfig, Project, ProjectExtraInfo } from "@/types";
 
 interface ProjectListProps {
-  onProjectAction: (project: Project, config: ExtensionConfig) => void;
+  onProjectAction: (project: Project, config: ExtensionConfig, extraInfo: ProjectExtraInfo) => void;
   requiredFields?: string[];
   actionPanelExtra?: React.ReactNode;
   actionTitle: string;
@@ -46,6 +45,9 @@ export default function ProjectList({
 
   useEffect(() => {
     if (!projects.length) return;
+
+    // TODO: Support Windows
+    if (IS_WINDOWS) return;
 
     async function fetchProjectsBranch() {
       const map: BranchMap = {};
@@ -94,7 +96,7 @@ export default function ProjectList({
 
   if (!isLoading && projects.length === 0) {
     return (
-      <List searchBarPlaceholder="Search projects...">
+      <List searchBarPlaceholder="Search project...">
         <List.EmptyView
           icon={{ source: "icon.svg" }}
           title="No Projects"
@@ -131,7 +133,7 @@ export default function ProjectList({
 
   if (missingFieldProject) {
     return (
-      <List searchBarPlaceholder="Search projects...">
+      <List searchBarPlaceholder="Search project...">
         <List.EmptyView
           icon={{ source: "icon.svg" }}
           title="Incomplete Configuration"
@@ -168,7 +170,7 @@ export default function ProjectList({
     }));
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search projects...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search project...">
       {sortedProjects.map((project) => {
         const accessories = branchMap[project.id]
           ? [{ tag: branchMap[project.id], icon: { source: "branch.svg", tintColor: Color.SecondaryText } }]
@@ -177,7 +179,7 @@ export default function ProjectList({
         return (
           <List.Item
             key={project.id}
-            icon={Icon.Folder}
+            icon={{ fileIcon: project.path }}
             title={project.name}
             keywords={project.keywords}
             subtitle={project.displayPath}
@@ -188,10 +190,13 @@ export default function ProjectList({
                   title={actionTitle}
                   icon={Icon.Terminal}
                   onAction={() => {
-                    if (config) {
-                      updateProjectLastUsedAt(project.id);
-                      onProjectAction(project, config);
-                    }
+                    if (!config) return;
+                    updateProjectLastUsedAt(project.id);
+                    const extraInfo: ProjectExtraInfo = {
+                      branch: branchMap[project.id],
+                      displayPath: project.displayPath,
+                    };
+                    onProjectAction(project, config, extraInfo);
                   }}
                 />
                 <Action.Push

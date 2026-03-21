@@ -8,16 +8,15 @@ export default function Releases() {
   const [releases, setReleases] = useState<Release[]>([]);
   const [error, setError] = useState("");
 
-  const fetchReleases = async () => {
-    try {
-      const releases = await loadRecentReleases();
-      setReleases(releases);
-    } catch (error) {
-      setError(error instanceof Error ? error.message : "An error occurred while loading releases");
-    }
-  };
-
   useEffect(() => {
+    const fetchReleases = async () => {
+      try {
+        const releases = await loadRecentReleases();
+        setReleases(releases);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "An error occurred while loading releases");
+      }
+    };
     fetchReleases();
   }, []);
 

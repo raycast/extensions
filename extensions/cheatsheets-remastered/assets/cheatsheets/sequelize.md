@@ -1,6 +1,9 @@
 ---
 title: Sequelize
 category: JavaScript libraries
+tech: sequelize
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

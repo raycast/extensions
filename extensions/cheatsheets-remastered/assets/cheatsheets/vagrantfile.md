@@ -1,6 +1,9 @@
 ---
 title: Vagrantfile
 category: Devops
+tech: vagrantfile
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Vagrantfile

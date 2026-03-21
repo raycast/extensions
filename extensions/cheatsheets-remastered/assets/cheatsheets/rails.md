@@ -1,6 +1,9 @@
 ---
 title: Rails
 category: Rails
+tech: rails
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 Helpers

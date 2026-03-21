@@ -1,6 +1,9 @@
 ---
 title: js-model
 category: JavaScript libraries
+tech: js-model
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example

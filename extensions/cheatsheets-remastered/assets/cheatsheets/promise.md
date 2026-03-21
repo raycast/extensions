@@ -1,6 +1,9 @@
 ---
 title: Promises
 category: JavaScript
+tech: promise
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Reference

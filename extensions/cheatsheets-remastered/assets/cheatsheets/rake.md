@@ -1,6 +1,9 @@
 ---
 title: Rake
 category: Ruby
+tech: rake
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic syntax

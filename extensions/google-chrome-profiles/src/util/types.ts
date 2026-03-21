@@ -1,3 +1,5 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export type GoogleChromeLocalState = {
   profile: { info_cache: GoogleChromeInfoCache };
 };
@@ -59,7 +61,7 @@ type GoogleChromeBookmark = GoogleChromeBookmarkFolder | GoogleChromeBookmarkURL
 
 export interface GoogleChromeBookmarkURL extends GoogleChromeBookmarkBase {
   type: "url";
-  url: string;
+  url?: string; // url can be null (cf. bookmarklet)
 }
 
 export interface GoogleChromeBookmarkFolder extends GoogleChromeBookmarkBase {
@@ -79,3 +81,27 @@ export type GoogleChromeBookmarkFile = {
     synced: GoogleChromeBookmarkFolder;
   };
 };
+
+export interface BrowserConfig {
+  readonly appName: string;
+  readonly dataPath: string;
+  readonly binaryPath: string;
+}
+
+export const BROWSERS: Record<string, BrowserConfig> = {
+  chrome: {
+    appName: "Google Chrome",
+    dataPath: "Library/Application Support/Google/Chrome",
+    binaryPath: "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+  },
+  "chrome-canary": {
+    appName: "Google Chrome Canary",
+    dataPath: "Library/Application Support/Google/Chrome Canary",
+    binaryPath: "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+  },
+};
+
+export function getSelectedBrowser(): BrowserConfig {
+  const { browser } = getPreferenceValues<ExtensionPreferences>();
+  return BROWSERS[browser] ?? BROWSERS["chrome"];
+}

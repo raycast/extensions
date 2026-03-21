@@ -7,7 +7,8 @@
   "author": "MisakiCoca",
   "contributors": [
     "xmok",
-    "ezzylan"
+    "ezzylan",
+    "cupcakearmy"
   ],
   "categories": [
     "Security",
@@ -28,17 +29,27 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Whether to exit Raycast after cleaning the link",
+      "name": "exitAfterCleaning",
+      "label": "Exit After Cleaning"
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.94.3"
+    "@raycast/api": "^1.102.6"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.14.0",
-    "@types/react": "^19.1.0",
-    "eslint": "^9.24.0",
-    "prettier": "^3.5.3",
-    "react": "^19.1.0",
-    "typescript": "^5.8.3"
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.12",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "react": "^19.1.1",
+    "typescript": "^5.9.2"
   },
   "scripts": {
     "build": "ray build -e dist",

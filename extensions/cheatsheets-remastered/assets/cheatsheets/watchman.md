@@ -1,11 +1,14 @@
 ---
 title: Watchman
-updated: 2017-10-18
+updated: 2017-10-18T00:00:00.000Z
 weight: -1
 keywords:
-- "watchman watch ~/src"
-- "watchman watch-list"
-- "watchman -- trigger ~/rsc remake '*.js' -- make "
+  - watchman watch ~/src
+  - watchman watch-list
+  - 'watchman -- trigger ~/rsc remake ''*.js'' -- make '
+tech: watchman
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Getting started

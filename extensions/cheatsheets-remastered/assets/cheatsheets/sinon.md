@@ -2,7 +2,10 @@
 title: Sinon
 category: JavaScript libraries
 weight: -1
-updated: 2017-10-27
+updated: 2017-10-27T00:00:00.000Z
+tech: sinon
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Creating spies

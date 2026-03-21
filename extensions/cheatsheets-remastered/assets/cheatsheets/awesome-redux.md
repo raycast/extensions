@@ -1,7 +1,10 @@
 ---
 title: Awesome Redux
 category: React
-updated: 2017-11-19
+updated: 2017-11-19T00:00:00.000Z
+tech: awesome-redux
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### redux-actions

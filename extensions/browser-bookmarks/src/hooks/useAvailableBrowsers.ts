@@ -9,7 +9,9 @@ export const BROWSERS_BUNDLE_ID = {
   chrome: "com.google.chrome",
   chromeBeta: "com.google.chrome.beta",
   chromeDev: "com.google.chrome.dev",
+  comet: "ai.perplexity.comet",
   dia: "company.thebrowser.dia",
+  chatGPTAtlas: "com.openai.atlas",
   firefox: "org.mozilla.firefox",
   firefoxDev: "org.mozilla.firefoxdeveloperedition",
   ghostBrowser: "com.ghostbrowser.gb1",
@@ -21,8 +23,11 @@ export const BROWSERS_BUNDLE_ID = {
   edgeCanary: "com.microsoft.edgemac.canary",
   prismaAccess: "com.talon-sec.work",
   vivaldi: "com.vivaldi.vivaldi",
+  vivaldiSnapshot: "com.vivaldi.vivaldi.snapshot",
   zen: "app.zen-browser.zen",
+  libreWolf: "org.mozilla.librewolf",
   whale: "com.naver.whale",
+  helium: "net.imput.helium",
 };
 
 export const availableBrowsers = Object.values(BROWSERS_BUNDLE_ID);

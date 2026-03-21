@@ -1,8 +1,12 @@
 ---
 title: Ansible modules
 category: Ansible
-prism_languages: [yaml]
-updated: 2017-10-03
+prism_languages:
+  - yaml
+updated: 2017-10-03T00:00:00.000Z
+tech: ansible-modules
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 {% raw %}

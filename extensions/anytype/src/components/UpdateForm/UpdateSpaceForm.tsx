@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
+import { useState } from "react";
 import { updateSpace } from "../../api";
 import { Space } from "../../models";
 
@@ -15,6 +16,7 @@ interface UpdateSpaceFormProps {
 
 export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
   const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
 
   const { handleSubmit, itemProps } = useForm<UpdateSpaceFormValues>({
     initialValues: {
@@ -22,6 +24,7 @@ export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
       description: space.description,
     },
     onSubmit: async (values) => {
+      setIsLoading(true);
       try {
         await showToast({
           style: Toast.Style.Animated,
@@ -38,6 +41,8 @@ export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
         pop();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to update space" });
+      } finally {
+        setIsLoading(false);
       }
     },
     validation: {
@@ -48,6 +53,7 @@ export function UpdateSpaceForm({ space, mutateSpaces }: UpdateSpaceFormProps) {
   return (
     <Form
       navigationTitle="Edit Space"
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />

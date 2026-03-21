@@ -1,10 +1,13 @@
 ---
 title: Knex
-updated: 2020-06-03
+updated: 2020-06-03T00:00:00.000Z
 category: Databases
 intro: |
   [Knex](http://knexjs.org/) is an SQL query builder for Node.js.
   This guide targets v0.13.0.
+tech: knex
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

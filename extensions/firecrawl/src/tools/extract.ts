@@ -10,9 +10,9 @@ export type Input = {
 export default async function (input: Input) {
   const { urls, userPrompt } = input;
 
-  const extractResult = await firecrawl.extract(urls, {
+  const extractResult = await firecrawl.extract({
+    urls,
     prompt: userPrompt ?? "Extract the main content from the webpage",
-    // @ts-expect-error integration property is not defined in ExtractParams type
     integration: "raycast",
   });
 

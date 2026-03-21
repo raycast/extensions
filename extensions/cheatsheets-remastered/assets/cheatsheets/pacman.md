@@ -1,7 +1,10 @@
 ---
 title: Pacman
 category: Linux
-updated: 2018-07-07
+updated: 2018-07-07T00:00:00.000Z
+tech: pacman
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Commands

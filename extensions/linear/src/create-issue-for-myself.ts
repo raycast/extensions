@@ -1,5 +1,5 @@
 import { LinearClient } from "@linear/sdk";
-import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast } from "@raycast/api";
+import { Clipboard, closeMainWindow, getPreferenceValues, open, Toast, showToast, Keyboard } from "@raycast/api";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
 
 import { getTeams } from "./api/getTeams";
@@ -38,11 +38,31 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
       throw Error("No team found");
     }
 
+    let stateId: string | undefined;
+
+    if (preferences.preferredStatusName) {
+      const states = await linearClient.workflowStates({
+        filter: {
+          team: { id: { eq: teamId } },
+          name: { eq: preferences.preferredStatusName },
+        },
+      });
+
+      const state = states.nodes[0];
+
+      if (!state) {
+        throw Error(`Status "${preferences.preferredStatusName}" not found`);
+      }
+
+      stateId = state.id;
+    }
+
     const payload = await linearClient.createIssue({
       teamId: teamId,
       title: props.arguments.title,
       description: props.arguments.description,
       assigneeId: viewer.id,
+      stateId: stateId,
     });
 
     const issue = await payload.issue;
@@ -54,7 +74,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.title = `Created issue • ${issue.identifier}`;
     toast.primaryAction = {
       title: "Open Issue",
-      shortcut: { modifiers: ["cmd", "shift"], key: "o" },
+      shortcut: Keyboard.Shortcut.Common.OpenWith,
       onAction: async () => {
         await open(issue.url);
         await toast.hide();
@@ -63,7 +83,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
 
     toast.secondaryAction = {
       title: "Copy Issue ID",
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+      shortcut: Keyboard.Shortcut.Common.Copy,
       onAction: () => Clipboard.copy(issue.identifier),
     };
   } catch (e) {
@@ -72,7 +92,7 @@ const command = async (props: { arguments: Arguments.CreateIssueForMyself }) => 
     toast.message = e instanceof Error ? e.message : String(e);
     toast.primaryAction = {
       title: "Copy Error Log",
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
+      shortcut: Keyboard.Shortcut.Common.Copy,
       onAction: () => Clipboard.copy(e instanceof Error ? (e.stack ?? e.message) : String(e)),
     };
   }

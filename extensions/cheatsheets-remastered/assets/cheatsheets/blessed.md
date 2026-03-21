@@ -1,6 +1,9 @@
 ---
 title: Blessed
 category: JavaScript libraries
+tech: blessed
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Screen

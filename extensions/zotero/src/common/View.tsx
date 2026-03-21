@@ -57,7 +57,7 @@ function getURL(item: RefData): string {
   return `${
     item.url
       ? item.url
-      : `${item.attachment.url ? item.attachment.url : `${item.DOI ? "https://doi.org/" + item.DOI : ""}`}`
+      : `${item.attachment?.url ? item.attachment.url : `${item.DOI ? "https://doi.org/" + item.DOI : ""}`}`
   }`;
 }
 
@@ -157,8 +157,9 @@ function getItemDetail(item: RefData): string {
   const creators = item.creators;
   const publicationTitle = item.publicationTitle;
   const publicationDate = getItemPublicationDate(item);
+  const pdfKey = item.attachment?.key;
 
-  return `## [${title}](zotero://open-pdf/library/items/${item.attachment.key})
+  return `## ${pdfKey ? `[${title}](zotero://open-pdf/library/items/${pdfKey})` : title}
 
   ---
 
@@ -173,7 +174,7 @@ ${
     ? "**DOI:** [" + getItemDoi(item) + "](" + "https://doi.org/" + getItemDoi(item) + ")"
     : item.url
     ? "**URL:** [" + item.url + "](" + item.url + ")"
-    : item.attachment.url
+    : item.attachment?.url
     ? "**URL:** [" + item.attachment.url + "](" + item.attachment.url + ")"
     : ""
 }
@@ -181,6 +182,15 @@ ${
 ${item.abstractNote ? "**Abstract:** " + item.abstractNote : ""}
 
 ${item.tags ? "**Tagged With:** " + item.tags.join(", ") : ""}
+
+${
+  item.notes?.length
+    ? `**Notes:**\n${item.notes
+        .slice(0, 3)
+        .map((note) => `- ${note.length > 280 ? note.slice(0, 277).trimEnd() + "..." : note}`)
+        .join("\n")}`
+    : ""
+}
 
 `;
 }

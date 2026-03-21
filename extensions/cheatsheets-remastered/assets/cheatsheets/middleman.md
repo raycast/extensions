@@ -1,8 +1,12 @@
 ---
 title: Middleman 3
 category: JavaScript libraries
-tags: [Archived]
+tags:
+  - Archived
 archived: This guide is for Middleman v3.
+tech: middleman
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

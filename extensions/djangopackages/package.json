@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "djangopackages",
+  "title": "Django Packages",
+  "version": "1.0.0",
+  "description": "Search and explore djangopackages.org without leaving Raycast.",
+  "icon": "icon.png",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "author": "saadmk11",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Developer Tools"],
+  "keywords": [
+    "django",
+    "python",
+    "packages",
+    "search",
+    "djangopackages"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "commands": [
+    {
+      "name": "search-packages",
+      "title": "Search Django Packages",
+      "subtitle": "djangopackages.org",
+      "description": "Search Django packages, filter by category, and open related resources.",
+      "mode": "view",
+      "keywords": ["django", "packages", "python", "search", "djangopackages"]
+    }
+  ],
+  "permissions": [
+    {
+      "name": "network",
+      "reason": "The commands call the public djangopackages.org API for package metadata."
+    }
+  ]
+}

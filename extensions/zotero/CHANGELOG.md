@@ -1,5 +1,17 @@
 # Zotero Changelog
 
+## [Fixes] - 2026-03-02
+
+- Fix "No data found" error with Zotero 7+ when Better BibTeX is enabled: `better-bibtex.migrated` (renamed from `better-bibtex.sqlite` by Zotero 7's migration) is now recognised as a valid citation key source
+- Fix crash when `better-bibtex.sqlite` / `better-bibtex.migrated` are both absent (graceful fallback instead of unhandled ENOENT)
+- Fix detail panel crash for items without a PDF attachment (`item.attachment.key` was accessed unconditionally)
+- Improve database error messages to show the actual error instead of a generic "Corrupt sqlite db!" string
+
+## [Features] - 2025-12-08
+
+- Add search through the notes
+- Update "Open PDF" priority to select the "Primary" PDF (oldest attachment)
+
 ## [Fixes] - 2024-04-03
 
 - If there are no results to a search, display "No Results" rather than "Type something...".

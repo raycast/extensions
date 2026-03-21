@@ -1,7 +1,10 @@
 ---
 title: Find
 category: CLI
-updated: 2019-11-17
+updated: 2019-11-17T00:00:00.000Z
+tech: find
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

@@ -1,8 +1,14 @@
 ---
 title: Deku v1
 category: JavaScript libraries
-intro: |
-  Quick reference for [Deku](https://www.npmjs.com/package/deku), a minimal virtual DOM library. **Deprecated:** This is for Deku v1. See [deku](./deku) for a more updated cheatsheet.
+intro: >
+  Quick reference for [Deku](https://www.npmjs.com/package/deku), a minimal
+  virtual DOM library. **Deprecated:** This is for Deku v1. See [deku](./deku)
+  for a more updated cheatsheet.
+tech: deku
+status: active
+lastReviewed: '2025-09-05'
+version: '1.'
 ---
 
 ### Example

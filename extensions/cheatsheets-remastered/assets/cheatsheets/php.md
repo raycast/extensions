@@ -1,7 +1,11 @@
 ---
 title: PHP
 category: PHP
-prism_languages: [php]
+prism_languages:
+  - php
+tech: php
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Hello world

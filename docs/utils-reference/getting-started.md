@@ -16,6 +16,14 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.2.3
+
+- Fixed an issue with `useSQL` on Windows where the query would refuse to be executed because the database is locked
+
+### v2.2.2
+
+- Fix `useCachedState` to preserve Date objects more precisely.
+
 ### v2.2.1
 
 - Fix compiled file to actually make `useSQL` and `executeSQL` work on Windows.

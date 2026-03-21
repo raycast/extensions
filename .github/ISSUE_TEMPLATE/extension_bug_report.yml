@@ -2,6 +2,7 @@ name: 🧩 🐞 Extension Bug Report
 description: Report a reproducible bug or regression related to extension(s) published in the Store
 title: "[Extension Name] ..."
 labels: [extension, bug]
+type: "Bug"
 body:
   - type: markdown
     attributes:
@@ -30,12 +31,11 @@ body:
     validations:
       required: true
   - type: input
-    id: macos-version
+    id: os-version
     attributes:
-      label: macOS Version
+      label: OS Version
       description: |
-        Please provide the version of macOS you are using.
-        You can find it in the Apple menu > About This Mac.
+        Please provide the version of macOS or Windows you are using.
       placeholder: ex. 14.4.1
   - type: textarea
     id: description

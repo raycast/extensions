@@ -104,7 +104,7 @@ function getAvailableServers(content: ContentToCheck, folderPath?: string): Cont
 
   if (isFolder(content)) {
     const serversInFolders = Object.values(content).map((server) =>
-      getAvailableServers(server, folderPath ? folderPath + "/" + content["#text"] : content["#text"])
+      getAvailableServers(server, folderPath ? folderPath + "/" + content["#text"] : content["#text"]),
     );
     return ([] as (Server | Folder | undefined)[]).concat(...serversInFolders);
   }
@@ -119,11 +119,11 @@ function getAvailableServers(content: ContentToCheck, folderPath?: string): Cont
       return ([] as (Server | Folder | undefined)[]).concat(
         ...Object.values(content).map((pieceOfContent: Server | Folder | undefined) => {
           const serversInFolders = Object.values(pieceOfContent as Server | Folder).map((contentToCheck) =>
-            getAvailableServers(contentToCheck, (pieceOfContent as Folder)["#text"])
+            getAvailableServers(contentToCheck, (pieceOfContent as Folder)["#text"]),
           );
 
           return ([] as (Server | Folder | undefined)[]).concat(...serversInFolders);
-        })
+        }),
       );
     }
   }
@@ -141,7 +141,7 @@ export async function getServers(location: "sitemanager" | "recentservers"): Pro
     const xmlFileContent = parser.parse(
       await readFile(homedir() + `/.config/filezilla/${location}.xml`, {
         flag: "r",
-      })
+      }),
     );
 
     if (typeof xmlFileContent.FileZilla3 !== "string" && !xmlFileContent.FileZilla3)

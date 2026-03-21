@@ -84,4 +84,46 @@ function formatTables(markdown: string): string {
     .join("\n");
 }
 
-export { getSheets, stripFrontmatter, stripTemplateTags, formatTables };
+/*
+  Converts HTML elements to a more readable format for Raycast.
+
+  Handles:
+  * <details> and <summary> elements - converts to collapsible sections
+  * <code> elements - preserves inline code formatting
+  * Other HTML tags - strips tags but preserves content
+*/
+function formatHtmlElements(markdown: string): string {
+  let result = markdown;
+
+  // Handle <details> and <summary> elements
+  result = result.replace(
+    /<details>\s*<summary[^>]*>(.*?)<\/summary>\s*(.*?)<\/details>/gs,
+    (match, summary, content) => {
+      // Clean up the summary text (remove HTML tags, preserve formatting)
+      const cleanSummary = summary
+        .replace(/<[^>]*>/g, "") // Remove HTML tags
+        .replace(/\*\*(.*?)\*\*/g, "**$1**") // Preserve bold
+        .replace(/`(.*?)`/g, "`$1`") // Preserve inline code
+        .trim();
+
+      // Clean up the content (remove HTML tags, preserve formatting)
+      const cleanContent = content
+        .replace(/<[^>]*>/g, "") // Remove HTML tags
+        .replace(/\*\*(.*?)\*\*/g, "**$1**") // Preserve bold
+        .replace(/`(.*?)`/g, "`$1`") // Preserve inline code
+        .trim();
+
+      return `**${cleanSummary}**\n\n${cleanContent}`;
+    },
+  );
+
+  // Handle standalone <code> elements
+  result = result.replace(/<code[^>]*>(.*?)<\/code>/g, "`$1`");
+
+  // Handle other HTML tags (strip them but preserve content)
+  result = result.replace(/<[^>]*>/g, "");
+
+  return result;
+}
+
+export { getSheets, stripFrontmatter, stripTemplateTags, formatTables, formatHtmlElements };

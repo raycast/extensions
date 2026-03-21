@@ -1,5 +1,20 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2026-02-25
+
+- Prevent crashes when `Open with` app preferences are missing or invalid.
+- Guard quicklink and open actions against undefined application bundle IDs.
+- Resolves: https://github.com/raycast/extensions/issues/25492
+
+## [Enhancement] - 2026-01-19
+
+- Added "Create Quicklink" action to GitRepoListItem component
+- Added "shkreios" to contributors list
+
+## [Bug Fix] - 2025-09-10
+
+- Fixes determination of remote URLs for worktrees.
+
 ## [Bug Fix] - 2025-05-28
 
 - Fixes an issue where if a directory path contained ".git", it would not be properly parsed. A common case is the special GitHub ".github" repository.

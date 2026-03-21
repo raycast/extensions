@@ -1,6 +1,9 @@
 ---
 title: Flynn
 category: Devops
+tech: flynn
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### General workflow

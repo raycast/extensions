@@ -1,6 +1,9 @@
 ---
 title: Ansible
 category: Ansible
+tech: ansible
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 {% raw %}

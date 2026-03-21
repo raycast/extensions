@@ -29,7 +29,8 @@ ${Object.entries(obj)
   .join(`\n`)}`;
 }
 
-export const onError = async (error: Error) => {
+export const onError = async (e: unknown) => {
+  const error = e as Error;
   const err = error.message as string | common.OciError;
   const title = "ERROR";
   const message = err instanceof common.OciError ? err.message : err;

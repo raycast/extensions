@@ -1,4 +1,5 @@
-import OpenAI from "openai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { generateText } from "ai";
 import { showFailureToast } from "@raycast/utils";
 
 export const FIX_FACT_TEXT_PROMPT = `
@@ -61,34 +62,45 @@ Output: "Hey! Yes, everything went perfectly. I've done a few of these things we
 # TEXT
 `;
 
-export async function processText(inputText: string, apiKey: string): Promise<string> {
+export async function processText(inputText: string, apiKey: string, modelId: string): Promise<string> {
   if (!inputText?.trim()) {
     await showFailureToast("No text to process.");
     throw new Error("No text to process.");
   }
 
-  const openai = new OpenAI({ apiKey });
-
   const currentDate = new Date().toLocaleString();
   const systemPrompt = FIX_FACT_TEXT_PROMPT.replace("{currentDate}", currentDate);
 
+  // OpenAI provider instance with the user's API key
+  const openaiProvider = createOpenAI({
+    apiKey: apiKey,
+  });
+
+  // in case of gpt5 models, we need to set the reasoning effort to low for faster responses
+  const isGPT5Model = modelId.startsWith("gpt-5");
+  const providerOptions = isGPT5Model
+    ? {
+        openai: {
+          reasoningEffort: "low" as const,
+        },
+      }
+    : undefined;
+
   try {
-    const { choices } = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: systemPrompt },
-        { role: "user", content: inputText },
-      ],
+    const { text } = await generateText({
+      model: openaiProvider(modelId),
+      system: systemPrompt,
+      prompt: inputText,
+      ...(providerOptions && { providerOptions }),
     });
 
-    const result = choices?.[0]?.message?.content?.trim();
-    if (!result) {
-      await showFailureToast("Failed to get a response from OpenAI.");
-      throw new Error("Failed to get a response from OpenAI.");
+    if (!text?.trim()) {
+      await showFailureToast("Failed to get a response from AI model.");
+      throw new Error("Failed to get a response from AI model.");
     }
-    return result;
+    return text;
   } catch (error) {
-    console.error("OpenAI API call failed:", error);
+    console.error("AI SDK API call failed:", error);
     await showFailureToast("An error occurred while processing the text.");
     throw error;
   }

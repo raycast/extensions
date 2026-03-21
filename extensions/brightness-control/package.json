@@ -5,6 +5,9 @@
   "description": "Quickly controls the brightness levels of your display",
   "icon": "command-icon.png",
   "author": "cali",
+  "contributors": [
+    "pavzagor"
+  ],
   "categories": [
     "System"
   ],
@@ -23,10 +26,32 @@
       "description": "Decreases the brightness by 10% of your display",
       "mode": "no-view",
       "icon": "brightness-down.png"
+    },
+    {
+      "name": "set-brightness",
+      "title": "Set Brightness",
+      "description": "Set the brightness level of your display using Lunar",
+      "mode": "no-view",
+      "icon": "command-icon.png",
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "Brightness (1-100)",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "max-brightness",
+      "title": "Max Brightness",
+      "description": "Instantly set brightness to 100% on the current display",
+      "mode": "no-view",
+      "icon": "command-icon.png"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.38.2",
+    "@raycast/api": "^1.86.2",
     "run-applescript": "^6.0.0"
   },
   "devDependencies": {

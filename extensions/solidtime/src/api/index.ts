@@ -5,6 +5,9 @@
 
 import type { ApiOf, ZodiosBodyByAlias, ZodiosQueryParamsByAlias, ZodiosResponseByAlias } from "@zodios/core";
 import { createApiClient } from "./openapi.json.client";
+import { usePreferences } from "../utils/preferences";
+
+const { url } = usePreferences();
 
 export type SolidTimeApi = ApiOf<typeof api>;
 
@@ -103,7 +106,7 @@ export type ApiTokenIndexResponse = ZodiosResponseByAlias<SolidTimeApi, "getApiT
 export type CreateApiTokenBody = ZodiosBodyByAlias<SolidTimeApi, "createApiToken">;
 export type ApiToken = ApiTokenIndexResponse["data"][0];
 
-const api = createApiClient("https://app.solidtime.io/api", {
+const api = createApiClient(url, {
   validate: "none",
 });
 

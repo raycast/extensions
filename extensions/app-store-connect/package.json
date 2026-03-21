@@ -54,13 +54,12 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
+    "@types/node": "22.13.10",
     "@types/node-fetch": "^2.6.11",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
-    "react-devtools": "^5.2.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

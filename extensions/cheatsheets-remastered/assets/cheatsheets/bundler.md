@@ -1,6 +1,9 @@
 ---
 title: Bundler
 category: Ruby
+tech: bundler
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Commands

@@ -1,6 +1,9 @@
 ---
 title: PostgreSQL
 category: Databases
+tech: postgresql
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Console

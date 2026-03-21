@@ -1,32 +1,31 @@
 import { ActionPanel, Action, List, getPreferenceValues, showToast, Toast, Icon, Image } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
 import fs from "fs/promises";
+import path from "path";
 import { useRef } from "react";
 import YAML from "yaml";
 import fetch from "cross-fetch";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
   const { isLoading, data } = useCachedPromise(
     parseFetchYamlResponse,
     [getPreferenceValues()["static-mark-yaml-url"]],
-    {
-      abortable,
-    }
+    { abortable },
   );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search bookmarks...">
       <List.Section title="Results" subtitle={data?.length + ""}>
-        {data?.map((searchResult, index) => (
-          <SearchListItem key={index} searchResult={searchResult} />
+        {data?.map((searchResult) => (
+          <SearchListItem key={searchResult.url} searchResult={searchResult} />
         ))}
       </List.Section>
     </List>
   );
 }
 
-function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
+function SearchListItem({ searchResult }: { readonly searchResult: LinkResult }) {
   const parents = [{ text: searchResult.parents.join(" > "), icon: Icon.Folder }];
 
   return (
@@ -48,24 +47,70 @@ function SearchListItem({ searchResult }: { searchResult: LinkResult }) {
   );
 }
 
+async function parseYamlFromUrl(url: string): Promise<LinkResult[]> {
+  const bookmarksUrlRes = await fetch(url);
+  if (bookmarksUrlRes.status === 404) throw new Error("YAML file not found");
+
+  const allBookmarks = await bookmarksUrlRes.text();
+  const json = YAML.parse(allBookmarks);
+  return flattenBookmarks({ json, bookmarksList: [], parents: [] });
+}
+
+async function parseYamlFromFile(filePath: string): Promise<LinkResult[]> {
+  const allBookmarks = await fs.readFile(filePath, "utf8");
+  const json = YAML.parse(allBookmarks);
+  return flattenBookmarks({ json, bookmarksList: [], parents: [] });
+}
+
+async function parseYamlFromDirectory(dirPath: string): Promise<LinkResult[]> {
+  const files = await fs.readdir(dirPath);
+  const yamlFiles = files.filter((file) => file.endsWith(".yml") || file.endsWith(".yaml"));
+
+  if (yamlFiles.length === 0) {
+    throw new Error("No YAML files found in the specified directory");
+  }
+
+  const linkResults: LinkResult[] = [];
+
+  for (const file of yamlFiles) {
+    const filePath = path.join(dirPath, file);
+    try {
+      const content = await fs.readFile(filePath, "utf8");
+      const json = YAML.parse(content);
+
+      const filename = path.basename(file, path.extname(file));
+      const fileBookmarks = flattenBookmarks({
+        json,
+        bookmarksList: [],
+        parents: [filename],
+      });
+
+      linkResults.push(...fileBookmarks);
+    } catch (error) {
+      console.warn(`Failed to read or parse file ${file}:`, error);
+    }
+  }
+
+  if (linkResults.length === 0) {
+    throw new Error("No valid YAML files could be read from the directory");
+  }
+
+  return linkResults;
+}
+
 async function parseFetchYamlResponse(url: string) {
   try {
-    let bookmarks = "";
-
     if (url.startsWith("http")) {
-      const bookmarksUrlRes = await fetch(url);
-      if (bookmarksUrlRes.status === 404) throw new Error("YAML file not found");
-
-      bookmarks = await bookmarksUrlRes.text();
+      return await parseYamlFromUrl(url);
     } else {
-      bookmarks = await fs.readFile(url, "utf8");
+      const stats = await fs.stat(url);
+
+      if (stats.isDirectory()) {
+        return await parseYamlFromDirectory(url);
+      } else {
+        return await parseYamlFromFile(url);
+      }
     }
-
-    const json = YAML.parse(bookmarks);
-
-    const linkResults = flattenBookmarks({ json, bookmarksList: [], parents: [] });
-
-    return linkResults;
   } catch (error) {
     showToast({
       style: Toast.Style.Failure,
@@ -89,7 +134,11 @@ function getBookmarkUrl(value: unknown): string[] {
   if (typeof value == "string") {
     urls = [value];
   } else if (Array.isArray(value)) {
-    value.forEach((item) => isValidURL(item) && urls.push(item));
+    value.forEach((item) => {
+      if (isValidURL(item)) {
+        urls.push(item);
+      }
+    });
   }
 
   return urls;
@@ -101,11 +150,11 @@ function isValidBookmark(value: unknown): boolean {
 }
 
 function getBookmarkDescription(value: unknown): string {
-  let description = "";
-
   if (typeof value == "string") {
-    description = "";
-  } else if (Array.isArray(value)) {
+    return "";
+  }
+
+  if (Array.isArray(value)) {
     const descriptionsArray: string[] = [];
     value.forEach((item) => {
       if (typeof item === "string" && !isValidBookmark(item)) {
@@ -113,10 +162,10 @@ function getBookmarkDescription(value: unknown): string {
       }
     });
 
-    description = descriptionsArray.join(" - ").trim();
+    return descriptionsArray.join(" - ").trim();
   }
 
-  return description;
+  return "";
 }
 
 function flattenBookmarks({ json, bookmarksList, parents }: flattenBookmarksType) {
@@ -144,12 +193,14 @@ function flattenBookmarks({ json, bookmarksList, parents }: flattenBookmarksType
         const bookmarkChildren: unknown[] = [];
 
         value.forEach((item) => {
-          typeof item === "object" && bookmarkChildren.push(item);
+          if (typeof item === "object") {
+            bookmarkChildren.push(item);
+          }
         });
 
         const currentParents = [...parents, key];
 
-        flattenBookmarks({ json: bookmarkChildren as unknown[], bookmarksList, parents: currentParents });
+        flattenBookmarks({ json: bookmarkChildren, bookmarksList, parents: currentParents });
       }
     } else if (typeof value !== "string") {
       const currentParents = isValidParent(key) ? [...parents, key] : [...parents];

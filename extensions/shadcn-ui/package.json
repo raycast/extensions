@@ -9,7 +9,8 @@
     "williamwelsh",
     "Olivier-OG",
     "ridemountainpig",
-    "siddharth-2382"
+    "siddharth-2382",
+    "1weiho"
   ],
   "categories": [
     "Documentation",
@@ -47,25 +48,32 @@
       "subtitle": "shadcn/ui",
       "description": "Search shadcn/ui examples",
       "mode": "view"
+    },
+    {
+      "name": "search-registries",
+      "title": "Search Registries",
+      "subtitle": "shadcn/ui",
+      "description": "Search shadcn/ui registries",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@octokit/rest": "^19.0.11",
-    "@octokit/types": "^9.2.3",
-    "@raycast/api": "^1.52.1",
-    "@raycast/utils": "^1.4.8",
-    "js-yaml": "^4.1.0",
-    "node-fetch": "^3.3.1",
-    "octokit": "^2.0.19"
+    "@octokit/rest": "^22.0.1",
+    "@octokit/types": "^16.0.0",
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.2",
+    "js-yaml": "^4.1.1",
+    "node-fetch": "^3.3.2",
+    "octokit": "^5.0.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/js-yaml": "^4.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "25.3.3",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -73,5 +81,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,4 +1,4 @@
-export type Language = "en" | "zh";
+export type Language = Preferences["language"];
 
 export const translations = {
   en: {

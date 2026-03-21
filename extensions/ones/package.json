@@ -146,7 +146,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.39.3",
-    "axios": "^0.24.0",
+    "axios": "^0.30.3",
     "moment": "^2.29.1"
   },
   "devDependencies": {
@@ -156,7 +156,6 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

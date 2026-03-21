@@ -5,6 +5,9 @@
   "description": "Raycast extension for managing Rize.io sessions (start, stop, extend).",
   "icon": "black-orb.png",
   "author": "sdquinn",
+  "contributors": [
+    "devneill"
+  ],
   "categories": [
     "Productivity"
   ],

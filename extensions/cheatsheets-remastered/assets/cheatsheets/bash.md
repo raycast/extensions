@@ -1,8 +1,9 @@
 ---
 title: Bash scripting
 category: CLI
-tags: [Featured]
-updated: 2020-07-05
+tags:
+  - Featured
+updated: 2020-07-05T00:00:00.000Z
 keywords:
   - Variables
   - Functions
@@ -11,6 +12,9 @@ keywords:
   - Loops
   - Conditional execution
   - Command substitution
+tech: bash
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

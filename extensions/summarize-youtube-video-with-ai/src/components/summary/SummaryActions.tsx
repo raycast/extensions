@@ -23,7 +23,7 @@ export default function SummaryActions({
     <ActionPanel title="Video Actions">
       <Action.Push
         icon={Icon.QuestionMark}
-        title="Ask Follow-up Question"
+        title="Ask Follow-Up Question"
         target={<FollowUpList transcript={transcript} questions={questions} onQuestionsUpdate={onQuestionsUpdate} />}
       />
       <Action.CopyToClipboard title="Copy Summary" content={summary ?? ""} />

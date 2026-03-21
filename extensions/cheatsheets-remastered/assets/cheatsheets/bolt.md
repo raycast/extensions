@@ -1,15 +1,18 @@
 ---
 title: Bolt Quickstart
 category: Bolt
-updated: 2018-12-25
+updated: 2018-12-25T00:00:00.000Z
 authors:
   - github: lucywyman
 keywords:
-    - Puppet
-    - tasks
-    - modules
+  - Puppet
+  - tasks
+  - modules
 description: |
   A quick guide to getting started writing Bolt tasks
+tech: bolt
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Install Bolt

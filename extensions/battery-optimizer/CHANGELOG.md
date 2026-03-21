@@ -1,5 +1,14 @@
 # Battery Optimizer Changelog
 
+## [Feature] - 2026-02-27
+
+Enable "Get Battery Threshold" command for `batt` users
+
+- Remove `bclm`-only guard so the command works regardless of selected tool
+- Fix empty output for the `batt status` command by redirecting stderr to stdout
+- Add parsing for current `batt status` output formats (`Upper limit` and `Charge limit`)
+- Rename command from "Get Battery Threshold (bclm)" to "Get Battery Threshold"
+
 ## [Feature] - 2025-06-04
 
 Add support for BATT in addition to BCLM for macOS 15+ compatibility

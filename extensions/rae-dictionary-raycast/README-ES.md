@@ -11,9 +11,9 @@ Busca palabras en el diccionario de la Real Academia Española directamente desd
 
 ## Comandos
 
-- `Query Word In RAE`: Busca una palabra en el diccionario de la RAE
-- `Query Word Of The Day In RAE`: Muestra la palabra del día
-- `Query Random Word In RAE`: Muestra una palabra aleatoria del diccionario
+- `Query RAE word`: Busca una palabra en el diccionario de la RAE
+- `Query RAE word of the day`: Muestra la palabra del día
+- `Query random RAE word`: Muestra una palabra aleatoria del diccionario
 
 ## Configuración
 

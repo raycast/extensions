@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 const WINDOW_VAR_NAME = "commandWindow";
 

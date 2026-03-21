@@ -1,5 +1,26 @@
 # Arc Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Fixed Arc duplicate windows] - 2026-03-04
+
+- Fixed duplicate window creation when launching Arc Browser from a stopped state
+- Improved window management logic for selectTab and selectSpace commands
+
+## [Fixes] - 2026-02-01
+
+- Fixed an issue where selecting a tab would not open it due to a timing issue with closing the Raycast window.
+
+## [New Features] - 2025-10-27
+
+- Added `Search Space Tabs` command to search and select tabs in the current space only.
+
+## [Update] - 2025-09-29
+
+- Added support for Zen Browser, Dia, and Perplexity Comet as browser options in the `Open in Other Browser` command.
+
 ## [Improvements] - 2025-08-04
 
 - Added preferences to order the tabs in the search results for the `Search Arc` command.
@@ -19,7 +40,7 @@
 
 ## [Suggest opening URL] - 2025-03-31
 
-When searching for a URL, offer to open the URL 
+When searching for a URL, offer to open the URL
 
 ## [✨ AI Enhancements] - 2025-02-21
 

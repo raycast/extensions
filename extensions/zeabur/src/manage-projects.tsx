@@ -1,13 +1,29 @@
 import { useState, useEffect, useMemo } from "react";
-import { List, ActionPanel, Action, Icon, Image, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Image,
+  confirmAlert,
+  showToast,
+  Toast,
+  Alert,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { ProjectInfo } from "./type";
-import { getProjects, deleteProject } from "./utils/zeabur-graphql";
+import { getProjects, getProjectUsage, deleteProject } from "./utils/zeabur-graphql";
 import ProjectServices from "./components/project-services";
+import ZeaburTokenUndefined from "./components/zeabur-token-undefined";
 
 export default function Command() {
+  const preferences = getPreferenceValues();
+  const zeaburToken = preferences.zeaburToken;
+
   const [isLoading, setIsLoading] = useState(true);
   const [projects, setProjects] = useState<ProjectInfo[]>([]);
+  const [projectUsages, setProjectUsages] = useState<{ [key: string]: string }>({});
   const [isReloading, setIsReloading] = useState(false);
   const [sortBy, setSortBy] = useState("");
 
@@ -16,14 +32,35 @@ export default function Command() {
       try {
         const projects = await getProjects();
         setProjects(projects);
+
+        const usages: { [key: string]: string } = {};
+        await Promise.all(
+          projects.map(async (project) => {
+            if (project.region.id.includes("server")) {
+              usages[project._id] = "Free";
+            } else {
+              try {
+                const usage = await getProjectUsage(project._id);
+                usages[project._id] = "$" + usage.usages.reduce((acc, curr) => acc + curr.usage, 0).toFixed(2);
+              } catch {
+                usages[project._id] = "$0";
+              }
+            }
+          }),
+        );
+        setProjectUsages(usages);
+
         setIsLoading(false);
-      } catch (error) {
+      } catch {
         showFailureToast("Failed to fetch projects");
         setIsLoading(false);
       }
     };
-    fetchProjects();
-  }, [isReloading]);
+
+    if (zeaburToken !== undefined && zeaburToken !== "") {
+      fetchProjects();
+    }
+  }, [isReloading, zeaburToken]);
 
   const sortedProjects = useMemo(() => {
     if (sortBy === "") {
@@ -38,6 +75,10 @@ export default function Command() {
       return 0;
     });
   }, [sortBy, projects]);
+
+  if (zeaburToken === undefined || zeaburToken === "") {
+    return <ZeaburTokenUndefined />;
+  }
 
   return (
     <List
@@ -56,11 +97,19 @@ export default function Command() {
             key={project._id}
             title={project.name}
             icon={{
-              source: project.iconURL == "" ? "extension-icon.png" : project.iconURL,
+              source: project.iconURL === "" ? "extension-icon.png" : project.iconURL,
               fallback: "extension-icon.png",
               mask: Image.Mask.RoundedRectangle,
             }}
             accessories={[
+              ...(project.region.providerInfo?.code && projectUsages[project._id] !== undefined
+                ? [
+                    {
+                      tag: projectUsages[project._id],
+                      tooltip: "Usage",
+                    },
+                  ]
+                : []),
               ...(project.region.providerInfo?.code
                 ? [
                     {
@@ -127,7 +176,7 @@ export default function Command() {
                             title: "Failed to delete project",
                           });
                         }
-                      } catch (error) {
+                      } catch {
                         await showToast({
                           style: Toast.Style.Failure,
                           title: "Failed to delete project",

@@ -251,19 +251,29 @@ export default function TaskActions({
           target={<TaskEdit task={task} />}
         />
 
-        <Action.PickDate
+        <ActionPanel.Submenu
           title="Schedule Task"
-          type={Action.PickDate.Type.DateTime}
+          icon={Icon.Calendar}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          onChange={(date) =>
-            updateTask({
-              id: task.id,
-              due: date
-                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                : { string: "no date" },
-            })
-          }
-        />
+        >
+          <Action.PickDate
+            title="Pick Date"
+            type={Action.PickDate.Type.DateTime}
+            onChange={(date) =>
+              updateTask({
+                id: task.id,
+                due: date
+                  ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                  : { string: "no date" },
+              })
+            }
+          />
+          <Action
+            title="Set Due to Every Day"
+            icon={Icon.Repeat}
+            onAction={() => updateTask({ id: task.id, due: { string: "every day" } })}
+          />
+        </ActionPanel.Submenu>
 
         {data?.user?.premium_status !== "not_premium" ? (
           <Action.PickDate

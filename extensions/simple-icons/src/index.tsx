@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
+import process from "node:process";
 import { setTimeout } from "node:timers/promises";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Detail,
   Grid,
   Icon,
@@ -11,7 +11,6 @@ import {
   Toast,
   confirmAlert,
   open,
-  showHUD,
   showToast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
@@ -20,16 +19,19 @@ import { getIconSlug } from "./vender/simple-icons-sdk.js";
 import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
 import {
   cacheAssetPack,
+  copyOrPaste,
   defaultDetailAction,
   displaySimpleIconsFontFeatures,
   enableAiSearch,
   getAliases,
   getRelativeFileLink,
   loadCachedJson,
+  shuffleOnStart,
   useSearch,
   useVersion,
 } from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
+import { arrayToShuffled } from "array-shuffle";
 
 const itemDisplayColumns = {
   small: 8,
@@ -44,44 +46,43 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   const { aiIsLoading, searchResult, setSearchString } = useSearch({ icons });
   const version = useVersion({ launchContext });
 
-  const fetchIcons = async (version: string) => {
-    setIsLoading(true);
-    setIcons([]);
-
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "Loading Icons",
-    });
-
-    await cacheAssetPack(version).catch(async (error) => {
-      await showFailureToast(error, { title: "Failed to cache asset pack" });
-      await setTimeout(1200);
-    });
-    const json = await loadCachedJson(version).catch(() => {
-      return [];
-    });
-    const icons = json.map((icon) => ({
-      ...icon,
-      slug: getIconSlug(icon),
-    }));
-
-    setIcons(icons);
-    setIsLoading(false);
-
-    if (icons.length > 0) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: `${icons.length} icons loaded`,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Unable to load icons",
-      });
-    }
-  };
-
   useEffect(() => {
+    const fetchIcons = async (version: string) => {
+      setIsLoading(true);
+      setIcons([]);
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Icons",
+      });
+
+      await cacheAssetPack(version).catch(async (error) => {
+        await showFailureToast(error, { title: "Failed to cache asset pack" });
+        await setTimeout(1200);
+      });
+      const json = await loadCachedJson(version).catch(() => {
+        return [];
+      });
+      const icons = json.map((icon) => ({
+        ...icon,
+        slug: getIconSlug(icon),
+      }));
+
+      setIcons(shuffleOnStart ? arrayToShuffled(icons) : icons);
+      setIsLoading(false);
+
+      if (icons.length > 0) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${icons.length} icons loaded`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Unable to load icons",
+        });
+      }
+    };
     if (version) {
       fetchIcons(version).catch((error) => {
         showFailureToast(error, { title: "Failed to fetch icons" });
@@ -139,7 +140,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                   message:
                     "This feature requires Raycast Pro subscription. Do you want to open Raycast Pro page? (You can hide this Pro feature in preferences)",
                 });
-                if (confirmed) open("https://raycast.com/pro");
+                if (confirmed) open("https://raycast.com/pro?via=litomore");
               }}
             />
           </ActionPanel>
@@ -172,17 +173,19 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                       title="See Detail"
                       target={
                         <Detail
-                          markdown={`<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`}
+                          markdown={
+                            process.platform === "darwin"
+                              ? `<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`
+                              : // [TODO] Windows does not support tinting images via URL parameters
+                                `<img src="${fileLink}?raycast-width=325&raycast-height=325" />`
+                          }
                           navigationTitle={icon.title}
                           metadata={
                             <Detail.Metadata>
                               <Detail.Metadata.TagList title="Title">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.title}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.title);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.title)}
                                 />
                               </Detail.Metadata.TagList>
                               {aliases.length > 0 && (
@@ -191,10 +194,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                                     <Detail.Metadata.TagList.Item
                                       key={alias}
                                       text={alias}
-                                      onAction={async () => {
-                                        Clipboard.copy(alias);
-                                        await showHUD("Copied to Clipboard");
-                                      }}
+                                      onAction={() => copyOrPaste(alias)}
                                     />
                                   ))}
                                 </Detail.Metadata.TagList>
@@ -202,20 +202,14 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                               <Detail.Metadata.TagList title="Slug">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.slug}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.slug);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.slug)}
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.TagList title="Brand color">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.hex}
                                   color={`#${icon.hex}`}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.hex);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.hex)}
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.Separator />

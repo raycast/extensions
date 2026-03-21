@@ -1,20 +1,23 @@
 import { Action, ActionPanel, Form, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import fs from "fs";
 import QRCode from "qrcode";
 import { useState } from "react";
-import { generateQRCode, getQRCodePath, QRCodeView } from "./utils";
-import { FormValidation, useForm, showFailureToast } from "@raycast/utils";
-import fs from "fs";
-import { QR_OPTIONS, SVG_OPTIONS, QR_OPTIONS_PREVIEW } from "./config";
+import { QR_OPTIONS, QR_OPTIONS_PREVIEW, SVG_OPTIONS } from "./config";
+import { copyQRCodeToClipboard, generateQRCode, getQRCodePath, QRCodeView } from "./utils";
+
+type FormatValue = "png" | "svg" | "png-bg";
 
 interface FormValues {
   url: string;
   inline: boolean;
-  format: "png" | "svg" | "png-bg";
+  copy?: boolean;
+  format: FormatValue;
 }
 
 interface Preferences {
   Index: {
-    primaryAction: "save" | "inline";
+    primaryAction: "save" | "inline" | "copy";
   };
 }
 
@@ -42,6 +45,8 @@ export default function Command() {
             message: error instanceof Error ? error.message : "Failed to generate QR code",
           });
         }
+      } else if (values.copy) {
+        await copyQRCodeToClipboard({ url: values.url, format: values.format });
       } else {
         try {
           const path = getQRCodePath(values.url, "png");
@@ -73,9 +78,7 @@ export default function Command() {
     },
     validation: {
       url: FormValidation.Required,
-    },
-    initialValues: {
-      format: "png",
+      format: FormValidation.Required,
     },
   });
 
@@ -98,21 +101,44 @@ export default function Command() {
       />
     );
 
-    return primaryAction === "save" ? (
-      <>
-        {saveAction}
-        {showAction}
-      </>
-    ) : (
-      <>
-        {showAction}
-        {saveAction}
-      </>
+    const copyAction = (
+      <Action.SubmitForm
+        title="Generate and Copy to Clipboard"
+        onSubmit={(values) => {
+          handleSubmit({ ...values, inline: false, copy: true } as FormValues);
+        }}
+      />
     );
+
+    if (primaryAction === "save") {
+      return (
+        <>
+          {saveAction}
+          {showAction}
+          {copyAction}
+        </>
+      );
+    } else if (primaryAction === "copy") {
+      return (
+        <>
+          {copyAction}
+          {saveAction}
+          {showAction}
+        </>
+      );
+    } else {
+      return (
+        <>
+          {showAction}
+          {saveAction}
+          {copyAction}
+        </>
+      );
+    }
   };
 
   if (qrData) {
-    return <QRCodeView qrData={qrData} height={350} />;
+    return <QRCodeView qrData={qrData} height={350} onBack={() => setQrData(undefined)} />;
   }
 
   return (
@@ -121,8 +147,11 @@ export default function Command() {
       <Form.Dropdown
         id="format"
         title="Format"
+        storeValue
         value={itemProps.format.value}
-        onChange={(value) => itemProps.format.onChange?.(value as "png" | "svg" | "png-bg")}
+        onChange={(value) => {
+          itemProps.format.onChange?.(value as FormatValue);
+        }}
       >
         <Form.Dropdown.Item value="png" title="PNG (Transparent)" />
         <Form.Dropdown.Item value="png-bg" title="PNG (w/BG)" />

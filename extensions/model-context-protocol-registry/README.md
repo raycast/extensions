@@ -30,6 +30,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 
 | Title | Description |
 |-------|-------------|
+| [Atono](https://docs.atono.io/docs/mcp-server-for-atono/) | AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands. |
 | [Brave Search](https://github.com/modelcontextprotocol/servers/tree/HEAD/src/brave-search) | A Model Context Protocol server for Brave Search. This server provides tools to read, search, and manipulate Brave Search repositories via Large Language Models. |
 | [Chroma](https://github.com/chroma-core/chroma-mcp) | This server provides data retrieval capabilities powered by Chroma, enabling AI models to create collections over generated data and user inputs, and retrieve that data using vector search, full text search, metadata filtering, and more. |
 | [Context 7](https://github.com/upstash/context7) | Context7 MCP pulls up-to-date, version-specific documentation and code examples straight from the source — and places them directly into your prompt. |
@@ -47,6 +48,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Paddle](https://github.com/PaddleHQ/paddle-mcp-server) | Paddle Billing is the developer-first merchant of record. We take care of payments, tax, subscriptions, and metrics with one unified API that does it all. This is a Model Context Protocol (MCP) server that provides tools for interacting with the Paddle API. |
 | [Perplexity](https://github.com/ppl-ai/modelcontextprotocol) | An MCP server implementation that integrates the Sonar API to provide Claude with unparalleled real-time, web-wide research. |
 | [Prisma](https://www.prisma.io/docs/postgres/integrations/mcp-server) | An MCP server that provisions and manages a Prisma Postgres database for your apps, so you don’t have to spend time fiddling with db infrastructure. |
+| [Sanity](https://www.sanity.io/docs/ai/mcp-server) | Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules. |
 | [Sentry](https://mcp.sentry.dev/) | This service provides a Model Context Provider (MCP) for interacting with Sentry's API. |
 | [Shopify Dev](https://github.com/Shopify/dev-mcp) | MCP server that interacts with Shopify Dev. This protocol supports various tools to interact with different Shopify APIs. |
 | [Slack](https://github.com/modelcontextprotocol/servers/tree/main/src/slack) | This service provides a Model Context Provider (MCP) for interacting with Slack's API. |
@@ -64,13 +66,14 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Polar](https://docs.polar.sh/integrate/mcp) | Extend the capabilities of your AI Agents with Polar as MCP Server |
 | [ElevenLabs](https://github.com/elevenlabs/elevenlabs-mcp) | Official ElevenLabs Model Context Protocol (MCP) server that enables interaction with powerful Text to Speech and audio processing APIs. This server allows MCP clients like Claude Desktop, Cursor, Windsurf, OpenAI Agents and others to generate speech, clone voices, transcribe audio, and more. |
 | [Apify](https://mcp.apify.com) | A Model Context Protocol (MCP) server for Apify enabling AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more. |
-| [Nuxt](https://mcp.nuxt.com/) | Access Nuxt documentation and modules with the public Nuxt MCP server |
+| [Nuxt](https://nuxt.com/mcp) | Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server |
 | [Zeabur](https://zeabur.com/docs/en-US/mcp) | Zeabur provides an official Model Context Protocol (MCP) server that allows you to manage and deploy your Zeabur projects. |
 | [Grafana](https://github.com/grafana/mcp-grafana) | Official Grafana MCP server that provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools. |
-| [Anytype](https://github.com/anyproto/anytype-mcp) | A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base. |
+| [Anytype](https://github.com/anyproto/anytype-mcp) | An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language. |
 | [Gen-PDF](https://gen-pdf.com) | MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more. |
 | [Linear](https://linear.app/docs/mcp) | The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments. |
 | [Rube](https://rube.composio.dev) |  Rube is a Model‑Context‑Protocol (MCP) server built on the Composio integration platform. It connects AI chat tools to more than 500 business and productivity applications – things like Gmail, Slack, Notion, GitHub, Linear, Airtable, and many others. |
+| [RouteMesh](https://github.com/routemesh/routemesh-mcp) | Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover. |
 
 ### Community MCP Servers
 

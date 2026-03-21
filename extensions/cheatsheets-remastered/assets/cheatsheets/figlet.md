@@ -1,42 +1,14 @@
 ---
 title: Figlet
-updated: 2018-06-14
-introduction: |
-  [Figlet] renders text as ASCII art. Here's a list of Figlet fonts for Figlet 2.2.5.
-  [Figlet]: http://www.figlet.org/
+updated: 2018-06-14T00:00:00.000Z
+introduction: >
+  [Figlet] renders text as ASCII art. Here's a list of Figlet fonts for Figlet
+  2.2.5.
 
-# Generated using this script:
-#
-# #!/usr/bin/env bash
-# do_figlet() {
-#   name=$1
-#   echo "### $name"
-#   echo ""
-#   echo "\`\`\`"
-# 
-#   echo Hamburger | figlet -f $name -w 2000
-# 
-#   echo "\`\`\`"
-#   echo "{: .-figlet}"
-#   echo ""
-# }
-# 
-# echo "## Figlet fonts"
-# echo ""
-# 
-# for fn in /usr/local/share/figlet/fonts/*.flf; do
-#   name=$(basename ${fn%.flf})
-#   do_figlet $name
-# done
-# 
-# echo ""
-# echo "## Toilet fonts"
-# echo ""
-# 
-# for fn in /usr/local/share/figlet/*.tlf; do
-#   name=$(basename ${fn%.tlf})
-#   do_figlet $name
-# done
+  [Figlet]: http://www.figlet.org/
+tech: figlet
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

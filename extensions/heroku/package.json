@@ -32,7 +32,7 @@
   "dependencies": {
     "@raycast/api": "^1.32.1",
     "@youri-kane/heroku-client": "0.1.17",
-    "axios": "^0.26.1",
+    "axios": "^0.30.3",
     "gravatar": "^1.8.2",
     "swr": "^1.2.2"
   },
@@ -45,7 +45,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

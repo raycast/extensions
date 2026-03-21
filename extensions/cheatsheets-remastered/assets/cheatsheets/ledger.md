@@ -1,8 +1,11 @@
 ---
 title: Ledger CLI
 category: Ledger
-updated: 2020-05-23
+updated: 2020-05-23T00:00:00.000Z
 weight: -5
+tech: ledger
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic usage

@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, showToast, Toast, showInFinder, open, closeMainWindow } from "@raycast/api";
+import React from "react";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  showToast,
+  Toast,
+  showInFinder,
+  open,
+  closeMainWindow,
+  Clipboard,
+} from "@raycast/api";
 import path from "path";
 
 import { getDefaultAction } from "../preferences";
@@ -91,9 +102,24 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
       await trackUsage();
       await closeMainWindow();
-      await showToast({ style: Toast.Style.Success, title: `Copied GIF "${file}" to clipboard` });
+      await showToast({ style: Toast.Style.Success, title: `Copied GIF "${path.basename(file)}" to clipboard` });
     } catch (error) {
       await showFailureToast(error, { title: "Could not copy GIF" });
+    }
+  }
+
+  async function pasteGif() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Pasting GIF" });
+      const isInFavorites = favIds?.includes(id);
+      const file = await copyFileToClipboard(item.download_url, item.download_name, isInFavorites);
+      await trackUsage();
+      await closeMainWindow();
+      await Clipboard.paste({ file });
+      await showToast({ style: Toast.Style.Success, title: `Pasted GIF "${path.basename(file)}"` });
+    } catch (error) {
+      console.error(error);
+      await showFailureToast(error, { title: "Could not paste GIF" });
     }
   }
 
@@ -123,7 +149,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
           },
         });
       }
-    } catch (error) {
+    } catch {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not download GIF",
@@ -139,6 +165,15 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       title="Copy GIF"
       onAction={copyGif}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+    />
+  );
+  const pasteFile = (
+    <Action
+      icon={Icon.Clipboard}
+      key="pasteFile"
+      title="Paste GIF"
+      onAction={pasteGif}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "p" }}
     />
   );
   const copyGifUrl = (
@@ -168,7 +203,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     />
   );
 
-  let toggleFav: JSX.Element | undefined;
+  let toggleFav: React.JSX.Element | undefined;
   if (favIds) {
     toggleFav = isInFavorites ? (
       <Action
@@ -237,8 +272,8 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
     />
   );
 
-  const actions: Array<(JSX.Element | undefined)[]> = [
-    [copyFile, copyGifUrl, copyGifMarkdown, pasteGifMarkdown],
+  const actions: Array<(React.JSX.Element | undefined)[]> = [
+    [copyFile, pasteFile, copyGifUrl, copyGifMarkdown, pasteGifMarkdown],
     [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];

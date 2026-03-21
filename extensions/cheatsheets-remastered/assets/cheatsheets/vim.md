@@ -1,9 +1,13 @@
 ---
 title: Vim
 category: Vim
-tags: [Featured]
-updated: 2020-07-05
+tags:
+  - Featured
+updated: 2020-07-05T00:00:00.000Z
 weight: -10
+tech: vim
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## Getting started

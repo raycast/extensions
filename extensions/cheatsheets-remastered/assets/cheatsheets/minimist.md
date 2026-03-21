@@ -1,6 +1,9 @@
 ---
 title: minimist
 category: JavaScript libraries
+tech: minimist
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Usage

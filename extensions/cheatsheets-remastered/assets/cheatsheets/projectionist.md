@@ -1,6 +1,9 @@
 ---
 title: Projectionist
 category: Vim
+tech: projectionist
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic usage

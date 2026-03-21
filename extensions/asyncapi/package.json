@@ -5,7 +5,9 @@
   "description": "AsyncAPI extension for Raycast brings some AsyncAPI tools to you.",
   "icon": "command-icon.png",
   "author": "smoya",
-  "categories": ["Developer Tools"],
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -47,7 +49,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

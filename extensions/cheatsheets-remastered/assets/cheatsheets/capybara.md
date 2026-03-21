@@ -2,8 +2,12 @@
 title: Capybara
 category: Ruby libraries
 weight: -5
-updated: 2020-06-13
-tags: [Featurable]
+updated: 2020-06-13T00:00:00.000Z
+tags:
+  - Featurable
+tech: capybara
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Navigating

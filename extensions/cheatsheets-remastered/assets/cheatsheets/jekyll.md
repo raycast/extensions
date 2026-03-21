@@ -1,9 +1,15 @@
 ---
 title: Jekyll
 jekyll_escape: true
-prism_languages: [bash, yaml, ruby]
+prism_languages:
+  - bash
+  - yaml
+  - ruby
 category: Jekyll
-updated: 2018-08-25
+updated: 2018-08-25T00:00:00.000Z
+tech: jekyll
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 {% raw %}

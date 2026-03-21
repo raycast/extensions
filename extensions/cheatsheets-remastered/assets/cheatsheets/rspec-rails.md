@@ -1,6 +1,9 @@
 ---
 title: Rspec-rails
 category: Ruby
+tech: rspec-rails
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### About

@@ -1,5 +1,8 @@
 ---
 title: Command line stuff
+tech: command_line
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ## List (ls)

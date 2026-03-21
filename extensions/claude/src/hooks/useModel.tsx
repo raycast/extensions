@@ -1,33 +1,25 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Model, ModelHook } from "../type";
+import { fetchAvailableModels } from "../api/models";
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
   updated_at: new Date().toISOString(),
   created_at: new Date().toISOString(),
-  name: "Haiku 3.5",
-  prompt: "You are a helpful assistant.",
-  option: "claude-3-5-haiku-latest",
+  name: "Default Model",
+  prompt: "You are a useful assistant",
+  option: "claude-haiku-4-5-20251001",
   temperature: "1",
   max_tokens: "4096",
   pinned: false,
 };
 
-const option: Model["option"][] = [
-  "claude-sonnet-4-20250514",
-  "claude-3-7-sonnet-latest",
-  "claude-3-7-sonnet-20250219",
-  "claude-3-5-haiku-latest",
-  "claude-3-5-haiku-20241022",
-  "claude-3-5-sonnet-latest",
-  "claude-3-5-sonnet-20241022",
-  "claude-3-5-sonnet-20240620",
-  "claude-3-opus-20240229",
-  "claude-3-sonnet-20240229",
-  "claude-3-haiku-20240307",
-  "claude-2.1",
-  "claude-2.0",
+// Fallback models in case API fetch fails
+const FALLBACK_OPTIONS: Model["option"][] = [
+  "claude-haiku-4-5-20251001",
+  "claude-sonnet-4-5-20250929",
+  "claude-opus-4-1-20250805",
 ];
 
 async function getStoredModels(): Promise<Model[]> {
@@ -42,11 +34,34 @@ async function getStoredModels(): Promise<Model[]> {
 export function useModel(): ModelHook {
   const [data, setData] = useState<Model[]>([]);
   const [isLoading, setLoading] = useState(false);
+  const [option, setOption] = useState<Model["option"][]>(FALLBACK_OPTIONS);
+  const [availableModels, setAvailableModels] = useState<Array<{ id: string; display_name: string }>>([]);
 
   useEffect(() => {
     setLoading(true);
-    getStoredModels()
-      .then(setData)
+    Promise.all([getStoredModels(), fetchAvailableModels()])
+      .then(([models, availableModelsData]) => {
+        // Extract model IDs from the fetched available models
+        const modelOptions = availableModelsData.map((m) => m.id as Model["option"]);
+        setOption(modelOptions);
+        // Store full available models for display names
+        setAvailableModels(availableModelsData);
+
+        // Update default model to use first available model if needed
+        const updatedModels = models.map((m) => {
+          if (m.id === "default" && modelOptions.length > 0) {
+            return { ...m, option: modelOptions[0] };
+          }
+          return m;
+        });
+        setData(updatedModels);
+      })
+      .catch((error) => {
+        console.error("Error loading models:", error);
+        // Still load stored models even if API fetch fails
+        getStoredModels().then(setData);
+        // Keep fallback options
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -116,7 +131,7 @@ export function useModel(): ModelHook {
   }, [setData]);
 
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear }),
-    [data, isLoading, option, add, update, remove, clear]
+    () => ({ data, isLoading, option, availableModels, add, update, remove, clear }),
+    [data, isLoading, option, availableModels, add, update, remove, clear]
   );
 }

@@ -1,5 +1,3 @@
-import { Image } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
 import { ReactElement } from "react";
 
 export interface Preferences {
@@ -7,20 +5,24 @@ export interface Preferences {
   readonly limitResults: number;
 }
 
-export class Tab {
-  constructor(public readonly title: string, public readonly url: string) {}
+export interface Shortcut {
+  id: string;
+  key: string;
+  modifiers: ("control" | "alt" | "shift" | "option" | "command")[];
+}
 
-  static parse(entry: { url: string; title: string }): Tab {
-    return new Tab(entry.title, entry.url);
-  }
+export interface Tab {
+  title: string;
+  url: string;
+}
 
-  urlWithoutScheme(): string {
-    return this.url.replace(/(^\w+:|^)\/\//, "").replace("www.", "");
-  }
-
-  googleFavicon(): Image.ImageLike {
-    return getFavicon(this.url);
-  }
+export interface WorkspaceEntry {
+  uuid: string;
+  name: string;
+  icon: string;
+  position: number;
+  is_default: boolean;
+  shortcut?: Shortcut;
 }
 
 export interface HistoryEntry {
@@ -30,17 +32,38 @@ export interface HistoryEntry {
   lastVisited: Date;
 }
 
+export interface BookmarkEntry {
+  id: number;
+  url: number;
+  title: number;
+  lastModified: Date;
+}
+
 export interface SearchResult<T> {
   data?: T[];
   errorView?: ReactElement;
   isLoading: boolean;
 }
 
-export interface BookmarkEntry {
-  id: number;
-  url: number;
-  title: number;
-  lastModified: Date;
+export interface ShortcutModel {
+  id: string;
+  key: string;
+  group: string;
+  modifiers: {
+    control: boolean;
+    alt: boolean;
+    shift: boolean;
+    meta: boolean;
+    accel: boolean;
+  };
+}
+
+export interface WorkspaceModel {
+  uuid: string;
+  name: string;
+  icon: string;
+  position: number;
+  is_default: boolean;
 }
 
 export type GroupedEntries = Map<string, HistoryEntry[]>;

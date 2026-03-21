@@ -1,15 +1,20 @@
 ---
 title: Rollup.js
 category: JavaScript libraries
-updated: 2020-01-29
+updated: 2020-01-29T00:00:00.000Z
 authors:
   - github: ryanSN
 keywords:
   - rollup.watch
   - bundle
   - rollup.config.js
-intro: |
-  [Rollup](https://rollupjs.org/) Rollup is a module bundler for JavaScript which compiles small pieces of code into something larger and more complex, such as a library or application.
+intro: >
+  [Rollup](https://rollupjs.org/) Rollup is a module bundler for JavaScript
+  which compiles small pieces of code into something larger and more complex,
+  such as a library or application.
+tech: rollup
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Basic config

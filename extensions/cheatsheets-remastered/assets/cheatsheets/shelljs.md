@@ -1,10 +1,14 @@
 ---
 title: Shell.js
 category: JavaScript libraries
-updated: 2017-10-27
+updated: 2017-10-27T00:00:00.000Z
 weight: -1
-intro: |
-  [ShellJS](https://github.com/shelljs/shelljs) is a portable (Windows/Linux/OS X) implementation of Unix shell commands on top of the Node.js API. 
+intro: >
+  [ShellJS](https://github.com/shelljs/shelljs) is a portable (Windows/Linux/OS
+  X) implementation of Unix shell commands on top of the Node.js API. 
+tech: shelljs
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Example

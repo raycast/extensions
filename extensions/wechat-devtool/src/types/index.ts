@@ -1,4 +1,4 @@
-import { REPOSITORY_TYPE } from "../constants";
+import { REPOSITORY_TYPE } from "@/constants";
 
 export interface ExtensionConfig {
   cliPath: string;
@@ -19,3 +19,8 @@ export type RepositoryType = (typeof REPOSITORY_TYPE)[keyof typeof REPOSITORY_TY
 export interface WechatProjectConfig {
   projectname?: string;
 }
+
+export type ProjectExtraInfo = {
+  branch: string | null;
+  displayPath: string;
+};

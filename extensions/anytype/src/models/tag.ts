@@ -1,11 +1,13 @@
 import { Color } from ".";
 
 export interface CreateTagRequest {
+  key?: string;
   name: string;
   color: Color;
 }
 
 export interface UpdateTagRequest {
+  key: string;
   name: string;
   color?: Color;
 }

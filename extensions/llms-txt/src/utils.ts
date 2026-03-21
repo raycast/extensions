@@ -1,6 +1,5 @@
 import type { WebsiteData, Website, Category, ActionType } from "./types";
 import { getPreferenceValues, LocalStorage, showToast, Toast, Clipboard, open } from "@raycast/api";
-import fetch from "node-fetch";
 import { addToHistory } from "./storage";
 import { showFailureToast } from "@raycast/utils";
 
@@ -145,7 +144,7 @@ export async function fetchWebsitesData(forceRefresh = false, retryDepth = 0): P
     let data: WebsiteData;
 
     try {
-      data = await response.json();
+      data = (await response.json()) as WebsiteData;
     } catch (parseError) {
       throw new ValidationError(
         `Failed to parse JSON response: ${parseError instanceof Error ? parseError.message : "Unknown parsing error"}`,
@@ -179,7 +178,7 @@ export async function fetchWebsitesData(forceRefresh = false, retryDepth = 0): P
           }
         }
       }
-    } catch (cacheError) {
+    } catch {
       console.debug("Failed to read cache during fallback");
     }
 
@@ -276,7 +275,7 @@ export async function handleWebsiteAction(website: Website, action: ActionType):
     if (url) {
       try {
         await open(url);
-      } catch (openError) {
+      } catch {
         // Fallback to system default browser
         await open(url); // Let the system handle it
       }

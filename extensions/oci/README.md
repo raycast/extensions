@@ -7,6 +7,16 @@
 This is a Raycast extension for [Oracle Cloud](https://cloud.oracle.com/). With this extension you can:
 - View **Core Services** (only Instances for now) and **VNIC Attachments**
 - View **Object Storage** *Buckets*.
+    - View *Objects*
+        - Delete *Object*
+        - Upload *Object*
+- View **NoSQL Database** *Tables*
+- View **KMS** *Vaults*
+    - Create *Vault*
+    - View *Secrets*
+        - Create *Secret*
+        - View *Versions*
+            - View *Bundle*
 
 ## 🚀 Getting Started
 

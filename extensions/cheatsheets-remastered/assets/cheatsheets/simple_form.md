@@ -1,6 +1,10 @@
 ---
 title: SimpleForm
-tags: [WIP]
+tags:
+  - WIP
+tech: simple_form
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Inputs

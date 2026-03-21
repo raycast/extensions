@@ -1,6 +1,9 @@
 ---
 title: Analytics libraries
 category: Analytics
+tech: analytics
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Mixpanel

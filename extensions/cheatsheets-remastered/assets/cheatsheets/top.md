@@ -1,8 +1,11 @@
 ---
 title: top
 category: CLI
-updated: 2020-01-01
+updated: 2020-01-01T00:00:00.000Z
 intro: See the processes in your Unix machine.
+tech: top
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 ### Shortcuts

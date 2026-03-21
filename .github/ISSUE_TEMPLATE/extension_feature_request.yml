@@ -2,6 +2,7 @@ name: 🧩 💎 Extension Feature Request
 description: Suggest new Feature or an improvement to existing Extension
 title: "[Extension Name] ..."
 labels: [extension, feature request]
+type: "Feature"
 body:
   - type: markdown
     attributes:

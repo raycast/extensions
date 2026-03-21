@@ -1,7 +1,6 @@
 import { ActionPanel, Action, List, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { CREATE_ERROR_TOAST_OPTIONS, SHADCN_URL } from "./constants";
-import fetch, { type Response } from "node-fetch";
 import yaml from "js-yaml";
 
 /**
@@ -31,7 +30,7 @@ export const parseComponentName = (componentName: string) => {
  */
 async function getComponentsFromGitHub(): Promise<SearchResult[]> {
   // GitHub API for directory listing
-  const res = await fetch("https://api.github.com/repos/shadcn/ui/contents/apps/www/content/docs/components");
+  const res = await fetch("https://api.github.com/repos/shadcn-ui/ui/contents/apps/v4/content/docs/components");
   if (!res.ok) {
     throw new Error(res.statusText);
   }
@@ -94,7 +93,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
       onError: async (e) => {
         await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
       },
-    }
+    },
   );
 
   return (
@@ -133,25 +132,28 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
               icon="npm-icon.png"
               title="Copy Add Component [Npm]"
               content={`npx shadcn@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
             />
             <Action.CopyToClipboard
               icon="yarn-icon.png"
               title="Copy Add Component [Yarn]"
-              content={`npx shadcn@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              content={`yarn shadcn@latest add ${searchResult.component}`}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "y" }, Windows: { modifiers: ["ctrl"], key: "y" } }}
             />
             <Action.CopyToClipboard
               icon="pnpm-icon.png"
               title="Copy Add Component [Pnpm]"
               content={`pnpm dlx shadcn@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "ctrl"], key: "p" },
+                Windows: { modifiers: ["ctrl", "alt"], key: "p" },
+              }}
             />
             <Action.CopyToClipboard
               icon="bun-icon.png"
               title="Copy Add Component [Bun]"
               content={`bunx --bun shadcn@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "b" }, Windows: { modifiers: ["ctrl"], key: "b" } }}
             />
           </ActionPanel.Section>
         </ActionPanel>

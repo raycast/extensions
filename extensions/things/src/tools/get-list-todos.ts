@@ -1,7 +1,8 @@
-import { CommandListName, getListTodos } from '../api';
+import { getListTodos } from '../api';
+import { CommandListName } from '../types';
 
 type Input = {
-  /** The name of the list to get todos from */
+  /** The name of the list to get to-dos from */
   commandListName: CommandListName;
 };
 

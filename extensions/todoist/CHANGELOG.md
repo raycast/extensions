@@ -1,5 +1,25 @@
 # Todoist Changelog
 
+## [Fix reminders and Create Task NLP parsing] - 2026-03-06
+- Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
+- Fixed Create Task natural-language token cleanup and due-time parsing edge cases.
+
+## [Fixing Todoist PR updates] - 2026-02-11
+- Fixed a crash in the syncRequest caused by the Todoist API returning an empty sync_status object, which led to a TypeError when reading error properties from an undefined value.
+
+## [Set Due Date to Everyday for Existing Tasks] - 2025-10-10
+- **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
+
+## [Improved Due Time Handling] - 2025-09-04
+
+- **Preserved Due Time on Date Conversion**: Ensured that the time component of a due date is preserved by using `toISOString()` during date-to-string conversions
+- **Fixed Due Time Getting Overriden By Current Time**: Set the time from parsedData whenever there's updates from nlp
+- **Enhanced NLP Robustness**: Resolved `TypeError: Cannot read properties of undefined (reading 'matchAll'` that occurred if users interacted with other form fields before entering a task title
+
+## [Fixed Create Task TypeError] - 2025-09-01
+
+- **Fixed TypeError on Task Creation**: Resolved `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form by adding defensive checks for undefined arrays
+
 ## [Fixed Create Task Form Initialization Error] - 2025-08-25
 
 - **Fixed TypeError on Task Creation**: Resolved intermittent `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form
@@ -48,9 +68,11 @@
 - Added Windows support
 
 ## [Add task priority mapping for Todoist API] - 2025-06-12
- - Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
+
+- Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
 
 ## [Use confetti when completing tasks] - 2025-05-28
+
 - Add option to use the Raycast confetti command when completing tasks.
 
 ## [Automatically create labels on quick add command] - 2025-05-09

@@ -9,14 +9,20 @@
   "contributors": [
     "shubham",
     "pernielsentikaer",
-    "sh-cho",
     "tdkn",
     "j3lte",
     "rien7",
     "teziovsky",
     "pewpeo",
     "joaopesce",
-    "ridemountainpig"
+    "ridemountainpig",
+    "GLaDO8",
+    "xmok",
+    "luiscarlospando",
+    "janrokita"
+  ],
+  "pastContributors": [
+    "sh-cho"
   ],
   "license": "MIT",
   "commands": [
@@ -47,6 +53,43 @@
       "subtitle": "Raindrop.io",
       "description": "Save the current browser tab to Raindrop",
       "mode": "view"
+    },
+    {
+      "name": "quick_add",
+      "title": "Quick Add Bookmark",
+      "subtitle": "Raindrop.io",
+      "description": "Quickly save a bookmark",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "required": true,
+          "placeholder": "URL"
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "list-collections",
+      "title": "List Collections",
+      "description": "Retrieve the user's collections together with their hierarchy."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search bookmarks by query, tags, and collection."
+    },
+    {
+      "name": "get-bookmark-details",
+      "title": "Get Bookmark Details",
+      "description": "Fetch a bookmark's full details, including notes and highlights."
+    },
+    {
+      "name": "save-bookmark",
+      "title": "Save Bookmark",
+      "description": "Create a new Raindrop bookmark from a URL."
     }
   ],
   "preferences": [
@@ -91,27 +134,27 @@
         },
         {
           "value": "created",
-          "title": "Date \u2191"
+          "title": "Date ↑"
         },
         {
           "value": "-created",
-          "title": "Date \u2193"
+          "title": "Date ↓"
         },
         {
           "value": "title",
-          "title": "Name \u2191"
+          "title": "Name ↑"
         },
         {
           "value": "-title",
-          "title": "Name \u2193"
+          "title": "Name ↓"
         },
         {
           "value": "domain",
-          "title": "Sites \u2191"
+          "title": "Sites ↑"
         },
         {
           "value": "-domain",
-          "title": "Sites \u2193"
+          "title": "Sites ↓"
         },
         {
           "value": "score",
@@ -212,28 +255,146 @@
       "title": "Tags Display",
       "description": "Select number of tags to display in list.",
       "default": "1"
+    },
+    {
+      "name": "secondaryBrowser",
+      "title": "Secondary Browser",
+      "type": "appPicker",
+      "required": false,
+      "description": "Specify a secondary browser to use for opening bookmarks"
     }
   ],
+  "ai": {
+    "instructions": "- Mention bookmark titles as Markdown links that point to their URLs.\\n- Call `search-bookmarks` before answering any question about existing content so you rely on up-to-date data.\\n- If the user references a bookmark by title, search for it first and then call `get-bookmark-details` with the returned id to read its note or highlights.\\n- When the user wants to save a link, translate the requested collection name into an id using `list-collections` (unless the id is already provided) before calling `save-bookmark`. Default to the Unsorted collection (collectionId: -1) when nothing is specified.\\n- Include collection names and relevant tags in your answers so the user understands where the bookmark lives.\\n- Never add or change bookmark notes unless the user explicitly provides the text you should store.",
+    "evals": [
+      {
+        "input": "@raindrop-io show me my TypeScript bookmarks tagged performance",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "TypeScript",
+                "tags": [
+                  "performance"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": 101,
+              "title": "TypeScript perf tips",
+              "url": "https://example.com/ts-perf",
+              "collectionTitle": "Development",
+              "collectionId": 12,
+              "tags": [
+                "performance",
+                "typescript"
+              ],
+              "excerpt": "Tips for optimizing TS projects."
+            }
+          ]
+        }
+      },
+      {
+        "input": "@raindrop-io save https://blog.raycast.com/ai-guide into my Research collection with tags ai and raycast",
+        "expected": [
+          {
+            "callsTool": "list-collections"
+          },
+          {
+            "callsTool": {
+              "name": "save-bookmark",
+              "arguments": {
+                "url": "https://blog.raycast.com/ai-guide",
+                "collectionId": 5,
+                "tags": [
+                  "ai",
+                  "raycast"
+                ]
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-collections": [
+            {
+              "id": 5,
+              "title": "Research",
+              "path": "Personal / Research"
+            }
+          ],
+          "save-bookmark": {
+            "id": 999,
+            "title": "AI Guide",
+            "url": "https://blog.raycast.com/ai-guide",
+            "collectionId": 5
+          }
+        }
+      },
+      {
+        "input": "@raindrop-io what's the note on my \"Raycast AI launch plan\" bookmark?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": "Raycast AI launch plan"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-bookmark-details",
+              "arguments": {
+                "bookmarkId": "1234"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": 1234,
+              "title": "Raycast AI launch plan",
+              "url": "https://example.com/raycast-ai",
+              "collectionTitle": "Product Launches"
+            }
+          ],
+          "get-bookmark-details": {
+            "id": 1234,
+            "title": "Raycast AI launch plan",
+            "note": "Finalize talking points before Friday."
+          }
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.3",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.0.0",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "react": "^18.2.0",
-    "typescript": "5.5.4"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx -y @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

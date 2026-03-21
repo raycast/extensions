@@ -10,6 +10,8 @@ import {
   Toast,
   getSelectedFinderItems,
 } from "@raycast/api";
+import { statSync } from "fs";
+import { basename, extname } from "path";
 
 export default function Command() {
   const [files, setFiles] = useState<string[]>([]);
@@ -80,15 +82,21 @@ export default function Command() {
       // Handle the case where files[index] is undefined
       return "";
     }
-    const lastSlashIndex = selectedFile.lastIndexOf("/");
-    const lastDotIndex = selectedFile.lastIndexOf(".");
-    const baseName = selectedFile.substring(lastSlashIndex + 1, lastDotIndex);
-    const extension = lastDotIndex >= 0 ? selectedFile.substring(lastDotIndex + 1) : "";
+
+    const isDirectory = statSync(selectedFile).isDirectory();
+
+    const fullName = basename(selectedFile);
+    const extension = isDirectory ? "" : extname(selectedFile);
+    const baseName = isDirectory ? fullName : basename(selectedFile, extension);
+
     const prefixWithUnderscore = prefix ? `${prefix}${separator}` : "";
     const suffixWithUnderscore = suffix ? `${separator}${suffix}` : "";
-    return preserveName
-      ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}.${extension}`
-      : `${prefixWithUnderscore}${newName}${indexSeparator}${index + 1}${suffixWithUnderscore}.${extension}`;
+
+    const newBaseName = preserveName
+      ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}`
+      : `${prefixWithUnderscore}${newName}${indexSeparator}${index + 1}${suffixWithUnderscore}`;
+
+    return isDirectory || !extension ? newBaseName : `${newBaseName}${extension}`;
   };
 
   const renameFiles = async () => {
@@ -96,11 +104,13 @@ export default function Command() {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const newNameWithExtension = generateNewName(i);
+        const escapedFilePath = file.replaceAll('"', '\\"');
+        const escapedNewName = newNameWithExtension.replaceAll('"', '\\"');
 
         await runAppleScript(`
           tell application "Finder"
-            set theItem to POSIX file "${file}" as alias
-            set name of theItem to "${newNameWithExtension}"
+            set theItem to POSIX file "${escapedFilePath}" as alias
+            set name of theItem to "${escapedNewName}"
           end tell
         `);
       }

@@ -1,5 +1,13 @@
 # Team Time Changelog
 
+## [Menu Bar Title Group Count Preference and Team Time Menu Bar Functionality] - 2025-11-21
+
+- Added a new preference for the number of time groups to display in the menu bar title.
+- Implemented the Team Time Menu Bar feature to show team flags and current times.
+- Updated dependencies to the latest versions.
+- Refactored ESLint configuration to use the latest Raycast ESLint config.
+- Improved code readability by changing "Move Up" to "Move up" in the action panel.
+
 ## [Add two countries and allow for reordering saved times] - 2025-03-19
 
 - Support for reordering saved locations with keyboard shortcuts (Shift+Cmd+↑ and Shift+Cmd+↓)

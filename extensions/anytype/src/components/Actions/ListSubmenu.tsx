@@ -34,7 +34,10 @@ export function ListSubmenu({ spaceId, objectId }: ListSubmenuProps) {
     <ActionPanel.Submenu
       icon={Icon.PlusTopRightSquare}
       title="Add to List"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "l" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+      }}
       onOpen={() => setIsOpen(true)}
       isLoading={isLoadingObjects}
       onSearchTextChange={setSearchText}

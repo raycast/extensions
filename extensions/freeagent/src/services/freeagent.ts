@@ -23,6 +23,8 @@ import {
   ProjectsResponse,
   Task,
   TasksResponse,
+  TaskCreateData,
+  TaskResponse,
   TimeslipCreateData,
   TimeslipResponse,
   Category,
@@ -179,6 +181,14 @@ export async function createTimeslip(accessToken: string, timeslipData: Timeslip
     body: JSON.stringify({ timeslip: timeslipData }),
   });
   return data.timeslip;
+}
+
+export async function createTask(accessToken: string, projectUrl: string, taskData: TaskCreateData): Promise<Task> {
+  const data = await makeRequest<TaskResponse>(`/tasks?project=${encodeURIComponent(projectUrl)}`, accessToken, {
+    method: "POST",
+    body: JSON.stringify({ task: taskData }),
+  });
+  return data.task;
 }
 
 export async function fetchCategories(accessToken: string): Promise<Category[]> {

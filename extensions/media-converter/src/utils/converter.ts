@@ -22,7 +22,7 @@ function convertQualityToCrf(qualityPercentage: Percentage): number {
   return Math.round(51 - (qualityPercentage / 100) * 51);
 }
 
-export function getUniqueOutputPath(filePath: string, extension: string): string {
+function getUniqueOutputPath(filePath: string, extension: string): string {
   const outputFilePath = filePath.replace(path.extname(filePath), extension);
   let finalOutputPath = outputFilePath;
   let counter = 1;
@@ -41,6 +41,7 @@ export async function convertMedia<T extends AllOutputExtension>(
   filePath: string,
   outputFormat: T,
   quality: QualitySettings,
+  returnCommandString = false,
 ): Promise<string> {
   const ffmpegPath = await findFFmpegPath();
 
@@ -65,11 +66,13 @@ export async function convertMedia<T extends AllOutputExtension>(
       try {
         // HEIC conversion is theoretically only available on macOS via the built-in SIPS utility.
         if (currentOutputFormat === ".heic") {
+          const sipsCmd = `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`;
+          if (returnCommandString) {
+            return sipsCmd;
+          }
           try {
             // Attempt HEIC conversion using SIPS directly
-            await execPromise(
-              `sips --setProperty format heic --setProperty formatOptions ${imageQuality[".heic"]} "${filePath}" --out "${finalOutputPath}"`,
-            );
+            await execPromise(sipsCmd);
           } catch (error) {
             // Parse error to provide more specific feedback
             const errorMessage = String(error);
@@ -94,19 +97,24 @@ export async function convertMedia<T extends AllOutputExtension>(
         } else {
           // If the input file is HEIC and the output format is not HEIC, convert to PNG first
           if (extension === ".heic") {
-            try {
-              const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
-              tempHeicFile = path.join(os.tmpdir(), tempFileName);
+            if (returnCommandString) {
+              // For command string, use original file (assuming user handles preprocessing)
+              processedInputPath = filePath;
+            } else {
+              try {
+                const tempFileName = `${path.basename(filePath, ".heic")}_temp_${Date.now()}.png`;
+                tempHeicFile = path.join(os.tmpdir(), tempFileName);
 
-              await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
+                await execPromise(`sips --setProperty format png "${filePath}" --out "${tempHeicFile}"`);
 
-              processedInputPath = tempHeicFile;
-            } catch (error) {
-              console.error(`Error pre-processing HEIC file: ${filePath}`, error);
-              if (tempHeicFile && fs.existsSync(tempHeicFile)) {
-                fs.unlinkSync(tempHeicFile);
+                processedInputPath = tempHeicFile;
+              } catch (error) {
+                console.error(`Error pre-processing HEIC file: ${filePath}`, error);
+                if (tempHeicFile && fs.existsSync(tempHeicFile)) {
+                  fs.unlinkSync(tempHeicFile);
+                }
+                throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
               }
-              throw new Error(`Failed to preprocess HEIC file: ${String(error)}`);
             }
           }
 
@@ -119,17 +127,28 @@ export async function convertMedia<T extends AllOutputExtension>(
               break;
             case ".png":
               if (imageQuality[".png"] === "png-8") {
-                const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
-                tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
+                if (returnCommandString) {
+                  // For command string, assume palette is generated separately
+                  const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette.png`;
+                  tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
+                  const paletteCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`;
+                  ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5" -compression_level 100 -y "${finalOutputPath}"`;
+                  return `${paletteCmd}\n${ffmpegCmd}`;
+                } else {
+                  const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
+                  tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
 
-                // Generate palette first
-                await execPromise(
-                  `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
-                );
-                // Then apply palette
-                ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+                  // Generate palette first
+                  await execPromise(
+                    `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`,
+                  );
+                  // Then apply palette
+                  ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5"`;
+                }
               }
-              ffmpegCmd += ` -compression_level 100 "${finalOutputPath}"`;
+              if (!returnCommandString || imageQuality[".png"] !== "png-8") {
+                ffmpegCmd += ` -compression_level 100`;
+              }
               break;
             case ".webp":
               ffmpegCmd += " -c:v libwebp";
@@ -149,6 +168,11 @@ export async function convertMedia<T extends AllOutputExtension>(
           }
           if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
             ffmpegCmd += ` -y "${finalOutputPath}"`;
+          } else {
+            ffmpegCmd += ` "${finalOutputPath}"`;
+          }
+          if (returnCommandString) {
+            return ffmpegCmd;
           }
           console.log(`Executing FFmpeg image command: ${ffmpegCmd}`);
           await execPromise(ffmpegCmd);
@@ -220,6 +244,9 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       ffmpegCmd += ` -y "${finalOutputPath}"`;
+      if (returnCommandString) {
+        return ffmpegCmd;
+      }
       console.log(`Executing FFmpeg audio command: ${ffmpegCmd}`);
       await execPromise(ffmpegCmd);
       return finalOutputPath;
@@ -273,6 +300,11 @@ export async function convertMedia<T extends AllOutputExtension>(
           throw new Error(`Unknown video output format: ${currentOutputFormat}`);
       }
 
+      // Force common pixel format for compatibility, except for .mov which may use higher bit depths
+      if (currentOutputFormat !== ".mov") {
+        ffmpegCmd += ` -pix_fmt yuv420p`;
+      }
+
       // Handle encoding mode (unified for all formats except .mov)
       const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
       let logFilePrefix: string | null = null;
@@ -292,17 +324,26 @@ export async function convertMedia<T extends AllOutputExtension>(
             }
 
             if (qualitySettings.encodingMode === "vbr-2-pass") {
-              // First pass - need to specify log file prefix for 2-pass encoding
-              logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
-              const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
-              const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
-              try {
-                await execPromise(firstPassCmd);
-              } catch (error) {
-                throw new Error(`First pass encoding failed: ${error}`);
+              if (returnCommandString) {
+                // For command string, include both passes
+                logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
+                const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
+                const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
+                const secondPassCmd = ffmpegCmd + ` -pass 2 -passlogfile "${logFilePrefix}" -y "${finalOutputPath}"`;
+                return `${firstPassCmd}\n${secondPassCmd}`;
+              } else {
+                // First pass - need to specify log file prefix for 2-pass encoding
+                logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
+                const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
+                const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
+                try {
+                  await execPromise(firstPassCmd);
+                } catch (error) {
+                  throw new Error(`First pass encoding failed: ${error}`);
+                }
+                // Second pass will be executed below
+                ffmpegCmd += ` -pass 2 -passlogfile "${logFilePrefix}"`;
               }
-              // Second pass will be executed below
-              ffmpegCmd += ` -pass 2 -passlogfile "${logFilePrefix}"`;
             }
           }
         }
@@ -310,6 +351,9 @@ export async function convertMedia<T extends AllOutputExtension>(
 
       try {
         ffmpegCmd += ` -y "${finalOutputPath}"`;
+        if (returnCommandString) {
+          return ffmpegCmd;
+        }
         console.log(`Executing FFmpeg video command: ${ffmpegCmd}`);
         await execPromise(ffmpegCmd);
         return finalOutputPath;

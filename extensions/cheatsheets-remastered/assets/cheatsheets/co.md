@@ -1,10 +1,14 @@
 ---
 title: co
 category: JavaScript libraries
-updated: 2017-10-27
+updated: 2017-10-27T00:00:00.000Z
 weight: -1
-intro: |
-  [co](https://github.com/tj/co) allows you to use generators to manage async flow.
+intro: >
+  [co](https://github.com/tj/co) allows you to use generators to manage async
+  flow.
+tech: co
+status: active
+lastReviewed: '2025-09-05'
 ---
 
 [co]: https://github.com/tj/co

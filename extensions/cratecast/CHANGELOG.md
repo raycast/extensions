@@ -1,5 +1,9 @@
 # Crates Search
 
+## [Added a new default action configuration feature] - 2025-11-14
+
+- Added possibility to choose default action
+
 ## [Added] - 2023-11-13
 
 - Added keywords to make it easier to find in the store

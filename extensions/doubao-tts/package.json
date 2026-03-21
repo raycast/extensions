@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "doubao-tts",
+  "title": "Doubao TTS",
+  "description": "Read selected text aloud using Volcengine Doubao TTS with 90+ Chinese and English voices",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read Selected Text",
+      "subtitle": "Doubao TTS",
+      "description": "Read selected text with default voice. Trigger again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with Voice Selection",
+      "subtitle": "Doubao TTS",
+      "description": "Browse 90+ voices and read selected text aloud",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "Doubao TTS",
+      "description": "Stop the current TTS playback",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "appId",
+      "type": "textfield",
+      "required": true,
+      "title": "App ID",
+      "description": "Volcengine TTS App ID (X-Api-App-Id)",
+      "placeholder": "Enter your App ID"
+    },
+    {
+      "name": "accessKey",
+      "type": "password",
+      "required": true,
+      "title": "Access Key",
+      "description": "Volcengine TTS Access Key (X-Api-Access-Key)",
+      "placeholder": "Enter your Access Key"
+    },
+    {
+      "name": "resourceId",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model Version",
+      "description": "TTS model version — different versions support different voices",
+      "default": "seed-tts-2.0",
+      "data": [
+        {
+          "title": "Doubao TTS 2.0 (Recommended)",
+          "value": "seed-tts-2.0"
+        },
+        {
+          "title": "Doubao TTS 1.0",
+          "value": "seed-tts-1.0"
+        },
+        {
+          "title": "Doubao TTS 1.0 (High Concurrency)",
+          "value": "seed-tts-1.0-concurr"
+        },
+        {
+          "title": "Voice Clone 2.0",
+          "value": "seed-icl-2.0"
+        },
+        {
+          "title": "Voice Clone 1.0",
+          "value": "seed-icl-1.0"
+        }
+      ]
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Voice",
+      "description": "Voice used for Quick Read command",
+      "default": "zh_female_vv_uranus_bigtts",
+      "data": [
+        {
+          "title": "Vivi 2.0 (Female, ZH)",
+          "value": "zh_female_vv_uranus_bigtts"
+        },
+        {
+          "title": "Xiaohe 2.0 (Female, ZH)",
+          "value": "zh_female_xiaohe_uranus_bigtts"
+        },
+        {
+          "title": "Yunzhou 2.0 (Male, ZH)",
+          "value": "zh_male_m191_uranus_bigtts"
+        },
+        {
+          "title": "Xiaotian 2.0 (Male, ZH)",
+          "value": "zh_male_taocheng_uranus_bigtts"
+        },
+        {
+          "title": "Cancan 1.0 (Female, ZH)",
+          "value": "zh_female_cancan_mars_bigtts"
+        },
+        {
+          "title": "Qingcang 1.0 (Male, ZH)",
+          "value": "zh_male_qingcang_mars_bigtts"
+        },
+        {
+          "title": "Gentle Female 1.0 (ZH)",
+          "value": "zh_female_qinqienvsheng_moon_bigtts"
+        },
+        {
+          "title": "Sunny Youth 1.0 (Male, ZH)",
+          "value": "zh_male_yangguangqingnian_moon_bigtts"
+        },
+        {
+          "title": "Tim 2.0 (Male, EN)",
+          "value": "en_male_tim_uranus_bigtts"
+        },
+        {
+          "title": "Adam 1.0 (Male, EN)",
+          "value": "en_male_adam_mars_bigtts"
+        }
+      ]
+    },
+    {
+      "name": "speechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "Speech Rate",
+      "description": "Playback speed for speech synthesis",
+      "default": "0",
+      "data": [
+        {
+          "title": "0.5x (Slow)",
+          "value": "-50"
+        },
+        {
+          "title": "0.75x",
+          "value": "-25"
+        },
+        {
+          "title": "1.0x (Normal)",
+          "value": "0"
+        },
+        {
+          "title": "1.25x",
+          "value": "25"
+        },
+        {
+          "title": "1.5x",
+          "value": "50"
+        },
+        {
+          "title": "2.0x (Fast)",
+          "value": "100"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
