@@ -1,4 +1,12 @@
-import { Icon, Image, MenuBarExtra, getPreferenceValues, open, Clipboard, showHUD } from "@raycast/api";
+import {
+  Icon,
+  Image,
+  MenuBarExtra,
+  getPreferenceValues,
+  open,
+  Clipboard,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import {
   TrackInfo,
@@ -10,7 +18,6 @@ import {
   openArtistInMusic,
   openAlbumInMusic,
 } from "./apple-music";
-
 
 export default function NowPlaying() {
   const preferences = getPreferenceValues<Preferences>();

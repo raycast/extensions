@@ -5,7 +5,9 @@
   "description": "Shows the current Apple Music album artwork and track info in your menu bar",
   "icon": "extension-icon.png",
   "author": "GuyMagen",
-  "categories": ["Media"],
+  "categories": [
+    "Media"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -46,7 +48,7 @@
     "@types/node": "22.5.2",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
+    "prettier": "^3.8.1",
     "typescript": "^5.4.5"
   },
   "scripts": {
