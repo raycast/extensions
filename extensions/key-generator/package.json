@@ -1,0 +1,125 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "key-generator",
+    "title": "SSH Key Manager",
+    "description": "Generate, audit, and manage SSH keys and SSH config entries.",
+    "icon": "extension-icon.png",
+    "author": "kaushalrajpuwar",
+    "categories": [
+        "Developer Tools",
+        "Security"
+    ],
+    "keywords": [
+        "ssh",
+        "keys",
+        "security",
+        "config",
+        "management"
+    ],
+    "platforms": [
+        "macOS"
+    ],
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "license": "MIT",
+    "preferences": [
+        {
+            "name": "customSshKeygenPath",
+            "type": "textfield",
+            "required": false,
+            "title": "Custom SSH-Keygen Path",
+            "description": "Optional absolute path to Homebrew's ssh-keygen. Required for FIDO hardware keys on a custom Homebrew prefix.",
+            "placeholder": "/opt/homebrew/opt/openssh/bin/ssh-keygen"
+        }
+    ],
+    "commands": [
+        {
+            "name": "list-keys",
+            "title": "List SSH Keys",
+            "description": "Browse local SSH keys, copy details, rename files, or delete keys.",
+            "mode": "view"
+        },
+        {
+            "name": "generate-key",
+            "title": "Generate SSH Key",
+            "description": "Create a new SSH key and copy the generated public key.",
+            "mode": "view"
+        },
+        {
+            "name": "ssh-config",
+            "title": "Manage SSH Config",
+            "description": "Create, edit, and connect to hosts from ~/.ssh/config.",
+            "mode": "view",
+            "preferences": [
+                {
+                    "name": "terminalApp",
+                    "type": "dropdown",
+                    "title": "Terminal Emulator",
+                    "description": "Choose which terminal app to use for Connect.",
+                    "required": true,
+                    "default": "terminal",
+                    "data": [
+                        {
+                            "title": "Terminal.app",
+                            "value": "terminal"
+                        },
+                        {
+                            "title": "iTerm2",
+                            "value": "iterm2"
+                        },
+                        {
+                            "title": "Alacritty",
+                            "value": "alacritty"
+                        },
+                        {
+                            "title": "WezTerm",
+                            "value": "wezterm"
+                        },
+                        {
+                            "title": "Kitty",
+                            "value": "kitty"
+                        },
+                        {
+                            "title": "Custom Command",
+                            "value": "custom"
+                        }
+                    ]
+                },
+                {
+                    "name": "customTerminalCommand",
+                    "type": "textfield",
+                    "title": "Custom Terminal Command",
+                    "description": "Used only when Terminal Emulator is Custom Command. Use {{command}} placeholder.",
+                    "required": false,
+                    "placeholder": "open -a \"Alacritty\" --args -e zsh -lc \"{{command}}\""
+                }
+            ]
+        },
+        {
+            "name": "audit-keys",
+            "title": "Audit SSH Keys",
+            "description": "Find and fix common SSH key security issues.",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.104.10",
+        "@raycast/utils": "^2.2.3"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.0.4",
+        "@types/node": "22.13.10",
+        "@types/react": "19.0.10",
+        "eslint": "^9.23.0",
+        "prettier": "^3.0.3",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "build": "ray build",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
