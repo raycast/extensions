@@ -58,6 +58,9 @@
       "mode": "view"
     }
   ],
+  "contributors": [
+    "vishalbalaji3"
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.10",
     "@raycast/utils": "^1.18.1",
@@ -76,6 +79,10 @@
   },
   "icon": "trakt.png",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "check": "tsc --noEmit",
@@ -86,12 +93,5 @@
     "publish": "ray publish",
     "pull": "ray pull-contributions"
   },
-  "contributors": [
-    "vishalbalaji3"
-  ],
-  "title": "Trakt Manager",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+  "title": "Trakt Manager"
 }
