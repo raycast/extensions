@@ -44,10 +44,13 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "~20.8.10",
-    "@types/react": "~18.2.0",
+    "@types/react": "18.2.27",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "18.2.27"
   },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",
