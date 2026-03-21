@@ -2,10 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { buildTree, buildAuthHeader, flattenJobs } from "./jenkins";
 import type { RawJenkinsNode } from "../types";
 
-// Mock node-fetch for API function tests
-vi.mock("node-fetch", () => ({
-  default: vi.fn(),
-}));
+vi.stubGlobal("fetch", vi.fn());
 
 describe("buildTree", () => {
   it("buildTree(0) returns base fields including lastBuild", () => {
@@ -158,7 +155,6 @@ describe("fetchJobParameters", () => {
   });
 
   it("parses Jenkins parameterDefinitions response into BuildParameter[]", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -191,7 +187,6 @@ describe("fetchJobParameters", () => {
   });
 
   it("returns empty array when job has no parameters (empty property array)", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -205,7 +200,6 @@ describe("fetchJobParameters", () => {
   });
 
   it("maps StringParameterDefinition correctly", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -233,7 +227,6 @@ describe("fetchJobParameters", () => {
   });
 
   it("maps ChoiceParameterDefinition with choices array", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -260,7 +253,6 @@ describe("fetchJobParameters", () => {
   });
 
   it("maps BooleanParameterDefinition with boolean defaultValue", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -293,7 +285,6 @@ describe("triggerBuild", () => {
   });
 
   it("returns Location header value as queue item URL on 201", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({ ok: false } as never); // crumb fetch: disabled
     mockFetch.mockResolvedValueOnce({
@@ -313,7 +304,6 @@ describe("triggerBuild", () => {
   });
 
   it("uses /build endpoint when params is empty object", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({ ok: false } as never); // crumb fetch: disabled
     mockFetch.mockResolvedValueOnce({
@@ -330,7 +320,6 @@ describe("triggerBuild", () => {
   });
 
   it("uses /buildWithParameters with query string when params has keys", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({ ok: false } as never); // crumb fetch: disabled
     mockFetch.mockResolvedValueOnce({
@@ -353,7 +342,6 @@ describe("pollQueueItem", () => {
   });
 
   it("returns build number when executable.number exists in response", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -369,7 +357,6 @@ describe("pollQueueItem", () => {
   });
 
   it("returns null when executable field is absent", async () => {
-    const { default: fetch } = await import("node-fetch");
     const mockFetch = vi.mocked(fetch);
     mockFetch.mockResolvedValueOnce({
       ok: true,

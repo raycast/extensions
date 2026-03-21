@@ -5,7 +5,6 @@ import type {
   JenkinsJob,
   RecentJob,
   BuildHistoryEntry,
-  ExtensionPreferences,
 } from "./types";
 
 describe("types module", () => {

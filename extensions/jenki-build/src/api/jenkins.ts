@@ -1,7 +1,6 @@
 import {
   RawJenkinsNode,
   JenkinsJob,
-  ExtensionPreferences,
   BuildParameter,
   JenkinsParamType,
   LastBuild,
@@ -63,22 +62,18 @@ export function flattenJobs(
 }
 
 export async function fetchJobTree(): Promise<JenkinsJob[]> {
-  const { default: fetch } = await import("node-fetch");
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const treeQuery = buildTree(6);
   const url = `${prefs.jenkinsUrl.replace(/\/$/, "")}/api/json?tree=jobs[${treeQuery}]`;
   const response = await fetch(url, {
     headers: { Authorization: buildAuthHeader(prefs.username, prefs.apiToken) },
   });
-  assertOk(response as unknown as { ok: boolean; status: number });
+  assertOk(response);
   const data = (await response.json()) as { jobs: RawJenkinsNode[] };
   return flattenJobs(data.jobs ?? []);
 }
 
-async function fetchCrumb(
-  prefs: ExtensionPreferences,
-): Promise<Record<string, string>> {
-  const { default: fetch } = await import("node-fetch");
+async function fetchCrumb(prefs: Preferences): Promise<Record<string, string>> {
   const url = `${prefs.jenkinsUrl.replace(/\/$/, "")}/crumbIssuer/api/json`;
   const response = await fetch(url, {
     headers: { Authorization: buildAuthHeader(prefs.username, prefs.apiToken) },
@@ -94,13 +89,12 @@ async function fetchCrumb(
 export async function fetchJobParameters(
   jobUrl: string,
 ): Promise<BuildParameter[]> {
-  const { default: fetch } = await import("node-fetch");
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const url = `${toHttps(jobUrl).replace(/\/$/, "")}/api/json?tree=property[parameterDefinitions[name,description,type,defaultParameterValue[value],choices]]`;
   const response = await fetch(url, {
     headers: { Authorization: buildAuthHeader(prefs.username, prefs.apiToken) },
   });
-  assertOk(response as unknown as { ok: boolean; status: number });
+  assertOk(response);
   const data = (await response.json()) as {
     property?: Array<{
       parameterDefinitions?: Array<{
@@ -129,8 +123,7 @@ export async function triggerBuild(
   jobUrl: string,
   params: Record<string, string>,
 ): Promise<string> {
-  const { default: fetch } = await import("node-fetch");
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const crumbHeaders = await fetchCrumb(prefs);
   const hasParams = Object.keys(params).length > 0;
   const endpoint = hasParams ? "buildWithParameters" : "build";
@@ -147,7 +140,7 @@ export async function triggerBuild(
     redirect: "manual",
   });
   if (response.status !== 201) {
-    assertOk(response as unknown as { ok: boolean; status: number });
+    assertOk(response);
   }
   return response.headers.get("location") ?? "";
 }
@@ -163,21 +156,19 @@ export interface BuildStatus {
 }
 
 export async function fetchBuildStatus(buildUrl: string): Promise<BuildStatus> {
-  const { default: fetch } = await import("node-fetch");
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const url = `${toHttps(buildUrl).replace(/\/$/, "")}/api/json?tree=building,result,duration,estimatedDuration,timestamp,displayName,url`;
   const response = await fetch(url, {
     headers: { Authorization: buildAuthHeader(prefs.username, prefs.apiToken) },
   });
-  assertOk(response as unknown as { ok: boolean; status: number });
+  assertOk(response);
   return (await response.json()) as BuildStatus;
 }
 
 export async function pollQueueItem(
   queueItemUrl: string,
 ): Promise<number | null> {
-  const { default: fetch } = await import("node-fetch");
-  const prefs = getPreferenceValues<ExtensionPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
   const url = `${toHttps(queueItemUrl).replace(/\/$/, "")}/api/json`;
   const response = await fetch(url, {
     headers: { Authorization: buildAuthHeader(prefs.username, prefs.apiToken) },

@@ -99,13 +99,15 @@ export default function TriggerBuild() {
     if (favorites.data) setFavoriteSet(new Set(favorites.data));
   }, [favorites.data]);
 
-  if (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to load jobs",
-      message: handleFetchError(error),
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to load jobs",
+        message: handleFetchError(error),
+      });
+    }
+  }, [error]);
 
   async function toggleFavorite(path: string) {
     if (favoriteSet.has(path)) {
