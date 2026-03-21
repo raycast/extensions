@@ -1,6 +1,6 @@
 # Trakt Manager Changelog
 
-## [Update] - 2026-03-21
+## [Update] - {PR_MERGE_DATE}
 
 - Fixed episode check-in sending the show's Trakt ID instead of the episode's Trakt ID (#23638)
 - Added Windows platform support (#25419)
