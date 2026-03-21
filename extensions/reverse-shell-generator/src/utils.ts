@@ -122,13 +122,91 @@ export function replacePlaceholders(str: string, ip: string, port: string): stri
 export interface ShellTemplate {
   type: string;
   name: string;
-  icon: string;
+  icon: string; // devicon URL or emoji
   command: string;
   description: string;
   category: "reverse" | "bind" | "msfvenom";
   subcategory: string;
   os: ("linux" | "windows" | "mac")[];
   listener?: string;
+}
+
+/**
+ * Get devicon URL for a shell type
+ */
+export function getDeviconUrl(type: string): string {
+  const baseUrl = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons";
+
+  const iconMap: Record<string, string> = {
+    // Shell Tools
+    "bash-tcp": "bash/bash-original.svg",
+    "bash-exec": "bash/bash-original.svg",
+    "bash-196": "bash/bash-original.svg",
+    "bash-udp": "bash/bash-original.svg",
+    "bash-read-line": "bash/bash-original.svg",
+    "bash-5": "bash/bash-original.svg",
+    zsh: "bash/bash-original.svg",
+    "nc-busybox": "linux/linux-original.svg",
+    "nc-exe": "windows8/windows8-original.svg",
+    "ncat-exe": "windows8/windows8-original.svg",
+    "ncat-udp": "linux/linux-original.svg",
+    "nc-standard": "linux/linux-original.svg",
+    "nc-fifo": "linux/linux-original.svg",
+    "nc-openbsd": "linux/linux-original.svg",
+    ncat: "linux/linux-original.svg",
+    socat: "linux/linux-original.svg",
+    "sqlite3-nc": "sqlite/sqlite-original.svg",
+    "socat-tty": "linux/linux-original.svg",
+    haskell: "haskell/haskell-original.svg",
+    telnet: "linux/linux-original.svg",
+
+    // Scripting Languages
+    python2: "python/python-original.svg",
+    python3: "python/python-original.svg",
+    "python-shortest": "python/python-original.svg",
+    "python-windows": "python/python-original.svg",
+    "python-2-var": "python/python-original.svg",
+    "php-exec": "php/php-original.svg",
+    "php-system": "php/php-original.svg",
+    "php-passthru": "php/php-original.svg",
+    "php-shell_exec": "php/php-original.svg",
+    "php-ivan": "php/php-original.svg",
+    "php-pentestmonkey": "php/php-original.svg",
+    "perl-no-sh": "perl/perl-original.svg",
+    "perl-pm": "perl/perl-original.svg",
+    perl: "perl/perl-original.svg",
+    "ruby-no-sh": "ruby/ruby-original.svg",
+    ruby: "ruby/ruby-original.svg",
+    nodejs: "nodejs/nodejs-original.svg",
+    "nodejs-2": "nodejs/nodejs-original.svg",
+    "lua-2": "lua/lua-original.svg",
+
+    // Compiled Languages
+    golang: "go/go-original.svg",
+    rust: "rust/rust-original.svg",
+    crystal: "crystal/crystal-original.svg",
+    dart: "dart/dart-original.svg",
+    java: "java/java-original.svg",
+    "java-2": "java/java-original.svg",
+    "java-3": "java/java-original.svg",
+
+    // Windows
+    "powershell-1": "powershell/powershell-original.svg",
+    "powershell-2": "powershell/powershell-original.svg",
+    "powershell-3": "powershell/powershell-original.svg",
+    "powershell-4": "powershell/powershell-original.svg",
+    "powershell-5": "powershell/powershell-original.svg",
+    cmd: "windows8/windows8-original.svg",
+
+    // Other
+    csharp: "csharp/csharp-original.svg",
+    swift: "swift/swift-original.svg",
+    kotlin: "kotlin/kotlin-original.svg",
+    typescript: "typescript/typescript-original.svg",
+  };
+
+  const iconPath = iconMap[type] || "linux/linux-original.svg";
+  return `${baseUrl}/${iconPath}`;
 }
 
 /**

