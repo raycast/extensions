@@ -7,7 +7,7 @@ import {
   Clipboard,
   showHUD,
 } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import {
   TrackInfo,
   getNowPlaying,
@@ -24,12 +24,16 @@ interface Preferences {
   showArtistName: boolean;
 }
 
+const HIDE_AFTER_MS = 10 * 60 * 1000;
+
 export default function NowPlaying() {
   const preferences = getPreferenceValues<Preferences>();
   const [track, setTrack] = useState<TrackInfo | null>(null);
   const [artworkPath, setArtworkPath] = useState<string | null>(null);
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hidden, setHidden] = useState(false);
+  const pausedSince = useRef<number | null>(null);
 
   const fetchNowPlaying = useCallback(async () => {
     try {
@@ -37,6 +41,17 @@ export default function NowPlaying() {
       setTrack(data.track);
       setArtworkPath(data.artworkPath);
       setTrackUrl(data.trackUrl);
+
+      if (data.track && data.track.playerState === "playing") {
+        pausedSince.current = null;
+        setHidden(false);
+      } else {
+        if (pausedSince.current === null) {
+          pausedSince.current = Date.now();
+        } else if (Date.now() - pausedSince.current > HIDE_AFTER_MS) {
+          setHidden(true);
+        }
+      }
     } catch {
       setTrack(null);
       setArtworkPath(null);
@@ -49,6 +64,10 @@ export default function NowPlaying() {
   useEffect(() => {
     fetchNowPlaying();
   }, [fetchNowPlaying]);
+
+  if (hidden) {
+    return null;
+  }
 
   let menuBarTitle: string | undefined;
   if (track) {
@@ -65,7 +84,6 @@ export default function NowPlaying() {
       }
     : Icon.Music;
 
-  // Artwork icon for use inside the dropdown
   const artworkIcon: Image.ImageLike | undefined = artworkPath
     ? {
         source: artworkPath,
@@ -97,26 +115,24 @@ export default function NowPlaying() {
     >
       {track && (
         <>
-          {/* Now Playing header with artwork */}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               title={track.name}
-              subtitle={track.artist}
-              icon={artworkIcon || Icon.Music}
+              icon={Icon.Music}
+              onAction={() => revealInMusic()}
+            />
+            <MenuBarExtra.Item
+              title={track.album}
+              icon={artworkIcon || Icon.Cd}
+              onAction={() => openAlbumInMusic()}
             />
             <MenuBarExtra.Item
               title={track.artist}
               icon={Icon.Person}
               onAction={() => openArtistInMusic(track.artist)}
             />
-            <MenuBarExtra.Item
-              title={track.album}
-              icon={Icon.Cd}
-              onAction={() => openAlbumInMusic()}
-            />
           </MenuBarExtra.Section>
 
-          {/* Controls */}
           <MenuBarExtra.Section title="Controls">
             <MenuBarExtra.Item
               title={isPlaying ? "Pause" : "Play"}
@@ -147,7 +163,6 @@ export default function NowPlaying() {
             />
           </MenuBarExtra.Section>
 
-          {/* Share & Actions */}
           <MenuBarExtra.Section>
             {trackUrl && (
               <MenuBarExtra.Item
