@@ -18,7 +18,7 @@
 - Implemented form validation for IP addresses and port numbers
 - Implemented code quality enforcement with ESLint and Prettier
 
-## [Unreleased] - 2026-03-10
+## [Unreleased] - 2026-03-21
 
 ### Added
 - add listener alternatives for nc templates
@@ -28,12 +28,15 @@
 - update extension icon with terminal/reverse-shell theme
 
 ### Changed
+- Merge pull request #1 from gandli/dependabot/npm_and_yarn/npm_and_yarn-e5a595f223
+- **deps-dev**: bump flatted
 - trigger CI re-run
 - add GitHub Actions workflow for automatic changelog generation
 - Add Vitest test framework and unit tests
 - Initial commit: Reverse Shell Generator extension
 
 ### Fixed
+- resolve ESLint and Prettier validation errors
 - wrap C# template with PowerShell compile-and-run command
 - add prettier config, metadata folder, remove windows from nodejs
 - use correct file extensions when saving, fix title case
@@ -41,5 +44,8 @@
 - resolve minimatch ReDoS vulnerability
 
 ### Documentation
+- update CHANGELOG.md [skip ci]
+- update CHANGELOG.md [skip ci]
+- update CHANGELOG.md [skip ci]
 - update CHANGELOG.md [skip ci]
 - update CHANGELOG.md [skip ci]
