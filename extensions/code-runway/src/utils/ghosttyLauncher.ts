@@ -116,10 +116,20 @@ function buildGhosttyLaunchScript(project: Project, template: WarpTemplate, runn
 
   template.commands.slice(1).forEach((command, index) => {
     const configVar = `cfg${index + 1}`;
+    const termVar = `term${index + 1}`;
     lines.push(...buildSurfaceConfiguration(configVar, resolveWorkingDir(project, command)));
-    lines.push(
-      `set currentTerminal to split currentTerminal direction ${splitDirection} with configuration ${configVar}`,
-    );
+
+    if (template.launchMode === "multi-window") {
+      lines.push(`set newWindow to new window with configuration ${configVar}`);
+      lines.push(`set ${termVar} to focused terminal of selected tab of newWindow`);
+    } else if (template.launchMode === "multi-tab") {
+      lines.push(`set newTab to new tab in rootWindow with configuration ${configVar}`);
+      lines.push(`set ${termVar} to focused terminal of newTab`);
+    } else {
+      lines.push(`set ${termVar} to split currentTerminal direction ${splitDirection} with configuration ${configVar}`);
+    }
+
+    lines.push(`set currentTerminal to ${termVar}`);
     lines.push(...buildMaybeRunCommandStatements("currentTerminal", command.command, autoRun));
   });
 

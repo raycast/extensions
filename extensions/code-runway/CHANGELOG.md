@@ -6,11 +6,11 @@
 
 - cmux terminal support with CLI-based launcher (split panes, tabs, workspaces)
 - OpenAI Codex desktop app as an editor option
-- Auto-detect newly installed editors and add recommended templates automatically
+- Auto-detect newly installed editors and add recommended templates on next launch
 
 ### Changed
 
-- Editor auto-sync now runs on every load instead of only once, so new editors appear immediately
+- Editor auto-sync now runs on every load instead of only once, so new editors are picked up without manual configuration
 
 ## [1.1.0] - 2025-03-19
 
