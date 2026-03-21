@@ -1130,14 +1130,14 @@ ${cmd.listener ? `## Listener Command\n\n\`\`\`bash\n${cmd.listener}\n\`\`\`` : 
                         onAction={() => setSortBy("name")}
                       />
                       <Action
-                        title="Sort by OS"
+                        title="Sort by Os"
                         icon={Icon.ComputerChip}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
                         onAction={() => setSortBy("os")}
                       />
                     </ActionPanel.Section>
                     <Action
-                      title="Re-enter IP/Port"
+                      title="Re-enter Ip/port"
                       icon={Icon.ArrowClockwise}
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={pop}
