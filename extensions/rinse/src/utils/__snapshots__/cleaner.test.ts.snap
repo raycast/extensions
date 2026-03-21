@@ -1,0 +1,67 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`cleanText > snapshots > claude build error with fixed-width padding → paste anywhere 1`] = `
+"The build failed for two reasons:
+
+- The TypeScript compiler rejected the import because the module path was wrong
+- The test runner timed out because the mock server was not started before the suite ran
+
+Fix with:
+
+npm run build -- --skipLibCheck
+npm test -- --timeout 10000\\"
+`;
+
+exports[`cleanText > snapshots > claude code explanation → paste to PR description or code comment 1`] = `
+"The join pass runs after the decoration pass so that --- lines still act as paragraph boundaries when the joiner inspects them.
+
+First sentence.
+Second sentence.
+
+Reversing the order would cause the joiner to merge the sentences."
+`;
+
+exports[`cleanText > snapshots > claude markdown response with header, inline code, and fenced block 1`] = `
+"## Why this works
+
+The \`SENTENCE_END_RE\` regex matches \`.\`, \`?\`, \`!\`, and \`:\` at the end of a line, preventing the joiner from merging sentences across those boundaries.
+
+\`\`\`typescript
+const cleaned = text.replace(ANSI_ESCAPE_RE, "");
+const result = cleaned.trim();
+\`\`\`
+
+Paste this wherever you need it."
+`;
+
+exports[`cleanText > snapshots > claude prose explanation → paste to Slack or notes 1`] = `
+"The core issue is that the component is doing two things at once: fetching data and rendering it. This makes it harder to test and reason about.
+
+Extract the data-fetching into a custom hook instead."
+`;
+
+exports[`cleanText > snapshots > claude step-by-step → paste to Jira or Confluence 1`] = `
+"Here is how to migrate. Each step is independent so you can split across PRs if needed.
+
+1. Move fixture strings into a dedicated module. This keeps the test file focused on assertions rather than string data.
+
+2. Replace toBe assertions with toMatchSnapshot. The first run writes the snapshots; subsequent runs catch regressions."
+`;
+
+exports[`cleanText > snapshots > claude terminal response with box-drawing header → paste to notes or AI prompt 1`] = `
+"Summary
+
+Vitest is a good fit here. Its built-in TypeScript support means zero additional config for a pure utility file like cleaner.ts.
+
+- Node test runner: requires ts-node or --experimental-strip-types.
+- Jest: heavier setup, not worth it for a project this size."
+`;
+
+exports[`cleanText > snapshots > npm install output 1`] = `
+"Installing packages...
+added 42 packages in 3s
+
+3 packages are looking for funding
+
+found 0 vulnerabilities"
+`;
