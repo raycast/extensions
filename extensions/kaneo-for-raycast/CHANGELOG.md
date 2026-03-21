@@ -2,7 +2,8 @@
 
 ## [Fix Project Detail] - {PR_MERGE_DATE}
 
-- Fix the project details fetch that fails for version 2.3.12 and above.
+- Fix the project details fetch that fails for version 2.3.12 and above
+- Fix the create project slug max length to 8 characters
 
 ## [Assign Task] - 2026-03-08
 
