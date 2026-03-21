@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Extension Icon](./assets/extension-icon.png)
+<img width="120" height="120" alt="extension-icon" src="./assets/extension-icon.png" />
 
 A powerful Raycast extension for quickly generating various reverse shell commands.
 
