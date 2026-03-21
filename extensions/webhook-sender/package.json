@@ -15,6 +15,16 @@
     "Developer Tools",
     "Productivity"
   ],
+  "keywords": [
+    "webhook",
+    "http",
+    "api",
+    "post",
+    "request",
+    "developer",
+    "rest",
+    "json"
+  ],
   "commands": [
     {
       "name": "index",
