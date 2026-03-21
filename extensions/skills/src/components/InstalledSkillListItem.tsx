@@ -9,7 +9,7 @@ import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 function formatDate(iso: string): string | undefined {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return undefined;
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
 }
 
 function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected: boolean }) {

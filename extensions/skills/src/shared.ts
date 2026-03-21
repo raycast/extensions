@@ -35,7 +35,7 @@ export type SearchResponse = {
 export type SkillLockEntry = {
   source: string;
   sourceType: string;
-  sourceUrl: string;
+  sourceUrl?: string;
   skillPath: string;
   skillFolderHash: string;
   installedAt: string;
