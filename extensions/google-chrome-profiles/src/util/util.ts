@@ -191,17 +191,34 @@ export const openGoogleChrome = async (
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
+  const fallbackScript = (action: ChromeTarget["action"]): string => {
+    const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
+    const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
+
+    if (action === "newWindow") {
+      return `
+        set theAppPath to quoted form of "${escapedBinaryPath}"
+        set theProfile to quoted form of "${escapedProfileDirectory}"
+        do shell script theAppPath & " --profile-directory=" & theProfile & " --new-window"
+      `;
+    }
+
+    const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
+    const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
+
+    return `
+      set theAppPath to quoted form of "${escapedBinaryPath}"
+      set theProfile to quoted form of "${escapedProfileDirectory}"
+      set theLink to quoted form of "${escapedFallbackUrl}"
+      do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
+    `;
+  };
+
   // For newWindow, launch Chrome directly via CLI to avoid focusing an existing window first
   if (action === "newWindow") {
-    const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
-    const script = `
-      set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-      set theProfile to quoted form of "${escapedProfileDirectory}"
-      do shell script theAppPath & " --profile-directory=" & theProfile & " --new-window"
-    `;
     try {
       await willOpen();
-      await runAppleScript(script);
+      await runAppleScript(fallbackScript(action));
     } catch (error) {
       // Handle errors silently
     }
@@ -297,20 +314,9 @@ export const openGoogleChrome = async (
   }
 
   // Fallback: use shell script to open Chrome with profile directory
-  const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
-  const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
-  const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
-  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
-  const fallbackScript = `
-    set theAppPath to quoted form of "${escapedBinaryPath}"
-    set theProfile to quoted form of "${escapedProfileDirectory}"
-    set theLink to quoted form of "${escapedFallbackUrl}"
-    do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
-  `;
-
   try {
     await willOpen();
-    await runAppleScript(fallbackScript);
+    await runAppleScript(fallbackScript(action));
   } catch (fallbackError) {
     console.error("Fallback shell script failed:", fallbackError);
 

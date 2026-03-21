@@ -282,11 +282,6 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               <ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} browser={props.browser} />
             }
           />
-          <List.Item
-            title="New Window"
-            icon={Icon.AppWindow}
-            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} />}
-          />
           {newTabItems.map((tab, index) => (
             <List.Item
               key={`newtab-${index}`}
@@ -296,6 +291,11 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
+          <List.Item
+            title="New Window"
+            icon={Icon.Duplicate}
+            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} />}
+          />
           {clipboardItem && (
             <List.Item
               title={clipboardItem.title}
