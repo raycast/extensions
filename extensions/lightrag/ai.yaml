@@ -1,0 +1,106 @@
+instructions: |
+  LightRAG is a self-hosted knowledge base that stores documents
+  in a graph-based RAG (Retrieval Augmented Generation) system.
+  It primarily contains scientific papers and research notes
+  managed via Zotero.
+
+  Tool usage guidelines:
+  - Use "query-lightrag" when the user wants a natural-language answer
+    about stored knowledge, papers, or documents. Default mode is "mix".
+  - Use "query-lightrag-data" when the user needs structured retrieval
+    (entities, relationships, chunks, references) without a generated
+    prose answer — for evidence, debugging, or analysis.
+  - Use "list-documents" when the user wants to browse or filter the
+    document list (paths, status, pagination).
+  - Use "get-document-status-counts" when the user only needs counts
+    per status (how many FAILED, PROCESSED, etc.) without listing files.
+  - Use "get-health" for server configuration, models, and global health.
+  - Use "get-pipeline-status" for indexing pipeline activity (busy,
+    job, progress, messages) — not the same as get-health.
+  - Use "insert-text" to add a text note (e.g. summary) into the
+    knowledge base; entries are tagged with file_source raycast_chat_text.
+    After insert, use "get-track-status" with the returned track_id if the
+    user asks about that batch; use "get-pipeline-status" for overall
+    pipeline activity.
+  - Use "get-track-status" with a track_id when asking whether a specific
+    upload or insert batch finished or failed — not for global pipeline
+    state (use get-pipeline-status) or file browsing (use list-documents).
+
+  Knowledge graph tools (explore entities and links, not document Q&A):
+  - Use "search-graph-labels" to find label strings by fuzzy match.
+  - Use "list-graph-labels" only when a full enumeration of labels is
+    needed (can be large).
+  - Use "get-popular-graph-labels" for the most connected hub concepts.
+  - Use "get-knowledge-graph" with a starting label to explore a local
+    subgraph; search labels first if the exact name is unknown. By default
+    responses are condensed (max_depth 3, max_nodes 64, long properties
+    truncated) so Raycast can show the tool result; set full_properties only
+    when the user explicitly needs full text and accepts size limits.
+  - Use "check-entity-exists" for a quick existence check of an entity name.
+
+  Query mode recommendations:
+  - "mix" is the best default for most queries
+  - "local" for specific entity details
+  - "global" for broad pattern analysis
+  - "hybrid" combines local and global
+  - "naive" for simple keyword search
+  - "bypass" to skip retrieval and query LLM directly
+
+  Always cite references when they are included in query results.
+  If no results are found, say so clearly.
+
+evals:
+  - input: "@lightrag What papers do I have about bump mapping?"
+    mocks:
+      query-lightrag: |
+        Bump mapping is discussed in several papers...
+
+        ---
+        **References:**
+        - bump_mapping_survey_2024.pdf
+    expected:
+      - callsTool:
+          name: "query-lightrag"
+          arguments:
+            query:
+              includes: "bump mapping"
+      - includes: "bump"
+
+  - input: "@lightrag Search globally for neural rendering approaches"
+    mocks:
+      query-lightrag: "Neural rendering combines deep learning..."
+    expected:
+      - callsTool:
+          name: "query-lightrag"
+          arguments:
+            mode:
+              eq: "global"
+
+  - input: "@lightrag Show me all my stored documents"
+    mocks:
+      list-documents: |
+        **Document Status Overview:**
+        - PROCESSED: 42
+        **Page 1 of 3** (42 total documents)
+    expected:
+      - callsTool: "list-documents"
+      - includes: "documents"
+
+  - input: "@lightrag Is the server running?"
+    mocks:
+      get-health: |
+        **LightRAG Server Status: healthy**
+        - LLM: openai / gpt-4
+    expected:
+      - callsTool: "get-health"
+      - includes: "healthy"
+
+  - input: "@lightrag Show me only failed documents"
+    mocks:
+      list-documents: "No documents found matching the criteria."
+    expected:
+      - callsTool:
+          name: "list-documents"
+          arguments:
+            status_filter:
+              eq: "FAILED"

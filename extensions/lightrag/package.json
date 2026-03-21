@@ -1,0 +1,134 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lightrag",
+  "version": "1.0.0",
+  "title": "LightRAG Knowledge Base",
+  "description": "Search and manage documents in your self-hosted LightRAG server.",
+  "icon": "extension-icon.png",
+  "author": "armin_goffin",
+  "platforms": ["macOS"],
+  "categories": ["Productivity", "Data"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "LightRAG Status",
+      "description": "Check the connection status of your LightRAG server",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "query-lightrag",
+      "title": "Query LightRAG (Answer)",
+      "description": "Ask the knowledge base in natural language and get a generated answer (RAG), with optional source references. Use for normal questions about papers and notes (e.g. explanations, comparisons). Do NOT use for raw graph dumps — use \"Query LightRAG (structured data)\" instead. Modes: mix (default), local, global, hybrid, naive, bypass."
+    },
+    {
+      "name": "query-lightrag-data",
+      "title": "Query LightRAG (Structured Data)",
+      "description": "Retrieve structured retrieval results WITHOUT a generated prose answer: entities, relationships, text chunks, and references (JSON). Use for evidence inspection, debugging retrieval, or analyzing what would feed a RAG answer. Not for casual Q&A — use \"Query LightRAG (answer)\" for that."
+    },
+    {
+      "name": "list-documents",
+      "title": "List Documents",
+      "description": "Browse documents with pagination and filters (status, sort). Use to list files, see filenames/paths, timestamps, and per-status counts on the page. For a quick global count by status without listing rows, use \"Document Status Counts\". Not for answering content questions — use query tools."
+    },
+    {
+      "name": "get-document-status-counts",
+      "title": "Document Status Counts",
+      "description": "Returns only how many documents are in each status (PENDING, PROCESSING, etc.) — lightweight, no filenames. Use for dashboards or \"how many failed?\". To list actual files or pages, use \"List Documents\" instead."
+    },
+    {
+      "name": "get-health",
+      "title": "Get Server Health",
+      "description": "Server-wide health and configuration: LLM/embedding models, auth mode, versions, pipeline_busy, WebUI. Use for \"is the server up?\", model names, or connectivity. Not for per-document processing progress — use \"Pipeline status\" for the indexing pipeline."
+    },
+    {
+      "name": "get-pipeline-status",
+      "title": "Pipeline Status",
+      "description": "Detailed document indexing pipeline state: busy, current job, batches, progress messages/history. Use when the user asks whether ingestion/indexing is running, stuck, or what the pipeline is doing. Not the same as server health — use \"Get Server Health\" for models and global status."
+    },
+    {
+      "name": "insert-text",
+      "title": "Insert Text (Raycast Notes)",
+      "description": "Insert a text note into LightRAG for later retrieval (e.g. summaries or chat notes). Always tagged with a dedicated Raycast chat text file_source so it is distinguishable from PDFs. Returns a track_id for background processing; use \"Pipeline Status\" for overall indexing activity, or \"Track Status\" with that track_id to see this batch’s processing state."
+    },
+    {
+      "name": "get-track-status",
+      "title": "Track Status",
+      "description": "Look up processing state for a specific track_id (returned by insert-text, upload, or text insert APIs). Use when the user asks whether a particular upload or note batch finished, failed, or is still processing. Not a substitute for \"Pipeline Status\" (global pipeline) or \"List Documents\" (file listing)."
+    },
+    {
+      "name": "list-graph-labels",
+      "title": "List Graph Labels",
+      "description": "Returns all entity/label strings in the knowledge graph (can be large). Use to enumerate graph vocabulary. For fuzzy lookup by substring, prefer \"Search Graph Labels\"; for central topics by connectivity, prefer \"Popular Graph Labels\"."
+    },
+    {
+      "name": "get-popular-graph-labels",
+      "title": "Popular Graph Labels",
+      "description": "Labels ranked by graph connectivity (degree) — \"hub\" concepts. Use for overview of dominant themes. Not a full list — use \"List Graph Labels\" for that. Not for natural-language Q&A — use query tools."
+    },
+    {
+      "name": "search-graph-labels",
+      "title": "Search Graph Labels",
+      "description": "Fuzzy search for label names matching a query string. Use to find how a concept is named in the graph before opening a subgraph. Not for document content search — use \"Query LightRAG\" tools for that."
+    },
+    {
+      "name": "get-knowledge-graph",
+      "title": "Knowledge Graph Subgraph",
+      "description": "Returns a connected subgraph around one starting label. Defaults: max_depth 3, max_nodes 64 (keeps Raycast tool output readable). Long fields (e.g. description, file_path) are truncated unless full_properties is true — full_properties may hit Raycast \"message too long\". Increase max_nodes only if needed. Requires an exact label — use \"Search Graph Labels\" first if unsure of spelling."
+    },
+    {
+      "name": "check-entity-exists",
+      "title": "Check Entity Exists",
+      "description": "Quick boolean check whether an entity name exists in the graph. Use before merge/rename-style questions or to validate a label string. Does not return relationships — use \"Knowledge Graph Subgraph\" or query-data for structure."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "LightRAG Server URL",
+      "description": "The base URL of your LightRAG server including protocol and port.",
+      "type": "textfield",
+      "required": true,
+      "default": "http://127.0.0.1:9621",
+      "placeholder": "http://127.0.0.1:9621"
+    },
+    {
+      "name": "username",
+      "title": "LightRAG Username",
+      "description": "Your LightRAG login username.",
+      "type": "textfield",
+      "required": true,
+      "default": "",
+      "placeholder": "username"
+    },
+    {
+      "name": "password",
+      "title": "LightRAG Password",
+      "description": "Your LightRAG login password.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish with npm.\\nIf that's the case, run \\`npx @raycast/api@latest publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
