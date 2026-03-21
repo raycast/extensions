@@ -91,6 +91,7 @@
   ],
   "title": "Trakt Manager",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
