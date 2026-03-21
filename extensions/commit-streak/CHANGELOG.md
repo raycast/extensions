@@ -1,9 +1,10 @@
 # Commit Streak Changelog
 
-## [Initial Release] - 2026-03-21
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Shows commit streak in the menu bar with a bolt icon
 - Shows snowflake icon when no commits today
 - Switches to sad face after 7+ days without commits
-- Milestone icons at 7, 30, 100, 314, and 365 day streaks
+- Milestone icons at 10, 30, 100, 314, and 365 day streaks
+- Streak stays alive until end of day if committed yesterday
 - Auto-refreshes every 10 minutes

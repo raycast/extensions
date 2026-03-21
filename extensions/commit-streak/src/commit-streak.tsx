@@ -89,21 +89,21 @@ function calculateStreak(
     .flatMap((w) => w.contributionDays)
     .sort((a, b) => b.date.localeCompare(a.date));
 
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toLocaleDateString("sv");
   const todayEntry = allDays.find((d) => d.date === today);
   const hasCommitToday = todayEntry ? todayEntry.contributionCount > 0 : false;
   const todayCount = todayEntry?.contributionCount ?? 0;
 
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-  const sevenDaysAgoStr = sevenDaysAgo.toISOString().split("T")[0];
+  const sevenDaysAgoStr = sevenDaysAgo.toLocaleDateString("sv");
   const totalLastWeek = allDays
     .filter((d) => d.date >= sevenDaysAgoStr)
     .reduce((sum, d) => sum + d.contributionCount, 0);
 
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split("T")[0];
+  const yesterdayStr = yesterday.toLocaleDateString("sv");
   const yesterdayEntry = allDays.find((d) => d.date === yesterdayStr);
   const hadCommitYesterday = yesterdayEntry
     ? yesterdayEntry.contributionCount > 0
