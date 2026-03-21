@@ -83,13 +83,6 @@ export interface BusyCalNextAvailableQuery {
 }
 
 /**
- * Raycast argument contract for no-view quick add commands.
- */
-export interface QuickAddArguments {
-  inputText: string;
-}
-
-/**
  * Form state for structured event creation.
  */
 export interface EventFormValues {

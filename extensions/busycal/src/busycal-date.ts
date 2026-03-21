@@ -209,7 +209,9 @@ function shouldShowTime(
 }
 
 function formatDate(date: Date, showsTime: boolean): string {
-  return new Intl.DateTimeFormat(undefined, {
+  // Raycast extensions render copy in US English, so date labels should stay
+  // stable regardless of the user's macOS locale.
+  return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: showsTime ? "short" : undefined,
   }).format(date);
