@@ -1,4 +1,4 @@
-# Jenkins Build Trigger
+# JenkiBuild
 
 Trigger Jenkins builds from Raycast without leaving the keyboard.
 
@@ -51,9 +51,3 @@ Trigger Jenkins builds from Raycast without leaving the keyboard.
 1. Open Raycast and search for "Build History"
 2. View your last 20 triggered builds with status and timestamps
 3. Select a build to open it in Jenkins, or re-trigger the same job
-
-## Screenshots
-
-![Trigger Build](metadata/screenshot-trigger-build.png)
-
-![Build History](metadata/screenshot-build-history.png)
