@@ -6,7 +6,6 @@ import {
   getPreferenceValues,
   Icon,
   Image,
-  LaunchProps,
   List,
   showHUD,
   showToast,
@@ -74,9 +73,14 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
             icon={Icon.AppWindow}
             shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
             onAction={async () => {
-              await openGoogleChrome(profile, ChromeAction.NewWindow, async () => {
-                await showHUD("Opening new window...");
-              });
+              await openGoogleChrome(
+                profile,
+                ChromeAction.NewWindow,
+                async () => {
+                  await showHUD("Opening new window...");
+                },
+                browser,
+              );
             }}
           />
         </ActionPanel>
@@ -294,7 +298,9 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
           <List.Item
             title="New Window"
             icon={Icon.Duplicate}
-            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} />}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} browser={props.browser} />
+            }
           />
           {clipboardItem && (
             <List.Item
