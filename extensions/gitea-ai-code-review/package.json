@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gitea-ai-code-review",
+  "title": "Gitea AI Code Review",
+  "description": "AI-powered code review assistant for Gitea pull requests",
+  "icon": "extension_icon.png",
+  "author": "pscheidt",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-pull-requests",
+      "title": "List Pull Requests",
+      "description": "Show all open pull requests from Gitea",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "giteaUrl",
+      "title": "Gitea URL",
+      "description": "Your Gitea Instance URL",
+      "type": "textfield",
+      "required": true,
+      "default": "http://your-gitea-instance:3000"
+    },
+    {
+      "name": "giteaToken",
+      "title": "Gitea API Token",
+      "description": "Personal access token for Gitea API",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "repository",
+      "title": "Repository",
+      "description": "Repository in format: owner/repo",
+      "type": "textfield",
+      "required": true,
+      "default": "you/your-repository"
+    },
+    {
+      "name": "aiModel",
+      "title": "AI Model",
+      "description": "AI model to use for code reviews",
+      "type": "dropdown",
+      "required": false,
+      "default": "anthropic-claude-sonnet-4-5",
+      "data": [
+        {
+          "title": "Claude Sonnet 4.5 (Default)",
+          "value": "anthropic-claude-sonnet-4-5"
+        },
+        {
+          "title": "Claude Opus 4.5",
+          "value": "anthropic-claude-opus-4-5"
+        },
+        {
+          "title": "Claude Haiku 4.5",
+          "value": "anthropic-claude-haiku-4-5"
+        },
+        {
+          "title": "GPT-4 Turbo",
+          "value": "openai-gpt-4-turbo"
+        },
+        {
+          "title": "GPT-4o",
+          "value": "openai-gpt-4o"
+        },
+        {
+          "title": "GPT-3.5 Turbo",
+          "value": "openai-gpt-3.5-turbo"
+        }
+      ]
+    },
+    {
+      "name": "reviewLanguage",
+      "title": "Review Language / Specialization",
+      "description": "Primary language of the codebase – tailors the AI reviewer's expertise",
+      "type": "dropdown",
+      "required": false,
+      "default": "general",
+      "data": [
+        { "title": "General / All-rounder (Default)", "value": "general" },
+        { "title": "Java", "value": "java" },
+        { "title": "TypeScript / JavaScript", "value": "typescript" },
+        { "title": "Python", "value": "python" },
+        { "title": "Go", "value": "go" },
+        { "title": "Rust", "value": "rust" },
+        { "title": "C / C++", "value": "cpp" },
+        { "title": "C#", "value": "csharp" },
+        { "title": "Kotlin", "value": "kotlin" },
+        { "title": "Swift", "value": "swift" },
+        { "title": "Ruby", "value": "ruby" },
+        { "title": "PHP", "value": "php" },
+        { "title": "Scala", "value": "scala" },
+        { "title": "Shell / Bash", "value": "shell" }
+      ]
+    },
+    {
+      "name": "javaVersion",
+      "title": "Java Version",
+      "description": "Target Java language level (only applied when Review Language is set to Java)",
+      "type": "dropdown",
+      "required": false,
+      "default": "Java 21",
+      "data": [
+        { "title": "Java 8 (LTS)", "value": "Java 8" },
+        { "title": "Java 11 (LTS)", "value": "Java 11" },
+        { "title": "Java 17 (LTS)", "value": "Java 17" },
+        { "title": "Java 21 (LTS) – Default", "value": "Java 21" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
