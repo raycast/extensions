@@ -8,6 +8,21 @@ struct Payload: Decodable {
   let location: String?
   let allDay: Bool
   let preferredCalendarIdentifier: String?
+  let recurrence: RecurrencePayload?
+}
+
+struct RecurrencePayload: Decodable {
+  let frequency: String
+  let interval: Int?
+  let weekday: Int?
+  let dayOfMonth: Int?
+  let end: RecurrenceEndPayload
+}
+
+struct RecurrenceEndPayload: Decodable {
+  let type: String
+  let count: Int?
+  let untilEpochMs: Double?
 }
 
 enum ScriptFailure: Error {
@@ -102,6 +117,9 @@ func saveEvent(payload: Payload) throws -> String {
   }
 
   event.calendar = calendar
+  if let recurrence = payload.recurrence {
+    try applyRecurrence(recurrence, to: event)
+  }
 
   do {
     try store.save(event, span: .thisEvent, commit: true)
@@ -110,6 +128,103 @@ func saveEvent(payload: Payload) throws -> String {
   }
 
   return calendar.title
+}
+
+func applyRecurrence(_ recurrence: RecurrencePayload, to event: EKEvent) throws {
+  let interval = max(recurrence.interval ?? 1, 1)
+  let frequency = try mapFrequency(recurrence.frequency)
+  let end = try mapRecurrenceEnd(recurrence.end, startDate: event.startDate)
+
+  var daysOfTheWeek: [EKRecurrenceDayOfWeek]?
+  var daysOfTheMonth: [NSNumber]?
+
+  if frequency == .weekly, let weekday = recurrence.weekday {
+    guard let mappedWeekday = mapWeekday(weekday) else {
+      throw ScriptFailure.message("Invalid recurrence weekday")
+    }
+    daysOfTheWeek = [EKRecurrenceDayOfWeek(mappedWeekday)]
+  }
+
+  if frequency == .monthly, let dayOfMonth = recurrence.dayOfMonth {
+    guard (1...31).contains(dayOfMonth) else {
+      throw ScriptFailure.message("Invalid recurrence day-of-month")
+    }
+    daysOfTheMonth = [NSNumber(value: dayOfMonth)]
+  }
+
+  let rule = EKRecurrenceRule(
+    recurrenceWith: frequency,
+    interval: interval,
+    daysOfTheWeek: daysOfTheWeek,
+    daysOfTheMonth: daysOfTheMonth,
+    monthsOfTheYear: nil,
+    weeksOfTheYear: nil,
+    daysOfTheYear: nil,
+    setPositions: nil,
+    end: end
+  )
+  event.recurrenceRules = [rule]
+}
+
+func mapFrequency(_ frequency: String) throws -> EKRecurrenceFrequency {
+  switch frequency {
+  case "daily":
+    return .daily
+  case "weekly":
+    return .weekly
+  case "monthly":
+    return .monthly
+  default:
+    throw ScriptFailure.message("Invalid recurrence frequency")
+  }
+}
+
+func mapWeekday(_ weekday: Int) -> EKWeekday? {
+  switch weekday {
+  case 0:
+    return .sunday
+  case 1:
+    return .monday
+  case 2:
+    return .tuesday
+  case 3:
+    return .wednesday
+  case 4:
+    return .thursday
+  case 5:
+    return .friday
+  case 6:
+    return .saturday
+  default:
+    return nil
+  }
+}
+
+func mapRecurrenceEnd(_ end: RecurrenceEndPayload, startDate: Date) throws -> EKRecurrenceEnd {
+  switch end.type {
+  case "count":
+    guard let count = end.count else {
+      throw ScriptFailure.message("Missing recurrence count")
+    }
+    guard (1...50).contains(count) else {
+      throw ScriptFailure.message("Recurrence count must be between 1 and 50")
+    }
+    return EKRecurrenceEnd(occurrenceCount: count)
+  case "until":
+    guard let untilEpochMs = end.untilEpochMs else {
+      throw ScriptFailure.message("Missing recurrence until date")
+    }
+    let untilDate = Date(timeIntervalSince1970: untilEpochMs / 1000)
+    guard untilDate >= startDate else {
+      throw ScriptFailure.message("Recurrence end date must be after event start")
+    }
+    if let maxDate = Calendar.current.date(byAdding: .year, value: 1, to: startDate), untilDate > maxDate {
+      throw ScriptFailure.message("Recurrence end date exceeds 1 year limit")
+    }
+    return EKRecurrenceEnd(end: untilDate)
+  default:
+    throw ScriptFailure.message("Invalid recurrence end type")
+  }
 }
 
 func main() throws {

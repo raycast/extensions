@@ -6,6 +6,13 @@ export interface ParsedSchedule {
   location?: string;
   source: string;
   intent: "event" | "deadline";
+  recurrence?: ParsedRecurrence;
+}
+
+export interface ParsedRecurrence {
+  frequency: "daily" | "weekly" | "monthly";
+  weekday?: number;
+  dayOfMonth?: number;
 }
 
 export type ParseResult =
@@ -37,33 +44,71 @@ const WEEKDAY_TOKENS = ["일", "월", "화", "수", "목", "금", "토"] as cons
 const AM_TOKENS = new Set(["새벽", "아침", "오전"]);
 const PM_TOKENS = new Set(["점심", "오후", "저녁", "밤"]);
 
-// Keep the parse.rb regular expression behavior as closely as possible.
+// parse.rb의 정규식을 최대한 그대로 유지한다.
 const MATCHER =
   /^((이달|이번달|담달|다음달|(내년|[0-9]{4}년){0,1} *[0-9]+월){0,1} *[0-9]+일+(?! *(?:안에|이내|내))|[0-9]+일 *(?:안에|이내|내)|오늘|내일|모레|(?:이번주|담주|다음주|다담주|다다음주) *내|(이번주|담주|다음주|다담주|다다음주){0,1} *([월화수목금토일](요일|욜)))( *(새벽|아침|점심|오전|오후|저녁|밤){0,1} *([0-9]+시|[0-9]+:[0-9]+) *([0-9]+분|반){0,1}){0,1}( *부터 *(?:새벽|아침|점심|오전|오후|저녁|밤){0,1} *(?:[0-9]+시|[0-9]+:[0-9]+) *(?:[0-9]+분|반){0,1} *까지){0,1}(?: *(?:까지|까지는|전까지|전에|전|이전까지|이전)){0,1}(?: *부터){0,1}에{0,1}( *(.+?)에서){0,1} */u;
 const DEADLINE_SUFFIX_PATTERN = /(까지|까지는|전까지|전에|전|이전까지|이전)\s*$/u;
 const RELATIVE_HOURS_WITHIN_PATTERN = /^([0-9]+)시간 *(안에|이내|내)\s*/u;
 const DAY_WITHIN_PATTERN = /^(오늘|내일|모레)\s*중\s*/u;
 const MONTH_WITHIN_PATTERN = /^(이달|이번달|담달|다음달)\s*내\s*/u;
-const TIME_ONLY_RANGE_PATTERN =
-  /^\s*(새벽|아침|점심|오전|오후|저녁|밤){0,1}\s*([0-9]+시|[0-9]+:[0-9]+)\s*([0-9]+분|반){0,1}\s*부터\s*(새벽|아침|점심|오전|오후|저녁|밤){0,1}\s*([0-9]+시|[0-9]+:[0-9]+)\s*([0-9]+분|반){0,1}\s*까지(?:\s*에)?\s*(.+){0,1}\s*$/u;
-const TIME_ONLY_SINGLE_PATTERN =
-  /^\s*(새벽|아침|점심|오전|오후|저녁|밤){0,1}\s*([0-9]+시|[0-9]+:[0-9]+)\s*([0-9]+분|반){0,1}\s*((?:까지|까지는|전까지|전에|전|이전까지|이전)|부터){0,1}(?:\s*에)?\s*(.+){0,1}\s*$/u;
+const DAILY_RECURRENCE_PATTERN = /^매\s*일\s+(.+)$/u;
+const WEEKLY_RECURRENCE_PATTERN = /^매\s*주(?:\s*([월화수목금토일](?:요일|욜)?))?\s+(.+)$/u;
+const MONTHLY_RECURRENCE_PATTERN = /^매\s*월\s*([0-9]{1,2})일\s+(.+)$/u;
+const DEADLINE_KEYWORD_ONLY_PREFIX_PATTERN = /^(마감|기한|데드라인)\s+(.+)$/u;
+const DEADLINE_KEYWORD_ONLY_SUFFIX_PATTERN = /^(.+)\s+(마감|기한|데드라인)$/u;
+const DEADLINE_KEYWORD_ONLY_SET = new Set(["마감", "기한", "데드라인"]);
+const EXPLICIT_LOCATION_PATTERN = /(?:^|[\s,;])장소\s*(?:는|:|=)\s*(.+)$/u;
+const TRAILING_LOCATION_AT_END_PATTERN = /^(.+?)\s+([^\s]+)에서$/u;
+const LEADING_LOCATION_PATTERN = /^(.+?)에서\s+(.+)$/u;
+const LOCATION_SURROUNDING_QUOTES_PATTERN = /^["'“”‘’]+|["'“”‘’]+$/gu;
+const LOCATION_TRAILING_PUNCTUATION_PATTERN = /[.,!?;:。！？、]+$/gu;
+const TOKEN_SPACING_NORMALIZERS: Array<[RegExp, string]> = [
+  [/다다음\s*주/gu, "다다음주"],
+  [/다담\s*주/gu, "다담주"],
+  [/다음\s*주/gu, "다음주"],
+  [/담\s*주/gu, "담주"],
+  [/이번\s*주/gu, "이번주"],
+  [/다음\s*달/gu, "다음달"],
+  [/담\s*달/gu, "담달"],
+  [/이번\s*달/gu, "이번달"],
+  [/이\s*달/gu, "이달"],
+];
 
 export function parseKoreanSchedule(input: string, options: ParseOptions = {}): ParseResult {
   if (!input.trim()) {
     return {
       ok: false,
-      error: "The schedule sentence is empty.",
+      error: "일정 문장이 비어 있습니다.",
     };
   }
 
-  const scheduleString = input.normalize("NFC").trim();
+  const sourceString = input.normalize("NFC").trim();
+  const normalizedScheduleString = normalizeTokenSpacing(sourceString);
+  const explicitLocationExtraction = extractExplicitLocation(normalizedScheduleString);
+  const trailingLocationExtraction = extractTrailingLocationAtSentenceEnd(explicitLocationExtraction.text);
+  const scheduleString = trailingLocationExtraction.text;
+  const explicitLocation = explicitLocationExtraction.location ?? trailingLocationExtraction.location;
   const now = options.now ? new Date(options.now) : new Date();
   const today = startOfDay(now);
   const durationMinutes = options.defaultDurationMinutes ?? 60;
 
+  const recurringResult = tryParseRecurringSchedule({
+    scheduleString,
+    sourceString,
+    explicitLocation,
+    now,
+    today,
+    durationMinutes,
+    options,
+  });
+  if (recurringResult) {
+    return recurringResult;
+  }
+
   const specialDeadlineResult = tryParseSpecialDeadlineSchedule({
     scheduleString,
+    sourceString,
+    explicitLocation,
     now,
     today,
     durationMinutes,
@@ -72,22 +117,22 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     return specialDeadlineResult;
   }
 
-  const timeOnlyResult = tryParseTimeOnlySchedule({
-    scheduleString,
-    now,
-    today,
-    durationMinutes,
-  });
-  if (timeOnlyResult) {
-    return timeOnlyResult;
-  }
-
   const match = scheduleString.match(MATCHER);
 
   if (!match) {
+    const keywordOnlyDeadlineResult = tryParseKeywordOnlyDeadline({
+      scheduleString,
+      sourceString,
+      explicitLocation,
+      today,
+    });
+    if (keywordOnlyDeadlineResult) {
+      return keywordOnlyDeadlineResult;
+    }
+
     return {
       ok: false,
-      error: "Could not recognize a date/time pattern. Example: 다음주 화요일 오후 3시에 회의",
+      error: "날짜/시간 패턴을 인식하지 못했습니다. 예) 다음주 화요일 오후 3시에 회의",
     };
   }
 
@@ -190,7 +235,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (hour === undefined || minute === undefined) {
       return {
         ok: false,
-        error: "Time range expressions must include a start time. Example: 내일 오후 4시부터 6시까지 회의",
+        error: "시간 범위는 시작 시간을 포함해 입력해 주세요. 예) 내일 오후 4시부터 6시까지 회의",
       };
     }
 
@@ -219,7 +264,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (relativeWithinDays !== undefined && (Number.isNaN(relativeWithinDays) || relativeWithinDays < 1)) {
     return {
       ok: false,
-      error: "Relative day values must be at least 1. Example: 3일 안에",
+      error: "상대 일수는 1일 이상으로 입력해 주세요. 예) 3일 안에",
     };
   }
 
@@ -246,7 +291,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (!isValidDayOfMonth(shiftedYear, shiftedMonth, day)) {
       return {
         ok: false,
-        error: "Invalid date. Please check the month/day combination.",
+        error: "유효하지 않은 날짜입니다. 월/일 조합을 확인해 주세요.",
       };
     }
 
@@ -271,21 +316,21 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (month !== undefined && (month < 1 || month > 12)) {
     return {
       ok: false,
-      error: "Month must be between 1 and 12.",
+      error: "월은 1부터 12 사이로 입력해 주세요.",
     };
   }
 
   if (day !== undefined && day < 1) {
     return {
       ok: false,
-      error: "Day must be 1 or greater.",
+      error: "일은 1 이상의 값으로 입력해 주세요.",
     };
   }
 
   if (year !== undefined && month !== undefined && day !== undefined && !isValidDayOfMonth(year, month, day)) {
     return {
       ok: false,
-      error: "Invalid date. Please check the month/day combination.",
+      error: "유효하지 않은 날짜입니다. 월/일 조합을 확인해 주세요.",
     };
   }
 
@@ -293,14 +338,14 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (ampm && (hour < 1 || hour > 12)) {
       return {
         ok: false,
-        error: "AM/PM hours must be between 1 and 12.",
+        error: "오전/오후 시간은 1시부터 12시 사이로 입력해 주세요.",
       };
     }
 
     if (!ampm && (hour < 0 || hour > 23)) {
       return {
         ok: false,
-        error: "Hour must be between 0 and 23.",
+        error: "시간은 0시부터 23시 사이로 입력해 주세요.",
       };
     }
   }
@@ -308,7 +353,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (minute !== undefined && (minute < 0 || minute > 59)) {
     return {
       ok: false,
-      error: "Minute must be between 0 and 59.",
+      error: "분은 0부터 59 사이로 입력해 주세요.",
     };
   }
 
@@ -316,14 +361,14 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
     if (endAmpm && (endHour < 1 || endHour > 12)) {
       return {
         ok: false,
-        error: "End time with AM/PM must be between 1 and 12.",
+        error: "종료 시간의 오전/오후 표기는 1시부터 12시 사이로 입력해 주세요.",
       };
     }
 
     if (!endAmpm && (endHour < 0 || endHour > 23)) {
       return {
         ok: false,
-        error: "End hour must be between 0 and 23.",
+        error: "종료 시간은 0시부터 23시 사이로 입력해 주세요.",
       };
     }
   }
@@ -331,7 +376,7 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (endMinute !== undefined && (endMinute < 0 || endMinute > 59)) {
     return {
       ok: false,
-      error: "End minute must be between 0 and 59.",
+      error: "종료 분은 0부터 59 사이로 입력해 주세요.",
     };
   }
 
@@ -350,11 +395,14 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
   if (year === undefined || month === undefined || day === undefined) {
     return {
       ok: false,
-      error: "Failed to resolve a date. Check numeric dates (e.g. 3월 2일) or weekday expressions.",
+      error: "날짜를 계산하지 못했습니다. 숫자 날짜(예: 3월 2일) 또는 요일 표현을 확인해 주세요.",
     };
   }
 
-  const title = scheduleString.replace(MATCHER, "").trim() || "Untitled";
+  const rawTitle = scheduleString.replace(MATCHER, "").trim();
+  const titleAndLocation =
+    explicitLocation || place ? { title: rawTitle || "새 일정" } : extractTitleAndLocation(rawTitle);
+  const title = titleAndLocation.title || "새 일정";
   const hasTime = hour !== undefined && minute !== undefined;
   const parsedHead = match[0].trim();
   const hasRangeExpression = Boolean(rangeTimeToken);
@@ -401,20 +449,361 @@ export function parseKoreanSchedule(input: string, options: ParseOptions = {}): 
       start,
       end,
       allDay: !hasTime,
-      location: place,
-      source: scheduleString,
+      location: explicitLocation ?? sanitizeLocation(place) ?? titleAndLocation.location,
+      source: sourceString,
       intent,
     },
   };
 }
 
+function normalizeTokenSpacing(value: string): string {
+  let next = value;
+  for (const [pattern, replacement] of TOKEN_SPACING_NORMALIZERS) {
+    next = next.replace(pattern, replacement);
+  }
+  return next;
+}
+
+function extractExplicitLocation(text: string): { text: string; location?: string } {
+  const match = text.match(EXPLICIT_LOCATION_PATTERN);
+  if (!match || match.index === undefined) {
+    return { text };
+  }
+
+  const normalizedLocation = sanitizeLocation(match[1]);
+  if (!normalizedLocation) {
+    return { text };
+  }
+
+  const strippedText = text.slice(0, match.index).trim();
+  return {
+    text: strippedText || text,
+    location: normalizedLocation,
+  };
+}
+
+function extractTrailingLocationAtSentenceEnd(text: string): { text: string; location?: string } {
+  const trimmed = text.trim();
+  const trailingMatch = trimmed.match(TRAILING_LOCATION_AT_END_PATTERN);
+  if (!trailingMatch) {
+    return { text };
+  }
+
+  const titlePart = trailingMatch[1]?.trim();
+  const normalizedLocation = sanitizeLocation(trailingMatch[2]);
+  if (!titlePart || !normalizedLocation) {
+    return { text };
+  }
+
+  return {
+    text: titlePart,
+    location: normalizedLocation,
+  };
+}
+
+function tryParseKeywordOnlyDeadline({
+  scheduleString,
+  sourceString,
+  explicitLocation,
+  today,
+}: {
+  scheduleString: string;
+  sourceString: string;
+  explicitLocation?: string;
+  today: Date;
+}): ParseResult | null {
+  const trimmed = scheduleString.trim();
+
+  let title: string | undefined;
+  const prefixMatch = trimmed.match(DEADLINE_KEYWORD_ONLY_PREFIX_PATTERN);
+  if (prefixMatch) {
+    title = prefixMatch[2]?.trim();
+  }
+
+  if (!title) {
+    const suffixMatch = trimmed.match(DEADLINE_KEYWORD_ONLY_SUFFIX_PATTERN);
+    if (suffixMatch) {
+      title = suffixMatch[1]?.trim();
+    }
+  }
+
+  if (!title && DEADLINE_KEYWORD_ONLY_SET.has(trimmed)) {
+    title = "새 일정";
+  }
+
+  if (!title) {
+    return null;
+  }
+
+  const start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+  const end = addDays(start, 1);
+
+  return {
+    ok: true,
+    value: {
+      title: title || "새 일정",
+      start,
+      end,
+      allDay: true,
+      location: explicitLocation,
+      source: sourceString,
+      intent: "deadline",
+    },
+  };
+}
+
+function tryParseRecurringSchedule({
+  scheduleString,
+  sourceString,
+  explicitLocation,
+  now,
+  today,
+  durationMinutes,
+  options,
+}: {
+  scheduleString: string;
+  sourceString: string;
+  explicitLocation?: string;
+  now: Date;
+  today: Date;
+  durationMinutes: number;
+  options: ParseOptions;
+}): ParseResult | null {
+  const dailyMatch = scheduleString.match(DAILY_RECURRENCE_PATTERN);
+  if (dailyMatch) {
+    const tail = dailyMatch[1].trim();
+    const baseResult = parseKoreanSchedule(`오늘 ${tail}`, options);
+    if (!baseResult.ok) {
+      return {
+        ok: false,
+        error: `반복 일정 문장을 인식하지 못했습니다: ${baseResult.error}`,
+      };
+    }
+
+    const recurrence: ParsedRecurrence = { frequency: "daily" };
+    return buildRecurringParseResult({
+      sourceString,
+      now,
+      today,
+      durationMinutes,
+      base: baseResult.value,
+      recurrence,
+      explicitLocation,
+    });
+  }
+
+  const weeklyMatch = scheduleString.match(WEEKLY_RECURRENCE_PATTERN);
+  if (weeklyMatch) {
+    const weekdayToken = weeklyMatch[1];
+    const tail = weeklyMatch[2].trim();
+    const parsedWeekday = parseWeekdayToken(weekdayToken);
+    const baseResult = parseKoreanSchedule(`오늘 ${tail}`, options);
+    if (!baseResult.ok) {
+      return {
+        ok: false,
+        error: `반복 일정 문장을 인식하지 못했습니다: ${baseResult.error}`,
+      };
+    }
+
+    const recurrence: ParsedRecurrence = {
+      frequency: "weekly",
+      weekday: parsedWeekday ?? today.getDay(),
+    };
+    return buildRecurringParseResult({
+      sourceString,
+      now,
+      today,
+      durationMinutes,
+      base: baseResult.value,
+      recurrence,
+      explicitLocation,
+    });
+  }
+
+  const monthlyMatch = scheduleString.match(MONTHLY_RECURRENCE_PATTERN);
+  if (monthlyMatch) {
+    const dayOfMonth = Number.parseInt(monthlyMatch[1], 10);
+    if (Number.isNaN(dayOfMonth) || dayOfMonth < 1 || dayOfMonth > 31) {
+      return {
+        ok: false,
+        error: "매월 반복의 일자는 1일부터 31일 사이로 입력해 주세요.",
+      };
+    }
+
+    const tail = monthlyMatch[2].trim();
+    const baseResult = parseKoreanSchedule(`오늘 ${tail}`, options);
+    if (!baseResult.ok) {
+      return {
+        ok: false,
+        error: `반복 일정 문장을 인식하지 못했습니다: ${baseResult.error}`,
+      };
+    }
+
+    const recurrence: ParsedRecurrence = {
+      frequency: "monthly",
+      dayOfMonth,
+    };
+    return buildRecurringParseResult({
+      sourceString,
+      now,
+      today,
+      durationMinutes,
+      base: baseResult.value,
+      recurrence,
+      explicitLocation,
+    });
+  }
+
+  return null;
+}
+
+function buildRecurringParseResult({
+  sourceString,
+  now,
+  today,
+  durationMinutes,
+  base,
+  recurrence,
+  explicitLocation,
+}: {
+  sourceString: string;
+  now: Date;
+  today: Date;
+  durationMinutes: number;
+  base: ParsedSchedule;
+  recurrence: ParsedRecurrence;
+  explicitLocation?: string;
+}): ParseResult {
+  const hasTime = !base.allDay;
+  const hour = base.start.getHours();
+  const minute = base.start.getMinutes();
+  const durationMs = hasTime ? Math.max(base.end.getTime() - base.start.getTime(), 60 * 1000) : 24 * 60 * 60 * 1000;
+
+  let start: Date;
+  if (recurrence.frequency === "daily") {
+    start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, minute, 0, 0);
+    if (hasTime && start < now) {
+      start = addDays(start, 1);
+    }
+  } else if (recurrence.frequency === "weekly") {
+    const targetWeekday = recurrence.weekday ?? today.getDay();
+    start = nextWeeklyOccurrence({
+      today,
+      now,
+      targetWeekday,
+      hasTime,
+      hour,
+      minute,
+    });
+  } else {
+    start = nextMonthlyOccurrence({
+      now,
+      today,
+      dayOfMonth: recurrence.dayOfMonth ?? today.getDate(),
+      hasTime,
+      hour,
+      minute,
+    });
+  }
+
+  const end = hasTime
+    ? new Date(start.getTime() + Math.max(durationMs, durationMinutes * 60 * 1000))
+    : addDays(start, 1);
+
+  return {
+    ok: true,
+    value: {
+      ...base,
+      start,
+      end,
+      intent: "event",
+      location: explicitLocation ?? base.location,
+      source: sourceString,
+      recurrence,
+    },
+  };
+}
+
+function parseWeekdayToken(token: string | undefined): number | undefined {
+  if (!token) {
+    return undefined;
+  }
+  const normalized = token.replace(/^([월화수목금토일]).*$/u, "$1");
+  const index = WEEKDAY_TOKENS.findIndex((weekday) => weekday === normalized);
+  return index >= 0 ? index : undefined;
+}
+
+function nextWeeklyOccurrence({
+  today,
+  now,
+  targetWeekday,
+  hasTime,
+  hour,
+  minute,
+}: {
+  today: Date;
+  now: Date;
+  targetWeekday: number;
+  hasTime: boolean;
+  hour: number;
+  minute: number;
+}): Date {
+  const normalizedTargetWeekday = targetWeekday === 0 ? 7 : targetWeekday;
+  const currentWeekday = today.getDay() === 0 ? 7 : today.getDay();
+  const delta = (normalizedTargetWeekday - currentWeekday + 7) % 7;
+  let candidate = addDays(today, delta);
+  candidate = new Date(candidate.getFullYear(), candidate.getMonth(), candidate.getDate(), hour, minute, 0, 0);
+
+  if (hasTime ? candidate < now : candidate < today) {
+    candidate = addDays(candidate, 7);
+  }
+
+  return candidate;
+}
+
+function nextMonthlyOccurrence({
+  now,
+  today,
+  dayOfMonth,
+  hasTime,
+  hour,
+  minute,
+}: {
+  now: Date;
+  today: Date;
+  dayOfMonth: number;
+  hasTime: boolean;
+  hour: number;
+  minute: number;
+}): Date {
+  const comparisonNow = hasTime ? now : today;
+  for (let offset = 0; offset <= 24; offset += 1) {
+    const pivot = new Date(today.getFullYear(), today.getMonth() + offset, 1);
+    if (!isValidDayOfMonth(pivot.getFullYear(), pivot.getMonth() + 1, dayOfMonth)) {
+      continue;
+    }
+
+    const candidate = new Date(pivot.getFullYear(), pivot.getMonth(), dayOfMonth, hour, minute, 0, 0);
+    if (candidate >= comparisonNow) {
+      return candidate;
+    }
+  }
+
+  // 24개월 안에서 계산이 안 되면 1개월 후 같은 규칙으로 보정한다.
+  return new Date(today.getFullYear(), today.getMonth() + 1, 1, hour, minute, 0, 0);
+}
+
 function tryParseSpecialDeadlineSchedule({
   scheduleString,
+  sourceString,
+  explicitLocation,
   now,
   today,
   durationMinutes,
 }: {
   scheduleString: string;
+  sourceString: string;
+  explicitLocation?: string;
   now: Date;
   today: Date;
   durationMinutes: number;
@@ -425,7 +814,7 @@ function tryParseSpecialDeadlineSchedule({
     if (Number.isNaN(relativeHours) || relativeHours < 1) {
       return {
         ok: false,
-        error: "Relative hour values must be at least 1. Example: 3시간 이내",
+        error: "상대 시간은 1시간 이상으로 입력해 주세요. 예) 3시간 이내",
       };
     }
 
@@ -438,8 +827,8 @@ function tryParseSpecialDeadlineSchedule({
         start: due,
         end: new Date(due.getTime() + durationMinutes * 60 * 1000),
         allDay: false,
-        location: parsedTail.location,
-        source: scheduleString,
+        location: explicitLocation ?? parsedTail.location,
+        source: sourceString,
         intent: "deadline",
       },
     };
@@ -462,8 +851,8 @@ function tryParseSpecialDeadlineSchedule({
         start,
         end: addDays(start, 1),
         allDay: true,
-        location: parsedTail.location,
-        source: scheduleString,
+        location: explicitLocation ?? parsedTail.location,
+        source: sourceString,
         intent: "deadline",
       },
     };
@@ -487,188 +876,9 @@ function tryParseSpecialDeadlineSchedule({
         start,
         end: addDays(start, 1),
         allDay: true,
-        location: parsedTail.location,
-        source: scheduleString,
+        location: explicitLocation ?? parsedTail.location,
+        source: sourceString,
         intent: "deadline",
-      },
-    };
-  }
-
-  return null;
-}
-
-function tryParseTimeOnlySchedule({
-  scheduleString,
-  now,
-  today,
-  durationMinutes,
-}: {
-  scheduleString: string;
-  now: Date;
-  today: Date;
-  durationMinutes: number;
-}): ParseResult | null {
-  const rangeMatch = scheduleString.match(TIME_ONLY_RANGE_PATTERN);
-  if (rangeMatch) {
-    const startAmpmToken = rangeMatch[1];
-    const startHourToken = rangeMatch[2];
-    const startMinuteToken = rangeMatch[3] ?? "0";
-    let endAmpmToken = rangeMatch[4];
-    const endHourToken = rangeMatch[5];
-    const endMinuteToken = rangeMatch[6] ?? "0";
-    const tailText = rangeMatch[7] ?? "";
-
-    const startTime = parseTimeTokens(startAmpmToken, startHourToken, startMinuteToken);
-    const endTime = parseTimeTokens(endAmpmToken, endHourToken, endMinuteToken);
-
-    let startHour = startTime.hour;
-    const startMinute = startTime.minute;
-    const startAmpm = startTime.ampm;
-    let endHour = endTime.hour;
-    const endMinute = endTime.minute;
-    let endAmpm = endTime.ampm;
-
-    if (startHour === undefined || startMinute === undefined || endHour === undefined || endMinute === undefined) {
-      return null;
-    }
-
-    if (startAmpm && (startHour < 1 || startHour > 12)) {
-      return {
-        ok: false,
-        error: "AM/PM hours must be between 1 and 12.",
-      };
-    }
-
-    if (!startAmpm && (startHour < 0 || startHour > 23)) {
-      return {
-        ok: false,
-        error: "Hour must be between 0 and 23.",
-      };
-    }
-
-    if (startMinute < 0 || startMinute > 59) {
-      return {
-        ok: false,
-        error: "Minute must be between 0 and 59.",
-      };
-    }
-
-    if (endAmpm && (endHour < 1 || endHour > 12)) {
-      return {
-        ok: false,
-        error: "End time with AM/PM must be between 1 and 12.",
-      };
-    }
-
-    if (!endAmpm && (endHour < 0 || endHour > 23)) {
-      return {
-        ok: false,
-        error: "End hour must be between 0 and 23.",
-      };
-    }
-
-    if (endMinute < 0 || endMinute > 59) {
-      return {
-        ok: false,
-        error: "End minute must be between 0 and 59.",
-      };
-    }
-
-    // If start meridiem is explicit and end meridiem is omitted, inherit start meridiem.
-    if (startAmpm !== undefined && endAmpm === undefined && startAmpmToken !== "밤") {
-      endAmpm = startAmpm;
-      endAmpmToken = startAmpmToken;
-    }
-
-    startHour = normalizeHour(startHour, startAmpm, startAmpmToken);
-    endHour = normalizeHour(endHour, endAmpm, endAmpmToken);
-
-    let start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), startHour, startMinute, 0, 0);
-    let end = new Date(today.getFullYear(), today.getMonth(), today.getDate(), endHour, endMinute, 0, 0);
-    if (end <= start) {
-      end = addDays(end, 1);
-    }
-
-    // If the whole range is already in the past, move to the next day.
-    if (end <= now) {
-      start = addDays(start, 1);
-      end = addDays(end, 1);
-    }
-
-    const parsedTail = extractTitleAndLocation(tailText);
-    return {
-      ok: true,
-      value: {
-        title: parsedTail.title,
-        start,
-        end,
-        allDay: false,
-        location: parsedTail.location,
-        source: scheduleString,
-        intent: "event",
-      },
-    };
-  }
-
-  const singleMatch = scheduleString.match(TIME_ONLY_SINGLE_PATTERN);
-  if (singleMatch) {
-    const ampmToken = singleMatch[1];
-    const hourToken = singleMatch[2];
-    const minuteToken = singleMatch[3] ?? "0";
-    const suffixToken = singleMatch[4];
-    const tailText = singleMatch[5] ?? "";
-    const parsedTime = parseTimeTokens(ampmToken, hourToken, minuteToken);
-
-    let hour = parsedTime.hour;
-    const minute = parsedTime.minute;
-    const ampm = parsedTime.ampm;
-
-    if (hour === undefined || minute === undefined) {
-      return null;
-    }
-
-    if (ampm && (hour < 1 || hour > 12)) {
-      return {
-        ok: false,
-        error: "AM/PM hours must be between 1 and 12.",
-      };
-    }
-
-    if (!ampm && (hour < 0 || hour > 23)) {
-      return {
-        ok: false,
-        error: "Hour must be between 0 and 23.",
-      };
-    }
-
-    if (minute < 0 || minute > 59) {
-      return {
-        ok: false,
-        error: "Minute must be between 0 and 59.",
-      };
-    }
-
-    hour = normalizeHour(hour, ampm, ampmToken);
-
-    let start = new Date(today.getFullYear(), today.getMonth(), today.getDate(), hour, minute, 0, 0);
-    // With no explicit date, past times are interpreted as the next day.
-    if (start < now) {
-      start = addDays(start, 1);
-    }
-
-    const parsedTail = extractTitleAndLocation(tailText);
-    const isDeadline = suffixToken !== undefined && suffixToken !== "부터" && DEADLINE_SUFFIX_PATTERN.test(suffixToken);
-
-    return {
-      ok: true,
-      value: {
-        title: parsedTail.title,
-        start,
-        end: new Date(start.getTime() + durationMinutes * 60 * 1000),
-        allDay: false,
-        location: parsedTail.location,
-        source: scheduleString,
-        intent: isDeadline ? "deadline" : "event",
       },
     };
   }
@@ -755,7 +965,7 @@ function parseRangeTimeToken(rangeTimeToken: string):
   if (!rangeMatch) {
     return {
       ok: false,
-      error: "Could not recognize a time range. Example: 내일 오후 4시부터 6시까지 회의",
+      error: "시간 범위를 인식하지 못했습니다. 예) 내일 오후 4시부터 6시까지 회의",
     };
   }
 
@@ -816,18 +1026,46 @@ function getMonthModifierDays(token: string | undefined): number | undefined {
 function extractTitleAndLocation(text: string): { title: string; location?: string } {
   const trimmed = text.trim();
   if (!trimmed) {
-    return { title: "Untitled" };
+    return { title: "새 일정" };
   }
 
-  const locationMatch = trimmed.match(/^(.+?)에서\s+(.+)$/u);
-  if (locationMatch) {
+  const trailingLocationMatch = trimmed.match(TRAILING_LOCATION_AT_END_PATTERN);
+  if (trailingLocationMatch) {
+    const title = trailingLocationMatch[1]?.trim() || "새 일정";
+    const location = sanitizeLocation(trailingLocationMatch[2]);
+    if (location) {
+      return {
+        title,
+        location,
+      };
+    }
+  }
+
+  const leadingLocationMatch = trimmed.match(LEADING_LOCATION_PATTERN);
+  if (leadingLocationMatch) {
     return {
-      title: locationMatch[2].trim() || "Untitled",
-      location: locationMatch[1].trim(),
+      title: leadingLocationMatch[2].trim() || "새 일정",
+      location: sanitizeLocation(leadingLocationMatch[1]),
     };
   }
 
   return { title: trimmed };
+}
+
+function sanitizeLocation(value: string | undefined): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  const collapsed = value.replace(/\s+/gu, " ").trim();
+  if (!collapsed) {
+    return undefined;
+  }
+
+  const withoutTrailingPunctuation = collapsed.replace(LOCATION_TRAILING_PUNCTUATION_PATTERN, "").trim();
+  const unquoted = withoutTrailingPunctuation.replace(LOCATION_SURROUNDING_QUOTES_PATTERN, "").trim();
+  const normalized = unquoted.replace(LOCATION_TRAILING_PUNCTUATION_PATTERN, "").trim();
+  return normalized || undefined;
 }
 
 function startOfDay(date: Date): Date {
