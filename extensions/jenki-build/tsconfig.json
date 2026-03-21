@@ -14,5 +14,5 @@
     "outDir": "dist",
     "baseUrl": "."
   },
-  "include": ["src"]
+  "include": ["src", "raycast-env.d.ts"]
 }
