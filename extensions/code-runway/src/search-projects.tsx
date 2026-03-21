@@ -396,229 +396,231 @@ export default function SearchProjects() {
                   />
                 </ActionPanel.Section>
 
-                <ActionPanel.Section title="Debug">
-                  <Action
-                    title="Inspect Raw Template Storage"
-                    icon={Icon.List}
-                    onAction={async () => {
-                      await debugTemplates();
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Template Data Logged",
-                        message: "Open the console with Cmd+Shift+J to inspect terminalType fields.",
-                      });
-                    }}
-                  />
-                  <Action
-                    title="Fix Ghostty Template Terminal Type"
-                    icon={Icon.Cog}
-                    onAction={async () => {
-                      await fixGhosttyTemplate("Ghostty");
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Template Updated",
-                        message: "Refresh templates with Cmd+Shift+R.",
-                      });
-                    }}
-                  />
-                  <Action
-                    title="Show All Template Details"
-                    icon={Icon.List}
-                    onAction={async () => {
-                      console.log("=== All Templates Debug ===");
-                      console.log("Total templates:", warpTemplates.length);
-                      warpTemplates.forEach((t, index) => {
-                        console.log(`\nTemplate ${index + 1}:`);
-                        console.log("  ID:", t.id);
-                        console.log("  Name:", t.name);
-                        console.log("  Terminal Type:", t.terminalType);
-                        console.log("  Is Default:", t.isDefault);
-                        console.log("  Commands:", t.commands.length);
-                        t.commands.forEach((cmd, cmdIndex) => {
-                          console.log(`    Command ${cmdIndex + 1}:`, cmd.title, "->", cmd.command);
-                        });
-                      });
-                      showToast({
-                        style: Toast.Style.Success,
-                        title: "Template Details Logged",
-                        message: "Open the console with Cmd+Shift+J.",
-                      });
-                    }}
-                  />
-                  <Action
-                    title="Debug Storage and Templates"
-                    icon={Icon.Hashtag}
-                    onAction={async () => {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Debugging Storage...",
-                        message: "Inspecting template storage and cache.",
-                      });
-
-                      try {
-                        await debugStorage();
+                {environment.isDevelopment && (
+                  <ActionPanel.Section title="Debug">
+                    <Action
+                      title="Inspect Raw Template Storage"
+                      icon={Icon.List}
+                      onAction={async () => {
+                        await debugTemplates();
                         showToast({
                           style: Toast.Style.Success,
-                          title: "Storage Debug Complete",
-                          message: "Check the console logs for details.",
+                          title: "Template Data Logged",
+                          message: "Open the console with Cmd+Shift+J to inspect terminalType fields.",
                         });
-                      } catch (error) {
+                      }}
+                    />
+                    <Action
+                      title="Fix Ghostty Template Terminal Type"
+                      icon={Icon.Cog}
+                      onAction={async () => {
+                        await fixGhosttyTemplate("Ghostty");
                         showToast({
-                          style: Toast.Style.Failure,
-                          title: "Storage Debug Failed",
-                          message: error instanceof Error ? error.message : "Unknown error",
+                          style: Toast.Style.Success,
+                          title: "Template Updated",
+                          message: "Refresh templates with Cmd+Shift+R.",
                         });
-                      }
-                    }}
-                  />
-                  <Action
-                    title="Clean Old Warp Configurations"
-                    icon={Icon.Trash}
-                    onAction={async () => {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Cleaning Configurations...",
-                        message: "Removing old Warp launch configuration files.",
-                      });
+                      }}
+                    />
+                    <Action
+                      title="Show All Template Details"
+                      icon={Icon.List}
+                      onAction={async () => {
+                        console.log("=== All Templates Debug ===");
+                        console.log("Total templates:", warpTemplates.length);
+                        warpTemplates.forEach((t, index) => {
+                          console.log(`\nTemplate ${index + 1}:`);
+                          console.log("  ID:", t.id);
+                          console.log("  Name:", t.name);
+                          console.log("  Terminal Type:", t.terminalType);
+                          console.log("  Is Default:", t.isDefault);
+                          console.log("  Commands:", t.commands.length);
+                          t.commands.forEach((cmd, cmdIndex) => {
+                            console.log(`    Command ${cmdIndex + 1}:`, cmd.title, "->", cmd.command);
+                          });
+                        });
+                        showToast({
+                          style: Toast.Style.Success,
+                          title: "Template Details Logged",
+                          message: "Open the console with Cmd+Shift+J.",
+                        });
+                      }}
+                    />
+                    <Action
+                      title="Debug Storage and Templates"
+                      icon={Icon.Hashtag}
+                      onAction={async () => {
+                        showToast({
+                          style: Toast.Style.Animated,
+                          title: "Debugging Storage...",
+                          message: "Inspecting template storage and cache.",
+                        });
 
-                      try {
-                        const fs = await import("fs/promises");
-                        const path = await import("path");
-                        const os = await import("os");
-
-                        const FILE_PREFIX = "code-runway__";
-                        const warpConfigDir = path.join(os.homedir(), ".warp", "launch_configurations");
-                        const files = await fs.readdir(warpConfigDir);
-
-                        // Only remove extension-generated configs with our safe prefix
-                        const projectConfigs = files.filter(
-                          (file) => file.startsWith(FILE_PREFIX) && file.endsWith(".yaml"),
-                        );
-
-                        for (const file of projectConfigs) {
-                          const filePath = path.join(warpConfigDir, file);
-                          await fs.unlink(filePath);
+                        try {
+                          await debugStorage();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Storage Debug Complete",
+                            message: "Check the console logs for details.",
+                          });
+                        } catch (error) {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Storage Debug Failed",
+                            message: error instanceof Error ? error.message : "Unknown error",
+                          });
                         }
+                      }}
+                    />
+                    <Action
+                      title="Clean Old Warp Configurations"
+                      icon={Icon.Trash}
+                      onAction={async () => {
+                        showToast({
+                          style: Toast.Style.Animated,
+                          title: "Cleaning Configurations...",
+                          message: "Removing old Warp launch configuration files.",
+                        });
 
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Configurations Removed",
-                          message: `Removed ${projectConfigs.length} configuration files created by this extension.`,
-                        });
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Clean Failed",
-                          message: error instanceof Error ? error.message : "Unknown error",
-                        });
-                      }
-                    }}
-                  />
-                  <Action
-                    title="Diagnose Warp Environment"
-                    icon={Icon.Bug}
-                    onAction={async () => {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Running Diagnostics...",
-                        message: "Checking Warp environment configuration.",
-                      });
+                        try {
+                          const fs = await import("fs/promises");
+                          const path = await import("path");
+                          const os = await import("os");
 
-                      try {
-                        await debugWarpEnvironment();
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Diagnostics Complete",
-                          message: "Check the console logs for details.",
-                        });
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Diagnostics Failed",
-                          message: error instanceof Error ? error.message : "Unknown error",
-                        });
-                      }
-                    }}
-                  />
-                  <Action
-                    title="Diagnose Ghostty Environment"
-                    icon={Icon.Bug}
-                    onAction={async () => {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Running Diagnostics...",
-                        message: "Checking Ghostty environment configuration.",
-                      });
+                          const FILE_PREFIX = "code-runway__";
+                          const warpConfigDir = path.join(os.homedir(), ".warp", "launch_configurations");
+                          const files = await fs.readdir(warpConfigDir);
 
-                      try {
-                        await debugGhosttyEnvironment();
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Diagnostics Complete",
-                          message: "Check the console logs for details.",
-                        });
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Diagnostics Failed",
-                          message: error instanceof Error ? error.message : "Unknown error",
-                        });
-                      }
-                    }}
-                  />
-                  <Action
-                    title="Diagnose iTerm Environment"
-                    icon={Icon.Bug}
-                    onAction={async () => {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Running Diagnostics...",
-                        message: "Checking iTerm environment configuration.",
-                      });
+                          // Only remove extension-generated configs with our safe prefix
+                          const projectConfigs = files.filter(
+                            (file) => file.startsWith(FILE_PREFIX) && file.endsWith(".yaml"),
+                          );
 
-                      try {
-                        await debugItermEnvironment();
-                        showToast({
-                          style: Toast.Style.Success,
-                          title: "Diagnostics Complete",
-                          message: "Check the console logs for details.",
-                        });
-                      } catch (error) {
-                        showToast({
-                          style: Toast.Style.Failure,
-                          title: "Diagnostics Failed",
-                          message: error instanceof Error ? error.message : "Unknown error",
-                        });
-                      }
-                    }}
-                  />
-                  <Action
-                    title="Diagnose Cmux Environment"
-                    icon={Icon.Bug}
-                    onAction={async () => {
-                      showToast({
-                        style: Toast.Style.Animated,
-                        title: "Running Diagnostics...",
-                        message: "Checking cmux environment configuration.",
-                      });
+                          for (const file of projectConfigs) {
+                            const filePath = path.join(warpConfigDir, file);
+                            await fs.unlink(filePath);
+                          }
 
-                      try {
-                        await debugCmuxEnvironment();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Configurations Removed",
+                            message: `Removed ${projectConfigs.length} configuration files created by this extension.`,
+                          });
+                        } catch (error) {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Clean Failed",
+                            message: error instanceof Error ? error.message : "Unknown error",
+                          });
+                        }
+                      }}
+                    />
+                    <Action
+                      title="Diagnose Warp Environment"
+                      icon={Icon.Bug}
+                      onAction={async () => {
                         showToast({
-                          style: Toast.Style.Success,
-                          title: "Diagnostics Complete",
-                          message: "Check the console logs for details.",
+                          style: Toast.Style.Animated,
+                          title: "Running Diagnostics...",
+                          message: "Checking Warp environment configuration.",
                         });
-                      } catch (error) {
+
+                        try {
+                          await debugWarpEnvironment();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Diagnostics Complete",
+                            message: "Check the console logs for details.",
+                          });
+                        } catch (error) {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Diagnostics Failed",
+                            message: error instanceof Error ? error.message : "Unknown error",
+                          });
+                        }
+                      }}
+                    />
+                    <Action
+                      title="Diagnose Ghostty Environment"
+                      icon={Icon.Bug}
+                      onAction={async () => {
                         showToast({
-                          style: Toast.Style.Failure,
-                          title: "Diagnostics Failed",
-                          message: error instanceof Error ? error.message : "Unknown error",
+                          style: Toast.Style.Animated,
+                          title: "Running Diagnostics...",
+                          message: "Checking Ghostty environment configuration.",
                         });
-                      }
-                    }}
-                  />
-                </ActionPanel.Section>
+
+                        try {
+                          await debugGhosttyEnvironment();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Diagnostics Complete",
+                            message: "Check the console logs for details.",
+                          });
+                        } catch (error) {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Diagnostics Failed",
+                            message: error instanceof Error ? error.message : "Unknown error",
+                          });
+                        }
+                      }}
+                    />
+                    <Action
+                      title="Diagnose iTerm Environment"
+                      icon={Icon.Bug}
+                      onAction={async () => {
+                        showToast({
+                          style: Toast.Style.Animated,
+                          title: "Running Diagnostics...",
+                          message: "Checking iTerm environment configuration.",
+                        });
+
+                        try {
+                          await debugItermEnvironment();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Diagnostics Complete",
+                            message: "Check the console logs for details.",
+                          });
+                        } catch (error) {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Diagnostics Failed",
+                            message: error instanceof Error ? error.message : "Unknown error",
+                          });
+                        }
+                      }}
+                    />
+                    <Action
+                      title="Diagnose Cmux Environment"
+                      icon={Icon.Bug}
+                      onAction={async () => {
+                        showToast({
+                          style: Toast.Style.Animated,
+                          title: "Running Diagnostics...",
+                          message: "Checking cmux environment configuration.",
+                        });
+
+                        try {
+                          await debugCmuxEnvironment();
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Diagnostics Complete",
+                            message: "Check the console logs for details.",
+                          });
+                        } catch (error) {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Diagnostics Failed",
+                            message: error instanceof Error ? error.message : "Unknown error",
+                          });
+                        }
+                      }}
+                    />
+                  </ActionPanel.Section>
+                )}
               </ActionPanel>
             }
           />

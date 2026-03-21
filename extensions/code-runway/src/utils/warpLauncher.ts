@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
@@ -7,7 +7,7 @@ import { dump } from "js-yaml";
 import { Project, WarpTemplate, WarpLaunchConfig, TerminalCommand } from "../types";
 import { environment } from "@raycast/api";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const DEBUG = environment.isDevelopment;
 const FILE_PREFIX = "code-runway__"; // only clean files we created
 
@@ -201,8 +201,8 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
     }
 
     try {
-      if (DEBUG) console.log("Try method1 - URL Scheme:", `open '${warpUrl}'`);
-      const result1 = await execAsync(`open '${warpUrl}'`);
+      if (DEBUG) console.log("Try method1 - URL Scheme:", warpUrl);
+      const result1 = await execFileAsync("open", [warpUrl]);
       if (DEBUG) {
         console.log("URL Scheme executed");
         console.log("stdout:", result1.stdout || "<empty>");
@@ -214,7 +214,7 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
 
       // Check whether Warp is now running.
       try {
-        const psResult = await execAsync("pgrep -x Warp");
+        const psResult = await execFileAsync("pgrep", ["-x", "Warp"]);
         if (psResult.stdout.trim()) {
           if (DEBUG) console.log("Warp process detected; URL Scheme worked");
           return;
@@ -225,7 +225,7 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
 
       // Fallback 1: open the Warp application directly.
       if (DEBUG) console.log("Try method2 - open Warp app");
-      await execAsync("open -a Warp");
+      await execFileAsync("open", ["-a", "Warp"]);
       if (DEBUG) console.log("Warp app open command executed");
 
       // Wait for Warp to finish launching.
@@ -234,10 +234,10 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
       // Fallback 2: use the Warp CLI when available.
       try {
         if (DEBUG) console.log("Try method3 - warp CLI check");
-        const warpCliResult = await execAsync("which warp");
+        const warpCliResult = await execFileAsync("which", ["warp"]);
         if (warpCliResult.stdout.trim()) {
           if (DEBUG) console.log("warp CLI found, launching config");
-          await execAsync(`warp launch "${config.name}"`);
+          await execFileAsync("warp", ["launch", config.name]);
           if (DEBUG) console.log("warp CLI launch success");
           return;
         }
@@ -274,11 +274,11 @@ export async function launchWarpConfig(project: Project, template: WarpTemplate)
  */
 export async function checkWarpInstalled(): Promise<boolean> {
   try {
-    await execAsync("which warp");
+    await execFileAsync("which", ["warp"]);
     return true;
   } catch {
     try {
-      await execAsync("ls /Applications/Warp.app");
+      await execFileAsync("ls", ["/Applications/Warp.app"]);
       return true;
     } catch {
       return false;
@@ -292,7 +292,7 @@ export async function checkWarpInstalled(): Promise<boolean> {
 export async function launchProjectSimple(project: Project): Promise<void> {
   try {
     const warpUrl = `warp://action/new_window?path=${encodeURIComponent(project.path)}`;
-    await execAsync(`open "${warpUrl}"`);
+    await execFileAsync("open", [warpUrl]);
   } catch (error) {
     throw new Error(`Failed to launch Warp: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -337,7 +337,7 @@ export async function debugWarpEnvironment(): Promise<void> {
 
   // 1. Check whether Warp is installed.
   try {
-    const result = await execAsync("which warp");
+    const result = await execFileAsync("which", ["warp"]);
     console.log("Warp CLI path:", result.stdout.trim());
   } catch {
     console.log("Warp CLI not found");
@@ -345,7 +345,7 @@ export async function debugWarpEnvironment(): Promise<void> {
 
   // 2. Check whether the app bundle exists.
   try {
-    await execAsync("ls -la /Applications/Warp.app");
+    await execFileAsync("ls", ["-la", "/Applications/Warp.app"]);
     console.log("Warp.app installed");
   } catch {
     console.log("Warp.app not found in /Applications");
@@ -369,7 +369,7 @@ export async function debugWarpEnvironment(): Promise<void> {
   // 4. Verify the basic URL scheme works.
   try {
     console.log("Test basic URI launch...");
-    await execAsync('open "warp://action/new_window"');
+    await execFileAsync("open", ["warp://action/new_window"]);
     console.log("Basic URI launch success");
   } catch (error) {
     console.log("Basic URI launch failed:", error);

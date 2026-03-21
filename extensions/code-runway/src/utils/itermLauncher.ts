@@ -1,9 +1,10 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { Project, WarpTemplate } from "../types";
 import { environment } from "@raycast/api";
+import { shellCd } from "./shellQuote";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const DEBUG = environment.isDevelopment;
 
 /**
@@ -11,7 +12,7 @@ const DEBUG = environment.isDevelopment;
  */
 export async function checkItermInstalled(): Promise<boolean> {
   try {
-    await execAsync("ls /Applications/iTerm.app");
+    await execFileAsync("ls", ["/Applications/iTerm.app"]);
     return true;
   } catch {
     return false;
@@ -47,7 +48,7 @@ export async function launchItermProject(project: Project, template: WarpTemplat
         const workingDir = cmd.workingDirectory ? `${project.path}/${cmd.workingDirectory}` : project.path;
         // Change directory before running a command when needed.
         if (cmd.workingDirectory) {
-          return `cd "${workingDir}" && ${cmd.command}`;
+          return `${shellCd(workingDir)} && ${cmd.command}`;
         }
         return cmd.command;
       })
@@ -74,7 +75,7 @@ export async function launchItermProject(project: Project, template: WarpTemplat
 
       if (DEBUG) console.log("Trying iTerm URL scheme:", itermUrl);
 
-      await execAsync(`open '${itermUrl}'`);
+      await execFileAsync("open", [itermUrl]);
 
       if (DEBUG) console.log("iTerm URL scheme launched successfully");
       return;
@@ -83,7 +84,7 @@ export async function launchItermProject(project: Project, template: WarpTemplat
     }
 
     // Fall back to AppleScript if the URL scheme fails.
-    const fullCommand = commands ? `cd "${workingDir}" && clear && ${commands}` : `cd "${workingDir}" && clear`;
+    const fullCommand = commands ? `${shellCd(workingDir)} && clear && ${commands}` : `${shellCd(workingDir)} && clear`;
 
     // Escape special characters before embedding the command in AppleScript.
     const escapedCommand = fullCommand.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
@@ -100,7 +101,7 @@ end tell
 
     if (DEBUG) console.log("Using AppleScript fallback");
 
-    await execAsync(`osascript -e '${appleScript.replace(/'/g, "'\"'\"'")}'`);
+    await execFileAsync("osascript", ["-e", appleScript]);
 
     if (DEBUG) console.log("iTerm launched successfully via AppleScript");
   } catch (error) {
@@ -125,7 +126,7 @@ export async function launchItermSimple(project: Project): Promise<void> {
 
       if (DEBUG) console.log("Trying iTerm URL scheme:", itermUrl);
 
-      await execAsync(`open '${itermUrl}'`);
+      await execFileAsync("open", [itermUrl]);
 
       if (DEBUG) console.log("iTerm URL scheme launched successfully");
       return;
@@ -134,7 +135,7 @@ export async function launchItermSimple(project: Project): Promise<void> {
     }
 
     // Fall back to AppleScript if the URL scheme fails.
-    const fullCommand = `cd "${project.path}" && clear`;
+    const fullCommand = `${shellCd(project.path)} && clear`;
     const escapedCommand = fullCommand.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
     const appleScript = `
@@ -149,7 +150,7 @@ end tell
 
     if (DEBUG) console.log("Using AppleScript fallback");
 
-    await execAsync(`osascript -e '${appleScript.replace(/'/g, "'\"'\"'")}'`);
+    await execFileAsync("osascript", ["-e", appleScript]);
 
     if (DEBUG) console.log("iTerm simple launch successful via AppleScript");
   } catch (error) {
@@ -165,7 +166,7 @@ export async function debugItermEnvironment(): Promise<void> {
 
   // 1. Check whether the app bundle exists.
   try {
-    await execAsync("ls -la /Applications/iTerm.app");
+    await execFileAsync("ls", ["-la", "/Applications/iTerm.app"]);
     console.log("iTerm.app installed");
   } catch {
     console.log("iTerm.app not found in /Applications");
@@ -174,7 +175,7 @@ export async function debugItermEnvironment(): Promise<void> {
   // 2. Verify the app can be opened.
   try {
     console.log("Testing basic app launch...");
-    await execAsync("open -a iTerm");
+    await execFileAsync("open", ["-a", "iTerm"]);
     console.log("Basic app launch succeeded");
   } catch (error) {
     console.log("Basic app launch failed:", error);
@@ -184,7 +185,7 @@ export async function debugItermEnvironment(): Promise<void> {
   try {
     console.log("Testing URL scheme...");
     const testDir = process.env.HOME || "/tmp";
-    await execAsync(`open 'iterm2:/command?d=${encodeURIComponent(testDir)}'`);
+    await execFileAsync("open", [`iterm2:/command?d=${encodeURIComponent(testDir)}`]);
     console.log("URL scheme launch succeeded");
   } catch (error) {
     console.log("URL scheme launch failed:", error);

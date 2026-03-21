@@ -1,10 +1,11 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { join } from "path";
 import { promisify } from "util";
 import { Project, WarpTemplate } from "../types";
 import { environment } from "@raycast/api";
+import { shellCd } from "./shellQuote";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const DEBUG = environment.isDevelopment;
 
 const CMUX_SPLIT_DIRECTIONS = {
@@ -21,7 +22,7 @@ function resolveWorkingDir(project: Project, command?: WarpTemplate["commands"][
 
 async function isCmuxRunning(): Promise<boolean> {
   try {
-    const result = await execAsync("pgrep -x cmux");
+    const result = await execFileAsync("pgrep", ["-x", "cmux"]);
     return result.stdout.trim().length > 0;
   } catch {
     return false;
@@ -31,19 +32,23 @@ async function isCmuxRunning(): Promise<boolean> {
 async function ensureCmuxRunning(): Promise<void> {
   const running = await isCmuxRunning();
   if (!running) {
-    await execAsync("open -a cmux");
+    await execFileAsync("open", ["-a", "cmux"]);
     // Wait for cmux to start and the CLI to become available.
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 }
 
+async function cmux(...args: string[]): Promise<void> {
+  await execFileAsync("cmux", args);
+}
+
 export async function checkCmuxInstalled(): Promise<boolean> {
   try {
-    await execAsync("which cmux");
+    await execFileAsync("which", ["cmux"]);
     return true;
   } catch {
     try {
-      await execAsync("ls /Applications/cmux.app");
+      await execFileAsync("ls", ["/Applications/cmux.app"]);
       return true;
     } catch {
       return false;
@@ -72,52 +77,41 @@ export async function launchCmuxProject(project: Project, template: WarpTemplate
 
     const firstWorkingDir = resolveWorkingDir(project, firstCommand);
 
+    async function sendCdAndCommand(workingDir: string, command?: string): Promise<void> {
+      await cmux("send", shellCd(workingDir));
+      await cmux("send-key", "Return");
+      if (command?.trim()) {
+        await cmux("send", command);
+        await cmux("send-key", "Return");
+      }
+    }
+
     if (template.launchMode === "multi-window") {
       for (const command of template.commands) {
         const workingDir = resolveWorkingDir(project, command);
-        await execAsync(`cmux new-workspace`);
+        await cmux("new-workspace");
         await new Promise((resolve) => setTimeout(resolve, 300));
-        await execAsync(`cmux send ${JSON.stringify(`cd ${JSON.stringify(workingDir)}`)}`);
-        await execAsync(`cmux send-key Return`);
-        if (command.command.trim()) {
-          await execAsync(`cmux send ${JSON.stringify(command.command)}`);
-          await execAsync(`cmux send-key Return`);
-        }
+        await sendCdAndCommand(workingDir, command.command);
       }
     } else if (template.launchMode === "multi-tab") {
       for (let i = 0; i < template.commands.length; i++) {
         const command = template.commands[i];
         const workingDir = resolveWorkingDir(project, command);
         if (i > 0) {
-          await execAsync(`cmux new-pane`);
+          await cmux("new-pane");
           await new Promise((resolve) => setTimeout(resolve, 300));
         }
-        await execAsync(`cmux send ${JSON.stringify(`cd ${JSON.stringify(workingDir)}`)}`);
-        await execAsync(`cmux send-key Return`);
-        if (command.command.trim()) {
-          await execAsync(`cmux send ${JSON.stringify(command.command)}`);
-          await execAsync(`cmux send-key Return`);
-        }
+        await sendCdAndCommand(workingDir, command.command);
       }
     } else {
       // split-panes mode
-      await execAsync(`cmux send ${JSON.stringify(`cd ${JSON.stringify(firstWorkingDir)}`)}`);
-      await execAsync(`cmux send-key Return`);
-      if (firstCommand.command.trim()) {
-        await execAsync(`cmux send ${JSON.stringify(firstCommand.command)}`);
-        await execAsync(`cmux send-key Return`);
-      }
+      await sendCdAndCommand(firstWorkingDir, firstCommand.command);
 
       for (const command of template.commands.slice(1)) {
         const workingDir = resolveWorkingDir(project, command);
-        await execAsync(`cmux new-split --direction ${splitDirection}`);
+        await cmux("new-split", "--direction", splitDirection);
         await new Promise((resolve) => setTimeout(resolve, 300));
-        await execAsync(`cmux send ${JSON.stringify(`cd ${JSON.stringify(workingDir)}`)}`);
-        await execAsync(`cmux send-key Return`);
-        if (command.command.trim()) {
-          await execAsync(`cmux send ${JSON.stringify(command.command)}`);
-          await execAsync(`cmux send-key Return`);
-        }
+        await sendCdAndCommand(workingDir, command.command);
       }
     }
   } catch (error) {
@@ -134,8 +128,8 @@ export async function launchCmuxSimple(project: Project): Promise<void> {
     }
 
     await ensureCmuxRunning();
-    await execAsync(`cmux send ${JSON.stringify(`cd ${JSON.stringify(project.path)}`)}`);
-    await execAsync(`cmux send-key Return`);
+    await cmux("send", shellCd(project.path));
+    await cmux("send-key", "Return");
   } catch (error) {
     throw new Error(`Failed to launch cmux: ${error instanceof Error ? error.message : String(error)}`);
   }
@@ -145,21 +139,21 @@ export async function debugCmuxEnvironment(): Promise<void> {
   console.log("Starting cmux environment diagnostics...");
 
   try {
-    const result = await execAsync("which cmux");
+    const result = await execFileAsync("which", ["cmux"]);
     console.log("cmux CLI path:", result.stdout.trim());
   } catch {
     console.log("cmux CLI not found");
   }
 
   try {
-    await execAsync("ls -la /Applications/cmux.app");
+    await execFileAsync("ls", ["-la", "/Applications/cmux.app"]);
     console.log("cmux.app installed");
   } catch {
     console.log("cmux.app not found in /Applications");
   }
 
   try {
-    const result = await execAsync("cmux --version");
+    const result = await execFileAsync("cmux", ["--version"]);
     console.log("cmux version:", result.stdout.trim());
   } catch {
     console.log("cmux --version failed");

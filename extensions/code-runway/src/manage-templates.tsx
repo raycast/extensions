@@ -311,9 +311,28 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
 
     const isGhosttyTerminal = isTerminalLauncher && terminalType === "ghostty";
     const isCmuxTerminal = isTerminalLauncher && terminalType === "cmux";
-    const validCommands = commands.filter(
-      (cmd) => cmd.title.trim() && (isGhosttyTerminal || isCmuxTerminal || cmd.command.trim()),
-    );
+    const normalizedCommands = commands.map((cmd) => ({
+      ...cmd,
+      title: cmd.title.trim(),
+      command: cmd.command.trim(),
+      workingDirectory: cmd.workingDirectory?.trim() || undefined,
+    }));
+    const validCommands = normalizedCommands.filter((cmd) => {
+      if (isGhosttyTerminal) {
+        return true;
+      }
+
+      return cmd.title && (isCmuxTerminal || cmd.command);
+    });
+
+    if (isGhosttyTerminal && ghosttyAutoRun && !normalizedCommands.some((cmd) => cmd.command)) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Add at least one command",
+        message: "Ghostty Auto-Run needs at least one command to execute.",
+      });
+      return;
+    }
 
     if (isTerminalLauncher && validCommands.length === 0) {
       showToast({
@@ -345,14 +364,7 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
         launchMode,
         ghosttyAutoRun: isGhostty ? ghosttyAutoRun : false,
         isDefault,
-        commands: isTerminalLauncher
-          ? validCommands.map((cmd) => ({
-              ...cmd,
-              title: cmd.title.trim(),
-              command: cmd.command.trim(),
-              workingDirectory: cmd.workingDirectory?.trim() || undefined,
-            }))
-          : [],
+        commands: isTerminalLauncher ? validCommands : [],
       };
 
       if (environment.isDevelopment) {
@@ -525,7 +537,7 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
         <Form.Checkbox
           id="ghosttyAutoRun"
           title="Auto-Run Commands"
-          label="Automatically enter and run commands in Ghostty through AppleScript"
+          label="Run commands automatically"
           value={ghosttyAutoRun}
           onChange={setGhosttyAutoRun}
         />
@@ -586,7 +598,9 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
               isWarp
                 ? "Configure terminal commands. At least one command is required."
                 : terminalType === "ghostty"
-                  ? "Configure commands. Ghostty will create panes in the current tab, a new tab, or a new window and open the working directory. Auto-run depends on the setting above."
+                  ? ghosttyAutoRun
+                    ? "Configure commands. Ghostty will create the layout, open the working directory, and auto-run any commands you provide."
+                    : "Configure panes, tabs, or windows for Ghostty. Commands are optional unless Auto-Run Commands is enabled."
                   : terminalType === "cmux"
                     ? "Configure commands. cmux will create splits, panes, or workspaces and run the commands automatically."
                     : "Configure terminal commands. iTerm will run them in the selected working directory."
@@ -612,7 +626,9 @@ function EditTemplateForm({ template, onSaved }: EditTemplateFormProps) {
                 onChange={(value) => updateCommand(index, "command", value)}
                 info={
                   isGhostty
-                    ? "Ghostty: can be left blank if you only want to create a window, tab, or split"
+                    ? ghosttyAutoRun
+                      ? "Required for any pane that should auto-run a command"
+                      : "Optional. Leave blank to only open the pane, tab, or window"
                     : "The terminal command to execute"
                 }
               />

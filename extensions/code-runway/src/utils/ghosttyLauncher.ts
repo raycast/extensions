@@ -1,10 +1,10 @@
-import { exec, execFile } from "child_process";
+import { execFile } from "child_process";
 import { join } from "path";
 import { promisify } from "util";
 import { Project, WarpTemplate } from "../types";
 import { environment } from "@raycast/api";
+import { shellCd } from "./shellQuote";
 
-const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 const DEBUG = environment.isDevelopment;
 const GHOSTTY_APP_NAME = "Ghostty";
@@ -20,7 +20,7 @@ function toAppleScriptString(value: string): string {
 }
 
 function toShellCdCommand(workingDir: string): string {
-  return `cd "${workingDir.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+  return shellCd(workingDir);
 }
 
 async function runAppleScript(script: string): Promise<string> {
@@ -30,7 +30,7 @@ async function runAppleScript(script: string): Promise<string> {
 
 async function isGhosttyRunning(): Promise<boolean> {
   try {
-    const result = await execAsync(`pgrep -x ${GHOSTTY_APP_NAME}`);
+    const result = await execFileAsync("pgrep", ["-x", GHOSTTY_APP_NAME]);
     return result.stdout.trim().length > 0;
   } catch {
     return false;
@@ -133,13 +133,11 @@ function buildGhosttyLaunchScript(project: Project, template: WarpTemplate, runn
  */
 export async function checkGhosttyInstalled(): Promise<boolean> {
   try {
-    // Try to locate the Ghostty CLI first.
-    await execAsync("which ghostty");
+    await execFileAsync("which", ["ghostty"]);
     return true;
   } catch {
     try {
-      // Fallback to the application bundle.
-      await execAsync("ls /Applications/Ghostty.app");
+      await execFileAsync("ls", ["/Applications/Ghostty.app"]);
       return true;
     } catch {
       return false;
@@ -238,7 +236,7 @@ export async function debugGhosttyEnvironment(): Promise<void> {
 
   // 1. Check the Ghostty CLI path.
   try {
-    const result = await execAsync("which ghostty");
+    const result = await execFileAsync("which", ["ghostty"]);
     console.log("Ghostty CLI path:", result.stdout.trim());
   } catch {
     console.log("Ghostty CLI not found");
@@ -246,7 +244,7 @@ export async function debugGhosttyEnvironment(): Promise<void> {
 
   // 2. Check whether the app bundle exists.
   try {
-    await execAsync("ls -la /Applications/Ghostty.app");
+    await execFileAsync("ls", ["-la", "/Applications/Ghostty.app"]);
     console.log("Ghostty.app installed");
   } catch {
     console.log("Ghostty.app not found in /Applications");
@@ -255,7 +253,7 @@ export async function debugGhosttyEnvironment(): Promise<void> {
   // 3. Verify the app can be opened.
   try {
     console.log("Testing basic app launch...");
-    await execAsync("open -a Ghostty");
+    await execFileAsync("open", ["-a", "Ghostty"]);
     console.log("Basic app launch succeeded");
   } catch (error) {
     console.log("Basic app launch failed:", error);
