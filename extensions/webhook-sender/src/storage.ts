@@ -41,7 +41,7 @@ export async function getSaved(): Promise<SavedWebhook[]> {
   }
 }
 
-export async function savWebhook(webhook: SavedWebhook): Promise<void> {
+export async function saveWebhook(webhook: SavedWebhook): Promise<void> {
   const saved = await getSaved();
   const existing = saved.findIndex((s) => s.id === webhook.id);
   let updated: SavedWebhook[];

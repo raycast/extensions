@@ -15,7 +15,7 @@ import {
   ValueType,
   WebhookRequest,
 } from "./types";
-import { addHistory, savWebhook } from "./storage";
+import { addHistory, saveWebhook } from "./storage";
 import { emptyField, fieldsToJson, generateId, sendWebhook } from "./utils";
 import { ResponseView } from "./ResponseView";
 
@@ -176,7 +176,7 @@ export function WebhookForm({ initial, onSent }: Props) {
       request: buildRequest(),
     };
 
-    await savWebhook(webhook);
+    await saveWebhook(webhook);
     await showToast({
       style: Toast.Style.Success,
       title: `Saved "${webhook.name}"`,
@@ -275,7 +275,6 @@ export function WebhookForm({ initial, onSent }: Props) {
                   key={field.id}
                   field={field}
                   onChange={(patch) => updateField(field.id, patch)}
-                  canRemove={fields.length > 1}
                 />
               ))}
               {fields.length > 1 && (
@@ -345,10 +344,9 @@ export function WebhookForm({ initial, onSent }: Props) {
 interface RowProps {
   field: KeyValueField;
   onChange: (patch: Partial<KeyValueField>) => void;
-  canRemove: boolean;
 }
 
-function KeyValueRow({ field, onChange, canRemove }: RowProps) {
+function KeyValueRow({ field, onChange }: RowProps) {
   const typeSuffix =
     field.type === "boolean"
       ? " (bool)"
@@ -393,10 +391,6 @@ function KeyValueRow({ field, onChange, canRemove }: RowProps) {
         <Form.Dropdown.Item value="number" title="number (42, 3.14)" />
         <Form.Dropdown.Item value="null" title="null" />
       </Form.Dropdown>
-      {canRemove &&
-        false && ( // removal handled via dropdown + ⌘⇧D
-          <Form.Description title="" text="" />
-        )}
       <Form.Separator />
     </>
   );

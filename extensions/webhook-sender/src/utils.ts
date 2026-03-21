@@ -8,8 +8,10 @@ export function parseValue(value: string, type: ValueType): unknown {
   switch (type) {
     case "boolean":
       return value.toLowerCase() === "true";
-    case "number":
-      return Number(value);
+    case "number": {
+      const n = Number(value);
+      return isFinite(n) ? n : value;
+    }
     case "null":
       return null;
     default:
@@ -94,7 +96,7 @@ export async function sendWebhook(
 ): Promise<{ status: number; body: string; responseTime: number }> {
   const body = buildBody(request);
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
     ...(request.headers || {}),
   };
 
