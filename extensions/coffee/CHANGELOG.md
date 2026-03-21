@@ -1,5 +1,8 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
 ## [Fix] - 2026-03-19
 
 - Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.
