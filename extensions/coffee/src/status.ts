@@ -69,7 +69,6 @@ export default async function Command() {
       stdio: "ignore",
     });
     child.on("exit", () => {});
-    child.unref();
   }
 
   updateCommandMetadata({ subtitle });
