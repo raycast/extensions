@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Fixed JSON parsing on first run] - {PR_MERGE_DATE}
+## [Fixed JSON parsing on first run] - 2026-03-21
 
 - Added `extractJSON` helper to strip npx stdout noise (e.g. npm warnings) before parsing JSON
 - Fixes "No output received from ccusage daily command" error on first run or cache refresh
