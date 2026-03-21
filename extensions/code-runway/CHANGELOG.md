@@ -28,7 +28,7 @@
 - Extension preference moved to extension level for easier access
 - Improved template icon display using native app icons instead of generic icons
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2025-09-30
 
 ### Added
 
