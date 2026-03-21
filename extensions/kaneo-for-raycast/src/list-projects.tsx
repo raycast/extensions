@@ -562,8 +562,10 @@ function ProjectTasksList({ project }: { project: Project }) {
     }
   };
 
+  const resolvedColumns = projectDetail?.data?.columns ?? projectDetail?.columns;
+
   const columnStatuses =
-    (projectDetail?.data || projectDetail)?.columns?.map((col) => ({
+    resolvedColumns?.map((col) => ({
       id: col.id,
       name: col.name,
       isDone: col.isFinal,
@@ -602,7 +604,7 @@ function ProjectTasksList({ project }: { project: Project }) {
         </ActionPanel>
       }
     >
-      {(projectDetail?.data || projectDetail)?.columns?.map((column) => {
+      {resolvedColumns?.map((column) => {
         const tasks = sort === "priority" ? sortTasksByPriority(column.tasks) : sortTasksByDueDate(column.tasks);
 
         return (
