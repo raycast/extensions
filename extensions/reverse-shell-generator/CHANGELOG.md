@@ -1,6 +1,6 @@
 # Reverse Shell Generator Changelog
 
-## 1.1.0 - 2026-03-21
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### ✨ NEW
 * Support for 66+ reverse shell types
