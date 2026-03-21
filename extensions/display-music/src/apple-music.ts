@@ -1,16 +1,11 @@
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
 import { join } from "path";
-import {
-  existsSync,
-  writeFileSync,
-  statSync,
-  readdirSync,
-  unlinkSync,
-} from "fs";
+import { existsSync, statSync, readdirSync, unlinkSync, mkdirSync } from "fs";
 import { createHash } from "crypto";
-import https from "https";
-import http from "http";
+import { get as httpsGet } from "https";
+import { get as httpGet } from "http";
+import { createWriteStream } from "fs";
 
 export interface TrackInfo {
   name: string;
@@ -28,9 +23,6 @@ export interface NowPlayingData {
 const CACHE_DIR = join(homedir(), ".cache");
 const ARTWORK_PREFIX = "raycast-display-music-";
 
-/**
- * Generate a unique artwork path based on track + artist.
- */
 function getArtworkPathForTrack(trackName: string, artist: string): string {
   const hash = createHash("md5")
     .update(`${trackName}::${artist}`)
@@ -39,9 +31,6 @@ function getArtworkPathForTrack(trackName: string, artist: string): string {
   return join(CACHE_DIR, `${ARTWORK_PREFIX}${hash}.jpg`);
 }
 
-/**
- * Clean up old artwork files (keep only the current one).
- */
 function cleanupOldArtwork(currentPath: string): void {
   try {
     const files = readdirSync(CACHE_DIR);
@@ -62,38 +51,31 @@ function cleanupOldArtwork(currentPath: string): void {
   }
 }
 
-/**
- * Download an image from a URL and save to disk.
- */
 function downloadImage(url: string, dest: string): Promise<boolean> {
   return new Promise((resolve) => {
-    const client = url.startsWith("https") ? https : http;
-    client
-      .get(url, (response) => {
-        if (response.statusCode === 301 || response.statusCode === 302) {
-          const redirectUrl = response.headers.location;
-          if (redirectUrl) {
-            downloadImage(redirectUrl, dest).then(resolve);
-            return;
-          }
-        }
-        if (response.statusCode !== 200) {
-          resolve(false);
+    const getter = url.startsWith("https") ? httpsGet : httpGet;
+    getter(url, (response) => {
+      if (response.statusCode === 301 || response.statusCode === 302) {
+        const redirectUrl = response.headers.location;
+        if (redirectUrl) {
+          downloadImage(redirectUrl, dest).then(resolve);
           return;
         }
-        const chunks: Buffer[] = [];
-        response.on("data", (chunk: Buffer) => chunks.push(chunk));
-        response.on("end", () => {
-          try {
-            writeFileSync(dest, Buffer.concat(chunks));
-            resolve(true);
-          } catch {
-            resolve(false);
-          }
-        });
-        response.on("error", () => resolve(false));
-      })
-      .on("error", () => resolve(false));
+      }
+      if (response.statusCode !== 200) {
+        resolve(false);
+        return;
+      }
+      const fileStream = createWriteStream(dest);
+      response.pipe(fileStream);
+      fileStream.on("finish", () => {
+        fileStream.close();
+        resolve(true);
+      });
+      fileStream.on("error", () => {
+        resolve(false);
+      });
+    }).on("error", () => resolve(false));
   });
 }
 
@@ -102,9 +84,6 @@ interface ITunesResult {
   trackUrl: string | null;
 }
 
-/**
- * Search the iTunes Search API for artwork URL and track link.
- */
 async function fetchFromITunesAPI(
   trackName: string,
   artist: string,
@@ -113,49 +92,39 @@ async function fetchFromITunesAPI(
   const url = `https://itunes.apple.com/search?term=${query}&media=music&limit=1`;
 
   return new Promise((resolve) => {
-    https
-      .get(url, (response) => {
-        let data = "";
-        response.on("data", (chunk: string) => (data += chunk));
-        response.on("end", () => {
-          try {
-            const json = JSON.parse(data);
-            if (json.results && json.results.length > 0) {
-              const result = json.results[0];
-              let artworkUrl = result.artworkUrl100 || null;
-              if (artworkUrl) {
-                artworkUrl = artworkUrl.replace("100x100", "300x300");
-              }
-              const trackUrl = result.trackViewUrl || null;
-              resolve({ artworkUrl, trackUrl });
-              return;
+    httpsGet(url, (response) => {
+      let data = "";
+      response.on("data", (chunk: string) => (data += chunk));
+      response.on("end", () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.results && json.results.length > 0) {
+            const result = json.results[0];
+            let artworkUrl: string | null = result.artworkUrl100 || null;
+            if (artworkUrl) {
+              artworkUrl = artworkUrl.replace("100x100", "300x300");
             }
-            resolve({ artworkUrl: null, trackUrl: null });
-          } catch {
-            resolve({ artworkUrl: null, trackUrl: null });
+            const trackUrl: string | null = result.trackViewUrl || null;
+            resolve({ artworkUrl, trackUrl });
+            return;
           }
-        });
-        response.on("error", () =>
-          resolve({ artworkUrl: null, trackUrl: null }),
-        );
-      })
-      .on("error", () => resolve({ artworkUrl: null, trackUrl: null }));
+          resolve({ artworkUrl: null, trackUrl: null });
+        } catch {
+          resolve({ artworkUrl: null, trackUrl: null });
+        }
+      });
+      response.on("error", () => resolve({ artworkUrl: null, trackUrl: null }));
+    }).on("error", () => resolve({ artworkUrl: null, trackUrl: null }));
   });
 }
 
-// Cache per track
 let lastTrackKey = "";
 let lastTrackUrl: string | null = null;
 let lastArtworkPath: string | null = null;
 
-/**
- * Single call for track info, artwork, and track URL.
- */
 export async function getNowPlaying(): Promise<NowPlayingData> {
   try {
-    // Ensure cache directory exists
     if (!existsSync(CACHE_DIR)) {
-      const { mkdirSync } = await import("fs");
       mkdirSync(CACHE_DIR, { recursive: true });
     }
 
@@ -197,7 +166,6 @@ export async function getNowPlaying(): Promise<NowPlayingData> {
     const trackKey = `${track.name}::${track.artist}`;
     const artworkPath = getArtworkPathForTrack(track.name, track.artist);
 
-    // If same track and we already have artwork, reuse everything
     if (
       trackKey === lastTrackKey &&
       lastArtworkPath &&
@@ -217,7 +185,6 @@ export async function getNowPlaying(): Promise<NowPlayingData> {
       }
     }
 
-    // New track — try AppleScript artwork first
     let gotArtwork = false;
     try {
       await runAppleScript(`
@@ -238,7 +205,6 @@ export async function getNowPlaying(): Promise<NowPlayingData> {
       // AppleScript artwork failed, will fall back to API
     }
 
-    // Fetch from iTunes API (for track URL, and artwork if AppleScript failed)
     const apiResult = await fetchFromITunesAPI(track.name, track.artist);
     lastTrackUrl = apiResult.trackUrl;
 
