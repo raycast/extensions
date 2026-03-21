@@ -1,8 +1,14 @@
 import { Action, ActionPanel, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { Player } from "./external-code/interfaces";
-import MusicAssistantClient from "./music-assistant-client";
+import { Player } from "./music-assistant/external-code/interfaces";
+import MusicAssistantClient from "./music-assistant/music-assistant-client";
+import { commandOrControlShortcut } from "./shortcuts/shortcuts";
 import React from "react";
+import {
+  getPlayerListSubtitle,
+  getPlayerListTitle,
+  splitPlayersByGroupRole,
+} from "./music-assistant/delegates/player-list-display-delegate";
 
 export default function ManagePlayerGroupsCommand() {
   const client = new MusicAssistantClient();
@@ -87,42 +93,58 @@ export default function ManagePlayerGroupsCommand() {
     }
   };
 
-  const getIcon = (player: Player, isMember = false): Icon | Image.ImageLike => {
-    // For members, always show the dot (indented)
-    if (isMember) return Icon.Dot;
+  const adjustMemberVolume = async (playerId: string, displayName: string, delta: number) => {
+    try {
+      const player = (players || []).find((p) => p.player_id === playerId);
+      if (!player) return;
 
-    // Try to get album art for this player
-    const albumArt = client.getPlayerAlbumArt(player);
-    if (albumArt) {
-      return { source: albumArt, mask: Image.Mask.RoundedRectangle };
+      const volumeBefore = player.volume_level ?? 0;
+      const newVolume = Math.max(0, Math.min(100, volumeBefore + delta));
+
+      const controller = await client.createPlayerVolumeController(playerId);
+      await controller.setVolume(newVolume);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Adjust Volume",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const syncMembersWithLeader = async (leaderId: string, displayName: string) => {
+    try {
+      const leader = (players || []).find((p) => p.player_id === leaderId);
+      if (!leader) return;
+
+      await client.syncMembersWithLeader(leader, players || []);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Members Synced",
+        message: `All members' volume synced to ${displayName}: ${leader.volume_level}%`,
+      });
+      revalidate();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Sync Members",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const getPlayerListIcon = (player: Player, options?: { isMember?: boolean }): Icon | Image.ImageLike => {
+    if (options?.isMember) {
+      return Icon.Dot;
     }
 
-    // Fallback to status icons
+    const albumArtUrl = client.getPlayerAlbumArt(player);
+    if (albumArtUrl) {
+      return { source: albumArtUrl, mask: Image.Mask.RoundedRectangle };
+    }
+
     const status = client.getGroupStatus(player);
     return status === "Standalone" ? Icon.Cd : Icon.TwoPeople;
-  };
-
-  const getTitle = (player: Player, isMember = false): string => {
-    // Indent member names to create tree-like appearance
-    if (isMember) {
-      return `    ${player.display_name}`;
-    }
-    return player.display_name;
-  };
-
-  const getSubtitle = (player: Player, isMember = false): string => {
-    // Members should only show "Group member", not their currently playing info
-    if (isMember) return "Group member";
-
-    // Show currently playing info for standalone players and group leaders
-    const nowPlaying = client.getCurrentlyPlayingSong(player);
-    if (nowPlaying) return nowPlaying;
-
-    const status = client.getGroupStatus(player);
-    if (status === "Leader") {
-      return `Group leader · ${player.group_childs.length} member(s)`;
-    }
-    return "Standalone";
   };
 
   const getAccessories = (player: Player): List.Item.Accessory[] => {
@@ -166,7 +188,7 @@ export default function ManagePlayerGroupsCommand() {
 
     return (
       <ActionPanel>
-        {/* Primary action varies by player status */}
+        {/* Primary action: grouping/ungrouping */}
         {status === "Standalone" && (
           <>
             {groupingTargets.length > 0 ? (
@@ -210,6 +232,14 @@ export default function ManagePlayerGroupsCommand() {
           </>
         )}
 
+        {status === "Member" && (
+          <Action
+            title="Remove from Group"
+            icon={Icon.Minus}
+            onAction={() => ungroupPlayer(player.player_id, player.display_name)}
+          />
+        )}
+
         {status === "Leader" && (
           <>
             {groupingTargets.length > 0 ? (
@@ -238,33 +268,64 @@ export default function ManagePlayerGroupsCommand() {
             <Action
               title="Disband Group"
               icon={Icon.Minus}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={commandOrControlShortcut("backspace")}
               onAction={() => removeAllMembers(player.player_id, player.display_name, player.group_childs)}
+            />
+            <Action
+              title="Sync Members"
+              icon={Icon.LevelMeter}
+              onAction={() => syncMembersWithLeader(player.player_id, player.display_name)}
             />
           </>
         )}
 
+        {/* Secondary actions: fine-grained volume control for group members and leaders */}
         {status === "Member" && (
-          <Action
-            title="Remove from Group"
-            icon={Icon.Minus}
-            onAction={() => ungroupPlayer(player.player_id, player.display_name)}
-          />
+          <>
+            <Action
+              title="Increase Volume"
+              icon={Icon.Plus}
+              shortcut={commandOrControlShortcut("=")}
+              onAction={() => adjustMemberVolume(player.player_id, player.display_name, 5)}
+            />
+            <Action
+              title="Decrease Volume"
+              icon={Icon.Minus}
+              shortcut={commandOrControlShortcut("-")}
+              onAction={() => adjustMemberVolume(player.player_id, player.display_name, -5)}
+            />
+          </>
+        )}
+
+        {/* Fine-grained volume control for group leaders */}
+        {status === "Leader" && (
+          <>
+            <Action
+              title="Increase Volume"
+              icon={Icon.Plus}
+              shortcut={commandOrControlShortcut("=")}
+              onAction={() => adjustMemberVolume(player.player_id, player.display_name, 5)}
+            />
+            <Action
+              title="Decrease Volume"
+              icon={Icon.Minus}
+              shortcut={commandOrControlShortcut("-")}
+              onAction={() => adjustMemberVolume(player.player_id, player.display_name, -5)}
+            />
+          </>
         )}
 
         <Action
           title="Reload Players"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={commandOrControlShortcut("r")}
           onAction={() => revalidate()}
         />
       </ActionPanel>
     );
   };
 
-  // Organize players for tree view
-  const groupLeaders = players?.filter((p) => client.isGroupLeader(p)) || [];
-  const standalonePlayers = players?.filter((p) => client.getGroupStatus(p) === "Standalone") || [];
+  const { groupLeaders, standalonePlayers } = splitPlayersByGroupRole(players);
 
   return (
     <List isLoading={isLoading} navigationTitle="Manage Player Groups" searchBarPlaceholder="Search players">
@@ -280,9 +341,9 @@ export default function ManagePlayerGroupsCommand() {
                 {/* Group Leader */}
                 <List.Item
                   key={leader.player_id}
-                  title={getTitle(leader, false)}
-                  subtitle={getSubtitle(leader, false)}
-                  icon={getIcon(leader, false)}
+                  title={getPlayerListTitle(leader)}
+                  subtitle={getPlayerListSubtitle(leader)}
+                  icon={getPlayerListIcon(leader)}
                   accessories={getAccessories(leader)}
                   actions={renderPlayerActions(leader)}
                 />
@@ -290,9 +351,9 @@ export default function ManagePlayerGroupsCommand() {
                 {members.map((member) => (
                   <List.Item
                     key={member.player_id}
-                    title={getTitle(member, true)}
-                    subtitle={getSubtitle(member, true)}
-                    icon={getIcon(member, true)}
+                    title={getPlayerListTitle(member, { isMember: true })}
+                    subtitle={getPlayerListSubtitle(member, { isMember: true })}
+                    icon={getPlayerListIcon(member, { isMember: true })}
                     accessories={getAccessories(member)}
                     actions={renderPlayerActions(member)}
                   />
@@ -309,9 +370,9 @@ export default function ManagePlayerGroupsCommand() {
           {standalonePlayers.map((player) => (
             <List.Item
               key={player.player_id}
-              title={getTitle(player, false)}
-              subtitle={getSubtitle(player, false)}
-              icon={getIcon(player, false)}
+              title={getPlayerListTitle(player)}
+              subtitle={getPlayerListSubtitle(player)}
+              icon={getPlayerListIcon(player)}
               accessories={getAccessories(player)}
               actions={renderPlayerActions(player)}
             />

@@ -14,4 +14,7 @@ export interface Preferences {
   defaultSort: string;
   openFolderAsDefault?: boolean;
   minCharsToSearch?: string;
+  maxResults?: string;
+  useRegex?: boolean;
+  useSdk?: boolean;
 }

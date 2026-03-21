@@ -51,6 +51,53 @@ type CreateTaskProps = {
   draftValues?: CreateTaskValues;
 };
 
+function normalizeWhitespace(content: string) {
+  return content.replace(/\s+/g, " ").trim();
+}
+
+function removeLastRegexMatch(content: string, regex: RegExp) {
+  const matches = Array.from(content.matchAll(regex));
+
+  if (matches.length === 0) {
+    return content;
+  }
+
+  const lastMatch = matches[matches.length - 1];
+  const beforeMatch = content.slice(0, lastMatch.index);
+  const afterMatch = content.slice(lastMatch.index! + lastMatch[0].length);
+  return normalizeWhitespace(`${beforeMatch} ${afterMatch}`);
+}
+
+function removeLastParsedDateString(content: string, dateString?: string) {
+  if (!dateString) {
+    return content;
+  }
+
+  const escapedDateString = dateString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const dateRegex = new RegExp(`\\b${escapedDateString}\\b`, "gi");
+  return removeLastRegexMatch(content, dateRegex);
+}
+
+function removeLastParsedDeadlineString(content: string, deadlineString?: string) {
+  if (!deadlineString) {
+    return content;
+  }
+
+  const escapedDeadlineString = deadlineString.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const deadlineRegex = new RegExp(`\\{\\s*${escapedDeadlineString}\\s*\\}`, "gi");
+  return removeLastRegexMatch(content, deadlineRegex);
+}
+
+function removePrefixedToken(content: string, prefix: "#" | "@", token: string) {
+  const escapedToken = token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(^|\\s)${prefix}(?:"${escapedToken}"|${escapedToken})(?=\\s|$|[.,!?;:])`, "gi");
+  return normalizeWhitespace(content.replace(regex, "$1"));
+}
+
+function removePriorityTokens(content: string) {
+  return normalizeWhitespace(content.replace(/\bp[1-4]\b/gi, " "));
+}
+
 function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues }: CreateTaskProps) {
   const { shouldCloseMainWindow } = getPreferenceValues<Preferences.CreateTask>();
 
@@ -74,19 +121,37 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
       await toast.show();
 
       try {
-        // Clean content by removing embedded project names and assignees when selected via form
+        // Clean title content by removing NLP/control tokens already mapped to structured fields.
         let cleanContent = values.content;
 
         // Remove project references from content if project is selected via dropdown
         if (values.projectId && projects) {
           const selectedProject = projects.find((p) => p.id === values.projectId);
           if (selectedProject) {
-            // Remove both quoted and unquoted project references
-            // Create regex to match both #Project and #"Project Name" formats
-            const escapedName = selectedProject.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            const projectRegex = new RegExp(`#(?:"${escapedName}"|#${escapedName})`, "gi");
-            cleanContent = cleanContent.replace(projectRegex, "").trim();
+            cleanContent = removePrefixedToken(cleanContent, "#", selectedProject.name);
           }
+        }
+
+        // Remove label references from title when labels are selected.
+        if (Array.isArray(values.labels) && values.labels.length > 0) {
+          for (const label of values.labels) {
+            cleanContent = removePrefixedToken(cleanContent, "@", label);
+          }
+        }
+
+        // Remove priority token (p1..p4) if NLP recognized one.
+        if (parsedData.priority !== undefined) {
+          cleanContent = removePriorityTokens(cleanContent);
+        }
+
+        // Remove parsed deadline token when deadline is set.
+        if (values.deadline) {
+          cleanContent = removeLastParsedDeadlineString(cleanContent, parsedData.deadlineString);
+        }
+
+        // Remove parsed natural-language date from content when a due date is set.
+        if (values.date) {
+          cleanContent = removeLastParsedDateString(cleanContent, parsedData.dateString);
         }
 
         // Use addTask API with structured parameters for reliable assignment
@@ -101,6 +166,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
             section_id: values.sectionId || undefined,
             parent_id: values.parentId || undefined,
             due: values.date ? { date: values.date.toISOString() } : undefined,
+            auto_reminder: true,
             deadline: values.deadline ? { date: values.deadline.toLocaleDateString("en-CA") } : undefined,
             duration:
               values.duration && values.date && !values.date.toDateString().includes(":")
@@ -561,6 +627,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
   // Previous values to detect manual changes
   const prevValuesRef = useRef(values);
+  const isNlpDateUpdateRef = useRef(false);
 
   // Detect manual field changes and update both tracking AND title
   useEffect(() => {
@@ -589,11 +656,15 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
 
     // Detect manual date change
     if (values.date?.getTime() !== prev.date?.getTime()) {
-      lastActionRef.current.date = { source: "manual", timestamp: now };
-      // Update title to reflect manual date change
-      if (now - lastActionRef.current.contentChanged > 100) {
-        // Debounce to avoid loops
-        updateTitleWithDate(values.date);
+      if (isNlpDateUpdateRef.current) {
+        isNlpDateUpdateRef.current = false;
+      } else {
+        lastActionRef.current.date = { source: "manual", timestamp: now };
+        // Update title to reflect manual date change
+        if (now - lastActionRef.current.contentChanged > 100) {
+          // Debounce to avoid loops
+          updateTitleWithDate(values.date);
+        }
       }
     }
 
@@ -675,6 +746,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         if (
           values.date &&
           (values.date.getHours() !== 0 || values.date.getMinutes() !== 0) &&
+          !parsedData.parsedDateHasTime &&
           newDate.toDateString() === values.date.toDateString()
         ) {
           newDate.setHours(values.date.getHours());
@@ -682,15 +754,17 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
           newDate.setSeconds(values.date.getSeconds());
         }
 
+        isNlpDateUpdateRef.current = true;
         setValue("date", newDate);
         lastActionRef.current.date = { source: "nlp", timestamp: nlpTimestamp };
       } else {
         // Reset to null/empty when date parameter is removed from title
+        isNlpDateUpdateRef.current = true;
         setValue("date", fromTodayEmptyView ? new Date() : null);
         lastActionRef.current.date = { source: "nlp", timestamp: nlpTimestamp };
       }
     }
-  }, [parsedData.parsedDate, setValue, fromTodayEmptyView]);
+  }, [parsedData.parsedDate, parsedData.parsedDateHasTime, setValue, fromTodayEmptyView]);
 
   // Auto-update deadline based on NLP parsing - respect last action
   useEffect(() => {

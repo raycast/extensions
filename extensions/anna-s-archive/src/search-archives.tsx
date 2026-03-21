@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useArchive } from "@/hooks/use-archive";
 import { useMirrorDomain } from "@/hooks/use-mirror-domain";
 import { isEmpty } from "@/utils";
@@ -45,18 +45,32 @@ const Command = () => {
       filtering={false}
       isShowingDetail={listData.length > 0}
     >
-      {(!error && !isLoading && listData.length === 0) || error ? (
+      {error && (
         <List.EmptyView
-          title={error ? "Error" : emptyViewTitle.title}
-          description={error ? error.message : emptyViewTitle.description}
-          icon={{ source: Icon.Book }}
+          title="Whoops! Something went wrong."
+          description={
+            "An error occurred! It might be that the mirror is down. Please press Enter to test the mirrors and maybe change to a different one in your extension preferences. If all are down, please copy the error message (See Actions) and report the issue."
+          }
+          icon={{ source: Icon.WifiDisabled }}
           actions={
             <ActionPanel>
               <TestMirrorsAction />
+              <Action.CopyToClipboard
+                title="Copy Error Message"
+                content={`Mirror: ${usedMirror.url}\nError: ${error.message}\nStack: ${error.stack}\nSearch: ${search}`}
+                icon={Icon.Clipboard}
+              />
             </ActionPanel>
           }
         />
-      ) : undefined}
+      )}
+      {!error && !isLoading && listData.length === 0 && (
+        <List.EmptyView
+          title={emptyViewTitle.title}
+          description={emptyViewTitle.description}
+          icon={{ source: Icon.Book }}
+        />
+      )}
       {!error && listData.map((item) => <ArchiveListItem key={item.id} item={item} />)}
     </List>
   );

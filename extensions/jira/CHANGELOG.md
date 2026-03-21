@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Bug Fix] - 2026-02-05
 
 - Fixed a bug where the Jira create-issue flow copied an API base URL instead of the normal `/browse/KEY` issue link.

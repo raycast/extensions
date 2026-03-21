@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, LaunchType, launchCommand } from "@raycast/api";
+import { MenuBarExtra, Icon, LaunchType, launchCommand, getPreferenceValues, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { createPrusaClientFromPreferences } from "./api/prusaClient";
@@ -18,6 +18,8 @@ function formatTime(seconds: number): string {
 }
 
 export default function Command() {
+  const { prusaConnectUUID: rawPrusaConnectUUID } = getPreferenceValues<Preferences>();
+  const prusaConnectUUID = rawPrusaConnectUUID?.trim();
   const {
     data: status,
     error,
@@ -72,9 +74,13 @@ export default function Command() {
   const timeRemaining = status.job.time_remaining;
   const timePrinting = status.job.time_printing;
 
-  // Build menu bar title based on state
   let title = "";
-  if (state === "PAUSED") {
+  let icon: Icon | string = "command-icon.png";
+
+  if (state === "ATTENTION") {
+    icon = Icon.AlarmRinging;
+    title = "Attention";
+  } else if (state === "PAUSED") {
     title = `⏸️ Paused: ${progress.toFixed(0)}%`;
   } else if (state === "PRINTING") {
     title =
@@ -86,7 +92,7 @@ export default function Command() {
   }
 
   return (
-    <MenuBarExtra icon="command-icon.png" title={title} tooltip="Prusa Printer Status" isLoading={isLoading}>
+    <MenuBarExtra icon={icon} title={title} tooltip="Prusa Printer Status" isLoading={isLoading}>
       <MenuBarExtra.Section title="Print Job">
         <MenuBarExtra.Item title="Progress" subtitle={`${progress.toFixed(1)}%`} icon={Icon.CircleProgress} />
         <MenuBarExtra.Item title="Time Remaining" subtitle={formatTime(timeRemaining)} icon={Icon.Clock} />
@@ -119,6 +125,15 @@ export default function Command() {
             }
           }}
         />
+        {prusaConnectUUID && (
+          <MenuBarExtra.Item
+            title="Open in Prusa Connect"
+            icon={Icon.Globe}
+            onAction={() => {
+              void open(`https://connect.prusa3d.com/printer/${prusaConnectUUID}/dashboard`);
+            }}
+          />
+        )}
         <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

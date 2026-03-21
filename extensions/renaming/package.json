@@ -38,6 +38,12 @@
       "title": "Replace File(s) Characters",
       "description": "Replace characters in file(s) names.",
       "mode": "view"
+    },
+    {
+      "name": "advanced-rename",
+      "title": "Advanced Batch Rename",
+      "description": "Rename files using a powerful rule-based engine.",
+      "mode": "view"
     }
   ],
   "dependencies": {

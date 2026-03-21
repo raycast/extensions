@@ -5,6 +5,9 @@
   "description": "Connect to remote displays and preserve audio output",
   "icon": "icon.png",
   "author": "pavzagor",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "System"
   ],
@@ -52,8 +55,5 @@
     "fix-lint": "npx ray lint --fix",
     "lint": "npx ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

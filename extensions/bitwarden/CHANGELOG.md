@@ -1,5 +1,17 @@
 # Bitwarden Changelog
 
+## [Fix] - 2026-03-20
+
+- Fix custom server URL "Restart Required" alert loop after CLI binary update
+- Fix reverting to default server when custom server URL preference is removed
+
+## [Unified Item Detail View] - 2026-03-20
+
+- Add unified detail screen for all vault item types (login, card, identity, note, SSH key)
+- Add field-type components with copy, paste, reveal/hide, and open-in-browser actions
+- Add keyboard shortcuts for copy/paste password and TOTP actions
+- Remove separate card and identity detail screens in favor of the unified view
+
 ## [Fix Password Generation] - 2026-02-18
 
 - Fix password generation failing due to false boolean options

@@ -7,40 +7,87 @@ import {
   calculateEstimatedUsage,
   calculateAverageUsage,
 } from "../utils/usage-limits-formatter";
+import { UsageLimitsError, sanitizeCodeBlock } from "../utils/usage-limits-error";
 import { ErrorMetadata } from "./ErrorMetadata";
-import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
+import { STANDARD_ACCESSORIES } from "./common/accessories";
+
+type UsageLimitsAccessoriesInput = {
+  hasData: boolean;
+  error: UsageLimitsError | null;
+  isStale: boolean;
+  lastFetched: Date | null;
+  fiveHourUtilization: number;
+};
+
+const getUsageLimitsErrorIcon = () => ({
+  source: Icon.ExclamationMark,
+  tintColor: Color.Red,
+});
+
+const getUsageLimitsAccessories = ({
+  hasData,
+  error,
+  isStale,
+  lastFetched,
+  fiveHourUtilization,
+}: UsageLimitsAccessoriesInput): List.Item.Accessory[] => {
+  if (error) {
+    return [{ text: "Error", icon: getUsageLimitsErrorIcon() }];
+  }
+
+  if (!hasData) {
+    return STANDARD_ACCESSORIES.LOADING;
+  }
+
+  if (isStale) {
+    return [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }];
+  }
+
+  return [
+    {
+      icon: Icon.Gauge,
+      text: `${fiveHourUtilization.toFixed(0)}%`,
+      tooltip: "5-Hour Limit (higher priority)",
+    },
+  ];
+};
+
+const getUsageLimitsErrorMarkdown = (error: UsageLimitsError): string => {
+  return [
+    `# ${error.title}`,
+    "",
+    error.message,
+    "",
+    "## Error Log",
+    "",
+    "```text",
+    sanitizeCodeBlock(error.log),
+    "```",
+  ].join("\n");
+};
 
 export function UsageLimits() {
-  const { data, isLoading, error, isStale, lastFetched, revalidate } = useClaudeUsageLimits();
+  const { data, isLoading, error, isStale, lastFetched, revalidate, isUsageLimitsAvailable } = useClaudeUsageLimits();
+
+  if (!isUsageLimitsAvailable) {
+    return null;
+  }
 
   const fiveHourUtil = data?.five_hour?.utilization ?? 0;
   const sevenDayUtil = data?.seven_day?.utilization ?? 0;
 
-  const accessories: List.Item.Accessory[] =
-    error && !data
-      ? STANDARD_ACCESSORIES.ERROR
-      : !data
-        ? STANDARD_ACCESSORIES.LOADING
-        : isStale
-          ? [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }]
-          : [
-              {
-                icon: Icon.Gauge,
-                text: `${fiveHourUtil.toFixed(0)}%`,
-                tooltip: "5-Hour Limit (higher priority)",
-              },
-            ];
+  const accessories = getUsageLimitsAccessories({
+    hasData: Boolean(data),
+    error,
+    isStale,
+    lastFetched,
+    fiveHourUtilization: fiveHourUtil,
+  });
 
   const renderDetailMetadata = (): ReactNode => {
-    if (error && !data) {
-      return (
-        <ErrorMetadata
-          error={error}
-          noDataMessage="Unable to fetch usage limits"
-          noDataSubMessage="Please ensure Claude Code is authenticated and keychain access is granted"
-        />
-      );
+    if (error) {
+      return null;
     }
 
     if (!data) {
@@ -102,7 +149,11 @@ export function UsageLimits() {
         )}
         <List.Item.Detail.Metadata.Label
           title="Resets in"
-          text={`${formatTimeRemaining(data.five_hour.resets_at)} || ${new Date(data.five_hour.resets_at).toLocaleString("en-US", { hour12: false })}`}
+          text={
+            data.five_hour.resets_at
+              ? `${formatTimeRemaining(data.five_hour.resets_at)} || ${new Date(data.five_hour.resets_at).toLocaleString()}`
+              : "N/A"
+          }
           icon={Icon.ArrowClockwise}
         />
         <List.Item.Detail.Metadata.Separator />
@@ -129,7 +180,11 @@ export function UsageLimits() {
         )}
         <List.Item.Detail.Metadata.Label
           title="Resets in"
-          text={`${formatTimeRemaining(data.seven_day.resets_at)} || ${new Date(data.seven_day.resets_at).toLocaleString("en-US", { hour12: false })}`}
+          text={
+            data.seven_day.resets_at
+              ? `${formatTimeRemaining(data.seven_day.resets_at)} || ${new Date(data.seven_day.resets_at).toLocaleString()}`
+              : "N/A"
+          }
           icon={Icon.ArrowClockwise}
         />
 
@@ -152,12 +207,19 @@ export function UsageLimits() {
     <List.Item
       id="usage-limits"
       title="Usage Limits"
-      icon={{ source: Icon.Gauge, tintColor: Color.SecondaryText }}
+      icon={Icon.Gauge}
       accessories={accessories}
-      detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
+      detail={
+        error ? (
+          <List.Item.Detail markdown={getUsageLimitsErrorMarkdown(error)} />
+        ) : (
+          <List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />
+        )
+      }
       actions={
         <ActionPanel>
           <Action title="Refresh Usage Limit" icon={Icon.ArrowClockwise} onAction={revalidate} />
+          {error && <Action.CopyToClipboard title="Copy Error Log" content={error.log} icon={Icon.Clipboard} />}
         </ActionPanel>
       }
     />

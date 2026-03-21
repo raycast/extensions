@@ -10,6 +10,12 @@ function getProgressColor(percent: number): string {
   return "#FF453A";
 }
 
+export function generateAsciiBar(percent: number, width = 15): string {
+  const p = Math.max(0, Math.min(100, percent));
+  const filled = Math.round((p / 100) * width);
+  return "▰".repeat(filled) + "▱".repeat(width - filled);
+}
+
 export function generatePieIcon(percent: number): Image.ImageLike {
   const p = Math.max(0, Math.min(100, percent));
   return getProgressIcon(p / 100, getProgressColor(p));

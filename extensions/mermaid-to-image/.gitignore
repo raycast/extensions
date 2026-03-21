@@ -8,3 +8,12 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
+
+# local worktrees
+.worktrees/
+
+# local package tarballs
+*.tgz
+
+# local development docs
+/docs/

@@ -1,6 +1,6 @@
 # Kitty Raycast Extension Changelog
 
-## [Initial Version] - 2026-02-24
+## [Initial Version] - 2026-02-27
 
 - New Kitty Window command
 - New Kitty Tab command

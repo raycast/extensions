@@ -1,4 +1,4 @@
-import { useNavigation } from "@raycast/api";
+import { popToRoot, useNavigation } from "@raycast/api";
 import ExpandableToast from "../components/ExpandableToast";
 
 import { Sourcegraph, instanceName, usesOAuth } from "../sourcegraph";
@@ -24,7 +24,10 @@ export default function checkAuthEffect(src: Sourcegraph) {
         const logoutAction = usesOAuth(src)
           ? {
               title: "Log out",
-              onAction: () => src.oauth.client.removeTokens(),
+              onAction: async () => {
+                await src.oauth.client.removeTokens();
+                popToRoot();
+              },
             }
           : undefined;
         const toast =

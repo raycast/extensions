@@ -24,9 +24,9 @@ export default function WeaknessMetadata(props: {
 
   if (weak.length) {
     tagList.push(
-      <TagListComponent title="Weak To" key="weak">
-        {weak.map(({ text, color }, index) => (
-          <TagListComponent.Item key={index} text={text} color={color} />
+      <TagListComponent title="Weaknesses" key="weak">
+        {weak.map((props, index) => (
+          <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,
     );
@@ -34,9 +34,9 @@ export default function WeaknessMetadata(props: {
 
   if (immune.length) {
     tagList.push(
-      <TagListComponent title="Immune To" key="immute">
-        {immune.map(({ text, color }, index) => (
-          <TagListComponent.Item key={index} text={text} color={color} />
+      <TagListComponent title="Immunities" key="immute">
+        {immune.map((props, index) => (
+          <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,
     );
@@ -44,9 +44,9 @@ export default function WeaknessMetadata(props: {
 
   if (resistant.length) {
     tagList.push(
-      <TagListComponent title="Resistant To" key="resistant">
-        {resistant.map(({ text, color }, index) => (
-          <TagListComponent.Item key={index} text={text} color={color} />
+      <TagListComponent title="Resistances" key="resistant">
+        {resistant.map((props, index) => (
+          <TagListComponent.Item key={index} {...props} />
         ))}
       </TagListComponent>,
     );

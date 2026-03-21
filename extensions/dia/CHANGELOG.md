@@ -1,5 +1,35 @@
 # Dia Changelog
 
+## [Fix tab fetching and JSON parsing] - 2026-03-12
+
+- Fix unescaped quotes in JSON from AppleScript so tab data parses correctly
+- When JXA returns 0 tabs but Dia has windows, fall back to AppleScript bulk fetch
+- Handle missing value in AppleScript escape_value to avoid errors
+
+## [Performance and Features] - 2026-03-10
+
+### Performance
+
+- Replace nested AppleScript repeat loops with JXA (JavaScript for Automation) with bulk AppleScript fallback using `properties of every tab` for 10-14x faster tab fetching
+- Switch `useTabs()` from `usePromise` to `useCachedPromise` for instant subsequent launches
+- Debounced search: expensive operations (history SQL, Google API, bookmarks I/O) use 200ms debounce while tab filtering and URL detection remain instant
+- Progressive UI loading: tabs render immediately, history/bookmarks/suggestions stream in independently
+- Skip history and Google queries for single-character searches
+- Defer VersionCheck: show content immediately instead of blocking render while checking Dia version
+- Cache bookmarks tree with `useCachedPromise` and `keepPreviousData` to avoid re-reading file on every search
+- Replace `focusTab()` nested AppleScript loops with JXA for faster tab switching
+- Remove `dedent` dependency to reduce cold start time
+
+### Added
+
+- **Open URL in Dia**: New no-view command to open a URL in Dia with argument, clipboard fallback, and Google search for non-URLs
+- **URL detection in Search**: Typing a URL shows "Open [url]" as the first result with default action to open in Dia
+- **Tab action preference**: Choose default Enter action (Focus Existing Tab or Open in New Tab) via extension preferences. Defaults to Focus Existing Tab
+
+## [Update Raycast Utils] - 2026-03-06
+
+- Updated `@raycast/utils` from `^2.2.2` to `^2.2.3`.
+
 ## [Search Bookmarks: Open all in folder] - 2026-02-02
 
 - Added "Open All # in Dia" action on bookmark folders to open all bookmarks in that folder (and subfolders) as tabs in Dia for quick access to a bookmarked set of tabs; Raycast window closes after opening to keep user in flow.

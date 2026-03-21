@@ -22,6 +22,7 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
     detached: true,
     stdio: "ignore",
   });
+  child.on("exit", () => {});
   child.unref();
 
   await update(updates, true);

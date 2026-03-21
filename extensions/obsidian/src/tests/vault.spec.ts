@@ -2,16 +2,17 @@ import { ObsidianVault } from "@/obsidian";
 import { getVaultNameFromPath, getVaultsFromPreferences } from "@/obsidian/internal/obsidian";
 import { getNotes, getExcludedFolders, getNoteFileContent, getMedia } from "@/obsidian/internal/vault";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { getPreferenceValues } from "@raycast/api";
 import { createTempVault } from "./helpers/createTemporaryVault";
 import fs from "fs";
 import path from "path";
 
 vi.mock("@raycast/api", () => ({
-  getPreferenceValues: () => ({
+  getPreferenceValues: vi.fn(() => ({
     excludedFolders: "",
     configFileName: ".obsidian",
     vaultPath: "/Test/test/test/vaultname",
-  }),
+  })),
   Icon: { Video: "video", Microphone: "mic" },
   Cache: class MockCache {
     private storage = new Map<string, string>();
@@ -55,9 +56,20 @@ describe("vault", () => {
   });
 
   describe("getExistingVaultsFromPreferences", () => {
-    it("should  get exisitng vaults from preferences", () => {
+    it("should get existing vaults from preferences", () => {
       const vaults = getVaultsFromPreferences();
       console.log(vaults);
+    });
+
+    it("should not throw and return empty array when vaultPath preference is undefined (first install)", () => {
+      vi.mocked(getPreferenceValues).mockReturnValue({
+        vaultPath: undefined as unknown as string,
+        excludedFolders: "",
+        configFileName: ".obsidian",
+      });
+      expect(() => getVaultsFromPreferences()).not.toThrow();
+      expect(getVaultsFromPreferences()).toEqual([]);
+      vi.mocked(getPreferenceValues).mockRestore();
     });
   });
 

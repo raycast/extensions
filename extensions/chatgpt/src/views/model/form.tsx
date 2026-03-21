@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, useFetch, useForm } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
-import { CSVPrompt, Model, ModelHook } from "../../type";
+import { CSVPrompt, Model, ModelHook, ReasoningEffort } from "../../type";
 import { parse } from "csv-parse/sync";
 import { useCallback, useState } from "react";
 import { getConfiguration } from "../../hooks/useChatGPT";
@@ -10,6 +10,7 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
   const { use, model } = props;
   const { pop } = useNavigation();
   const { isCustomModel } = getConfiguration();
+  const reasoningEffortOptions: ReasoningEffort[] = ["none", "low", "medium", "high"];
 
   const { handleSubmit, itemProps, setValue } = useForm<Model>({
     onSubmit: async (model) => {
@@ -60,8 +61,10 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
     initialValues: {
       name: model?.name ?? props.name ?? "",
       temperature: model?.temperature.toString() ?? "1",
-      option: model?.option ?? "gpt-4o-mini",
+      option: model?.option ?? "gpt-5-nano",
       prompt: model?.prompt ?? "You are a helpful assistant.",
+      enableReasoningEffortChange: model?.enableReasoningEffortChange ?? false,
+      reasoningEffort: model?.reasoningEffort ?? "medium",
       pinned: model?.pinned ?? false,
       vision: model?.vision ?? false,
     },
@@ -139,6 +142,32 @@ export const ModelForm = (props: { model?: Model; use: { models: ModelHook }; na
         placeholder="Set your sampling temperature (0 - 2)"
         {...itemProps.temperature}
       />
+      <Form.Checkbox
+        id="enableReasoningEffortChange"
+        title="Reasoning"
+        label="Enable reasoning effort change"
+        value={itemProps.enableReasoningEffortChange.value}
+        onChange={(value) => {
+          itemProps.enableReasoningEffortChange.onChange?.(value);
+          if (value) {
+            setValue("reasoningEffort", "medium");
+          }
+        }}
+      />
+      {itemProps.enableReasoningEffortChange.value && (
+        <Form.Dropdown
+          id="reasoningEffort"
+          title="Effort"
+          placeholder="Choose reasoning effort"
+          value={itemProps.reasoningEffort.value}
+          error={itemProps.reasoningEffort.error}
+          onChange={(value) => itemProps.reasoningEffort.onChange?.(value as ReasoningEffort)}
+        >
+          {reasoningEffortOptions.map((effort) => (
+            <Form.Dropdown.Item value={effort} title={effort} key={effort} />
+          ))}
+        </Form.Dropdown>
+      )}
       {isCustomModel ? (
         <Form.TextField title="Model" placeholder="Custom model name" {...itemProps.option} />
       ) : (

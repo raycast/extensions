@@ -1,8 +1,8 @@
 import { LaunchProps, showToast, Toast } from "@raycast/api";
 import { createLink } from "./api";
 
-export default async function SaveLink(props: LaunchProps<{ arguments: Arguments.SaveLink }>) {
-  const { url, title } = props.arguments;
+export default async function SaveLink(props: LaunchProps<{ arguments: { title: string; url: string } }>) {
+  const { title, url } = props.arguments;
 
   if (!url.trim()) {
     await showToast(Toast.Style.Failure, "URL is required");

@@ -19,14 +19,7 @@ Floaty lets you pin and manage floating windows using the Floaty app ([floatytoo
 
 ## Install
 
-There are two common ways to use this extension:
-
 - Raycast Store: Search for "Floaty" in the Raycast Extensions store and install.
-- From source (developer mode):
-  1. Clone this repository into your local Raycast extensions folder.
-  2. Install dependencies and build (if required) per your Raycast development setup.
-
-If you need a packaged release or help publishing to the Raycast Store, I can add a `package.json` script and publishing notes.
 
 ## Requirements
 
@@ -41,19 +34,8 @@ Open Raycast and run any of the commands above. Typical flows:
 - List windows: run `List Windows` to see active windows and quick actions.
 - Restore: run `Unpin or Restore All Windows` to clear pins.
 
-## Development notes
-
-- Entry points are in `src/`. Match commands in `package.json` and the extension manifest if you change filenames.
-- Keep Floaty running while testing commands that interact with the app.
-
 ## Links
 
 - Project / website: [https://www.floatytool.com/](https://www.floatytool.com/)
 - Repository: [https://github.com/raycast/extensions](https://github.com/raycast/extensions) (this extension lives under `extensions/floaty`)
 
----
-
-If you want, I can also:
-
-- Remove any additional non-English text across the repo (I removed Chinese comments from config already).
-- Add a short `CONTRIBUTING.md` and developer run scripts for local testing.

@@ -14,6 +14,8 @@ import { useAmpUsage } from "./amp/fetcher";
 import { getAmpAccessory } from "./amp/renderer";
 import { useAntigravityUsage } from "./antigravity/fetcher";
 import { getAntigravityAccessory } from "./antigravity/renderer";
+import { useClaudeUsage } from "./claude/fetcher";
+import { getClaudeAccessory } from "./claude/renderer";
 import { useCodexUsage } from "./codex/fetcher";
 import { getCodexAccessory } from "./codex/renderer";
 import { useDroidUsage } from "./droid/fetcher";
@@ -49,6 +51,7 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 export default function MenuBarCommand() {
   const prefs = getPreferenceValues<Preferences>();
   const isAmpVisible = Boolean(prefs.showAmp);
+  const isClaudeVisible = Boolean(prefs.showClaude);
   const isCodexVisible = Boolean(prefs.showCodex);
   const isDroidVisible = Boolean(prefs.showDroid);
   const isGeminiVisible = Boolean(prefs.showGemini);
@@ -57,6 +60,7 @@ export default function MenuBarCommand() {
   const isZaiVisible = Boolean(prefs.showZai);
 
   const ampState = useAmpUsage(isAmpVisible);
+  const claudeState = useClaudeUsage(isClaudeVisible);
   const codexState = useCodexUsage(isCodexVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
@@ -73,6 +77,15 @@ export default function MenuBarCommand() {
       isLoading: ampState.isLoading,
       accessory: getAmpAccessory(ampState.usage, ampState.error, ampState.isLoading),
       revalidate: ampState.revalidate,
+    },
+    {
+      id: "claude",
+      name: "Claude",
+      icon: "claude-icon.svg",
+      visible: isClaudeVisible,
+      isLoading: claudeState.isLoading,
+      accessory: getClaudeAccessory(claudeState.usage, claudeState.error, claudeState.isLoading),
+      revalidate: claudeState.revalidate,
     },
     {
       id: "codex",
@@ -145,7 +158,7 @@ export default function MenuBarCommand() {
       hasAutoRefreshed.current = true;
       void Promise.all(visibleAgents.map((a) => a.revalidate()));
     }
-  }, [isLoading]);
+  }, [isLoading, visibleAgents]);
 
   const handleRefresh = async () => {
     await Promise.all(visibleAgents.map((a) => a.revalidate()));

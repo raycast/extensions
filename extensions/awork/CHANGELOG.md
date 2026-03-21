@@ -1,5 +1,9 @@
 # awork Changelog
 
+## [Improve time logging search] - 2026-03-01
+
+- Added search for task key and project key in time logging
+
 ## [Project and task keys] - 2026-02-19
 
 - Added search support for project key and task key

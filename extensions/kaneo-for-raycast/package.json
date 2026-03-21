@@ -85,6 +85,44 @@
           "title": "Due Date"
         }
       ]
+    },
+    {
+      "name": "youAsAssignee",
+      "type": "checkbox",
+      "label": "Assigned to you",
+      "description": "Display your name or \"You\" when task is assigned to you",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "requestTimeout",
+      "type": "dropdown",
+      "title": "Request Timeout",
+      "description": "Delay before timeout requests",
+      "required": true,
+      "default": "2500",
+      "data": [
+        {
+          "value": "1000",
+          "title": "1 Seconds"
+        },
+        {
+          "value": "2500",
+          "title": "2.5 Seconds"
+        },
+        {
+          "value": "5000",
+          "title": "5 Seconds"
+        },
+        {
+          "value": "10000",
+          "title": "10 Seconds"
+        },
+        {
+          "value": "30000",
+          "title": "30 Seconds"
+        }
+      ]
     }
   ],
   "keywords": [

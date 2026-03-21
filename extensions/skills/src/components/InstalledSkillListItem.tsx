@@ -1,21 +1,25 @@
 import { ActionPanel, Action, Icon, Keyboard, List, Color } from "@raycast/api";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { useCachedPromise } from "@raycast/utils";
-import { type InstalledSkill, removeFrontmatter } from "../shared";
+import { type InstalledSkill, parseFrontmatter } from "../shared";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
+import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 
 function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected: boolean }) {
-  const { data: content, isLoading } = useCachedPromise(
+  const { data: parsed, isLoading } = useCachedPromise(
     async (path: string) => {
       const raw = await readFile(join(path, "SKILL.md"), "utf-8");
-      return removeFrontmatter(raw);
+      return parseFrontmatter(raw);
     },
     [skill.path],
     { execute: isSelected },
   );
 
-  const markdown = isLoading ? `# ${skill.name}\n\nLoading...` : (content ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const markdown = isLoading
+    ? `# ${skill.name}\n\nLoading...`
+    : (parsed?.body ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const frontmatter = parsed?.frontmatter ?? {};
 
   return (
     <List.Item.Detail
@@ -23,7 +27,18 @@ function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
+          {frontmatter.description && (
+            <List.Item.Detail.Metadata.Label title="Description" text={frontmatter.description} />
+          )}
           <List.Item.Detail.Metadata.Label title="Name" text={skill.name} />
+          {frontmatter.license && (
+            <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
+          )}
+          {skill.hasUpdate && (
+            <List.Item.Detail.Metadata.TagList title="Status">
+              <List.Item.Detail.Metadata.TagList.Item text="Update available" color={Color.Orange} />
+            </List.Item.Detail.Metadata.TagList>
+          )}
           <List.Item.Detail.Metadata.TagList title="Agents">
             {skill.agents.map((agent) => (
               <List.Item.Detail.Metadata.TagList.Item key={agent} text={agent} color={Color.Blue} />
@@ -58,9 +73,21 @@ export function InstalledSkillListItem({
     <List.Item
       title={skill.name}
       subtitle={isShowingDetail ? undefined : agentsText}
-      icon={{ source: Icon.Hammer, tintColor: Color.Purple }}
+      icon={{ source: Icon.Hammer, tintColor: skill.hasUpdate ? Color.Orange : Color.Purple }}
       accessories={
-        isShowingDetail ? [] : [{ icon: Icon.ComputerChip, text: `${skill.agentCount}`, tooltip: agentsText }]
+        isShowingDetail
+          ? []
+          : [
+              ...(skill.hasUpdate
+                ? [
+                    {
+                      icon: { source: Icon.ArrowClockwise, tintColor: Color.Orange },
+                      tag: { value: "Update available", color: Color.Orange },
+                    },
+                  ]
+                : []),
+              { icon: Icon.ComputerChip, text: `${skill.agentCount}`, tooltip: agentsText },
+            ]
       }
       keywords={[skill.name, ...skill.agents]}
       id={skill.name}
@@ -83,6 +110,7 @@ export function InstalledSkillListItem({
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}
             <RemoveSkillAction skill={skill} onRemove={onUpdate} />
           </ActionPanel.Section>
           <Action

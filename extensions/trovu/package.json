@@ -1517,7 +1517,7 @@
     "dayjs": "^1.11.7",
     "escape-string-regexp": "^4.0.0",
     "js-yaml": "^4.1.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "split-limit": "^1.0.5"
   },
   "devDependencies": {

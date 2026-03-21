@@ -1,6 +1,7 @@
+import { useState, useEffect, useCallback, useRef } from "react";
 import { DroidUsage, DroidUsageTier, DroidError } from "./types";
+import { resolveDroidAuth } from "./auth";
 import { httpFetch } from "../agents/http";
-import { createTokenBasedHook } from "../agents/hooks";
 
 const DROID_USAGE_API = "https://api.factory.ai/api/organization/subscription/schedule";
 
@@ -69,8 +70,66 @@ function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error
   }
 }
 
-export const useDroidUsage = createTokenBasedHook<DroidUsage, DroidError>({
-  preferenceKey: "droidAuthToken",
-  agentName: "Droid",
-  fetcher: fetchDroidUsage,
-});
+export function useDroidUsage(enabled = true) {
+  const [usage, setUsage] = useState<DroidUsage | null>(null);
+  const [error, setError] = useState<DroidError | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const requestIdRef = useRef(0);
+
+  const fetchData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    setIsLoading(true);
+    setError(null);
+
+    const { accessToken } = await resolveDroidAuth();
+    if (requestId !== requestIdRef.current) return;
+
+    if (!accessToken) {
+      setUsage(null);
+      setError({
+        type: "not_configured",
+        message: "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.*).",
+      });
+      setIsLoading(false);
+      setHasInitialFetch(true);
+      return;
+    }
+
+    const result = await fetchDroidUsage(accessToken);
+    if (requestId !== requestIdRef.current) return;
+
+    setUsage(result.usage);
+    setError(result.error);
+    setIsLoading(false);
+    setHasInitialFetch(true);
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
+    }
+
+    if (!hasInitialFetch) {
+      void fetchData();
+    }
+  }, [enabled, hasInitialFetch, fetchData]);
+
+  const revalidate = useCallback(async () => {
+    if (!enabled) return;
+    await fetchData();
+  }, [enabled, fetchData]);
+
+  return {
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
+    revalidate,
+  };
+}

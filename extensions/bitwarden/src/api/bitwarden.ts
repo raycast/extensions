@@ -217,6 +217,8 @@ export class Bitwarden {
         // clear the data.json file to avoid issues with the new binary
         const dataJsonPath = join(supportPath, "data.json");
         await tryExec(() => unlink(dataJsonPath));
+        // clear stored server URL so checkServerUrl() re-configures the CLI
+        await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;
@@ -280,7 +282,8 @@ export class Bitwarden {
   async checkServerUrl(serverUrl: string | undefined): Promise<void> {
     // Check the CLI has been configured to use the preference Url
     const storedServer = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL);
-    if (!serverUrl || storedServer === serverUrl) return;
+    if (!serverUrl && !storedServer) return;
+    if (storedServer === serverUrl) return;
 
     // Update the server Url
     const toast = await this.showToast({
@@ -296,7 +299,11 @@ export class Bitwarden {
       }
       // If URL is empty, set it to the default
       await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { resetVaultTimeout: false });
-      await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
+      if (serverUrl) {
+        await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
+      } else {
+        await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
+      }
 
       toast.style = Toast.Style.Success;
       toast.title = "Success";
