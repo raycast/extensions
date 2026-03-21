@@ -37,8 +37,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.19.1",
     "@solana/web3.js": "^1.91.1",
     "ethers": "^6.11.1"
   },
@@ -54,7 +54,7 @@
     "@types/react": "18.2.79"
   },
   "scripts": {
-    "build": "ray build -e dist --skip-types",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
