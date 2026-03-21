@@ -23,7 +23,7 @@ Shows your currently playing Apple Music track's **album artwork** directly in t
 
 ```bash
 # Clone or copy this extension folder
-cd apple-music-artwork-menubar
+cd display-music
 
 # Install dependencies
 npm install
@@ -53,7 +53,7 @@ The extension uses AppleScript to communicate with Apple Music:
 
 1. Checks if Music.app is running and playing
 2. Extracts the raw artwork data from the current track
-3. Writes it to a temp file (`~/.cache/raycast-apple-music-artwork.jpg`)
+3. Writes it to a temp file in `~/.cache/` using a per-track hash (e.g. `~/.cache/raycast-display-music-<hash>.jpg`)
 4. Uses that file as the `MenuBarExtra` icon with a rounded rectangle mask
 5. Refreshes every 10 seconds via Raycast's background refresh
 

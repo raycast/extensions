@@ -11,10 +11,6 @@ import {
   openAlbumInMusic,
 } from "./apple-music";
 
-interface Preferences {
-  showTrackTitle: boolean;
-  showArtistName: boolean;
-}
 
 export default function NowPlaying() {
   const preferences = getPreferenceValues<Preferences>();
