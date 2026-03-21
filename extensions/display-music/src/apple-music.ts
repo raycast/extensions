@@ -1,7 +1,13 @@
 import { runAppleScript } from "run-applescript";
 import { homedir } from "os";
 import { join } from "path";
-import { existsSync, writeFileSync, statSync, readdirSync, unlinkSync } from "fs";
+import {
+  existsSync,
+  writeFileSync,
+  statSync,
+  readdirSync,
+  unlinkSync,
+} from "fs";
 import { createHash } from "crypto";
 import https from "https";
 import http from "http";
@@ -26,7 +32,10 @@ const ARTWORK_PREFIX = "raycast-display-music-";
  * Generate a unique artwork path based on track + artist.
  */
 function getArtworkPathForTrack(trackName: string, artist: string): string {
-  const hash = createHash("md5").update(`${trackName}::${artist}`).digest("hex").slice(0, 12);
+  const hash = createHash("md5")
+    .update(`${trackName}::${artist}`)
+    .digest("hex")
+    .slice(0, 12);
   return join(CACHE_DIR, `${ARTWORK_PREFIX}${hash}.jpg`);
 }
 
@@ -96,7 +105,10 @@ interface ITunesResult {
 /**
  * Search the iTunes Search API for artwork URL and track link.
  */
-async function fetchFromITunesAPI(trackName: string, artist: string): Promise<ITunesResult> {
+async function fetchFromITunesAPI(
+  trackName: string,
+  artist: string,
+): Promise<ITunesResult> {
   const query = encodeURIComponent(`${trackName} ${artist}`);
   const url = `https://itunes.apple.com/search?term=${query}&media=music&limit=1`;
 
@@ -123,7 +135,9 @@ async function fetchFromITunesAPI(trackName: string, artist: string): Promise<IT
             resolve({ artworkUrl: null, trackUrl: null });
           }
         });
-        response.on("error", () => resolve({ artworkUrl: null, trackUrl: null }));
+        response.on("error", () =>
+          resolve({ artworkUrl: null, trackUrl: null }),
+        );
       })
       .on("error", () => resolve({ artworkUrl: null, trackUrl: null }));
   });
@@ -184,11 +198,19 @@ export async function getNowPlaying(): Promise<NowPlayingData> {
     const artworkPath = getArtworkPathForTrack(track.name, track.artist);
 
     // If same track and we already have artwork, reuse everything
-    if (trackKey === lastTrackKey && lastArtworkPath && existsSync(lastArtworkPath)) {
+    if (
+      trackKey === lastTrackKey &&
+      lastArtworkPath &&
+      existsSync(lastArtworkPath)
+    ) {
       try {
         const stats = statSync(lastArtworkPath);
         if (stats.size > 0) {
-          return { track, artworkPath: lastArtworkPath, trackUrl: lastTrackUrl };
+          return {
+            track,
+            artworkPath: lastArtworkPath,
+            trackUrl: lastTrackUrl,
+          };
         }
       } catch {
         // fall through
