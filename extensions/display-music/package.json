@@ -35,6 +35,19 @@
       "default": false,
       "required": false,
       "label": "Show artist name in menu bar"
+    },
+    {
+      "name": "hideAfterMinutes",
+      "title": "Hide After Inactivity",
+      "description": "Hide the menu bar icon after this many minutes of paused or no playback",
+      "type": "dropdown",
+      "default": "8",
+      "required": false,
+      "data": [
+        { "title": "4 minutes", "value": "4" },
+        { "title": "8 minutes", "value": "8" },
+        { "title": "12 minutes", "value": "12" }
+      ]
     }
   ],
   "dependencies": {

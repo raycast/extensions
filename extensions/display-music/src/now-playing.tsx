@@ -22,12 +22,12 @@ import {
 interface Preferences {
   showTrackTitle: boolean;
   showArtistName: boolean;
+  hideAfterMinutes: string;
 }
-
-const HIDE_AFTER_MS = 10 * 60 * 1000;
 
 export default function NowPlaying() {
   const preferences = getPreferenceValues<Preferences>();
+  const hideAfterMs = parseInt(preferences.hideAfterMinutes, 10) * 60 * 1000;
   const [track, setTrack] = useState<TrackInfo | null>(null);
   const [artworkPath, setArtworkPath] = useState<string | null>(null);
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
@@ -48,7 +48,7 @@ export default function NowPlaying() {
       } else {
         if (pausedSince.current === null) {
           pausedSince.current = Date.now();
-        } else if (Date.now() - pausedSince.current > HIDE_AFTER_MS) {
+        } else if (Date.now() - pausedSince.current > hideAfterMs) {
           setHidden(true);
         }
       }
@@ -59,7 +59,7 @@ export default function NowPlaying() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [hideAfterMs]);
 
   useEffect(() => {
     fetchNowPlaying();
