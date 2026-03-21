@@ -4,7 +4,7 @@
   "title": "Display Music",
   "description": "Shows the current Apple Music album artwork and track info in your menu bar",
   "icon": "extension-icon.png",
-  "author": "guy-magen",
+  "author": "GuyMagen",
   "categories": ["Media"],
   "license": "MIT",
   "commands": [
