@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { basename } from "node:path";
+import { basename, join } from "node:path";
 import { getCustomNpxPath } from "../preferences";
-import type { InstalledSkill, Skill } from "../shared";
+import type { InstalledSkill, Skill, SkillLockEntry } from "../shared";
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
 
@@ -155,4 +156,26 @@ export async function checkForUpdates(): Promise<string[]> {
  */
 export async function updateAllSkills(): Promise<void> {
   await runSkillsCli(["update", "-y"]);
+}
+
+const LOCK_FILE = ".skill-lock.json";
+const AGENTS_DIR = ".agents";
+
+function getSkillLockPath(): string {
+  const xdgStateHome = process.env.XDG_STATE_HOME;
+  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
+  return join(home, AGENTS_DIR, LOCK_FILE);
+}
+
+export async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
+  try {
+    const raw = await readFile(getSkillLockPath(), "utf-8");
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
+      return parsed.skills as Record<string, SkillLockEntry>;
+    }
+    return {};
+  } catch {
+    return {};
+  }
 }
