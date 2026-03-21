@@ -1222,7 +1222,7 @@ ${cmd.listener ? `## Listener Command\n\n\`\`\`bash\n${cmd.listener}\n\`\`\`` : 
                         onAction={() => setSortBy("name")}
                       />
                       <Action
-                        title="Sort by Os"
+                        title="Sort by OS"
                         icon={Icon.ComputerChip}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "3" }}
                         onAction={() => setSortBy("os")}
