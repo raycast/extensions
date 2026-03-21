@@ -202,7 +202,7 @@ export default function Command() {
                   <ActionPanel>
                     <Action
                       title={
-                        entry.error ? "Open in Form (failed)" : "View Response"
+                        entry.error ? "Open in Form (Failed)" : "View Response"
                       }
                       icon={entry.error ? Icon.Pencil : Icon.Eye}
                       onAction={() => openHistoryResult(entry)}
