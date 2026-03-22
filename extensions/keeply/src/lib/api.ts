@@ -1,13 +1,5 @@
 import { getPreferenceValues } from '@raycast/api';
-import type {
-  Bookmark,
-  CreateBookmarkPayload,
-  Folder,
-  Preferences,
-  SidebarData,
-  Tag,
-  UpdateBookmarkPayload,
-} from './types';
+import type { Bookmark, CreateBookmarkPayload, Folder, SidebarData, Tag, UpdateBookmarkPayload } from './types';
 
 export class KeeplyApi {
   private readonly apiKey: string;
