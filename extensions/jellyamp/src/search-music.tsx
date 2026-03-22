@@ -300,7 +300,9 @@ export default function SearchMusicCommand(): React.ReactElement {
 
   // Check if credentials are configured on mount
   useEffect(() => {
-    credentialsConfigured().then((ok) => setNeedsSetup(!ok));
+    credentialsConfigured()
+      .then((ok) => setNeedsSetup(!ok))
+      .catch(() => setNeedsSetup(true));
   }, []);
 
   // Resolve credentials once setup is confirmed done
