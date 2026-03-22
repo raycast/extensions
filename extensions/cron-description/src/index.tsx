@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, Keyboard } from "@raycast/api";
+import { Form, ActionPanel, Action, Keyboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import cronstrue from "cronstrue";
 import { CronExpressionParser } from "cron-parser";
 import { useEffect, useState } from "react";
@@ -8,8 +8,18 @@ const TIMEZONES = ["UTC", ...Intl.supportedValuesOf("timeZone")];
 export default function main() {
   const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
+  const preferences = getPreferenceValues<{ defaultTimezone: string }>();
+  let defaultTz = localTimezone;
+  if (preferences.defaultTimezone) {
+    if (TIMEZONES.includes(preferences.defaultTimezone)) {
+      defaultTz = preferences.defaultTimezone;
+    } else {
+      showToast(Toast.Style.Failure, "Invalid default timezone", `Using local timezone: ${localTimezone}`);
+    }
+  }
+
   const [cron, setCron] = useState("* * * * *");
-  const [cronTimezone, setCronTimezone] = useState(localTimezone);
+  const [cronTimezone, setCronTimezone] = useState(defaultTz);
   const [cronError, setCronError] = useState("");
   const [description, setDescription] = useState("");
   const [nextRunCronTz, setNextRunCronTz] = useState("");
