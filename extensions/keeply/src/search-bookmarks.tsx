@@ -43,14 +43,10 @@ export default function SearchBookmarks() {
     data: searchResults = [],
     isLoading: searchLoading,
     mutate: searchMutate,
-  } = useCachedPromise(
-    (query: string) => api.searchBookmarks(query),
-    [searchText],
-    {
-      execute: isSearchMode,
-      onError: (error) => handleApiError(error),
-    },
-  );
+  } = useCachedPromise((query: string) => api.searchBookmarks(query), [searchText], {
+    execute: isSearchMode,
+    onError: (error) => handleApiError(error),
+  });
 
   const isLoading = isSearchMode ? searchLoading : allLoading;
 
