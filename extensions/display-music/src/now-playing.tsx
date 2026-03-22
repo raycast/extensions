@@ -100,10 +100,7 @@ export default function NowPlaying() {
 
   if (!track && !isLoading) {
     return (
-      <MenuBarExtra
-        icon={Icon.Music}
-        tooltip="Display Music — Nothing playing"
-      >
+      <MenuBarExtra icon={Icon.Music} tooltip="Display Music — Nothing playing">
         <MenuBarExtra.Item title="Nothing playing" />
         <MenuBarExtra.Item
           title="Open Apple Music"
