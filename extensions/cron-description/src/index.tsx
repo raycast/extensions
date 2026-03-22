@@ -5,14 +5,13 @@ import { useEffect, useState } from "react";
 
 const TIMEZONES = ["UTC", ...Intl.supportedValuesOf("timeZone")];
 const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const preferences = getPreferenceValues<Preferences>();
+const defaultTz =
+  preferences.defaultTimezone && TIMEZONES.includes(preferences.defaultTimezone)
+    ? preferences.defaultTimezone
+    : localTimezone;
 
 export default function main() {
-  const preferences = getPreferenceValues<Preferences>();
-  const defaultTz =
-    preferences.defaultTimezone && TIMEZONES.includes(preferences.defaultTimezone)
-      ? preferences.defaultTimezone
-      : localTimezone;
-
   useEffect(() => {
     if (preferences.defaultTimezone && !TIMEZONES.includes(preferences.defaultTimezone)) {
       showToast(Toast.Style.Failure, "Invalid default timezone", `Using local timezone: ${localTimezone}`);
