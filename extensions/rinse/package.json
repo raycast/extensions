@@ -67,6 +67,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "format:fix": "prettier --write .",
+    "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npm run pull-contributions && npx @raycast/api@latest publish",
