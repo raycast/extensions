@@ -1,4 +1,4 @@
-import type { Bookmark } from './types';
+import type { Bookmark } from "./types";
 
 export function getDomain(url: string): string {
   try {
@@ -17,7 +17,7 @@ export function formatRelativeDate(isoString: string): string {
   const weeks = Math.floor(days / 7);
   const months = Math.floor(days / 30);
 
-  if (seconds < 60) return 'just now';
+  if (seconds < 60) return "just now";
   if (minutes < 60) return `${minutes}m ago`;
   if (hours < 24) return `${hours}h ago`;
   if (days < 7) return `${days}d ago`;
@@ -36,7 +36,7 @@ export function getTagNames(bookmark: Bookmark): string[] {
 export function isValidUrl(input: string): boolean {
   try {
     const { protocol } = new URL(input);
-    return protocol === 'http:' || protocol === 'https:';
+    return protocol === "http:" || protocol === "https:";
   } catch {
     return false;
   }
