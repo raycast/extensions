@@ -58,10 +58,20 @@ export default function Command() {
       })
     ) {
       try {
-        const fs = await import("fs");
-        const filesToTrash = [key.publicKeyPath, key.privateKeyPath].filter(
-          (filePath): filePath is string => Boolean(filePath) && fs.existsSync(filePath),
-        );
+        const fsPromises = await import("fs/promises");
+        const filesToTrash = (
+          await Promise.all(
+            [key.publicKeyPath, key.privateKeyPath].map(async (filePath) => {
+              if (!filePath) return null;
+              try {
+                await fsPromises.access(filePath);
+                return filePath;
+              } catch {
+                return null;
+              }
+            }),
+          )
+        ).filter((filePath): filePath is string => filePath !== null);
 
         if (filesToTrash.length === 0) {
           throw new Error("No key files were found on disk for this entry.");

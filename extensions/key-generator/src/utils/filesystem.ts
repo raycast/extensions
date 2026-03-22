@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import os from "os";
 import { SSHKey, StorageType } from "../types/ssh";
-import { getFingerprint } from "./ssh";
+import { getFingerprint, checkIfKeyHasPassphrase } from "./ssh";
 
 export async function listAgentKeys(): Promise<SSHKey[]> {
   const { execFile } = await import("child_process");
@@ -101,7 +101,6 @@ export async function scanSSHDirectory(): Promise<SSHKey[]> {
       let hasPassphrase = false;
       if (storageType === "file") {
         try {
-          const { checkIfKeyHasPassphrase } = await import("./ssh");
           hasPassphrase = await checkIfKeyHasPassphrase(privPath);
         } catch {
           // Ignore

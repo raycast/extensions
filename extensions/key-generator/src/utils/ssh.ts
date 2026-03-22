@@ -1,9 +1,55 @@
-import { execFile } from "child_process";
+import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import os from "os";
 
 const execFileAsync = promisify(execFile);
+
+function execFileWithInput(command: string, args: string[], input: string, env?: NodeJS.ProcessEnv) {
+  return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
+    const child = spawn(command, args, { env });
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += String(chunk);
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += String(chunk);
+    });
+
+    child.on("error", (error) => reject(error));
+
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr });
+        return;
+      }
+
+      const error = new Error(stderr.trim() || `Command failed with exit code ${code}`) as Error & {
+        code?: number | null;
+        stdout?: string;
+        stderr?: string;
+      };
+      error.code = code;
+      error.stdout = stdout;
+      error.stderr = stderr;
+      reject(error);
+    });
+
+    child.stdin.write(input);
+    child.stdin.end();
+  });
+}
+
+export async function changeKeyPassphrase(privateKeyPath: string, currentPassphrase: string, newPassphrase: string) {
+  await execFileWithInput(
+    "ssh-keygen",
+    ["-p", "-f", privateKeyPath, "-P", currentPassphrase],
+    `${newPassphrase}\n${newPassphrase}\n`,
+  );
+}
 
 export async function generateSSHKey(options: {
   name: string;
@@ -18,7 +64,7 @@ export async function generateSSHKey(options: {
   const fs = await import("fs/promises");
   await fs.mkdir(sshDir, { recursive: true });
 
-  const args = ["-t", algorithm, "-f", filePath, "-N", passphrase || ""];
+  const args = ["-t", algorithm, "-f", filePath];
 
   if (comment) {
     args.push("-C", comment);
@@ -50,7 +96,11 @@ export async function generateSSHKey(options: {
   }
 
   try {
-    const { stdout, stderr } = await execFileAsync(sshKeygenPath, args);
+    const { stdout, stderr } = await execFileWithInput(
+      sshKeygenPath,
+      args,
+      `${passphrase || ""}\n${passphrase || ""}\n`,
+    );
     return stdout + stderr;
   } catch (error) {
     const errorMessage = (error as Error).message;

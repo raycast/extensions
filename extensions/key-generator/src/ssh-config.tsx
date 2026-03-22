@@ -207,9 +207,13 @@ export default function Command() {
         throw new Error("Set Custom Terminal Command in command preferences");
       }
 
-      const customCommand = customTemplate.includes("{{command}}")
-        ? customTemplate.replace(/\{\{command\}\}/g, sshCommand)
-        : `${customTemplate} ${sshCommand}`;
+      if (!customTemplate.includes("{{command}}")) {
+        throw new Error(
+          'Custom Terminal Command must contain the {{command}} placeholder. Example: open -a "Alacritty" --args -e zsh -lc "{{command}}"',
+        );
+      }
+
+      const customCommand = customTemplate.replace(/\{\{command\}\}/g, sshCommand);
 
       await execFileAsync("zsh", ["-lc", customCommand]);
     } catch (error) {

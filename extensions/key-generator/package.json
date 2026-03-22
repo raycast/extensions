@@ -90,7 +90,7 @@
                     "name": "customTerminalCommand",
                     "type": "textfield",
                     "title": "Custom Terminal Command",
-                    "description": "Used only when Terminal Emulator is Custom Command. Use {{command}} placeholder.",
+                    "description": "Used only when Terminal Emulator is Custom Command. Must include {{command}} placeholder (required). Example: open -a \"Alacritty\" --args -e zsh -lc \"{{command}}\"",
                     "required": false,
                     "placeholder": "open -a \"Alacritty\" --args -e zsh -lc \"{{command}}\""
                 }

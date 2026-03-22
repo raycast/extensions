@@ -14,6 +14,7 @@ import {
 
 import { useEffect, useState } from "react";
 import { auditSSHKeys, AuditIssue } from "./utils/audit";
+import { changeKeyPassphrase } from "./utils/ssh";
 import { execFile } from "child_process";
 import { promisify } from "util";
 
@@ -183,8 +184,7 @@ function SetPassphraseForm(props: { issue: AuditIssue; onFix: () => void }) {
       title: "Setting passphrase...",
     });
     try {
-      // -P "" specifies that the current passphrase is empty
-      await execFileAsync("ssh-keygen", ["-p", "-f", props.issue.filePath, "-P", "", "-N", values.passphrase]);
+      await changeKeyPassphrase(props.issue.filePath, "", values.passphrase);
       toast.style = Toast.Style.Success;
       toast.title = "Passphrase set successfully";
       props.onFix();
