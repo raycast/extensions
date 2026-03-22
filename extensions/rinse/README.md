@@ -27,6 +27,7 @@ Or it's full AI CLI output with box-drawing and spinner noise:
 Becomes:
 
 ```txt
+Claude Thinking...
 Just use a hook. You're done.
 ```
 
