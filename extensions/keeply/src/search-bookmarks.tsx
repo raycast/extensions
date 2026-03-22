@@ -16,7 +16,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { KeeplyApi } from "./lib/api";
 import type { Bookmark, Folder, Tag, UpdateBookmarkPayload } from "./lib/types";
-import { formatMarkdownLink, formatRelativeDate, getDomain, getTagNames } from "./lib/utils";
+import { formatMarkdownLink, formatRelativeDate, getDomain, getTagNames, isValidUrl } from "./lib/utils";
 
 const api = new KeeplyApi();
 
@@ -223,7 +223,16 @@ export default function SearchBookmarks() {
               <Action.Push
                 title="Edit Bookmark"
                 icon={Icon.Pencil}
-                target={<EditBookmarkView bookmark={bookmark} sidebar={sidebar} onSave={() => mutate()} />}
+                target={
+                  <EditBookmarkView
+                    bookmark={bookmark}
+                    sidebar={sidebar}
+                    onSave={() => {
+                      mutate();
+                      searchMutate();
+                    }}
+                  />
+                }
                 shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
               <Action
@@ -335,6 +344,15 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
   const { pop } = useNavigation();
 
   async function handleSubmit(values: EditFormValues) {
+    if (!isValidUrl(values.url)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid URL",
+        message: "Must start with http:// or https://",
+      });
+      return;
+    }
+
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving changes..." });
 
     try {
