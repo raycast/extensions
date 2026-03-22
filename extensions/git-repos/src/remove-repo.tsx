@@ -29,7 +29,7 @@ async function deleteFromDisk(repo: GitRepo, revalidate: () => void) {
       removeToast,
       Toast.Style.Failure,
       "Failed to remove repository",
-      err instanceof Error ? err.message : String(err)
+      err instanceof Error ? err.message : String(err),
     );
   }
 }
@@ -44,7 +44,7 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
         toast,
         Toast.Style.Failure,
         "Cannot remove repository",
-        "There are uncommitted changes or untracked files"
+        "There are uncommitted changes or untracked files",
       );
       return;
     }
@@ -57,7 +57,7 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
           toast,
           Toast.Style.Failure,
           "Cannot remove repository",
-          "There are local commits that haven't been pushed"
+          "There are local commits that haven't been pushed",
         );
         return;
       }
@@ -69,7 +69,7 @@ async function removeRepo(repo: GitRepo, revalidate: () => void) {
       toast,
       Toast.Style.Failure,
       "Failed to check repository",
-      err instanceof Error ? err.message : String(err)
+      err instanceof Error ? err.message : String(err),
     );
     return;
   }
@@ -105,7 +105,9 @@ async function forceRemoveRepo(repo: GitRepo, revalidate: () => void) {
 
 export default function RemoveRepo() {
   const { data: repos, isLoading, revalidate } = useCachedPromise(GitRepoService.gitRepos);
-  const removableRepos = repos?.filter((repo) => repo.repoType !== GitRepoType.Worktree);
+  const removableRepos = repos?.filter(
+    (repo) => repo.repoType !== GitRepoType.Worktree && repo.repoType !== GitRepoType.Submodule,
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search repositories...">
