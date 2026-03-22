@@ -49,8 +49,8 @@ function execFileWithInput(command: string, args: string[], input: string, env?:
 export async function changeKeyPassphrase(privateKeyPath: string, currentPassphrase: string, newPassphrase: string) {
   await execFileWithInput(
     "ssh-keygen",
-    ["-p", "-f", privateKeyPath, "-P", currentPassphrase],
-    `${newPassphrase}\n${newPassphrase}\n`,
+    ["-p", "-f", privateKeyPath],
+    `${currentPassphrase}\n${newPassphrase}\n${newPassphrase}\n`,
   );
 }
 
