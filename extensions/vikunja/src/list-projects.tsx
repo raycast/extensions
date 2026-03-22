@@ -31,6 +31,174 @@ function projectIcon(project: Project): { source: Icon; tintColor?: Color } {
   return { source: Icon.List };
 }
 
+type ProjectActionsProps = {
+  project: Project;
+  projects: Project[];
+  baseUrl: string;
+  loadProjects: () => void;
+  onArchiveToggle: (project: Project) => void;
+  onDelete: (project: Project) => void;
+  push: ReturnType<typeof useNavigation>["push"];
+};
+
+function ProjectActions({
+  project,
+  projects,
+  baseUrl,
+  loadProjects,
+  onArchiveToggle,
+  onDelete,
+  push,
+}: ProjectActionsProps) {
+  return (
+    <ActionPanel>
+      <ActionPanel.Section>
+        <Action
+          title="Show Tasks"
+          icon={Icon.List}
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "list-tasks",
+                type: LaunchType.UserInitiated,
+                context: { projectId: project.id },
+              });
+            } catch {
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to launch List Tasks",
+              });
+            }
+          }}
+        />
+        <Action
+          title="Create Project"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={() =>
+            push(<ProjectForm projects={projects} onSubmit={loadProjects} />)
+          }
+        />
+        <Action
+          title="Create Sub-Project"
+          icon={Icon.PlusSquare}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+          onAction={() =>
+            push(
+              <ProjectForm
+                parentProjectId={project.id}
+                projects={projects}
+                onSubmit={loadProjects}
+              />,
+            )
+          }
+        />
+        <Action
+          title="Edit Project"
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+          onAction={() =>
+            push(
+              <ProjectForm
+                project={project}
+                projects={projects}
+                onSubmit={loadProjects}
+              />,
+            )
+          }
+        />
+        <Action.OpenInBrowser
+          title="Open in Vikunja"
+          url={`${baseUrl}/projects/${project.id}`}
+          shortcut={{ modifiers: ["cmd"], key: "o" }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title={project.is_archived ? "Unarchive Project" : "Archive Project"}
+          icon={Icon.Box}
+          shortcut={{ modifiers: ["cmd"], key: "a" }}
+          onAction={() => onArchiveToggle(project)}
+        />
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          onAction={loadProjects}
+          shortcut={{ modifiers: ["cmd"], key: "r" }}
+        />
+        <Action
+          title="Delete Project"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => onDelete(project)}
+          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        />
+      </ActionPanel.Section>
+    </ActionPanel>
+  );
+}
+
+type ProjectListItemProps = {
+  project: Project;
+  parentMap: Map<number, Project>;
+  taskCounts: Record<number, number>;
+  projects: Project[];
+  baseUrl: string;
+  loadProjects: () => void;
+  onArchiveToggle: (project: Project) => void;
+  onDelete: (project: Project) => void;
+  push: ReturnType<typeof useNavigation>["push"];
+};
+
+function ProjectListItem({
+  project,
+  parentMap,
+  taskCounts,
+  projects,
+  baseUrl,
+  loadProjects,
+  onArchiveToggle,
+  onDelete,
+  push,
+}: ProjectListItemProps) {
+  const parent = project.parent_project_id
+    ? parentMap.get(project.parent_project_id)
+    : null;
+  const count = taskCounts[project.id];
+  const subtitle =
+    count !== undefined
+      ? `${count} open tasks`
+      : project.description?.slice(0, 50);
+  const accessories: List.Item.Accessory[] = [];
+  if (parent) {
+    accessories.push({ tag: parent.title });
+  }
+  if (project.identifier) {
+    accessories.push({ text: project.identifier });
+  }
+
+  return (
+    <List.Item
+      key={project.id}
+      title={project.title}
+      subtitle={subtitle}
+      icon={projectIcon(project)}
+      accessories={accessories}
+      actions={
+        <ProjectActions
+          project={project}
+          projects={projects}
+          baseUrl={baseUrl}
+          loadProjects={loadProjects}
+          onArchiveToggle={onArchiveToggle}
+          onDelete={onDelete}
+          push={push}
+        />
+      }
+    />
+  );
+}
+
 export default function ListProjects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [taskCounts, setTaskCounts] = useState<Record<number, number>>({});
@@ -139,126 +307,6 @@ export default function ListProjects() {
     }
   }
 
-  function ProjectActions({ project }: { project: Project }) {
-    return (
-      <ActionPanel>
-        <ActionPanel.Section>
-          <Action
-            title="Show Tasks"
-            icon={Icon.List}
-            onAction={async () => {
-              try {
-                await launchCommand({
-                  name: "list-tasks",
-                  type: LaunchType.UserInitiated,
-                  context: { projectId: project.id },
-                });
-              } catch {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Failed to launch List Tasks",
-                });
-              }
-            }}
-          />
-          <Action
-            title="Create Project"
-            icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() =>
-              push(<ProjectForm projects={projects} onSubmit={loadProjects} />)
-            }
-          />
-          <Action
-            title="Create Sub-Project"
-            icon={Icon.PlusSquare}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
-            onAction={() =>
-              push(
-                <ProjectForm
-                  parentProjectId={project.id}
-                  projects={projects}
-                  onSubmit={loadProjects}
-                />,
-              )
-            }
-          />
-          <Action
-            title="Edit Project"
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-            onAction={() =>
-              push(
-                <ProjectForm
-                  project={project}
-                  projects={projects}
-                  onSubmit={loadProjects}
-                />,
-              )
-            }
-          />
-          <Action.OpenInBrowser
-            title="Open in Vikunja"
-            url={`${baseUrl}/projects/${project.id}`}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          <Action
-            title={
-              project.is_archived ? "Unarchive Project" : "Archive Project"
-            }
-            icon={Icon.Box}
-            shortcut={{ modifiers: ["cmd"], key: "a" }}
-            onAction={() => handleArchiveToggle(project)}
-          />
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={loadProjects}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-          <Action
-            title="Delete Project"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={() => handleDelete(project)}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          />
-        </ActionPanel.Section>
-      </ActionPanel>
-    );
-  }
-
-  function renderProjectItem(project: Project) {
-    const parent = project.parent_project_id
-      ? parentMap.get(project.parent_project_id)
-      : null;
-    const count = taskCounts[project.id];
-    const subtitle =
-      count !== undefined
-        ? `${count} open tasks`
-        : project.description?.slice(0, 50);
-    const accessories: List.Item.Accessory[] = [];
-    if (parent) {
-      accessories.push({ tag: parent.title });
-    }
-    if (project.identifier) {
-      accessories.push({ text: project.identifier });
-    }
-
-    return (
-      <List.Item
-        key={project.id}
-        title={project.title}
-        subtitle={subtitle}
-        icon={projectIcon(project)}
-        accessories={accessories}
-        actions={<ProjectActions project={project} />}
-      />
-    );
-  }
-
   return (
     <List
       isLoading={isLoading}
@@ -287,14 +335,40 @@ export default function ListProjects() {
             title="Projects"
             subtitle={`${topLevel.length} projects`}
           >
-            {topLevel.map(renderProjectItem)}
+            {topLevel.map((project) => (
+              <ProjectListItem
+                key={project.id}
+                project={project}
+                parentMap={parentMap}
+                taskCounts={taskCounts}
+                projects={projects}
+                baseUrl={baseUrl}
+                loadProjects={loadProjects}
+                onArchiveToggle={handleArchiveToggle}
+                onDelete={handleDelete}
+                push={push}
+              />
+            ))}
           </List.Section>
           {subProjects.length > 0 && (
             <List.Section
               title="Sub-Projects"
               subtitle={`${subProjects.length} projects`}
             >
-              {subProjects.map(renderProjectItem)}
+              {subProjects.map((project) => (
+                <ProjectListItem
+                  key={project.id}
+                  project={project}
+                  parentMap={parentMap}
+                  taskCounts={taskCounts}
+                  projects={projects}
+                  baseUrl={baseUrl}
+                  loadProjects={loadProjects}
+                  onArchiveToggle={handleArchiveToggle}
+                  onDelete={handleDelete}
+                  push={push}
+                />
+              ))}
             </List.Section>
           )}
         </>

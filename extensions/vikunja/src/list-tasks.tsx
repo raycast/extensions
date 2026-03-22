@@ -39,8 +39,12 @@ function formatDueDate(dueDate: string | null): string | undefined {
   const date = new Date(dueDate);
   if (date.getFullYear() <= 1) return undefined;
   const now = new Date();
-  const diff = date.getTime() - now.getTime();
-  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  now.setHours(0, 0, 0, 0);
+  const dueDay = new Date(date);
+  dueDay.setHours(0, 0, 0, 0);
+  const days = Math.round(
+    (dueDay.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+  );
   if (days < 0) return `${Math.abs(days)}d overdue`;
   if (days === 0) return "Today";
   if (days === 1) return "Tomorrow";
@@ -56,8 +60,12 @@ function dueDateColor(dueDate: string | null): Color | undefined {
   const date = new Date(dueDate);
   if (date.getFullYear() <= 1) return undefined;
   const now = new Date();
-  const diff = date.getTime() - now.getTime();
-  const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+  now.setHours(0, 0, 0, 0);
+  const dueDay = new Date(date);
+  dueDay.setHours(0, 0, 0, 0);
+  const days = Math.round(
+    (dueDay.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+  );
   if (days < 0) return Color.Red;
   if (days <= 1) return Color.Orange;
   if (days <= 3) return Color.Yellow;
@@ -73,7 +81,9 @@ export default function ListTasks(
 ) {
   const initialProjectId = props.launchContext?.projectId;
   const [projects, setProjects] = useState<Project[]>([]);
-  const [selectedProject, setSelectedProject] = useState<string>("all");
+  const [selectedProject, setSelectedProject] = useState<string>(
+    initialProjectId ? String(initialProjectId) : "all",
+  );
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [projectsError, setProjectsError] = useState<string | null>(null);
@@ -91,6 +101,8 @@ export default function ListTasks(
           p.some((proj) => proj.id === initialProjectId)
         ) {
           setSelectedProject(String(initialProjectId));
+        } else if (initialProjectId) {
+          setSelectedProject("all");
         }
       } catch (error) {
         const message =

@@ -86,8 +86,31 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function fetchAllPages<T>(
+  buildPath: (page: number) => string,
+): Promise<T[]> {
+  const perPage = 100;
+  const results: T[] = [];
+  let page = 1;
+
+  while (true) {
+    const pageItems = await request<T[]>(buildPath(page));
+    results.push(...pageItems);
+
+    if (pageItems.length < perPage) {
+      break;
+    }
+
+    page += 1;
+  }
+
+  return results;
+}
+
 export async function getProjects(includeArchived = false): Promise<Project[]> {
-  const projects = await request<Project[]>("/projects");
+  const projects = await fetchAllPages<Project>(
+    (page) => `/projects?page=${page}&per_page=100`,
+  );
   return includeArchived ? projects : projects.filter((p) => !p.is_archived);
 }
 
@@ -113,7 +136,7 @@ export async function deleteProject(projectId: number): Promise<void> {
 }
 
 export async function getLabels(): Promise<Label[]> {
-  return request<Label[]>("/labels");
+  return fetchAllPages<Label>((page) => `/labels?page=${page}&per_page=100`);
 }
 
 export async function createTask(
@@ -142,19 +165,20 @@ export async function addLabelsToTask(
   taskId: number,
   labelIds: number[],
 ): Promise<void> {
-  for (const labelId of labelIds) {
-    await addLabelToTask(taskId, labelId);
-  }
+  await Promise.all(labelIds.map((labelId) => addLabelToTask(taskId, labelId)));
 }
 
 export async function getProjectTasks(projectId: number): Promise<Task[]> {
-  return request<Task[]>(
-    `/projects/${projectId}/tasks?sort_by=done&order_by=asc`,
+  return fetchAllPages<Task>(
+    (page) =>
+      `/projects/${projectId}/tasks?sort_by=done&order_by=asc&page=${page}&per_page=100`,
   );
 }
 
 export async function getAllTasks(): Promise<Task[]> {
-  return request<Task[]>("/tasks?sort_by=done&order_by=asc");
+  return fetchAllPages<Task>(
+    (page) => `/tasks?sort_by=done&order_by=asc&page=${page}&per_page=100`,
+  );
 }
 
 export async function toggleTaskDone(task: Task): Promise<Task> {

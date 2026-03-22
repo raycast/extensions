@@ -5,7 +5,9 @@
   "description": "Create and manage tasks in your self-hosted Vikunja instance",
   "icon": "command-icon.png",
   "author": "flexorflex",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
