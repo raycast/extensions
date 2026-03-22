@@ -114,6 +114,11 @@ export async function enableMicLock(targetMic: string) {
 
 export async function disableMicLock() {
   await stopAgent();
+  try {
+    await fs.unlink(plistPath());
+  } catch {
+    // Ignore if the plist does not exist.
+  }
 }
 
 export async function updateLockedMicTarget(targetMic: string) {

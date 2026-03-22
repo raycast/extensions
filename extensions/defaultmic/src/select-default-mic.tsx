@@ -110,6 +110,18 @@ export default function Command() {
 
   return (
     <List isLoading={state.isLoading}>
+      {state.devices.length === 0 && !state.isLoading && (
+        <List.EmptyView
+          title="No Input Devices Found"
+          description="Make sure SwitchAudioSource is installed."
+          actions={
+            <ActionPanel>
+              <Action title="Install SwitchAudioSource" icon={Icon.Download} onAction={handleInstallDependency} />
+              <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+            </ActionPanel>
+          }
+        />
+      )}
       {state.devices.map((device) => {
         const accessories: List.Item.Accessory[] = [];
 
