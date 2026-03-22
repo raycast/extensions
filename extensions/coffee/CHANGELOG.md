@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-22
 
 - Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
 
