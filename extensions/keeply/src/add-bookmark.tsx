@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Form, openExtensionPreferences, showToast, Toast, useNavigation } from '@raycast/api';
-import { useCachedPromise } from '@raycast/utils';
-import { KeeplyApi } from './lib/api';
-import { isValidUrl } from './lib/utils';
+import { Action, ActionPanel, Form, openExtensionPreferences, showToast, Toast, useNavigation } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { KeeplyApi } from "./lib/api";
+import { isValidUrl } from "./lib/utils";
 
 const api = new KeeplyApi();
 
@@ -24,8 +24,8 @@ export default function AddBookmark() {
         style: Toast.Style.Failure,
         title: error.message,
         primaryAction:
-          error.message.includes('API key') || error.message.includes('scope')
-            ? { title: 'Open Preferences', onAction: openExtensionPreferences }
+          error.message.includes("API key") || error.message.includes("scope")
+            ? { title: "Open Preferences", onAction: openExtensionPreferences }
             : undefined,
       });
     },
@@ -35,13 +35,13 @@ export default function AddBookmark() {
     if (!isValidUrl(values.url)) {
       await showToast({
         style: Toast.Style.Failure,
-        title: 'Invalid URL',
-        message: 'Must start with http:// or https://',
+        title: "Invalid URL",
+        message: "Must start with http:// or https://",
       });
       return;
     }
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: 'Saving bookmark...' });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Saving bookmark..." });
 
     try {
       let extraTagId: string | undefined;
@@ -52,8 +52,8 @@ export default function AddBookmark() {
           const newTag = await api.createTag(normalizedName);
           extraTagId = newTag.id;
         } catch (error) {
-          const msg = error instanceof Error ? error.message : '';
-          if (msg.includes('already exists') && sidebar) {
+          const msg = error instanceof Error ? error.message : "";
+          if (msg.includes("already exists") && sidebar) {
             const existing = sidebar.tags.find((t) => t.name.toLowerCase() === normalizedName);
             if (existing) extraTagId = existing.id;
           } else {
@@ -74,7 +74,7 @@ export default function AddBookmark() {
       });
 
       toast.style = Toast.Style.Success;
-      toast.title = 'Bookmark saved';
+      toast.title = "Bookmark saved";
       toast.message = bookmark.title || bookmark.url;
 
       pop();
@@ -83,8 +83,8 @@ export default function AddBookmark() {
       toast.style = Toast.Style.Failure;
       toast.title = err.message;
       toast.primaryAction =
-        err.message.includes('API key') || err.message.includes('scope')
-          ? { title: 'Open Preferences', onAction: openExtensionPreferences }
+        err.message.includes("API key") || err.message.includes("scope")
+          ? { title: "Open Preferences", onAction: openExtensionPreferences }
           : undefined;
     }
   }
