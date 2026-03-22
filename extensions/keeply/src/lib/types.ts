@@ -49,4 +49,3 @@ export interface UpdateBookmarkPayload {
   archived?: boolean;
   tagIds?: string[];
 }
-
