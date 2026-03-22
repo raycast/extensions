@@ -28,6 +28,11 @@ function plistPath() {
   return path.join(os.homedir(), "Library", "LaunchAgents", `${LABEL}.plist`);
 }
 
+function launchctlDomain() {
+  const uid = typeof process.getuid === "function" ? process.getuid() : os.userInfo().uid;
+  return `gui/${uid}`;
+}
+
 async function ensureSupportFiles() {
   await fs.mkdir(supportDir(), { recursive: true });
 
@@ -89,15 +94,15 @@ async function writePlist() {
 
 async function stopAgent() {
   try {
-    await execFileAsync("launchctl", ["unload", plistPath()]);
+    await execFileAsync("/bin/launchctl", ["bootout", launchctlDomain(), plistPath()]);
   } catch {
-    // Ignore unload errors if it was not loaded.
+    // Ignore bootout errors if it was not loaded.
   }
 }
 
 async function startAgent() {
   await stopAgent();
-  await execFileAsync("launchctl", ["load", plistPath()]);
+  await execFileAsync("/bin/launchctl", ["bootstrap", launchctlDomain(), plistPath()]);
 }
 
 export async function enableMicLock(targetMic: string) {

@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { constants } from "node:fs";
 import { access } from "node:fs/promises";
 import { promisify } from "node:util";
 
@@ -15,7 +16,7 @@ let installPromise: Promise<void> | null = null;
 
 async function isExecutable(filePath: string): Promise<boolean> {
   try {
-    await access(filePath);
+    await access(filePath, constants.X_OK);
     return true;
   } catch {
     return false;
@@ -90,7 +91,7 @@ async function runSwitchAudioSource(args: string[]) {
   return execFileAsync(binPath, args, { maxBuffer: 1024 * 1024 });
 }
 
-export async function ensureSwitchAudioSourceInstalled() {
+export async function ensureSwitchAudioSourceInstalled(onInstallStart?: () => Promise<unknown> | unknown) {
   try {
     await runSwitchAudioSource(["-h"]);
     return;
@@ -99,6 +100,7 @@ export async function ensureSwitchAudioSourceInstalled() {
   }
 
   if (!installPromise) {
+    await onInstallStart?.();
     installPromise = installSwitchAudioSource().finally(() => {
       installPromise = null;
     });

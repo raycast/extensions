@@ -31,7 +31,12 @@ export default function Command() {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      await ensureSwitchAudioSourceInstalled();
+      await ensureSwitchAudioSourceInstalled(() =>
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Installing switchaudio-osx via Homebrew…",
+        }),
+      );
       const [devices, current, preferred, lockEnabledRaw] = await Promise.all([
         getInputDevices(),
         getCurrentInputDevice(),

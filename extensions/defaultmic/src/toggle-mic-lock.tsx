@@ -21,7 +21,12 @@ export default function Command() {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      await ensureSwitchAudioSourceInstalled();
+      await ensureSwitchAudioSourceInstalled(() =>
+        showToast({
+          style: Toast.Style.Animated,
+          title: "Installing switchaudio-osx via Homebrew…",
+        }),
+      );
       const [lockEnabledRaw, preferredMic] = await Promise.all([
         LocalStorage.getItem<string>(STORAGE_KEYS.lockEnabled),
         LocalStorage.getItem<string>(STORAGE_KEYS.preferredMic),
