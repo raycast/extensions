@@ -6,8 +6,9 @@ import {
   open,
   Clipboard,
   showHUD,
+  Cache,
 } from "@raycast/api";
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   TrackInfo,
   getNowPlaying,
@@ -25,6 +26,9 @@ interface Preferences {
   hideAfterMinutes: string;
 }
 
+const cache = new Cache();
+const PAUSED_SINCE_KEY = "pausedSince";
+
 export default function NowPlaying() {
   const preferences = getPreferenceValues<Preferences>();
   const hideAfterMs = parseInt(preferences.hideAfterMinutes, 10) * 60 * 1000;
@@ -33,7 +37,6 @@ export default function NowPlaying() {
   const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hidden, setHidden] = useState(false);
-  const pausedSince = useRef<number | null>(null);
 
   const fetchNowPlaying = useCallback(async () => {
     try {
@@ -43,13 +46,17 @@ export default function NowPlaying() {
       setTrackUrl(data.trackUrl);
 
       if (data.track && data.track.playerState === "playing") {
-        pausedSince.current = null;
+        cache.remove(PAUSED_SINCE_KEY);
         setHidden(false);
       } else {
-        if (pausedSince.current === null) {
-          pausedSince.current = Date.now();
-        } else if (Date.now() - pausedSince.current > hideAfterMs) {
-          setHidden(true);
+        const stored = cache.get(PAUSED_SINCE_KEY);
+        if (!stored) {
+          cache.set(PAUSED_SINCE_KEY, Date.now().toString());
+        } else {
+          const pausedAt = parseInt(stored, 10);
+          if (Date.now() - pausedAt > hideAfterMs) {
+            setHidden(true);
+          }
         }
       }
     } catch {
@@ -93,7 +100,10 @@ export default function NowPlaying() {
 
   if (!track && !isLoading) {
     return (
-      <MenuBarExtra icon={Icon.Music} tooltip="Display Music — Nothing playing">
+      <MenuBarExtra
+        icon={Icon.Music}
+        tooltip="Display Music — Nothing playing"
+      >
         <MenuBarExtra.Item title="Nothing playing" />
         <MenuBarExtra.Item
           title="Open Apple Music"
