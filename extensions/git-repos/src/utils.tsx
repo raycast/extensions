@@ -55,7 +55,7 @@ export class GitRepoService {
     }
     const repos = await findRepos(
       repoPaths,
-      parseInt(preferences.repoScanDepth) ?? 3,
+      parseInt(preferences.repoScanDepth, 10) || 3,
       preferences.includeSubmodules ?? false,
     );
 
