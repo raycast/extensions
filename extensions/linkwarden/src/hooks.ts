@@ -3,7 +3,7 @@ import { useFetch } from "@raycast/utils";
 import { ApiResponse, Collection, Tag } from "./interfaces";
 
 const { LinkwardenUrl, LinkwardenApiKey } = getPreferenceValues<Preferences>();
-const baseUrl = `${LinkwardenUrl}/api/v1/`;
+const baseUrl = `${LinkwardenUrl.replace(/\/+$/, "")}/api/v1/`;
 const headers = {
   Authorization: `Bearer ${LinkwardenApiKey}`,
 };
