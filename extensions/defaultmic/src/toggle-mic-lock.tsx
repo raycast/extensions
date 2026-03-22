@@ -61,7 +61,9 @@ export default function Command() {
         return;
       }
 
-      await ensureSwitchAudioSourceInstalled();
+      await ensureSwitchAudioSourceInstalled(() =>
+        showToast({ style: Toast.Style.Animated, title: "Installing switchaudio-osx via Homebrew…" }),
+      );
       const targetMic = state.preferredMic || (await getCurrentInputDevice());
 
       if (!targetMic) {
