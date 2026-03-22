@@ -13,6 +13,8 @@ import {
 } from "@raycast/api";
 
 import { useEffect, useState } from "react";
+import fsPromises from "fs/promises";
+import path from "path";
 import { scanSSHDirectory } from "./utils/filesystem";
 import { SSHKey } from "./types/ssh";
 import { execFile } from "child_process";
@@ -58,7 +60,6 @@ export default function Command() {
       })
     ) {
       try {
-        const fsPromises = await import("fs/promises");
         const filesToTrash = (
           await Promise.all(
             [key.publicKeyPath, key.privateKeyPath].map(async (filePath) => {
@@ -217,8 +218,6 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
     }
 
     try {
-      const fs = await import("fs/promises");
-      const path = await import("path");
       const sshDir = path.dirname(props.keyItem.publicKeyPath);
       const newPub = path.join(sshDir, `${newName}.pub`);
       const newPriv = path.join(sshDir, newName);
@@ -228,7 +227,7 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
       let privateExists = false;
       if (privatePath) {
         try {
-          await fs.access(privatePath);
+          await fsPromises.access(privatePath);
           privateExists = true;
         } catch {
           privateExists = false;
@@ -244,7 +243,7 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
       let destinationInUse = false;
       try {
         if (newPub !== currentPub) {
-          await fs.access(newPub);
+          await fsPromises.access(newPub);
           destinationInUse = true;
         }
       } catch {
@@ -253,7 +252,7 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
 
       try {
         if (newPriv !== privatePath) {
-          await fs.access(newPriv);
+          await fsPromises.access(newPriv);
           destinationInUse = true;
         }
       } catch {
@@ -270,15 +269,15 @@ function RenameKeyForm(props: { keyItem: SSHKey; onRename: () => void }) {
       }
 
       if (privateExists) {
-        await fs.rename(privatePath, newPriv);
+        await fsPromises.rename(privatePath, newPriv);
       }
 
       try {
-        await fs.rename(props.keyItem.publicKeyPath, newPub);
+        await fsPromises.rename(props.keyItem.publicKeyPath, newPub);
       } catch (error) {
         if (privateExists) {
           try {
-            await fs.rename(newPriv, privatePath);
+            await fsPromises.rename(newPriv, privatePath);
           } catch {
             // Best-effort rollback; keep original error for user context.
           }

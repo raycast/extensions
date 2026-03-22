@@ -1,4 +1,7 @@
 import { execFile, spawn } from "child_process";
+import { getPreferenceValues } from "@raycast/api";
+import { constants } from "fs";
+import fs from "fs/promises";
 import { promisify } from "util";
 import path from "path";
 import os from "os";
@@ -61,7 +64,6 @@ export async function generateSSHKey(options: {
   const sshDir = path.join(os.homedir(), ".ssh");
   const filePath = path.join(sshDir, name);
 
-  const fs = await import("fs/promises");
   await fs.mkdir(sshDir, { recursive: true });
 
   const args = ["-t", algorithm, "-f", filePath];
@@ -72,7 +74,6 @@ export async function generateSSHKey(options: {
 
   let sshKeygenPath = "ssh-keygen"; // default
   if (algorithm.endsWith("-sk")) {
-    const { getPreferenceValues } = await import("@raycast/api");
     const prefs = getPreferenceValues<Preferences>();
 
     const testPaths = [];
@@ -133,9 +134,7 @@ export async function getFingerprint(filePath: string): Promise<string> {
 
 export async function checkIfKeyHasPassphrase(privateKeyPath: string): Promise<boolean> {
   try {
-    const fs = await import("fs/promises");
-    const nodeFs = await import("fs");
-    await fs.access(privateKeyPath, nodeFs.constants.R_OK);
+    await fs.access(privateKeyPath, constants.R_OK);
   } catch {
     return false;
   }

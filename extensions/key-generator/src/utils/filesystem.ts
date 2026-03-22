@@ -1,13 +1,14 @@
+import { execFile } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 import os from "os";
+import { promisify } from "util";
 import { SSHKey, StorageType } from "../types/ssh";
 import { getFingerprint, checkIfKeyHasPassphrase } from "./ssh";
 
+const execFileAsync = promisify(execFile);
+
 export async function listAgentKeys(): Promise<SSHKey[]> {
-  const { execFile } = await import("child_process");
-  const { promisify } = await import("util");
-  const execFileAsync = promisify(execFile);
   try {
     const { stdout: lOut } = await execFileAsync("ssh-add", ["-l"]);
     const { stdout: LOut } = await execFileAsync("ssh-add", ["-L"]);

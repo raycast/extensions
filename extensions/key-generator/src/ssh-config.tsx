@@ -11,8 +11,14 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
+import { execFile } from "child_process";
+import os from "os";
+import path from "path";
 import { useEffect, useState } from "react";
+import { promisify } from "util";
 import { parseSSHConfig, SSHHostConfig, saveSSHConfig, updateRawBlock } from "./utils/parser";
+
+const execFileAsync = promisify(execFile);
 
 export default function Command() {
   const { push } = useNavigation();
@@ -152,9 +158,6 @@ export default function Command() {
 
       const sshCommand = buildSshCommand(config);
       const escapedCommand = escapeAppleScriptString(sshCommand);
-      const { execFile } = await import("child_process");
-      const { promisify } = await import("util");
-      const execFileAsync = promisify(execFile);
 
       const terminalApp = preferences.terminalApp || "terminal";
 
@@ -270,12 +273,6 @@ export default function Command() {
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
                 onAction={async () => {
                   try {
-                    const { execFile } = await import("child_process");
-                    const { promisify } = await import("util");
-                    const execFileAsync = promisify(execFile);
-                    const path = await import("path");
-                    const os = await import("os");
-
                     await execFileAsync("open", ["-e", path.join(os.homedir(), ".ssh", "config")]);
                   } catch (error) {
                     showToast({
