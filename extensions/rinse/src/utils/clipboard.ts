@@ -4,7 +4,7 @@ import { cleanWithStats, type CleanResult } from "./cleaner";
 export type ClipboardCleanResult =
   | { status: "cleaned"; result: CleanResult }
   | { status: "empty" }
-  | { status: "unchanged" };
+  | { status: "unchanged"; text: string };
 
 export async function readAndClean(): Promise<ClipboardCleanResult> {
   const { text } = await Clipboard.read();
@@ -16,7 +16,7 @@ export async function readAndClean(): Promise<ClipboardCleanResult> {
   const result = cleanWithStats(text);
 
   if (!result.changed) {
-    return { status: "unchanged" };
+    return { status: "unchanged", text };
   }
 
   return { status: "cleaned", result };

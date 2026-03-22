@@ -44,7 +44,7 @@ Silent and instant. Reads your clipboard, strips the noise, writes it back. You 
 
 ### Clean & Paste Clipboard
 
-Cleans your clipboard and pastes the result directly into the focused app in one shot. No intermediate step — copy Claude's output, trigger the command, and clean text lands where your cursor is.
+Cleans your clipboard and pastes the result directly into the focused app in one shot. No intermediate step. Copy Claude's output, trigger the command, and clean text lands where your cursor is.
 
 > **"Straight bougie!"**
 

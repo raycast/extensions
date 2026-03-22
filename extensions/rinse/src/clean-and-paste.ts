@@ -10,6 +10,8 @@ export default async function main() {
   }
 
   if (outcome.status === "unchanged") {
+    await closeMainWindow();
+    await Clipboard.paste(outcome.text);
     await showHUD("✓ Nothing to clean");
     return;
   }
