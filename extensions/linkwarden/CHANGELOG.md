@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Fix Potential Search Errors] - 2026-03-22
+## [Fix Potential Search Errors] - {PR_MERGE_DATE}
 
 - Fixed "Bad Request" error caused by sending empty `collectionId` to the API
 - Fixed search text not being URL-encoded, causing malformed requests with special characters
