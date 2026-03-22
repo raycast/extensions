@@ -235,5 +235,7 @@ export async function saveSSHConfig(configs: SSHHostConfig[]): Promise<void> {
   const nextContent = mergeHostBlocksPreservingOrder(originalContent, hostBlocks);
 
   await fs.mkdir(sshDir, { recursive: true });
-  await fs.writeFile(configPath, nextContent, "utf-8");
+  const tmpPath = `${configPath}.raycast-tmp`;
+  await fs.writeFile(tmpPath, nextContent, "utf-8");
+  await fs.rename(tmpPath, configPath);
 }
