@@ -4,19 +4,20 @@ import { CronExpressionParser } from "cron-parser";
 import { useEffect, useState } from "react";
 
 const TIMEZONES = ["UTC", ...Intl.supportedValuesOf("timeZone")];
+const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 export default function main() {
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const preferences = getPreferenceValues<Preferences>();
+  const defaultTz =
+    preferences.defaultTimezone && TIMEZONES.includes(preferences.defaultTimezone)
+      ? preferences.defaultTimezone
+      : localTimezone;
 
-  const preferences = getPreferenceValues<{ defaultTimezone: string }>();
-  let defaultTz = localTimezone;
-  if (preferences.defaultTimezone) {
-    if (TIMEZONES.includes(preferences.defaultTimezone)) {
-      defaultTz = preferences.defaultTimezone;
-    } else {
+  useEffect(() => {
+    if (preferences.defaultTimezone && !TIMEZONES.includes(preferences.defaultTimezone)) {
       showToast(Toast.Style.Failure, "Invalid default timezone", `Using local timezone: ${localTimezone}`);
     }
-  }
+  }, []);
 
   const [cron, setCron] = useState("* * * * *");
   const [cronTimezone, setCronTimezone] = useState(defaultTz);
