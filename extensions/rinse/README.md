@@ -35,6 +35,15 @@ Copy. Clean. Paste. Done.
 
 ---
 
+## Install
+
+1. Clone this repo
+2. `cd` into the `rinse` directory
+3. Run `pnpm install && pnpm dev`
+4. Raycast picks it up automatically and it appears at the top of root search
+
+---
+
 ## Commands
 
 ### Clean Clipboard
