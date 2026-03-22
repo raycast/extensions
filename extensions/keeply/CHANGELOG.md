@@ -1,4 +1,4 @@
-## [Initial Version] - 2026-03-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 
