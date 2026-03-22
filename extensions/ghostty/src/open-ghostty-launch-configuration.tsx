@@ -122,7 +122,7 @@ async function RunLaunchConfiguration({ name }: { name: string }) {
     }
 
     await runAppleScript(fullScript);
-  } catch {
+  } catch (error) {
     console.error("Failed to parse or execute launch configuration:", error);
   }
 }

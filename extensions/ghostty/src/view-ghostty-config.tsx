@@ -547,7 +547,7 @@ export default function Command() {
                           target={<AddForm option={opt} raw={raw} onSave={saveRaw} />}
                         />
                       )}
-                      <Action.Open title="Open Config in Editor" path={CONFIG_PATH} />
+                      <Action.Open title="Open Config in Editor" target={CONFIG_PATH} />
                     </ActionPanel>
                   }
                 />
@@ -596,7 +596,7 @@ export default function Command() {
                   />
                   <Action.Open
                     title="Open Config in Editor"
-                    path={CONFIG_PATH}
+                    target={CONFIG_PATH}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                   />
                 </ActionPanel>
