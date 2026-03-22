@@ -24,6 +24,7 @@ export default function Command() {
   function getDefaultFilename(selectedAlgorithm: string) {
     if (selectedAlgorithm === "ed25519") return "id_ed25519";
     if (selectedAlgorithm === "ecdsa") return "id_ecdsa";
+    if (selectedAlgorithm === "rsa") return "id_rsa";
     if (selectedAlgorithm === "ed25519-sk") return "id_ed25519_sk";
     if (selectedAlgorithm === "ecdsa-sk") return "id_ecdsa_sk";
     return `id_${selectedAlgorithm.replace(/-/g, "_")}`;
@@ -105,10 +106,13 @@ export default function Command() {
 
     try {
       let publicKeyContent = "";
+      const selectedAlgorithm = values.algorithm || "ed25519";
+      const bits = selectedAlgorithm === "rsa" ? 4096 : undefined;
 
       await generateSSHKey({
         name: filename,
-        algorithm: values.algorithm || "ed25519",
+        algorithm: selectedAlgorithm,
+        bits,
         comment: values.comment,
         passphrase: values.passphrase,
       });
@@ -165,6 +169,7 @@ export default function Command() {
           <>
             <Form.Dropdown.Item value="ed25519" title="Ed25519" />
             <Form.Dropdown.Item value="ecdsa" title="ECDSA" />
+            <Form.Dropdown.Item value="rsa" title="RSA (4096)" />
           </>
         )}
       </Form.Dropdown>

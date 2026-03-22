@@ -57,16 +57,21 @@ export async function changeKeyPassphrase(privateKeyPath: string, currentPassphr
 export async function generateSSHKey(options: {
   name: string;
   algorithm: string;
+  bits?: number;
   comment?: string;
   passphrase?: string;
 }): Promise<string> {
-  const { name, algorithm, comment, passphrase } = options;
+  const { name, algorithm, bits, comment, passphrase } = options;
   const sshDir = path.join(os.homedir(), ".ssh");
   const filePath = path.join(sshDir, name);
 
   await fs.mkdir(sshDir, { recursive: true });
 
   const args = ["-t", algorithm, "-f", filePath];
+
+  if (bits && Number.isFinite(bits) && bits > 0) {
+    args.push("-b", String(bits));
+  }
 
   if (comment) {
     args.push("-C", comment);

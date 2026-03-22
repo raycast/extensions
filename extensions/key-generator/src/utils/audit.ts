@@ -100,7 +100,16 @@ export async function auditSSHKeys(): Promise<AuditIssue[]> {
   }
 
   const pubFiles = files.filter((file) => file.endsWith(".pub"));
-  const excludes = ["known_hosts", "known_hosts.old", "config", "authorized_keys", "authorized_keys2"];
+  const excludes = [
+    "known_hosts",
+    "known_hosts.old",
+    "config",
+    "authorized_keys",
+    "authorized_keys2",
+    "environment",
+    "rc",
+    "resident_identity",
+  ];
 
   for (const pubFile of pubFiles) {
     const name = pubFile.replace(".pub", "");
@@ -130,7 +139,14 @@ export async function auditSSHKeys(): Promise<AuditIssue[]> {
       continue;
     }
 
-    if (content.trim().startsWith("-----BEGIN")) {
+    const trimmedContent = content.trimStart();
+    const isPrivateKeyFile =
+      trimmedContent.startsWith("-----BEGIN OPENSSH PRIVATE KEY-----") ||
+      trimmedContent.startsWith("-----BEGIN RSA PRIVATE KEY-----") ||
+      trimmedContent.startsWith("-----BEGIN EC PRIVATE KEY-----") ||
+      trimmedContent.startsWith("-----BEGIN DSA PRIVATE KEY-----");
+
+    if (isPrivateKeyFile) {
       const pubFile = `${file}.pub`;
       if (!files.includes(pubFile)) {
         issues.push({
