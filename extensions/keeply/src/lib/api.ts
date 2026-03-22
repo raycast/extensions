@@ -1,9 +1,9 @@
-import { getPreferenceValues } from '@raycast/api';
-import type { Bookmark, CreateBookmarkPayload, Folder, SidebarData, Tag, UpdateBookmarkPayload } from './types';
+import { getPreferenceValues } from "@raycast/api";
+import type { Bookmark, CreateBookmarkPayload, Folder, SidebarData, Tag, UpdateBookmarkPayload } from "./types";
 
 export class KeeplyApi {
   private readonly apiKey: string;
-  private readonly baseUrl = 'https://api.keeply.tools';
+  private readonly baseUrl = "https://api.keeply.tools";
 
   constructor() {
     const prefs = getPreferenceValues<Preferences>();
@@ -12,7 +12,7 @@ export class KeeplyApi {
 
   private get headers(): Record<string, string> {
     return {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `ApiKey ${this.apiKey}`,
     };
   }
@@ -23,11 +23,11 @@ export class KeeplyApi {
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { message?: string | string[] };
       const raw = body.message;
-      const msg = Array.isArray(raw) ? raw.join(', ') : (raw ?? `HTTP ${res.status}`);
+      const msg = Array.isArray(raw) ? raw.join(", ") : (raw ?? `HTTP ${res.status}`);
 
-      if (res.status === 401) throw new Error('Invalid API key. Update it in Extension Preferences.');
+      if (res.status === 401) throw new Error("Invalid API key. Update it in Extension Preferences.");
       if (res.status === 403)
-        throw new Error('Missing required API key scope. Re-generate your key at app.keeply.tools/settings.');
+        throw new Error("Missing required API key scope. Re-generate your key at app.keeply.tools/settings.");
       throw new Error(msg);
     }
 
@@ -36,23 +36,23 @@ export class KeeplyApi {
   }
 
   async whoami(): Promise<{ email: string; name?: string; isPro: boolean }> {
-    return this.request('/users/me');
+    return this.request("/users/me");
   }
 
   async listBookmarks(): Promise<Bookmark[]> {
-    return this.request('/bookmarks');
+    return this.request("/bookmarks");
   }
 
   async createBookmark(payload: CreateBookmarkPayload): Promise<Bookmark> {
-    return this.request('/bookmarks', { method: 'POST', body: JSON.stringify(payload) });
+    return this.request("/bookmarks", { method: "POST", body: JSON.stringify(payload) });
   }
 
   async updateBookmark(id: string, payload: UpdateBookmarkPayload): Promise<Bookmark> {
-    return this.request(`/bookmarks/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
+    return this.request(`/bookmarks/${id}`, { method: "PATCH", body: JSON.stringify(payload) });
   }
 
   async deleteBookmark(id: string): Promise<void> {
-    return this.request(`/bookmarks/${id}`, { method: 'DELETE' });
+    return this.request(`/bookmarks/${id}`, { method: "DELETE" });
   }
 
   async searchBookmarks(query: string): Promise<Bookmark[]> {
@@ -61,11 +61,11 @@ export class KeeplyApi {
   }
 
   async listFolders(): Promise<Folder[]> {
-    return this.request('/folders');
+    return this.request("/folders");
   }
 
   async listTags(): Promise<Tag[]> {
-    return this.request('/tags');
+    return this.request("/tags");
   }
 
   async getSidebarData(): Promise<SidebarData> {
@@ -74,6 +74,6 @@ export class KeeplyApi {
   }
 
   async createTag(name: string): Promise<Tag> {
-    return this.request('/tags', { method: 'POST', body: JSON.stringify({ name }) });
+    return this.request("/tags", { method: "POST", body: JSON.stringify({ name }) });
   }
 }
