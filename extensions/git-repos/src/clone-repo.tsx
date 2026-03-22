@@ -1,7 +1,6 @@
-import { Form, ActionPanel, Action, showToast, Toast, popToRoot, List } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, popToRoot, List, getPreferenceValues } from "@raycast/api";
 import { execFile } from "child_process";
-import { Preferences, parsePath, tildifyPath } from "./utils";
-import { getPreferenceValues } from "@raycast/api";
+import { parsePath, tildifyPath } from "./utils";
 
 function updateToast(toast: Toast, style: Toast.Style, title: string, message?: string) {
   toast.style = style;
@@ -10,7 +9,7 @@ function updateToast(toast: Toast, style: Toast.Style, title: string, message?: 
 }
 
 export default function CloneRepo() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const [dirs] = parsePath(preferences.repoScanPath);
 
   if (dirs.length === 0) {
