@@ -1,5 +1,8 @@
 # Home Assistant Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+- Fix "Show Entity IDs" preference
+
 ## [Fix] - 2026-03-15
 - use translations for services if available
   - fallback to service slug when no translation is available

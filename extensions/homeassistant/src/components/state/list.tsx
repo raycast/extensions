@@ -89,7 +89,7 @@ export function StateListItem(props: { state: State }): React.ReactElement {
         icon = ha.urlJoin(ep);
       }
     }
-    if (shouldDisplayEntityID()) {
+    if (!shouldDisplayEntityID()) {
       return extra;
     }
     if (extra) {
