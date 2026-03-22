@@ -50,6 +50,3 @@ export interface UpdateBookmarkPayload {
   tagIds?: string[];
 }
 
-export interface Preferences {
-  apiKey: string;
-}
