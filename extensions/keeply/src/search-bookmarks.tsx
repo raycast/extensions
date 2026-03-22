@@ -11,20 +11,20 @@ import {
   showToast,
   Toast,
   useNavigation,
-} from '@raycast/api';
-import { useCachedPromise } from '@raycast/utils';
-import { useMemo, useState } from 'react';
-import { KeeplyApi } from './lib/api';
-import type { Bookmark, Folder, Tag, UpdateBookmarkPayload } from './lib/types';
-import { formatMarkdownLink, formatRelativeDate, getDomain, getTagNames } from './lib/utils';
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import { KeeplyApi } from "./lib/api";
+import type { Bookmark, Folder, Tag, UpdateBookmarkPayload } from "./lib/types";
+import { formatMarkdownLink, formatRelativeDate, getDomain, getTagNames } from "./lib/utils";
 
 const api = new KeeplyApi();
 
-const NO_FOLDER = '__none__';
+const NO_FOLDER = "__none__";
 
 export default function SearchBookmarks() {
-  const [searchText, setSearchText] = useState('');
-  const [filterValue, setFilterValue] = useState('all');
+  const [searchText, setSearchText] = useState("");
+  const [filterValue, setFilterValue] = useState("all");
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const isSearchMode = searchText.length > 0;
@@ -54,12 +54,12 @@ export default function SearchBookmarks() {
 
     const active = allBookmarks.filter((b) => !b.deletedAt);
 
-    if (filterValue === 'archived') return active.filter((b) => b.archived);
-    if (filterValue.startsWith('folder:')) {
+    if (filterValue === "archived") return active.filter((b) => b.archived);
+    if (filterValue.startsWith("folder:")) {
       const id = filterValue.slice(7);
       return active.filter((b) => !b.archived && b.folderId === id);
     }
-    if (filterValue.startsWith('tag:')) {
+    if (filterValue.startsWith("tag:")) {
       const id = filterValue.slice(4);
       return active.filter((b) => !b.archived && b.tags.some((t) => t.tag.id === id));
     }
@@ -68,7 +68,7 @@ export default function SearchBookmarks() {
 
   // In the default "all" browse mode, group bookmarks by folder
   const sections = useMemo(() => {
-    if (isSearchMode || filterValue !== 'all') return null;
+    if (isSearchMode || filterValue !== "all") return null;
     const map = new Map<string, Bookmark[]>();
     for (const b of displayedBookmarks) {
       const key = b.folderId ?? NO_FOLDER;
@@ -87,9 +87,9 @@ export default function SearchBookmarks() {
       style: Toast.Style.Failure,
       title: error.message,
       primaryAction:
-        error.message.includes('API key') || error.message.includes('scope')
-          ? { title: 'Open Preferences', onAction: openExtensionPreferences }
-          : { title: 'Retry', onAction: () => mutate() },
+        error.message.includes("API key") || error.message.includes("scope")
+          ? { title: "Open Preferences", onAction: openExtensionPreferences }
+          : { title: "Retry", onAction: () => mutate() },
     });
   }
 
@@ -100,7 +100,7 @@ export default function SearchBookmarks() {
         optimisticUpdate: (data) => data?.map((b) => (b.id === bookmark.id ? { ...b, archived } : b)),
         rollbackOnError: true,
       });
-      await showToast({ style: Toast.Style.Success, title: archived ? 'Archived' : 'Unarchived' });
+      await showToast({ style: Toast.Style.Success, title: archived ? "Archived" : "Unarchived" });
     } catch (error) {
       handleApiError(toError(error));
     }
@@ -108,9 +108,9 @@ export default function SearchBookmarks() {
 
   async function handleDelete(bookmark: Bookmark) {
     const confirmed = await confirmAlert({
-      title: 'Delete Bookmark',
+      title: "Delete Bookmark",
       message: `Delete "${bookmark.title || getDomain(bookmark.url)}"?`,
-      primaryAction: { title: 'Delete', style: Alert.ActionStyle.Destructive },
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
 
@@ -119,7 +119,7 @@ export default function SearchBookmarks() {
         optimisticUpdate: (data) => data?.filter((b) => b.id !== bookmark.id),
         rollbackOnError: true,
       });
-      await showToast({ style: Toast.Style.Success, title: 'Bookmark deleted' });
+      await showToast({ style: Toast.Style.Success, title: "Bookmark deleted" });
     } catch (error) {
       handleApiError(toError(error));
     }
@@ -142,9 +142,9 @@ export default function SearchBookmarks() {
             : [
                 ...tagNames.slice(0, 2).map((t) => ({ tag: { value: t, color: Color.Blue } })),
                 ...(bookmark.archived
-                  ? [{ icon: { source: Icon.Tray, tintColor: Color.Yellow }, tooltip: 'Archived' }]
+                  ? [{ icon: { source: Icon.Tray, tintColor: Color.Yellow }, tooltip: "Archived" }]
                   : []),
-                { text: formatRelativeDate(bookmark.createdAt), tooltip: 'Saved' },
+                { text: formatRelativeDate(bookmark.createdAt), tooltip: "Saved" },
               ]
         }
         detail={
@@ -190,18 +190,18 @@ export default function SearchBookmarks() {
               <Action.CopyToClipboard
                 title="Copy URL"
                 content={bookmark.url}
-                shortcut={{ modifiers: ['cmd'], key: 'c' }}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
               />
               <Action.CopyToClipboard
                 title="Copy as Markdown Link"
                 content={formatMarkdownLink(bookmark)}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
               <Action
-                title={isShowingDetail ? 'Hide Detail' : 'Show Detail'}
+                title={isShowingDetail ? "Hide Detail" : "Show Detail"}
                 icon={Icon.Sidebar}
                 onAction={() => setIsShowingDetail((v) => !v)}
-                shortcut={{ modifiers: ['cmd'], key: 'y' }}
+                shortcut={{ modifiers: ["cmd"], key: "y" }}
               />
             </ActionPanel.Section>
             <ActionPanel.Section title="Manage">
@@ -209,13 +209,13 @@ export default function SearchBookmarks() {
                 title="Edit Bookmark"
                 icon={Icon.Pencil}
                 target={<EditBookmarkView bookmark={bookmark} sidebar={sidebar} onSave={() => mutate()} />}
-                shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                shortcut={{ modifiers: ["cmd"], key: "e" }}
               />
               <Action
-                title={bookmark.archived ? 'Unarchive' : 'Archive'}
+                title={bookmark.archived ? "Unarchive" : "Archive"}
                 icon={Icon.Tray}
                 onAction={() => handleArchive(bookmark)}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
@@ -224,7 +224,7 @@ export default function SearchBookmarks() {
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={() => handleDelete(bookmark)}
-                shortcut={{ modifiers: ['ctrl'], key: 'x' }}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
             </ActionPanel.Section>
           </ActionPanel>
@@ -256,15 +256,15 @@ export default function SearchBookmarks() {
 
   const emptyTitle = isSearchMode
     ? `No results for "${searchText}"`
-    : filterValue !== 'all'
-      ? 'No bookmarks match this filter'
-      : 'No bookmarks yet';
+    : filterValue !== "all"
+      ? "No bookmarks match this filter"
+      : "No bookmarks yet";
 
   const emptyDescription = isSearchMode
-    ? 'Try a different search term'
-    : filterValue !== 'all'
-      ? ''
-      : 'Press ⌘N to save your first bookmark';
+    ? "Try a different search term"
+    : filterValue !== "all"
+      ? ""
+      : "Press ⌘N to save your first bookmark";
 
   return (
     <List
@@ -285,7 +285,7 @@ export default function SearchBookmarks() {
           .map(([key, items]) => (
             <List.Section
               key={key}
-              title={key === NO_FOLDER ? 'Unsorted' : (folderNameMap.get(key) ?? 'Unknown Folder')}
+              title={key === NO_FOLDER ? "Unsorted" : (folderNameMap.get(key) ?? "Unknown Folder")}
               subtitle={String(items.length)}
             >
               {items.map(bookmarkItem)}
@@ -320,7 +320,7 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
   const { pop } = useNavigation();
 
   async function handleSubmit(values: EditFormValues) {
-    const toast = await showToast({ style: Toast.Style.Animated, title: 'Saving changes...' });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Saving changes..." });
 
     try {
       let extraTagId: string | undefined;
@@ -331,8 +331,8 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
           const newTag = await api.createTag(normalizedName);
           extraTagId = newTag.id;
         } catch (error) {
-          const msg = error instanceof Error ? error.message : '';
-          if (msg.includes('already exists') && sidebar) {
+          const msg = error instanceof Error ? error.message : "";
+          if (msg.includes("already exists") && sidebar) {
             const existing = sidebar.tags.find((t) => t.name.toLowerCase() === normalizedName);
             if (existing) extraTagId = existing.id;
           } else {
@@ -353,7 +353,7 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
       await api.updateBookmark(bookmark.id, payload);
 
       toast.style = Toast.Style.Success;
-      toast.title = 'Bookmark updated';
+      toast.title = "Bookmark updated";
 
       onSave();
       pop();
@@ -362,8 +362,8 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
       toast.style = Toast.Style.Failure;
       toast.title = err.message;
       toast.primaryAction =
-        err.message.includes('API key') || err.message.includes('scope')
-          ? { title: 'Open Preferences', onAction: openExtensionPreferences }
+        err.message.includes("API key") || err.message.includes("scope")
+          ? { title: "Open Preferences", onAction: openExtensionPreferences }
           : undefined;
     }
   }
@@ -378,14 +378,14 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
       }
     >
       <Form.TextField id="url" title="URL" defaultValue={bookmark.url} />
-      <Form.TextField id="title" title="Title" defaultValue={bookmark.title ?? ''} placeholder="Page title" />
+      <Form.TextField id="title" title="Title" defaultValue={bookmark.title ?? ""} placeholder="Page title" />
       <Form.TextField
         id="description"
         title="Description"
-        defaultValue={bookmark.description ?? ''}
+        defaultValue={bookmark.description ?? ""}
         placeholder="Short description"
       />
-      <Form.TextArea id="note" title="Note" defaultValue={bookmark.note ?? ''} placeholder="Personal note..." />
+      <Form.TextArea id="note" title="Note" defaultValue={bookmark.note ?? ""} placeholder="Personal note..." />
       <Form.Separator />
       <Form.Dropdown id="folderId" title="Folder" defaultValue={bookmark.folderId ?? NO_FOLDER}>
         <Form.Dropdown.Item title="No folder (Unsorted)" value={NO_FOLDER} />
