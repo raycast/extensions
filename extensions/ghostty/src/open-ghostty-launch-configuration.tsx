@@ -122,7 +122,7 @@ async function RunLaunchConfiguration({ name }: { name: string }) {
     }
 
     await runAppleScript(fullScript);
-  } catch (error) {
+  } catch {
     console.error("Failed to parse or execute launch configuration:", error);
   }
 }
@@ -168,7 +168,7 @@ function CreateItem({ onCreateSuccess }: { onCreateSuccess: () => Promise<void> 
           if (!config.name) {
             return "YAML must include a 'name' field";
           }
-        } catch (error) {
+        } catch {
           return "Invalid YAML format";
         }
       },
@@ -216,7 +216,7 @@ function EditItem({ name, yaml, onEditSuccess }: { name: string; yaml: string; o
           if (!config.name) {
             return "YAML must include a 'name' field";
           }
-        } catch (error) {
+        } catch {
           return "Invalid YAML format";
         }
       },
