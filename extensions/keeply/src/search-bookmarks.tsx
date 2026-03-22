@@ -39,10 +39,17 @@ export default function SearchBookmarks() {
 
   const { data: sidebar } = useCachedPromise(() => api.getSidebarData(), []);
 
-  const { data: searchResults = [], isLoading: searchLoading } = useCachedPromise(
+  const {
+    data: searchResults = [],
+    isLoading: searchLoading,
+    mutate: searchMutate,
+  } = useCachedPromise(
     (query: string) => api.searchBookmarks(query),
     [searchText],
-    { execute: isSearchMode },
+    {
+      execute: isSearchMode,
+      onError: (error) => handleApiError(error),
+    },
   );
 
   const isLoading = isSearchMode ? searchLoading : allLoading;
@@ -96,10 +103,16 @@ export default function SearchBookmarks() {
   async function handleArchive(bookmark: Bookmark) {
     const archived = !bookmark.archived;
     try {
-      await mutate(api.updateBookmark(bookmark.id, { archived }), {
-        optimisticUpdate: (data) => data?.map((b) => (b.id === bookmark.id ? { ...b, archived } : b)),
-        rollbackOnError: true,
-      });
+      await Promise.all([
+        mutate(api.updateBookmark(bookmark.id, { archived }), {
+          optimisticUpdate: (data) => data?.map((b) => (b.id === bookmark.id ? { ...b, archived } : b)),
+          rollbackOnError: true,
+        }),
+        searchMutate(undefined, {
+          optimisticUpdate: (data) => data?.map((b) => (b.id === bookmark.id ? { ...b, archived } : b)),
+          rollbackOnError: true,
+        }),
+      ]);
       await showToast({ style: Toast.Style.Success, title: archived ? "Archived" : "Unarchived" });
     } catch (error) {
       handleApiError(toError(error));
@@ -115,10 +128,16 @@ export default function SearchBookmarks() {
     if (!confirmed) return;
 
     try {
-      await mutate(api.deleteBookmark(bookmark.id), {
-        optimisticUpdate: (data) => data?.filter((b) => b.id !== bookmark.id),
-        rollbackOnError: true,
-      });
+      await Promise.all([
+        mutate(api.deleteBookmark(bookmark.id), {
+          optimisticUpdate: (data) => data?.filter((b) => b.id !== bookmark.id),
+          rollbackOnError: true,
+        }),
+        searchMutate(undefined, {
+          optimisticUpdate: (data) => data?.filter((b) => b.id !== bookmark.id),
+          rollbackOnError: true,
+        }),
+      ]);
       await showToast({ style: Toast.Style.Success, title: "Bookmark deleted" });
     } catch (error) {
       handleApiError(toError(error));
