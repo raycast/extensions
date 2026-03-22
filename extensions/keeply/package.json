@@ -5,8 +5,12 @@
   "description": "Search, browse, and manage your Keeply bookmarks",
   "icon": "keeply-icon.png",
   "author": "rolfkoenders",
-  "categories": ["Productivity", "Web"],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "version": "1.0.0",
   "commands": [
     {
@@ -39,8 +43,9 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
-    "typescript": "^5.7.3",
-    "eslint": "^8.57.1"
+    "@vicinae/api": "^0.20.7",
+    "eslint": "^8.57.1",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "dev": "ray develop",
