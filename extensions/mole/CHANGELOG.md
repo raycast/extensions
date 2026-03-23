@@ -1,6 +1,6 @@
 # Mole Changelog
 
-## [Friendly Install Screen] - {PR_MERGE_DATE}
+## [Friendly Install Screen] - 2026-03-23
 
 - Added MoleNotInstalled component with multiple install options when Mole CLI is not found
 - Added install options via Homebrew Raycast extension, Homebrew Terminal, curl script, and GitHub page.
