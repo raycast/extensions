@@ -47,18 +47,22 @@ function getTypeColor(type: string): Color {
 const fetchAllComponents = withCache(
   async () => {
     const response = await fetch("https://base-ui-api.vercel.app/api/base-ui");
+    if (!response.ok) throw new Error(`Failed to fetch Base UI data: ${response.status}`);
     return (await response.json()) as ApiResponse;
   },
   { maxAge: 24 * 60 * 60 * 1000 },
 );
 
 export default function Command() {
-  const { data, isLoading } = usePromise(fetchAllComponents);
+  const { data, isLoading, error } = usePromise(fetchAllComponents);
 
   return (
     <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search components...">
-      {!isLoading && !data && (
-        <List.EmptyView title="No Components Found" description="Could not load Base UI components." />
+      {!isLoading && error && (
+        <List.EmptyView title="Failed to Load Components" description={error.message ?? "An unknown error occurred."} />
+      )}
+      {!isLoading && !error && !data && (
+        <List.EmptyView title="No Components Found" description="No Base UI components were returned from the API." />
       )}
       <List.Section title="Components">
         {data?.components.map((item) => (

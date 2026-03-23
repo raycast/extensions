@@ -1,8 +1,8 @@
-# Raycast Base UI
+# Base UI Components
 
 A Raycast extension to browse [Base UI](https://base-ui.com) component documentation.
 
-![](assets/screenshot.png)
+![](media/screenshot.png)
 
 ## Features
 
@@ -14,8 +14,8 @@ A Raycast extension to browse [Base UI](https://base-ui.com) component documenta
 
 ## Actions
 
-| Action | Shortcut |
-| --- | --- |
-| Open Documentation | `Enter` |
-| Copy Main Example | `Cmd + Shift + C` |
-| Copy URL | `Cmd + Shift + .` |
+| Action             | Shortcut          |
+| ------------------ | ----------------- |
+| Open Documentation | `Enter`           |
+| Copy Main Example  | `Cmd + Shift + C` |
+| Copy URL           | `Cmd + Shift + .` |

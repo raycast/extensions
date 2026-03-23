@@ -1,4 +1,4 @@
-# Base UI Components Changelog
+# Base UI Components
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
