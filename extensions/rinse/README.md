@@ -2,6 +2,8 @@
 
 > Rinse the Claude off your clipboard.
 
+A [Raycast](https://raycast.com) extension.
+
 You copy Claude's response out of your terminal. It's wrapped at 80 characters with a two-space indent on the continuation:
 
 ```txt
@@ -33,16 +35,12 @@ Just use a hook. You're done.
 
 Copy. Clean. Paste. Done.
 
----
-
 ## Install
 
 1. Clone this repo
 2. `cd` into the `rinse` directory
 3. Run `npm install && npm run dev`
 4. Raycast picks it up automatically and it appears at the top of root search
-
----
 
 ## Commands
 
@@ -64,8 +62,6 @@ Opens a preview of the cleaned result before committing. The sidebar shows exact
 
 > **"Confirm the baby. Toss the bathwater."**
 
----
-
 ## What Gets Cleaned
 
 | Artifact                      | Example                                              |
@@ -80,7 +76,7 @@ Opens a preview of the cleaned result before committing. The sidebar shows exact
 | Soft-wrapped lines            | Terminal-wrapped lines rejoined into full paragraphs |
 | Excessive blank lines         | 3+ consecutive blank lines collapsed to 2            |
 
-### What Stays Intact
+## What Stays Intact
 
 Rinse is careful not to over-clean. It preserves:
 
@@ -88,8 +84,7 @@ Rinse is careful not to over-clean. It preserves:
 - **List structure**: lines starting with `-`, `*`, `>`, or numbered lists aren't merged
 - **Sentence boundaries**: lines ending with `.`, `?`, `!`, or `:` don't get merged into the next line
 - **Indented code**: lines indented relative to surrounding text are treated as code and left alone
-
----
+- **Markdown tables**: multi-column tables (`| a | b |`) are preserved as-is; single-column rows (`| content |`) are treated as terminal pipe borders and stripped
 
 ## Tips
 

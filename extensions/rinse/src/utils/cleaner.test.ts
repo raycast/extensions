@@ -102,6 +102,28 @@ describe("cleanText", () => {
     });
   });
 
+  describe("markdown tables", () => {
+    it("preserves a two-column table intact", () => {
+      const table = "| Name | Value |\n| ---- | ----- |\n| foo  | bar   |";
+      expect(cleanText(table)).toBe(table);
+    });
+
+    it("preserves a multi-column table intact", () => {
+      const table = "| A | B | C |\n| - | - | - |\n| 1 | 2 | 3 |";
+      expect(cleanText(table)).toBe(table);
+    });
+
+    it("does not join table rows together", () => {
+      const input = "| col1 | col2 |\n| val1 | val2 |";
+      expect(cleanText(input)).toBe(input);
+    });
+
+    it("preserves a table that follows a paragraph", () => {
+      const input = "Some intro text.\n\n| Name | Value |\n| ---- | ----- |\n| foo  | bar   |";
+      expect(cleanText(input)).toBe(input);
+    });
+  });
+
   describe("line joining", () => {
     it("joins wrapped lines", () => {
       expect(cleanText("This is a long\nline that wrapped")).toBe("This is a long line that wrapped");

@@ -8,8 +8,8 @@ const ANSI_ESCAPE_RE = /\x1B\[[0-9;?]*[A-Za-z]|\x1B[()][AB012]|\x1B[=>]|\x1B[78]
 // Spinner / progress characters (Braille + common spinner frames)
 const SPINNER_RE = /[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏⠁⠂⠄⡀⢀⠠⠐⠈]/g;
 
-// Lines that are purely decorative: only repeated ─ ═ - = ~ * # chars (3+)
-const DECORATION_LINE_RE = /^[\s\-=~*#─═━]+$/;
+// Lines that are purely decorative separators: only repeated ─ ═ - = ~ * # chars (3+)
+const SEPARATOR_LINE_RE = /^[\s\-=~*#─═━]+$/;
 
 // Sentence-ending punctuation that signals a line should NOT be joined forward
 const SENTENCE_END_RE = /[.?!:]$/;
@@ -27,12 +27,35 @@ const INDENTED_LINE_RE = /^\s/;
 // Fenced code block delimiter (``` with optional language tag)
 const FENCE_RE = /^```/;
 
+// Matches rows with 2+ columns — single-column rows (| content |) are ambiguous with terminal
+// borders and intentionally not matched. Unicode │ is stripped by BOX_DRAWING_RE before this
+// check runs, so only ASCII | remains.
+const TABLE_ROW_RE = /^\s*\|(?:[^|]*\|){2,}\s*$/;
+
 function dedent(text: string): string {
   const lines = text.split("\n");
-  const nonEmpty = lines.filter((l) => l.trim().length > 0);
-  if (nonEmpty.length === 0) return text;
-  const minIndent = Math.min(...nonEmpty.map((l) => (l.match(/^( *)/) ?? ["", ""])[1].length));
-  if (minIndent === 0) return text;
+  let minIndent = Infinity;
+
+  for (const line of lines) {
+    if (line.trim().length === 0) {
+      continue;
+    }
+
+    const indent = (line.match(/^( *)/) ?? ["", ""])[1].length;
+
+    if (indent < minIndent) {
+      minIndent = indent;
+    }
+
+    if (minIndent === 0) {
+      break;
+    }
+  }
+
+  if (!isFinite(minIndent) || minIndent === 0) {
+    return text;
+  }
+
   return lines.map((l) => l.slice(minIndent)).join("\n");
 }
 
@@ -50,15 +73,20 @@ export function cleanText(input: string): string {
 
   const lines = text.split("\n");
   const cleaned: string[] = [];
+  const tableRowIndices = new Set<number>();
 
   for (const rawLine of lines) {
     let line = rawLine;
 
-    line = line.replace(LEADING_PIPE_RE, "");
-    line = line.replace(TRAILING_PIPE_RE, "");
+    if (TABLE_ROW_RE.test(line)) {
+      tableRowIndices.add(cleaned.length);
+    } else {
+      line = line.replace(LEADING_PIPE_RE, "");
+      line = line.replace(TRAILING_PIPE_RE, "");
 
-    if (DECORATION_LINE_RE.test(line)) {
-      continue;
+      if (SEPARATOR_LINE_RE.test(line)) {
+        continue;
+      }
     }
 
     cleaned.push(line);
@@ -71,21 +99,29 @@ export function cleanText(input: string): string {
     const current = cleaned[i];
     const next = cleaned[i + 1];
 
-    if (FENCE_RE.test(current)) {
+    const isFenceDelimiter = FENCE_RE.test(current);
+
+    if (isFenceDelimiter) {
       inFence = !inFence;
     }
 
-    const isIndentedCode = INDENTED_LINE_RE.test(current) && !LIST_MARKER_RE.test(current);
+    const isIndentedCode = !isFenceDelimiter && INDENTED_LINE_RE.test(current) && !LIST_MARKER_RE.test(current);
+    const isTableRow = tableRowIndices.has(i);
+    const isClauseEnd = SENTENCE_END_RE.test(current);
+    const isNextEmpty = next === undefined || next === "";
+    const isNextTableRow = tableRowIndices.has(i + 1);
+    const isNextListItem = LIST_MARKER_RE.test(next);
 
     const canJoin =
-      !inFence &&
-      !FENCE_RE.test(current) &&
       current !== "" &&
-      next !== undefined &&
-      next !== "" &&
-      !SENTENCE_END_RE.test(current) &&
-      !LIST_MARKER_RE.test(next) &&
-      !isIndentedCode;
+      !inFence &&
+      !isFenceDelimiter &&
+      !isIndentedCode &&
+      !isTableRow &&
+      !isClauseEnd &&
+      !isNextEmpty &&
+      !isNextTableRow &&
+      !isNextListItem;
 
     if (canJoin) {
       cleaned[i + 1] = `${current} ${next.trimStart()}`;
