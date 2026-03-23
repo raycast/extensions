@@ -99,26 +99,17 @@ function parseMusicSections(container: XmlNode): LibrarySection[] {
 }
 
 export async function getMusicSectionsForServer(server: PlexServerResource): Promise<LibrarySection[]> {
-  const preferred = server.preferredConnection ?? server.connections[0];
-  const fallbacks = server.connections.filter((c) => c !== preferred);
-  const candidates = preferred ? [preferred, ...fallbacks] : fallbacks;
+  const candidates = server.connections.length > 0 ? server.connections : server.preferredConnection ? [server.preferredConnection] : [];
 
   if (candidates.length === 0) {
     throw new Error(`No usable connection was found for ${server.name}.`);
   }
 
-  let lastError: unknown;
+  const container = await Promise.any(
+    candidates.map((connection) => requestXml(connection.uri, "/library/sections", undefined, true, server.accessToken)),
+  );
 
-  for (const connection of candidates) {
-    try {
-      const container = await requestXml(connection.uri, "/library/sections", undefined, true, server.accessToken);
-      return parseMusicSections(container);
-    } catch (error) {
-      lastError = error;
-    }
-  }
-
-  throw lastError instanceof Error ? lastError : new Error(String(lastError));
+  return parseMusicSections(container);
 }
 
 export async function getMusicSections(): Promise<LibrarySection[]> {
