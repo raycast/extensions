@@ -25,9 +25,21 @@ interface MindicadorResponse {
 }
 
 const INDICATORS = [
-  { id: "dolar", title: "Dólar", color: Color.Green, keywords: ["dollar", "usd"], decimals: 2 },
+  {
+    id: "dolar",
+    title: "Dólar",
+    color: Color.Green,
+    keywords: ["dollar", "usd"],
+    decimals: 2,
+  },
   { id: "uf", title: "UF", color: Color.Blue, keywords: [], decimals: 4 },
-  { id: "euro", title: "Euro", color: Color.Purple, keywords: ["eur"], decimals: 2 },
+  {
+    id: "euro",
+    title: "Euro",
+    color: Color.Purple,
+    keywords: ["eur"],
+    decimals: 2,
+  },
   { id: "utm", title: "UTM", color: Color.Orange, keywords: [], decimals: 4 },
 ] as const;
 
