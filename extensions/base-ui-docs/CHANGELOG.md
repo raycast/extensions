@@ -1,6 +1,6 @@
 # Base UI Components
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-23
 
 - Browse and search all Base UI components and utilities
 - Preview code examples inline with syntax highlighting
