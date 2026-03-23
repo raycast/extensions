@@ -1,4 +1,4 @@
-import { List, Icon, ActionPanel, Action, LaunchType, launchCommand, open } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, LaunchType, launchCommand, open, showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
 
 const MOLE_GITHUB = "https://github.com/tw93/Mole";
@@ -18,12 +18,15 @@ function openInBrewExtension() {
 }
 
 function runInTerminal(command: string) {
-  execFile("/usr/bin/osascript", [
-    "-e",
-    `tell application "Terminal" to do script "${command}"`,
-    "-e",
-    'tell application "Terminal" to activate',
-  ]);
+  execFile(
+    "/usr/bin/osascript",
+    ["-e", `tell application "Terminal" to do script "${command}"`, "-e", 'tell application "Terminal" to activate'],
+    (err) => {
+      if (err) {
+        showToast({ style: Toast.Style.Failure, title: "Failed to open Terminal", message: err.message });
+      }
+    },
+  );
 }
 
 export function MoleNotInstalled() {
