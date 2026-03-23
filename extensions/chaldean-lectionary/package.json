@@ -1,0 +1,52 @@
+{
+  "name": "chaldean-lectionary",
+  "title": "Chaldean Lectionary",
+  "description": "Daily readings for the Chaldean Catholic Church",
+  "icon": "icon.png",
+  "author": "peter_patros",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today",
+      "title": "Today's Readings",
+      "description": "View the readings for today",
+      "mode": "view"
+    },
+    {
+      "name": "lookup",
+      "title": "Look up Readings",
+      "description": "View readings for any day",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "calendarId",
+      "title": "Google Calendar ID",
+      "description": "The ID of your liturgical calendar",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "googleApiKey",
+      "title": "Google API Key",
+      "description": "Your Google API key for calendar access",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
