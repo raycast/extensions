@@ -1,5 +1,5 @@
 import { basename } from "node:path";
-import { closeMainWindow, getPreferenceValues, showHUD, Toast, showToast } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, Toast, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import {
   observeWorkspaceRunSession,
@@ -37,6 +37,23 @@ function terminalTitle(repoName: string, state: XcodeRunState) {
   }
 }
 
+function terminalToastStyle(state: XcodeRunState) {
+  switch (state) {
+    case "succeeded":
+      return Toast.Style.Success;
+    case "failed":
+    case "cancelled":
+    default:
+      return Toast.Style.Failure;
+  }
+}
+
+function completeToast(toast: Toast, title: string, style: Toast.Style, message?: string) {
+  toast.style = style;
+  toast.title = title;
+  toast.message = message;
+}
+
 export default async function command() {
   let toast: Toast | undefined;
   let repoName: string | undefined;
@@ -47,12 +64,12 @@ export default async function command() {
     const repoRoot = readFocusedRepoRoot();
     repoName = basename(repoRoot);
 
-    await closeMainWindow({ clearRootSearch: true });
-
     toast = await showToast({
       style: Toast.Style.Animated,
       title: buildingTitle(repoName),
     });
+
+    await closeMainWindow({ clearRootSearch: true });
 
     const target = resolveXcodeTarget(repoRoot);
     toast.message = workspaceLabel(target.targetPath);
@@ -67,16 +84,20 @@ export default async function command() {
     }
 
     if (!session.actionResultId) {
-      await toast.hide();
-      await showHUD(untrackedBuildTitle(repoName));
+      completeToast(toast, untrackedBuildTitle(repoName), Toast.Style.Success, workspaceLabel(target.targetPath));
       return;
     }
 
     didStartTrackedRun = true;
     const result = observeWorkspaceRunSession(session);
 
-    await toast.hide();
-    await showHUD(terminalTitle(repoName, result.state === "building" ? "unknown" : result.state));
+    const terminalState = result.state === "building" ? "unknown" : result.state;
+    completeToast(
+      toast,
+      terminalTitle(repoName, terminalState),
+      terminalToastStyle(terminalState),
+      workspaceLabel(target.targetPath),
+    );
   } catch (error) {
     if (error instanceof UserFacingError) {
       if (toast) {
@@ -94,8 +115,7 @@ export default async function command() {
     }
 
     if (toast && repoName && didStartTrackedRun) {
-      await toast.hide();
-      await showHUD(terminalTitle(repoName, "unknown"));
+      completeToast(toast, terminalTitle(repoName, "unknown"), Toast.Style.Failure);
       return;
     }
 
