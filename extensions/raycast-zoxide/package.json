@@ -51,11 +51,11 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.5.0",
+    "@types/node": "^22.19.15",
     "@types/react": "19.2.14",
     "eslint": "^10.1.0",
     "prettier": "^3.8.1",
-    "typescript": "^6.0.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
