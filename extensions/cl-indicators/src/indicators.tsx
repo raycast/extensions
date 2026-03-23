@@ -1,4 +1,12 @@
-import { List, ActionPanel, Action, showHUD, Clipboard, Color, Icon } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  showHUD,
+  Clipboard,
+  Color,
+  Icon,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 const API_URL = "https://mindicador.cl/api";
@@ -31,14 +39,39 @@ function formatDate(isoDate: string): string {
 }
 
 export default function Command() {
-  const { data, isLoading, error, revalidate } = useFetch<MindicadorResponse>(API_URL);
+  const { data, isLoading, error, revalidate } =
+    useFetch<MindicadorResponse>(API_URL);
 
   const indicators = data
     ? [
-        { id: "dolar", title: "Dólar", value: data.dolar.valor, date: data.dolar.fecha, color: Color.Green },
-        { id: "uf",    title: "UF",    value: data.uf.valor,    date: data.uf.fecha,    color: Color.Blue },
-        { id: "euro",  title: "Euro",  value: data.euro.valor,  date: data.euro.fecha,  color: Color.Purple },
-        { id: "utm",   title: "UTM",   value: data.utm.valor,   date: data.utm.fecha,   color: Color.Orange },
+        {
+          id: "dolar",
+          title: "Dólar",
+          value: data.dolar.valor,
+          date: data.dolar.fecha,
+          color: Color.Green,
+        },
+        {
+          id: "uf",
+          title: "UF",
+          value: data.uf.valor,
+          date: data.uf.fecha,
+          color: Color.Blue,
+        },
+        {
+          id: "euro",
+          title: "Euro",
+          value: data.euro.valor,
+          date: data.euro.fecha,
+          color: Color.Purple,
+        },
+        {
+          id: "utm",
+          title: "UTM",
+          value: data.utm.valor,
+          date: data.utm.fecha,
+          color: Color.Orange,
+        },
       ]
     : [];
 
@@ -51,7 +84,11 @@ export default function Command() {
           description={error.message}
           actions={
             <ActionPanel>
-              <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action
+                title="Retry"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
             </ActionPanel>
           }
         />
@@ -70,7 +107,9 @@ export default function Command() {
                   icon={Icon.Clipboard}
                   onAction={async () => {
                     await Clipboard.copy(String(item.value));
-                    await showHUD(`${item.title} copied: $${formatCLP(item.value)}`);
+                    await showHUD(
+                      `${item.title} copied: $${formatCLP(item.value)}`,
+                    );
                   }}
                 />
                 <Action
