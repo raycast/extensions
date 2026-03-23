@@ -64,13 +64,6 @@ function setupDescription(status?: PlexSetupStatus, problem?: string): string {
   return [problem, ...details].filter(Boolean).join("\n\n");
 }
 
-function serverAccessories(server: PlexServerResource): List.Item.Accessory[] {
-  return [
-    ...(server.preferredConnection?.localNetwork ? [{ tag: { value: "LAN", color: Color.Blue } }] : []),
-    ...(server.sourceTitle ? [{ text: server.sourceTitle, tooltip: "Shared By" }] : []),
-  ];
-}
-
 export function PlexSetupView(props: PlexSetupViewProps) {
   const [authPin, setAuthPin] = useState<PlexAuthPin>();
   const [state, setState] = useState<SetupState>({
@@ -401,7 +394,6 @@ export function PlexSetupView(props: PlexSetupViewProps) {
                         },
                       ]
                     : []),
-                  ...serverAccessories(server),
                   ...(library.totalSize !== undefined ? [{ text: `${library.totalSize} artists` }] : []),
                 ]}
                 actions={
