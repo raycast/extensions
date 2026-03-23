@@ -5,6 +5,11 @@
   "description": "Track DDR4 and DDR5 market pricing from RamRadar.",
   "icon": "extension-icon.png",
   "author": "alexi.build",
+  "categories": [
+    "Finance",
+    "Data",
+    "Other"
+  ],
   "platforms": [
     "macOS",
     "Windows"
