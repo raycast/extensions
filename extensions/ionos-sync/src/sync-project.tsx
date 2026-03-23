@@ -222,14 +222,9 @@ export default function Command() {
       <Detail
         markdown={`# ⚠️ Credentials missing
 
-Please open the **Extension Settings** and enter your host and username.
+Please open **Extension Preferences** to enter your host and username.
 
-\`⌘ + ,\` → IONOS Sync → Settings`}
-        actions={
-          <ActionPanel>
-            <Action.OpenExtensionPreferences title="Open Extension Preferences" />
-          </ActionPanel>
-        }
+Press \`⌘ + ,\` while IONOS Sync is selected.`}
       />
     );
   }
