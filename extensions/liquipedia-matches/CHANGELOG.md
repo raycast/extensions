@@ -6,4 +6,4 @@
 - Fix: Restore multi-stream support — all available streams are now shown as actions
 - Chore: Update preference type to `textfield`
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-23

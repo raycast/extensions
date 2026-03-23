@@ -52,5 +52,8 @@
         "required": true
       }
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
