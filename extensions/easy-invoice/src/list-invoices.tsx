@@ -40,8 +40,36 @@ export default function ListInvoices() {
   }, []);
 
   useEffect(() => {
-    loadInvoices();
-  }, [loadInvoices]);
+    let isCancelled = false;
+
+    const fetchInvoices = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getInvoices();
+        if (isCancelled) return;
+        data.sort((a, b) => b.invoiceDate.localeCompare(a.invoiceDate));
+        setInvoices(data);
+      } catch (err) {
+        if (!isCancelled) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load invoices",
+            message: String(err),
+          });
+        }
+      } finally {
+        if (!isCancelled) setIsLoading(false);
+      }
+    };
+
+    // Start initial load
+
+    fetchInvoices();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
 
   const years = [...new Set(invoices.map((inv) => inv.invoiceDate.substring(0, 4)))].sort().reverse();
 

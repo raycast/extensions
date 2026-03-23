@@ -24,7 +24,40 @@ export default function ManageClients() {
   }, []);
 
   useEffect(() => {
-    loadClients();
+    let isCancelled = false;
+
+    const fetchClients = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getClients();
+        if (isCancelled) return;
+        setClients(data);
+
+        const counts: Record<string, number> = {};
+        for (const client of data) {
+          if (isCancelled) break;
+          counts[client.id] = await getInvoiceCountForClient(client.id);
+        }
+        if (isCancelled) return;
+        setInvoiceCounts(counts);
+      } catch (err) {
+        if (!isCancelled) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load clients",
+            message: String(err),
+          });
+        }
+      } finally {
+        if (!isCancelled) setIsLoading(false);
+      }
+    };
+
+    fetchClients();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [loadClients]);
 
   async function handleDelete(client: Client) {

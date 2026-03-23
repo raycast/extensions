@@ -20,10 +20,29 @@ export default function ExportInvoices() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    getClients().then((data) => {
-      setClients(data);
-      setIsLoading(false);
-    });
+    let isCancelled = false;
+
+    getClients()
+      .then((data) => {
+        if (isCancelled) return;
+        setClients(data);
+      })
+      .catch((err) => {
+        if (!isCancelled) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to load clients",
+            message: String(err),
+          });
+        }
+      })
+      .finally(() => {
+        if (!isCancelled) setIsLoading(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
   async function handleSubmit(values: Record<string, string | Date>) {
