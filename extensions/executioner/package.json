@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "executioner",
+  "title": "Executioner",
+  "description": "Advanced process manager with instant kill, multi-select, grouping, freeze/resume, port kill, and more",
+  "icon": "icon.png",
+  "author": "Supremum",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-processes",
+      "title": "Executioner",
+      "description": "List and manage running processes with advanced grouping, sorting, and bulk actions",
+      "mode": "view"
+    },
+    {
+      "name": "kill-by-port",
+      "title": "Kill by Port",
+      "description": "Find and kill processes listening on a specific port",
+      "mode": "view"
+    },
+    {
+      "name": "resource-hogs",
+      "title": "Resource Hogs",
+      "description": "View processes consuming excessive CPU or memory",
+      "mode": "view"
+    },
+    {
+      "name": "recently-killed",
+      "title": "Recently Killed",
+      "description": "View and re-kill recently terminated processes",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Auto-Refresh",
+      "description": "How often to refresh the process list",
+      "type": "dropdown",
+      "required": false,
+      "default": "3000",
+      "data": [
+        { "title": "1 second", "value": "1000" },
+        { "title": "2 seconds", "value": "2000" },
+        { "title": "3 seconds", "value": "3000" },
+        { "title": "5 seconds", "value": "5000" },
+        { "title": "10 seconds", "value": "10000" },
+        { "title": "Off", "value": "0" }
+      ]
+    },
+    {
+      "name": "cpuThreshold",
+      "title": "CPU Hog Threshold (%)",
+      "description": "Processes above this CPU % are flagged as hogs",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "memThreshold",
+      "title": "Memory Hog Threshold (MB)",
+      "description": "Processes above this memory usage are flagged as hogs",
+      "type": "textfield",
+      "required": false,
+      "default": "1024"
+    },
+    {
+      "name": "showPid",
+      "title": "Display",
+      "description": "Show PID in process list",
+      "label": "Show PID",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "closeAfterKill",
+      "title": "",
+      "description": "Close Raycast window after killing a process",
+      "label": "Close Window After Kill",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.19.0",
+    "pretty-bytes": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
