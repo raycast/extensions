@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simple-timer",
+  "title": "Simple Timer",
+  "description": "A keyboard-first timer with stopwatch and Pomodoro \u2014 runs in the background on Windows",
+  "icon": "timer-icon.png",
+  "author": "dejwv",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Simple Timer",
+      "description": "Start a countdown timer",
+      "mode": "view"
+    },
+    {
+      "name": "start-preset-1",
+      "title": "Start Preset 1",
+      "description": "Start the first preset timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-preset-2",
+      "title": "Start Preset 2",
+      "description": "Start the second preset timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-preset-3",
+      "title": "Start Preset 3",
+      "description": "Start the third preset timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-preset-4",
+      "title": "Start Preset 4",
+      "description": "Start the fourth preset timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-preset-5",
+      "title": "Start Preset 5",
+      "description": "Start the fifth preset timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "start-preset-6",
+      "title": "Start Preset 6",
+      "description": "Start the sixth preset timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "repeat-last",
+      "title": "Repeat Last Timer",
+      "description": "Repeat the last used timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "dismiss-finished",
+      "title": "Dismiss Finished Timers",
+      "description": "Dismiss all finished timers",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use the \\`npm run publish\\` script.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "windows"
+  ]
+}
