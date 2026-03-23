@@ -22,27 +22,50 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [terminals, setTerminals] = useState<typeof KNOWN_TERMINALS>([]);
   const [terminal, setTerminal] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [recentLoaded, setRecentLoaded] = useState(false);
+  const [terminalsLoaded, setTerminalsLoaded] = useState(false);
 
   useEffect(() => {
-    getRecentPaths().then(setRecentPaths);
+    let mounted = true;
+    getRecentPaths().then((paths) => {
+      if (!mounted) return;
+      setRecentPaths(paths);
+      setRecentLoaded(true);
+    });
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
+    let mounted = true;
     async function loadTerminals() {
       const apps = await getApplications();
+      if (!mounted) return;
       const bundleIds = new Set(apps.map((a) => a.bundleId));
       const available = KNOWN_TERMINALS.filter((t) => bundleIds.has(t.bundleId));
-      setTerminals(available);
+      if (mounted) setTerminals(available);
 
       const saved = await LocalStorage.getItem<string>(TERMINAL_STORAGE_KEY);
+      if (!mounted) return;
       if (saved && available.some((t) => t.value === saved)) {
         setTerminal(saved);
       } else if (available.length > 0) {
         setTerminal(available[0].value);
       }
+
+      if (mounted) setTerminalsLoaded(true);
     }
     loadTerminals();
+    return () => {
+      mounted = false;
+    };
   }, []);
+
+  useEffect(() => {
+    setIsLoading(!(recentLoaded && terminalsLoaded));
+  }, [recentLoaded, terminalsLoaded]);
 
   const currentTerminalTitle = terminals.find((t) => t.value === terminal)?.title ?? "Terminal";
 
@@ -133,6 +156,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={isLoading}
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
