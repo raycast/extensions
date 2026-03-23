@@ -1,6 +1,6 @@
 # Cron Description Changelog
 
-## [Add Default Timezone Configuration] - {PR_MERGE_DATE}
+## [Add Default Timezone Configuration] - 2026-03-23
 
 - Added a user preference to set a default timezone for cron expressions instead of always using the local timezone
 - Added validation to ensure the configured timezone is valid, with fallback to local timezone and a warning toast if invalid
