@@ -104,22 +104,39 @@ export function PlexSetupView(props: PlexSetupViewProps) {
         });
 
         const servers = await discoverPlexServers();
-        const serverLibraries = (
-          await Promise.all(
-            servers.map(async (server) => {
-              try {
-                return {
-                  server,
-                  libraries: await getMusicSectionsForServer(server),
-                };
-              } catch {
-                return undefined;
-              }
-            }),
-          )
-        ).filter((entry): entry is ServerLibraries => entry !== undefined && entry.libraries.length > 0);
 
-        const selectableLibraries = serverLibraries.flatMap((entry) =>
+        // Sort local servers first so they appear sooner
+        const sortedServers = [...servers].sort((a, b) => {
+          const aLocal = a.preferredConnection?.localNetwork ? 0 : 1;
+          const bLocal = b.preferredConnection?.localNetwork ? 0 : 1;
+          return aLocal - bLocal;
+        });
+
+        // Stream results in as each server resolves
+        const results: ServerLibraries[] = [];
+        let remaining = sortedServers.length;
+
+        await Promise.all(
+          sortedServers.map(async (server) => {
+            try {
+              const libraries = await getMusicSectionsForServer(server);
+              if (libraries.length > 0) {
+                results.push({ server, libraries });
+                setState((current) => ({
+                  ...current,
+                  isLoading: remaining > 1,
+                  serverLibraries: [...results],
+                }));
+              }
+            } catch {
+              // Server unreachable or has no music — skip
+            } finally {
+              remaining--;
+            }
+          }),
+        );
+
+        const selectableLibraries = results.flatMap((entry) =>
           entry.libraries.map((library) => ({ server: entry.server, library })),
         );
 
@@ -141,7 +158,7 @@ export function PlexSetupView(props: PlexSetupViewProps) {
           isLoading: false,
           stage: "library-selection",
           status,
-          serverLibraries,
+          serverLibraries: results,
           problem: props.problem,
         });
         return;
@@ -356,7 +373,7 @@ export function PlexSetupView(props: PlexSetupViewProps) {
   if (state.stage === "library-selection") {
     return (
       <List
-        isLoading={state.isLoading && state.serverLibraries.length > 0}
+        isLoading={state.isLoading}
         navigationTitle={props.navigationTitle}
         searchBarPlaceholder="Choose a Plex music library"
       >
