@@ -24,12 +24,7 @@ export default async function Command() {
 
     const processed = trimParagraphs(text);
 
-    await outputResult(processed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Trimmed leading & trailing whitespace per paragraph",
-    });
+    await outputResult(processed, "Trimmed leading & trailing whitespace per paragraph");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to trim whitespace" });
   }

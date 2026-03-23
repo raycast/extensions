@@ -19,12 +19,7 @@ export default async function Command() {
 
     const trimmed = trimTrailingWhitespacePerParagraph(text);
 
-    await outputResult(trimmed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Trailing whitespace trimmed from clipboard",
-    });
+    await outputResult(trimmed, "Trailing whitespace trimmed from clipboard");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to trim trailing whitespace" });
   }

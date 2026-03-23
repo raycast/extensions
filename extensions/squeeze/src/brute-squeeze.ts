@@ -17,12 +17,7 @@ export default async function Command() {
     // Remove all whitespace characters (spaces, tabs, line breaks, etc.)
     const processed = text.replace(/\s+/g, "");
 
-    await outputResult(processed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Clipboard text brute squeezed",
-    });
+    await outputResult(processed, "Clipboard text brute squeezed");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to process clipboard" });
   }

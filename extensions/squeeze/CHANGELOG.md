@@ -1,6 +1,6 @@
 # Squeeze Changelog
 
-## [Add "Paste After Squeeze" Preference] - 2026-03-16
+## [Add "Paste After Squeeze" Preference] - {PR_MERGE_DATE}
 
 Added an extension preference to paste squeezed text directly into the active app instead of just copying to the clipboard.
 

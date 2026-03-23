@@ -19,12 +19,7 @@ export default async function Command() {
 
     const trimmed = trimLeadingWhitespacePerParagraph(text);
 
-    await outputResult(trimmed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Leading whitespace trimmed from clipboard",
-    });
+    await outputResult(trimmed, "Leading whitespace trimmed from clipboard");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to trim leading whitespace" });
   }
