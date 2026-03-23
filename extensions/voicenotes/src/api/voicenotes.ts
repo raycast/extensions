@@ -35,19 +35,27 @@ const getHeaders = () => {
 };
 
 export async function getRecordings(): Promise<VoiceNote[]> {
-  const response = await fetch(`${BASE_URL}/recordings`, {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify({
-      last_synced_note_updated_at: null,
-      obsidian_deleted_recording_ids: [],
-    }),
-  });
+  let url: string | undefined = `${BASE_URL}/recordings`;
+  const all: VoiceNote[] = [];
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch recordings: ${response.statusText}`);
+  while (url) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify({
+        last_synced_note_updated_at: null,
+        obsidian_deleted_recording_ids: [],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch recordings: ${response.statusText}`);
+    }
+
+    const json = (await response.json()) as RecordingsResponse;
+    all.push(...json.data);
+    url = json.links?.next;
   }
 
-  const json = (await response.json()) as RecordingsResponse;
-  return json.data;
+  return all;
 }
