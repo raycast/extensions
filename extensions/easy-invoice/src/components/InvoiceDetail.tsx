@@ -55,7 +55,7 @@ ${invoice.notes ? `---\n\n## Notes\n${invoice.notes}` : ""}
       navigationTitle={invoice.invoiceNumber}
       actions={
         <ActionPanel>
-          <Action title="Open Pdf" icon={Icon.Document} onAction={() => open(invoice.pdfPath)} />
+          <Action title="Open PDF" icon={Icon.Document} onAction={() => open(invoice.pdfPath)} />
           <Action
             title="Open in Finder"
             icon={Icon.Finder}

@@ -106,10 +106,19 @@ export default function CreateInvoice() {
   })();
 
   useEffect(() => {
-    getClients().then((data) => {
-      setClients(data);
-      setIsLoading(false);
-    });
+    getClients()
+      .then((data) => {
+        setClients(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load clients",
+          message: String(err),
+        });
+        setIsLoading(false);
+      });
   }, []);
 
   if (successInvoice) {
@@ -118,7 +127,7 @@ export default function CreateInvoice() {
         markdown={`# Invoice Created\n\n${buildInvoiceSummary(successInvoice)}\n\n**PDF saved to:** \`${successInvoice.pdfPath}\``}
         actions={
           <ActionPanel>
-            <Action title="Open Pdf" icon={Icon.Document} onAction={() => open(successInvoice.pdfPath)} />
+            <Action title="Open PDF" icon={Icon.Document} onAction={() => open(successInvoice.pdfPath)} />
             <Action title="Open in Finder" icon={Icon.Finder} onAction={() => showInFinder(successInvoice.pdfPath)} />
             <Action
               title="Copy File Path"

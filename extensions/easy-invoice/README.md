@@ -43,17 +43,17 @@ Use "List Invoices" to see all invoices. Filter by status (draft/sent/paid) or y
 
 ### Keyboard shortcuts
 
-| Shortcut | Action |
-|---|---|
-| Cmd+L | Add line item (create form) |
-| Cmd+Shift+L | Remove last line item |
-| Cmd+D | View invoice details |
-| Cmd+O | Open in Finder |
-| Cmd+C | Copy file path |
-| Cmd+Shift+C | Copy invoice summary |
-| Cmd+S | Mark as sent |
-| Cmd+Shift+P | Mark as paid |
-| Cmd+Backspace | Delete invoice |
+| Shortcut      | Action                      |
+| ------------- | --------------------------- |
+| Cmd+L         | Add line item (create form) |
+| Cmd+Shift+L   | Remove last line item       |
+| Cmd+D         | View invoice details        |
+| Cmd+O         | Open in Finder              |
+| Cmd+C         | Copy file path              |
+| Cmd+Shift+C   | Copy invoice summary        |
+| Cmd+S         | Mark as sent                |
+| Cmd+Shift+P   | Mark as paid                |
+| Cmd+Backspace | Delete invoice              |
 
 ## How it works
 

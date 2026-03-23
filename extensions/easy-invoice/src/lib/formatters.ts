@@ -5,7 +5,7 @@ import { Invoice } from "./types";
 
 export function formatCurrency(amount: number): string {
   const preferences = getPreferenceValues<Preferences>();
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: preferences.currencyCode || "GBP",
   }).format(amount);
@@ -13,18 +13,19 @@ export function formatCurrency(amount: number): string {
 
 export function getCurrencySymbol(): string {
   const preferences = getPreferenceValues<Preferences>();
+  const currency = preferences.currencyCode || "GBP";
   return (
-    new Intl.NumberFormat(undefined, {
+    new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: preferences.currencyCode || "GBP",
+      currency,
     })
       .formatToParts(0)
-      .find((p) => p.type === "currency")?.value ?? "£"
+      .find((p) => p.type === "currency")?.value ?? currency
   );
 }
 
 export function formatDate(isoDate: string): string {
-  return new Date(isoDate).toLocaleDateString(undefined, {
+  return new Date(isoDate).toLocaleDateString("en-US", {
     day: "numeric",
     month: "long",
     year: "numeric",

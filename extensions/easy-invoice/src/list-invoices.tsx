@@ -163,7 +163,7 @@ export default function ListInvoices() {
             ]}
             actions={
               <ActionPanel>
-                <Action title="Open Pdf" icon={Icon.Document} onAction={() => open(inv.pdfPath)} />
+                <Action title="Open PDF" icon={Icon.Document} onAction={() => open(inv.pdfPath)} />
                 <Action
                   title="View Details"
                   icon={Icon.Eye}
