@@ -38,7 +38,9 @@ export function buildRsyncArgs(
     args.push("--dry-run");
   }
 
-  if (project.deleteOnSync && mode === "live") {
+  const isRootRemote =
+    project.remotePath === "~" || project.remotePath === "~/";
+  if (project.deleteOnSync && mode === "live" && !isRootRemote) {
     args.push("--delete");
   }
 
