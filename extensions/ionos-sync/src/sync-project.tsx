@@ -225,6 +225,11 @@ export default function Command() {
 Please open the **Extension Settings** and enter your host and username.
 
 \`⌘ + ,\` → IONOS Sync → Settings`}
+        actions={
+          <ActionPanel>
+            <Action.OpenExtensionPreferences title="Open Extension Preferences" />
+          </ActionPanel>
+        }
       />
     );
   }

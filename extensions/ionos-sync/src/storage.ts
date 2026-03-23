@@ -6,7 +6,12 @@ import { Project, StorageData, STORAGE_KEY, DATA_VERSION } from "./types";
 export async function loadProjects(): Promise<Project[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return [];
-  const data: StorageData = JSON.parse(raw);
+  let data: StorageData;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    return [];
+  }
   return data.projects ?? [];
 }
 
