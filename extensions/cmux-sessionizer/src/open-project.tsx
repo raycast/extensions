@@ -8,9 +8,13 @@ import {
   closeMainWindow,
   getPreferenceValues,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
-import { execSync } from "child_process";
+import { useCachedPromise } from "@raycast/utils";
+import { useCallback } from "react";
+import { execSync, execFile } from "child_process";
+import { promisify } from "util";
 import { homedir } from "os";
+
+const execFileAsync = promisify(execFile);
 
 interface Preferences {
   sourceDirectories: string;
@@ -26,6 +30,29 @@ interface Project {
 
 const CMUX = "/Applications/cmux.app/Contents/Resources/bin/cmux";
 
+const FD_PATH = (() => {
+  try {
+    return execSync("which fd", { encoding: "utf-8", timeout: 2000 }).trim();
+  } catch {
+    return null;
+  }
+})();
+
+const PRUNE_DIRS = [
+  "node_modules",
+  ".cache",
+  "vendor",
+  ".venv",
+  "venv",
+  "__pycache__",
+  ".terraform",
+  "target",
+  "build",
+  "dist",
+  ".gradle",
+  "Pods",
+];
+
 function resolveHome(path: string): string {
   return path.replace(/^~/, homedir());
 }
@@ -39,37 +66,85 @@ function cmux(args: string): string {
   }).trim();
 }
 
-function findProjects(sourceDirs: string[], maxDepth: number): Project[] {
-  const projects: Project[] = [];
-
-  for (const dir of sourceDirs) {
-    const resolved = resolveHome(dir.trim());
-    try {
-      const result = execSync(
-        `find "${resolved}" -maxdepth ${maxDepth} -name .git -type d 2>/dev/null`,
-        { encoding: "utf-8", timeout: 10000 },
-      );
-      const repos = result
-        .trim()
-        .split("\n")
-        .filter(Boolean)
-        .map((gitDir) => {
-          const fullPath = gitDir.replace(/\/\.git$/, "");
-          const relativePath = fullPath.replace(`${resolved}/`, "");
-          return {
-            name: relativePath.split("/").pop() || relativePath,
-            relativePath,
-            fullPath,
-            sourceDir: dir.trim(),
-          };
-        });
-      projects.push(...repos);
-    } catch {
-      // Directory doesn't exist or isn't accessible
-    }
+function buildScanCommand(
+  resolved: string,
+  maxDepth: number,
+): { cmd: string; args: string[] } {
+  if (FD_PATH) {
+    return {
+      cmd: FD_PATH,
+      args: [
+        "--hidden",
+        "--type",
+        "d",
+        "--max-depth",
+        String(maxDepth),
+        "^\\.git$",
+        resolved,
+      ],
+    };
   }
 
-  return projects.sort((a, b) => a.name.localeCompare(b.name));
+  const pruneExpr = PRUNE_DIRS.flatMap((name) => ["-name", name, "-o"]).slice(
+    0,
+    -1,
+  );
+
+  return {
+    cmd: "/usr/bin/find",
+    args: [
+      resolved,
+      "-maxdepth",
+      String(maxDepth),
+      "(",
+      ...pruneExpr,
+      ")",
+      "-prune",
+      "-o",
+      "-name",
+      ".git",
+      "-type",
+      "d",
+      "-print",
+    ],
+  };
+}
+
+async function findProjectsAsync(
+  sourceDirs: string[],
+  maxDepth: number,
+): Promise<Project[]> {
+  const results = await Promise.all(
+    sourceDirs.map(async (dir) => {
+      const trimmed = dir.trim();
+      const resolved = resolveHome(trimmed);
+      try {
+        const { cmd, args } = buildScanCommand(resolved, maxDepth);
+        const { stdout } = await execFileAsync(cmd, args, {
+          encoding: "utf-8",
+          timeout: 15000,
+        });
+        return stdout
+          .trim()
+          .split("\n")
+          .filter(Boolean)
+          .map((gitDir) => {
+            const fullPath = gitDir.replace(/\/\.git$/, "");
+            const relativePath = fullPath.replace(`${resolved}/`, "");
+            return {
+              name: relativePath.split("/").pop() || relativePath,
+              relativePath,
+              fullPath,
+              sourceDir: trimmed,
+            };
+          });
+      } catch {
+        return [];
+      }
+    }),
+  );
+
+  return results.flat().sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function findExistingWorkspace(fullPath: string): string | null {
@@ -89,16 +164,19 @@ function findExistingWorkspace(fullPath: string): string | null {
 }
 
 export default function Command() {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const preferences = getPreferenceValues<Preferences>();
+  const dirs = preferences.sourceDirectories.split(",").filter(Boolean);
+  const depth = parseInt(preferences.maxDepth, 10) || 4;
 
-  useEffect(() => {
-    const dirs = preferences.sourceDirectories.split(",").filter(Boolean);
-    const depth = parseInt(preferences.maxDepth, 10) || 4;
-    setProjects(findProjects(dirs, depth));
-    setIsLoading(false);
-  }, []);
+  const {
+    data: projects,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(findProjectsAsync, [dirs, depth], {
+    keepPreviousData: true,
+    initialData: [] as Project[],
+    failureToastOptions: { title: "Failed to scan for projects" },
+  });
 
   const openProject = useCallback(async (project: Project) => {
     try {
@@ -135,6 +213,16 @@ export default function Command() {
         title="No Projects Found"
         description="Check your source directories in the extension preferences."
         icon={Icon.Folder}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Refresh Projects"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={() => revalidate()}
+            />
+          </ActionPanel>
+        }
       />
       {projects.map((project) => (
         <List.Item
@@ -153,6 +241,12 @@ export default function Command() {
                 title="Open in Cmux"
                 icon={Icon.Terminal}
                 onAction={() => openProject(project)}
+              />
+              <Action
+                title="Refresh Projects"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={() => revalidate()}
               />
             </ActionPanel>
           }
