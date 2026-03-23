@@ -1,6 +1,6 @@
 # Changelog
 
-## [Lock File Metadata] - {PR_MERGE_DATE}
+## [Lock File Metadata] - 2026-03-23
 
 - Show skill source, install date, and update date from the global lock file in the detail panel
 - Add "Open on GitHub" action for installed skills
