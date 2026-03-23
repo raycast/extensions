@@ -2,6 +2,10 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://api.voicenotes.com/api/integrations/obsidian-sync";
 
+interface Preferences {
+  token: string;
+}
+
 export interface VoiceNote {
   id: string;
   recording_id: string;
@@ -21,10 +25,6 @@ interface RecordingsResponse {
   };
 }
 
-interface Preferences {
-  token: string;
-}
-
 const getHeaders = () => {
   const { token } = getPreferenceValues<Preferences>();
   return {
@@ -33,9 +33,8 @@ const getHeaders = () => {
     "Content-Type": "application/json",
   };
 };
-export async function getRecordings(
-  signal?: AbortSignal,
-): Promise<VoiceNote[]> {
+
+export async function getRecordings(): Promise<VoiceNote[]> {
   const response = await fetch(`${BASE_URL}/recordings`, {
     method: "POST",
     headers: getHeaders(),
@@ -43,18 +42,12 @@ export async function getRecordings(
       last_synced_note_updated_at: null,
       obsidian_deleted_recording_ids: [],
     }),
-    signal,
   });
 
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Failed to fetch recordings: ${response.status} ${response.statusText} - ${text}`,
-    );
+    throw new Error(`Failed to fetch recordings: ${response.statusText}`);
   }
 
-  const data: RecordingsResponse = await response.json();
-  return data.data || [];
+  const json = (await response.json()) as RecordingsResponse;
+  return json.data;
 }
-
-// Note: `getUserInfo` was removed because it was not used anywhere in the extension.

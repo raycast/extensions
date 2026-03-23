@@ -32,7 +32,7 @@
     "@raycast/api": "1.79.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
     "@types/react": "18.2.79",
     "eslint": "^8.57.0",

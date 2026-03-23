@@ -2,10 +2,10 @@ import {
   ActionPanel,
   Action,
   List,
+  Detail,
   showToast,
   Toast,
   Color,
-  Detail,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getRecordings, VoiceNote } from "./api/voicenotes";
@@ -19,15 +19,11 @@ export default function Command() {
   );
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    async function fetchData() {
+    async function fetch() {
       try {
-        const data = await getRecordings(controller.signal);
+        const data = await getRecordings();
         setState({ isLoading: false, data });
       } catch (error) {
-        if ((error as unknown as { name?: string })?.name === "AbortError")
-          return;
         setState({ isLoading: false, data: [] });
         showToast({
           style: Toast.Style.Failure,
@@ -36,12 +32,7 @@ export default function Command() {
         });
       }
     }
-
-    fetchData();
-
-    return () => {
-      controller.abort();
-    };
+    fetch();
   }, []);
 
   const [filter, setFilter] = useState("all");
@@ -77,15 +68,11 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {filteredNotes.length === 0 && !state.isLoading && (
-        <List.EmptyView title="No Notes" description="No Voicenotes found" />
-      )}
-
       {filteredNotes.map((note) => (
         <List.Item
           key={note.id}
           title={note.title || "Untitled Note"}
-          subtitle={new Date(note.created_at).toLocaleDateString("en-US")}
+          subtitle={new Date(note.created_at).toLocaleDateString()}
           accessories={[
             ...(note.tags || []).map((tag) => ({
               tag: { value: tag.name, color: Color.Blue },
@@ -122,7 +109,7 @@ function NoteDetail({ note }: { note: VoiceNote }) {
         <Detail.Metadata>
           <Detail.Metadata.Label
             title="Created"
-            text={new Date(note.created_at).toLocaleString("en-US")}
+            text={new Date(note.created_at).toLocaleString()}
           />
           <Detail.Metadata.Label title="Duration" text={`${note.duration}s`} />
           {note.tags && note.tags.length > 0 && (
