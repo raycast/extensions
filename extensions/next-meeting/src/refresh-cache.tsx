@@ -1,11 +1,6 @@
 import { updateCommandMetadata } from "@raycast/api";
 
-import {
-  fetchEvents,
-  formatTimeUntil,
-  parseEvents,
-  writeCache,
-} from "./get-next-event";
+import { fetchEvents, formatTimeUntil, parseEvents, writeCache } from "./get-next-event";
 
 export default async function RefreshCache() {
   try {

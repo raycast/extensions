@@ -40,9 +40,7 @@ function extractVideoLink(text: string): string | undefined {
 
 function getTimeColor(event: CalendarEvent): Color {
   if (event.isAllDay) return Color.Blue;
-  const minutes = Math.floor(
-    (event.startTimestamp * 1000 - Date.now()) / 60_000,
-  );
+  const minutes = Math.floor((event.startTimestamp * 1000 - Date.now()) / 60_000);
   if (minutes <= 20) return Color.Red;
   if (minutes <= 40) return Color.Orange;
   if (minutes <= 60) return Color.Yellow;
@@ -60,13 +58,9 @@ export default function NextMeeting() {
   }, []);
 
   // 2. Fetch fresh data in background
-  const { data: freshData, error } = useExec(
-    "osascript",
-    ["-l", "JavaScript", "-e", JXA_SCRIPT],
-    {
-      shell: false,
-    },
-  );
+  const { data: freshData, error } = useExec("osascript", ["-l", "JavaScript", "-e", JXA_SCRIPT], {
+    shell: false,
+  });
 
   // 3. Update cache when fresh data arrives
   useEffect(() => {
@@ -75,9 +69,7 @@ export default function NextMeeting() {
 
   // Show fresh data if available, otherwise cached
   const events = freshData
-    ? filterTodayOrTomorrow(
-        parseEvents(freshData).filter((e) => !isEventPast(e)),
-      )
+    ? filterTodayOrTomorrow(parseEvents(freshData).filter((e) => !isEventPast(e)))
     : cachedEvents;
   const showLoading = cachedEvents.length === 0 && !freshData;
   const stale = !freshData && cachedEvents.length > 0;
@@ -85,23 +77,13 @@ export default function NextMeeting() {
   return (
     <List isLoading={showLoading}>
       {error && cachedEvents.length === 0 && (
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Failed to load calendar"
-          description={error.message}
-        />
+        <List.EmptyView icon={Icon.XMarkCircle} title="Failed to load calendar" description={error.message} />
       )}
       {!showLoading && !error && events.length === 0 && (
-        <List.EmptyView
-          icon={Icon.CheckCircle}
-          title="No upcoming meetings"
-          description="Your calendar is clear!"
-        />
+        <List.EmptyView icon={Icon.CheckCircle} title="No upcoming meetings" description="Your calendar is clear!" />
       )}
       {events.map((event, index) => {
-        const videoLink = extractVideoLink(
-          `${event.location} ${event.notes} ${event.url}`,
-        );
+        const videoLink = extractVideoLink(`${event.location} ${event.notes} ${event.url}`);
         return (
           <List.Item
             key={`${event.title}-${event.startTimestamp}`}
@@ -111,9 +93,7 @@ export default function NextMeeting() {
             }}
             title={event.title}
             subtitle={
-              event.isAllDay
-                ? "All day"
-                : `${formatTime(event.startTimestamp)} - ${formatTime(event.endTimestamp)}`
+              event.isAllDay ? "All day" : `${formatTime(event.startTimestamp)} - ${formatTime(event.endTimestamp)}`
             }
             accessories={[
               ...(stale && index === 0
@@ -123,24 +103,15 @@ export default function NextMeeting() {
                     },
                   ]
                 : []),
-              ...(event.location
-                ? [{ icon: Icon.Pin, text: event.location }]
-                : []),
-              ...(videoLink
-                ? [{ icon: Icon.Video, tooltip: "Video call available" }]
-                : []),
+              ...(event.location ? [{ icon: Icon.Pin, text: event.location }] : []),
+              ...(videoLink ? [{ icon: Icon.Video, tooltip: "Video call available" }] : []),
               {
                 tag: {
                   value: event.isAllDay
                     ? "all day"
                     : (() => {
-                        const t = formatTimeUntil(
-                          event.startTimestamp,
-                          event.endTimestamp,
-                        );
-                        return t === "now" || t === "in progress"
-                          ? t
-                          : `in ${t}`;
+                        const t = formatTimeUntil(event.startTimestamp, event.endTimestamp);
+                        return t === "now" || t === "in progress" ? t : `in ${t}`;
                       })(),
                   color: getTimeColor(event),
                 },
@@ -148,13 +119,7 @@ export default function NextMeeting() {
             ]}
             actions={
               <ActionPanel>
-                {videoLink && (
-                  <Action.OpenInBrowser
-                    title="Join Video Call"
-                    url={videoLink}
-                    icon={Icon.Video}
-                  />
-                )}
+                {videoLink && <Action.OpenInBrowser title="Join Video Call" url={videoLink} icon={Icon.Video} />}
                 <Action.CopyToClipboard
                   title="Copy Meeting Name"
                   content={event.title}

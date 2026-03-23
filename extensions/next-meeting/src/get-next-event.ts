@@ -33,7 +33,7 @@ if (events.count === 0) {
     var l = (ObjC.unwrap(e.location) || "").replace(/\\n/g, " ");
     var n = (ObjC.unwrap(e.notes) || "").replace(/\\n/g, " ");
     var u = e.URL ? ObjC.unwrap(e.URL.absoluteString) || "" : "";
-    lines.push(title + "|||" + s + "|||" + en + "|||" + a + "|||" + l + "|||" + n + "|||" + u);
+    lines.push(title + "\\uE000" + s + "\\uE000" + en + "\\uE000" + a + "\\uE000" + l + "\\uE000" + n + "\\uE000" + u);
   }
   lines.join("\\n");
 }
@@ -62,7 +62,7 @@ export function parseEvent(output: string): CalendarEvent | null {
   const trimmed = output.trim();
   if (!trimmed || trimmed === "NONE") return null;
 
-  const parts = trimmed.split("|||");
+  const parts = trimmed.split("\uE000");
   if (parts.length < 7) return null;
   const [title, startTs, endTs, allDay, location, notes, url] = parts;
   return {
@@ -112,30 +112,18 @@ export function isEventPast(event: CalendarEvent): boolean {
   return event.endTimestamp * 1000 < Date.now();
 }
 
-export function filterTodayOrTomorrow(
-  events: CalendarEvent[],
-): CalendarEvent[] {
+export function filterTodayOrTomorrow(events: CalendarEvent[]): CalendarEvent[] {
   const now = new Date();
-  const startOfTomorrow =
-    new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() /
-    1000;
-  const startOfDayAfter =
-    new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2).getTime() /
-    1000;
+  const startOfTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).getTime() / 1000;
+  const startOfDayAfter = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2).getTime() / 1000;
 
   const todayEvents = events.filter((e) => e.startTimestamp < startOfTomorrow);
   if (todayEvents.length > 0) return todayEvents;
 
-  return events.filter(
-    (e) =>
-      e.startTimestamp >= startOfTomorrow && e.startTimestamp < startOfDayAfter,
-  );
+  return events.filter((e) => e.startTimestamp >= startOfTomorrow && e.startTimestamp < startOfDayAfter);
 }
 
-export function formatTimeUntil(
-  startTimestamp: number,
-  endTimestamp?: number,
-): string {
+export function formatTimeUntil(startTimestamp: number, endTimestamp?: number): string {
   const diffMs = startTimestamp * 1000 - Date.now();
   if (diffMs <= 0) {
     if (endTimestamp && endTimestamp * 1000 > Date.now()) return "in progress";

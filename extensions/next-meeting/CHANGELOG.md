@@ -1,10 +1,10 @@
 # Next Meeting Changelog
 
-## [1.2.0] - 2026-03-20
+## [1.2.0] - {PR_MERGE_DATE}
 
 - Fixed video call URLs losing query parameters (e.g. Zoom password)
 
-## [1.1.0] - 2026-03-20
+## [1.1.0] - {PR_MERGE_DATE}
 
 - Show "now" for imminent meetings and "in progress" for ongoing ones
 - Limit displayed meetings to today, with fallback to tomorrow
