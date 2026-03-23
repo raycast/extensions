@@ -10,7 +10,8 @@ import { Client } from "./lib/types";
 
 function getTaxYearStart(): Date {
   const now = new Date();
-  const year = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1; // April = month 3
+  const thisYearStart = new Date(now.getFullYear(), 3, 6); // 6 April this year
+  const year = now >= thisYearStart ? now.getFullYear() : now.getFullYear() - 1;
   return new Date(year, 3, 6); // 6 April
 }
 
