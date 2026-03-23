@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cmux-sessionizer",
+  "title": "Cmux Sessionizer",
+  "description": "Fuzzy-find git projects and open them as cmux workspaces",
+  "icon": "command-icon.png",
+  "author": "kyle_kincer",
+  "license": "MIT",
+  "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
+  "preferences": [
+    {
+      "name": "sourceDirectories",
+      "title": "Source Directories",
+      "description": "Comma-separated list of directories to scan for git projects (e.g. ~/src,~/work)",
+      "type": "textfield",
+      "required": true,
+      "default": "~/src",
+      "placeholder": "~/src,~/projects"
+    },
+    {
+      "name": "maxDepth",
+      "title": "Max Search Depth",
+      "description": "How many directory levels deep to search for git repositories",
+      "type": "dropdown",
+      "required": false,
+      "default": "4",
+      "data": [
+        { "title": "2", "value": "2" },
+        { "title": "3", "value": "3" },
+        { "title": "4", "value": "4" },
+        { "title": "5", "value": "5" },
+        { "title": "6", "value": "6" }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "open-project",
+      "title": "Open Project",
+      "subtitle": "cmux",
+      "description": "Find and open a git project as a cmux workspace",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.3.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray dev",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
