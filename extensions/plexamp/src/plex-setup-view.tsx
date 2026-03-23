@@ -112,20 +112,20 @@ export function PlexSetupView(props: PlexSetupViewProps) {
           return aLocal - bLocal;
         });
 
-        // Stream results in as each server resolves
-        const results: ServerLibraries[] = [];
+        // Stream results in as each server resolves, preserving sort order
+        const results: (ServerLibraries | null)[] = new Array(sortedServers.length).fill(null);
         let remaining = sortedServers.length;
 
         await Promise.all(
-          sortedServers.map(async (server) => {
+          sortedServers.map(async (server, index) => {
             try {
               const libraries = await getMusicSectionsForServer(server);
               if (libraries.length > 0) {
-                results.push({ server, libraries });
+                results[index] = { server, libraries };
                 setState((current) => ({
                   ...current,
                   isLoading: remaining > 1,
-                  serverLibraries: [...results],
+                  serverLibraries: results.filter((r): r is ServerLibraries => r !== null),
                 }));
               }
             } catch {
@@ -136,7 +136,8 @@ export function PlexSetupView(props: PlexSetupViewProps) {
           }),
         );
 
-        const selectableLibraries = results.flatMap((entry) =>
+        const serverLibraries = results.filter((r): r is ServerLibraries => r !== null);
+        const selectableLibraries = serverLibraries.flatMap((entry) =>
           entry.libraries.map((library) => ({ server: entry.server, library })),
         );
 
@@ -158,7 +159,7 @@ export function PlexSetupView(props: PlexSetupViewProps) {
           isLoading: false,
           stage: "library-selection",
           status,
-          serverLibraries: results,
+          serverLibraries,
           problem: props.problem,
         });
         return;
