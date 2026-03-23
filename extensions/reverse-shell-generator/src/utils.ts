@@ -195,15 +195,9 @@ export function getDeviconUrl(type: string): string {
     "powershell-1": "powershell/powershell-original.svg",
     "powershell-2": "powershell/powershell-original.svg",
     "powershell-3": "powershell/powershell-original.svg",
-    "powershell-4": "powershell/powershell-original.svg",
-    "powershell-5": "powershell/powershell-original.svg",
+    "powershell-base64": "powershell/powershell-original.svg",
+    "powershell-4-tls": "powershell/powershell-original.svg",
     cmd: "windows8/windows8-original.svg",
-
-    // Other
-    csharp: "csharp/csharp-original.svg",
-    swift: "swift/swift-original.svg",
-    kotlin: "kotlin/kotlin-original.svg",
-    typescript: "typescript/typescript-original.svg",
   };
 
   const iconPath = iconMap[type] || "linux/linux-original.svg";
