@@ -1,5 +1,5 @@
 import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
-import { execSync, spawn } from "node:child_process";
+import { execSync } from "node:child_process";
 import { Schedule } from "./interfaces";
 
 export type { Schedule };
@@ -15,15 +15,14 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
   }
   await stopCaffeinate({ menubar: false, status: false });
 
-  // Use spawn with detached: true to properly detach the caffeinate process
-  // This prevents zombie processes when the extension helper exits
-  const args = generateArgs(additionalArgs).split(/\s+/).filter(Boolean);
-  const child = spawn("/usr/bin/caffeinate", args, {
-    detached: true,
-    stdio: "ignore",
-  });
-  child.on("exit", () => {});
-  child.unref();
+  // Spawn caffeinate via a shell with & to double-fork it.  The shell
+  // backgrounds caffeinate and exits immediately; execSync reaps the shell.
+  // caffeinate is reparented to launchd (PID 1), which automatically reaps
+  // it when it is killed — completely preventing zombie accumulation.
+  // The -u flag asserts user activity to keep the display awake on battery
+  // (macOS 26+ can override -d/-i assertions on battery power).
+  const argsString = generateArgs(additionalArgs);
+  execSync(`/usr/bin/caffeinate -u ${argsString} >/dev/null 2>&1 &`);
 
   await update(updates, true);
 }

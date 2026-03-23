@@ -1,5 +1,11 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed zombie process accumulation by double-forking the caffeinate process via shell backgrounding, reparenting it to launchd (PID 1) which automatically reaps exited children.
+- Eliminated periodic `caffeinate -u -t 1` spawning in the status command by folding the `-u` flag into the main caffeinate process.
+- Removed stale `caffeinate -u` process filter in menu bar status that would have hidden the main process.
+
 ## [Fix] - 2026-03-22
 
 - Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
