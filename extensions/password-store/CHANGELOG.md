@@ -1,10 +1,15 @@
 # Password Store Changelog
 
 ## [Improvements] - {PR_MERGE_DATE}
+
 - Able to insert password via `pass insert`
 - Able to generate password via `pass generate`
 - Able to rename password via `pass mv`
 - Able to delete password via `pass rm`
+- Added ability to insert passwords via `pass insert`.
+- Added ability to generate passwords via `pass generate`.
+- Added ability to rename passwords via `pass mv`.
+- Added ability to delete passwords via `pass rm`.
 
 ## [Improvements] - 2025-03-17
 
