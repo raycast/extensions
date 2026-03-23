@@ -4,6 +4,7 @@ import { execFile } from "child_process";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getMolePathSafe, MOLE_ENV } from "./utils/mole";
 import { formatBytes } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 interface AnalyzeEntry {
   name: string;
@@ -52,15 +53,7 @@ export default function AnalyzeDisk() {
   const molePath = useMemo(() => getMolePathSafe(), []);
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   const { analyzePath } = getPreferenceValues<Preferences.Analyze>();

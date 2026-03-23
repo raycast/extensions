@@ -29,7 +29,14 @@
       "subtitle": "Mole",
       "description": "View real-time system health, CPU, memory, disk, battery, and network status",
       "mode": "view",
-      "keywords": ["health", "cpu", "memory", "disk", "battery", "monitor"],
+      "keywords": [
+        "health",
+        "cpu",
+        "memory",
+        "disk",
+        "battery",
+        "monitor"
+      ],
       "preferences": [
         {
           "name": "statusRefreshInterval",
@@ -39,10 +46,22 @@
           "required": false,
           "default": "5",
           "data": [
-            { "title": "3 Seconds", "value": "3" },
-            { "title": "5 Seconds", "value": "5" },
-            { "title": "10 Seconds", "value": "10" },
-            { "title": "30 Seconds", "value": "30" }
+            {
+              "title": "3 Seconds",
+              "value": "3"
+            },
+            {
+              "title": "5 Seconds",
+              "value": "5"
+            },
+            {
+              "title": "10 Seconds",
+              "value": "10"
+            },
+            {
+              "title": "30 Seconds",
+              "value": "30"
+            }
           ]
         }
       ]
@@ -53,7 +72,14 @@
       "subtitle": "Mole",
       "description": "Preview and remove caches, logs, and temporary files to free up disk space",
       "mode": "view",
-      "keywords": ["cache", "clean", "free", "space", "trash", "logs"]
+      "keywords": [
+        "cache",
+        "clean",
+        "free",
+        "space",
+        "trash",
+        "logs"
+      ]
     },
     {
       "name": "optimize",
@@ -61,7 +87,14 @@
       "subtitle": "Mole",
       "description": "Rebuild databases, refresh services, and optimize system performance",
       "mode": "view",
-      "keywords": ["optimize", "repair", "rebuild", "dns", "spotlight", "performance"]
+      "keywords": [
+        "optimize",
+        "repair",
+        "rebuild",
+        "dns",
+        "spotlight",
+        "performance"
+      ]
     },
     {
       "name": "uninstall",
@@ -69,7 +102,13 @@
       "subtitle": "Mole",
       "description": "Uninstall apps and clean residual files from Library, Caches, and Preferences",
       "mode": "view",
-      "keywords": ["uninstall", "remove", "delete", "app", "application"]
+      "keywords": [
+        "uninstall",
+        "remove",
+        "delete",
+        "app",
+        "application"
+      ]
     },
     {
       "name": "purge",
@@ -77,7 +116,14 @@
       "subtitle": "Mole",
       "description": "Find and remove old build artifacts like node_modules, .next, dist, and target folders",
       "mode": "view",
-      "keywords": ["purge", "node_modules", "build", "artifacts", "dev", "clean"]
+      "keywords": [
+        "purge",
+        "node_modules",
+        "build",
+        "artifacts",
+        "dev",
+        "clean"
+      ]
     },
     {
       "name": "analyze",
@@ -85,7 +131,14 @@
       "subtitle": "Mole",
       "description": "Browse folders sorted by size to find what's using your disk space",
       "mode": "view",
-      "keywords": ["disk", "space", "size", "analyze", "storage", "usage"],
+      "keywords": [
+        "disk",
+        "space",
+        "size",
+        "analyze",
+        "storage",
+        "usage"
+      ],
       "preferences": [
         {
           "name": "analyzePath",
@@ -102,7 +155,13 @@
       "subtitle": "Mole",
       "description": "Find and remove installer files (.dmg, .pkg, .iso) from Downloads, Desktop, and Documents",
       "mode": "view",
-      "keywords": ["installer", "dmg", "pkg", "downloads", "cleanup"]
+      "keywords": [
+        "installer",
+        "dmg",
+        "pkg",
+        "downloads",
+        "cleanup"
+      ]
     },
     {
       "name": "touchid",
@@ -110,15 +169,24 @@
       "subtitle": "Mole",
       "description": "Configure Touch ID for sudo authentication",
       "mode": "view",
-      "keywords": ["touchid", "sudo", "fingerprint", "auth"]
+      "keywords": [
+        "touchid",
+        "sudo",
+        "fingerprint",
+        "auth"
+      ]
     },
     {
       "name": "update-mole",
       "title": "Update Mole",
       "subtitle": "Mole",
       "description": "Update Mole to the latest version",
-      "mode": "no-view",
-      "keywords": ["update", "upgrade", "version"]
+      "mode": "view",
+      "keywords": [
+        "update",
+        "upgrade",
+        "version"
+      ]
     }
   ],
   "dependencies": {

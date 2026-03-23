@@ -3,6 +3,7 @@ import { execFile } from "child_process";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { getMolePathSafe, MOLE_ENV } from "./utils/mole";
 import { stripAnsi } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 function useTouchIdStatus(molePath: string) {
   const [enabled, setEnabled] = useState<boolean | null>(null);
@@ -32,15 +33,7 @@ export default function TouchIdForSudo() {
   const molePath = useMemo(() => getMolePathSafe(), []);
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <TouchIdView molePath={molePath} />;

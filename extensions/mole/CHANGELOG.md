@@ -1,5 +1,12 @@
 # Mole Changelog
 
+## [Friendly Install Screen] - {PR_MERGE_DATE}
+
+- Added MoleNotInstalled component with multiple install options when Mole CLI is not found
+- Install via Homebrew Raycast extension, Homebrew Terminal, curl script, or GitHub page
+- Improved Update Mole command to show current version after update check
+- Changed Update Mole from no-view to view mode for better UX
+
 ## [Uninstall Residual Cleanup] - 2026-03-20
 
 - Added deep residual file scanning when uninstalling apps (searches ~/Library, /Library, containers, and vendor directories)
