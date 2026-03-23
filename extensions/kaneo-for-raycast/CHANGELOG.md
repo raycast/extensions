@@ -1,6 +1,6 @@
 # Kaneo Changelog
 
-## [Fix Project Detail] - {PR_MERGE_DATE}
+## [Fix Project Detail] - 2026-03-23
 
 - Fix the project details fetch that fails for version 2.3.12 and above
 - Fix the create project slug max length to 8 characters
