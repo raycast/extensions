@@ -18,9 +18,11 @@ import {
 } from "./storage";
 import { sortJobs } from "./utils/sort";
 import { handleFetchError } from "./utils/errors";
-import { JenkinsJob } from "./types";
+import { JenkinsJob, BuildHistoryEntry } from "./types";
 import { relativeTime } from "./utils/time";
 import { BuildParamForm } from "./components/BuildParamForm";
+import { getBuildHistory } from "./storage";
+import { RunningBuildsSection } from "./components/RunningBuildsSection";
 import { getStatusIcon } from "./utils/status";
 import BuildHistory from "./build-history";
 
@@ -91,6 +93,16 @@ export default function TriggerBuild() {
   });
   const favorites = useCachedPromise(getFavorites);
   const recentJobs = useCachedPromise(getRecentJobs);
+  const buildHistory = useCachedPromise(getBuildHistory);
+
+  const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+  const runningBuilds = useMemo(() => {
+    if (!buildHistory.data) return [];
+    const cutoff = Date.now() - TWO_HOURS_MS;
+    return buildHistory.data.filter(
+      (e: BuildHistoryEntry) => e.triggeredAt >= cutoff,
+    );
+  }, [buildHistory.data]);
 
   const [favoriteSet, setFavoriteSet] = useState<Set<string>>(new Set());
   const [searchText, setSearchText] = useState("");
@@ -160,6 +172,7 @@ export default function TriggerBuild() {
           description="Your Jenkins instance returned no triggerable jobs. Check your Jenkins URL and credentials in preferences."
         />
       )}
+      <RunningBuildsSection entries={runningBuilds} />
       {favoriteJobs.length > 0 && (
         <List.Section title="Favorites">
           {favoriteJobs.map((job) => (

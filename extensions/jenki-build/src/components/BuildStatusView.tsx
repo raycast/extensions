@@ -2,26 +2,13 @@ import { Detail, ActionPanel, Action, Color, Icon, open } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { fetchBuildStatus, BuildStatus } from "../api/jenkins";
 import { handleFetchError } from "../utils/errors";
+import { progressBar, formatDuration } from "../utils/build";
 
 interface BuildStatusViewProps {
   jobName: string;
   jobPath: string;
   jobUrl: string;
   buildNumber: number;
-}
-
-function progressBar(pct: number): string {
-  const filled = Math.round(pct / 5);
-  const empty = 20 - filled;
-  return "█".repeat(filled) + "░".repeat(empty);
-}
-
-function formatDuration(ms: number): string {
-  const s = Math.floor(ms / 1000);
-  if (s < 60) return `${s}s`;
-  const m = Math.floor(s / 60);
-  const rem = s % 60;
-  return rem > 0 ? `${m}m ${rem}s` : `${m}m`;
 }
 
 export function BuildStatusView({
