@@ -34,7 +34,6 @@ type SetupStage = "loading" | "auth" | "waiting-auth" | "library-selection" | "p
 interface ServerLibraries {
   server: PlexServerResource;
   libraries: LibrarySection[];
-  problem?: string;
 }
 
 interface PlexSetupViewProps {
@@ -112,22 +111,20 @@ export function PlexSetupView(props: PlexSetupViewProps) {
         });
 
         const servers = await discoverPlexServers();
-        const serverLibraries = await Promise.all(
-          servers.map(async (server) => {
-            try {
-              return {
-                server,
-                libraries: await getMusicSectionsForServer(server),
-              };
-            } catch (error) {
-              return {
-                server,
-                libraries: [],
-                problem: error instanceof Error ? error.message : String(error),
-              };
-            }
-          }),
-        );
+        const serverLibraries = (
+          await Promise.all(
+            servers.map(async (server) => {
+              try {
+                return {
+                  server,
+                  libraries: await getMusicSectionsForServer(server),
+                };
+              } catch {
+                return undefined;
+              }
+            }),
+          )
+        ).filter((entry): entry is ServerLibraries => entry !== undefined && entry.libraries.length > 0);
 
         const selectableLibraries = serverLibraries.flatMap((entry) =>
           entry.libraries.map((library) => ({ server: entry.server, library })),
@@ -388,55 +385,39 @@ export function PlexSetupView(props: PlexSetupViewProps) {
         ) : null}
         {state.serverLibraries.map(({ server, libraries }) => (
           <List.Section key={server.clientIdentifier} title={server.name} subtitle={server.preferredConnection?.uri}>
-            {libraries.length > 0 ? (
-              libraries.map((library) => (
-                <List.Item
-                  key={`${server.clientIdentifier}:${library.key}`}
-                  icon={Icon.Music}
-                  title={library.title}
-                  accessories={[
-                    ...(state.status?.selectedLibrary === library.key
-                      ? [
-                          {
-                            icon: {
-                              source: Icon.CheckCircle,
-                              tintColor: Color.Green,
-                            },
-                          },
-                        ]
-                      : []),
-                    ...serverAccessories(server),
-                    ...(library.totalSize !== undefined ? [{ text: `${library.totalSize} artists` }] : []),
-                  ]}
-                  actions={
-                    <ActionPanel>
-                      <Action
-                        title="Use This Library"
-                        icon={Icon.CheckCircle}
-                        onAction={() => void chooseLibrary(library, server)}
-                      />
-                      <Action title="Refresh Libraries" icon={Icon.ArrowClockwise} onAction={() => void reload()} />
-                      <Action title="Reset Setup" icon={Icon.Trash} onAction={() => void resetSetup()} />
-                      <PreferencesAction />
-                    </ActionPanel>
-                  }
-                />
-              ))
-            ) : (
+            {libraries.map((library) => (
               <List.Item
-                key={`${server.clientIdentifier}:empty`}
-                icon={Icon.Warning}
-                title="No Music Libraries Available"
-                accessories={serverAccessories(server)}
+                key={`${server.clientIdentifier}:${library.key}`}
+                icon={Icon.Music}
+                title={library.title}
+                accessories={[
+                  ...(state.status?.selectedLibrary === library.key
+                    ? [
+                        {
+                          icon: {
+                            source: Icon.CheckCircle,
+                            tintColor: Color.Green,
+                          },
+                        },
+                      ]
+                    : []),
+                  ...serverAccessories(server),
+                  ...(library.totalSize !== undefined ? [{ text: `${library.totalSize} artists` }] : []),
+                ]}
                 actions={
                   <ActionPanel>
+                    <Action
+                      title="Use This Library"
+                      icon={Icon.CheckCircle}
+                      onAction={() => void chooseLibrary(library, server)}
+                    />
                     <Action title="Refresh Libraries" icon={Icon.ArrowClockwise} onAction={() => void reload()} />
                     <Action title="Reset Setup" icon={Icon.Trash} onAction={() => void resetSetup()} />
                     <PreferencesAction />
                   </ActionPanel>
                 }
               />
-            )}
+            ))}
           </List.Section>
         ))}
       </List>
