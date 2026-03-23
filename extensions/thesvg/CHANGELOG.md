@@ -1,6 +1,6 @@
 # TheSVG
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-23
 
 - Search 4,000+ brand SVG icons with category filtering
 - Copy SVG markup to clipboard with one shortcut
