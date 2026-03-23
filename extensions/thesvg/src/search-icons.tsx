@@ -20,21 +20,26 @@ import {
   getIconPageUrl,
   getCdnUrl,
   type IconEntry,
-  type Preferences,
 } from "./api";
 
 export default function SearchIcons() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState("all");
 
-  const { data: categories } = useCachedPromise(getCategories);
+  const { data: categories, error: categoriesError } =
+    useCachedPromise(getCategories);
 
-  const { data, isLoading } = useCachedPromise(
-    searchIcons,
-    [searchText || undefined, category, 100],
-    { keepPreviousData: true },
-  );
+  const {
+    data,
+    isLoading,
+    error: iconsError,
+  } = useCachedPromise(searchIcons, [searchText || undefined, category, 100], {
+    keepPreviousData: true,
+  });
 
+  const loadError = categoriesError ?? iconsError;
+  const errorMessage =
+    loadError instanceof Error ? loadError.message : "Please try again.";
   const icons = data?.icons ?? [];
 
   return (
@@ -63,10 +68,16 @@ export default function SearchIcons() {
         </List.Dropdown>
       }
     >
-      {icons.map((icon) => (
-        <IconListItem key={icon.slug} icon={icon} />
-      ))}
-      {icons.length === 0 && !isLoading && (
+      {loadError ? (
+        <List.EmptyView
+          title="Could not load icons"
+          description={errorMessage}
+          icon={Icon.ExclamationMark}
+        />
+      ) : (
+        icons.map((icon) => <IconListItem key={icon.slug} icon={icon} />)
+      )}
+      {!loadError && icons.length === 0 && !isLoading && (
         <List.EmptyView
           title="No icons found"
           description={
@@ -183,6 +194,12 @@ function isVisibleHex(hex: string): boolean {
   );
 }
 
+function toTitleCase(text: string): string {
+  return text
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
 function IconDetailView({ slug }: { slug: string }) {
   const { data: icon, isLoading } = useCachedPromise(getIcon, [slug]);
 
@@ -255,7 +272,7 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
             target={getIconPageUrl(slug)}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="CDN" text={getIconUrl(slug)} />
+          <Detail.Metadata.Label title="Direct URL" text={getIconUrl(slug)} />
           <Detail.Metadata.Label title="jsDelivr" text={getCdnUrl(slug)} />
         </Detail.Metadata>
       }
@@ -265,7 +282,7 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
             {variantKeys.map((variant) => (
               <Action
                 key={variant}
-                title={`Copy ${variant} SVG`}
+                title={`Copy ${toTitleCase(variant)} SVG`}
                 icon={Icon.Clipboard}
                 onAction={async () => {
                   const svg = icon.variants[variant]?.svg;

@@ -1,6 +1,6 @@
-# theSVG Raycast Extension Changelog
+# TheSVG
 
-## [Initial Version] - 2026-03-09
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search 4,000+ brand SVG icons with category filtering
 - Copy SVG markup to clipboard with one shortcut

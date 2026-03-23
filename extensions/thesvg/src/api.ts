@@ -1,9 +1,5 @@
 const BASE_URL = "https://thesvg.org";
 
-export interface Preferences {
-  defaultVariant: string;
-}
-
 // Search API only returns slug, title, categories, variants (keys)
 export interface IconEntry {
   slug: string;

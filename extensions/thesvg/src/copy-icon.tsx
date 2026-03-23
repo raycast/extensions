@@ -6,14 +6,10 @@ import {
   Toast,
   getPreferenceValues,
 } from "@raycast/api";
-import { searchIcons, getIcon, type Preferences } from "./api";
-
-interface Arguments {
-  query: string;
-}
+import { searchIcons, getIcon } from "./api";
 
 export default async function CopyIcon(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.CopyIcon }>,
 ) {
   const { query } = props.arguments;
   const { defaultVariant } = getPreferenceValues<Preferences>();
