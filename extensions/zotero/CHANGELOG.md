@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2026-03-23
 
 - Add Pandoc Citation Key copy and paste actions
 - Support Zotero 7/8 native Citation Key from `zotero.sqlite` (no `better-bibtex.sqlite` required)
