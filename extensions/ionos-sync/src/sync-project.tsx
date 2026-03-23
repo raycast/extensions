@@ -40,10 +40,7 @@ function SyncOutputView({
     async function run() {
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title:
-          mode === "dry"
-            ? "Dry-run running…"
-            : `${direction === "push" ? "Push" : "Pull"} running…`,
+        title: mode === "dry" ? "Dry-run running…" : `${direction === "push" ? "Push" : "Pull"} running…`,
         message: project.name,
       });
 
@@ -84,18 +81,10 @@ function SyncOutputView({
   }, []);
 
   const dirLabel = direction === "push" ? "local → IONOS" : "IONOS → local";
-  const modeLabel =
-    mode === "dry"
-      ? "🔍 Dry-run"
-      : direction === "push"
-        ? "⬆️ Push"
-        : "⬇️ Pull";
+  const modeLabel = mode === "dry" ? "🔍 Dry-run" : direction === "push" ? "⬆️ Push" : "⬇️ Pull";
   const statusIcon = running ? "⏳" : exitCode === 0 ? "✅" : "❌";
 
-  const markdownOutput =
-    lines.length > 0
-      ? "```\n" + lines.join("\n") + "\n```"
-      : "*Waiting for output…*";
+  const markdownOutput = lines.length > 0 ? "```\n" + lines.join("\n") + "\n```" : "*Waiting for output…*";
 
   const markdown = `# ${modeLabel} — ${project.name}
 
@@ -115,11 +104,7 @@ ${markdownOutput}
       actions={
         !running ? (
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Output"
-              content={lines.join("\n")}
-              icon={Icon.Clipboard}
-            />
+            <Action.CopyToClipboard title="Copy Output" content={lines.join("\n")} icon={Icon.Clipboard} />
           </ActionPanel>
         ) : undefined
       }
@@ -141,56 +126,32 @@ function DirectionPicker({
   const { push } = useNavigation();
 
   function launch(direction: SyncDirection, mode: SyncMode) {
-    push(
-      <SyncOutputView
-        project={project}
-        direction={direction}
-        mode={mode}
-        prefs={prefs}
-        onDone={onDone}
-      />,
-    );
+    push(<SyncOutputView project={project} direction={direction} mode={mode} prefs={prefs} onDone={onDone} />);
   }
 
   const isRoot = !project.deleteOnSync;
 
   return (
     <List navigationTitle={`Sync — ${project.name}`}>
-      <List.Section
-        title={`Project: ${project.name}`}
-        subtitle={`${project.localPath} ↔ ${project.remotePath}`}
-      >
+      <List.Section title={`Project: ${project.name}`} subtitle={`${project.localPath} ↔ ${project.remotePath}`}>
         <List.Item
           icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Blue }}
           title="Dry-run (preview)"
           subtitle="Shows what would change — nothing is transferred"
           actions={
             <ActionPanel>
-              <Action
-                title="Start Dry-Run"
-                onAction={() => launch("push", "dry")}
-              />
+              <Action title="Start Dry-Run" onAction={() => launch("push", "dry")} />
             </ActionPanel>
           }
         />
         <List.Item
           icon={{ source: Icon.ArrowUp, tintColor: Color.Green }}
           title="Push — local → IONOS"
-          subtitle={
-            isRoot
-              ? "⚠️ Root-sync: --delete disabled"
-              : "Transfers changes to server"
-          }
+          subtitle={isRoot ? "⚠️ Root-sync: --delete disabled" : "Transfers changes to server"}
           actions={
             <ActionPanel>
-              <Action
-                title="Start Push"
-                onAction={() => launch("push", "live")}
-              />
-              <Action
-                title="Dry-Run First"
-                onAction={() => launch("push", "dry")}
-              />
+              <Action title="Start Push" onAction={() => launch("push", "live")} />
+              <Action title="Dry-Run First" onAction={() => launch("push", "dry")} />
             </ActionPanel>
           }
         />
@@ -200,14 +161,8 @@ function DirectionPicker({
           subtitle="Fetches changes from server"
           actions={
             <ActionPanel>
-              <Action
-                title="Start Pull"
-                onAction={() => launch("pull", "live")}
-              />
-              <Action
-                title="Dry-Run First"
-                onAction={() => launch("pull", "dry")}
-              />
+              <Action title="Start Pull" onAction={() => launch("pull", "live")} />
+              <Action title="Dry-Run First" onAction={() => launch("pull", "dry")} />
             </ActionPanel>
           }
         />
@@ -257,9 +212,7 @@ export default function Command() {
   }
 
   async function handleSyncDone(project: Project, record: SyncRecord) {
-    const updated = projects.map((p) =>
-      p.id === project.id ? { ...p, lastSync: record } : p,
-    );
+    const updated = projects.map((p) => (p.id === project.id ? { ...p, lastSync: record } : p));
     setProjects(updated);
     await saveProjects(updated);
   }

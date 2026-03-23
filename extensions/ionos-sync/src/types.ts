@@ -27,14 +27,4 @@ export interface StorageData {
 export const STORAGE_KEY = "ionos-sync-data";
 export const DATA_VERSION = 1;
 
-export const DEFAULT_EXCLUDES = [
-  "backup",
-  "backup/",
-  "files",
-  "files/",
-  "files.zip",
-  ".env*",
-  ".git",
-  ".DS_Store",
-  "node_modules",
-];
+export const DEFAULT_EXCLUDES = [".git", ".DS_Store", "node_modules", ".env*"];

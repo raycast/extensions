@@ -29,7 +29,7 @@ export function buildRsyncArgs(
 ): string[] {
   const port = prefs.ionosPort || "22";
   const sshArgs = prefs.sshKeyPath
-    ? `ssh -p ${port} -i ${prefs.sshKeyPath} -o SendEnv=NOTHING`
+    ? `ssh -p ${port} -i "${prefs.sshKeyPath}" -o SendEnv=NOTHING`
     : `ssh -p ${port} -o SendEnv=NOTHING`;
 
   const args: string[] = ["-avzh", "--chmod=F644,D755", `-e`, sshArgs];
@@ -38,8 +38,7 @@ export function buildRsyncArgs(
     args.push("--dry-run");
   }
 
-  const isRootRemote =
-    project.remotePath === "~" || project.remotePath === "~/";
+  const isRootRemote = project.remotePath === "~" || project.remotePath === "~/";
   if (project.deleteOnSync && mode === "live" && !isRootRemote) {
     args.push("--delete");
   }

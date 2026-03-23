@@ -12,23 +12,12 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import {
-  loadProjects,
-  upsertProject,
-  deleteProject,
-  newProjectId,
-} from "./storage";
+import { loadProjects, upsertProject, deleteProject, newProjectId } from "./storage";
 import { Project, DEFAULT_EXCLUDES } from "./types";
 
 // ─── Project Form (Add / Edit) ────────────────────────────────────────────────
 
-function ProjectForm({
-  existing,
-  onSave,
-}: {
-  existing?: Project;
-  onSave: (p: Project) => void;
-}) {
+function ProjectForm({ existing, onSave }: { existing?: Project; onSave: (p: Project) => void }) {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
   const [localError, setLocalError] = useState<string | undefined>();
@@ -207,10 +196,7 @@ export default function Command() {
             {
               tag: {
                 value: excludeSummary(project),
-                color:
-                  project.excludes.length > 0
-                    ? Color.Blue
-                    : Color.SecondaryText,
+                color: project.excludes.length > 0 ? Color.Blue : Color.SecondaryText,
               },
             },
             {
@@ -225,9 +211,7 @@ export default function Command() {
               <Action
                 title="Edit"
                 icon={Icon.Pencil}
-                onAction={() =>
-                  push(<ProjectForm existing={project} onSave={handleSave} />)
-                }
+                onAction={() => push(<ProjectForm existing={project} onSave={handleSave} />)}
               />
               <Action
                 title="Add Project"
@@ -248,11 +232,7 @@ export default function Command() {
       ))}
 
       {projects.length === 0 && !isLoading && (
-        <List.EmptyView
-          icon={Icon.Globe}
-          title="No projects yet"
-          description="Press ⌘N to add a project"
-        />
+        <List.EmptyView icon={Icon.Globe} title="No projects yet" description="Press ⌘N to add a project" />
       )}
     </List>
   );
