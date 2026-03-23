@@ -36,6 +36,5 @@ export const DEFAULT_EXCLUDES = [
   ".env*",
   ".git",
   ".DS_Store",
-  "CLAUDE.md",
   "node_modules",
 ];

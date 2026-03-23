@@ -44,15 +44,15 @@ function ProjectForm({
     let valid = true;
 
     if (!values.name.trim()) {
-      setNameError("Name ist erforderlich");
+      setNameError("Name is required");
       valid = false;
     }
     if (!values.localPath.trim()) {
-      setLocalError("Lokaler Pfad ist erforderlich");
+      setLocalError("Local path is required");
       valid = false;
     }
     if (!values.remotePath.trim()) {
-      setRemoteError("Remote-Pfad ist erforderlich");
+      setRemoteError("Remote path is required");
       valid = false;
     }
     if (!valid) return;
@@ -80,13 +80,11 @@ function ProjectForm({
 
   return (
     <Form
-      navigationTitle={
-        existing ? `Bearbeiten: ${existing.name}` : "Neues Projekt"
-      }
+      navigationTitle={existing ? `Edit: ${existing.name}` : "New Project"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={existing ? "Speichern" : "Projekt Hinzufügen"}
+            title={existing ? "Save" : "Add Project"}
             icon={Icon.CheckCircle}
             onSubmit={handleSubmit}
           />
@@ -96,43 +94,43 @@ function ProjectForm({
       <Form.TextField
         id="name"
         title="Name"
-        placeholder="mein-projekt"
+        placeholder="my-project"
         defaultValue={existing?.name}
         error={nameError}
         onChange={() => setNameError(undefined)}
-        info="Eindeutiger Kurzname (wird in der Liste angezeigt)"
+        info="Unique short name (shown in the list)"
       />
       <Form.TextField
         id="localPath"
-        title="Lokaler Pfad"
-        placeholder="~/projects/mein-projekt/dist"
+        title="Local Path"
+        placeholder="~/projects/my-project/dist"
         defaultValue={existing?.localPath}
         error={localError}
         onChange={() => setLocalError(undefined)}
-        info="Absoluter Pfad oder mit ~/ — der Inhalt dieses Ordners wird synchronisiert"
+        info="Absolute path or with ~/ — the contents of this folder will be synced"
       />
       <Form.TextField
         id="remotePath"
-        title="Remote-Pfad (IONOS)"
-        placeholder="~/mein-projekt"
+        title="Remote Path (IONOS)"
+        placeholder="~/my-project"
         defaultValue={existing?.remotePath}
         error={remoteError}
         onChange={() => setRemoteError(undefined)}
-        info="Pfad auf dem IONOS-Server. ~/ = Home-Verzeichnis des SSH-Benutzers"
+        info="Path on the IONOS server. ~/ = SSH user home directory"
       />
       <Form.Separator />
       <Form.Checkbox
         id="deleteOnSync"
-        label="--delete aktivieren (gelöschte lokale Dateien auch remote löschen)"
+        label="Enable --delete (also delete remotely files deleted locally)"
         defaultValue={existing?.deleteOnSync ?? true}
-        info="Bei Root-Sync (~/) unbedingt deaktivieren — sonst Gefahr, andere Projekte zu löschen"
+        info="Disable for root sync (~/) — otherwise other projects may be deleted"
       />
       <Form.TextArea
         id="excludes"
         title="Excludes"
         placeholder={DEFAULT_EXCLUDES.join("\n")}
         defaultValue={defaultExcludes}
-        info="Eine Exclude-Regel pro Zeile. Wildcards erlaubt (z.B. wp-*)"
+        info="One exclude rule per line. Wildcards allowed (e.g. wp-*)"
         enableMarkdown={false}
       />
     </Form>
@@ -158,41 +156,40 @@ export default function Command() {
     setProjects(updated);
     void showToast({
       style: Toast.Style.Success,
-      title: "Projekt gespeichert",
+      title: "Project saved",
       message: project.name,
     });
   }
 
   async function handleDelete(project: Project) {
     const confirmed = await confirmAlert({
-      title: `"${project.name}" löschen?`,
-      message:
-        "Die Konfiguration wird entfernt. Dateien werden nicht gelöscht.",
-      primaryAction: { title: "Löschen", style: Alert.ActionStyle.Destructive },
+      title: `Delete "${project.name}"?`,
+      message: "The configuration will be removed. Files will not be deleted.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
     if (!confirmed) return;
     const updated = await deleteProject(project.id);
     setProjects(updated);
     void showToast({
       style: Toast.Style.Success,
-      title: "Projekt gelöscht",
+      title: "Project deleted",
       message: project.name,
     });
   }
 
   function excludeSummary(p: Project): string {
-    if (p.excludes.length === 0) return "Keine Excludes";
-    return `${p.excludes.length} Excludes`;
+    if (p.excludes.length === 0) return "No excludes";
+    return `${p.excludes.length} excludes`;
   }
 
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Projekte verwalten"
+      navigationTitle="Manage Projects"
       actions={
         <ActionPanel>
           <Action
-            title="Projekt Hinzufügen"
+            title="Add Project"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => push(<ProjectForm onSave={handleSave} />)}
@@ -218,7 +215,7 @@ export default function Command() {
             },
             {
               tag: {
-                value: project.deleteOnSync ? "--delete" : "kein delete",
+                value: project.deleteOnSync ? "--delete" : "no delete",
                 color: project.deleteOnSync ? Color.Orange : Color.Green,
               },
             },
@@ -226,20 +223,20 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action
-                title="Bearbeiten"
+                title="Edit"
                 icon={Icon.Pencil}
                 onAction={() =>
                   push(<ProjectForm existing={project} onSave={handleSave} />)
                 }
               />
               <Action
-                title="Projekt Hinzufügen"
+                title="Add Project"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={() => push(<ProjectForm onSave={handleSave} />)}
               />
               <Action
-                title="Löschen"
+                title="Delete"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
@@ -253,8 +250,8 @@ export default function Command() {
       {projects.length === 0 && !isLoading && (
         <List.EmptyView
           icon={Icon.Globe}
-          title="Noch keine Projekte"
-          description="Drücke ⌘N um ein Projekt hinzuzufügen"
+          title="No projects yet"
+          description="Press ⌘N to add a project"
         />
       )}
     </List>

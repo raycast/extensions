@@ -1,13 +1,6 @@
 import { execa, ExecaChildProcess } from "execa";
 import { Project, SyncDirection, SyncMode } from "./types";
 
-export interface Preferences {
-  ionosHost: string;
-  ionosUser: string;
-  ionosPort: string;
-  sshKeyPath: string;
-}
-
 export interface RsyncResult {
   output: string[];
   exitCode: number;

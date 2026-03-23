@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { loadProjects, saveProjects } from "./storage";
-import { runRsync, Preferences } from "./rsync";
+import { runRsync } from "./rsync";
 import { Project, SyncDirection, SyncMode, SyncRecord } from "./types";
 
 // ─── Sync Output Detail View ──────────────────────────────────────────────────
@@ -42,8 +42,8 @@ function SyncOutputView({
         style: Toast.Style.Animated,
         title:
           mode === "dry"
-            ? "Dry-run läuft…"
-            : `${direction === "push" ? "Push" : "Pull"} läuft…`,
+            ? "Dry-run running…"
+            : `${direction === "push" ? "Push" : "Pull"} running…`,
         message: project.name,
       });
 
@@ -68,13 +68,12 @@ function SyncOutputView({
 
       if (success) {
         toast.style = Toast.Style.Success;
-        toast.title =
-          mode === "dry" ? "Dry-run abgeschlossen" : "Sync erfolgreich";
-        toast.message = `${result.output.length} Zeilen Output`;
+        toast.title = mode === "dry" ? "Dry-run complete" : "Sync complete";
+        toast.message = `${result.output.length} lines`;
       } else {
         toast.style = Toast.Style.Failure;
-        toast.title = "Fehler beim Sync";
-        toast.message = `Exit Code ${result.exitCode}`;
+        toast.title = "Sync failed";
+        toast.message = `Exit code ${result.exitCode}`;
       }
     }
 
@@ -84,7 +83,7 @@ function SyncOutputView({
     };
   }, []);
 
-  const dirLabel = direction === "push" ? "lokal → IONOS" : "IONOS → lokal";
+  const dirLabel = direction === "push" ? "local → IONOS" : "IONOS → local";
   const modeLabel =
     mode === "dry"
       ? "🔍 Dry-run"
@@ -96,13 +95,13 @@ function SyncOutputView({
   const markdownOutput =
     lines.length > 0
       ? "```\n" + lines.join("\n") + "\n```"
-      : "*Warte auf Output…*";
+      : "*Waiting for output…*";
 
   const markdown = `# ${modeLabel} — ${project.name}
 
-**Richtung:** ${dirLabel}  
-**Status:** ${statusIcon} ${running ? "läuft…" : exitCode === 0 ? "Fertig" : `Fehler (Exit ${exitCode})`}  
-**Zeilen:** ${lines.length}
+**Direction:** ${dirLabel}
+**Status:** ${statusIcon} ${running ? "running…" : exitCode === 0 ? "Done" : `Error (exit ${exitCode})`}
+**Lines:** ${lines.length}
 
 ---
 
@@ -117,7 +116,7 @@ ${markdownOutput}
         !running ? (
           <ActionPanel>
             <Action.CopyToClipboard
-              title="Output Kopieren"
+              title="Copy Output"
               content={lines.join("\n")}
               icon={Icon.Clipboard}
             />
@@ -158,17 +157,17 @@ function DirectionPicker({
   return (
     <List navigationTitle={`Sync — ${project.name}`}>
       <List.Section
-        title={`Projekt: ${project.name}`}
+        title={`Project: ${project.name}`}
         subtitle={`${project.localPath} ↔ ${project.remotePath}`}
       >
         <List.Item
           icon={{ source: Icon.MagnifyingGlass, tintColor: Color.Blue }}
-          title="Dry-run (Vorschau)"
-          subtitle="Zeigt was sich ändern würde — nichts wird übertragen"
+          title="Dry-run (preview)"
+          subtitle="Shows what would change — nothing is transferred"
           actions={
             <ActionPanel>
               <Action
-                title="Dry-Run Starten"
+                title="Start Dry-Run"
                 onAction={() => launch("push", "dry")}
               />
             </ActionPanel>
@@ -176,20 +175,20 @@ function DirectionPicker({
         />
         <List.Item
           icon={{ source: Icon.ArrowUp, tintColor: Color.Green }}
-          title="Push — lokal → IONOS"
+          title="Push — local → IONOS"
           subtitle={
             isRoot
-              ? "⚠️ Root-Sync: --delete deaktiviert"
-              : "Überträgt Änderungen zum Server"
+              ? "⚠️ Root-sync: --delete disabled"
+              : "Transfers changes to server"
           }
           actions={
             <ActionPanel>
               <Action
-                title="Push Starten"
+                title="Start Push"
                 onAction={() => launch("push", "live")}
               />
               <Action
-                title="Erst Dry-Run"
+                title="Dry-Run First"
                 onAction={() => launch("push", "dry")}
               />
             </ActionPanel>
@@ -197,16 +196,16 @@ function DirectionPicker({
         />
         <List.Item
           icon={{ source: Icon.ArrowDown, tintColor: Color.Orange }}
-          title="Pull — IONOS → lokal"
-          subtitle="Holt Änderungen vom Server"
+          title="Pull — IONOS → local"
+          subtitle="Fetches changes from server"
           actions={
             <ActionPanel>
               <Action
-                title="Pull Starten"
+                title="Start Pull"
                 onAction={() => launch("pull", "live")}
               />
               <Action
-                title="Erst Dry-Run"
+                title="Dry-Run First"
                 onAction={() => launch("pull", "dry")}
               />
             </ActionPanel>
@@ -233,14 +232,14 @@ export default function Command() {
   }, []);
 
   function formatLastSync(record?: SyncRecord): string {
-    if (!record) return "Noch nicht synchronisiert";
+    if (!record) return "Never synced";
     const d = new Date(record.timestamp);
-    const dateStr = d.toLocaleDateString("de-DE", {
+    const dateStr = d.toLocaleDateString(undefined, {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",
     });
-    const timeStr = d.toLocaleTimeString("de-DE", {
+    const timeStr = d.toLocaleTimeString(undefined, {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -268,21 +267,18 @@ export default function Command() {
   if (!prefs.ionosHost || !prefs.ionosUser) {
     return (
       <Detail
-        markdown={`# ⚠️ Zugangsdaten fehlen
+        markdown={`# ⚠️ Credentials missing
 
-Bitte öffne die **Extension-Einstellungen** und trage Host und Benutzername ein.
+Please open the **Extension Settings** and enter your host and username.
 
-\`⌘ + ,\` → IONOS Sync → Einstellungen`}
+\`⌘ + ,\` → IONOS Sync → Settings`}
       />
     );
   }
 
   return (
     <List isLoading={isLoading} navigationTitle="IONOS Sync">
-      <List.Section
-        title="Projekte"
-        subtitle={`${projects.length} konfiguriert`}
-      >
+      <List.Section title="Projects" subtitle={`${projects.length} configured`}>
         {projects.map((project) => (
           <List.Item
             key={project.id}
@@ -301,7 +297,7 @@ Bitte öffne die **Extension-Einstellungen** und trage Host und Benutzername ein
             actions={
               <ActionPanel>
                 <Action
-                  title="Sync Starten"
+                  title="Start Sync"
                   icon={Icon.ArrowClockwise}
                   onAction={() =>
                     push(
