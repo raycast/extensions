@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   List,
   Action,
@@ -18,12 +18,15 @@ export default function KillByPort() {
   const [allPorts, setAllPorts] = useState<PortProcess[] | null>(null);
 
   const loadAllPorts = () => {
-    if (allPorts !== null) return;
     setIsLoading(true);
     const ports = findAllListeningPorts();
     setAllPorts(ports);
     setIsLoading(false);
   };
+
+  useEffect(() => {
+    loadAllPorts();
+  }, []);
 
   const handleSearch = (text: string) => {
     setSearchText(text);

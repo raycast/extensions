@@ -5,6 +5,7 @@
   "description": "Advanced process manager with instant kill, multi-select, grouping, freeze/resume, port kill, and more",
   "icon": "icon.png",
   "author": "Supremum",
+  "categories": ["System", "Productivity"],
   "license": "MIT",
   "commands": [
     {

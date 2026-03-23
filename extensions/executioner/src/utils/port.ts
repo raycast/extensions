@@ -3,12 +3,11 @@ import type { PortProcess } from "../types";
 
 export function findProcessesByPort(port: number): PortProcess[] {
   try {
-    const output = execSync(
-      `lsof -iTCP:${port} -sTCP:LISTEN -P -n 2>/dev/null`,
-      {
-        maxBuffer: 5 * 1024 * 1024,
-      },
-    ).toString();
+    const output = execSync(`/usr/sbin/lsof -iTCP:${port} -sTCP:LISTEN -P -n`, {
+      maxBuffer: 5 * 1024 * 1024,
+      shell: "/bin/zsh",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).toString();
 
     const lines = output.split("\n").slice(1); // skip header
     const results: PortProcess[] = [];
@@ -34,8 +33,10 @@ export function findProcessesByPort(port: number): PortProcess[] {
 
 export function findAllListeningPorts(): PortProcess[] {
   try {
-    const output = execSync("lsof -iTCP -sTCP:LISTEN -P -n 2>/dev/null", {
+    const output = execSync("/usr/sbin/lsof -iTCP -sTCP:LISTEN -P -n", {
       maxBuffer: 10 * 1024 * 1024,
+      shell: "/bin/zsh",
+      stdio: ["pipe", "pipe", "pipe"],
     }).toString();
 
     const lines = output.split("\n").slice(1);
@@ -68,8 +69,10 @@ export function findAllListeningPorts(): PortProcess[] {
 
 export function getProcessPorts(pid: number): number[] {
   try {
-    const output = execSync(`lsof -p ${pid} -iTCP -P -n 2>/dev/null`, {
+    const output = execSync(`/usr/sbin/lsof -p ${pid} -iTCP -P -n`, {
       maxBuffer: 5 * 1024 * 1024,
+      shell: "/bin/zsh",
+      stdio: ["pipe", "pipe", "pipe"],
     }).toString();
 
     const ports = new Set<number>();
