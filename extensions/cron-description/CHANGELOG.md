@@ -1,4 +1,4 @@
-# Cron Expression Description Changelog
+# Cron Description Changelog
 
 ## [Add Default Timezone Configuration] - {PR_MERGE_DATE}
 

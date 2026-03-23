@@ -66,7 +66,7 @@ export default function main() {
       setNextRunCronTz("Unable to calculate");
       setNextRunLocalTz("");
     }
-  }, [cron, cronTimezone, localTimezone]);
+  }, [cron, cronTimezone]);
 
   return (
     <Form
