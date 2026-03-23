@@ -1,4 +1,4 @@
-# Raycast Voicenotes Extension
+# Voicenotes
 
 Search and filter your [Voicenotes.com](https://voicenotes.com) recordings directly from Raycast.
 
@@ -25,4 +25,3 @@ You can find this in your Voicenotes settings under **Integrations > Obsidian**.
 - [Raycast API](https://developers.raycast.com)
 - TypeScript
 - React
-

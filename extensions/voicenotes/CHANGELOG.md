@@ -1,4 +1,4 @@
-# Voicenotes Changelog
+# Voicenotes
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

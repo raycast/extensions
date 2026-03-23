@@ -2,7 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://api.voicenotes.com/api/integrations/obsidian-sync";
 
-
 export interface VoiceNote {
   id: string;
   recording_id: string;
@@ -22,6 +21,10 @@ interface RecordingsResponse {
   };
 }
 
+interface Preferences {
+  token: string;
+}
+
 const getHeaders = () => {
   const { token } = getPreferenceValues<Preferences>();
   return {
@@ -30,20 +33,28 @@ const getHeaders = () => {
     "Content-Type": "application/json",
   };
 };
-
-  body: JSON.stringify({
-    last_synced_note_updated_at: null,
-    obsidian_deleted_recording_ids: [],
-  }),
-
-export async function getUserInfo() {
-  const response = await fetch(`${BASE_URL}/user/info`, {
+export async function getRecordings(
+  signal?: AbortSignal,
+): Promise<VoiceNote[]> {
+  const response = await fetch(`${BASE_URL}/recordings`, {
+    method: "POST",
     headers: getHeaders(),
+    body: JSON.stringify({
+      last_synced_note_updated_at: null,
+      obsidian_deleted_recording_ids: [],
+    }),
+    signal,
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch user info: ${response.statusText}`);
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `Failed to fetch recordings: ${response.status} ${response.statusText} - ${text}`,
+    );
   }
 
-  return response.json();
+  const data: RecordingsResponse = await response.json();
+  return data.data || [];
 }
+
+// Note: `getUserInfo` was removed because it was not used anywhere in the extension.

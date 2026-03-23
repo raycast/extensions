@@ -5,6 +5,7 @@ import {
   showToast,
   Toast,
   Color,
+  Detail,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { getRecordings, VoiceNote } from "./api/voicenotes";
@@ -18,11 +19,15 @@ export default function Command() {
   );
 
   useEffect(() => {
-    async function fetch() {
+    const controller = new AbortController();
+
+    async function fetchData() {
       try {
-        const data = await getRecordings();
+        const data = await getRecordings(controller.signal);
         setState({ isLoading: false, data });
       } catch (error) {
+        if ((error as unknown as { name?: string })?.name === "AbortError")
+          return;
         setState({ isLoading: false, data: [] });
         showToast({
           style: Toast.Style.Failure,
@@ -31,7 +36,12 @@ export default function Command() {
         });
       }
     }
-    fetch();
+
+    fetchData();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const [filter, setFilter] = useState("all");
@@ -67,11 +77,15 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      {filteredNotes.length === 0 && !state.isLoading && (
+        <List.EmptyView title="No Notes" description="No Voicenotes found" />
+      )}
+
       {filteredNotes.map((note) => (
         <List.Item
           key={note.id}
           title={note.title || "Untitled Note"}
-          subtitle={new Date(note.created_at).toLocaleDateString()}
+          subtitle={new Date(note.created_at).toLocaleDateString("en-US")}
           accessories={[
             ...(note.tags || []).map((tag) => ({
               tag: { value: tag.name, color: Color.Blue },
@@ -102,49 +116,39 @@ export default function Command() {
 
 function NoteDetail({ note }: { note: VoiceNote }) {
   return (
-    <List isShowingDetail>
-      <List.Item
-        title={note.title}
-        detail={
-          <List.Item.Detail
-            markdown={note.transcript}
-            metadata={
-              <List.Item.Detail.Metadata>
-                <List.Item.Detail.Metadata.Label
-                  title="Created"
-                  text={new Date(note.created_at).toLocaleString()}
-                />
-                <List.Item.Detail.Metadata.Label
-                  title="Duration"
-                  text={`${note.duration}s`}
-                />
-                {note.tags && note.tags.length > 0 && (
-                  <List.Item.Detail.Metadata.TagList title="Tags">
-                    {note.tags.map((tag) => (
-                      <List.Item.Detail.Metadata.TagList.Item
-                        key={tag.name}
-                        text={tag.name}
-                        color={Color.Blue}
-                      />
-                    ))}
-                  </List.Item.Detail.Metadata.TagList>
-                )}
-              </List.Item.Detail.Metadata>
-            }
+    <Detail
+      markdown={note.transcript}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Created"
+            text={new Date(note.created_at).toLocaleString("en-US")}
           />
-        }
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser
-              url={`https://voicenotes.com/notes/${note.id}`}
-            />
-            <Action.CopyToClipboard
-              content={note.transcript}
-              title="Copy Transcript"
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
+          <Detail.Metadata.Label title="Duration" text={`${note.duration}s`} />
+          {note.tags && note.tags.length > 0 && (
+            <Detail.Metadata.TagList title="Tags">
+              {note.tags.map((tag) => (
+                <Detail.Metadata.TagList.Item
+                  key={tag.name}
+                  text={tag.name}
+                  color={Color.Blue}
+                />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            url={`https://voicenotes.com/notes/${note.id}`}
+          />
+          <Action.CopyToClipboard
+            content={note.transcript}
+            title="Copy Transcript"
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
