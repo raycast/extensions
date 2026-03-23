@@ -1,10 +1,32 @@
 import { useState, useEffect } from "react";
-import { List, Action, ActionPanel, Icon, Color, Form, useNavigation, showHUD } from "@raycast/api";
-import { getPresets, savePresets, parseInput, formatLabel, DEFAULT_PRESETS } from "./utils";
+import {
+  List,
+  Action,
+  ActionPanel,
+  Icon,
+  Color,
+  Form,
+  useNavigation,
+  showHUD,
+} from "@raycast/api";
+import {
+  getPresets,
+  savePresets,
+  parseInput,
+  formatLabel,
+  DEFAULT_PRESETS,
+} from "./utils";
 
-interface Preset { label: string; seconds: number }
+interface Preset {
+  label: string;
+  seconds: number;
+}
 
-function EditPresetView({ index, current, onSave }: {
+function EditPresetView({
+  index,
+  current,
+  onSave,
+}: {
   index: number;
   current: Preset;
   onSave: (preset: Preset) => void;
@@ -40,13 +62,20 @@ function EditPresetView({ index, current, onSave }: {
         placeholder="e.g. 5m · 1h30m · 90s · 25 minutes"
         value={input}
         error={error}
-        onChange={(v) => { setInput(v); setError(undefined); }}
+        onChange={(v) => {
+          setInput(v);
+          setError(undefined);
+        }}
       />
     </Form>
   );
 }
 
-export function PresetSettings({ onPresetsChanged }: { onPresetsChanged: () => void }) {
+export function PresetSettings({
+  onPresetsChanged,
+}: {
+  onPresetsChanged: () => void;
+}) {
   const [presets, setPresets] = useState<Preset[]>([]);
   const { push } = useNavigation();
 
@@ -82,13 +111,15 @@ export function PresetSettings({ onPresetsChanged }: { onPresetsChanged: () => v
               <Action
                 title={`Edit Preset ${i + 1}`}
                 icon={Icon.Pencil}
-                onAction={() => push(
-                  <EditPresetView
-                    index={i}
-                    current={p}
-                    onSave={(preset) => updatePreset(i, preset)}
-                  />
-                )}
+                onAction={() =>
+                  push(
+                    <EditPresetView
+                      index={i}
+                      current={p}
+                      onSave={(preset) => updatePreset(i, preset)}
+                    />,
+                  )
+                }
               />
               <ActionPanel.Section>
                 <Action

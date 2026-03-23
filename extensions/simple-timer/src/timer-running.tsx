@@ -9,8 +9,18 @@ import {
   useNavigation,
   Form,
 } from "@raycast/api";
-import { formatCountdown, formatLabel, getVolume, setVolume, getSound, setSound, SOUND_OPTIONS } from "./utils";
-import { TimerEntry, readState, writeState, updateTimerSound, pauseTimer, resumeTimer, cancelTimer, dismissTimer, setNotificationsInState } from "./timer-state";
+import { formatCountdown, setVolume, setSound, SOUND_OPTIONS } from "./utils";
+import {
+  TimerEntry,
+  readState,
+  writeState,
+  updateTimerSound,
+  pauseTimer,
+  resumeTimer,
+  cancelTimer,
+  dismissTimer,
+  setNotificationsInState,
+} from "./timer-state";
 import { stopAlertSound } from "./sound";
 
 const VOLUME_OPTIONS = [1, 10, 25, 50, 75, 100];
@@ -28,15 +38,23 @@ export function TimerRunning({ timerId }: Props) {
 
   function refresh() {
     const state = readState();
-    const t = state.timers.find(t => t.id === timerId) ?? null;
-    if (!t) { pop(); return; }
+    const t = state.timers.find((t) => t.id === timerId) ?? null;
+    if (!t) {
+      pop();
+      return;
+    }
     setNotificationsState(state.notificationsEnabled ?? true);
     // Use per-timer sound/volume from JSON
     setVolumeState(t.volume);
     setSoundState(t.soundFile);
-    setTimer(prev => {
+    setTimer((prev) => {
       if (!prev) return t;
-      if (prev.remaining === t.remaining && prev.status === t.status && prev.note === t.note) return prev;
+      if (
+        prev.remaining === t.remaining &&
+        prev.status === t.status &&
+        prev.note === t.note
+      )
+        return prev;
       return t;
     });
   }
@@ -61,11 +79,27 @@ export function TimerRunning({ timerId }: Props) {
     pop();
   }
 
-  function handlePause() { pauseTimer(timerId); refresh(); showHUD("⏸ Timer paused"); }
-  function handleResume() { resumeTimer(timerId); refresh(); showHUD("▶ Timer resumed"); }
+  function handlePause() {
+    pauseTimer(timerId);
+    refresh();
+    showHUD("⏸ Timer paused");
+  }
+  function handleResume() {
+    resumeTimer(timerId);
+    refresh();
+    showHUD("▶ Timer resumed");
+  }
 
-  async function changeVolume(v: number) { setVolumeState(v); await setVolume(v); updateTimerSound(timerId, sound, v); }
-  async function changeSoundFn(id: string) { setSoundState(id); await setSound(id); updateTimerSound(timerId, id, volume); }
+  async function changeVolume(v: number) {
+    setVolumeState(v);
+    await setVolume(v);
+    updateTimerSound(timerId, sound, v);
+  }
+  async function changeSoundFn(id: string) {
+    setSoundState(id);
+    await setSound(id);
+    updateTimerSound(timerId, id, volume);
+  }
   function toggleNotifications() {
     const next = !notificationsEnabled;
     setNotificationsState(next);
@@ -76,8 +110,8 @@ export function TimerRunning({ timerId }: Props) {
   if (!timer) return <Detail markdown="Loading..." />;
 
   const elapsed = timer.totalSeconds - timer.remaining;
-  const timeLeft = timer.remaining / timer.totalSeconds;
-  const currentSoundLabel = SOUND_OPTIONS.find(s => s.id === sound)?.label ?? "Classic";
+  const currentSoundLabel =
+    SOUND_OPTIONS.find((s) => s.id === sound)?.label ?? "Classic";
   const noteSection = `\n\n---\n\n${timer.note ? timer.note : "> *You can add a note alongside the timer, or via Actions (Ctrl+K).*"}`;
 
   let markdown: string;
@@ -89,11 +123,19 @@ export function TimerRunning({ timerId }: Props) {
     markdown = `<div align="center">\n\n&nbsp;\n\n# ${formatCountdown(timer.remaining)}\n\n&nbsp;\n\n</div>${noteSection}`;
   }
 
-  const volumeActions = VOLUME_OPTIONS.map(v => (
-    <Action key={`vol-${v}`} title={`${v}%${v === volume ? " ✓" : ""}`} onAction={() => changeVolume(v)} />
+  const volumeActions = VOLUME_OPTIONS.map((v) => (
+    <Action
+      key={`vol-${v}`}
+      title={`${v}%${v === volume ? " ✓" : ""}`}
+      onAction={() => changeVolume(v)}
+    />
   ));
-  const soundActions = SOUND_OPTIONS.map(s => (
-    <Action key={s.id} title={`${s.label}${s.id === sound ? " ✓" : ""}`} onAction={() => changeSoundFn(s.id)} />
+  const soundActions = SOUND_OPTIONS.map((s) => (
+    <Action
+      key={s.id}
+      title={`${s.label}${s.id === sound ? " ✓" : ""}`}
+      onAction={() => changeSoundFn(s.id)}
+    />
   ));
 
   return (
@@ -112,20 +154,37 @@ export function TimerRunning({ timerId }: Props) {
             icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Volume" text={`${volume}%`} icon={Icon.Speaker} />
-          <Detail.Metadata.Label title="Sound" text={currentSoundLabel} icon={Icon.Music} />
+          <Detail.Metadata.Label
+            title="Volume"
+            text={`${volume}%`}
+            icon={Icon.Speaker}
+          />
+          <Detail.Metadata.Label
+            title="Sound"
+            text={currentSoundLabel}
+            icon={Icon.Music}
+          />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label
             title="Notifications"
             text={notificationsEnabled ? "On" : "Off"}
-            icon={{ source: notificationsEnabled ? Icon.Bell : Icon.BellDisabled, tintColor: notificationsEnabled ? Color.Green : Color.SecondaryText }}
+            icon={{
+              source: notificationsEnabled ? Icon.Bell : Icon.BellDisabled,
+              tintColor: notificationsEnabled
+                ? Color.Green
+                : Color.SecondaryText,
+            }}
           />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
           {timer.status === "done" ? (
-            <Action title="Dismiss" icon={Icon.CheckCircle} onAction={handleDismiss} />
+            <Action
+              title="Dismiss"
+              icon={Icon.CheckCircle}
+              onAction={handleDismiss}
+            />
           ) : (
             <>
               <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
@@ -138,12 +197,15 @@ export function TimerRunning({ timerId }: Props) {
               />
               <Action
                 title={timer.status === "paused" ? "Resume" : "Pause"}
-                icon={timer.status === "paused"
-                  ? { source: Icon.Play, tintColor: Color.Green }
-                  : { source: Icon.Pause, tintColor: Color.Yellow }
+                icon={
+                  timer.status === "paused"
+                    ? { source: Icon.Play, tintColor: Color.Green }
+                    : { source: Icon.Pause, tintColor: Color.Yellow }
                 }
                 shortcut={{ modifiers: [], key: "space" }}
-                onAction={timer.status === "paused" ? handleResume : handlePause}
+                onAction={
+                  timer.status === "paused" ? handleResume : handlePause
+                }
               />
             </>
           )}
@@ -151,34 +213,60 @@ export function TimerRunning({ timerId }: Props) {
             <Action
               title={timer.note ? "Edit Note" : "Add Note"}
               icon={timer.note ? Icon.Pencil : Icon.Plus}
-              onAction={() => push(
-                <Form
-                  navigationTitle={timer.note ? "Edit Note" : "Add Note"}
-                  actions={
-                    <ActionPanel>
-                      <Action.SubmitForm
-                        title="Save"
-                        onSubmit={(v: { note: string }) => {
-                          const state = readState();
-                          const t = state.timers.find(t => t.id === timerId);
-                          if (t) { t.note = v.note; writeState(state); }
-                          pop();
-                          refresh();
-                        }}
-                      />
-                    </ActionPanel>
-                  }
-                >
-                  <Form.TextField id="note" title="Note" placeholder="What is this timer for?" defaultValue={timer.note} />
-                </Form>
-              )}
+              onAction={() =>
+                push(
+                  <Form
+                    navigationTitle={timer.note ? "Edit Note" : "Add Note"}
+                    actions={
+                      <ActionPanel>
+                        <Action.SubmitForm
+                          title="Save"
+                          onSubmit={(v: { note: string }) => {
+                            const state = readState();
+                            const t = state.timers.find(
+                              (t) => t.id === timerId,
+                            );
+                            if (t) {
+                              t.note = v.note;
+                              writeState(state);
+                            }
+                            pop();
+                            refresh();
+                          }}
+                        />
+                      </ActionPanel>
+                    }
+                  >
+                    <Form.TextField
+                      id="note"
+                      title="Note"
+                      placeholder="What is this timer for?"
+                      defaultValue={timer.note}
+                    />
+                  </Form>,
+                )
+              }
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ActionPanel.Submenu title={`Volume: ${volume}%`} icon={Icon.Speaker}>{volumeActions}</ActionPanel.Submenu>
-            <ActionPanel.Submenu title={`Sound: ${currentSoundLabel}`} icon={Icon.Music}>{soundActions}</ActionPanel.Submenu>
+            <ActionPanel.Submenu
+              title={`Volume: ${volume}%`}
+              icon={Icon.Speaker}
+            >
+              {volumeActions}
+            </ActionPanel.Submenu>
+            <ActionPanel.Submenu
+              title={`Sound: ${currentSoundLabel}`}
+              icon={Icon.Music}
+            >
+              {soundActions}
+            </ActionPanel.Submenu>
             <Action
-              title={notificationsEnabled ? "Notifications: On ✓" : "Notifications: Off"}
+              title={
+                notificationsEnabled
+                  ? "Notifications: on ✓"
+                  : "Notifications: Off"
+              }
               icon={notificationsEnabled ? Icon.Bell : Icon.BellDisabled}
               onAction={toggleNotifications}
             />

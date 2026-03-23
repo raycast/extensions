@@ -12,5 +12,7 @@ export default async function Command() {
     stopAlertSound(t.id);
     await dismissTimer(t.id);
   }
-  await showHUD(`✅ ${done.length} timer${done.length > 1 ? "s" : ""} dismissed`);
+  await showHUD(
+    `✅ ${done.length} timer${done.length > 1 ? "s" : ""} dismissed`,
+  );
 }

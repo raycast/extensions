@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import path from "path";
 import {
   Grid,
   List,
@@ -76,14 +77,19 @@ async function saveRecent(seconds: number): Promise<void> {
   await LocalStorage.setItem(RECENT_KEY, JSON.stringify(updated));
 }
 
-function AlertDurationForm({ current, onSave }: { current: number; onSave: (v: number) => void }) {
+function AlertDurationForm({
+  current,
+  onSave,
+}: {
+  current: number;
+  onSave: (v: number) => void;
+}) {
   const { pop } = useNavigation();
   const [input, setInput] = useState("");
   const [error, setError] = useState<string | undefined>();
 
   function handleSubmit() {
-    const { parseInput } = require("./utils");
-    const parsed = parseInput(input);
+    const parsed = parseFullInput(input)?.seconds ?? null;
     if (!parsed || parsed <= 0) {
       setError("Invalid duration – try '30s', '2m', '1 minute'");
       return;
@@ -101,14 +107,19 @@ function AlertDurationForm({ current, onSave }: { current: number; onSave: (v: n
         </ActionPanel>
       }
     >
-      <Form.Description text={`Current: ${current === 0 ? "Until dismissed" : current + "s"}`} />
+      <Form.Description
+        text={`Current: ${current === 0 ? "Until dismissed" : current + "s"}`}
+      />
       <Form.TextField
         id="duration"
         title="Duration"
         placeholder="e.g. 30s · 2m · 1 minute"
         value={input}
         error={error}
-        onChange={(v) => { setInput(v); setError(undefined); }}
+        onChange={(v) => {
+          setInput(v);
+          setError(undefined);
+        }}
       />
     </Form>
   );
@@ -129,7 +140,7 @@ function SoundPreview({ volume }: { volume: number }) {
                 title={`Preview ${s.label}`}
                 icon={Icon.Play}
                 onAction={() => {
-                  const wavPath = require("path").join(environment.assetsPath, s.id);
+                  const wavPath = path.join(environment.assetsPath, s.id);
                   previewSound(wavPath, volume);
                   showHUD(`▶ Playing ${s.label}`);
                 }}
@@ -142,7 +153,17 @@ function SoundPreview({ volume }: { volume: number }) {
   );
 }
 
-function PomodoroSetup({ volume, sound, alertDuration, onStart }: { volume: number; sound: string; alertDuration: number; onStart?: () => void }) {
+function PomodoroSetup({
+  volume,
+  sound,
+  alertDuration,
+  onStart,
+}: {
+  volume: number;
+  sound: string;
+  alertDuration: number;
+  onStart?: () => void;
+}) {
   const { push, pop } = useNavigation();
   const [workInput, setWorkInput] = useState("25m");
   const [breakInput, setBreakInput] = useState("5m");
@@ -153,14 +174,30 @@ function PomodoroSetup({ volume, sound, alertDuration, onStart }: { volume: numb
   const [cyclesError, setCyclesError] = useState<string | undefined>();
 
   function handleStart() {
-    const { parseFullInput } = require("./utils");
     const work = parseFullInput(workInput)?.seconds;
     const brk = parseFullInput(breakInput)?.seconds;
-    if (!work) { setWorkError("Invalid duration"); return; }
-    if (!brk) { setBreakError("Invalid duration"); return; }
+    if (!work) {
+      setWorkError("Invalid duration");
+      return;
+    }
+    if (!brk) {
+      setBreakError("Invalid duration");
+      return;
+    }
     const maxCycles = cyclesInput ? parseInt(cyclesInput) : 0;
-    if (cyclesInput && (isNaN(maxCycles) || maxCycles < 1)) { setCyclesError("Enter a number ≥ 1, or leave empty for infinite"); return; }
-    const entry = startPomodoro({ workSeconds: work, breakSeconds: brk, note: noteInput, soundFile: sound, volume, alertDuration, maxCycles });
+    if (cyclesInput && (isNaN(maxCycles) || maxCycles < 1)) {
+      setCyclesError("Enter a number ≥ 1, or leave empty for infinite");
+      return;
+    }
+    const entry = startPomodoro({
+      workSeconds: work,
+      breakSeconds: brk,
+      note: noteInput,
+      soundFile: sound,
+      volume,
+      alertDuration,
+      maxCycles,
+    });
     onStart?.();
     pop();
     push(<PomodoroRunning pomodoroId={entry.id} />);
@@ -175,10 +212,46 @@ function PomodoroSetup({ volume, sound, alertDuration, onStart }: { volume: numb
         </ActionPanel>
       }
     >
-      <Form.TextField id="work" title="Work interval" placeholder="e.g. 25m" value={workInput} error={workError} onChange={(v) => { setWorkInput(v); setWorkError(undefined); }} />
-      <Form.TextField id="brk" title="Break interval" placeholder="e.g. 5m" value={breakInput} error={breakError} onChange={(v) => { setBreakInput(v); setBreakError(undefined); }} />
-      <Form.TextField id="cycles" title="Cycles (optional)" placeholder="e.g. 4 — leave empty for infinite" value={cyclesInput} error={cyclesError} onChange={(v) => { setCyclesInput(v); setCyclesError(undefined); }} />
-      <Form.TextField id="note" title="Note (optional)" placeholder="What are you working on?" value={noteInput} onChange={setNoteInput} />
+      <Form.TextField
+        id="work"
+        title="Work interval"
+        placeholder="e.g. 25m"
+        value={workInput}
+        error={workError}
+        onChange={(v) => {
+          setWorkInput(v);
+          setWorkError(undefined);
+        }}
+      />
+      <Form.TextField
+        id="brk"
+        title="Break interval"
+        placeholder="e.g. 5m"
+        value={breakInput}
+        error={breakError}
+        onChange={(v) => {
+          setBreakInput(v);
+          setBreakError(undefined);
+        }}
+      />
+      <Form.TextField
+        id="cycles"
+        title="Cycles (optional)"
+        placeholder="e.g. 4 — leave empty for infinite"
+        value={cyclesInput}
+        error={cyclesError}
+        onChange={(v) => {
+          setCyclesInput(v);
+          setCyclesError(undefined);
+        }}
+      />
+      <Form.TextField
+        id="note"
+        title="Note (optional)"
+        placeholder="What are you working on?"
+        value={noteInput}
+        onChange={setNoteInput}
+      />
     </Form>
   );
 }
@@ -242,7 +315,8 @@ export default function Command() {
   );
   const [activeCount, setActiveCount] = useState<number>(0);
   const [alertDuration, setAlertDurationState] = useState<number>(0);
-  const [notificationsEnabled, setNotificationsEnabledState] = useState<boolean>(true);
+  const [notificationsEnabled, setNotificationsEnabledState] =
+    useState<boolean>(true);
   const [finishedCount, setFinishedCount] = useState<number>(0);
   const [historyCount, setHistoryCount] = useState<number>(0);
   const { push } = useNavigation();
@@ -350,9 +424,16 @@ export default function Command() {
   const currentSoundLabel =
     SOUND_OPTIONS.find((s) => s.id === sound)?.label ?? "Classic";
   const currentAlertDurationLabel =
-    ALERT_DURATION_OPTIONS.find((o) => o.seconds === alertDuration)?.label ?? "Until dismissed";
+    ALERT_DURATION_OPTIONS.find((o) => o.seconds === alertDuration)?.label ??
+    "Until dismissed";
 
-  function makeActions(seconds: number, note = "", primaryAction?: () => void, primaryTitle?: string, primaryIcon?: string) {
+  function makeActions(
+    seconds: number,
+    note = "",
+    primaryAction?: () => void,
+    primaryTitle?: string,
+    primaryIcon?: string,
+  ) {
     return (
       <ActionPanel>
         <Action
@@ -371,7 +452,15 @@ export default function Command() {
           title="History"
           icon={Icon.Clock}
           shortcut={{ modifiers: ["ctrl"], key: "h" }}
-          onAction={() => push(<HistoryTimers onRefresh={refreshCounts} autoPop={false} onRepeatTimer={(e) => repeatHistoryEntry(e)} />)}
+          onAction={() =>
+            push(
+              <HistoryTimers
+                onRefresh={refreshCounts}
+                autoPop={false}
+                onRepeatTimer={(e) => repeatHistoryEntry(e)}
+              />,
+            )
+          }
         />
         <Action
           title="Input Guide"
@@ -446,20 +535,29 @@ export default function Command() {
                   />
                 ))}
                 <Action
-                  title="Custom..."
+                  title="Custom…"
                   icon={Icon.Pencil}
-                  onAction={() => push(<AlertDurationForm current={alertDuration} onSave={changeAlertDuration} />)}
+                  onAction={() =>
+                    push(
+                      <AlertDurationForm
+                        current={alertDuration}
+                        onSave={changeAlertDuration}
+                      />,
+                    )
+                  }
                 />
               </ActionPanel.Submenu>
               <Action
-                title="Sound Preview..."
+                title="Sound Preview…"
                 icon={Icon.Play}
                 onAction={() => push(<SoundPreview volume={volume} />)}
               />
             </ActionPanel.Section>
           </ActionPanel.Submenu>
           <ActionPanel.Submenu
-            title={notificationsEnabled ? "Notifications: On" : "Notifications: Off"}
+            title={
+              notificationsEnabled ? "Notifications: On" : "Notifications: Off"
+            }
             icon={notificationsEnabled ? Icon.Bell : Icon.BellDisabled}
           >
             <Action
@@ -517,52 +615,76 @@ export default function Command() {
         onSearchTextChange={setSearchText}
         throttle={false}
       >
-        {isPomodoroKeyword(searchText) ? (() => {
-          const parsed = parsePomodoroInput(searchText);
-          if (parsed === "setup" || parsed === null) {
+        {isPomodoroKeyword(searchText) ? (
+          (() => {
+            const parsed = parsePomodoroInput(searchText);
+            if (parsed === "setup" || parsed === null) {
+              return (
+                <List.Section title="Pomodoro">
+                  <List.Item
+                    icon={{ source: Icon.Clock, tintColor: Color.Red }}
+                    title="Start Pomodoro"
+                    subtitle={
+                      parsed === null
+                        ? "Invalid format — try [pomo:25m:5m]"
+                        : "↵ to configure"
+                    }
+                    actions={
+                      <ActionPanel>
+                        <Action
+                          title="Configure Pomodoro"
+                          icon={Icon.Clock}
+                          onAction={() =>
+                            push(
+                              <PomodoroSetup
+                                volume={volume}
+                                sound={sound}
+                                alertDuration={alertDuration}
+                                onStart={() => setSearchText("")}
+                              />,
+                            )
+                          }
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                </List.Section>
+              );
+            }
             return (
               <List.Section title="Pomodoro">
                 <List.Item
                   icon={{ source: Icon.Clock, tintColor: Color.Red }}
-                  title="Start Pomodoro"
-                  subtitle={parsed === null ? "Invalid format — try [pomo:25m:5m]" : "↵ to configure"}
+                  title={`Pomodoro: ${formatLabel(parsed.workSeconds)} work + ${formatLabel(parsed.breakSeconds)} break${parsed.maxCycles ? ` · ${parsed.maxCycles} cycles` : ""}`}
+                  subtitle={parsed.note ? `📝 ${parsed.note}` : "↵ to start"}
                   actions={
                     <ActionPanel>
                       <Action
-                        title="Configure Pomodoro"
+                        title="Start Pomodoro"
                         icon={Icon.Clock}
-                        onAction={() => push(<PomodoroSetup volume={volume} sound={sound} alertDuration={alertDuration} onStart={() => setSearchText("")} />)}
+                        onAction={() => {
+                          const entry = startPomodoro({
+                            workSeconds: parsed.workSeconds,
+                            breakSeconds: parsed.breakSeconds,
+                            note: parsed.note,
+                            soundFile: sound,
+                            volume,
+                            alertDuration,
+                            maxCycles: parsed.maxCycles ?? 0,
+                          });
+                          refreshCounts();
+                          setSearchText("");
+                          push(<PomodoroRunning pomodoroId={entry.id} />);
+                        }}
                       />
                     </ActionPanel>
                   }
                 />
               </List.Section>
             );
-          }
-          return (
-            <List.Section title="Pomodoro">
-              <List.Item
-                icon={{ source: Icon.Clock, tintColor: Color.Red }}
-                title={`Pomodoro: ${formatLabel(parsed.workSeconds)} work + ${formatLabel(parsed.breakSeconds)} break${parsed.maxCycles ? ` · ${parsed.maxCycles} cycles` : ""}`}
-                subtitle={parsed.note ? `📝 ${parsed.note}` : "↵ to start"}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Start Pomodoro"
-                      icon={Icon.Clock}
-                      onAction={() => {
-                        const entry = startPomodoro({ workSeconds: parsed.workSeconds, breakSeconds: parsed.breakSeconds, note: parsed.note, soundFile: sound, volume, alertDuration, maxCycles: parsed.maxCycles ?? 0 });
-                        refreshCounts();
-                        setSearchText("");
-                        push(<PomodoroRunning pomodoroId={entry.id} />);
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            </List.Section>
-          );
-        })() : isStopwatchInput(searchText) ? (() => {
+          })()
+        ) : isStopwatchInput(searchText) ? (
+          (() => {
             const swNote = parseStopwatchNote(searchText);
             return (
               <List.Section title="Stopwatch">
@@ -587,7 +709,8 @@ export default function Command() {
                 />
               </List.Section>
             );
-          })() : parsed !== null ? (
+          })()
+        ) : parsed !== null ? (
           <List.Section title="Custom">
             <List.Item
               icon={{ source: Icon.Clock, tintColor: Color.Blue }}
@@ -596,7 +719,8 @@ export default function Command() {
               actions={makeActions(parsed, parsedNote)}
             />
           </List.Section>
-        ) : (() => {
+        ) : (
+          (() => {
             const suggestions = generateSuggestions(searchText);
             if (suggestions.length > 0) {
               return (
@@ -604,7 +728,10 @@ export default function Command() {
                   {suggestions.map((s) => (
                     <List.Item
                       key={`sug-${s.seconds}`}
-                      icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
+                      icon={{
+                        source: Icon.Clock,
+                        tintColor: Color.SecondaryText,
+                      }}
                       title={`Start: ${s.label}`}
                       subtitle="↵ to start"
                       actions={makeActions(s.seconds)}
@@ -617,10 +744,13 @@ export default function Command() {
               <List.EmptyView
                 icon={Icon.QuestionMark}
                 title="Can't parse that time"
-                description={'Try "5m", "1h30", "sw" for stopwatch, or "pomo:25m:5m" for pomodoro'}
+                description={
+                  'Try "5m", "1h30", "sw" for stopwatch, or "pomo:25m:5m" for pomodoro'
+                }
               />
             );
-          })()}
+          })()
+        )}
       </List>
     );
   }
@@ -641,21 +771,51 @@ export default function Command() {
             <Grid.Item
               content={{ source: Icon.CheckCircle, tintColor: Color.Red }}
               title={`${finishedCount} Finished`}
-              actions={makeActions(0, "", () => { refreshCounts(); push(<FinishedTimers onRefresh={refreshCounts} />); }, "Open Finished Timers", Icon.CheckCircle)}
+              actions={makeActions(
+                0,
+                "",
+                () => {
+                  refreshCounts();
+                  push(<FinishedTimers onRefresh={refreshCounts} />);
+                },
+                "Open Finished Timers",
+                Icon.CheckCircle,
+              )}
             />
           )}
           {activeCount > 0 && (
             <Grid.Item
               content={{ source: Icon.Clock, tintColor: Color.Orange }}
               title={`${activeCount} Active`}
-              actions={makeActions(0, "", () => { refreshCounts(); push(<ActiveTimers onRefresh={refreshCounts} />); }, "Open Active Timers", Icon.Clock)}
+              actions={makeActions(
+                0,
+                "",
+                () => {
+                  refreshCounts();
+                  push(<ActiveTimers onRefresh={refreshCounts} />);
+                },
+                "Open Active Timers",
+                Icon.Clock,
+              )}
             />
           )}
           {historyCount > 0 && (
             <Grid.Item
               content={{ source: Icon.List, tintColor: Color.SecondaryText }}
               title="History"
-              actions={makeActions(0, "", () => push(<HistoryTimers onRefresh={refreshCounts} onRepeatTimer={(e) => repeatHistoryEntry(e)} />), "Open History", Icon.List)}
+              actions={makeActions(
+                0,
+                "",
+                () =>
+                  push(
+                    <HistoryTimers
+                      onRefresh={refreshCounts}
+                      onRepeatTimer={(e) => repeatHistoryEntry(e)}
+                    />,
+                  ),
+                "Open History",
+                Icon.List,
+              )}
             />
           )}
         </Grid.Section>

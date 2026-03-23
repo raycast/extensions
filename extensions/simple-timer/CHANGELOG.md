@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.1] - 2026-03-23
+## [1.0.1] - {PR_MERGE_DATE}
 
 ### Fixed
 - Sound label in timer/pomodoro detail view now shows the correct per-timer sound instead of the global setting
@@ -8,7 +8,7 @@
 
 ---
 
-## [1.0.0] - 2026-03-23
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 

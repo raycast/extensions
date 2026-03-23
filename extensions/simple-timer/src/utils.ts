@@ -12,15 +12,14 @@ export async function setVolume(v: number): Promise<void> {
   await LocalStorage.setItem(VOLUME_KEY, v);
 }
 
-
 const ALERT_DURATION_KEY = "alert-duration";
 export const DEFAULT_ALERT_DURATION = 0; // 0 = until dismissed
 
 export const ALERT_DURATION_OPTIONS = [
-  { label: "5 seconds",          seconds: 5 },
-  { label: "15 seconds",         seconds: 15 },
-  { label: "1 minute",           seconds: 60 },
-  { label: "Until dismissed",    seconds: 0 },
+  { label: "5 seconds", seconds: 5 },
+  { label: "15 seconds", seconds: 15 },
+  { label: "1 minute", seconds: 60 },
+  { label: "Until dismissed", seconds: 0 },
 ];
 
 export async function getAlertDuration(): Promise<number> {
@@ -48,7 +47,9 @@ export async function setNotificationsEnabled(v: boolean): Promise<void> {
 // Rules:
 //   - bare number alone (e.g. "3") is NOT a time
 //   - number must have unit: 3m, 3s, 3h, 1h30, 30m20, @18:00, at 6pm, etc.
-export function parseFullInput(input: string): { seconds: number; note: string } | null {
+export function parseFullInput(
+  input: string,
+): { seconds: number; note: string } | null {
   const raw = input.trim();
   if (!raw) return null;
 
@@ -110,9 +111,12 @@ export function parseFullInput(input: string): { seconds: number; note: string }
 
   // 2) note + time: text ends, time token at end
   //    Time token = \d+[hms] or \d+h\d+ or \d+m\d+ or @/at... or word units
-  const timeTokenPattern = /(?:@\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?|at\s+\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?|\d+h\d+|\d+m\d+|\d+\s*(?:hours?|h\b)|\d+\s*(?:minutes?|mins?|m\b)|\d+\s*(?:seconds?|secs?|s\b)|\d+h\d*m?\d*s?)/i;
+  const timeTokenPattern =
+    /(?:@\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?|at\s+\d{1,2}(?::\d{2})?(?:\s*(?:am|pm))?|\d+h\d+|\d+m\d+|\d+\s*(?:hours?|h\b)|\d+\s*(?:minutes?|mins?|m\b)|\d+\s*(?:seconds?|secs?|s\b)|\d+h\d*m?\d*s?)/i;
 
-  const timeAtEnd = raw.match(new RegExp(`^(.+?)\\s+(${timeTokenPattern.source})$`, "i"));
+  const timeAtEnd = raw.match(
+    new RegExp(`^(.+?)\\s+(${timeTokenPattern.source})$`, "i"),
+  );
   if (timeAtEnd) {
     const note = timeAtEnd[1].trim();
     const timePart = timeAtEnd[2].trim();
@@ -121,7 +125,9 @@ export function parseFullInput(input: string): { seconds: number; note: string }
   }
 
   // 3) time + note: time token first, rest is note
-  const timeAtStart = raw.match(new RegExp(`^(${timeTokenPattern.source})\\s+(.+)$`, "i"));
+  const timeAtStart = raw.match(
+    new RegExp(`^(${timeTokenPattern.source})\\s+(.+)$`, "i"),
+  );
   if (timeAtStart) {
     const timePart = timeAtStart[1].trim();
     const note = timeAtStart[2].trim();
@@ -208,17 +214,10 @@ export function formatElapsed(seconds: number): string {
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  if (h > 0)
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
-
-export interface PomodoroInput {
-  workSeconds: number;
-  breakSeconds: number;
-  note: string;
-  maxCycles: number; // 0 = infinite
-}
-
 
 export interface PomodoroInput {
   workSeconds: number;
@@ -245,26 +244,29 @@ function parsePomoTime(s: string): number | null {
 }
 
 // Matches: pomo:25m:5m | pomodoro:33m40s:7m3s | note pomo:25m:5m | pomo:25m:5m note
-export function parsePomodoroInput(raw: string): PomodoroInput | "setup" | null {
+export function parsePomodoroInput(
+  raw: string,
+): PomodoroInput | "setup" | null {
   const t = raw.trim().replace(/^\[/, "").replace(/\]$/, "").trim();
 
   // Keyword only → setup
   if (/^pomo(?:doro)?$/i.test(t)) return "setup";
 
   // Match pomo keyword position first, then extract note before/after
-  const re = /^(.*?)pomo(?:doro)?[:;]([0-9hms]+)[:;]([0-9hms]+)(?:[:;](\d+))?(.*)$/i;
+  const re =
+    /^(.*?)pomo(?:doro)?[:;]([0-9hms]+)[:;]([0-9hms]+)(?:[:;](\d+))?(.*)$/i;
   const m = t.match(re);
   if (!m) return null;
 
   const noteBefore = (m[1] ?? "").trim();
-  const workStr   = m[2].trim();
-  const breakStr  = m[3].trim();
+  const workStr = m[2].trim();
+  const breakStr = m[3].trim();
   const cyclesStr = m[4] ?? "";
   const noteAfter = (m[5] ?? "").trim();
   const note = [noteBefore, noteAfter].filter(Boolean).join(" ");
 
   const work = parsePomoTime(workStr);
-  const brk  = parsePomoTime(breakStr);
+  const brk = parsePomoTime(breakStr);
   if (!work || !brk) return null;
 
   const maxCycles = cyclesStr ? parseInt(cyclesStr) : 0;
@@ -277,7 +279,9 @@ export function isPomodoroKeyword(input: string): boolean {
   return t.startsWith("pomo");
 }
 
-export function generateSuggestions(input: string): { seconds: number; label: string }[] {
+export function generateSuggestions(
+  input: string,
+): { seconds: number; label: string }[] {
   const t = input.trim();
   if (!t) return [];
 
@@ -291,23 +295,33 @@ export function generateSuggestions(input: string): { seconds: number; label: st
   const results: { seconds: number; label: string }[] = [];
 
   // X minutes (most common)
-  results.push({ seconds: Math.round(n * 60), label: `${n} ${n === 1 ? "minute" : "minutes"}` });
+  results.push({
+    seconds: Math.round(n * 60),
+    label: `${n} ${n === 1 ? "minute" : "minutes"}`,
+  });
 
   // X * 10 minutes (e.g. typing "5" → 50 minutes)
   const tenX = n * 10;
-  if (tenX <= 1440) // max 24h
+  if (tenX <= 1440)
+    // max 24h
     results.push({ seconds: Math.round(tenX * 60), label: `${tenX} minutes` });
 
   // X seconds
-  results.push({ seconds: Math.round(n), label: `${n} ${n === 1 ? "second" : "seconds"}` });
+  results.push({
+    seconds: Math.round(n),
+    label: `${n} ${n === 1 ? "second" : "seconds"}`,
+  });
 
   // X hours (only if reasonable)
   if (n <= 24)
-    results.push({ seconds: Math.round(n * 3600), label: `${n} ${n === 1 ? "hour" : "hours"}` });
+    results.push({
+      seconds: Math.round(n * 3600),
+      label: `${n} ${n === 1 ? "hour" : "hours"}`,
+    });
 
   // Filter out duplicates and zero/negative
   const seen = new Set<number>();
-  return results.filter(r => {
+  return results.filter((r) => {
     if (r.seconds <= 0 || seen.has(r.seconds)) return false;
     seen.add(r.seconds);
     return true;
@@ -316,9 +330,14 @@ export function generateSuggestions(input: string): { seconds: number; label: st
 
 export function isStopwatchInput(input: string): boolean {
   const t = input.trim().toLowerCase();
-  return t === "stopwatch" || t === "sw" || 
-         t.startsWith("sw ") || t.startsWith("stopwatch ") ||
-         t.endsWith(" sw") || t.endsWith(" stopwatch");
+  return (
+    t === "stopwatch" ||
+    t === "sw" ||
+    t.startsWith("sw ") ||
+    t.startsWith("stopwatch ") ||
+    t.endsWith(" sw") ||
+    t.endsWith(" stopwatch")
+  );
 }
 
 export function parseStopwatchNote(input: string): string {
@@ -332,12 +351,12 @@ export function parseStopwatchNote(input: string): string {
 }
 
 export const SOUND_OPTIONS = [
-  { id: "alert.wav",  label: "Bell" },
+  { id: "alert.wav", label: "Bell" },
   { id: "alert2.wav", label: "Chime" },
   { id: "alert3.wav", label: "Pulse" },
   { id: "alert4.wav", label: "Soft" },
   { id: "alert5.wav", label: "Digital" },
-  { id: "",           label: "No Sound" },
+  { id: "", label: "No Sound" },
 ];
 
 export async function getSound(): Promise<string> {
@@ -352,20 +371,28 @@ export async function setSound(id: string): Promise<void> {
 const PRESETS_KEY = "custom-presets";
 
 export const DEFAULT_PRESETS: { label: string; seconds: number }[] = [
-  { label: "1 minute",  seconds: 60 },
+  { label: "1 minute", seconds: 60 },
   { label: "2 minutes", seconds: 120 },
   { label: "5 minutes", seconds: 300 },
   { label: "10 minutes", seconds: 600 },
   { label: "30 minutes", seconds: 1800 },
-  { label: "1 hour",    seconds: 3600 },
+  { label: "1 hour", seconds: 3600 },
 ];
 
-export async function getPresets(): Promise<{ label: string; seconds: number }[]> {
+export async function getPresets(): Promise<
+  { label: string; seconds: number }[]
+> {
   const raw = await LocalStorage.getItem<string>(PRESETS_KEY);
   if (!raw) return DEFAULT_PRESETS;
-  try { return JSON.parse(raw); } catch { return DEFAULT_PRESETS; }
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return DEFAULT_PRESETS;
+  }
 }
 
-export async function savePresets(presets: { label: string; seconds: number }[]): Promise<void> {
+export async function savePresets(
+  presets: { label: string; seconds: number }[],
+): Promise<void> {
   await LocalStorage.setItem(PRESETS_KEY, JSON.stringify(presets));
 }

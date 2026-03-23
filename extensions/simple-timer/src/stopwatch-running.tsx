@@ -10,7 +10,14 @@ import {
   Form,
 } from "@raycast/api";
 import { formatElapsed } from "./utils";
-import { TimerEntry, readState, writeState, pauseTimer, resumeTimer, cancelTimer } from "./timer-state";
+import {
+  TimerEntry,
+  readState,
+  writeState,
+  pauseTimer,
+  resumeTimer,
+  cancelTimer,
+} from "./timer-state";
 
 interface Props {
   stopwatchId: string;
@@ -22,9 +29,12 @@ export function StopwatchRunning({ stopwatchId }: Props) {
 
   function refresh() {
     const state = readState();
-    const t = state.timers.find(t => t.id === stopwatchId) ?? null;
-    if (!t) { pop(); return; }
-    setSw(prev => {
+    const t = state.timers.find((t) => t.id === stopwatchId) ?? null;
+    if (!t) {
+      pop();
+      return;
+    }
+    setSw((prev) => {
       if (!prev) return t;
       if (prev.elapsed === t.elapsed && prev.status === t.status) return prev;
       return t;
@@ -39,7 +49,7 @@ export function StopwatchRunning({ stopwatchId }: Props) {
 
   async function handleStop() {
     const state = readState();
-    const t = state.timers.find(t => t.id === stopwatchId);
+    const t = state.timers.find((t) => t.id === stopwatchId);
     if (t) {
       const historyEntry = {
         id: t.id,
@@ -49,7 +59,7 @@ export function StopwatchRunning({ stopwatchId }: Props) {
         dismissedAt: Date.now(),
       };
       state.history = [historyEntry, ...state.history].slice(0, 10);
-      state.timers = state.timers.filter(t => t.id !== stopwatchId);
+      state.timers = state.timers.filter((t) => t.id !== stopwatchId);
       writeState(state);
     } else {
       cancelTimer(stopwatchId);
@@ -74,9 +84,10 @@ export function StopwatchRunning({ stopwatchId }: Props) {
 
   const noteSection = `\n\n---\n\n${sw.note ? sw.note : "> *You can add a note via Actions (Ctrl+K).*"}`;
 
-  const markdown = sw.status === "paused"
-    ? `<div align="center">\n\n&nbsp;\n\n# ⏸ ${formatElapsed(sw.elapsed)}\n\n&nbsp;\n\n</div>${noteSection}`
-    : `<div align="center">\n\n&nbsp;\n\n# ${formatElapsed(sw.elapsed)}\n\n&nbsp;\n\n</div>${noteSection}`;
+  const markdown =
+    sw.status === "paused"
+      ? `<div align="center">\n\n&nbsp;\n\n# ⏸ ${formatElapsed(sw.elapsed)}\n\n&nbsp;\n\n</div>${noteSection}`
+      : `<div align="center">\n\n&nbsp;\n\n# ${formatElapsed(sw.elapsed)}\n\n&nbsp;\n\n</div>${noteSection}`;
 
   return (
     <Detail
@@ -86,7 +97,10 @@ export function StopwatchRunning({ stopwatchId }: Props) {
           <Detail.Metadata.Label
             title="Stopwatch"
             text={sw.status === "paused" ? "Paused" : "Running"}
-            icon={{ source: sw.status === "paused" ? Icon.Pause : Icon.Play, tintColor: sw.status === "paused" ? Color.Yellow : Color.Green }}
+            icon={{
+              source: sw.status === "paused" ? Icon.Pause : Icon.Play,
+              tintColor: sw.status === "paused" ? Color.Yellow : Color.Green,
+            }}
           />
           <Detail.Metadata.Label
             title="Elapsed"
@@ -97,11 +111,7 @@ export function StopwatchRunning({ stopwatchId }: Props) {
       }
       actions={
         <ActionPanel>
-          <Action
-            title="Back"
-            icon={Icon.ArrowLeft}
-            onAction={pop}
-          />
+          <Action title="Back" icon={Icon.ArrowLeft} onAction={pop} />
           <Action
             title="Stop"
             icon={{ source: Icon.Stop, tintColor: Color.Red }}
@@ -113,27 +123,37 @@ export function StopwatchRunning({ stopwatchId }: Props) {
             <Action
               title={sw.note ? "Edit Note" : "Add Note"}
               icon={sw.note ? Icon.Pencil : Icon.Plus}
-              onAction={() => push(
-                <Form
-                  navigationTitle={sw.note ? "Edit Note" : "Add Note"}
-                  actions={
-                    <ActionPanel>
-                      <Action.SubmitForm
-                        title="Save"
-                        onSubmit={(v: { note: string }) => {
-                          const state = readState();
-                          const t = state.timers.find(t => t.id === sw.id);
-                          if (t) { t.note = v.note; writeState(state); }
-                          pop();
-                          refresh();
-                        }}
-                      />
-                    </ActionPanel>
-                  }
-                >
-                  <Form.TextField id="note" title="Note" placeholder="What are you tracking?" defaultValue={sw.note} />
-                </Form>
-              )}
+              onAction={() =>
+                push(
+                  <Form
+                    navigationTitle={sw.note ? "Edit Note" : "Add Note"}
+                    actions={
+                      <ActionPanel>
+                        <Action.SubmitForm
+                          title="Save"
+                          onSubmit={(v: { note: string }) => {
+                            const state = readState();
+                            const t = state.timers.find((t) => t.id === sw.id);
+                            if (t) {
+                              t.note = v.note;
+                              writeState(state);
+                            }
+                            pop();
+                            refresh();
+                          }}
+                        />
+                      </ActionPanel>
+                    }
+                  >
+                    <Form.TextField
+                      id="note"
+                      title="Note"
+                      placeholder="What are you tracking?"
+                      defaultValue={sw.note}
+                    />
+                  </Form>,
+                )
+              }
             />
           </ActionPanel.Section>
           {sw.status === "running" ? (

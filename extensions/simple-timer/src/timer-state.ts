@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { environment, LocalStorage } from "@raycast/api";
+import { environment, LocalStorage, showHUD, open } from "@raycast/api";
 import { spawn } from "child_process";
 import { formatLabel } from "./utils";
 
@@ -47,7 +47,16 @@ interface TimerState {
 }
 
 const STATE_PATH = path.join(environment.supportPath, "timers.json");
-const WORKER_PATH = path.join(environment.assetsPath, "timer-worker", "bin", "Release", "net10.0-windows", "win-x64", "publish", "timer-worker.exe");
+const WORKER_PATH = path.join(
+  environment.assetsPath,
+  "timer-worker",
+  "bin",
+  "Release",
+  "net10.0-windows",
+  "win-x64",
+  "publish",
+  "timer-worker.exe",
+);
 const ASSETS_PATH = environment.assetsPath;
 const RECENT_KEY = "recent-timers";
 const MAX_RECENT = 3;
@@ -70,7 +79,12 @@ export function writeState(state: TimerState): void {
 
 function isDaemonRunning(pid?: number): boolean {
   if (!pid) return false;
-  try { process.kill(pid, 0); return true; } catch { return false; }
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function ensureDaemon(): void {
@@ -78,21 +92,21 @@ function ensureDaemon(): void {
   if (isDaemonRunning(state.daemonPid)) return;
 
   // Check if worker exists
-  if (!require("fs").existsSync(WORKER_PATH)) {
-    const { showHUD } = require("@raycast/api");
+  if (!fs.existsSync(WORKER_PATH)) {
     showHUD("⚠️ Timer worker not found — please reinstall the extension");
     return;
   }
 
   const child = spawn(WORKER_PATH, [STATE_PATH, ASSETS_PATH], {
-    detached: true, stdio: "pipe", windowsHide: false,
+    detached: true,
+    stdio: "pipe",
+    windowsHide: false,
   });
 
   // Detect .NET Runtime missing
   child.stderr?.on("data", (data: Buffer) => {
     const msg = data.toString();
     if (msg.includes("You must install") || msg.includes(".NET")) {
-      const { showHUD, open } = require("@raycast/api");
       showHUD("⚠️ .NET Runtime required — click to download");
       open("https://aka.ms/dotnet/download");
     }
@@ -173,7 +187,8 @@ export function startPomodoro(params: {
 }): TimerEntry {
   const state = readState();
   // For pomodoro, if alertDuration is 0 (until dismissed), use 5s so phases auto-advance
-  const pomAlertDuration = params.alertDuration === 0 ? 5 : params.alertDuration;
+  const pomAlertDuration =
+    params.alertDuration === 0 ? 5 : params.alertDuration;
   const entry: TimerEntry = {
     id: generateId(),
     type: "pomodoro",
@@ -201,13 +216,16 @@ export function startPomodoro(params: {
 
 export function pauseTimer(id: string): void {
   const state = readState();
-  const t = state.timers.find(t => t.id === id);
-  if (t && t.status === "running") { t.status = "paused"; writeState(state); }
+  const t = state.timers.find((t) => t.id === id);
+  if (t && t.status === "running") {
+    t.status = "paused";
+    writeState(state);
+  }
 }
 
 export function resumeTimer(id: string): void {
   const state = readState();
-  const t = state.timers.find(t => t.id === id);
+  const t = state.timers.find((t) => t.id === id);
   if (t && t.status === "paused") {
     t.status = "running";
     t.lastTick = Date.now();
@@ -218,40 +236,55 @@ export function resumeTimer(id: string): void {
 
 export function cancelTimer(id: string): void {
   const state = readState();
-  state.timers = state.timers.filter(t => t.id !== id);
+  state.timers = state.timers.filter((t) => t.id !== id);
   writeState(state);
 }
 
 export async function dismissTimer(id: string): Promise<void> {
   const state = readState();
-  const t = state.timers.find(t => t.id === id);
+  const t = state.timers.find((t) => t.id === id);
 
   if (t) {
     // Save to recent (for pomodoro save workSeconds, for stopwatch skip)
     if (t.type !== "stopwatch") {
-      const recentSeconds = t.type === "pomodoro" ? (t.pomodoroWorkSeconds ?? t.totalSeconds) : t.totalSeconds;
+      const recentSeconds =
+        t.type === "pomodoro"
+          ? (t.pomodoroWorkSeconds ?? t.totalSeconds)
+          : t.totalSeconds;
       const raw = await LocalStorage.getItem<string>(RECENT_KEY);
       const existing: number[] = raw ? JSON.parse(raw) : [];
-      const updated = [recentSeconds, ...existing.filter(s => s !== recentSeconds)].slice(0, MAX_RECENT);
+      const updated = [
+        recentSeconds,
+        ...existing.filter((s) => s !== recentSeconds),
+      ].slice(0, MAX_RECENT);
       await LocalStorage.setItem(RECENT_KEY, JSON.stringify(updated));
     }
 
     // Save to history with proper label
-    const label = t.type === "pomodoro"
-      ? `Pomodoro ${formatLabel(t.pomodoroWorkSeconds ?? 0)}+${formatLabel(t.pomodoroBreakSeconds ?? 0)} · ${t.pomodoroCycle ?? 1}${(t.pomodoroMaxCycles ?? 0) > 0 ? `/${t.pomodoroMaxCycles}` : ""} cycles`
-      : t.label;
+    const label =
+      t.type === "pomodoro"
+        ? `Pomodoro ${formatLabel(t.pomodoroWorkSeconds ?? 0)}+${formatLabel(t.pomodoroBreakSeconds ?? 0)} · ${t.pomodoroCycle ?? 1}${(t.pomodoroMaxCycles ?? 0) > 0 ? `/${t.pomodoroMaxCycles}` : ""} cycles`
+        : t.label;
     const historyEntry: HistoryEntry = {
       id: t.id,
       label,
       note: t.note,
-      totalSeconds: t.type === "pomodoro" ? (t.pomodoroWorkSeconds ?? t.totalSeconds) : t.totalSeconds,
+      totalSeconds:
+        t.type === "pomodoro"
+          ? (t.pomodoroWorkSeconds ?? t.totalSeconds)
+          : t.totalSeconds,
       dismissedAt: Date.now(),
-      ...(t.type === "pomodoro" ? { pomodoroBreakSeconds: t.pomodoroBreakSeconds, pomodoroMaxCycles: t.pomodoroMaxCycles } : {}),
+      ...(t.type === "pomodoro"
+        ? {
+            pomodoroBreakSeconds: t.pomodoroBreakSeconds,
+            pomodoroMaxCycles: t.pomodoroMaxCycles,
+          }
+        : {}),
     };
     state.history = [historyEntry, ...state.history].slice(0, MAX_HISTORY);
   }
 
-  state.timers = state.timers.filter(t => t.id !== id);
+  state.timers = state.timers.filter((t) => t.id !== id);
   writeState(state);
 }
 
@@ -262,11 +295,13 @@ export function clearHistory(): void {
 }
 
 export function getActiveTimers(): TimerEntry[] {
-  return readState().timers.filter(t => t.status === "running" || t.status === "paused");
+  return readState().timers.filter(
+    (t) => t.status === "running" || t.status === "paused",
+  );
 }
 
 export function getDoneTimers(): TimerEntry[] {
-  return readState().timers.filter(t => t.status === "done");
+  return readState().timers.filter((t) => t.status === "done");
 }
 
 export function getHistory(): HistoryEntry[] {
@@ -279,10 +314,18 @@ export function setNotificationsInState(enabled: boolean): void {
   writeState(state);
 }
 
-export function updateTimerSound(id: string, soundFile: string, volume: number): void {
+export function updateTimerSound(
+  id: string,
+  soundFile: string,
+  volume: number,
+): void {
   const state = readState();
-  const t = state.timers.find(t => t.id === id);
-  if (t) { t.soundFile = soundFile; t.volume = volume; writeState(state); }
+  const t = state.timers.find((t) => t.id === id);
+  if (t) {
+    t.soundFile = soundFile;
+    t.volume = volume;
+    writeState(state);
+  }
 }
 
 export function killAllTimers(): void {
@@ -290,7 +333,12 @@ export function killAllTimers(): void {
 
   // Kill worker process
   if (state.daemonPid) {
-    try { process.kill(state.daemonPid, 0); process.kill(state.daemonPid); } catch { /* ignore */ }
+    try {
+      process.kill(state.daemonPid, 0);
+      process.kill(state.daemonPid);
+    } catch {
+      /* ignore */
+    }
   }
 
   state.timers = [];

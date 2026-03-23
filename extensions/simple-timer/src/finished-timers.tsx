@@ -1,14 +1,31 @@
 import { useEffect, useState } from "react";
-import { List, Action, ActionPanel, Icon, Color, showHUD, useNavigation, Detail } from "@raycast/api";
-import { TimerEntry, getDoneTimers, dismissTimer, cancelTimer } from "./timer-state";
+import {
+  List,
+  Action,
+  ActionPanel,
+  Icon,
+  Color,
+  showHUD,
+  useNavigation,
+  Detail,
+} from "@raycast/api";
+import {
+  TimerEntry,
+  getDoneTimers,
+  dismissTimer,
+  cancelTimer,
+} from "./timer-state";
 import { stopAlertSound } from "./sound";
-import { formatLabel } from "./utils";
 
 interface Props {
   onRefresh?: () => void;
 }
 
-function FinishedDetail({ timer, onDismiss, onCancel }: {
+function FinishedDetail({
+  timer,
+  onDismiss,
+  onCancel,
+}: {
   timer: TimerEntry;
   onDismiss: () => void;
   onCancel: () => void;
@@ -34,14 +51,20 @@ function FinishedDetail({ timer, onDismiss, onCancel }: {
           <Action
             title="Dismiss"
             icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-            onAction={() => { onDismiss(); pop(); }}
+            onAction={() => {
+              onDismiss();
+              pop();
+            }}
           />
           <Action
             title="Cancel"
             icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["ctrl"], key: "return" }}
-            onAction={() => { onCancel(); pop(); }}
+            onAction={() => {
+              onCancel();
+              pop();
+            }}
           />
           <Action
             title="Back"
@@ -77,14 +100,18 @@ export function FinishedTimers({ onRefresh }: Props) {
   if (timers.length === 0) {
     return (
       <List navigationTitle="Finished Timers">
-        <List.EmptyView icon={Icon.CheckCircle} title="No finished timers" description="Timers will appear here when they complete" />
+        <List.EmptyView
+          icon={Icon.CheckCircle}
+          title="No finished timers"
+          description="Timers will appear here when they complete"
+        />
       </List>
     );
   }
 
   return (
     <List navigationTitle={`Finished Timers (${timers.length})`}>
-      {timers.map(t => (
+      {timers.map((t) => (
         <List.Item
           key={t.id}
           icon={{ source: Icon.CheckCircle, tintColor: Color.Red }}
@@ -96,25 +123,27 @@ export function FinishedTimers({ onRefresh }: Props) {
               <Action
                 title="Open"
                 icon={Icon.Eye}
-                onAction={() => push(
-                  <FinishedDetail
-                    timer={t}
-                    onDismiss={async () => {
-                      stopAlertSound(t.id);
-                      await dismissTimer(t.id);
-                      showHUD(`✅ ${t.label} dismissed`);
-                      onRefresh?.();
-                      refresh();
-                    }}
-                    onCancel={() => {
-                      stopAlertSound(t.id);
-                      cancelTimer(t.id);
-                      showHUD(`❌ ${t.label} cancelled`);
-                      onRefresh?.();
-                      refresh();
-                    }}
-                  />
-                )}
+                onAction={() =>
+                  push(
+                    <FinishedDetail
+                      timer={t}
+                      onDismiss={async () => {
+                        stopAlertSound(t.id);
+                        await dismissTimer(t.id);
+                        showHUD(`✅ ${t.label} dismissed`);
+                        onRefresh?.();
+                        refresh();
+                      }}
+                      onCancel={() => {
+                        stopAlertSound(t.id);
+                        cancelTimer(t.id);
+                        showHUD(`❌ ${t.label} cancelled`);
+                        onRefresh?.();
+                        refresh();
+                      }}
+                    />,
+                  )
+                }
               />
               <Action
                 title="Cancel"

@@ -1,6 +1,20 @@
 import { useEffect, useState } from "react";
-import { List, Action, ActionPanel, Icon, Color, showHUD, useNavigation } from "@raycast/api";
-import { TimerEntry, getActiveTimers, pauseTimer, resumeTimer, cancelTimer } from "./timer-state";
+import {
+  List,
+  Action,
+  ActionPanel,
+  Icon,
+  Color,
+  showHUD,
+  useNavigation,
+} from "@raycast/api";
+import {
+  TimerEntry,
+  getActiveTimers,
+  pauseTimer,
+  resumeTimer,
+  cancelTimer,
+} from "./timer-state";
 import { stopAlertSound } from "./sound";
 import { formatCountdown, formatElapsed } from "./utils";
 import { StopwatchRunning } from "./stopwatch-running";
@@ -28,8 +42,8 @@ export function ActiveTimers({ onRefresh }: Props) {
     return () => clearInterval(interval);
   }, []);
 
-  const running = timers.filter(t => t.status === "running");
-  const paused  = timers.filter(t => t.status === "paused");
+  const running = timers.filter((t) => t.status === "running");
+  const paused = timers.filter((t) => t.status === "paused");
 
   function renderTimer(t: TimerEntry) {
     const isStopwatch = t.type === "stopwatch";
@@ -38,19 +52,27 @@ export function ActiveTimers({ onRefresh }: Props) {
     const subtitle = isStopwatch
       ? formatElapsed(t.elapsed)
       : isPomodoro
-      ? `${formatCountdown(t.remaining)}  ${pomPhase} · Cycle ${t.pomodoroCycle ?? 1}`
-      : formatCountdown(t.remaining);
+        ? `${formatCountdown(t.remaining)}  ${pomPhase} · Cycle ${t.pomodoroCycle ?? 1}`
+        : formatCountdown(t.remaining);
 
     return (
       <List.Item
         key={t.id}
-        icon={t.type === "stopwatch"
-          ? { source: Icon.Stopwatch, tintColor: t.status === "running" ? Color.Blue : Color.Yellow }
-          : t.type === "pomodoro"
-          ? { source: Icon.Clock, tintColor: t.pomodoroPhase === "work" ? Color.Red : Color.Green }
-          : t.status === "running"
-          ? { source: Icon.Play, tintColor: Color.Green }
-          : { source: Icon.Pause, tintColor: Color.Yellow }
+        icon={
+          t.type === "stopwatch"
+            ? {
+                source: Icon.Stopwatch,
+                tintColor: t.status === "running" ? Color.Blue : Color.Yellow,
+              }
+            : t.type === "pomodoro"
+              ? {
+                  source: Icon.Clock,
+                  tintColor:
+                    t.pomodoroPhase === "work" ? Color.Red : Color.Green,
+                }
+              : t.status === "running"
+                ? { source: Icon.Play, tintColor: Color.Green }
+                : { source: Icon.Pause, tintColor: Color.Yellow }
         }
         title={t.label}
         subtitle={subtitle}
@@ -58,13 +80,20 @@ export function ActiveTimers({ onRefresh }: Props) {
         actions={
           <ActionPanel>
             <Action
-              title={t.type === "stopwatch" ? "Open Stopwatch" : t.type === "pomodoro" ? "Open Pomodoro" : "Open Timer"}
+              title={
+                t.type === "stopwatch"
+                  ? "Open Stopwatch"
+                  : t.type === "pomodoro"
+                    ? "Open Pomodoro"
+                    : "Open Timer"
+              }
               icon={t.type === "stopwatch" ? Icon.Stopwatch : Icon.Clock}
-              onAction={() => t.type === "stopwatch"
-                ? push(<StopwatchRunning stopwatchId={t.id} />)
-                : t.type === "pomodoro"
-                ? push(<PomodoroRunning pomodoroId={t.id} />)
-                : push(<TimerRunning timerId={t.id} />)
+              onAction={() =>
+                t.type === "stopwatch"
+                  ? push(<StopwatchRunning stopwatchId={t.id} />)
+                  : t.type === "pomodoro"
+                    ? push(<PomodoroRunning pomodoroId={t.id} />)
+                    : push(<TimerRunning timerId={t.id} />)
               }
             />
             <Action
@@ -72,21 +101,32 @@ export function ActiveTimers({ onRefresh }: Props) {
               icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "return" }}
-              onAction={() => { stopAlertSound(t.id); cancelTimer(t.id); refresh(); showHUD(`❌ ${t.label} cancelled`); }}
+              onAction={() => {
+                stopAlertSound(t.id);
+                cancelTimer(t.id);
+                refresh();
+                showHUD(`❌ ${t.label} cancelled`);
+              }}
             />
             {t.status === "running" ? (
               <Action
                 title="Pause"
                 icon={{ source: Icon.Pause, tintColor: Color.Yellow }}
                 shortcut={{ modifiers: [], key: "space" }}
-                onAction={() => { pauseTimer(t.id); refresh(); }}
+                onAction={() => {
+                  pauseTimer(t.id);
+                  refresh();
+                }}
               />
             ) : (
               <Action
                 title="Resume"
                 icon={{ source: Icon.Play, tintColor: Color.Green }}
                 shortcut={{ modifiers: [], key: "space" }}
-                onAction={() => { resumeTimer(t.id); refresh(); }}
+                onAction={() => {
+                  resumeTimer(t.id);
+                  refresh();
+                }}
               />
             )}
           </ActionPanel>
@@ -98,15 +138,23 @@ export function ActiveTimers({ onRefresh }: Props) {
   if (timers.length === 0) {
     return (
       <List navigationTitle="Active Timers">
-        <List.EmptyView icon={Icon.Stopwatch} title="No active timers" description="All timers are either finished or none started" />
+        <List.EmptyView
+          icon={Icon.Stopwatch}
+          title="No active timers"
+          description="All timers are either finished or none started"
+        />
       </List>
     );
   }
 
   return (
     <List navigationTitle="Active Timers">
-      {running.length > 0 && <List.Section title="Running">{running.map(renderTimer)}</List.Section>}
-      {paused.length  > 0 && <List.Section title="Paused">{paused.map(renderTimer)}</List.Section>}
+      {running.length > 0 && (
+        <List.Section title="Running">{running.map(renderTimer)}</List.Section>
+      )}
+      {paused.length > 0 && (
+        <List.Section title="Paused">{paused.map(renderTimer)}</List.Section>
+      )}
     </List>
   );
 }
