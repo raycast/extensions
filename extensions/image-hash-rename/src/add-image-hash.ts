@@ -1,13 +1,8 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { createHash } from "crypto";
-import {
-  createReadStream,
-  existsSync,
-  readdirSync,
-  renameSync,
-  statSync,
-} from "fs";
-import { extname, join, basename } from "path";
+import { createReadStream, constants } from "fs";
+import { access, readdir, rename, stat } from "fs/promises";
+import { basename, extname, join } from "path";
 
 const IMAGE_EXTENSIONS = new Set([
   ".jpg",
@@ -33,19 +28,35 @@ function md5Hash(filePath: string): Promise<string> {
   });
 }
 
-function isImage(filePath: string): boolean {
-  return IMAGE_EXTENSIONS.has(extname(filePath).toLowerCase());
+function isImage(filename: string): boolean {
+  return IMAGE_EXTENSIONS.has(extname(filename).toLowerCase());
 }
 
-/** Returns true if filename already looks like name.XXXXXXXX.ext (8-char hex hash) */
-function alreadyHashed(filename: string): boolean {
+/**
+ * If the filename matches the `name.XXXXXXXX.ext` pattern, returns the
+ * 8-char hex candidate embedded in it. Otherwise returns null.
+ *
+ * The caller is responsible for verifying the candidate against the actual
+ * file content before deciding to skip the file — a name-only check risks
+ * false positives for files like `logo.deadbeef.png` that were never
+ * processed by this tool but happen to carry an 8-char hex segment.
+ */
+function extractHashCandidate(filename: string): string | null {
   const ext = extname(filename);
   const stem = basename(filename, ext);
-  // stem must contain at least one dot — last segment is the hash
   const parts = stem.split(".");
-  if (parts.length < 2) return false;
+  if (parts.length < 2) return null;
   const last = parts[parts.length - 1];
-  return /^[0-9a-f]{8}$/.test(last);
+  return /^[0-9a-f]{8}$/.test(last) ? last : null;
+}
+
+async function fileExists(filePath: string): Promise<boolean> {
+  try {
+    await access(filePath, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export default async function main() {
@@ -58,38 +69,58 @@ export default async function main() {
   });
 
   try {
-    const entries = readdirSync(folder);
-    const images = entries.filter((f) => {
-      const full = join(folder, f);
-      return statSync(full).isFile() && isImage(f) && !alreadyHashed(f);
-    });
+    const entries = await readdir(folder);
 
-    if (images.length === 0) {
+    // Stat all entries concurrently; keep only plain image files.
+    const imageFiles = (
+      await Promise.all(
+        entries.map(async (f) => {
+          const full = join(folder, f);
+          const info = await stat(full);
+          return info.isFile() && isImage(f) ? { filename: f, full } : null;
+        }),
+      )
+    ).filter((x): x is { filename: string; full: string } => x !== null);
+
+    if (imageFiles.length === 0) {
       await showToast({
         style: Toast.Style.Success,
         title: "Nothing to rename",
-        message: "All images already have a hash, or the folder is empty.",
+        message: "No image files found in the folder.",
       });
       return;
     }
 
     let renamed = 0;
+    let skipped = 0;
     const errors: string[] = [];
 
-    for (const filename of images) {
-      const full = join(folder, filename);
+    for (const { filename, full } of imageFiles) {
       const ext = extname(filename);
       const stem = basename(filename, ext);
       try {
+        // Compute the hash once and reuse it for both the idempotency check
+        // and the new filename — avoids hashing each file twice.
         const hash = await md5Hash(full);
+
+        // True idempotency: skip only when the hash embedded in the filename
+        // matches the actual content hash. A pure name-based check would
+        // incorrectly skip files like `logo.deadbeef.png` whose hex segment
+        // was never written by this tool.
+        if (extractHashCandidate(filename) === hash) {
+          skipped++;
+          continue;
+        }
+
         const newName = `${stem}.${hash}${ext}`;
         const newPath = join(folder, newName);
-        if (existsSync(newPath)) {
+
+        if (await fileExists(newPath)) {
           errors.push(
             `${filename}: target "${newName}" already exists, skipping`,
           );
         } else {
-          renameSync(full, newPath);
+          await rename(full, newPath);
           renamed++;
         }
       } catch (err) {
@@ -97,6 +128,15 @@ export default async function main() {
           `${filename}: ${err instanceof Error ? err.message : String(err)}`,
         );
       }
+    }
+
+    if (renamed === 0 && errors.length === 0) {
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Nothing to rename",
+        message: `All ${skipped} image${skipped === 1 ? "" : "s"} already have a hash.`,
+      });
+      return;
     }
 
     if (errors.length > 0) {
