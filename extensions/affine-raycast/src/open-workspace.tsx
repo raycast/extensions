@@ -6,10 +6,7 @@ export default function OpenWorkspaceCommand() {
   const [workspaces, setWorkspaces] = useState<AffineWorkspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { baseUrl, apiToken } = getPreferenceValues<{
-    baseUrl: string;
-    apiToken: string;
-  }>();
+  const { baseUrl, apiToken } = getPreferenceValues<Preferences.OpenWorkspace>();
 
   useEffect(() => {
     if (!apiToken) {
@@ -43,7 +40,7 @@ export default function OpenWorkspaceCommand() {
           subtitle={ws.public ? "Public" : "Private"}
           accessories={[
             {
-              text: new Date(ws.createdAt).toLocaleDateString(),
+              text: new Date(ws.createdAt).toLocaleDateString("en-US"),
             },
           ]}
           actions={

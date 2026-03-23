@@ -1,10 +1,7 @@
 import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
 
 export default function SetupMCPCommand() {
-  const { baseUrl, apiToken } = getPreferenceValues<{
-    baseUrl: string;
-    apiToken: string;
-  }>();
+  const { baseUrl, apiToken } = getPreferenceValues<Preferences.SetupMcp>();
 
   const hasToken = Boolean(apiToken?.trim());
   const configSnippet = hasToken

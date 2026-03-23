@@ -1,4 +1,4 @@
-# AFFiNE Changelog
+# AFFiNE Extension Changelog
 
 ## [Initial release: search, open, desktop app links] - {PR_MERGE_DATE}
 

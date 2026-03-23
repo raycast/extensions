@@ -7,10 +7,7 @@ export default function SearchDocsCommand() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { baseUrl, apiToken } = getPreferenceValues<{
-    baseUrl: string;
-    apiToken: string;
-  }>();
+  const { baseUrl, apiToken } = getPreferenceValues<Preferences.SearchDocs>();
 
   useEffect(() => {
     if (!query.trim() || !apiToken) {
@@ -53,7 +50,7 @@ export default function SearchDocsCommand() {
               key={`${workspaceId}-${doc.docId}`}
               title={doc.title || "Untitled"}
               subtitle={doc.highlight ?? undefined}
-              accessories={[{ text: new Date(doc.updatedAt).toLocaleDateString() }]}
+              accessories={[{ text: new Date(doc.updatedAt).toLocaleDateString("en-US") }]}
               actions={
                 <ActionPanel>
                   <Action.Open target={desktopUrl} title="Open in Desktop App" />

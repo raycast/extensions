@@ -1,4 +1,4 @@
-# AFFiNE Raycast Extension
+# AFFiNE Extension
 
 Quick commands to search and open AFFiNE workspaces and documents from Raycast. Uses the AFFiNE GraphQL API (same as [DAWNCR0W/affine-mcp-server](https://github.com/DAWNCR0W/affine-mcp-server)).
 
@@ -15,9 +15,11 @@ Quick commands to search and open AFFiNE workspaces and documents from Raycast. 
 ## Setup
 
 1. **Extension preferences** (Raycast → Preferences → Extensions → AFFiNE):
-  - **AFFiNE URL**: Use `https://app.affine.pro` for Cloud and for the **desktop app** (desktop has no HTTP API; use Cloud sync). Self-hosted: e.g. `http://localhost:3010`.
-  - **API Token**: From AFFiNE → Settings → Integrations → MCP Server (Cloud or your self-hosted instance).
-  - **Default Workspace ID** (optional): Required for "Open AFFiNE Document". Find it in the browser URL when you open a workspace.
+
+- **AFFiNE URL**: Use `https://app.affine.pro` for Cloud and for the **desktop app** (desktop has no HTTP API; use Cloud sync). Self-hosted: e.g. `http://localhost:3010`.
+- **API Token**: From AFFiNE → Settings → Integrations → MCP Server (Cloud or your self-hosted instance).
+- **Default Workspace ID** (optional): Required for "Open AFFiNE Document". Find it in the browser URL when you open a workspace.
+
 2. **Icon**: Place a 512×512 PNG as `assets/icon.png` (or use Raycast's "Create Extension" to generate assets).
 
 ## Development

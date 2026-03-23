@@ -151,19 +151,20 @@ export async function searchAllWorkspaces(
   limitPerWorkspace: number = 20,
 ): Promise<SearchResult[]> {
   const workspaces = await getWorkspaces(baseUrl, token);
-  const results: SearchResult[] = [];
   const perWs = Math.max(5, Math.ceil(limitPerWorkspace / workspaces.length));
-  for (const ws of workspaces) {
-    try {
-      const docs = await searchWorkspace(baseUrl, token, ws.id, keyword, perWs);
-      if (docs.length > 0) {
-        results.push({ workspaceId: ws.id, docs });
-      }
-    } catch {
-      // Skip workspace on error
-    }
-  }
-  return results;
+
+  const searchResults = await Promise.allSettled(
+    workspaces.map((ws) =>
+      searchWorkspace(baseUrl, token, ws.id, keyword, perWs).then((docs) => ({
+        workspaceId: ws.id,
+        docs,
+      })),
+    ),
+  );
+
+  return searchResults
+    .filter((r): r is PromiseFulfilledResult<SearchResult> => r.status === "fulfilled" && r.value.docs.length > 0)
+    .map((r) => r.value);
 }
 
 /** Build URL to open a document in the browser. */

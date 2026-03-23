@@ -6,11 +6,7 @@ export default function OpenDocCommand() {
   const [docs, setDocs] = useState<AffineDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { baseUrl, apiToken, workspaceId } = getPreferenceValues<{
-    baseUrl: string;
-    apiToken: string;
-    workspaceId?: string;
-  }>();
+  const { baseUrl, apiToken, workspaceId } = getPreferenceValues<Preferences.OpenDoc>();
 
   useEffect(() => {
     if (!apiToken) {
@@ -51,7 +47,7 @@ export default function OpenDocCommand() {
             title={doc.title || "Untitled"}
             accessories={[
               {
-                text: new Date(doc.updatedAt).toLocaleDateString(),
+                text: new Date(doc.updatedAt).toLocaleDateString("en-US"),
               },
             ]}
             actions={
