@@ -1,23 +1,11 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  launchCommand,
-  LaunchType,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useCollections } from "./hooks";
+import { baseUrl, headers, useCollections } from "./hooks";
 import { ApiResponse, Link } from "./interfaces";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [collectionId, setCollectionId] = useState("");
 
@@ -26,7 +14,6 @@ export default function Command() {
   // NOTE: GET /api/v1/links is deprecated per Linkwarden API docs.
   // Migrate to GET /api/v1/search when feasible.
   // See: https://docs.linkwarden.app/api/retrieve-a-list-of-links
-  const baseUrl = preferences.LinkwardenUrl.replace(/\/+$/, "");
   const searchParams = new URLSearchParams({
     sort: "0",
     searchQueryString: searchText,
@@ -45,10 +32,8 @@ export default function Command() {
     data,
     error: linksError,
     revalidate,
-  } = useFetch(`${baseUrl}/api/v1/links?${searchParams.toString()}`, {
-    headers: {
-      Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-    },
+  } = useFetch(`${baseUrl}links?${searchParams.toString()}`, {
+    headers,
     mapResult(result: ApiResponse<Link[]>) {
       return {
         data: result.response,
@@ -70,10 +55,8 @@ export default function Command() {
 
   const deleteLink = async (id: number) => {
     try {
-      await axios.delete(`${baseUrl}/api/v1/links/${id}`, {
-        headers: {
-          Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-        },
+      await axios.delete(`${baseUrl}links/${id}`, {
+        headers,
       });
 
       showToast({
