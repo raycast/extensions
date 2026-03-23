@@ -315,18 +315,24 @@ class HttpDevinClient implements DevinClient {
 }
 
 let client: DevinClient | undefined;
+let cachedApiKey: string | undefined;
+let cachedApiBaseUrl: string | undefined;
+let cachedAppBaseUrl: string | undefined;
 
 export function getDevinClient(): DevinClient {
-  if (client) {
-    return client;
-  }
-
   const preferences = getExtensionPreferences();
-  client = new HttpDevinClient(
-    normalizeBaseUrl(preferences.apiBaseUrl),
-    normalizeBaseUrl(preferences.appBaseUrl),
-    preferences.apiKey,
-  );
+  const apiKey = preferences.apiKey;
+  const apiBaseUrl = normalizeBaseUrl(preferences.apiBaseUrl);
+  const appBaseUrl = normalizeBaseUrl(preferences.appBaseUrl);
+
+  // Recreate the client if preferences changed so updates in the extension
+  // preferences are reflected without restarting the extension process.
+  if (!client || apiKey !== cachedApiKey || apiBaseUrl !== cachedApiBaseUrl || appBaseUrl !== cachedAppBaseUrl) {
+    client = new HttpDevinClient(apiBaseUrl, appBaseUrl, apiKey);
+    cachedApiKey = apiKey;
+    cachedApiBaseUrl = apiBaseUrl;
+    cachedAppBaseUrl = appBaseUrl;
+  }
 
   return client;
 }

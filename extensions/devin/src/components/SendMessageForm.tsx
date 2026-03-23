@@ -17,6 +17,16 @@ export function SendMessageForm({ sessionId, onSent }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: FormValues) {
+    if (!values.message || !values.message.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Message required",
+        message: "Please enter a message before sending.",
+      });
+
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

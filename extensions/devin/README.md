@@ -1,4 +1,4 @@
-# Devin for Raycast
+# Devin
 
 Manage Devin sessions from Raycast.
 

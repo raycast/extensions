@@ -25,6 +25,16 @@ export function CreateSessionForm({ onCreated }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(values: FormValues) {
+    if (!values.prompt || !values.prompt.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Prompt required",
+        message: "Please enter a prompt before creating a session.",
+      });
+
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {

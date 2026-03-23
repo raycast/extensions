@@ -107,7 +107,7 @@ export function buildSessionMarkdown(session: SessionSummary, detail?: SessionDe
         .slice(-5)
         .map((message) => {
           const author = formatMessageAuthor(message.author);
-          const timestamp = message.createdAt ? ` · ${new Date(message.createdAt).toLocaleString()}` : "";
+          const timestamp = message.createdAt ? ` · ${new Date(message.createdAt).toLocaleString("en-US")}` : "";
 
           return `**${author}**${timestamp}\n\n${message.body}`;
         })
@@ -115,8 +115,8 @@ export function buildSessionMarkdown(session: SessionSummary, detail?: SessionDe
     : "_No messages returned by the API._";
   const metadataLines = [
     `**Status**  \n${session.statusLabel}`,
-    `**Updated**  \n${new Date(session.updatedAt).toLocaleString()}`,
-    `**Created**  \n${new Date(session.createdAt).toLocaleString()}`,
+    `**Updated**  \n${new Date(session.updatedAt).toLocaleString("en-US")}`,
+    `**Created**  \n${new Date(session.createdAt).toLocaleString("en-US")}`,
     `**Session ID**  \n\`${session.id}\``,
     `**Tags**  \n${tags}`,
     session.requestingUserEmail ? `**Creator**  \n${session.requestingUserEmail}` : undefined,

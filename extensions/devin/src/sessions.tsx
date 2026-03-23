@@ -24,6 +24,7 @@ export default function Command() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [recents, setRecents] = useState<string[]>([]);
   const [details, setDetails] = useState<Record<string, SessionDetail>>({});
+  const detailsRef = useRef(details);
   const [selectedId, setSelectedId] = useState<string | undefined>();
   const [searchText, setSearchText] = useState("");
   const [hasMore, setHasMore] = useState(false);
@@ -87,8 +88,12 @@ export default function Command() {
   );
 
   useEffect(() => {
+    // Use a ref for details to avoid unnecessary re-runs when the details object
+    // identity changes. We only want to fetch when the selectedId changes and
+    // there's no cached detail for that id.
+    detailsRef.current = details;
     const sessionId = selectedId;
-    if (!sessionId || details[sessionId]) {
+    if (!sessionId || detailsRef.current[sessionId]) {
       return;
     }
 
@@ -112,7 +117,11 @@ export default function Command() {
     return () => {
       cancelled = true;
     };
-  }, [client, details, selectedId]);
+  }, [client, selectedId]);
+
+  useEffect(() => {
+    detailsRef.current = details;
+  }, [details]);
 
   async function recordSessionTouch(sessionId: string) {
     const nextRecents = await touchRecentSessionId(sessionId);
@@ -162,7 +171,7 @@ export default function Command() {
             const accessories: List.Item.Accessory[] = [
               {
                 text: relativeTime(session.updatedAt),
-                tooltip: new Date(session.updatedAt).toLocaleString(),
+                tooltip: new Date(session.updatedAt).toLocaleString("en-US"),
               },
             ];
 
