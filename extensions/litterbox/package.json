@@ -25,7 +25,6 @@
     {
       "name": "upload-to-litterbox",
       "title": "Upload to Litterbox",
-      "subtitle": "Temporary file hosting",
       "description": "Upload files to Litterbox with 1h, 12h, 24h, or 72h expiry using the file picker; the shareable URL is copied to the clipboard.",
       "keywords": [
         "upload",
@@ -38,8 +37,8 @@
     },
     {
       "name": "recent-uploads",
-      "title": "Recent Uploads",
-      "subtitle": "Litterbox history",
+      "title": "View Recent Uploads",
+      "subtitle": "Litterbox",
       "description": "View recent Litterbox uploads with copy-URL and open-in-browser actions. Entries are shown until they expire (1h–72h depending on upload).",
       "keywords": [
         "recent",
