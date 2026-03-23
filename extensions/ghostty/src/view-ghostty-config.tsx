@@ -1,4 +1,5 @@
-import { readFileSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { dirname } from "path";
 import { homedir } from "os";
 import { join } from "path";
 import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
@@ -6,7 +7,7 @@ import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 
 const CONFIG_PATH = join(homedir(), ".config", "ghostty", "config");
-const HEX_RE = /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/;
+const HEX_RE = /#([0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/;
 
 interface ConfigEntry {
   key: string;
@@ -488,6 +489,7 @@ export default function Command() {
   const configuredKeys = new Set(entries.map((e) => e.key));
 
   const saveRaw = (newRaw: string) => {
+    mkdirSync(dirname(CONFIG_PATH), { recursive: true });
     writeFileSync(CONFIG_PATH, newRaw, "utf-8");
     setRaw(newRaw);
   };
