@@ -17,12 +17,6 @@ Browse and search the full theSVG library. Filter by category, preview icons, an
 - **View Details** (`Cmd+D`) - See all variants, SVG source, and metadata
 - **Copy Color** - Copy the brand hex color (Detail view only)
 
-### Quick Copy
-
-Copy a brand SVG instantly without opening Raycast's UI. Type the brand name as an argument.
-
-Example: `Copy Brand Icon` > `github` copies the GitHub SVG to your clipboard.
-
 ## Preferences
 
 | Setting         | Description                                        | Default               |

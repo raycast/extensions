@@ -21,21 +21,6 @@
       "subtitle": "theSVG",
       "description": "Search 4,000+ brand SVG icons. Copy SVG, download, or open in browser.",
       "mode": "view"
-    },
-    {
-      "name": "copy-icon",
-      "title": "Copy Brand Icon",
-      "subtitle": "theSVG",
-      "description": "Quick copy a brand SVG by name",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "github, vercel, openai...",
-          "type": "text",
-          "required": true
-        }
-      ]
     }
   ],
   "preferences": [
