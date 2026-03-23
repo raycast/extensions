@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { Preferences } from "./types/preferences";
 import { applyWallpaperUpdate, isValidFile } from "./utils";
+import { DescriptionCache, getDescriptions } from "./ai-descriptions";
 import {
   Action,
   ActionPanel,
@@ -53,16 +54,22 @@ async function ensureThumbnailDir(dirHash: string) {
 
 async function createThumbnail(filePath: string, specificThumbDir: string): Promise<string> {
   try {
-    const fileName = path.basename(filePath);
-    const sanitizedFileName = sanitizeFileName(fileName);
-    const thumbnailPath = path.join(specificThumbDir, `thumb_${sanitizedFileName}`);
+    // Always use .jpg extension — sips outputs JPEG format
+    const baseName = path.basename(filePath, path.extname(filePath));
+    const sanitizedBase = sanitizeFileName(baseName);
+    const thumbnailPath = path.join(specificThumbDir, `thumb_${sanitizedBase}.jpg`);
 
     try {
       await stat(thumbnailPath);
       return thumbnailPath;
     } catch {
-      // Use sips to create thumbnail directly from source file
-      await execPromise(`sips -Z 300 -s format jpeg --out "${thumbnailPath}" "${filePath}"`);
+      // sips child process can't write to Application Support or /tmp (sandbox restriction).
+      // Write to TMPDIR (user-scoped temp dir) first, then copy via Node.js.
+      const tmpDir = process.env.TMPDIR ?? "/var/folders";
+      const tmpPath = path.join(tmpDir, `raycast-thumb-${sanitizedBase}-${Date.now()}.jpg`);
+      await execPromise(`sips -Z 300 -s format jpeg --out "${tmpPath}" "${filePath}"`);
+      await fs.promises.copyFile(tmpPath, thumbnailPath);
+      fs.promises.unlink(tmpPath).catch(() => undefined);
       return thumbnailPath;
     }
   } catch (error) {
@@ -105,6 +112,7 @@ export default function Command() {
   const [wallpapers, setWallpapers] = useState<FileWithThumbnail[]>([]);
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [descriptions, setDescriptions] = useState<DescriptionCache>({});
 
   useEffect(() => {
     getWallpapers()
@@ -113,7 +121,31 @@ export default function Command() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const filteredWallpapers = wallpapers.filter((file) => file.name.toLowerCase().includes(searchText.toLowerCase()));
+  // Load AI descriptions in background — used for subtitle tags and unified search
+  useEffect(() => {
+    if (wallpapers.length > 0) {
+      getDescriptions(wallpapers)
+        .then(setDescriptions)
+        .catch((error) => console.error("Error loading AI descriptions:", error));
+    }
+  }, [wallpapers]);
+
+  // Unified search: score by keyword overlap across filename + description + tags
+  const displayedWallpapers = (() => {
+    if (!searchText.trim()) return wallpapers;
+    const queryWords = searchText.toLowerCase().split(/\s+/).filter(Boolean);
+    return wallpapers
+      .map((file) => {
+        const desc = descriptions[file.path];
+        const baseName = path.basename(file.name, path.extname(file.name)).replace(/[-_]/g, " ");
+        const haystack = [baseName, desc?.description, desc?.tags].filter(Boolean).join(" ").toLowerCase();
+        const score = queryWords.reduce((acc, word) => acc + (haystack.includes(word) ? 1 : 0), 0);
+        return { file, score };
+      })
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ file }) => file);
+  })();
 
   const columnCount = {
     small: 7,
@@ -128,30 +160,37 @@ export default function Command() {
       aspectRatio="16/9"
       filtering={false}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search for wallpapers"
+      searchBarPlaceholder="Search by name, color, mood, or style…"
       isLoading={isLoading}
     >
-      <Grid.EmptyView icon={Icon.Image} title="No wallpapers found. Add some images." />
-      {filteredWallpapers.map((file) => (
-        <Grid.Item
-          key={file.path}
-          title={preferences.showTitle ? file.name.split(".")[0].replace(/[-_]/g, " ") : ""}
-          content={{ source: file.thumbnail }}
-          actions={
-            <ActionPanel>
-              <Action title="Set as Wallpaper" icon={Icon.Desktop} onAction={() => applyWallpaperUpdate(file.path)} />
-              <Action.ShowInFinder path={file.path} />
-              <Action title="Open Wallpaper Folder" icon={Icon.Folder} onAction={() => open(wallpaperDir)} />
-              <Action
-                title="Open Preferences"
-                icon={Icon.Gear}
-                onAction={() => openExtensionPreferences()}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      <Grid.EmptyView
+        icon={Icon.Image}
+        title={searchText.trim() ? "No matches found" : "No wallpapers found. Add some images."}
+      />
+      {displayedWallpapers.map((file) => {
+        const desc = descriptions[file.path];
+        return (
+          <Grid.Item
+            key={file.path}
+            title={preferences.showTitle ? file.name.split(".")[0].replace(/[-_]/g, " ") : ""}
+            subtitle={desc?.tags || undefined}
+            content={{ source: file.thumbnail }}
+            actions={
+              <ActionPanel>
+                <Action title="Set as Wallpaper" icon={Icon.Desktop} onAction={() => applyWallpaperUpdate(file.path)} />
+                <Action.ShowInFinder path={file.path} />
+                <Action title="Open Wallpaper Folder" icon={Icon.Folder} onAction={() => open(wallpaperDir)} />
+                <Action
+                  title="Open Preferences"
+                  icon={Icon.Gear}
+                  onAction={() => openExtensionPreferences()}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </Grid>
   );
 }
