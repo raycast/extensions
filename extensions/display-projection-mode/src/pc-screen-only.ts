@@ -1,26 +1,5 @@
-import { showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execAsync = promisify(exec);
+import { switchDisplay } from "./switch-display";
 
 export default async function main() {
-  try {
-    await execAsync("DisplaySwitch.exe /internal", {
-      encoding: "utf-8",
-      windowsHide: true,
-    });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Switching to PC Screen Only...",
-    });
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Display mode change failed:", errorMessage);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to change display mode",
-      message: errorMessage,
-    });
-  }
+  await switchDisplay("/internal", "Switching to PC Screen Only...");
 }
