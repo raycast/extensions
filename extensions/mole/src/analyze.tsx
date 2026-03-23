@@ -50,7 +50,7 @@ function useAnalyze(molePath: string, dirPath: string) {
 }
 
 export default function AnalyzeDisk() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
     return <MoleNotInstalled />;
@@ -65,12 +65,12 @@ export default function AnalyzeDisk() {
 function AnalyzeList({ molePath, dirPath }: { molePath: string; dirPath: string }) {
   const { data, isLoading, revalidate } = useAnalyze(molePath, dirPath);
 
-  const sorted = useMemo(() => {
+  const sorted = useMemo<AnalyzeEntry[]>(() => {
     if (!data?.entries) return [];
     return [...data.entries].sort((a, b) => b.size - a.size);
   }, [data]);
 
-  const totalSize = useMemo(() => sorted.reduce((sum, e) => sum + e.size, 0), [sorted]);
+  const totalSize = useMemo<number>(() => sorted.reduce((sum: number, e: AnalyzeEntry) => sum + e.size, 0), [sorted]);
 
   const sizeColor = (size: number): Color => {
     const ratio = totalSize > 0 ? size / totalSize : 0;
@@ -83,7 +83,7 @@ function AnalyzeList({ molePath, dirPath }: { molePath: string; dirPath: string 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={`Browsing ${dirPath}`} navigationTitle={dirPath.split("/").pop()}>
       {isLoading && !data && <List.Item title="Analyzing..." subtitle={dirPath} icon={Icon.MagnifyingGlass} />}
-      {sorted.map((entry) => (
+      {sorted.map((entry: AnalyzeEntry) => (
         <List.Item
           key={entry.path}
           title={entry.name}

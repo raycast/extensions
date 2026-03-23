@@ -1,13 +1,13 @@
 import { List, Icon, Color, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { getMolePathSafe } from "./utils/mole";
 import { type MoleStatus, formatBytes, formatPercent, formatRate } from "./utils/parsers";
 import { getHealthIcon, getUsageColor, getBatteryIcon } from "./utils/icons";
 import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 export default function SystemStatus() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
     return <MoleNotInstalled />;

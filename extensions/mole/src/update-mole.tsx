@@ -1,6 +1,6 @@
 import { Detail, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { runMole, getMolePathSafe } from "./utils/mole";
 import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
@@ -17,6 +17,8 @@ function UpdateView() {
   });
 
   useEffect(() => {
+    let mounted = true;
+
     async function update() {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Updating Mole..." });
       try {
@@ -29,6 +31,8 @@ function UpdateView() {
         toast.style = Toast.Style.Success;
         toast.title = alreadyUpToDate ? "No updates available" : "Mole updated successfully";
 
+        if (!mounted) return;
+
         setResult({
           status: "success",
           message: alreadyUpToDate ? "You're on the latest version." : "Mole has been updated.",
@@ -36,6 +40,7 @@ function UpdateView() {
         });
       } catch (err) {
         await showFailureToast(err, { title: "Update failed" });
+        if (!mounted) return;
         setResult({
           status: "error",
           message: err instanceof Error ? err.message : "Unknown error",
@@ -43,7 +48,12 @@ function UpdateView() {
         });
       }
     }
+
     update();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const markdown =
@@ -57,7 +67,7 @@ function UpdateView() {
 }
 
 export default function UpdateMole() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
     return <MoleNotInstalled />;

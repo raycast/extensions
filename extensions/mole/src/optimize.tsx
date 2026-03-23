@@ -1,12 +1,11 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert } from "@raycast/api";
 import { useCachedPromise, showFailureToast } from "@raycast/utils";
-import { useMemo } from "react";
 import { getMolePathSafe, runMole } from "./utils/mole";
 import { parseOptimizeDryRun } from "./utils/parsers";
 import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 export default function OptimizeSystem() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
     return <MoleNotInstalled />;

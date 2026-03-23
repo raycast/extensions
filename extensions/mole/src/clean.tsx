@@ -1,7 +1,7 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { spawn, type ChildProcess } from "child_process";
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getMolePathSafe, runMole, MOLE_ENV } from "./utils/mole";
 import { parseCleanDryRun, type CleanDryRunResult } from "./utils/parsers";
 import { MoleNotInstalled } from "./components/MoleNotInstalled";
@@ -73,7 +73,7 @@ function useStreamingClean(molePath: string) {
 }
 
 export default function CleanSystem() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
     return <MoleNotInstalled />;

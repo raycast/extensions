@@ -3,7 +3,7 @@
 ## [Friendly Install Screen] - {PR_MERGE_DATE}
 
 - Added MoleNotInstalled component with multiple install options when Mole CLI is not found
-- Install via Homebrew Raycast extension, Homebrew Terminal, curl script, or GitHub page
+- Added install options via Homebrew Raycast extension, Homebrew Terminal, curl script, and GitHub page.
 - Improved Update Mole command to show current version after update check
 - Changed Update Mole from no-view to view mode for better UX
 

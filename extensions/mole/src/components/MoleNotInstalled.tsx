@@ -17,10 +17,13 @@ function openInBrewExtension() {
   });
 }
 
-function runInTerminal(command: string) {
+type KnownInstallCommand = typeof BREW_COMMAND | typeof SCRIPT_COMMAND;
+
+function runInTerminal(command: KnownInstallCommand) {
+  const escaped = command.replace(/"/g, '\\"');
   execFile(
     "/usr/bin/osascript",
-    ["-e", `tell application "Terminal" to do script "${command}"`, "-e", 'tell application "Terminal" to activate'],
+    ["-e", `tell application "Terminal" to do script "${escaped}"`, "-e", 'tell application "Terminal" to activate'],
     (err) => {
       if (err) {
         showToast({ style: Toast.Style.Failure, title: "Failed to open Terminal", message: err.message });
