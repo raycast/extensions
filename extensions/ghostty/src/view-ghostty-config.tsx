@@ -50,7 +50,7 @@ function getGroup(key: string): string {
   if (key.startsWith("quick-terminal")) return "Quick Terminal";
   if (key.startsWith("clipboard") || key.startsWith("copy") || key.startsWith("selection") || key.startsWith("paste"))
     return "Clipboard";
-  if (key.startsWith("shell") || key === "term" || key === "shell") return "Shell";
+  if (key.startsWith("shell") || key === "term") return "Shell";
   return "General";
 }
 
