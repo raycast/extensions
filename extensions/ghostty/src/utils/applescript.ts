@@ -1,7 +1,7 @@
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
-import { runAppleScript as executeAppleScript } from "run-applescript";
+import { runAppleScript as executeAppleScript } from "@raycast/utils";
 
 const execFileAsync = promisify(execFile);
 
