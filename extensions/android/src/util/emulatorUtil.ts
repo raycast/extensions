@@ -95,7 +95,9 @@ export async function getEmulators(): Promise<Emulator[]> {
 export async function startEmulator(
   emulatorName: string,
   output: ((out: string) => void) | undefined,
-  error: ((error: string) => void) | undefined
+  error: ((error: string) => void) | undefined,
+  extraArgs?: string[]
 ) {
-  runCommand(`${emulatorPath} @${emulatorName}`, output, error);
+  const args = extraArgs ? ` ${extraArgs.join(" ")}` : "";
+  runCommand(`${emulatorPath} @${emulatorName}${args}`, output, error);
 }
