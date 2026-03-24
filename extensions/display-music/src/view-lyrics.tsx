@@ -1,19 +1,29 @@
-import { Detail, showToast, Toast } from "@raycast/api";
+import {
+  Detail,
+  showToast,
+  Toast,
+  ActionPanel,
+  Action,
+  Clipboard,
+  showHUD,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getNowPlaying } from "./apple-music";
+import { getNowPlaying, revealInMusic } from "./apple-music";
 import { fetchLyrics } from "./lyrics";
 
 export default function ViewLyrics() {
   const [markdown, setMarkdown] = useState<string>("Loading lyrics...");
+  const [plainLyrics, setPlainLyrics] = useState<string | null>(null);
   const [trackName, setTrackName] = useState<string>("");
   const [artistName, setArtistName] = useState<string>("");
   const [albumName, setAlbumName] = useState<string>("");
+  const [trackUrl, setTrackUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const { track } = await getNowPlaying();
+        const { track, trackUrl: url } = await getNowPlaying();
 
         if (!track) {
           setMarkdown(
@@ -26,6 +36,7 @@ export default function ViewLyrics() {
         setTrackName(track.name);
         setArtistName(track.artist);
         setAlbumName(track.album);
+        setTrackUrl(url);
 
         const result = await fetchLyrics(track.name, track.artist, track.album);
 
@@ -34,6 +45,7 @@ export default function ViewLyrics() {
         if (!lyrics) {
           setMarkdown("*No lyrics found for this track.*");
         } else {
+          setPlainLyrics(lyrics);
           const formattedLyrics = lyrics
             .split("\n")
             .map((line: string) => (line.trim() === "" ? "\n&nbsp;\n" : line))
@@ -67,6 +79,35 @@ export default function ViewLyrics() {
             <Detail.Metadata.Label title="Album" text={albumName} />
           </Detail.Metadata>
         ) : undefined
+      }
+      actions={
+        <ActionPanel>
+          {plainLyrics && (
+            <Action
+              title="Copy Lyrics"
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              onAction={async () => {
+                await Clipboard.copy(plainLyrics);
+                await showHUD("Lyrics copied!");
+              }}
+            />
+          )}
+          {trackUrl && (
+            <Action
+              title="Copy Link"
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              onAction={async () => {
+                await Clipboard.copy(trackUrl);
+                await showHUD("Link copied!");
+              }}
+            />
+          )}
+          <Action
+            title="Reveal in Music"
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={() => revealInMusic()}
+          />
+        </ActionPanel>
       }
     />
   );
