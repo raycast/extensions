@@ -1,6 +1,6 @@
 # Raycast Zoxide Changelog
 
-## [Fixed Memory Limit Crash] - {PR_MERGE_DATE}
+## [Fixed Memory Limit Crash] - 2026-03-24
 
 - Fixed "JS heap out of memory" crash for users with large zoxide databases by capping rendered results to 500
 - Updated to latest versions of dependency packages
