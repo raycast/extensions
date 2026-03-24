@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { ActionPanel, Action, List, getPreferenceValues, Icon, Form, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
