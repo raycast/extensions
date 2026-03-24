@@ -1,7 +1,8 @@
 import { ActionPanel, Action, Icon, List, Toast, showToast, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Repo, RepoStatus, ProjectGroup } from "./shared/types";
-import { getProjectGroups, countRepos, scanRepos, pullRepo, parallelPull } from "./shared/git";
+import { getProjectGroups, scanRepos, pullRepo, parallelPull } from "./shared/git";
+import { useRepoCounts } from "./shared/hooks";
 import { getStatusIcon, getStatusTag } from "./shared/ui";
 import { EditorActions, OpenInTerminal, CopyBranchName } from "./shared/actions";
 
@@ -160,26 +161,24 @@ function PullProgress({ group }: { group: ProjectGroup }) {
 export default function Command() {
   const groups = getProjectGroups();
   const { push } = useNavigation();
+  const repoCounts = useRepoCounts(groups);
 
   return (
     <List>
-      {groups.map((group) => {
-        const repoCount = countRepos(group.path);
-        return (
-          <List.Item
-            key={group.path}
-            icon={Icon.Folder}
-            title={group.name}
-            accessories={[{ text: `${repoCount} repos` }]}
-            actions={
-              <ActionPanel>
-                <Action title="Pull All" icon={Icon.Download} onAction={() => push(<PullProgress group={group} />)} />
-                <Action.ShowInFinder path={group.path} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {groups.map((group) => (
+        <List.Item
+          key={group.path}
+          icon={Icon.Folder}
+          title={group.name}
+          accessories={[{ text: repoCounts[group.path] != null ? `${repoCounts[group.path]} repos` : undefined }]}
+          actions={
+            <ActionPanel>
+              <Action title="Pull All" icon={Icon.Download} onAction={() => push(<PullProgress group={group} />)} />
+              <Action.ShowInFinder path={group.path} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

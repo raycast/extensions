@@ -11,7 +11,8 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ProjectGroup } from "./shared/types";
-import { getProjectGroups, countRepos, scanRepos, isDirty, getAheadBehind, pullRepo } from "./shared/git";
+import { getProjectGroups, scanRepos, isDirty, getAheadBehind, pullRepo } from "./shared/git";
+import { useRepoCounts } from "./shared/hooks";
 import { EditorActions, OpenInTerminal, CopyBranchName } from "./shared/actions";
 
 type StatusCategory = "dirty" | "diverged" | "ahead" | "behind" | "no-upstream" | "clean";
@@ -210,26 +211,24 @@ function StatusList({ group }: { group: ProjectGroup }) {
 export default function Command() {
   const groups = getProjectGroups();
   const { push } = useNavigation();
+  const repoCounts = useRepoCounts(groups);
 
   return (
     <List>
-      {groups.map((group) => {
-        const repoCount = countRepos(group.path);
-        return (
-          <List.Item
-            key={group.path}
-            icon={Icon.Folder}
-            title={group.name}
-            accessories={[{ text: `${repoCount} repos` }]}
-            actions={
-              <ActionPanel>
-                <Action title="View Status" icon={Icon.Eye} onAction={() => push(<StatusList group={group} />)} />
-                <Action.ShowInFinder path={group.path} />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+      {groups.map((group) => (
+        <List.Item
+          key={group.path}
+          icon={Icon.Folder}
+          title={group.name}
+          accessories={[{ text: repoCounts[group.path] != null ? `${repoCounts[group.path]} repos` : undefined }]}
+          actions={
+            <ActionPanel>
+              <Action title="View Status" icon={Icon.Eye} onAction={() => push(<StatusList group={group} />)} />
+              <Action.ShowInFinder path={group.path} />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

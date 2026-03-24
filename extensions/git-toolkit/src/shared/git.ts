@@ -1,6 +1,6 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { readdirSync, existsSync, statSync } from "fs";
+import { readdir, stat } from "fs/promises";
 import { join, basename } from "path";
 import { homedir } from "os";
 import { getPreferenceValues } from "@raycast/api";
@@ -28,20 +28,32 @@ export function getProjectGroups(): ProjectGroup[] {
     });
 }
 
-export function countRepos(groupPath: string): number {
-  if (!existsSync(groupPath)) return 0;
+async function listRepoPaths(groupPath: string): Promise<string[]> {
   try {
-    return readdirSync(groupPath).filter((entry) => {
-      const fullPath = join(groupPath, entry);
-      try {
-        return statSync(fullPath).isDirectory() && existsSync(join(fullPath, ".git"));
-      } catch {
-        return false;
-      }
-    }).length;
+    const entries = await readdir(groupPath);
+    const checks = await Promise.all(
+      entries.map(async (entry) => {
+        const fullPath = join(groupPath, entry);
+        try {
+          const s = await stat(fullPath);
+          if (s.isDirectory()) {
+            await stat(join(fullPath, ".git"));
+            return fullPath;
+          }
+        } catch {
+          // skip
+        }
+        return null;
+      }),
+    );
+    return checks.filter((p): p is string => p !== null);
   } catch {
-    return 0;
+    return [];
   }
+}
+
+export async function countRepos(groupPath: string): Promise<number> {
+  return (await listRepoPaths(groupPath)).length;
 }
 
 export async function getBranch(repoPath: string): Promise<string> {
@@ -54,26 +66,14 @@ export async function getBranch(repoPath: string): Promise<string> {
 }
 
 export async function scanRepos(groupPath: string): Promise<Repo[]> {
-  if (!existsSync(groupPath)) return [];
+  const repoPaths = await listRepoPaths(groupPath);
 
-  const entries = readdirSync(groupPath);
-
-  const results = await Promise.all(
-    entries.map(async (entry) => {
-      const fullPath = join(groupPath, entry);
-      try {
-        if (statSync(fullPath).isDirectory() && existsSync(join(fullPath, ".git"))) {
-          const branch = await getBranch(fullPath);
-          return { name: entry, path: fullPath, status: "idle" as RepoStatus, branch };
-        }
-      } catch {
-        // skip invalid entries
-      }
-      return null;
+  return Promise.all(
+    repoPaths.map(async (fullPath) => {
+      const branch = await getBranch(fullPath);
+      return { name: basename(fullPath), path: fullPath, status: "idle" as RepoStatus, branch };
     }),
   );
-
-  return results.filter((r): r is Repo => r !== null);
 }
 
 export async function isDirty(repoPath: string): Promise<boolean> {
