@@ -190,8 +190,15 @@ function StatusList({ group }: { group: ProjectGroup }) {
     );
   };
 
+  const summary = !isLoading
+    ? sectionOrder
+        .filter((cat) => repos.some((r) => r.category === cat))
+        .map((cat) => `${repos.filter((r) => r.category === cat).length} ${sectionTitles[cat].toLowerCase()}`)
+        .join(", ")
+    : "";
+
   return (
-    <List isLoading={isLoading || isPulling} navigationTitle={group.name}>
+    <List isLoading={isLoading || isPulling} navigationTitle={summary ? `${group.name} — ${summary}` : group.name}>
       {!isLoading &&
         sectionOrder
           .filter((cat) => repos.some((r) => r.category === cat))

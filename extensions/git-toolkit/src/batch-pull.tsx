@@ -136,11 +136,19 @@ function PullProgress({ group }: { group: ProjectGroup }) {
     />
   );
 
+  const summary = isDone
+    ? sectionOrder
+        .filter((status) => repos.some((r) => r.status === status))
+        .map((status) => `${repos.filter((r) => r.status === status).length} ${sectionTitles[status].toLowerCase()}`)
+        .join(", ")
+    : "";
+
+  let navTitle = group.name;
+  if (isPulling) navTitle = `${group.name} — ${progress.done}/${progress.total}`;
+  else if (summary) navTitle = `${group.name} — ${summary}`;
+
   return (
-    <List
-      isLoading={isLoading || isPulling}
-      navigationTitle={isPulling ? `${group.name} — ${progress.done}/${progress.total}` : group.name}
-    >
+    <List isLoading={isLoading || isPulling} navigationTitle={navTitle}>
       {isDone
         ? sectionOrder
             .filter((status) => repos.some((r) => r.status === status))
