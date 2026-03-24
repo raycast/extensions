@@ -2,7 +2,7 @@ import { popToRoot, showToast, Toast } from "@raycast/api";
 import { postValues } from "./types";
 import { trelloClient } from "./trelloClient";
 
-export const postTodo = async (values: postValues) => {
+export const postCard = async (values: postValues) => {
   try {
     await trelloClient.createCard({
       name: values.name,

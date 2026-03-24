@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { trelloClient } from "./utils/trelloClient";
 import { List } from "./List";
 import { Member } from "./Member";
-import { postTodo } from "./utils/postTodo";
+import { postCard } from "./utils/postCard";
 import { Board } from "./Board";
 
 // TODO: Consolidate with types?
@@ -58,7 +58,7 @@ export default function Command() {
   }
 
   function handleSubmit(values: Values) {
-    postTodo(values);
+    postCard(values);
   }
 
   // BONUS: If clipboard has a URL inject into card description

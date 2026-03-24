@@ -4,6 +4,7 @@
   "title": "Trello",
   "description": "Manage Trello boards, lists, and cards from Raycast",
   "icon": "command-icon.png",
+    "categories": ["Productivity"],
   "author": "ChrisChinchilla",
   "contributors": [
     "jimmy-b36",
@@ -14,17 +15,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Fetch Todos",
-      "subtitle": "Trello",
-      "description": "Fetch all assigned todos",
-      "mode": "view"
-    },
-    {
       "name": "searchTodos",
-      "title": "Search Todos",
+      "title": "Search Cards",
       "subtitle": "Trello",
-      "description": "Search all todos across all your boards",
+      "description": "Search all cards across all your boards",
       "mode": "view"
     },
     {
@@ -36,14 +30,21 @@
     },
     {
       "name": "createTodo",
-      "title": "Create a Todo",
+      "title": "Create a Card",
       "subtitle": "Trello",
       "description": "Create a card on a selected board/list",
       "mode": "view"
     },
+        {
+      "name": "index",
+      "title": "Fetch all Cards",
+      "subtitle": "Trello",
+      "description": "Fetch all assigned cards",
+      "mode": "view"
+    },
     {
       "name": "listCards",
-      "title": "Fetch Cards",
+      "title": "Fetch Cards in a List",
       "subtitle": "Trello",
       "description": "View all cards in a list",
       "mode": "view"
