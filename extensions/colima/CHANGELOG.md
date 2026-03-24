@@ -1,6 +1,6 @@
 # Colima Changelog
 
-## [Save Template Defaults] - {PR_MERGE_DATE}
+## [Save Template Defaults] - 2026-03-24
 
 ### Added
 
