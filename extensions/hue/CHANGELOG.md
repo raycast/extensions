@@ -1,5 +1,12 @@
 # Hue Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Fix crash when setting a scene with certain light colors
+- Downgrade expected network errors (timeouts, connection refused, etc.) and rate limit responses to warnings
+- Treat bridge firmware update errors as expected
+- Update dependencies
+
 ## [Update HTTPS support] - 2025-12-25
 
 - Add CA Certificate
