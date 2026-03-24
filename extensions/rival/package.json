@@ -56,11 +56,11 @@
     "@raycast/utils": "^1.19.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.x",
     "@types/react": "19.x",
     "eslint": "^9.0.0",
-    "prettier": "^3.4.0",
+    "prettier": "^3.8.1",
     "typescript": "^5.7.0"
   },
   "scripts": {

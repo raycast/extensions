@@ -81,7 +81,7 @@ export default function CompareModelsCommand() {
           actions={
             <ActionPanel>
               <Action
-                title="Select as Model A"
+                title="Select as Model a"
                 icon={Icon.ArrowRight}
                 onAction={() =>
                   push(<PickModelB modelA={model} allModels={models} />)
