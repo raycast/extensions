@@ -56,7 +56,7 @@ export default async function tool(
       success: true,
       links,
       total: links.length,
-      total: filtered.length,
+    };
   } catch (error) {
     return {
       success: false,
