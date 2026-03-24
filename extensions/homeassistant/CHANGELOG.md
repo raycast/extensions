@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-03-24
 
 - Show entity area/room names as subtitles in entity lists
  
