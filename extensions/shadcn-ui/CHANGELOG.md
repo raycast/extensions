@@ -1,6 +1,6 @@
 # shadcn/ui Changelog
 
-## [Fix broken Search Components] - {PR_MERGE_DATE}
+## [Fix broken Search Components] - 2026-03-24
 
 - Fix "Search Components" command broken by upstream shadcn/ui repo restructuring (components moved from flat `components/` to `components/radix/` subdirectory)
 - Update GitHub API path, raw content URL, and docs URL to match new upstream structure
