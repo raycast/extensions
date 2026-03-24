@@ -6,10 +6,6 @@ import { getRepoIdentifierFromArgumentOrCurrentTab } from "./get-repo-identifier
 
 const MAX_CONCURRENCY = 5 // Limit concurrent fetches
 
-interface Arguments {
-  repoIdentifier?: string
-}
-
 // Define a type for tracking crawl statistics
 interface CrawlStats {
   attempted: number
@@ -98,7 +94,7 @@ async function crawlPage(
   }
 }
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.CrawlDeepwikiDocs }>) {
   let repoIdentifier: string
 
   try {

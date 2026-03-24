@@ -3,11 +3,7 @@ import { showFailureToast } from "@raycast/utils"
 import { URL } from "url"
 import { getRepoIdentifierFromArgumentOrCurrentTab } from "./get-repo-identifier"
 
-interface OpenDeepwikiArguments {
-  repoIdentifier?: string
-}
-
-export default async function Command(props: LaunchProps<{ arguments: OpenDeepwikiArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenDeepwiki }>) {
   const deepWikiBaseUrl = "https://deepwiki.com/"
 
   let targetUrl = ""

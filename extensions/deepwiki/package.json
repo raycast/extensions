@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepwiki",
   "version": "0.2.2",
-  "title": "Deepwiki",
+  "title": "DeepWiki",
   "description": "Search, open, and crawl DeepWiki pages for GitHub repositories.",
   "icon": "deep-wiki.png",
   "author": "vivek",
@@ -18,7 +18,7 @@
   "commands": [
     {
       "name": "open-deepwiki",
-      "title": "Open Deepwiki Page",
+      "title": "Open DeepWiki Page",
       "description": "Open DeepWiki for a GitHub repo URL, org/repo, or the current browser tab.",
       "mode": "no-view",
       "arguments": [
@@ -32,13 +32,13 @@
     },
     {
       "name": "search-deepwiki",
-      "title": "Search Deepwiki Repos",
+      "title": "Search DeepWiki Repos",
       "description": "Search repositories indexed by DeepWiki.",
       "mode": "view"
     },
     {
       "name": "crawl-deepwiki-docs",
-      "title": "Crawl Deepwiki Docs",
+      "title": "Crawl DeepWiki Docs",
       "description": "Crawl DeepWiki docs for a repo URL, org/repo, or the current browser tab.",
       "mode": "no-view",
       "arguments": [
