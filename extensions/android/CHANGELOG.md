@@ -1,6 +1,6 @@
 # Android Changelog
 
-## [Feature Update] - {PR_MERGE_DATE}
+## [Feature Update] - 2026-03-24
 
 - Add "Start (Cold Boot)" emulator action
 
