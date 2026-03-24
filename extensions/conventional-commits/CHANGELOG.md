@@ -1,6 +1,6 @@
 # Conventional Commits Changelog
 
-## [Dependency Upgrades] - {PR_MERGE_DATE}
+## [Dependency Upgrades] - 2026-03-24
 
 - [CHORE] Upgraded all dependencies to latest versions (Raycast API v1.104.11, TypeScript v5.8.3, Prettier v3.8.1)
 - [CHORE] Migrated ESLint config to flat format required by ESLint 9
