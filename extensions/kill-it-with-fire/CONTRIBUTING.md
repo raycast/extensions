@@ -30,11 +30,10 @@ Open Raycast and search for **"Kill It With Fire!"** to test.
 | `swift/overlay.swift` | Native macOS overlay (transparent window + WebView) |
 | `assets/flame.html` | Self-contained flame animation (loaded by the overlay) |
 | `scripts/build-overlay.sh` | Compiles the Swift source into `assets/overlay` |
-| `demo/` | Standalone browser demo (not part of the extension) |
 
 ## Development Workflow
 
-1. **Modify the flame animation** → Edit `assets/flame.html`. Reload from Raycast or use the browser demo (`demo/index.html`) for rapid iteration.
+1. **Modify the flame animation** → Edit `assets/flame.html`. Reload from Raycast to see changes.
 2. **Modify the overlay window** → Edit `swift/overlay.swift`, then run `npm run build-overlay` to recompile.
 3. **Modify the Raycast command** → Edit `src/kill-it-with-fire.tsx`. The dev server (`npm run dev`) picks up changes automatically.
 

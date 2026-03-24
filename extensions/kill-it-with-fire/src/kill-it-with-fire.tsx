@@ -6,7 +6,7 @@
  * always-on-top window with the flame animation, then auto-closes.
  */
 
-import { environment, showHUD } from "@raycast/api";
+import { closeMainWindow, environment, showHUD } from "@raycast/api";
 import { spawn } from "child_process";
 import path from "path";
 import fs from "fs";
@@ -42,5 +42,5 @@ export default async function Command() {
   });
   child.unref();
 
-  await showHUD("🔥 Kill it with fire!");
+  await closeMainWindow();
 }

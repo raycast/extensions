@@ -3,7 +3,7 @@ Kill it with fire! Set your screen on fire and watch it burn. A chaotic alternat
 
 [Raycast](https://raycast.com) has confetti. That's nice. But what do you do when you need to express your frustration? 
 
-Kill It With Fire is a chaotic alternative to Raycast's confetti for when you need to **kill something with fire**.
+Kill It With Fire is a chaotic alternative to Raycast's confetti for when you need to **kill something with fire!**
 
 ## Features
 
@@ -60,10 +60,6 @@ kill-it-with-fire/
 │   └── overlay                   Compiled macOS binary (git-ignored, built on install)
 ├── scripts/
 │   └── build-overlay.sh          Compiles overlay.swift → assets/overlay
-├── demo/
-│   ├── index.html                Standalone browser demo
-│   ├── script.js                 Documented particle engine
-│   └── style.css                 Demo page styles
 ├── package.json                  Raycast extension manifest & npm scripts
 ├── tsconfig.json                 TypeScript configuration
 ├── LICENSE                       MIT License
@@ -75,14 +71,7 @@ kill-it-with-fire/
 
 ### Modifying the flame animation
 
-Edit `assets/flame.html` directly. For rapid iteration, use the browser demo:
-
-```bash
-npm run demo
-# Open http://localhost:8000 in your browser
-```
-
-The demo in `demo/` uses the same particle engine with interactive controls (Ignite / Stop buttons, click-to-fire).
+Edit `assets/flame.html` directly.
 
 ### Rebuilding the overlay binary
 
@@ -103,7 +92,6 @@ This compiles the Swift source and places the binary at `assets/overlay`. The bi
 | `npm run lint` | Run ESLint |
 | `npm run fix-lint` | Auto-fix lint issues |
 | `npm run build-overlay` | Recompile the Swift overlay binary |
-| `npm run demo` | Serve the browser demo on port 8000 |
 
 ## Contributing
 

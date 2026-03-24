@@ -2,7 +2,7 @@
     "$schema": "https://www.raycast.com/schemas/extension.json",
     "name": "kill-it-with-fire",
     "title": "Kill It with Fire",
-    "description": "Kill it with fire! A chaotic alternative to Raycast's confetti.",
+    "description": "Set your screen on fire and watch it burn.",
     "icon": "command-icon.png",
     "author": "tjlotz",
     "categories": [
@@ -12,15 +12,14 @@
     "keywords": [
         "fire",
         "flames",
-        "confetti",
         "animation",
         "fun"
     ],
     "commands": [
         {
             "name": "kill-it-with-fire",
-            "title": "Kill It with Fire!",
-            "description": "Launch a full-screen flame animation",
+            "title": "Kill It with Fire",
+            "description": "Set your screen on fire and watch it burn.",
             "mode": "no-view"
         }
     ],
@@ -43,8 +42,7 @@
         "prepublishOnly": "echo \"Error: no publish\" && exit 1",
         "publish": "npx @raycast/api@latest publish",
         "build-overlay": "bash scripts/build-overlay.sh",
-        "postinstall": "bash scripts/build-overlay.sh",
-        "demo": "cd demo && python3 -m http.server 8000"
+        "postinstall": "bash scripts/build-overlay.sh"
     },
     "repository": {
         "type": "git",

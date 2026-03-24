@@ -15,5 +15,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Click-through overlay — interact with your apps while it burns.
 - Auto-close after ~6 seconds.
 - Raycast "no-view" command: search **"Kill It With Fire!"** and press Enter.
-- Standalone browser demo in `demo/` for rapid iteration.
 - Swift overlay source with build script (`scripts/build-overlay.sh`).
