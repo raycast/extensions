@@ -150,7 +150,7 @@ export default function Command() {
       const jsonString = JSON.stringify(data, null, 2);
       await Clipboard.copy(jsonString);
       void showToast(Toast.Style.Success, "Data exported", "JSON copied to clipboard");
-    } catch {
+    } catch (e) {
       void showToast(Toast.Style.Failure, "Export failed");
     }
   }
@@ -172,7 +172,7 @@ export default function Command() {
       setUsageDays(parsed.usageDays || []);
       await saveData(migratedExpenses, parsed.usageDays || []);
       void showToast(Toast.Style.Success, "Data imported", `${migratedExpenses.length} expenses loaded`);
-    } catch {
+    } catch (e) {
       void showToast(Toast.Style.Failure, "Import failed", "Invalid JSON data");
     }
   }
