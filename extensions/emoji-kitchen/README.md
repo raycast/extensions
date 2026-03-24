@@ -17,10 +17,4 @@ Google's Emoji Kitchen, but actually fast and native. Cook up 100,000+ combinati
 3. **Enter** to copy the image to your clipboard.
 4. **Cmd + R** if you're feeling lucky.
 
-### Build it
-```bash
-npm install
-npm run dev
-```
-
 *Requires Raycast. Built for people who value their time.*

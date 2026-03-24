@@ -1,13 +1,5 @@
-import {
-  ActionPanel,
-  Action,
-  Grid,
-  showToast,
-  Toast,
-  useNavigation,
-  Icon,
-} from "@raycast/api";
-import { useMemo, useState } from "react";
+import { ActionPanel, Action, Grid, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { useMemo, useState, useCallback } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { EmojiWithUnicode, Combinations } from "./types";
 import { CATEGORY_ORDER, GLOBAL_SYNONYMS } from "./constants";
@@ -29,17 +21,13 @@ export default function Command() {
   const [mode, setMode] = useState<"combine" | "explore">("explore");
   const [searchText, setSearchText] = useState("");
 
-  const { data: index, isLoading: isLoadingIndex } = useCachedPromise(
-    async () => {
-      return loadEmojiIndex();
-    },
-  );
+  const { data: index, isLoading: isLoadingIndex } = useCachedPromise(async () => {
+    return loadEmojiIndex();
+  });
 
-  const { data: vectors, isLoading: isLoadingVectors } = useCachedPromise(
-    async () => {
-      return loadEmojiVectors();
-    },
-  );
+  const { data: vectors, isLoading: isLoadingVectors } = useCachedPromise(async () => {
+    return loadEmojiVectors();
+  });
 
   const isLoading = isLoadingIndex || isLoadingVectors;
 
@@ -53,10 +41,7 @@ export default function Command() {
 
       // Add synonyms if any base keyword matches a synonym category
       synonymsEntries.forEach(([key, values]) => {
-        if (
-          values.some((v) => baseKeywords.includes(v)) ||
-          baseKeywords.includes(key)
-        ) {
+        if (values.some((v) => baseKeywords.includes(v)) || baseKeywords.includes(key)) {
           extraKeywords.add(key);
           values.forEach((v) => extraKeywords.add(v));
         }
@@ -97,7 +82,7 @@ export default function Command() {
   }, [emojiList, searchText, vectors]);
 
   const categories = useMemo(() => {
-    if (!emojiList.length || searchResults) return [];
+    if (!emojiList.length || searchResults !== null) return [];
     const cats: Record<string, typeof emojiList> = {};
     emojiList.forEach((item) => {
       const cat = item.c || "other";
@@ -120,49 +105,53 @@ export default function Command() {
       });
   }, [emojiList, searchResults]);
 
-  const handleSelectEmoji = (item: EmojiWithUnicode) => {
-    if (!index) return;
+  const handleSelectEmoji = useCallback(
+    (item: EmojiWithUnicode) => {
+      if (!index) return;
 
-    if (mode === "explore") {
-      push(<MashupGrid baseEmoji={item} index={index} />);
-    } else {
-      if (!selectedEmoji1) {
-        setSelectedEmoji1(item.unicode);
-        showToast({
-          title: `Selected ${item.e}`,
-          message: "Now select another emoji to combine",
-          style: Toast.Style.Animated,
-        });
+      if (mode === "explore") {
+        push(<MashupGrid baseEmoji={item} index={index} />);
       } else {
-        const emoji1Combs = loadCombinations(selectedEmoji1);
-        const comboStr = emoji1Combs[item.unicode];
-
-        if (comboStr) {
-          const [date, left] = comboStr.split("/");
-          const right = left === item.unicode ? selectedEmoji1 : item.unicode;
-          const url = getGStaticUrl(left, right, date);
-
-          push(
-            <ResultView
-              url={url}
-              e1={index[selectedEmoji1].e}
-              e2={item.e}
-              onReset={() => setSelectedEmoji1(null)}
-            />,
-          );
-        } else {
+        if (!selectedEmoji1) {
+          setSelectedEmoji1(item.unicode);
           showToast({
-            title: "No combination found",
-            message: `Sorry, ${index[selectedEmoji1].e} and ${item.e} can't be combined yet.`,
-            style: Toast.Style.Failure,
+            title: `Selected ${item.e}`,
+            message: "Now select another emoji to combine",
+            style: Toast.Style.Success,
           });
-          setSelectedEmoji1(null);
+        } else {
+          const emoji1Combs = loadCombinations(selectedEmoji1);
+          const comboStr = emoji1Combs[item.unicode];
+
+          if (comboStr) {
+            const [date, left] = comboStr.split("/");
+            const right = left === item.unicode ? selectedEmoji1 : item.unicode;
+            const url = getGStaticUrl(left, right, date);
+
+            push(
+              <ResultView
+                url={url}
+                e1={index[selectedEmoji1].e}
+                e2={item.e}
+                filename={`${index[selectedEmoji1].a}_${item.a}_mashup`}
+                onReset={() => setSelectedEmoji1(null)}
+              />,
+            );
+          } else {
+            showToast({
+              title: "No combination found",
+              message: `Sorry, ${index[selectedEmoji1].e} and ${item.e} can't be combined yet.`,
+              style: Toast.Style.Failure,
+            });
+            setSelectedEmoji1(null);
+          }
         }
       }
-    }
-  };
+    },
+    [index, mode, selectedEmoji1, push],
+  );
 
-  const handleRandomize = () => {
+  const handleRandomize = useCallback(() => {
     if (!index) return;
     const keys = Object.keys(index);
     let randomKey1: string;
@@ -199,10 +188,11 @@ export default function Command() {
         url={url}
         e1={index[randomKey1].e}
         e2={index[randomKey2].e}
+        filename={`${index[randomKey1].a}_${index[randomKey2].a}_mashup`}
         onReset={() => setSelectedEmoji1(null)}
       />,
     );
-  };
+  }, [index, push]);
 
   return (
     <Grid
@@ -211,30 +201,20 @@ export default function Command() {
       inset={Grid.Inset.Small}
       filtering={false}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder={
-        selectedEmoji1 && index
-          ? `Combining ${index[selectedEmoji1].e} with...`
-          : "Search emoji to cook..."
-      }
+      searchBarPlaceholder="Search emoji to cook..."
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Mode"
           storeValue={true}
           onChange={(newValue) => {
-            setMode(newValue as "combine" | "explore");
-            setSelectedEmoji1(null);
+            setMode((prev) => {
+              if (prev !== newValue) setSelectedEmoji1(null);
+              return newValue as "combine" | "explore";
+            });
           }}
         >
-          <Grid.Dropdown.Item
-            title="Explore Mashups"
-            value="explore"
-            icon={Icon.MagnifyingGlass}
-          />
-          <Grid.Dropdown.Item
-            title="Combine Emojis"
-            value="combine"
-            icon={Icon.PlusCircle}
-          />
+          <Grid.Dropdown.Item title="Explore Mashups" value="explore" icon={Icon.MagnifyingGlass} />
+          <Grid.Dropdown.Item title="Combine Emojis" value="combine" icon={Icon.PlusCircle} />
         </Grid.Dropdown>
       }
     >
@@ -246,18 +226,14 @@ export default function Command() {
             title="Selected"
             actions={
               <ActionPanel>
-                <Action
-                  title="Clear Selection"
-                  onAction={() => setSelectedEmoji1(null)}
-                  icon={Icon.XMarkCircle}
-                />
+                <Action title="Clear Selection" onAction={() => setSelectedEmoji1(null)} icon={Icon.XMarkCircle} />
               </ActionPanel>
             }
           />
         </Grid.Section>
       )}
 
-      {searchResults ? (
+      {searchResults !== null && searchResults.length > 0 ? (
         <Grid.Section title="Search Results">
           {searchResults.map((item) => (
             <Grid.Item
@@ -268,6 +244,7 @@ export default function Command() {
                 <ActionPanel>
                   <Action
                     title={mode === "combine" ? "Combine" : "Explore"}
+                    icon={Icon.MagnifyingGlass}
                     onAction={() => handleSelectEmoji(item)}
                   />
                   <Action
@@ -277,18 +254,14 @@ export default function Command() {
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
                   {selectedEmoji1 && (
-                    <Action
-                      title="Clear Selection"
-                      onAction={() => setSelectedEmoji1(null)}
-                      icon={Icon.XMarkCircle}
-                    />
+                    <Action title="Clear Selection" onAction={() => setSelectedEmoji1(null)} icon={Icon.XMarkCircle} />
                   )}
                 </ActionPanel>
               }
             />
           ))}
         </Grid.Section>
-      ) : (
+      ) : searchResults === null ? (
         categories.map(([cat, items]) => (
           <Grid.Section key={cat} title={cat.toUpperCase()}>
             {items.map((item) => (
@@ -296,11 +269,11 @@ export default function Command() {
                 key={item.unicode}
                 content={item.e}
                 title={formatEmojiName(item.a)}
-                keywords={item.k}
                 actions={
                   <ActionPanel>
                     <Action
                       title={mode === "combine" ? "Combine" : "Explore"}
+                      icon={mode === "combine" ? Icon.Plus : Icon.Compass}
                       onAction={() => handleSelectEmoji(item)}
                     />
                     <Action
@@ -322,7 +295,7 @@ export default function Command() {
             ))}
           </Grid.Section>
         ))
-      )}
+      ) : null}
     </Grid>
   );
 }

@@ -5,17 +5,15 @@ interface ResultViewProps {
   url: string;
   e1: string;
   e2: string;
+  filename?: string;
   onReset: () => void;
 }
 
-export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
+export function ResultView({ url, e1, e2, filename, onReset }: ResultViewProps) {
   const { pop } = useNavigation();
-  const name = `${e1}_${e2}_mashup`;
+  const name = filename ?? `emoji_mashup`;
 
-  const markdown = `
-# 
-<img src="${url}" alt="${e1} + ${e2}" width="250" />
-`;
+  const markdown = `# ${e1} + ${e2}\n\n<img src="${url}" alt="${e1} + ${e2}" width="250" />`;
 
   return (
     <Detail
@@ -23,11 +21,7 @@ export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
       navigationTitle={`${e1} + ${e2}`}
       actions={
         <ActionPanel>
-          <Action
-            title="Copy Image"
-            icon={Icon.CopyClipboard}
-            onAction={() => copyImageToClipboard(url, name)}
-          />
+          <Action title="Copy Image" icon={Icon.CopyClipboard} onAction={() => copyImageToClipboard(url, name)} />
           <Action
             title="Save to Downloads"
             icon={Icon.Download}
@@ -36,10 +30,7 @@ export function ResultView({ url, e1, e2, onReset }: ResultViewProps) {
           />
           <Action.CopyToClipboard title="Copy Image URL" content={url} />
           <Action.OpenInBrowser title="Open in Browser" url={url} />
-          <Action.CopyToClipboard
-            title="Copy Emoji Combination"
-            content={`${e1}${e2}`}
-          />
+          <Action.CopyToClipboard title="Copy Emoji Combination" content={`${e1}${e2}`} />
           <Action
             title="Mix More"
             onAction={() => {

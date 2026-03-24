@@ -1,10 +1,4 @@
-import {
-  showToast,
-  Toast,
-  Clipboard,
-  showHUD,
-  environment,
-} from "@raycast/api";
+import { showToast, Toast, Clipboard, showHUD, environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -44,9 +38,7 @@ function pruneClipboardCache() {
         return null;
       }
     })
-    .filter((item): item is { filePath: string; mtimeMs: number } =>
-      Boolean(item),
-    )
+    .filter((item): item is { filePath: string; mtimeMs: number } => Boolean(item))
     .sort((a, b) => b.mtimeMs - a.mtimeMs);
 
   const now = Date.now();
@@ -123,11 +115,7 @@ export async function saveImageToDownloads(url: string, name: string) {
   });
 
   try {
-    const downloadPath = path.join(
-      os.homedir(),
-      "Downloads",
-      `${sanitizeFileName(name)}.png`,
-    );
+    const downloadPath = path.join(os.homedir(), "Downloads", `${sanitizeFileName(name)}.png`);
     await downloadImage(url, name, {
       directory: path.dirname(downloadPath),
       uniqueFileName: false,
@@ -201,15 +189,16 @@ export function getQueryVector(text: string): Float32Array {
   return vector;
 }
 
-export function cosineSimilarity(
-  v1: Float32Array | number[],
-  v2: Float32Array | number[],
-): number {
+export function cosineSimilarity(v1: Float32Array | number[], v2: Float32Array | number[]): number {
   let dot = 0;
+  let norm2 = 0;
   for (let i = 0; i < VECTOR_DIMENSION; i++) {
     dot += v1[i] * v2[i];
+    norm2 += v2[i] * v2[i];
   }
-  return dot;
+  // v1 (query vector) is always normalised to unit length by getQueryVector,
+  // so true cosine similarity = dot / (1 * ||v2||)
+  return norm2 > 0 ? dot / Math.sqrt(norm2) : 0;
 }
 
 export function formatEmojiName(name: string): string {
@@ -222,11 +211,7 @@ export function formatEmojiName(name: string): string {
 export function loadCombinations(unicode: string): Combinations {
   try {
     const prefix = unicode.slice(0, 2);
-    const dataPath = path.join(
-      environment.assetsPath,
-      "combinations",
-      `${prefix}.json`,
-    );
+    const dataPath = path.join(environment.assetsPath, "combinations", `${prefix}.json`);
     const rawData = fs.readFileSync(dataPath, "utf-8");
     const group = JSON.parse(rawData);
     return group[unicode] || {};
