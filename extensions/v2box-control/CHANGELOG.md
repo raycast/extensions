@@ -1,4 +1,4 @@
-# V2BOX VPN CHANGELOG
+# V2BOX VPN
 
 ## [Add V2BOX VPN extension] - {PR_MERGE_DATE}
 

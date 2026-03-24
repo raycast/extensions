@@ -33,7 +33,7 @@
   "commands": [
     {
       "name": "on-vpn",
-      "title": "Connect VPN",
+      "title": "Connect V2BOX",
       "subtitle": "V2BOX VPN",
       "description": "Connect to the configured VPN service",
       "mode": "no-view",
@@ -47,7 +47,7 @@
     },
     {
       "name": "off-vpn",
-      "title": "Disconnect VPN",
+      "title": "Disconnect V2BOX",
       "subtitle": "V2BOX VPN",
       "description": "Disconnect from the configured VPN service",
       "mode": "no-view",
@@ -61,7 +61,7 @@
     },
     {
       "name": "status",
-      "title": "VPN Status",
+      "title": "V2BOX Status",
       "subtitle": "V2BOX VPN",
       "description": "Check the configured VPN service status",
       "mode": "no-view",
@@ -74,7 +74,7 @@
     },
     {
       "name": "toggle-vpn",
-      "title": "Toggle VPN",
+      "title": "Toggle V2BOX",
       "subtitle": "V2BOX VPN",
       "description": "Toggle the configured VPN service",
       "mode": "no-view",
