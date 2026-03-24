@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notion-paste",
+  "title": "Notion Field Paste",
+  "description": "Search Notion databases and paste field values into any app",
+  "icon": "extension-icon.png",
+  "author": "pavelapekhtin",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "notion-databases",
+      "title": "Notion Field Paste",
+      "description": "Pick a database, then search and paste a field value",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "databasesJson",
+          "type": "textfield",
+          "required": true,
+          "title": "Databases JSON",
+          "description": "JSON array of database configs. Each entry needs: label, databaseId, searchProperty, searchPropertyType, displayProperties, pickerProperties, and optional filterProperty/filterPropertyType/filterValues.",
+          "placeholder": "[{\"label\":\"Ops\",\"databaseId\":\"897e5a76...\",\"searchProperty\":\"Name\",\"searchPropertyType\":\"title\",\"displayProperties\":\"Status, Owner\",\"pickerProperties\":\"Slug, URL\"}]"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "notionApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Notion API Key",
+      "description": "Your Notion integration token. Create one at https://www.notion.so/my-integrations and share it with your target databases.",
+      "placeholder": "secret_..."
+    }
+  ],
+  "dependencies": {
+    "@notionhq/client": "^2.2.3",
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.5.4",
+    "@types/react": "^19.0.10",
+    "eslint": "^10.0.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "overrides": {
+    "@types/react": "^19.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
