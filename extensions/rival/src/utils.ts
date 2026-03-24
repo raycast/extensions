@@ -143,7 +143,8 @@ export function buildModelDetailMarkdown(model: LensModel): string {
 
   const headerParts: string[] = [`**${provider}**`];
   if (model.rank != null) headerParts.push(`Rank **#${model.rank}**`);
-  if (model.score != null) headerParts.push(`Score **${model.score.toFixed(1)}**`);
+  if (model.score != null)
+    headerParts.push(`Score **${model.score.toFixed(1)}**`);
   lines.push(headerParts.join("  ·  "));
 
   lines.push("");
@@ -203,14 +204,30 @@ export function buildComparisonMarkdown(a: LensModel, b: LensModel): string {
   lines.push("| | " + a.name + " | " + b.name + " |");
   lines.push("|---|---|---|");
 
-  lines.push(`| Provider | ${getProviderName(a.provider)} | ${getProviderName(b.provider)} |`);
-  lines.push(`| Rank | ${a.rank != null ? "#" + a.rank : "Unranked"} | ${b.rank != null ? "#" + b.rank : "Unranked"} |`);
-  lines.push(`| Score | ${a.score != null ? a.score.toFixed(1) : "N/A"} | ${b.score != null ? b.score.toFixed(1) : "N/A"} |`);
-  lines.push(`| Context | ${a.ctx != null ? formatContext(a.ctx) : "N/A"} | ${b.ctx != null ? formatContext(b.ctx) : "N/A"} |`);
-  lines.push(`| Input Price | ${a.pricing ? formatPrice(a.pricing.input) + " / 1M" : "N/A"} | ${b.pricing ? formatPrice(b.pricing.input) + " / 1M" : "N/A"} |`);
-  lines.push(`| Output Price | ${a.pricing ? formatPrice(a.pricing.output) + " / 1M" : "N/A"} | ${b.pricing ? formatPrice(b.pricing.output) + " / 1M" : "N/A"} |`);
-  lines.push(`| Win Rate | ${a.winRate != null ? formatPercent(a.winRate) : "N/A"} | ${b.winRate != null ? formatPercent(b.winRate) : "N/A"} |`);
-  lines.push(`| Duels | ${a.duels != null ? formatNumber(a.duels) : "N/A"} | ${b.duels != null ? formatNumber(b.duels) : "N/A"} |`);
+  lines.push(
+    `| Provider | ${getProviderName(a.provider)} | ${getProviderName(b.provider)} |`,
+  );
+  lines.push(
+    `| Rank | ${a.rank != null ? "#" + a.rank : "Unranked"} | ${b.rank != null ? "#" + b.rank : "Unranked"} |`,
+  );
+  lines.push(
+    `| Score | ${a.score != null ? a.score.toFixed(1) : "N/A"} | ${b.score != null ? b.score.toFixed(1) : "N/A"} |`,
+  );
+  lines.push(
+    `| Context | ${a.ctx != null ? formatContext(a.ctx) : "N/A"} | ${b.ctx != null ? formatContext(b.ctx) : "N/A"} |`,
+  );
+  lines.push(
+    `| Input Price | ${a.pricing ? formatPrice(a.pricing.input) + " / 1M" : "N/A"} | ${b.pricing ? formatPrice(b.pricing.input) + " / 1M" : "N/A"} |`,
+  );
+  lines.push(
+    `| Output Price | ${a.pricing ? formatPrice(a.pricing.output) + " / 1M" : "N/A"} | ${b.pricing ? formatPrice(b.pricing.output) + " / 1M" : "N/A"} |`,
+  );
+  lines.push(
+    `| Win Rate | ${a.winRate != null ? formatPercent(a.winRate) : "N/A"} | ${b.winRate != null ? formatPercent(b.winRate) : "N/A"} |`,
+  );
+  lines.push(
+    `| Duels | ${a.duels != null ? formatNumber(a.duels) : "N/A"} | ${b.duels != null ? formatNumber(b.duels) : "N/A"} |`,
+  );
 
   // Best for
   const aBestFor = a.bestFor.length > 0 ? a.bestFor.join(", ") : "N/A";
@@ -231,7 +248,9 @@ export function buildComparisonMarkdown(a: LensModel, b: LensModel): string {
     const better = a.rank < b.rank ? a : b;
     const worse = a.rank < b.rank ? b : a;
     if (a.rank !== b.rank) {
-      verdictParts.push(`${better.name} is ranked higher (#${better.rank} vs #${worse.rank})`);
+      verdictParts.push(
+        `${better.name} is ranked higher (#${better.rank} vs #${worse.rank})`,
+      );
     } else {
       verdictParts.push(`Both are ranked #${a.rank}`);
     }
@@ -240,9 +259,13 @@ export function buildComparisonMarkdown(a: LensModel, b: LensModel): string {
   // Price comparison
   if (a.pricing && b.pricing) {
     if (a.pricing.input < b.pricing.input) {
-      verdictParts.push(`cheaper on input (${formatPrice(a.pricing.input)} vs ${formatPrice(b.pricing.input)})`);
+      verdictParts.push(
+        `cheaper on input (${formatPrice(a.pricing.input)} vs ${formatPrice(b.pricing.input)})`,
+      );
     } else if (b.pricing.input < a.pricing.input) {
-      verdictParts.push(`${b.name} is cheaper on input (${formatPrice(b.pricing.input)} vs ${formatPrice(a.pricing.input)})`);
+      verdictParts.push(
+        `${b.name} is cheaper on input (${formatPrice(b.pricing.input)} vs ${formatPrice(a.pricing.input)})`,
+      );
     }
   }
 
@@ -252,7 +275,9 @@ export function buildComparisonMarkdown(a: LensModel, b: LensModel): string {
     const smaller = a.ctx > b.ctx ? b : a;
     // Reason: TypeScript can't narrow through ternary + property access, so we assert non-null
     // after the null check guard above.
-    verdictParts.push(`${bigger.name} has a larger context window (${formatContextShort(bigger.ctx!)} vs ${formatContextShort(smaller.ctx!)})`);
+    verdictParts.push(
+      `${bigger.name} has a larger context window (${formatContextShort(bigger.ctx!)} vs ${formatContextShort(smaller.ctx!)})`,
+    );
   }
 
   if (verdictParts.length > 0) {
@@ -288,8 +313,12 @@ export function sortModels(models: LensModel[], key: SortKey): LensModel[] {
     case "price-asc":
       // Cheapest first by input price. Models without pricing go to the end.
       sorted.sort((a, b) => {
-        const aPrice = a.pricing ? a.pricing.input + a.pricing.output : Infinity;
-        const bPrice = b.pricing ? b.pricing.input + b.pricing.output : Infinity;
+        const aPrice = a.pricing
+          ? a.pricing.input + a.pricing.output
+          : Infinity;
+        const bPrice = b.pricing
+          ? b.pricing.input + b.pricing.output
+          : Infinity;
         return aPrice - bPrice;
       });
       break;
@@ -327,17 +356,24 @@ export function sortModels(models: LensModel[], key: SortKey): LensModel[] {
 /**
  * Filters models by category.
  */
-export function filterModels(models: LensModel[], category: FilterCategory): LensModel[] {
+export function filterModels(
+  models: LensModel[],
+  category: FilterCategory,
+): LensModel[] {
   switch (category) {
     case "all":
       return models;
     case "ranked":
       return models.filter((m) => m.rank != null);
     case "free":
-      return models.filter((m) => m.pricing && m.pricing.input === 0 && m.pricing.output === 0);
+      return models.filter(
+        (m) => m.pricing && m.pricing.input === 0 && m.pricing.output === 0,
+      );
     case "affordable":
       // Input price under $1 per 1M tokens
-      return models.filter((m) => m.pricing && m.pricing.input > 0 && m.pricing.input <= 1);
+      return models.filter(
+        (m) => m.pricing && m.pricing.input > 0 && m.pricing.input <= 1,
+      );
     case "premium":
       // Input price $5+ per 1M tokens
       return models.filter((m) => m.pricing && m.pricing.input >= 5);
@@ -350,7 +386,10 @@ export function filterModels(models: LensModel[], category: FilterCategory): Len
 /**
  * Filters models by provider slug.
  */
-export function filterByProvider(models: LensModel[], provider: string): LensModel[] {
+export function filterByProvider(
+  models: LensModel[],
+  provider: string,
+): LensModel[] {
   if (provider === "all") return models;
   return models.filter((m) => m.provider === provider);
 }
@@ -386,7 +425,7 @@ export interface CostResult {
 export function calculateCosts(
   models: LensModel[],
   inputTokens: number,
-  outputTokens: number
+  outputTokens: number,
 ): CostResult[] {
   const results: CostResult[] = [];
 
@@ -424,7 +463,7 @@ export function formatCost(n: number): string {
 export function buildCostDetailMarkdown(
   result: CostResult,
   inputTokens: number,
-  outputTokens: number
+  outputTokens: number,
 ): string {
   const { model, inputCost, outputCost, totalCost } = result;
   const lines: string[] = [];
@@ -440,8 +479,12 @@ export function buildCostDetailMarkdown(
   lines.push("|---|---|");
   lines.push(`| Input Tokens | ${formatNumber(inputTokens)} |`);
   lines.push(`| Output Tokens | ${formatNumber(outputTokens)} |`);
-  lines.push(`| Input Rate | ${formatPrice(model.pricing!.input)} / 1M tokens |`);
-  lines.push(`| Output Rate | ${formatPrice(model.pricing!.output)} / 1M tokens |`);
+  lines.push(
+    `| Input Rate | ${formatPrice(model.pricing!.input)} / 1M tokens |`,
+  );
+  lines.push(
+    `| Output Rate | ${formatPrice(model.pricing!.output)} / 1M tokens |`,
+  );
   lines.push("");
   lines.push("## Total");
   lines.push("");

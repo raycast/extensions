@@ -152,12 +152,36 @@ function FilterDropdown({
   return (
     <List.Dropdown tooltip="Filter Models" value={value} onChange={onChange}>
       <List.Dropdown.Section title="Category">
-        <List.Dropdown.Item title="All Models" value="all:all" icon={Icon.List} />
-        <List.Dropdown.Item title="Ranked Only" value="ranked:all" icon={Icon.Trophy} />
-        <List.Dropdown.Item title="Free Models" value="free:all" icon={Icon.Gift} />
-        <List.Dropdown.Item title="Affordable (< $1 input)" value="affordable:all" icon={Icon.Coins} />
-        <List.Dropdown.Item title="Premium ($5+ input)" value="premium:all" icon={Icon.Star} />
-        <List.Dropdown.Item title="Large Context (100K+)" value="large-context:all" icon={Icon.TextDocument} />
+        <List.Dropdown.Item
+          title="All Models"
+          value="all:all"
+          icon={Icon.List}
+        />
+        <List.Dropdown.Item
+          title="Ranked Only"
+          value="ranked:all"
+          icon={Icon.Trophy}
+        />
+        <List.Dropdown.Item
+          title="Free Models"
+          value="free:all"
+          icon={Icon.Gift}
+        />
+        <List.Dropdown.Item
+          title="Affordable (< $1 input)"
+          value="affordable:all"
+          icon={Icon.Coins}
+        />
+        <List.Dropdown.Item
+          title="Premium ($5+ input)"
+          value="premium:all"
+          icon={Icon.Star}
+        />
+        <List.Dropdown.Item
+          title="Large Context (100K+)"
+          value="large-context:all"
+          icon={Icon.TextDocument}
+        />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Provider">
         {providerSlugs.map((slug) => (
@@ -195,7 +219,15 @@ function ModelListItem({
 
   if (model.rank != null) {
     accessories.push({
-      tag: { value: `#${model.rank}`, color: model.rank <= 3 ? Color.Yellow : model.rank <= 10 ? Color.Green : Color.Blue },
+      tag: {
+        value: `#${model.rank}`,
+        color:
+          model.rank <= 3
+            ? Color.Yellow
+            : model.rank <= 10
+              ? Color.Green
+              : Color.Blue,
+      },
       tooltip: `Rival Index Rank #${model.rank}`,
     });
   }
@@ -252,9 +284,7 @@ function ModelListItem({
               onAction={() => {
                 // Reason: We push a picker that will navigate to the compare detail.
                 // This lets us reuse the compare flow without duplicating the full list.
-                push(
-                  <ComparePickerForModel sourceModel={model} />
-                );
+                push(<ComparePickerForModel sourceModel={model} />);
               }}
             />
           </ActionPanel.Section>
@@ -352,7 +382,12 @@ function ComparePickerForModel({ sourceModel }: { sourceModel: LensModel }) {
     if (!searchText.trim()) return sortModels(available, "rank");
     const q = searchText.toLowerCase();
     return available.filter((m) => {
-      const searchable = [m.name, m.id, getProviderName(m.provider), ...m.bestFor]
+      const searchable = [
+        m.name,
+        m.id,
+        getProviderName(m.provider),
+        ...m.bestFor,
+      ]
         .join(" ")
         .toLowerCase();
       return searchable.includes(q);
@@ -385,9 +420,7 @@ function ComparePickerForModel({ sourceModel }: { sourceModel: LensModel }) {
                 title="Compare"
                 icon={Icon.Switch}
                 onAction={() => {
-                  push(
-                    <CompareDetail modelA={sourceModel} modelB={model} />
-                  );
+                  push(<CompareDetail modelA={sourceModel} modelB={model} />);
                 }}
               />
             </ActionPanel>
@@ -413,14 +446,18 @@ function buildCopyableSpec(model: LensModel): string {
   lines.push(`Provider: ${provider}`);
   if (model.rank != null) lines.push(`Rank: #${model.rank}`);
   if (model.score != null) lines.push(`Score: ${model.score.toFixed(1)}`);
-  if (model.ctx != null) lines.push(`Context: ${model.ctx.toLocaleString("en-US")} tokens`);
+  if (model.ctx != null)
+    lines.push(`Context: ${model.ctx.toLocaleString("en-US")} tokens`);
   if (model.pricing) {
     lines.push(`Input: ${formatPrice(model.pricing.input)} / 1M tokens`);
     lines.push(`Output: ${formatPrice(model.pricing.output)} / 1M tokens`);
   }
-  if (model.winRate != null) lines.push(`Win Rate: ${model.winRate.toFixed(1)}%`);
-  if (model.duels != null) lines.push(`Duels: ${model.duels.toLocaleString("en-US")}`);
-  if (model.bestFor.length > 0) lines.push(`Best For: ${model.bestFor.join(", ")}`);
+  if (model.winRate != null)
+    lines.push(`Win Rate: ${model.winRate.toFixed(1)}%`);
+  if (model.duels != null)
+    lines.push(`Duels: ${model.duels.toLocaleString("en-US")}`);
+  if (model.bestFor.length > 0)
+    lines.push(`Best For: ${model.bestFor.join(", ")}`);
   if (model.benchmarks) {
     lines.push(`Benchmarks:`);
     for (const [name, score] of Object.entries(model.benchmarks)) {

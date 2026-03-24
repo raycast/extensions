@@ -56,7 +56,7 @@ export default function CalculateCostCommand() {
 
   const results = useMemo(
     () => calculateCosts(models, inputTokens, outputTokens),
-    [models, inputTokens, outputTokens]
+    [models, inputTokens, outputTokens],
   );
 
   // Search filter on model name / provider
@@ -64,7 +64,11 @@ export default function CalculateCostCommand() {
     if (!searchText.trim()) return results;
     const q = searchText.toLowerCase();
     return results.filter((r) => {
-      const searchable = [r.model.name, r.model.id, getProviderName(r.model.provider)]
+      const searchable = [
+        r.model.name,
+        r.model.id,
+        getProviderName(r.model.provider),
+      ]
         .join(" ")
         .toLowerCase();
       return searchable.includes(q);
@@ -88,7 +92,10 @@ export default function CalculateCostCommand() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search models by name..."
       searchBarAccessory={
-        <TokenPresetDropdown value={dropdownValue} onChange={handleDropdownChange} />
+        <TokenPresetDropdown
+          value={dropdownValue}
+          onChange={handleDropdownChange}
+        />
       }
       throttle
     >
@@ -125,7 +132,11 @@ function TokenPresetDropdown({
   onChange: (v: string) => void;
 }) {
   return (
-    <List.Dropdown tooltip="Token Count Preset" value={value} onChange={onChange}>
+    <List.Dropdown
+      tooltip="Token Count Preset"
+      value={value}
+      onChange={onChange}
+    >
       <List.Dropdown.Section title="Common Workloads">
         <List.Dropdown.Item
           title="Quick query (1K in / 500 out)"
@@ -153,18 +164,9 @@ function TokenPresetDropdown({
         />
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Equal I/O">
-        <List.Dropdown.Item
-          title="1K in / 1K out"
-          value="1000:1000"
-        />
-        <List.Dropdown.Item
-          title="10K in / 10K out"
-          value="10000:10000"
-        />
-        <List.Dropdown.Item
-          title="100K in / 100K out"
-          value="100000:100000"
-        />
+        <List.Dropdown.Item title="1K in / 1K out" value="1000:1000" />
+        <List.Dropdown.Item title="10K in / 10K out" value="10000:10000" />
+        <List.Dropdown.Item title="100K in / 100K out" value="100000:100000" />
       </List.Dropdown.Section>
     </List.Dropdown>
   );
@@ -192,7 +194,14 @@ function CostListItem({
     {
       tag: {
         value: formatCost(totalCost),
-        color: totalCost === 0 ? Color.Green : totalCost < 0.01 ? Color.Blue : totalCost < 0.1 ? Color.Yellow : Color.Orange,
+        color:
+          totalCost === 0
+            ? Color.Green
+            : totalCost < 0.01
+              ? Color.Blue
+              : totalCost < 0.1
+                ? Color.Yellow
+                : Color.Orange,
       },
       tooltip: `Total: ${formatCost(totalCost)} (${formatCost(inputCost)} in + ${formatCost(outputCost)} out)`,
     },

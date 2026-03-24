@@ -41,7 +41,13 @@ export default function CompareModelsCommand() {
     if (!searchText.trim()) return sorted;
     const q = searchText.toLowerCase();
     return sorted.filter((m) => {
-      const searchable = [m.name, m.id, getProviderName(m.provider), m.provider, ...m.bestFor]
+      const searchable = [
+        m.name,
+        m.id,
+        getProviderName(m.provider),
+        m.provider,
+        ...m.bestFor,
+      ]
         .join(" ")
         .toLowerCase();
       return searchable.includes(q);
@@ -77,7 +83,9 @@ export default function CompareModelsCommand() {
               <Action
                 title="Select as Model A"
                 icon={Icon.ArrowRight}
-                onAction={() => push(<PickModelB modelA={model} allModels={models} />)}
+                onAction={() =>
+                  push(<PickModelB modelA={model} allModels={models} />)
+                }
               />
             </ActionPanel>
           }
@@ -108,7 +116,13 @@ function PickModelB({
     if (!searchText.trim()) return sorted;
     const q = searchText.toLowerCase();
     return sorted.filter((m) => {
-      const searchable = [m.name, m.id, getProviderName(m.provider), m.provider, ...m.bestFor]
+      const searchable = [
+        m.name,
+        m.id,
+        getProviderName(m.provider),
+        m.provider,
+        ...m.bestFor,
+      ]
         .join(" ")
         .toLowerCase();
       return searchable.includes(q);
@@ -166,7 +180,12 @@ function buildAccessories(model: LensModel): List.Item.Accessory[] {
     accessories.push({
       tag: {
         value: `#${model.rank}`,
-        color: model.rank <= 3 ? Color.Yellow : model.rank <= 10 ? Color.Green : Color.Blue,
+        color:
+          model.rank <= 3
+            ? Color.Yellow
+            : model.rank <= 10
+              ? Color.Green
+              : Color.Blue,
       },
       tooltip: `Rival Index Rank #${model.rank}`,
     });

@@ -6,13 +6,7 @@
 // and the compare-models two-step picker flow.
 // --------------------------------------------------------------------------
 
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import {
   buildComparisonMarkdown,
   compareUrl,
