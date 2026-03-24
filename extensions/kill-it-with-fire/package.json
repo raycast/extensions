@@ -1,0 +1,57 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "kill-it-with-fire",
+    "title": "Kill It with Fire",
+    "description": "Kill it with fire! A chaotic alternative to Raycast's confetti.",
+    "icon": "command-icon.png",
+    "author": "tjlotz",
+    "categories": [
+        "Fun"
+    ],
+    "license": "MIT",
+    "keywords": [
+        "fire",
+        "flames",
+        "confetti",
+        "animation",
+        "fun"
+    ],
+    "commands": [
+        {
+            "name": "kill-it-with-fire",
+            "title": "Kill It with Fire!",
+            "description": "Launch a full-screen flame animation",
+            "mode": "no-view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.83.1"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^1.0.11",
+        "@types/node": "22.10.2",
+        "@types/react": "19.0.2",
+        "eslint": "^8.57.1",
+        "prettier": "^3.4.2",
+        "typescript": "^5.7.2"
+    },
+    "scripts": {
+        "build": "ray build",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+        "publish": "npx @raycast/api@latest publish",
+        "build-overlay": "bash scripts/build-overlay.sh",
+        "postinstall": "bash scripts/build-overlay.sh",
+        "demo": "cd demo && python3 -m http.server 8000"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tylerlotz/raycast-kill-it-with-fire.git"
+    },
+    "bugs": {
+        "url": "https://github.com/tylerlotz/raycast-kill-it-with-fire/issues"
+    },
+    "homepage": "https://github.com/tylerlotz/raycast-kill-it-with-fire#readme"
+}
