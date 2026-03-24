@@ -1,6 +1,6 @@
 # Chilean Indicators Changelog
 
-## [Conversion Support] - {PR_MERGE_DATE}
+## [Conversion Support] - 2026-03-24
 
 - Added inline currency converter: type an amount (e.g. `35 UF` or `50000`) in the search bar to convert between CLP and Dólar, UF, Euro, UTM
 
