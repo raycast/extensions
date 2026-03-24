@@ -1,12 +1,12 @@
 import { AI, environment } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import fs from "fs";
 import path from "path";
 import { promisify } from "util";
 import zlib from "zlib";
 import { File } from "./types/file";
 
-const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
 
 export interface WallpaperDescription {
   description: string;
@@ -209,7 +209,7 @@ async function extractImageColors(filePath: string): Promise<string> {
   const tmpDir = process.env.TMPDIR ?? "/tmp";
   const tmpPath = path.join(tmpDir, `raycast-colors-${Date.now()}-${Math.random().toString(36).slice(2)}.png`);
   try {
-    await execPromise(`sips -Z 30 -s format png "${filePath}" --out "${tmpPath}" 2>/dev/null`);
+    await execFilePromise("sips", ["-Z", "30", "-s", "format", "png", filePath, "--out", tmpPath]);
     const buffer = fs.readFileSync(tmpPath);
     const pixels = parsePNGPixels(buffer);
     fs.unlink(tmpPath, () => undefined);

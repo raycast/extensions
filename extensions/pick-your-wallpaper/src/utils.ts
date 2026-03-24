@@ -28,26 +28,24 @@ export async function runAppleScriptSilently(appleScript: string) {
 }
 
 export async function getWallpaperFiles(directoryPath: string): Promise<File[]> {
-  let result: File[] = [];
   try {
-    const files = await readdir(directoryPath);
-    for (const file of files) {
-      const filePath = path.join(directoryPath, file);
-      const fileStats = await stat(filePath);
-      if (fileStats.isDirectory()) {
-        const subFiles = await getWallpaperFiles(filePath);
-        result = result.concat(subFiles);
-      } else {
-        const newFile = { name: file, path: filePath };
-        if (isValidFile(newFile)) {
-          result.push(newFile);
+    const entries = await readdir(directoryPath);
+    const results = await Promise.all(
+      entries.map(async (entry) => {
+        const filePath = path.join(directoryPath, entry);
+        const fileStats = await stat(filePath);
+        if (fileStats.isDirectory()) {
+          return getWallpaperFiles(filePath);
         }
-      }
-    }
+        const newFile = { name: entry, path: filePath };
+        return isValidFile(newFile) ? [newFile] : [];
+      })
+    );
+    return results.flat();
   } catch (error) {
     console.error(`Error reading directory ${directoryPath}:`, error);
+    return [];
   }
-  return result;
 }
 
 export function applyWallpaperUpdate(file: string) {
