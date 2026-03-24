@@ -1,6 +1,6 @@
 # Developer Excuse Changelog
 
-## [1.1] - {PR_MERGE_DATE}
+## [1.1] - 2026-03-24
 
 - Updated all dependencies to current versions
 - Removed duplicate and near-duplicate excuses
