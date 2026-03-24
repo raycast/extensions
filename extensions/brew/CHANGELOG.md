@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Cask Id] - {PR_MERGE_DATE}
+## [Cask Id] - 2026-03-24
 
 - Add cask id to the cask metadata
 
