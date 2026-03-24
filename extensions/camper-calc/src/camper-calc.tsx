@@ -139,7 +139,7 @@ export default function Command() {
         });
       await Clipboard.copy(csv);
       void showToast(Toast.Style.Success, "CSV exported", "Copied to clipboard");
-    } catch {
+    } catch (e) {
       void showToast(Toast.Style.Failure, "CSV export failed");
     }
   }
