@@ -9,14 +9,14 @@ async function getToken(): Promise<string> {
   return token;
 }
 
-let cachedUserId: string | null = null;
+let cachedUserIdForToken: { token: string; userId: string } | null = null;
 
 export async function getUserId(): Promise<string> {
-  if (cachedUserId) {
-    return cachedUserId;
-  }
-
   const token = await getToken();
+
+  if (cachedUserIdForToken?.token === token) {
+    return cachedUserIdForToken.userId;
+  }
 
   // JWT: decode user ID from payload
   const parts = token.split(".");
@@ -24,8 +24,8 @@ export async function getUserId(): Promise<string> {
     try {
       const payload = JSON.parse(atob(parts[1])) as { sub?: string };
       if (payload.sub) {
-        cachedUserId = payload.sub;
-        return cachedUserId;
+        cachedUserIdForToken = { token, userId: payload.sub };
+        return payload.sub;
       }
     } catch {
       // Not a valid JWT, fall through to viewer query
@@ -34,8 +34,8 @@ export async function getUserId(): Promise<string> {
 
   // Fallback: fetch from viewer query
   const data = await graphqlRequest<{ viewer: { id: string } }>(VIEWER_QUERY);
-  cachedUserId = data.viewer.id;
-  return cachedUserId;
+  cachedUserIdForToken = { token, userId: data.viewer.id };
+  return data.viewer.id;
 }
 
 interface GraphqlError {
