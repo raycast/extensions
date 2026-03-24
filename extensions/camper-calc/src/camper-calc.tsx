@@ -123,12 +123,13 @@ export default function Command() {
   async function exportCSV() {
     try {
       let csv = "Year,Category,Description,Amount\n";
+      let csv = "Year,Category,Description,Amount\n";
+      const quote = (s: string) => `"${s.replace(/"/g, '""')}"`;
       expenses
         .sort((a, b) => a.year - b.year)
         .forEach((e) => {
           const amount = e.amount.toFixed(2);
-          csv += `${e.year},${e.category},${e.description},${amount}\n`;
-        });
+          csv += `${e.year},${quote(e.category)},${quote(e.description)},${amount}\n`;
       csv += "\n";
       csv += "Year,Usage Days\n";
       usageDays
