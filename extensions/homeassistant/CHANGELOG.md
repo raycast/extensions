@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-24
 - Fix "Show Entity IDs" preference
 
 ## [Fix] - 2026-03-15
