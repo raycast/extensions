@@ -19,7 +19,7 @@ import RateLimitedQueue from "./RateLimitedQueue";
 import StreamArray from "stream-json/streamers/stream-array.js";
 import { Duplex } from "node:stream";
 import { logError } from "../helpers/errors";
-import "../helpers/arrayExtensions";
+import { mergeObjectsById, replaceItems } from "../helpers/collections";
 
 const DATA_PREFIX = "data: ";
 const { HTTP2_HEADER_METHOD, HTTP2_HEADER_PATH, HTTP2_HEADER_ACCEPT } = constants;
@@ -195,35 +195,35 @@ export default class HueClient {
           return resource.type === "light";
         }) as (Partial<Light> & HasId)[];
 
-        return lights.replaceItems(lightUpdates.mergeObjectsById());
+        return replaceItems(lights, mergeObjectsById(lightUpdates));
       });
 
       this.setGroupedLights?.((groupedLights) => {
         const updatedGroupedLights = updateEvent.data.filter((resource) => {
           return resource.type === "grouped_light";
         }) as (Partial<GroupedLight> & HasId)[];
-        return groupedLights.replaceItems(updatedGroupedLights);
+        return replaceItems(groupedLights, updatedGroupedLights);
       });
 
       this.setRooms?.((rooms) => {
         const updatedRooms = updateEvent.data.filter((resource) => {
           return resource.type === "room";
         }) as (Partial<Room> & HasId)[];
-        return rooms.replaceItems(updatedRooms);
+        return replaceItems(rooms, updatedRooms);
       });
 
       this.setZones?.((zones) => {
         const updatedZones = updateEvent.data.filter((resource) => {
           return resource.type === "zone";
         }) as (Partial<Zone> & HasId)[];
-        return zones.replaceItems(updatedZones);
+        return replaceItems(zones, updatedZones);
       });
 
       this.setScenes?.((scenes) => {
         const updatedScenes = updateEvent.data.filter((resource) => {
           return resource.type === "scene";
         }) as (Partial<Scene> & HasId)[];
-        return scenes.replaceItems(updatedScenes);
+        return replaceItems(scenes, updatedScenes);
       });
 
       // If the parser encounters a new JSON array, it will throw an error

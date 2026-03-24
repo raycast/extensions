@@ -7,7 +7,6 @@ import { useHue } from "./hooks/useHue";
 import { getProgressIcon } from "@raycast/utils";
 import React, { useMemo, useState } from "react";
 import useGradientUris from "./hooks/useGradientUris";
-import "./helpers/arrayExtensions";
 import useInputRateLimiter from "./hooks/useInputRateLimiter";
 import UnlinkAction from "./components/UnlinkAction";
 import SetScene from "./setScene";

@@ -1,6 +1,5 @@
 import { Action, ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
 import { logError } from "./helpers/errors";
-import "./helpers/arrayExtensions";
 import type { CssColor, Group, Id, Light, PngUriLightIconSet } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
