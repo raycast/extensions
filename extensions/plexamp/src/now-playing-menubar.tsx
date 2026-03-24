@@ -2,7 +2,7 @@ import { Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { formatNowPlayingMenuBarTitle } from "./format";
-import { getImageUrl, getMetadataByKey, getMetadataByRatingKey, getTimeline } from "./plex";
+import { getImageUrl, getMetadataByKeyForTimeline, getMetadataByRatingKey, getTimeline } from "./plex";
 import type { MetadataItem, TimelineInfo } from "./types";
 
 interface MenuBarState {
@@ -24,7 +24,7 @@ export default function Command() {
 
       if (timeline.key) {
         try {
-          current = await getMetadataByKey(timeline.key);
+          current = await getMetadataByKeyForTimeline(timeline, timeline.key);
         } catch {
           current = undefined;
         }
