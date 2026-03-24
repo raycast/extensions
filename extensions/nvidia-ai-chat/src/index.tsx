@@ -1,15 +1,5 @@
 // @ts-nocheck
-import {
-  ActionPanel,
-  Action,
-  List,
-  getPreferenceValues,
-  Icon,
-  Form,
-  useNavigation,
-  confirmAlert,
-  Alert,
-} from "@raycast/api";
+import { ActionPanel, Action, List, getPreferenceValues, Icon, Form, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import OpenAI from "openai";
@@ -124,7 +114,7 @@ function ArchiveList({ sessions, setSessions }: { sessions: ChatSession[]; setSe
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const openai = useMemo(
     () =>
@@ -170,7 +160,6 @@ export default function Command() {
   function handleModelChange(newId: string) {
     setModelId(newId);
     setRecentModelIds((prev) => {
-      // Keep only up to 5 unique recent models
       const topRecent = [newId, ...(prev || []).filter((id) => id !== newId)].slice(0, 5);
       return topRecent;
     });
@@ -375,4 +364,3 @@ export default function Command() {
     </List>
   );
 }
-
