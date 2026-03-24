@@ -50,13 +50,6 @@
       "mode": "view"
     },
     {
-      "name": "fetchBoard",
-      "title": "Fetch Board",
-      "subtitle": "Trello",
-      "description": "View board info and lists",
-      "mode": "view"
-    },
-    {
       "name": "moveCard",
       "title": "Move Card",
       "subtitle": "Trello",
