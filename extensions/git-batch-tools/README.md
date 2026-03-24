@@ -1,4 +1,4 @@
-# Git Toolkit
+# Git Batch Tools
 
 Batch git operations across multiple project groups.
 
