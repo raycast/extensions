@@ -1,9 +1,6 @@
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 import fs from "node:fs";
 import path from "node:path";
-
-const execFileAsync = promisify(execFile);
+import { showInFinder } from "@raycast/api";
 
 export type SelectedPdfFile = {
   id: string;
@@ -107,5 +104,5 @@ export const resolveOutputPath = (outputDirectory: string, outputName: string): 
 };
 
 export const revealInFinder = async (targetPath: string): Promise<void> => {
-  await execFileAsync("open", ["-R", targetPath]);
+  await showInFinder(targetPath);
 };

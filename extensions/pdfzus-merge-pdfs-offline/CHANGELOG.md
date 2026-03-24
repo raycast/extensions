@@ -4,4 +4,4 @@
 
 - Add an offline Raycast workflow to pick, reorder, and merge local PDF files.
 - Add local export actions for opening the merged PDF, revealing it in Finder, and copying its path.
-- Add German README content with a backlink to pdfzus.de.
+- Add an English README describing the workflow, features, and privacy posture.

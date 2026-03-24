@@ -255,7 +255,20 @@ function MergeResultScreen(props: { outputPath: string; files: SelectedPdfFile[]
       actions={
         <ActionPanel>
           <Action.Open title="Open Merged PDF" target={outputPath} icon={Icon.Document} />
-          <Action title="Show in Finder" icon={Icon.Finder} onAction={() => revealInFinder(outputPath)} />
+          <Action
+            title="Show in Finder"
+            icon={Icon.Finder}
+            onAction={async () => {
+              try {
+                await revealInFinder(outputPath);
+              } catch {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Could not reveal file in Finder",
+                });
+              }
+            }}
+          />
           <Action title="Open Output Folder" icon={Icon.Folder} onAction={() => open(outputFolder)} />
           <Action title="Copy Output Path" icon={Icon.Clipboard} onAction={() => Clipboard.copy(outputPath)} />
           <Action title="Start New Merge" icon={Icon.RotateAntiClockwise} onAction={popToRoot} />
