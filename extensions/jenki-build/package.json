@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jenki-build",
+  "title": "JenkiBuild",
+  "description": "Search and trigger Jenkins builds without leaving the keyboard",
+  "icon": "icon.png",
+  "author": "manohar_yekkala",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "jenkins",
+    "ci",
+    "build",
+    "devops",
+    "automation"
+  ],
+  "commands": [
+    {
+      "name": "trigger-build",
+      "title": "Trigger Build",
+      "description": "Search and trigger Jenkins builds",
+      "mode": "view"
+    },
+    {
+      "name": "build-history",
+      "title": "Build History",
+      "description": "View and re-trigger recent builds",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "jenkinsUrl",
+      "title": "Jenkins URL",
+      "type": "textfield",
+      "required": true,
+      "description": "Base URL of your Jenkins instance (e.g. https://jenkins.example.com)",
+      "placeholder": "https://jenkins.example.com"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "type": "textfield",
+      "required": true,
+      "description": "Jenkins username"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "type": "password",
+      "required": true,
+      "description": "Jenkins API token (not your password)"
+    },
+    {
+      "name": "defaultJobPath",
+      "title": "Default Job Path",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional job path to pre-select on open"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0",
+    "@raycast/utils": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2",
+    "vitest": "^1.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use the \\`npm run publish\\` script.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}
