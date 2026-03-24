@@ -59,12 +59,12 @@ export function updateRawBlock(rawBlock: string, values: Omit<SSHHostConfig, "ra
 
   newLines.splice(actualInsertIndex, 0, ...addedLines);
 
-  return newLines.join("\n").trimEnd();
+  return newLines.join("\n");
 }
 
 function buildHostBlock(config: SSHHostConfig): string {
   if (config.rawBlock && config.rawBlock.trim() !== "") {
-    return config.rawBlock.trimEnd();
+    return config.rawBlock;
   }
 
   let block = `Host ${config.host}\n`;
@@ -76,11 +76,7 @@ function buildHostBlock(config: SSHHostConfig): string {
 }
 
 function normalizeRawBlock(blockLines: string[]): string {
-  const lines = [...blockLines];
-  while (lines.length > 0 && lines[lines.length - 1].trim() === "") {
-    lines.pop();
-  }
-  return lines.join("\n");
+  return blockLines.join("\n");
 }
 
 function findHostBlockRanges(lines: string[]): Array<{ start: number; end: number }> {
