@@ -44,8 +44,7 @@
         "lint": "ray lint",
         "prepublishOnly": "echo \"Error: no publish\" && exit 1",
         "publish": "npx @raycast/api@latest publish",
-        "build-overlay": "bash scripts/build-overlay.sh",
-        "postinstall": "bash scripts/build-overlay.sh"
+        "build-overlay": "bash scripts/build-overlay.sh"
     },
     "repository": {
         "type": "git",

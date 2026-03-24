@@ -1,13 +1,6 @@
-# Changelog
+# Kill It With Fire Changelog
 
-All notable changes to **Kill It With Fire** will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-
-## [1.0.0] - 2026-03-23
-
-### Added
-
+## [Initial Release] - {PR_MERGE_DATE}
 - Full-screen flame animation via native macOS transparent overlay.
 - Canvas particle system with flame and smoke particles.
 - Fire grows from the bottom of the screen to midscreen over ~3 seconds.

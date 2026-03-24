@@ -4,9 +4,6 @@ node_modules/
 # Raycast build output
 .ray/
 
-# Compiled overlay binary (built from swift/overlay.swift via `npm run build-overlay`)
-assets/overlay
-
 # OS files
 .DS_Store
 Thumbs.db

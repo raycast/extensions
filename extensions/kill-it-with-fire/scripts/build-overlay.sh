@@ -24,12 +24,23 @@ ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SWIFT_SRC="$ROOT/swift/overlay.swift"
 OUTPUT="$ROOT/assets/overlay"
 
-echo "→ Compiling overlay helper…"
+echo "→ Compiling overlay helper (universal binary)…"
 swiftc "$SWIFT_SRC" \
-  -o "$OUTPUT" \
+  -o "${OUTPUT}_arm64" \
   -O \
+  -target arm64-apple-macos12 \
   -framework Cocoa \
   -framework WebKit
 
+swiftc "$SWIFT_SRC" \
+  -o "${OUTPUT}_x86_64" \
+  -O \
+  -target x86_64-apple-macos12 \
+  -framework Cocoa \
+  -framework WebKit
+
+lipo -create -output "$OUTPUT" "${OUTPUT}_arm64" "${OUTPUT}_x86_64"
+rm -f "${OUTPUT}_arm64" "${OUTPUT}_x86_64"
+
 chmod +x "$OUTPUT"
-echo "✓ Built $OUTPUT"
+echo "✓ Built universal binary: $OUTPUT"
