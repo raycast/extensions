@@ -6,7 +6,6 @@ import { PID_REGISTRY_FILENAME } from "./constants";
 
 export class AudioEngine {
   private registryPath: string;
-  private loopFlags: Map<string, boolean> = new Map();
 
   constructor(supportPath: string) {
     this.registryPath = path.join(supportPath, PID_REGISTRY_FILENAME);
@@ -40,9 +39,9 @@ export class AudioEngine {
   private isProcessAlive(pid: number): boolean {
     try {
       process.kill(pid, 0);
-      // Verify it's actually afplay
+      // Verify it's the sh loop we spawned, not a recycled PID
       const comm = execSync(`ps -p ${pid} -o comm= 2>/dev/null`, { encoding: "utf-8" }).trim();
-      return comm.includes("afplay");
+      return comm === "sh";
     } catch {
       return false;
     }
@@ -66,20 +65,24 @@ export class AudioEngine {
     }
 
     const afplayVolume = Math.max(0, Math.min(1, volume / 100));
-    const child = spawn("afplay", ["-v", String(afplayVolume), filePath], {
+
+    // Spawn a detached shell loop so playback continues looping even when
+    // the Raycast process is not running. The shell becomes the process
+    // group leader (detached: true), so we can kill the whole group —
+    // both the sh and any afplay child — with a single SIGTERM to -pid.
+    const child = spawn("sh", ["-c", `while true; do afplay -v ${afplayVolume} "${filePath}"; done`], {
       detached: true,
       stdio: "ignore",
     });
 
     if (!child.pid) {
-      console.error(`[AudioEngine] Failed to spawn afplay for ${soundId}`);
+      console.error(`[AudioEngine] Failed to spawn loop for ${soundId}`);
       return null;
     }
+
     child.unref();
 
-    // Register PID
     const registry = this.readRegistry();
-    // Remove any existing entry for this sound
     registry.entries = registry.entries.filter((e) => e.soundId !== soundId);
     registry.entries.push({
       soundId,
@@ -89,27 +92,17 @@ export class AudioEngine {
     });
     this.writeRegistry(registry);
 
-    // Set up looping
-    this.loopFlags.set(soundId, true);
-    child.on("close", (code) => {
-      if (code === 0 && this.loopFlags.get(soundId)) {
-        // Sound finished playing naturally, restart for loop
-        this.startSound(soundId, filePath, volume);
-      }
-    });
-
     return child.pid;
   }
 
   stopSound(soundId: string): void {
-    this.loopFlags.set(soundId, false);
-
     const registry = this.readRegistry();
     const entry = registry.entries.find((e) => e.soundId === soundId);
     if (!entry) return;
 
     try {
-      process.kill(entry.pid, "SIGTERM");
+      // Negative PID kills the entire process group (sh + afplay child)
+      process.kill(-entry.pid, "SIGTERM");
     } catch {
       // Process already dead
     }
@@ -119,17 +112,14 @@ export class AudioEngine {
   }
 
   stopAll(): void {
-    this.loopFlags.clear();
-
     const registry = this.readRegistry();
     for (const entry of registry.entries) {
       try {
-        process.kill(entry.pid, "SIGTERM");
+        process.kill(-entry.pid, "SIGTERM");
       } catch {
         // Process already dead
       }
     }
-
     this.writeRegistry({ entries: [], lastUpdated: Date.now() });
   }
 
@@ -138,18 +128,16 @@ export class AudioEngine {
     const entry = registry.entries.find((e) => e.soundId === soundId);
 
     if (entry && this.isProcessAlive(entry.pid)) {
-      // Overlap strategy: start new first, then kill old
-      this.loopFlags.set(soundId, false); // prevent old loop handler from restarting
+      // Start the new loop first for a seamless transition, then kill the old group
       const newPid = this.startSound(soundId, filePath, newVolume);
       if (newPid) {
         try {
-          process.kill(entry.pid, "SIGTERM");
+          process.kill(-entry.pid, "SIGTERM");
         } catch {
           // Already dead
         }
       }
     } else {
-      // Not currently playing, just start fresh
       this.startSound(soundId, filePath, newVolume);
     }
   }

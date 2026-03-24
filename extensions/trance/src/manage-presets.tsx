@@ -6,6 +6,8 @@ import {
   confirmAlert,
   Form,
   Icon,
+  launchCommand,
+  LaunchType,
   List,
   showToast,
   Toast,
@@ -78,44 +80,34 @@ export default function ManagePresetsCommand() {
   const { push } = useNavigation();
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search presets..." navigationTitle="Presets">
-      <List.Section title="Actions">
-        <List.Item
-          title="Save Current Mix as Preset"
-          icon={{ source: Icon.Plus, tintColor: Color.Blue }}
-          subtitle={
-            state.activeSounds.length > 0
-              ? `${state.activeSounds.length} sound${state.activeSounds.length !== 1 ? "s" : ""} in mix`
-              : "No sounds in mix"
-          }
-          actions={
-            <ActionPanel>
-              <Action
-                title="Save Current Mix"
-                icon={Icon.SaveDocument}
-                onAction={async () => {
-                  if (state.activeSounds.length === 0) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "No sounds in mix",
-                      message: "Add sounds in Mix Sounds first",
-                    });
-                    return;
-                  }
-                  push(
-                    <SavePresetForm
-                      onSave={async (name) => {
-                        await save(name, state.activeSounds, state.masterVolume);
-                        await showToast({ style: Toast.Style.Success, title: `Saved "${name}"` });
-                      }}
-                    />,
-                  );
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
+    <List isLoading={isLoading} searchBarPlaceholder="Search presets...">
+      {state.activeSounds.length > 0 && (
+        <List.Section title="Actions">
+          <List.Item
+            title="Save Current Mix as Preset"
+            icon={{ source: Icon.Plus, tintColor: Color.Blue }}
+            subtitle={`${state.activeSounds.length} sound${state.activeSounds.length !== 1 ? "s" : ""} in mix`}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Save Current Mix"
+                  icon={Icon.SaveDocument}
+                  onAction={() => {
+                    push(
+                      <SavePresetForm
+                        onSave={async (name) => {
+                          await save(name, state.activeSounds, state.masterVolume);
+                          await showToast({ style: Toast.Style.Success, title: `Saved "${name}"` });
+                        }}
+                      />,
+                    );
+                  }}
+                />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
 
       <List.Section title="Saved Presets" subtitle={`${presets.length} preset${presets.length !== 1 ? "s" : ""}`}>
         {presets.map((preset) => {
@@ -205,9 +197,30 @@ export default function ManagePresetsCommand() {
 
       {presets.length === 0 && !isLoading && (
         <List.EmptyView
-          title="No Presets Yet"
-          description="Add sounds in Mix Sounds, then save your mix here"
+          title={state.activeSounds.length === 0 ? "No Mix Active" : "No Presets Yet"}
+          description={
+            state.activeSounds.length === 0
+              ? "Open the mixer to add sounds, then come back to save a preset"
+              : "Save your current mix using the action above"
+          }
           icon={Icon.Music}
+          actions={
+            state.activeSounds.length === 0 ? (
+              <ActionPanel>
+                <Action
+                  title="Open Mixer"
+                  icon={Icon.AppWindowGrid3x3}
+                  onAction={async () => {
+                    try {
+                      await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });
+                    } catch {
+                      await showToast({ style: Toast.Style.Failure, title: "Could not open mixer" });
+                    }
+                  }}
+                />
+              </ActionPanel>
+            ) : undefined
+          }
         />
       )}
     </List>

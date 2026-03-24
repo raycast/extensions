@@ -5,9 +5,17 @@
   "description": "Ambient sound mixer for focus and relaxation. Layer multiple sounds, save presets, and control from your menu bar.",
   "icon": "icon.png",
   "author": "chandlervdw",
-  "categories": ["Productivity", "Media"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "mix-sounds",
@@ -39,6 +47,13 @@
       "title": "Set Sleep Timer",
       "description": "Set an auto-stop timer for the current mix",
       "mode": "view"
+    },
+    {
+      "name": "keep-alive",
+      "title": "Keep Alive",
+      "description": "Restart any sounds that should be playing but have stopped — run this on a schedule to keep your mix looping",
+      "mode": "no-view",
+      "interval": "20s"
     }
   ],
   "preferences": [
