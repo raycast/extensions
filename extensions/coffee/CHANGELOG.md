@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-24
 
 - Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
 - Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
