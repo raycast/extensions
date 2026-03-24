@@ -5,7 +5,10 @@
   "description": "Search and copy Figma keyboard shortcuts for macOS, Windows, or Linux",
   "icon": "command-icon.png",
   "author": "arturdz",
-  "categories": ["Design Tools", "Productivity"],
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -20,9 +23,18 @@
           "title": "Platform",
           "description": "Which OS shortcut format to display and copy",
           "data": [
-            { "value": "mac", "title": "macOS" },
-            { "value": "windows", "title": "Windows" },
-            { "value": "linux", "title": "Linux" }
+            {
+              "value": "mac",
+              "title": "macOS"
+            },
+            {
+              "value": "windows",
+              "title": "Windows"
+            },
+            {
+              "value": "linux",
+              "title": "Linux"
+            }
           ],
           "default": "mac",
           "required": false

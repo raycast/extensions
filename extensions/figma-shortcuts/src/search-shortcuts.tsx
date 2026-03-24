@@ -5,7 +5,6 @@ import type { FigmaShortcut } from "./data/shortcuts";
 
 type Platform = "mac" | "windows" | "linux";
 
-
 const PLATFORMS: { value: Platform; label: string }[] = [
   { value: "mac", label: "macOS" },
   { value: "windows", label: "Win" },
