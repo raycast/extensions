@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, showToast, showHUD } from "@raycast/api";
 import { getProfileNames, startFocusWithProfile, startFocus, getActiveProfileName } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
@@ -31,11 +31,11 @@ export default async function Command() {
   if (profiles.length === 0) {
     await startFocus();
     await toast.hide();
-    await showToast({ style: Toast.Style.Success, title: "Focus started" });
+    await showHUD("Focus started");
   } else {
     toast.title = `Starting Focus with profile: ${firstProfile}...`;
     await startFocusWithProfile(firstProfile);
     await toast.hide();
-    await showToast({ style: Toast.Style.Success, title: `Focus started with profile: ${firstProfile}` });
+    await showHUD(`Focus started with profile: ${firstProfile}`);
   }
 }

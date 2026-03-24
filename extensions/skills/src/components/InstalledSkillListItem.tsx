@@ -1,22 +1,31 @@
 import { ActionPanel, Action, Icon, Keyboard, List, Color } from "@raycast/api";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { useCachedPromise } from "@raycast/utils";
-import { type InstalledSkill, removeFrontmatter } from "../shared";
+import { type InstalledSkill, parseFrontmatter } from "../shared";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 
+function formatDate(iso: string): string | undefined {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return undefined;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
 function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected: boolean }) {
-  const { data: content, isLoading } = useCachedPromise(
+  const { data: parsed, isLoading } = useCachedPromise(
     async (path: string) => {
       const raw = await readFile(join(path, "SKILL.md"), "utf-8");
-      return removeFrontmatter(raw);
+      return parseFrontmatter(raw);
     },
     [skill.path],
     { execute: isSelected },
   );
 
-  const markdown = isLoading ? `# ${skill.name}\n\nLoading...` : (content ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const markdown = isLoading
+    ? `# ${skill.name}\n\nLoading...`
+    : (parsed?.body ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const frontmatter = parsed?.frontmatter ?? {};
 
   return (
     <List.Item.Detail
@@ -24,12 +33,36 @@ function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
+          {frontmatter.description && (
+            <List.Item.Detail.Metadata.Label title="Description" text={frontmatter.description} />
+          )}
           <List.Item.Detail.Metadata.Label title="Name" text={skill.name} />
+          {frontmatter.license && (
+            <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
+          )}
           {skill.hasUpdate && (
             <List.Item.Detail.Metadata.TagList title="Status">
               <List.Item.Detail.Metadata.TagList.Item text="Update available" color={Color.Orange} />
             </List.Item.Detail.Metadata.TagList>
           )}
+          {skill.sourceUrl && (
+            <List.Item.Detail.Metadata.Link
+              title="Source"
+              text={skill.source ?? skill.sourceUrl}
+              target={skill.sourceUrl}
+            />
+          )}
+          {skill.installedAt && formatDate(skill.installedAt) && (
+            <List.Item.Detail.Metadata.Label
+              title="Installed"
+              text={formatDate(skill.installedAt)!}
+              icon={Icon.Calendar}
+            />
+          )}
+          {skill.updatedAt && formatDate(skill.updatedAt) && (
+            <List.Item.Detail.Metadata.Label title="Updated" text={formatDate(skill.updatedAt)!} icon={Icon.Clock} />
+          )}
+          {(skill.sourceUrl || skill.installedAt) && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.TagList title="Agents">
             {skill.agents.map((agent) => (
               <List.Item.Detail.Metadata.TagList.Item key={agent} text={agent} color={Color.Blue} />
@@ -64,7 +97,7 @@ export function InstalledSkillListItem({
     <List.Item
       title={skill.name}
       subtitle={isShowingDetail ? undefined : agentsText}
-      icon={{ source: Icon.Hammer, tintColor: Color.Purple }}
+      icon={{ source: Icon.Hammer, tintColor: skill.hasUpdate ? Color.Orange : Color.Purple }}
       accessories={
         isShowingDetail
           ? []
@@ -80,13 +113,21 @@ export function InstalledSkillListItem({
               { icon: Icon.ComputerChip, text: `${skill.agentCount}`, tooltip: agentsText },
             ]
       }
-      keywords={[skill.name, ...skill.agents]}
+      keywords={[skill.name, ...skill.agents, ...(skill.source ? [skill.source] : [])]}
       id={skill.name}
       detail={<InlineDetail skill={skill} isSelected={isSelected} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Open">
             <Action.ShowInFinder path={skill.path} icon={Icon.Finder} />
+            {skill.sourceUrl && (
+              <Action.OpenInBrowser
+                title="Open on GitHub"
+                url={skill.sourceUrl}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
@@ -99,6 +140,7 @@ export function InstalledSkillListItem({
               content={skill.path}
               shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
+            {skill.sourceUrl && <Action.CopyToClipboard title="Copy Source URL" content={skill.sourceUrl} />}
           </ActionPanel.Section>
           <ActionPanel.Section>
             {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}

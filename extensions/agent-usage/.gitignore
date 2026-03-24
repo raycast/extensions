@@ -14,5 +14,7 @@ compiled_raycast_rust
 .DS_Store
 
 # Claude
-.claude/
+.claude
 CLAUDE.md
+
+docs

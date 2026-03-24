@@ -1,5 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Keyboard } from "@raycast/api";
-import { hex } from "color-convert";
+import { converter } from "culori";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import colors from "tailwindcss/colors";
@@ -7,6 +7,25 @@ import { capitalize } from "lodash";
 import { useEffect, useState } from "react";
 
 import { moveFirstMatchToFront } from "./utils/move-to-front-extension";
+
+const toRgb = converter("rgb");
+const toHsl = converter("hsl");
+const toOklch = converter("oklch");
+
+function formatRgb(hex: string): string {
+  const rgb = toRgb(hex);
+  return rgb ? `rgb(${Math.round(rgb.r * 255)},${Math.round(rgb.g * 255)},${Math.round(rgb.b * 255)})` : hex;
+}
+
+function formatHsl(hex: string): string {
+  const hsl = toHsl(hex);
+  return hsl ? `hsl(${Math.round(hsl.h ?? 0)},${Math.round(hsl.s * 100)}%,${Math.round(hsl.l * 100)}%)` : hex;
+}
+
+function formatOklch(hex: string): string {
+  const oklch = toOklch(hex);
+  return oklch ? `oklch(${+(oklch.l * 100).toFixed(2)}% ${+oklch.c.toFixed(4)} ${+(oklch.h ?? 0).toFixed(2)})` : hex;
+}
 
 const hiddenColors = [
   "inherit",
@@ -177,7 +196,7 @@ function Actions({
         {
           id: "value-rgb",
           title: "Copy RGB Value",
-          content: `rgb(${hex.rgb(value)})`,
+          content: formatRgb(value),
           shortcut: {
             macOS: { modifiers: ["cmd", "opt"], key: "r" },
             Windows: { modifiers: ["ctrl", "alt"], key: "r" },
@@ -186,10 +205,19 @@ function Actions({
         {
           id: "value-hsl",
           title: "Copy HSL Value",
-          content: `hsl(${hex.hsl(value)})`,
+          content: formatHsl(value),
           shortcut: {
             macOS: { modifiers: ["cmd", "opt"], key: "s" },
             Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+          } as Keyboard.Shortcut,
+        },
+        {
+          id: "value-oklch",
+          title: "Copy OKLCH Value",
+          content: formatOklch(value),
+          shortcut: {
+            macOS: { modifiers: ["cmd", "opt"], key: "l" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "l" },
           } as Keyboard.Shortcut,
         },
       ],

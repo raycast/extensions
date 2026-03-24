@@ -120,6 +120,10 @@
               "value": "value-hsl"
             },
             {
+              "title": "Copy OKLCH",
+              "value": "value-oklch"
+            },
+            {
               "title": "Copy Background Class",
               "value": "bg-class"
             },
@@ -164,14 +168,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
-    "color-convert": "^2.0.1",
+    "culori": "^4.0.1",
     "css": "^3.0.0",
     "lodash": "^4.17.21",
     "tailwindcss": "^3.3.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/color-convert": "^2.0.0",
+    "@types/culori": "^2.1.0",
     "@types/css": "^0.0.33",
     "@types/lodash": "^4.14.188",
     "@types/node": "22.13.10",

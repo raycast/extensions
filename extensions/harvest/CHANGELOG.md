@@ -1,5 +1,12 @@
 # Harvest Changelog
 
+## [Improved Project Filtering With Clients Included] - 2026-03-09
+
+- Added: New preference "Show Client Name in Project Dropdown" (default off) — when enabled, the project dropdown additionally displays entries with client name for easier filtering by client name
+- Changed: Projects and client groups are now sorted alphabetically in the project dropdown
+
+## [Add Windows Support] - 2026-03-04
+
 ## [Bug Fixes] - 2026-01-19
 
 - Fix: Clearing notes when editing a time entry now properly deletes the note

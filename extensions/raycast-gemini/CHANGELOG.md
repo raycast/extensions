@@ -1,5 +1,17 @@
 # Google Gemini Changelog
 
+## [TypeScript Migration & Model Updates] - 2026-03-16
+
+- 🛠️ Migrated entire codebase from JSX to TypeScript (TSX/TS) for improved type safety.
+- ⬆️ Updated `@google/genai` SDK from ^1.37.0 to ^1.44.0.
+- 🆕 Updated model list: removed deprecated models, added Gemini 3.1 Pro.
+- 🔧 Set default model to Gemini 2.5 Flash.
+- 🐛 Fixed streaming bug in AI Chat regeneration (`result.stream` → `result`).
+
+## [Fix copy actions in AI Chat] - 2026-03-07
+
+- 🐛 Fix: enable “Copy Answer”, “Copy Prompt”, and “Copy Entire Chat (Transcript)” actions for the selected message.
+
 ## [New models & SDK Migration] - 2026-01-19
 
 - 🆕 New Model: Gemini 3.0 Flash

@@ -1,10 +1,15 @@
 import { List, Icon, ActionPanel, Action, useNavigation } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useModelsData } from "./hooks/useModelsData";
 import { ModelListSection } from "./components";
 import { filterByCapabilities, filterOutDeprecated, sortByProviderThenName } from "./lib/filters";
 import { ALL_CAPABILITIES, CAPABILITIES } from "./lib/constants";
 import { Capability, Model } from "./lib/types";
+
+// Stable accessory arrays to avoid creating new instances
+const SELECTED_ACCESSORIES: List.Item.Accessory[] = [{ icon: Icon.CheckCircle, tooltip: "Selected" }];
+const EMPTY_ACCESSORIES: List.Item.Accessory[] = [];
+const EMPTY_MODELS: Model[] = [];
 
 type CapabilityResultsViewProps = {
   models: Model[];
@@ -65,42 +70,45 @@ function CapabilitySelectionView({
   const selectedSet = useMemo(() => new Set(selectedCapabilities), [selectedCapabilities]);
   const selectedCount = selectedCapabilities.length;
 
-  const renderCapabilityItem = (capability: Capability) => {
-    const capInfo = CAPABILITIES[capability];
-    const isSelected = selectedSet.has(capability);
-    const accessories: List.Item.Accessory[] = isSelected ? [{ icon: Icon.CheckCircle, tooltip: "Selected" }] : [];
+  const renderCapabilityItem = useCallback(
+    (capability: Capability) => {
+      const capInfo = CAPABILITIES[capability];
+      const isSelected = selectedSet.has(capability);
+      const accessories = isSelected ? SELECTED_ACCESSORIES : EMPTY_ACCESSORIES;
 
-    return (
-      <List.Item
-        key={capability}
-        title={capInfo.label}
-        subtitle={capInfo.description}
-        icon={capInfo.icon}
-        accessories={accessories}
-        keywords={[capability, capInfo.label]}
-        actions={
-          <ActionPanel>
-            <Action
-              title={isSelected ? "Remove Capability" : "Add Capability"}
-              icon={isSelected ? Icon.MinusCircle : Icon.PlusCircle}
-              onAction={() => onToggle(capability)}
-            />
-            {selectedCount > 0 && (
-              <ActionPanel.Section>
-                <Action
-                  title="Show Matching Models"
-                  icon={Icon.ArrowRight}
-                  onAction={onShowResults}
-                  shortcut={{ modifiers: ["cmd"], key: "return" }}
-                />
-                <Action title="Clear Selected Capabilities" icon={Icon.XMarkCircle} onAction={onClear} />
-              </ActionPanel.Section>
-            )}
-          </ActionPanel>
-        }
-      />
-    );
-  };
+      return (
+        <List.Item
+          key={capability}
+          title={capInfo.label}
+          subtitle={capInfo.description}
+          icon={capInfo.icon}
+          accessories={accessories}
+          keywords={[capability, capInfo.label]}
+          actions={
+            <ActionPanel>
+              <Action
+                title={isSelected ? "Remove Capability" : "Add Capability"}
+                icon={isSelected ? Icon.MinusCircle : Icon.PlusCircle}
+                onAction={() => onToggle(capability)}
+              />
+              {selectedCount > 0 && (
+                <ActionPanel.Section>
+                  <Action
+                    title="Show Matching Models"
+                    icon={Icon.ArrowRight}
+                    onAction={onShowResults}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                  />
+                  <Action title="Clear Selected Capabilities" icon={Icon.XMarkCircle} onAction={onClear} />
+                </ActionPanel.Section>
+              )}
+            </ActionPanel>
+          }
+        />
+      );
+    },
+    [selectedSet, selectedCount, onToggle, onShowResults, onClear],
+  );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search capabilities...">
@@ -121,25 +129,29 @@ export default function AIModelsByCapability() {
   const { push } = useNavigation();
   const [selectedCapabilities, setSelectedCapabilities] = useState<Capability[]>([]);
 
-  const toggleCapability = (capability: Capability) => {
+  const toggleCapability = useCallback((capability: Capability) => {
     setSelectedCapabilities((current) =>
       current.includes(capability) ? current.filter((cap) => cap !== capability) : [...current, capability],
     );
-  };
+  }, []);
 
-  const handleShowResults = () => {
-    const models = data?.models ?? [];
+  const handleClear = useCallback(() => {
+    setSelectedCapabilities([]);
+  }, []);
+
+  const handleShowResults = useCallback(() => {
+    const models = data?.models ?? EMPTY_MODELS;
     push(
       <CapabilityResultsView models={models} isLoading={isLoading} selectedCapabilities={[...selectedCapabilities]} />,
     );
-  };
+  }, [data?.models, isLoading, selectedCapabilities, push]);
 
   return (
     <CapabilitySelectionView
       isLoading={isLoading && !data?.models?.length}
       selectedCapabilities={selectedCapabilities}
       onToggle={toggleCapability}
-      onClear={() => setSelectedCapabilities([])}
+      onClear={handleClear}
       onShowResults={handleShowResults}
     />
   );

@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   Icon,
+  Image,
   List,
   getPreferenceValues,
   Detail,
@@ -15,10 +16,20 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { useForm, FormValidation, showFailureToast, usePromise } from "@raycast/utils";
-import { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, CopyProjectName } from "./shortcut";
-import { Project, Task, CreateProjectFormValues, CreateTaskFormValues } from "./types";
+import { useForm, FormValidation, showFailureToast, usePromise, getAvatarIcon } from "@raycast/utils";
+import {
+  ChangeStatus,
+  ChangePriority,
+  CopyTaskTitle,
+  CopyTaskDescription,
+  CopyProjectName,
+  AssignTask,
+  Revalidate,
+} from "./shortcut";
+import { Project, Task, CreateProjectFormValues, CreateTaskFormValues, ProjectDetail } from "./types";
 import { KaneoAPI } from "./api/kaneo";
+import { useAuthSession } from "./hooks/useAuthSession";
+import { useEffect, useState } from "react";
 
 function formatDate(date: string | null) {
   if (!date) return "N/A";
@@ -92,7 +103,15 @@ function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void 
     },
     validation: {
       name: FormValidation.Required,
-      slug: FormValidation.Required,
+      slug: (value) => {
+        if (!value) {
+          return "Slug is required";
+        }
+        if (value.length > 8) {
+          return "Slug must be at most 8 characters long";
+        }
+        return undefined;
+      },
     },
   });
 
@@ -234,20 +253,26 @@ function TaskDetailView({
 
   const markdown = `# ${task.title}
 
+
 ## Description
 ${cleanDescription(task.description)}
+
 
 ## Status
 ${status}
 
+
 ## Priority
 ${priority}
+
 
 ## Due Date
 ${formatDate(task.dueDate)}
 
+
 ## Assignee
 ${task.assigneeName || "Unassigned"}
+
 
 ## Created At
 ${formatDate(task.createdAt)}
@@ -344,14 +369,102 @@ ${formatDate(task.createdAt)}
 
 function ProjectTasksList({ project }: { project: Project }) {
   const api = new KaneoAPI();
-  const { sort } = getPreferenceValues<{
-    sort: string;
-  }>();
+  const { sort, youAsAssignee } = getPreferenceValues<Preferences>();
   const {
     isLoading,
-    data: projectDetail,
+    data: dProject,
     revalidate,
   } = usePromise((id: string) => api.getProjectTasks(id), [project.id.toString()]);
+  const { session } = useAuthSession();
+  const [projectDetail, setProjectDetail] = useState<ProjectDetail | undefined>(dProject);
+
+  useEffect(() => {
+    if (dProject) {
+      setProjectDetail(dProject);
+    }
+  }, [dProject]);
+
+  if (isLoading || !projectDetail) {
+    return <List isLoading navigationTitle={`Tasks - ${project.name}`} />;
+  }
+
+  const userId = session?.user?.id ?? null;
+  const toggleAssignTask = async (task: Task) => {
+    if (!userId) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No session",
+        message: "You must be logged in to assign tasks.",
+      });
+      return;
+    }
+
+    const isAssignedToMe = task.assigneeId === userId;
+
+    await showToast({
+      style: Toast.Style.Animated,
+      title: isAssignedToMe ? "Unassigning task..." : "Assigning task...",
+    });
+
+    try {
+      await api.assignTask(task.id, isAssignedToMe ? "" : userId);
+
+      const newAssigneeId = isAssignedToMe ? null : userId;
+      const newAssigneeName = isAssignedToMe ? null : (session?.user?.name ?? null);
+      const newAssigneeImage = isAssignedToMe ? null : (session?.user?.image ?? null);
+
+      setProjectDetail((prev) => {
+        if (!prev) return prev;
+
+        return {
+          ...prev,
+          data: prev.data
+            ? {
+                ...prev.data,
+                columns: prev.data.columns.map((col) => ({
+                  ...col,
+                  tasks: col.tasks.map((t) =>
+                    t.id === task.id
+                      ? {
+                          ...t,
+                          assigneeId: newAssigneeId,
+                          assigneeName: newAssigneeName,
+                          assigneeImage: newAssigneeImage,
+                        }
+                      : t,
+                  ),
+                })),
+              }
+            : undefined,
+          columns: !prev.data
+            ? prev.columns?.map((col) => ({
+                ...col,
+                tasks: col.tasks.map((t) =>
+                  t.id === task.id
+                    ? {
+                        ...t,
+                        assigneeId: newAssigneeId,
+                        assigneeName: newAssigneeName,
+                        assigneeImage: newAssigneeImage,
+                      }
+                    : t,
+                ),
+              }))
+            : undefined,
+        };
+      });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: isAssignedToMe ? "Task unassigned" : "Task assigned to you",
+      });
+    } catch (error) {
+      await showFailureToast(error, {
+        title: isAssignedToMe ? "Failed to unassign task" : "Failed to assign task",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
 
   const priorityOrder = ["urgent", "high", "medium", "low", "no-priority"];
 
@@ -449,8 +562,10 @@ function ProjectTasksList({ project }: { project: Project }) {
     }
   };
 
+  const resolvedColumns = projectDetail?.data?.columns ?? projectDetail?.columns;
+
   const columnStatuses =
-    projectDetail?.columns.map((col) => ({
+    resolvedColumns?.map((col) => ({
       id: col.id,
       name: col.name,
       isDone: col.isFinal,
@@ -489,7 +604,7 @@ function ProjectTasksList({ project }: { project: Project }) {
         </ActionPanel>
       }
     >
-      {projectDetail.columns.map((column) => {
+      {resolvedColumns?.map((column) => {
         const tasks = sort === "priority" ? sortTasksByPriority(column.tasks) : sortTasksByDueDate(column.tasks);
 
         return (
@@ -504,7 +619,19 @@ function ProjectTasksList({ project }: { project: Project }) {
                   icon={column.isFinal ? Icon.CircleProgress100 : Icon.Circle}
                   title={item.title}
                   accessories={[
-                    { text: item.assigneeName || "Unassigned", icon: Icon.Person },
+                    {
+                      text:
+                        (youAsAssignee
+                          ? item.assigneeId === userId
+                            ? "You"
+                            : item.assigneeName
+                          : item.assigneeName) || "Unassigned",
+                      icon: item.assigneeName
+                        ? item.assigneeImage
+                          ? { source: item.assigneeImage, mask: Image.Mask.Circle }
+                          : getAvatarIcon(`${item.assigneeName}`)
+                        : undefined,
+                    },
                     ...(item.dueDate
                       ? [
                           {
@@ -582,6 +709,13 @@ function ProjectTasksList({ project }: { project: Project }) {
                         shortcut={Keyboard.Shortcut.Common.Remove}
                       />
 
+                      <Action
+                        title={item.assigneeId === session?.user?.id ? "Unassign from Me" : "Assign to Me"}
+                        icon={Icon.Person}
+                        shortcut={AssignTask}
+                        onAction={() => toggleAssignTask(item)}
+                      />
+
                       <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
                         {columnStatuses
                           .filter((status) => status.id !== item.status)
@@ -631,6 +765,13 @@ function ProjectTasksList({ project }: { project: Project }) {
                           shortcut={CopyTaskDescription}
                         />
                       )}
+
+                      <Action
+                        title="Revalidate"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={Revalidate}
+                        onAction={() => revalidate()}
+                      />
                     </ActionPanel>
                   }
                 />

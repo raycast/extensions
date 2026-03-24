@@ -25,6 +25,7 @@ export default function Command() {
       searchBarPlaceholder="Search history..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      throttle={true}
     >
       {data?.map((item) => (
         <HistoryListItem key={item.id} item={item} onHistoryAction={revalidate} />

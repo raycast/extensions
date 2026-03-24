@@ -85,6 +85,44 @@
           "title": "Due Date"
         }
       ]
+    },
+    {
+      "name": "youAsAssignee",
+      "type": "checkbox",
+      "label": "Assigned to you",
+      "description": "Display your name or \"You\" when task is assigned to you",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "requestTimeout",
+      "type": "dropdown",
+      "title": "Request Timeout",
+      "description": "Delay before timeout requests",
+      "required": true,
+      "default": "2500",
+      "data": [
+        {
+          "value": "1000",
+          "title": "1 Seconds"
+        },
+        {
+          "value": "2500",
+          "title": "2.5 Seconds"
+        },
+        {
+          "value": "5000",
+          "title": "5 Seconds"
+        },
+        {
+          "value": "10000",
+          "title": "10 Seconds"
+        },
+        {
+          "value": "30000",
+          "title": "30 Seconds"
+        }
+      ]
     }
   ],
   "keywords": [
@@ -93,15 +131,15 @@
     "productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3",
     "react": "^19.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^25.2.3",
+    "@types/node": "^25.5.0",
     "@types/react": "^19.2.14",
-    "eslint": "^10.0.0",
+    "eslint": "^10.1.0",
     "prettier": "^3.8.1",
     "typescript": "^5.8.2"
   },

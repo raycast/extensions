@@ -1,33 +1,73 @@
+// Hook to fetch stories and events for a selected category
+
 import { useFetch } from "@raycast/utils";
-import { useMemo } from "react";
-import { Cluster, HistoricalEvent, OnThisDayResponse, CategoryResponse } from "../interfaces";
-import { NEWS_BASE_URL, clustersToArticles } from "../utils";
+import { useMemo, useState, useEffect } from "react";
+import { HistoricalEvent } from "../interfaces";
+import { getLatestBatch, storiesToArticles, StoryResponse } from "../utils";
 
-export function useCategoryFeed(categoryFile: string, language: string) {
-  const suffix = language === "default" ? "" : `_${language}`;
-  const fileName = categoryFile.replace(".json", `${suffix}.json`);
-  const url = `${NEWS_BASE_URL}/${fileName}`;
+export function useCategoryFeed(categoryId: string, language: string, providedBatchId?: string) {
+  const isOnThisDay = categoryId === "onthisday";
+  const [batchId, setBatchId] = useState<string | null>(providedBatchId || null);
+  const [isLoadingBatch, setIsLoadingBatch] = useState(!providedBatchId);
+  const [batchError, setBatchError] = useState<string | null>(null);
 
-  const { isLoading, data, error } = useFetch<CategoryResponse | OnThisDayResponse>(url, {
-    parseResponse: async (response): Promise<CategoryResponse | OnThisDayResponse> => {
-      if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
+  useEffect(() => {
+    if (providedBatchId) {
+      return;
+    }
+
+    const fetchBatch = async () => {
+      try {
+        setIsLoadingBatch(true);
+        const batch = await getLatestBatch(language);
+        setBatchId(batch.id);
+        setBatchError(null);
+      } catch (err) {
+        setBatchError(err instanceof Error ? err.message : "Failed to load batch");
+        setBatchId(null);
+      } finally {
+        setIsLoadingBatch(false);
       }
-      return (await response.json()) as CategoryResponse | OnThisDayResponse;
+    };
+
+    fetchBatch();
+  }, [language, providedBatchId]);
+
+  // Build the URL for content fetching - ONLY if categoryId is not empty
+  const contentUrl = !categoryId
+    ? "" // Don't fetch if no category selected
+    : isOnThisDay
+      ? `https://kite.kagi.com/api/batches/latest/onthisday?lang=${encodeURIComponent(language)}`
+      : batchId
+        ? `https://kite.kagi.com/api/batches/${encodeURIComponent(batchId)}/categories/${encodeURIComponent(
+            categoryId,
+          )}/stories?lang=${encodeURIComponent(language)}&limit=50`
+        : "";
+
+  // Fetch stories or Today in History data
+  const {
+    isLoading: loadingContent,
+    data: contentData,
+    error: contentError,
+  } = useFetch<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>(contentUrl, {
+    parseResponse: async (response): Promise<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }> => {
+      if (!response.ok) {
+        throw new Error(`Failed to fetch content: ${response.status}`);
+      }
+      return response.json() as Promise<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>;
     },
+    execute: contentUrl !== "",
   });
 
-  const isOnThisDay = categoryFile === "onthisday.json";
-
+  // Transform data into articles and events
   const { articles, events } = useMemo(() => {
-    if (!data) {
+    if (!contentData) {
       return { articles: [], events: [] };
     }
 
     if (isOnThisDay) {
-      const responseData = data as OnThisDayResponse;
-      const allEvents = (responseData.events || []) as HistoricalEvent[];
-
+      // Today in History response structure
+      const allEvents = (contentData.events || []) as HistoricalEvent[];
       const eventsList = allEvents.filter((e) => e.type === "event").sort((a, b) => a.sort_year - b.sort_year);
       const peopleList = allEvents.filter((e) => e.type === "people").sort((a, b) => a.sort_year - b.sort_year);
 
@@ -36,20 +76,20 @@ export function useCategoryFeed(categoryFile: string, language: string) {
         events: [...eventsList, ...peopleList],
       };
     } else {
-      const responseData = data as CategoryResponse;
-      const parsedArticles = clustersToArticles((responseData.clusters || []) as Cluster[]);
+      // Stories response structure
+      const parsedArticles = storiesToArticles(contentData.stories || []);
       return {
         articles: parsedArticles,
         events: [],
       };
     }
-  }, [data, isOnThisDay]);
+  }, [contentData, isOnThisDay]);
 
   return {
     articles,
     events,
-    isLoading,
-    error: error ? (error as Error).message : null,
+    isLoading: isLoadingBatch || loadingContent,
+    error: batchError || (contentError instanceof Error ? contentError.message : null),
     isOnThisDay,
   };
 }

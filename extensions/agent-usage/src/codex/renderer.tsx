@@ -8,6 +8,7 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError | null): string {
@@ -17,8 +18,10 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
 
   let text = `Codex Usage\nAccount: ${u.account}`;
   text += `\n\n5h Limit: ${u.fiveHourLimit.percentageRemaining}% remaining`;
+  text += `\n${generateAsciiBar(u.fiveHourLimit.percentageRemaining)}`;
   text += `\nResets In: ${formatDuration(u.fiveHourLimit.resetsInSeconds)}`;
   text += `\n\nWeekly Limit: ${u.weeklyLimit.percentageRemaining}% remaining`;
+  text += `\n${generateAsciiBar(u.weeklyLimit.percentageRemaining)}`;
   text += `\nResets In: ${formatDuration(u.weeklyLimit.resetsInSeconds)}`;
 
   if (u.codeReviewLimit) {
@@ -41,12 +44,18 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
       <List.Item.Detail.Metadata.Label title="Account" text={u.account} />
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label title="5h Limit" text={`${u.fiveHourLimit.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label
+        title="5h Limit"
+        text={`${generateAsciiBar(u.fiveHourLimit.percentageRemaining)} ${u.fiveHourLimit.percentageRemaining}% remaining`}
+      />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.fiveHourLimit.resetsInSeconds)} />
 
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label title="Weekly Limit" text={`${u.weeklyLimit.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label
+        title="Weekly Limit"
+        text={`${generateAsciiBar(u.weeklyLimit.percentageRemaining)} ${u.weeklyLimit.percentageRemaining}% remaining`}
+      />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.weeklyLimit.resetsInSeconds)} />
 
       {u.codeReviewLimit && (

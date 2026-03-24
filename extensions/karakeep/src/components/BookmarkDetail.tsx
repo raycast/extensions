@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[BookmarkDetail]");
 import { fetchDeleteBookmark, fetchGetSingleBookmark, fetchSummarizeBookmark, fetchUpdateBookmark } from "../apis";
 import {
   ARCHIVED_COLOR,
@@ -16,6 +18,7 @@ import { Bookmark } from "../types";
 import { getScreenshot } from "../utils/screenshot";
 import { runWithToast } from "../utils/toast";
 import { BookmarkEdit } from "./BookmarkEdit";
+import { NoteEdit } from "./NoteEdit";
 
 interface BookmarkDetailProps {
   bookmark: Bookmark;
@@ -42,7 +45,7 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.screenshot = await getScreenshot(screenshot.id);
         } catch (error) {
-          logger.error("Failed to get screenshot", { screenshotId: screenshot.id, error });
+          log.error("Failed to get screenshot", { screenshotId: screenshot.id, error });
         }
       }
 
@@ -50,7 +53,7 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.asset = await getScreenshot(bookmark.content.assetId);
         } catch (error) {
-          logger.error("Failed to get asset image", { assetId: bookmark.content.assetId, error });
+          log.error("Failed to get asset image", { assetId: bookmark.content.assetId, error });
         }
       }
 
@@ -113,7 +116,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
         setBookmark(latest as Bookmark);
       }
     } catch (error) {
-      logger.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
+      log.error("Failed to fetch latest bookmark", { bookmarkId: bookmark.id, error });
     }
   }, [bookmark.id]);
 
@@ -138,6 +141,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
   };
 
   const handleDelete = async () => {
+    log.info("Deleting bookmark", { bookmarkId: bookmark.id });
     await handleToast("delete", async () => {
       await fetchDeleteBookmark(bookmark.id);
       await onRefresh?.();
@@ -151,7 +155,11 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
   };
 
   const handleEdit = async () => {
-    push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    if (bookmark.content.type === "text") {
+      push(<NoteEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    } else {
+      push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    }
   };
 
   function renderMarkdown() {
@@ -289,6 +297,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
           />
           <Action
             title={t("bookmark.actions.delete")}
+            style={Action.Style.Destructive}
             onAction={handleDelete}
             icon={Icon.Trash}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -335,6 +344,7 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: Bookmar
               key={tag.id}
               text={tag.name}
               color={tag.attachedBy === "ai" ? TAG_AI_COLOR : TAG_HUMAN_COLOR}
+              icon={tag.attachedBy === "ai" ? Icon.Wand : undefined}
             />
           ))}
         </Detail.Metadata.TagList>

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "navidrome",
+  "title": "Navidrome",
+  "description": "Search and browse your Navidrome music library. Find artists, albums, and songs, then open them directly in your browser.",
+  "icon": "extension-icon.png",
+  "author": "alexandervarney",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "Navidrome",
+      "description": "Search for artists, albums, and songs in your Navidrome library",
+      "mode": "view"
+    },
+    {
+      "name": "recently-added",
+      "title": "Recently Added Albums",
+      "subtitle": "Navidrome",
+      "description": "Browse recently added albums in your Navidrome library",
+      "mode": "view"
+    },
+    {
+      "name": "most-played",
+      "title": "Most Played Albums",
+      "subtitle": "Navidrome",
+      "description": "Browse your most played albums in Navidrome",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Your Navidrome server URL (e.g. https://music.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://music.example.com"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Navidrome username",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your Navidrome password",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "md5": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/md5": "^2.3.5",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

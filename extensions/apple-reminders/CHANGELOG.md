@@ -1,5 +1,10 @@
 # Apple Reminders Changelog
 
+## [Fix Quick Add Reminder scheduling for past time-only input] - 2026-03-15
+
+- In `Quick Add Reminder` (non-AI mode), when a time is provided without an explicit date and that time has already passed, schedule the reminder for the next day instead of earlier today.
+- Resolves: https://github.com/raycast/extensions/issues/26334
+
 ## [Prevent accidental recurring reminders from AI] - 2026-02-26
 
 - Add tool confirmations for recurring reminder creation and recurrence updates so users can approve recurrence changes.

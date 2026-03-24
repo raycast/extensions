@@ -1,5 +1,9 @@
 # Anna's Archive Changelog
 
+## [Bugfix] - 2026-03-06
+
+- Another round of domains taken down... (Fix [#26070](https://github.com/raycast/extensions/issues/26070))
+
 ## [Bugfix] - 2026-01-15
 
 - Fix an issue where the standard mirrors have been removed, replacing with `.li`, `.pm`, and `.in` domains (see [#24510](https://github.com/raycast/extensions/issues/24510))

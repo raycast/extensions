@@ -132,6 +132,10 @@ export interface PokemonDexNumber {
 }
 
 export interface Pokedex {
+  id: number;
+  name: string;
+  is_main_series: boolean;
+  pokedexnames: Name[];
   pokedexversiongroups: PokedexVersionGroup[];
 }
 
@@ -177,6 +181,7 @@ export interface PokemonForm {
 export interface PokemonFormType {
   form_name: string;
   pokemon_id: number;
+  is_mega: boolean;
   variety: boolean;
   pokemonformnames: PokemonFormName[];
   pokemonformtypes: PokemonType[];
@@ -302,4 +307,10 @@ export interface ItemCategory {
 export interface ItemPocket {
   name: string;
   itempocketnames: Name[];
+}
+
+export interface PokemonDex {
+  pokedex_number: number;
+  pokemon_species_id: number;
+  pokemonspecy: PokemonSpecies;
 }

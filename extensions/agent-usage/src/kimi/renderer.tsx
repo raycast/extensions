@@ -9,6 +9,7 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 export function formatKimiUsageText(usage: KimiUsage | null, error: KimiError | null): string {
@@ -18,8 +19,10 @@ export function formatKimiUsageText(usage: KimiUsage | null, error: KimiError | 
 
   let text = `Kimi Usage`;
   text += `\n\nWeekly Limit: ${u.weeklyUsage.remaining}/${u.weeklyUsage.limit}`;
+  text += `\n${generateAsciiBar(u.weeklyUsage.limit > 0 ? (u.weeklyUsage.remaining / u.weeklyUsage.limit) * 100 : 0)}`;
   text += `\nResets In: ${formatResetTime(u.weeklyUsage.resetTime)}`;
   text += `\n\nRate Limit (${u.rateLimit.windowMinutes}m): ${u.rateLimit.remaining}/${u.rateLimit.limit}`;
+  text += `\n${generateAsciiBar(u.rateLimit.limit > 0 ? (u.rateLimit.remaining / u.rateLimit.limit) * 100 : 0)}`;
   text += `\nResets In: ${formatResetTime(u.rateLimit.resetTime)}`;
 
   return text;
@@ -35,12 +38,18 @@ export function renderKimiDetail(usage: KimiUsage | null, error: KimiError | nul
 
   return (
     <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Label title={`Rate Limit (${u.rateLimit.windowMinutes}m)`} text={ratePercent} />
+      <List.Item.Detail.Metadata.Label
+        title={`Rate Limit (${u.rateLimit.windowMinutes}m)`}
+        text={`${generateAsciiBar(getRemainingPercent(u.rateLimit.remaining, u.rateLimit.limit))} ${ratePercent}`}
+      />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.rateLimit.resetTime)} />
 
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label title="Weekly Limit" text={weeklyPercent} />
+      <List.Item.Detail.Metadata.Label
+        title="Weekly Limit"
+        text={`${generateAsciiBar(getRemainingPercent(u.weeklyUsage.remaining, u.weeklyUsage.limit))} ${weeklyPercent}`}
+      />
       <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.weeklyUsage.resetTime)} />
     </List.Item.Detail.Metadata>
   );
@@ -69,11 +78,10 @@ export function getKimiAccessory(usage: KimiUsage | null, error: KimiError | nul
   }
 
   const { remaining, limit } = usage.rateLimit;
-  const ratePercent = formatRemainingPercent(remaining, limit);
 
   return {
     icon: generatePieIcon(getRemainingPercent(remaining, limit)),
-    text: ratePercent,
+    text: `${getRemainingPercent(remaining, limit)}%`,
     tooltip: `Rate (${usage.rateLimit.windowMinutes}m): ${usage.rateLimit.remaining}/${usage.rateLimit.limit} | Weekly: ${usage.weeklyUsage.remaining}/${usage.weeklyUsage.limit}`,
   };
 }
