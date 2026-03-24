@@ -8,7 +8,7 @@ Launch configurations let you quickly open Ghostty windows, open tabs, navigate 
 
 ### Creating a Launch Configuration
 
-Create a YAML launch configuration and paste it into the `Open Ghostty Launch Configuration` command. See `launch-config-example.yaml` for more complete examples.
+Create a YAML launch configuration and paste it into the `Open Ghostty Launch Configuration` command. See the simple example below.
 
 ### YAML Reference
 

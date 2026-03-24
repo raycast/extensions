@@ -4,7 +4,7 @@ import type { LaunchConfig, LayoutPane, LayoutTab, PaneConfig, SplitDirection, W
 import { expandHome, getDirectoryName } from "./paths";
 
 export interface LaunchConfigToLayoutsOptions {
-  /** When set (e.g. from Git List), cwd is handled by openWorkspace—no */
+  /** When set (e.g. from Git List), cwd is handled by openWorkspace—no need to expand path here. */
   directoryOverride?: string;
 }
 

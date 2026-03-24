@@ -32,11 +32,26 @@
       "description": "Max depth to scan for git repositories",
       "default": "3",
       "data": [
-        { "title": "2", "value": "2" },
-        { "title": "3", "value": "3" },
-        { "title": "4", "value": "4" },
-        { "title": "5", "value": "5" },
-        { "title": "6", "value": "6" }
+        {
+          "title": "2",
+          "value": "2"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        }
       ]
     },
     {
@@ -104,8 +119,14 @@
           "description": "Open selected Finder folder in new window or new tab",
           "default": "window",
           "data": [
-            { "title": "New Window", "value": "window" },
-            { "title": "New Tab", "value": "tab" }
+            {
+              "title": "New Window",
+              "value": "window"
+            },
+            {
+              "title": "New Tab",
+              "value": "tab"
+            }
           ]
         }
       ]
