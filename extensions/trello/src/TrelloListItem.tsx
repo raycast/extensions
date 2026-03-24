@@ -3,11 +3,11 @@ import { JSX } from "react";
 import { TrelloCard } from "./trelloResponse.model";
 import { CardDetail } from "./components/CardDetail";
 
-interface TodoListItemProps {
+interface CardListItemProps {
   card: TrelloCard;
 }
 
-export const TodoListItem = ({ card }: TodoListItemProps): JSX.Element => {
+export const CardListItem = ({ card }: CardListItemProps): JSX.Element => {
   const dueDate = card.due ? new Date(card.due).toLocaleDateString() : "";
   const accessories: List.Item.Accessory[] = [];
   if (card.due) accessories.push({ date: new Date(card.due) });
@@ -17,7 +17,6 @@ export const TodoListItem = ({ card }: TodoListItemProps): JSX.Element => {
     <List.Item
       id={card.id}
       title={card.name}
-      accessoryTitle={dueDate}
       subtitle={card.desc}
       icon={card.dueComplete ? Icon.CheckCircle : Icon.Checkmark}
       accessories={accessories}

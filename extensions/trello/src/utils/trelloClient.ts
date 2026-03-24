@@ -1,5 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch, { BodyInit } from "node-fetch";
+import type { BodyInit } from "node-fetch";
 import { Board } from "../Board";
 import { List } from "../List";
 import { Member } from "../Member";
