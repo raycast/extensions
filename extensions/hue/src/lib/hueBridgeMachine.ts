@@ -8,6 +8,7 @@ import createHueClient from "./createHueClient";
 import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
+import { logError } from "../helpers/errors";
 import Style = Toast.Style;
 
 export type HueBridgeState = {
@@ -178,7 +179,7 @@ export default function hueBridgeMachine(
           },
           onError: {
             actions: ({ event }) => {
-              console.error(event.error);
+              logError(event.error);
               const message = event.error instanceof Error ? event.error.message : String(event.error);
               new Toast({
                 title: "Failed to connect to bridge",
@@ -222,7 +223,7 @@ export default function hueBridgeMachine(
             },
           ],
           onError: {
-            actions: ({ event }) => console.error(event.error),
+            actions: ({ event }) => logError(event.error),
             target: "discoveringUsingMdns",
           },
         },
@@ -250,7 +251,7 @@ export default function hueBridgeMachine(
           ],
 
           onError: {
-            actions: ({ event }) => console.error(event.error),
+            actions: ({ event }) => logError(event.error),
             target: "noBridgeFound",
           },
         },
@@ -303,7 +304,7 @@ export default function hueBridgeMachine(
             actions: ({ event }) => {
               const message = event.error instanceof Error ? event.error.message : String(event.error);
               new Toast({ title: "Failed to link with bridge", message }).show().then();
-              console.error(event.error);
+              logError(event.error);
             },
             target: "failedToLink",
           },

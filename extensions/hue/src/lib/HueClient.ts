@@ -18,6 +18,7 @@ import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
 import StreamArray from "stream-json/streamers/stream-array.js";
 import { Duplex } from "node:stream";
+import { logError } from "../helpers/errors";
 import "../helpers/arrayExtensions";
 
 const DATA_PREFIX = "data: ";
@@ -149,8 +150,9 @@ export default class HueClient {
             // On non-200 responses, the body is an HTML page with an error message
             const errorMatch = data.match(/(?<=<div class="error">)(.*?)(?=<\/div>)/);
             if (errorMatch && errorMatch[0]) {
-              console.error({ headers: response.headers, message: errorMatch[0] });
-              return reject(`Status ${response.headers[":status"]}: ${errorMatch[0]}`);
+              const errorMessage = `Status ${response.headers[":status"]}: ${errorMatch[0]}`;
+              logError(errorMessage);
+              return reject(errorMessage);
             }
           }
 
@@ -253,7 +255,7 @@ export default class HueClient {
     stream.on("error", (error) => {
       parser?.end();
       stream.close();
-      console.error(error);
+      logError(error);
     });
   }
 }

@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Grid, Icon, Image, Toast, useNavigation } from "@raycast/api";
+import { logError } from "./helpers/errors";
 import type { Group, GroupedLight, Id, Light, Palette, PngUri, Room, Zone } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -331,7 +332,7 @@ async function handleToggle(
     toast.title = `Turned ${groupedLight?.on?.on ? "off" : "on"} ${group.metadata.name}`;
     await toast.show();
   } catch (error) {
-    console.error(error);
+    logError(error);
     toast.style = Style.Failure;
     toast.title = `Failed turning ${groupedLight?.on?.on ? "off" : "on"} ${group.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
