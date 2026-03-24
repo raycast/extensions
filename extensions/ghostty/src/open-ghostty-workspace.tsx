@@ -41,7 +41,13 @@ export default function Command() {
   const [configs, setConfigs] = useState<StoredLaunchConfig[]>([]);
 
   useEffect(() => {
-    loadStoredLaunchConfigs({ directoryOverrideCompatibleOnly: true }).then(setConfigs);
+    let active = true;
+    loadStoredLaunchConfigs({ directoryOverrideCompatibleOnly: true }).then((data) => {
+      if (active) setConfigs(data);
+    });
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (!prefs.parentDirectory) {
@@ -133,7 +139,11 @@ function RepoActions({
   return (
     <ActionPanel>
       {configs.length === 0 ? (
-        <Action title="No Launch Configurations" icon={Icon.ExclamationMark} onAction={() => {}} />
+        <Action.Open
+          title="Create Launch Configuration"
+          icon={Icon.Plus}
+          target="raycast://extensions/jarry_chung/ghostty/open-ghostty-launch-configuration"
+        />
       ) : (
         configs.map((lc) => (
           <Action
@@ -194,7 +204,7 @@ function getPreferences() {
 }
 
 function sortRepositories(repos: ChildDirectory[], sortOrder: WorkspaceSortOrder) {
-  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+  const collator = new Intl.Collator("en-US", { numeric: true, sensitivity: "base" });
   const sorted = [...repos];
 
   switch (sortOrder) {

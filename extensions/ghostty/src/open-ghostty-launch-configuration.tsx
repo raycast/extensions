@@ -25,18 +25,32 @@ import { launchConfigToWorkspaceLayouts } from "./utils/launch-config-converter"
 
 export default function Command() {
   const [items, setItems] = useState<StoredLaunchConfig[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchItems = async () => {
-    setItems(await loadStoredLaunchConfigs());
+    setIsLoading(true);
+    const configs = await loadStoredLaunchConfigs();
+    setItems(configs);
+    setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchItems();
+    let active = true;
+    (async () => {
+      const configs = await loadStoredLaunchConfigs();
+      if (active) {
+        setItems(configs);
+        setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (items.length === 0) {
+  if (!isLoading && items.length === 0) {
     return (
-      <List>
+      <List isLoading={isLoading}>
         <List.EmptyView
           title="No Launch Configurations"
           description="Create a new launch configuration to get started."
@@ -51,7 +65,7 @@ export default function Command() {
   }
 
   return (
-    <List>
+    <List isLoading={isLoading}>
       {items.map((item) => (
         <List.Item
           key={item.key}
