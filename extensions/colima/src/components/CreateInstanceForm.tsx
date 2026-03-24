@@ -64,6 +64,14 @@ async function handleSubmit(values: CreateInstanceFormValues, onCreated: () => v
   const { profile, cpus, memory, disk, runtime, vmType, kubernetes } = values;
   const trimmedProfile = profile.trim() || "default";
 
+  if (Number.isNaN(Number(cpus)) || Number.isNaN(Number(memory)) || Number.isNaN(Number(disk))) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "CPU, memory, and disk must be numbers",
+    });
+    return;
+  }
+
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Creating instance...",

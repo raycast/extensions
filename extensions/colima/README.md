@@ -46,17 +46,17 @@ A flexible form that supports two workflows: paste a raw `docker run` command, o
 
 Structured fields include:
 
-| Field | Example |
-|---|---|
-| Image | `nginx:latest`, `postgres:16` |
-| Container Name | `my-app` (optional) |
-| Ports | `8080:80, 5432:5432` |
-| Environment Variables | `KEY=VALUE` (one per line) |
-| Volumes | `/host/path:/container/path` (one per line) |
-| Network | Default (bridge) or any existing Docker network |
-| Restart Policy | `no` / `always` / `unless-stopped` / `on-failure` |
-| Detached | Enabled by default |
-| Additional Flags | `--memory 512m --cpus 2` |
+| Field                 | Example                                           |
+| --------------------- | ------------------------------------------------- |
+| Image                 | `nginx:latest`, `postgres:16`                     |
+| Container Name        | `my-app` (optional)                               |
+| Ports                 | `8080:80, 5432:5432`                              |
+| Environment Variables | `KEY=VALUE` (one per line)                        |
+| Volumes               | `/host/path:/container/path` (one per line)       |
+| Network               | Default (bridge) or any existing Docker network   |
+| Restart Policy        | `no` / `always` / `unless-stopped` / `on-failure` |
+| Detached              | Enabled by default                                |
+| Additional Flags      | `--memory 512m --cpus 2`                          |
 
 ## Development
 
