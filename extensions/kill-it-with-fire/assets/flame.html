@@ -34,8 +34,15 @@
     <canvas id="flame"></canvas>
     <script>
         /**
-         * Flame Animation Engine (inlined for Raycast asset use).
-         * See src/script.js for the fully-documented version.
+         * Flame Animation Engine — Metaball Fire
+         *
+         * Instead of individual sprites, flame particles are soft radial-
+         * gradient blobs rendered onto a persistent offscreen buffer with
+         * additive blending. Overlapping blobs merge into one cohesive,
+         * building fire mass. The buffer fades slowly each frame so the
+         * base stays hot and bright while tips dissolve.
+         *
+         * Smoke and embers are still drawn as separate sprites.
          */
 
         // ── Canvas setup ──────────────────────────────────────────────────────
@@ -43,66 +50,186 @@
         const ctx = canvas.getContext('2d');
         let W = canvas.width = innerWidth;
         let H = canvas.height = innerHeight;
+
+        // ── Fire persistence buffer (offscreen) ───────────────────────────────
+        const fireCanvas = document.createElement('canvas');
+        fireCanvas.width = W;
+        fireCanvas.height = H;
+        const fCtx = fireCanvas.getContext('2d');
+
         window.addEventListener('resize', () => {
             W = canvas.width = innerWidth;
             H = canvas.height = innerHeight;
+            fireCanvas.width = W;
+            fireCanvas.height = H;
         });
+
+        // ── Value noise for organic turbulence ────────────────────────────────
+        const _noiseSize = 256;
+        const _noisePerm = new Uint8Array(_noiseSize);
+        const _noiseGrad = new Float32Array(_noiseSize);
+        for (let i = 0; i < _noiseSize; i++) { _noisePerm[i] = i; _noiseGrad[i] = Math.random() * 2 - 1; }
+        for (let i = _noiseSize - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; const tmp = _noisePerm[i]; _noisePerm[i] = _noisePerm[j]; _noisePerm[j] = tmp; }
+        function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+        function noise1d(x) {
+            const xi = Math.floor(x) & (_noiseSize - 1);
+            const xf = x - Math.floor(x);
+            const u = fade(xf);
+            return (1 - u) * _noiseGrad[_noisePerm[xi]] + u * _noiseGrad[_noisePerm[(xi + 1) & (_noiseSize - 1)]];
+        }
+
+        // ── Fire colour ramp ─────────────────────────────────────────────────
+        // Warmer palette: bright yellow base → saturated orange → red → crimson
+        function flameColour(t) {
+            let r, g, b;
+            if (t < 0.10) {
+                // Bright yellow (no white)
+                const u = t / 0.10;
+                r = 255; g = 230 - Math.floor(20 * u); b = 50 - Math.floor(30 * u);
+            } else if (t < 0.35) {
+                // Yellow → saturated orange
+                const u = (t - 0.10) / 0.25;
+                r = 255; g = 210 - Math.floor(90 * u); b = 20 - Math.floor(15 * u);
+            } else if (t < 0.65) {
+                // Orange → vivid red-orange
+                const u = (t - 0.35) / 0.3;
+                r = 255 - Math.floor(30 * u); g = 120 - Math.floor(80 * u); b = 5;
+            } else {
+                // Red → dark crimson
+                const u = (t - 0.65) / 0.35;
+                r = 225 - Math.floor(110 * u); g = 40 - Math.floor(30 * u); b = 5 - Math.floor(3 * u);
+            }
+            return [r, g, b];
+        }
+
+        // ── Pre-render blob sprites ──────────────────────────────────────────
+        // Soft radial gradient circles at discrete colour stops.
+        // Drawing pre-baked images is far cheaper than creating gradients per particle.
+        const BLOB_STEPS = 10;
+        const BLOB_SIZE = 128;
+        const BLOB_HALF = BLOB_SIZE / 2;
+        const blobSprites = [];
+        for (let i = 0; i < BLOB_STEPS; i++) {
+            const t = i / (BLOB_STEPS - 1);
+            const [r, g, b] = flameColour(t);
+            const c = document.createElement('canvas');
+            c.width = c.height = BLOB_SIZE;
+            const bc = c.getContext('2d');
+            const grad = bc.createRadialGradient(BLOB_HALF, BLOB_HALF, 0, BLOB_HALF, BLOB_HALF, BLOB_HALF);
+            grad.addColorStop(0, `rgba(${r},${g},${b},1)`);
+            grad.addColorStop(0.25, `rgba(${r},${g},${b},0.7)`);
+            grad.addColorStop(0.55, `rgba(${r},${g},${b},0.3)`);
+            grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+            bc.fillStyle = grad;
+            bc.fillRect(0, 0, BLOB_SIZE, BLOB_SIZE);
+            blobSprites.push(c);
+        }
+
+        // Hot core blob — warm yellow-orange, NOT white
+        const coreBlob = document.createElement('canvas');
+        coreBlob.width = coreBlob.height = BLOB_SIZE;
+        (() => {
+            const bc = coreBlob.getContext('2d');
+            const grad = bc.createRadialGradient(BLOB_HALF, BLOB_HALF, 0, BLOB_HALF, BLOB_HALF, BLOB_HALF);
+            grad.addColorStop(0, 'rgba(255,230,80,1)');
+            grad.addColorStop(0.2, 'rgba(255,200,50,0.55)');
+            grad.addColorStop(0.5, 'rgba(255,160,30,0.12)');
+            grad.addColorStop(1, 'rgba(255,120,10,0)');
+            bc.fillStyle = grad;
+            bc.fillRect(0, 0, BLOB_SIZE, BLOB_SIZE);
+        })();
 
         // ── Particle ──────────────────────────────────────────────────────────
         class Particle {
             constructor(x, y, opts = { type: 'flame' }) {
                 this.x = x; this.y = y;
                 this.type = opts.type;
-                this.seed = Math.random() * 10;
+                this.seed = Math.random() * 200;
+                this.wobbleAmp = 0.3 + Math.random() * 0.5;
+
                 if (this.type === 'flame') {
-                    const spread = 0.6;
+                    const spread = 0.55;
                     const ang = (Math.random() - 0.5) * Math.PI * spread - Math.PI / 2;
-                    const speed = 200 + Math.random() * 200;
+                    const speed = 220 + Math.random() * 250;
                     this.vx = Math.cos(ang) * speed / 60;
                     this.vy = Math.sin(ang) * speed / 60;
-                    this.maxLife = 700 + Math.random() * 900;
-                    this.size = 8 + Math.random() * 20;
+                    this.maxLife = 400 + Math.random() * 600;
+                    this.baseSize = 35 + Math.random() * 55;
+                    this.size = this.baseSize;
                     this.gravity = 20;
+                } else if (this.type === 'ember') {
+                    const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.2;
+                    const speed = 180 + Math.random() * 280;
+                    this.vx = Math.cos(ang) * speed / 60;
+                    this.vy = Math.sin(ang) * speed / 60;
+                    this.maxLife = 600 + Math.random() * 800;
+                    this.baseSize = 1.5 + Math.random() * 3;
+                    this.size = this.baseSize;
+                    this.gravity = 8;
+                    this.twinklePhase = Math.random() * Math.PI * 2;
                 } else {
-                    this.vx = (Math.random() - 0.5) * 12 / 60;
-                    this.vy = -(8 + Math.random() * 30) / 60;
-                    this.maxLife = 1000 + Math.random() * 1600;
-                    this.size = 14 + Math.random() * 40;
-                    this.gravity = -6;
+                    // smoke — wispy tendrils
+                    this.vx = (Math.random() - 0.5) * 18 / 60;
+                    this.vy = -(12 + Math.random() * 40) / 60;
+                    this.maxLife = 800 + Math.random() * 1200;
+                    this.baseSize = 14 + Math.random() * 30;
+                    this.size = this.baseSize;
+                    this.gravity = -5;
+                    // wisp shape: elongated & rotated
+                    this.stretch = 2.0 + Math.random() * 2.5;  // width/height ratio
+                    this.rotation = (Math.random() - 0.5) * 0.8; // initial angle
+                    this.rotSpeed = (Math.random() - 0.5) * 0.3; // slow tumble
+                    this.puffs = 1 + Math.floor(Math.random() * 2); // sub-puffs per wisp
+                    this.puffOffsets = [];
+                    for (let j = 0; j < this.puffs; j++) {
+                        this.puffOffsets.push({
+                            dx: (Math.random() - 0.5) * 0.3,
+                            dy: (Math.random() - 0.5) * 0.6,
+                            scale: 0.5 + Math.random() * 0.6,
+                        });
+                    }
                 }
                 this.life = this.maxLife;
                 this.created = performance.now();
             }
+
             update(now, dt) {
                 const dtSec = dt / 1000;
-                const flicker = Math.sin((now - this.created) / 80 + this.seed) * 0.25;
-                this.vx += (Math.random() - 0.5) * 0.6 * dtSec;
-                this.vx *= Math.pow(0.985, dtSec * 60);
-                this.vy += (this.gravity / 60) * dtSec * 60;
-                this.x += (this.vx + flicker) * dtSec * 60;
-                this.y += this.vy * dtSec * 60;
-                this.life -= dt;
-                this.size *= 1 - 0.002 * (dt / 16);
-            }
-            draw(ctx) {
-                const t = 1 - Math.max(0, this.life) / this.maxLife;
+                const age = now - this.created;
+                const noiseVal = noise1d(age * 0.0025 + this.seed) * this.wobbleAmp;
+
                 if (this.type === 'flame') {
-                    const alpha = Math.max(0, (1 - t) * 0.95);
-                    const r = 240;
-                    const g = Math.floor(120 * (1 - t));
-                    const b = Math.floor(30 * (1 - t));
-                    const spread = Math.max(1, this.size * (1 - t * 0.6));
-                    ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
-                    ctx.beginPath();
-                    ctx.ellipse(this.x, this.y, spread, spread * 1.4, 0, 0, Math.PI * 2);
-                    ctx.fill();
+                    this.vx += noiseVal * 2.0 * dtSec;
+                    this.vx += (Math.random() - 0.5) * 0.4 * dtSec;
+                    this.vx *= Math.pow(0.98, dtSec * 60);
+                    this.vy += (this.gravity / 60) * dtSec * 60;
+                    this.x += this.vx * dtSec * 60;
+                    this.y += this.vy * dtSec * 60;
+                    this.life -= dt;
+                    const lifeT = 1 - Math.max(0, this.life) / this.maxLife;
+                    const env = lifeT < 0.08 ? lifeT / 0.08 : 1 - (lifeT - 0.08) / 0.92;
+                    this.size = this.baseSize * (0.25 + 0.75 * env);
+                } else if (this.type === 'ember') {
+                    this.vx += noiseVal * 3.0 * dtSec;
+                    this.vx *= Math.pow(0.99, dtSec * 60);
+                    this.vy += (this.gravity / 60) * dtSec * 60;
+                    this.x += this.vx * dtSec * 60;
+                    this.y += this.vy * dtSec * 60;
+                    this.life -= dt;
                 } else {
-                    const alpha = Math.max(0, (1 - t) * 0.45);
-                    const gray = 40 + Math.floor(80 * t);
-                    ctx.fillStyle = `rgba(${gray},${gray},${gray},${alpha})`;
-                    ctx.beginPath();
-                    ctx.ellipse(this.x, this.y, this.size * (0.6 + t * 0.6), this.size * (0.3 + t * 1.2), 0, 0, Math.PI * 2);
-                    ctx.fill();
+                    // smoke — stronger drift & slow rotation
+                    this.vx += noiseVal * 2.5 * dtSec;
+                    this.vx += (Math.random() - 0.5) * 0.5 * dtSec;
+                    this.vx *= Math.pow(0.99, dtSec * 60);
+                    this.vy += (this.gravity / 60) * dtSec * 60;
+                    this.x += this.vx * dtSec * 60;
+                    this.y += this.vy * dtSec * 60;
+                    this.life -= dt;
+                    const lifeT = 1 - Math.max(0, this.life) / this.maxLife;
+                    this.size = this.baseSize * (0.4 + lifeT * 1.0);
+                    this.rotation += this.rotSpeed * dtSec;
+                    // wisps stretch further as they age
+                    this.stretch += 0.3 * dtSec;
                 }
             }
         }
@@ -111,17 +238,21 @@
         const particles = [];
         const emitters = [];
         let lastT = 0;
+        let fireEnded = false;   // true once main emitter finishes
+        let smolderSpawned = false;
 
         // ── FullWidthGrowingEmitter ───────────────────────────────────────────
+        const MAX_PARTICLES = 600;
+
         class FullWidthGrowingEmitter {
             constructor(duration = 3000, basePps = 300) {
                 this.basePps = basePps;
                 this.duration = duration;
                 this.start = performance.now();
                 this.accum = 0;
-                this.startY = H + 60;
-                this.targetTop = H * 0.5;
+                this.targetTop = H * 0.40;
                 this._smokeAcc = 0;
+                this._emberAcc = 0;
                 this.finished = false;
             }
             update(now, dt) {
@@ -130,34 +261,123 @@
                 const maxRise = H - this.targetTop;
                 const currentRise = maxRise * progress;
                 const minY = H - currentRise - 10;
-                const maxY = H + 20;
+                const maxY = H + 30;
 
-                const pps = this.basePps * (0.8 + 1.5 * progress);
-                this.accum += pps * (dt / 1000);
+                // Skip spawning if at cap
+                if (particles.length < MAX_PARTICLES) {
+                    const pps = this.basePps * (0.8 + 1.4 * progress);
+                    this.accum += pps * (dt / 1000);
 
-                while (this.accum >= 1) {
-                    this.accum -= 1;
-                    const px = Math.random() * W;
-                    const py = minY + Math.random() * (maxY - minY);
-                    if (Math.random() < 0.18) particles.push(new Particle(px + (Math.random() - 0.5) * 20, py + (Math.random() - 0.5) * 10, { type: 'smoke' }));
-                    particles.push(new Particle(px + (Math.random() - 0.5) * 30, py + (Math.random() - 0.5) * 20, { type: 'flame' }));
+                    while (this.accum >= 1 && particles.length < MAX_PARTICLES) {
+                        this.accum -= 1;
+                        const px = Math.random() * W;
+                        const py = minY + Math.random() * (maxY - minY);
+                        particles.push(new Particle(px + (Math.random() - 0.5) * 40, py + (Math.random() - 0.5) * 25, { type: 'flame' }));
+                        if (Math.random() < 0.06) {
+                            particles.push(new Particle(px + (Math.random() - 0.5) * 20, py + (Math.random() - 0.5) * 10, { type: 'smoke' }));
+                        }
+                    }
+
+                    const smokePerSec = 20 * (0.4 + progress);
+                    this._smokeAcc += smokePerSec * (dt / 1000);
+                    while (this._smokeAcc >= 1 && particles.length < MAX_PARTICLES) {
+                        this._smokeAcc -= 1;
+                        const sx = Math.random() * W;
+                        const sy = minY - Math.random() * 50;
+                        const s = new Particle(sx, sy, { type: 'smoke' });
+                        s.maxLife = 1200 + Math.random() * 1400;
+                        s.life = s.maxLife;
+                        s.vy = -(25 + Math.random() * 55) / 60;
+                        particles.push(s);
+                    }
+
+                    const emberPerSec = 15 * progress;
+                    this._emberAcc += emberPerSec * (dt / 1000);
+                    while (this._emberAcc >= 1 && particles.length < MAX_PARTICLES) {
+                        this._emberAcc -= 1;
+                        const ex = Math.random() * W;
+                        const ey = minY + Math.random() * (maxY - minY) * 0.5;
+                        particles.push(new Particle(ex, ey, { type: 'ember' }));
+                    }
+                } else {
+                    this.accum = 0;
+                    this._smokeAcc = 0;
+                    this._emberAcc = 0;
                 }
 
-                const smokePerSec = 40 * (0.5 + progress);
-                this._smokeAcc += smokePerSec * (dt / 1000);
-                while (this._smokeAcc >= 1) {
-                    this._smokeAcc -= 1;
-                    const sx = Math.random() * W;
-                    const sy = minY - Math.random() * 40;
-                    const s = new Particle(sx, sy, { type: 'smoke' });
-                    s.maxLife = 2000 + Math.random() * 2200;
-                    s.life = s.maxLife;
-                    s.vy = -(20 + Math.random() * 60) / 60;
-                    particles.push(s);
+                if (progress >= 1) {
+                    this.finished = true;
+                    fireEnded = true;
                 }
-
-                if (progress >= 1) this.finished = true;
             }
+        }
+
+        // ── Smolder embers — stationary glowing dots ──────────────────────────
+        function spawnSmolderEmbers() {
+            const count = 60 + Math.floor(Math.random() * 30);
+            const now = performance.now();
+            for (let i = 0; i < count; i++) {
+                const p = new Particle(Math.random() * W, H * (0.3 + Math.random() * 0.7), { type: 'ember' });
+                // Override: stationary, long-lived, slow twinkle
+                p.vx = 0;
+                p.vy = 0;
+                p.gravity = 0;
+                p.maxLife = 2000 + Math.random() * 3000;
+                p.life = p.maxLife;
+                p.baseSize = 1 + Math.random() * 2.5;
+                p.size = p.baseSize;
+                p.twinklePhase = Math.random() * Math.PI * 2;
+                p.smolder = true;
+                particles.push(p);
+            }
+        }
+
+        // ── Draw helpers for smoke & embers ───────────────────────────────────
+        function drawSmoke(ctx, p) {
+            const t = 1 - Math.max(0, p.life) / p.maxLife;
+            const baseAlpha = Math.max(0, (1 - t) * 0.28 * (t < 0.1 ? t / 0.1 : 1));
+            if (baseAlpha < 0.005) return;
+            const gray = 35 + Math.floor(70 * t);
+            const sz = p.size;
+            const rx = sz * 0.35;
+            const ry = sz * p.stretch * 0.5;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+
+            // Draw layered sub-puffs for wispy tendril look
+            for (let j = 0; j < p.puffs; j++) {
+                const off = p.puffOffsets[j];
+                const pAlpha = baseAlpha * (0.5 + 0.5 * off.scale);
+                const prx = rx * off.scale;
+                const pry = ry * off.scale;
+                const px = off.dx * sz;
+                const py = off.dy * sz;
+
+                // Soft gradient puff
+                const grad = ctx.createRadialGradient(px, py, 0, px, py, Math.max(prx, pry));
+                grad.addColorStop(0, `rgba(${gray},${gray},${gray + 5},${pAlpha})`);
+                grad.addColorStop(0.5, `rgba(${gray},${gray},${gray + 5},${pAlpha * 0.4})`);
+                grad.addColorStop(1, `rgba(${gray},${gray},${gray + 5},0)`);
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.ellipse(px, py, prx, pry, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function drawEmber(ctx, p) {
+            const t = 1 - Math.max(0, p.life) / p.maxLife;
+            const age = performance.now() - p.created;
+            const twinkle = 0.5 + 0.5 * Math.sin(age * 0.012 + p.twinklePhase);
+            const alpha = Math.max(0, (1 - t) * 0.9 * twinkle);
+            const sz = Math.max(0.5, p.baseSize * (1 - t * 0.5));
+            ctx.fillStyle = `rgba(255,${200 + Math.floor(55 * (1 - t))},${60 + Math.floor(80 * (1 - t))},${alpha})`;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+            ctx.fill();
         }
 
         // ── Animation loop ────────────────────────────────────────────────────
@@ -167,6 +387,7 @@
             const dt = Math.min(40, now - lastT);
             lastT = now;
 
+            // Update emitters & particles
             for (let i = emitters.length - 1; i >= 0; i--) {
                 const e = emitters[i];
                 e.update(now, dt);
@@ -175,14 +396,66 @@
             for (let i = particles.length - 1; i >= 0; i--) {
                 const p = particles[i];
                 p.update(now, dt);
-                if (p.life <= 0 || p.size < 0.5) particles.splice(i, 1);
+                if (p.life <= 0 || p.size < 0.3) particles.splice(i, 1);
             }
 
+            // ── Render fire buffer ────────────────────────────────────────────
+            // Fade faster once fire has ended to clear the lingering glow
+            const fadeRate = fireEnded ? 0.25 : 0.07;
+            fCtx.globalCompositeOperation = 'destination-out';
+            fCtx.fillStyle = `rgba(0,0,0,${fadeRate})`;
+            fCtx.fillRect(0, 0, W, H);
+
+            // 2. Draw flame blobs additively — overlapping blobs merge
+            fCtx.globalCompositeOperation = 'lighter';
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                if (p.type !== 'flame') continue;
+
+                const lifeT = 1 - Math.max(0, p.life) / p.maxLife;
+                const alphaEnv = lifeT < 0.05 ? lifeT / 0.05 : Math.pow(1 - lifeT, 1.3);
+                const alpha = Math.max(0, alphaEnv * 0.45);
+                if (alpha < 0.01) continue;
+
+                // Pick the pre-baked blob colour closest to this particle's age
+                const spriteIdx = Math.min(BLOB_STEPS - 1, Math.floor(lifeT * BLOB_STEPS));
+                const sprite = blobSprites[spriteIdx];
+                const sz = Math.max(2, p.size);
+                const drawW = sz * 2.2;
+                const drawH = sz * 2.8;      // taller than wide for flame shape
+
+                fCtx.globalAlpha = alpha;
+                fCtx.drawImage(sprite, p.x - drawW / 2, p.y - drawH / 2, drawW, drawH);
+
+                // White-hot core for young particles near the base
+                if (lifeT < 0.2) {
+                    const coreAlpha = (1 - lifeT / 0.2) * 0.22;
+                    const coreSz = sz * 0.5;
+                    fCtx.globalAlpha = coreAlpha;
+                    fCtx.drawImage(coreBlob, p.x - coreSz / 2, p.y - coreSz / 2, coreSz, coreSz);
+                }
+            }
+            fCtx.globalAlpha = 1;
+
+            // ── Composite to main canvas ──────────────────────────────────────
             ctx.clearRect(0, 0, W, H);
+
+            // Smoke layer behind fire (source-over, semi-transparent)
+            ctx.globalCompositeOperation = 'source-over';
+            for (const p of particles) { if (p.type === 'smoke') drawSmoke(ctx, p); }
+
+            // Fire buffer — the cohesive merged fire mass
             ctx.globalCompositeOperation = 'lighter';
-            ctx.save();
-            for (const p of particles) p.draw(ctx);
-            ctx.restore();
+            ctx.drawImage(fireCanvas, 0, 0);
+
+            // Embers on top (including smoldering)
+            for (const p of particles) { if (p.type === 'ember') drawEmber(ctx, p); }
+
+            // Spawn smolder embers once fire ends
+            if (fireEnded && !smolderSpawned) {
+                smolderSpawned = true;
+                spawnSmolderEmbers();
+            }
 
             if (emitters.length > 0 || particles.length > 0) {
                 requestAnimationFrame(loop);
@@ -190,8 +463,7 @@
         }
 
         // ── Auto-start ────────────────────────────────────────────────────────
-        // Fire starts immediately when the page loads.
-        const e = new FullWidthGrowingEmitter(3000, 420);
+        const e = new FullWidthGrowingEmitter(1500, 400);
         emitters.push(e);
         requestAnimationFrame(loop);
 

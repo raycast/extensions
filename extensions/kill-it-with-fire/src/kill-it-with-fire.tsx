@@ -12,7 +12,7 @@ import path from "path";
 import fs from "fs";
 
 /** Duration the overlay stays visible (seconds). */
-const DURATION_SEC = "6";
+const DURATION_SEC = "4.5";
 
 export default async function Command() {
   const overlayBin = path.join(environment.assetsPath, "overlay");
