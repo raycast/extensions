@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-03-24
 
 - Use new Ghostty AppleScript API
 - Add new command to list git repos in a directory and open with your launch configuration
