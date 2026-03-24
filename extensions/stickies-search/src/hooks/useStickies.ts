@@ -1,8 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
-import { readStickies, StickiesNote } from "../utils/stickies-utils";
+import { readStickies } from "../utils/stickies-utils";
 
 export function useStickies() {
-  return useCachedPromise(() => {
-    return readStickies() as Promise<StickiesNote[]>;
-  });
+  return useCachedPromise(() => readStickies());
 }

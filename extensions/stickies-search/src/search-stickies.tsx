@@ -19,11 +19,12 @@ import Fuse from "fuse.js";
 import { ActionsNotes } from "./components/actions-notes";
 import { StickiesListEmptyView } from "./components/stickies-list-empty-view";
 import { StickiesEmptyView } from "./components/stickies-empty-view";
+import { formatNoteDate } from "./utils/date-format";
 
 export default function SearchStickies() {
   const { showAsMarkdown, showDetailMetadata } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
-  const { data: stickiesNotesData, isLoading, mutate } = useStickies();
+  const { data: stickiesNotesData, isLoading, mutate, error: stickiesError } = useStickies();
   const { stickies: openWindowNames } = useStickiesMenu();
   const frontmostApps = useFrontmostApp();
 
@@ -46,19 +47,14 @@ export default function SearchStickies() {
     return fuse_.search(searchText).map((result) => result.item);
   }, [stickiesNotes, searchText]);
 
-  // Try to find the matching window name for a given stickies note
   const getWindowNameForNote = (note: StickiesNote) => {
-    // The menu name is usually the first part of the text
-    const cleanContent = note.content.trim().replace(/\\n/g, " ");
-    for (const windwName of openWindowNames) {
-      // Very basic comparison. Stickies menu names often trim and truncate.
-      // If the content starts with the window name (ignoring some punctuation/ellipsis), it's probably it.
-      const simplifiedWindow = windwName.replace(/…$/, "").trim();
+    const cleanContent = note.content.trim().replace(/\n/g, " ");
+    for (const windowName of openWindowNames) {
+      const simplifiedWindow = windowName.replace(/…$/, "").trim();
       if (simplifiedWindow && cleanContent.startsWith(simplifiedWindow)) {
-        return windwName;
+        return windowName;
       }
     }
-    // Fallback: fuzzy match among window names
     if (openWindowNames.length > 0) {
       const fuse = new Fuse(openWindowNames, { includeScore: true, threshold: 0.6 });
       const results = fuse.search(note.title);
@@ -87,14 +83,57 @@ export default function SearchStickies() {
     );
   };
 
-  return stickiesNotes.length > 1 ? (
+  if (stickiesError) {
+    return (
+      <List searchBarPlaceholder="Search stickies content" onSearchTextChange={setSearchText}>
+        <StickiesListEmptyView mutate={mutate} error={stickiesError} />
+      </List>
+    );
+  }
+
+  if (stickiesNotes.length === 0) {
+    return <StickiesEmptyView mutate={mutate} isLoading={isLoading} />;
+  }
+
+  if (stickiesNotes.length === 1) {
+    const note = stickiesNotes[0];
+    return (
+      <Detail
+        isLoading={isLoading}
+        actions={
+          <ActionsNotes stickiesNote={note} frontmostApps={frontmostApps} mutate={mutate}>
+            <SwitchAction note={note} />
+          </ActionsNotes>
+        }
+        markdown={showAsMarkdown ? note.content : "```\n" + note.content + "\n```"}
+        metadata={
+          showDetailMetadata ? (
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title={"Modified"} text={formatNoteDate(note.rawStat.mtime)} />
+              <List.Item.Detail.Metadata.Label title={"Created"} text={formatNoteDate(note.rawStat.birthtime)} />
+            </List.Item.Detail.Metadata>
+          ) : undefined
+        }
+      />
+    );
+  }
+
+  const showNoSearchResults = fuseStickiesNotes.length === 0 && searchText.trim() !== "" && stickiesNotes.length > 0;
+
+  return (
     <List
       isShowingDetail={true}
       isLoading={isLoading}
       searchBarPlaceholder={"Search stickies content"}
       onSearchTextChange={setSearchText}
     >
-      <StickiesListEmptyView mutate={mutate} />
+      {showNoSearchResults ? (
+        <List.EmptyView
+          title="No Matching Notes"
+          description="Try a different search term."
+          icon={Icon.MagnifyingGlass}
+        />
+      ) : null}
       {fuseStickiesNotes.map((note) => (
         <List.Item
           key={note.path}
@@ -104,12 +143,12 @@ export default function SearchStickies() {
           detail={
             <List.Item.Detail
               isLoading={isLoading}
-              markdown={showAsMarkdown ? note.content : "```" + "\\n" + note.content + "\\n```"}
+              markdown={showAsMarkdown ? note.content : "```\n" + note.content + "\n```"}
               metadata={
                 showDetailMetadata ? (
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title={"Modified"} text={note.rawStat.mtime.toLocaleString()} />
-                    <List.Item.Detail.Metadata.Label title={"Created"} text={note.rawStat.birthtime.toLocaleString()} />
+                    <List.Item.Detail.Metadata.Label title={"Modified"} text={formatNoteDate(note.rawStat.mtime)} />
+                    <List.Item.Detail.Metadata.Label title={"Created"} text={formatNoteDate(note.rawStat.birthtime)} />
                   </List.Item.Detail.Metadata>
                 ) : undefined
               }
@@ -123,31 +162,5 @@ export default function SearchStickies() {
         />
       ))}
     </List>
-  ) : stickiesNotes.length === 1 ? (
-    <Detail
-      isLoading={isLoading}
-      actions={
-        <ActionsNotes stickiesNote={stickiesNotes[0]} frontmostApps={frontmostApps} mutate={mutate}>
-          <SwitchAction note={stickiesNotes[0]} />
-        </ActionsNotes>
-      }
-      markdown={showAsMarkdown ? stickiesNotes[0]?.content : "```" + "\\n" + stickiesNotes[0]?.content + "\\n```"}
-      metadata={
-        showDetailMetadata ? (
-          <List.Item.Detail.Metadata>
-            <List.Item.Detail.Metadata.Label
-              title={"Modified"}
-              text={stickiesNotes[0]?.rawStat.mtime.toLocaleString()}
-            />
-            <List.Item.Detail.Metadata.Label
-              title={"Created"}
-              text={stickiesNotes[0]?.rawStat.birthtime.toLocaleString()}
-            />
-          </List.Item.Detail.Metadata>
-        ) : undefined
-      }
-    />
-  ) : (
-    <StickiesEmptyView mutate={mutate} />
   );
 }

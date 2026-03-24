@@ -40,7 +40,6 @@ export function ActionsNotes(props: {
   };
   return (
     <ActionPanel>
-      {children}
       <Action
         title={primaryAction === PrimaryAction.PASTE ? pasteAppActionTitle() : "Copy to Clipboard"}
         icon={primaryAction === PrimaryAction.PASTE ? pasteAppActionIcon() : Icon.Clipboard}
@@ -108,6 +107,7 @@ export function ActionsNotes(props: {
           onAction={openExtensionPreferences}
         />
       </ActionPanel.Section>
+      {children}
     </ActionPanel>
   );
 }

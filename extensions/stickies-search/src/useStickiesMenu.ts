@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { runAppleScript } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 
+/** Escape a string for use inside an AppleScript double-quoted literal. */
+function appleScriptStringLiteral(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export function useStickiesMenu() {
   const [stickies, setStickies] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,14 +77,23 @@ export function useStickiesMenu() {
 
 export async function switchToSticky(stickyName: string) {
   try {
+    const targetName = appleScriptStringLiteral(stickyName);
     const script = `
       tell application "System Events"
         if not (exists process "Stickies") then
           return
         end if
+        set targetName to "${targetName}"
         tell process "Stickies"
           set frontmost to true
-          click menu item "${stickyName.replace(/"/g, '\\"')}" of menu 1 of menu bar item "Window" of menu bar 1
+          repeat with mi in menu items of menu 1 of menu bar item "Window" of menu bar 1
+            try
+              if (name of mi as string) is equal to targetName then
+                click mi
+                exit repeat
+              end if
+            end try
+          end repeat
         end tell
       end tell
     `;

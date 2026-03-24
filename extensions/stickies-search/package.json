@@ -62,19 +62,25 @@
       "required": false,
       "default": "Paste",
       "data": [
-        { "title": "Paste to Active App", "value": "Paste" },
-        { "title": "Copy to Clipboard", "value": "Copy" }
+        {
+          "title": "Paste to Active App",
+          "value": "Paste"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "Copy"
+        }
       ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.9",
     "@raycast/utils": "^1.17.0",
-    "@types/fs-extra": "^11.0.4",
     "fs-extra": "^11.3.4",
     "fuse.js": "^7.1.0"
   },
   "devDependencies": {
+    "@types/fs-extra": "^11.0.4",
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",

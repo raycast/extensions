@@ -11,6 +11,9 @@ const stickiesDir = path.join(os.homedir(), "Library/Containers/com.apple.Sticki
 const stickiesTempDir = path.join(environment.supportPath, "temp");
 
 export const getStickiesNotesCount = async () => {
+  if (!(await fs.pathExists(stickiesDir))) {
+    return 0;
+  }
   const files = await fs.readdir(stickiesDir);
   return files.filter((file) => file.endsWith(".rtfd")).length;
 };
@@ -54,8 +57,10 @@ function rtfToTxt(rtf: StickiesRtfd[]) {
   return rtf;
 }
 
-function readRtf() {
-  const result: StickiesRtfd[] = [];
+function readRtf(): StickiesRtfd[] {
+  if (!fs.pathExistsSync(stickiesDir)) {
+    return [];
+  }
   try {
     const stickiesRtfds = fs.readdirSync(stickiesDir);
     const rtfdItems: StickiesRtfd[] = [];
@@ -69,8 +74,8 @@ function readRtf() {
     return rtfdItems.sort((a, b) => b.stat.mtime.getTime() - a.stat.mtime.getTime());
   } catch (err) {
     console.error("Error reading Stickies directory:", err);
+    throw err instanceof Error ? err : new Error(String(err));
   }
-  return result;
 }
 
 const getFirstLine = (text: string): string => {
@@ -110,18 +115,14 @@ function readTxt(rtf: StickiesRtfd[]) {
 }
 
 export async function readStickies() {
-  const result: StickiesNote[] = [];
   try {
-    // read rtf files from Stickies directory
     const sortedRtfdItems = readRtf();
-    // convert rtf to txt
     rtfToTxt(sortedRtfdItems);
-    // read txt files
     return readTxt(sortedRtfdItems);
   } catch (err) {
     console.error("Error reading Stickies directory:", err);
+    throw err instanceof Error ? err : new Error(String(err));
   }
-  return result;
 }
 
 export async function showStickies(isToggle: boolean = false) {

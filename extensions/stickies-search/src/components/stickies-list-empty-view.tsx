@@ -4,11 +4,47 @@ import { MutatePromise } from "@raycast/utils";
 
 export function StickiesListEmptyView(props: {
   mutate: MutatePromise<StickiesNote[] | undefined, StickiesNote[] | undefined>;
+  isLoading?: boolean;
+  error?: Error | unknown | null;
 }) {
-  const { mutate } = props;
+  const { mutate, isLoading, error } = props;
+
+  if (error != null) {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      <List.EmptyView
+        title="Could Not Load Stickies"
+        description={message}
+        icon={Icon.ExclamationMark}
+        actions={
+          <ActionPanel>
+            <ActionPanel.Section>
+              <Action
+                title="Try Again"
+                icon={Icon.Repeat}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={mutate}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              <Action
+                title={"Configure Extension"}
+                shortcut={{ modifiers: ["opt", "cmd"], key: "," }}
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel.Section>
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  const title = isLoading ? "Loading Stickies…" : "No Stickies";
+
   return (
     <List.EmptyView
-      title={"No Stickies"}
+      title={title}
       icon={Icon.QuoteBlock}
       actions={
         <ActionPanel>

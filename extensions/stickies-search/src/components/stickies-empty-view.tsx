@@ -6,11 +6,13 @@ import { StickiesListEmptyView } from "./stickies-list-empty-view";
 
 export function StickiesEmptyView(props: {
   mutate: MutatePromise<StickiesNote[] | undefined, StickiesNote[] | undefined>;
+  isLoading?: boolean;
+  error?: Error | unknown | null;
 }) {
-  const { mutate } = props;
+  const { mutate, isLoading, error } = props;
   return (
-    <List>
-      <StickiesListEmptyView mutate={mutate} />
+    <List isLoading={Boolean(isLoading)}>
+      <StickiesListEmptyView mutate={mutate} isLoading={isLoading} error={error} />
     </List>
   );
 }
