@@ -1,6 +1,6 @@
 # Year in Progress Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-03-24
 
 - Fixed user preferences (pinned items, menubar selections) resetting on extension restart
 
