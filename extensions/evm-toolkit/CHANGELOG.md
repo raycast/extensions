@@ -1,4 +1,4 @@
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-24
 
 - Open Explorer: open addresses, transactions, and blocks in the chain's native block explorer
 - Open Code: view verified contract source code in a web IDE via deth.net
