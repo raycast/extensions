@@ -2,9 +2,9 @@
 
 ## [Fix] - {PR_MERGE_DATE}
 
-- Fixed zombie process accumulation by double-forking the caffeinate process via shell backgrounding, reparenting it to launchd (PID 1) which automatically reaps exited children.
-- Eliminated periodic `caffeinate -u -t 1` spawning in the status command by folding the `-u` flag into the main caffeinate process.
-- Removed stale `caffeinate -u` process filter in menu bar status that would have hidden the main process.
+- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
+- Removed stale process filter in menu bar status
 
 ## [Fix] - 2026-03-22
 
