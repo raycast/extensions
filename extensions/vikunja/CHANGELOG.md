@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - 2026-03-22
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Create tasks with title, description, project, due date, priority, labels, and favorite
 - Pre-fill task title from selected text or quick argument

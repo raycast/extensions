@@ -1,60 +1,39 @@
 import {
-  Icon,
   List,
   showToast,
   Toast,
   confirmAlert,
   getPreferenceValues,
-  LaunchProps,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import {
+  searchTasks,
   getProjects,
-  getProjectTasks,
-  getAllTasks,
   toggleTaskDone,
   deleteTask,
   Task,
 } from "./api";
 import { TaskListItem } from "./components/task-list-item";
 
-interface ListTasksContext {
-  projectId?: number;
-}
+export default function SearchTasks() {
+  const [searchText, setSearchText] = useState("");
 
-export default function ListTasks(
-  props: LaunchProps<{ launchContext: ListTasksContext }>,
-) {
-  const initialProjectId = props.launchContext?.projectId;
-  const [selectedProject, setSelectedProject] = useState<string>(
-    initialProjectId ? String(initialProjectId) : "all",
-  );
+  const { apiUrl } = getPreferenceValues<Preferences>();
+  const baseUrl = apiUrl.replace(/\/+$/, "");
 
-  const baseUrl = useMemo(() => {
-    const { apiUrl } = getPreferenceValues<Preferences>();
-    return apiUrl.replace(/\/+$/, "");
-  }, []);
-
-  const { data: projects, isLoading: projectsLoading } = useCachedPromise(
-    getProjects,
-    [],
-    { keepPreviousData: true },
-  );
+  const { data: projects } = useCachedPromise(getProjects, [], {
+    keepPreviousData: true,
+  });
 
   const {
     data: tasks,
-    isLoading: tasksLoading,
+    isLoading,
     revalidate,
-    error: tasksError,
-  } = useCachedPromise(
-    (projectId: string) =>
-      projectId === "all"
-        ? getAllTasks()
-        : getProjectTasks(parseInt(projectId)),
-    [selectedProject],
-    { keepPreviousData: true },
-  );
+  } = useCachedPromise((query: string) => searchTasks(query), [searchText], {
+    keepPreviousData: true,
+    execute: searchText.length > 0,
+  });
 
   async function handleToggleDone(task: Task) {
     try {
@@ -94,50 +73,27 @@ export default function ListTasks(
     }
   }
 
-  const isLoading = projectsLoading || tasksLoading;
   const taskList = tasks ?? [];
   const projectList = projects ?? [];
   const openTasks = taskList.filter((t) => !t.done);
   const doneTasks = taskList.filter((t) => t.done);
 
-  const showEmptyView =
-    !isLoading && (tasksError !== undefined || taskList.length === 0);
-  let emptyTitle = "No tasks";
-  let emptyDescription =
-    selectedProject === "all"
-      ? "There are no tasks in your Vikunja instance yet."
-      : "There are no tasks in this project. Try another project or create tasks in Vikunja.";
-  if (tasksError) {
-    emptyTitle = "Failed to load tasks";
-    emptyDescription =
-      tasksError instanceof Error ? tasksError.message : "Unknown error";
-  }
-
   return (
     <List
       isLoading={isLoading}
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Project"
-          value={selectedProject}
-          onChange={setSelectedProject}
-        >
-          <List.Dropdown.Item key="all" value="all" title="All Projects" />
-          {projectList.map((project) => (
-            <List.Dropdown.Item
-              key={project.id}
-              value={String(project.id)}
-              title={project.title}
-            />
-          ))}
-        </List.Dropdown>
-      }
+      searchBarPlaceholder="Search tasks..."
+      onSearchTextChange={setSearchText}
+      throttle
     >
-      {showEmptyView ? (
+      {searchText.length === 0 ? (
         <List.EmptyView
-          title={emptyTitle}
-          description={emptyDescription}
-          icon={tasksError ? Icon.Warning : Icon.Tray}
+          title="Search Vikunja Tasks"
+          description="Start typing to search across all your tasks"
+        />
+      ) : taskList.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Results"
+          description={`No tasks found for "${searchText}"`}
         />
       ) : (
         <>

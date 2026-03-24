@@ -5,9 +5,7 @@
   "description": "Create and manage tasks in your self-hosted Vikunja instance",
   "icon": "command-icon.png",
   "author": "flexorflex",
-  "categories": [
-    "Productivity"
-  ],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -37,6 +35,13 @@
       "title": "List Projects",
       "subtitle": "Vikunja",
       "description": "Browse and manage your Vikunja projects",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Vikunja",
+      "description": "Search across all your Vikunja tasks",
       "mode": "view"
     }
   ],
@@ -76,8 +81,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"Error: no publish\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

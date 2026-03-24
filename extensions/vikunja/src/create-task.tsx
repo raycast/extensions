@@ -62,7 +62,11 @@ export default function CreateTask(
     if (!argTitle) {
       getSelectedText()
         .then((text) => {
-          if (text.trim()) setPrefillTitle(text.trim());
+          // Only prefill if there's actual selected text (non-empty, reasonable length)
+          const trimmed = text?.trim();
+          if (trimmed && trimmed.length > 0 && trimmed.length < 500) {
+            setPrefillTitle(trimmed);
+          }
         })
         .catch(() => {
           // No selected text available — leave title empty
