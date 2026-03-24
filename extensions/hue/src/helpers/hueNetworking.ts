@@ -1,4 +1,5 @@
 import { APP_NAME } from "./constants";
+import * as tls from "tls";
 import { PeerCertificate } from "tls";
 import * as https from "https";
 import { HueApiService, LinkResponse, MDnsService } from "../lib/types";
@@ -125,6 +126,36 @@ export async function getUsernameFromBridge(ipAddress: string, bridgeId: string)
     );
 
     request.end();
+  });
+}
+
+export function getBridgeIdFromCertificate(ipAddress: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const socket = tls.connect(
+      {
+        host: ipAddress,
+        port: 443,
+        ca: getCaCertificate(),
+        checkServerIdentity: (_hostname, peerCertificate) => {
+          if (peerCertificate.issuer.CN !== "root-bridge") {
+            return new Error(
+              "Server identity check failed. Certificate issuer's Common Name does not match the expected value.",
+            );
+          }
+          return undefined;
+        },
+      },
+      () => {
+        const cert = socket.getPeerCertificate();
+        socket.destroy();
+        resolve(cert.subject.CN);
+      },
+    );
+
+    socket.on("error", (error) => {
+      socket.destroy();
+      reject(error);
+    });
   });
 }
 

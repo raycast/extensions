@@ -3,6 +3,7 @@
 ## [Improvements] - {PR_MERGE_DATE}
 
 - Fix crash when setting a scene with certain light colors
+- Fix manual bridge IP setup failing when no bridge was previously discovered
 - Downgrade expected network errors (timeouts, connection refused, etc.) and rate limit responses to warnings
 - Treat bridge firmware update errors as expected
 - Update dependencies
