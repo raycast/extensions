@@ -86,15 +86,7 @@ function parsePlexampClientInfo(container: XmlNode): PlexampClientInfo {
   };
 }
 
-export async function getMusicSectionsForServer(server: PlexServerResource): Promise<LibrarySection[]> {
-  const preferredConnection = server.preferredConnection ?? server.connections[0];
-
-  if (!preferredConnection) {
-    throw new Error(`No usable connection was found for ${server.name}.`);
-  }
-
-  const container = await requestXml(preferredConnection.uri, "/library/sections", undefined, true, server.accessToken);
-
+function parseMusicSections(container: XmlNode): LibrarySection[] {
   return arrayify(container.Directory)
     .filter((node): node is XmlNode => typeof node === "object")
     .filter((node) => asString(node.type) === "artist")
@@ -104,6 +96,23 @@ export async function getMusicSectionsForServer(server: PlexServerResource): Pro
       type: "artist" as const,
       totalSize: asNumber(node.totalSize),
     }));
+}
+
+export async function getMusicSectionsForServer(server: PlexServerResource): Promise<LibrarySection[]> {
+  const candidates =
+    server.connections.length > 0 ? server.connections : server.preferredConnection ? [server.preferredConnection] : [];
+
+  if (candidates.length === 0) {
+    throw new Error(`No usable connection was found for ${server.name}.`);
+  }
+
+  const container = await Promise.any(
+    candidates.map((connection) =>
+      requestXml(connection.uri, "/library/sections", undefined, true, server.accessToken),
+    ),
+  );
+
+  return parseMusicSections(container);
 }
 
 export async function getMusicSections(): Promise<LibrarySection[]> {

@@ -1,5 +1,12 @@
 # Linkwarden Changelog
 
+## [Fix Potential Search Errors] - 2026-03-23
+
+- Fixed "Bad Request" error caused by sending empty `collectionId` to the API
+- Fixed search text not being URL-encoded, causing malformed requests with special characters
+- Added error toast when link fetching fails (previously silent)
+- Fixed double-slash in API URLs when instance URL has a trailing slash
+
 ## [Add Helium Browser Support] - 2026-01-26
 
 - Added Helium to the list of supported Chromium browsers

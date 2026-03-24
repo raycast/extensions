@@ -1,9 +1,10 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert, trash } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getMolePathSafe, getMolePath, runMole, MOLE_ENV } from "./utils/mole";
 import { parsePurgeDryRun, type PurgeDryRunResult } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 function usePurgeScan(molePath: string) {
   const [data, setData] = useState<PurgeDryRunResult | null>(null);
@@ -41,18 +42,10 @@ function usePurgeScan(molePath: string) {
 }
 
 export default function PurgeArtifacts() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <PurgeView />;

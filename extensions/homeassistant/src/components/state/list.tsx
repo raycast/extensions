@@ -90,7 +90,7 @@ export function StateListItem(props: { state: State }): React.ReactElement {
         icon = ha.urlJoin(ep);
       }
     }
-    if (shouldDisplayEntityID()) {
+    if (!shouldDisplayEntityID()) {
       const parts = [areaName, extra].filter(Boolean);
       return parts.length > 0 ? parts.join(" | ") : undefined;
     }

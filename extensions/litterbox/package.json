@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "litterbox",
+  "title": "Litterbox",
+  "description": "Upload files to Litterbox from Raycast with a file picker, set expiry (1h, 12h, 24h, or 72h), and get shareable links. Recent uploads are listed until they expire.",
+  "icon": "icon.png",
+  "author": "0xdhrv",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "litterbox",
+    "upload",
+    "temporary",
+    "file sharing",
+    "expiry",
+    "share link"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-to-litterbox",
+      "title": "Upload to Litterbox",
+      "description": "Upload files to Litterbox with 1h, 12h, 24h, or 72h expiry using the file picker; the shareable URL is copied to the clipboard.",
+      "keywords": [
+        "upload",
+        "file",
+        "share",
+        "expiry",
+        "litterbox"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "recent-uploads",
+      "title": "View Recent Uploads",
+      "subtitle": "Litterbox",
+      "description": "View recent Litterbox uploads with copy-URL and open-in-browser actions. Entries are shown until they expire (1h–72h depending on upload).",
+      "keywords": [
+        "recent",
+        "history",
+        "links",
+        "litterbox",
+        "uploads"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

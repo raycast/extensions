@@ -1,3 +1,15 @@
+# Plexamp CHANGELOG
+
+## [Library Selection Fixes] - 2026-03-24
+
+- Fixed music library detection failing silently when the preferred server connection is unreachable by trying all connections concurrently.
+- Fixed the library selection screen hanging for minutes when remote server connections timeout.
+- Fixed the "Sign in to Plex" screen flashing briefly on the Plexamp Status command while the initial load completes.
+- Added progressive loading to the library selection screen so libraries appear as each server responds instead of waiting for all servers.
+- Added local server prioritization so nearby servers appear first during library selection.
+- Removed servers without music libraries from the library selection screen.
+- Removed the LAN badge and "Shared By" accessories from library selection items.
+
 ## [Plex Sign-In, Now Playing, and Search Improvements] - 2026-03-22
 
 - Added managed Plex sign-in, server selection, and music library selection inside Raycast.

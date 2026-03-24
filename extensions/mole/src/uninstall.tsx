@@ -2,9 +2,10 @@ import { List, Icon, ActionPanel, Action, Alert, showToast, Toast, confirmAlert,
 import { readdirSync, statSync, existsSync } from "fs";
 import { join, basename } from "path";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { getMolePathSafe } from "./utils/mole";
 import { formatBytes } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 import { execFile } from "child_process";
 
 interface AppInfo {
@@ -411,18 +412,10 @@ function useInstalledApps() {
 }
 
 export default function UninstallApp() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <UninstallView />;

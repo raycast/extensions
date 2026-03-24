@@ -1,8 +1,9 @@
 import { List, Icon, Color, ActionPanel, Action, Clipboard, showHUD } from "@raycast/api";
 import { execFile } from "child_process";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getMolePathSafe, MOLE_ENV } from "./utils/mole";
 import { stripAnsi } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 function useTouchIdStatus(molePath: string) {
   const [enabled, setEnabled] = useState<boolean | null>(null);
@@ -29,18 +30,10 @@ function useTouchIdStatus(molePath: string) {
 }
 
 export default function TouchIdForSudo() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <TouchIdView molePath={molePath} />;
@@ -98,11 +91,12 @@ function TouchIdView({ molePath }: { molePath: string }) {
                 title="Run in Terminal"
                 icon={Icon.Terminal}
                 onAction={async () => {
+                  const escaped = command.replace(/"/g, '\\"');
                   execFile(
                     "/usr/bin/osascript",
                     [
                       "-e",
-                      `tell application "Terminal" to do script "${command}"`,
+                      `tell application "Terminal" to do script "${escaped}"`,
                       "-e",
                       `tell application "Terminal" to activate`,
                     ],

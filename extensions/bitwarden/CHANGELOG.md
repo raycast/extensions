@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix & Improvements] - 2026-03-24
+
+- Catch error when unlinking data.json file
+- Fix Search Vault primaryAction preference and add "Show Details" option
+
 ## [Fix] - 2026-03-20
 
 - Fix custom server URL "Restart Required" alert loop after CLI binary update
