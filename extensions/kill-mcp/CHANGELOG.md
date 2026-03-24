@@ -1,6 +1,6 @@
 # Kill MCP Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [1.0.0] - 2026-03-24
 
 ### Added
 - Auto-refresh: Process list now updates automatically every 5 seconds
@@ -15,6 +15,9 @@
 ### Fixed
 - Removed unused `getSourceIcon` function
 - Fixed potential command injection vulnerabilities in process killing
+- Fixed false positive matching in MCP server detection
+- Removed dead code and code duplication in mcp-detector.ts
+- Improved ESLint and Prettier configuration compatibility
 
 ## [Initial Version] - 2025-01-19
 

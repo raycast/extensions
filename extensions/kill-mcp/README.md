@@ -26,13 +26,16 @@ A Raycast extension to view and manage MCP (Model Context Protocol) servers runn
 ## Usage
 
 1. Open Raycast
-2. Type "List MCP Servers" or "Kill MCP"
-3. Browse running MCP servers
-4. Click on a server to see details
+2. Type "List MCP Servers"
+3. Browse running MCP servers with real-time resource monitoring
+4. Click on a server to see detailed information
 5. Use keyboard shortcuts to kill processes:
-   - `⌘K` - Kill process gracefully
-   - `⇧⌘K` - Force kill process
-   - `⇧⌘A` - Kill all MCP servers
+   - `⌘K` - Kill process gracefully (SIGTERM)
+   - `⇧⌘K` - Force kill process (SIGKILL)
+   - `⇧⌘A` - Kill all filtered MCP servers
+   - `⌘R` - Refresh the process list
+   - `⌘C` - Copy process ID
+   - `⇧⌘C` - Copy full command
 
 ## Supported Applications
 
@@ -42,3 +45,16 @@ The extension detects MCP servers from:
 - **VS Code** — `~/Library/Application Support/Code/User/mcp.json`
 - **Cursor** — `~/.cursor/mcp.json`
 - **Claude Code** — `~/.claude/settings.json`
+
+## Troubleshooting
+
+### No MCP servers detected
+Ensure you have configured MCP servers in at least one of the supported applications. The extension monitors system processes and looks for patterns matching your MCP configurations.
+
+### Process still running after "kill"
+Try using "Force Kill" (⇧⌘K) to send SIGKILL instead of SIGTERM.
+
+## Requirements
+
+- macOS 11+
+- Raycast 1.50+

@@ -1,4 +1,5 @@
-import { execSync, spawnSync } from "child_process";
+import { spawnSync } from "child_process";
+import { execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 import path from "path";
@@ -144,16 +145,6 @@ export function getMCPConfigs(): MCPConfig[] {
   return configs;
 }
 
-
-      }
-    }
-  } catch {
-    // ps failed, cpuMap stays empty
-  }
-
-  return cpuMap;
-}
-
 // Get running MCP processes
 export function getMCPProcesses(): MCPProcess[] {
   const processes: MCPProcess[] = [];
@@ -245,14 +236,27 @@ export function getMCPProcesses(): MCPProcess[] {
         const cmdBase = cmdPattern.split(" ")[0];
         const isGeneric = GENERIC_COMMANDS.has(cmdBase);
 
-        if (
-          fullCommand.includes(cmdPattern) ||
-          (!isGeneric && cmdPattern.split(" ").some((part) => part.length > 3 && fullCommand.includes(part)))
-        ) {
+        // Exact pattern match first
+        if (fullCommand.includes(cmdPattern)) {
           serverName = info.name;
           source = info.source;
           configPath = info.configPath;
           break;
+        }
+
+        // Only match specific tokens (non-generic, > 3 chars) to avoid false positives on "node"
+        if (!isGeneric) {
+          const tokens = cmdPattern.split(" ");
+          const uniqueTokens = tokens.filter((t) => t.length > 3);
+          if (
+            uniqueTokens.length > 0 &&
+            uniqueTokens.every((token) => fullCommand.includes(token))
+          ) {
+            serverName = info.name;
+            source = info.source;
+            configPath = info.configPath;
+            break;
+          }
         }
       }
 
@@ -303,8 +307,11 @@ function isMCPServerProcess(command: string, configs: MCPConfig[]): boolean {
         if (!serverConfig.args || serverConfig.args.length === 0) {
           return true;
         }
-        // If args are configured, at least one must match
-        if (serverConfig.args.some((arg) => command.includes(arg))) {
+        // If args are configured, ALL must match (not just one) to avoid false positives
+        if (
+          serverConfig.args.length > 0 &&
+          serverConfig.args.every((arg) => command.includes(arg))
+        ) {
           return true;
         }
       }
