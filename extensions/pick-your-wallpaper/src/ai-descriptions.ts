@@ -155,10 +155,10 @@ function rgbToColorName(r: number, g: number, b: number): string {
     max === min
       ? 0
       : max === r
-        ? ((60 * ((g - b) / (max - min))) % 360 + 360) % 360
-        : max === g
-          ? 60 * ((b - r) / (max - min)) + 120
-          : 60 * ((r - g) / (max - min)) + 240;
+      ? (((60 * ((g - b) / (max - min))) % 360) + 360) % 360
+      : max === g
+      ? 60 * ((b - r) / (max - min)) + 120
+      : 60 * ((r - g) / (max - min)) + 240;
 
   const prefix = lightness < 0.38 ? "dark " : lightness > 0.68 ? "light " : "";
   if (hue < 20 || hue >= 340) return `${prefix}red`;
@@ -293,90 +293,4 @@ export async function getDescriptions(files: File[]): Promise<DescriptionCache> 
 
   saveDescriptionCache(cache);
   return cache;
-}
-
-// ── Interactive AI search / suggest (used in choose-wallpaper grid) ───────────
-
-export async function aiSearch(query: string, files: File[], cache: DescriptionCache): Promise<File[]> {
-  if (!environment.canAccess(AI)) return files;
-
-  const wallpaperList = files
-    .map((f) => {
-      const desc = cache[f.path];
-      return desc ? `${f.name}: ${desc.description} [${desc.tags}]` : f.name;
-    })
-    .join("\n");
-
-  const prompt = `Here are wallpapers with their descriptions:
-${wallpaperList}
-
-Find the best matches for this search query: "${query}"
-
-Return ONLY a JSON array of matched filenames (with extension) ordered from best to worst match. Return between 1 and 15 results. No extra text or markdown.
-Example: ["sunset-mountains.jpg", "ocean-view.png"]`;
-
-  try {
-    const response = await AI.ask(prompt, { creativity: "low" });
-    const jsonMatch = response.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) return files;
-
-    const rankedNames = JSON.parse(jsonMatch[0]) as string[];
-    const rankedFiles: File[] = [];
-
-    for (const name of rankedNames) {
-      const match = files.find((f) => f.name.toLowerCase() === name.toLowerCase());
-      if (match && !rankedFiles.find((r) => r.path === match.path)) {
-        rankedFiles.push(match);
-      }
-    }
-
-    const matched = new Set(rankedFiles.map((f) => f.path));
-    const remaining = files.filter((f) => !matched.has(f.path));
-    return [...rankedFiles, ...remaining];
-  } catch (error) {
-    console.error("AI search error:", error);
-    return files;
-  }
-}
-
-export async function suggestWallpaper(
-  mood: string,
-  files: File[],
-  cache: DescriptionCache,
-  exclude: string[] = []
-): Promise<{ file: File; reason: string } | null> {
-  if (!environment.canAccess(AI) || files.length === 0) return null;
-
-  const availableFiles = files.filter((f) => !exclude.includes(f.path));
-  if (availableFiles.length === 0) return null;
-
-  const wallpaperList = availableFiles
-    .map((f) => {
-      const desc = cache[f.path];
-      return desc ? `${f.name}: ${desc.description} [${desc.tags}]` : f.name;
-    })
-    .join("\n");
-
-  const prompt = `You are a wallpaper curator. From the following wallpapers, pick ONE that best fits the mood/context: "${mood}".
-
-Wallpapers:
-${wallpaperList}
-
-Return ONLY a JSON object with this exact structure, no extra text or markdown:
-{"filename": "exact-filename-with-extension.jpg", "reason": "brief explanation of why this fits the mood"}`;
-
-  try {
-    const response = await AI.ask(prompt, { creativity: "medium" });
-    const jsonMatch = response.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) return null;
-
-    const parsed = JSON.parse(jsonMatch[0]) as { filename: string; reason: string };
-    const matchedFile = availableFiles.find((f) => f.name.toLowerCase() === parsed.filename.toLowerCase());
-
-    if (!matchedFile) return null;
-    return { file: matchedFile, reason: parsed.reason };
-  } catch (error) {
-    console.error("AI suggest error:", error);
-    return null;
-  }
 }
