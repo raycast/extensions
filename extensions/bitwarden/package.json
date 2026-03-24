@@ -53,9 +53,13 @@
           "type": "dropdown",
           "description": "The primary action to perform on a vault item.",
           "required": false,
-          "title": "Primary Password Action",
-          "default": "copy",
+          "title": "Primary Item Action",
+          "default": "showDetails",
           "data": [
+            {
+              "title": "Show Details",
+              "value": "showDetails"
+            },
             {
               "title": "Copy to Clipboard",
               "value": "copy"

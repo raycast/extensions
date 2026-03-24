@@ -192,6 +192,17 @@ export async function saveSelectedServer(server: PlexServerResource): Promise<vo
   invalidateCachedConfig();
 }
 
+export async function updateSavedServerConnection(uri: string, accessToken?: string): Promise<void> {
+  const updates: Promise<void>[] = [LocalStorage.setItem(MANAGED_SERVER_URL_KEY, uri)];
+
+  if (accessToken) {
+    updates.push(LocalStorage.setItem(MANAGED_SERVER_TOKEN_KEY, accessToken));
+  }
+
+  await Promise.all(updates);
+  invalidateCachedConfig();
+}
+
 export async function saveSelectedLibrary(library: LibrarySection): Promise<void> {
   await LocalStorage.setItem(MANAGED_LIBRARY_KEY, library.key);
   invalidateCachedConfig();
