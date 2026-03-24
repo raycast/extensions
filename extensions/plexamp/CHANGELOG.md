@@ -1,3 +1,5 @@
+# Plexamp CHANGELOG
+
 ## [Library Selection Fixes] - {PR_MERGE_DATE}
 
 - Fixed music library detection failing silently when the preferred server connection is unreachable by trying all connections concurrently.
