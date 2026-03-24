@@ -1,6 +1,6 @@
 # Rival Changelog
 
-## [Initial Version] - 2026-03-24
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search AI Models: fuzzy search across 265+ models with rich detail sidebar
 - Compare AI Models: side-by-side comparison with auto-generated verdict
