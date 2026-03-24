@@ -16,11 +16,6 @@ export interface NotionRecord {
   pickerProperties: NotionProperty[];
 }
 
-/** Preferences shared across the entire extension (extension-level). */
-export interface ExtensionPreferences {
-  notionApiKey: string;
-}
-
 /** A configured Notion database entry for the multi-database command. */
 export interface DatabaseConfig {
   label: string;
@@ -45,8 +40,9 @@ export interface DatabaseConfig {
   filterValues?: string;
 }
 
-/** Preferences that are set per-command. */
-export interface CommandPreferences extends ExtensionPreferences {
+/** Normalized preferences passed from the database picker into the search view. */
+export interface NotionSearchPreferences {
+  notionApiKey: string;
   databaseId: string;
   searchProperty: string;
   searchPropertyType: "title" | "rich_text";

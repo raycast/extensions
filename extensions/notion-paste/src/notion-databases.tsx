@@ -9,15 +9,7 @@ import {
 } from "@raycast/api";
 import { useMemo } from "react";
 import { NotionSearch } from "./components/notion-search";
-import type {
-  CommandPreferences,
-  DatabaseConfig,
-  ExtensionPreferences,
-} from "./types";
-
-interface DatabasesPreferences extends ExtensionPreferences {
-  databasesJson: string;
-}
+import type { DatabaseConfig, NotionSearchPreferences } from "./types";
 
 function parseDatabases(input: string): DatabaseConfig[] {
   const trimmed = input.trim();
@@ -209,7 +201,7 @@ export default function NotionDatabasesCommand() {
 }
 
 function getPreferences() {
-  const preferences = getPreferenceValues<DatabasesPreferences>();
+  const preferences = getPreferenceValues<Preferences.NotionDatabases>();
   const databases = parseDatabases(preferences.databasesJson ?? "");
   return {
     notionApiKey: preferences.notionApiKey,
@@ -220,7 +212,7 @@ function getPreferences() {
 function buildCommandPreferences(
   notionApiKey: string,
   database: DatabaseConfig,
-): CommandPreferences {
+): NotionSearchPreferences {
   return {
     notionApiKey,
     databaseId: database.databaseId,

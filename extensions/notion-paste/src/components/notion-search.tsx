@@ -12,12 +12,12 @@ import {
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { searchNotionDatabase } from "../notion-api";
-import type { CommandPreferences, NotionRecord } from "../types";
+import type { NotionRecord, NotionSearchPreferences } from "../types";
 import { useDebounce } from "../utils";
 import { FieldPicker } from "./field-picker";
 
 interface NotionSearchProps {
-  preferences: CommandPreferences;
+  preferences: NotionSearchPreferences;
   commandTitle: string;
 }
 
