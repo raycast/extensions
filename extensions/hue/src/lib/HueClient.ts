@@ -16,8 +16,8 @@ import {
 import { ClientHttp2Session, constants, IncomingHttpHeaders, IncomingHttpStatusHeader, sensitiveHeaders } from "http2";
 import React from "react";
 import RateLimitedQueue from "./RateLimitedQueue";
-import StreamArray from "stream-json/streamers/StreamArray";
-import Chain from "stream-chain";
+import StreamArray from "stream-json/streamers/stream-array.js";
+import { Duplex } from "node:stream";
 import "../helpers/arrayExtensions";
 
 const DATA_PREFIX = "data: ";
@@ -185,7 +185,7 @@ export default class HueClient {
       [sensitiveHeaders]: ["hue-application-key"],
     });
 
-    let parser: Chain | null = null;
+    let parser: Duplex | null = null;
 
     const onParsedUpdateEvent = ({ value: updateEvent }: ParsedUpdateEvent) => {
       this.setLights?.((lights) => {
@@ -253,13 +253,13 @@ export default class HueClient {
     stream.on("error", (error) => {
       parser?.end();
       stream.close();
-      console.error(error, [parser?.input]);
+      console.error(error);
     });
   }
 }
 
-function createParser(parser: Chain | null, callback: (data: ParsedUpdateEvent) => void): Chain {
-  parser = StreamArray.withParser();
+function createParser(parser: Duplex | null, callback: (data: ParsedUpdateEvent) => void): Duplex {
+  parser = StreamArray.withParserAsStream();
 
   parser.on("data", (data) => {
     callback(data);
