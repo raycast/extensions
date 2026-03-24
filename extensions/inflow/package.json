@@ -1,0 +1,194 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "inflow",
+  "title": "InFlow",
+  "description": "Transform selected text with AI — right where you write.",
+  "icon": "icon.png",
+  "author": "jimmycheung",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "ai-command",
+      "title": "AI Command",
+      "description": "Run a custom instruction on selected text. You can have AI perform explanations, replies, etc., on the selected text.",
+      "mode": "view",
+      "icon": "command/command.png"
+    },
+    {
+      "name": "ai-compose-email",
+      "title": "Compose Email",
+      "description": "Refine or generate professional emails based on selected text.",
+      "mode": "no-view",
+      "icon": "command/email.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Draft a professional email based on the selected content. Write a clear, polite, and professional email in the {Expression Language}. Use \"Hi\" as the greeting and do not include the recipient's name unless it appears in the input. Keep the message direct, concise, and professional, avoiding unnecessary pleasantries or overly verbose phrasing. Output only the email body and do not include a subject line."
+        }
+      ]
+    },
+    {
+      "name": "ai-humanize",
+      "title": "Humanize Writing",
+      "description": "Rewrite text to sound like natural human writing, removing AI-style patterns.",
+      "mode": "no-view",
+      "icon": "command/humanize.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Rewrite the text to sound like natural human writing. Requirements: - Avoid AI-style rhetorical patterns. - Use varied sentence length and rhythm. - Do not use emojis in structured expressions and headings. - Allow slight imperfections and conversational phrasing. - Do not use formulaic transitions like \"Firstly\", \"In conclusion\", \"Not only... but also\". Keep the meaning unchanged but make the text feel like it was written by a thoughtful human."
+        }
+      ]
+    },
+    {
+      "name": "ai-proofread",
+      "title": "Fix Spelling and Grammar",
+      "description": "Correct grammar and clarity issues in selected text.",
+      "mode": "no-view",
+      "icon": "command/proofread.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Proofread the content for typos, spelling errors, and grammatical mistakes. Fix only errors; do not rewrite or rephrase unless there is a structural sentence issue."
+        }
+      ]
+    },
+    {
+      "name": "ai-rewrite",
+      "title": "Improve Writing",
+      "description": "Rewrite selected text to be clear, professional and concise.",
+      "mode": "no-view",
+      "icon": "command/rewrite.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Rewrite the content to be clearer, more professional, and more concise without changing the original meaning. Best Practices for Typography in the Current Language."
+        }
+      ]
+    },
+    {
+      "name": "ai-simplify",
+      "title": "Simplify",
+      "description": "Simplify selected text while preserving key meaning.",
+      "mode": "no-view",
+      "icon": "command/simplify.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Simplify the content: remove redundancy and make it more concise and efficient without changing the original meaning."
+        }
+      ]
+    },
+    {
+      "name": "ai-structure",
+      "title": "Structured Expression",
+      "description": "Restructure selected text into a clearer, well-organised format.",
+      "mode": "no-view",
+      "icon": "command/restructure.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Restructure the text to improve readability while preserving the original meaning and tone. Only adjust the structure. Do not rewrite the content. Use clear paragraphs, spacing, and bullet lists where appropriate. Apply Markdown formatting if it improves clarity, and preserve existing Markdown when present."
+        }
+      ]
+    },
+    {
+      "name": "ai-summarize",
+      "title": "Summarize",
+      "description": "Summarize the core content into a concise and easy-to-understand summary.",
+      "mode": "no-view",
+      "icon": "command/summarize.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Summarize the provided content, extract the key points, and present them in a clear, concise, and easy-to-understand manner in the {Default Language}, aiming for brevity. Use structured formats where appropriate to enhance readability."
+        }
+      ]
+    },
+    {
+      "name": "ai-translate",
+      "title": "Smart Translate",
+      "description": "Translate selected text between languages.",
+      "mode": "no-view",
+      "icon": "command/translate.png",
+      "preferences": [
+        {
+          "name": "customPrompt",
+          "type": "textfield",
+          "required": false,
+          "title": "Custom Prompt",
+          "description": "Customize the prompt for this command. Use {Default Language} and {Expression Language} as placeholders.",
+          "default": "Translate the input text. Follow these rules strictly in order: Step 1: Detect the primary language of the input. Step 2: If the primary language is {Default Language} (or {Default Language} mixed with {Expression Language}), translate the entire text into {Expression Language}. Step 3: Otherwise, for ALL other languages, translate the entire text into {Default Language}."
+        }
+      ]
+    },
+    {
+      "name": "inflow-settings",
+      "title": "InFlow Settings",
+      "description": "Configure AI providers, personal context, and other preferences for InFlow.",
+      "mode": "view",
+      "icon": "command/settings.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.13.10",
+    "eslint": "8.57.0",
+    "prettier": "3.8.1",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "predev": "node scripts/sync-commands.mjs",
+    "prebuild": "node scripts/sync-commands.mjs",
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
+    "lint:local": "npm run lint",
+    "lint:local:fix": "eslint \"src/**/*.{js,ts,tsx}\" --fix",
+    "lint:raycast": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run lint && npm run typecheck",
+    "sync-commands": "node scripts/sync-commands.mjs",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
