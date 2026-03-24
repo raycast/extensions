@@ -232,6 +232,6 @@ export async function saveSSHConfig(configs: SSHHostConfig[]): Promise<void> {
 
   await fs.mkdir(sshDir, { recursive: true });
   const tmpPath = `${configPath}.raycast-tmp`;
-  await fs.writeFile(tmpPath, nextContent, "utf-8");
+  await fs.writeFile(tmpPath, nextContent, { encoding: "utf-8", mode: 0o600 });
   await fs.rename(tmpPath, configPath);
 }
