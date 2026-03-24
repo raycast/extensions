@@ -9,6 +9,7 @@ import {
   Cache,
   launchCommand,
   LaunchType,
+  openExtensionPreferences,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import {
@@ -17,6 +18,8 @@ import {
   togglePlayPause,
   nextTrack,
   previousTrack,
+  loveTrack,
+  dislikeTrack,
   revealInMusic,
   openArtistInMusic,
   openAlbumInMusic,
@@ -109,6 +112,12 @@ export default function NowPlaying() {
           icon={Icon.ArrowRight}
           onAction={() => open("music://")}
         />
+        <MenuBarExtra.Separator />
+        <MenuBarExtra.Item
+          title="Settings…"
+          icon={Icon.Gear}
+          onAction={() => openExtensionPreferences()}
+        />
       </MenuBarExtra>
     );
   }
@@ -170,13 +179,30 @@ export default function NowPlaying() {
                 setTimeout(fetchNowPlaying, 500);
               }}
             />
+            <MenuBarExtra.Item
+              title="Love"
+              icon={Icon.Heart}
+              onAction={async () => {
+                await loveTrack();
+                await showHUD("Loved!");
+              }}
+            />
+            <MenuBarExtra.Item
+              title="Dislike"
+              icon={Icon.HeartDisabled}
+              onAction={async () => {
+                await dislikeTrack();
+                await nextTrack();
+                await showHUD("Disliked — skipping");
+                setTimeout(fetchNowPlaying, 500);
+              }}
+            />
           </MenuBarExtra.Section>
 
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               title="View Lyrics"
               icon={Icon.Text}
-              shortcut={{ modifiers: ["cmd"], key: "l" }}
               onAction={async () => {
                 try {
                   await launchCommand({
@@ -188,11 +214,20 @@ export default function NowPlaying() {
                 }
               }}
             />
+            <MenuBarExtra.Item
+              title="Share Track"
+              icon={Icon.Message}
+              onAction={async () => {
+                const text = `Now playing: ${track.name} — ${track.artist}`;
+                const shareText = trackUrl ? `${text}\n${trackUrl}` : text;
+                await Clipboard.copy(shareText);
+                await showHUD("Copied to clipboard!");
+              }}
+            />
             {trackUrl && (
               <MenuBarExtra.Item
                 title="Copy Link"
                 icon={Icon.Link}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
                 onAction={async () => {
                   await Clipboard.copy(trackUrl);
                   await showHUD("Link copied!");
@@ -202,8 +237,15 @@ export default function NowPlaying() {
             <MenuBarExtra.Item
               title="Reveal in Music"
               icon={Icon.Eye}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
               onAction={() => revealInMusic()}
+            />
+          </MenuBarExtra.Section>
+
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item
+              title="Settings…"
+              icon={Icon.Gear}
+              onAction={() => openExtensionPreferences()}
             />
           </MenuBarExtra.Section>
         </>
