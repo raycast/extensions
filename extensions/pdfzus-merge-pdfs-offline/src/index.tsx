@@ -59,19 +59,11 @@ export default function Command() {
       navigationTitle="Merge PDFs"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.ArrowRight}
-            title="Arrange PDFs"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm icon={Icon.ArrowRight} title="Arrange PDFs" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.FilePicker
-        id="files"
-        title="PDF Files"
-        info="Choose the PDF files you want to merge."
-      />
+      <Form.FilePicker id="files" title="PDF Files" info="Choose the PDF files you want to merge." />
       <Form.Description
         title="Privacy"
         text="All processing happens locally in Raycast. Your PDF files are never uploaded to a server."
@@ -145,16 +137,8 @@ function ArrangeFilesScreen(props: { initialFiles: SelectedPdfFile[] }) {
                 title="Continue to Export"
                 target={<SaveMergedPdfScreen files={files} />}
               />
-              <Action
-                icon={Icon.ArrowUp}
-                title="Move Earlier"
-                onAction={() => moveFile(index, -1)}
-              />
-              <Action
-                icon={Icon.ArrowDown}
-                title="Move Later"
-                onAction={() => moveFile(index, 1)}
-              />
+              <Action icon={Icon.ArrowUp} title="Move Earlier" onAction={() => moveFile(index, -1)} />
+              <Action icon={Icon.ArrowDown} title="Move Later" onAction={() => moveFile(index, 1)} />
               <Action
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
@@ -222,11 +206,7 @@ function SaveMergedPdfScreen(props: { files: SelectedPdfFile[] }) {
       navigationTitle="Export Merged PDF"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Document}
-            title="Merge PDFs"
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm icon={Icon.Document} title="Merge PDFs" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -252,10 +232,7 @@ function SaveMergedPdfScreen(props: { files: SelectedPdfFile[] }) {
   );
 }
 
-function MergeResultScreen(props: {
-  outputPath: string;
-  files: SelectedPdfFile[];
-}) {
+function MergeResultScreen(props: { outputPath: string; files: SelectedPdfFile[] }) {
   const { outputPath, files } = props;
   const outputName = path.basename(outputPath);
   const outputFolder = path.dirname(outputPath);
@@ -277,31 +254,11 @@ function MergeResultScreen(props: {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action.Open
-            title="Open Merged PDF"
-            target={outputPath}
-            icon={Icon.Document}
-          />
-          <Action
-            title="Show in Finder"
-            icon={Icon.Finder}
-            onAction={() => revealInFinder(outputPath)}
-          />
-          <Action
-            title="Open Output Folder"
-            icon={Icon.Folder}
-            onAction={() => open(outputFolder)}
-          />
-          <Action
-            title="Copy Output Path"
-            icon={Icon.Clipboard}
-            onAction={() => Clipboard.copy(outputPath)}
-          />
-          <Action
-            title="Start New Merge"
-            icon={Icon.RotateAntiClockwise}
-            onAction={popToRoot}
-          />
+          <Action.Open title="Open Merged PDF" target={outputPath} icon={Icon.Document} />
+          <Action title="Show in Finder" icon={Icon.Finder} onAction={() => revealInFinder(outputPath)} />
+          <Action title="Open Output Folder" icon={Icon.Folder} onAction={() => open(outputFolder)} />
+          <Action title="Copy Output Path" icon={Icon.Clipboard} onAction={() => Clipboard.copy(outputPath)} />
+          <Action title="Start New Merge" icon={Icon.RotateAntiClockwise} onAction={popToRoot} />
         </ActionPanel>
       }
     />

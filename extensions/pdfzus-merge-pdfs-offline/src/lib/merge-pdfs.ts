@@ -26,9 +26,7 @@ const parsePageRange = (range: string, totalPages: number): number[] => {
       continue;
     }
 
-    const [startRaw, endRaw] = trimmedSegment
-      .split("-")
-      .map((part) => part.trim());
+    const [startRaw, endRaw] = trimmedSegment.split("-").map((part) => part.trim());
     const start = Number.parseInt(startRaw, 10);
     const end = endRaw ? Number.parseInt(endRaw, 10) : Number.NaN;
 
@@ -57,12 +55,9 @@ const parsePageRange = (range: string, totalPages: number): number[] => {
 const getAllPageIndices = (totalPages: number): number[] =>
   Array.from({ length: totalPages }, (_unused, index) => index);
 
-const isBlob = (value: unknown): value is Blob =>
-  typeof Blob !== "undefined" && value instanceof Blob;
+const isBlob = (value: unknown): value is Blob => typeof Blob !== "undefined" && value instanceof Blob;
 
-const hasArrayBuffer = (
-  value: unknown,
-): value is { arrayBuffer: () => Promise<ArrayBuffer> } =>
+const hasArrayBuffer = (value: unknown): value is { arrayBuffer: () => Promise<ArrayBuffer> } =>
   Boolean(
     value &&
     typeof value === "object" &&
@@ -76,11 +71,7 @@ const toArrayBuffer = async (source: PdfSource): Promise<ArrayBuffer> => {
   }
 
   if (ArrayBuffer.isView(source)) {
-    const view = new Uint8Array(
-      source.buffer,
-      source.byteOffset,
-      source.byteLength,
-    );
+    const view = new Uint8Array(source.buffer, source.byteOffset, source.byteLength);
     return view.slice().buffer;
   }
 
@@ -103,9 +94,10 @@ const loadPdfLib = async (): Promise<PdfLibModule> => {
   return pdfLibModulePromise;
 };
 
-export const mergePdfs = async (
-  inputs: MergePdfSource[],
-): Promise<Uint8Array> => {
+const isEncryptedPdfError = (error: unknown): error is Error =>
+  error instanceof Error && /encrypted/i.test(error.message);
+
+export const mergePdfs = async (inputs: MergePdfSource[]): Promise<Uint8Array> => {
   if (inputs.length === 0) {
     throw new Error("At least one PDF source is required.");
   }
@@ -115,20 +107,23 @@ export const mergePdfs = async (
 
   for (const input of inputs) {
     const bytes = await toArrayBuffer(input.data);
-    const sourceDocument = await PDFDocument.load(bytes, {
-      ignoreEncryption: true,
-    });
-    const selectedPageIndices = parsePageRange(
-      input.pageRange ?? "",
-      sourceDocument.getPageCount(),
-    );
+    let sourceDocument;
+
+    try {
+      sourceDocument = await PDFDocument.load(bytes);
+    } catch (error) {
+      if (isEncryptedPdfError(error)) {
+        throw new Error("Password-protected PDFs are not supported. Remove the password and try again.");
+      }
+
+      throw error;
+    }
+
+    const selectedPageIndices = parsePageRange(input.pageRange ?? "", sourceDocument.getPageCount());
     const pageIndices = selectedPageIndices.length
       ? selectedPageIndices
       : getAllPageIndices(sourceDocument.getPageCount());
-    const copiedPages = await mergedDocument.copyPages(
-      sourceDocument,
-      pageIndices,
-    );
+    const copiedPages = await mergedDocument.copyPages(sourceDocument, pageIndices);
 
     for (const page of copiedPages) {
       mergedDocument.addPage(page);
@@ -138,9 +133,7 @@ export const mergePdfs = async (
   return mergedDocument.save();
 };
 
-export const mergePdfFiles = async (
-  filePaths: string[],
-): Promise<Uint8Array> => {
+export const mergePdfFiles = async (filePaths: string[]): Promise<Uint8Array> => {
   const files = await Promise.all(
     filePaths.map(async (filePath) => ({
       data: await readFile(filePath),

@@ -1,29 +1,23 @@
 # Merge PDFs Offline
 
-`Merge PDFs Offline` ist eine Raycast-Erweiterung zum lokalen Zusammenfügen mehrerer PDF-Dateien auf dem Mac. Dateien bleiben auf Ihrem Gerät, lassen sich vor dem Export neu anordnen und werden ohne Upload oder Tracking in eine einzige PDF geschrieben.
+`Merge PDFs Offline` is a Raycast extension for combining multiple local PDF files on macOS. Files stay on your device, can be reordered before export, and are saved as a single merged PDF without uploads or tracking.
 
-Mehr Kontext zum deutschen Online-Tool für [PDF zusammenfügen mit pdfzus](https://pdfzus.de/) finden Sie auf der Produktseite.
+## Features
 
-## Funktionen
+- Pick multiple PDF files from your Mac
+- Reorder files before merging
+- Save the merged document with a custom file name and destination folder
+- Open the result right away or reveal it in Finder
+- Keep the workflow fully local and offline
 
-- Mehrere PDF-Dateien lokal auswählen
-- Reihenfolge vor dem Merge per Raycast neu sortieren
-- Ergebnis unter frei wählbarem Namen und Ordner speichern
-- Keine Cloud, keine Telemetrie, kein externer Upload
+## How It Works
 
-## So funktioniert es
+1. Open the `Merge PDFs` command in Raycast.
+2. Select the PDF files you want to combine.
+3. Reorder the list or remove files you do not need.
+4. Choose the output file name and destination folder.
+5. Save the merged PDF and open it from Raycast.
 
-1. Befehl `Merge PDFs` in Raycast öffnen.
-2. Die gewünschten PDF-Dateien auswählen.
-3. Reihenfolge in der Liste anpassen oder einzelne Dateien entfernen.
-4. Dateiname und Zielordner festlegen.
-5. Zusammengeführte PDF lokal speichern und direkt im Finder öffnen.
+## Privacy
 
-## Datenschutz
-
-Die Verarbeitung erfolgt vollständig lokal. Die Erweiterung nutzt `pdf-lib` direkt in der Raycast-Laufzeit und sendet keine Dokumente an fremde Server.
-
-## Projektlink
-
-- Website: [https://pdfzus.de/](https://pdfzus.de/)
-- Repository-Hintergrund: Dieses Projekt unterstützt den Aufbau thematisch passender Backlinks rund um das Keyword `pdf zusammenfügen`.
+All processing happens locally on your Mac. The extension uses `pdf-lib` inside the Raycast runtime and does not upload documents, call external APIs, or collect analytics.

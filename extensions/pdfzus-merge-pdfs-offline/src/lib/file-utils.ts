@@ -92,23 +92,15 @@ export const normalizeOutputName = (input: string): string => {
   return `${sanitized}.pdf`;
 };
 
-export const resolveOutputPath = (
-  outputDirectory: string,
-  outputName: string,
-): string => {
-  if (
-    !fs.existsSync(outputDirectory) ||
-    !fs.statSync(outputDirectory).isDirectory()
-  ) {
+export const resolveOutputPath = (outputDirectory: string, outputName: string): string => {
+  if (!fs.existsSync(outputDirectory) || !fs.statSync(outputDirectory).isDirectory()) {
     throw new Error("Please choose a valid output folder.");
   }
 
   const resolvedPath = path.join(outputDirectory, outputName);
 
   if (fs.existsSync(resolvedPath)) {
-    throw new Error(
-      "A file with the same name already exists in the selected folder.",
-    );
+    throw new Error("A file with the same name already exists in the selected folder.");
   }
 
   return resolvedPath;
