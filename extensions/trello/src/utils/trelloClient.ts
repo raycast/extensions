@@ -1,5 +1,4 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import type { BodyInit } from "node-fetch";
 import { Board } from "../Board";
 import { List } from "../List";
 import { Member } from "../Member";
@@ -20,7 +19,7 @@ const withAuth = (path: string) => {
   return `${API_BASE}${path}${glue}${authParams()}`;
 };
 
-async function trelloFetch<T>(path: string, method: HttpMethod = "GET", body?: BodyInit): Promise<T> {
+async function trelloFetch<T>(path: string, method: HttpMethod = "GET", body?: string): Promise<T> {
   try {
     const response = await fetch(withAuth(path), { method, body });
     if (!response.ok) {

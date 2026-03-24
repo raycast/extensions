@@ -38,6 +38,7 @@ export default function Command() {
         setLoading(false);
       } catch (error) {
         showToast(Toast.Style.Failure, "Failed loading boards");
+        setLoading(false);
       }
     }
     fetchBoards();
@@ -53,7 +54,8 @@ export default function Command() {
       if (listsResponse[0]?.id) setSelectedList(listsResponse[0].id);
       setLoading(false);
     } catch (error) {
-      showToast(Toast.Style.Failure, "Failed loading boards");
+      showToast(Toast.Style.Failure, "Failed loading lists");
+      setLoading(false);
     }
   }
 
