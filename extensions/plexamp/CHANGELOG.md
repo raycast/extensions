@@ -1,6 +1,6 @@
 # Plexamp CHANGELOG
 
-## [Library Selection Fixes] - {PR_MERGE_DATE}
+## [Library Selection Fixes] - 2026-03-24
 
 - Fixed music library detection failing silently when the preferred server connection is unreachable by trying all connections concurrently.
 - Fixed the library selection screen hanging for minutes when remote server connections timeout.
