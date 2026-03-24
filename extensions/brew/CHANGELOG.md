@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Cask Id] - {PR_MERGE_DATE}
+
+- Add cask id to the cask metadata
+
 ## [Improvements] - 2026-02-24
 
 - Remove updating homebrew index toast from outdated command
