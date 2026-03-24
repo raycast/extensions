@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -26,25 +26,23 @@ import { launchConfigToWorkspaceLayouts } from "./utils/launch-config-converter"
 export default function Command() {
   const [items, setItems] = useState<StoredLaunchConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const isMounted = useRef(true);
 
   const fetchItems = async () => {
     setIsLoading(true);
     const configs = await loadStoredLaunchConfigs();
+    if (!isMounted.current) {
+      return;
+    }
+
     setItems(configs);
     setIsLoading(false);
   };
 
   useEffect(() => {
-    let active = true;
-    (async () => {
-      const configs = await loadStoredLaunchConfigs();
-      if (active) {
-        setItems(configs);
-        setIsLoading(false);
-      }
-    })();
+    void fetchItems();
     return () => {
-      active = false;
+      isMounted.current = false;
     };
   }, []);
 

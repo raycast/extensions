@@ -97,6 +97,43 @@
       "mode": "view",
       "preferences": [
         {
+          "name": "workspaceParentDirectory",
+          "type": "directory",
+          "required": false,
+          "title": "Workspaces Parent Directory",
+          "description": "Directory to scan for git repos (used by Open Workspace from Git Repos)"
+        },
+        {
+          "name": "workspaceScanDepth",
+          "type": "dropdown",
+          "required": true,
+          "title": "Workspace Scan Depth",
+          "description": "Max depth to scan for git repositories",
+          "default": "3",
+          "data": [
+            {
+              "title": "2",
+              "value": "2"
+            },
+            {
+              "title": "3",
+              "value": "3"
+            },
+            {
+              "title": "4",
+              "value": "4"
+            },
+            {
+              "title": "5",
+              "value": "5"
+            },
+            {
+              "title": "6",
+              "value": "6"
+            }
+          ]
+        },
+        {
           "name": "editorApplication",
           "type": "appPicker",
           "required": false,
