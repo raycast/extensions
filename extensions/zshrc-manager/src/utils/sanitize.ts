@@ -139,10 +139,10 @@ export async function validateFilePathForWrite(filePath: string): Promise<boolea
  * Validates file size against maximum allowed size
  *
  * @param fileSize The file size in bytes to validate
- * @returns True if the file size is within acceptable limits
+ * @returns True if the file size is within acceptable limits (non-negative and under max)
  */
 export function validateFileSize(fileSize: number): boolean {
-  return fileSize <= FILE_CONSTANTS.MAX_FILE_SIZE;
+  return fileSize >= 0 && fileSize <= FILE_CONSTANTS.MAX_FILE_SIZE;
 }
 
 /**
@@ -161,10 +161,38 @@ export function truncateContent(content: string, maxLength: number = FILE_CONSTA
 }
 
 /**
- * Validates zshrc content for basic syntax safety
+ * Suspicious patterns to detect in zshrc content.
+ * These are heuristics and can be bypassed - they serve as a warning mechanism,
+ * not a security boundary. The user's zshrc is already trusted code.
+ */
+const SUSPICIOUS_PATTERNS: Array<{ pattern: RegExp; message: string }> = [
+  // Detect eval with remote code execution patterns (curl, wget, etc.)
+  {
+    pattern: /eval\s+.*\$\(\s*(?:curl|wget|fetch)/i,
+    message: "Suspicious pattern: eval with remote code download",
+  },
+  // Detect dangerous recursive delete on root
+  {
+    pattern: /rm\s+(?:-[a-z]*r[a-z]*\s+)?(?:-[a-z]*f[a-z]*\s+)?\/(?:\s|$|;)/,
+    message: "Dangerous command: recursive delete on root filesystem",
+  },
+  // Detect chmod 777 on sensitive paths
+  {
+    pattern: /chmod\s+777\s+(?:\/|~)/,
+    message: "Suspicious pattern: overly permissive chmod on home or root",
+  },
+];
+
+/**
+ * Validates zshrc content for basic safety checks.
+ *
+ * Note: This is NOT a security boundary. The user's zshrc is already trusted code
+ * that runs in their shell. These checks serve as helpful warnings for potentially
+ * dangerous patterns that might indicate copy-paste errors or malicious code
+ * injected from untrusted sources.
  *
  * @param content The zshrc content to validate
- * @returns Object containing validation result and any errors found
+ * @returns Object containing validation result and any warnings found
  */
 export function validateZshrcContent(content: string): {
   isValid: boolean;
@@ -172,7 +200,7 @@ export function validateZshrcContent(content: string): {
 } {
   const errors: string[] = [];
 
-  // Check for extremely long lines (potential DoS)
+  // Check for extremely long lines (potential DoS or binary content)
   const lines = content.split("\n");
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -181,13 +209,11 @@ export function validateZshrcContent(content: string): {
     }
   }
 
-  // Check for suspicious patterns
-  if (content.includes("eval ") && content.includes("$(curl")) {
-    errors.push("Suspicious pattern detected: eval with curl");
-  }
-
-  if (content.includes("rm -rf /")) {
-    errors.push("Dangerous command detected: rm -rf /");
+  // Check for suspicious patterns using regex for more robust detection
+  for (const { pattern, message } of SUSPICIOUS_PATTERNS) {
+    if (pattern.test(content)) {
+      errors.push(message);
+    }
   }
 
   return {

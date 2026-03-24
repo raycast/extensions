@@ -22,7 +22,7 @@ const installedBrowsers = GetInstalledBrowsers().map(
   // Safari gets found in /Applications here but actually exists in
   // /System/Volumes/Preboot/Cryptexes/App/System/Applications, so strip the
   // rest of the path for all browsers
-  (browser) => path.basename(path.dirname(path.dirname(path.dirname(browser.path))))
+  (browser) => path.basename(path.dirname(path.dirname(path.dirname(browser.path)))),
 );
 
 export default function Command() {
@@ -31,7 +31,7 @@ export default function Command() {
   const favoriteGitReposState = useCachedPromise(GitRepoService.favorites);
 
   const favoriteGitRepos = gitReposState.data?.filter((gitRepo) =>
-    favoriteGitReposState.data?.includes(gitRepo.fullPath)
+    favoriteGitReposState.data?.includes(gitRepo.fullPath),
   );
 
   const repoTypes = Object.keys(GitRepoType)
@@ -85,10 +85,16 @@ function GitRepoListItem(props: {
   isFavorite: boolean;
   revalidate: () => void;
   recordUsageHook?: (id: string | number) => void;
-}): JSX.Element {
+}) {
   const preferences = props.preferences;
   const repo = props.repo;
   const isFavorite = props.isFavorite;
+  const quicklinkApplication =
+    preferences.openWith1?.bundleId ||
+    preferences.openWith2?.bundleId ||
+    preferences.openWith3?.bundleId ||
+    preferences.openWith4?.bundleId ||
+    preferences.openWith5?.bundleId;
   const tildifiedPath = tildifyPath(repo.fullPath);
   const keywords = (() => {
     switch (preferences.searchKeys) {
@@ -109,8 +115,12 @@ function GitRepoListItem(props: {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <GitRepoOpenAction openWith={preferences.openWith1} repo={repo} recordUsageHook={props.recordUsageHook} />
-            <GitRepoOpenAction openWith={preferences.openWith2} repo={repo} recordUsageHook={props.recordUsageHook} />
+            {preferences.openWith1 && (
+              <GitRepoOpenAction openWith={preferences.openWith1} repo={repo} recordUsageHook={props.recordUsageHook} />
+            )}
+            {preferences.openWith2 && (
+              <GitRepoOpenAction openWith={preferences.openWith2} repo={repo} recordUsageHook={props.recordUsageHook} />
+            )}
             {preferences.openWith3 && (
               <GitRepoOpenAction
                 openWith={preferences.openWith3}
@@ -141,7 +151,7 @@ function GitRepoListItem(props: {
               onAction={() => {
                 // checking for app != null to not open in default app
                 function openIn(application?: Application) {
-                  if (application != null) {
+                  if (application?.bundleId) {
                     open(getTarget(repo, application), application.bundleId);
                   }
                 }
@@ -171,6 +181,17 @@ function GitRepoListItem(props: {
               }}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
             />
+            {quicklinkApplication && (
+              <Action.CreateQuicklink
+                title="Create Quicklink"
+                quicklink={{
+                  link: repo.fullPath,
+                  name: repo.name,
+                  application: quicklinkApplication,
+                }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             {repo.remotes.map((remote) => {
@@ -264,7 +285,7 @@ function GitRepoListItem(props: {
 function GitRepoPropertyDropdown(props: {
   repoTypes: GitRepoType[];
   onRepoTypeChange: (newValue: GitRepoType) => void;
-}): JSX.Element {
+}) {
   const { repoTypes, onRepoTypeChange } = props;
   return (
     <List.Dropdown
@@ -288,7 +309,7 @@ function GitRepoOpenAction(props: {
   openWith: OpenWith;
   shortcut?: Keyboard.Shortcut;
   recordUsageHook?: (id: string | number) => void;
-}): JSX.Element {
+}) {
   return (
     <Action.Open
       title={`Open in ${props.openWith.name}`}
@@ -302,12 +323,16 @@ function GitRepoOpenAction(props: {
 }
 
 function getTarget(repo: GitRepo, app: Application): string {
+  const appBundleId = app.bundleId?.toLowerCase();
+  const defaultBrowserId = repo.defaultBrowserId?.toLowerCase();
+  const appName = app.path ? path.basename(app.path) : undefined;
+
   // Should it return the repo fullPath or url?
   if (
     repo.remotes.length > 0 &&
     repo.remotes[0].url.length > 0 &&
-    (app.bundleId?.toLowerCase() === repo.defaultBrowserId.toLowerCase() ||
-      installedBrowsers.includes(path.basename(app.path)))
+    ((appBundleId && defaultBrowserId && appBundleId === defaultBrowserId) ||
+      (appName && installedBrowsers.includes(appName)))
   ) {
     return repo.remotes[0].url;
   }

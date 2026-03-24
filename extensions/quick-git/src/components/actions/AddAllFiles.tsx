@@ -23,7 +23,10 @@ export function AddAllFiles() {
       title="Add All Files"
       icon={Icon.PlusCircle}
       onAction={revalidate}
-      shortcut={{ key: "a", modifiers: ["cmd", "shift"] }}
+      shortcut={{
+        macOS: { key: "a", modifiers: ["cmd", "shift"] },
+        Windows: { key: "a", modifiers: ["ctrl", "shift"] },
+      }}
     />
   );
 }

@@ -1,11 +1,10 @@
 import { Action, ActionPanel, Color, Grid, Icon, open, openExtensionPreferences, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { runAppleScript, runPowerShellScript, usePromise } from "@raycast/utils";
 import { basename, dirname } from "path";
 import { useEffect, useState } from "react";
-import { runAppleScriptSync } from "run-applescript";
 import tildify from "tildify";
 import { fileURLToPath } from "url";
-import { RemoveMethods, useRecentEntries } from "./db";
+import { RemoveMethods, useRecentEntries } from "./lib/db";
 import {
   ListOrGrid,
   ListOrGridDropdown,
@@ -14,20 +13,19 @@ import {
   ListOrGridEmptyView,
   ListOrGridItem,
   ListOrGridSection,
-} from "./grid-or-list";
-import { getBuildScheme, getVSCodeCLIFilename } from "./lib/vscode";
-import { usePinnedEntries } from "./pinned";
+} from "./lib/grid-or-list";
+import { getBuildScheme } from "./lib/vscode";
+import { usePinnedEntries } from "./lib/pinned";
 import {
   build,
-  bundleIdentifier,
   closeOtherWindows,
   gitBranchColor,
   keepSectionOrder,
   layout,
   showGitBranch,
   terminalApp,
-} from "./preferences";
-import { EntryLike, EntryType, PinMethods } from "./types";
+} from "./lib/preferences";
+import { EntryLike, EntryType, PinMethods } from "./lib/types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
@@ -38,11 +36,10 @@ import {
   isValidHexColor,
   isWin,
   isWorkspaceEntry,
-  runExec,
-} from "./utils";
+} from "./lib/utils";
 import { getEditorApplication } from "./utils/editor";
 import { getGitBranch } from "./utils/git";
-import { OpenInShell } from "./actions";
+import { OpenInShell } from "./lib/actions";
 
 export default function Command() {
   const { data, isLoading, error, ...removeMethods } = useRecentEntries();
@@ -169,7 +166,7 @@ function LocalItem(
         if (mounted) {
           setGitBranch(branch);
         }
-      } catch (error) {
+      } catch {
         // Silently handle errors - they're already handled in getGitBranch
       }
     }
@@ -187,22 +184,18 @@ function LocalItem(
   };
 
   const getAction = (revert = false) => {
-    if (isWin) {
-      return () => {
-        const cliFilename = getVSCodeCLIFilename();
-        const fp = fileURLToPath(props.uri);
-        runExec([cliFilename, fp], (error) => {
-          if (error) {
-            console.error(`Error opening file: ${error}`);
-            showToast(Toast.Style.Failure, `Failed to open file: ${error}`);
-            return;
-          }
-        });
-      };
-    }
-    return () => {
+    return async () => {
       if (closeOtherWindows !== revert) {
-        runAppleScriptSync(`
+        if (isWin) {
+          await runPowerShellScript(`
+        $AppName = "${build}"
+
+        while (Get-Process -Name $AppName -ErrorAction SilentlyContinue | Where-Object {$_.MainWindowTitle}) {
+          Get-Process -Name $AppName | Where-Object {$_.MainWindowTitle} | Select-Object -First 1 | ForEach-Object {$_.CloseMainWindow()}
+        }
+          `);
+        } else {
+          await runAppleScript(`
         tell application "System Events"
           tell process "${build}"
             repeat while window 1 exists
@@ -211,8 +204,10 @@ function LocalItem(
           end tell
         end tell
         `);
+        }
       }
-      open(props.uri, bundleIdentifier);
+
+      open(isWin ? path : props.uri, editorApp);
     };
   };
 

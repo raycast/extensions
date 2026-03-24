@@ -1,5 +1,22 @@
 # Harvest Changelog
 
+## [Improved Project Filtering With Clients Included] - 2026-03-09
+
+- Added: New preference "Show Client Name in Project Dropdown" (default off) — when enabled, the project dropdown additionally displays entries with client name for easier filtering by client name
+- Changed: Projects and client groups are now sorted alphabetically in the project dropdown
+
+## [Add Windows Support] - 2026-03-04
+
+## [Bug Fixes] - 2026-01-19
+
+- Fix: Clearing notes when editing a time entry now properly deletes the note
+- Fix: Duration parsing now runs on submit, not just on blur
+
+## [Flexible Duration Input] - 2026-01-13
+
+- Added: Duration field now accepts flexible formats like `15m`, `1h30m`, `1.5h`, `.5+15m`
+- Changed: Duration auto-formats on blur based on user's time format preference
+
 ## [Bug Fixes] - 2025-11-24
 
 - Fix: Resolved issue where task selection would not update in the New Time Entry form

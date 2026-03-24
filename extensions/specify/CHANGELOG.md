@@ -1,5 +1,9 @@
 # Specify Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [New Command] - 2023-05-31
 
 - Added a new `Search API Documentation` command

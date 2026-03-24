@@ -1,0 +1,8 @@
+[1]This is a test of the Escape key interrupt feature.\
+[1]If you press Escape while this is typing, it should stop immediately.\
+[1]Let's add some delays to give you time to test...\
+[2]Waiting 2 seconds here...\
+[2]And another 2 seconds...\
+[1]Still typing... press Escape anytime!\
+[1]Almost done with this test...\
+[1]Final line of the test!

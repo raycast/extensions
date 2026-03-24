@@ -2,7 +2,7 @@ import { environment, getPreferenceValues } from "@raycast/api";
 
 const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 export function roundUpTime(date = new Date(), roundMins = 15) {
   const ms = 1000 * 60 * roundMins;

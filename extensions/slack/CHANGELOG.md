@@ -1,13 +1,31 @@
 # Slack Changelog
 
+## [Add Direct command for setting slack status] - 2026-02-23
+
+- Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.
+- Added full support for custom workspace emojis (beyond default emojis).
+ 
+## [Add proxy support for corporate networks] - 2026-02-13
+
+- Add optional "Proxy URL" preference for routing Slack API requests through a corporate proxy
+- Proxy is resolved from the Raycast preference, `HTTPS_PROXY`, or `HTTP_PROXY` environment variables
+- Note: proxy applies to Slack API calls only; OAuth login uses Raycast's built-in networking
+
+## [Multi-word search support] - 2026-01-20
+
+- Improved search in "Open Channel" and "Send Message" commands to support multi-word queries
+- Now you can search for "sre time" to find channel "sre-free-time"
+
 ## [Add action for copying IDs of users or channels] - 2025-11-20
 
 - Added "Copy ID to Clipboard" action to the "Open Channel" command so we can easily copy the user or channel's ID straight from the list for both MacOS and Windows
 
 ## [Fix Send Message Missing Scope Error] - 2025-08-25
+
 - Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
 
 ## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
+
 - Added the `search.message` slack api to enable AI to use the tool (search for full messages)
 - Fixed failure to find channelId when using get-channel-history with AI
 - Fixed issue that prevented importing all slack channels

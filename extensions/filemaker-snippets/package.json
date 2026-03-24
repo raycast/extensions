@@ -54,6 +54,20 @@
       "icon": "FM12App512.png",
       "description": "View favorited files from FileMaker Pro",
       "mode": "view"
+    },
+    {
+      "name": "fm-to-xml",
+      "title": "Convert FM to XML",
+      "subtitle": "FileMaker Snippets",
+      "description": "Convert FileMaker clipboard to XML text",
+      "mode": "no-view"
+    },
+    {
+      "name": "xml-to-fm",
+      "title": "Convert XML to FM",
+      "subtitle": "FileMaker Snippets",
+      "description": "Convert XML text to FileMaker clipboard",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

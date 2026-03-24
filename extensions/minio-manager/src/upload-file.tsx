@@ -9,18 +9,19 @@ import {
   LaunchProps,
   getSelectedFinderItems,
   Clipboard,
+  Alert,
+  confirmAlert,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import * as Minio from "minio";
 import * as fs from "fs";
 import * as path from "path";
 import { promisify } from "util";
+import http from "http";
+import https from "https";
 
 // Convert fs.access to a Promise-based version
 const accessAsync = promisify(fs.access);
-
-// File size limit constant (1GB)
-const MAX_FILE_SIZE = 1024 * 1024 * 1024;
 
 interface Preferences {
   endpoint: string;
@@ -31,6 +32,11 @@ interface Preferences {
   defaultBucket: string;
   publicUrlBase?: string;
   autoCopyUrl?: boolean;
+  // Upload configuration
+  maxFileSize: string; // in MB
+  partSize: string; // in MB
+  concurrency: string;
+  retryCount: string; // Number of retries for failed parts
 }
 
 interface CommandArguments {
@@ -51,6 +57,10 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
+
+  // Ref for cancellation control
+  const uploadCancelledRef = useRef(false);
+  const activeRequestsRef = useRef<http.ClientRequest[]>([]);
 
   // Initialize MinIO client
   const getMinioClient = () => {
@@ -158,10 +168,15 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       });
 
       // Check if file size exceeds limit
-      if (stats.size > MAX_FILE_SIZE) {
+      const maxFileSize = parseInt(preferences.maxFileSize || "1024") * 1024 * 1024;
+      if (stats.size > maxFileSize) {
+        const maxSizeDisplay =
+          parseInt(preferences.maxFileSize || "1024") >= 1024
+            ? `${(parseInt(preferences.maxFileSize || "1024") / 1024).toFixed(1)} GB`
+            : `${preferences.maxFileSize || "1024"} MB`;
         return {
           hasPermission: false,
-          error: `File is too large (${(stats.size / 1024 / 1024 / 1024).toFixed(2)} GB). Maximum allowed size is 1 GB.`,
+          error: `File is too large (${(stats.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is ${maxSizeDisplay}.`,
         };
       }
 
@@ -209,6 +224,7 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Uploading file",
+        message: "0%",
       });
 
       // Get file path string
@@ -255,8 +271,301 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
           await minioClient.makeBucket(bucket, "us-east-1");
         }
 
-        // Upload file
-        await minioClient.fPutObject(bucket, objectName, filePath, {});
+        // Get file size for progress tracking
+        const fileStats = fs.statSync(filePath);
+        const fileSize = fileStats.size;
+
+        // Parse upload configuration from preferences
+        const partSize = Math.max(5, parseInt(preferences.partSize || "5")) * 1024 * 1024; // Minimum 5MB
+        const concurrency = Math.max(1, parseInt(preferences.concurrency || "4"));
+        const maxRetries = Math.max(0, parseInt(preferences.retryCount || "3"));
+
+        // Reset cancellation state
+        uploadCancelledRef.current = false;
+        activeRequestsRef.current = [];
+
+        // For small files (< partSize), use simple upload
+        if (fileSize < partSize) {
+          toast.message = "Uploading...";
+          await minioClient.fPutObject(bucket, objectName, filePath, {});
+        } else {
+          // For large files, use concurrent multipart upload
+          const fileBuffer = fs.readFileSync(filePath);
+          const totalParts = Math.ceil(fileSize / partSize);
+
+          // Track progress for each part
+          const partProgress: number[] = new Array(totalParts).fill(0);
+
+          const updateTotalProgress = () => {
+            const totalUploaded = partProgress.reduce((sum, p) => sum + p, 0);
+            const percentage = Math.round((totalUploaded / fileSize) * 100);
+            const uploadedMB = (totalUploaded / 1024 / 1024).toFixed(1);
+            const totalMB = (fileSize / 1024 / 1024).toFixed(1);
+            toast.message = `${percentage}% (${uploadedMB}/${totalMB} MB)`;
+          };
+
+          // Initialize multipart upload
+          const uploadId = await minioClient.initiateNewMultipartUpload(bucket, objectName, {});
+
+          // Prepare parts
+          interface PartInfo {
+            partNumber: number;
+            start: number;
+            end: number;
+          }
+
+          const parts: PartInfo[] = [];
+          for (let i = 0; i < totalParts; i++) {
+            const start = i * partSize;
+            const end = Math.min(start + partSize, fileSize);
+            parts.push({ partNumber: i + 1, start, end });
+          }
+
+          // Upload a single part with progress tracking
+          const uploadPart = async (part: PartInfo): Promise<{ part: number; etag: string }> => {
+            // Check if upload was cancelled
+            if (uploadCancelledRef.current) {
+              throw new Error("Upload cancelled");
+            }
+
+            const partBuffer = fileBuffer.subarray(part.start, part.end);
+            const partSize = part.end - part.start;
+
+            // Get presigned URL for this part
+            const presignedUrl = await minioClient.presignedUrl("PUT", bucket, objectName, 60 * 60, {
+              partNumber: String(part.partNumber),
+              uploadId: uploadId,
+            });
+
+            return new Promise((resolve, reject) => {
+              // Check cancellation before starting request
+              if (uploadCancelledRef.current) {
+                reject(new Error("Upload cancelled"));
+                return;
+              }
+
+              const url = new URL(presignedUrl);
+              const protocol = url.protocol === "https:" ? https : http;
+
+              const options = {
+                hostname: url.hostname,
+                port: url.port || (url.protocol === "https:" ? 443 : 80),
+                path: url.pathname + url.search,
+                method: "PUT",
+                headers: {
+                  "Content-Length": partSize,
+                },
+              };
+
+              const req = protocol.request(options, (res) => {
+                // Remove from active requests
+                activeRequestsRef.current = activeRequestsRef.current.filter((r) => r !== req);
+
+                const etag = res.headers.etag?.replace(/"/g, "") || "";
+                if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
+                  resolve({ part: part.partNumber, etag });
+                } else {
+                  reject(new Error(`Part ${part.partNumber} upload failed with status ${res.statusCode}`));
+                }
+              });
+
+              // Track active request for cancellation
+              activeRequestsRef.current.push(req);
+
+              req.on("error", (err) => {
+                activeRequestsRef.current = activeRequestsRef.current.filter((r) => r !== req);
+                reject(err);
+              });
+
+              // Track upload progress for this part
+              let uploaded = 0;
+              const chunkSize = 64 * 1024;
+
+              const writeChunk = () => {
+                // Check cancellation during upload
+                if (uploadCancelledRef.current) {
+                  req.destroy();
+                  reject(new Error("Upload cancelled"));
+                  return;
+                }
+
+                let canContinue = true;
+                while (canContinue && uploaded < partSize) {
+                  const end = Math.min(uploaded + chunkSize, partSize);
+                  const chunk = partBuffer.subarray(uploaded, end);
+                  canContinue = req.write(chunk);
+                  uploaded = end;
+
+                  // Update this part's progress
+                  partProgress[part.partNumber - 1] = uploaded;
+                  updateTotalProgress();
+                }
+
+                if (uploaded >= partSize) {
+                  req.end();
+                }
+              };
+
+              req.on("drain", writeChunk);
+              writeChunk();
+            });
+          };
+
+          // Upload a single part with retry logic
+          const uploadPartWithRetry = async (
+            part: PartInfo,
+            retriesLeft: number = maxRetries,
+          ): Promise<{ part: number; etag: string }> => {
+            try {
+              return await uploadPart(part);
+            } catch (error) {
+              // Don't retry if cancelled
+              if (uploadCancelledRef.current || (error instanceof Error && error.message === "Upload cancelled")) {
+                throw error;
+              }
+
+              if (retriesLeft > 0) {
+                console.debug(`Part ${part.partNumber} failed, retrying... (${retriesLeft} retries left)`);
+                // Reset progress for this part before retry
+                partProgress[part.partNumber - 1] = 0;
+                updateTotalProgress();
+                // Wait a bit before retrying (exponential backoff)
+                await new Promise((resolve) => setTimeout(resolve, (maxRetries - retriesLeft + 1) * 1000));
+                return uploadPartWithRetry(part, retriesLeft - 1);
+              }
+              throw error;
+            }
+          };
+
+          // Concurrent upload with limited concurrency
+          const uploadedParts: { part: number; etag: string }[] = [];
+          const queue = [...parts];
+          let uploadError: Error | null = null;
+
+          const worker = async () => {
+            while (queue.length > 0 && !uploadCancelledRef.current && !uploadError) {
+              const part = queue.shift();
+              if (part) {
+                try {
+                  const result = await uploadPartWithRetry(part);
+                  uploadedParts.push(result);
+                } catch (err) {
+                  if (err instanceof Error && err.message === "Upload cancelled") {
+                    throw err;
+                  }
+                  uploadError = err instanceof Error ? err : new Error(String(err));
+                  throw uploadError;
+                }
+              }
+            }
+          };
+
+          // Function to run upload workers
+          const runUploadWorkers = async (): Promise<boolean> => {
+            // Reset error state for retry
+            uploadError = null;
+
+            // Start concurrent workers (at least 1, but not more than remaining parts)
+            const workerCount = Math.min(concurrency, Math.max(queue.length, 1));
+            const workers: Promise<void>[] = [];
+
+            for (let i = 0; i < workerCount; i++) {
+              workers.push(worker());
+            }
+
+            try {
+              await Promise.all(workers);
+              return !uploadError && queue.length === 0;
+            } catch (err) {
+              console.debug("Worker error caught:", err);
+              // Check if cancelled
+              if (uploadCancelledRef.current || (err instanceof Error && err.message === "Upload cancelled")) {
+                return false;
+              }
+              return false;
+            }
+          };
+
+          // Initial upload attempt
+          let uploadSuccess = await runUploadWorkers();
+
+          // Handle failures with user choice
+          while (!uploadSuccess && !uploadCancelledRef.current) {
+            // Calculate failed parts
+            const completedPartNumbers = new Set(uploadedParts.map((p) => p.part));
+            const failedParts = parts.filter((p) => !completedPartNumbers.has(p.partNumber));
+            const failedPartsCount = failedParts.length;
+            const completedPartsCount = uploadedParts.length;
+
+            // If no parts failed, we're done
+            if (failedPartsCount === 0) {
+              uploadSuccess = true;
+              break;
+            }
+
+            // Ask user what to do
+            let shouldRetry = false;
+            try {
+              shouldRetry = await confirmAlert({
+                title: "Upload Failed",
+                message: `${completedPartsCount}/${totalParts} parts uploaded successfully. ${failedPartsCount} part(s) failed.\n\nDo you want to retry the failed parts?`,
+                primaryAction: {
+                  title: "Retry Failed Parts",
+                  style: Alert.ActionStyle.Default,
+                },
+                dismissAction: {
+                  title: "Abort Upload",
+                  style: Alert.ActionStyle.Destructive,
+                },
+              });
+            } catch (alertErr) {
+              console.error("Alert error:", alertErr);
+              shouldRetry = false;
+            }
+
+            if (!shouldRetry) {
+              // User chose to abort
+              try {
+                console.debug("User chose to abort, cleaning up multipart upload...");
+                await minioClient.abortMultipartUpload(bucket, objectName, uploadId);
+              } catch (abortErr) {
+                console.error("Failed to abort multipart upload:", abortErr);
+              }
+              throw new Error("Upload aborted by user");
+            }
+
+            // User chose to retry - rebuild queue with failed parts only
+            queue.length = 0;
+            queue.push(...failedParts);
+
+            // Reset progress for failed parts
+            failedParts.forEach((p) => {
+              partProgress[p.partNumber - 1] = 0;
+            });
+            updateTotalProgress();
+
+            toast.style = Toast.Style.Animated;
+            toast.title = "Retrying failed parts";
+
+            // Retry upload
+            uploadSuccess = await runUploadWorkers();
+          }
+
+          // Check if upload was cancelled
+          if (uploadCancelledRef.current) {
+            try {
+              await minioClient.abortMultipartUpload(bucket, objectName, uploadId);
+            } catch (abortErr) {
+              console.error("Failed to abort multipart upload:", abortErr);
+            }
+            throw new Error("Upload cancelled");
+          }
+
+          // Sort parts by part number and complete multipart upload
+          uploadedParts.sort((a, b) => a.part - b.part);
+
+          await minioClient.completeMultipartUpload(bucket, objectName, uploadId, uploadedParts);
+        }
 
         // Generate public URL
         const publicUrl = generatePublicUrl(bucket, objectName);
@@ -289,18 +598,37 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
       } catch (err) {
         console.error("Upload error:", err);
         const errorMessage = err instanceof Error ? err.message : String(err);
+        const errorCode = err instanceof Error && "code" in err ? (err as NodeJS.ErrnoException).code : "";
+
+        // Check for network/connection errors
+        const isNetworkError =
+          errorCode === "ECONNRESET" ||
+          errorCode === "ECONNREFUSED" ||
+          errorCode === "ETIMEDOUT" ||
+          errorCode === "ENOTFOUND" ||
+          errorMessage.includes("socket hang up") ||
+          errorMessage.includes("network") ||
+          errorMessage.includes("ECONNRESET");
 
         // Check for SSL connection error
-        if (
+        const isSSLError =
           useSSL &&
           (errorMessage.includes("TLS connection") ||
-            errorMessage.includes("ECONNRESET") ||
-            errorMessage.includes("certificate"))
-        ) {
-          // Prompt user to try disabling SSL
+            errorMessage.includes("certificate") ||
+            errorMessage.includes("SSL"));
+
+        if (isSSLError) {
           toast.style = Toast.Style.Failure;
           toast.title = "SSL Connection Error";
           toast.message = "Try disabling SSL in the options";
+        } else if (isNetworkError) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Network Error";
+          toast.message = "Connection lost. Please check your network and try again.";
+        } else if (errorMessage === "Upload cancelled" || errorMessage === "Upload aborted by user") {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Upload Cancelled";
+          toast.message = "The upload was cancelled";
         } else {
           toast.style = Toast.Style.Failure;
           toast.title = "Upload failed";
@@ -393,12 +721,36 @@ export default function Command(props: LaunchProps<{ arguments: CommandArguments
     getFinderSelection();
   }, [fileArgument]);
 
+  // Cancel ongoing upload
+  const cancelUpload = () => {
+    uploadCancelledRef.current = true;
+
+    // Abort all active HTTP requests
+    activeRequestsRef.current.forEach((req) => {
+      try {
+        req.destroy();
+      } catch (e) {
+        console.error("Error destroying request:", e);
+      }
+    });
+    activeRequestsRef.current = [];
+  };
+
   return (
     <Form
       isLoading={isLoading || isUploading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Upload} title="Upload File" />
+          {isUploading ? (
+            <Action
+              title="Cancel Upload"
+              icon={Icon.XMarkCircle}
+              style={Action.Style.Destructive}
+              onAction={cancelUpload}
+            />
+          ) : (
+            <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.Upload} title="Upload File" />
+          )}
           {uploadedFileUrl && (
             <Action title="Copy File URL" icon={Icon.Link} onAction={() => copyUrlToClipboard(uploadedFileUrl)} />
           )}

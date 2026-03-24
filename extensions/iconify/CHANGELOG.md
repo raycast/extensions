@@ -1,5 +1,9 @@
 # Iconify Changelog
 
+## [Docs] - 2025-12-24
+
+- Add cross-extension badge and credits part to README
+
 ## [Features] - 2025-12-19
 
 - Fix icon custom color rendering issue

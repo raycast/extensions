@@ -1,5 +1,10 @@
 # arXiv Changelog
 
+## [Security Maintenance] - {PR_MERGE_DATE}
+
+- Removed unused `npm` dependency.
+- Reduced transitive dependency surface (including removal of transitive `tar` usage) to address security advisories.
+
 
 ## [Added viewing formats, publication year, and citation export] - 2025-09-09
 

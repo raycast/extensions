@@ -88,7 +88,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         let notificationCount = 0;
         try {
           notificationCount = await getUnreadNotificationCount();
-        } catch (error) {
+        } catch {
           // This try...catch is to account for following case:
           // When user runs extension and session is expiring or expired, ERROR on next line is thrown
           // `initialRes.body?.cancel is not a function`
@@ -162,7 +162,7 @@ export default function Notifications({ previousViewTitle = "" }: ViewNotificati
         showSuccessToast(ViewingNotification);
 
         return;
-      } catch (error) {
+      } catch {
         showDangerToast(ErrorLoadingNotification);
         setDetailsText(ErrorLoadingNotification);
         return;

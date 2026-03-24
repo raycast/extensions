@@ -1,5 +1,30 @@
 # Google Cloud CLI Changelog
 
+## [1.0.4] - 2026-02-10
+- Fixed JS heap out-of-memory crash in index command by limiting API response payloads
+- Deduplicated IAM policy modification logic into a single reusable method
+- Removed dead code, orphaned files, and unused `dotenv` dependency
+
+## [1.0.3] - 2026-01-13
+- Added Cloud Shell SSH connection action across all views
+- Added keyboard shortcut (Cmd+Opt+S) to copy Cloud Shell connection command
+- Improved action component error handling and input validation
+
+## [1.0.2] - 2026-01-05
+- Added Cloud Functions v2 service with Gen 2 support
+- Added function invocation from Raycast with live response
+- Added function creation form with streaming deployment logs
+- Added ApiErrorView for consistent API error handling across services
+- Improved service consistency and error handling patterns
+- Improved IAMService, SecretManagerService, CloudBuildService, ComputeService
+
+## [1.0.1] - 2025-12-28
+- Added optimistic UI updates for VM start/stop actions
+- Fixed Streamer Mode not hiding "Copy Latest Value" action in Secrets list
+- Fixed Streamer Mode toggle not updating secret value display in real-time
+- Allow copying secrets even when Streamer Mode is enabled (display remains masked)
+- Redesigned Secret detail view to match design patterns (metadata sidebar, tables)
+
 ## [1.0.0] - 2025-12-15
 - Added Streamer Mode - hide sensitive data (emails, IPs, secrets) with Cmd+Shift+H
 - Added Windows compatibility

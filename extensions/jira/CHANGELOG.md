@@ -1,5 +1,13 @@
 # Jira Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Bug Fix] - 2026-02-05
+
+- Fixed a bug where the Jira create-issue flow copied an API base URL instead of the normal `/browse/KEY` issue link.
+
 ## [Update] - 2025-12-07
 
 - Add MacOS and Windows to supported platforms
@@ -7,7 +15,7 @@
 
 ## [Fix unbounded JQL error when no project filter] - 2025-09-08
 
-- Added a fallback `created >= -30d` clause in the *Search Issues* command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
+- Added a fallback `created >= -30d` clause in the _Search Issues_ command when no project is selected to prevent Jira’s “Unbounded JQL queries are not allowed” error.
 
 ## [Fix deprecated Jira search API] - 2025-08-20
 

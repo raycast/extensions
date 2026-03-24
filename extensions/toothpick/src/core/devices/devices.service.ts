@@ -12,7 +12,7 @@ let currentServiceType: string;
 let devicesService: DevicesService;
 
 export function getDevicesService(
-  serviceType?: ServiceType | ExtensionPreferences["bluetoothBackend"]
+  serviceType?: ServiceType | ExtensionPreferences["bluetoothBackend"],
 ): DevicesService {
   if (serviceType && currentServiceType !== serviceType) {
     currentServiceType = serviceType;

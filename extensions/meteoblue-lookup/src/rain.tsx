@@ -8,6 +8,7 @@ import {
   Color,
 } from "@raycast/api";
 import { useWeather } from "./hooks";
+import { useFavorites } from "./favorites";
 
 export default function Command() {
   const {
@@ -23,6 +24,22 @@ export default function Command() {
     handleUseCurrentLocation,
     preferences,
   } = useWeather();
+
+  const {
+    favorites,
+    lastUsedLocation,
+    handleAddFavorite,
+    handleRemoveFavorite,
+    handleSetLastUsed,
+    isLocationFavorite,
+  } = useFavorites();
+
+  const selectLocation = async (
+    location: import("./types").LocationSearchResult,
+  ) => {
+    await handleSetLastUsed(location);
+    await handleSelectLocation(location);
+  };
 
   const getRainStatus = (probability: number) => {
     if (probability <= 10)
@@ -119,8 +136,21 @@ export default function Command() {
                       <Action
                         title="Select Location"
                         icon={Icon.Check}
-                        onAction={() => handleSelectLocation(location)}
+                        onAction={() => selectLocation(location)}
                       />
+                      {isLocationFavorite(location.id) ? (
+                        <Action
+                          title="Remove from Favorites"
+                          icon={Icon.StarDisabled}
+                          onAction={() => handleRemoveFavorite(location.id)}
+                        />
+                      ) : (
+                        <Action
+                          title="Add to Favorites"
+                          icon={Icon.Star}
+                          onAction={() => handleAddFavorite(location)}
+                        />
+                      )}
                       <Action
                         title="Configure Extension"
                         icon={Icon.Gear}
@@ -195,14 +225,8 @@ export default function Command() {
     return (
       <Detail
         markdown={`# ${status.text}
-        
+
 ${status.blurb}
-
----
-
-**Location:** ${locationName}
-**Rain Chance (Est):** ${maxRainChance}%
-**Total Rain (Next 12h):** ${next12Hours.reduce((acc, curr) => acc + (curr.precipitation || 0), 0).toFixed(1)} ${weatherData.basic?.units?.precipitation || "mm"}
 `}
         actions={
           <ActionPanel>
@@ -211,6 +235,20 @@ ${status.blurb}
               icon={Icon.MagnifyingGlass}
               onAction={() => setSearchText("")} // Hack to go back to search
             />
+            {selectedLocation &&
+              (isLocationFavorite(selectedLocation.id) ? (
+                <Action
+                  title="Remove from Favorites"
+                  icon={Icon.StarDisabled}
+                  onAction={() => handleRemoveFavorite(selectedLocation.id)}
+                />
+              ) : (
+                <Action
+                  title="Add to Favorites"
+                  icon={Icon.Star}
+                  onAction={() => handleAddFavorite(selectedLocation)}
+                />
+              ))}
             <Action
               title="Configure Extension"
               icon={Icon.Gear}
@@ -229,6 +267,10 @@ ${status.blurb}
               title="Rain Chance"
               text={`${maxRainChance}%`}
             />
+            <Detail.Metadata.Label
+              title="Total Rain (12h)"
+              text={`${next12Hours.reduce((acc, curr) => acc + (curr.precipitation || 0), 0).toFixed(1)} ${weatherData.basic?.units?.precipitation || "mm"}`}
+            />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Location" text={locationName} />
           </Detail.Metadata>
@@ -246,26 +288,86 @@ ${status.blurb}
       throttle
     >
       {searchText.length === 0 && !selectedLocation ? (
-        <List.Section title="Suggestions">
-          <List.Item
-            title="Current Location"
-            icon={Icon.Pin}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Use Current Location"
-                  icon={Icon.Pin}
-                  onAction={handleUseCurrentLocation}
+        <>
+          <List.Section title="Suggestions">
+            {lastUsedLocation && (
+              <List.Item
+                title={lastUsedLocation.name}
+                subtitle={`${lastUsedLocation.country}${lastUsedLocation.admin1 ? `, ${lastUsedLocation.admin1}` : ""}`}
+                icon={Icon.Clock}
+                accessories={[{ text: "Last used" }]}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Select Location"
+                      icon={Icon.Check}
+                      onAction={() => selectLocation(lastUsedLocation)}
+                    />
+                    {isLocationFavorite(lastUsedLocation.id) ? (
+                      <Action
+                        title="Remove from Favorites"
+                        icon={Icon.StarDisabled}
+                        onAction={() =>
+                          handleRemoveFavorite(lastUsedLocation.id)
+                        }
+                      />
+                    ) : (
+                      <Action
+                        title="Add to Favorites"
+                        icon={Icon.Star}
+                        onAction={() => handleAddFavorite(lastUsedLocation)}
+                      />
+                    )}
+                  </ActionPanel>
+                }
+              />
+            )}
+            <List.Item
+              title="Current Location"
+              icon={Icon.Pin}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Use Current Location"
+                    icon={Icon.Pin}
+                    onAction={handleUseCurrentLocation}
+                  />
+                  <Action
+                    title="Configure Extension"
+                    icon={Icon.Gear}
+                    onAction={openExtensionPreferences}
+                  />
+                </ActionPanel>
+              }
+            />
+          </List.Section>
+          {favorites.length > 0 && (
+            <List.Section title="Favorites">
+              {favorites.map((fav) => (
+                <List.Item
+                  key={fav.id}
+                  title={fav.name}
+                  subtitle={`${fav.country}${fav.admin1 ? `, ${fav.admin1}` : ""}`}
+                  icon={Icon.Star}
+                  actions={
+                    <ActionPanel>
+                      <Action
+                        title="Select Location"
+                        icon={Icon.Check}
+                        onAction={() => selectLocation(fav)}
+                      />
+                      <Action
+                        title="Remove from Favorites"
+                        icon={Icon.StarDisabled}
+                        onAction={() => handleRemoveFavorite(fav.id)}
+                      />
+                    </ActionPanel>
+                  }
                 />
-                <Action
-                  title="Configure Extension"
-                  icon={Icon.Gear}
-                  onAction={openExtensionPreferences}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
+              ))}
+            </List.Section>
+          )}
+        </>
       ) : (
         <List.EmptyView
           icon={

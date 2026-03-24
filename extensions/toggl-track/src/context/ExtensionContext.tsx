@@ -19,7 +19,7 @@ export const ExtensionContextProvider = ({ children }: { children: JSX.Element }
       <List
         actions={
           <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       >

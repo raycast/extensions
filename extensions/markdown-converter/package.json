@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-converter",
+  "title": "Markdown Converter",
+  "description": "Convert rich text from clipboard into Markdown format",
+  "icon": "icon.png",
+  "author": "ewilderj",
+  "keywords": [
+    "markdown",
+    "converter",
+    "clipboard",
+    "rich text",
+    "word",
+    "google docs",
+    "html",
+    "org-mode",
+    "org"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-clipboard",
+      "title": "Convert Clipboard to Markdown",
+      "description": "Convert rich text from clipboard into Markdown format",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-clipboard-org",
+      "title": "Convert Clipboard to Org",
+      "description": "Convert rich text from clipboard into Org-mode format",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-html",
+      "title": "Convert Clipboard to HTML",
+      "description": "Convert Markdown or Org text to generic HTML rich text",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-google-docs",
+      "title": "Convert Clipboard to Google Docs",
+      "description": "Convert Markdown or Org text to Google Docs optimized rich text",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-word",
+      "title": "Convert Clipboard to Word 365",
+      "description": "Convert Markdown or Org text to Microsoft Word optimized rich text",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-slack",
+      "title": "Convert Clipboard to Slack",
+      "description": "Convert Markdown or Org text to Slack mrkdwn format",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "linkedom": "^0.18.12",
+    "rehype-stringify": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
+    "turndown": "^7.1.2",
+    "turndown-plugin-gfm": "^1.0.2",
+    "unified": "^11.0.5"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "@types/turndown": "^5.0.5",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "version": "1.2.1"
+}

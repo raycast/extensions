@@ -78,7 +78,7 @@ export default function Command() {
       ) : (
         <List.Section title="Results" subtitle={state.results.length + ""}>
           {state.results.map((searchResult) => (
-            <SearchListItem key={searchResult.id} searchResult={searchResult} />
+            <SearchListItem key={searchResult.id} searchResult={searchResult} channel={selectedBranch} />
           ))}
         </List.Section>
       )}

@@ -5,7 +5,7 @@ import { AnswerView } from "./lib/ui/AnswerView/main";
 const p = getPreferenceValues<Preferences>();
 if (!p.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-const listErrorLegacyArguments = (
+const listErrorLegacyArguments: React.JSX.Element = (
   <List>
     <List.EmptyView
       icon={Icon.ExclamationMark}
@@ -15,7 +15,7 @@ const listErrorLegacyArguments = (
   </List>
 );
 
-export default function Command(props: RaycastArgumentsOllamaCommandCustom) {
+export default function Command(props: RaycastArgumentsOllamaCommandCustom): React.JSX.Element {
   let server: string;
   let model: string;
   let parameters: any;

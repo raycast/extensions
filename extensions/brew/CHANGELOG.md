@@ -1,5 +1,32 @@
 # Brew Changelog
 
+## [Improvements] - 2026-02-24
+
+- Remove updating homebrew index toast from outdated command
+
+## [Bug Fix] - 2026-02-24
+
+- Improve install/uninstall/upgrade failure toasts by surfacing concise Homebrew errors instead of full auto-update logs.
+- Keep full `stderr`/`stdout` output available through the toast's `Copy Logs` action for debugging.
+
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
+
+- Added optional split-view metadata panel for search results
+- Enable "Show metadata panel in search results" in Search command preferences (default true)
+- Displays package description and metadata alongside the search list
+
+## [Improvements] - 2026-01-05
+
+- Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".
+
 ## [Homebrew 5.0 Support] - 2025-12-16
 
 - Added compatibility with Homebrew 5.0

@@ -25,7 +25,8 @@ export function getVaultNameFromPath(vaultPath: string): string | undefined {
 
 export function getVaultsFromPreferences(): ObsidianVault[] {
   const pref: GlobalPreferences = getPreferenceValues();
-  const vaultString = pref.vaultPath;
+  // The preference can actually be undefined instead of a string on first install -> default to empty string
+  const vaultString = pref.vaultPath ?? "";
 
   return vaultString
     .split(",")
@@ -75,15 +76,18 @@ export function validateNotePath(notePath: string, vaults: ObsidianVault[]): boo
 export enum ObsidianTargetType {
   OpenVault = "obsidian://open?vault=",
   OpenPath = "obsidian://open?path=",
+  OpenWorkspace = "obsidian://adv-uri?",
   DailyNote = "obsidian://adv-uri?daily=true&vault=",
   DailyNoteAppend = "obsidian://adv-uri?daily=true&",
   NewNote = "obsidian://new?vault=",
   AppendTask = "obsidian://adv-uri?mode=append&filepath=",
+  AppendToNote = "obsidian://adv-uri?filepath=",
 }
 
 export type ObsidianTarget =
   | { type: ObsidianTargetType.OpenVault; vault: ObsidianVault }
   | { type: ObsidianTargetType.OpenPath; path: string }
+  | { type: ObsidianTargetType.OpenWorkspace; vault: ObsidianVault; workspace: string }
   | { type: ObsidianTargetType.DailyNote; vault: ObsidianVault }
   | {
       type: ObsidianTargetType.DailyNoteAppend;
@@ -101,6 +105,15 @@ export type ObsidianTarget =
       path: string;
       heading?: string;
       silent?: boolean;
+    }
+  | {
+      type: ObsidianTargetType.AppendToNote;
+      vault: ObsidianVault;
+      text: string;
+      path: string;
+      mode: "append" | "prepend" | "overwrite";
+      heading?: string;
+      silent?: boolean;
     };
 
 export function getObsidianTarget(target: ObsidianTarget) {
@@ -110,6 +123,15 @@ export function getObsidianTarget(target: ObsidianTarget) {
     }
     case ObsidianTargetType.OpenPath: {
       return ObsidianTargetType.OpenPath + encodeURIComponent(target.path);
+    }
+    case ObsidianTargetType.OpenWorkspace: {
+      return (
+        ObsidianTargetType.OpenWorkspace +
+        "vault=" +
+        encodeURIComponent(target.vault.name) +
+        "&workspace=" +
+        encodeURIComponent(target.workspace)
+      );
     }
     case ObsidianTargetType.DailyNote: {
       return ObsidianTargetType.DailyNote + encodeURIComponent(target.vault.name);
@@ -146,6 +168,21 @@ export function getObsidianTarget(target: ObsidianTarget) {
         encodeURIComponent(target.text) +
         "&vault=" +
         encodeURIComponent(target.vault.name) +
+        headingParam +
+        (target.silent ? "&openmode=silent" : "")
+      );
+    }
+    case ObsidianTargetType.AppendToNote: {
+      const headingParam = target.heading ? "&heading=" + encodeURIComponent(target.heading) : "";
+      return (
+        ObsidianTargetType.AppendToNote +
+        encodeURIComponent(target.path) +
+        "&vault=" +
+        encodeURIComponent(target.vault.name) +
+        "&data=" +
+        encodeURIComponent(target.text) +
+        "&mode=" +
+        target.mode +
         headingParam +
         (target.silent ? "&openmode=silent" : "")
       );

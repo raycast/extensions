@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 
 import { getGitHubClient } from "./api/githubClient";
 import PullRequestDetail from "./components/PullRequestDetail";
+import { PullRequestMergeMethod } from "./generated/graphql";
 import { getErrorMessage } from "./helpers/errors";
+import { getMergeMethodTitle } from "./helpers/pull-request";
 import { getGitHubUser } from "./helpers/users";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
@@ -14,6 +16,8 @@ type PullRequestFormValues = {
   from: string;
   into: string;
   draft: boolean;
+  autoMerge: boolean;
+  autoMergeMethod: string;
   title: string;
   description: string;
   reviewers: string[];
@@ -114,6 +118,19 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           toast.style = Toast.Style.Success;
           toast.title = "Created pull request";
 
+          if (values.autoMerge) {
+            try {
+              await github.enablePullRequestAutoMerge({
+                nodeId: pullRequestId,
+                mergeMethod: (values.autoMergeMethod as PullRequestMergeMethod) || allowedMergeMethods[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Success;
+              toast.title = "Created pull request, but auto-merge failed";
+              toast.message = getErrorMessage(error);
+            }
+          }
+
           if (pullRequest) {
             toast.primaryAction = {
               title: "Open Pull Request",
@@ -134,6 +151,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           from: "",
           into: "",
           draft: false,
+          autoMerge: false,
+          autoMergeMethod: "",
           description: "",
           reviewers: [],
           assignees: [],
@@ -154,6 +173,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       from: draftValues?.from ?? "",
       into: draftValues?.into ?? "",
       draft: draftValues?.draft ?? false,
+      autoMerge: draftValues?.autoMerge ?? false,
+      autoMergeMethod: draftValues?.autoMergeMethod ?? "",
       title: draftValues?.title ?? "",
       description: draftValues?.description ?? "",
       reviewers: draftValues?.reviewers ?? [],
@@ -183,6 +204,14 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     [values.repository],
     { execute: !!values.repository },
   );
+
+  const selectedRepository = repositories?.find((r) => r.id === values.repository);
+  const autoMergeAllowed = selectedRepository?.autoMergeAllowed ?? false;
+  const allowedMergeMethods = [
+    selectedRepository?.mergeCommitAllowed && PullRequestMergeMethod.Merge,
+    selectedRepository?.squashMergeAllowed && PullRequestMergeMethod.Squash,
+    selectedRepository?.rebaseMergeAllowed && PullRequestMergeMethod.Rebase,
+  ].filter(Boolean) as PullRequestMergeMethod[];
 
   const defaultBranch = data?.repository?.defaultBranchRef;
   const defaultBranchName = defaultBranch?.name ?? "";
@@ -329,6 +358,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       </Form.Dropdown>
 
       <Form.Checkbox {...itemProps.draft} label="As draft" />
+
+      {autoMergeAllowed && <Form.Checkbox {...itemProps.autoMerge} label="Enable auto-merge" />}
+
+      {autoMergeAllowed && values.autoMerge && allowedMergeMethods.length > 1 && (
+        <Form.Dropdown {...itemProps.autoMergeMethod} title="Auto-Merge Method">
+          {allowedMergeMethods.map((method) => (
+            <Form.Dropdown.Item key={method} title={getMergeMethodTitle(method)} value={method} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       <Form.Separator />
 

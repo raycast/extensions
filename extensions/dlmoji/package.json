@@ -82,7 +82,7 @@
     ],
     "dependencies": {
         "@raycast/api": "^1.31.0",
-        "axios": "^0.25.0",
+        "axios": "^0.30.3",
         "cheerio": "^1.0.0-rc.12",
         "crypto-js": "^4.1.1",
         "form-data": "^4.0.0",

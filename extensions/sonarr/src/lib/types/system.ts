@@ -45,19 +45,19 @@ export enum HealthCheckType {
 
 export interface Command {
   name: string;
-  commandName: string;
-  message?: string;
-  body: CommandBody;
-  priority: string;
-  status: string;
-  queued: string;
-  started?: string;
-  ended?: string;
-  duration?: string;
-  trigger: string;
-  stateChangeTime?: string;
-  sendUpdatesToClient: boolean;
-  updateScheduledTask: boolean;
+  commandName?: string;
+  message?: string | null;
+  body?: CommandBody;
+  priority?: string;
+  status?: string;
+  queued?: string;
+  started?: string | null;
+  ended?: string | null;
+  duration?: string | null;
+  trigger?: string;
+  stateChangeTime?: string | null;
+  sendUpdatesToClient?: boolean;
+  updateScheduledTask?: boolean;
   lastExecutionTime?: string;
   id: number;
 }

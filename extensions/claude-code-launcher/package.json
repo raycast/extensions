@@ -5,6 +5,10 @@
   "description": "Quickly open Claude Code in any directory with your preferred terminal.",
   "icon": "icon.png",
   "author": "stephendolan",
+  "contributors": [
+    "ridemountainpig",
+    "tim_gailey"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
@@ -40,6 +44,32 @@
         {
           "title": "Ghostty",
           "value": "Ghostty"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iTerm2"
+        }
+      ]
+    },
+    {
+      "name": "ghosttyOpenBehavior",
+      "title": "Ghostty: Open Behavior",
+      "description": "Only applies when Ghostty is selected. 'New Window' launches a separate Ghostty window. 'New Tab' opens a tab in your current Ghostty window (requires macOS Accessibility permissions).",
+      "type": "dropdown",
+      "required": false,
+      "default": "window",
+      "data": [
+        {
+          "title": "New Window",
+          "value": "window"
+        },
+        {
+          "title": "New Tab",
+          "value": "tab"
         }
       ]
     },

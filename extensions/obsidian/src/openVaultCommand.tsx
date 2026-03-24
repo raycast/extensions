@@ -2,7 +2,7 @@ import { Action, ActionPanel, closeMainWindow, List, open, popToRoot, Icon } fro
 
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { Obsidian, ObsidianTargetType } from "@/obsidian";
-import { ShowVaultInFinderAction } from "./utils/actions";
+import { ShowVaultInFinderAction, CopyVaultPathAction } from "./utils/actions";
 import { useObsidianVaults } from "./utils/hooks";
 
 export default function Command() {
@@ -38,6 +38,7 @@ export default function Command() {
                   target={Obsidian.getTarget({ type: ObsidianTargetType.OpenVault, vault: vault })}
                 />
                 <ShowVaultInFinderAction vault={vault} />
+                <CopyVaultPathAction vault={vault} />
               </ActionPanel>
             }
           />

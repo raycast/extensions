@@ -1,10 +1,27 @@
 import { MenuBarExtra, open } from "@raycast/api";
-import { Obsidian, ObsidianTargetType, ObsidianVault, Note } from "@/obsidian";
+import { Obsidian, ObsidianTargetType, ObsidianVault } from "@/obsidian";
 import { ObsidianIcon } from "./utils/constants";
-import { useObsidianVaults, useVaultPluginCheck } from "./utils/hooks";
+import { useObsidianVaults, useVaultPluginCheck, useNotes } from "./utils/hooks";
 
 function BookmarkedNotesList(props: { vault: ObsidianVault }) {
-  const notes: Note[] = [];
+  const { notes, loading } = useNotes(props.vault, true);
+
+  if (loading) {
+    return (
+      <MenuBarExtra.Submenu title={props.vault.name} key={props.vault.path + "Bookmarked Notes"}>
+        <MenuBarExtra.Item title="Loading..." key="loading" />
+      </MenuBarExtra.Submenu>
+    );
+  }
+
+  if (notes.length === 0) {
+    return (
+      <MenuBarExtra.Submenu title={props.vault.name} key={props.vault.path + "Bookmarked Notes"}>
+        <MenuBarExtra.Item title="No bookmarked notes" key="empty" />
+      </MenuBarExtra.Submenu>
+    );
+  }
+
   return (
     <MenuBarExtra.Submenu title={props.vault.name} key={props.vault.path + "Bookmarked Notes"}>
       {notes.map((note) => (

@@ -4,6 +4,16 @@ This is a reference page for all features of the extension. You can use this ref
 
 Last time verified all: 2025-12-11 (macOS)
 
+## Callouts Rendering
+
+- [ ] Obsidian callouts are rendered with emojis in Quick Look and detail views
+- [ ] All standard callout types are supported (note, warning, error, success, tip, question, info, todo, bug, example, quote, etc.)
+- [ ] Callouts with titles display emoji + bold title
+- [ ] Callouts without titles display emoji only
+- [ ] Multi-line callout content is preserved
+- [ ] Callouts are properly spaced from surrounding text
+- [ ] Unknown callout types fall back to note emoji (📝)
+
 ## General Preferences
 
 - [ ] Path to Vault
@@ -22,6 +32,11 @@ Last time verified all: 2025-12-11 (macOS)
 
 Nearly every command has a vault selection that either moves to the next "action/page" directly when there is only one vault in Obsidian or shows a selection when there are multiple vaults.
 
+- [ ] actions
+  - [ ] Select Vault
+  - [ ] Show in Finder
+  - [ ] Copy File Path (opt + shift + c)
+
 ## Notes List
 
 Many commands use a note list.
@@ -39,6 +54,7 @@ Many commands use a note list.
     - [ ] if multiple code blocks in the note -> shows code blocks in a list with language information -> paste or copy now
   - [ ] Copy Note Content
   - [ ] Copy Note Title
+  - [ ] Copy File Path (opt + shift + c)
   - [ ] Paste Note Content
   - [ ] Copy Markdown Link
   - [ ] Copy Obsidian Link
@@ -85,6 +101,7 @@ Many commands use a note list.
 - [ ] actions
   - [ ] Open Vault
   - [ ] Show in Finder
+  - [ ] Copy File Path (opt + shift + c)
 
 ## Random Note Command
 
@@ -186,6 +203,7 @@ Many commands use a note list.
   - [ ] open in macOS quick look
   - [ ] open in Obsidian
   - [ ] show in finder
+  - [ ] Copy File Path (opt + shift + c)
 - [ ] preferences
   - [ ] excluded folders
     - [ ] media from those folders should not appear
@@ -198,4 +216,25 @@ Many commands use a note list.
 
 - [ ] shows in menubar when enabled
 - [ ] opens daily note via vault selection of subset of vaults
+- [ ] opens vaults
 - [ ] shows bookmarked notes via vault selection of subset of vaults
+
+## AI Tools
+
+- [ ] create note
+- [ ] open note
+- [ ] search note
+- [ ] read note
+- [ ] update note
+- [ ] get vaults
+- [ ] prepend/append to note
+  - [ ] regular note
+  - [ ] daily note
+  - [ ] below certain heading
+
+## Open Workspaces
+
+- [ ] see vault selection (only shows vaults with workspaces core plugin enabled)
+- [ ] shows list of workspaces
+- [ ] last active workspace is selected
+- [ ] opens workspace

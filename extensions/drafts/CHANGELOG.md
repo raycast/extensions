@@ -1,5 +1,9 @@
 # Drafts Changelog
 
+## [Security Maintenance] - {PR_MERGE_DATE}
+
+- Update transitive `tar` dependency to 7.5.11 to address hardlink path traversal CVE
+
 ## [Add Find Features and AI Extension Support] - 2025-04-10
 
 New Commands to search through Drafts database

@@ -1,18 +1,28 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ISearchResponse, IStatusResult } from "./types";
+import { ISearchResponse, IStatusResult, ErrorResult } from "./types";
+import { DOMAIN_RESEARCH_API_URL } from "./constants";
 
-const { rapidApiKey } = getPreferenceValues<Preferences.Domainr>();
-const API_URL = "https://api.fastly.com/domain-management/v1/tools/";
-const API_HEADERS = {
-  "Fastly-Key": rapidApiKey,
-};
 const makeRequest = async <T>(endpoint: string) => {
-  const response = await fetch(API_URL + endpoint, {
-    headers: API_HEADERS,
+  const { rapidApiKey } = getPreferenceValues<Preferences.Domainr>();
+  const fastlyApiKey = rapidApiKey;
+  const url = DOMAIN_RESEARCH_API_URL + endpoint;
+  const response = await fetch(url, {
+    headers: {
+      "Fastly-Key": fastlyApiKey,
+    },
   });
-  const result = await response.json();
+  const result = (await response.json()) as Record<string, unknown>;
   if (!response.ok) {
-    throw new Error((result as { msg: string }).msg, {
+    if (response.status === 404) {
+      throw new Error("Domain Research API not enabled. Please enable it in Fastly Dashboard.", {
+        cause: response.status,
+      });
+    }
+
+    const errorResult = result as ErrorResult;
+    const errorMessage = errorResult.msg || errorResult.error || errorResult.message || "Unknown error occurred";
+
+    throw new Error(errorMessage, {
       cause: response.status,
     });
   }

@@ -1,4 +1,4 @@
-import { ActionPanel, Action, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, getPreferenceValues, Keyboard } from "@raycast/api";
 
 import { IssueResult } from "../../api/getIssues";
 
@@ -19,7 +19,7 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
       <Action.CopyToClipboard
         content={issue.identifier}
         title="Copy Issue ID"
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
       />
       <Action.CopyToClipboard
         content={{
@@ -27,18 +27,21 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
           text: issue.url,
         }}
         title="Copy Formatted Issue URL"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+        shortcut={Keyboard.Shortcut.Common.CopyPath}
       />
       <Action.CopyToClipboard content={issue.url} title="Copy Issue URL" />
       <Action.CopyToClipboard
         content={issue.title}
         title="Copy Issue Title"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "'" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "'" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+        }}
       />
       <Action.CopyToClipboard
         content={issue.branchName}
         title="Copy Git Branch Name"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+        shortcut={Keyboard.Shortcut.Common.CopyName}
       />
       {issueCustomCopyAction && issueCustomCopyAction !== "" ? (
         <Action.CopyToClipboard
@@ -47,7 +50,10 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
             return value ? value : substring;
           })}
           title="Custom Copy"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "." },
+            Windows: { modifiers: ["ctrl", "alt"], key: "." },
+          }}
         />
       ) : null}
     </ActionPanel.Section>

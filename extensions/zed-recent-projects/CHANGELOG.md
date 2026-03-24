@@ -1,4 +1,27 @@
-#  Zed Recent Projects Changelog
+# Zed Recent Projects Changelog
+
+## [Fix Environment Inheritance] - 2026-02-23
+
+- Fix Zed inheriting Raycast environment variables when launched via extension
+
+## [Multi-folder Workspace Support] - 2026-01-21
+
+- Add support for multi-folder workspaces (requires Zed CLI to be installed)
+- Multi-folder workspaces now display all folder names comma-separated in the title
+- Fixed timestamp parsing for correct sorting of recent projects
+- Improved workspace identification using database IDs for reliable tracking
+
+## [Enhancements] - 2026-01-15
+
+- Add colored dots per project for easy visual identification
+- Show green "Open" tag for projects currently open in Zed
+- Reorder list when opening a project to show it at the top
+- Add "Close Project" action to close open Zed windows directly (macOS only)
+- Add "open" and "closed" keywords to filter projects by typing in the search bar
+
+## [Windows Support] - 2025-12-28
+
+- Added Windows support.
 
 ## [Update] - 2025-11-03
 

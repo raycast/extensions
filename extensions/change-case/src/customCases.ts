@@ -1,14 +1,37 @@
 import { getPreferenceValues } from "@raycast/api";
 import { SMALL_WORDS, titleCase as titleCaseLib } from "title-case";
 import * as changeCase from "change-case";
-import { spongeCase as spongeCaseLib } from "sponge-case";
 import { swapCase as swapCaseLib } from "swap-case";
 
 export type CaseFunction = (input: string, options?: changeCase.Options) => string;
 
 const ALPHABETIC_REGEX = /\p{L}/u;
 
-export const spongeCase: CaseFunction = (input) => spongeCaseLib(input);
+const isAlphabetic = (char: string) => ALPHABETIC_REGEX.test(char);
+
+export const alternatingCase = (input: string) => {
+  let alphabeticCount = 0;
+  return input
+    .split("")
+    .map((char) => {
+      if (!isAlphabetic(char)) return char;
+      alphabeticCount++;
+      return alphabeticCount % 2 === 1 ? char.toUpperCase() : char.toLowerCase();
+    })
+    .join("");
+};
+
+export const spongeCase = alternatingCase;
+
+export const randomCase = (input: string) => {
+  return input
+    .split("")
+    .map((char) => {
+      if (!isAlphabetic(char)) return char;
+      return Math.random() > 0.5 ? char.toUpperCase() : char.toLowerCase();
+    })
+    .join("");
+};
 
 export const swapCase: CaseFunction = (input) => swapCaseLib(input);
 

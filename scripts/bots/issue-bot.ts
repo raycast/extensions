@@ -15,9 +15,9 @@ type API = {
   core: typeof Core;
 };
 
-const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/([^\/]+)\/([^\/\s]+)/;
+const newMatch = /### Extension\s*(?:https:\/\/)?(?:www\.)?raycast\.com\/([^\/]+)\/([^\/\s]+)/;
 const newMatchGitHub =
-  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
+  /### Extension\s*(?:https:\/\/)?(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatchGithub =
   /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
 

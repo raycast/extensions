@@ -12,7 +12,12 @@
     "erics118",
     "xilopaint",
     "validate",
-    "dead_hikikomori"
+    "dead_hikikomori",
+    "mateus_badalotti"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -639,16 +644,26 @@
   },
   "preferences": [
     {
-      "description": "Determine whether the process path should be searched for the query or only the process name.",
+      "description": "Refresh the list every N ms. Use 0 to disable. Minimum: 1000.",
+      "label": "Interval (ms)",
+      "name": "refreshDuration",
+      "required": false,
+      "title": "Auto-Refresh",
+      "type": "textfield",
+      "default": "3000",
+      "placeholder": "3000"
+    },
+    {
+      "description": "Search in the full executable path.",
       "label": "Search Process Paths",
       "name": "shouldSearchInPaths",
       "required": false,
       "default": false,
-      "title": "Filtering",
+      "title": "Search",
       "type": "checkbox"
     },
     {
-      "description": "Determine whether the process PID should be searched for the query or only the process name.",
+      "description": "Search in the PID.",
       "label": "Search Process PID",
       "name": "shouldSearchInPid",
       "required": false,
@@ -657,27 +672,9 @@
       "type": "checkbox"
     },
     {
-      "description": "Determine whether apps are listed before other results when filtering.",
+      "description": "List app processes before other results.",
       "label": "Prioritize Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether processes are sorted by CPU or memory usage.",
-      "label": "Sort by Memory Usage",
-      "name": "sortByMem",
-      "required": false,
-      "default": false,
-      "title": "",
-      "type": "checkbox"
-    },
-    {
-      "description": "Determine whether aggregate processes belong to the same app.",
-      "label": "Aggregate Apps",
-      "name": "aggregateApps",
       "required": false,
       "default": false,
       "title": "",
@@ -702,7 +699,7 @@
       "type": "checkbox"
     },
     {
-      "description": "Close window after killing a process",
+      "description": "Close window after killing a process.",
       "label": "Close Window",
       "name": "closeWindowAfterKill",
       "required": false,
@@ -711,43 +708,44 @@
       "type": "checkbox"
     },
     {
-      "description": "Clear search bar after killing a process",
+      "description": "Clear search bar after killing a process.",
       "label": "Clear Search Bar",
       "name": "clearSearchBarAfterKill",
       "required": false,
       "default": true,
+      "title": "",
       "type": "checkbox"
     },
     {
-      "description": "Go back to root search after killing a process",
-      "label": "Go back to Root Search",
+      "description": "Go back to root search after killing a process.",
+      "label": "Go Back to Root Search",
       "name": "goToRootAfterKill",
       "required": false,
       "default": false,
+      "title": "",
       "type": "checkbox"
     },
     {
-      "description": "Refresh duration in milliseconds (min: 1000ms; 0 to disable auto-refresh).",
-      "label": "Refresh Duration",
-      "name": "refreshDuration",
+      "description": "Skip confirmation dialogs when killing processes.",
+      "label": "Never Ask for Confirmation",
+      "name": "skipConfirmation",
       "required": false,
-      "title": "Refresh Duration",
-      "type": "textfield",
-      "default": "3000",
-      "placeholder": "3000"
+      "default": false,
+      "title": "Confirmation",
+      "type": "checkbox"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.90.0",
-    "pretty-bytes": "^6.1.1"
+    "@raycast/api": "^1.104.1",
+    "pretty-bytes": "^7.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "18.18.4",
-    "@types/react": "18.2.37",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -755,9 +753,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+  }
 }

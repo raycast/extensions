@@ -17,11 +17,11 @@ const timesheetSchema = z.object({
   project: z.number(),
   user: z.number(),
   id: z.number(),
-  begin: z.string(), // Date
-  end: z.string().nullable(), // Date
-  duration: z.number(), // in seconds
-  description: z.string().nullable(), // Can be null
-  rate: z.number(), // total sum
+  begin: z.string(),
+  end: z.string().nullable(),
+  duration: z.number(),
+  description: z.string().nullable(),
+  rate: z.number(),
   internalRate: z.number(),
   exported: z.boolean(),
   billable: z.boolean(),
@@ -79,10 +79,33 @@ export const validateTimesheets = (data: unknown) => {
   return validationResponse.success ? validationResponse.data : [];
 };
 
+const calculateTotalSeconds = (timesheets: z.infer<typeof timesheetSchema>[]) => {
+  return timesheets.reduce((r, t) => {
+    if (t.end === null) {
+      return r + dayjs().diff(dayjs(t.begin), "second");
+    }
+    return r + t.duration;
+  }, 0);
+};
+
 export const getLoggedHoursToday = async () => {
   const startDate = `${dayjs().format("YYYY-MM-DD")}T00:00:00`;
   const responseData = await fetch(`timesheets?begin=${startDate}`);
-  const totalSeconds = validateTimesheets(responseData).reduce((r, t) => r + t.duration, 0);
+  const totalSeconds = calculateTotalSeconds(validateTimesheets(responseData));
+  return convertToHours(totalSeconds);
+};
+
+export const getLoggedHoursThisWeek = async () => {
+  const startDate = `${dayjs().startOf("week").format("YYYY-MM-DD")}T00:00:00`;
+  const responseData = await fetch(`timesheets?begin=${startDate}`);
+  const totalSeconds = calculateTotalSeconds(validateTimesheets(responseData));
+  return convertToHours(totalSeconds);
+};
+
+export const getLoggedHoursThisMonth = async () => {
+  const startDate = `${dayjs().startOf("month").format("YYYY-MM-DD")}T00:00:00`;
+  const responseData = await fetch(`timesheets?begin=${startDate}`);
+  const totalSeconds = calculateTotalSeconds(validateTimesheets(responseData));
   return convertToHours(totalSeconds);
 };
 
@@ -102,3 +125,38 @@ export const saveTimesheet = async (body: TimesheetPayload) => {
     body: JSON.stringify(body),
   });
 };
+
+export const getActiveTimesheet = async () => {
+  const responseData = await fetch(`timesheets?active=1`);
+  const timesheets = validateTimesheets(responseData);
+  return timesheets.length > 0 ? timesheets[0] : null;
+};
+
+export const stopTimesheet = async (id: number) => {
+  await fetch(`timesheets/${id}/stop`, {
+    method: "PATCH",
+  });
+};
+
+export const getRecentTimesheets = async (days: number = 7) => {
+  const startDate = `${dayjs().subtract(days, "day").format("YYYY-MM-DD")}T00:00:00`;
+  const responseData = await fetch(`timesheets?begin=${startDate}&order=DESC&orderBy=begin`);
+  return validateTimesheets(responseData);
+};
+
+export const updateTimesheet = async (id: number, body: Partial<TimesheetPayload>) => {
+  await fetch(`timesheets/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+};
+
+export const deleteTimesheet = async (id: number) => {
+  await fetch(`timesheets/${id}`, {
+    method: "DELETE",
+  });
+};
+
+export type Timesheet = z.infer<typeof timesheetSchema>;
+export type Project = z.infer<typeof projectSchema>;
+export type Activity = z.infer<typeof activitySchema>;

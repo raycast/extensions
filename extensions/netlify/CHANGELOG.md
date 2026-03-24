@@ -1,5 +1,9 @@
 # Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [✨AI: View Env & DNS] - 2025-03-11
 
 - AI Tools to:

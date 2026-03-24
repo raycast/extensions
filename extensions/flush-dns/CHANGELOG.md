@@ -1,5 +1,10 @@
 # Flush DNS Changelog
 
+## [macOS 26+ Support] - 2026-01-04
+
+- Added support for macOS Tahoe (26) and later versions.
+- Updated dependencies
+
 ## [Windows Support] - 2025-06-17
 
 - Added Windows support.

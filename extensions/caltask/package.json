@@ -1,0 +1,172 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "caltask",
+  "title": "CalTask",
+  "description": "Track tasks with timer, manage calendar events, AI-powered search, and time reporting",
+  "icon": "extension-icon.png",
+  "author": "dennis_cheng",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "task-history",
+      "title": "CalTask",
+      "subtitle": "Calendar",
+      "description": "Timer, upcoming events, recent history, AI search, and event management",
+      "mode": "view"
+    },
+    {
+      "name": "task-report",
+      "title": "CalTask Report",
+      "subtitle": "Calendar",
+      "description": "Generate time reports from Mac Calendar events",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "CalTask Menu Bar",
+      "subtitle": "Calendar",
+      "description": "Show current task timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "manage-calendars",
+      "title": "Manage Calendars",
+      "subtitle": "CalTask",
+      "description": "Toggle visible calendars and set default calendar",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "aiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Model",
+      "description": "AI model to use for smart features",
+      "default": "anthropic-claude-4-5-haiku",
+      "data": [
+        {
+          "title": "Anthropic Claude 4.5 Haiku",
+          "value": "anthropic-claude-4-5-haiku"
+        },
+        {
+          "title": "Anthropic Claude 4 Sonnet",
+          "value": "anthropic-claude-sonnet-4"
+        },
+        {
+          "title": "Anthropic Claude 4.5 Sonnet",
+          "value": "anthropic-claude-sonnet-4-5"
+        },
+        {
+          "title": "Anthropic Claude 4 Opus",
+          "value": "anthropic-claude-opus-4"
+        },
+        {
+          "title": "OpenAI GPT-4o",
+          "value": "openai-gpt-4o"
+        },
+        {
+          "title": "OpenAI GPT-4o mini",
+          "value": "openai-gpt-4o-mini"
+        },
+        {
+          "title": "OpenAI GPT-4.1",
+          "value": "openai-gpt-4.1"
+        },
+        {
+          "title": "OpenAI GPT-4.1 mini",
+          "value": "openai-gpt-4.1-mini"
+        },
+        {
+          "title": "Google Gemini 2.5 Flash",
+          "value": "google-gemini-2.5-flash"
+        },
+        {
+          "title": "Google Gemini 2.5 Pro",
+          "value": "google-gemini-2.5-pro"
+        },
+        {
+          "title": "Perplexity Sonar",
+          "value": "perplexity-sonar"
+        }
+      ]
+    },
+    {
+      "name": "upcomingDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Upcoming Events Days",
+      "description": "Number of days ahead to show in Upcoming section",
+      "default": "7"
+    },
+    {
+      "name": "recentHistoryDays",
+      "type": "textfield",
+      "required": false,
+      "title": "Recent History Days",
+      "description": "Number of days back to show in Recent History",
+      "default": "30"
+    },
+    {
+      "name": "defaultEventDuration",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Event Duration",
+      "description": "Default duration for new events without an end time",
+      "default": "60",
+      "data": [
+        {
+          "title": "15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "45 minutes",
+          "value": "45"
+        },
+        {
+          "title": "60 minutes",
+          "value": "60"
+        },
+        {
+          "title": "90 minutes",
+          "value": "90"
+        },
+        {
+          "title": "120 minutes",
+          "value": "120"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

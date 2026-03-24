@@ -4,17 +4,9 @@ import {
   OpenExtensionByIDInBrowserAction,
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
-} from "./extension-actions";
+} from "./lib/extension-actions";
 import { Extension, getLocalExtensions } from "./lib/vscode";
-import { getErrorMessage } from "./utils";
-
-function OpenExtensionInVSCodeAction(props: { extension: Extension }) {
-  return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
-}
-
-function OpenExtensionInBrowserAction(props: { extension: Extension }) {
-  return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
-}
+import { getErrorMessage } from "./lib/utils";
 
 function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }) {
   const e = props.extension;
@@ -33,8 +25,8 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenExtensionInVSCodeAction extension={e} />
-            <OpenExtensionInBrowserAction extension={e} />
+            <OpenExtensionByIDInVSCodeAction extensionID={e.id} />
+            <OpenExtensionByIDInBrowserAction extensionID={e.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard

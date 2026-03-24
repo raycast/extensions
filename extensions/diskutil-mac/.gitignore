@@ -10,7 +10,8 @@ raycast-env.d.ts
 .DS_Store
 
 # old stuff
-*/.old/*
+*/.old*
 
 # local dev files
 testdata/*
+metadata/.old2

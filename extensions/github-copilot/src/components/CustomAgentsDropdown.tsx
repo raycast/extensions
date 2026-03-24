@@ -1,12 +1,14 @@
-import { Form } from "@raycast/api";
+import { Form, Icon } from "@raycast/api";
 import { useMemo, useEffect, useRef } from "react";
 import { useCustomAgents } from "../hooks/useCustomAgents";
 
-export function CustomAgentsDropdown(props: {
-  itemProps: Form.ItemProps<string>;
-  repository?: string;
-  onLoadingChange?: (isLoading: boolean) => void;
-}) {
+export function CustomAgentsDropdown(
+  props: Readonly<{
+    itemProps: Form.ItemProps<string>;
+    repository?: string;
+    onLoadingChange?: (isLoading: boolean) => void;
+  }>,
+) {
   const { customAgents, isLoading } = useCustomAgents(props.repository ?? "");
 
   const { onChange, value, ...restItemProps } = props.itemProps;
@@ -53,6 +55,9 @@ export function CustomAgentsDropdown(props: {
       value={controlledValue}
       {...restItemProps}
     >
+      {isLoading && customAgents.length === 0 && (
+        <Form.Dropdown.Item title="Loading..." value="" icon={Icon.CircleProgress} />
+      )}
       {customAgents.map((agent) => (
         <Form.Dropdown.Item key={`${props.repository}-${agent.name}`} title={agent.display_name} value={agent.name} />
       ))}

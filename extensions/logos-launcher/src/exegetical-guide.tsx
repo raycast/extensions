@@ -1,6 +1,8 @@
 import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
 import { useCallback, useMemo, useState } from "react";
 import { BIBLE_BOOKS, type BookMetadata } from "./data/bible-books";
+import { LOGOS_BUNDLE_ID } from "./logos/constants";
+import { encodeForRefLy } from "./utils/encodeForRefLy";
 
 type Preferences = {
   guideTitle?: string;
@@ -8,7 +10,6 @@ type Preferences = {
 };
 
 const DEFAULT_GUIDE_TITLE = "My Exegetical Guide";
-const LOGOS_BUNDLE_ID = "com.logos.desktop.logos";
 const DEFAULT_REFERENCE_PREFIX = "BibleESV";
 
 export default function Command() {
@@ -125,10 +126,6 @@ function buildRefLyUri(title: string, refParam: string | undefined, query: strin
     return `https://ref.ly/logos4/Guide?t=${encodedTitle}&ref=${encodeForRefLy(refParam)}`;
   }
   return `https://ref.ly/logos4/Guide?t=${encodedTitle}&q=${encodeForRefLy(query)}`;
-}
-
-function encodeForRefLy(value: string) {
-  return encodeURIComponent(value).replace(/%20/g, "+");
 }
 
 function buildCommandUris(command: string): string[] {

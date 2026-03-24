@@ -8,7 +8,7 @@
     <img alt="" src="https://img.shields.io/badge/Follow%20@raycast-black.svg?style=for-the-badge&logo=X">
   </a>
   <a aria-label="Join the community on Slack" href="https://raycast.com/community">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Slack">
+    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Raycast&logoColor=fff">
   </a>
 </p>
 

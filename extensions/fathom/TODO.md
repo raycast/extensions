@@ -8,3 +8,4 @@
 - [X] Add refresh cache action for Search command
 - [X] Adjust cache invalidation logic
 - [X] Update Fathom SDK
+- [X] Make sure full text search in search-meetings.tsx works correctly (e.g. add an option to include transcriptions in search context)

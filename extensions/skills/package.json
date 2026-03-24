@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skills",
+  "title": "Skills",
+  "description": "Browse, search, and manage AI agent skills from Skills",
+  "icon": "icon.png",
+  "author": "keito4",
+  "contributors": [
+    "DaleSeo",
+    "dominik_lukes",
+    "raulg",
+    "elwin_liu",
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "subtitle": "Skills",
+      "description": "Search for agent skills",
+      "mode": "view"
+    },
+    {
+      "name": "trending-skills",
+      "title": "Trending Skills",
+      "subtitle": "Skills",
+      "description": "Browse trending skills",
+      "mode": "view"
+    },
+    {
+      "name": "manage-skills",
+      "title": "Manage Skills",
+      "subtitle": "Skills",
+      "description": "View and remove installed skills",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customNpxPath",
+      "title": "Custom npx Path",
+      "description": "Optional custom `npx` path override for cases when the extension cannot detect it automatically.",
+      "placeholder": "e.g., /opt/homebrew/bin/npx or ~/.local/bin/npx",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "githubToken",
+      "title": "GitHub Personal Access Token",
+      "description": "Optional token to increase the GitHub API rate limit from 60 to 5,000 requests/hour.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.5",
+    "@raycast/utils": "2.2.3",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "semver": "^7.7.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.2.3",
+    "@types/react": "^19.2.13",
+    "@types/semver": "^7.7.1",
+    "eslint": "^10.0.0",
+    "eslint-plugin-n": "^17.24.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

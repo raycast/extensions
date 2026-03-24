@@ -1,6 +1,6 @@
-# Atlassian Data Center
+# Atlassian Data Center (Self-Hosted)
 
-A Raycast extension for Atlassian Data Center products to search and manage Confluence and Jira, with CQL/JQL syntax support.
+A Raycast extension for self-hosted Atlassian products to search and manage Confluence contents and Jira issues, with CQL/JQL syntax support.
 
 ## ⚙️ Setup Required
 
@@ -11,12 +11,18 @@ This extension integrates with your Atlassian applications using Personal Access
 
 On first use, you'll need to provide:
 
-- **Confluence Base URL**: Base URL of your Confluence Data Center instance, e.g. `https://confluence.example.com`
+- **Confluence Base URL**: Base URL of your Confluence site, e.g. `https://confluence.example.com`
 - **Confluence PAT**: Create it from Confluence → Profile → Personal Access Tokens → Create token
-- **Jira Base URL**: Base URL of your Jira Data Center instance, e.g. `https://jira.example.com`
+- **Jira Base URL**: Base URL of your Jira site, e.g. `https://jira.example.com`
 - **Jira PAT**: Create it from Jira → Profile → Personal Access Tokens → Create token
 
+> [!NOTE]
+> All configurations above are required. If you only use Confluence or Jira, you can enter any non-empty value for the unused service's configuration.
+
 ## ✨ Features
+
+> [!TIP]
+> Due to limited display space in Raycast List, additional information is available in tooltips. Hover over icons, titles, subtitles, timestamps, avatars, and other elements to view details.
 
 ### 📚 Confluence
 

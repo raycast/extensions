@@ -14,6 +14,7 @@ import {
 import { useLocalStorage } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { formatHours, isAxiosError, newTimeEntry, useCompany, useMyProjects } from "./services/harvest";
+import { parseDuration } from "./services/parseDuration";
 import { HarvestTimeEntry } from "./services/responseTypes";
 import dayjs from "dayjs";
 import isToday from "dayjs/plugin/isToday";
@@ -39,8 +40,17 @@ export default function Command({
   const [taskId, setTaskId] = useState<string | null>(entry?.task.id.toString() ?? null);
   const [notes, setNotes] = useState<string>(entry?.notes ?? "");
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
+  const [hoursError, setHoursError] = useState<string | undefined>();
   const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
-  const { showClient = false } = getPreferenceValues<{ showClient?: boolean }>();
+  const {
+    showClient = false,
+    timeFormat = "company",
+    showClientInProject = false,
+  } = getPreferenceValues<{
+    showClient?: boolean;
+    timeFormat?: "company" | "hours_minutes" | "decimal";
+    showClientInProject?: boolean;
+  }>();
 
   // Use useLocalStorage for persisting last used project/task
   const {
@@ -71,9 +81,11 @@ export default function Command({
   }, [error]);
 
   const groupedProjects = useMemo(() => {
-    // return an array of arrays thats grouped by client to easily group them via a map function
+    // Group by client, then sort clients and projects alphabetically
     const grouped = groupBy(projects, (o) => o.client.id);
-    return Object.values(grouped);
+    return Object.values(grouped)
+      .sort((a, b) => a[0].client.name.localeCompare(b[0].client.name))
+      .map((group) => group.sort((a, b) => a.project.name.localeCompare(b.project.name)));
   }, [projects]);
 
   useEffect(() => {
@@ -104,10 +116,14 @@ export default function Command({
       return;
     }
 
-    setTimeFormat(hours);
+    const parsedHours = formatDuration(hours);
+    if (hours && !parsedHours) {
+      showToast({ style: Toast.Style.Failure, title: "Invalid Duration" });
+      return;
+    }
     const spentDate = isDate(values.spent_date) ? values.spent_date : viewDate;
 
-    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
+    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !parsedHours)
       if (
         !(await confirmAlert({
           icon: Icon.ExclamationMark,
@@ -124,6 +140,14 @@ export default function Command({
     await toast.show();
 
     const data = omitBy(values, isEmpty);
+    // Always include notes when editing to allow clearing
+    if (entry?.id && !data.notes) {
+      data.notes = "";
+    }
+    // Use parsed hours instead of raw form value
+    if (parsedHours) {
+      data.hours = parsedHours;
+    }
     const timeEntry = await newTimeEntry(
       {
         ...data,
@@ -158,37 +182,33 @@ export default function Command({
     return project ? project.task_assignments : [];
   }, [projects, projectId]);
 
-  function setTimeFormat(value?: string) {
-    // This function can be called directly from the onBlur event to better match the Harvest app behavior when it exists
-    if (!value) return;
+  function formatDuration(value?: string): string | undefined {
+    if (!value) {
+      setHoursError(undefined);
+      return undefined;
+    }
 
-    if (company?.time_format === "decimal") {
-      if (value.includes(":")) {
-        const parsed = value.split(":");
-        const hour = parseInt(parsed[0]);
-        const minute = parseInt(parsed[1]);
-        if (!isNaN(hour)) {
-          if (!isNaN(minute)) {
-            value = parseFloat(`${hour}.${minute / 60}`)
-              .toFixed(2)
-              .toString();
-          } else {
-            value = hour.toString();
-          }
-        }
-      }
+    const duration = parseDuration(value);
+    if (!duration) {
+      setHoursError("Invalid duration");
+      return undefined;
     }
-    if (company?.time_format === "hours_minutes") {
-      if (!value.includes(":")) {
-        const parsed = parseFloat(value);
-        if (!isNaN(parsed)) {
-          const hour = Math.floor(parsed);
-          const minute = parseInt(((parsed - hour) * 60).toFixed(0));
-          value = `${hour}:${minute < 10 ? "0" : ""}${minute}`;
-        }
-      }
+
+    setHoursError(undefined);
+    const totalMinutes = Math.round(duration.asMinutes());
+    const useHoursMinutes =
+      timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes");
+
+    let formatted: string;
+    if (useHoursMinutes) {
+      const h = Math.floor(totalMinutes / 60);
+      const m = totalMinutes % 60;
+      formatted = `${h}:${m < 10 ? "0" : ""}${m}`;
+    } else {
+      formatted = (totalMinutes / 60).toFixed(2);
     }
-    return setHours(value);
+    setHours(formatted);
+    return formatted;
   }
 
   return (
@@ -227,7 +247,9 @@ export default function Command({
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );
@@ -260,9 +282,15 @@ export default function Command({
         <Form.TextField
           id="hours"
           title="Duration"
-          placeholder="Enter numbers, or blank to start a new timer"
+          placeholder="Leave blank to start a new timer"
           value={hours}
-          onChange={setHours}
+          error={hoursError}
+          onChange={(v) => {
+            setHours(v);
+            setHoursError(undefined);
+          }}
+          onBlur={(e) => formatDuration(e.target.value)}
+          info="You can enter numbers (decimal or h:mm format), simple durations (e.g. 1h30m), or simple time math (e.g. 1+15m-5m)"
         />
       )}
       <Form.DatePicker

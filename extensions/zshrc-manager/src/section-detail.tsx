@@ -1,13 +1,11 @@
-import { Detail, List, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
-import { LogicalSection } from "./lib/parse-zshrc";
+import type React from "react";
+import type { ReactNode } from "react";
+import { Detail, List, ActionPanel, Action, Icon } from "@raycast/api";
+import type { LogicalSection } from "./lib/parse-zshrc";
 import { MODERN_COLORS } from "./constants";
-import { ReactNode, ReactElement } from "react";
 import { getZshrcPath } from "./lib/zsh";
-import EditAlias, { aliasConfig } from "./edit-alias";
-import EditExport, { exportConfig } from "./edit-export";
-import { truncateValueMiddle } from "./utils/formatters";
 import { parseSectionContent, applyContentFilter, generateSectionMarkdown } from "./utils/markdown";
-import { deleteItem } from "./lib/delete-item";
+import { AliasListItem, ExportListItem, OtherLineListItem } from "./components";
 
 interface SectionDetailProps {
   /** The section to display */
@@ -73,8 +71,7 @@ interface SectionDetailListProps {
   /** Custom actions to override default actions */
   actions?: ReactNode;
   /** Search bar accessory (dropdown) */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  searchBarAccessory?: ReactElement<any> | null;
+  searchBarAccessory?: React.ReactElement | null;
 }
 
 /**
@@ -87,7 +84,6 @@ export function SectionDetailList({
   actions,
   searchBarAccessory,
 }: SectionDetailListProps) {
-  const { pop } = useNavigation();
   const content = parseSectionContent(section);
   const filtered = applyContentFilter(content, filterType);
   const { aliases, exports, otherLines } = filtered;
@@ -95,6 +91,16 @@ export function SectionDetailList({
   const hasAliases = aliases.length > 0;
   const hasExports = exports.length > 0;
   const hasOtherContent = otherLines.length > 0;
+
+  // Shared handler for delete actions
+  // Note: Delete operations are handled by the individual list item components
+  // (AliasListItem, ExportListItem) through their own delete actions.
+  // This callback is passed to enable child components to notify the parent
+  // that a refresh may be needed, but currently the parent doesn't subscribe
+  // to changes dynamically - users refresh manually with Cmd+R.
+  const handleDelete = () => {
+    // No-op: Parent component handles refresh via manual action
+  };
 
   // Build content based on display mode
   const renderContent = () => {
@@ -167,280 +173,50 @@ ${section.content}
             </List.Section>
 
             {hasAliases && (
-              <List.Section title="🖥️ Aliases">
+              <List.Section title="Aliases">
                 {aliases.map((alias, index) => (
-                  <List.Item
+                  <AliasListItem
                     key={`alias-${alias.name}-${index}`}
-                    title={alias.name}
-                    subtitle={truncateValueMiddle(alias.command, 60)}
-                    icon={{
-                      source: Icon.Terminal,
-                      tintColor: MODERN_COLORS.success,
-                    }}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
-# Alias: \`${alias.name}\`
-
-**Command:** \`${alias.command}\`
-
-**Full Definition:**
-\`\`\`zsh
-alias ${alias.name}='${alias.command}'
-\`\`\`
-                        `}
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="Edit Alias"
-                          target={
-                            <EditAlias
-                              existingName={alias.name}
-                              existingCommand={alias.command}
-                              sectionLabel={section.label}
-                            />
-                          }
-                          icon={Icon.Pencil}
-                          shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        />
-                        <Action
-                          title="Delete Alias"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                          onAction={async () => {
-                            try {
-                              await deleteItem(alias.name, aliasConfig);
-                              pop();
-                            } catch {
-                              // Error already shown in deleteItem
-                            }
-                          }}
-                        />
-                        <Action.Push
-                          title="View Alias Detail"
-                          target={
-                            <Detail
-                              navigationTitle={`Alias: ${alias.name}`}
-                              markdown={`
-# Alias: \`${alias.name}\`
-
-**Command:** \`${alias.command}\`
-
-**Full Definition:**
-\`\`\`zsh
-alias ${alias.name}='${alias.command}'
-\`\`\`
-
-**Usage:**
-Type \`${alias.name}\` in your terminal to execute: \`${alias.command}\`
-                              `}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CopyToClipboard
-                                    title="Copy Alias"
-                                    content={`alias ${alias.name}='${alias.command}'`}
-                                  />
-                                  <Action.CopyToClipboard title="Copy Command Only" content={alias.command} />
-                                  <Action.CopyToClipboard title="Copy Name Only" content={alias.name} />
-                                </ActionPanel>
-                              }
-                            />
-                          }
-                          icon={Icon.Eye}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Alias"
-                          content={`alias ${alias.name}='${alias.command}'`}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Command Only"
-                          content={alias.command}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Name Only"
-                          content={alias.name}
-                          shortcut={{ modifiers: ["cmd", "alt"], key: "c" }}
-                        />
-                      </ActionPanel>
-                    }
+                    alias={alias}
+                    sectionLabel={section.label}
+                    index={index}
+                    onDelete={handleDelete}
                   />
                 ))}
               </List.Section>
             )}
 
             {hasExports && (
-              <List.Section title="📦 Exports">
+              <List.Section title="Exports">
                 {exports.map((exp, index) => (
-                  <List.Item
+                  <ExportListItem
                     key={`export-${exp.variable}-${index}`}
-                    title={exp.variable}
-                    subtitle={truncateValueMiddle(exp.value, 60)}
-                    icon={{
-                      source: Icon.Box,
-                      tintColor: MODERN_COLORS.primary,
-                    }}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
-# Export: \`${exp.variable}\`
-
-**Value:** \`${exp.value}\`
-
-**Full Definition:**
-\`\`\`zsh
-export ${exp.variable}=${exp.value}
-\`\`\`
-                        `}
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="Edit Export"
-                          target={
-                            <EditExport
-                              existingVariable={exp.variable}
-                              existingValue={exp.value}
-                              sectionLabel={section.label}
-                            />
-                          }
-                          icon={Icon.Pencil}
-                          shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        />
-                        <Action
-                          title="Delete Export"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                          onAction={async () => {
-                            try {
-                              await deleteItem(exp.variable, exportConfig);
-                              pop();
-                            } catch {
-                              // Error already shown in deleteItem
-                            }
-                          }}
-                        />
-                        <Action.Push
-                          title="View Export Detail"
-                          target={
-                            <Detail
-                              navigationTitle={`Export: ${exp.variable}`}
-                              markdown={`
-# Export: \`${exp.variable}\`
-
-**Value:** \`${exp.value}\`
-
-**Full Definition:**
-\`\`\`zsh
-export ${exp.variable}=${exp.value}
-\`\`\`
-
-**Usage:**
-This environment variable will be available to all child processes.
-                              `}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CopyToClipboard
-                                    title="Copy Export"
-                                    content={`export ${exp.variable}=${exp.value}`}
-                                  />
-                                  <Action.CopyToClipboard title="Copy Value Only" content={exp.value} />
-                                  <Action.CopyToClipboard title="Copy Variable Only" content={exp.variable} />
-                                </ActionPanel>
-                              }
-                            />
-                          }
-                          icon={Icon.Eye}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Export"
-                          content={`export ${exp.variable}=${exp.value}`}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Value Only"
-                          content={exp.value}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Variable Only"
-                          content={exp.variable}
-                          shortcut={{ modifiers: ["cmd", "alt"], key: "c" }}
-                        />
-                      </ActionPanel>
-                    }
+                    exportItem={exp}
+                    sectionLabel={section.label}
+                    index={index}
+                    onDelete={handleDelete}
                   />
                 ))}
               </List.Section>
             )}
 
             {hasOtherContent && (
-              <List.Section title="⚙️ Other Configuration">
-                {otherLines.map((line, index) => (
-                  <List.Item
-                    key={`other-${index}`}
-                    title={truncateValueMiddle(line, 80)}
-                    icon={{
-                      source: Icon.Code,
-                      tintColor: MODERN_COLORS.neutral,
-                    }}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
-# Configuration Line ${section.startLine + index}
-
-**Content:**
-\`\`\`zsh
-${line}
-\`\`\`
-
-**Context:**
-This line is part of the "${section.label}" section in your zshrc file.
-                        `}
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="View Line Detail"
-                          target={
-                            <Detail
-                              navigationTitle={`Line ${section.startLine + index}`}
-                              markdown={`
-# Configuration Line ${section.startLine + index}
-
-**Content:**
-\`\`\`zsh
-${line}
-\`\`\`
-
-**Context:**
-This line is part of the "${section.label}" section in your zshrc file.
-                              `}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CopyToClipboard title="Copy Line" content={line} />
-                                </ActionPanel>
-                              }
-                            />
-                          }
-                          icon={Icon.Eye}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Line"
-                          content={line}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                ))}
+              <List.Section title="Other Configuration">
+                {otherLines.map((line, index) => {
+                  // Calculate actual line number by finding position in original content
+                  const sectionLines = section.content.split("\n");
+                  const lineIndex = sectionLines.findIndex((l) => l === line);
+                  const actualLineNumber = lineIndex >= 0 ? section.startLine + lineIndex : section.startLine + index;
+                  return (
+                    <OtherLineListItem
+                      key={`other-${index}`}
+                      line={line}
+                      lineNumber={actualLineNumber}
+                      sectionLabel={section.label}
+                      index={index}
+                    />
+                  );
+                })}
               </List.Section>
             )}
           </>
@@ -490,280 +266,50 @@ ${section.content.split("\n").slice(0, 10).join("\n")}${section.content.split("\
             </List.Section>
 
             {hasAliases && (
-              <List.Section title="🖥️ Aliases">
+              <List.Section title="Aliases">
                 {aliases.map((alias, index) => (
-                  <List.Item
+                  <AliasListItem
                     key={`alias-${alias.name}-${index}`}
-                    title={alias.name}
-                    subtitle={truncateValueMiddle(alias.command, 60)}
-                    icon={{
-                      source: Icon.Terminal,
-                      tintColor: MODERN_COLORS.success,
-                    }}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
-# Alias: \`${alias.name}\`
-
-**Command:** \`${alias.command}\`
-
-**Full Definition:**
-\`\`\`zsh
-alias ${alias.name}='${alias.command}'
-\`\`\`
-                        `}
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="Edit Alias"
-                          target={
-                            <EditAlias
-                              existingName={alias.name}
-                              existingCommand={alias.command}
-                              sectionLabel={section.label}
-                            />
-                          }
-                          icon={Icon.Pencil}
-                          shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        />
-                        <Action
-                          title="Delete Alias"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                          onAction={async () => {
-                            try {
-                              await deleteItem(alias.name, aliasConfig);
-                              pop();
-                            } catch {
-                              // Error already shown in deleteItem
-                            }
-                          }}
-                        />
-                        <Action.Push
-                          title="View Alias Detail"
-                          target={
-                            <Detail
-                              navigationTitle={`Alias: ${alias.name}`}
-                              markdown={`
-# Alias: \`${alias.name}\`
-
-**Command:** \`${alias.command}\`
-
-**Full Definition:**
-\`\`\`zsh
-alias ${alias.name}='${alias.command}'
-\`\`\`
-
-**Usage:**
-Type \`${alias.name}\` in your terminal to execute: \`${alias.command}\`
-                              `}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CopyToClipboard
-                                    title="Copy Alias"
-                                    content={`alias ${alias.name}='${alias.command}'`}
-                                  />
-                                  <Action.CopyToClipboard title="Copy Command Only" content={alias.command} />
-                                  <Action.CopyToClipboard title="Copy Name Only" content={alias.name} />
-                                </ActionPanel>
-                              }
-                            />
-                          }
-                          icon={Icon.Eye}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Alias"
-                          content={`alias ${alias.name}='${alias.command}'`}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Command Only"
-                          content={alias.command}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Name Only"
-                          content={alias.name}
-                          shortcut={{ modifiers: ["cmd", "alt"], key: "c" }}
-                        />
-                      </ActionPanel>
-                    }
+                    alias={alias}
+                    sectionLabel={section.label}
+                    index={index}
+                    onDelete={handleDelete}
                   />
                 ))}
               </List.Section>
             )}
 
             {hasExports && (
-              <List.Section title="📦 Exports">
+              <List.Section title="Exports">
                 {exports.map((exp, index) => (
-                  <List.Item
+                  <ExportListItem
                     key={`export-${exp.variable}-${index}`}
-                    title={exp.variable}
-                    subtitle={truncateValueMiddle(exp.value, 60)}
-                    icon={{
-                      source: Icon.Box,
-                      tintColor: MODERN_COLORS.primary,
-                    }}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
-# Export: \`${exp.variable}\`
-
-**Value:** \`${exp.value}\`
-
-**Full Definition:**
-\`\`\`zsh
-export ${exp.variable}=${exp.value}
-\`\`\`
-                        `}
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="Edit Export"
-                          target={
-                            <EditExport
-                              existingVariable={exp.variable}
-                              existingValue={exp.value}
-                              sectionLabel={section.label}
-                            />
-                          }
-                          icon={Icon.Pencil}
-                          shortcut={{ modifiers: ["cmd"], key: "e" }}
-                        />
-                        <Action
-                          title="Delete Export"
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                          onAction={async () => {
-                            try {
-                              await deleteItem(exp.variable, exportConfig);
-                              pop();
-                            } catch {
-                              // Error already shown in deleteItem
-                            }
-                          }}
-                        />
-                        <Action.Push
-                          title="View Export Detail"
-                          target={
-                            <Detail
-                              navigationTitle={`Export: ${exp.variable}`}
-                              markdown={`
-# Export: \`${exp.variable}\`
-
-**Value:** \`${exp.value}\`
-
-**Full Definition:**
-\`\`\`zsh
-export ${exp.variable}=${exp.value}
-\`\`\`
-
-**Usage:**
-This environment variable will be available to all child processes.
-                              `}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CopyToClipboard
-                                    title="Copy Export"
-                                    content={`export ${exp.variable}=${exp.value}`}
-                                  />
-                                  <Action.CopyToClipboard title="Copy Value Only" content={exp.value} />
-                                  <Action.CopyToClipboard title="Copy Variable Only" content={exp.variable} />
-                                </ActionPanel>
-                              }
-                            />
-                          }
-                          icon={Icon.Eye}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Export"
-                          content={`export ${exp.variable}=${exp.value}`}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Value Only"
-                          content={exp.value}
-                          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Variable Only"
-                          content={exp.variable}
-                          shortcut={{ modifiers: ["cmd", "alt"], key: "c" }}
-                        />
-                      </ActionPanel>
-                    }
+                    exportItem={exp}
+                    sectionLabel={section.label}
+                    index={index}
+                    onDelete={handleDelete}
                   />
                 ))}
               </List.Section>
             )}
 
             {hasOtherContent && (
-              <List.Section title="⚙️ Other Configuration">
-                {otherLines.map((line, index) => (
-                  <List.Item
-                    key={`other-${index}`}
-                    title={truncateValueMiddle(line, 80)}
-                    icon={{
-                      source: Icon.Code,
-                      tintColor: MODERN_COLORS.neutral,
-                    }}
-                    detail={
-                      <List.Item.Detail
-                        markdown={`
-# Configuration Line ${section.startLine + index}
-
-**Content:**
-\`\`\`zsh
-${line}
-\`\`\`
-
-**Context:**
-This line is part of the "${section.label}" section in your zshrc file.
-                        `}
-                      />
-                    }
-                    actions={
-                      <ActionPanel>
-                        <Action.Push
-                          title="View Line Detail"
-                          target={
-                            <Detail
-                              navigationTitle={`Line ${section.startLine + index}`}
-                              markdown={`
-# Configuration Line ${section.startLine + index}
-
-**Content:**
-\`\`\`zsh
-${line}
-\`\`\`
-
-**Context:**
-This line is part of the "${section.label}" section in your zshrc file.
-                              `}
-                              actions={
-                                <ActionPanel>
-                                  <Action.CopyToClipboard title="Copy Line" content={line} />
-                                </ActionPanel>
-                              }
-                            />
-                          }
-                          icon={Icon.Eye}
-                        />
-                        <Action.CopyToClipboard
-                          title="Copy Line"
-                          content={line}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        />
-                      </ActionPanel>
-                    }
-                  />
-                ))}
+              <List.Section title="Other Configuration">
+                {otherLines.map((line, index) => {
+                  // Calculate actual line number by finding position in original content
+                  const sectionLines = section.content.split("\n");
+                  const lineIndex = sectionLines.findIndex((l) => l === line);
+                  const actualLineNumber = lineIndex >= 0 ? section.startLine + lineIndex : section.startLine + index;
+                  return (
+                    <OtherLineListItem
+                      key={`other-${index}`}
+                      line={line}
+                      lineNumber={actualLineNumber}
+                      sectionLabel={section.label}
+                      index={index}
+                    />
+                  );
+                })}
               </List.Section>
             )}
           </>
@@ -776,7 +322,7 @@ This line is part of the "${section.label}" section in your zshrc file.
       navigationTitle={`${section.label} - Section Detail`}
       isShowingDetail={true}
       actions={actions}
-      searchBarAccessory={searchBarAccessory}
+      searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
     >
       {renderContent()}
     </List>

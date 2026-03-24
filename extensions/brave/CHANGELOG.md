@@ -1,5 +1,10 @@
 # Brave Changelog
 
+## [Bookmark Folder Search] - 2026-01-05
+
+- Added support for searching bookmark folders.
+- Added an action to open all bookmarks in a folder simultaneously.
+
 ## [Bookmarklets Support] - 2025-12-19
 
 - Added support for executing bookmarklets

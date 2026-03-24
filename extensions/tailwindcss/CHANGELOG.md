@@ -1,5 +1,18 @@
 # Tailwind CSS Changelog
 
+## [Replace color-convert with culori for dynamic OKLCH conversion] - 2026-03-06
+
+- Replace `color-convert` dependency with `culori` for color format conversions
+- Add OKLCH option in Search Colors
+
+## [Update keyboard shortcuts] - 2026-01-05
+
+- Update `Shortcut`s to be cross-platform
+- Update `metadata` images to show updated UI
+- Add **README**
+- Modernize extension to use latest Raycast API
+
+
 ## [Add default action preference for Search Colors] - 2025-06-24
 - Add preference to configure the default action when selecting a color
 - Add more copy-to-clipboard actions

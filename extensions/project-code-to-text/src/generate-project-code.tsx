@@ -15,8 +15,15 @@ import {
 import { useState, useEffect, useCallback } from "react";
 import path from "path";
 import fs from "fs/promises";
-import { generateProjectCodeString } from "./fileProcessor";
-import { DEFAULT_MAX_FILE_SIZE_BYTES, MIN_MAX_FILE_SIZE_MB, MAX_MAX_FILE_SIZE_MB } from "./constants";
+import { generateProjectCodeToFile } from "./fileProcessor";
+import {
+  DEFAULT_MAX_FILE_SIZE_BYTES,
+  MIN_MAX_FILE_SIZE_MB,
+  MAX_MAX_FILE_SIZE_MB,
+  CLIPBOARD_MAX_SIZE_BYTES,
+} from "./constants";
+import { useProcessingMode } from "./hooks/useProcessingMode";
+import { useProjectStats } from "./hooks/useProjectStats";
 // GenerationConfig is not directly used in this file, FileProcessorConfig is.
 // If GenerationConfig is only defined in types.ts and used by FileProcessorConfig,
 // then it's fine. If it was meant to be used here, we need to ensure it is.
@@ -81,16 +88,6 @@ const sanitizeFileName = (name: string): string => {
     .replace(/[^a-zA-Z0-9._-]/g, "");
 };
 
-/**
- * Estimates the number of tokens in a text string using a simple heuristic.
- * Uses the approximation: 1 token ≈ 4 characters for English code.
- * @param content The text content to estimate tokens for.
- * @returns The estimated number of tokens.
- */
-const estimateTokens = (content: string): number => {
-  return Math.ceil(content.length / 4);
-};
-
 const INITIAL_STATE: AppState = {
   isLoading: false, // Don't start with loading state to prevent flicker
   currentStep: "selectDirectory",
@@ -118,6 +115,18 @@ const INITIAL_STATE: AppState = {
 export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
   // Changed props to _props
   const [state, setState] = useState<AppState>(INITIAL_STATE);
+
+  // Use hooks to manage processing mode and statistics
+  const { processOnlySelectedFiles, selectedFilePaths, setProcessOnlySelectedFiles, setSelectedFilePaths } =
+    useProcessingMode(state.finderSelectionInfo, state.useDirectoryInsteadOfFiles);
+
+  const { estimatedStats, isCalculatingStats, setEstimatedStats } = useProjectStats(
+    state.currentStep,
+    state.projectDirectory,
+    processOnlySelectedFiles,
+    selectedFilePaths,
+    state.maxFileSizeMbString,
+  );
 
   /**
    * Analyzes Finder selection and returns information for UI decision making.
@@ -223,8 +232,6 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                 formErrors: {},
               }));
               console.log("Analyzed Finder selection:", selectionInfo, "All paths:", allSelectedPaths);
-              // Update processing mode after state is set
-              setTimeout(() => updateProcessingMode(), 0);
               return; // Successfully found and set Finder path.
             }
           }
@@ -248,85 +255,75 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     initializeFinderPath();
   }, []); // Empty dependency array ensures this runs only once on mount.
 
-  /**
-   * Effect to pre-calculate statistics when entering configureGeneration step.
-   * This runs in the background to estimate file size and token count.
-   */
+  // Synchronize state with hooks for backward compatibility
   useEffect(() => {
-    async function calculatePreviewStats() {
-      if (state.currentStep !== "configureGeneration" || !state.projectDirectory) {
-        return;
-      }
+    setState((prev) => ({
+      ...prev,
+      processOnlySelectedFiles,
+      selectedFilePaths,
+    }));
+  }, [processOnlySelectedFiles, selectedFilePaths]);
 
-      if (state.isCalculatingStats || state.estimatedStats) {
-        return; // Already calculating or already calculated
-      }
-
-      setState((prev) => ({ ...prev, isCalculatingStats: true }));
-
-      try {
-        // Create a temporary config for preview
-        const previewConfig: FileProcessorConfig = {
-          projectDirectory: state.projectDirectory,
-          maxFileSizeBytes: parseFloat(state.maxFileSizeMbString || "1") * 1024 * 1024,
-          includeAiInstructions: state.includeAiInstructions,
-          processOnlySelectedFiles: state.processOnlySelectedFiles,
-          selectedFilePaths: state.selectedFilePaths,
-        };
-
-        // Generate preview (this will process files but we only need the string length)
-        const previewString = await generateProjectCodeString(previewConfig, (update) => {
-          // Update progress silently
-          console.log("Preview calculation:", update.message);
-        });
-
-        const estimatedTokens = estimateTokens(previewString);
-        const estimatedSize = previewString.length;
-
-        setState((prev) => ({
-          ...prev,
-          estimatedStats: { size: estimatedSize, tokens: estimatedTokens },
-          isCalculatingStats: false,
-        }));
-      } catch (error) {
-        console.error("Error calculating preview stats:", error);
-        setState((prev) => ({ ...prev, isCalculatingStats: false }));
-      }
-    }
-
-    calculatePreviewStats();
-  }, [
-    state.currentStep,
-    state.projectDirectory,
-    state.processOnlySelectedFiles,
-    state.selectedFilePaths,
-    state.includeAiInstructions,
-    state.maxFileSizeMbString,
-  ]);
+  useEffect(() => {
+    setState((prev) => ({
+      ...prev,
+      estimatedStats,
+      isCalculatingStats,
+    }));
+  }, [estimatedStats, isCalculatingStats]);
 
   /**
    * Finds the common parent directory for an array of paths.
-   * @param paths Array of file or directory paths.
+   * Handles different drives on Windows and resolves symlinks.
+   *
+   * @param paths - Array of file or directory paths.
    * @returns The common parent directory path.
    */
-  const findCommonParent = useCallback((paths: string[]): string => {
+  const findCommonParent = useCallback(async (paths: string[]): Promise<string> => {
     if (paths.length === 0) return "";
     if (paths.length === 1) {
       // For a single path, return its parent directory
-      return path.dirname(paths[0]);
+      try {
+        // Resolve symlinks for accurate path comparison
+        const resolved = await fs.realpath(paths[0]);
+        return path.dirname(resolved);
+      } catch {
+        // If realpath fails, fall back to dirname
+        return path.dirname(paths[0]);
+      }
     }
 
+    // Resolve all paths to handle symlinks and get absolute paths
+    const resolvedPaths = await Promise.all(
+      paths.map(async (p) => {
+        try {
+          return await fs.realpath(p);
+        } catch {
+          return path.resolve(p);
+        }
+      }),
+    );
+
     // Split all paths into segments
-    const splitPaths = paths.map((p) => {
+    const splitPaths = resolvedPaths.map((p) => {
       const resolved = path.resolve(p);
       return resolved.split(path.sep).filter((segment) => segment !== "");
     });
+
+    // Check if paths are on different drives (Windows)
+    const roots = resolvedPaths.map((p) => path.parse(p).root);
+    const uniqueRoots = new Set(roots.filter((r) => r));
+    if (uniqueRoots.size > 1) {
+      // Paths are on different drives, return root of first path
+      console.warn("Paths are on different drives, using first path's root");
+      return roots[0] || path.sep;
+    }
 
     // Find the minimum length to avoid out-of-bounds
     const minLength = Math.min(...splitPaths.map((p) => p.length));
     if (minLength === 0) {
       // If any path is root, return root
-      return path.parse(paths[0]).root || path.sep;
+      return roots[0] || path.sep;
     }
 
     const commonSegments: string[] = [];
@@ -341,14 +338,13 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       }
     }
 
-    // If no common segments found (different drives on Windows), return root of first path
+    // If no common segments found, return root of first path
     if (commonSegments.length === 0) {
-      const root = path.parse(paths[0]).root;
-      return root || path.sep;
+      return roots[0] || path.sep;
     }
 
     // Reconstruct the path
-    const root = path.parse(paths[0]).root;
+    const root = roots[0];
     const result = root ? root + commonSegments.join(path.sep) : path.sep + commonSegments.join(path.sep);
     return result;
   }, []);
@@ -403,7 +399,7 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           }
         } else {
           // Multiple paths: find common parent
-          derivedRoot = findCommonParent(selectedPaths);
+          derivedRoot = await findCommonParent(selectedPaths);
           isMultiSelection = true;
         }
 
@@ -414,16 +410,17 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
 
         const nextStep = "configureGeneration";
 
+        // Update processing mode using hook setters
+        setProcessOnlySelectedFiles(isMultiSelection);
+        setSelectedFilePaths(selectedPaths);
+        setEstimatedStats(null); // Reset stats to trigger recalculation with new selection
+
         setState((prev) => ({
           ...prev,
           isLoading: false,
           projectDirectory: derivedRoot,
-          selectedFilePaths: selectedPaths, // Store all selected paths
-          processOnlySelectedFiles: isMultiSelection,
           outputFileName: sanitizeFileName(`${dirName}_project_code.txt`),
           currentStep: nextStep,
-          estimatedStats: null, // Reset stats to trigger recalculation
-          isCalculatingStats: false,
           formErrors: {},
         }));
       } catch (e) {
@@ -443,20 +440,6 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     },
     [findCommonParent],
   );
-
-  /**
-   * Updates the processing mode based on user selection.
-   */
-  const updateProcessingMode = useCallback(() => {
-    setState((prev) => {
-      const shouldUseFiles = Boolean(prev.finderSelectionInfo?.hasFiles && !prev.useDirectoryInsteadOfFiles);
-      return {
-        ...prev,
-        processOnlySelectedFiles: shouldUseFiles,
-        selectedFilePaths: shouldUseFiles ? prev.finderSelectionInfo?.selectedFiles || [] : [],
-      };
-    });
-  }, []);
 
   /**
    * Validates the output configuration form (filename, max file size).
@@ -540,13 +523,13 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
     // Determine output directory:
     // - If processing multiple selected items: save in the common parent (projectDirectory)
     // - If processing entire directory: save in parent directory (one level up)
-    const outputDirectory = state.processOnlySelectedFiles
+    const outputDirectory = processOnlySelectedFiles
       ? state.projectDirectory // Common parent for multiple selections
       : path.dirname(state.projectDirectory); // Parent directory for single directory
     const outputFilePath = path.join(outputDirectory, finalOutputFileName);
 
     // Validate that selectedFilePaths is set when processOnlySelectedFiles is true
-    if (state.processOnlySelectedFiles && (!state.selectedFilePaths || state.selectedFilePaths.length === 0)) {
+    if (processOnlySelectedFiles && (!selectedFilePaths || selectedFilePaths.length === 0)) {
       setState((prev) => ({
         ...prev,
         isLoading: false,
@@ -568,28 +551,36 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       maxFileSizeBytes: parseFloat(state.maxFileSizeMbString) * 1024 * 1024,
       additionalIgnorePatterns: state.additionalIgnorePatterns,
       includeAiInstructions: state.includeAiInstructions,
-      processOnlySelectedFiles: state.processOnlySelectedFiles,
-      selectedFilePaths: state.selectedFilePaths,
+      processOnlySelectedFiles,
+      selectedFilePaths,
     };
 
     try {
-      const projectCodeString = await generateProjectCodeString(processorConfig, (update) => {
+      const result = await generateProjectCodeToFile(processorConfig, outputFilePath, (update) => {
         setState((prev) => ({ ...prev, progress: update }));
         if (toast) {
           toast.message = `${update.message}${update.details ? `: ${update.details.substring(0, 50)}...` : ""}`;
         }
       });
 
-      await fs.writeFile(outputFilePath, projectCodeString, "utf-8");
-
-      // Copy to clipboard if requested
+      // Copy to clipboard if requested (only for smaller files to avoid memory issues)
       if (state.outputToClipboard) {
-        await Clipboard.copy(projectCodeString);
+        if (result.fileSize <= CLIPBOARD_MAX_SIZE_BYTES) {
+          const fileContent = await fs.readFile(outputFilePath, "utf-8");
+          await Clipboard.copy(fileContent);
+        } else {
+          // File too large for clipboard, show warning
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Clipboard Copy Skipped",
+            message: `File too large (${(result.fileSize / 1024 / 1024).toFixed(2)} MB) to copy to clipboard.`,
+          });
+        }
       }
 
-      // Calculate estimated tokens for UI display
-      const estimatedTokens = estimateTokens(projectCodeString);
-      const fileSize = projectCodeString.length;
+      // Use results from generation
+      const estimatedTokens = result.estimatedTokens;
+      const fileSize = result.fileSize;
 
       // Save generation result and move to results screen
       setState((prev) => ({
@@ -617,9 +608,9 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
       console.error("Generation Error:", e);
       console.error("Error details:", {
         projectDirectory: state.projectDirectory,
-        processOnlySelectedFiles: state.processOnlySelectedFiles,
-        selectedFilePaths: state.selectedFilePaths,
-        selectedFilePathsLength: state.selectedFilePaths?.length,
+        processOnlySelectedFiles,
+        selectedFilePaths,
+        selectedFilePathsLength: selectedFilePaths?.length,
       });
       setState((prev) => ({
         ...prev,
@@ -715,6 +706,9 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                   // Don't allow changing the directory selection when in directory mode
                   return;
                 }
+                // Update selected file paths using hook setter
+                setSelectedFilePaths(newFiles);
+
                 setState((prev) => {
                   const updatedSelectionInfo = prev.finderSelectionInfo
                     ? {
@@ -725,10 +719,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
                   return {
                     ...prev,
                     finderSelectionInfo: updatedSelectionInfo,
-                    selectedFilePaths: newFiles,
                   };
                 });
-                updateProcessingMode();
               }}
             >
               {state.useDirectoryInsteadOfFiles ? (
@@ -754,7 +746,6 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
               value={state.useDirectoryInsteadOfFiles}
               onChange={(newValue) => {
                 setState((prev) => ({ ...prev, useDirectoryInsteadOfFiles: newValue }));
-                updateProcessingMode();
               }}
               info="Check this to process the entire parent directory instead of just the selected files"
             />
@@ -820,15 +811,15 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
         }
       >
         <Form.Description text={`Selected Project: ${state.projectDirectory}`} />
-        {state.processOnlySelectedFiles && (
-          <Form.Description text={`Processing Mode: Selected files only (${state.selectedFilePaths.length} items)`} />
+        {processOnlySelectedFiles && (
+          <Form.Description text={`Processing Mode: Selected files only (${selectedFilePaths.length} items)`} />
         )}
-        {!state.processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
-        {state.isCalculatingStats && <Form.Description text="Calculating preview statistics..." />}
-        {state.estimatedStats && !state.isCalculatingStats && (
+        {!processOnlySelectedFiles && <Form.Description text="Processing Mode: Entire directory" />}
+        {isCalculatingStats && <Form.Description text="Calculating preview statistics..." />}
+        {estimatedStats && !isCalculatingStats && (
           <>
-            <Form.Description text={`Estimated size: ${(state.estimatedStats.size / 1024 / 1024).toFixed(2)} MB`} />
-            <Form.Description text={`Estimated tokens: ~${state.estimatedStats.tokens.toLocaleString()}`} />
+            <Form.Description text={`Estimated size: ${(estimatedStats.size / 1024 / 1024).toFixed(2)} MB`} />
+            <Form.Description text={`Estimated tokens: ~${estimatedStats.tokens.toLocaleString()}`} />
           </>
         )}
         <Form.Separator />
@@ -839,7 +830,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           value={state.outputFileName}
           error={state.formErrors.outputFileName}
           onChange={(newValue) => {
-            setState((prev) => ({ ...prev, outputFileName: newValue, estimatedStats: null }));
+            setState((prev) => ({ ...prev, outputFileName: newValue }));
+            setEstimatedStats(null);
             if (state.formErrors.outputFileName)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, outputFileName: undefined } }));
           }}
@@ -852,7 +844,8 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           value={state.maxFileSizeMbString}
           error={state.formErrors.maxFileSizeMbString}
           onChange={(newValue) => {
-            setState((prev) => ({ ...prev, maxFileSizeMbString: newValue, estimatedStats: null }));
+            setState((prev) => ({ ...prev, maxFileSizeMbString: newValue }));
+            setEstimatedStats(null); // Reset stats to trigger recalculation with new max file size
             if (state.formErrors.maxFileSizeMbString)
               setState((prev) => ({ ...prev, formErrors: { ...prev.formErrors, maxFileSizeMbString: undefined } }));
           }}
@@ -881,9 +874,10 @@ export default function GenerateProjectCodeCommand(_props: CommandLaunchProps) {
           id="includeAiInstructions"
           label="Include AI Instructions"
           value={state.includeAiInstructions}
-          onChange={(newValue) =>
-            setState((prev) => ({ ...prev, includeAiInstructions: newValue, estimatedStats: null }))
-          }
+          onChange={(newValue) => {
+            setState((prev) => ({ ...prev, includeAiInstructions: newValue }));
+            setEstimatedStats(null);
+          }}
           info="Includes special <ai_instruction> and <ai_analysis_guide> tags in the output, which can help AI models better process the code."
         />
         <Form.Checkbox
@@ -954,10 +948,7 @@ Use the actions below to open the file or copy its path.`;
                   finderSelectionInfo: null,
                   finderSelectedPaths: [],
                   pickerSelectedPaths: [],
-                  selectedFilePaths: [],
-                  processOnlySelectedFiles: false,
                   generationResult: null,
-                  estimatedStats: null,
                   formErrors: {},
                 }));
               }}

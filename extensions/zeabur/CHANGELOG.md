@@ -1,5 +1,17 @@
 # Zeabur Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Feature] - 2026-03-01
+
+- Added the send email command to send emails through Zeabur Email API.
+
+## [Feature] - 2026-01-16
+
+- Added the AI Hub command to view your AI Hub balance and usage.
+
 ## [Feature] - 2025-12-17
 
 - Added the manage servers command to manage the servers on Zeabur.

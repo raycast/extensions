@@ -1,6 +1,10 @@
 # Whois Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improvements] - 2025-12-18
 
 - Improved error handling (fix: [#22388](https://github.com/raycast/extensions/issues/22388))
 

@@ -18,16 +18,6 @@ export function getGranolaConfigPath(filename: string): string {
   }
 }
 
-/**
- * Get the path to the Granola supabase.json file
- */
 export function getSupabaseConfigPath(): string {
   return getGranolaConfigPath("supabase.json");
-}
-
-/**
- * Get the path to the Granola cache-v3.json file
- */
-export function getCacheConfigPath(): string {
-  return getGranolaConfigPath("cache-v3.json");
 }

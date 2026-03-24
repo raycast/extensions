@@ -5,6 +5,9 @@
   "description": "Access Dashlane Vault. Requires installing the Dashlane CLI.",
   "icon": "dashlane-512.png",
   "author": "tm.wrnr",
+  "contributors": [
+    "mushop"
+  ],
   "categories": [
     "Security"
   ],
@@ -41,9 +44,9 @@
   ],
   "preferences": [
     {
-      "description": "Enter the CLI binary path. You can find the path by running `which dcli` in your terminal.",
+      "description": "Enter the CLI binary path. On macOS, you can find the path by running `which dcli` in your terminal. On Windows, you can find the path by running `where dcli` in your terminal.",
       "name": "cliPath",
-      "placeholder": "e.g.: /usr/local/bin/dcli",
+      "placeholder": "e.g.: /usr/local/bin/dcli (macOS) or C:\\Program Files\\Dashlane\\bin\\dcli.exe (Windows)",
       "required": true,
       "title": "Dashlane CLI path",
       "type": "textfield"
@@ -51,7 +54,7 @@
     {
       "name": "masterPassword",
       "title": "Master Password",
-      "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain.",
+      "description": "If you don't have saved your master password in the Dashlane CLI, you can enter it here. It will be stored securely in the macOS Keychain on macOS or in the Windows Credential Manager on Windows.",
       "type": "password",
       "required": false
     },
@@ -77,7 +80,7 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
+    "prettier": "3.7.4",
     "prettier-plugin-organize-imports": "^4.3.0",
     "typescript": "^5.8.2"
   },
@@ -90,6 +93,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

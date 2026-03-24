@@ -1,16 +1,21 @@
+// kagi-news.tsx
+// Daily News command - browse today's categories and articles with favorites
+
 import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useCategoryFeed } from "./hooks/useCategoryFeed";
 import { useCategories } from "./hooks/useCategories";
+import { useFavoriteCategories } from "./hooks/useFavoriteCategories";
 import { stripHtml } from "./utils";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
-  const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "world.json");
+  const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "");
 
   const { categories, isLoading: loadingCategories, error: categoriesError } = useCategories();
+  const { isFavorite, toggleFavorite } = useFavoriteCategories();
 
   const {
     articles,
@@ -19,6 +24,15 @@ export default function Command() {
     error: contentError,
     isOnThisDay,
   } = useCategoryFeed(selectedCategory, preferences.language);
+
+  // Sort categories: favorites first (alphabetically), then others (alphabetically)
+  const sortedCategories = [
+    ...categories.filter((cat) => isFavorite(cat.id)).sort((a, b) => a.name.localeCompare(b.name)),
+    ...categories.filter((cat) => !isFavorite(cat.id)).sort((a, b) => a.name.localeCompare(b.name)),
+  ];
+
+  // Get current category for action
+  const currentCategory = categories.find((cat) => cat.id === selectedCategory);
 
   return (
     <List
@@ -29,8 +43,12 @@ export default function Command() {
           value={selectedCategory}
           onChange={(newValue) => setSelectedCategory(newValue)}
         >
-          {categories.map((category) => (
-            <List.Dropdown.Item key={category.file} title={category.name} value={category.file} />
+          {sortedCategories.map((category) => (
+            <List.Dropdown.Item
+              key={category.id}
+              title={`${isFavorite(category.id) ? "★ " : ""}${category.name}`}
+              value={category.id}
+            />
           ))}
         </List.Dropdown>
       }
@@ -94,6 +112,13 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push title="View Article" icon={Icon.Eye} target={<ArticleDetail article={article} />} />
+                {currentCategory && (
+                  <Action
+                    title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
+                    icon={isFavorite(currentCategory.id) ? Icon.Star : Icon.CircleProgress}
+                    onAction={() => toggleFavorite(currentCategory.id)}
+                  />
+                )}
               </ActionPanel>
             }
           />
