@@ -38,15 +38,6 @@ export interface Task {
   updated: string;
 }
 
-export const PRIORITY_MAP: Record<number, string> = {
-  0: "Unset",
-  1: "Low",
-  2: "Medium",
-  3: "High",
-  4: "Urgent",
-  5: "DO NOW",
-};
-
 export interface TaskInput {
   title: string;
   description?: string;
@@ -138,11 +129,33 @@ export async function addLabelToTask(
   });
 }
 
+export async function removeLabelFromTask(
+  taskId: number,
+  labelId: number,
+): Promise<void> {
+  await request(`/tasks/${taskId}/labels/${labelId}`, { method: "DELETE" });
+}
+
 export async function addLabelsToTask(
   taskId: number,
   labelIds: number[],
 ): Promise<void> {
   for (const labelId of labelIds) {
+    await addLabelToTask(taskId, labelId);
+  }
+}
+
+export async function updateTaskLabels(
+  taskId: number,
+  oldLabelIds: number[],
+  newLabelIds: number[],
+): Promise<void> {
+  const toRemove = oldLabelIds.filter((id) => !newLabelIds.includes(id));
+  const toAdd = newLabelIds.filter((id) => !oldLabelIds.includes(id));
+  for (const labelId of toRemove) {
+    await removeLabelFromTask(taskId, labelId);
+  }
+  for (const labelId of toAdd) {
     await addLabelToTask(taskId, labelId);
   }
 }

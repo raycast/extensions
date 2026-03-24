@@ -1,5 +1,15 @@
 # Changelog
 
+## [Task Detail View, Search, and Caching] - {PR_MERGE_DATE}
+
+- Task Detail view with full markdown description and metadata sidebar
+- New "Search Tasks" command with debounced API search across all tasks
+- All list commands migrated to `useCachedPromise` for instant navigation
+- Labels TagPicker in Edit Task form with pre-selected current labels
+- Proper label add/remove support when editing tasks
+- Shared `TaskListItem`, `TaskDetail`, `EditTaskForm`, and `TaskActions` components
+- Shared date and priority helpers extracted to `src/helpers/`
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Create tasks with title, description, project, due date, priority, labels, and favorite

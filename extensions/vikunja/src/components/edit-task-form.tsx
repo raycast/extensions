@@ -7,7 +7,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { updateTask, addLabelsToTask, getLabels, Project, Task } from "../api";
+import { updateTask, updateTaskLabels, getLabels, Project, Task } from "../api";
 import { PRIORITY_MAP } from "../helpers/priorities";
 
 export function EditTaskForm({
@@ -56,16 +56,10 @@ export function EditTaskForm({
         project_id: parseInt(values.projectId),
       });
 
-      // Update labels if changed
+      // Update labels: add new ones and remove de-selected ones
       const newLabelIds = values.labelIds?.map((id) => parseInt(id)) ?? [];
       const oldLabelIds = (task.labels ?? []).map((l) => l.id);
-      const labelsChanged =
-        newLabelIds.length !== oldLabelIds.length ||
-        newLabelIds.some((id) => !oldLabelIds.includes(id));
-
-      if (labelsChanged) {
-        await addLabelsToTask(task.id, newLabelIds);
-      }
+      await updateTaskLabels(task.id, oldLabelIds, newLabelIds);
 
       showToast({ style: Toast.Style.Success, title: "Task updated" });
       onRefresh();
