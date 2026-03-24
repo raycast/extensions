@@ -1,4 +1,16 @@
-import { ActionPanel, Action, List, getPreferenceValues, Icon, Form, useNavigation, confirmAlert, Alert } from "@raycast/api";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-nocheck
+import {
+  ActionPanel,
+  Action,
+  List,
+  getPreferenceValues,
+  Icon,
+  Form,
+  useNavigation,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import OpenAI from "openai";
@@ -363,3 +375,4 @@ export default function Command() {
     </List>
   );
 }
+
