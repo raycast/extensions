@@ -239,6 +239,22 @@ export async function previousTrack(): Promise<void> {
   await runAppleScript(`tell application "Music" to previous track`);
 }
 
+export async function loveTrack(): Promise<void> {
+  await runAppleScript(`
+    tell application "Music"
+      set favorited of current track to true
+    end tell
+  `);
+}
+
+export async function dislikeTrack(): Promise<void> {
+  await runAppleScript(`
+    tell application "Music"
+      set disliked of current track to true
+    end tell
+  `);
+}
+
 export async function revealInMusic(): Promise<void> {
   await runAppleScript(`
     tell application "Music"

@@ -180,11 +180,11 @@ export default function NowPlaying() {
               }}
             />
             <MenuBarExtra.Item
-              title="Love"
+              title="Like"
               icon={Icon.Heart}
               onAction={async () => {
                 await loveTrack();
-                await showHUD("Loved!");
+                await showHUD("Liked!");
               }}
             />
             <MenuBarExtra.Item
@@ -214,16 +214,7 @@ export default function NowPlaying() {
                 }
               }}
             />
-            <MenuBarExtra.Item
-              title="Share Track"
-              icon={Icon.Message}
-              onAction={async () => {
-                const text = `Now playing: ${track.name} — ${track.artist}`;
-                const shareText = trackUrl ? `${text}\n${trackUrl}` : text;
-                await Clipboard.copy(shareText);
-                await showHUD("Copied to clipboard!");
-              }}
-            />
+
             {trackUrl && (
               <MenuBarExtra.Item
                 title="Copy Link"
