@@ -261,11 +261,11 @@ export function buildComparisonMarkdown(a: LensModel, b: LensModel): string {
     if (a.pricing.input < b.pricing.input) {
       verdictParts.push(
         `cheaper on input (${formatPrice(a.pricing.input)} vs ${formatPrice(b.pricing.input)})`,
-  if (a.pricing && b.pricing) {
-    if (a.pricing.input < b.pricing.input) {
-      verdictParts.push(`${a.name} is cheaper on input (${formatPrice(a.pricing.input)} vs ${formatPrice(b.pricing.input)})`);
+      );
     } else if (b.pricing.input < a.pricing.input) {
-      verdictParts.push(`${b.name} is cheaper on input (${formatPrice(b.pricing.input)} vs ${formatPrice(a.pricing.input)})`);
+      verdictParts.push(
+        `${b.name} is cheaper on input (${formatPrice(b.pricing.input)} vs ${formatPrice(a.pricing.input)})`,
+      );
     }
   }
 
