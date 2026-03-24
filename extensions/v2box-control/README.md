@@ -24,7 +24,7 @@ Control your V2BOX VPN connection from Raycast.
 
 ## Local Installation
 
-1. Open the extension folder in Cursor.
+1. Open the extension folder in your code editor.
 2. Run `npm install`.
 3. Run `npm run dev`.
 4. Open Raycast and search for `V2BOX VPN`, `On`, `Off`, `Status`, or `Toggle`.

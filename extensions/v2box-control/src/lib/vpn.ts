@@ -7,9 +7,6 @@ const scutilPath = "/usr/sbin/scutil";
 
 type NetworkCommandAction = "status" | "start" | "stop";
 type ExecFileError = Error & { stdout?: string; stderr?: string };
-type ExtensionPreferences = {
-  serviceName: string;
-};
 
 export type VpnState =
   | "connected"
@@ -29,7 +26,7 @@ function normalizeOutput(stdout?: string, stderr?: string): string {
 }
 
 function getServiceName(): string {
-  const { serviceName } = getPreferenceValues<ExtensionPreferences>();
+  const { serviceName } = getPreferenceValues<Preferences>();
   const value = serviceName.trim();
 
   if (!value) {
@@ -99,6 +96,21 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+async function pollStatus(
+  targetState: "connected" | "disconnected",
+  maxAttempts = 10,
+  interval = 100,
+): Promise<VpnStatus> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const status = await getVpnStatus();
+    if (status.state === targetState) {
+      return status;
+    }
+    await sleep(interval);
+  }
+  return getVpnStatus();
+}
+
 export async function getVpnStatus(): Promise<VpnStatus> {
   const raw = await runScutil("status");
   return {
@@ -109,14 +121,12 @@ export async function getVpnStatus(): Promise<VpnStatus> {
 
 export async function turnOnVpn(): Promise<VpnStatus> {
   await runScutil("start");
-  await sleep(350);
-  return getVpnStatus();
+  return pollStatus("connected");
 }
 
 export async function turnOffVpn(): Promise<VpnStatus> {
   await runScutil("stop");
-  await sleep(350);
-  return getVpnStatus();
+  return pollStatus("disconnected");
 }
 
 export async function toggleVpn(): Promise<VpnStatus> {

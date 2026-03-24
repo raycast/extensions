@@ -33,7 +33,7 @@
   "commands": [
     {
       "name": "on-vpn",
-      "title": "On",
+      "title": "Connect VPN",
       "subtitle": "V2BOX VPN",
       "description": "Connect to the configured VPN service",
       "mode": "no-view",
@@ -47,7 +47,7 @@
     },
     {
       "name": "off-vpn",
-      "title": "Off",
+      "title": "Disconnect VPN",
       "subtitle": "V2BOX VPN",
       "description": "Disconnect from the configured VPN service",
       "mode": "no-view",
@@ -61,7 +61,7 @@
     },
     {
       "name": "status",
-      "title": "Status",
+      "title": "VPN Status",
       "subtitle": "V2BOX VPN",
       "description": "Check the configured VPN service status",
       "mode": "no-view",
@@ -74,7 +74,7 @@
     },
     {
       "name": "toggle-vpn",
-      "title": "Toggle",
+      "title": "Toggle VPN",
       "subtitle": "V2BOX VPN",
       "description": "Toggle the configured VPN service",
       "mode": "no-view",
@@ -98,7 +98,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
-    "@types/node": "25.3.3",
+    "@types/node": "^25.5.0",
     "eslint": "9.39.3",
     "prettier": "3.8.1",
     "typescript": "5.9.3"
