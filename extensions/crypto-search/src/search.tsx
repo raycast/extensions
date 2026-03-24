@@ -12,10 +12,6 @@ import {
 } from "./utils/blockchain";
 import { getGMGNUrl, getExplorerUrl, getTransactionExplorerUrl } from "./utils/urls";
 
-interface Preferences {
-  defaultTarget: "gmgn" | "explorer";
-}
-
 interface SearchResolution {
   status: "success" | "failure";
   url?: string;
@@ -47,8 +43,8 @@ function getHeuristicTarget(input: string, makerAddress?: string): HeuristicTarg
     if (lowerInput.endsWith("4444") || lowerInput.endsWith("6666")) {
       const suffix = lowerInput.endsWith("4444") ? "4444" : "6666";
       return {
-        url: getGMGNUrl("bsc", "token", input, maker),
-        title: `Heuristic match: BSC ${suffix} token`,
+        url: getGMGNUrl("ethereum", "token", input, maker),
+        title: `Heuristic match: Ethereum ${suffix} token`,
       };
     }
   }

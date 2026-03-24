@@ -8,7 +8,6 @@ const SOLANA_RPCS = [
   "https://solana.public-rpc.com",
 ];
 const ETH_RPCS = [
-  "https://mainnet.infura.io",
   "https://1rpc.io/eth",
   "https://rpc.mevblocker.io/fast",
   "https://rpc.mevblocker.io/noreverts",
@@ -134,26 +133,29 @@ async function tryProviders(rpcs: string[], useCache = true): Promise<ethers.Jso
     }
   }
 
-  // Try providers with exponential backoff
-  let backoffMs = 100;
-  for (const rpc of rpcs) {
+  // Try providers in parallel - fastest response wins
+  const providerPromises = rpcs.map(async (rpc) => {
     try {
       const provider = new ethers.JsonRpcProvider(rpc);
       await Promise.race([
         provider.getNetwork(),
         new Promise((_, reject) => setTimeout(() => reject(new Error("timeout")), RPC_TIMEOUT)),
       ]);
-
-      // Cache successful provider
-      providerCache.set(rpc, { provider, timestamp: Date.now() });
-      return provider;
+      return { provider, rpc };
     } catch {
-      // Exponential backoff with max 1 second
-      await new Promise((resolve) => setTimeout(resolve, Math.min(backoffMs, 1000)));
-      backoffMs *= 2;
-      continue;
+      return null;
     }
+  });
+
+  const results = await Promise.all(providerPromises);
+  const working = results.find((result) => result !== null);
+
+  if (working) {
+    // Cache successful provider
+    providerCache.set(working.rpc, { provider: working.provider, timestamp: Date.now() });
+    return working.provider;
   }
+
   return null;
 }
 
