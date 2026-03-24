@@ -7,6 +7,8 @@ import {
   Clipboard,
   showHUD,
   Cache,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import {
@@ -171,6 +173,21 @@ export default function NowPlaying() {
           </MenuBarExtra.Section>
 
           <MenuBarExtra.Section>
+            <MenuBarExtra.Item
+              title="View Lyrics"
+              icon={Icon.Text}
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              onAction={async () => {
+                try {
+                  await launchCommand({
+                    name: "view-lyrics",
+                    type: LaunchType.UserInitiated,
+                  });
+                } catch {
+                  await showHUD("Could not open lyrics");
+                }
+              }}
+            />
             {trackUrl && (
               <MenuBarExtra.Item
                 title="Copy Link"

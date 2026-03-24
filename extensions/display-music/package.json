@@ -15,6 +15,13 @@
       "description": "Shows album artwork and current track info in the menu bar",
       "mode": "menu-bar",
       "interval": "10s"
+    },
+    {
+      "name": "view-lyrics",
+      "title": "View Lyrics",
+      "subtitle": "Display Music",
+      "description": "Shows lyrics for the currently playing track",
+      "mode": "view"
     }
   ],
   "preferences": [
