@@ -1,18 +1,20 @@
 import { LaunchProps, open } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
 import { URL } from "url"
+import { getRepoIdentifierFromArgumentOrCurrentTab } from "./get-repo-identifier"
 
 interface OpenDeepwikiArguments {
-  repoIdentifier: string
+  repoIdentifier?: string
 }
 
 export default async function Command(props: LaunchProps<{ arguments: OpenDeepwikiArguments }>) {
-  const { repoIdentifier } = props.arguments
   const deepWikiBaseUrl = "https://deepwiki.com/"
 
   let targetUrl = ""
 
   try {
+    const repoIdentifier = await getRepoIdentifierFromArgumentOrCurrentTab(props.arguments.repoIdentifier)
+
     if (repoIdentifier.startsWith(deepWikiBaseUrl)) {
       // Already a DeepWiki URL
       new URL(repoIdentifier) // Validate URL format

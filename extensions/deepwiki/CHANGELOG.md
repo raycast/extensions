@@ -1,5 +1,10 @@
 # DeepWiki Changelog
 
+## [0.2.3] - {PR_MERGE_DATE}
+
+- Make the Open DeepWiki Page and Crawl DeepWiki Docs command arguments optional by falling back to the current browser tab URL via the Raycast Browser Extension.
+- Update command metadata, README usage notes, and manifest title casing to match the latest Raycast validation requirements.
+
 ## [0.2.2] - 2025-09-08
 
 - Rename `Deepwiki` to `DeepWiki`.

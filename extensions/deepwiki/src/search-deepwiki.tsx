@@ -140,7 +140,7 @@ export default function Command(): React.ReactElement {
             accessories={repo.stars ? [{ text: repo.stars, icon: Icon.Star }] : []}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in DeepWiki" url={repo.deepWikiUrl} />
+                <Action.OpenInBrowser title="Open in Deepwiki" url={repo.deepWikiUrl} />
                 <Action.OpenInBrowser title="Open in GitHub" url={repo.githubUrl} />
                 <Action
                   title="Crawl and Copy Docs"
@@ -161,7 +161,7 @@ export default function Command(): React.ReactElement {
                   }}
                 />
                 <Action
-                  title="Open DeepWiki Page Command"
+                  title="Open Deepwiki Page Command"
                   icon={Icon.Terminal}
                   onAction={async () => {
                     try {
@@ -177,7 +177,7 @@ export default function Command(): React.ReactElement {
                     }
                   }}
                 />
-                <Action.CopyToClipboard title="Copy DeepWiki URL" content={repo.deepWikiUrl} />
+                <Action.CopyToClipboard title="Copy Deepwiki URL" content={repo.deepWikiUrl} />
                 <Action.CopyToClipboard title="Copy GitHub URL" content={repo.githubUrl} />
                 <Action.CopyToClipboard title="Copy Org/repo" content={repo.orgRepo} />
               </ActionPanel>
