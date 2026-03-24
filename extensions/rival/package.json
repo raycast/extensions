@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rival",
+  "title": "Rival",
+  "description": "AI model intelligence. Search 265+ models, compare specs, calculate costs. Data from rival.tips",
+  "icon": "icon.png",
+  "author": "nuance-dev",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-models",
+      "title": "Search AI Models",
+      "description": "Search and browse 265+ AI models with specs, pricing, and rankings",
+      "mode": "view",
+      "keywords": [
+        "ai",
+        "model",
+        "llm",
+        "gpt",
+        "claude",
+        "gemini"
+      ]
+    },
+    {
+      "name": "compare-models",
+      "title": "Compare AI Models",
+      "description": "Side-by-side comparison of any two AI models",
+      "mode": "view",
+      "keywords": [
+        "compare",
+        "versus",
+        "vs",
+        "diff"
+      ]
+    },
+    {
+      "name": "calculate-cost",
+      "title": "Calculate Token Cost",
+      "description": "Calculate API costs across models for your token usage",
+      "mode": "view",
+      "keywords": [
+        "cost",
+        "price",
+        "tokens",
+        "budget",
+        "estimate"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.x",
+    "@types/react": "19.x",
+    "eslint": "^9.0.0",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
