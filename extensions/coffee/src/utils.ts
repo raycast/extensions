@@ -1,5 +1,5 @@
 import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, showHUD } from "@raycast/api";
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { Schedule } from "./interfaces";
 
 export type { Schedule };
@@ -15,14 +15,9 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
   }
   await stopCaffeinate({ menubar: false, status: false });
 
-  // Spawn caffeinate via a shell with & to double-fork it.  The shell
-  // backgrounds caffeinate and exits immediately; execSync reaps the shell.
-  // caffeinate is reparented to launchd (PID 1), which automatically reaps
-  // it when it is killed — completely preventing zombie accumulation.
-  // The -u flag asserts user activity to keep the display awake on battery
-  // (macOS 26+ can override -d/-i assertions on battery power).
-  const argsString = generateArgs(additionalArgs);
-  execSync(`/usr/bin/caffeinate -u ${argsString} >/dev/null 2>&1 &`);
+  const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
+  const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
+  child.unref();
 
   await update(updates, true);
 }
