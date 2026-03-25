@@ -1,6 +1,6 @@
 // --- DEV SWITCH ---
 // Instead of UI or package.json, you can toggle debug here when in development.
-const ENABLE_DEBUG = true;
+const ENABLE_DEBUG = false;
 const IS_DEV = process.env.NODE_ENV === "development" && ENABLE_DEBUG;
 
 /**
