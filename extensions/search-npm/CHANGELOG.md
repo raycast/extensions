@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [API usage optimization] - {PR_MERGE_DATE}
+
+- Debounce search API calls to avoid unnecessary requests while the user is typing.
+
 ## [Fix keywords] - 2026-02-10
 
 - Fix intermittent `keywords` issue
