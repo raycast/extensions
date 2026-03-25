@@ -233,6 +233,17 @@ export class OneTimeSecretClient {
 
 export function parseRecentResponse(data: unknown): RecentReceiptRow[] {
   const root = asRecord(data);
+
+  const fromRecords: RecentReceiptRow[] = [];
+  if (Array.isArray(root?.records)) {
+    for (const item of root.records as unknown[]) {
+      const row = normaliseReceiptItem(item);
+      if (row) {
+        fromRecords.push(row);
+      }
+    }
+  }
+
   const record = asRecord(root?.record);
   const details =
     asRecord(record?.details) ??
@@ -242,12 +253,22 @@ export function parseRecentResponse(data: unknown): RecentReceiptRow[] {
   const received = Array.isArray(details?.received) ? (details.received as unknown[]) : [];
   const notreceived = Array.isArray(details?.notreceived) ? (details.notreceived as unknown[]) : [];
 
-  const rows: RecentReceiptRow[] = [];
+  const fromDetails: RecentReceiptRow[] = [];
   for (const item of [...notreceived, ...received]) {
     const row = normaliseReceiptItem(item);
     if (row) {
-      rows.push(row);
+      fromDetails.push(row);
     }
+  }
+
+  const seen = new Set<string>();
+  const rows: RecentReceiptRow[] = [];
+  for (const row of [...fromRecords, ...fromDetails]) {
+    if (seen.has(row.metadataKey)) {
+      continue;
+    }
+    seen.add(row.metadataKey);
+    rows.push(row);
   }
 
   return rows;
@@ -268,18 +289,20 @@ function normaliseReceiptItem(item: unknown): RecentReceiptRow | null {
   if (!rec) {
     return null;
   }
-  return normaliseReceiptObject(rec);
+  const nested = asRecord(rec.receipt);
+  return normaliseReceiptObject(nested ?? rec);
 }
 
 function normaliseReceiptObject(rec: Record<string, unknown>): RecentReceiptRow | null {
-  const metadataKey = readString(rec.key) ?? readString(rec.identifier);
+  const metadataKey = readString(rec.key) ?? readString(rec.identifier) ?? readString(rec.metadata_key);
   if (!metadataKey) {
     return null;
   }
 
-  const isBurned = readBool(rec.is_burned);
-  const isReceived = readBool(rec.is_received);
-  const isViewed = readBool(rec.is_viewed);
+  const stateStr = readString(rec.state);
+  const isBurned = readBool(rec.is_burned) || stateStr === "burned";
+  const isReceived = readBool(rec.is_received) || readBool(rec.is_revealed) || stateStr === "revealed";
+  const isViewed = readBool(rec.is_viewed) || readBool(rec.is_previewed) || stateStr === "previewed";
   const lifecycle: RecentReceiptLifecycle = isBurned
     ? "burned"
     : isReceived
@@ -288,15 +311,18 @@ function normaliseReceiptObject(rec: Record<string, unknown>): RecentReceiptRow 
         ? "viewed"
         : "none";
 
+  const metadataTtl = readNumber(rec.metadata_ttl);
+  const receiptTtl = readNumber(rec.receipt_ttl);
+
   return {
     metadataKey,
     secretIdentifier: readString(rec.secret_identifier),
-    secretShortid: readString(rec.secret_shortid),
+    secretShortid: readString(rec.secret_shortid) ?? readString(rec.shortid),
     secretTtlSeconds: readNumber(rec.secret_ttl),
-    metadataTtlSeconds: readNumber(rec.metadata_ttl),
+    metadataTtlSeconds: metadataTtl > 0 ? metadataTtl : receiptTtl,
     hasPassphrase: readBool(rec.has_passphrase),
     createdUnix: readNumber(rec.created),
     lifecycle,
-    state: readString(rec.state),
+    state: stateStr,
   };
 }
