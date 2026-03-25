@@ -4,13 +4,19 @@
   "title": "Trello",
   "description": "Manage Trello boards, lists, and cards from Raycast",
   "icon": "command-icon.png",
-    "categories": ["Productivity"],
   "author": "ChrisChinchilla",
   "contributors": [
     "jimmy-b36",
     "brittanyjoiner15",
     "ajaypremshankar",
     "nahidz3"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -35,7 +41,7 @@
       "description": "Create a card on a selected board/list",
       "mode": "view"
     },
-        {
+    {
       "name": "index",
       "title": "Fetch all Cards",
       "subtitle": "Trello",
@@ -124,9 +130,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+  }
 }

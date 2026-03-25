@@ -10,9 +10,14 @@ export default function PackageList() {
 
   const onSearchTextChange = async (text: string) => {
     setLoading(true);
-    const response = await trelloClient.searchCards(text);
-    setCards(response);
-    setLoading(false);
+    try {
+      const response = await trelloClient.searchCards(text);
+      setCards(response);
+    } catch (error) {
+      console.error("Failed to search cards:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

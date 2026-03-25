@@ -8,15 +8,17 @@ type Props = { cardId: string };
 export function CardDetail({ cardId }: Props) {
   const [card, setCard] = useState<TrelloCardDetails | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     trelloClient
       .getCardDetails(cardId)
       .then((result) => setCard(result))
+      .catch((err) => setError(err instanceof Error ? err.message : "Failed to load card details"))
       .finally(() => setLoading(false));
   }, [cardId]);
 
-  const markdown = card ? buildMarkdown(card) : "Loading card details...";
+  const markdown = error ? `**Error:** ${error}` : card ? buildMarkdown(card) : "Loading card details...";
 
   return (
     <Detail

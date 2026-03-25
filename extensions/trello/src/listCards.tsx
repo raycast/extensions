@@ -19,6 +19,7 @@ export default function CardsForList() {
         setBoards(response);
         if (response[0]?.id) setSelectedBoard(response[0].id);
       })
+      .catch((err) => console.error("Failed to load boards:", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -28,6 +29,7 @@ export default function CardsForList() {
     trelloClient
       .getLists(selectedBoard)
       .then((response) => setLists(response))
+      .catch((err) => console.error("Failed to load lists:", err))
       .finally(() => setLoading(false));
   }, [selectedBoard]);
 
@@ -78,6 +80,7 @@ function CardsList({ list }: { list: TrelloList }) {
     trelloClient
       .getCardsForList(list.id)
       .then((response) => setCards(response))
+      .catch((err) => console.error("Failed to load cards:", err))
       .finally(() => setLoading(false));
   }, [list.id]);
 
