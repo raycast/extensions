@@ -249,7 +249,7 @@ function PluginDetail({ plugin, categories }: { plugin: Plugin; categories: Cate
     lines.push("");
   }
 
-  const editionsWithFeatures = plugin.editions.filter((e) => e.features?.length > 0);
+  const editionsWithFeatures = plugin.editions.filter((e) => e.features && e.features.length > 0);
   if (editionsWithFeatures.length > 0) {
     lines.push("---");
     lines.push("");
@@ -262,8 +262,10 @@ function PluginDetail({ plugin, categories }: { plugin: Plugin; categories: Cate
     if (plugin.editions.length === 1) {
       const edition = editionsWithFeatures[0];
       lines.push(`**${edition.name}** ${editionPriceLabel(edition)}`);
-      for (const f of edition.features) {
-        lines.push(`- ${f.name}`);
+      if (edition.features) {
+        for (const f of edition.features) {
+          lines.push(`- ${f.name}`);
+        }
       }
     } else {
       for (let i = 0; i < editionsWithFeatures.length; i++) {
@@ -274,8 +276,10 @@ function PluginDetail({ plugin, categories }: { plugin: Plugin; categories: Cate
           lines.push("");
         }
         lines.push(`**${edition.name}** ${editionPriceLabel(edition)}`);
-        for (const f of edition.features) {
-          lines.push(`- ${f.name}`);
+        if (edition.features) {
+          for (const f of edition.features) {
+            lines.push(`- ${f.name}`);
+          }
         }
       }
     }
