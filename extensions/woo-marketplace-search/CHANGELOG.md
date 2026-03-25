@@ -1,6 +1,6 @@
 # Woo Marketplace Search Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-25
 
 - Search WooCommerce products (themes, extensions, services) directly from Raycast
 - Search WooCommerce documentation, guides, and blog posts
