@@ -1,6 +1,6 @@
 # Clipboard Type Changelog
 
-## [Fixed timeout for long text] - {PR_MERGE_DATE}
+## [Fixed timeout for long text] - 2026-03-25
 
 - Disabled the default 10s AppleScript timeout which caused typing to fail for long clipboard content with human cadence enabled.
 
