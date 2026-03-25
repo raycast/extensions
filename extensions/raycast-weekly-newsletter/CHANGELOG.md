@@ -1,6 +1,6 @@
 # Raycast Weekly Newsletter Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [Updates] - {PR_MERGE_DATE}
 
 ### Changed
 
