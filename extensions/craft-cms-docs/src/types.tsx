@@ -10,7 +10,7 @@ export interface PluginEdition {
   price: number | null;
   basePrice: number | null;
   renewalPrice: number | null;
-  features: PluginEditionFeature[];
+  features: PluginEditionFeature[] | null;
 }
 
 export interface Plugin {

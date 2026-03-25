@@ -56,6 +56,7 @@ export default function SearchPlugins(props: Props) {
   const [searchText, setSearchText] = useState(initialSearchText);
   const [filter, setFilter] = useState("all");
   const isSearching = searchText.trim().length > 0;
+  const shouldFetchAll = isSearching || filter !== "all";
 
   const {
     data: pagedPlugins,
@@ -71,18 +72,18 @@ export default function SearchPlugins(props: Props) {
   );
 
   const { data: allPlugins, isLoading: isSearchLoading } = useCachedPromise(fetchAllPlugins, [], {
-    execute: isSearching,
+    execute: shouldFetchAll,
     keepPreviousData: true,
   });
 
   const { data: coreData } = useCachedPromise(fetchCoreData, []);
   const categories = coreData?.categories ?? [];
 
-  const isLoading = isSearching ? isSearchLoading : isBrowseLoading;
+  const isLoading = shouldFetchAll ? isSearchLoading : isBrowseLoading;
 
   const results = useMemo(() => {
     const query = searchText.trim();
-    const source = isSearching ? (allPlugins ?? pagedPlugins ?? []) : (pagedPlugins ?? []);
+    const source = shouldFetchAll ? (allPlugins ?? pagedPlugins ?? []) : (pagedPlugins ?? []);
     const seen = new Set<number>();
     return source
       .filter((p) => {
@@ -92,7 +93,7 @@ export default function SearchPlugins(props: Props) {
       })
       .filter((p) => matchesFilter(p, filter))
       .filter((p) => matchesQuery(p, query));
-  }, [allPlugins, pagedPlugins, searchText, filter, isSearching]);
+  }, [allPlugins, pagedPlugins, searchText, filter, shouldFetchAll]);
 
   return (
     <Grid
@@ -100,7 +101,7 @@ export default function SearchPlugins(props: Props) {
       fit={Grid.Fit.Fill}
       inset={Grid.Inset.Medium}
       isLoading={isLoading}
-      pagination={isSearching ? undefined : pagination}
+      pagination={shouldFetchAll ? undefined : pagination}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Craft Plugins…"
@@ -152,7 +153,7 @@ export default function SearchPlugins(props: Props) {
     >
       {results.length === 0 && !isLoading ? (
         <Grid.EmptyView title="No Plugins Found" description="Try a different search or filter" />
-      ) : results.length === 0 && isSearching && isSearchLoading ? (
+      ) : results.length === 0 && shouldFetchAll && isSearchLoading ? (
         <Grid.EmptyView
           title=""
           icon={{ source: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" }}
