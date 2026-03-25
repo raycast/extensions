@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Add Cache] - {PG_MERGE_DATE}
+## [Add Cache] - {PR_MERGE_DATE}
 
 - Add 15 minutes cache for Read All Stories command selection
 
