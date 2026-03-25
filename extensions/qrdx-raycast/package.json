@@ -1,0 +1,77 @@
+{
+  "name": "qrdx-raycast",
+  "title": "QRdx",
+  "description": "Generate fully-customised QR codes with body patterns, corner styles, colours, templates, and logos right from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "ritesh_bucha",
+  "categories": [
+    "Developer Tools",
+    "Design Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-qr",
+      "title": "Generate QR",
+      "subtitle": "QRdx",
+      "description": "Generate a QR code with full customisation — body patterns, corner styles, colours, templates and logos.",
+      "mode": "view",
+      "keywords": [
+        "qr",
+        "qrcode",
+        "generator",
+        "barcode"
+      ]
+    },
+    {
+      "name": "saved-qrs",
+      "title": "Saved QR Codes",
+      "subtitle": "QRdx",
+      "description": "Browse, preview, edit and export your saved QR code configurations.",
+      "mode": "view",
+      "keywords": [
+        "qr",
+        "saved",
+        "library",
+        "qrcode"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "generate-qr",
+      "title": "Generate QR Code",
+      "description": "Generate a QR code PNG for any URL, text, email, or phone number with optional body pattern, corner style, colors, and template. Saves the PNG to ~/Downloads."
+    },
+    {
+      "name": "list-saved",
+      "title": "List Saved QR Codes",
+      "description": "List all QR codes previously saved in the qrdx library. Optionally filter by name or URL."
+    }
+  ],
+  "ai": {
+    "instructions": "You are a QR code generation assistant for qrdx. When the user asks to generate, create, or make a QR code, always use the generate-qr tool. When they ask about saved or existing QR codes, use list-saved. For body patterns, prefer 'rounded' or 'circle' for modern/minimal styles, 'square' for classic. For colors, convert descriptive names to hex. Always confirm the URL before generating."
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1",
+    "qrdx": "workspace:*",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^20.8.10",
+    "@types/react": "19.0.10",
+    "@types/react-dom": "19.0.4",
+    "typescript": "^5.4.5"
+  }
+}

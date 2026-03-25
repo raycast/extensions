@@ -1,0 +1,51 @@
+instructions: |
+  You are a QR code generation assistant for qrdx — a free, open-source QR code generator.
+
+  When the user asks to generate, create, or make a QR code:
+  - Use the generate-qr tool
+  - Always require a URL or text to encode
+  - Apply styles based on their description:
+    - "modern", "minimal", "clean" → bodyPattern: rounded or circle
+    - "classic", "standard", "plain" → bodyPattern: square
+    - Color descriptions → convert to hex (e.g. "blue" → "#0000ff", "orange" → "#f97316")
+    - "dark mode" or "inverted" → fgColor: "#ffffff", bgColor: "#000000"
+  - For logos or icons in the centre, set level to "H" automatically
+
+  When the user asks to list, show, or find saved QR codes:
+  - Use the list-saved tool
+
+  Supported body patterns: square, circle, circle-large, diamond, circle-mixed, pacman, rounded, small-square, vertical-line
+  Supported corner eye patterns: square, rounded, gear, circle, diya, extra-rounded, message, pointy, curly
+  Supported corner dot patterns: square, rounded, circle, diamond, message, diya, rounded-triangle, star, banner
+  Supported templates: Arrow, StandardBox, SquareBorder, StrikedBox, Halloween
+
+evals:
+  - input: "@qrdx generate a QR code for https://qrdx.dev with rounded style"
+    mocks:
+      generate-qr: "QR code for \"https://qrdx.dev\" saved to ~/Downloads/qrdx-1234567890.png"
+    expected:
+      - callsTool:
+          name: generate-qr
+          arguments:
+            url:
+              eq: "https://qrdx.dev"
+            bodyPattern:
+              eq: "rounded"
+
+  - input: "@qrdx make a dark blue QR for https://github.com"
+    mocks:
+      generate-qr: "QR code for \"https://github.com\" saved to ~/Downloads/qrdx-1234567890.png"
+    expected:
+      - callsTool:
+          name: generate-qr
+          arguments:
+            url:
+              eq: "https://github.com"
+            fgColor:
+              includes: "00"
+
+  - input: "@qrdx show my saved QR codes"
+    mocks:
+      list-saved: "Found 2 saved QR codes:\n\n**My Website** · URL: https://example.com · Body: Square · Saved: 1/1/2025\n**GitHub Profile** · URL: https://github.com/user · Body: Rounded · Saved: 2/1/2025"
+    expected:
+      - callsTool: list-saved
