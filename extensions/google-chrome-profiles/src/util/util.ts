@@ -1,5 +1,7 @@
 import { URL } from "url";
+import { confirmAlert, Icon } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { BrowserConfig } from "./types";
 
 export type ChromeTarget = { action: "focus" } | { action: "newTab" } | { action: "openUrl"; url: string };
 
@@ -179,6 +181,7 @@ export const openGoogleChrome = async (
   profile: { name: string; directory: string },
   target: ChromeTarget,
   willOpen: () => Promise<void>,
+  browser: BrowserConfig,
 ) => {
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
@@ -186,13 +189,14 @@ export const openGoogleChrome = async (
   // Escape all user-controlled input to prevent AppleScript injection
   const escapedProfileName = escapeAppleScriptString(profile.name);
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
+  const escapedAppName = escapeAppleScriptString(browser.appName);
 
   // Use menu bar item 8 for Profiles menu (language-independent position)
   // Chrome menu bar: 1=Apple, 2=Chrome, 3=File, 4=Edit, 5=View, 6=History, 7=Bookmarks, 8=Profiles, 9=Tab, 10=Window, 11=Help
   const script = `
-    tell application "Google Chrome" to activate
+    tell application "${escapedAppName}" to activate
     tell application "System Events"
-      tell process "Google Chrome"
+      tell process "${escapedAppName}"
         -- Focus the profile window via Profiles menu (menu bar item 8, language-independent)
         set profileMenu to menu 1 of menu bar item 8 of menu bar 1
         set menuItems to name of menu items of profileMenu
@@ -223,7 +227,7 @@ export const openGoogleChrome = async (
     ${
       action === "newTab"
         ? `
-    tell application "Google Chrome"
+    tell application "${escapedAppName}"
       set currentURL to URL of active tab of front window
       -- Check if current tab is already a new tab
       if currentURL is not "chrome://newtab/" then
@@ -237,7 +241,7 @@ export const openGoogleChrome = async (
     ${
       escapedUrl
         ? `
-    tell application "Google Chrome"
+    tell application "${escapedAppName}"
       set targetURL to "${escapedUrl}"
       set tabCount to count of tabs of front window
       set foundTab to false
@@ -258,12 +262,15 @@ export const openGoogleChrome = async (
     }
   `;
 
+  let profilesMenuError: unknown;
+
   try {
     await willOpen();
     await runAppleScript(script);
     return;
   } catch (error) {
     // If the Profiles menu approach fails, fall back to the shell script method
+    profilesMenuError = error;
     console.error("Profiles menu approach failed, falling back to shell script:", error);
   }
 
@@ -271,8 +278,9 @@ export const openGoogleChrome = async (
   const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
   const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
   const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
+  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
   const fallbackScript = `
-    set theAppPath to quoted form of "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    set theAppPath to quoted form of "${escapedBinaryPath}"
     set theProfile to quoted form of "${escapedProfileDirectory}"
     set theLink to quoted form of "${escapedFallbackUrl}"
     do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
@@ -281,7 +289,22 @@ export const openGoogleChrome = async (
   try {
     await willOpen();
     await runAppleScript(fallbackScript);
-  } catch (error) {
-    // Handle errors silently
+  } catch (fallbackError) {
+    console.error("Fallback shell script failed:", fallbackError);
+
+    await confirmAlert({
+      title: `Failed to open ${browser.appName}`,
+      icon: Icon.ExclamationMark,
+      message: [
+        `Profile: ${profile.name}`,
+        "",
+        `Profiles menu error: ${String(profilesMenuError)}`,
+        "",
+        `Fallback error: ${String(fallbackError)}`,
+        "",
+        `Is ${browser.appName} installed and accessible at "${browser.binaryPath}"?`,
+      ].join("\n"),
+      primaryAction: { title: "OK" },
+    });
   }
 };

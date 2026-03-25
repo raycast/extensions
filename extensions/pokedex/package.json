@@ -36,6 +36,21 @@
       ]
     },
     {
+      "name": "regional_pokedex",
+      "title": "Regional Pokédex",
+      "subtitle": "Pokémon",
+      "description": "Explore Pokémon by region with detailed profiles, stats, abilities, moves, evolution chains, encounters, and entries.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Pokémon name or number",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "type_chart",
       "title": "Type Chart",
       "subtitle": "Mechanics",
@@ -241,8 +256,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.7",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3",
     "axios": "^1.13.6",
     "json2md": "^2.0.3",
     "lodash.debounce": "^4.0.8",
@@ -260,7 +275,7 @@
     "@types/lodash.shuffle": "^4.2.9",
     "@types/lodash.uniqby": "^4.7.9",
     "@types/react": "^19.2.14",
-    "eslint": "^10.0.2",
+    "eslint": "^10.0.3",
     "prettier": "^3.8.1",
     "typescript": "^5.9.3"
   },

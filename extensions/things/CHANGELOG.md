@@ -1,5 +1,9 @@
 # Things Changelog
 
+## [Quick Find] - 2026-03-17
+
+- Added a new command "Quick Find" to search across all areas, projects, and to-dos.
+
 ## [Tag Filtering and Grouping] - 2026-02-23
 
 - Added tag filter dropdown to list views (matches Things native behavior)

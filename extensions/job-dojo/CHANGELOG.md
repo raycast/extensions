@@ -1,5 +1,10 @@
 # Job Dojo Changelog
 
+## [Bug Fixes] - 2026-03-14
+
+- Added error messages for template messages
+- Removed default model from docs
+
 ## [Bug Fixes] - 2026-03-09
 
 - Fixed API key authentication with production server

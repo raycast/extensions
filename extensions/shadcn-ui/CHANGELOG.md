@@ -1,5 +1,11 @@
 # shadcn/ui Changelog
 
+## [Fix broken Search Components] - 2026-03-24
+
+- Fix "Search Components" command broken by upstream shadcn/ui repo restructuring (components moved from flat `components/` to `components/radix/` subdirectory)
+- Update GitHub API path, raw content URL, and docs URL to match new upstream structure
+- Fix title casing in copy-to-clipboard action titles (`[Npm]` → `[npm]`)
+
 ## [Maintenance] - 2026-03-04
 
 - Fix "search registries" command error

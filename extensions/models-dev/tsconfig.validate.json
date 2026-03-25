@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*", "scripts/**/*", "__mocks__/**/*", "raycast-env.d.ts"],
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "module": "CommonJS",
+    "noEmit": true,
+    "paths": {
+      "@raycast/api": ["./__mocks__/@raycast/api"]
+    }
+  }
+}

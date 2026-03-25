@@ -1,5 +1,10 @@
 # Search npm Changelog
 
+## [API usage optimization] - 2026-03-25
+
+- Debounce search API calls to avoid unnecessary requests while the user is typing.
+- Do not make API calls when the search term is empty or too short.
+
 ## [Fix keywords] - 2026-02-10
 
 - Fix intermittent `keywords` issue

@@ -7,8 +7,11 @@ interface UsageLimitsState {
   error: Error | null;
   isLoading: boolean;
   isStale: boolean;
+  isRateLimited: boolean;
   isUsageLimitsAvailable: boolean;
   lastFetched: Date | null;
+  rateLimitedUntil: number | null;
+  nextRefreshAt: number | null;
   revalidate: () => void;
 }
 

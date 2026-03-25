@@ -549,7 +549,7 @@
     "date-fns": "^4.1.0",
     "filesize": "^11.0.13",
     "form-data": "^4.0.5",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "marklassian": "^1.1.0",
     "node-fetch": "^3.3.2",
     "node-html-markdown": "^2.0.0",

@@ -1,5 +1,11 @@
 # Apple Music Changelog
 
+## [Menu Bar Energy Optimization] - 2026-03-12
+
+- Consolidated menu bar polling into a single AppleScript snapshot that checks whether Music is running, reads player state, and fetches current track metadata in one call — reducing subprocess count from 3 to 1 per refresh.
+- Cached the macOS version lookup so favorite-property detection no longer spawns `sw_vers` on every menu bar refresh.
+- Switched to `useCachedPromise` with `keepPreviousData` so the menu bar retains the last known state between refreshes instead of flickering.
+
 ## [Menu Bar & Favorite Command Improvements] - 2026-02-21
 
 - `Favorite Track` and `Favorite and Add to Library` commands now close Raycast immediately, showing HUD only after Apple Music confirms the state change.

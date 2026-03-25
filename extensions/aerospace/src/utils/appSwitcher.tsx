@@ -1,4 +1,4 @@
-import { popToRoot, closeMainWindow } from "@raycast/api";
+import { popToRoot, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { spawnSync } from "child_process";
 import { shellEnvSync } from "shell-env";
 
@@ -72,6 +72,41 @@ export async function getWindows(workspace: string) {
 
 export function focusWindow(windowId: string) {
   spawnSync("aerospace", ["focus", "--window-id", `${windowId}`], {
+    env: env(),
+    encoding: "utf8",
+    timeout: 15000,
+  });
+
+  popToRoot({ clearSearchBar: true });
+  closeMainWindow({ clearRootSearch: true });
+}
+
+export async function pullWindowToCurrentWorkspace(windowId: string) {
+  const focused = spawnSync("aerospace", ["list-workspaces", "--focused"], {
+    env: env(),
+    encoding: "utf8",
+    timeout: 15000,
+  });
+
+  const focusedWorkspace = focused.stdout.trim();
+
+  if (!focusedWorkspace) {
+    await showToast({ style: Toast.Style.Failure, title: "Could not determine focused workspace" });
+    return;
+  }
+
+  const move = spawnSync("aerospace", ["move-node-to-workspace", "--window-id", windowId, focusedWorkspace], {
+    env: env(),
+    encoding: "utf8",
+    timeout: 15000,
+  });
+
+  if (move.status !== 0) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to move window", message: move.stderr });
+    return;
+  }
+
+  spawnSync("aerospace", ["focus", "--window-id", windowId], {
     env: env(),
     encoding: "utf8",
     timeout: 15000,

@@ -1,4 +1,6 @@
 import { Clipboard, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 function trimLeadingWhitespacePerParagraph(text: string) {
   const paragraphs = text.split("\n");
@@ -17,17 +19,8 @@ export default async function Command() {
 
     const trimmed = trimLeadingWhitespacePerParagraph(text);
 
-    await Clipboard.copy(trimmed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Leading whitespace trimmed from clipboard",
-    });
+    await outputResult(trimmed, "Leading whitespace trimmed from clipboard");
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to trim leading whitespace",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Failed to trim leading whitespace" });
   }
 }

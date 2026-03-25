@@ -239,23 +239,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   useEffect(() => {
     LocalStorage.getItem<string>(AGENT_ORDER_KEY).then((stored) => {
-      if (!stored) {
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(stored);
-        if (!Array.isArray(parsed)) {
-          setAgentOrder(AGENT_IDS);
-          return;
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
+            const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
+            setAgentOrder([...validOrder, ...missingIds]);
+          }
+        } catch {
+          // keep default order
         }
-
-        const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
-        const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
-        setAgentOrder([...validOrder, ...missingIds]);
-      } catch {
-        setAgentOrder(AGENT_IDS);
       }
+      setOrderLoaded(true);
     });
   }, []);
 
@@ -267,26 +263,11 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const orderedAgentViews = agentOrder.map((agentId) => agentViews[agentId]);
   const visibleAgentViews = orderedAgentViews.filter((agent) => agent.isVisible);
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
-  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(() =>
+  const launchSelectedId =
     typeof requestedSelectedAgentId === "string" && isAgentId(requestedSelectedAgentId)
       ? requestedSelectedAgentId
-      : undefined,
-  );
-
-  useEffect(() => {
-    if (visibleAgentViews.length === 0) {
-      if (selectedItemId !== undefined) {
-        setSelectedItemId(undefined);
-      }
-      return;
-    }
-
-    if (selectedItemId && visibleAgentViews.some((agent) => agent.id === selectedItemId)) {
-      return;
-    }
-
-    setSelectedItemId(visibleAgentViews[0].id);
-  }, [selectedItemId, visibleAgentViews]);
+      : undefined;
+  const [orderLoaded, setOrderLoaded] = useState(false);
 
   const isLoading = visibleAgentViews.some((agent) => agent.isLoading);
 
@@ -362,68 +343,68 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={!orderLoaded || isLoading}
       isShowingDetail
-      selectedItemId={selectedItemId}
-      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
+      {...(launchSelectedId ? { selectedItemId: launchSelectedId } : {})}
     >
-      {visibleAgentViews.map((agent, index) => {
-        const accessory = agent.getAccessory();
-        const detail = agent.isSupported ? agent.renderDetail() : renderUnsupportedDetail(agent);
+      {orderLoaded &&
+        visibleAgentViews.map((agent, index) => {
+          const accessory = agent.getAccessory();
+          const detail = agent.isSupported ? agent.renderDetail() : renderUnsupportedDetail(agent);
 
-        const canMoveUp = index > 0;
-        const canMoveDown = index < visibleAgentViews.length - 1;
+          const canMoveUp = index > 0;
+          const canMoveDown = index < visibleAgentViews.length - 1;
 
-        return (
-          <List.Item
-            key={agent.id}
-            id={agent.id}
-            icon={agent.icon}
-            title={agent.name}
-            subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
-            accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
-            detail={<List.Item.Detail metadata={detail} />}
-            actions={
-              <ActionPanel>
-                {agent.isSupported && (
-                  <>
-                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
-                    <Action.CopyToClipboard
-                      title="Copy Usage Details"
-                      content={agent.formatUsageText()}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
-                    />
-                    {agent.id === "gemini" && geminiState.error?.type === "unauthorized" && (
-                      <Action title="Run Gemini Re-Authentication" icon={Icon.Key} onAction={handleGeminiReauth} />
-                    )}
-                    {agent.settingsUrl && (
-                      <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
-                    )}
-                  </>
-                )}
-                <ActionPanel.Section title="Reorder">
-                  {canMoveUp && (
-                    <Action
-                      title="Move up"
-                      icon={Icon.ArrowUp}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
-                      onAction={() => moveAgent(agent.id, "up")}
-                    />
+          return (
+            <List.Item
+              key={agent.id}
+              id={agent.id}
+              icon={agent.icon}
+              title={agent.name}
+              subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
+              accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
+              detail={<List.Item.Detail metadata={detail} />}
+              actions={
+                <ActionPanel>
+                  {agent.isSupported && (
+                    <>
+                      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={handleRefresh} />
+                      <Action.CopyToClipboard
+                        title="Copy Usage Details"
+                        content={agent.formatUsageText()}
+                        shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      />
+                      {agent.id === "gemini" && geminiState.error?.type === "unauthorized" && (
+                        <Action title="Run Gemini Re-Authentication" icon={Icon.Key} onAction={handleGeminiReauth} />
+                      )}
+                      {agent.settingsUrl && (
+                        <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
+                      )}
+                    </>
                   )}
-                  {canMoveDown && (
-                    <Action
-                      title="Move Down"
-                      icon={Icon.ArrowDown}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
-                      onAction={() => moveAgent(agent.id, "down")}
-                    />
-                  )}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+                  <ActionPanel.Section title="Reorder">
+                    {canMoveUp && (
+                      <Action
+                        title="Move Up" // eslint-disable-line @raycast/prefer-title-case
+                        icon={Icon.ArrowUp}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                        onAction={() => moveAgent(agent.id, "up")}
+                      />
+                    )}
+                    {canMoveDown && (
+                      <Action
+                        title="Move Down"
+                        icon={Icon.ArrowDown}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                        onAction={() => moveAgent(agent.id, "down")}
+                      />
+                    )}
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }

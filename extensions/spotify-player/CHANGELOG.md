@@ -1,5 +1,13 @@
 # Spotify Player Changelog
 
+## [Reduce API Rate Limiting] - 2026-03-18
+
+- Added tiered API-level caching (short/medium/long TTL) to reduce redundant Spotify API calls
+- Removed cascading background command launches from playback commands (next, previous, like, dislike, skip15, back15)
+- Lazy-load Your Library sections by selected category instead of fetching all upfront
+- Increased menu bar polling interval and added debouncing to prevent refresh bursts
+- Simplified rate limit middleware to a single retry after honouring Retry-After
+
 ## [Fix Rate Limiting from Spotify API Changes] - 2026-03-08
 
 - Added 429 Retry-After middleware — all API calls now automatically retry on rate limit with proper backoff

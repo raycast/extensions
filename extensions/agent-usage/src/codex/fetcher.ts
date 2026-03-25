@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { getPreferenceValues } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
-import { resolveCodexAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
+import { resolveCodexAuthToken } from "./auth";
 import { httpFetch, normalizeBearerToken } from "../agents/http";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
-
-type Preferences = Preferences.AgentUsage;
 
 const CODEX_HEADERS = {
   Accept: "application/json",
@@ -18,8 +15,7 @@ async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | nul
   const { data, error } = await httpFetch({
     url: CODEX_USAGE_API,
     headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
-    unauthorizedMessage:
-      "Authorization token expired or invalid. Run 'codex login' or update the token in extension settings.",
+    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
   });
   if (error) return { usage: null, error };
   return parseCodexApiResponse(data);
@@ -150,42 +146,22 @@ export function useCodexUsage(enabled = true) {
     setIsLoading(true);
     setError(null);
 
-    const preferences = getPreferenceValues<Preferences>();
-    const preferenceToken = preferences.codexAuthToken?.trim() || "";
-    const {
-      primaryToken,
-      localToken,
-      preferenceToken: cleanedPreferenceToken,
-    } = resolveCodexAuthTokens({ preferenceToken });
+    const token = resolveCodexAuthToken();
 
-    if (!primaryToken) {
+    if (!token) {
       setUsage(null);
       setError({
         type: "not_configured",
-        message: "Codex is not configured. Run 'codex login' or add a token in extension settings (Cmd+,).",
+        message: "Codex is not configured. Run 'codex login' to authenticate.",
       });
       setIsLoading(false);
       setHasInitialFetch(true);
       return;
     }
 
-    let result = await fetchCodexUsage(primaryToken);
+    const result = await fetchCodexUsage(token);
     if (requestId !== requestIdRef.current) {
       return;
-    }
-
-    if (
-      cleanedPreferenceToken &&
-      shouldFallbackToPreferenceToken({
-        localToken,
-        preferenceToken: cleanedPreferenceToken,
-        errorType: result.error?.type,
-      })
-    ) {
-      result = await fetchCodexUsage(cleanedPreferenceToken);
-      if (requestId !== requestIdRef.current) {
-        return;
-      }
     }
 
     setUsage(result.usage);

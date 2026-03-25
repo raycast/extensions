@@ -2,8 +2,7 @@
 
 ## [Security Fixes] - {PR_MERGE_DATE}
 
-- Upgraded `tar` to `7.5.7` to resolve security advisories.
-- Updated tar import usage for `tar@7` compatibility when extracting FVM archives.
+- Update `tar` to ^7.5.11 to address hardlink path traversal CVE
 
 ## [Initial Version] - 2024-03-20
 

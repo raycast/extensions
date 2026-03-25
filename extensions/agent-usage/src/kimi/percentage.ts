@@ -9,5 +9,5 @@ export function formatRemainingPercent(remaining: number, limit: number): string
   if (!Number.isFinite(remaining) || !Number.isFinite(limit) || limit <= 0) {
     return "--";
   }
-  return `${getRemainingPercent(remaining, limit)}%`;
+  return `${getRemainingPercent(remaining, limit)}% remaining`;
 }

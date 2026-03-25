@@ -1,5 +1,27 @@
 # Changelog
 
+## [Lock File Metadata] - 2026-03-23
+
+- Show skill source, install date, and update date from the global lock file in the detail panel
+- Add "Open on GitHub" action for installed skills
+- Add "Copy Source URL" action for installed skills
+
+## [Improve macOS `npx` Path Resolution] - 2026-03-20
+
+- Run the Skills CLI without spawning a login shell by building an explicit PATH for Homebrew and common Node.js version-manager installs
+- Add a custom `npx` path preference for non-standard setups
+- Show clearer recovery guidance for `npx` and Skills CLI failures, including a shortcut to open Extension Preference
+
+## [Fix Incomplete Agent List] - 2026-03-17
+
+- Use `skills list --json` for structured output instead of parsing ANSI text
+- Show all supported agents in the filter dropdown and detail panel
+
+## [Highlight Outdated Skills] - 2026-03-16
+
+- Highlight outdated skills with an orange hammer icon in the installed skills list
+- Show "Updates Available" section with count when updates exist
+
 ## [Fix Duplicate Audit Error Toast] - 2026-03-11
 
 - Fix error toast showing twice when re-selecting a skill with a failed audit fetch

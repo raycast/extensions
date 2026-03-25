@@ -501,15 +501,19 @@ export class GitLab {
       });
       const s = response.status;
       logAPI(`status code: ${s}`);
+      if (s === 204 || s === 304) {
+        return;
+      }
+
       if (s >= 200 && s < 300) {
-        const json = await response.json();
-        return json;
-      } else if (s === 304) {
-        // Not Modified
-        // ignored
-      } else if (s == 401) {
+        return await response.json();
+      }
+
+      if (s === 401) {
         throw Error("Unauthorized");
-      } else if (s == 403) {
+      }
+
+      if (s === 403) {
         const json = (await response.json()) as any;
         let msg = "Forbidden";
         if (json.error && json.error == "insufficient_scope") {
@@ -517,9 +521,13 @@ export class GitLab {
         }
         logAPI(msg);
         throw Error(msg);
-      } else if (s == 404) {
+      }
+
+      if (s === 404) {
         throw Error("Not found");
-      } else if (s >= 400 && s < 500) {
+      }
+
+      if (s >= 400 && s < 500) {
         const json = (await response.json()) as any;
         logAPI(json);
         let msg = `http status ${s}`;
@@ -528,10 +536,10 @@ export class GitLab {
           msg = JSON.stringify(json.message);
         }
         throw Error(msg);
-      } else {
-        logAPI("unknown error");
-        throw Error(`http status ${s}`);
       }
+
+      logAPI("unknown error");
+      throw Error(`http status ${s}`);
     } catch (e: any) {
       logAPI(`catch error: ${e}`);
       throw Error(e.message); // rethrow error, otherwise raycast could not catch the error

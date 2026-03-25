@@ -1,5 +1,27 @@
 # Agent Usage Changelog
 
+## [Progress Bars & Zero-Config Auth] - {PR_MERGE_DATE}
+
+### New Features
+
+- Add ASCII progress bar visualization for all agent usage details
+- Auto-detect Droid auth token from `~/.factory/auth.*` (zero config)
+- Auto-detect Codex auth token from `~/.codex/auth.json` (zero config)
+- Auto-detect z.ai API key from shell environment variables (`ZAI_API_KEY` / `GLM_API_KEY`)
+- Auto-refresh usage data on menu bar click
+
+### Improvements
+
+- Unify detail field names and progress bar style across all agents
+- Simplify Amp detail view (remove email and nickname)
+- Simplify Gemini detail view (remove email and tier fields)
+- Shorten Amp bonus duration format to "d" suffix
+
+### Bug Fixes
+
+- Fix z.ai env token lookup to be async and robust
+- Harden Droid and Codex auth refresh and hook state
+
 ## [Add Claude Usage Provider] - 2026-03-09
 
 - Add Claude usage provider powered by Claude CLI OAuth credentials
