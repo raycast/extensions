@@ -137,6 +137,7 @@ export default function Command() {
       await Clipboard.copy(csv);
       void showToast(Toast.Style.Success, "CSV exported", "Copied to clipboard");
     } catch (e) {
+      console.error(e);
       void showToast(Toast.Style.Failure, "CSV export failed");
     }
   }
@@ -148,6 +149,7 @@ export default function Command() {
       await Clipboard.copy(jsonString);
       void showToast(Toast.Style.Success, "Data exported", "JSON copied to clipboard");
     } catch (e) {
+      console.error(e);
       void showToast(Toast.Style.Failure, "Export failed");
     }
   }
@@ -170,6 +172,7 @@ export default function Command() {
       await saveData(migratedExpenses, parsed.usageDays || []);
       void showToast(Toast.Style.Success, "Data imported", `${migratedExpenses.length} expenses loaded`);
     } catch (e) {
+      console.error(e);
       void showToast(Toast.Style.Failure, "Import failed", "Invalid JSON data");
     }
   }
