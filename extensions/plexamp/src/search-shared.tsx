@@ -131,7 +131,7 @@ function SearchResultsList(props: {
                   <PlaybackActionItems
                     item={album}
                     browseTitle="Browse Tracks"
-                    browseTarget={<AlbumTrackList album={album} />}
+                    browseTarget={<AlbumTrackList album={album} sectionKey={props.sectionKey} />}
                     onPlay={props.onPlay}
                     onPlayNext={props.onPlayNext}
                     onQueue={props.onQueue}
@@ -191,7 +191,7 @@ function SearchResultsList(props: {
                   <PlaybackActionItems
                     item={playlist}
                     browseTitle="Browse Playlist"
-                    browseTarget={<PlaylistTrackList playlist={playlist} />}
+                    browseTarget={<PlaylistTrackList playlist={playlist} sectionKey={props.sectionKey} />}
                     onPlay={props.onPlay}
                     onPlayNext={props.onPlayNext}
                     onQueue={props.onQueue}

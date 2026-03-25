@@ -1,5 +1,7 @@
 import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { formatTrackDisplayTitle, getTrackRatingDisplayMode } from "./format";
 import {
@@ -9,6 +11,8 @@ import {
   getMetadataByRatingKey,
   getTracksForAlbum,
   getTracksForPlaylist,
+  getTracksPage,
+  searchLibrary,
 } from "./plex";
 import {
   NowPlayingAction,
@@ -22,7 +26,68 @@ import {
 import { PlexSetupView } from "./plex-setup-view";
 import { useAsyncValue } from "./use-async-value";
 import { useLibrarySelection } from "./use-library-selection";
-import type { AudioPlaylist, MusicAlbum, MusicArtist, MusicTrack, PlayableItem } from "./types";
+import type { AudioPlaylist, MusicAlbum, MusicArtist, MusicTrack, PlayableItem, SearchResults } from "./types";
+
+const TRACKS_PAGE_SIZE = 100;
+
+// ---------------------------------------------------------------------------
+// Shared: debounced server-side search hook
+// ---------------------------------------------------------------------------
+
+interface BrowseSearchState {
+  isLoading: boolean;
+  results: SearchResults;
+}
+
+function useBrowseSearch(sectionKey: string | undefined, query: string): BrowseSearchState {
+  const [state, setState] = useState<BrowseSearchState>({
+    isLoading: false,
+    results: { tracks: [], albums: [], artists: [], playlists: [] },
+  });
+  const activeRequestRef = useRef(0);
+
+  useEffect(() => {
+    const requestId = ++activeRequestRef.current;
+
+    if (!sectionKey || query.trim().length === 0) {
+      setState({
+        isLoading: false,
+        results: { tracks: [], albums: [], artists: [], playlists: [] },
+      });
+      return;
+    }
+
+    setState((current) => ({ ...current, isLoading: true }));
+
+    const timeout = setTimeout(() => {
+      void searchLibrary(sectionKey, query)
+        .then((results) => {
+          if (requestId === activeRequestRef.current) {
+            setState({ isLoading: false, results });
+          }
+        })
+        .catch(() => {
+          if (requestId === activeRequestRef.current) {
+            setState({
+              isLoading: false,
+              results: { tracks: [], albums: [], artists: [], playlists: [] },
+            });
+          }
+        });
+    }, 250);
+
+    return () => {
+      activeRequestRef.current += 1;
+      clearTimeout(timeout);
+    };
+  }, [query, sectionKey]);
+
+  return state;
+}
+
+// ---------------------------------------------------------------------------
+// Shared: launch context
+// ---------------------------------------------------------------------------
 
 interface BrowseLaunchContext {
   target?: "album" | "artist";
@@ -34,208 +99,9 @@ function getBrowseNavigationTitle(libraryName: string, serverName?: string): str
   return `Browse: ${libraryName} on ${serverName ?? "Plex Media Server"}`;
 }
 
-function normalizeReleaseType(album: MusicAlbum): string {
-  const value = `${album.releaseType ?? ""} ${album.releaseSubType ?? ""}`.toLowerCase().trim();
-
-  if (value.includes("compilation")) {
-    return "Compilations";
-  }
-
-  if (value.includes("live")) {
-    return "Live";
-  }
-
-  if (value.includes("single") || value.includes("ep")) {
-    return "Singles & EPs";
-  }
-
-  if (value.includes("soundtrack")) {
-    return "Soundtracks";
-  }
-
-  if (value.includes("remix")) {
-    return "Remixes";
-  }
-
-  if (value.includes("demo")) {
-    return "Demos";
-  }
-
-  return "Albums";
-}
-
-function groupAlbumsByReleaseType(albums: MusicAlbum[]): [string, MusicAlbum[]][] {
-  const sections = new Map<string, MusicAlbum[]>();
-
-  for (const album of albums) {
-    const section = normalizeReleaseType(album);
-    const items = sections.get(section) ?? [];
-    items.push(album);
-    sections.set(section, items);
-  }
-
-  const order = ["Albums", "Singles & EPs", "Live", "Compilations", "Soundtracks", "Remixes", "Demos"];
-
-  return [...sections.entries()]
-    .map(
-      ([title, items]) =>
-        [
-          title,
-          [...items].sort((left, right) => {
-            const yearDifference = (right.year ?? 0) - (left.year ?? 0);
-
-            if (yearDifference !== 0) {
-              return yearDifference;
-            }
-
-            return left.title.localeCompare(right.title);
-          }),
-        ] as [string, MusicAlbum[]],
-    )
-    .sort(([left], [right]) => {
-      const leftIndex = order.indexOf(left);
-      const rightIndex = order.indexOf(right);
-
-      if (leftIndex === -1 && rightIndex === -1) {
-        return left.localeCompare(right);
-      }
-
-      if (leftIndex === -1) {
-        return 1;
-      }
-
-      if (rightIndex === -1) {
-        return -1;
-      }
-
-      return leftIndex - rightIndex;
-    });
-}
-
-function AlbumRow(props: {
-  album: MusicAlbum;
-  onPlay: (item: PlayableItem) => Promise<void>;
-  onPlayNext: (item: PlayableItem) => Promise<void>;
-  onQueue: (item: PlayableItem) => Promise<void>;
-}) {
-  const { push } = useNavigation();
-
-  return (
-    <List.Item
-      key={props.album.ratingKey}
-      icon={artworkSource(props.album.thumb)}
-      title={props.album.title}
-      subtitle={props.album.parentTitle}
-      accessories={albumAccessories(props.album)}
-      actions={
-        <ActionPanel>
-          <Action
-            title="Browse Tracks"
-            icon={Icon.ArrowRight}
-            onAction={() => push(<AlbumTrackList album={props.album} />)}
-          />
-          <PlaybackActionItems
-            item={props.album}
-            onPlay={props.onPlay}
-            onPlayNext={props.onPlayNext}
-            onQueue={props.onQueue}
-            nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function RootContent() {
-  const libraries = useLibrarySelection();
-  const artists = useAsyncValue(
-    () => (libraries.selectedLibrary ? getArtists(libraries.selectedLibrary.key) : Promise.resolve([])),
-    libraries.selectedLibrary?.key ?? "no-library",
-    [] as MusicArtist[],
-  );
-  const playlists = useAsyncValue(
-    () => (libraries.selectedLibrary ? getAudioPlaylists(libraries.selectedLibrary.key) : Promise.resolve([])),
-    `playlists-${libraries.selectedLibrary?.key ?? "no-library"}`,
-    [] as AudioPlaylist[],
-  );
-  const playback = usePlaybackActions();
-  const { push } = useNavigation();
-
-  const isLoading = libraries.isLoading || artists.isLoading || playlists.isLoading || playback.isPerforming;
-  const error = libraries.error ?? artists.error ?? playlists.error;
-  const selectedLibrary = libraries.selectedLibrary;
-
-  if (libraries.isLoading) {
-    return <List isLoading navigationTitle="Browse Library" />;
-  }
-
-  if (libraries.error || !selectedLibrary) {
-    return (
-      <PlexSetupView
-        navigationTitle="Browse Library"
-        problem={error}
-        onConfigured={() => {
-          void libraries.reload();
-        }}
-      />
-    );
-  }
-
-  return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={getBrowseNavigationTitle(selectedLibrary.title, libraries.selectedServerName)}
-      searchBarPlaceholder="Filter artists and playlists"
-      actions={
-        <ActionPanel>
-          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-          <PreferencesAction />
-        </ActionPanel>
-      }
-    >
-      <List.Section title="Playlists">
-        {playlists.value.map((playlist) => (
-          <List.Item
-            key={playlist.ratingKey}
-            icon={artworkSource(playlist.thumb, Icon.List)}
-            title={playlist.title}
-            accessories={playlist.leafCount ? [{ text: `${playlist.leafCount} tracks` }] : []}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Browse Playlist"
-                  icon={Icon.ArrowRight}
-                  onAction={() => push(<PlaylistTrackList playlist={playlist} />)}
-                />
-                <PlaybackActionItems
-                  item={playlist}
-                  onPlay={playback.play}
-                  onPlayNext={playback.playNext}
-                  onQueue={playback.queue}
-                  nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-
-      <List.Section title="Artists">
-        {artists.value.map((artist) => (
-          <ArtistRow
-            key={artist.ratingKey}
-            artist={artist}
-            sectionKey={selectedLibrary.key}
-            onPlay={playback.play}
-            onPlayNext={playback.playNext}
-            onQueue={playback.queue}
-          />
-        ))}
-      </List.Section>
-    </List>
-  );
-}
+// ---------------------------------------------------------------------------
+// Row components
+// ---------------------------------------------------------------------------
 
 function ArtistRow(props: {
   artist: MusicArtist;
@@ -272,6 +138,311 @@ function ArtistRow(props: {
   );
 }
 
+function AlbumRow(props: {
+  album: MusicAlbum;
+  sectionKey: string;
+  onPlay: (item: PlayableItem) => Promise<void>;
+  onPlayNext: (item: PlayableItem) => Promise<void>;
+  onQueue: (item: PlayableItem) => Promise<void>;
+}) {
+  const { push } = useNavigation();
+
+  return (
+    <List.Item
+      key={props.album.ratingKey}
+      icon={artworkSource(props.album.thumb)}
+      title={props.album.title}
+      subtitle={props.album.parentTitle}
+      accessories={albumAccessories(props.album)}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Browse Tracks"
+            icon={Icon.ArrowRight}
+            onAction={() => push(<AlbumTrackList album={props.album} sectionKey={props.sectionKey} />)}
+          />
+          <PlaybackActionItems
+            item={props.album}
+            onPlay={props.onPlay}
+            onPlayNext={props.onPlayNext}
+            onQueue={props.onQueue}
+            nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function PlaylistRow(props: {
+  playlist: AudioPlaylist;
+  sectionKey: string;
+  onPlay: (item: PlayableItem) => Promise<void>;
+  onPlayNext: (item: PlayableItem) => Promise<void>;
+  onQueue: (item: PlayableItem) => Promise<void>;
+}) {
+  const { push } = useNavigation();
+
+  return (
+    <List.Item
+      key={props.playlist.ratingKey}
+      icon={artworkSource(props.playlist.thumb, Icon.List)}
+      title={props.playlist.title}
+      accessories={props.playlist.leafCount ? [{ text: `${props.playlist.leafCount} tracks` }] : []}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Browse Playlist"
+            icon={Icon.ArrowRight}
+            onAction={() => push(<PlaylistTrackList playlist={props.playlist} sectionKey={props.sectionKey} />)}
+          />
+          <PlaybackActionItems
+            item={props.playlist}
+            onPlay={props.onPlay}
+            onPlayNext={props.onPlayNext}
+            onQueue={props.onQueue}
+            nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function TrackRow(props: {
+  track: MusicTrack;
+  coverPath?: string;
+  onPlay: (item: PlayableItem) => Promise<void>;
+  onPlayNext: (item: PlayableItem) => Promise<void>;
+  onQueue: (item: PlayableItem) => Promise<void>;
+}) {
+  const ratingDisplayMode = getTrackRatingDisplayMode();
+
+  return (
+    <List.Item
+      key={props.track.ratingKey}
+      icon={artworkSource(props.track.thumb ?? props.coverPath)}
+      title={formatTrackDisplayTitle(props.track.title, {
+        parentIndex: props.track.parentIndex,
+        index: props.track.index,
+        userRating: props.track.userRating,
+        displayMode: ratingDisplayMode,
+      })}
+      subtitle={[props.track.grandparentTitle, props.track.parentTitle].filter(Boolean).join(" - ")}
+      accessories={trackAccessories(props.track)}
+      actions={
+        <ActionPanel>
+          <PlaybackActionItems
+            item={props.track}
+            onPlay={props.onPlay}
+            onPlayNext={props.onPlayNext}
+            onQueue={props.onQueue}
+            nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Search results view (shared between RootContent and AlbumList)
+// ---------------------------------------------------------------------------
+
+function SearchResultsView(props: {
+  sectionKey: string;
+  serverName?: string;
+  navigationTitle: string;
+  searchText: string;
+  onSearchTextChange: (text: string) => void;
+  search: BrowseSearchState;
+  playlists: AudioPlaylist[];
+  playback: {
+    play: (item: PlayableItem) => Promise<void>;
+    playNext: (item: PlayableItem) => Promise<void>;
+    queue: (item: PlayableItem) => Promise<void>;
+    isPerforming: boolean;
+  };
+}) {
+  const matchingPlaylists = props.playlists.filter((playlist) =>
+    playlist.title.toLowerCase().includes(props.searchText.trim().toLowerCase()),
+  );
+  const hasResults =
+    props.search.results.artists.length > 0 ||
+    props.search.results.albums.length > 0 ||
+    props.search.results.tracks.length > 0 ||
+    matchingPlaylists.length > 0;
+
+  return (
+    <List
+      isLoading={props.search.isLoading || props.playback.isPerforming}
+      filtering={false}
+      navigationTitle={props.navigationTitle}
+      searchBarPlaceholder="Search artists, albums, songs, and playlists"
+      searchText={props.searchText}
+      onSearchTextChange={props.onSearchTextChange}
+      actions={
+        <ActionPanel>
+          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+          <PreferencesAction />
+        </ActionPanel>
+      }
+    >
+      {props.search.results.artists.length > 0 ? (
+        <List.Section title="Artists">
+          {props.search.results.artists.map((artist) => (
+            <ArtistRow
+              key={artist.ratingKey}
+              artist={artist}
+              sectionKey={props.sectionKey}
+              onPlay={props.playback.play}
+              onPlayNext={props.playback.playNext}
+              onQueue={props.playback.queue}
+            />
+          ))}
+        </List.Section>
+      ) : null}
+
+      {props.search.results.albums.length > 0 ? (
+        <List.Section title="Albums">
+          {props.search.results.albums.map((album) => (
+            <AlbumRow
+              key={album.ratingKey}
+              album={album}
+              sectionKey={props.sectionKey}
+              onPlay={props.playback.play}
+              onPlayNext={props.playback.playNext}
+              onQueue={props.playback.queue}
+            />
+          ))}
+        </List.Section>
+      ) : null}
+
+      {props.search.results.tracks.length > 0 ? (
+        <List.Section title="Songs">
+          {props.search.results.tracks.map((track) => (
+            <TrackRow
+              key={track.ratingKey}
+              track={track}
+              onPlay={props.playback.play}
+              onPlayNext={props.playback.playNext}
+              onQueue={props.playback.queue}
+            />
+          ))}
+        </List.Section>
+      ) : null}
+
+      {matchingPlaylists.length > 0 ? (
+        <List.Section title="Playlists">
+          {matchingPlaylists.map((playlist) => (
+            <PlaylistRow
+              key={playlist.ratingKey}
+              playlist={playlist}
+              sectionKey={props.sectionKey}
+              onPlay={props.playback.play}
+              onPlayNext={props.playback.playNext}
+              onQueue={props.playback.queue}
+            />
+          ))}
+        </List.Section>
+      ) : null}
+
+      {!props.search.isLoading && !hasResults ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No results"
+          description="No matching artists, albums, songs, or playlists found."
+        />
+      ) : null}
+    </List>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// RootContent: Browse Library (paginated artists + playlists, server-side search)
+// ---------------------------------------------------------------------------
+
+function RootContent() {
+  const libraries = useLibrarySelection();
+  const selectedLibrary = libraries.selectedLibrary;
+
+  const artists = useAsyncValue(
+    () => (selectedLibrary ? getArtists(selectedLibrary.key) : Promise.resolve([])),
+    selectedLibrary?.key ?? "no-library",
+    [] as MusicArtist[],
+  );
+  const playlists = useAsyncValue(
+    () => (selectedLibrary ? getAudioPlaylists(selectedLibrary.key) : Promise.resolve([])),
+    `playlists-${selectedLibrary?.key ?? "no-library"}`,
+    [] as AudioPlaylist[],
+  );
+  const playback = usePlaybackActions();
+
+  const isLoading = libraries.isLoading || artists.isLoading || playlists.isLoading || playback.isPerforming;
+
+  if (libraries.isLoading) {
+    return <List isLoading navigationTitle="Browse Library" />;
+  }
+
+  if (libraries.error || !selectedLibrary) {
+    return (
+      <PlexSetupView
+        navigationTitle="Browse Library"
+        problem={libraries.error}
+        onConfigured={() => {
+          void libraries.reload();
+        }}
+      />
+    );
+  }
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle={getBrowseNavigationTitle(selectedLibrary.title, libraries.selectedServerName)}
+      searchBarPlaceholder="Filter artists and playlists"
+      actions={
+        <ActionPanel>
+          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+          <PreferencesAction />
+        </ActionPanel>
+      }
+    >
+      {playlists.value.length > 0 ? (
+        <List.Section title="Playlists">
+          {playlists.value.map((playlist) => (
+            <PlaylistRow
+              key={playlist.ratingKey}
+              playlist={playlist}
+              sectionKey={selectedLibrary.key}
+              onPlay={playback.play}
+              onPlayNext={playback.playNext}
+              onQueue={playback.queue}
+            />
+          ))}
+        </List.Section>
+      ) : null}
+
+      <List.Section title="Artists">
+        {artists.value.map((artist) => (
+          <ArtistRow
+            key={artist.ratingKey}
+            artist={artist}
+            sectionKey={selectedLibrary.key}
+            onPlay={playback.play}
+            onPlayNext={playback.playNext}
+            onQueue={playback.queue}
+          />
+        ))}
+      </List.Section>
+    </List>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// AlbumList: paginated albums for an artist, server-side search
+// ---------------------------------------------------------------------------
+
 export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
   const albums = useAsyncValue(
     () => getAlbumsForArtist(props.sectionKey, props.artist),
@@ -279,7 +450,6 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
     [] as MusicAlbum[],
   );
   const playback = usePlaybackActions();
-  const sections = groupAlbumsByReleaseType(albums.value);
 
   return (
     <List
@@ -306,25 +476,37 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
           }
         />
       ) : null}
-      {sections.map(([title, items]) => (
-        <List.Section key={title} title={title}>
-          {items.map((album) => (
-            <AlbumRow
-              key={album.ratingKey}
-              album={album}
-              onPlay={playback.play}
-              onPlayNext={playback.playNext}
-              onQueue={playback.queue}
-            />
-          ))}
-        </List.Section>
+      {albums.value.map((album) => (
+        <AlbumRow
+          key={album.ratingKey}
+          album={album}
+          sectionKey={props.sectionKey}
+          onPlay={playback.play}
+          onPlayNext={playback.playNext}
+          onQueue={playback.queue}
+        />
       ))}
     </List>
   );
 }
 
-export function AlbumTrackList(props: { album: MusicAlbum }) {
-  const tracks = useAsyncValue(() => getTracksForAlbum(props.album), props.album.ratingKey, [] as MusicTrack[]);
+// ---------------------------------------------------------------------------
+// Track loading threshold: below this, load all tracks for scoped client-side
+// filtering. Above this, paginate and fall back to library-wide search.
+// ---------------------------------------------------------------------------
+
+const SCOPED_SEARCH_TRACK_LIMIT = 1000;
+
+// ---------------------------------------------------------------------------
+// AlbumTrackList: albums are small — always load all tracks for scoped search
+// ---------------------------------------------------------------------------
+
+export function AlbumTrackList(props: { album: MusicAlbum; sectionKey: string }) {
+  const tracks = useAsyncValue(
+    () => getTracksForAlbum(props.album),
+    props.album.ratingKey,
+    [] as MusicTrack[],
+  );
   const playback = usePlaybackActions();
 
   return (
@@ -341,7 +523,22 @@ export function AlbumTrackList(props: { album: MusicAlbum }) {
   );
 }
 
-export function PlaylistTrackList(props: { playlist: AudioPlaylist }) {
+// ---------------------------------------------------------------------------
+// PlaylistTrackList: threshold-based — scoped search if small, paginated
+// with library-wide search fallback if large
+// ---------------------------------------------------------------------------
+
+export function PlaylistTrackList(props: { playlist: AudioPlaylist; sectionKey: string }) {
+  const isSmall = (props.playlist.leafCount ?? 0) <= SCOPED_SEARCH_TRACK_LIMIT;
+
+  if (isSmall) {
+    return <SmallPlaylistTrackList playlist={props.playlist} sectionKey={props.sectionKey} />;
+  }
+
+  return <LargePlaylistTrackList playlist={props.playlist} sectionKey={props.sectionKey} />;
+}
+
+function SmallPlaylistTrackList(props: { playlist: AudioPlaylist; sectionKey: string }) {
   const tracks = useAsyncValue(
     () => getTracksForPlaylist(props.playlist),
     props.playlist.ratingKey,
@@ -362,6 +559,64 @@ export function PlaylistTrackList(props: { playlist: AudioPlaylist }) {
     />
   );
 }
+
+function LargePlaylistTrackList(props: { playlist: AudioPlaylist; sectionKey: string }) {
+  const [searchText, setSearchText] = useState("");
+  const isSearching = searchText.trim().length > 0;
+
+  const {
+    data: tracks,
+    isLoading: tracksLoading,
+    pagination,
+  } = usePromise(
+    (browseKey: string) =>
+      async (options: { page: number }) => {
+        const { items, totalSize } = await getTracksPage(browseKey, options.page * TRACKS_PAGE_SIZE, TRACKS_PAGE_SIZE);
+        return { data: items, hasMore: options.page * TRACKS_PAGE_SIZE + items.length < totalSize };
+      },
+    [props.playlist.browseKey],
+  );
+
+  const search = useBrowseSearch(props.sectionKey, searchText);
+  const playback = usePlaybackActions();
+
+  const onSearchTextChange = useCallback((text: string) => {
+    setSearchText(text);
+  }, []);
+
+  if (isSearching) {
+    return (
+      <SearchResultsView
+        sectionKey={props.sectionKey}
+        navigationTitle={props.playlist.title}
+        searchText={searchText}
+        onSearchTextChange={onSearchTextChange}
+        search={search}
+        playlists={[]}
+        playback={playback}
+      />
+    );
+  }
+
+  return (
+    <PaginatedTrackList
+      title={props.playlist.title}
+      coverPath={props.playlist.thumb}
+      tracks={tracks ?? []}
+      isLoading={tracksLoading || playback.isPerforming}
+      pagination={pagination}
+      searchText={searchText}
+      onSearchTextChange={onSearchTextChange}
+      onPlay={playback.play}
+      onPlayNext={playback.playNext}
+      onQueue={playback.queue}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// TrackList: all tracks loaded — uses Raycast built-in client-side filtering
+// ---------------------------------------------------------------------------
 
 function TrackList(props: {
   title: string;
@@ -429,7 +684,74 @@ function TrackList(props: {
   );
 }
 
-function LaunchAlbumView(props: { ratingKey: string }) {
+// ---------------------------------------------------------------------------
+// PaginatedTrackList: large track lists — paginated, no client-side filtering
+// ---------------------------------------------------------------------------
+
+function PaginatedTrackList(props: {
+  title: string;
+  coverPath?: string;
+  tracks: MusicTrack[];
+  isLoading: boolean;
+  pagination?: { pageSize: number; hasMore: boolean; onLoadMore: () => void };
+  searchText?: string;
+  onSearchTextChange?: (text: string) => void;
+  onPlay: (item: PlayableItem) => Promise<void>;
+  onPlayNext: (item: PlayableItem) => Promise<void>;
+  onQueue: (item: PlayableItem) => Promise<void>;
+}) {
+  const ratingDisplayMode = getTrackRatingDisplayMode();
+
+  return (
+    <List
+      isLoading={props.isLoading}
+      filtering={false}
+      navigationTitle={props.title}
+      searchBarPlaceholder="Search tracks"
+      searchText={props.searchText}
+      onSearchTextChange={props.onSearchTextChange}
+      pagination={props.pagination}
+      actions={
+        <ActionPanel>
+          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+          <PreferencesAction />
+        </ActionPanel>
+      }
+    >
+      {props.tracks.map((track) => (
+        <List.Item
+          key={track.ratingKey}
+          icon={artworkSource(track.thumb ?? props.coverPath)}
+          title={formatTrackDisplayTitle(track.title, {
+            parentIndex: track.parentIndex,
+            index: track.index,
+            userRating: track.userRating,
+            displayMode: ratingDisplayMode,
+          })}
+          subtitle={[track.grandparentTitle, track.parentTitle].filter(Boolean).join(" - ")}
+          accessories={trackAccessories(track)}
+          actions={
+            <ActionPanel>
+              <PlaybackActionItems
+                item={track}
+                onPlay={props.onPlay}
+                onPlayNext={props.onPlayNext}
+                onQueue={props.onQueue}
+                nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Deep-link launch views
+// ---------------------------------------------------------------------------
+
+function LaunchAlbumView(props: { ratingKey: string; sectionKey: string }) {
   const album = useAsyncValue(
     async () => {
       const metadata = await getMetadataByRatingKey(props.ratingKey);
@@ -445,7 +767,7 @@ function LaunchAlbumView(props: { ratingKey: string }) {
   );
 
   if (album.value) {
-    return <AlbumTrackList album={album.value} />;
+    return <AlbumTrackList album={album.value} sectionKey={props.sectionKey} />;
   }
 
   return (
@@ -519,11 +841,15 @@ function LaunchArtistView(props: { ratingKey: string; sectionKey: string }) {
   );
 }
 
+// ---------------------------------------------------------------------------
+// Command entry point
+// ---------------------------------------------------------------------------
+
 export default function Command(props: LaunchProps<{ launchContext?: BrowseLaunchContext }>) {
   const context = props.launchContext;
 
-  if (context?.target === "album" && context.ratingKey) {
-    return <LaunchAlbumView ratingKey={context.ratingKey} />;
+  if (context?.target === "album" && context.ratingKey && context.sectionKey) {
+    return <LaunchAlbumView ratingKey={context.ratingKey} sectionKey={context.sectionKey} />;
   }
 
   if (context?.target === "artist" && context.ratingKey && context.sectionKey) {
