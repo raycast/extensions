@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "craft-cms-docs",
-  "title": "Craft CMS Docs",
-  "description": "Search the official Craft CMS documentation, knowledge base, and glossary.",
+  "title": "Craft CMS",
+  "description": "Search the official Craft CMS documentation, knowledge base, glossary, and plugin store.",
   "icon": "extension-icon.png",
   "author": "bensomething",
   "platforms": [
@@ -102,6 +102,20 @@
               "value": "compact"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "search-plugins",
+      "title": "Search Plugins",
+      "description": "Search the Craft CMS plugin store",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "type": "text",
+          "required": false,
+          "placeholder": "Search term"
         }
       ]
     }
