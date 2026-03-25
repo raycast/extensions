@@ -1,6 +1,6 @@
 # Password Store Changelog
 
-## [Fix] - 2026-03-25
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed insert password hanging indefinitely due to stdin not closing properly
 
