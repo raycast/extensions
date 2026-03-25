@@ -7,10 +7,7 @@
   "author": "jimmycheung",
   "license": "MIT",
   "platforms": [
-    "macOS"
-  ],
   "categories": [
-    "Applications",
     "Productivity"
   ],
   "commands": [
