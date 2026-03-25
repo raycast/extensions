@@ -36,7 +36,6 @@ interface StorageData {
 const DATA_VERSION = 1;
 const STORAGE_KEY = "camper-calc-data";
 
-// 🔧 CATEGORIES — Add or rename categories here
 const CATEGORIES = [
   "Purchase",
   "Additional Equipment",
@@ -52,9 +51,7 @@ const CATEGORIES = [
   "Other",
 ];
 
-// 📝 CATEGORY MIGRATION — Define renames here
 const CATEGORY_MIGRATIONS: { [oldName: string]: string } = {
-  // Legacy German keys (for users migrating from womo-calc JSON exports)
   Anschaffung: "Purchase",
   Zusatzausstattung: "Additional Equipment",
   Wartung: "Maintenance",
@@ -122,14 +119,14 @@ export default function Command() {
 
   async function exportCSV() {
     try {
-      let csv = "Year,Category,Description,Amount\n";
-      let csv = "Year,Category,Description,Amount\n";
       const quote = (s: string) => `"${s.replace(/"/g, '""')}"`;
+      let csv = "Year,Category,Description,Amount\n";
       expenses
         .sort((a, b) => a.year - b.year)
         .forEach((e) => {
           const amount = e.amount.toFixed(2);
           csv += `${e.year},${quote(e.category)},${quote(e.description)},${amount}\n`;
+        });
       csv += "\n";
       csv += "Year,Usage Days\n";
       usageDays
@@ -212,14 +209,12 @@ export default function Command() {
     let grossExpenses = 0;
     let residualValue = 0;
 
-    // Use only the most recent residual value entry (highest year)
     const residualEntries = expenses.filter((e) => e.category === "Residual Value");
     if (residualEntries.length > 0) {
       const latest = residualEntries.sort((a, b) => b.year - a.year)[0];
       residualValue = latest.amount;
     }
 
-    // Gross = all expenses except residual value entries
     expenses.forEach((e) => {
       if (e.category !== "Residual Value") {
         grossExpenses += e.amount;
@@ -233,7 +228,6 @@ export default function Command() {
     const byYear: { [year: number]: { expenses: number; days: number } } = {};
     expenses.forEach((e) => {
       if (!byYear[e.year]) byYear[e.year] = { expenses: 0, days: 0 };
-      // Residual value excluded from yearly breakdown
       if (e.category !== "Residual Value") {
         byYear[e.year].expenses += e.amount;
       }
@@ -243,7 +237,6 @@ export default function Command() {
       byYear[u.year].days += u.days;
     });
 
-    // Category stats exclude residual value
     const byCategory: { [category: string]: number } = {};
     expenses.forEach((e) => {
       if (e.category !== "Residual Value") {
@@ -361,7 +354,8 @@ export default function Command() {
       <List.Section title="📂 By Category">
         {Object.entries(stats.byCategory)
           .sort((a, b) => b[1] - a[1])
-          const percentage = stats.netExpenses > 0 ? (amount / stats.netExpenses) * 100 : 0;
+          .map(([category, amount]) => {
+            const percentage = stats.netExpenses > 0 ? (amount / stats.netExpenses) * 100 : 0;
             return (
               <List.Item
                 key={category}
@@ -369,7 +363,7 @@ export default function Command() {
                 accessories={[
                   {
                     text: `${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                    tooltip: `${percentage.toFixed(1)}% of ${isResidual ? "gross expenses" : "net cost"}`,
+                    tooltip: `${percentage.toFixed(1)}% of net cost`,
                   },
                 ]}
               />
