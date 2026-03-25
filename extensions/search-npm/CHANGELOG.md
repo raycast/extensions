@@ -3,6 +3,7 @@
 ## [API usage optimization] - {PR_MERGE_DATE}
 
 - Debounce search API calls to avoid unnecessary requests while the user is typing.
+- Do not make API calls when the search term is empty or too short.
 
 ## [Fix keywords] - 2026-02-10
 

@@ -24,7 +24,7 @@ export default function PackageList() {
   // If the search term is empty or only 1 character - the request will always result in 'Bad Request' error, so there's no reason to make it
   const canSearch = Boolean(debouncedSearchTerm) && debouncedSearchTerm.length > 1;
 
-  const { isLoading, data, revalidate } = useFetch<FetchResponseObject[]>(url, {
+  const { isLoading, data } = useFetch<FetchResponseObject[]>(url, {
     execute: canSearch,
     onError: (error: unknown) => {
       if (debouncedSearchTerm) {
@@ -60,7 +60,8 @@ export default function PackageList() {
     if (searchTerm) {
       debouncedUpdateHistory(searchTerm);
     } else {
-      revalidate();
+      debouncedUpdateHistory.cancel();
+      debouncedUpdateSearchTerm.cancel();
     }
   }, [searchTerm]);
 
