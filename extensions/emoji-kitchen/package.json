@@ -48,5 +48,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you want to publish your extension to the Raycast Store instead, please add raycast-extension to your keywords in package.json and run \\`npx @raycast/api@latest publish\\`.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
