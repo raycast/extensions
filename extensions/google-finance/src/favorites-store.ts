@@ -76,10 +76,7 @@ export function useFavorites() {
     [favorites],
   );
 
-  const isFavorite = useCallback(
-    (symbol: string) => favorites.some((f) => f.symbol === symbol),
-    [favorites],
-  );
+  const isFavorite = useCallback((symbol: string) => favorites.some((f) => f.symbol === symbol), [favorites]);
 
   return {
     favorites,
@@ -115,11 +112,7 @@ export function useFavoritesQuotes(favorites: FavoriteEntry[]) {
       })
       .catch((e) => {
         if (e.name !== "AbortError") {
-          showToast(
-            Toast.Style.Failure,
-            "Failed to fetch favorites",
-            e.message || "",
-          );
+          showToast(Toast.Style.Failure, "Failed to fetch favorites", e.message || "");
           setIsLoading(false);
         }
       });

@@ -41,10 +41,7 @@ export function StockListItem({
       detail={<StockDetail quote={quote} financials={financials} />}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open in Google Finance"
-            url={googleFinanceUrl}
-          />
+          <Action.OpenInBrowser title="Open in Google Finance" url={googleFinanceUrl} />
           {isFavorite ? (
             <Action
               title="Remove from Favorites"

@@ -2,9 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchFinancialDetails, FinancialDetails } from "./yahoo-finance";
 
 export function useFinancialDetails(symbols: string[]) {
-  const [details, setDetails] = useState<Map<string, FinancialDetails>>(
-    new Map(),
-  );
+  const [details, setDetails] = useState<Map<string, FinancialDetails>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
 
   const key = [...symbols].sort().join(",");

@@ -34,11 +34,7 @@ function extractKeyValuePairs(html: string): Record<string, string> {
   return pairs;
 }
 
-function parseQuoteFromHtml(
-  html: string,
-  symbol: string,
-  exchange: string,
-): Quote | null {
+function parseQuoteFromHtml(html: string, symbol: string, exchange: string): Quote | null {
   // Extract current price
   const lastPriceMatch = html.match(/data-last-price="([^"]+)"/);
   if (!lastPriceMatch) return null;
@@ -65,14 +61,11 @@ function parseQuoteFromHtml(
 
   // Previous close
   const prevCloseRaw = kvPairs["Previous close"];
-  const previousClose = prevCloseRaw
-    ? parseFloat(prevCloseRaw.replace(/[^0-9.-]/g, ""))
-    : price;
+  const previousClose = prevCloseRaw ? parseFloat(prevCloseRaw.replace(/[^0-9.-]/g, "")) : price;
 
   // Compute change
   const change = price - previousClose;
-  const changePercent =
-    previousClose !== 0 ? (change / previousClose) * 100 : 0;
+  const changePercent = previousClose !== 0 ? (change / previousClose) * 100 : 0;
 
   // Market cap
   const marketCap = kvPairs["Market cap"] || undefined;
@@ -92,8 +85,7 @@ function parseQuoteFromHtml(
   const yearRange = kvPairs["Year range"] || undefined;
 
   // Average volume
-  const avgVolume =
-    kvPairs["Avg Volume"] || kvPairs["Average volume"] || undefined;
+  const avgVolume = kvPairs["Avg Volume"] || kvPairs["Average volume"] || undefined;
 
   // P/E ratio
   const peRatio = kvPairs["P/E ratio"] || undefined;
@@ -112,9 +104,7 @@ function parseQuoteFromHtml(
     marketState = "POST";
   } else if (html.includes("Market open") || html.includes("Disclaimer")) {
     // If page has a "Disclaimer" link near the timestamp, market data is live
-    const timestampArea = html.match(
-      /class="ygUjEc"[^>]*>([^<]*(?:<[^>]*>[^<]*)*)/,
-    );
+    const timestampArea = html.match(/class="ygUjEc"[^>]*>([^<]*(?:<[^>]*>[^<]*)*)/);
     if (timestampArea && !timestampArea[0].includes("Closed")) {
       marketState = "REGULAR";
     }
@@ -141,11 +131,7 @@ function parseQuoteFromHtml(
   };
 }
 
-export async function fetchQuote(
-  symbol: string,
-  exchange?: string,
-  signal?: AbortSignal,
-): Promise<Quote | null> {
+export async function fetchQuote(symbol: string, exchange?: string, signal?: AbortSignal): Promise<Quote | null> {
   const exchangesToTry = exchange ? [exchange] : EXCHANGES;
 
   for (const exch of exchangesToTry) {
@@ -197,10 +183,7 @@ export async function fetchQuotes(
   return results;
 }
 
-export async function searchStocks(
-  query: string,
-  signal?: AbortSignal,
-): Promise<SearchResult[]> {
+export async function searchStocks(query: string, signal?: AbortSignal): Promise<SearchResult[]> {
   if (!query.trim()) return [];
 
   try {
@@ -238,11 +221,7 @@ export async function searchStocks(
     return results;
   } catch (e) {
     if ((e as Error).name === "AbortError") throw e;
-    showToast(
-      Toast.Style.Failure,
-      "Stock search failed",
-      (e as Error).message || "",
-    );
+    showToast(Toast.Style.Failure, "Stock search failed", (e as Error).message || "");
     return [];
   }
 }

@@ -37,10 +37,7 @@ function extractFieldValue(html: string, fieldId: string): string | undefined {
   return undefined;
 }
 
-async function fetchStatistics(
-  symbol: string,
-  signal?: AbortSignal,
-): Promise<Partial<FinancialDetails>> {
+async function fetchStatistics(symbol: string, signal?: AbortSignal): Promise<Partial<FinancialDetails>> {
   const url = `https://stockanalysis.com/stocks/${encodeURIComponent(symbol.toLowerCase())}/statistics/`;
   try {
     const response = await fetch(url, {
@@ -71,10 +68,7 @@ async function fetchStatistics(
   }
 }
 
-async function fetchBalanceSheet(
-  symbol: string,
-  signal?: AbortSignal,
-): Promise<Partial<FinancialDetails>> {
+async function fetchBalanceSheet(symbol: string, signal?: AbortSignal): Promise<Partial<FinancialDetails>> {
   const url = `https://stockanalysis.com/stocks/${encodeURIComponent(symbol.toLowerCase())}/financials/balance-sheet/?p=quarterly`;
   try {
     const response = await fetch(url, {
@@ -137,10 +131,7 @@ async function fetchBalanceSheet(
   }
 }
 
-async function fetchEarningsGrowth(
-  symbol: string,
-  signal?: AbortSignal,
-): Promise<Partial<FinancialDetails>> {
+async function fetchEarningsGrowth(symbol: string, signal?: AbortSignal): Promise<Partial<FinancialDetails>> {
   const url = `https://stockanalysis.com/stocks/${encodeURIComponent(symbol.toLowerCase())}/financials/?p=quarterly`;
   try {
     const response = await fetch(url, {
@@ -153,9 +144,7 @@ async function fetchEarningsGrowth(
     // Extract datekey array to find which indices are Y/Y comparable
     const dateMatch = html.match(/datekey:\[([^\]]+)\]/);
     if (!dateMatch) return {};
-    const dates = dateMatch[1]!
-      .match(/"([^"]+)"/g)
-      ?.map((d) => d.replace(/"/g, ""));
+    const dates = dateMatch[1]!.match(/"([^"]+)"/g)?.map((d) => d.replace(/"/g, ""));
     if (!dates || dates.length < 5) return {};
 
     // Find the index 4 quarters back (same quarter prior year)
@@ -195,10 +184,7 @@ async function fetchEarningsGrowth(
   }
 }
 
-export async function fetchFinancialDetails(
-  symbol: string,
-  signal?: AbortSignal,
-): Promise<FinancialDetails | null> {
+export async function fetchFinancialDetails(symbol: string, signal?: AbortSignal): Promise<FinancialDetails | null> {
   try {
     const [stats, balanceSheet, earnings] = await Promise.all([
       fetchStatistics(symbol, signal),

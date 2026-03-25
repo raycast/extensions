@@ -17,13 +17,8 @@ export default function Command() {
     moveDown,
     isFavorite,
   } = useFavorites();
-  const { quotes: favQuotes, isLoading: favQuotesLoading } =
-    useFavoritesQuotes(favorites);
-  const {
-    results: searchResults,
-    quotes: searchQuotes,
-    isLoading: searchLoading,
-  } = useStockSearch(searchText);
+  const { quotes: favQuotes, isLoading: favQuotesLoading } = useFavoritesQuotes(favorites);
+  const { results: searchResults, quotes: searchQuotes, isLoading: searchLoading } = useStockSearch(searchText);
 
   const isSearching = searchText.trim().length > 0;
 

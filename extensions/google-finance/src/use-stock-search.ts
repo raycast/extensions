@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
-import {
-  searchStocks,
-  fetchQuotes,
-  Quote,
-  SearchResult,
-} from "./google-finance";
+import { searchStocks, fetchQuotes, Quote, SearchResult } from "./google-finance";
 
 export function useStockSearch(query: string) {
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -48,11 +43,7 @@ export function useStockSearch(query: string) {
         if ((e as Error).name !== "AbortError") {
           // Notify the user of network/search failures
           // Fire-and-forget so we don't block UI
-          showToast(
-            Toast.Style.Failure,
-            "Stock search failed",
-            (e as Error).message || "",
-          );
+          showToast(Toast.Style.Failure, "Stock search failed", (e as Error).message || "");
           setIsLoading(false);
         }
       }
@@ -62,8 +53,7 @@ export function useStockSearch(query: string) {
   }, [query]);
 
   // Show previous results while loading new ones
-  const displayResults =
-    results.length > 0 ? results : isLoading ? prevResultsRef.current : [];
+  const displayResults = results.length > 0 ? results : isLoading ? prevResultsRef.current : [];
 
   return { results: displayResults, quotes, isLoading };
 }

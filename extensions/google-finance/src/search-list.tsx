@@ -35,9 +35,7 @@ export function SearchList({
             quote={quote}
             financials={financials.get(result.symbol)}
             isFavorite={isFavorite(result.symbol)}
-            onAddFavorite={() =>
-              onAddFavorite(result.symbol, result.exchange || undefined)
-            }
+            onAddFavorite={() => onAddFavorite(result.symbol, result.exchange || undefined)}
             onRemoveFavorite={() => onRemoveFavorite(result.symbol)}
           />
         );
