@@ -10,13 +10,32 @@ on:
   pull_request_review:
     types: [submitted]
 
+concurrency:
+  # イベント種別 + トリガーのコメント/レビューIDを含めることで、
+  # 同一 PR/Issue 内でも異なるメンションが互いをキャンセルしない
+  group: >-
+    claude-${{ github.repository }}-${{
+      github.event.issue.number
+      || github.event.pull_request.number
+      || github.run_id
+    }}-${{
+      github.event.comment.id
+      || github.event.review.id
+      || github.run_id
+    }}
+  cancel-in-progress: false
+
 jobs:
   claude:
+    # Bot 全般を除外（sender.type で判定するため、Bot 名のハードコードが不要）
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      github.event.sender.type != 'Bot' &&
+      (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read
