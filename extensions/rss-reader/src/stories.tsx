@@ -57,15 +57,20 @@ function getCachedFilter() {
     return undefined;
   }
 
-  const parsed = JSON.parse(raw) as CachedFilter;
-  const isFresh = Date.now() - parsed.savedAt < STORIES_FILTER_TTL_MS;
+  try {
+    const parsed = JSON.parse(raw) as CachedFilter;
+    const isFresh = Date.now() - parsed.savedAt < STORIES_FILTER_TTL_MS;
 
-  if (!isFresh) {
+    if (!isFresh) {
+      storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+      return undefined;
+    }
+
+    return parsed.value;
+  } catch {
     storiesCache.remove(STORIES_FILTER_CACHE_KEY);
     return undefined;
   }
-
-  return parsed.value;
 }
 
 function setCachedFilter(value: string) {
