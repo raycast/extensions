@@ -26,13 +26,13 @@ export interface Plugin {
   abandoned: boolean;
   cloudTested: boolean;
   supportsGql: boolean;
-  iconUrl: string;
+  iconUrl: string | null;
   url: string;
   keywords: string[];
   categoryIds: number[];
   editions: PluginEdition[];
   lastUpdate: string;
-  supportLink: string;
+  supportLink: string | null;
   totalReviews: number;
   ratingAvg: number | null;
 }

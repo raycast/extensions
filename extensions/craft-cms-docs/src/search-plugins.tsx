@@ -13,7 +13,7 @@ function getLowestPrice(plugin: Plugin): number | null {
 
 function matchesFilter(plugin: Plugin, filter: string): boolean {
   if (filter === "all") return true;
-  if (filter === "free") return getLowestPrice(plugin) === null;
+  if (filter === "free") return plugin.editions.some((e) => e.price === null);
   if (filter === "paid") return getLowestPrice(plugin) !== null;
   if (filter === "cloud") return plugin.cloudTested;
   if (filter === "gql") return plugin.supportsGql;
@@ -115,12 +115,12 @@ export default function SearchPlugins(props: Props) {
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section>
             <Grid.Dropdown.Item
-              title="Free Plugins"
+              title="Free Editions"
               value="free"
               icon={{ source: "icons/free.svg", tintColor: Color.SecondaryText }}
             />
             <Grid.Dropdown.Item
-              title="Paid Plugins"
+              title="Paid Editions"
               value="paid"
               icon={{ source: "icons/paid.svg", tintColor: Color.SecondaryText }}
             />
@@ -194,7 +194,7 @@ function InstallActions({ plugin }: { plugin: Plugin }) {
 
 function PluginItem({ plugin, categories }: { plugin: Plugin; categories: Category[] }) {
   const price = getLowestPrice(plugin);
-  const priceLabel = price !== null ? `$${price}` : "Free";
+  const editionPrices = plugin.editions.map((e) => (e.price !== null ? `$${e.price}` : "Free")).join(" · ");
 
   return (
     <Grid.Item
@@ -203,7 +203,7 @@ function PluginItem({ plugin, categories }: { plugin: Plugin; categories: Catego
       content={plugin.iconUrl ? { source: plugin.iconUrl } : { source: Icon.Box }}
       accessory={
         price !== null
-          ? { icon: { source: "icons/paid.svg", tintColor: Color.SecondaryText }, tooltip: priceLabel }
+          ? { icon: { source: "icons/paid.svg", tintColor: Color.SecondaryText }, tooltip: editionPrices }
           : undefined
       }
       actions={
