@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-03-25
 
 - Add "Pull to Current Workspace" action to window switcher (Shift+Enter)
 
