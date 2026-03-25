@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "video2gif",
+  "title": "Video to GIF",
+  "description": "Convert videos to high-quality GIFs with customizable quality, dimensions, and speed",
+  "icon": "icon.png",
+  "author": "stefan.imbesi",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "convert-to-gif",
+      "title": "Convert to GIF",
+      "description": "Quickly convert a selected video to GIF using default settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-to-gif-custom",
+      "title": "Convert to GIF (Custom)",
+      "description": "Convert a video to GIF with custom quality, dimensions, speed, and trimming options",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outputFolder",
+      "title": "Output Folder",
+      "description": "Where converted GIFs are saved",
+      "type": "directory",
+      "required": false,
+      "default": "~/Desktop"
+    },
+    {
+      "name": "defaultQuality",
+      "title": "Default Quality",
+      "description": "GIF quality (1-100)",
+      "type": "textfield",
+      "required": false,
+      "default": "80"
+    },
+    {
+      "name": "defaultMaxWidth",
+      "title": "Default Max Width",
+      "description": "Maximum output width in pixels",
+      "type": "dropdown",
+      "required": false,
+      "default": "640",
+      "data": [
+        {
+          "title": "Original",
+          "value": "original"
+        },
+        {
+          "title": "320px",
+          "value": "320"
+        },
+        {
+          "title": "480px",
+          "value": "480"
+        },
+        {
+          "title": "640px",
+          "value": "640"
+        },
+        {
+          "title": "800px",
+          "value": "800"
+        },
+        {
+          "title": "1080px",
+          "value": "1080"
+        }
+      ]
+    },
+    {
+      "name": "defaultFps",
+      "title": "Default FPS",
+      "description": "Frames per second (1-50)",
+      "type": "textfield",
+      "required": false,
+      "default": "15"
+    },
+    {
+      "name": "defaultLoopMode",
+      "title": "Default Loop Mode",
+      "description": "How the GIF loops",
+      "type": "dropdown",
+      "required": false,
+      "default": "loop",
+      "data": [
+        {
+          "title": "Loop Forever",
+          "value": "loop"
+        },
+        {
+          "title": "No Loop",
+          "value": "none"
+        }
+      ]
+    },
+    {
+      "name": "longVideoThreshold",
+      "title": "Long Video Threshold",
+      "description": "Videos longer than this (in seconds) will auto-show trim fields",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1",
+    "execa": "^8.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

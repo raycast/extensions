@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Raycast build output
+.raycast/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment
+.env
+.env.local
+
+# Source assets
+Image Assets/
