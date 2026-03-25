@@ -1,5 +1,9 @@
 # Password Store Changelog
 
+## [Fix] - 2026-03-25
+
+- Fixed insert password hanging indefinitely due to stdin not closing properly
+
 ## [Improvements] - 2026-03-23
 
 - Able to insert password via `pass insert`
