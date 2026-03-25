@@ -1,6 +1,6 @@
 # One-Time Secret Changelog
 
-## [Recent Secrets, region choice, and receipt access] - {PR_MERGE_DATE}
+## [Recent Secrets, region choice, and receipt access] - 2026-03-25
 
 - Choose your **region** (Canada, EU, New Zealand, UK, or US) so you can decide where your data is stored.
 - The extension now uses **Onetime Secret API v2**, the latest version of their service.
