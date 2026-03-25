@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { exec, execFile, spawn } from "child_process";
 import { promisify } from "node:util";
 
-/** Executes `pass` executable directly without spawning a shell. */
+/** Executes `pass` executable directly. Uses `spawn` when stdin input is needed, `execFile` otherwise. */
 export const runPassCmd = async (args: string[], input?: string): Promise<string> => {
   const preferences = getPreferenceValues();
   const paths = [...(preferences.ADDITIONAL_PATH?.split(":") || []), "/opt/homebrew/bin"].filter(Boolean).join(":");
