@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Edit Ghostty Config] - {PR_MERGE_DATE}
+## [Edit Ghostty Config] - 2026-03-25
 
 - Add new command to view and edit the Ghostty configuration file (`~/.config/ghostty/config`)
 - Settings are grouped by category: Font, Colors, Cursor, Window, macOS, Mouse & Scroll, Clipboard, Shell, and more
