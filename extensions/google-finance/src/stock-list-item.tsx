@@ -60,7 +60,7 @@ export function StockListItem({
           )}
           {isFavorite && onMoveUp && (
             <Action
-              title="Move Up in Favorites"
+              title="Move up in Favorites"
               shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
               onAction={onMoveUp}
             />

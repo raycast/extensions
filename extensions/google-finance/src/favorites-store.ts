@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { fetchQuotes, Quote } from "./google-finance";
 
@@ -115,6 +115,11 @@ export function useFavoritesQuotes(favorites: FavoriteEntry[]) {
       })
       .catch((e) => {
         if (e.name !== "AbortError") {
+          showToast(
+            Toast.Style.Failure,
+            "Failed to fetch favorites",
+            e.message || "",
+          );
           setIsLoading(false);
         }
       });

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { showToast, Toast } from "@raycast/api";
 import {
   searchStocks,
   fetchQuotes,
@@ -45,6 +46,13 @@ export function useStockSearch(query: string) {
         setIsLoading(false);
       } catch (e) {
         if ((e as Error).name !== "AbortError") {
+          // Notify the user of network/search failures
+          // Fire-and-forget so we don't block UI
+          showToast(
+            Toast.Style.Failure,
+            "Stock search failed",
+            (e as Error).message || "",
+          );
           setIsLoading(false);
         }
       }
