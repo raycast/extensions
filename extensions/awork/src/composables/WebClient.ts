@@ -1,6 +1,5 @@
 import { Alert, confirmAlert, getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { RequestInit } from "node-fetch";
 import { fetchWithTimeout } from "./HttpClient";
 
 interface workspace {

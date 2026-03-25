@@ -1,5 +1,3 @@
-import fetch, { RequestInit, Response } from "node-fetch";
-
 const DEFAULT_REQUEST_TIMEOUT_MS = 20000;
 
 export const fetchWithTimeout = async (
