@@ -1,5 +1,5 @@
 import { useCachedState, useFetch } from "@raycast/utils";
-import type { KitIconsResult, SearchItem, SearchResult } from "@/types";
+import type { KitIconUpload, KitIconsResult, SearchItem, SearchResult } from "@/types";
 import { buildScopedCacheKey } from "@/utils/access-token";
 import { familyStylesByPrefix } from "@/utils/data";
 import { findKitByToken } from "@/utils/kits";
@@ -44,7 +44,7 @@ export const useData = (accessToken: string, cacheScope: string, execute: boolea
       const trimmedQuery = query.trim().toLowerCase();
 
       normalized = uploads
-        .filter((upload) => {
+        .filter((upload: KitIconUpload) => {
           if (!trimmedQuery) {
             return true;
           }
@@ -58,7 +58,7 @@ export const useData = (accessToken: string, cacheScope: string, execute: boolea
 
           return nameMatch || unicodeMatch;
         })
-        .map((upload) => {
+        .map((upload: KitIconUpload) => {
           const rawPathData = upload.pathData;
           const paths = Array.isArray(rawPathData) ? rawPathData : [rawPathData];
 

@@ -52,14 +52,14 @@ export interface KitIconUpload {
   pathData: string | string[];
 }
 
+export interface KitWithIconUploads extends Kit {
+  iconUploads: KitIconUpload[];
+}
+
 export interface KitIconsResult {
   data: {
     me: {
-      kits: {
-        name: string;
-        token: string;
-        iconUploads: KitIconUpload[];
-      }[];
+      kits: KitWithIconUploads[];
     };
   };
 }

@@ -24,6 +24,6 @@ export function filterKits(kits: Kit[], kitFilter?: string) {
   });
 }
 
-export function findKitByToken(kits: Kit[], kitToken: string) {
+export function findKitByToken<T extends Kit>(kits: T[], kitToken: string) {
   return kits.find((kit) => kit.token === kitToken);
 }
