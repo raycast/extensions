@@ -1,6 +1,6 @@
 # Kagi News Changelog
 
-## [1.4] - {PR_MERGE_DATE}
+## [1.4] - 2026-03-25
 
 - Added the Chaos Index Scale and analysis as a category (Cmd+P menu)  
 - Updated the favorites icons UI using Raycast natives  
