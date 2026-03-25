@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "dnb-content-viewer",
+  "name": "dnb-book-content",
   "title": "DNB Book Content",
   "description": "Quick access to book contents from Deutsche Nationalbibliothek with AI-powered Klappentext generation",
   "icon": "extension-icon.png",
@@ -16,7 +16,7 @@
   "license": "MIT",
   "keywords": [
     "dnb",
-    "deutsche nationalbibliothek",
+    "nationalbibliothek",
     "isbn",
     "books",
     "library",
@@ -29,19 +29,19 @@
   "commands": [
     {
       "name": "search-content",
-      "title": "Search Book Content",
+      "title": "Search DNB Book",
       "description": "Search for book contents in the Deutsche Nationalbibliothek using ISBN",
       "mode": "view",
       "arguments": [
         {
           "name": "isbn",
-          "placeholder": "ISBN-10 or ISBN-13 (e.g., 9783957577597)",
+          "placeholder": "ISBN-10 or ISBN-13 — or paste TOC below",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "tocText",
-          "placeholder": "TOC einfügen (optional)",
+          "placeholder": "Paste TOC (optional)",
           "type": "text",
           "required": false
         }
@@ -72,17 +72,17 @@
         {
           "name": "generateKlappentext",
           "type": "checkbox",
-          "title": "Klappentext generieren",
-          "label": "AI-generierten Klappentext aus Inhaltsverzeichnis erstellen",
-          "description": "Generiert automatisch einen Klappentext (max. 150 Wörter) + Suchwörter. Benötigt Raycast Pro oder BYOK.",
+          "title": "Generate Book Description",
+          "label": "Generate AI book description from table of contents",
+          "description": "AI description + keywords from TOC. Needs Raycast Pro or BYOK.",
           "default": false,
           "required": false
         },
         {
           "name": "eurobuchPassword",
           "type": "password",
-          "title": "Eurobuch Passwort",
-          "description": "Eurobuch API Passwort (optional)",
+          "title": "Eurobuch Password",
+          "description": "Eurobuch API password (optional)",
           "required": false,
           "default": ""
         }
@@ -90,7 +90,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.65.0"
+    "@raycast/api": "^1.104.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
