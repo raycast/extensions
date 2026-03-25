@@ -68,7 +68,7 @@ export default function SearchPlugins(props: Props) {
       return { data: result.plugins.filter((p) => !p.abandoned), hasMore: result.nextPage !== null };
     },
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true, execute: !shouldFetchAll },
   );
 
   const { data: allPlugins, isLoading: isSearchLoading } = useCachedPromise(fetchAllPlugins, [], {
@@ -83,7 +83,7 @@ export default function SearchPlugins(props: Props) {
 
   const results = useMemo(() => {
     const query = searchText.trim();
-    const source = shouldFetchAll ? (allPlugins ?? pagedPlugins ?? []) : (pagedPlugins ?? []);
+    const source = shouldFetchAll ? (allPlugins ?? []) : (pagedPlugins ?? []);
     const seen = new Set<number>();
     return source
       .filter((p) => {
