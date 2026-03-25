@@ -2,6 +2,7 @@
 
 ## [Add Cache] - {PR_MERGE_DATE}
 
+- Prefill Add Subscription with the active browser tab URL when the Raycast Browser Extension is available
 - Add 15 minutes cache for Read All Stories command selection
 
 ## [AI Tool Support] - 2025-10-09
