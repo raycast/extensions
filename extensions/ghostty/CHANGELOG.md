@@ -1,6 +1,6 @@
 # Ghostty Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-25
 
 - Fix "Open with Ghostty" to open the selected Finder item (file or folder), not just the current window directory
 - Support files (opens parent directory), folders, multiple selections, and Path Finder
