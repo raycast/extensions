@@ -846,9 +846,7 @@ export default function Command() {
         ? selectedAccel
         : getDefaultAccel(availableAccels);
       encoder = getEncoderForAccel(values.codec, selectedAccel, encoderSet);
-      console.log("[debug] available accels", availableAccels);
-      console.log("[debug] selected accel", selectedAccel);
-      console.log("[debug] encoder", encoder);
+      
       if (selectedAccel !== values.accel) {
         await showToast({
           style: Toast.Style.Animated,
