@@ -277,7 +277,11 @@ export async function getArtists(sectionKey: string): Promise<MusicArtist[]> {
   );
 }
 
-export function getArtistsPage(sectionKey: string, offset: number, limit: number): Promise<PageResult<MusicArtist>> {
+export function getArtistsPage(
+  sectionKey: string,
+  offset: number,
+  limit: number,
+): Promise<PageResult<MusicArtist>> {
   return fetchPage(
     `/library/sections/${sectionKey}/all?type=8&sort=titleSort:asc`,
     "Directory",
@@ -287,7 +291,11 @@ export function getArtistsPage(sectionKey: string, offset: number, limit: number
   );
 }
 
-export function getTracksPage(browseKey: string, offset: number, limit: number): Promise<PageResult<MusicTrack>> {
+export function getTracksPage(
+  browseKey: string,
+  offset: number,
+  limit: number,
+): Promise<PageResult<MusicTrack>> {
   return fetchPage(browseKey, "Track", parseTrack, offset, limit);
 }
 

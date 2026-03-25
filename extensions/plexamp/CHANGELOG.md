@@ -1,6 +1,6 @@
 # Plexamp CHANGELOG
 
-## [Large Library Performance Fixes] - 2026-03-25
+## [Large Library Performance Fixes] - {PR_MERGE_DATE}
 
 - Fixed "JS heap out of memory" crashes when browsing large music libraries by paginating all Plex API requests so no single XML response can exceed the Raycast worker memory limit.
 - Fixed playlist section resolution causing excessive memory usage by removing the N+1 metadata lookup per playlist and filtering by the explicit library section key instead.

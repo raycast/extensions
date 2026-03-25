@@ -502,7 +502,11 @@ const SCOPED_SEARCH_TRACK_LIMIT = 1000;
 // ---------------------------------------------------------------------------
 
 export function AlbumTrackList(props: { album: MusicAlbum; sectionKey: string }) {
-  const tracks = useAsyncValue(() => getTracksForAlbum(props.album), props.album.ratingKey, [] as MusicTrack[]);
+  const tracks = useAsyncValue(
+    () => getTracksForAlbum(props.album),
+    props.album.ratingKey,
+    [] as MusicTrack[],
+  );
   const playback = usePlaybackActions();
 
   return (
@@ -565,10 +569,11 @@ function LargePlaylistTrackList(props: { playlist: AudioPlaylist; sectionKey: st
     isLoading: tracksLoading,
     pagination,
   } = usePromise(
-    (browseKey: string) => async (options: { page: number }) => {
-      const { items, totalSize } = await getTracksPage(browseKey, options.page * TRACKS_PAGE_SIZE, TRACKS_PAGE_SIZE);
-      return { data: items, hasMore: options.page * TRACKS_PAGE_SIZE + items.length < totalSize };
-    },
+    (browseKey: string) =>
+      async (options: { page: number }) => {
+        const { items, totalSize } = await getTracksPage(browseKey, options.page * TRACKS_PAGE_SIZE, TRACKS_PAGE_SIZE);
+        return { data: items, hasMore: options.page * TRACKS_PAGE_SIZE + items.length < totalSize };
+      },
     [props.playlist.browseKey],
   );
 
