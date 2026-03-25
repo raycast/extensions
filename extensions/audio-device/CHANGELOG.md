@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Major Update] - Mar 2026
+## [Major Update] - {PR_MERGE_DATE}
 
 ### Default device enforcement
 Press Cmd+Shift+D on any device to make it your default. If macOS switches away after sleep or Bluetooth reconnect, the extension switches back within 10 seconds. Manually switching gives you a 1-minute grace period before enforcement resumes.
