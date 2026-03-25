@@ -1,9 +1,8 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "fs";
-import { dirname } from "path";
+import { dirname, join } from "path";
 import { homedir } from "os";
-import { join } from "path";
 import { Action, ActionPanel, Color, Form, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 
 const CONFIG_PATH = join(homedir(), ".config", "ghostty", "config");
@@ -617,37 +616,44 @@ export default function Command() {
 function EditForm({ entry, raw, onSave }: { entry: ConfigEntry; raw: string; onSave: (newRaw: string) => void }) {
   const { pop } = useNavigation();
   const knownOption = KNOWN_OPTIONS.find((o) => o.key === entry.key);
+  const hasValidOptions = knownOption?.options && knownOption.options.includes(entry.value);
 
-  function save(value: string) {
-    const lines = raw.split("\n");
-    lines[entry.lineIndex] = `${entry.key} = ${value}`;
-    try {
-      onSave(lines.join("\n"));
-      showToast({ style: Toast.Style.Success, title: "Saved", message: `${entry.key} updated` });
-      pop();
-    } catch (error) {
-      showFailureToast(error, { title: "Failed to save config" });
-    }
-  }
+  const { handleSubmit, itemProps } = useForm<{ value: string }>({
+    initialValues: { value: entry.value },
+    validation: {
+      value: hasValidOptions ? undefined : (v) => (!v || v.trim() === "" ? "Value is required" : undefined),
+    },
+    onSubmit: (values) => {
+      const lines = raw.split("\n");
+      lines[entry.lineIndex] = `${entry.key} = ${values.value}`;
+      try {
+        onSave(lines.join("\n"));
+        showToast({ style: Toast.Style.Success, title: "Saved", message: `${entry.key} updated` });
+        pop();
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to save config" });
+      }
+    },
+  });
 
   return (
     <Form
       navigationTitle={`Edit: ${entry.key}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Save" onSubmit={(values) => save(values.value)} />
+          <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       {knownOption?.description && <Form.Description title="About" text={knownOption.description} />}
-      {knownOption?.options ? (
-        <Form.Dropdown id="value" title={entry.key} defaultValue={entry.value}>
-          {knownOption.options.map((o) => (
+      {hasValidOptions ? (
+        <Form.Dropdown title={entry.key} {...itemProps.value}>
+          {knownOption!.options!.map((o) => (
             <Form.Dropdown.Item key={o} title={o} value={o} />
           ))}
         </Form.Dropdown>
       ) : (
-        <Form.TextField id="value" title={entry.key} defaultValue={entry.value} />
+        <Form.TextField title={entry.key} {...itemProps.value} />
       )}
     </Form>
   );
@@ -655,37 +661,42 @@ function EditForm({ entry, raw, onSave }: { entry: ConfigEntry; raw: string; onS
 
 function AddForm({ option, raw, onSave }: { option: KnownOption; raw: string; onSave: (newRaw: string) => void }) {
   const { pop } = useNavigation();
-
-  function save(value: string) {
-    const newRaw = `${raw.trimEnd()}\n${option.key} = ${value}\n`;
-    try {
-      onSave(newRaw);
-      showToast({ style: Toast.Style.Success, title: "Added", message: `${option.key} added to config` });
-      pop();
-    } catch (error) {
-      showFailureToast(error, { title: "Failed to save config" });
-    }
-  }
+  const { handleSubmit, itemProps } = useForm<{ value: string }>({
+    initialValues: { value: option.defaultValue ?? "" },
+    validation: {
+      value: option.options ? undefined : (v) => (!v || v.trim() === "" ? "Value is required" : undefined),
+    },
+    onSubmit: (values) => {
+      const newRaw = `${raw.trimEnd()}\n${option.key} = ${values.value}\n`;
+      try {
+        onSave(newRaw);
+        showToast({ style: Toast.Style.Success, title: "Added", message: `${option.key} added to config` });
+        pop();
+      } catch (error) {
+        showFailureToast(error, { title: "Failed to save config" });
+      }
+    },
+  });
 
   return (
     <Form
       navigationTitle={`Add: ${option.key}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add to Config" onSubmit={(values) => save(values.value)} />
+          <Action.SubmitForm title="Add to Config" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.Description title="About" text={option.description} />
       {option.defaultValue && <Form.Description title="Default" text={option.defaultValue} />}
       {option.options ? (
-        <Form.Dropdown id="value" title={option.key} defaultValue={option.defaultValue}>
+        <Form.Dropdown title={option.key} {...itemProps.value}>
           {option.options.map((o) => (
             <Form.Dropdown.Item key={o} title={o} value={o} />
           ))}
         </Form.Dropdown>
       ) : (
-        <Form.TextField id="value" title={option.key} defaultValue={option.defaultValue} />
+        <Form.TextField title={option.key} {...itemProps.value} />
       )}
     </Form>
   );
