@@ -1,5 +1,12 @@
 # Trakt Manager Changelog
 
+## [Update] - 2026-03-25
+
+- Fixed episode check-in sending the show's Trakt ID instead of the episode's Trakt ID (#23638)
+- Added Windows platform support (#25419)
+- Upgraded @raycast/api to v1.104.10 and migrated to React 19 types
+- Upgraded ESLint to v10 with flat config and resolved all npm audit vulnerabilities
+
 ## [Fix] - 2026-03-01
 
 - Added User-Agent header to OAuth token and refresh requests to prevent authentication failures

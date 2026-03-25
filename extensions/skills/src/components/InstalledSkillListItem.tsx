@@ -6,6 +6,12 @@ import { type InstalledSkill, parseFrontmatter } from "../shared";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 
+function formatDate(iso: string): string | undefined {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return undefined;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
 function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected: boolean }) {
   const { data: parsed, isLoading } = useCachedPromise(
     async (path: string) => {
@@ -39,6 +45,24 @@ function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected
               <List.Item.Detail.Metadata.TagList.Item text="Update available" color={Color.Orange} />
             </List.Item.Detail.Metadata.TagList>
           )}
+          {skill.sourceUrl && (
+            <List.Item.Detail.Metadata.Link
+              title="Source"
+              text={skill.source ?? skill.sourceUrl}
+              target={skill.sourceUrl}
+            />
+          )}
+          {skill.installedAt && formatDate(skill.installedAt) && (
+            <List.Item.Detail.Metadata.Label
+              title="Installed"
+              text={formatDate(skill.installedAt)!}
+              icon={Icon.Calendar}
+            />
+          )}
+          {skill.updatedAt && formatDate(skill.updatedAt) && (
+            <List.Item.Detail.Metadata.Label title="Updated" text={formatDate(skill.updatedAt)!} icon={Icon.Clock} />
+          )}
+          {(skill.sourceUrl || skill.installedAt) && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.TagList title="Agents">
             {skill.agents.map((agent) => (
               <List.Item.Detail.Metadata.TagList.Item key={agent} text={agent} color={Color.Blue} />
@@ -89,13 +113,21 @@ export function InstalledSkillListItem({
               { icon: Icon.ComputerChip, text: `${skill.agentCount}`, tooltip: agentsText },
             ]
       }
-      keywords={[skill.name, ...skill.agents]}
+      keywords={[skill.name, ...skill.agents, ...(skill.source ? [skill.source] : [])]}
       id={skill.name}
       detail={<InlineDetail skill={skill} isSelected={isSelected} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Open">
             <Action.ShowInFinder path={skill.path} icon={Icon.Finder} />
+            {skill.sourceUrl && (
+              <Action.OpenInBrowser
+                title="Open on GitHub"
+                url={skill.sourceUrl}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
@@ -108,6 +140,7 @@ export function InstalledSkillListItem({
               content={skill.path}
               shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
+            {skill.sourceUrl && <Action.CopyToClipboard title="Copy Source URL" content={skill.sourceUrl} />}
           </ActionPanel.Section>
           <ActionPanel.Section>
             {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}

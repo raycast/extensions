@@ -1,112 +1,55 @@
-import { Cache, Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { UsageLimitData } from "../types/usage-types";
 import { getClaudeAccessToken } from "./keychain-access";
 import { fetchClaudeUsageLimits } from "./claude-api-client";
-import { UsageLimitsError } from "./usage-limits-error";
+import type { UsageLimitsResult } from "./claude-api-client";
 
 interface CacheState {
   data: UsageLimitData | null;
-  error: UsageLimitsError | null;
+  error: Error | null;
   isLoading: boolean;
   isStale: boolean;
+  isRateLimited: boolean;
   isUsageLimitsAvailable: boolean;
   lastFetched: Date | null;
+  rateLimitedUntil: number | null;
+  nextRefreshAt: number | null;
 }
 
 type Listener = (state: CacheState) => void;
 
-interface PersistedUsageLimitsAvailability {
-  isAvailable: boolean;
-  lastCheckedAt: string;
-}
+const raycastCache = new Cache();
+const LIMITS_CACHE_KEY = "usage-limits-data";
 
-const availabilityCache = new Cache();
-const USAGE_LIMITS_AVAILABILITY_CACHE_KEY = "usage-limits-availability";
-
-const readPersistedAvailability = (): PersistedUsageLimitsAvailability | null => {
-  const cachedValue = availabilityCache.get(USAGE_LIMITS_AVAILABILITY_CACHE_KEY);
-
-  if (!cachedValue) {
-    return null;
-  }
-
+const restoredData = ((): UsageLimitData | null => {
+  const cached = raycastCache.get(LIMITS_CACHE_KEY);
+  if (!cached) return null;
   try {
-    const parsedValue = JSON.parse(cachedValue) as Partial<PersistedUsageLimitsAvailability>;
-
-    if (typeof parsedValue.isAvailable !== "boolean" || typeof parsedValue.lastCheckedAt !== "string") {
-      availabilityCache.remove(USAGE_LIMITS_AVAILABILITY_CACHE_KEY);
-      return null;
-    }
-
-    return {
-      isAvailable: parsedValue.isAvailable,
-      lastCheckedAt: parsedValue.lastCheckedAt,
-    };
+    return JSON.parse(cached) as UsageLimitData;
   } catch {
-    availabilityCache.remove(USAGE_LIMITS_AVAILABILITY_CACHE_KEY);
     return null;
   }
+})();
+
+let cacheState: CacheState = {
+  data: restoredData,
+  error: null,
+  isLoading: true,
+  isStale: restoredData !== null,
+  isRateLimited: false,
+  isUsageLimitsAvailable: false,
+  lastFetched: null,
+  rateLimitedUntil: null,
+  nextRefreshAt: null,
 };
 
-const persistAvailability = (isAvailable: boolean): void => {
-  const persistedValue: PersistedUsageLimitsAvailability = {
-    isAvailable,
-    lastCheckedAt: new Date().toISOString(),
-  };
-
-  availabilityCache.set(USAGE_LIMITS_AVAILABILITY_CACHE_KEY, JSON.stringify(persistedValue));
-};
-
-const createInitialCacheState = (): CacheState => {
-  const persistedAvailability = readPersistedAvailability();
-
-  if (!persistedAvailability) {
-    return {
-      data: null,
-      error: null,
-      isLoading: true,
-      isStale: false,
-      isUsageLimitsAvailable: false,
-      lastFetched: null,
-    };
-  }
-
-  return {
-    data: null,
-    error: null,
-    isLoading: persistedAvailability.isAvailable,
-    isStale: false,
-    isUsageLimitsAvailable: persistedAvailability.isAvailable,
-    lastFetched: null,
-  };
-};
-
-let cacheState: CacheState = createInitialCacheState();
+const RATE_LIMIT_BACKOFF_MS = 5 * 60 * 1000;
 
 const listeners = new Set<Listener>();
 let fetchInterval: NodeJS.Timeout | null = null;
 let isFetching = false;
-
-const showUsageLimitsErrorToast = async (error: UsageLimitsError): Promise<void> => {
-  await showToast({
-    style: Toast.Style.Failure,
-    title: error.title,
-    message: error.message,
-    primaryAction: {
-      title: "Retry",
-      onAction: async (toast) => {
-        toast.hide();
-        await revalidateUsageLimits();
-      },
-    },
-    secondaryAction: {
-      title: "Copy Error Log",
-      onAction: async () => {
-        await Clipboard.copy(error.log);
-      },
-    },
-  });
-};
+let rateLimitedUntil: number | null = null;
+let fetchIntervalMs = 60 * 1000;
 
 const notifyListeners = (): void => {
   listeners.forEach((listener) => listener(cacheState));
@@ -114,15 +57,14 @@ const notifyListeners = (): void => {
 
 const fetchUsageLimits = async (): Promise<void> => {
   if (isFetching) return;
+  if (rateLimitedUntil !== null && Date.now() < rateLimitedUntil) return;
 
   isFetching = true;
   const previousData = cacheState.data;
 
   try {
     const token = await getClaudeAccessToken();
-
     const isUsageLimitsAvailable = typeof token === "string" && token.trim().length > 0;
-    persistAvailability(isUsageLimitsAvailable);
 
     if (!isUsageLimitsAvailable) {
       cacheState = {
@@ -130,46 +72,65 @@ const fetchUsageLimits = async (): Promise<void> => {
         error: null,
         isLoading: false,
         isStale: false,
+        isRateLimited: false,
         isUsageLimitsAvailable: false,
         lastFetched: null,
+        rateLimitedUntil: null,
+        nextRefreshAt: null,
       };
       notifyListeners();
       return;
     }
 
-    cacheState = {
-      ...cacheState,
-      error: null,
-      isLoading: previousData === null,
-      isUsageLimitsAvailable: true,
-    };
-    notifyListeners();
+    const result: UsageLimitsResult = await fetchClaudeUsageLimits(token);
 
-    const limitData = await fetchClaudeUsageLimits(token);
-
-    cacheState = {
-      data: limitData,
-      error: null,
-      isLoading: false,
-      isUsageLimitsAvailable: true,
-      isStale: false,
-      lastFetched: new Date(),
-    };
-  } catch (error) {
-    if (!(error instanceof UsageLimitsError)) {
-      throw error;
+    if (result.status === "ok") {
+      rateLimitedUntil = null;
+      raycastCache.set(LIMITS_CACHE_KEY, JSON.stringify(result.data));
+      cacheState = {
+        data: result.data,
+        error: null,
+        isLoading: false,
+        isRateLimited: false,
+        isUsageLimitsAvailable: true,
+        isStale: false,
+        lastFetched: new Date(),
+        rateLimitedUntil: null,
+        nextRefreshAt: Date.now() + fetchIntervalMs,
+      };
+    } else if (result.status === "rate_limited") {
+      rateLimitedUntil = Date.now() + RATE_LIMIT_BACKOFF_MS;
+      cacheState = {
+        ...cacheState,
+        data: previousData,
+        error: null,
+        isLoading: false,
+        isRateLimited: true,
+        isUsageLimitsAvailable: true,
+        isStale: previousData !== null,
+        rateLimitedUntil,
+      };
+    } else {
+      cacheState = {
+        ...cacheState,
+        data: previousData,
+        error: new Error(result.message),
+        isLoading: false,
+        isRateLimited: false,
+        isUsageLimitsAvailable: true,
+        isStale: previousData !== null,
+      };
     }
-
+  } catch (err) {
+    const error = err instanceof Error ? err : new Error("Unknown error occurred");
     cacheState = {
       ...cacheState,
       data: previousData,
       error,
       isLoading: false,
-      isUsageLimitsAvailable: true,
+      isUsageLimitsAvailable: cacheState.isUsageLimitsAvailable,
       isStale: previousData !== null,
     };
-
-    await showUsageLimitsErrorToast(error);
   } finally {
     isFetching = false;
     notifyListeners();
@@ -182,6 +143,7 @@ const startFetching = (): void => {
   const preferences = getPreferenceValues<Preferences>();
   const intervalSeconds = parseInt(preferences.usageLimitsRefreshInterval || "60", 10);
   const intervalMs = intervalSeconds * 1000;
+  fetchIntervalMs = intervalMs;
 
   const shouldFetchImmediately = (): boolean => {
     if (!cacheState.data || !cacheState.lastFetched) {
@@ -226,5 +188,6 @@ export const subscribeToUsageLimits = (listener: Listener): (() => void) => {
 export const getUsageLimitsState = (): CacheState => cacheState;
 
 export const revalidateUsageLimits = async (): Promise<void> => {
+  rateLimitedUntil = null;
   await fetchUsageLimits();
 };

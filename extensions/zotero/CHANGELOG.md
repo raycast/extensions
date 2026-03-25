@@ -1,5 +1,10 @@
 # Zotero Changelog
 
+## [Features] - 2026-03-23
+
+- Add Pandoc Citation Key copy and paste actions
+- Support Zotero 7/8 native Citation Key from `zotero.sqlite` (no `better-bibtex.sqlite` required)
+
 ## [Fixes] - 2026-03-02
 
 - Fix "No data found" error with Zotero 7+ when Better BibTeX is enabled: `better-bibtex.migrated` (renamed from `better-bibtex.sqlite` by Zotero 7's migration) is now recognised as a valid citation key source

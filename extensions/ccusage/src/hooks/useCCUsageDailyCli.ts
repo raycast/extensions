@@ -1,19 +1,27 @@
+import { useState } from "react";
+import { Cache } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { DailyUsageCommandResponseSchema } from "../types/usage-types";
+import { DailyUsageCommandResponse, DailyUsageCommandResponseSchema } from "../types/usage-types";
 import { getExecOptions } from "../utils/exec-options";
 import { stringToJSON } from "../utils/string-to-json-schema";
 import { preferences } from "../preferences";
 
-/**
- * Hook for executing `ccusage daily --json` command
- */
+const cache = new Cache();
+const CACHE_KEY = "ccusage-daily";
+
 export const useCCUsageDailyCli = () => {
   const useDirectCommand = preferences.useDirectCcusageCommand;
+
+  const [initialData] = useState<DailyUsageCommandResponse | undefined>(() => {
+    const cached = cache.get(CACHE_KEY);
+    return cached ? (JSON.parse(cached) as DailyUsageCommandResponse) : undefined;
+  });
 
   const command = useDirectCommand ? "ccusage" : "npx";
   const args = useDirectCommand ? ["daily", "--json"] : ["ccusage@latest", "daily", "--json"];
   const result = useExec(command, args, {
     ...getExecOptions(),
+    initialData,
     parseOutput: ({ stdout }) => {
       if (!stdout) {
         throw new Error("No output received from ccusage daily command");
@@ -25,6 +33,7 @@ export const useCCUsageDailyCli = () => {
         throw new Error(`Invalid daily usage data: ${parseResult.error.message}`);
       }
 
+      cache.set(CACHE_KEY, JSON.stringify(parseResult.data));
       return parseResult.data;
     },
     keepPreviousData: true,

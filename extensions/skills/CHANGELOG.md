@@ -1,5 +1,11 @@
 # Changelog
 
+## [Lock File Metadata] - 2026-03-23
+
+- Show skill source, install date, and update date from the global lock file in the detail panel
+- Add "Open on GitHub" action for installed skills
+- Add "Copy Source URL" action for installed skills
+
 ## [Improve macOS `npx` Path Resolution] - 2026-03-20
 
 - Run the Skills CLI without spawning a login shell by building an explicit PATH for Homebrew and common Node.js version-manager installs

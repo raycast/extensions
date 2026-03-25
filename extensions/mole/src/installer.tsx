@@ -2,9 +2,10 @@ import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert,
 import { showFailureToast } from "@raycast/utils";
 import { readdirSync, statSync } from "fs";
 import { join } from "path";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { getMolePathSafe } from "./utils/mole";
 import { formatBytes } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 interface InstallerFile {
   name: string;
@@ -68,18 +69,10 @@ function useInstallerFiles() {
 }
 
 export default function CleanInstallers() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <InstallerView />;

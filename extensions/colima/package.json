@@ -12,6 +12,14 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Miskamyasa/raycast-colima.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Miskamyasa/raycast-colima/issues"
+  },
+  "homepage": "https://github.com/Miskamyasa/raycast-colima#readme",
   "commands": [
     {
       "name": "list-instances",

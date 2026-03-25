@@ -40,7 +40,9 @@ export function getAppName(bundleId: string | null): string {
   return APP_NAMES[bundleId] ?? bundleId.split(".").pop() ?? bundleId;
 }
 
-export function getDisplayText(transcript: Transcript): string {
+export function getDisplayText(
+  transcript: Pick<Transcript, "editedText" | "formattedText" | "asrText">,
+): string {
   return (
     transcript.editedText ||
     transcript.formattedText ||

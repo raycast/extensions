@@ -19,7 +19,7 @@ import {
   VaultIsLockedError,
 } from "~/utils/errors";
 import { join, dirname } from "path";
-import { chmod, rename, rm, unlink } from "fs/promises";
+import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
@@ -216,7 +216,7 @@ export class Bitwarden {
 
         // clear the data.json file to avoid issues with the new binary
         const dataJsonPath = join(supportPath, "data.json");
-        await tryExec(() => unlink(dataJsonPath));
+        tryExec(() => unlinkSync(dataJsonPath));
         // clear stored server URL so checkServerUrl() re-configures the CLI
         await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
       } catch (extractError) {

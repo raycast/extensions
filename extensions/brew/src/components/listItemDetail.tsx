@@ -88,6 +88,8 @@ export function CaskListItemDetail({ cask, isInstalled }: CaskListItemDetailProp
       markdown={formatCaskMarkdown(cask)}
       metadata={
         <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Id" text={cask.token || "—"} />
+          <List.Item.Detail.Metadata.Separator />
           {cask.homepage ? (
             <List.Item.Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
           ) : (

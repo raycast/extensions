@@ -22,7 +22,7 @@ const installedBrowsers = GetInstalledBrowsers().map(
   // Safari gets found in /Applications here but actually exists in
   // /System/Volumes/Preboot/Cryptexes/App/System/Applications, so strip the
   // rest of the path for all browsers
-  (browser) => path.basename(path.dirname(path.dirname(path.dirname(browser.path))))
+  (browser) => path.basename(path.dirname(path.dirname(path.dirname(browser.path)))),
 );
 
 export default function Command() {
@@ -31,7 +31,7 @@ export default function Command() {
   const favoriteGitReposState = useCachedPromise(GitRepoService.favorites);
 
   const favoriteGitRepos = gitReposState.data?.filter((gitRepo) =>
-    favoriteGitReposState.data?.includes(gitRepo.fullPath)
+    favoriteGitReposState.data?.includes(gitRepo.fullPath),
   );
 
   const repoTypes = Object.keys(GitRepoType)
@@ -85,7 +85,7 @@ function GitRepoListItem(props: {
   isFavorite: boolean;
   revalidate: () => void;
   recordUsageHook?: (id: string | number) => void;
-}): JSX.Element {
+}) {
   const preferences = props.preferences;
   const repo = props.repo;
   const isFavorite = props.isFavorite;
@@ -285,7 +285,7 @@ function GitRepoListItem(props: {
 function GitRepoPropertyDropdown(props: {
   repoTypes: GitRepoType[];
   onRepoTypeChange: (newValue: GitRepoType) => void;
-}): JSX.Element {
+}) {
   const { repoTypes, onRepoTypeChange } = props;
   return (
     <List.Dropdown
@@ -309,7 +309,7 @@ function GitRepoOpenAction(props: {
   openWith: OpenWith;
   shortcut?: Keyboard.Shortcut;
   recordUsageHook?: (id: string | number) => void;
-}): JSX.Element {
+}) {
   return (
     <Action.Open
       title={`Open in ${props.openWith.name}`}

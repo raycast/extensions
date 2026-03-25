@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "fs";
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "fs";
 import { dirname } from "path";
 import { homedir } from "os";
 import { join } from "path";
@@ -489,8 +489,11 @@ export default function Command() {
   const configuredKeys = new Set(entries.map((e) => e.key));
 
   const saveRaw = (newRaw: string) => {
-    mkdirSync(dirname(CONFIG_PATH), { recursive: true });
-    writeFileSync(CONFIG_PATH, newRaw, "utf-8");
+    const dir = dirname(CONFIG_PATH);
+    mkdirSync(dir, { recursive: true });
+    const tmp = `${CONFIG_PATH}.tmp`;
+    writeFileSync(tmp, newRaw, "utf-8");
+    renameSync(tmp, CONFIG_PATH);
     setRaw(newRaw);
   };
 
