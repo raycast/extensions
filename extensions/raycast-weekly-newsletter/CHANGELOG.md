@@ -1,5 +1,13 @@
 # Raycast Weekly Newsletter Changelog
 
+## [1.0.1] - {PR_MERGE_DATE}
+
+### Changed
+
+- Reduced the newsletter cache duration to 5 minutes so post stats refresh more frequently.
+- Added a clear fallback state when a post fails to load instead of leaving the detail view stuck loading.
+- Added failure handling when opening the subscription page.
+
 ## [Initial Version] - 2026-01-19
 
 ### Features

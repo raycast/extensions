@@ -3,7 +3,7 @@ import type { SubstackPost } from "../types/post";
 
 const PUBLICATION_URL = "https://raycastweekly.substack.com";
 const CACHE_KEY = "raycast-weekly-posts";
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 1 day in ms
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in ms
 
 const cache = new Cache();
 
@@ -77,8 +77,4 @@ export function getPostUrl(slug: string): string {
 
 export function getSubscribeUrl(): string {
   return `${PUBLICATION_URL}?utm_source=raycast&utm_medium=raycast-extension`;
-}
-
-export function clearCache(): void {
-  cache.clear();
 }
