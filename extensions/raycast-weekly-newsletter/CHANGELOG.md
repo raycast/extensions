@@ -1,6 +1,6 @@
 # Raycast Weekly Newsletter Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-03-25
 
 ### Changed
 
