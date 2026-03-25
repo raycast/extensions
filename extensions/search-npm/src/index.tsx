@@ -56,8 +56,8 @@ export default function PackageList() {
   );
 
   useEffect(() => {
+    debouncedUpdateSearchTerm(searchTerm);
     if (searchTerm) {
-      debouncedUpdateSearchTerm(searchTerm);
       debouncedUpdateHistory(searchTerm);
     } else {
       revalidate();
