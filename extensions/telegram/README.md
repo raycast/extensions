@@ -1,12 +1,15 @@
 # Telegram
 
-A Raycast extension for viewing and sending messages to your Telegram Saved Messages.
+A Raycast extension for browsing chats, reading messages, and sending messages to your Telegram contacts and groups directly from Raycast.
 
 ## Features
 
+- 💬 **Browse Chats**: Browse all your Telegram chats and groups
+- 📨 **Send Messages**: Send messages (and files) to any chat or group
 - 📥 **View Saved Messages**: Browse your Telegram saved messages directly in Raycast
 - 📤 **Send to Saved Messages**: Quickly send notes and messages to yourself
-- 🔐 **Secure Authentication**: Uses official Telegram API with session persistence
+- 🔐 **Secure Authentication**: Uses official Telegram API with session persistence and 2FA support
+- 🔄 **Reset Session**: Recover from broken authentication states with one command
 
 ## Setup
 
@@ -43,7 +46,8 @@ Before using this extension, you need to obtain API credentials from Telegram:
 2. Click "Send Verification Code"
 3. Check your Telegram app for the verification code
 4. Enter the code in Raycast
-5. You're all set! 🎉
+5. **If you have Two-Factor Authentication (2FA) enabled**, you will be prompted to enter your 2FA password after the code step
+6. You're all set! 🎉
 
 The extension will remember your session, so you only need to authenticate once.
 
@@ -51,11 +55,26 @@ The extension will remember your session, so you only need to authenticate once.
 
 ### Authenticate with Telegram
 
-Log in to your Telegram account. You'll need to do this once before using the other commands.
+Log in to your Telegram account. You'll need to do this once before using the other commands. Supports accounts with Two-Factor Authentication (2FA) enabled.
+
+### Browse Chats
+
+Browse all your Telegram private chats and groups in a list view. Features:
+
+- See chat titles, types, and last messages
+- Open a chat to view its message history
+
+### Send Message
+
+Send a message to any Telegram chat or group. Features:
+
+- Search for a chat by name
+- Attach files from your clipboard
 
 ### View Saved Messages
 
 Browse your Telegram saved messages in a list view. Features:
+
 - Search through your messages
 - See message timestamps
 - Copy messages to clipboard
@@ -64,9 +83,20 @@ Browse your Telegram saved messages in a list view. Features:
 ### Send to Saved Messages
 
 Quickly send a message to your Telegram saved messages. Perfect for:
+
 - Saving quick notes
 - Storing links for later
 - Sending reminders to yourself
+
+### Reset Telegram Session
+
+Clear all stored authentication data to recover from a broken or stuck login state. Use this command if:
+
+- Authentication keeps failing after entering a correct code
+- You are stuck in a loop and cannot complete login
+- You want to log in with a different account
+
+After resetting, run "Authenticate with Telegram" to log in again.
 
 ## Privacy & Security
 
@@ -85,18 +115,17 @@ If you see this error, run the "Authenticate with Telegram" command to log in.
 
 Make sure you've entered the correct API ID and API Hash in the extension preferences. The API ID should be a number, not a string.
 
-### "Failed to Load Messages" Error
+### "Verification code has expired" Error
 
-This usually means your session has expired. Try running the "Authenticate with Telegram" command again.
+Verification codes expire quickly. Click "Send Verification Code" again to request a fresh code and enter it promptly.
 
-## Future Features
+### Stuck or broken authentication state
 
-Coming soon:
-- View all chats
-- Send messages to other users and groups
-- Media support (photos, files)
-- Message search
-- Notifications
+Run the "Reset Telegram Session" command to clear all stored state, then run "Authenticate with Telegram" again.
+
+### 2FA / Two-Factor Authentication
+
+If your Telegram account has 2FA enabled, you will see a password prompt automatically after entering your verification code. Enter your Telegram cloud password to complete authentication.
 
 ## License
 

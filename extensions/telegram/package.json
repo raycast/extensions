@@ -5,6 +5,9 @@
   "description": "Browse chats, view messages, and send messages to your Telegram contacts and groups",
   "icon": "telegram.png",
   "author": "ikupenov",
+  "contributors": [
+    "JediRhymeTrix"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -79,6 +82,12 @@
       "name": "send-saved-message",
       "title": "Send to Saved Messages",
       "description": "Send a message to your Telegram saved messages",
+      "mode": "view"
+    },
+    {
+      "name": "reset-session",
+      "title": "Reset Telegram Session",
+      "description": "Clear stored authentication data to recover from a broken login state",
       "mode": "view"
     }
   ],

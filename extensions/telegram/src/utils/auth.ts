@@ -1,5 +1,7 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { isAuthenticated, authenticate, TelegramConfig } from "../services/telegram-client";
+import { showFailureToast } from "@raycast/utils";
+import { isAuthenticated, authenticate, verifyPassword, TelegramConfig } from "../services/telegram-client";
+import { handleTelegramError } from "./errors";
 
 export interface Preferences {
   apiId: string;
@@ -37,7 +39,9 @@ export async function ensureAuthenticated(): Promise<boolean> {
   return true;
 }
 
-export async function handleAuthFlow(code?: string): Promise<{ success: boolean; needsCode: boolean }> {
+export async function handleAuthFlow(
+  code?: string,
+): Promise<{ success: boolean; needsCode: boolean; needsPassword?: boolean }> {
   try {
     const config = getConfig();
     const result = await authenticate(config, code);
@@ -51,6 +55,10 @@ export async function handleAuthFlow(code?: string): Promise<{ success: boolean;
       return { success: false, needsCode: true };
     }
 
+    if (result.needsPassword) {
+      return { success: false, needsCode: false, needsPassword: true };
+    }
+
     if (!result.needsCode) {
       await showToast({
         style: Toast.Style.Success,
@@ -61,12 +69,36 @@ export async function handleAuthFlow(code?: string): Promise<{ success: boolean;
     }
 
     return { success: false, needsCode: result.needsCode };
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Authentication Failed",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
+  } catch (rawError) {
+    let friendlyError = rawError;
+    try {
+      handleTelegramError(rawError);
+    } catch (e) {
+      friendlyError = e;
+    }
+    await showFailureToast(friendlyError, { title: "Authentication Failed" });
     return { success: false, needsCode: false };
+  }
+}
+
+export async function handlePasswordFlow(password: string): Promise<{ success: boolean }> {
+  try {
+    const config = getConfig();
+    await verifyPassword(config, password);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Authenticated",
+      message: "Successfully authenticated with Telegram!",
+    });
+    return { success: true };
+  } catch (rawError) {
+    let friendlyError = rawError;
+    try {
+      handleTelegramError(rawError);
+    } catch (e) {
+      friendlyError = e;
+    }
+    await showFailureToast(friendlyError, { title: "Authentication Failed" });
+    return { success: false };
   }
 }
