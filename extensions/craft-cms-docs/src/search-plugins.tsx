@@ -288,7 +288,6 @@ function PluginDetail({ plugin, categories }: { plugin: Plugin; categories: Cate
   return (
     <Detail
       markdown={lines.join("\n")}
-      navigationTitle={plugin.name}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title={plugin.editions.length === 1 ? "Price" : "Editions"}>
