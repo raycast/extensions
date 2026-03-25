@@ -1,6 +1,6 @@
 # Google Finance Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-25
 
 - Search stocks by ticker symbol across major global exchanges
 - View real-time quotes with price, change, and market state
