@@ -9,7 +9,7 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { runAppleScript } from "@raycast/utils";
+import { runAppleScript, getFavicon } from "@raycast/utils";
 import {
   SearchResult,
   getChromeProfilePath,
@@ -164,11 +164,11 @@ export default function Command() {
     try {
       const profilePath = getChromeProfilePath();
 
-      // Phase 1: Load tab metadata, bookmarks, and history in parallel
+      // Phase 1: Load tabs, bookmarks, and history concurrently
       const [tabs, bookmarks, history] = await Promise.all([
         getChromeTabs(),
-        Promise.resolve(getChromeBookmarks(profilePath)),
-        Promise.resolve(getChromeHistory(500, profilePath)),
+        getChromeBookmarks(profilePath),
+        getChromeHistory(500, profilePath),
       ]);
 
       // Combine and deduplicate (tabs have highest priority)
@@ -323,10 +323,9 @@ function ResultItem({
   const tag = getSourceTag(result.source);
   const domain = extractDomain(result.url);
 
-  // Determine icon: use favicon if available, fall back to source icon
-  const icon = result.favicon
-    ? { source: result.favicon, fallback: getSourceIcon(result.source) }
-    : getSourceIcon(result.source);
+  const icon = getFavicon(result.url, {
+    fallback: getSourceIcon(result.source),
+  });
 
   // Build accessories array - include content match tag if applicable
   const accessories: List.Item.Accessory[] = [];

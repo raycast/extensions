@@ -3,7 +3,6 @@ import {
   getChromeBasePath,
   detectActiveProfile,
   getChromeProfilePath,
-  getFaviconUrl,
   normalizeUrl,
   deduplicateResults,
   extractBookmarks,
@@ -242,34 +241,6 @@ describe("getChromeProfilePath", () => {
     const result = getChromeProfilePath("/fake/chrome", deps);
 
     expect(result).toBe("/fake/chrome/Default");
-  });
-});
-
-describe("getFaviconUrl", () => {
-  it("returns Google favicon service URL for valid URL", () => {
-    const result = getFaviconUrl("https://example.com/page");
-    expect(result).toBe(
-      "https://www.google.com/s2/favicons?sz=64&domain=example.com",
-    );
-  });
-
-  it("extracts hostname correctly from URL with path", () => {
-    const result = getFaviconUrl(
-      "https://sub.example.com/path/to/page?query=1",
-    );
-    expect(result).toBe(
-      "https://www.google.com/s2/favicons?sz=64&domain=sub.example.com",
-    );
-  });
-
-  it("returns empty string for invalid URL", () => {
-    const result = getFaviconUrl("not a url");
-    expect(result).toBe("");
-  });
-
-  it("returns empty string for empty string", () => {
-    const result = getFaviconUrl("");
-    expect(result).toBe("");
   });
 });
 
@@ -692,16 +663,6 @@ describe("parseHistoryOutput", () => {
 
     expect(results[0].visitCount).toBe(0);
   });
-
-  it("generates favicon URL", () => {
-    const output = "https://example.com|||Title|||1";
-
-    const results = parseHistoryOutput(output);
-
-    expect(results[0].favicon).toBe(
-      "https://www.google.com/s2/favicons?sz=64&domain=example.com",
-    );
-  });
 });
 
 describe("getChromeHistory", () => {
@@ -710,70 +671,70 @@ describe("getChromeHistory", () => {
     readFileSync: vi.fn(),
     copyFileSync: vi.fn(),
     unlinkSync: vi.fn(),
-    execSync: vi.fn().mockReturnValue("https://example.com|||Example|||5"),
+    exec: vi
+      .fn()
+      .mockResolvedValue({ stdout: "https://example.com|||Example|||5" }),
     tmpdir: vi.fn().mockReturnValue("/tmp"),
   });
 
-  it("returns empty array when History file does not exist", () => {
+  it("returns empty array when History file does not exist", async () => {
     const deps = createMockDeps();
     deps.existsSync = vi.fn().mockReturnValue(false);
 
-    const result = getChromeHistory(500, "/fake/profile", deps);
+    const result = await getChromeHistory(500, "/fake/profile", deps);
 
     expect(result).toHaveLength(0);
   });
 
-  it("copies history file, queries it, and cleans up", () => {
+  it("copies history file, queries it, and cleans up", async () => {
     const deps = createMockDeps();
 
-    const result = getChromeHistory(500, "/fake/profile", deps);
+    const result = await getChromeHistory(500, "/fake/profile", deps);
 
     expect(deps.copyFileSync).toHaveBeenCalled();
-    expect(deps.execSync).toHaveBeenCalled();
+    expect(deps.exec).toHaveBeenCalled();
     expect(deps.unlinkSync).toHaveBeenCalled();
     expect(result).toHaveLength(1);
   });
 
-  it("returns empty array when copy fails", () => {
+  it("returns empty array when copy fails", async () => {
     const deps = createMockDeps();
     deps.copyFileSync = vi.fn().mockImplementation(() => {
       throw new Error("Copy failed");
     });
 
-    const result = getChromeHistory(500, "/fake/profile", deps);
+    const result = await getChromeHistory(500, "/fake/profile", deps);
 
     expect(result).toHaveLength(0);
   });
 
-  it("returns empty array when sqlite query fails", () => {
+  it("returns empty array when sqlite query fails", async () => {
     const deps = createMockDeps();
-    deps.execSync = vi.fn().mockImplementation(() => {
-      throw new Error("Query failed");
-    });
+    deps.exec = vi.fn().mockRejectedValue(new Error("Query failed"));
 
-    const result = getChromeHistory(500, "/fake/profile", deps);
+    const result = await getChromeHistory(500, "/fake/profile", deps);
 
     expect(result).toHaveLength(0);
     expect(deps.unlinkSync).toHaveBeenCalled(); // cleanup still happens
   });
 
-  it("handles cleanup error gracefully", () => {
+  it("handles cleanup error gracefully", async () => {
     const deps = createMockDeps();
     deps.unlinkSync = vi.fn().mockImplementation(() => {
       throw new Error("Cleanup failed");
     });
 
-    const result = getChromeHistory(500, "/fake/profile", deps);
+    const result = await getChromeHistory(500, "/fake/profile", deps);
 
     expect(result).toHaveLength(1); // should still return results
   });
 
-  it("uses correct limit in query", () => {
+  it("uses correct limit in query", async () => {
     const deps = createMockDeps();
 
-    getChromeHistory(100, "/fake/profile", deps);
+    await getChromeHistory(100, "/fake/profile", deps);
 
-    expect(deps.execSync).toHaveBeenCalledWith(
+    expect(deps.exec).toHaveBeenCalledWith(
       expect.stringContaining("LIMIT 100"),
       expect.any(Object),
     );
@@ -842,16 +803,6 @@ describe("parseTabOutput", () => {
     const tabs = parseTabOutput(output);
 
     expect(tabs).toHaveLength(2);
-  });
-
-  it("generates favicon URL for each tab", () => {
-    const output = "1|||1|||Tab|||https://example.com";
-
-    const tabs = parseTabOutput(output);
-
-    expect(tabs[0].favicon).toBe(
-      "https://www.google.com/s2/favicons?sz=64&domain=example.com",
-    );
   });
 });
 
@@ -1113,7 +1064,6 @@ describe("mergeContentIntoResults", () => {
         url: "https://example.com",
         source: "tab",
         subtitle: "Subtitle",
-        favicon: "https://favicon.com/icon.png",
         windowIndex: 1,
         tabIndex: 1,
       },
@@ -1128,7 +1078,6 @@ describe("mergeContentIntoResults", () => {
     expect(merged[0].id).toBe("tab-1-1");
     expect(merged[0].title).toBe("Tab 1");
     expect(merged[0].subtitle).toBe("Subtitle");
-    expect(merged[0].favicon).toBe("https://favicon.com/icon.png");
     expect(merged[0].content).toBe("Content");
   });
 

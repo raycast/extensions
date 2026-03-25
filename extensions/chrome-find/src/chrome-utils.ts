@@ -1,7 +1,10 @@
 import { readFileSync, existsSync, copyFileSync, unlinkSync } from "fs";
 import { homedir, tmpdir } from "os";
 import { join } from "path";
-import { execSync } from "child_process";
+import { exec as execCallback } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(execCallback);
 
 // ─── Types ───────────────────────────────────────────────────
 export interface SearchResult {
@@ -10,7 +13,6 @@ export interface SearchResult {
   url: string;
   source: "tab" | "bookmark" | "history";
   subtitle?: string;
-  favicon?: string;
   windowIndex?: number;
   tabIndex?: number;
   visitCount?: number;
@@ -45,7 +47,10 @@ export interface FsDeps {
   readFileSync: typeof readFileSync;
   copyFileSync: typeof copyFileSync;
   unlinkSync: typeof unlinkSync;
-  execSync: typeof execSync;
+  exec: (
+    command: string,
+    options: { encoding: string; timeout?: number },
+  ) => Promise<{ stdout: string }>;
   tmpdir: typeof tmpdir;
 }
 
@@ -54,7 +59,7 @@ export const defaultFsDeps: FsDeps = {
   readFileSync,
   copyFileSync,
   unlinkSync,
-  execSync,
+  exec: (cmd, opts) => execAsync(cmd, opts) as Promise<{ stdout: string }>,
   tmpdir,
 };
 
@@ -121,16 +126,6 @@ export function getChromeProfilePath(
   return join(chromePath, profile);
 }
 
-// ─── Favicon Helper ──────────────────────────────────────────
-export function getFaviconUrl(pageUrl: string): string {
-  try {
-    const parsed = new URL(pageUrl);
-    return `https://www.google.com/s2/favicons?sz=64&domain=${parsed.hostname}`;
-  } catch {
-    return "";
-  }
-}
-
 // ─── URL Normalization ───────────────────────────────────────
 export function normalizeUrl(url: string): string {
   try {
@@ -173,7 +168,6 @@ export function extractBookmarks(
       url: node.url,
       source: "bookmark",
       subtitle: path ? `${path} › ${node.url}` : node.url,
-      favicon: getFaviconUrl(node.url),
     });
   }
 
@@ -231,18 +225,17 @@ export function parseHistoryOutput(output: string): SearchResult[] {
         url: parts[0] || "",
         source: "history" as const,
         subtitle: parts[0] || "",
-        favicon: getFaviconUrl(parts[0] || ""),
         visitCount: parseInt(parts[2]) || 0,
       };
     });
 }
 
 // ─── Get Chrome History ──────────────────────────────────────
-export function getChromeHistory(
+export async function getChromeHistory(
   limit = 500,
   profilePath?: string,
   deps: FsDeps = defaultFsDeps,
-): SearchResult[] {
+): Promise<SearchResult[]> {
   const resolvedPath = profilePath ?? getChromeProfilePath();
   try {
     const historyPath = join(resolvedPath, "History");
@@ -263,12 +256,11 @@ export function getChromeHistory(
     let results: SearchResult[] = [];
 
     try {
-      const output = deps.execSync(
+      const { stdout } = await deps.exec(
         `sqlite3 -separator '|||' "${tempPath}" "SELECT url, title, visit_count FROM urls ORDER BY last_visit_time DESC LIMIT ${limit};"`,
         { encoding: "utf-8", timeout: 5000 },
-      ) as string;
-
-      results = parseHistoryOutput(output);
+      );
+      results = parseHistoryOutput(stdout);
     } catch (error) {
       console.error("Error querying history database:", error);
     }
@@ -307,7 +299,6 @@ export function parseTabOutput(output: string): SearchResult[] {
         url,
         source: "tab",
         subtitle: url,
-        favicon: getFaviconUrl(url),
         windowIndex,
         tabIndex,
       });
