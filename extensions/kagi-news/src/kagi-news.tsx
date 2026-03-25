@@ -10,13 +10,29 @@ import { stripHtml } from "./utils";
 import { ArticleDetail } from "./views/ArticleDetail";
 import { EventDetail } from "./views/EventDetail";
 import { ChaosIndexDetail } from "./views/ChaosIndexDetail";
+import { Category } from "./interfaces";
+
+// Extracted favorites action component
+function FavoritesAction({ category }: { category: Category | undefined }) {
+  const { isFavorite, toggleFavorite } = useFavoriteCategories();
+
+  if (!category) return null;
+
+  return (
+    <Action
+      title={isFavorite(category.id) ? "Remove from Favorites" : "Add to Favorites"}
+      icon={isFavorite(category.id) ? Icon.StarDisabled : { source: Icon.Star, tintColor: Color.Yellow }}
+      onAction={() => toggleFavorite(category.id)}
+    />
+  );
+}
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("selected-category", "");
 
   const { categories, isLoading: loadingCategories, error: categoriesError } = useCategories();
-  const { isFavorite, toggleFavorite } = useFavoriteCategories();
+  const { isFavorite } = useFavoriteCategories();
 
   const {
     articles,
@@ -79,17 +95,7 @@ export default function Command() {
                   icon={Icon.Eye}
                   target={<ChaosIndexDetail score={chaosIndex.score} description={chaosIndex.description} />}
                 />
-                {currentCategory && (
-                  <Action
-                    title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
-                    icon={
-                      isFavorite(currentCategory.id)
-                        ? Icon.StarDisabled
-                        : { source: Icon.Star, tintColor: Color.Yellow }
-                    }
-                    onAction={() => toggleFavorite(currentCategory.id)}
-                  />
-                )}
+                <FavoritesAction category={currentCategory} />
               </ActionPanel>
             }
           />
@@ -112,17 +118,7 @@ export default function Command() {
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
-                        {currentCategory && (
-                          <Action
-                            title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
-                            icon={
-                              isFavorite(currentCategory.id)
-                                ? Icon.StarDisabled
-                                : { source: Icon.Star, tintColor: Color.Yellow }
-                            }
-                            onAction={() => toggleFavorite(currentCategory.id)}
-                          />
-                        )}
+                        <FavoritesAction category={currentCategory} />
                       </ActionPanel>
                     }
                   />
@@ -139,17 +135,7 @@ export default function Command() {
                     actions={
                       <ActionPanel>
                         <Action.Push title="View Event" icon={Icon.Eye} target={<EventDetail event={event} />} />
-                        {currentCategory && (
-                          <Action
-                            title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
-                            icon={
-                              isFavorite(currentCategory.id)
-                                ? Icon.StarDisabled
-                                : { source: Icon.Star, tintColor: Color.Yellow }
-                            }
-                            onAction={() => toggleFavorite(currentCategory.id)}
-                          />
-                        )}
+                        <FavoritesAction category={currentCategory} />
                       </ActionPanel>
                     }
                   />
@@ -169,17 +155,7 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Push title="View Article" icon={Icon.Eye} target={<ArticleDetail article={article} />} />
-                {currentCategory && (
-                  <Action
-                    title={isFavorite(currentCategory.id) ? "Remove from Favorites" : "Add to Favorites"}
-                    icon={
-                      isFavorite(currentCategory.id)
-                        ? Icon.StarDisabled
-                        : { source: Icon.Star, tintColor: Color.Yellow }
-                    }
-                    onAction={() => toggleFavorite(currentCategory.id)}
-                  />
-                )}
+                <FavoritesAction category={currentCategory} />
               </ActionPanel>
             }
           />

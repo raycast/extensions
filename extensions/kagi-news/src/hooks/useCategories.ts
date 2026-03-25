@@ -18,6 +18,7 @@ export function useCategories() {
       const json = (await response.json()) as {
         categories: { categoryName: string; id: string }[];
         hasOnThisDay?: boolean;
+        hasChaosIndex?: boolean;
       };
 
       const categories: Category[] = json.categories.map((cat) => ({

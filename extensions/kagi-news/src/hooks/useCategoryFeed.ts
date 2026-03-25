@@ -103,14 +103,19 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
     }
 
     if (isChaosIndex) {
+      // Check if all three chaos fields are missing/falsy
+      const hasValidChaosData = contentData.chaosIndex || contentData.chaosDescription || contentData.chaosLastUpdated;
+
       return {
         articles: [],
         events: [],
-        chaosIndex: {
-          score: contentData.chaosIndex || 0,
-          description: contentData.chaosDescription || "",
-          timestamp: contentData.chaosLastUpdated || "",
-        },
+        chaosIndex: hasValidChaosData
+          ? {
+              score: contentData.chaosIndex || 0,
+              description: contentData.chaosDescription || "",
+              timestamp: contentData.chaosLastUpdated || "",
+            }
+          : null,
       };
     }
 

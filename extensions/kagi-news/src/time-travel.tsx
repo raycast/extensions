@@ -21,6 +21,7 @@ interface BatchCategoryResponse {
 interface BatchCategoriesData {
   categories: BatchCategoryResponse[];
   hasOnThisDay?: boolean;
+  hasChaosIndex?: boolean;
 }
 
 // Date Picker Component
