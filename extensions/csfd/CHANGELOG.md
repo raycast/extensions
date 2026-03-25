@@ -1,6 +1,6 @@
 # ČSFD Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2026-03-25
 
 - Fixed extension not working due to ČSFD API changes by updating `node-csfd-api` to v5.7.0
 
