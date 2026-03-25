@@ -28,7 +28,6 @@ export interface TokenData {
 
 // Kits metadata returned from the Font Awesome GraphQL API
 export interface Kit {
-  id: string;
   name: string;
   token: string;
 }
@@ -57,7 +56,6 @@ export interface KitIconsResult {
   data: {
     me: {
       kits: {
-        id: string;
         name: string;
         token: string;
         iconUploads: KitIconUpload[];
