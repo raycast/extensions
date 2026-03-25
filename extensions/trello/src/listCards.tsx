@@ -1,4 +1,4 @@
-import { List, Icon, Action, ActionPanel } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { trelloClient } from "./utils/trelloClient";
 import { Board } from "./Board";
@@ -19,7 +19,10 @@ export default function CardsForList() {
         setBoards(response);
         if (response[0]?.id) setSelectedBoard(response[0].id);
       })
-      .catch((err) => console.error("Failed to load boards:", err))
+      .catch((err) => {
+        console.error("Failed to load boards:", err);
+        showToast(Toast.Style.Failure, "Failed to load boards");
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,7 +32,10 @@ export default function CardsForList() {
     trelloClient
       .getLists(selectedBoard)
       .then((response) => setLists(response))
-      .catch((err) => console.error("Failed to load lists:", err))
+      .catch((err) => {
+        console.error("Failed to load lists:", err);
+        showToast(Toast.Style.Failure, "Failed to load lists");
+      })
       .finally(() => setLoading(false));
   }, [selectedBoard]);
 
@@ -80,7 +86,10 @@ function CardsList({ list }: { list: TrelloList }) {
     trelloClient
       .getCardsForList(list.id)
       .then((response) => setCards(response))
-      .catch((err) => console.error("Failed to load cards:", err))
+      .catch((err) => {
+        console.error("Failed to load cards:", err);
+        showToast(Toast.Style.Failure, "Failed to load cards");
+      })
       .finally(() => setLoading(false));
   }, [list.id]);
 

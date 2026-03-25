@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { trelloClient } from "./utils/trelloClient";
 import { TrelloFetchResponse } from "./trelloResponse.model";
@@ -15,6 +15,7 @@ export default function PackageList() {
       setCards(response);
     } catch (error) {
       console.error("Failed to search cards:", error);
+      showToast(Toast.Style.Failure, "Failed to search cards");
     } finally {
       setLoading(false);
     }
