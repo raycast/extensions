@@ -1,6 +1,6 @@
 # Craft CMS Changelog
 
-## [Add Plugin Store Search] - {PR_MERGE_DATE}
+## [Add Plugin Store Search] - 2026-03-26
 
 ### Added
 
