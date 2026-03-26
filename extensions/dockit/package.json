@@ -49,7 +49,7 @@
       "title": "Python Path",
       "description": "Path to Python 3 with dockit installed",
       "type": "textfield",
-      "default": "/Users/tianli/miniforge3/bin/python3",
+      "default": "/usr/local/bin/python3",
       "required": false
     }
   ],
