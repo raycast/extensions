@@ -5,6 +5,7 @@
 > **⚠️ Breaking Change**: This update moves preferences from per-command to global extension level. You will need to reconfigure your preferences in Extension Settings after updating.
 
 ### Fixed
+
 - **macOS 26 Tahoe Compatibility**: Complete rewrite of Control Center script to fix "Could not run AppleScript" error on macOS 26 Tahoe (Darwin 25+)
   - Fixed Control Center UI hierarchy changes where Sound controls are no longer accessible as a separate menu bar item
   - Rewritten to navigate through nested Control Center → Sound module → device list structure
@@ -19,6 +20,7 @@
   - Added input validation to reject non-positive airpodsIndex values
 
 ### Added
+
 - **Intelligent Retry Logic**: Up to 2 attempts to open Control Center window with proper state cleanup between retries
 - **Detailed Error Messages**: 8 specific error codes for better debugging and user feedback
   - `error-control-center-not-found`: Control Center icon not found in menu bar
@@ -33,18 +35,21 @@
 - **Dual-Script Approach**: Fast path attempts direct Sound menu bar access, automatically falls back to nested Control Center approach if unavailable
 
 ### Changed
+
 - **Preferences Architecture**: Moved preferences from per-command to global extension level
   - Affects: `optionOne`, `optionTwo`, `showHudNC`, `showHudCA`
   - Users must reconfigure preferences in Extension Settings (not per-command settings)
   - Provides more consistent configuration experience across all commands
 
 ### Improved
+
 - **Reliability**: Robust window state management with automatic cleanup of stale Control Center states before retry attempts
 - **Detection Strategy**: Index-based UI element detection using volume slider identification instead of fragile name-based menu search
 - **Error Handling**: Graceful failure handling with proper ESC key cleanup in all error paths to prevent UI state corruption
 - **Code Quality**: Removed all debug logging and console output for production readiness
 
 ### Technical
+
 - **Dual-Script Execution Strategy** with automatic fallback:
   - **Approach 1 (Fast Path)**: Direct Sound menu bar access
     1. Search for Sound menu bar item by description
@@ -77,22 +82,26 @@
 > **Note:** This update has only been tested on macOS Tahoe (26).
 
 ### macOS Tahoe Support
+
 - Updated AppleScript to work with the new ControlCenter process on macOS Tahoe
 - Added backward compatibility for pre-Sequoia macOS versions using SystemUIServer
 
 ### New Features
+
 - Added **AirPods Type** preference to select between AirPods Pro and AirPods Max
 - Different menu layouts are now properly handled for each AirPods model:
   - **AirPods Max**: Off, Transparency, Noise Cancellation
   - **AirPods Pro**: Transparency, Adaptive, Noise Cancellation + Conversation Awareness
 
 ### Bug Fixes
+
 - Fixed disclosure triangle selection to target the correct AirPods item
 - Fixed conversation awareness indices
 - Added validation to show error when "Adaptive" mode is selected for AirPods Max
 - Fixed `entire contents` statement missing object reference
 
 ### Performance
+
 - Reduced delays for faster execution
 
 ## [Bug Fix] - 2025-04-15
@@ -105,10 +114,12 @@
 - Gracefully handle AppleScript runtime errors
 
 ## [Improvements] - 2024-03-09
+
 - Typo fixed.
 - Added current mode in the subtitle of both commands.
 
 ## [Improvements] - 2024-01-03
+
 - Added `Off` Mode
 - Main function fixed
 

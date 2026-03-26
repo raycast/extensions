@@ -610,12 +610,6 @@ end tell
 
   // Process the result from whichever script succeeded
   switch (result) {
-    case "sound-menu-not-found": {
-      await showFailureToast("", {
-        title: "Sound menu not found. Check Localization!",
-      });
-      return null;
-    }
     case "error-control-center-not-found": {
       await showFailureToast("", {
         title: "Control Center not found in menu bar",

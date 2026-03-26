@@ -2,6 +2,7 @@
 
 This is a simple extension that toggles between Noise Cancellation, Transparency
 or Adaptive and toggles Conversation Awareness on AirPods.
+
 > Adaptive and Conversation Awareness will only work with supported AirPods (AirPods Pro only)
 
 ⚠️ **This extension has been tested on macOS Tahoe `26.0`.**
