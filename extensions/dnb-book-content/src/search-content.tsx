@@ -307,13 +307,14 @@ async function fetchGoogleBooksInfo(isbn: string): Promise<ExternalSource | null
       return null;
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as Record<string, unknown>;
+    const items = data.items as Array<{ volumeInfo: { description?: string; infoLink?: string } }> | undefined;
 
-    if (!data.items || data.items.length === 0) {
+    if (!items || items.length === 0) {
       return null;
     }
 
-    const book = data.items[0].volumeInfo;
+    const book = items[0].volumeInfo;
     const description = book.description;
 
     if (!description) {
@@ -322,7 +323,7 @@ async function fetchGoogleBooksInfo(isbn: string): Promise<ExternalSource | null
 
     return {
       name: "Google Books (Publisher Description)",
-      snippet: description.substring(0, 500), // Limit to 500 chars
+      snippet: description.substring(0, 500),
       url: book.infoLink || `https://books.google.com/books?isbn=${isbn}`,
       confidence: 85,
     };
@@ -344,13 +345,14 @@ async function fetchWikipediaInfo(title: string, author: string): Promise<Extern
     const searchResponse = await fetch(searchUrl);
     if (!searchResponse.ok) return null;
 
-    const searchData = await searchResponse.json();
+    const searchData = (await searchResponse.json()) as Record<string, unknown>;
+    const wikiQuery = searchData.query as { search?: Array<{ title: string }> } | undefined;
 
-    if (!searchData.query?.search || searchData.query.search.length === 0) {
+    if (!wikiQuery?.search || wikiQuery.search.length === 0) {
       return null;
     }
 
-    const firstResult = searchData.query.search[0];
+    const firstResult = wikiQuery.search[0];
     const pageTitle = firstResult.title;
 
     // Get page extract
@@ -359,13 +361,14 @@ async function fetchWikipediaInfo(title: string, author: string): Promise<Extern
     const extractResponse = await fetch(extractUrl);
     if (!extractResponse.ok) return null;
 
-    const extractData = await extractResponse.json();
-    const pages = extractData.query?.pages;
+    const extractData = (await extractResponse.json()) as Record<string, unknown>;
+    const extractQuery = extractData.query as { pages?: Record<string, { extract?: string }> } | undefined;
+    const pages = extractQuery?.pages;
 
     if (!pages) return null;
 
-    const page = Object.values(pages)[0] as { extract?: string };
-    const extract = page.extract;
+    const page = Object.values(pages)[0];
+    const extract = page?.extract;
 
     if (!extract) return null;
 
@@ -779,7 +782,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
 
         try {
           const klappentextResult = await generateVerifiedKlappentext("", "", "", "", effectiveTocText);
-          setBookInfo({ title: "", author: "", tocUrl: "", tocFromClipboard, isbn: "" });
+          setBookInfo({ title: "", author: "", tocUrl: "", tocFromClipboard: tocFromClipboard ?? null, isbn: "" });
           setResult(klappentextResult);
           setShowDetail(true);
           await toast.hide();
@@ -882,7 +885,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
               tocTextForGen,
             );
 
-            setBookInfo({ title, author, tocUrl, tocFromClipboard, isbn: normalizeISBN(effectiveIsbn) });
+            setBookInfo({
+              title,
+              author,
+              tocUrl,
+              tocFromClipboard: tocFromClipboard ?? null,
+              isbn: normalizeISBN(effectiveIsbn),
+            });
             setResult(klappentextResult);
             setShowDetail(true);
             await toast.hide();
