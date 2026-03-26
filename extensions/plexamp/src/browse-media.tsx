@@ -612,7 +612,7 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
 
   if (viewMode === "grid") {
     const groups = groupAlbumsByReleaseType(albums.value);
-    const gridColumns = Number(getPreferenceValues<{ gridColumns?: string }>().gridColumns) || 4;
+    const gridColumns = Number(getPreferenceValues<Preferences>().gridColumns) || 4;
 
     return (
       <Grid

@@ -104,7 +104,11 @@ export default function Command() {
         />
       ) : null}
       {!tracks.isLoading && tracks.value.length === 0 && !tracks.error ? (
-        <List.EmptyView icon={Icon.Clock} title="No recently played tracks" description="Play some music to see your history here." />
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="No recently played tracks"
+          description="Play some music to see your history here."
+        />
       ) : null}
       {tracks.value.map((track) => (
         <RecentTrackRow
