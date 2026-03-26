@@ -41,23 +41,28 @@ export function ExtensionListItem({
   const accessories: List.Item.Accessory[] = [];
 
   // Always show platform icons so users remember which platforms are visible
-  const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
-  const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
-  if (hasMac) {
-    accessories.push({ icon: { source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }, tooltip: "macOS" });
-  }
-  if (hasWindows) {
-    accessories.push({ icon: { source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }, tooltip: "Windows" });
+  // Removed extensions don't have reliable platform data, so skip those icons
+  if (item.type !== "removed") {
+    const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
+    const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
+    if (hasMac) {
+      accessories.push({ icon: { source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }, tooltip: "macOS" });
+    }
+    if (hasWindows) {
+      accessories.push({ icon: { source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }, tooltip: "Windows" });
+    }
   }
 
   if (showTypeTag) {
-    accessories.push({
-      icon: {
-        source: item.type === "new" ? Icon.StarCircle : Icon.ArrowUpCircle,
-        tintColor: item.type === "new" ? Color.Green : Color.Blue,
-      },
-      tooltip: item.type === "new" ? "New Extension" : "Updated Extension",
-    });
+    const typeIcon =
+      item.type === "removed"
+        ? { source: Icon.MinusCircle, tintColor: Color.Red }
+        : item.type === "new"
+          ? { source: Icon.StarCircle, tintColor: Color.Green }
+          : { source: Icon.ArrowUpCircle, tintColor: Color.Blue };
+    const typeTooltip =
+      item.type === "removed" ? "Removed Extension" : item.type === "new" ? "New Extension" : "Updated Extension";
+    accessories.push({ icon: typeIcon, tooltip: typeTooltip });
   }
 
   return (

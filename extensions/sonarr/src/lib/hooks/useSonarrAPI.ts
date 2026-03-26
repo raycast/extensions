@@ -1,36 +1,114 @@
 import { useFetch, showFailureToast } from "@raycast/utils";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { addDays, format } from "date-fns";
 import { z } from "zod";
 import type { SingleSeries } from "@/lib/types/episode";
-import type { SeriesFull, SeriesLookup, RootFolder, QualityProfile, AddSeriesOptions } from "@/lib/types/series";
+import type { BlocklistResponse } from "@/lib/types/blocklist";
+import type { HistoryResponse } from "@/lib/types/history";
+import type { SonarrPreferences } from "@/lib/types/preferences";
 import type { QueueItem } from "@/lib/types/queue";
+import type { AddSeriesOptions, QualityProfile, RootFolder, SeriesFull, SeriesLookup } from "@/lib/types/series";
+import type { Command, HealthCheck, SystemStatus } from "@/lib/types/system";
 import type { WantedMissingResponse } from "@/lib/types/wanted";
-import type { SystemStatus, HealthCheck, Command } from "@/lib/types/system";
 import {
-  SeriesLookupSchema,
-  SeriesFullSchema,
-  RootFolderSchema,
-  QualityProfileSchema,
-  SystemStatusSchema,
   CommandSchema,
+  QualityProfileSchema,
+  RootFolderSchema,
+  SeriesFullSchema,
+  SeriesLookupSchema,
+  SystemStatusSchema,
 } from "@/lib/types/schemas";
 import { fetchAndValidate, fetchWithTimeout } from "@/lib/utils/api-helpers";
 
 function getApiConfig() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { host, port, base, http, apiKey } = preferences;
+  const preferences = getPreferenceValues<SonarrPreferences>();
+  const rawHost = preferences.host.trim();
+  const rawPort = preferences.port.trim();
+  const rawBase = preferences.base.trim();
+  const apiKey = preferences.apiKey.trim();
 
-  const baseUrl = base ? base.replace(/^\/|\/$/g, "") : "";
-  const url = `${http}://${host}:${port}${baseUrl ? `/${baseUrl}` : ""}`;
+  let protocol = preferences.http;
+  let host = rawHost;
+  let port = rawPort;
+  let baseFromHost = "";
+
+  if (/^https?:\/\//i.test(rawHost)) {
+    try {
+      const parsed = new URL(rawHost);
+      protocol = parsed.protocol.replace(":", "") as "http" | "https";
+      host = parsed.hostname;
+      port = parsed.port || rawPort;
+      baseFromHost = parsed.pathname === "/" ? "" : parsed.pathname;
+    } catch {
+      // Keep original values and let the request fail with a clear error.
+    }
+  } else {
+    const slashIndex = host.indexOf("/");
+
+    if (slashIndex !== -1) {
+      baseFromHost = host.slice(slashIndex + 1);
+      host = host.slice(0, slashIndex);
+    }
+
+    const hostPortMatch = host.match(/^(.+):(\d+)$/);
+    if (hostPortMatch) {
+      host = hostPortMatch[1];
+      port = hostPortMatch[2];
+    }
+  }
+
+  host = host.replace(/\/+$/g, "");
+  const basePath = (rawBase || baseFromHost).replace(/^\/|\/$/g, "");
+
+  const url = `${protocol}://${host}${port ? `:${port}` : ""}${basePath ? `/${basePath}` : ""}`;
 
   return {
     url,
-    apiKey,
     headers: {
       "X-Api-Key": apiKey,
     },
   };
+}
+
+function getErrorMessageFromPayload(payload: unknown): string | undefined {
+  if (typeof payload === "string") {
+    return payload;
+  }
+
+  if (!payload || typeof payload !== "object") {
+    return undefined;
+  }
+
+  const record = payload as Record<string, unknown>;
+
+  if (typeof record.message === "string") {
+    return record.message;
+  }
+
+  if (typeof record.error === "string") {
+    return record.error;
+  }
+
+  return undefined;
+}
+
+async function parseResponsePayload(response: Response): Promise<unknown> {
+  const rawText = await response.text();
+
+  if (!rawText) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(rawText);
+  } catch {
+    return rawText;
+  }
+}
+
+function getApiError(status: number, payload: unknown): Error {
+  const message = getErrorMessageFromPayload(payload);
+  return new Error(message ? `API returned ${status}: ${message}` : `API returned ${status}`);
 }
 
 export function useSonarrAPI<T>(endpoint: string, options?: { execute?: boolean }) {
@@ -40,8 +118,24 @@ export function useSonarrAPI<T>(endpoint: string, options?: { execute?: boolean 
   return useFetch<T>(fullUrl, {
     headers,
     execute: options?.execute ?? true,
+    keepPreviousData: true,
+    parseResponse: async (response) => {
+      const payload = await parseResponsePayload(response);
+
+      if (!response.ok) {
+        throw getApiError(response.status, payload);
+      }
+
+      return payload as T;
+    },
     onError: (error) => {
-      showFailureToast("Failed to fetch data from Sonarr", { message: error.message });
+      showFailureToast(error, {
+        title: "Failed to fetch data from Sonarr",
+        primaryAction: {
+          title: "Open Extension Preferences",
+          onAction: openExtensionPreferences,
+        },
+      });
     },
   });
 }
@@ -67,6 +161,22 @@ export function useWantedMissing(page: number = 1, pageSize: number = 50) {
   return useSonarrAPI<WantedMissingResponse>(
     `/wanted/missing?page=${page}&pageSize=${pageSize}&sortKey=airDateUtc&sortDirection=descending&includeSeries=true`,
   );
+}
+
+export function useHistory(page: number = 1, pageSize: number = 100) {
+  return useSonarrAPI<HistoryResponse>(
+    `/history?page=${page}&pageSize=${pageSize}&sortKey=date&sortDirection=descending&includeSeries=true&includeEpisode=true`,
+  );
+}
+
+export function useBlocklist(page: number = 1, pageSize: number = 100) {
+  return useSonarrAPI<BlocklistResponse>(
+    `/blocklist?page=${page}&pageSize=${pageSize}&sortKey=date&sortDirection=descending&includeSeries=true`,
+  );
+}
+
+export function useCommands() {
+  return useSonarrAPI<Command[]>("/command");
 }
 
 export function useSystemStatus() {
@@ -135,7 +245,8 @@ export async function removeQueueItem(id: number, blocklist: boolean = false): P
     });
 
     if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
+      const payload = await parseResponsePayload(response);
+      throw getApiError(response.status, payload);
     }
 
     showToast({
@@ -155,58 +266,75 @@ export async function removeQueueItem(id: number, blocklist: boolean = false): P
 export async function executeCommand(command: string, body: Record<string, unknown> = {}): Promise<Command> {
   const { url, headers } = getApiConfig();
 
+  const response = await fetchWithTimeout(`${url}/api/v3/command`, {
+    method: "POST",
+    headers: {
+      ...headers,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      name: command,
+      ...body,
+    }),
+  });
+
+  const payload = await parseResponsePayload(response);
+
+  if (!response.ok) {
+    throw getApiError(response.status, payload);
+  }
+
+  const parsed = CommandSchema.safeParse(payload);
+
+  if (!parsed.success) {
+    throw new Error("Sonarr returned an unexpected response for this command");
+  }
+
+  return parsed.data;
+}
+
+export async function searchEpisode(episodeIds: number[]): Promise<Command> {
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Queueing episode search...",
+  });
+
   try {
-    return await fetchAndValidate(`${url}/api/v3/command`, CommandSchema, {
-      method: "POST",
-      headers: {
-        ...headers,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        name: command,
-        ...body,
-      }),
-    });
+    const result = await executeCommand("EpisodeSearch", { episodeIds });
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Episode search queued";
+    toast.message = result.status ? `Status: ${result.status}` : undefined;
+
+    return result;
   } catch (error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to execute command",
-      message: error instanceof Error ? error.message : "Unknown error",
-    });
+    toast.style = Toast.Style.Failure;
+    toast.title = "Episode search failed";
+    toast.message = error instanceof Error ? error.message : "Unknown error";
     throw error;
   }
 }
 
-export async function searchEpisode(episodeIds: number[]): Promise<Command> {
-  await showToast({
-    style: Toast.Style.Animated,
-    title: "Searching for episode...",
-  });
-
-  const result = await executeCommand("EpisodeSearch", { episodeIds });
-
-  showToast({
-    style: Toast.Style.Success,
-    title: "Episode search started",
-  });
-
-  return result;
-}
-
 export async function searchSeason(seriesId: number, seasonNumber: number): Promise<Command> {
-  await showToast({
+  const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Searching for season...",
+    title: "Queueing season search...",
   });
 
-  const result = await executeCommand("SeasonSearch", { seriesId, seasonNumber });
+  try {
+    const result = await executeCommand("SeasonSearch", { seriesId, seasonNumber });
 
-  showToast({
-    style: Toast.Style.Success,
-    title: "Season search started",
-  });
+    toast.style = Toast.Style.Success;
+    toast.title = "Season search queued";
+    toast.message = result.status ? `Status: ${result.status}` : undefined;
 
-  return result;
+    return result;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Season search failed";
+    toast.message = error instanceof Error ? error.message : "Unknown error";
+    throw error;
+  }
 }
 
 export async function toggleEpisodeMonitoring(episodeId: number, monitored: boolean): Promise<void> {
@@ -226,7 +354,8 @@ export async function toggleEpisodeMonitoring(episodeId: number, monitored: bool
     });
 
     if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
+      const payload = await parseResponsePayload(response);
+      throw getApiError(response.status, payload);
     }
 
     showToast({
@@ -265,6 +394,7 @@ export async function getQualityProfiles(): Promise<QualityProfile[]> {
     const profiles = await fetchAndValidate(`${url}/api/v3/qualityprofile`, z.array(QualityProfileSchema), {
       headers,
     });
+
     return profiles as QualityProfile[];
   } catch (error) {
     showToast({

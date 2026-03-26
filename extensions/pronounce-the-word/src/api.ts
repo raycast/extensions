@@ -34,9 +34,11 @@ export interface ApiResponse {
 /**
  * Fetch word data from Free Dictionary API
  */
-async function fetchFromFreeDictionary(word: string): Promise<ApiResponse> {
+async function fetchFromFreeDictionary(word: string, signal?: AbortSignal): Promise<ApiResponse> {
   try {
-    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`);
+    const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(word)}`, {
+      signal,
+    });
 
     if (!response.ok) {
       if (response.status === 404) {
@@ -48,7 +50,15 @@ async function fetchFromFreeDictionary(word: string): Promise<ApiResponse> {
       throw new Error(`API responded with status ${response.status}`);
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as {
+      word: string;
+      phonetics: { text?: string; audio?: string; sourceUrl?: string }[];
+      meanings: {
+        partOfSpeech: string;
+        definitions: { definition: string; example?: string; synonyms?: string[]; antonyms?: string[] }[];
+      }[];
+      sourceUrls: string[];
+    }[];
 
     if (!Array.isArray(data) || data.length === 0) {
       return {
@@ -115,6 +125,9 @@ async function fetchFromFreeDictionary(word: string): Promise<ApiResponse> {
       data: wordData,
     };
   } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
     console.error("Free Dictionary API error:", error);
     return {
       success: false,
@@ -126,15 +139,18 @@ async function fetchFromFreeDictionary(word: string): Promise<ApiResponse> {
 /**
  * Get suggestions for similar words
  */
-async function getSuggestions(word: string): Promise<string[]> {
+async function getSuggestions(word: string, signal?: AbortSignal): Promise<string[]> {
   try {
-    const response = await fetch(`https://api.datamuse.com/sug?s=${encodeURIComponent(word)}&max=5`);
+    const response = await fetch(`https://api.datamuse.com/sug?s=${encodeURIComponent(word)}&max=5`, { signal });
     if (!response.ok) {
       return [];
     }
     const data = (await response.json()) as Array<{ word: string }>;
     return data.map((item) => item.word);
   } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw error;
+    }
     console.error("Suggestions API error:", error);
     return [];
   }
@@ -143,16 +159,16 @@ async function getSuggestions(word: string): Promise<string[]> {
 /**
  * Main function to fetch word data with suggestions
  */
-export async function fetchWordData(word: string): Promise<ApiResponse> {
+export async function fetchWordData(word: string, signal?: AbortSignal): Promise<ApiResponse> {
   // Try Free Dictionary API
-  const freeDictResult = await fetchFromFreeDictionary(word);
+  const freeDictResult = await fetchFromFreeDictionary(word, signal);
 
   if (freeDictResult.success) {
     return freeDictResult;
   }
 
   // If it fails, get suggestions
-  const suggestions = await getSuggestions(word);
+  const suggestions = await getSuggestions(word, signal);
 
   return {
     success: false,

@@ -346,6 +346,23 @@ const CONFLICT_PATTERN = /Error: (Cask|Formula) '([^']+)' conflicts with '([^']+
 const MACOS_VERSION_PATTERN = /Error: (Cask|Formula) '([^']+)' requires macOS\s*([><=]+\s*[\d.]+)/i;
 
 /**
+ * Homebrew output lines that are not useful in user-facing toast errors.
+ */
+const BREW_NOISE_LINE_PATTERNS = [
+  /^==>\s+Auto-updating Homebrew/i,
+  /^Adjust how often this is run/i,
+  /^Hide these hints/i,
+  /^\$HOMEBREW_/i,
+  /^✔︎\s+JSON API/i,
+  /^==>\s+Auto-updated Homebrew/i,
+  /^==>\s+Updated Homebrew/i,
+  /^Updated \d+ taps?/i,
+  /^==>\s+New Formulae/i,
+  /^==>\s+New Casks/i,
+  /^You have \d+ outdated formulae and \d+ outdated casks installed\./i,
+];
+
+/**
  * Check if an error message indicates a brew lock error.
  */
 export function isBrewLockMessage(message: string): boolean {
@@ -400,6 +417,33 @@ export function isMacOSVersionMessage(message: string): boolean {
  */
 export function ensureError(err: unknown): Error {
   return err instanceof Error ? err : new Error(String(err));
+}
+
+function isNoiseLine(line: string): boolean {
+  return BREW_NOISE_LINE_PATTERNS.some((pattern) => pattern.test(line));
+}
+
+function summarizeBrewOutput(output: string): string {
+  const lines = output
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length === 0) {
+    return "";
+  }
+
+  const errorLines = lines.filter((line) => /^Error:/i.test(line));
+  if (errorLines.length > 0) {
+    return errorLines[errorLines.length - 1];
+  }
+
+  const nonNoiseLines = lines.filter((line) => !isNoiseLine(line));
+  if (nonNoiseLines.length > 0) {
+    return nonNoiseLines[nonNoiseLines.length - 1];
+  }
+
+  return lines[lines.length - 1];
 }
 
 /**
@@ -483,8 +527,9 @@ export function getErrorMessage(error: unknown): string {
         }
         return message;
       }
+      return summarizeBrewOutput(error.stderr);
     }
-    return error.stderr ?? error.message;
+    return summarizeBrewOutput(error.message);
   }
 
   if (error instanceof BrewError) {
@@ -512,9 +557,9 @@ export function getErrorMessage(error: unknown): string {
         }
         return message;
       }
-      return execError.stderr;
+      return summarizeBrewOutput(execError.stderr);
     }
-    return error.message;
+    return summarizeBrewOutput(error.message);
   }
 
   return String(error);

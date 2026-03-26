@@ -9,6 +9,9 @@ import {
   Nature,
   Move,
   Ability,
+  Item,
+  Pokedex,
+  PokemonDex,
 } from "../types";
 
 const cache = new Cache();
@@ -120,7 +123,7 @@ export const fetchPokemon = async (
             name
             generation {
               name
-              generationnames(where: {language_id: {_eq: 9}}) {
+              generationnames(where: {language_id: {_eq: $language_id}}) {
                 name
               }
             }
@@ -188,7 +191,7 @@ export const fetchPokemon = async (
           name
           generation {
             name
-            generationnames(where: {language_id: {_eq: 9}}) {
+            generationnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
@@ -279,16 +282,40 @@ export const fetchPokemon = async (
             }
           }
         }
-        pokemons(order_by: {id: asc}, where: {pokemonforms: {form_name: {_nin: ["starter", "totem", "totem-alola"]}}}) {
+        pokemons(
+          order_by: {id: asc}
+          where: {pokemonforms: {form_name: {_nin: ["starter", "totem", "totem-alola"]}}}
+        ) {
           name
           height
           weight
           pokemonforms {
             form_name
             pokemon_id
+            is_mega
             pokemonformnames(where: {language_id: {_eq: $language_id}}) {
               name
               pokemon_name
+            }
+            pokemonformtypes {
+              type {
+                id
+                name
+                typenames(where: {language_id: {_eq: $language_id}}) {
+                  name
+                }
+                typeefficacies(where: {damage_factor: {_neq: 100}}) {
+                  damage_factor
+                  damage_type_id
+                  target_type_id
+                  type {
+                    name
+                    typenames(where: {language_id: {_eq: $language_id}}) {
+                      name
+                    }
+                  }
+                }
+              }
             }
           }
           pokemonabilities {
@@ -320,7 +347,10 @@ export const fetchPokemon = async (
             }
           }
         }
-        pokemonspeciesflavortexts(where: {language_id: {_eq: $language_id}}, order_by: {version_id: asc}) {
+        pokemonspeciesflavortexts(
+          where: {language_id: {_eq: $language_id}}
+          order_by: {version_id: asc}
+        ) {
           flavor_text
           version {
             id
@@ -331,7 +361,7 @@ export const fetchPokemon = async (
               generation_id
               generation {
                 name
-                generationnames(where: {language_id: {_eq: 9}}) {
+                generationnames(where: {language_id: {_eq: $language_id}}) {
                   name
                 }
               }
@@ -447,7 +477,7 @@ export const fetchMove = async (move_id: number): Promise<Move | undefined> => {
         }
       }
       generation {
-        generationnames(where: {language_id: {_eq: 9}}) {
+        generationnames(where: {language_id: {_eq: $language_id}}) {
           name
         }
       }
@@ -469,7 +499,7 @@ export const fetchMove = async (move_id: number): Promise<Move | undefined> => {
           name
           generation {
             name
-            generationnames(where: {language_id: {_eq: 9}}) {
+            generationnames(where: {language_id: {_eq: $language_id}}) {
               name
             }
           }
@@ -578,4 +608,155 @@ export const fetchAbilities = async (): Promise<Ability[] | undefined> => {
   const variables = { language_id };
 
   return fetchDataWithCaching(query, variables, "ability", true);
+};
+
+export const fetchItems = async (): Promise<Item[] | undefined> => {
+  const query = `query items($language_id: Int) {
+    item {
+      id
+      name
+      cost
+      itemnames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      itemcategory {
+        name
+        item_pocket_id
+        itemcategorynames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+        itempocket {
+          name
+          itempocketnames(where: {language_id: {_eq: $language_id}}) {
+            name
+          }
+        }
+      }
+      itemeffecttexts(where: {language_id: {_eq: $language_id}}) {
+        short_effect
+        effect
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "item", true);
+};
+
+export const fetchItem = async (item_id: number): Promise<Item | undefined> => {
+  const query = `query item($language_id: Int, $item_id: Int) {
+    item(where: {id: {_eq: $item_id}}) {
+      id
+      name
+      cost
+      itemnames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      itemcategory {
+        name
+        item_pocket_id
+        itemcategorynames(where: {language_id: {_eq: $language_id}}) {
+          name
+        }
+        itempocket {
+          name
+          itempocketnames(where: {language_id: {_eq: $language_id}}) {
+            name
+          }
+        }
+      }
+      itemeffecttexts(where: {language_id: {_eq: $language_id}}) {
+        short_effect
+        effect
+      }
+      itemflavortexts(where: {language_id: {_eq: $language_id}}) {
+        flavor_text
+        versiongroup {
+          name
+          generation {
+            name
+            generationnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          versions {
+            name
+            versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id, item_id };
+
+  return fetchDataWithCaching(query, variables, "item");
+};
+
+export const fetchPokedexes = async (): Promise<Pokedex[] | undefined> => {
+  // exclude national dex (id: 1) since it contains all pokemon and isn't a "regional" dex
+  const query = `query pokedexes($language_id: Int) {
+    pokedex(where: {id: {_neq: 1}, is_main_series: {_eq: true}}) {
+      id
+      name
+      is_main_series
+      pokedexnames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      pokedexversiongroups {
+        version_group_id
+        versiongroup {
+          name
+          generation {
+            name
+            generationnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          versions {
+            name
+            versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "pokedex", true);
+};
+
+export const fetchPokedexPokemon = async (
+  pokedexId: number,
+): Promise<PokemonDex[] | undefined> => {
+  const query = `query pokemondexnumber($dex_id: Int, $language_id: Int) {
+    pokemondexnumber(
+      where: {pokedex_id: {_eq: $dex_id}}
+      order_by: [{pokedex_number: asc}]
+    ) {
+      pokedex_number
+      pokemon_species_id
+      pokemonspecy {
+        is_baby
+        is_legendary
+        is_mythical
+        name
+        pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+          genus
+          name
+          language_id
+        }
+      }
+    }
+  }`;
+
+  const variables = { dex_id: pokedexId, language_id };
+
+  return fetchDataWithCaching(query, variables, "pokemondexnumber", true);
 };

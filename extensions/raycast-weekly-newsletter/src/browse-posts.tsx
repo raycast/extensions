@@ -79,8 +79,31 @@ function PostDetail({ slug }: { slug: string }) {
     },
   });
 
-  if (isLoading || !post) {
+  if (isLoading) {
     return <Detail isLoading={true} />;
+  }
+
+  if (!post) {
+    return (
+      <Detail
+        markdown={[
+          "# Unable to Load Post",
+          "",
+          "Raycast Weekly couldn't load this post right now.",
+          "Try opening it in your browser and try again later.",
+        ].join("\n")}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser url={getPostUrl(slug)} />
+            <Action.CopyToClipboard
+              title="Copy Link"
+              content={getPostUrl(slug)}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   const markdown = generatePostMarkdown(post);

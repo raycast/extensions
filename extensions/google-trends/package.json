@@ -800,7 +800,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.25.6",
-    "axios": "^0.24.0",
+    "axios": "^0.30.3",
     "html-entities": "^2.3.2"
   },
   "devDependencies": {

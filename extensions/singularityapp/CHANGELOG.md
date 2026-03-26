@@ -1,5 +1,23 @@
 # SingularityApp Changelog
 
+## [0.2.0] - 2026-03-01
+
+### Added
+
+- Proper API pagination using `offset` + `maxCount` — all tasks are now fetched automatically across multiple pages (up to 1000 per request), no manual limit needed
+
+### Changed
+
+- API token is now configured via Raycast's built-in extension preferences (⌘ + Shift + , on any command) instead of a dedicated command — Raycast natively prompts on first launch
+- 401 authentication errors now show an **Open Preferences** action in the error toast for quick recovery
+
+### Removed
+
+- **Set API Token** command — replaced by built-in Raycast preferences
+- **Set Max Tasks Count** command — no longer needed due to automatic pagination
+
+
+
 ## [Initial Release] - 2026-01-29
 
 ### Features

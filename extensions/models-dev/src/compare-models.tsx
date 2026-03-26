@@ -1,11 +1,12 @@
-import { List, Detail, Icon, ActionPanel, Action, useNavigation, showToast, Toast } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { List, Detail, Icon, ActionPanel, Action } from "@raycast/api";
+import { useState, useMemo, useCallback } from "react";
 import { useModelsData } from "./hooks/useModelsData";
 import { ModelListItem, ModelListSection } from "./components";
 import { Model } from "./lib/types";
 import { formatPrice, formatContextWindow } from "./lib/formatters";
+import { filterOutDeprecated } from "./lib/filters";
 
-function ComparisonView({ models }: { models: Model[] }) {
+function ComparisonView({ models, onEditSelection }: { models: Model[]; onEditSelection: () => void }) {
   // Build comparison markdown table
   const headers = ["", ...models.map((m) => m.name)];
   const headerRow = `| ${headers.join(" | ")} |`;
@@ -33,9 +34,6 @@ function ComparisonView({ models }: { models: Model[] }) {
   const tableRows = rows.map((row) => `| ${row.join(" | ")} |`).join("\n");
   const markdown = `# Model Comparison\n\n${headerRow}\n${separatorRow}\n${tableRows}`;
 
-  // Build markdown for copy
-  const copyMarkdown = `# Model Comparison\n\n${headerRow}\n${separatorRow}\n${tableRows}`;
-
   return (
     <Detail
       markdown={markdown}
@@ -44,8 +42,14 @@ function ComparisonView({ models }: { models: Model[] }) {
         <ActionPanel>
           <Action.CopyToClipboard
             title="Copy as Markdown"
-            content={copyMarkdown}
+            content={markdown}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          <Action
+            title="Edit Selection"
+            icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            onAction={onEditSelection}
           />
         </ActionPanel>
       }
@@ -55,61 +59,69 @@ function ComparisonView({ models }: { models: Model[] }) {
 
 export default function CompareAIModels() {
   const { data, isLoading } = useModelsData();
-  const { push } = useNavigation();
   const [selectedModels, setSelectedModels] = useState<Model[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
   const availableTitle = selectedModels.length > 0 ? "Available" : "Models";
+
+  // Memoized to prevent unnecessary re-renders when other state changes.
+  // Note: View switching (showComparison state) is the actual OOM fix -
+  // it unmounts the List when comparison shows, preventing view stacking.
+  const canAddToComparison = useMemo(() => selectedModels.length < 2, [selectedModels.length]);
 
   const selectedIds = useMemo(() => new Set(selectedModels.map((m) => `${m.providerId}-${m.id}`)), [selectedModels]);
 
   const availableModels = useMemo(() => {
     if (!data?.models) return [];
-    return data.models.filter((m) => !selectedIds.has(`${m.providerId}-${m.id}`));
-  }, [data?.models, selectedIds]);
+    if (showComparison || selectedModels.length >= 2) return [];
+    return filterOutDeprecated(data.models.filter((m) => !selectedIds.has(`${m.providerId}-${m.id}`)));
+  }, [data?.models, selectedIds, showComparison, selectedModels.length]);
 
-  const handleToggleModel = (model: Model) => {
+  const handleToggleModel = useCallback((model: Model) => {
     const modelKey = `${model.providerId}-${model.id}`;
-    if (selectedIds.has(modelKey)) {
-      setSelectedModels(selectedModels.filter((m) => `${m.providerId}-${m.id}` !== modelKey));
-    } else {
-      if (selectedModels.length >= 3) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Maximum 3 models",
-          message: "Remove a model before adding another",
-        });
-        return;
-      }
-      setSelectedModels([...selectedModels, model]);
-    }
-  };
 
-  const handleCompare = () => {
-    if (selectedModels.length < 2) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Select at least 2 models",
-        message: "Choose 2-3 models to compare",
-      });
-      return;
+    setSelectedModels((prev) => {
+      const isSelected = prev.some((m) => `${m.providerId}-${m.id}` === modelKey);
+
+      if (isSelected) {
+        const next = prev.filter((m) => `${m.providerId}-${m.id}` !== modelKey);
+        if (next.length < 2) {
+          setTimeout(() => setShowComparison(false), 0);
+        }
+        return next;
+      }
+
+      // Defensive guard: never allow selecting more than 2.
+      if (prev.length >= 2) {
+        return prev;
+      }
+
+      const newSelection = [...prev, model];
+      if (newSelection.length === 2) {
+        // Avoid stacking the heavy List view and the Detail view.
+        // Switching views unmounts the List, reducing peak memory.
+        setTimeout(() => setShowComparison(true), 0);
+      }
+      return newSelection;
+    });
+  }, []);
+
+  const handleRemoveFromDropdown = useCallback((value: string) => {
+    if (value !== "info") {
+      setSelectedModels((prev) => prev.filter((m) => `${m.providerId}-${m.id}` !== value));
     }
-    push(<ComparisonView models={selectedModels} />);
-  };
+  }, []);
+
+  if (showComparison && selectedModels.length === 2) {
+    return <ComparisonView models={selectedModels} onEditSelection={() => setShowComparison(false)} />;
+  }
 
   return (
     <List
       isLoading={isLoading && !data?.models?.length}
       searchBarPlaceholder="Search models to compare..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip={`${selectedModels.length} selected`}
-          value="info"
-          onChange={(value) => {
-            if (value !== "info") {
-              setSelectedModels(selectedModels.filter((m) => `${m.providerId}-${m.id}` !== value));
-            }
-          }}
-        >
-          <List.Dropdown.Item title={`${selectedModels.length}/3 models selected`} value="info" />
+        <List.Dropdown tooltip={`${selectedModels.length} selected`} value="info" onChange={handleRemoveFromDropdown}>
+          <List.Dropdown.Item title={`${selectedModels.length}/2 models selected`} value="info" />
           {selectedModels.map((m) => (
             <List.Dropdown.Item
               key={`${m.providerId}-${m.id}`}
@@ -123,7 +135,7 @@ export default function CompareAIModels() {
     >
       <List.EmptyView title="No Models Found" description="No models match your search" icon={Icon.MagnifyingGlass} />
       {selectedModels.length > 0 && (
-        <List.Section title={`Selected (${selectedModels.length}/3)`}>
+        <List.Section title={`Selected (${selectedModels.length}/2)`}>
           {selectedModels.map((model) => (
             <ModelListItem
               key={`selected-${model.providerId}-${model.id}`}
@@ -135,18 +147,6 @@ export default function CompareAIModels() {
                   onAction={() => handleToggleModel(model)}
                 />
               }
-              extraActions={
-                selectedModels.length >= 2 ? (
-                  <ActionPanel.Section>
-                    <Action
-                      title="Compare Selected Models"
-                      icon={Icon.Switch}
-                      onAction={handleCompare}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
-                    />
-                  </ActionPanel.Section>
-                ) : null
-              }
             />
           ))}
         </List.Section>
@@ -155,21 +155,8 @@ export default function CompareAIModels() {
       <ModelListSection
         models={availableModels}
         title={availableTitle}
-        getPrimaryAction={(model) => (
-          <Action title="Add to Comparison" icon={Icon.PlusCircle} onAction={() => handleToggleModel(model)} />
-        )}
-        extraActions={
-          selectedModels.length >= 2 ? (
-            <ActionPanel.Section>
-              <Action
-                title="Compare Selected Models"
-                icon={Icon.Switch}
-                onAction={handleCompare}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-              />
-            </ActionPanel.Section>
-          ) : null
-        }
+        onAddToComparison={handleToggleModel}
+        canAddToComparison={canAddToComparison}
       />
     </List>
   );

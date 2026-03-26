@@ -5,6 +5,9 @@ export enum Adapter {
   SoundCloud = "soundCloud",
   Deezer = "deezer",
   Tidal = "tidal",
+  Qobuz = "qobuz",
+  Bandcamp = "bandcamp",
+  Pandora = "pandora",
 }
 
 export enum MetadataType {
@@ -25,7 +28,7 @@ export type SearchMetadata = {
 };
 
 export type SearchResultLink = {
-  type: Adapter;
+  type: string;
   url: string;
   isVerified?: boolean;
 };

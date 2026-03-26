@@ -34,6 +34,7 @@ export class State {
   public attributes: Record<string, any> = {};
   public last_updated = "";
   public last_changed = "";
+  public area_name?: string;
 }
 
 export interface HomeAssistantOptions {

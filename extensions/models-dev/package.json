@@ -127,8 +127,11 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "25.1.0",
     "@types/react": "19.2.10",
+    "@types/react-dom": "^19.0.0",
     "eslint": "^9.39.2",
     "prettier": "^3.8.1",
+    "react-dom": "^19.0.0",
+    "tsx": "^4.0.0",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -136,7 +139,12 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "validate": "NODE_OPTIONS='--expose-gc' tsx --tsconfig tsconfig.validate.json scripts/validate-memory.tsx",
+    "validate:e2e": "tsx scripts/validate-e2e-compare-models.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "react": "19.2.4"
   }
 }

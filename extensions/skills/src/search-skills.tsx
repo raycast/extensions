@@ -4,10 +4,13 @@ import { useState } from "react";
 import { SkillListItem } from "./components/SkillListItem";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
-import { buildIssueUrl } from "./shared";
+import { buildGithubIssueUrl } from "./shared";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isShowingDetail, setIsShowingDetail] = useState(true);
+  const toggleDetail = () => setIsShowingDetail((prev) => !prev);
 
   const { data, isLoading, error, revalidate, searchUrl } = useDebouncedSearch(searchText);
 
@@ -22,7 +25,16 @@ export default function Command() {
             <Action title="Clear Cache & Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
             <Action.OpenInBrowser
               title="Report Issue on GitHub"
-              url={buildIssueUrl(searchUrl, error)}
+              url={buildGithubIssueUrl({
+                title: "API Error",
+                description: `Failed to fetch data from the Skills API: ${searchUrl}`,
+                error,
+                reproductionSteps: [
+                  "Open Raycast and run the 'Search Skills' command.",
+                  `Search for skills with the search query "${searchText}".`,
+                  "Observe the resulting error.",
+                ],
+              })}
               icon={Icon.Bug}
             />
           </ActionPanel>
@@ -36,6 +48,8 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder="Search skills..."
       onSearchTextChange={setSearchText}
+      onSelectionChange={setSelectedId}
+      isShowingDetail={skills.length > 0 && isShowingDetail}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Owner" value={owner} storeValue onChange={setOwner}>
           <List.Dropdown.Item title="All Owners" value="all" />
@@ -58,7 +72,13 @@ export default function Command() {
       ) : (
         <List.Section title={`Results for "${searchText}"`} subtitle={`${skills.length} skills`}>
           {skills.map((skill) => (
-            <SkillListItem key={skill.id} skill={skill} />
+            <SkillListItem
+              key={skill.id}
+              skill={skill}
+              isSelected={selectedId === skill.id}
+              isShowingDetail={isShowingDetail}
+              onToggleDetail={toggleDetail}
+            />
           ))}
         </List.Section>
       )}

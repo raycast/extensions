@@ -1,6 +1,11 @@
 import { UsageLimitData, UsageLimitDataSchema } from "../types/usage-types";
 
-export const fetchClaudeUsageLimits = async (accessToken: string): Promise<UsageLimitData | null> => {
+export type UsageLimitsResult =
+  | { status: "ok"; data: UsageLimitData }
+  | { status: "rate_limited" }
+  | { status: "error"; message: string };
+
+export const fetchClaudeUsageLimits = async (accessToken: string): Promise<UsageLimitsResult> => {
   try {
     const response = await fetch("https://api.anthropic.com/api/oauth/usage", {
       headers: {
@@ -11,15 +16,21 @@ export const fetchClaudeUsageLimits = async (accessToken: string): Promise<Usage
       },
     });
 
+    if (response.status === 429) {
+      return { status: "rate_limited" };
+    }
+
     if (!response.ok) {
-      return null;
+      return { status: "error", message: `API returned ${response.status}` };
     }
 
     const data = await response.json();
     const result = UsageLimitDataSchema.safeParse(data);
 
-    return result.success ? result.data : null;
-  } catch {
-    return null;
+    return result.success
+      ? { status: "ok", data: result.data }
+      : { status: "error", message: "Unexpected API response format" };
+  } catch (err) {
+    return { status: "error", message: err instanceof Error ? err.message : "Network error" };
   }
 };

@@ -90,7 +90,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
+    "@raycast/api": "^1.104.7",
     "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0",
     "fetch-cookie": "^3.2.0",

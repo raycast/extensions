@@ -9,7 +9,7 @@ import { getLibraryName } from "./general";
 import { createQueryString, parseQueryString, runScript, tell } from "../apple-script";
 import { STAR_VALUE } from "../constants";
 import { getMacosVersion } from "../get-macos-version";
-import { ScriptError, Track } from "../models";
+import { MenuBarSnapshot, PlayerState, ScriptError, Track } from "../models";
 
 const FAVORITE_CONFIRMATION_TIMEOUT_MS = 10_000;
 const FAVORITE_POLL_INTERVAL_MS = 250;
@@ -58,6 +58,63 @@ const getFavoriteTimeoutError = (targetState: boolean, lastError?: Error | Scrip
       lastError ? ` (last check error: ${getFavoriteErrorMessage(lastError)})` : ""
     }.`,
   );
+
+type MenuBarSnapshotQuery = {
+  kind: string;
+  playerState?: string;
+  id?: string;
+  name?: string;
+  artist?: string;
+  album?: string;
+  duration?: string;
+  rating?: string;
+  favorited?: string;
+};
+
+const getMenuBarNotRunningQueryString = createQueryString({
+  kind: '"not-running"',
+});
+const getMenuBarNoTrackQueryString = createQueryString({
+  kind: '"no-track"',
+  playerState: "trackPlayerState",
+});
+const getMenuBarTrackQueryString = createQueryString({
+  kind: '"ok"',
+  playerState: "trackPlayerState",
+  id: "trackId",
+  name: "trackName",
+  artist: "trackArtist",
+  album: "trackAlbum",
+  duration: "trackDuration",
+  rating: "trackRating",
+  favorited: "trackFavorited",
+});
+
+const toPlayerState = (playerState?: string): PlayerState =>
+  match(playerState)
+    .with(PlayerState.PLAYING, () => PlayerState.PLAYING)
+    .with(PlayerState.PAUSED, () => PlayerState.PAUSED)
+    .otherwise(() => PlayerState.STOPPED);
+
+const toMenuBarSnapshot = (query: MenuBarSnapshotQuery): MenuBarSnapshot =>
+  match(query.kind)
+    .with("ok", () => ({
+      kind: "ok" as const,
+      playerState: toPlayerState(query.playerState),
+      track: {
+        id: query.id,
+        name: query.name ?? "",
+        artist: query.artist ?? "",
+        album: query.album ?? "",
+        duration: query.duration ?? "",
+        favorited: query.favorited,
+      },
+    }))
+    .with("no-track", () => ({
+      kind: "no-track" as const,
+      playerState: toPlayerState(query.playerState),
+    }))
+    .otherwise(() => ({ kind: "not-running" as const }));
 
 const waitForFavoriteConfirmation = (
   getFavoriteStatus: () => TE.TaskEither<ScriptError, string>,
@@ -222,44 +279,89 @@ export const addToPlaylist = (playlist: string) =>
   );
 
 export const getCurrentTrack = (): TE.TaskEither<Error, Readonly<Track>> => {
-  const querystring = createQueryString({
-    id: "trackId",
-    name: "trackName",
-    artist: "trackArtist",
-    album: "trackAlbum",
-    duration: "trackDuration",
-    rating: "trackRating",
-  });
-
-  // prettier-ignore
   return pipe(
-    runScript(`
-      set output to ""
-      tell application "System Events"
-        set isNotRunning to (count of (every process whose name is "Music")) = 0
-      end tell
+    TE.tryCatch(() => getMacosVersion(), E.toError),
+    TE.chainW((version) => {
+      const favProp = isSonomaOrNewer(version.major) ? "favorited" : "loved";
+      const querystring = createQueryString({
+        id: "trackId",
+        name: "trackName",
+        artist: "trackArtist",
+        album: "trackAlbum",
+        duration: "trackDuration",
+        rating: "trackRating",
+        favorited: "trackFavorited",
+      });
 
-      if isNotRunning then
-        error
-      else
-        tell application "Music"
-          set t to (get current track)
-          set trackId to id of t
-          set trackName to name of t
-          set trackArtist to artist of t
-          set trackAlbum to album of t
-          set trackDuration to duration of t
-          set trackRating to rating of t
+      // prettier-ignore
+      return pipe(
+        runScript(`
+          set output to ""
+          tell application "System Events"
+            set isNotRunning to (count of (every process whose name is "Music")) = 0
+          end tell
 
-          set output to ${querystring}
-        end tell
-      end if
+          if isNotRunning then
+            error
+          else
+            tell application "Music"
+              set t to (get current track)
+              set trackId to id of t
+              set trackName to name of t
+              set trackArtist to artist of t
+              set trackAlbum to album of t
+              set trackDuration to duration of t
+              set trackRating to rating of t
+              set trackFavorited to ${favProp} of t
 
-      return output
-    `),
-    TE.map(parseQueryString<Track>())
+              set output to ${querystring}
+            end tell
+          end if
+
+          return output
+        `),
+        TE.map(parseQueryString<Track>()),
+      );
+    }),
   );
 };
+
+export const getMenuBarSnapshot = (): TE.TaskEither<Error, MenuBarSnapshot> =>
+  pipe(
+    TE.tryCatch(() => getMacosVersion(), E.toError),
+    TE.chainW((version) => {
+      const favoriteProperty = getFavoritePropertyByVersion(version.major);
+
+      return pipe(
+        runScript(`
+          if application "Music" is running then
+            tell application "Music"
+              set trackPlayerState to (player state as text)
+
+              try
+                set t to (get current track)
+                set trackId to (id of t) as text
+                set trackName to name of t
+                set trackArtist to artist of t
+                set trackAlbum to album of t
+                set trackDuration to (duration of t) as text
+                set trackRating to (rating of t) as text
+                set trackFavorited to (${favoriteProperty} of t) as text
+
+                return ${getMenuBarTrackQueryString}
+              on error
+                return ${getMenuBarNoTrackQueryString}
+              end try
+            end tell
+          else
+            return ${getMenuBarNotRunningQueryString}
+          end if
+        `),
+        TE.map(parseQueryString<MenuBarSnapshotQuery>()),
+        TE.map(toMenuBarSnapshot),
+      );
+    }),
+  );
 
 // Adapted from: https://dougscripts.com/itunes/2018/05/remove-currently-playing-from-current-playlist/
 export const removeCurrentTrackFromCurrentPlaylist = (): TE.TaskEither<

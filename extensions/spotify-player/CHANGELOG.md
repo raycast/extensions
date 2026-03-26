@@ -1,5 +1,28 @@
 # Spotify Player Changelog
 
+## [Reduce API Rate Limiting] - 2026-03-18
+
+- Added tiered API-level caching (short/medium/long TTL) to reduce redundant Spotify API calls
+- Removed cascading background command launches from playback commands (next, previous, like, dislike, skip15, back15)
+- Lazy-load Your Library sections by selected category instead of fetching all upfront
+- Increased menu bar polling interval and added debouncing to prevent refresh bursts
+- Simplified rate limit middleware to a single retry after honouring Retry-After
+
+## [Fix Rate Limiting from Spotify API Changes] - 2026-03-08
+
+- Added 429 Retry-After middleware — all API calls now automatically retry on rate limit with proper backoff
+- Reduced menu bar polling interval from 10s to 30s, current-track from 30s to 1m
+- Consolidated Now Playing to use `is_playing` from currently-playing endpoint, removing a redundant API call
+- Lazy-loaded devices, playlists, and user profile in Now Playing — initial mount fires 1 API call instead of 5
+- Toggle Play/Pause now uses AppleScript first (zero API calls on macOS)
+- Volume Up/Down now reads volume via AppleScript before falling back to API
+- Skip/Back 15s and Replay no longer make a redundant currently-playing API call
+- Batched play + queue into a single `play({ uris })` call instead of N+1 separate calls
+- Debounced menu bar refresh trigger with 5s window to prevent rapid successive refreshes
+- Added `keepPreviousData` to hooks for graceful degradation during rate limiting
+- Fixed duplicate React key warnings in Add to Playlist and menu bar playlist submenus
+- Silenced noisy "No enabled command" console log for disabled commands
+
 ## [Fix Menu Bar Unloading Before API Fetch Completes] - 2026-02-17
 
 - Fixed the menu bar icon disappearing permanently when "Hide icon while idle" is enabled and Spotify is restarted

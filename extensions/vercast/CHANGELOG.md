@@ -1,5 +1,8 @@
 # Vercast Changelog
 
+## [2.17] - 2026-02-20
+
+- Added `Cancel Deployment` action to deployments
 ## [2.16] - 2026-02-15
 
 - Added `Search AI Gateway Logs` command

@@ -1,38 +1,57 @@
 import { List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BookmarkListItem } from "./components/BookmarkListItem";
 import { HistoryListItem } from "./components/HistoryListItem";
 import { SuggestionListItem } from "./components/SuggestionListItem";
 import { TabListItem } from "./components/TabListItem";
+import { URLListItem } from "./components/URLListItem";
 import withVersionCheck from "./components/VersionCheck";
 import { useSearchHistory, useTabs, useBookmarks } from "./dia";
 import { useGoogleSuggestions } from "./google";
-import { filterHistory, filterTabs } from "./utils";
+import { filterHistory, filterTabs, isLikelyURL } from "./utils";
 
 type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | "suggestions";
+
+function useDebouncedValue<T>(value: T, delayMs: number): T {
+  const [debounced, setDebounced] = useState(value);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    timer.current = setTimeout(() => setDebounced(value), delayMs);
+    return () => clearTimeout(timer.current);
+  }, [value, delayMs]);
+
+  return debounced;
+}
 
 function Command() {
   const [searchText, setSearchText] = useState<string>("");
   const [viewMode, setViewMode] = useCachedState<ViewMode>("view-mode", "all");
 
+  // Immediate: tabs filter + URL detection (cheap, local)
+  // Debounced: history SQL + Google API + bookmarks file I/O (expensive)
+  const debouncedSearch = useDebouncedValue(searchText, 200);
+
   const { isLoading: isLoadingTabs, data: tabs, revalidate: revalidateTabs } = useTabs();
-  const { isLoading: isLoadingHistory, data: history, permissionView } = useSearchHistory(searchText);
-  const { isLoading: isLoadingBookmarks, data: bookmarks } = useBookmarks(searchText);
-  const { isLoading: isLoadingGoogleSuggestions, data: googleSuggestions } = useGoogleSuggestions(searchText);
+  const { data: history, permissionView } = useSearchHistory(debouncedSearch);
+  const { data: bookmarks } = useBookmarks(debouncedSearch);
+  const { data: googleSuggestions } = useGoogleSuggestions(debouncedSearch);
 
   if (permissionView) {
     return permissionView;
   }
 
+  // Tab filtering is instant (local array filter) — uses immediate searchText
   const filteredTabs = useMemo(() => filterTabs(tabs, searchText), [tabs, searchText]);
   const filteredHistory = useMemo(() => filterHistory(history, tabs), [history, tabs]);
 
   const shouldShow = (section: ViewMode) => viewMode === "all" || viewMode === section;
+  const detectedURL = searchText && isLikelyURL(searchText) ? searchText.trim() : null;
 
   return (
     <List
-      isLoading={isLoadingTabs || isLoadingHistory || isLoadingBookmarks || isLoadingGoogleSuggestions}
+      isLoading={isLoadingTabs}
       searchBarPlaceholder="Search tabs, bookmarks and browsing history..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -55,6 +74,12 @@ function Command() {
         </List.Dropdown>
       }
     >
+      {detectedURL && (
+        <List.Section title="Open URL">
+          <URLListItem url={detectedURL} searchText={searchText} />
+        </List.Section>
+      )}
+
       {shouldShow("pinned-tabs") && (
         <List.Section title="Pinned Tabs">
           {filteredTabs
@@ -85,7 +110,7 @@ function Command() {
         </List.Section>
       )}
 
-      {shouldShow("bookmarks") && !isLoadingTabs && searchText && (
+      {shouldShow("bookmarks") && debouncedSearch && (
         <List.Section title="Bookmarks">
           {bookmarks?.map((bookmark) => (
             <BookmarkListItem
@@ -103,7 +128,7 @@ function Command() {
         </List.Section>
       )}
 
-      {shouldShow("history") && !isLoadingTabs && (
+      {shouldShow("history") && (
         <List.Section title="History">
           {filteredHistory?.map((item) => (
             <HistoryListItem
@@ -116,7 +141,7 @@ function Command() {
         </List.Section>
       )}
 
-      {shouldShow("suggestions") && !isLoadingTabs && searchText && (
+      {shouldShow("suggestions") && debouncedSearch && (
         <List.Section title="Google Suggestions">
           {googleSuggestions?.map((suggestion) => (
             <SuggestionListItem key={suggestion.id} suggestion={suggestion} onSuggestionAction={revalidateTabs} />

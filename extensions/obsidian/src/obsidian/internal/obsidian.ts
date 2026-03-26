@@ -25,7 +25,8 @@ export function getVaultNameFromPath(vaultPath: string): string | undefined {
 
 export function getVaultsFromPreferences(): ObsidianVault[] {
   const pref: GlobalPreferences = getPreferenceValues();
-  const vaultString = pref.vaultPath;
+  // The preference can actually be undefined instead of a string on first install -> default to empty string
+  const vaultString = pref.vaultPath ?? "";
 
   return vaultString
     .split(",")
