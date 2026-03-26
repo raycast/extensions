@@ -59,6 +59,13 @@
       "subtitle": "Plexamp",
       "description": "Search songs, albums, and artists in the selected Plex music library.",
       "mode": "view"
+    },
+    {
+      "name": "recently-played",
+      "title": "Recently Played",
+      "subtitle": "Plexamp",
+      "description": "Browse recently played tracks from the selected Plex music library.",
+      "mode": "view"
     }
   ],
   "preferences": [

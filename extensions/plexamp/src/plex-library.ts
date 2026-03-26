@@ -357,6 +357,17 @@ export async function getAlbumsForArtist(sectionKey: string, artist: MusicArtist
   return hydrateAlbums(albums);
 }
 
+export async function getRecentlyPlayed(sectionKey: string, limit = 50): Promise<MusicTrack[]> {
+  const result = await fetchPage(
+    `/library/sections/${sectionKey}/all?type=10&sort=lastViewedAt:desc`,
+    "Track",
+    parseTrack,
+    0,
+    limit,
+  );
+  return result.items;
+}
+
 export async function getTracksForAlbum(album: MusicAlbum): Promise<MusicTrack[]> {
   return fetchAllPaginated(album.browseKey, "Track", parseTrack, 100);
 }

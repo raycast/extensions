@@ -1,5 +1,10 @@
 # Plexamp CHANGELOG
 
+## [Recently Played] - {PR_MERGE_DATE}
+
+- Added the `Recently Played` command to browse the 50 most recently played tracks from the selected Plex music library.
+- Recently played data is cached for instant startup on repeat opens.
+
 ## [Instant Library Startup Cache] - {PR_MERGE_DATE}
 
 - Added stale-while-revalidate caching for the Browse Library artist and playlist lists using Raycast's Cache API, so repeat opens show content instantly while refreshing in the background.
