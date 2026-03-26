@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Improve repository picker] - {PR_MERGE_DATE}
+## [Improve repository picker] - 2026-03-26
 
 - Remember "Recently used" repositories in the repository picker
 - Show a more relevant list of repositories in the repository picker by default
