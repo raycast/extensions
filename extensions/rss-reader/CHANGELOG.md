@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Add Cache] - {PR_MERGE_DATE}
+## [Add Cache] - 2026-03-26
 
 - Prefill Add Subscription with the active browser tab URL when the Raycast Browser Extension is available
 - Add 15 minutes cache for Read All Stories command selection
