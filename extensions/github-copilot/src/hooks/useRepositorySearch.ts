@@ -97,7 +97,7 @@ export function useSearchRepositories(opts: { searchQuery?: string; organization
       if (owner) {
         searchText += ` user:${owner} ${repo}`;
       } else {
-        searchText += ` ${searchQuery}`;
+        searchText += ` user:@me ${searchQuery}`;
         if (organizations) {
           searchText += organizations.map((org) => ` org:${org}`).join("");
         }
