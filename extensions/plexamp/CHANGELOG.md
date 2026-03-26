@@ -1,5 +1,10 @@
 # Plexamp CHANGELOG
 
+## [Instant Library Startup Cache] - {PR_MERGE_DATE}
+
+- Added stale-while-revalidate caching for the Browse Library artist and playlist lists using Raycast's Cache API, so repeat opens show content instantly while refreshing in the background.
+- Cached data is preserved on reload and on transient server errors instead of resetting to an empty list.
+
 ## [Album Grid View] - {PR_MERGE_DATE}
 
 - Added a toggleable Grid view for artist album pages showing album art in a square grid with release year subtitles.

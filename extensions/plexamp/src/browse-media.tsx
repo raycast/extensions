@@ -375,11 +375,13 @@ function RootContent() {
     () => (selectedLibrary ? getArtists(selectedLibrary.key) : Promise.resolve([])),
     selectedLibrary?.key ?? "no-library",
     [] as MusicArtist[],
+    selectedLibrary ? `artists-${selectedLibrary.key}` : undefined,
   );
   const playlists = useAsyncValue(
     () => (selectedLibrary ? getAudioPlaylists(selectedLibrary.key) : Promise.resolve([])),
     `playlists-${selectedLibrary?.key ?? "no-library"}`,
     [] as AudioPlaylist[],
+    selectedLibrary ? `playlists-${selectedLibrary.key}` : undefined,
   );
   const playback = usePlaybackActions();
 
