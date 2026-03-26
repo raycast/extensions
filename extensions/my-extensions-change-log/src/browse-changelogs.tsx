@@ -31,7 +31,7 @@ export default function Command() {
 
         const extensionPromises = entries
           .filter((entry) => entry.isDirectory())
-          .map(async (entry) => {
+          .map(async (entry): Promise<Extension | null> => {
             try {
               const packageJsonPath = join(extensionsPath, entry.name, "package.json");
               const packageJson = JSON.parse(await readFile(packageJsonPath, "utf-8"));
