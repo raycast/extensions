@@ -1,6 +1,6 @@
 # tategaki Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-26
 
 - Added vertical text conversion with grapheme-level Unicode support
 - Three separator modes: none, space, tab
