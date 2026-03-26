@@ -38,8 +38,8 @@
         { "title": "Sao Paulo (sa-east-1)", "value": "sa-east-1" },
         { "title": "Canada (ca-central-1)", "value": "ca-central-1" },
         { "title": "London (eu-west-2)", "value": "eu-west-2" },
-        { "title": "Oregon (us-west-1)", "value": "us-west-1" },
-        { "title": "N. Virginia (us-east-2)", "value": "us-east-2" }
+        { "title": "N. California (us-west-1)", "value": "us-west-1" },
+        { "title": "Ohio (us-east-2)", "value": "us-east-2" }
       ]
     }
   ],

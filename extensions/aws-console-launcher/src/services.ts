@@ -164,16 +164,7 @@ export const services: AwsService[] = [
     name: "Amazon RDS",
     consoleUrl: "rds/home#databases:",
     aliases: ["rds"],
-    keywords: [
-      "database",
-      "mysql",
-      "postgres",
-      "postgresql",
-      "sql",
-      "aurora",
-      "mariadb",
-      "oracle",
-    ],
+    keywords: ["database", "mysql", "postgres", "postgresql", "sql", "aurora", "mariadb", "oracle"],
     category: "Database",
     isGlobal: false,
     icon: Icon.List,
@@ -245,13 +236,7 @@ export const services: AwsService[] = [
     name: "Amazon VPC",
     consoleUrl: "vpcconsole/home#vpcs:",
     aliases: ["vpc"],
-    keywords: [
-      "network",
-      "virtual private cloud",
-      "subnet",
-      "cidr",
-      "security group",
-    ],
+    keywords: ["network", "virtual private cloud", "subnet", "cidr", "security group"],
     category: "Networking",
     isGlobal: false,
     icon: Icon.Globe,
@@ -259,8 +244,7 @@ export const services: AwsService[] = [
   {
     id: "cloudfront",
     name: "Amazon CloudFront",
-    consoleUrl:
-      "https://us-east-1.console.aws.amazon.com/cloudfront/v4/home#/distributions",
+    consoleUrl: "https://us-east-1.console.aws.amazon.com/cloudfront/v4/home#/distributions",
     aliases: ["cf", "cloudfront"],
     keywords: ["cdn", "distribution", "cache", "edge"],
     category: "Networking",
@@ -270,8 +254,7 @@ export const services: AwsService[] = [
   {
     id: "route53",
     name: "Amazon Route 53",
-    consoleUrl:
-      "https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones",
+    consoleUrl: "https://us-east-1.console.aws.amazon.com/route53/v2/hostedzones",
     aliases: ["r53", "route53"],
     keywords: ["dns", "domain", "hosted zone", "record"],
     category: "Networking",
@@ -311,8 +294,7 @@ export const services: AwsService[] = [
   {
     id: "global-accelerator",
     name: "AWS Global Accelerator",
-    consoleUrl:
-      "https://us-west-2.console.aws.amazon.com/globalaccelerator/home",
+    consoleUrl: "https://us-west-2.console.aws.amazon.com/globalaccelerator/home",
     aliases: ["ga", "globalaccelerator"],
     keywords: ["accelerator", "anycast", "global"],
     category: "Networking",
@@ -326,15 +308,7 @@ export const services: AwsService[] = [
     name: "AWS IAM",
     consoleUrl: "https://us-east-1.console.aws.amazon.com/iam/home",
     aliases: ["iam"],
-    keywords: [
-      "identity",
-      "access",
-      "role",
-      "policy",
-      "user",
-      "permission",
-      "group",
-    ],
+    keywords: ["identity", "access", "role", "policy", "user", "permission", "group"],
     category: "Security",
     isGlobal: true,
     icon: Icon.Lock,
@@ -516,8 +490,7 @@ export const services: AwsService[] = [
   {
     id: "organizations",
     name: "AWS Organizations",
-    consoleUrl:
-      "https://us-east-1.console.aws.amazon.com/organizations/v2/home",
+    consoleUrl: "https://us-east-1.console.aws.amazon.com/organizations/v2/home",
     aliases: ["org", "organizations"],
     keywords: ["organization", "account", "ou", "scp"],
     category: "Management",
@@ -797,8 +770,7 @@ export const services: AwsService[] = [
   {
     id: "cost-explorer",
     name: "AWS Cost Explorer",
-    consoleUrl:
-      "https://us-east-1.console.aws.amazon.com/cost-management/home#/cost-explorer",
+    consoleUrl: "https://us-east-1.console.aws.amazon.com/cost-management/home#/cost-explorer",
     aliases: ["cost", "ce"],
     keywords: ["cost", "spending", "usage", "explorer", "analysis"],
     category: "Cost Management",
@@ -808,8 +780,7 @@ export const services: AwsService[] = [
   {
     id: "budgets",
     name: "AWS Budgets",
-    consoleUrl:
-      "https://us-east-1.console.aws.amazon.com/billing/home#/budgets/overview",
+    consoleUrl: "https://us-east-1.console.aws.amazon.com/billing/home#/budgets/overview",
     aliases: ["budgets"],
     keywords: ["budget", "cost", "alert", "threshold"],
     category: "Cost Management",

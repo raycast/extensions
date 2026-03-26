@@ -1,21 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  getPreferenceValues,
-  open,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, open } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { services } from "./services";
 import { getUsageMap, recordUsage } from "./storage";
 import { partitionByUsage } from "./utils/ranking";
 import { buildConsoleUrl } from "./utils/url";
 import { AwsService } from "./types";
-
-interface Preferences {
-  defaultRegion: string;
-}
 
 export default function Command() {
   const { defaultRegion } = getPreferenceValues<Preferences>();
@@ -43,11 +32,7 @@ export default function Command() {
         accessories={[{ text: service.isGlobal ? "Global" : defaultRegion }]}
         actions={
           <ActionPanel>
-            <Action
-              title="Open Console"
-              icon={Icon.Globe}
-              onAction={() => handleOpen(service)}
-            />
+            <Action title="Open Console" icon={Icon.Globe} onAction={() => handleOpen(service)} />
             <Action.CopyToClipboard title="Copy Console URL" content={url} />
           </ActionPanel>
         }
