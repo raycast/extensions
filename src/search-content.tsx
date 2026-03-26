@@ -19,17 +19,6 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
-interface Preferences {
-  contentType: "toc" | "text" | "both";
-  generateKlappentext: boolean;
-  eurobuchPassword: string;
-}
-
-interface Arguments {
-  isbn: string;
-  tocText?: string;
-}
-
 interface ExternalSource {
   name: string;
   snippet?: string;
@@ -245,7 +234,7 @@ const convertISBN10to13 = (isbn10: string): string => {
  * Fetches book info from Eurobuch API (requires platform credentials in preferences)
  */
 async function fetchEurobuchInfo(isbn: string): Promise<ExternalSource | null> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.SearchContent>();
 
   // Skip if no password configured
   if (!prefs.eurobuchPassword) return null;
@@ -685,9 +674,9 @@ ${result.sources.map((s) => `- **${s.name}** (Confidence: ${s.confidence}%)${s.u
 /**
  * Main Command Component
  */
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchContent }>) {
   const { isbn: argIsbn, tocText: argTocText } = props.arguments;
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchContent>();
 
   const [isLoading, setIsLoading] = useState(true);
   const [showDetail, setShowDetail] = useState(false);
