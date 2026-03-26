@@ -1,8 +1,8 @@
 # NetBird Changelog
 
-## UX Improvements
+## [UX Improvements] - {PR_MERGE_DATE}
 
-### Fixed - {PR_MERGE_DATE}
+### Fixed 
 
 - Status screen now shows empty screen during loading instead of empty data
 - Homebrew errors handling and display during update
