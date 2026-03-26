@@ -27,12 +27,7 @@ interface AsyncValueState<T> {
   error?: string;
 }
 
-export function useAsyncValue<T>(
-  loader: () => Promise<T>,
-  dependencyKey: string,
-  initialValue: T,
-  cacheKey?: string,
-) {
+export function useAsyncValue<T>(loader: () => Promise<T>, dependencyKey: string, initialValue: T, cacheKey?: string) {
   const cached = cacheKey ? readCache<T>(cacheKey) : undefined;
 
   const [state, setState] = useState<AsyncValueState<T>>({
@@ -55,7 +50,10 @@ export function useAsyncValue<T>(
     // When we have cached data, keep showing it (don't reset to initialValue)
     setState((prev) => ({
       isLoading: true,
-      value: prev.value === initialValueRef.current && currentCacheKey ? (readCache<T>(currentCacheKey) ?? prev.value) : prev.value,
+      value:
+        prev.value === initialValueRef.current && currentCacheKey
+          ? (readCache<T>(currentCacheKey) ?? prev.value)
+          : prev.value,
       error: undefined,
     }));
 
@@ -80,7 +78,9 @@ export function useAsyncValue<T>(
       }
 
       // On error, keep cached data if available instead of falling back to empty
-      const fallback = currentCacheKey ? (readCache<T>(currentCacheKey) ?? initialValueRef.current) : initialValueRef.current;
+      const fallback = currentCacheKey
+        ? (readCache<T>(currentCacheKey) ?? initialValueRef.current)
+        : initialValueRef.current;
 
       setState({
         isLoading: false,
