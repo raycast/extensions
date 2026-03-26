@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cedarville-people-search",
+  "title": "Cedarville People Search",
+  "description": "Search the Cedarville University student/staff directory",
+  "icon": "icon.png",
+  "author": "taciturnaxolotl",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": ["Productivity", "Web"],
+  "commands": [
+    {
+      "name": "search-directory",
+      "title": "Search Cedarville Directory",
+      "description": "Search the Cedarville directory by name",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "demoMode",
+          "title": "Demo Mode",
+          "description": "Redact personal information for screenshots and demos",
+          "type": "checkbox",
+          "label": "Hide personal data",
+          "required": false,
+          "default": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.15",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
