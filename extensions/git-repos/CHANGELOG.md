@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Added Command] - {PR_MERGE_DATE}
+## [Added Command] - 2026-03-26
 
 - Added a new `Clone Repo` command to clone a repository into one of the scanned directories from preferences.
 
