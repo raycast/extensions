@@ -290,7 +290,12 @@ export default function Command() {
             ))}
           </Form.Dropdown>
 
-          <Form.Dropdown id="loopMode" title="Loop Mode" value={loopMode} onChange={(val) => setLoopMode(val as "loop" | "none")}>
+          <Form.Dropdown
+            id="loopMode"
+            title="Loop Mode"
+            value={loopMode}
+            onChange={(val) => setLoopMode(val as "loop" | "none")}
+          >
             <Form.Dropdown.Item title="Loop Forever" value="loop" />
             <Form.Dropdown.Item title="No Loop" value="none" />
           </Form.Dropdown>
