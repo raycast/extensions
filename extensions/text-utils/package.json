@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "text-utils",
+  "title": "Text Utils",
+  "description": "30 deterministic text transformation commands for replacing, counting, extracting, and manipulating text",
+  "icon": "extension-icon.png",
+  "author": "degouville",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    { "name": "text-utils", "title": "Text Utils", "subtitle": "All tools", "description": "All text transformations in one list view with before/after preview and AI features", "mode": "view" },
+    { "name": "double-quote-to-single-quote", "title": "Double Quote to Single Quote", "subtitle": "Replace", "description": "Replace double quotes with single quotes", "mode": "no-view" },
+    { "name": "single-quote-to-double-quote", "title": "Single Quote to Double Quote", "subtitle": "Replace", "description": "Replace single quotes with double quotes", "mode": "no-view" },
+    { "name": "em-dash-to-semicolon", "title": "Em Dash to Semicolon", "subtitle": "Replace", "description": "Replace em dashes with semicolons", "mode": "no-view" },
+    { "name": "smart-quotes-to-straight", "title": "Smart Quotes to Straight", "subtitle": "Replace", "description": "Replace smart/curly quotes with straight quotes", "mode": "no-view" },
+
+    { "name": "count-words", "title": "Count Words", "subtitle": "Count", "description": "Count words in selected text", "mode": "no-view" },
+    { "name": "count-letters", "title": "Count Letters", "subtitle": "Count", "description": "Count letters in selected text", "mode": "no-view" },
+    { "name": "count-vowels", "title": "Count Vowels", "subtitle": "Count", "description": "Count vowels in selected text", "mode": "no-view" },
+    { "name": "count-consonants", "title": "Count Consonants", "subtitle": "Count", "description": "Count consonants in selected text", "mode": "no-view" },
+    { "name": "count-spaces", "title": "Count Spaces", "subtitle": "Count", "description": "Count spaces in selected text", "mode": "no-view" },
+    { "name": "count-lines", "title": "Count Lines", "subtitle": "Count", "description": "Count lines in selected text", "mode": "no-view" },
+
+    { "name": "url-remove-query-params", "title": "Remove URL Query Params", "subtitle": "URL", "description": "Remove query parameters from URLs", "mode": "no-view" },
+    { "name": "extract-emails", "title": "Extract Emails", "subtitle": "Extract", "description": "Extract email addresses from text", "mode": "no-view" },
+    { "name": "extract-ips", "title": "Extract IPs", "subtitle": "Extract", "description": "Extract IP addresses from text", "mode": "no-view" },
+    { "name": "extract-ids", "title": "Extract IDs", "subtitle": "Extract", "description": "Extract UUIDs and numeric IDs from text", "mode": "no-view" },
+    { "name": "extract-urls", "title": "Extract URLs", "subtitle": "Extract", "description": "Extract URLs from text", "mode": "no-view" },
+
+    { "name": "single-to-double-newlines", "title": "Single to Double Newlines", "subtitle": "Lines", "description": "Convert single newlines to double newlines", "mode": "no-view" },
+    { "name": "double-to-single-newlines", "title": "Double to Single Newlines", "subtitle": "Lines", "description": "Convert double newlines to single newlines", "mode": "no-view" },
+    { "name": "wrap-lines-at-length", "title": "Wrap Lines at Length", "subtitle": "Lines", "description": "Wrap lines at specified character count", "mode": "no-view", "arguments": [{ "name": "length", "type": "text", "placeholder": "80", "required": true }] },
+    { "name": "unwrap-lines", "title": "Unwrap Lines", "subtitle": "Lines", "description": "Join all lines into one", "mode": "no-view" },
+    { "name": "sort-lines", "title": "Sort Lines", "subtitle": "Lines", "description": "Sort lines alphabetically", "mode": "no-view" },
+    { "name": "reverse-lines", "title": "Reverse Lines", "subtitle": "Lines", "description": "Reverse line order", "mode": "no-view" },
+    { "name": "deduplicate-lines", "title": "Deduplicate Lines", "subtitle": "Lines", "description": "Remove duplicate lines", "mode": "no-view" },
+    { "name": "number-lines", "title": "Number Lines", "subtitle": "Lines", "description": "Add line numbers", "mode": "no-view" },
+    { "name": "remove-line-numbers", "title": "Remove Line Numbers", "subtitle": "Lines", "description": "Remove leading line numbers", "mode": "no-view" },
+
+    { "name": "trim-whitespace", "title": "Trim Whitespace", "subtitle": "Transform", "description": "Trim leading and trailing whitespace from each line", "mode": "no-view" },
+    { "name": "remove-empty-lines", "title": "Remove Empty Lines", "subtitle": "Transform", "description": "Remove blank lines from text", "mode": "no-view" },
+    { "name": "prefix-lines", "title": "Prefix Lines", "subtitle": "Lines", "description": "Add prefix to each line", "mode": "no-view", "arguments": [{ "name": "prefix", "type": "text", "placeholder": "//", "required": true }] },
+    { "name": "suffix-lines", "title": "Suffix Lines", "subtitle": "Lines", "description": "Add suffix to each line", "mode": "no-view", "arguments": [{ "name": "suffix", "type": "text", "placeholder": "...", "required": true }] },
+
+    { "name": "markdown-to-plain-text", "title": "Markdown to Plain Text", "subtitle": "Transform", "description": "Strip markdown formatting from text", "mode": "no-view" },
+    { "name": "reverse-text", "title": "Reverse Text", "subtitle": "Transform", "description": "Reverse all characters in text", "mode": "no-view" }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
