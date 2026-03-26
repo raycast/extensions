@@ -1,16 +1,16 @@
 # Plexamp CHANGELOG
 
-## [Recently Played] - {PR_MERGE_DATE}
+## [Recently Played] - 2026-03-26
 
 - Added the `Recently Played` command to browse the 50 most recently played tracks from the selected Plex music library.
 - Recently played data is cached for instant startup on repeat opens.
 
-## [Instant Library Startup Cache] - {PR_MERGE_DATE}
+## [Instant Library Startup Cache] - 2026-03-26
 
 - Added stale-while-revalidate caching for the Browse Library artist and playlist lists using Raycast's Cache API, so repeat opens show content instantly while refreshing in the background.
 - Cached data is preserved on reload and on transient server errors instead of resetting to an empty list.
 
-## [Album Grid View] - {PR_MERGE_DATE}
+## [Album Grid View] - 2026-03-26
 
 - Added a toggleable Grid view for artist album pages showing album art in a square grid with release year subtitles.
 - Added release type grouping in Grid view: albums are organized into sections (Albums, EPs, Singles, Compilations, Live, Demos, Remixes) sorted by release year descending.
