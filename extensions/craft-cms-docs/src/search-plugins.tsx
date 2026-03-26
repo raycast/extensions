@@ -37,13 +37,15 @@ function matchesQuery(plugin: Plugin, query: string): boolean {
   );
 }
 
-async function fetchAllPlugins(): Promise<Plugin[]> {
+async function fetchAllPlugins(options?: { signal?: AbortSignal }): Promise<Plugin[]> {
+  const signal = options?.signal;
   const all: Plugin[] = [];
   let page = 1;
   while (true) {
-    const result = await fetchPluginStorePage(page, 200);
+    const result = await fetchPluginStorePage(page, 200, { signal });
     all.push(...result.plugins.filter((p) => !p.abandoned));
     if (result.nextPage === null) break;
+    if (signal?.aborted) throw new Error("aborted");
     page++;
   }
   return all;
