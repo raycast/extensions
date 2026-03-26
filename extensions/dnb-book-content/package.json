@@ -1,4 +1,4 @@
-ion{
+{
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "dnb-book-content",
   "title": "DNB Book Content",
