@@ -212,9 +212,7 @@ function parseChangelog(markdown: string, extension: Extension): ChangelogEntry[
 
     // Match version headers like: ## [v1.2] - 2026-01-08 or ## [Initial Version] - 2023-10-25
     const versionMatch = line.match(/^##\s*\[([^\]]+)\]\s*-\s*(\d{4}-\d{2}-\d{2})/);
-
-    if (versionMatch) {
-      // Save previous entry if exists
+      currentDate = new Date(Number(versionMatch[2].slice(0, 4)), Number(versionMatch[2].slice(5, 7)) - 1, Number(versionMatch[2].slice(8, 10)));
       if (currentVersion && currentDate && currentChanges.length > 0) {
         entries.push({
           extensionName: extension.name,
