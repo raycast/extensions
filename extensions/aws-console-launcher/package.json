@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aws-console-launcher",
+  "title": "AWS Console Launcher",
+  "description": "Quickly search and open AWS service consoles from Raycast",
+  "icon": "command-icon.png",
+  "author": "pjocprac",
+  "categories": ["Developer Tools", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Open AWS Console",
+      "subtitle": "AWS Console Launcher",
+      "description": "Search and open AWS service consoles",
+      "mode": "view",
+      "keywords": ["aws", "console", "cloud", "amazon", "awsc"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultRegion",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Region",
+      "description": "AWS region used for regional service console URLs",
+      "default": "ap-northeast-1",
+      "data": [
+        { "title": "Tokyo (ap-northeast-1)", "value": "ap-northeast-1" },
+        { "title": "US East (us-east-1)", "value": "us-east-1" },
+        { "title": "US West (us-west-2)", "value": "us-west-2" },
+        { "title": "EU Ireland (eu-west-1)", "value": "eu-west-1" },
+        { "title": "EU Frankfurt (eu-central-1)", "value": "eu-central-1" },
+        { "title": "Singapore (ap-southeast-1)", "value": "ap-southeast-1" },
+        { "title": "Sydney (ap-southeast-2)", "value": "ap-southeast-2" },
+        { "title": "Seoul (ap-northeast-2)", "value": "ap-northeast-2" },
+        { "title": "Mumbai (ap-south-1)", "value": "ap-south-1" },
+        { "title": "Sao Paulo (sa-east-1)", "value": "sa-east-1" },
+        { "title": "Canada (ca-central-1)", "value": "ca-central-1" },
+        { "title": "London (eu-west-2)", "value": "eu-west-2" },
+        { "title": "Oregon (us-west-1)", "value": "us-west-1" },
+        { "title": "N. Virginia (us-east-2)", "value": "us-east-2" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.x",
+    "@types/react": "19.x",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

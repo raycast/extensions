@@ -1,0 +1,5 @@
+node_modules/
+build/
+.raycast/
+.claude
+.DS_Store
