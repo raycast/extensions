@@ -17,9 +17,8 @@ Because DNB's `/04` endpoint delivers scan-only PDFs (no extractable text), the 
 | Priority | Source | Confidence | What it provides |
 |---|---|---|---|
 | 1 | **Clipboard TOC** | assessed | Manually copied table of contents |
-| 2 | **Eurobuch** | 90% | Publisher data (requires API password) |
-| 3 | **Google Books** | 85% | Publisher description |
-| 4 | **Wikipedia (DE)** | 75% | Article extract |
+| 2 | **Google Books** | 85% | Publisher description |
+| 3 | **Wikipedia (DE)** | 75% | Article extract |
 
 All external sources are always queried when an ISBN is available. The confidence score reflects the quality and origin of the source material.
 
@@ -41,7 +40,6 @@ No API keys are required for basic usage (browser open mode).
 |---|---|---|
 | **Content to Open** | Table of Contents | What to open in the browser when generation is disabled: TOC, full text, or both |
 | **Generate Book Description** | Off | Enable AI-generated book description. Requires Raycast Pro or BYOK. |
-| **Eurobuch Password** | — | Eurobuch API password. When set, Eurobuch is queried as the highest-confidence source (90%). Leave empty to skip Eurobuch. |
 
 ## Workflow
 

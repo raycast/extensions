@@ -45,7 +45,6 @@ const DNB_SRU_BASE_URL = "https://services.dnb.de/sru/dnb";
 const DNB_BASE_URL = "https://d-nb.info";
 const TOC_SUFFIX = "/04";
 const TEXT_SUFFIX = "/34";
-const EUROBUCH_PLATFORM = "106795";
 
 /**
  * Normalizes ISBN by removing all hyphens, spaces, and other separators
@@ -188,102 +187,6 @@ Antworte NUR mit dem JSON-Objekt, nichts anderes!`;
   }
 }
 
-// --- Eurobuch helpers (extracted from eurobuch-search-v2) ---
-
-const decodeXMLEntities = (str: string): string =>
-  str
-    .replace(/&amp;/g, "&")
-    .replace(/&quot;/g, '"')
-    .replace(/&apos;/g, "'")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">");
-
-interface EurobuchBook {
-  title: string;
-  author: string;
-}
-
-const parseEurobuchXML = (xml: string): EurobuchBook[] => {
-  const books: EurobuchBook[] = [];
-  const bookRegex = /<Book\s+([^>]*?)\s*\/>/g;
-  let match: RegExpExecArray | null;
-
-  while ((match = bookRegex.exec(xml)) !== null) {
-    const captured = match[1];
-    const getAttribute = (name: string): string => {
-      const value = new RegExp(`${name}="([^"]*)"`, "i").exec(captured)?.[1] || "";
-      return decodeXMLEntities(value);
-    };
-    const book = { title: getAttribute("title"), author: getAttribute("author") };
-    if (book.title) books.push(book);
-  }
-
-  return books;
-};
-
-const convertISBN10to13 = (isbn10: string): string => {
-  const clean = isbn10.replace(/[-\s]/g, "");
-  if (clean.length !== 10) return isbn10;
-  const base = "978" + clean.substring(0, 9);
-  let sum = 0;
-  for (let i = 0; i < 12; i++) sum += parseInt(base[i]) * (i % 2 === 0 ? 1 : 3);
-  return base + ((10 - (sum % 10)) % 10);
-};
-
-/**
- * Fetches book info from Eurobuch API (requires platform credentials in preferences)
- */
-async function fetchEurobuchInfo(isbn: string): Promise<ExternalSource | null> {
-  const prefs = getPreferenceValues<Preferences.SearchContent>();
-
-  // Skip if no password configured
-  if (!prefs.eurobuchPassword) return null;
-
-  try {
-    const clean = isbn.replace(/[-\s]/g, "");
-    const searchIsbn = clean.length === 10 ? convertISBN10to13(clean) : clean;
-
-    let clientIP = "0.0.0.0";
-    try {
-      const ipRes = await fetch("https://api.ipify.org?format=text", { signal: AbortSignal.timeout(3000) });
-      clientIP = await ipRes.text();
-    } catch {
-      /* use fallback IP */
-    }
-
-    const params = new URLSearchParams({
-      platform: EUROBUCH_PLATFORM,
-      password: prefs.eurobuchPassword || "",
-      isbn: searchIsbn,
-      author: "",
-      title: "",
-      mediatype: "0",
-      clientip: clientIP,
-      format: "xml",
-      maxresults: "1",
-    });
-
-    const response = await fetch(`https://www.eurobuch.de/extreq/meta/extquery.php?${params}`, {
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!response.ok) return null;
-
-    const books = parseEurobuchXML(await response.text());
-    if (books.length === 0) return null;
-
-    const book = books[0];
-    return {
-      name: "Eurobuch",
-      snippet: book.author ? `${book.title} / ${book.author}` : book.title,
-      url: `https://www.eurobuch.de/buch/isbn/${searchIsbn}.html`,
-      confidence: 90,
-    };
-  } catch (error) {
-    console.error("Eurobuch fetch failed:", error);
-    return null;
-  }
-}
-
 /**
  * Fetches book description from Google Books API
  */
@@ -391,11 +294,7 @@ async function generateVerifiedKlappentext(
   const tocQuality = await assessTOCQuality(clipboardToc);
 
   // 2. Always fetch all external sources when isbn is available
-  // Priority order: Eurobuch (90) → Google Books (85) → Wikipedia (75)
   if (isbn) {
-    const eurobuch = await fetchEurobuchInfo(isbn);
-    if (eurobuch) sources.push(eurobuch);
-
     const googleBooks = await fetchGoogleBooksInfo(isbn);
     if (googleBooks) sources.push(googleBooks);
 

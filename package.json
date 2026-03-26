@@ -77,14 +77,6 @@
           "description": "AI description + keywords from TOC. Needs Raycast Pro or BYOK.",
           "default": false,
           "required": false
-        },
-        {
-          "name": "eurobuchPassword",
-          "type": "password",
-          "title": "Eurobuch Password",
-          "description": "Eurobuch API password (optional)",
-          "required": false,
-          "default": ""
         }
       ]
     }
