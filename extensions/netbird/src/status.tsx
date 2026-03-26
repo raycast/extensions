@@ -18,6 +18,10 @@ export default function Command() {
     );
   }
 
+  if (isLoading && !status) {
+    return <Detail isLoading={true} />;
+  }
+
   const isConnected = status?.management.connected || false;
   const connectionIcon = { source: Icon.CircleFilled, tintColor: isConnected ? Color.Green : Color.Red };
 
