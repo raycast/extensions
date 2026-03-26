@@ -1,6 +1,6 @@
 # Changelog
 
-## [Bug fixes and stability] - {PR_MERGE_DATE}
+## [Bug fixes and stability] - 2026-03-26
 
 - Fix typo in toast: "visted" → "visited"
 - Move error toasts out of render into `useEffect` to avoid render-phase side effects
