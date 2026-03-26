@@ -522,7 +522,17 @@ KONFIDENZ:
 
     const klappentext = klappentextMatch?.[1]?.trim() || "";
     const keywordsStr = keywordsMatch?.[1]?.trim() || "";
-    const confidence = parseInt(confidenceMatch?.[1] || "50", 10);
+    const rawConfidence = parseInt(confidenceMatch?.[1] || "50", 10);
+
+    // Floor confidence based on available sources with content:
+    // 2+ sources with snippets → at least 70%, 1 source → at least 60%
+    const sourcesWithSnippets = sources.filter((s) => s.snippet && s.snippet.trim().length > 0).length;
+    const confidence =
+      sourcesWithSnippets >= 2
+        ? Math.max(rawConfidence, 70)
+        : sourcesWithSnippets >= 1
+          ? Math.max(rawConfidence, 60)
+          : rawConfidence;
 
     // Check for insufficient data
     if (klappentext.includes("INSUFFICIENT_DATA")) {
@@ -547,7 +557,7 @@ KONFIDENZ:
     let warning: string | undefined;
     if (poorTocWithSources) {
       warning = "ℹ️ Based on title and external sources – no book content available.";
-    } else if (confidence < 50) {
+    } else if (confidence < 60) {
       warning = "⚠️ Low confidence - please review manually!";
     } else if (tocQuality.quality === "poor") {
       warning = "ℹ️ Based mainly on external sources (table of contents has little informational value)";
