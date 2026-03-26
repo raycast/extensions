@@ -41,15 +41,11 @@ export type CommandName = CommandManifestEntry["name"];
 
 export const COMMAND_MANIFEST = rawCommandManifest as CommandManifestEntry[];
 
-export function isTextCommandManifestEntry(
-  entry: CommandManifestEntry,
-): entry is TextCommandManifestEntry {
+export function isTextCommandManifestEntry(entry: CommandManifestEntry): entry is TextCommandManifestEntry {
   return entry.mode === "no-view";
 }
 
-export function getCommandManifestEntry(
-  name: CommandName,
-): CommandManifestEntry {
+export function getCommandManifestEntry(name: CommandName): CommandManifestEntry {
   const command = COMMAND_MANIFEST.find((entry) => entry.name === name);
   if (!command) {
     throw new Error(`Unknown command manifest entry: ${name}`);

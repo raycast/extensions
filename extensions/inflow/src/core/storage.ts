@@ -18,12 +18,7 @@ function normalizeHistoryItem(item: unknown): HistoryItem | null {
     };
   }
 
-  if (
-    typeof item === "object" &&
-    item !== null &&
-    "prompt" in item &&
-    typeof item.prompt === "string"
-  ) {
+  if (typeof item === "object" && item !== null && "prompt" in item && typeof item.prompt === "string") {
     return {
       prompt: item.prompt,
       isFavorite: "isFavorite" in item ? !!item.isFavorite : false,
@@ -34,15 +29,11 @@ function normalizeHistoryItem(item: unknown): HistoryItem | null {
 }
 
 export async function getOnboardingCompleted(): Promise<boolean> {
-  const completed = await LocalStorage.getItem<boolean>(
-    ONBOARDING_COMPLETED_STORAGE_KEY,
-  );
+  const completed = await LocalStorage.getItem<boolean>(ONBOARDING_COMPLETED_STORAGE_KEY);
   return !!completed;
 }
 
-export async function setOnboardingCompleted(
-  completed: boolean,
-): Promise<void> {
+export async function setOnboardingCompleted(completed: boolean): Promise<void> {
   if (completed) {
     await LocalStorage.setItem(ONBOARDING_COMPLETED_STORAGE_KEY, true);
     return;
@@ -53,9 +44,7 @@ export async function setOnboardingCompleted(
 
 export async function loadHistory(): Promise<HistoryItem[]> {
   try {
-    const historyJson = await LocalStorage.getItem<string>(
-      COMMAND_HISTORY_STORAGE_KEY,
-    );
+    const historyJson = await LocalStorage.getItem<string>(COMMAND_HISTORY_STORAGE_KEY);
     if (!historyJson) {
       return [];
     }
@@ -65,9 +54,7 @@ export async function loadHistory(): Promise<HistoryItem[]> {
       return [];
     }
 
-    return parsed
-      .map((item) => normalizeHistoryItem(item))
-      .filter((item): item is HistoryItem => item !== null);
+    return parsed.map((item) => normalizeHistoryItem(item)).filter((item): item is HistoryItem => item !== null);
   } catch (error) {
     console.error("Failed to load history:", error);
     return [];
@@ -75,16 +62,10 @@ export async function loadHistory(): Promise<HistoryItem[]> {
 }
 
 export async function saveHistory(history: HistoryItem[]): Promise<void> {
-  await LocalStorage.setItem(
-    COMMAND_HISTORY_STORAGE_KEY,
-    JSON.stringify(history),
-  );
+  await LocalStorage.setItem(COMMAND_HISTORY_STORAGE_KEY, JSON.stringify(history));
 }
 
-export async function upsertHistoryItem(
-  history: HistoryItem[],
-  prompt: string,
-): Promise<HistoryItem[]> {
+export async function upsertHistoryItem(history: HistoryItem[], prompt: string): Promise<HistoryItem[]> {
   const existing = history.find((item) => item.prompt === prompt);
   const nextHistory = [
     { prompt, isFavorite: existing?.isFavorite || false },
@@ -95,10 +76,7 @@ export async function upsertHistoryItem(
   return nextHistory;
 }
 
-export async function toggleFavorite(
-  history: HistoryItem[],
-  prompt: string,
-): Promise<HistoryItem[]> {
+export async function toggleFavorite(history: HistoryItem[], prompt: string): Promise<HistoryItem[]> {
   const nextHistory = history.map((item) =>
     item.prompt === prompt ? { ...item, isFavorite: !item.isFavorite } : item,
   );
@@ -107,18 +85,13 @@ export async function toggleFavorite(
   return nextHistory;
 }
 
-export async function removeHistoryItem(
-  history: HistoryItem[],
-  prompt: string,
-): Promise<HistoryItem[]> {
+export async function removeHistoryItem(history: HistoryItem[], prompt: string): Promise<HistoryItem[]> {
   const nextHistory = history.filter((item) => item.prompt !== prompt);
   await saveHistory(nextHistory);
   return nextHistory;
 }
 
-export async function clearNonFavoriteHistory(
-  history: HistoryItem[],
-): Promise<HistoryItem[]> {
+export async function clearNonFavoriteHistory(history: HistoryItem[]): Promise<HistoryItem[]> {
   const nextHistory = history.filter((item) => item.isFavorite);
   await saveHistory(nextHistory);
   return nextHistory;

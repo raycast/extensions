@@ -33,22 +33,13 @@ const VERIFY_MARKER = "__INFLOW_PASTE_VERIFY__";
  * @param input - Original input text (used for comparison)
  * @returns "pasted" if paste succeeded; "not_editable" if the area is not editable.
  */
-export async function outputResult(
-  text: string,
-  input?: string,
-  signal?: AbortSignal,
-): Promise<OutputMethod> {
+export async function outputResult(text: string, input?: string, signal?: AbortSignal): Promise<OutputMethod> {
   throwIfAborted(signal);
 
-  logger.logStatus(
-    "outputResult",
-    `Start. Preview: "${text.substring(0, 30).replace(/\n/g, " ")}..."`,
-  );
+  logger.logStatus("outputResult", `Start. Preview: "${text.substring(0, 30).replace(/\n/g, " ")}..."`);
 
   if (input && text.trim() === input.trim()) {
-    logger.warn(
-      "[outputResult] CAUTION: AI result is identical to original input!",
-    );
+    logger.warn("[outputResult] CAUTION: AI result is identical to original input!");
   }
 
   await delay(PASTE_DELAY_MS, signal);
@@ -69,10 +60,7 @@ export async function outputResult(
  * the user explicitly chose to paste the generated result back into the app.
  */
 export async function pasteToFrontmostApp(text: string): Promise<void> {
-  logger.logStatus(
-    "pasteToFrontmostApp",
-    "Waiting for Raycast to lose focus...",
-  );
+  logger.logStatus("pasteToFrontmostApp", "Waiting for Raycast to lose focus...");
   await waitForFrontmostNonRaycast();
   await delay(PANEL_POST_FOCUS_WAIT_MS);
   await Clipboard.paste(text);
@@ -81,11 +69,7 @@ export async function pasteToFrontmostApp(text: string): Promise<void> {
 /**
  * Paste and verify: universally robust editability detection.
  */
-async function performPasteAndVerify(
-  text: string,
-  input?: string,
-  signal?: AbortSignal,
-): Promise<OutputMethod> {
+async function performPasteAndVerify(text: string, input?: string, signal?: AbortSignal): Promise<OutputMethod> {
   try {
     throwIfAborted(signal);
     // 1. Use Raycast native paste which is much more stable across apps (e.g., WeChat, Browsers)
@@ -98,27 +82,20 @@ async function performPasteAndVerify(
     // Explicitly check if the original input is still in the clipboard.
     // if Cmd+C successfully copied the original selection, it means the area was NOT editable.
     if (input && clipboardText === input.trim()) {
-      logger.logStatus(
-        "performPasteAndVerify",
-        "Original selection still present. Paste failed.",
-      );
+      logger.logStatus("performPasteAndVerify", "Original selection still present. Paste failed.");
       return "not_editable";
     }
 
     // If Cmd+C copied nothing, the selection was successfully removed (paste succeeded).
     // Some apps leave the MARKER intact, others clear the clipboard to "".
     // If the paste failed, the original selection would still be there, and Cmd+C would copy it.
-    const selectionConsumed =
-      clipboardText === VERIFY_MARKER || clipboardText === "";
+    const selectionConsumed = clipboardText === VERIFY_MARKER || clipboardText === "";
 
     logger.logStatus(
       "performPasteAndVerify",
       `Clipboard after Cmd+C: "${clipboardText.substring(0, 40).replace(/\n/g, " ")}"`,
     );
-    logger.logStatus(
-      "performPasteAndVerify",
-      `Selection consumed: ${selectionConsumed}`,
-    );
+    logger.logStatus("performPasteAndVerify", `Selection consumed: ${selectionConsumed}`);
 
     if (selectionConsumed) {
       logger.logStatus("performPasteAndVerify", "Paste verified successful!");

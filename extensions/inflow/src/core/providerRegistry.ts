@@ -1,14 +1,6 @@
 type EndpointResolver = string | ((baseUrl: string) => string);
 
-export type ProviderId =
-  | "raycast"
-  | "bigmodel"
-  | "deepseek"
-  | "openai"
-  | "openrouter"
-  | "qwen"
-  | "zai"
-  | "custom";
+export type ProviderId = "raycast" | "bigmodel" | "deepseek" | "openai" | "openrouter" | "qwen" | "zai" | "custom";
 
 export interface ProviderDefinition {
   id: string;
@@ -90,8 +82,7 @@ const providerRegistry: readonly ProviderDefinition[] = [
     label: "Qwen",
     icon: "model/qwen.svg",
     defaultModel: "qwen-turbo",
-    chatEndpoint:
-      "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    chatEndpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
     modelsEndpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/models",
     requiresApiKey: true,
     supportsModelFetch: true,
@@ -125,17 +116,13 @@ const providerRegistry: readonly ProviderDefinition[] = [
 export const DEFAULT_PROVIDER_ID: ProviderId = "raycast";
 export const PROVIDER_REGISTRY = providerRegistry;
 
-const providerMap = new Map(
-  PROVIDER_REGISTRY.map((provider) => [provider.id, provider] as const),
-);
+const providerMap = new Map(PROVIDER_REGISTRY.map((provider) => [provider.id, provider] as const));
 
 export function isProviderId(provider: string): provider is ProviderId {
   return providerMap.has(provider as ProviderId);
 }
 
-export function getProviderDefinition(
-  provider: string,
-): (typeof PROVIDER_REGISTRY)[number] | undefined {
+export function getProviderDefinition(provider: string): (typeof PROVIDER_REGISTRY)[number] | undefined {
   return providerMap.get(provider as ProviderId);
 }
 
@@ -147,10 +134,7 @@ export function getProviderModelPlaceholder(provider: string): string {
   return "";
 }
 
-export function getProviderHeaders(
-  provider: string,
-  apiKey: string,
-): Record<string, string> {
+export function getProviderHeaders(provider: string, apiKey: string): Record<string, string> {
   const definition = getProviderDefinition(provider);
   if (!definition?.buildHeaders) return {};
   return definition.buildHeaders(apiKey);
@@ -163,10 +147,7 @@ export function normalizeCustomBaseUrl(baseUrl: string): string {
     .replace(/\/(chat\/completions|models)\/?$/, "");
 }
 
-function resolveEndpoint(
-  endpoint: EndpointResolver | undefined,
-  baseUrl?: string,
-): string | undefined {
+function resolveEndpoint(endpoint: EndpointResolver | undefined, baseUrl?: string): string | undefined {
   if (!endpoint) return undefined;
   if (typeof endpoint === "string") return endpoint;
 
@@ -175,22 +156,10 @@ function resolveEndpoint(
   return endpoint(normalizedBaseUrl);
 }
 
-export function getProviderChatEndpoint(
-  provider: string,
-  baseUrl?: string,
-): string | undefined {
-  return resolveEndpoint(
-    getProviderDefinition(provider)?.chatEndpoint,
-    baseUrl,
-  );
+export function getProviderChatEndpoint(provider: string, baseUrl?: string): string | undefined {
+  return resolveEndpoint(getProviderDefinition(provider)?.chatEndpoint, baseUrl);
 }
 
-export function getProviderModelsEndpoint(
-  provider: string,
-  baseUrl?: string,
-): string | undefined {
-  return resolveEndpoint(
-    getProviderDefinition(provider)?.modelsEndpoint,
-    baseUrl,
-  );
+export function getProviderModelsEndpoint(provider: string, baseUrl?: string): string | undefined {
+  return resolveEndpoint(getProviderDefinition(provider)?.modelsEndpoint, baseUrl);
 }

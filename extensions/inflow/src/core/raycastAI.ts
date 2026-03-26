@@ -1,18 +1,11 @@
 import { AI } from "@raycast/api";
 import { logger } from "./logger";
-import {
-  createAbortError,
-  isAbortLikeError,
-  isRaycastConnectionError,
-} from "./requestErrors";
+import { createAbortError, isAbortLikeError, isRaycastConnectionError } from "./requestErrors";
 
 const MAX_RAYCAST_ATTEMPTS = 2;
 const RAYCAST_RETRY_DELAY_MS = 350;
 
-export async function askRaycastAI(
-  prompt: string,
-  signal?: AbortSignal,
-): Promise<string> {
+export async function askRaycastAI(prompt: string, signal?: AbortSignal): Promise<string> {
   let lastError: unknown;
 
   for (let attempt = 1; attempt <= MAX_RAYCAST_ATTEMPTS; attempt++) {
@@ -22,7 +15,6 @@ export async function askRaycastAI(
 
     try {
       logger.logStatus("runPrompt", `Calling Raycast AI.ask()`);
-      // @ts-ignore
       return await AI.ask(prompt, { signal });
     } catch (error) {
       lastError = error;
@@ -31,8 +23,7 @@ export async function askRaycastAI(
         throw createAbortError();
       }
 
-      const shouldRetry =
-        isRaycastConnectionError(error) && attempt < MAX_RAYCAST_ATTEMPTS;
+      const shouldRetry = isRaycastConnectionError(error) && attempt < MAX_RAYCAST_ATTEMPTS;
 
       if (!shouldRetry) {
         throw error;

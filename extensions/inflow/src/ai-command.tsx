@@ -1,12 +1,4 @@
-import {
-  Application,
-  Icon,
-  LaunchType,
-  List,
-  Toast,
-  launchCommand,
-  showToast,
-} from "@raycast/api";
+import { Application, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { CommandList } from "./components/CommandList";
 import { ResultDetail } from "./components/ResultDetail";
@@ -25,9 +17,7 @@ export default function CommandRoot(props: {
     autoRunInput?: string;
   };
 }) {
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<
-    boolean | null
-  >(null);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
     async function checkOnboarding() {
@@ -72,9 +62,7 @@ function QuickCommand(props: {
   const [inputSource, setInputSource] = useState<InputSource>("none");
   const [inputApp, setInputApp] = useState<Application | undefined>(undefined);
   const [isInitializing, setIsInitializing] = useState(true);
-  const panelInputPromiseRef = useRef<Promise<
-    Awaited<ReturnType<typeof detectInputForPanel>>
-  > | null>(null);
+  const panelInputPromiseRef = useRef<Promise<Awaited<ReturnType<typeof detectInputForPanel>>> | null>(null);
   const {
     history,
     isLoading: isHistoryLoading,
@@ -84,13 +72,7 @@ function QuickCommand(props: {
     deleteHistory,
     handleToggleFavorite,
   } = useCommandHistory();
-  const {
-    abortCurrentRun,
-    generatedResult,
-    handleRun,
-    panelStatusTitle,
-    viewState,
-  } = usePromptExecution({
+  const { abortCurrentRun, generatedResult, handleRun, panelStatusTitle, viewState } = usePromptExecution({
     autoRunPrompt: props.autoRun?.autoRunPrompt,
   });
 
@@ -118,11 +100,7 @@ function QuickCommand(props: {
 
         if (props.autoRun?.autoRunPrompt) {
           if (!isMounted) return;
-          await runCommand(
-            props.autoRun.autoRunPrompt,
-            props.autoRun.autoRunTitle,
-            initialInput,
-          );
+          await runCommand(props.autoRun.autoRunPrompt, props.autoRun.autoRunTitle, initialInput);
         } else if (!initialInput || initialInput.trim().length === 0) {
           await showToast({
             style: Toast.Style.Failure,
@@ -149,11 +127,7 @@ function QuickCommand(props: {
     };
   }, []);
 
-  const runCommand = async (
-    prompt: string,
-    title?: string,
-    overrideInput?: string,
-  ) => {
+  const runCommand = async (prompt: string, title?: string, overrideInput?: string) => {
     if (!title) {
       await addCustomPrompt(prompt);
     }

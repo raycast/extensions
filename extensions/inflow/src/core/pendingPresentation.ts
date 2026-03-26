@@ -4,9 +4,7 @@ import { PromptPhase } from "./promptEvents";
 export type PendingPhase = PromptPhase | "thinking";
 const INLINE_COMMAND_GRACE_SECONDS = 2;
 
-export function createPendingProgress(
-  onTick: (elapsedSeconds: number) => void,
-): {
+export function createPendingProgress(onTick: (elapsedSeconds: number) => void): {
   getElapsedSeconds: () => number;
   stop: () => void;
 } {
@@ -46,10 +44,7 @@ export function renderInlinePendingState({
     elapsedSeconds,
     phase,
   });
-  toast.message =
-    phase === "thinking" && reasoning
-      ? formatThinkingToastMessage(reasoning)
-      : "";
+  toast.message = phase === "thinking" && reasoning ? formatThinkingToastMessage(reasoning) : "";
 }
 
 export function renderPanelPendingState({
@@ -84,10 +79,7 @@ export function renderPanelPendingState({
   );
 }
 
-export function formatPendingTitle(
-  phase: PendingPhase,
-  elapsedSeconds: number,
-): string {
+export function formatPendingTitle(phase: PendingPhase, elapsedSeconds: number): string {
   switch (phase) {
     case "connecting":
       return `Connecting... ${elapsedSeconds}s`;
@@ -123,10 +115,7 @@ function formatInlinePendingTitle({
     return `${commandTitle}...`;
   }
 
-  if (
-    phase === "connecting" &&
-    elapsedSeconds <= INLINE_COMMAND_GRACE_SECONDS
-  ) {
+  if (phase === "connecting" && elapsedSeconds <= INLINE_COMMAND_GRACE_SECONDS) {
     return `${commandTitle}...`;
   }
 
@@ -159,10 +148,7 @@ function formatPendingMarkdown({
   reasoning: string;
 }): string {
   const title = formatPendingTitle(phase, elapsedSeconds);
-  const body =
-    phase === "thinking" && reasoning.trim().length > 0
-      ? `${title}\n\n${reasoning.trim()}`
-      : title;
+  const body = phase === "thinking" && reasoning.trim().length > 0 ? `${title}\n\n${reasoning.trim()}` : title;
 
   return body
     .split("\n")
@@ -171,9 +157,5 @@ function formatPendingMarkdown({
 }
 
 function formatNonStreamingWaitingMarkdown(): string {
-  return [
-    "> Preparing your result...",
-    ">",
-    "> Raycast AI does not provide live output.",
-  ].join("\n");
+  return ["> Preparing your result...", ">", "> Raycast AI does not provide live output."].join("\n");
 }

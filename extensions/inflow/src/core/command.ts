@@ -1,11 +1,5 @@
 // Command pipeline entry for no-view preset commands.
-import {
-  getPreferenceValues,
-  launchCommand,
-  LaunchType,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { getPreferenceValues, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 import { resolveExecutionContext } from "./executionContext";
 import { getInputText } from "./input";
 import { logger } from "./logger";
@@ -26,10 +20,7 @@ export type TextCommandConfig = {
  * Execution pipeline for no-view preset commands.
  * Checks settings: if inline processing is disabled, routes to panel mode immediately.
  */
-export async function runTextCommand(
-  config: TextCommandConfig,
-  inputOverride?: string,
-): Promise<void> {
+export async function runTextCommand(config: TextCommandConfig, inputOverride?: string): Promise<void> {
   const taskName = config.name || config.title;
   const task = registerTask(taskName);
 
@@ -56,8 +47,7 @@ export async function runTextCommand(
   }
 
   try {
-    const input =
-      inputOverride !== undefined ? inputOverride.trim() : await getInputText();
+    const input = inputOverride !== undefined ? inputOverride.trim() : await getInputText();
 
     // Abort if no text is selected
     if (!input) {
@@ -72,10 +62,8 @@ export async function runTextCommand(
 
     // Use custom prompt from preferences if configured, otherwise use default
     const prefs = getPreferenceValues<{ customPrompt?: string }>();
-    let activePrompt =
-      prefs.customPrompt && prefs.customPrompt.trim().length > 0
-        ? prefs.customPrompt
-        : config.prompt;
+    const activePrompt =
+      prefs.customPrompt && prefs.customPrompt.trim().length > 0 ? prefs.customPrompt : config.prompt;
 
     if (context.settings.editableTextHandling !== "inline") {
       // Inline processing disabled, fallback to panel mode in ALL scenarios.

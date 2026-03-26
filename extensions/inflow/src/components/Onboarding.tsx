@@ -4,8 +4,7 @@ import { ActionPanel, Action, Icon, environment, Detail } from "@raycast/api";
  * Step 1: Welcome Screen
  */
 export function WelcomeStep({ onNext }: { onNext: () => void }) {
-  const banner =
-    environment.appearance === "dark" ? "step1@dark.png" : "step1.png";
+  const banner = environment.appearance === "dark" ? "step1@dark.png" : "step1.png";
   const welcomeMarkdown = `![InFlow](${banner})`;
 
   return (
@@ -25,8 +24,7 @@ export function WelcomeStep({ onNext }: { onNext: () => void }) {
  * Step 2: Usage Introduction
  */
 export function UsageStep({ onNext }: { onNext: () => void }) {
-  const banner =
-    environment.appearance === "dark" ? "step2@dark.png" : "step2.png";
+  const banner = environment.appearance === "dark" ? "step2@dark.png" : "step2.png";
   const usageMarkdown = `![InFlow](${banner})`;
 
   return (
@@ -46,8 +44,7 @@ export function UsageStep({ onNext }: { onNext: () => void }) {
  * Step 4: Completion Screen
  */
 export function FinishStep({ onFinish }: { onFinish: () => void }) {
-  const banner =
-    environment.appearance === "dark" ? "step4@dark.png" : "step4.png";
+  const banner = environment.appearance === "dark" ? "step4@dark.png" : "step4.png";
   const finishMarkdown = `![InFlow](${banner})`;
 
   return (
@@ -56,11 +53,7 @@ export function FinishStep({ onFinish }: { onFinish: () => void }) {
       navigationTitle="All set (4/4)"
       actions={
         <ActionPanel>
-          <Action
-            title="Get Started"
-            onAction={onFinish}
-            icon={Icon.Checkmark}
-          />
+          <Action title="Get Started" onAction={onFinish} icon={Icon.Checkmark} />
         </ActionPanel>
       }
     />

@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  closeMainWindow,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { pasteToFrontmostApp } from "../core/output";
 
 type ResultDetailProps = {
@@ -17,12 +8,7 @@ type ResultDetailProps = {
   onCancel?: () => void;
 };
 
-export function ResultDetail({
-  result,
-  isLoading = false,
-  navigationTitle,
-  onCancel,
-}: ResultDetailProps) {
+export function ResultDetail({ result, isLoading = false, navigationTitle, onCancel }: ResultDetailProps) {
   const hasResult = result.trim().length > 0;
   const markdown = hasResult ? result.replace(/\n/g, "  \n") : "";
 
@@ -48,20 +34,9 @@ export function ResultDetail({
       actions={
         <ActionPanel>
           {isLoading && (
-            <Action
-              title="Cancel"
-              icon={Icon.Stop}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={onCancel}
-            />
+            <Action title="Cancel" icon={Icon.Stop} shortcut={{ modifiers: ["cmd"], key: "." }} onAction={onCancel} />
           )}
-          {!isLoading && hasResult && (
-            <Action
-              title="Paste to App"
-              icon={Icon.Pencil}
-              onAction={handlePaste}
-            />
-          )}
+          {!isLoading && hasResult && <Action title="Paste to App" icon={Icon.Pencil} onAction={handlePaste} />}
           {!isLoading && hasResult && (
             <Action
               title="Copy Result"

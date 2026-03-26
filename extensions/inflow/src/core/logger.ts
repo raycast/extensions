@@ -12,22 +12,13 @@ export const logger = {
     return IS_DEV;
   },
 
-  log: IS_DEV
-    ? (message: string, ...args: any[]) => console.log(message, ...args)
-    : () => {},
+  log: IS_DEV ? (message: string, ...args: unknown[]) => console.log(message, ...args) : () => {},
 
-  info: IS_DEV
-    ? (message: string, ...args: any[]) =>
-        console.info(`[INFO] ${message}`, ...args)
-    : () => {},
+  info: IS_DEV ? (message: string, ...args: unknown[]) => console.info(`[INFO] ${message}`, ...args) : () => {},
 
-  warn: IS_DEV
-    ? (message: string, ...args: any[]) => console.warn(message, ...args)
-    : () => {},
+  warn: IS_DEV ? (message: string, ...args: unknown[]) => console.warn(message, ...args) : () => {},
 
-  error: IS_DEV
-    ? (message: string, ...args: any[]) => console.error(message, ...args)
-    : () => {},
+  error: IS_DEV ? (message: string, ...args: unknown[]) => console.error(message, ...args) : () => {},
 
   logErrorDetail(prefix: string, e: unknown) {
     if (!IS_DEV) return;
@@ -46,9 +37,7 @@ export const logger = {
         `[runPrompt] FULL PROMPT (truncated):\n${prompt.substring(0, previewLength / 2)}... [TRUNCATED] ...${prompt.substring(prompt.length - previewLength / 2)}`,
       );
     } else {
-      this.log(
-        `[runPrompt] FULL PROMPT:\n------------------\n${prompt}\n------------------`,
-      );
+      this.log(`[runPrompt] FULL PROMPT:\n------------------\n${prompt}\n------------------`);
     }
   },
 

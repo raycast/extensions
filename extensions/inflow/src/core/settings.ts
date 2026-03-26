@@ -1,6 +1,6 @@
 // Settings layer: persists user configuration in Raycast's encrypted LocalStorage.
 import { LocalStorage } from "@raycast/api";
-import { normalizeStoredLanguageValue } from "./languages";
+import { DEFAULT_LANGUAGE, normalizeStoredLanguageValue } from "./languages";
 import { SETTINGS_STORAGE_KEY } from "./storage";
 
 export interface ProviderConfig {
@@ -38,8 +38,8 @@ const DEFAULT_STORED: StoredSettings = {
   aiProvider: "raycast",
   providers: {},
   customInstructions: "",
-  defaultLanguage: "",
-  expressionLanguage: "English (US)",
+  defaultLanguage: DEFAULT_LANGUAGE,
+  expressionLanguage: DEFAULT_LANGUAGE,
   editableTextHandling: "panel",
 };
 
@@ -55,9 +55,7 @@ export async function getStoredSettings(): Promise<StoredSettings> {
   return { ...DEFAULT_STORED };
 }
 
-export async function saveStoredSettings(
-  settings: StoredSettings,
-): Promise<void> {
+export async function saveStoredSettings(settings: StoredSettings): Promise<void> {
   await LocalStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
 }
 
@@ -72,10 +70,8 @@ export async function getAppSettings(): Promise<AppSettings> {
     apiEndpoint: config.apiEndpoint || "",
     customInstructions: stored.customInstructions || "",
     personalContext: stored.personalContext || "",
-    defaultLanguage: normalizeStoredLanguageValue(stored.defaultLanguage || ""),
-    expressionLanguage: normalizeStoredLanguageValue(
-      stored.expressionLanguage || "English (US)",
-    ),
+    defaultLanguage: normalizeStoredLanguageValue(stored.defaultLanguage || DEFAULT_LANGUAGE),
+    expressionLanguage: normalizeStoredLanguageValue(stored.expressionLanguage || DEFAULT_LANGUAGE),
     editableTextHandling: stored.editableTextHandling || "panel",
   };
 }

@@ -1,11 +1,4 @@
-import {
-  closeMainWindow,
-  Clipboard,
-  LaunchType,
-  launchCommand,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { closeMainWindow, Clipboard, LaunchType, launchCommand, showToast, Toast } from "@raycast/api";
 import type { ExecutionContext } from "./executionContext";
 import { runPrompt } from "./ai";
 import { displayErrorToast } from "./error";
@@ -22,10 +15,7 @@ import {
 } from "./pendingPresentation";
 import { createAbortError, isAbortLikeError } from "./requestErrors";
 
-export type ExecutePromptResult =
-  | { status: "success"; result: string }
-  | { status: "empty" }
-  | { status: "aborted" };
+export type ExecutePromptResult = { status: "success"; result: string } | { status: "empty" } | { status: "aborted" };
 
 type ExecutePromptOptions = {
   prompt: string;
@@ -130,9 +120,7 @@ export async function runInlineFlow({
 
     let hasStartedContent = false;
     let latestReasoning = "";
-    let currentPhase: PendingPhase = getInitialPendingPhase(
-      context.settings.aiProvider,
-    );
+    let currentPhase: PendingPhase = getInitialPendingPhase(context.settings.aiProvider);
 
     const progress = createPendingProgress((elapsedSeconds) => {
       if (hasStartedContent) return;
@@ -200,10 +188,7 @@ export async function runInlineFlow({
         const flatText = update.text.replace(/\n/g, " ").replace(/\s+/g, " ");
         const displayLength = 25;
         const codePoints = [...flatText];
-        toast.title =
-          codePoints.length > displayLength
-            ? codePoints.slice(-displayLength).join("")
-            : flatText;
+        toast.title = codePoints.length > displayLength ? codePoints.slice(-displayLength).join("") : flatText;
         toast.message = "";
       },
     });
@@ -285,11 +270,8 @@ export async function runPanelFlow({
     let hasStartedContent = false;
     let lastUpdateTime = 0;
     let latestReasoning = "";
-    let currentPhase: PendingPhase = getInitialPendingPhase(
-      context.settings.aiProvider,
-    );
-    const usesStaticWaitingPlaceholder =
-      context.settings.aiProvider === "raycast";
+    let currentPhase: PendingPhase = getInitialPendingPhase(context.settings.aiProvider);
+    const usesStaticWaitingPlaceholder = context.settings.aiProvider === "raycast";
 
     renderPanelPendingState({
       elapsedSeconds: 1,
@@ -324,9 +306,7 @@ export async function runPanelFlow({
         if (update.kind === "phase") {
           if (!hasStartedContent && currentPhase !== "thinking") {
             currentPhase = update.phase;
-            onStatusChange?.(
-              formatPendingTitle(currentPhase, progress.getElapsedSeconds()),
-            );
+            onStatusChange?.(formatPendingTitle(currentPhase, progress.getElapsedSeconds()));
             renderPanelPendingState({
               elapsedSeconds: progress.getElapsedSeconds(),
               onResultChange,
@@ -338,11 +318,7 @@ export async function runPanelFlow({
           return;
         }
 
-        if (
-          update.kind === "content" &&
-          !hasStartedContent &&
-          update.text.trim().length > 0
-        ) {
+        if (update.kind === "content" && !hasStartedContent && update.text.trim().length > 0) {
           hasStartedContent = true;
           latestReasoning = "";
           progress.stop();
@@ -371,11 +347,7 @@ export async function runPanelFlow({
         }
 
         const now = Date.now();
-        if (
-          now - lastUpdateTime > 60 ||
-          update.text.length < 50 ||
-          !hasStartedContent
-        ) {
+        if (now - lastUpdateTime > 60 || update.text.length < 50 || !hasStartedContent) {
           onResultChange?.(update.text);
           lastUpdateTime = now;
         }
@@ -406,10 +378,7 @@ export async function runPanelFlow({
       await toast.hide();
       return { status: "aborted" };
     }
-    displayErrorToast(
-      await showToast({ style: Toast.Style.Failure, title: "Error" }),
-      error,
-    );
+    displayErrorToast(await showToast({ style: Toast.Style.Failure, title: "Error" }), error);
     return { status: "error" };
   } finally {
     pendingProgress?.stop();

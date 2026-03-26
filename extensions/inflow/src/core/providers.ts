@@ -14,12 +14,33 @@ export interface ProviderMessage {
   content: string;
 }
 
-type ReasoningControlVariant =
-  | "omit"
-  | "reasoning-none"
-  | "reasoning-low"
-  | "qwen-disabled"
-  | "glm-disabled";
+type ChatCompletionMessage = {
+  content?: string;
+  reasoning_content?: string;
+};
+
+type ChatCompletionDelta = {
+  content?: string;
+  reasoning_content?: string;
+  thinking?: string;
+};
+
+type ChatCompletionResponse = {
+  choices?: Array<{
+    message?: ChatCompletionMessage;
+    delta?: ChatCompletionDelta;
+  }>;
+};
+
+type ProviderModelRecord = {
+  id?: string;
+};
+
+type ProviderModelsResponse = {
+  data?: ProviderModelRecord[];
+};
+
+type ReasoningControlVariant = "omit" | "reasoning-none" | "reasoning-low" | "qwen-disabled" | "glm-disabled";
 
 type ReasoningControlAttempt = {
   variant: ReasoningControlVariant;
@@ -48,10 +69,7 @@ type ReasoningRule = {
   variants: ReasoningControlVariant[];
 };
 
-const REASONING_CONTROL_PARAMS: Record<
-  ReasoningControlVariant,
-  Record<string, unknown>
-> = {
+const REASONING_CONTROL_PARAMS: Record<ReasoningControlVariant, Record<string, unknown>> = {
   omit: {},
   "reasoning-none": { reasoning_effort: "none" },
   "reasoning-low": { reasoning_effort: "low" },
@@ -125,9 +143,7 @@ function supportsReasoningEffortLowForChatCompletions(model: string): boolean {
 const REASONING_RULES: readonly ReasoningRule[] = [
   {
     id: "qwen-thinking-switch",
-    matches: (context) =>
-      context.normalizedProvider === "qwen" ||
-      context.normalizedModel.includes("qwen"),
+    matches: (context) => context.normalizedProvider === "qwen" || context.normalizedModel.includes("qwen"),
     variants: ["qwen-disabled", "omit"],
   },
   {
@@ -140,21 +156,17 @@ const REASONING_RULES: readonly ReasoningRule[] = [
   },
   {
     id: "reasoning-none",
-    matches: (context) =>
-      supportsReasoningEffortNoneForChatCompletions(context.model),
+    matches: (context) => supportsReasoningEffortNoneForChatCompletions(context.model),
     variants: ["reasoning-none", "reasoning-low", "omit"],
   },
   {
     id: "mimo-low",
-    matches: (context) =>
-      context.normalizedModel.includes("mimo") ||
-      context.normalizedEndpoint.includes("mimo"),
+    matches: (context) => context.normalizedModel.includes("mimo") || context.normalizedEndpoint.includes("mimo"),
     variants: ["reasoning-low", "omit"],
   },
   {
     id: "reasoning-low",
-    matches: (context) =>
-      supportsReasoningEffortLowForChatCompletions(context.model),
+    matches: (context) => supportsReasoningEffortLowForChatCompletions(context.model),
     variants: ["reasoning-low", "omit"],
   },
   {
@@ -164,11 +176,7 @@ const REASONING_RULES: readonly ReasoningRule[] = [
   },
 ];
 
-function buildReasoningRuleContext(
-  provider: string,
-  model: string,
-  endpoint: string,
-): ReasoningRuleContext {
+function buildReasoningRuleContext(provider: string, model: string, endpoint: string): ReasoningRuleContext {
   return {
     provider,
     model,
@@ -179,23 +187,15 @@ function buildReasoningRuleContext(
   };
 }
 
-function getReasoningControlCacheKey(
-  provider: string,
-  model: string,
-  endpoint: string,
-): string {
+function getReasoningControlCacheKey(provider: string, model: string, endpoint: string): string {
   return `reasoning-control:${provider}:${model}:${endpoint}`;
 }
 
-function dedupeReasoningVariants(
-  variants: ReasoningControlVariant[],
-): ReasoningControlVariant[] {
+function dedupeReasoningVariants(variants: ReasoningControlVariant[]): ReasoningControlVariant[] {
   return [...new Set(variants)];
 }
 
-function isReasoningControlVariant(
-  value: string,
-): value is ReasoningControlVariant {
+function isReasoningControlVariant(value: string): value is ReasoningControlVariant {
   return value in REASONING_CONTROL_PARAMS;
 }
 
@@ -206,17 +206,11 @@ async function getReasoningControlAttempts(
 ): Promise<ReasoningControlPlan> {
   const context = buildReasoningRuleContext(provider, model, endpoint);
   const cacheKey = getReasoningControlCacheKey(provider, model, endpoint);
-  const matchedRule =
-    REASONING_RULES.find((rule) => rule.matches(context)) || null;
+  const matchedRule = REASONING_RULES.find((rule) => rule.matches(context)) || null;
   const cachedVariantValue = await LocalStorage.getItem<string>(cacheKey);
-  const cachedVariant =
-    cachedVariantValue && isReasoningControlVariant(cachedVariantValue)
-      ? cachedVariantValue
-      : null;
+  const cachedVariant = cachedVariantValue && isReasoningControlVariant(cachedVariantValue) ? cachedVariantValue : null;
 
-  const variants: ReasoningControlVariant[] = matchedRule
-    ? [...matchedRule.variants]
-    : ["omit"];
+  const variants: ReasoningControlVariant[] = matchedRule ? [...matchedRule.variants] : ["omit"];
   if (cachedVariant) {
     variants.unshift(cachedVariant);
   }
@@ -232,22 +226,13 @@ async function getReasoningControlAttempts(
   };
 }
 
-function isReasoningControlError(
-  errorText: string,
-  attempt: ReasoningControlAttempt,
-): boolean {
+function isReasoningControlError(errorText: string, attempt: ReasoningControlAttempt): boolean {
   if (attempt.variant === "omit") return false;
 
   const normalizedError = errorText.toLowerCase();
 
-  if (
-    attempt.variant === "reasoning-none" ||
-    attempt.variant === "reasoning-low"
-  ) {
-    return (
-      normalizedError.includes("reasoning_effort") ||
-      normalizedError.includes("reasoning.effort")
-    );
+  if (attempt.variant === "reasoning-none" || attempt.variant === "reasoning-low") {
+    return normalizedError.includes("reasoning_effort") || normalizedError.includes("reasoning.effort");
   }
 
   if (attempt.variant === "qwen-disabled") {
@@ -266,18 +251,14 @@ function isReasoningControlError(
   return false;
 }
 
-function shouldIncludeSamplingControls(
-  model: string,
-  attempt: ReasoningControlAttempt,
-): boolean {
+function shouldIncludeSamplingControls(model: string, attempt: ReasoningControlAttempt): boolean {
   if (attempt.variant === "reasoning-low") {
     return false;
   }
 
   if (
     attempt.variant === "omit" &&
-    (supportsReasoningEffortLowForChatCompletions(model) ||
-      isHighOnlyReasoningModel(model))
+    (supportsReasoningEffortLowForChatCompletions(model) || isHighOnlyReasoningModel(model))
   ) {
     return false;
   }
@@ -342,9 +323,7 @@ export async function callCustomProvider(
   const endpoint = getProviderChatEndpoint(selectedProvider, customEndpoint);
   if (!endpoint) {
     if (providerDefinition.requiresBaseUrl) {
-      throw new Error(
-        `${providerDefinition.label} Base URL is required. Please configure it in extension settings.`,
-      );
+      throw new Error(`${providerDefinition.label} Base URL is required. Please configure it in extension settings.`);
     }
     throw new Error(`Unsupported provider: ${selectedProvider}`);
   }
@@ -372,9 +351,7 @@ async function callOpenAIProxy(
 ): Promise<string> {
   const startTime = logger.isEnabled() ? Date.now() : 0;
   if (logger.isEnabled()) {
-    logger.info(
-      `[AI Request] Initiating request to ${endpoint} with model ${model}`,
-    );
+    logger.info(`[AI Request] Initiating request to ${endpoint} with model ${model}`);
   }
 
   const headers: Record<string, string> = {
@@ -382,8 +359,11 @@ async function callOpenAIProxy(
     ...providerHeaders,
   };
 
-  const { cacheKey, attempts, matchedRuleId, cachedVariant } =
-    await getReasoningControlAttempts(provider, model, endpoint);
+  const { cacheKey, attempts, matchedRuleId, cachedVariant } = await getReasoningControlAttempts(
+    provider,
+    model,
+    endpoint,
+  );
 
   if (logger.isEnabled()) {
     logger.info(
@@ -396,17 +376,10 @@ async function callOpenAIProxy(
 
   for (let index = 0; index < attempts.length; index += 1) {
     const attempt = attempts[index];
-    const requestBody = buildOpenAIProxyRequestBody(
-      messages,
-      model,
-      onUpdate,
-      attempt,
-    );
+    const requestBody = buildOpenAIProxyRequestBody(messages, model, onUpdate, attempt);
 
     if (logger.isEnabled()) {
-      logger.info(
-        `[AI Request] Attempt ${index + 1}/${attempts.length} using reasoning control ${attempt.variant}`,
-      );
+      logger.info(`[AI Request] Attempt ${index + 1}/${attempts.length} using reasoning control ${attempt.variant}`);
     }
 
     response = await fetch(endpoint, {
@@ -429,9 +402,7 @@ async function callOpenAIProxy(
     }
 
     const errorText = await response.text();
-    const shouldRetry =
-      index < attempts.length - 1 &&
-      isReasoningControlError(errorText, attempt);
+    const shouldRetry = index < attempts.length - 1 && isReasoningControlError(errorText, attempt);
 
     if (logger.isEnabled()) {
       const message = `[AI Request] API Error (${response.status}) [reasoning control: ${attempt.variant}]: ${errorText}`;
@@ -456,17 +427,14 @@ async function callOpenAIProxy(
   onUpdate?.({ kind: "phase", phase: "generating" });
 
   if (!onUpdate) {
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as ChatCompletionResponse;
     if (logger.isEnabled()) {
       const finalTime = Date.now();
-      logger.info(
-        `[AI Request] Full JSON response received. Total time: ${finalTime - startTime}ms`,
-      );
+      logger.info(`[AI Request] Full JSON response received. Total time: ${finalTime - startTime}ms`);
     }
     if (!data?.choices?.[0]?.message?.content) {
       // Logic for providers that might return ONLY reasoning in non-streaming (rare but possible)
-      if (data?.choices?.[0]?.message?.reasoning_content)
-        return data.choices[0].message.reasoning_content;
+      if (data?.choices?.[0]?.message?.reasoning_content) return data.choices[0].message.reasoning_content;
       throw new Error("Invalid response format from API");
     }
     return data.choices[0].message.content;
@@ -492,14 +460,12 @@ async function callOpenAIProxy(
         if (data === "[DONE]") {
           if (logger.isEnabled()) {
             const doneTime = Date.now();
-            logger.info(
-              `[AI Request] Stream finished [DONE]. Total time: ${doneTime - startTime}ms`,
-            );
+            logger.info(`[AI Request] Stream finished [DONE]. Total time: ${doneTime - startTime}ms`);
           }
           continue;
         }
         try {
-          const parsed = JSON.parse(data);
+          const parsed = JSON.parse(data) as ChatCompletionResponse;
           const delta = parsed.choices?.[0]?.delta;
 
           if (delta) {
@@ -523,9 +489,7 @@ async function callOpenAIProxy(
             if (content) {
               if (logger.isEnabled() && firstTokenTime === null) {
                 firstTokenTime = now;
-                const reasoningDuration = firstReasoningTime
-                  ? ` (Reasoning took: ${now - firstReasoningTime}ms)`
-                  : "";
+                const reasoningDuration = firstReasoningTime ? ` (Reasoning took: ${now - firstReasoningTime}ms)` : "";
                 logger.info(
                   `[AI Request] First content token received. Time since request: ${now - startTime}ms${reasoningDuration}`,
                 );
@@ -546,7 +510,7 @@ async function callOpenAIProxy(
               logger.info(`[AI Request] Finished reasoning phase.`);
             }
           }
-        } catch (e) {
+        } catch {
           // ignore parsing error for incomplete data
         }
       }
@@ -563,8 +527,8 @@ async function callOpenAIProxy(
       processBuffer();
     }
   } else {
-    for await (const chunk of response.body as any) {
-      buffer += chunk.toString("utf-8");
+    for await (const chunk of response.body as AsyncIterable<string | Uint8Array>) {
+      buffer += typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf-8");
       processBuffer();
     }
   }
@@ -600,7 +564,9 @@ export async function fetchProviderModels(
       if (cachedModelsStr) {
         try {
           return JSON.parse(cachedModelsStr);
-        } catch (e) {}
+        } catch {
+          // Ignore invalid cached JSON and refetch models.
+        }
       }
     }
   }
@@ -615,14 +581,15 @@ export async function fetchProviderModels(
     const res = await fetch(endpoint, { headers, signal });
     if (!res.ok) throw new Error(`API Error: ${res.status}`);
 
-    const data = (await res.json()) as any;
+    const data = (await res.json()) as ProviderModelsResponse;
 
     if (!data?.data || !Array.isArray(data.data)) {
       throw new Error("Invalid models response");
     }
 
-    models = (data.data as any[])
-      .map((m) => m.id as string)
+    models = data.data
+      .map((model) => model.id)
+      .filter((id): id is string => typeof id === "string")
       .filter((id) => {
         if (
           id.includes("embedding") ||
@@ -647,7 +614,9 @@ export async function fetchProviderModels(
     if (cachedModelsStr) {
       try {
         return JSON.parse(cachedModelsStr);
-      } catch (e) {}
+      } catch {
+        // Ignore invalid cached JSON and surface the original fetch error.
+      }
     }
     throw error; // Let the caller handle the fallback
   }

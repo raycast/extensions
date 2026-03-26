@@ -14,8 +14,5 @@ export function isAbortLikeError(error: unknown): boolean {
 }
 
 export function isRaycastConnectionError(error: unknown): boolean {
-  return (
-    error instanceof Error &&
-    error.message.toLowerCase().includes("failed connecting to server")
-  );
+  return error instanceof Error && error.message.toLowerCase().includes("failed connecting to server");
 }

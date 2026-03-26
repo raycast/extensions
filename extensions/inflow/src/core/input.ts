@@ -1,10 +1,5 @@
 // Input layer: detects selected text.
-import {
-  getSelectedText,
-  getFrontmostApplication,
-  Application,
-  Clipboard,
-} from "@raycast/api";
+import { getSelectedText, getFrontmostApplication, Application, Clipboard } from "@raycast/api";
 
 export type InputSource = "selected" | "none";
 
@@ -33,9 +28,7 @@ interface DetectOptions {
  * Detects available input, prioritizing selected text.
  * Includes a small delay and retry to improve reliability with focus transitions.
  */
-export async function detectInput(
-  options?: DetectOptions,
-): Promise<InputResult> {
+export async function detectInput(options?: DetectOptions): Promise<InputResult> {
   let app: Application | undefined;
   try {
     app = await getFrontmostApplication();
@@ -74,14 +67,11 @@ export async function getInputText(): Promise<string> {
   return text;
 }
 
-async function tryGetSelectedText(
-  options?: DetectOptions,
-): Promise<string | null> {
+async function tryGetSelectedText(options?: DetectOptions): Promise<string | null> {
   const maxAttempts = options?.maxAttempts ?? 2;
   const retryDelayMs = options?.retryDelayMs ?? 100;
   const filterClipboard = options?.filterClipboard ?? false;
-  const allowClipboardMatchOnLastAttempt =
-    options?.allowClipboardMatchOnLastAttempt ?? true;
+  const allowClipboardMatchOnLastAttempt = options?.allowClipboardMatchOnLastAttempt ?? true;
 
   // Snapshot clipboard content before detection to identify false positives.
   // Some apps/system states may cause getSelectedText() to return the clipboard

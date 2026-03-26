@@ -16,7 +16,7 @@ export function readTaskState(): TaskState | null {
     if (fs.existsSync(LOCK_FILE)) {
       return JSON.parse(fs.readFileSync(LOCK_FILE, "utf-8"));
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
   return null;
@@ -29,7 +29,7 @@ export function writeTaskState(state: TaskState) {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(LOCK_FILE, JSON.stringify(state), "utf-8");
-  } catch (e) {
+  } catch {
     // ignore
   }
 }
@@ -39,7 +39,7 @@ export function clearTaskState() {
     if (fs.existsSync(LOCK_FILE)) {
       fs.unlinkSync(LOCK_FILE);
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 }

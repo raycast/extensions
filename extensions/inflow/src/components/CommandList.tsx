@@ -40,33 +40,20 @@ export function CommandList({
 
     if (inputText && inputSource === "selected") {
       const singleLineText = inputText.replace(/\s+/g, " ").trim();
-      const truncated =
-        singleLineText.length > 50
-          ? `${singleLineText.substring(0, 50)}…`
-          : singleLineText;
+      const truncated = singleLineText.length > 50 ? `${singleLineText.substring(0, 50)}…` : singleLineText;
       return `[${inputApp.name}] ${truncated}`;
     }
 
     return `[${inputApp.name}]`;
   };
 
-  const filterFn = (text: string) =>
-    !searchText || text.toLowerCase().includes(searchText.toLowerCase());
+  const filterFn = (text: string) => !searchText || text.toLowerCase().includes(searchText.toLowerCase());
 
-  const filteredFavorites = history.filter(
-    (item) => item.isFavorite && filterFn(item.prompt),
-  );
-  const filteredPresets = presets.filter(
-    (cmd) => filterFn(cmd.title) || filterFn(cmd.description || ""),
-  );
-  const filteredHistory = history.filter(
-    (item) => !item.isFavorite && filterFn(item.prompt),
-  );
+  const filteredFavorites = history.filter((item) => item.isFavorite && filterFn(item.prompt));
+  const filteredPresets = presets.filter((cmd) => filterFn(cmd.title) || filterFn(cmd.description || ""));
+  const filteredHistory = history.filter((item) => !item.isFavorite && filterFn(item.prompt));
   const hasVisibleItems =
-    Boolean(searchText) ||
-    filteredFavorites.length > 0 ||
-    filteredPresets.length > 0 ||
-    filteredHistory.length > 0;
+    Boolean(searchText) || filteredFavorites.length > 0 || filteredPresets.length > 0 || filteredHistory.length > 0;
 
   return (
     <List
@@ -91,11 +78,7 @@ export function CommandList({
             icon={{ source: "command/custom.png" }}
             actions={
               <ActionPanel>
-                <Action
-                  title="Run Custom Prompt"
-                  icon={Icon.Bolt}
-                  onAction={() => onRun(searchText)}
-                />
+                <Action title="Run Custom Prompt" icon={Icon.Bolt} onAction={() => onRun(searchText)} />
               </ActionPanel>
             }
           />
@@ -111,11 +94,7 @@ export function CommandList({
               icon={{ source: "command/star.png" }}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Run"
-                    icon={Icon.Bolt}
-                    onAction={() => onRun(item.prompt)}
-                  />
+                  <Action title="Run" icon={Icon.Bolt} onAction={() => onRun(item.prompt)} />
                   <Action
                     title="Unfavorite"
                     icon={Icon.StarDisabled}
@@ -152,11 +131,7 @@ export function CommandList({
               subtitle={cmd.description}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Run"
-                    icon={Icon.Bolt}
-                    onAction={() => onRun(cmd.prompt, cmd.title)}
-                  />
+                  <Action title="Run" icon={Icon.Bolt} onAction={() => onRun(cmd.prompt, cmd.title)} />
                 </ActionPanel>
               }
             />
@@ -171,18 +146,10 @@ export function CommandList({
               key={item.prompt}
               title={item.prompt}
               icon={{ source: "command/history.png" }}
-              accessories={
-                item.isFavorite
-                  ? [{ icon: Icon.Star, tooltip: "Favorited" }]
-                  : []
-              }
+              accessories={item.isFavorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Run"
-                    icon={Icon.Bolt}
-                    onAction={() => onRun(item.prompt)}
-                  />
+                  <Action title="Run" icon={Icon.Bolt} onAction={() => onRun(item.prompt)} />
                   <Action
                     title={item.isFavorite ? "Unfavorite" : "Favorite"}
                     icon={item.isFavorite ? Icon.StarDisabled : Icon.Star}

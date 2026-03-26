@@ -17,12 +17,8 @@ export type ExecutionViewState = "idle" | "running" | "done";
 
 export function usePromptExecution(options?: { autoRunPrompt?: string }) {
   const [generatedResult, setGeneratedResult] = useState<string | null>(null);
-  const [panelStatusTitle, setPanelStatusTitle] = useState<string | undefined>(
-    undefined,
-  );
-  const [viewState, setViewState] = useState<ExecutionViewState>(
-    options?.autoRunPrompt ? "running" : "idle",
-  );
+  const [panelStatusTitle, setPanelStatusTitle] = useState<string | undefined>(undefined);
+  const [viewState, setViewState] = useState<ExecutionViewState>(options?.autoRunPrompt ? "running" : "idle");
   const abortControllerRef = useRef<AbortController | null>(null);
   const runIdRef = useRef(0);
 
@@ -39,13 +35,7 @@ export function usePromptExecution(options?: { autoRunPrompt?: string }) {
     setViewState("idle");
   };
 
-  const handleRun = async ({
-    prompt,
-    title,
-    overrideInput,
-    inputSource,
-    inputText,
-  }: RunPromptOptions) => {
+  const handleRun = async ({ prompt, title, overrideInput, inputSource, inputText }: RunPromptOptions) => {
     abortCurrentRun();
     const runId = ++runIdRef.current;
     abortControllerRef.current = new AbortController();
@@ -62,8 +52,7 @@ export function usePromptExecution(options?: { autoRunPrompt?: string }) {
     }
 
     try {
-      const finalInput =
-        overrideInput ?? (inputSource === "selected" ? inputText : "");
+      const finalInput = overrideInput ?? (inputSource === "selected" ? inputText : "");
 
       if (!finalInput) {
         if (isCurrentRun()) {
@@ -78,10 +67,7 @@ export function usePromptExecution(options?: { autoRunPrompt?: string }) {
 
       const context = await resolveExecutionContext();
 
-      if (
-        options?.autoRunPrompt &&
-        context.settings.editableTextHandling === "inline"
-      ) {
+      if (options?.autoRunPrompt && context.settings.editableTextHandling === "inline") {
         await runInlineFlow({
           prompt,
           input: finalInput,
@@ -116,9 +102,7 @@ export function usePromptExecution(options?: { autoRunPrompt?: string }) {
 
       if (logger.isEnabled()) {
         const totalTime = Date.now() - startTime;
-        logger.info(
-          `[UI] Task complete. Total time from trigger to display: ${totalTime}ms`,
-        );
+        logger.info(`[UI] Task complete. Total time from trigger to display: ${totalTime}ms`);
       }
 
       if (flowResult.status === "aborted") {
@@ -137,10 +121,7 @@ export function usePromptExecution(options?: { autoRunPrompt?: string }) {
         setViewState(flowResult.status === "success" ? "done" : "idle");
       }
     } catch (error) {
-      if (
-        error instanceof Error &&
-        (error.message === "AbortError" || error.name === "AbortError")
-      ) {
+      if (error instanceof Error && (error.message === "AbortError" || error.name === "AbortError")) {
         if (isCurrentRun()) {
           setGeneratedResult(null);
           setPanelStatusTitle(undefined);

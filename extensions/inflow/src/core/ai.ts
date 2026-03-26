@@ -28,12 +28,7 @@ export async function runPrompt({
   const provider = settings.aiProvider || "raycast";
   logger.logStatus("runPrompt", `Using AI provider: ${provider}`);
 
-  const { systemPrompt, userMessage } = buildPrompt(
-    prompt,
-    input,
-    settings,
-    personalContext,
-  );
+  const { systemPrompt, userMessage } = buildPrompt(prompt, input, settings, personalContext);
   logger.logPrompt(`SYSTEM: ${systemPrompt}\nUSER: ${userMessage}`);
 
   let response = "";
@@ -109,9 +104,7 @@ function buildStreamUpdate(
   }
 
   const inferredReasoning = extractReasoningDisplay(text);
-  return inferredReasoning.length > 0
-    ? { kind: "reasoning", text: inferredReasoning }
-    : null;
+  return inferredReasoning.length > 0 ? { kind: "reasoning", text: inferredReasoning } : null;
 }
 
 const SYSTEM_GUARD = [
@@ -131,9 +124,7 @@ function buildPrompt(
   let resolvedTask = task;
 
   const defaultLang = getLanguagePromptLabel(settings.defaultLanguage || "");
-  const expressionLang = getLanguagePromptLabel(
-    settings.expressionLanguage || "English (US)",
-  );
+  const expressionLang = getLanguagePromptLabel(settings.expressionLanguage || "English (US)");
 
   logger.logStatus(
     "buildPrompt",
@@ -144,28 +135,19 @@ function buildPrompt(
     resolvedTask = resolvedTask.replace(/{Default Language}/gi, defaultLang);
   }
   if (expressionLang) {
-    resolvedTask = resolvedTask.replace(
-      /{Expression Language}/gi,
-      expressionLang,
-    );
+    resolvedTask = resolvedTask.replace(/{Expression Language}/gi, expressionLang);
   }
 
   const normalizedTask = resolvedTask.toLowerCase();
-  const isTranslationTask = normalizedTask.match(
-    /(translate|translation|翻译|译成|翻成)/,
-  );
-  const isCommTask = normalizedTask.match(
-    /(email|mail|letter|write|draft|reply|compose|起草|回复|写一封|邮件)/,
-  );
+  const isTranslationTask = normalizedTask.match(/(translate|translation|翻译|译成|翻成)/);
+  const isCommTask = normalizedTask.match(/(email|mail|letter|write|draft|reply|compose|起草|回复|写一封|邮件)/);
   const needsPersonalContext =
     !!personalContext &&
     normalizedTask.match(
       /(email|mail|letter|write|draft|reply|compose|introduce|introduction|bio|profile|about me|self[- ]introduction|signature|contact|起草|回复|邮件|自我介绍|个人简介|介绍我自己|署名|签名|联系方式)/,
     );
 
-  const globalInstructions = settings.customInstructions
-    ? `\nGLOBAL PREFERENCES:\n${settings.customInstructions}`
-    : "";
+  const globalInstructions = settings.customInstructions ? `\nGLOBAL PREFERENCES:\n${settings.customInstructions}` : "";
 
   let taskGuidance = "";
   if (isTranslationTask) {
@@ -238,14 +220,7 @@ ${input || "_NO_CONTENT_"}
 }
 
 // Common markers that reasoning models emit before their final answer.
-const FINAL_MARKERS = [
-  "final",
-  "answer",
-  "response",
-  "result",
-  "translation",
-  "output",
-];
+const FINAL_MARKERS = ["final", "answer", "response", "result", "translation", "output"];
 
 const THINKING_TAGS = ["thinking", "think"];
 
@@ -254,10 +229,7 @@ function stripReasoning(text: string): string {
 
   // Remove complete tagged thinking blocks explicitly.
   for (const tag of THINKING_TAGS) {
-    const completeTagPattern = new RegExp(
-      `<${tag}>[\\s\\S]*?<\\/${tag}>`,
-      "gi",
-    );
+    const completeTagPattern = new RegExp(`<${tag}>[\\s\\S]*?<\\/${tag}>`, "gi");
     output = output.replace(completeTagPattern, "").trim();
   }
 
@@ -301,10 +273,7 @@ function extractTaggedReasoning(text: string): string {
   const output = text.trim();
 
   for (const tag of THINKING_TAGS) {
-    const completeTagPattern = new RegExp(
-      `<${tag}>([\\s\\S]*?)<\\/${tag}>`,
-      "gi",
-    );
+    const completeTagPattern = new RegExp(`<${tag}>([\\s\\S]*?)<\\/${tag}>`, "gi");
     let completeMatch: RegExpExecArray | null = null;
     for (const match of output.matchAll(completeTagPattern)) {
       completeMatch = match;

@@ -78,8 +78,7 @@ export function useCommandHistory() {
     if (
       !(await confirmAlert({
         title: "Clear History",
-        message:
-          "Are you sure you want to clear all history items except for your favorites?",
+        message: "Are you sure you want to clear all history items except for your favorites?",
         primaryAction: {
           title: "Clear",
           style: Alert.ActionStyle.Destructive,

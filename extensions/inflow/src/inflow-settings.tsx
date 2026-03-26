@@ -12,17 +12,9 @@ import {
   Alert,
 } from "@raycast/api";
 import { useState, useRef, useEffect } from "react";
-import {
-  getStoredSettings,
-  saveStoredSettings,
-  StoredSettings,
-} from "./core/settings";
+import { getStoredSettings, saveStoredSettings, StoredSettings } from "./core/settings";
 import { getOnboardingCompleted, setOnboardingCompleted } from "./core/storage";
-import {
-  callCustomProvider,
-  fetchProviderModels,
-  AIModel,
-} from "./core/providers";
+import { callCustomProvider, fetchProviderModels, AIModel } from "./core/providers";
 import {
   DEFAULT_PROVIDER_ID,
   getProviderModelPlaceholder,
@@ -32,8 +24,8 @@ import {
   ProviderId,
 } from "./core/providerRegistry";
 import {
+  DEFAULT_LANGUAGE,
   SYSTEM_LANGUAGES,
-  getDefaultLanguageFromEnv,
   getLanguageDisplayLabel,
   normalizeStoredLanguageValue,
 } from "./core/languages";
@@ -54,8 +46,7 @@ function useDebounce<T>(value: T, delay: number): T {
 export default function SettingsCommand() {
   const [step, setStep] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasCompletedOnboarding, setHasCompletedOnboarding] =
-    useState<boolean>(false);
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
   const storedRef = useRef<StoredSettings | null>(null);
   const { pop } = useNavigation();
 
@@ -65,15 +56,12 @@ export default function SettingsCommand() {
   const [apiUrl, setApiUrl] = useState("");
   const [customInstructions, setCustomInstructions] = useState("");
   const [personalContext, setPersonalContext] = useState("");
-  const [defaultLanguage, setDefaultLanguage] = useState("");
-  const [expressionLanguage, setExpressionLanguage] = useState("English (US)");
-  const [editableTextHandling, setEditableTextHandling] =
-    useState<string>("panel");
+  const [defaultLanguage, setDefaultLanguage] = useState(DEFAULT_LANGUAGE);
+  const [expressionLanguage, setExpressionLanguage] = useState(DEFAULT_LANGUAGE);
+  const [editableTextHandling, setEditableTextHandling] = useState<string>("panel");
   const [fetchedModels, setFetchedModels] = useState<AIModel[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
-  const [modelSelectionMode, setModelSelectionMode] = useState<
-    "preset" | "custom"
-  >("preset");
+  const [modelSelectionMode, setModelSelectionMode] = useState<"preset" | "custom">("preset");
 
   useEffect(() => {
     async function loadSettings() {
@@ -86,30 +74,19 @@ export default function SettingsCommand() {
       const settings = await getStoredSettings();
       storedRef.current = settings;
 
-      const activeProvider = isProviderId(settings.aiProvider)
-        ? settings.aiProvider
-        : DEFAULT_PROVIDER_ID;
+      const activeProvider = isProviderId(settings.aiProvider) ? settings.aiProvider : DEFAULT_PROVIDER_ID;
       const activeConfig = settings.providers[activeProvider] || {};
       setProvider(activeProvider);
       setApiKey(activeConfig.apiKey || "");
       setModel(activeConfig.aiModel || "");
       setApiUrl(activeConfig.apiEndpoint || "");
-      setModelSelectionMode(
-        activeConfig.modelSelectionMode === "custom" ? "custom" : "preset",
-      );
+      setModelSelectionMode(activeConfig.modelSelectionMode === "custom" ? "custom" : "preset");
       setCustomInstructions(settings.customInstructions || "");
       setPersonalContext(settings.personalContext || "");
       setDefaultLanguage(
-        normalizeStoredLanguageValue(settings.defaultLanguage || "") ||
-          getDefaultLanguageFromEnv(
-            Intl.DateTimeFormat().resolvedOptions().locale,
-          ),
+        normalizeStoredLanguageValue(settings.defaultLanguage || DEFAULT_LANGUAGE) || DEFAULT_LANGUAGE,
       );
-      setExpressionLanguage(
-        normalizeStoredLanguageValue(
-          settings.expressionLanguage || "English (US)",
-        ),
-      );
+      setExpressionLanguage(normalizeStoredLanguageValue(settings.expressionLanguage || DEFAULT_LANGUAGE));
       setEditableTextHandling(settings.editableTextHandling || "panel");
       setIsLoading(false);
     }
@@ -147,19 +124,14 @@ export default function SettingsCommand() {
 
       setIsLoadingModels(true);
       try {
-        const models = await fetchProviderModels(
-          provider,
-          debouncedApiKey,
-          debouncedApiUrl,
-          abortController.signal,
-        );
+        const models = await fetchProviderModels(provider, debouncedApiKey, debouncedApiUrl, abortController.signal);
         if (isMounted) {
           setFetchedModels(models);
         }
-      } catch (err: any) {
-        if (err.name === "AbortError") return;
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") return;
         if (isMounted) {
-          console.error("Error loading models:", err);
+          console.error("Error loading models:", error);
           setFetchedModels([]);
         }
       } finally {
@@ -183,9 +155,7 @@ export default function SettingsCommand() {
     setApiKey(config.apiKey || "");
     setModel(config.aiModel || "");
     setApiUrl(config.apiEndpoint || "");
-    setModelSelectionMode(
-      config.modelSelectionMode === "custom" ? "custom" : "preset",
-    );
+    setModelSelectionMode(config.modelSelectionMode === "custom" ? "custom" : "preset");
   };
 
   const handleSubmit = async () => {
@@ -205,9 +175,7 @@ export default function SettingsCommand() {
       storedRef.current.personalContext = personalContext;
       storedRef.current.defaultLanguage = defaultLanguage;
       storedRef.current.expressionLanguage = expressionLanguage;
-      storedRef.current.editableTextHandling = editableTextHandling as
-        | "inline"
-        | "panel";
+      storedRef.current.editableTextHandling = editableTextHandling as "inline" | "panel";
 
       await saveStoredSettings(storedRef.current);
 
@@ -238,14 +206,7 @@ export default function SettingsCommand() {
     const start = Date.now();
 
     try {
-      await callCustomProvider(
-        "You are a helpful assistant.",
-        "Hi",
-        provider,
-        apiKey,
-        model,
-        apiUrl,
-      );
+      await callCustomProvider("You are a helpful assistant.", "Hi", provider, apiKey, model, apiUrl);
       const latency = Date.now() - start;
       toast.style = Toast.Style.Success;
       toast.title = "Connection Successful";
@@ -289,26 +250,18 @@ export default function SettingsCommand() {
   const isRaycast = provider === DEFAULT_PROVIDER_ID;
   const isCustom = provider === "custom";
 
-  const isSelectedModelCustom =
-    model !== "" &&
-    fetchedModels.length > 0 &&
-    !fetchedModels.some((m) => m.id === model);
-  const showCustomTextField =
-    modelSelectionMode === "custom" || isSelectedModelCustom;
+  const isSelectedModelCustom = model !== "" && fetchedModels.length > 0 && !fetchedModels.some((m) => m.id === model);
+  const showCustomTextField = modelSelectionMode === "custom" || isSelectedModelCustom;
   const dropdownModelValue = showCustomTextField ? "__custom__" : model;
 
   return (
     <Form
       isLoading={isLoadingModels}
-      navigationTitle={
-        hasCompletedOnboarding ? "Settings" : "Configuration (3/4)"
-      }
+      navigationTitle={hasCompletedOnboarding ? "Settings" : "Configuration (3/4)"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={
-              hasCompletedOnboarding ? "Save Settings" : "Save and Continue"
-            }
+            title={hasCompletedOnboarding ? "Save Settings" : "Save and Continue"}
             icon={Icon.Checkmark}
             onSubmit={handleSubmit}
           />
@@ -343,8 +296,7 @@ export default function SettingsCommand() {
                   if (
                     await confirmAlert({
                       title: "Clear All Settings",
-                      message:
-                        "Are you sure you want to clear all settings and history? This cannot be undone.",
+                      message: "Are you sure you want to clear all settings and history? This cannot be undone.",
                       primaryAction: {
                         title: "Clear",
                         style: Alert.ActionStyle.Destructive,
@@ -372,16 +324,8 @@ export default function SettingsCommand() {
         onChange={setEditableTextHandling}
         info="Choose how InFlow processes editable text. Inline Processing applies results directly in place with a HUD, while Panel Preview shows the AI panel with a live preview."
       >
-        <Form.Dropdown.Item
-          value="inline"
-          title="Inline Processing"
-          icon={getCommandIcon("inline.svg")}
-        />
-        <Form.Dropdown.Item
-          value="panel"
-          title="Panel Preview"
-          icon={getCommandIcon("panel.svg")}
-        />
+        <Form.Dropdown.Item value="inline" title="Inline Processing" icon={getCommandIcon("inline.svg")} />
+        <Form.Dropdown.Item value="panel" title="Panel Preview" icon={getCommandIcon("panel.svg")} />
       </Form.Dropdown>
 
       <Form.Separator />
@@ -427,11 +371,7 @@ export default function SettingsCommand() {
         title="AI Provider"
         value={provider}
         onChange={handleProviderChange}
-        info={
-          isCustom
-            ? "Use an OpenAI-compatible custom model provider."
-            : undefined
-        }
+        info={isCustom ? "Use an OpenAI-compatible custom model provider." : undefined}
       >
         {PROVIDER_REGISTRY.map((providerDefinition) => (
           <Form.Dropdown.Item
@@ -487,11 +427,7 @@ export default function SettingsCommand() {
                 }}
                 info="Select an available model fetched from your provider."
               >
-                <Form.Dropdown.Item
-                  value=""
-                  title="Select a model"
-                  icon={Icon.Cd}
-                />
+                <Form.Dropdown.Item value="" title="Select a model" icon={Icon.Cd} />
                 {fetchedModels.map((m) => (
                   <Form.Dropdown.Item
                     key={m.id}
