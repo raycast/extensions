@@ -12,8 +12,7 @@
     "kytta",
     "emilshr",
     "chingweih",
-    "nilleb",
-    "mittuled"
+    "nilleb"
   ],
   "scripts": {
     "build": "ray build",
