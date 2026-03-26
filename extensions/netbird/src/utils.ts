@@ -336,9 +336,10 @@ export async function netbirdUpdate(): Promise<{ version: string; updated: boole
 
   if (didUpgrade) {
     const bin = await getNetbirdBin();
+    const safeBin = bin.replace(/'/g, "'\\''");
     try {
       await execAsync(
-        `osascript -e 'do shell script "${bin} service uninstall && ${bin} service install && ${bin} service start" with administrator privileges'`,
+        `osascript -e 'do shell script "${safeBin} service uninstall && ${safeBin} service install && ${safeBin} service start" with administrator privileges'`,
       );
 
       // Wait for daemon to come back online
