@@ -9,7 +9,8 @@
     "pernielsentikaer",
     "escwxyz",
     "litomore",
-    "michalzuch"
+    "michalzuch",
+    "NirRosh"
   ],
   "categories": [
     "Applications",
@@ -58,6 +59,13 @@
       "name": "install-extension",
       "title": "Install Extension",
       "description": "Install Extensions from the Cursor Marketplace",
+      "mode": "view"
+    },
+    {
+      "name": "active-workspaces",
+      "title": "Show Active Workspaces",
+      "subtitle": "Cursor",
+      "description": "Show currently active Cursor windows and workspaces",
       "mode": "view"
     }
   ],

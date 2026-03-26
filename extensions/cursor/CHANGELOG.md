@@ -1,9 +1,5 @@
 # Cursor Documentation Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
-
-- Add "Show Active Workspaces" command to list and switch between open Cursor windows
-
 ## [Improvement] - 2024-09-19
 
 - Update project name for more lisibility with [cursor-recent-projects](https://www.raycast.com/degouville/cursor-recent-projects)

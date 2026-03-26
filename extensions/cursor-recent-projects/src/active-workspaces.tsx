@@ -4,12 +4,10 @@ import { useEffect, useState } from "react";
 import { basename } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
-import { execFile } from "child_process";
-import { promisify } from "util";
+import tildify from "tildify";
 import * as fs from "fs";
 import * as path from "path";
-
-const execFileAsync = promisify(execFile);
+import { execFilePromise } from "./utils/exec";
 
 const DB_PATH = `${homedir()}/Library/Application Support/Cursor/User/globalStorage/state.vscdb`;
 const RECENT_ENTRIES_QUERY =
@@ -21,11 +19,6 @@ interface CursorWindow {
   workspaceName: string;
   workspacePath: string | null;
   gitBranch: string | null;
-}
-
-function tildify(filePath: string): string {
-  const home = homedir();
-  return filePath.startsWith(home) ? filePath.replace(home, "~") : filePath;
 }
 
 function stripAppSuffix(title: string): string {
@@ -89,7 +82,7 @@ async function getGitBranch(directoryPath: string): Promise<string | null> {
   try {
     const gitDir = path.join(directoryPath, ".git");
     await fs.promises.access(gitDir);
-    const { stdout } = await execFileAsync("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
+    const { stdout } = await execFilePromise("git", ["rev-parse", "--abbrev-ref", "HEAD"], {
       cwd: directoryPath,
       encoding: "utf-8",
     });
@@ -103,7 +96,7 @@ async function getRecentEntriesMap(): Promise<Map<string, string>> {
   const map = new Map<string, string>();
   try {
     if (!fs.existsSync(DB_PATH)) return map;
-    const { stdout } = await execFileAsync("sqlite3", [DB_PATH, RECENT_ENTRIES_QUERY]);
+    const { stdout } = await execFilePromise("sqlite3", [DB_PATH, RECENT_ENTRIES_QUERY]);
     if (!stdout.trim()) return map;
     const entries = JSON.parse(stdout.trim());
     for (const entry of entries) {
@@ -143,7 +136,7 @@ function useActiveWindows() {
           const resolvedPath = recentEntries.get(win.workspaceName) ?? null;
           const gitBranch = resolvedPath ? await getGitBranch(resolvedPath) : null;
           return { ...win, workspacePath: resolvedPath, gitBranch };
-        })
+        }),
       );
       setWindows(enriched);
     } catch (error) {
