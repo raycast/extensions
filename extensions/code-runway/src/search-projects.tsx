@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon, showHUD, environment } from "@raycast/api";
+import { ActionPanel, Action, List, showToast, Toast, Icon, showHUD, environment, getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { Project, WarpTemplate } from "./types";
@@ -25,6 +25,10 @@ import { debugStorage } from "./debug-storage";
 import { debugTemplates, fixGhosttyTemplate } from "./debug-templates";
 import { templateEvents } from "./utils/templateEvents";
 
+interface Preferences {
+  enterAction: "default-template" | "choose-template";
+}
+
 const LAUNCH_DEDUP_MS = 1200;
 let lastLaunch: { projectPath: string; at: number } | null = null;
 
@@ -47,6 +51,7 @@ function getTemplateIcon(template: WarpTemplate): string | Icon | { fileIcon: st
 }
 
 export default function SearchProjects() {
+  const preferences = getPreferenceValues<Preferences>();
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -361,7 +366,20 @@ export default function SearchProjects() {
             ]}
             actions={
               <ActionPanel>
-                {orderedTemplates.length > 0 ? (
+                {preferences.enterAction === "choose-template" && orderedTemplates.length > 0 ? (
+                  <>
+                    <ActionPanel.Submenu title="Choose Launch Action" icon={Icon.AppWindowList}>
+                      {orderedTemplates.map((template) => (
+                        <Action
+                          key={template.id}
+                          title={getTemplateActionTitle(template)}
+                          icon={getTemplateIcon(template)}
+                          onAction={() => launchProject(project, template)}
+                        />
+                      ))}
+                    </ActionPanel.Submenu>
+                  </>
+                ) : orderedTemplates.length > 0 ? (
                   orderedTemplates.map((template) => (
                     <Action
                       key={template.id}
