@@ -121,7 +121,7 @@
       "name": "copilotAuthToken",
       "type": "password",
       "title": "Copilot Authorization Token (Optional)",
-      "description": "Optional fallback token. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN with read:user scope.",
+      "description": "Optional fallback OAuth token for Copilot usage. Usually auto-detected from GH_TOKEN or GITHUB_TOKEN (for example from 'gh auth token'). Standard PATs may not work.",
       "required": false
     },
     {

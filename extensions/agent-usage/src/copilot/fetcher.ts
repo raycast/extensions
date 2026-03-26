@@ -74,6 +74,9 @@ function deriveFromMonthlyAndLimited(monthly?: number | string, limited?: number
   const monthlyNum = toNumber(monthly);
   const limitedNum = toNumber(limited);
   if (!monthlyNum || monthlyNum <= 0 || limitedNum === null) return null;
+  // `limited_user_quotas` behaves like the remaining amount for the month, not the used amount.
+  // This matches CodexBar's Copilot model fallback, which derives percentRemaining from
+  // limited / monthly when `quota_snapshots` is missing.
   return clampPercent((limitedNum / monthlyNum) * 100);
 }
 

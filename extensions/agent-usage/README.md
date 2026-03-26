@@ -52,9 +52,10 @@ This works by comparing your stored account tokens with the keys configured in `
 
 ### Copilot Token
 
-1. Set `GH_TOKEN` or `GITHUB_TOKEN` with a GitHub token that has `read:user`
-2. If Raycast doesn't inherit your shell env, Agent Usage will resolve it from your login shell
-3. Optional fallback: paste a token in extension preferences (`Copilot Authorization Token`)
+1. Use a GitHub OAuth token that the Copilot internal API accepts, such as the token from `gh auth token`
+2. Standard personal access tokens may not work with `https://api.github.com/copilot_internal/user`
+3. Set that token in `GH_TOKEN` or `GITHUB_TOKEN`; if Raycast doesn't inherit shell env, Agent Usage will resolve it from your login shell
+4. Optional fallback: paste the same OAuth token in extension preferences (`Copilot Authorization Token`)
 
 ## Preferences
 
