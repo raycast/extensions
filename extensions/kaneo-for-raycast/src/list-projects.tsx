@@ -25,6 +25,8 @@ import {
   CopyProjectName,
   AssignTask,
   Revalidate,
+  SubTask,
+  ParentTask,
 } from "./shortcut";
 import { Project, Task, CreateProjectFormValues, CreateTaskFormValues, ProjectDetail } from "./types";
 import { KaneoAPI } from "./api/kaneo";
@@ -251,7 +253,16 @@ function TaskDetailView({
   const priorityRaw = task.priority || "no-priority";
   const priority = priorityRaw.charAt(0).toUpperCase() + priorityRaw.slice(1).replaceAll("-", " ");
 
-  const markdown = `# ${task.title}
+  const openTask = (taskId: string) => {
+    const webUrl = new URL(webInstanceUrl);
+    webUrl.pathname = `/dashboard/workspace/${workspaceId}/project/${projectId}/board`;
+    webUrl.searchParams.set("taskId", taskId);
+    return webUrl.toString();
+  };
+
+  const markdown = `
+  ${task.parentTasks.length > 0 ? `**Subtask of** ${task.parentTasks.map((parentTask) => `[${parentTask.title}](${openTask(parentTask.id)})`).join("\n")}\n\n` : ""}
+  # ${task.title}
 
 
 ## Description
@@ -277,12 +288,6 @@ ${task.assigneeName || "Unassigned"}
 ## Created At
 ${formatDate(task.createdAt)}
 `;
-
-  const openTask = () => {
-    const webUrl = new URL(webInstanceUrl);
-    webUrl.pathname = `/dashboard/workspace/${workspaceId}/project/${projectId}/task/${task.id}`;
-    return webUrl.toString();
-  };
 
   const handleStatusUpdate = async (taskId: string, newStatus: string, taskTitle: string) => {
     await onStatusUpdate(taskId, newStatus, taskTitle);
@@ -311,7 +316,49 @@ ${formatDate(task.createdAt)}
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask()} />
+          <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask(task.id)} />
+
+          {task.parentTasks.length > 0 && (
+            <Action.Push
+              title="Open Parent Task"
+              icon={Icon.Binoculars}
+              shortcut={ParentTask}
+              target={
+                <TaskDetailView
+                  taskId={task.parentTasks[0].id}
+                  projectId={projectId}
+                  columnStatuses={columnStatuses}
+                  columnPriorities={columnPriorities}
+                  onStatusUpdate={handleStatusUpdate}
+                  onPriorityUpdate={handlePriorityUpdate}
+                />
+              }
+              onPop={revalidate}
+            />
+          )}
+
+          {task.subTasks.length > 0 && (
+            <ActionPanel.Submenu title="Sub Tasks" icon={Icon.List} shortcut={SubTask}>
+              {task.subTasks.map((subTask) => (
+                <Action.Push
+                  key={subTask.id}
+                  title={subTask.title}
+                  icon={Icon.Binoculars}
+                  target={
+                    <TaskDetailView
+                      taskId={subTask.id}
+                      projectId={projectId}
+                      columnStatuses={columnStatuses}
+                      columnPriorities={columnPriorities}
+                      onStatusUpdate={handleStatusUpdate}
+                      onPriorityUpdate={handlePriorityUpdate}
+                    />
+                  }
+                  onPop={revalidate}
+                />
+              ))}
+            </ActionPanel.Submenu>
+          )}
 
           <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
             {columnStatuses
