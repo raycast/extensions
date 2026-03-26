@@ -64,6 +64,7 @@ export default function HistoryCommand() {
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       navigationTitle="Enhancement History"
       searchBarPlaceholder="Search generated text history"
       actions={
@@ -139,7 +140,7 @@ function HistoryDetail(props: { entry: HistoryEntry }) {
   return (
     <Detail
       navigationTitle="History Entry"
-      markdown={renderHistoryBodyMarkdown(entry)}
+      markdown={renderHistoryMarkdown(entry)}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
@@ -265,24 +266,6 @@ function getEnhancementTitle(entry: HistoryEntry) {
 }
 
 function renderHistoryMarkdown(entry: HistoryEntry) {
-  return [
-    `# ${getHistoryTitle(entry)}`,
-    "",
-    "## Original Draft",
-    "",
-    "```text",
-    entry.values.draft.replace(/```/g, "\\`\\`\\`"),
-    "```",
-    "",
-    "## Result",
-    "",
-    "```text",
-    entry.result.replace(/```/g, "\\`\\`\\`"),
-    "```",
-  ].join("\n");
-}
-
-function renderHistoryBodyMarkdown(entry: HistoryEntry) {
   return [
     `# ${getHistoryTitle(entry)}`,
     "",

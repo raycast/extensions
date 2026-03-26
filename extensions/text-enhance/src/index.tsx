@@ -39,16 +39,6 @@ type GenerationSession = {
   result: string;
 };
 
-type ExtensionPreferences = {
-  defaultPurpose?: PurposeId;
-  defaultEnhancement?: EnhancementId;
-  defaultTone?: ToneId;
-  defaultModel?: ModelId;
-  defaultCreativity?: CreativityId;
-  defaultExtraInstruction?: string;
-  autoCopyResult?: boolean;
-};
-
 const PURPOSES = [
   { id: "general", title: "Plain Text", prompt: "plain general-purpose text" },
   { id: "email", title: "Email", prompt: "a polished email" },
@@ -380,7 +370,7 @@ const CREATIVITY_LEVELS = [
 ] as const;
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const defaultValues = getDefaultFormValues(preferences);
 
   const [values, setValues] = useState<FormValues>(defaultValues);
@@ -546,11 +536,7 @@ export default function Command() {
     const trimmedName = name.trim();
 
     if (!trimmedName) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Preset name is required",
-      });
-      return;
+      return false;
     }
 
     const nextPreset: SavedPreset = {
@@ -573,6 +559,7 @@ export default function Command() {
       title: "Preset saved",
       message: `Saved "${trimmedName}".`,
     });
+    return true;
   }
 
   async function deleteSelectedPreset() {
@@ -985,8 +972,9 @@ export default function Command() {
   );
 }
 
-function SavePresetForm(props: { onSave: (name: string) => Promise<void> }) {
+function SavePresetForm(props: { onSave: (name: string) => Promise<boolean> }) {
   const [name, setName] = useState("");
+  const [nameError, setNameError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
   const { pop } = useNavigation();
 
@@ -1000,10 +988,20 @@ function SavePresetForm(props: { onSave: (name: string) => Promise<void> }) {
             title="Save Preset"
             icon={Icon.SaveDocument}
             onSubmit={async () => {
+              const trimmedName = name.trim();
+
+              if (!trimmedName) {
+                setNameError("Preset name is required");
+                return false;
+              }
+
               setIsSaving(true);
               try {
-                await props.onSave(name);
-                pop();
+                const didSave = await props.onSave(trimmedName);
+                if (didSave) {
+                  pop();
+                }
+                return didSave;
               } finally {
                 setIsSaving(false);
               }
@@ -1017,7 +1015,13 @@ function SavePresetForm(props: { onSave: (name: string) => Promise<void> }) {
         title="Preset Name"
         placeholder="Example: Warm Client Email"
         value={name}
-        onChange={setName}
+        error={nameError}
+        onChange={(value) => {
+          setName(value);
+          if (nameError && value.trim()) {
+            setNameError(undefined);
+          }
+        }}
       />
     </Form>
   );
@@ -1044,18 +1048,17 @@ function buildPrompt(
     "Return only the final rewritten text with no explanation, no bullets, and no quotation marks around it.",
   ];
 
-  if (values.customPrompt.trim()) {
-    instructions.push(`Extra instruction: ${values.customPrompt.trim()}`);
-  }
-
   if (correction?.trim()) {
     instructions.push(`Follow-up correction: ${correction.trim()}`);
   }
 
-  const sections = [
-    instructions.join("\n"),
-    `Original draft:\n${values.draft.trim()}`,
-  ];
+  const sections = [instructions.join("\n")];
+
+  if (values.customPrompt.trim()) {
+    sections.push(`Additional user guidance:\n${values.customPrompt.trim()}`);
+  }
+
+  sections.push(`Original draft:\n${values.draft.trim()}`);
 
   if (previousResult?.trim()) {
     sections.push(`Previous enhanced version:\n${previousResult.trim()}`);
@@ -1237,7 +1240,7 @@ function extractRememberedSettings(values: FormValues): RememberedSettings {
   };
 }
 
-function getDefaultFormValues(preferences: ExtensionPreferences): FormValues {
+function getDefaultFormValues(preferences: Preferences): FormValues {
   return {
     draft: "",
     purpose: preferences.defaultPurpose ?? "general",
