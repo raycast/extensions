@@ -3,6 +3,7 @@
 ## [1.2.0] - {PR_MERGE_DATE}
 
 - Fixed video call URLs losing query parameters (e.g. Zoom password)
+- Fixed command subtitle showing meetings beyond today/tomorrow scope
 
 ## [1.1.0] - {PR_MERGE_DATE}
 

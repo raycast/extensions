@@ -1,13 +1,20 @@
 import { updateCommandMetadata } from "@raycast/api";
 
-import { fetchEvents, formatTimeUntil, parseEvents, writeCache } from "./get-next-event";
+import {
+  fetchEvents,
+  filterTodayOrTomorrow,
+  formatTimeUntil,
+  isEventPast,
+  parseEvents,
+  writeCache,
+} from "./get-next-event";
 
 export default async function RefreshCache() {
   try {
     const raw = fetchEvents();
     writeCache(raw);
 
-    const events = parseEvents(raw);
+    const events = filterTodayOrTomorrow(parseEvents(raw).filter((e) => !isEventPast(e)));
     const next = events.find((e) => !e.isAllDay) ?? events[0];
     if (next && !next.isAllDay) {
       const timeStr = formatTimeUntil(next.startTimestamp, next.endTimestamp);

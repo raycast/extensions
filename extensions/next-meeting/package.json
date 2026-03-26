@@ -15,7 +15,7 @@
       "mode": "view",
       "icon": "command-icon.png"
     },
-{
+    {
       "name": "refresh-cache",
       "title": "Refresh Calendar Cache",
       "description": "Background refresh of calendar data",
