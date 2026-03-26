@@ -56,11 +56,6 @@ export function StockListItem({
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Google Finance" url={googleFinanceUrl} />
-          <Action
-            title={isShowingDetail ? "Switch to List View" : "Switch to Detail View"}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-            onAction={onToggleDetailView}
-          />
           {isFavorite ? (
             <Action
               title="Remove from Favorites"
@@ -88,6 +83,11 @@ export function StockListItem({
               onAction={onMoveDown}
             />
           )}
+          <Action
+            title={isShowingDetail ? "Switch to List View" : "Switch to Detail View"}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={onToggleDetailView}
+          />
         </ActionPanel>
       }
     />

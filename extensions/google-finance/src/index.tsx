@@ -38,7 +38,7 @@ export default function Command() {
   useEffect(() => {
     async function loadDetailViewPreference() {
       const storedValue = await LocalStorage.getItem<string>("is-showing-detail-view");
-      if (storedValue === null) {
+      if (storedValue == null) {
         return;
       }
 
