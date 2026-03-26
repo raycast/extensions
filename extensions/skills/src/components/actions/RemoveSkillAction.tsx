@@ -43,7 +43,10 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
   }
 
   async function handleSubmit() {
-    if (selected.size === 0) return;
+    if (selected.size === 0) {
+      await showToast({ style: Toast.Style.Failure, title: "Select at least one agent" });
+      return;
+    }
 
     const agents = [...selected];
     const isAll = agents.length === skill.agents.length;
