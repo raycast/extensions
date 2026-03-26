@@ -1,4 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
+
 import { graphqlRequest } from "../api/client";
 import { SEARCH_TASKS_ALL_QUERY, SEARCH_TASKS_QUERY } from "../api/queries";
 import type { TaskRecord } from "../api/types";
@@ -11,29 +12,42 @@ interface SearchTasksQueryData {
   };
 }
 
-async function searchTasks(workspaceId: string, search: string): Promise<TaskRecord[]> {
+const searchTasks = async (
+  workspaceId: string,
+  search: string
+): Promise<TaskRecord[]> => {
   const data = await graphqlRequest<SearchTasksQueryData>(SEARCH_TASKS_QUERY, {
-    first: 50,
     after: null,
+    first: 50,
+    search,
     workspaceId,
-    search,
   });
 
   return data.tasks.nodes;
-}
+};
 
-async function searchTasksAll(workspaceIds: string[], search: string): Promise<TaskRecord[]> {
-  const data = await graphqlRequest<SearchTasksQueryData>(SEARCH_TASKS_ALL_QUERY, {
-    first: 50,
-    after: null,
-    workspaceIds,
-    search,
-  });
+const searchTasksAll = async (
+  workspaceIds: string[],
+  search: string
+): Promise<TaskRecord[]> => {
+  const data = await graphqlRequest<SearchTasksQueryData>(
+    SEARCH_TASKS_ALL_QUERY,
+    {
+      after: null,
+      first: 50,
+      search,
+      workspaceIds,
+    }
+  );
 
   return data.tasks.nodes;
-}
+};
 
-export function useSearchTasks(workspaceId: string | null, searchText: string, allWorkspaceIds?: string[]) {
+export const useSearchTasks = (
+  workspaceId: string | null,
+  searchText: string,
+  allWorkspaceIds?: string[]
+) => {
   const { isAll, cacheKey } = resolveAllScope(workspaceId, allWorkspaceIds);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -45,9 +59,12 @@ export function useSearchTasks(workspaceId: string | null, searchText: string, a
     },
     [cacheKey, searchText],
     {
-      execute: !!workspaceId && searchText.length > 0 && (isAll || workspaceId !== ALL_WORKSPACES_ID),
-    },
+      execute:
+        !!workspaceId &&
+        searchText.length > 0 &&
+        (isAll || workspaceId !== ALL_WORKSPACES_ID),
+    }
   );
 
-  return { tasks: data || [], isLoading, error, revalidate };
-}
+  return { error, isLoading, revalidate, tasks: data || [] };
+};

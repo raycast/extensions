@@ -1,6 +1,15 @@
-import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { useForm, withAccessToken } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
+import { useCallback, useState } from "react";
+
 import { createProject } from "./api/mutations";
 import { dateOnlyEpochFromLocalDate } from "./helpers/date-codecs";
 import { ALL_WORKSPACES_ID, useWorkspaces } from "./hooks/use-workspaces";
@@ -11,34 +20,39 @@ interface FormValues {
   key: string;
   description: string;
   targetDate: Date | null;
-  workspaceId: string;
+  workspaceId?: string;
 }
 
-function CreateProject() {
-  const { workspaces, workspaceId: selectedWorkspaceId, isLoading: isLoadingWorkspace } = useWorkspaces();
+const CreateProject = () => {
+  const {
+    workspaces,
+    workspaceId: selectedWorkspaceId,
+    isLoading: isLoadingWorkspace,
+  } = useWorkspaces();
   const isAll = selectedWorkspaceId === ALL_WORKSPACES_ID;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
-    initialValues: {
-      name: "",
-      key: "",
-      description: "",
-      targetDate: null,
-      workspaceId: "",
-    },
-    validation: {
-      name: (value) => (!value?.trim() ? "Name is required" : undefined),
-      key: (value) => (!value?.trim() ? "Key is required" : undefined),
-      workspaceId: (value) => {
-        if (isAll && workspaces.length > 1 && !value?.trim()) {
-          return "Workspace is required";
-        }
-        return undefined;
-      },
-    },
-    async onSubmit(values) {
-      const targetWorkspaceId = isAll ? values.workspaceId || workspaces[0]?.id : selectedWorkspaceId;
+  const handleSubmit = useCallback(
+    async (values: FormValues): Promise<void> => {
+      if (!values.name.trim()) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Name is required",
+        });
+        return;
+      }
+
+      if (!values.key.trim()) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Key is required",
+        });
+        return;
+      }
+
+      const targetWorkspaceId = isAll
+        ? values.workspaceId || workspaces[0]?.id
+        : selectedWorkspaceId;
 
       if (!targetWorkspaceId) {
         await showToast({
@@ -51,47 +65,63 @@ function CreateProject() {
       setIsSubmitting(true);
       try {
         await createProject(targetWorkspaceId, {
-          name: values.name.trim(),
-          key: values.key.trim().toUpperCase(),
           description: values.description?.trim() || undefined,
-          targetDate: values.targetDate ? dateOnlyEpochFromLocalDate(values.targetDate) : undefined,
+          key: values.key.trim().toUpperCase(),
+          name: values.name.trim(),
+          targetDate: values.targetDate
+            ? dateOnlyEpochFromLocalDate(values.targetDate)
+            : undefined,
         });
-        await showToast({ style: Toast.Style.Success, title: "Project created" });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Project created",
+        });
         await popToRoot();
       } catch (error) {
         await showToast({
+          message: error instanceof Error ? error.message : "Unknown error",
           style: Toast.Style.Failure,
           title: "Failed to create project",
-          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsSubmitting(false);
       }
     },
-  });
-
-  useEffect(() => {
-    if (!isAll || !workspaces[0]?.id) {
-      return;
-    }
-    setValue("workspaceId", (current) => current || workspaces[0]!.id);
-  }, [isAll, workspaces, setValue]);
+    [isAll, workspaces, selectedWorkspaceId]
+  );
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} title="Create Project" />
+          <Action.SubmitForm
+            icon={Icon.Plus}
+            onSubmit={handleSubmit}
+            title="Create Project"
+          />
         </ActionPanel>
       }
       isLoading={isLoadingWorkspace || isSubmitting}
     >
-      <Form.TextField autoFocus placeholder="Project name..." title="Name" {...itemProps.name} />
-      <Form.TextField placeholder="PROJECT" title="Key" {...itemProps.key} />
-      <Form.TextArea placeholder="Project description..." title="Description" {...itemProps.description} />
-      <Form.DatePicker title="Target Date" {...itemProps.targetDate} />
+      <Form.TextField
+        autoFocus
+        id="name"
+        placeholder="Project name..."
+        title="Name"
+      />
+      <Form.TextField id="key" placeholder="PROJECT" title="Key" />
+      <Form.TextArea
+        id="description"
+        placeholder="Project description..."
+        title="Description"
+      />
+      <Form.DatePicker id="targetDate" title="Target Date" />
       {isAll && workspaces.length > 1 && (
-        <Form.Dropdown title="Workspace" {...itemProps.workspaceId}>
+        <Form.Dropdown
+          defaultValue={workspaces[0]?.id}
+          id="workspaceId"
+          title="Workspace"
+        >
           {workspaces.map((w) => (
             <Form.Dropdown.Item key={w.id} title={w.name} value={w.id} />
           ))}
@@ -99,6 +129,6 @@ function CreateProject() {
       )}
     </Form>
   );
-}
+};
 
 export default withAccessToken(oauthService)(CreateProject);

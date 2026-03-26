@@ -3,84 +3,94 @@ import { todayDateOnlyEpoch, tomorrowDateOnlyEpoch } from "./date-codecs";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-function startOfDayEpoch(now: Date): number {
+const startOfDayEpoch = (now: Date): number => {
   const start = new Date(now);
   start.setHours(0, 0, 0, 0);
   return start.getTime();
-}
+};
 
-function toEpoch(value: string | null | undefined): number | null {
+const toEpoch = (value: string | null | undefined): number | null => {
   if (!value) {
     return null;
   }
   const ms = Date.parse(value);
   return Number.isNaN(ms) ? null : ms;
-}
+};
 
-function hasDeadlineOnDay(task: TaskRecord, dayStart: number, dayEnd: number): boolean {
+const hasDeadlineOnDay = (
+  task: TaskRecord,
+  dayStart: number,
+  dayEnd: number
+): boolean => {
   const deadlineAt = toEpoch(task.deadlineAt);
   return deadlineAt !== null && deadlineAt >= dayStart && deadlineAt < dayEnd;
-}
+};
 
-export function buildTaskStartFields(
+export const buildTaskStartFields = (
   view: TaskView,
-  now = new Date(),
+  now = new Date()
 ): {
   start: string;
   startBucket: string;
   startDate: number | null;
   todayIndexReferenceDate: number | null;
-} {
+} => {
   const today = todayDateOnlyEpoch(now);
   const tomorrow = tomorrowDateOnlyEpoch(now);
 
   switch (view) {
-    case "inbox":
+    case "inbox": {
       return {
         start: "not_started",
         startBucket: "today",
         startDate: null,
         todayIndexReferenceDate: null,
       };
-    case "anytime":
+    }
+    case "anytime": {
       return {
         start: "started",
         startBucket: "today",
         startDate: null,
         todayIndexReferenceDate: null,
       };
-    case "today":
+    }
+    case "today": {
       return {
         start: "started",
         startBucket: "today",
         startDate: today,
         todayIndexReferenceDate: today,
       };
-    case "upcoming":
+    }
+    case "upcoming": {
       return {
         start: "started",
         startBucket: "upcoming",
         startDate: tomorrow,
         todayIndexReferenceDate: null,
       };
-    case "someday":
+    }
+    case "someday": {
       return {
         start: "someday",
         startBucket: "today",
         startDate: null,
         todayIndexReferenceDate: null,
       };
-    default:
+    }
+    default: {
       return {
         start: "not_started",
         startBucket: "today",
         startDate: null,
         todayIndexReferenceDate: null,
       };
+    }
   }
-}
+};
 
-export function getTaskState(task: TaskRecord): TaskState {
+export const getTaskState = (task: TaskRecord): TaskState => {
   if (task.archivedAt !== null) {
     return "archived";
   }
@@ -88,23 +98,27 @@ export function getTaskState(task: TaskRecord): TaskState {
     return "done";
   }
   return "open";
-}
+};
 
 /**
  * Determine which view a task belongs to.
  * Matches the frontend logic in manage-frontend/lib/tasks/task-status.ts
  */
-function getTaskView(task: TaskRecord, now = new Date()): TaskView | null {
+const getTaskView = (task: TaskRecord, now = new Date()): TaskView | null => {
+  // Repeat templates are hidden from normal views (they generate instances)
+  if (task.repeatRule !== null && task.repeatTemplateId === null) {
+    return null;
+  }
+
   if (task.archivedAt !== null) {
     return null;
   }
   if (task.completedAt !== null) {
-    return null;
+    return "logbook";
   }
 
-  const start = task.start;
+  const { start } = task;
   const startDate = toEpoch(task.startDate);
-  const startBucket = (task.startBucket || "").trim().toLowerCase();
 
   const todayStart = startOfDayEpoch(now);
   const tomorrow = todayStart + DAY_MS;
@@ -128,22 +142,18 @@ function getTaskView(task: TaskRecord, now = new Date()): TaskView | null {
     return deadlineToday ? "today" : "anytime";
   }
 
-  // Check if scheduled for today
-  const isTodayBucket = startBucket === "today" || startBucket === "evening";
-  const scheduledForToday = startDate < tomorrow && isTodayBucket;
-
-  if (scheduledForToday || deadlineToday) {
+  // Tasks with today's (or past) start date appear in Today (Things 3 pattern)
+  if (startDate < tomorrow || deadlineToday) {
     return "today";
   }
 
   return "upcoming";
-}
+};
 
-export function matchesView(task: TaskRecord, view: TaskView): boolean {
-  return getTaskView(task) === view;
-}
+export const matchesView = (task: TaskRecord, view: TaskView): boolean =>
+  getTaskView(task) === view;
 
-export function formatDate(isoDate: string | null | undefined): string {
+export const formatDate = (isoDate: string | null | undefined): string => {
   if (!isoDate) {
     return "";
   }
@@ -152,15 +162,15 @@ export function formatDate(isoDate: string | null | undefined): string {
     return "";
   }
   return date.toLocaleDateString("en-US", {
-    month: "short",
     day: "numeric",
+    month: "short",
     year: "numeric",
   });
-}
+};
 
-export function isOverdue(task: TaskRecord): boolean {
+export const isOverdue = (task: TaskRecord): boolean => {
   if (!task.deadlineAt || task.completedAt || task.archivedAt) {
     return false;
   }
   return new Date(task.deadlineAt) < new Date();
-}
+};
