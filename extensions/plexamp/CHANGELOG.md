@@ -1,5 +1,12 @@
 # Plexamp CHANGELOG
 
+## [Album Grid View] - 2026-03-26
+
+- Added a toggleable Grid view for artist album pages showing album art in a square grid with release year subtitles.
+- Added release type grouping in Grid view: albums are organized into sections (Albums, EPs, Singles, Compilations, Live, Demos, Remixes) sorted by release year descending.
+- Added Grid/List toggle action (`Cmd+Shift+V`) with the preference persisted across sessions.
+- Added the `Album View Grid Columns` extension preference to configure grid columns (3-6, default 4).
+
 ## [Large Library Performance Fixes] - 2026-03-25
 
 - Fixed "JS heap out of memory" crashes when browsing large music libraries by paginating all Plex API requests so no single XML response can exceed the Raycast worker memory limit.
