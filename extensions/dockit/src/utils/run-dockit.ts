@@ -1,10 +1,6 @@
 import { execFile, execSync } from "child_process";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  pythonPath: string;
-}
-
 export interface DockitResult {
   success: boolean;
   output: Record<string, unknown>;
@@ -17,7 +13,7 @@ export interface DockitResult {
  * Resolves (never rejects) with a DockitResult indicating success/failure.
  */
 export async function runDockit(args: string[]): Promise<DockitResult> {
-  const { pythonPath } = getPreferenceValues<Preferences>();
+  const { pythonPath } = getPreferenceValues<ExtensionPreferences>();
   const python = pythonPath || "/usr/local/bin/python3";
 
   return new Promise((resolve) => {
