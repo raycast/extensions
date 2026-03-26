@@ -47,7 +47,7 @@ function parseKiBPerSecond(value: string): number | undefined {
 }
 
 export default function AddTorrents() {
-  const { address, username, password, redirectAfterAdding } = getPreferenceValues();
+  const { address, username, password, redirectAfterAdding } = getPreferenceValues<Preferences.AddTorrents>();
   const qbit = useMemo(() => {
     return new QBittorrent({
       baseUrl: address,
@@ -139,11 +139,10 @@ export default function AddTorrents() {
       .split(/\r?\n/)
       .map((url) => url.trim())
       .filter(Boolean);
-    const localTorrents = await Promise.all(torrentPaths.map((path) => readFile(path)));
     const parsedDownloadLimit = parseKiBPerSecond(dlLimit);
     const parsedUploadLimit = parseKiBPerSecond(upLimit);
 
-    if (!localTorrents.length && !urls.length) {
+    if (!torrentPaths.length && !urls.length) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to submit torrents",
@@ -193,6 +192,8 @@ export default function AddTorrents() {
     }
 
     try {
+      const localTorrents = await Promise.all(torrentPaths.map((path) => readFile(path)));
+
       await qbit.login();
 
       await Promise.all(

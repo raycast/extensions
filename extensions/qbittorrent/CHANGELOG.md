@@ -1,6 +1,6 @@
 # qBittorrent Changelog
 
-## [Update] - 2026-03-26
+## [Update] - {PR_MERGE_DATE}
 
 - Replaced the torrent file tag picker with a real file picker that supports Finder prefill and manual browsing
 - Synced the add form's save path with the selected qBittorrent category

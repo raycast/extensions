@@ -254,8 +254,8 @@ export default function Torrents() {
             accessories={[
               formatSizeAccessory(torrent),
               ...(tagsAccessory ? [tagsAccessory] : []),
-              formatSpeedAccessory("Download", torrent.dlspeed, Color.Blue, Icon.Download),
-              formatSpeedAccessory("Upload", torrent.upspeed, Color.Green, Icon.Upload),
+              formatSpeedAccessory("Download", torrent.dlspeed, Color.Green, Icon.Download),
+              formatSpeedAccessory("Upload", torrent.upspeed, Color.Blue, Icon.Upload),
             ]}
             actions={
               <ActionPanel>
