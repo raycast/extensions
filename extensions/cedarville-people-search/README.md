@@ -1,4 +1,4 @@
-# Cedarville People Search
+# Cedarville People Search Raycast Extension
 
 ![detail of a user](./media/cedarstalk-1.png)
 
