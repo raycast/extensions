@@ -2,14 +2,10 @@ import { showHUD, showToast, Toast, open, LaunchProps } from "@raycast/api";
 import { runDockit, getFinderSelection } from "./utils/run-dockit";
 import path from "path";
 
-interface ConvertArguments {
-  format: string;
-}
-
 const SUPPORTED_INPUT_EXTENSIONS = [".xlsx", ".xls", ".csv", ".txt"];
 
 export default async function Command(
-  props: LaunchProps<{ arguments: ConvertArguments }>,
+  props: LaunchProps<{ arguments: Arguments.ConvertFormat }>,
 ) {
   const targetFormat = props.arguments.format;
 
