@@ -81,10 +81,9 @@ export function useSearchRepositories(opts: { searchQuery?: string; organization
         } catch (error) {
           // If some orgs require SAML, the query may return partial data alongside errors.
           if (error instanceof GraphqlResponseError) {
-            const nodes =
-              (error.data?.viewer?.repositoriesContributedTo?.nodes ?? []).filter(
-                (node: RepositoryNode | null) => node != null,
-              );
+            const nodes = (error.data?.viewer?.repositoriesContributedTo?.nodes ?? []).filter(
+              (node: RepositoryNode | null) => node != null,
+            );
             return { nodes: nodes as RepositoryNode[] };
           }
           throw error;
