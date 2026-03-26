@@ -94,6 +94,20 @@
       ]
     },
     {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Album View Grid Columns",
+      "default": "4",
+      "description": "Number of columns in album grid view.",
+      "data": [
+        { "title": "3", "value": "3" },
+        { "title": "4", "value": "4" },
+        { "title": "5", "value": "5" },
+        { "title": "6", "value": "6" }
+      ]
+    },
+    {
       "name": "menuBarFormat",
       "type": "textfield",
       "required": false,
