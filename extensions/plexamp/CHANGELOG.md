@@ -1,6 +1,6 @@
 # Plexamp CHANGELOG
 
-## [Album Grid View] - 2026-03-26
+## [Album Grid View] - {PR_MERGE_DATE}
 
 - Added a toggleable Grid view for artist album pages showing album art in a square grid with release year subtitles.
 - Added release type grouping in Grid view: albums are organized into sections (Albums, EPs, Singles, Compilations, Live, Demos, Remixes) sorted by release year descending.
