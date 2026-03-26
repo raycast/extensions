@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { ReactNode, useCallback, useEffect, useState } from "react";
-import { AuthStatus, resolveAuthStatus, signInWithCodexAuth } from "../utils/auth";
+import { AuthStatus, getInitialAuthStatus, resolveAuthStatus, signInWithCodexAuth } from "../utils/auth";
 import { getErrorMessage } from "../utils/error";
 
 interface AuthRequiredViewProps {
@@ -22,25 +22,28 @@ export function AuthGate({
   description,
   allowChatGPTSignIn = true,
 }: AuthGateProps) {
-  const [isLoading, setLoading] = useState(true);
-  const [auth, setAuth] = useState<AuthStatus | null>(null);
+  const [auth, setAuth] = useState<AuthStatus>(() => getInitialAuthStatus());
+  const [isLoading, setLoading] = useState<boolean>(() => !getInitialAuthStatus().hasApiKey);
 
-  const refreshAuth = useCallback(async () => {
-    setLoading(true);
+  const refreshAuth = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setLoading(true);
+    }
+
     const status = await resolveAuthStatus();
     setAuth(status);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    refreshAuth();
+    refreshAuth(false);
   }, [refreshAuth]);
 
   if (isLoading) {
     return <List isLoading={true} />;
   }
 
-  const hasAccess = requireApiKey ? !!auth?.hasApiKey : auth?.provider !== "none";
+  const hasAccess = requireApiKey ? auth.hasApiKey : auth.provider !== "none";
 
   if (!hasAccess) {
     return (
@@ -48,7 +51,7 @@ export function AuthGate({
         title={title}
         description={description}
         allowChatGPTSignIn={requireApiKey ? false : allowChatGPTSignIn}
-        onAuthChange={refreshAuth}
+        onAuthChange={() => refreshAuth(true)}
       />
     );
   }

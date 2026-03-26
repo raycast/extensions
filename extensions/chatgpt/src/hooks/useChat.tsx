@@ -4,8 +4,8 @@ import say from "say";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Message, Model } from "../type";
 import { buildUserMessage, chatTransformer } from "../utils";
-import { requestCodexResponse } from "../utils/codex-responses";
-import { resolveAuthStatus } from "../utils/auth";
+import { isCodexUnauthorizedError, requestCodexResponse } from "../utils/codex-responses";
+import { getCodexAuthSessionWithRefresh, refreshCodexAuthSession, resolveAuthStatus } from "../utils/auth";
 import { resolveModelOptionForAuth } from "../utils/model-support";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
@@ -119,24 +119,47 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
         toast.message = `Using ${modelOption} for ChatGPT sign-in.`;
       }
 
-      if (auth.provider === "chatgpt" && auth.session) {
-        const answer = await requestCodexResponse({
-          accessToken: auth.session.accessToken,
-          accountId: auth.session.accountId,
-          model: modelOption,
-          messages,
-          instructions: model.prompt,
-          stream: useStream,
-          signal: abortSignal,
-          httpAgent: proxy,
-          onDelta: (content) => {
-            if (!content) {
-              return;
-            }
-            chat.answer += content;
-            setStreamData({ ...chat, answer: chat.answer });
-          },
-        });
+      if (auth.provider === "chatgpt") {
+        const onDelta = (content: string) => {
+          if (!content) {
+            return;
+          }
+          chat.answer += content;
+          setStreamData({ ...chat, answer: chat.answer });
+        };
+
+        const runCodexRequest = async (session: { accessToken: string; accountId: string }) => {
+          return requestCodexResponse({
+            accessToken: session.accessToken,
+            accountId: session.accountId,
+            model: modelOption,
+            messages,
+            instructions: model.prompt,
+            stream: useStream,
+            signal: abortSignal,
+            httpAgent: proxy,
+            onDelta,
+          });
+        };
+
+        const session = await getCodexAuthSessionWithRefresh();
+        if (!session) {
+          throw new Error("You are not signed in. Add an API key in extension preferences or sign in with ChatGPT.");
+        }
+
+        let answer: string;
+
+        try {
+          answer = await runCodexRequest(session);
+        } catch (error) {
+          if (!isCodexUnauthorizedError(error)) {
+            throw error;
+          }
+
+          const refreshedSession = await refreshCodexAuthSession(session);
+          toast.message = "ChatGPT session refreshed. Retrying request...";
+          answer = await runCodexRequest(refreshedSession);
+        }
 
         chat = { ...chat, answer };
 

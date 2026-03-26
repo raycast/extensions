@@ -67,28 +67,38 @@ export function useCommand(): CommandHook {
         (await LocalStorage.getItem<string>(COMMANDS_STORAGE_KEY)) || "{}",
       );
 
+      let hydratedCommands: Record<string, Command>;
+      let shouldPersistHydratedCommands = false;
+
       if (Object.keys(storedCommands).length === 0) {
-        setData(DEFAULT_COMMANDS);
-        Object.values(DEFAULT_COMMANDS).forEach((cmd) => {
-          addModel(mapCommandToModel(cmd));
-        });
+        hydratedCommands = { ...DEFAULT_COMMANDS };
+        shouldPersistHydratedCommands = true;
       } else {
         const allCommands: Record<string, Command> = { ...storedCommands };
         Object.keys(DEFAULT_COMMANDS).forEach((defaultKey) => {
           if (!storedCommands[defaultKey]) {
             allCommands[defaultKey] = DEFAULT_COMMANDS[defaultKey];
+            shouldPersistHydratedCommands = true;
           }
 
           const storedCommand = allCommands[defaultKey];
           if (storedCommand?.model === "gpt-4o-mini") {
             allCommands[defaultKey] = { ...storedCommand, model: "gpt-5.2" };
+            shouldPersistHydratedCommands = true;
           }
         });
-        setData(allCommands);
-        Object.values(allCommands).forEach((cmd) => {
-          addModel(mapCommandToModel(cmd));
-        });
+        hydratedCommands = allCommands;
       }
+
+      setData(hydratedCommands);
+      Object.values(hydratedCommands).forEach((cmd) => {
+        addModel(mapCommandToModel(cmd));
+      });
+
+      if (shouldPersistHydratedCommands) {
+        await LocalStorage.setItem(COMMANDS_STORAGE_KEY, JSON.stringify(hydratedCommands));
+      }
+
       setLoading(false);
       isInitialMount.current = false;
     })();

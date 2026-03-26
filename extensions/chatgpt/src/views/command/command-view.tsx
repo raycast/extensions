@@ -18,7 +18,7 @@ import { PrimaryAction } from "../../actions";
 import { Command, ChatHook } from "../../type";
 import { fetchContent } from "../../utils/cmd-input";
 import { getAppIconPath } from "../../utils/icon";
-import { resolveAuthStatus } from "../../utils/auth";
+import { getInitialAuthStatus, resolveAuthStatus } from "../../utils/auth";
 import { resolveModelOptionForAuth } from "../../utils/model-support";
 import Ask from "../../ask";
 import { v4 as uuidv4 } from "uuid";
@@ -29,18 +29,21 @@ type CommandLaunchContext = { commandId?: string };
 export type CommandLaunchProps = LaunchProps<{ launchContext?: CommandLaunchContext }>;
 
 export default function CommandView(props: CommandLaunchProps) {
-  const [isAuthLoading, setAuthLoading] = useState(true);
-  const [hasAuth, setHasAuth] = useState(false);
+  const [hasAuth, setHasAuth] = useState<boolean>(() => getInitialAuthStatus().provider !== "none");
+  const [isAuthLoading, setAuthLoading] = useState<boolean>(() => getInitialAuthStatus().provider === "none");
 
-  const refreshAuth = useCallback(async () => {
-    setAuthLoading(true);
+  const refreshAuth = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setAuthLoading(true);
+    }
+
     const status = await resolveAuthStatus();
     setHasAuth(status.provider !== "none");
     setAuthLoading(false);
   }, []);
 
   useEffect(() => {
-    refreshAuth();
+    refreshAuth(false);
   }, [refreshAuth]);
 
   if (isAuthLoading) {
@@ -48,7 +51,7 @@ export default function CommandView(props: CommandLaunchProps) {
   }
 
   if (!hasAuth) {
-    return <AuthRequiredView onAuthChange={refreshAuth} />;
+    return <AuthRequiredView onAuthChange={() => refreshAuth(true)} />;
   }
 
   return <AuthenticatedCommandView {...props} />;

@@ -17,6 +17,10 @@ export const PreferencesActionSection = () => {
   }, [refreshAuthState]);
 
   async function handleSignInWithChatGPT() {
+    if (isBusy) {
+      return;
+    }
+
     setBusy(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -39,6 +43,10 @@ export const PreferencesActionSection = () => {
   }
 
   async function handleSignOutFromChatGPT() {
+    if (isBusy) {
+      return;
+    }
+
     setBusy(true);
     await clearCodexAuthSession();
     await refreshAuthState();
@@ -69,11 +77,7 @@ export const PreferencesActionSection = () => {
         />
       )}
 
-      <Action
-        icon={Icon.Gear}
-        title={isBusy ? "Working…" : "Open Extension Preferences"}
-        onAction={openExtensionPreferences}
-      />
+      <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
     </ActionPanel.Section>
   );
 };

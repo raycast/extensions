@@ -1,5 +1,5 @@
-import fetch, { Response } from "cross-fetch";
-import { Agent } from "http";
+import { Agent, IncomingMessage } from "node:http";
+import * as https from "node:https";
 import { Message } from "../type";
 
 const CODEX_RESPONSES_URL = "https://chatgpt.com/backend-api/codex/responses";
@@ -42,6 +42,12 @@ export interface CodexResponseParams {
   onDelta?: (delta: string) => void;
 }
 
+interface CodexHttpResponse {
+  statusCode: number;
+  statusText: string;
+  stream: IncomingMessage;
+}
+
 export async function requestCodexResponse(params: CodexResponseParams): Promise<string> {
   const instructions = resolveInstructions(params.instructions, params.messages);
 
@@ -57,35 +63,103 @@ export async function requestCodexResponse(params: CodexResponseParams): Promise
     body.reasoning = { effort: "medium" };
   }
 
-  const requestInit: Record<string, unknown> = {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${params.accessToken}`,
-      "ChatGPT-Account-ID": params.accountId,
-      "Content-Type": "application/json",
-      Accept: params.stream ? "text/event-stream" : "application/json",
-    },
-    body: JSON.stringify(body),
+  const payload = JSON.stringify(body);
+  const response = await postCodexRequest({
+    payload,
+    accessToken: params.accessToken,
+    accountId: params.accountId,
+    stream: params.stream,
     signal: params.signal,
-  };
+    httpAgent: params.httpAgent,
+  });
 
-  if (params.httpAgent) {
-    requestInit.agent = params.httpAgent;
-  }
-
-  const response = await fetch(CODEX_RESPONSES_URL, requestInit as Parameters<typeof fetch>[1]);
-
-  if (!response.ok) {
+  if (!isHttpSuccess(response.statusCode)) {
     throw new Error(await parseCodexError(response));
   }
 
   if (!params.stream) {
-    const raw = await response.text();
+    const raw = await readIncomingMessageText(response.stream);
     const parsed = parseNonStreamText(raw);
     return parsed ?? "";
   }
 
-  return readStreamingText(response, params.onDelta);
+  return readStreamingText(response.stream, params.onDelta);
+}
+
+export function isCodexUnauthorizedError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return message.includes("(401)") || message.includes("unauthorized");
+}
+
+function postCodexRequest(options: {
+  payload: string;
+  accessToken: string;
+  accountId: string;
+  stream: boolean;
+  signal?: AbortSignal;
+  httpAgent?: Agent;
+}): Promise<CodexHttpResponse> {
+  const { payload, accessToken, accountId, stream, signal, httpAgent } = options;
+
+  return new Promise((resolve, reject) => {
+    const request = https.request(
+      CODEX_RESPONSES_URL,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "ChatGPT-Account-ID": accountId,
+          "Content-Type": "application/json",
+          Accept: stream ? "text/event-stream" : "application/json",
+          "Accept-Encoding": "identity",
+          "Content-Length": Buffer.byteLength(payload).toString(),
+        },
+        agent: httpAgent,
+      },
+      (response) => {
+        cleanupAbortHandler();
+        resolve({
+          statusCode: response.statusCode ?? 0,
+          statusText: response.statusMessage ?? "",
+          stream: response,
+        });
+      },
+    );
+
+    const onAbort = () => {
+      request.destroy(new Error("AbortError"));
+    };
+
+    const cleanupAbortHandler = () => {
+      signal?.removeEventListener("abort", onAbort);
+    };
+
+    if (signal) {
+      if (signal.aborted) {
+        cleanupAbortHandler();
+        reject(new Error("AbortError"));
+        return;
+      }
+
+      signal.addEventListener("abort", onAbort, { once: true });
+    }
+
+    request.on("error", (error) => {
+      cleanupAbortHandler();
+      reject(error);
+    });
+
+    request.write(payload);
+    request.end();
+  });
+}
+
+function isHttpSuccess(statusCode: number): boolean {
+  return statusCode >= 200 && statusCode < 300;
 }
 
 function supportsReasoningEffort(model: string): boolean {
@@ -179,16 +253,10 @@ function mapMessageContent(content: Message["content"]): CodexInputContent[] {
   return result;
 }
 
-async function readStreamingText(response: Response, onDelta?: (delta: string) => void): Promise<string> {
-  if (!response.body) {
-    return "";
-  }
-
+async function readStreamingText(stream: IncomingMessage, onDelta?: (delta: string) => void): Promise<string> {
   let pending = "";
   let deltaText = "";
   let completedText: string | null = null;
-
-  const stream = response.body as unknown as AsyncIterable<Buffer | Uint8Array | string>;
 
   for await (const chunk of stream) {
     pending += toUTF8(chunk);
@@ -351,13 +419,13 @@ function extractResponseText(payload: unknown): string | null {
   return fragments.join("\n");
 }
 
-async function parseCodexError(response: Response): Promise<string> {
-  const body = await response.text();
+async function parseCodexError(response: CodexHttpResponse): Promise<string> {
+  const body = await readIncomingMessageText(response.stream);
   const parsedMessage = parseErrorBody(body);
   if (parsedMessage) {
-    return `Request failed (${response.status}): ${parsedMessage}`;
+    return `Request failed (${response.statusCode}): ${parsedMessage}`;
   }
-  return `Request failed (${response.status}): ${response.statusText || "Unknown error"}`;
+  return `Request failed (${response.statusCode}): ${response.statusText || "Unknown error"}`;
 }
 
 function parseErrorBody(body: string): string | null {
@@ -388,6 +456,16 @@ function parseErrorBody(body: string): string | null {
   }
 
   return trimmed;
+}
+
+async function readIncomingMessageText(response: IncomingMessage): Promise<string> {
+  const chunks: string[] = [];
+
+  for await (const chunk of response) {
+    chunks.push(toUTF8(chunk));
+  }
+
+  return chunks.join("");
 }
 
 function toUTF8(chunk: Buffer | Uint8Array | string): string {

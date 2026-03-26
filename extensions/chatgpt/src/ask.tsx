@@ -10,7 +10,7 @@ import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
 import { useSavedChat } from "./hooks/useSavedChat";
-import { AuthProvider, AuthStatus, resolveAuthStatus } from "./utils/auth";
+import { AuthProvider, AuthStatus, getInitialAuthStatus, resolveAuthStatus } from "./utils/auth";
 import { filterModelsForAuth, orderModelsForSelection, resolveModelOptionForAuth } from "./utils/model-support";
 import { Chat, Conversation, Model } from "./type";
 import { AuthRequiredView } from "./views/auth-required";
@@ -24,26 +24,29 @@ interface AskProps {
 }
 
 export default function Ask(props: AskProps) {
-  const [isAuthLoading, setAuthLoading] = useState(true);
-  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [authStatus, setAuthStatus] = useState<AuthStatus>(() => getInitialAuthStatus());
+  const [isAuthLoading, setAuthLoading] = useState<boolean>(() => !getInitialAuthStatus().hasApiKey);
 
-  const refreshAuth = useCallback(async () => {
-    setAuthLoading(true);
+  const refreshAuth = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setAuthLoading(true);
+    }
+
     const status = await resolveAuthStatus();
     setAuthStatus(status);
     setAuthLoading(false);
   }, []);
 
   useEffect(() => {
-    refreshAuth();
+    refreshAuth(false);
   }, [refreshAuth]);
 
   if (isAuthLoading) {
     return <List isLoading={true} />;
   }
 
-  if (!authStatus || authStatus.provider === "none") {
-    return <AuthRequiredView onAuthChange={refreshAuth} />;
+  if (authStatus.provider === "none") {
+    return <AuthRequiredView onAuthChange={() => refreshAuth(true)} />;
   }
 
   return <AskContent {...props} authProvider={authStatus.provider} />;
