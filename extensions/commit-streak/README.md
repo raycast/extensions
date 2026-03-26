@@ -1,11 +1,11 @@
 # Commit Streak
 
-A Raycast menu bar extension that tracks your GitHub commit streak.
+A Raycast menu bar extension that tracks your GitHub contribution streak.
 
 ## Features
 
-- 🔥 Shows your current streak count when you've committed today
-- ❄️ Shows how many days you've gone without a commit
+- 🔥 Shows your current streak count when you've contributed today
+- ❄️ Shows how many days you've gone without a contribution
 - 🏆 Milestone icons unlock as your streak grows
 - Refreshes automatically every 10 minutes
 

@@ -264,15 +264,15 @@ export default function CommitStreak() {
         : `❄️ ${streak.count} day${streak.count !== 1 ? "s" : ""} without commits`;
 
   const todayTitle = streak.hasCommitToday
-    ? `Today: ${streak.todayCount} commit${streak.todayCount !== 1 ? "s" : ""}`
-    : "No commits today";
+    ? `Today: ${streak.todayCount} contribution${streak.todayCount !== 1 ? "s" : ""}`
+    : "No contributions today";
 
   return (
     <MenuBarExtra icon={icon} title={label}>
       <MenuBarExtra.Item title={statusTitle} />
       <MenuBarExtra.Item title={todayTitle} />
       <MenuBarExtra.Item
-        title={`Last 7 days: ${streak.totalLastWeek} commits`}
+        title={`Last 7 days: ${streak.totalLastWeek} contributions`}
       />
       <MenuBarExtra.Separator />
       <MenuBarExtra.Item

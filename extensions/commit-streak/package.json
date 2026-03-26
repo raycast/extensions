@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "commit-streak",
   "title": "Commit Streak",
-  "description": "Track your GitHub commit streak in the menu bar. Stay motivated or get reminded.",
+  "description": "Track your GitHub contribution streak in the menu bar. Stay motivated or get reminded.",
   "icon": "icon.png",
   "author": "aundu",
   "categories": [
