@@ -1,6 +1,6 @@
 # Done Bear Changelog
 
-## [Update] - 2026-03-26
+## [Update] - {PR_MERGE_DATE}
 
 Updated extension icon.
 
