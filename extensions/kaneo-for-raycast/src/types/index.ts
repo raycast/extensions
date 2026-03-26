@@ -45,8 +45,8 @@ interface Task {
   assigneeName: string | null;
   assigneeImage: string | null;
   projectId: string;
-  parentTasks: Task[];
-  subTasks: Task[];
+  parentTasks?: Task[];
+  subTasks?: Task[];
 }
 
 interface TaskRelation {

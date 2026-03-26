@@ -260,8 +260,10 @@ function TaskDetailView({
     return webUrl.toString();
   };
 
-  const markdown = `
-  ${task.parentTasks.length > 0 ? `**Subtask of** ${task.parentTasks.map((parentTask) => `[${parentTask.title}](${openTask(parentTask.id)})`).join("\n")}\n\n` : ""}
+  const parentTasks = task.parentTasks || [];
+  const subTasks = task.subTasks || [];
+
+  const markdown = `${parentTasks.length > 0 ? `**Subtask of** ${parentTasks.map((parentTask) => `[${parentTask.title}](${openTask(parentTask.id)})`).join("\n")}\n\n` : ""}
   # ${task.title}
 
 
@@ -318,14 +320,14 @@ ${formatDate(task.createdAt)}
         <ActionPanel>
           <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask(task.id)} />
 
-          {task.parentTasks.length > 0 && (
+          {parentTasks.length > 0 && (
             <Action.Push
               title="Open Parent Task"
               icon={Icon.Binoculars}
               shortcut={ParentTask}
               target={
                 <TaskDetailView
-                  taskId={task.parentTasks[0].id}
+                  taskId={parentTasks[0].id}
                   projectId={projectId}
                   columnStatuses={columnStatuses}
                   columnPriorities={columnPriorities}
@@ -337,9 +339,9 @@ ${formatDate(task.createdAt)}
             />
           )}
 
-          {task.subTasks.length > 0 && (
+          {subTasks.length > 0 && (
             <ActionPanel.Submenu title="Sub Tasks" icon={Icon.List} shortcut={SubTask}>
-              {task.subTasks.map((subTask) => (
+              {subTasks.map((subTask) => (
                 <Action.Push
                   key={subTask.id}
                   title={subTask.title}
