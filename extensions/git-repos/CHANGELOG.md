@@ -1,5 +1,9 @@
 # Git Repos Changelog
 
+## [Added Command] - 2026-03-26
+
+- Added a new `Clone Repo` command to clone a repository into one of the scanned directories from preferences.
+
 ## [Added Command] - 2026-03-22
 
 - Added a new `Remove Repo` command to move a local repository to the Trash. The default action prevents removal if there are uncommitted changes or unpushed commits. A force remove option is available to bypass these checks.

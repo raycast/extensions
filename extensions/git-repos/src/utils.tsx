@@ -10,24 +10,6 @@ import parseGitConfig from "parse-git-config";
 import parseGithubURL from "parse-github-url";
 import getDefaultBrowser from "default-browser";
 
-export interface OpenWith {
-  name: string;
-  path: string;
-  bundleId: string;
-}
-
-export interface Preferences {
-  repoScanPath: string;
-  repoScanDepth?: number;
-  includeSubmodules?: boolean;
-  searchKeys?: string;
-  openWith1?: OpenWith;
-  openWith2?: OpenWith;
-  openWith3?: OpenWith;
-  openWith4?: OpenWith;
-  openWith5?: OpenWith;
-}
-
 export enum GitRepoType {
   All = "All",
   Repo = "Repo",
@@ -54,15 +36,11 @@ interface GitRemote {
   url: string;
 }
 
-function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export class GitRepoService {
   private static favoritesStorageKey = "git-repos-favorites";
 
   static async gitRepos(): Promise<GitRepo[]> {
-    const preferences = getPreferences();
+    const preferences = getPreferenceValues<ExtensionPreferences>();
     if (preferences.repoScanPath.length == 0) {
       showToast(Toast.Style.Failure, "", "Directories to scan has not been defined in settings");
       return [];
@@ -75,7 +53,11 @@ export class GitRepoService {
         `Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`,
       );
     }
-    const repos = await findRepos(repoPaths, preferences.repoScanDepth ?? 3, preferences.includeSubmodules ?? false);
+    const repos = await findRepos(
+      repoPaths,
+      parseInt(preferences.repoScanDepth, 10) || 3,
+      preferences.includeSubmodules ?? false,
+    );
 
     return repos;
   }

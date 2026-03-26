@@ -15,7 +15,7 @@ import path from "path";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { GetInstalledBrowsers } from "get-installed-browsers";
-import { GitRepo, Preferences, tildifyPath, GitRepoService, GitRepoType, OpenWith } from "./utils";
+import { GitRepo, tildifyPath, GitRepoService, GitRepoType } from "./utils";
 import { useUsageBasedSort } from "./hooks/useUsageBasedSort";
 
 const installedBrowsers = GetInstalledBrowsers().map(
@@ -26,7 +26,7 @@ const installedBrowsers = GetInstalledBrowsers().map(
 );
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   const gitReposState = useCachedPromise(GitRepoService.gitRepos);
   const favoriteGitReposState = useCachedPromise(GitRepoService.favorites);
 
@@ -80,7 +80,7 @@ export default function Command() {
 }
 
 function GitRepoListItem(props: {
-  preferences: Preferences;
+  preferences: ExtensionPreferences;
   repo: GitRepo;
   isFavorite: boolean;
   revalidate: () => void;
@@ -306,7 +306,7 @@ function GitRepoPropertyDropdown(props: {
 
 function GitRepoOpenAction(props: {
   repo: GitRepo;
-  openWith: OpenWith;
+  openWith: Application;
   shortcut?: Keyboard.Shortcut;
   recordUsageHook?: (id: string | number) => void;
 }) {
