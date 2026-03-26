@@ -202,6 +202,8 @@ export async function verifyPassword(config: TelegramConfig, password: string): 
 
   const me = await client.getMe();
   await LocalStorage.setItem(USER_ID_KEY, me.id.toString());
+
+  await LocalStorage.removeItem(PHONE_CODE_HASH_KEY);
 }
 
 export async function resetSession(): Promise<void> {
