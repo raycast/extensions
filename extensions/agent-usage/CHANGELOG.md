@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Progress Bars & Zero-Config Auth] - 2026-03-13
+## [Progress Bars & Zero-Config Auth] - {PR_MERGE_DATE}
 
 ### New Features
 

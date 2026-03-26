@@ -1,5 +1,5 @@
 import { Toast, showToast, showHUD, List, ActionPanel, Action, Icon, closeMainWindow } from "@raycast/api";
-import { getProfileNames, startFocusWithProfile, getActiveProfileName } from "./utils";
+import { getProfileNames, startFocusWithProfile, getActiveProfileName, openPreferences } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
 import { ensureFocusIsRunning } from "./helpers";
 
@@ -47,7 +47,7 @@ export default function Command() {
           title="No profiles found"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Open Focus Preferences" url="focus://preferences" />
+              <Action title="Open Focus Preferences" onAction={openPreferences} />
             </ActionPanel>
           }
         />

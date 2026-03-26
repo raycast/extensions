@@ -170,6 +170,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | OpenAI_GPT-5.3_Instant | OpenAI's fast, capable model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.3_Codex | A version of GPT-5.3 optimized for agentic coding tasks in Codex or similar environments. |
 | OpenAI_GPT-5.4 | OpenAI's most capable model for professional work and long-running agents with state-of-the-art tool-calling. |
+| OpenAI_GPT-5.4_mini | OpenAI's strongest mini model yet for coding and agentic workflows. |
+| OpenAI_GPT-5.4_nano | OpenAI's cheapest GPT-5.4-class model for simpler tasks. |
 | OpenAI_o3 | Advanced model excelling in math, science, coding, and visual tasks. |
 | OpenAI_o4-mini | Fast, efficient model optimized for coding and visual tasks. |
 | OpenAI_o1 | Advanced reasoning model for complex STEM problems. |
@@ -205,6 +207,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | Together_AI_DeepSeek-V3 | Advanced Mixture-of-Experts model. |
 | Together_AI_Kimi_K2.5 | Kimi K2.5 is an advanced multimodal AI model with improved reasoning and instruction-following capabilities. |
 | xAI_Grok-4.1_Fast | xAI's best agentic tool calling model that shines in real-world use cases like customer support and deep research. |
+| xAI_Grok-4.20 | xAI's advanced reasoning model with enhanced capabilities. |
 | xAI_Grok-4 | Advanced language model with enhanced reasoning and tool capabilities. |
 | xAI_Grok-4_Fast | xAI's latest advancement in cost-efficient reasoning models. |
 | xAI_Grok_Code_Fast_1 | Grok Code Fast 1 is xAI's Coding Agent focused model |

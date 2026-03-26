@@ -103,7 +103,15 @@ function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void 
     },
     validation: {
       name: FormValidation.Required,
-      slug: FormValidation.Required,
+      slug: (value) => {
+        if (!value) {
+          return "Slug is required";
+        }
+        if (value.length > 8) {
+          return "Slug must be at most 8 characters long";
+        }
+        return undefined;
+      },
     },
   });
 
@@ -410,19 +418,39 @@ function ProjectTasksList({ project }: { project: Project }) {
 
         return {
           ...prev,
-          columns: prev.columns.map((col) => ({
-            ...col,
-            tasks: col.tasks.map((t) =>
-              t.id === task.id
-                ? {
-                    ...t,
-                    assigneeId: newAssigneeId,
-                    assigneeName: newAssigneeName,
-                    assigneeImage: newAssigneeImage,
-                  }
-                : t,
-            ),
-          })),
+          data: prev.data
+            ? {
+                ...prev.data,
+                columns: prev.data.columns.map((col) => ({
+                  ...col,
+                  tasks: col.tasks.map((t) =>
+                    t.id === task.id
+                      ? {
+                          ...t,
+                          assigneeId: newAssigneeId,
+                          assigneeName: newAssigneeName,
+                          assigneeImage: newAssigneeImage,
+                        }
+                      : t,
+                  ),
+                })),
+              }
+            : undefined,
+          columns: !prev.data
+            ? prev.columns?.map((col) => ({
+                ...col,
+                tasks: col.tasks.map((t) =>
+                  t.id === task.id
+                    ? {
+                        ...t,
+                        assigneeId: newAssigneeId,
+                        assigneeName: newAssigneeName,
+                        assigneeImage: newAssigneeImage,
+                      }
+                    : t,
+                ),
+              }))
+            : undefined,
         };
       });
 
@@ -534,8 +562,10 @@ function ProjectTasksList({ project }: { project: Project }) {
     }
   };
 
+  const resolvedColumns = projectDetail?.data?.columns ?? projectDetail?.columns;
+
   const columnStatuses =
-    projectDetail?.columns.map((col) => ({
+    resolvedColumns?.map((col) => ({
       id: col.id,
       name: col.name,
       isDone: col.isFinal,
@@ -574,7 +604,7 @@ function ProjectTasksList({ project }: { project: Project }) {
         </ActionPanel>
       }
     >
-      {projectDetail.columns.map((column) => {
+      {resolvedColumns?.map((column) => {
         const tasks = sort === "priority" ? sortTasksByPriority(column.tasks) : sortTasksByDueDate(column.tasks);
 
         return (

@@ -1,5 +1,9 @@
 # Mattermost Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Fix DMs Not Shown] - 2025-07-30
 
 - Fix: Direct Messages would not show in `Search Channels` (ref: [Issue #19587](https://github.com/raycast/extensions/issues/19587))

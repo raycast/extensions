@@ -1,5 +1,9 @@
 # Coinpaprika Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [Favorite Coins] - 2022-07-05
 - Additional Section -> Favorite Coins
 - Add & Remove Favorite Coins

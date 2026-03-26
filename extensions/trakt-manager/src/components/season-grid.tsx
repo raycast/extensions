@@ -10,7 +10,7 @@ import { EpisodeGrid } from "./episode-grid";
 import { GenericGrid } from "./generic-grid";
 
 export const SeasonGrid = ({ showId, slug, imdbId }: { showId: number; slug?: string; imdbId: string }) => {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
   const { isLoading, data: seasons } = useCachedPromise(

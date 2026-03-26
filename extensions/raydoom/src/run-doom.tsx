@@ -18,7 +18,9 @@ import { GameConfig } from "./menu-config";
 import { startMemoryMonitoring, stopMemoryMonitoring, formatMemoryStats, getMemoryStats } from "./memory-manager";
 import type { MemoryStats } from "./memory-manager";
 import { isWadDownloaded, deleteWadFile, getWadFileSize, getWadPath } from "./utils/wad-manager";
+import { areEngineFilesDownloaded } from "./utils/engine-manager";
 import DownloadPrompt from "./components/download-prompt";
+import EngineDownloadPrompt from "./components/engine-download-prompt";
 import { DEFAULT_CONFIG } from "./menu-config";
 
 interface RunDoomProps {
@@ -36,6 +38,7 @@ const HEARTBEAT_TIMEOUT_MS = 3000;
 function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
   const [asciiFrame, setAsciiFrame] = useState<string>("Loading DOOM...");
   const [isInitialized, setIsInitialized] = useState(false);
+  const [engineReady, setEngineReady] = useState(areEngineFilesDownloaded());
   const [wadReady, setWadReady] = useState(isWadDownloaded());
   const [heartbeat, setHeartbeat] = useState<number>(0); // Forces re-render to prove component is alive
   const [navTitle, setNavTitle] = useState<string>("DOOM");
@@ -411,7 +414,12 @@ function Command({ config = DEFAULT_CONFIG }: RunDoomProps = {}) {
     });
   }, []);
 
-  // Check WAD file availability - AFTER all hooks are called
+  // Check engine availability - AFTER all hooks are called
+  if (!engineReady) {
+    return <EngineDownloadPrompt onComplete={() => setEngineReady(true)} />;
+  }
+
+  // Check WAD file availability
   if (!wadReady) {
     return <DownloadPrompt onComplete={() => setWadReady(true)} />;
   }
