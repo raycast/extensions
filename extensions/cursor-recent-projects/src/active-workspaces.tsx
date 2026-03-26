@@ -136,7 +136,7 @@ function useActiveWindows() {
           const resolvedPath = recentEntries.get(win.workspaceName) ?? null;
           const gitBranch = resolvedPath ? await getGitBranch(resolvedPath) : null;
           return { ...win, workspacePath: resolvedPath, gitBranch };
-        }),
+        })
       );
       setWindows(enriched);
     } catch (error) {
