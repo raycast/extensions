@@ -1,5 +1,15 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
+
+const execFileP = promisify(execFile);
+
+/** Shell-free command execution. Uses execFile() instead of exec() to spawn
+ *  binaries directly without /bin/sh, preventing zombie process accumulation.
+ *  See: https://github.com/raycast/extensions/issues/26480 */
+export const execf = async (file: string, args: string[] = [], maxBuffer?: number): Promise<string> => {
+  const { stdout } = await execFileP(file, args, maxBuffer ? { maxBuffer } : undefined);
+  return String(stdout).trim();
+};
 
 export const formatBytes = (bytes: number): string => {
   const decimals = 2;
@@ -22,13 +32,6 @@ export const isObjectEmpty = (obj: object): boolean => {
   }
 
   return true;
-};
-
-export const execp = async (command: string): Promise<string> => {
-  const execp = promisify(exec);
-  const output = await execp(command);
-
-  return output.stdout.trim();
 };
 
 export const convertMsToTime = (milliseconds: number): string => {

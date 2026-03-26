@@ -31,7 +31,16 @@ export default async function getUsageLimits(input?: Input): Promise<{
     throw new Error("Usage limits require Claude OAuth authentication in Claude Code.");
   }
 
-  const usageLimitsData = await fetchClaudeUsageLimits(token);
+  const result = await fetchClaudeUsageLimits(token);
+
+  if (result.status === "rate_limited") {
+    throw new Error("Rate limited by Anthropic API. Please try again later.");
+  }
+  if (result.status === "error") {
+    throw new Error(result.message);
+  }
+
+  const usageLimitsData = result.data;
 
   const formatResetTime = (isoString: string | null): string => {
     if (!isoString) {

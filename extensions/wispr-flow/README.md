@@ -18,6 +18,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 | **Manage Dictionary** | View, edit, search, and delete dictionary entries |
 | **Start Recording** | Begin voice dictation instantly |
 | **Stop Recording** | End voice dictation |
+| **Paste Last Transcript** | Paste your latest unarchived transcript into the active app |
 | **Open Wispr Flow** | Launch the Wispr Flow app |
 
 ## Transcription History

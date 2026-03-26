@@ -35,13 +35,7 @@ function useCaffeinateInfo(execute: boolean) {
         return { isRunning: false, timeRemaining: null };
       }
 
-      // Filter out keep-alive "caffeinate -u" processes used to reset the
-      // idle timer on battery (see status.ts), so they don't interfere with
-      // the time-remaining calculation.
-      const lines = stdout.split("\n").filter((l) => !l.includes("caffeinate -u"));
-      if (lines.length === 0) {
-        return { isRunning: false, timeRemaining: null };
-      }
+      const lines = stdout.split("\n");
       const [etime, ...cmdArgs] = lines[lines.length - 1].trim().split(/\s+/);
 
       const secondsRunning = parseEtime(etime);

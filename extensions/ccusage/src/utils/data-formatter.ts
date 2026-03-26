@@ -64,3 +64,31 @@ export const copyToClipboard = async (text: string, message: string): Promise<vo
 export const getCCUsageCommand = (): string => {
   return "npx ccusage@latest";
 };
+
+export const formatDuration = (ms: number): string => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m`;
+  return `${seconds}s`;
+};
+
+export const formatCostDelta = (todayCost: number, yesterdayCost: number): string => {
+  const delta = todayCost - yesterdayCost;
+  const sign = delta >= 0 ? "+" : "-";
+  const formatted = formatCost(Math.abs(delta));
+  if (yesterdayCost === 0) return `${sign}${formatted}`;
+  const pct = (Math.abs(delta) / yesterdayCost) * 100;
+  return `${sign}${formatted} (${pct.toFixed(1)}%)`;
+};
+
+export const formatTokenDelta = (todayTokens: number, yesterdayTokens: number): string => {
+  const delta = todayTokens - yesterdayTokens;
+  const sign = delta >= 0 ? "+" : "-";
+  const formatted = formatTokens(Math.abs(delta));
+  if (yesterdayTokens === 0) return `${sign}${formatted}`;
+  const pct = (Math.abs(delta) / yesterdayTokens) * 100;
+  return `${sign}${formatted} (${pct.toFixed(1)}%)`;
+};

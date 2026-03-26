@@ -1,5 +1,16 @@
 # System Monitor Changelog
 
+## [Eliminate Zombie Processes] - 2026-03-20
+
+- Replace all `exec()` calls with `execFile()` to avoid spawning shell processes
+- Remove `systeminformation` and `os-utils` dependencies (both spawn child processes internally)
+- Rearchitect menubar command to align with Raycast's menu-bar lifecycle (load → render → unload)
+- Cache menubar data to disk via Raycast Cache API to prevent flicker between interval restarts
+- Cache `system_profiler` results for battery condition/capacity (rarely changes, slow to fetch)
+- Poll for live updates only while the menu is open (2s interval via `useInterval`)
+- Parallelize system data fetches with `Promise.all` for faster command execution
+- Fix `pmset -g log` buffer overflow in Power Monitor view
+
 ## [Fix Zombie Process Accumulation] - 2026-03-20
 
 - Add revalidation guards to prevent overlapping child process spawns in the menubar command

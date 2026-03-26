@@ -1,0 +1,367 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "evm-toolkit",
+  "title": "EVM Toolkit",
+  "description": "A toolkit for Ethereum power users: explore addresses, transactions, and blocks across EVM chains",
+  "icon": "extension_icon.png",
+  "author": "imqdee",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "explorer",
+      "title": "Open Explorer",
+      "description": "Open an address, transaction, or block in the chain's block explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "network",
+          "type": "dropdown",
+          "placeholder": "Default",
+          "required": false,
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Mainnet",
+              "value": "1"
+            },
+            {
+              "title": "Base",
+              "value": "8453"
+            },
+            {
+              "title": "Arbitrum",
+              "value": "42161"
+            },
+            {
+              "title": "Polygon",
+              "value": "137"
+            },
+            {
+              "title": "Optimism",
+              "value": "10"
+            },
+            {
+              "title": "BSC",
+              "value": "56"
+            },
+            {
+              "title": "Linea",
+              "value": "59144"
+            },
+            {
+              "title": "Ink",
+              "value": "57073"
+            },
+            {
+              "title": "Arbitrum Nova",
+              "value": "42170"
+            },
+            {
+              "title": "zkSync",
+              "value": "324"
+            },
+            {
+              "title": "Avalanche",
+              "value": "43114"
+            },
+            {
+              "title": "Gnosis",
+              "value": "100"
+            },
+            {
+              "title": "Scroll",
+              "value": "534352"
+            },
+            {
+              "title": "Celo",
+              "value": "42220"
+            },
+            {
+              "title": "Mantle",
+              "value": "5000"
+            },
+            {
+              "title": "Blast",
+              "value": "81457"
+            },
+            {
+              "title": "Sonic",
+              "value": "146"
+            },
+            {
+              "title": "Unichain",
+              "value": "130"
+            },
+            {
+              "title": "Flow",
+              "value": "747"
+            },
+            {
+              "title": "World Chain",
+              "value": "480"
+            },
+            {
+              "title": "ApeChain",
+              "value": "33139"
+            },
+            {
+              "title": "Abstract",
+              "value": "2741"
+            },
+            {
+              "title": "HyperEVM",
+              "value": "999"
+            },
+            {
+              "title": "Mode",
+              "value": "34443"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "intel",
+      "title": "Open Intel",
+      "description": "Open an address on Arkham Intel blockchain analytics",
+      "mode": "no-view"
+    },
+    {
+      "name": "code",
+      "title": "Open Code",
+      "description": "Open a contract's source code in a web IDE via deth.net",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "network",
+          "type": "dropdown",
+          "placeholder": "Default",
+          "required": false,
+          "data": [
+            {
+              "title": "Default",
+              "value": "default"
+            },
+            {
+              "title": "Mainnet",
+              "value": "1"
+            },
+            {
+              "title": "Base",
+              "value": "8453"
+            },
+            {
+              "title": "Arbitrum",
+              "value": "42161"
+            },
+            {
+              "title": "Polygon",
+              "value": "137"
+            },
+            {
+              "title": "Optimism",
+              "value": "10"
+            },
+            {
+              "title": "BSC",
+              "value": "56"
+            },
+            {
+              "title": "Avalanche",
+              "value": "43114"
+            },
+            {
+              "title": "Gnosis",
+              "value": "100"
+            },
+            {
+              "title": "Blast",
+              "value": "81457"
+            },
+            {
+              "title": "Sonic",
+              "value": "146"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "profile",
+      "title": "Open Profile",
+      "description": "Open an account's portfolio page on DeBank",
+      "mode": "no-view"
+    },
+    {
+      "name": "eip",
+      "title": "Open EIP",
+      "description": "Open an Ethereum Improvement Proposal by its number",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "eip",
+          "type": "text",
+          "placeholder": "EIP number",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "repository",
+      "title": "Open Editor",
+      "description": "Open a GitHub repository in a web IDE",
+      "mode": "no-view"
+    },
+    {
+      "name": "simulate",
+      "title": "Simulate Transaction",
+      "description": "Open a prefilled Tenderly simulation page for a transaction",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultNetwork",
+      "title": "Default Network",
+      "description": "The network to use when none is explicitly selected",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "Mainnet",
+          "value": "1"
+        },
+        {
+          "title": "Base",
+          "value": "8453"
+        },
+        {
+          "title": "Arbitrum",
+          "value": "42161"
+        },
+        {
+          "title": "Polygon",
+          "value": "137"
+        },
+        {
+          "title": "Optimism",
+          "value": "10"
+        },
+        {
+          "title": "BSC",
+          "value": "56"
+        },
+        {
+          "title": "Linea",
+          "value": "59144"
+        },
+        {
+          "title": "Ink",
+          "value": "57073"
+        },
+        {
+          "title": "Arbitrum Nova",
+          "value": "42170"
+        },
+        {
+          "title": "zkSync",
+          "value": "324"
+        },
+        {
+          "title": "Avalanche",
+          "value": "43114"
+        },
+        {
+          "title": "Gnosis",
+          "value": "100"
+        },
+        {
+          "title": "Scroll",
+          "value": "534352"
+        },
+        {
+          "title": "Celo",
+          "value": "42220"
+        },
+        {
+          "title": "Mantle",
+          "value": "5000"
+        },
+        {
+          "title": "Blast",
+          "value": "81457"
+        },
+        {
+          "title": "Sonic",
+          "value": "146"
+        },
+        {
+          "title": "Unichain",
+          "value": "130"
+        },
+        {
+          "title": "Flow",
+          "value": "747"
+        },
+        {
+          "title": "World Chain",
+          "value": "480"
+        },
+        {
+          "title": "ApeChain",
+          "value": "33139"
+        },
+        {
+          "title": "Abstract",
+          "value": "2741"
+        },
+        {
+          "title": "HyperEVM",
+          "value": "999"
+        },
+        {
+          "title": "Mode",
+          "value": "34443"
+        }
+      ]
+    }
+  ],
+  "keywords": [
+    "ethereum",
+    "evm",
+    "blockchain",
+    "explorer",
+    "etherscan",
+    "web3",
+    "toolkit"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/react": "^19.0.10",
+    "lefthook": "^2.1.1",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lint:ci": "ray lint -I",
+    "fix-lint": "ray lint --fix"
+  }
+}

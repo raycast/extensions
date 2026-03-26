@@ -1,22 +1,14 @@
 import { List, Icon, Color, ActionPanel, Action, Toast, showToast, confirmAlert } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useMemo } from "react";
+import { useCachedPromise, showFailureToast } from "@raycast/utils";
 import { getMolePathSafe, runMole } from "./utils/mole";
 import { parseOptimizeDryRun } from "./utils/parsers";
+import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
 export default function OptimizeSystem() {
-  const molePath = useMemo(() => getMolePathSafe(), []);
+  const molePath = getMolePathSafe();
 
   if (!molePath) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Mole Not Installed"
-          description="Install Mole to use this extension: brew install mole"
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
+    return <MoleNotInstalled />;
   }
 
   return <OptimizeView />;
@@ -43,9 +35,7 @@ function OptimizeView() {
         toast.title = "System optimized successfully";
         revalidate();
       } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Optimization failed";
-        toast.message = error instanceof Error ? error.message : String(error);
+        await showFailureToast(error, { title: "Optimization failed" });
       }
     }
   }
