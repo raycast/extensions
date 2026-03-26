@@ -4,7 +4,9 @@ import { showToast, Toast } from "@raycast/api";
 const USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
-const EXCHANGES = [
+const US_EXCHANGES = ["NASDAQ", "NYSE", "NYSEARCA", "NYSEAMERICAN", "BATS", "MUTF"];
+
+const FALLBACK_EXCHANGES = [
   "NASDAQ",
   "NYSE",
   "NYSEARCA",
@@ -132,7 +134,9 @@ function parseQuoteFromHtml(html: string, symbol: string, exchange: string): Quo
 }
 
 export async function fetchQuote(symbol: string, exchange?: string, signal?: AbortSignal): Promise<Quote | null> {
-  const exchangesToTry = exchange ? [exchange] : EXCHANGES;
+  const exchangesToTry = exchange
+    ? [exchange]
+    : [...US_EXCHANGES, ...FALLBACK_EXCHANGES.filter((ex) => !US_EXCHANGES.includes(ex))];
 
   for (const exch of exchangesToTry) {
     const url = `https://www.google.com/finance/quote/${encodeURIComponent(symbol.toUpperCase())}:${exch}`;

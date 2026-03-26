@@ -5,6 +5,9 @@
   "description": "Track stock prices powered by Google Finance",
   "icon": "extension-icon.png",
   "author": "kyle_samani",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS"
   ],
