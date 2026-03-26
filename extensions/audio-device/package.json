@@ -75,6 +75,14 @@
       "interval": "10s"
     },
     {
+      "name": "customize-order",
+      "title": "Customize Order (Replaced)",
+      "subtitle": "Audio Device",
+      "description": "This command has been replaced. Use Cmd+Shift+D in Set Output/Input Device to set a default device.",
+      "mode": "view",
+      "disabledByDefault": true
+    },
+    {
       "name": "favourite",
       "title": "Set Output Device to Favourite",
       "subtitle": "Audio Device",

@@ -17,6 +17,8 @@ Device list loads instantly from cache on repeat opens. Volume data for all devi
 ### Breaking change: priority ordering removed
 The old system where you ranked multiple devices as fallbacks is gone. Replaced by a single default device per direction. On first run, your top-priority device is automatically migrated to the new default.
 
+The `Customize Order` command has been removed. Use Cmd+Shift+D in Set Output Device or Set Input Device to set your default. A redirect command is available for users who had it pinned.
+
 ### New icons
 Clean 512x512 monoline icons for all device types. Works properly with Raycast's tint system.
 
