@@ -328,7 +328,6 @@ export async function netbirdUpdate(): Promise<{ version: string; updated: boole
     await execAsync("brew upgrade netbird", { env });
     didUpgrade = true;
   } catch (error) {
-    console.log(error);
     const message = error instanceof Error ? error.message : String(error);
     if (!message.includes("already installed")) {
       throw error;
@@ -341,6 +340,9 @@ export async function netbirdUpdate(): Promise<{ version: string; updated: boole
       await execAsync(
         `osascript -e 'do shell script "${bin} service uninstall && ${bin} service install && ${bin} service start" with administrator privileges'`,
       );
+
+      // Wait for daemon to come back online
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       console.error("Failed to restart NetBird service:", error);
     }

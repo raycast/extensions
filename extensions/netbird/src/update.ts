@@ -18,7 +18,6 @@ export default async function main() {
         message: `Current version ${version}.`,
       });
     } else if (latestVersion && latestVersion !== version) {
-      console.log(latestVersion, version);
       await showToast({
         style: Toast.Style.Failure,
         title: "Automatic Update Failed",
