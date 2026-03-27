@@ -1,6 +1,6 @@
 # Changelog
 
-## Updated - {PR_MERGE_DATE}
+## Updated - 2026-03-27
 
 - icons to better differentiate js, html, css, svg, http, ... features from MDN guides / tutorials
 - metadata about browser compatibility using the _baseline_ nomenclature, and granular browser support data
