@@ -4,7 +4,7 @@
   "title": "Peon Ping",
   "description": "Toggle peon-ping system-wide from Raycast with an optional menu bar indicator.",
   "icon": "icon.png",
-  "author": "local",
+  "author": "garry_kasparov",
   "platforms": ["macOS"],
   "categories": ["Productivity", "Developer Tools"],
   "license": "MIT",
