@@ -17,11 +17,7 @@ const deduplicateById = (items: TaskRecord[]): TaskRecord[] => {
   });
 };
 
-export const useTasks = (
-  workspaceId: string | null,
-  view?: TaskView,
-  allWorkspaceIds?: string[]
-) => {
+export const useTasks = (workspaceId: string | null, view?: TaskView, allWorkspaceIds?: string[]) => {
   const { isAll, cacheKey } = resolveAllScope(workspaceId, allWorkspaceIds);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -40,7 +36,7 @@ export const useTasks = (
       });
     },
     [cacheKey],
-    { execute: !!workspaceId && (isAll || workspaceId !== ALL_WORKSPACES_ID) }
+    { execute: !!workspaceId && (isAll || workspaceId !== ALL_WORKSPACES_ID) },
   );
 
   // Deduplicate by ID — pagination or multi-workspace queries can return dupes
@@ -52,9 +48,7 @@ export const useTasks = (
   } else if (view) {
     tasks = unique.filter((task) => matchesView(task, view));
   } else {
-    tasks = unique.filter(
-      (task) => task.completedAt === null && task.archivedAt === null
-    );
+    tasks = unique.filter((task) => task.completedAt === null && task.archivedAt === null);
   }
 
   return { error, isLoading, revalidate, tasks };

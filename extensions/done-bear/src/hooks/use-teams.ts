@@ -13,7 +13,7 @@ export const useTeams = (workspaceId: string | null) => {
         variables: { workspaceId: wId },
       }),
     [workspaceId || ""],
-    { execute: !!workspaceId }
+    { execute: !!workspaceId },
   );
 
   return { error, isLoading, revalidate, teams: data || [] };

@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useCallback, useState } from "react";
 
@@ -30,10 +22,7 @@ interface FormValues {
   workspaceId?: string;
 }
 
-const validateFormValues = (
-  values: FormValues,
-  targetWorkspaceId: string | null | undefined
-): string | null => {
+const validateFormValues = (values: FormValues, targetWorkspaceId: string | null | undefined): string | null => {
   if (!values.title.trim()) {
     return "Title is required";
   }
@@ -43,11 +32,7 @@ const validateFormValues = (
   return null;
 };
 
-const submitChecklistItems = async (
-  workspaceId: string,
-  taskId: string,
-  raw: string | undefined
-) => {
+const submitChecklistItems = async (workspaceId: string, taskId: string, raw: string | undefined) => {
   const lines = (raw || "")
     .split("\n")
     .map((line) => line.trim())
@@ -59,27 +44,18 @@ const submitChecklistItems = async (
 };
 
 const CreateTask = () => {
-  const {
-    workspaces,
-    workspaceId: selectedWorkspaceId,
-    isLoading: isLoadingWorkspace,
-  } = useWorkspaces();
+  const { workspaces, workspaceId: selectedWorkspaceId, isLoading: isLoadingWorkspace } = useWorkspaces();
   const isAll = selectedWorkspaceId === ALL_WORKSPACES_ID;
   const [formWorkspaceId, setFormWorkspaceId] = useState<string>("");
-  const effectiveWorkspaceId = isAll
-    ? formWorkspaceId || workspaces[0]?.id || null
-    : selectedWorkspaceId;
-  const { projects, isLoading: isLoadingProjects } =
-    useProjects(effectiveWorkspaceId);
+  const effectiveWorkspaceId = isAll ? formWorkspaceId || workspaces[0]?.id || null : selectedWorkspaceId;
+  const { projects, isLoading: isLoadingProjects } = useProjects(effectiveWorkspaceId);
   const { teams, isLoading: isLoadingTeams } = useTeams(effectiveWorkspaceId);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [whenValue, setWhenValue] = useState("today");
 
   const handleSubmit = useCallback(
     async (values: FormValues) => {
-      const targetWorkspaceId = isAll
-        ? values.workspaceId || workspaces[0]?.id
-        : selectedWorkspaceId;
+      const targetWorkspaceId = isAll ? values.workspaceId || workspaces[0]?.id : selectedWorkspaceId;
 
       const validationError = validateFormValues(values, targetWorkspaceId);
       if (validationError) {
@@ -90,24 +66,16 @@ const CreateTask = () => {
       setIsSubmitting(true);
       try {
         const taskId = await createTask(targetWorkspaceId as string, {
-          deadlineAt: values.deadline
-            ? dateOnlyEpochFromLocalDate(values.deadline)
-            : undefined,
+          deadlineAt: values.deadline ? dateOnlyEpochFromLocalDate(values.deadline) : undefined,
           description: values.description?.trim() || undefined,
           projectId: values.projectId || undefined,
-          startDate: values.startDate
-            ? dateOnlyEpochFromLocalDate(values.startDate)
-            : undefined,
+          startDate: values.startDate ? dateOnlyEpochFromLocalDate(values.startDate) : undefined,
           teamId: values.teamId || undefined,
           title: values.title.trim(),
           view: (values.when as TaskView) || "today",
         });
 
-        await submitChecklistItems(
-          targetWorkspaceId as string,
-          taskId,
-          values.checklistItems
-        );
+        await submitChecklistItems(targetWorkspaceId as string, taskId, values.checklistItems);
 
         await showToast({ style: Toast.Style.Success, title: "Task created" });
         await popToRoot();
@@ -121,38 +89,20 @@ const CreateTask = () => {
         setIsSubmitting(false);
       }
     },
-    [isAll, workspaces, selectedWorkspaceId]
+    [isAll, workspaces, selectedWorkspaceId],
   );
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Plus}
-            onSubmit={handleSubmit}
-            title="Create Task"
-          />
+          <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} title="Create Task" />
         </ActionPanel>
       }
-      isLoading={
-        isLoadingWorkspace ||
-        isLoadingProjects ||
-        isLoadingTeams ||
-        isSubmitting
-      }
+      isLoading={isLoadingWorkspace || isLoadingProjects || isLoadingTeams || isSubmitting}
     >
-      <Form.TextField
-        autoFocus
-        id="title"
-        placeholder="Task title..."
-        title="Title"
-      />
-      <Form.TextArea
-        id="description"
-        placeholder="Task description..."
-        title="Description"
-      />
+      <Form.TextField autoFocus id="title" placeholder="Task title..." title="Title" />
+      <Form.TextArea id="description" placeholder="Task description..." title="Description" />
       <Form.Separator />
       {isAll && workspaces.length > 1 && (
         <Form.Dropdown
@@ -166,21 +116,14 @@ const CreateTask = () => {
           ))}
         </Form.Dropdown>
       )}
-      <Form.Dropdown
-        defaultValue="today"
-        id="when"
-        onChange={setWhenValue}
-        title="When"
-      >
+      <Form.Dropdown defaultValue="today" id="when" onChange={setWhenValue} title="When">
         <Form.Dropdown.Item title="Inbox" value="inbox" />
         <Form.Dropdown.Item title="Today" value="today" />
         <Form.Dropdown.Item title="Anytime" value="anytime" />
         <Form.Dropdown.Item title="Upcoming" value="upcoming" />
         <Form.Dropdown.Item title="Someday" value="someday" />
       </Form.Dropdown>
-      {whenValue === "upcoming" && (
-        <Form.DatePicker id="startDate" title="Start Date" />
-      )}
+      {whenValue === "upcoming" && <Form.DatePicker id="startDate" title="Start Date" />}
       <Form.DatePicker id="deadline" title="Deadline" />
       <Form.Dropdown defaultValue="" id="projectId" title="Project">
         <Form.Dropdown.Item title="No Project" value="" />
@@ -194,11 +137,7 @@ const CreateTask = () => {
           <Form.Dropdown.Item key={t.id} title={t.name} value={t.id} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea
-        id="checklistItems"
-        placeholder="One item per line..."
-        title="Checklist Items"
-      />
+      <Form.TextArea id="checklistItems" placeholder="One item per line..." title="Checklist Items" />
     </Form>
   );
 };

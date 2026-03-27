@@ -13,7 +13,7 @@ export const useChecklistItems = (taskId: string | null) => {
         variables: { taskId: tId },
       }),
     [taskId || ""],
-    { execute: !!taskId }
+    { execute: !!taskId },
   );
 
   return { checklistItems: data || [], error, isLoading, revalidate };

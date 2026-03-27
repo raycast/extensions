@@ -17,18 +17,14 @@ const toEpoch = (value: string | null | undefined): number | null => {
   return Number.isNaN(ms) ? null : ms;
 };
 
-const hasDeadlineOnDay = (
-  task: TaskRecord,
-  dayStart: number,
-  dayEnd: number
-): boolean => {
+const hasDeadlineOnDay = (task: TaskRecord, dayStart: number, dayEnd: number): boolean => {
   const deadlineAt = toEpoch(task.deadlineAt);
   return deadlineAt !== null && deadlineAt >= dayStart && deadlineAt < dayEnd;
 };
 
 export const buildTaskStartFields = (
   view: TaskView,
-  now = new Date()
+  now = new Date(),
 ): {
   start: string;
   startBucket: string;
@@ -150,8 +146,7 @@ const getTaskView = (task: TaskRecord, now = new Date()): TaskView | null => {
   return "upcoming";
 };
 
-export const matchesView = (task: TaskRecord, view: TaskView): boolean =>
-  getTaskView(task) === view;
+export const matchesView = (task: TaskRecord, view: TaskView): boolean => getTaskView(task) === view;
 
 export const formatDate = (isoDate: string | null | undefined): string => {
   if (!isoDate) {

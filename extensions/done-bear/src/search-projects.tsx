@@ -7,23 +7,11 @@ import { useProjects } from "./hooks/use-projects";
 import { oauthService } from "./oauth";
 
 const SearchProjects = () => {
-  const {
-    workspaceId,
-    allWorkspaceIds,
-    isLoading: isLoadingWorkspace,
-    dropdown,
-  } = useWorkspaceDropdown();
-  const { projects, isLoading: isLoadingProjects } = useProjects(
-    workspaceId,
-    allWorkspaceIds
-  );
+  const { workspaceId, allWorkspaceIds, isLoading: isLoadingWorkspace, dropdown } = useWorkspaceDropdown();
+  const { projects, isLoading: isLoadingProjects } = useProjects(workspaceId, allWorkspaceIds);
 
-  const activeProjects = projects.filter(
-    (p) => !(p.completedAt || p.archivedAt)
-  );
-  const completedProjects = projects.filter(
-    (p) => p.completedAt && !p.archivedAt
-  );
+  const activeProjects = projects.filter((p) => !(p.completedAt || p.archivedAt));
+  const completedProjects = projects.filter((p) => p.completedAt && !p.archivedAt);
 
   return (
     <List
@@ -40,10 +28,7 @@ const SearchProjects = () => {
         ))}
       </List.Section>
       {completedProjects.length > 0 && (
-        <List.Section
-          subtitle={`${completedProjects.length}`}
-          title="Completed"
-        >
+        <List.Section subtitle={`${completedProjects.length}`} title="Completed">
           {completedProjects.map((project) => (
             <ProjectListItem key={project.id} project={project} />
           ))}

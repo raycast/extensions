@@ -7,27 +7,14 @@ import { useWorkspaces } from "./hooks/use-workspaces";
 import { oauthService } from "./oauth";
 
 const MenuBarToday = () => {
-  const {
-    workspaceId,
-    allWorkspaceIds,
-    isLoading: isLoadingWorkspace,
-  } = useWorkspaces();
-  const {
-    tasks,
-    isLoading: isLoadingTasks,
-    revalidate,
-  } = useTasks(workspaceId, "today", allWorkspaceIds);
+  const { workspaceId, allWorkspaceIds, isLoading: isLoadingWorkspace } = useWorkspaces();
+  const { tasks, isLoading: isLoadingTasks, revalidate } = useTasks(workspaceId, "today", allWorkspaceIds);
 
   const isLoading = isLoadingWorkspace || isLoadingTasks;
   const title = isLoading ? "" : `${tasks.length}`;
 
   return (
-    <MenuBarExtra
-      icon={Icon.Star}
-      isLoading={isLoading}
-      title={title}
-      tooltip="Done Bear - Today"
-    >
+    <MenuBarExtra icon={Icon.Star} isLoading={isLoading} title={title} tooltip="Done Bear - Today">
       <MenuBarExtra.Section title="Today's Tasks">
         {tasks.map((task) => {
           // oxlint-disable-next-line jsx-no-new-function-as-prop -- handler in map body
@@ -45,26 +32,16 @@ const MenuBarToday = () => {
               revalidate();
             } catch (error) {
               await showToast({
-                message:
-                  error instanceof Error ? error.message : "Unknown error",
+                message: error instanceof Error ? error.message : "Unknown error",
                 style: Toast.Style.Failure,
                 title: "Failed to complete task",
               });
             }
           };
-          return (
-            <MenuBarExtra.Item
-              icon={Icon.Circle}
-              key={task.id}
-              onAction={handleAction}
-              title={task.title}
-            />
-          );
+          return <MenuBarExtra.Item icon={Icon.Circle} key={task.id} onAction={handleAction} title={task.title} />;
         })}
       </MenuBarExtra.Section>
-      {tasks.length === 0 && !isLoading && (
-        <MenuBarExtra.Item title="No tasks for today" />
-      )}
+      {tasks.length === 0 && !isLoading && <MenuBarExtra.Item title="No tasks for today" />}
     </MenuBarExtra>
   );
 };

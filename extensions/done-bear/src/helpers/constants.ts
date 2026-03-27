@@ -2,10 +2,7 @@ import { Color, Icon } from "@raycast/api";
 
 import type { TaskView } from "../api/types";
 
-export const VIEW_CONFIG: Record<
-  TaskView,
-  { title: string; icon: Icon; color: Color }
-> = {
+export const VIEW_CONFIG: Record<TaskView, { title: string; icon: Icon; color: Color }> = {
   anytime: { color: Color.Green, icon: Icon.Calendar, title: "Anytime" },
   inbox: { color: Color.Blue, icon: Icon.Tray, title: "Inbox" },
   someday: { color: Color.Orange, icon: Icon.Cloud, title: "Someday" },

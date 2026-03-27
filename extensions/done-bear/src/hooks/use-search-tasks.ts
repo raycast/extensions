@@ -12,10 +12,7 @@ interface SearchTasksQueryData {
   };
 }
 
-const searchTasks = async (
-  workspaceId: string,
-  search: string
-): Promise<TaskRecord[]> => {
+const searchTasks = async (workspaceId: string, search: string): Promise<TaskRecord[]> => {
   const data = await graphqlRequest<SearchTasksQueryData>(SEARCH_TASKS_QUERY, {
     after: null,
     first: 50,
@@ -26,28 +23,18 @@ const searchTasks = async (
   return data.tasks.nodes;
 };
 
-const searchTasksAll = async (
-  workspaceIds: string[],
-  search: string
-): Promise<TaskRecord[]> => {
-  const data = await graphqlRequest<SearchTasksQueryData>(
-    SEARCH_TASKS_ALL_QUERY,
-    {
-      after: null,
-      first: 50,
-      search,
-      workspaceIds,
-    }
-  );
+const searchTasksAll = async (workspaceIds: string[], search: string): Promise<TaskRecord[]> => {
+  const data = await graphqlRequest<SearchTasksQueryData>(SEARCH_TASKS_ALL_QUERY, {
+    after: null,
+    first: 50,
+    search,
+    workspaceIds,
+  });
 
   return data.tasks.nodes;
 };
 
-export const useSearchTasks = (
-  workspaceId: string | null,
-  searchText: string,
-  allWorkspaceIds?: string[]
-) => {
+export const useSearchTasks = (workspaceId: string | null, searchText: string, allWorkspaceIds?: string[]) => {
   const { isAll, cacheKey } = resolveAllScope(workspaceId, allWorkspaceIds);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -59,11 +46,8 @@ export const useSearchTasks = (
     },
     [cacheKey, searchText],
     {
-      execute:
-        !!workspaceId &&
-        searchText.length > 0 &&
-        (isAll || workspaceId !== ALL_WORKSPACES_ID),
-    }
+      execute: !!workspaceId && searchText.length > 0 && (isAll || workspaceId !== ALL_WORKSPACES_ID),
+    },
   );
 
   return { error, isLoading, revalidate, tasks: data || [] };

@@ -21,11 +21,7 @@ export default function TaskList({ view }: TaskListProps) {
     isLoading: isLoadingWorkspace,
     dropdown,
   } = useWorkspaceDropdown();
-  const {
-    tasks,
-    isLoading: isLoadingTasks,
-    revalidate,
-  } = useTasks(workspaceId, view, allWorkspaceIds);
+  const { tasks, isLoading: isLoadingTasks, revalidate } = useTasks(workspaceId, view, allWorkspaceIds);
   const { projects } = useProjects(workspaceId, allWorkspaceIds);
 
   return (
@@ -34,10 +30,7 @@ export default function TaskList({ view }: TaskListProps) {
       searchBarAccessory={dropdown}
       searchBarPlaceholder={`Filter ${config.title.toLowerCase()} tasks...`}
     >
-      <List.Section
-        subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`}
-        title={config.title}
-      >
+      <List.Section subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`} title={config.title}>
         {tasks.map((task) => (
           <TaskListItem
             key={task.id}

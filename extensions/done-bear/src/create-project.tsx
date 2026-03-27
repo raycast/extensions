@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  popToRoot,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useCallback, useState } from "react";
 
@@ -24,11 +16,7 @@ interface FormValues {
 }
 
 const CreateProject = () => {
-  const {
-    workspaces,
-    workspaceId: selectedWorkspaceId,
-    isLoading: isLoadingWorkspace,
-  } = useWorkspaces();
+  const { workspaces, workspaceId: selectedWorkspaceId, isLoading: isLoadingWorkspace } = useWorkspaces();
   const isAll = selectedWorkspaceId === ALL_WORKSPACES_ID;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,9 +38,7 @@ const CreateProject = () => {
         return;
       }
 
-      const targetWorkspaceId = isAll
-        ? values.workspaceId || workspaces[0]?.id
-        : selectedWorkspaceId;
+      const targetWorkspaceId = isAll ? values.workspaceId || workspaces[0]?.id : selectedWorkspaceId;
 
       if (!targetWorkspaceId) {
         await showToast({
@@ -68,9 +54,7 @@ const CreateProject = () => {
           description: values.description?.trim() || undefined,
           key: values.key.trim().toUpperCase(),
           name: values.name.trim(),
-          targetDate: values.targetDate
-            ? dateOnlyEpochFromLocalDate(values.targetDate)
-            : undefined,
+          targetDate: values.targetDate ? dateOnlyEpochFromLocalDate(values.targetDate) : undefined,
         });
         await showToast({
           style: Toast.Style.Success,
@@ -87,41 +71,24 @@ const CreateProject = () => {
         setIsSubmitting(false);
       }
     },
-    [isAll, workspaces, selectedWorkspaceId]
+    [isAll, workspaces, selectedWorkspaceId],
   );
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            icon={Icon.Plus}
-            onSubmit={handleSubmit}
-            title="Create Project"
-          />
+          <Action.SubmitForm icon={Icon.Plus} onSubmit={handleSubmit} title="Create Project" />
         </ActionPanel>
       }
       isLoading={isLoadingWorkspace || isSubmitting}
     >
-      <Form.TextField
-        autoFocus
-        id="name"
-        placeholder="Project name..."
-        title="Name"
-      />
+      <Form.TextField autoFocus id="name" placeholder="Project name..." title="Name" />
       <Form.TextField id="key" placeholder="PROJECT" title="Key" />
-      <Form.TextArea
-        id="description"
-        placeholder="Project description..."
-        title="Description"
-      />
+      <Form.TextArea id="description" placeholder="Project description..." title="Description" />
       <Form.DatePicker id="targetDate" title="Target Date" />
       {isAll && workspaces.length > 1 && (
-        <Form.Dropdown
-          defaultValue={workspaces[0]?.id}
-          id="workspaceId"
-          title="Workspace"
-        >
+        <Form.Dropdown defaultValue={workspaces[0]?.id} id="workspaceId" title="Workspace">
           {workspaces.map((w) => (
             <Form.Dropdown.Item key={w.id} title={w.name} value={w.id} />
           ))}

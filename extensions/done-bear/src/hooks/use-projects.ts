@@ -5,10 +5,7 @@ import { PROJECTS_ALL_QUERY, PROJECTS_QUERY } from "../api/queries";
 import type { ProjectRecord } from "../api/types";
 import { ALL_WORKSPACES_ID, resolveAllScope } from "./use-workspaces";
 
-export const useProjects = (
-  workspaceId: string | null,
-  allWorkspaceIds?: string[]
-) => {
+export const useProjects = (workspaceId: string | null, allWorkspaceIds?: string[]) => {
   const { isAll, cacheKey } = resolveAllScope(workspaceId, allWorkspaceIds);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
@@ -27,7 +24,7 @@ export const useProjects = (
       });
     },
     [cacheKey],
-    { execute: !!workspaceId && (isAll || workspaceId !== ALL_WORKSPACES_ID) }
+    { execute: !!workspaceId && (isAll || workspaceId !== ALL_WORKSPACES_ID) },
   );
 
   return { error, isLoading, projects: data || [], revalidate };

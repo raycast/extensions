@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useCallback } from "react";
 
 import { completeTask, reopenTask } from "../api/mutations";
@@ -19,16 +12,10 @@ interface TaskDetailProps {
   revalidate: () => void;
 }
 
-export default function TaskDetail({
-  task,
-  projects,
-  revalidate,
-}: TaskDetailProps) {
+export default function TaskDetail({ task, projects, revalidate }: TaskDetailProps) {
   const { checklistItems } = useChecklistItems(task.id);
   const state = getTaskState(task);
-  const project = task.projectId
-    ? projects.find((p) => p.id === task.projectId)
-    : undefined;
+  const project = task.projectId ? projects.find((p) => p.id === task.projectId) : undefined;
 
   let markdown = `# ${task.title}\n\n`;
 
@@ -114,25 +101,10 @@ export default function TaskDetail({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label text={state} title="Status" />
-          {project && (
-            <Detail.Metadata.Label text={project.name} title="Project" />
-          )}
-          {task.deadlineAt && (
-            <Detail.Metadata.Label
-              text={formatDate(task.deadlineAt)}
-              title="Deadline"
-            />
-          )}
-          {task.startDate && (
-            <Detail.Metadata.Label
-              text={formatDate(task.startDate)}
-              title="Start Date"
-            />
-          )}
-          <Detail.Metadata.Label
-            text={formatDate(task.createdAt)}
-            title="Created"
-          />
+          {project && <Detail.Metadata.Label text={project.name} title="Project" />}
+          {task.deadlineAt && <Detail.Metadata.Label text={formatDate(task.deadlineAt)} title="Deadline" />}
+          {task.startDate && <Detail.Metadata.Label text={formatDate(task.startDate)} title="Start Date" />}
+          <Detail.Metadata.Label text={formatDate(task.createdAt)} title="Created" />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label text={task.id} title="ID" />
         </Detail.Metadata>

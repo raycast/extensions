@@ -9,7 +9,7 @@ const buildMutateRequest = (
   modelName: string,
   modelId: string,
   action: "INSERT" | "UPDATE" | "ARCHIVE" | "UNARCHIVE",
-  payload: Record<string, unknown>
+  payload: Record<string, unknown>,
 ) => ({
   batchId: randomUUID(),
   transactions: [
@@ -35,7 +35,7 @@ export const createTask = async (
     projectId?: string;
     teamId?: string;
     assigneeId?: string;
-  }
+  },
 ): Promise<string> => {
   const id = randomUUID();
   const startFields = buildTaskStartFields(fields.view || "inbox");
@@ -75,14 +75,12 @@ export const completeTask = async (taskId: string): Promise<void> => {
   await syncMutate(
     buildMutateRequest("Task", taskId, "UPDATE", {
       completedAt: instantEpochFromDate(new Date()),
-    })
+    }),
   );
 };
 
 export const reopenTask = async (taskId: string): Promise<void> => {
-  await syncMutate(
-    buildMutateRequest("Task", taskId, "UPDATE", { completedAt: null })
-  );
+  await syncMutate(buildMutateRequest("Task", taskId, "UPDATE", { completedAt: null }));
 };
 
 export const archiveTask = async (taskId: string): Promise<void> => {
@@ -100,7 +98,7 @@ export const createProject = async (
     key: string;
     description?: string;
     targetDate?: number;
-  }
+  },
 ): Promise<string> => {
   const id = randomUUID();
 
@@ -127,7 +125,7 @@ export const createChecklistItem = async (
   workspaceId: string,
   taskId: string,
   title: string,
-  sortOrder: number
+  sortOrder: number,
 ): Promise<string> => {
   const id = randomUUID();
 
@@ -138,7 +136,7 @@ export const createChecklistItem = async (
       taskId,
       title,
       workspaceId,
-    })
+    }),
   );
 
   return id;

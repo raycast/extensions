@@ -11,17 +11,8 @@ const WorkspaceDropdown = ({
   selectedId: string;
   onSelect: (id: string) => void;
 }) => (
-  <List.Dropdown
-    onChange={onSelect}
-    tooltip="Select Workspace"
-    value={selectedId}
-  >
-    <List.Dropdown.Item
-      icon={Icon.Globe}
-      key="all"
-      title="All Workspaces"
-      value={ALL_WORKSPACES_ID}
-    />
+  <List.Dropdown onChange={onSelect} tooltip="Select Workspace" value={selectedId}>
+    <List.Dropdown.Item icon={Icon.Globe} key="all" title="All Workspaces" value={ALL_WORKSPACES_ID} />
     {workspaces.map((w) => (
       <List.Dropdown.Item key={w.id} title={w.name} value={w.id} />
     ))}
@@ -29,22 +20,11 @@ const WorkspaceDropdown = ({
 );
 
 export const useWorkspaceDropdown = () => {
-  const {
-    workspaces,
-    workspaceId,
-    allWorkspaceIds,
-    isAllWorkspaces,
-    selectWorkspace,
-    isLoading,
-  } = useWorkspaces();
+  const { workspaces, workspaceId, allWorkspaceIds, isAllWorkspaces, selectWorkspace, isLoading } = useWorkspaces();
 
   const dropdown =
     workspaces.length > 1 ? (
-      <WorkspaceDropdown
-        onSelect={selectWorkspace}
-        selectedId={workspaceId || ""}
-        workspaces={workspaces}
-      />
+      <WorkspaceDropdown onSelect={selectWorkspace} selectedId={workspaceId || ""} workspaces={workspaces} />
     ) : undefined;
 
   return {

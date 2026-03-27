@@ -18,11 +18,7 @@ const SearchTasks = () => {
     isLoading: isLoadingWorkspace,
     dropdown,
   } = useWorkspaceDropdown();
-  const {
-    tasks,
-    isLoading: isSearching,
-    revalidate,
-  } = useSearchTasks(workspaceId, searchText, allWorkspaceIds);
+  const { tasks, isLoading: isSearching, revalidate } = useSearchTasks(workspaceId, searchText, allWorkspaceIds);
   const { projects } = useProjects(workspaceId, allWorkspaceIds);
 
   return (
@@ -34,15 +30,9 @@ const SearchTasks = () => {
       throttle
     >
       {searchText.length === 0 ? (
-        <List.EmptyView
-          description="Search across all your tasks"
-          title="Type to Search"
-        />
+        <List.EmptyView description="Search across all your tasks" title="Type to Search" />
       ) : (
-        <List.Section
-          subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`}
-          title="Results"
-        >
+        <List.Section subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`} title="Results">
           {tasks.map((task) => (
             <TaskListItem
               key={task.id}

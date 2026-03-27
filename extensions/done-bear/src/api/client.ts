@@ -49,10 +49,7 @@ interface GraphqlResponse<T> {
   errors?: GraphqlError[];
 }
 
-export const graphqlRequest = async <T>(
-  query: string,
-  variables: Record<string, unknown> = {}
-): Promise<T> => {
+export const graphqlRequest = async <T>(query: string, variables: Record<string, unknown> = {}): Promise<T> => {
   const token = await getToken();
   const response = await fetch(`${API_URL}/graphql`, {
     body: JSON.stringify({ query, variables }),
@@ -82,9 +79,7 @@ export const graphqlRequest = async <T>(
 };
 
 export const fetchWorkspaces = async (): Promise<WorkspaceSummary[]> => {
-  const data = await graphqlRequest<{ myWorkspaces: WorkspaceSummary[] }>(
-    MY_WORKSPACES_QUERY
-  );
+  const data = await graphqlRequest<{ myWorkspaces: WorkspaceSummary[] }>(MY_WORKSPACES_QUERY);
   return data.myWorkspaces;
 };
 
@@ -103,10 +98,7 @@ export const paginateGraphql = async <T>(options: {
 
   for (let page = 0; page < 100; page += 1) {
     const variables = { after, first: 100, ...options.variables };
-    const data: Record<string, PaginatedResponse<T>> = await graphqlRequest(
-      options.query,
-      variables
-    );
+    const data: Record<string, PaginatedResponse<T>> = await graphqlRequest(options.query, variables);
 
     const connection: PaginatedResponse<T> = data[options.nodeKey];
     results.push(...connection.nodes);
