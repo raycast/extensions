@@ -1,6 +1,6 @@
 # Emoji Kitchen Changelog
 
-# [Updates] - {PR_MERGE_DATE}
+## [Updates] - {PR_MERGE_DATE}
 
 - Added Windows support.  
 - Added the AI Extension.  
