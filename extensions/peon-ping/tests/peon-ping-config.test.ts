@@ -20,6 +20,12 @@ test("resolvePeonPingPaths prefers Raycast preference over env and home default"
   expect(withPreference.configFilePath).toBe(
     join(preferenceDir, "hooks/peon-ping/config.json"),
   );
+  expect(withPreference.pausedFilePath).toBe(
+    join(preferenceDir, "hooks/peon-ping/.paused"),
+  );
+  expect(withPreference.scriptPath).toBe(
+    join(preferenceDir, "hooks/peon-ping/peon.sh"),
+  );
 
   const envWins = resolvePeonPingPaths({
     homeDir,
@@ -37,18 +43,43 @@ test("resolvePeonPingPaths prefers Raycast preference over env and home default"
   expect(homeDefault.configFilePath).toBe(
     join(homeDir, ".claude", "hooks/peon-ping/config.json"),
   );
+  expect(homeDefault.pausedFilePath).toBe(
+    join(homeDir, ".claude", "hooks/peon-ping/.paused"),
+  );
+  expect(homeDefault.scriptPath).toBe(
+    join(homeDir, ".claude", "hooks/peon-ping/peon.sh"),
+  );
 });
 
 test("getPeonPingStatus reads enabled false from config JSON", () => {
   const fx = createClaudeConfigFixture();
   fx.writeConfigJson({ enabled: false });
-  expect(getPeonPingStatus(fx.configFilePath)).toEqual({ enabled: false });
+  expect(
+    getPeonPingStatus(fx.configFilePath, fx.pausedFilePath),
+  ).toEqual({ enabled: false });
+});
+
+test("getPeonPingStatus is effectively enabled when config enabled and not paused", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true });
+  expect(
+    getPeonPingStatus(fx.configFilePath, fx.pausedFilePath),
+  ).toEqual({ enabled: true });
+});
+
+test("getPeonPingStatus is effectively disabled when paused file exists", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true });
+  fx.touchPaused();
+  expect(
+    getPeonPingStatus(fx.configFilePath, fx.pausedFilePath),
+  ).toEqual({ enabled: false });
 });
 
 test("getPeonPingStatus throws when enabled is missing", () => {
   const fx = createClaudeConfigFixture();
   fx.writeConfigJson({});
-  expect(() => getPeonPingStatus(fx.configFilePath)).toThrow(
-    "peon-ping config is missing boolean enabled",
-  );
+  expect(() =>
+    getPeonPingStatus(fx.configFilePath, fx.pausedFilePath),
+  ).toThrow("peon-ping config is missing boolean enabled");
 });

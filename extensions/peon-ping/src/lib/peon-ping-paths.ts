@@ -3,6 +3,8 @@ import { join } from "node:path";
 export type PeonPingResolvedPaths = {
   claudeConfigDir: string;
   configFilePath: string;
+  pausedFilePath: string;
+  scriptPath: string;
 };
 
 export type ResolvePeonPingPathsInput = {
@@ -23,8 +25,11 @@ export function resolvePeonPingPaths(
   input: ResolvePeonPingPathsInput,
 ): PeonPingResolvedPaths {
   const claudeConfigDir = pickClaudeConfigDir(input);
+  const hookDir = join(claudeConfigDir, "hooks/peon-ping");
   return {
     claudeConfigDir,
-    configFilePath: join(claudeConfigDir, "hooks/peon-ping/config.json"),
+    configFilePath: join(hookDir, "config.json"),
+    pausedFilePath: join(hookDir, ".paused"),
+    scriptPath: join(hookDir, "peon.sh"),
   };
 }
