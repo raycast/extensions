@@ -1,5 +1,10 @@
 # Changelog
 
+## [Agent-Specific Skill Installation] - {PR_MERGE_DATE}
+
+- Support installing skills to specific agents instead of all agents at once
+- Show all 43 supported agents with already-installed agents marked as read-only
+
 ## [Fix `fnm` macOS Path Resolution] - 2026-03-28
 
 - Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
