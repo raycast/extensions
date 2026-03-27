@@ -8,6 +8,8 @@ interface StockListItemProps {
   quote: Quote;
   financials?: FinancialDetails | null;
   isFavorite: boolean;
+  isShowingDetail: boolean;
+  onToggleDetailView: () => void;
   onAddFavorite?: () => void;
   onRemoveFavorite?: () => void;
   onMoveUp?: () => void;
@@ -18,26 +20,38 @@ export function StockListItem({
   quote,
   financials,
   isFavorite,
+  isShowingDetail,
+  onToggleDetailView,
   onAddFavorite,
   onRemoveFavorite,
   onMoveUp,
   onMoveDown,
 }: StockListItemProps) {
   const googleFinanceUrl = `https://www.google.com/finance/quote/${quote.symbol}:${quote.exchange}`;
+  const priceText = formatMoney(quote.price, quote.currency);
 
   return (
     <List.Item
       title={quote.symbol}
-      subtitle={quote.name}
+      subtitle={isShowingDetail ? quote.name : undefined}
       icon={changeIcon(quote.change)}
-      accessories={[
-        {
-          text: {
-            value: formatMoney(quote.price, quote.currency),
-            color: changeColor(quote.change),
-          },
-        },
-      ]}
+      accessories={
+        isShowingDetail
+          ? []
+          : [
+              {
+                text: {
+                  value: quote.name,
+                },
+              },
+              {
+                text: {
+                  value: priceText,
+                  color: changeColor(quote.change),
+                },
+              },
+            ]
+      }
       detail={<StockDetail quote={quote} financials={financials} />}
       actions={
         <ActionPanel>
@@ -69,6 +83,11 @@ export function StockListItem({
               onAction={onMoveDown}
             />
           )}
+          <Action
+            title={isShowingDetail ? "Switch to List View" : "Switch to Detail View"}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={onToggleDetailView}
+          />
         </ActionPanel>
       }
     />

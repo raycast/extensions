@@ -7,6 +7,8 @@ interface FavoritesListProps {
   favorites: { symbol: string; exchange?: string }[];
   quotes: Map<string, Quote>;
   financials: Map<string, FinancialDetails>;
+  isShowingDetail: boolean;
+  onToggleDetailView: () => void;
   isFavorite: (symbol: string) => boolean;
   onRemoveFavorite: (symbol: string) => void;
   onMoveUp: (symbol: string) => void;
@@ -17,6 +19,8 @@ export function FavoritesList({
   favorites,
   quotes,
   financials,
+  isShowingDetail,
+  onToggleDetailView,
   isFavorite,
   onRemoveFavorite,
   onMoveUp,
@@ -37,6 +41,8 @@ export function FavoritesList({
             quote={quote}
             financials={financials.get(fav.symbol)}
             isFavorite={isFavorite(fav.symbol)}
+            isShowingDetail={isShowingDetail}
+            onToggleDetailView={onToggleDetailView}
             onRemoveFavorite={() => onRemoveFavorite(fav.symbol)}
             onMoveUp={() => onMoveUp(fav.symbol)}
             onMoveDown={() => onMoveDown(fav.symbol)}
