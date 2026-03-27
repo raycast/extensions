@@ -1,39 +1,17 @@
-import { List, ActionPanel, Action, Detail, Icon } from "@raycast/api";
-import {
-  formatPercentage,
-  getFirstOutcomePrice,
-  trimQuestion,
-  formatVolumeWithSuffix,
-  getMarketUrl,
-  parseOutcomeData,
-} from "./utils";
-import { Ticker, Market, Interval, PolyPriceHistory, PolyPricePoint, Tag } from "./types";
+import { Detail, ActionPanel, Action } from "@raycast/api";
+import { parseOutcomeData, getMarketUrl } from "../helpers";
+import { Ticker, Market, Interval, PolyPriceHistory, PolyPricePoint, Tag } from "../types";
 import { useFetch } from "@raycast/utils";
-import { POLY_CLOB_URL } from "./constants";
-import { renderGraphToSVG } from "./graph";
+import { POLY_CLOB_URL } from "../../../utils/constants";
+import { renderGraphToSVG } from "../../../components/graph/Graph";
 
-// TODO: Better organise various components
-// TODO: Move various api calls into dedicated file
-// TODO: Make AI API results available to AI commands. E.g. ask ai about market.
-
-function JsonItem({ json }: { json: object }) {
-  return (
-    <Detail
-      markdown={`\`\`\`json\n${JSON.stringify(json, null, 2)}\n\`\`\``}
-      navigationTitle="Raw Data"
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Raw Data"
-            content={JSON.stringify(json, null, 2)}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
+/**
+ * Renders the active metadata statuses for a given Market details view.
+ * Displays conditionally loaded tags such as "Active", "Closed", "Featured", etc.
+ *
+ * @param props.market - The Polymarket `Market` object containing boolean state flags.
+ * @returns {JSX.Element} A Raycast `Detail.Metadata.TagList` showing applicable statuses.
+ */
 function MarketStatusList({ market }: { market: Market }) {
   return (
     <Detail.Metadata.TagList title="Status">
@@ -47,6 +25,13 @@ function MarketStatusList({ market }: { market: Market }) {
   );
 }
 
+/**
+ * Renders the possible voting outcomes and their current trading prices.
+ * Parses the raw outcome tokens (e.g., "Yes", "No") and pairs them with their JSON stringified values.
+ *
+ * @param props.market - The Polymarket `Market` object whose outcomes need parsing.
+ * @returns {JSX.Element} A Raycast `Detail.Metadata.TagList` tracking the outcome values.
+ */
 function MarketOutcomeList({ market }: { market: Market }) {
   const parsedOutcomes = parseOutcomeData(market);
   return (
@@ -58,6 +43,13 @@ function MarketOutcomeList({ market }: { market: Market }) {
   );
 }
 
+/**
+ * Renders the list of categorical tags (e.g., "Politics", "Crypto") associated with the parent Event.
+ * Useful for filtering and giving contextual hints below the Market description.
+ *
+ * @param props.tags - An array of `Tag` objects extracted from the parent `Ticker`.
+ * @returns {JSX.Element} A Raycast `Detail.Metadata.TagList` rendering each Tag's label.
+ */
 function MarketTagList({ tags }: { tags: Tag[] }) {
   return (
     <Detail.Metadata.TagList title="Tags">
@@ -68,7 +60,18 @@ function MarketTagList({ tags }: { tags: Tag[] }) {
   );
 }
 
-function MarketDetails({ market, ticker }: { market: Market; ticker: Ticker }) {
+/**
+ * Main "Details Page" for a specific condition/market within an Event.
+ * Orchestrates the data-fetching for the 2D Line Chart (SVG historic prices) and renders a detailed
+ * breakdown of the market statistics including Volume, Spread, Order sizes, and URL shortcuts.
+ *
+ * This is the UI presented when a user presses `Cmd + D` (or "View Market Details") on a specific market row.
+ *
+ * @param props.market - The exact `Market` condition user selected.
+ * @param props.ticker - The overarching `Ticker` (Event) that hosts this market, providing broader tags.
+ * @returns {JSX.Element} A complex Raycast `Detail` component mapping price vectors and metadata.
+ */
+export function MarketDetails({ market, ticker }: { market: Market; ticker: Ticker }) {
   const parsedOutcomes = parseOutcomeData(market);
   // TODO: Make the interval a choice in the search bar.
   const interval: Interval = "max";
@@ -166,85 +169,3 @@ function MarketDetails({ market, ticker }: { market: Market; ticker: Ticker }) {
     />
   );
 }
-
-function EventListItem({ ticker }: { ticker: Ticker }) {
-  return (
-    <List.Item
-      key={ticker.slug}
-      title={ticker.title}
-      subtitle={`${ticker.markets.length} markets`}
-      accessories={[{ text: `24h Vol: ${formatVolumeWithSuffix(ticker.volume24hr)}` }]}
-      actions={
-        <ActionPanel>
-          <Action.Push title="View Markets" target={<MarketList ticker={ticker} />} icon={Icon.AppWindowList} />
-          <Action.CopyToClipboard
-            title="Copy Market Summary"
-            content={`${ticker.title}\n24h Volume: ${formatVolumeWithSuffix(ticker.volume24hr)}\nMarkets: ${ticker.markets.length}`}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function MarketListItem({ market, ticker }: { market: Market; ticker: Ticker }) {
-  if (!market.outcomePrices || (!market.groupItemTitle && !market.question)) {
-    return null;
-  }
-
-  const firstPrice = getFirstOutcomePrice(market.outcomePrices);
-  const volume = Number(market.volume24hr) || 0;
-
-  return (
-    <List.Item
-      key={market.slug}
-      title={market.groupItemTitle || trimQuestion(market.question)}
-      accessories={[{ text: formatPercentage(firstPrice) }, { text: `24h Vol: ${formatVolumeWithSuffix(volume)}` }]}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open Market" url={getMarketUrl(ticker.slug)} />
-          <Action.Push
-            icon={Icon.LineChart}
-            title="View Market Details"
-            target={<MarketDetails market={market} ticker={ticker} />}
-            shortcut={{ modifiers: ["cmd"], key: "d" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Market Summary"
-            content={`${market.groupItemTitle || market.question}\n${formatPercentage(firstPrice)}\n24h Volume: ${formatVolumeWithSuffix(volume)}`}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action.Push
-            icon={Icon.Code}
-            title="View Raw Data"
-            target={<JsonItem json={market} />}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-function MarketList({ ticker }: { ticker: Ticker }) {
-  const sortedMarkets = [...ticker.markets].sort((a, b) => {
-    const aPrice = getFirstOutcomePrice(a.outcomePrices);
-    const bPrice = getFirstOutcomePrice(b.outcomePrices);
-    return bPrice - aPrice;
-  });
-
-  return (
-    <List>
-      {sortedMarkets.map((market) => {
-        try {
-          return <MarketListItem market={market} ticker={ticker} key={market.slug} />;
-        } catch {
-          return null;
-        }
-      })}
-    </List>
-  );
-}
-
-export { EventListItem, MarketList };

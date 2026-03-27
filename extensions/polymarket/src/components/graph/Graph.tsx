@@ -1,4 +1,4 @@
-import { DataPoint } from "./types";
+import { DataPoint } from "../../types";
 import * as echarts from "echarts";
 import { EChartsOption } from "echarts";
 
