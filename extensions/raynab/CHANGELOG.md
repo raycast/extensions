@@ -1,6 +1,6 @@
 # Raynab Changelog
 
-## [Security: Refresh Lockfile] - {PR_MERGE_DATE}
+## [Security: Refresh Lockfile] - 2026-03-27
 
 ### 🔧 Technical Updates
 - Refreshed `package-lock.json` to update transitive `rollup` to `4.60.0` and address security advisories.

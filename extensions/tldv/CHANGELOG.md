@@ -1,6 +1,6 @@
 # Changelog
 
-## [Security: Refresh Lockfile] - {PR_MERGE_DATE}
+## [Security: Refresh Lockfile] - 2026-03-27
 
 ### Changed
 

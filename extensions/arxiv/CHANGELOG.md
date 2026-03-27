@@ -1,6 +1,6 @@
 # arXiv Changelog
 
-## [Security: Refresh Lockfile] - {PR_MERGE_DATE}
+## [Security: Refresh Lockfile] - 2026-03-27
 
 - Refreshed `package-lock.json` to update transitive `underscore` to `1.13.8` and address security advisories.
 
