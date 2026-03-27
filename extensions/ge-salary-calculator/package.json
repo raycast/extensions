@@ -19,6 +19,43 @@
       "title": "Salary Calculator",
       "description": "Calculate hourly, daily, weekly, and yearly salary from a monthly amount in GEL",
       "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Salary Menubar",
+      "description": "Shows your last calculated net salary in the menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hoursPerDay",
+      "type": "textfield",
+      "required": false,
+      "title": "Hours per Day",
+      "default": "8",
+      "description": "Default working hours per day"
+    },
+    {
+      "name": "daysPerWeek",
+      "type": "textfield",
+      "required": false,
+      "title": "Days per Week",
+      "default": "5",
+      "description": "Default working days per week"
+    },
+    {
+      "name": "taxRegime",
+      "type": "dropdown",
+      "required": false,
+      "title": "Tax Regime",
+      "default": "employee",
+      "description": "Your Georgian tax status",
+      "data": [
+        { "title": "Employee (−20% income tax −2% pension)", "value": "employee" },
+        { "title": "Small IE (−1% turnover tax)", "value": "small_ie" },
+        { "title": "Micro Business (no tax)", "value": "micro" }
+      ]
     }
   ],
   "dependencies": {
