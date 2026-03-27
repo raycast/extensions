@@ -5,6 +5,9 @@
   "description": "Browse the xkcd comics and keep track of the ones you've read.",
   "icon": "icon.png",
   "author": "maggie",
+  "contributors": [
+    "ronakguliani"
+  ],
   "license": "MIT",
   "commands": [
     {
