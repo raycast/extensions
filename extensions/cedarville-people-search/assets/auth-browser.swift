@@ -5,7 +5,7 @@ import Foundation
 let TARGET_HOST = "selfservice.cedarville.edu"
 let AUTH_COOKIES: Set<String> = [".ASPXAUTH", "studentselfservice_live"]
 let SIGN_IN_URL = URL(string: "https://selfservice.cedarville.edu/cedarinfo/directory")!
-let COOKIE_FILE = "/tmp/cedarsearch-cookie.txt"
+let COOKIE_FILE = CommandLine.arguments[1]
 
 class CookieObserver: NSObject, WKHTTPCookieStoreObserver {
     weak var browser: AuthBrowser?

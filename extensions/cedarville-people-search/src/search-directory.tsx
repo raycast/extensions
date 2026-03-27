@@ -35,7 +35,6 @@ import {
 import { getCacheSize, mergePeopleIntoCache, searchCache } from "./cache";
 import { getCachedPhotoPath } from "./images";
 
-
 type AuthState =
   | { kind: "loading" }
   | { kind: "ready"; cookie: string }
@@ -88,7 +87,8 @@ function formatPhone(phone: string): string {
   const digits = phone.replace(/\D/g, "");
   if (digits.length === 4) return `ext. ${digits}`;
   if (digits.length === 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  if (digits.length === 10) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+  if (digits.length === 10)
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
   if (digits.length === 11 && digits[0] === "1")
     return `+1 (${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`;
   return phone.trim();
@@ -97,15 +97,17 @@ function formatPhone(phone: string): string {
 const FACULTY_TITLE_KEYWORDS = /professor|instructor|lecturer|faculty/i;
 
 function isFacultyHeuristic(person: DirectoryPerson): boolean {
-	if (person.isFaculty !== undefined) return person.isFaculty;
-	return !!person.Title && FACULTY_TITLE_KEYWORDS.test(person.Title);
+  if (person.isFaculty !== undefined) return person.isFaculty;
+  return !!person.Title && FACULTY_TITLE_KEYWORDS.test(person.Title);
 }
 
 const DEMO_NAMES_STUDENT = ["Alex Johnson", "Jordan Smith", "Taylor Williams"];
-const DEMO_NAMES_STAFF   = ["Dr. Chris Brown", "Pat Miller", "Sam Davis"];
+const DEMO_NAMES_STAFF = ["Dr. Chris Brown", "Pat Miller", "Sam Davis"];
 
 function demoName(person: DirectoryPerson): string {
-  const isStaffPerson = !person.StudentType || !!(person.Title?.trim() && person.OfficeBuildingCode);
+  const isStaffPerson =
+    !person.StudentType ||
+    !!(person.Title?.trim() && person.OfficeBuildingCode);
   const pool = isStaffPerson ? DEMO_NAMES_STAFF : DEMO_NAMES_STUDENT;
   return pool[parseInt(person.Id.slice(-2), 10) % pool.length];
 }
@@ -128,10 +130,23 @@ function formatTime(t: string): string {
   return `${hour > 12 ? hour - 12 : hour || 12}:${m} ${hour >= 12 ? "PM" : "AM"}`;
 }
 
-const DAY_ORDER = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAY_ORDER = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 const DAY_ABBR: Record<string, string> = {
-  Monday: "M", Tuesday: "T", Wednesday: "W", Thursday: "Th",
-  Friday: "F", Saturday: "Sa", Sunday: "Su",
+  Monday: "M",
+  Tuesday: "T",
+  Wednesday: "W",
+  Thursday: "Th",
+  Friday: "F",
+  Saturday: "Sa",
+  Sunday: "Su",
 };
 const TYPE_LABEL: Record<string, string> = {
   Lecture: "",
@@ -159,7 +174,9 @@ function buildScheduleText(items: ScheduleItem[], demo: boolean): string {
   // Sort courses by earliest day of week
   const courses = [...courseMap.entries()].sort((a, b) => {
     const earliest = (slots: { days: string[] }[]) =>
-      Math.min(...slots.flatMap((s) => s.days.map((d) => DAY_ORDER.indexOf(d))));
+      Math.min(
+        ...slots.flatMap((s) => s.days.map((d) => DAY_ORDER.indexOf(d))),
+      );
     return earliest(a[1]) - earliest(b[1]);
   });
 
@@ -171,11 +188,15 @@ function buildScheduleText(items: ScheduleItem[], demo: boolean): string {
       const sortedSlots = [...slots].sort((a, b) => {
         const aFirst = Math.min(...a.days.map((d) => DAY_ORDER.indexOf(d)));
         const bFirst = Math.min(...b.days.map((d) => DAY_ORDER.indexOf(d)));
-        return aFirst - bFirst || a.item.startTime.localeCompare(b.item.startTime);
+        return (
+          aFirst - bFirst || a.item.startTime.localeCompare(b.item.startTime)
+        );
       });
 
       const timeLines = sortedSlots.map(({ item, days }) => {
-        const sortedDays = [...days].sort((a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b));
+        const sortedDays = [...days].sort(
+          (a, b) => DAY_ORDER.indexOf(a) - DAY_ORDER.indexOf(b),
+        );
         const dayStr = sortedDays.map((d) => DAY_ABBR[d] ?? d).join("");
         const timeStr = `${formatTime(item.startTime)}–${formatTime(item.endTime)}`;
         const typeStr = TYPE_LABEL[item.type] ?? item.type;
@@ -240,7 +261,9 @@ function PersonDetail({
   const md: string[] = [];
   if (!demo && photoDataUrl) md.push(`![Photo](${photoDataUrl})`);
   md.push(`# ${name}`);
-  const isStaff = !person.StudentType || !!(person.Title?.trim() && person.OfficeBuildingCode);
+  const isStaff =
+    !person.StudentType ||
+    !!(person.Title?.trim() && person.OfficeBuildingCode);
   const tags: string[] = [];
   if (isStaff) {
     tags.push(isFacultyHeuristic(person) ? "Faculty" : "Staff");
@@ -271,7 +294,9 @@ function PersonDetail({
     ? info.faculty.term?.description
     : info?.student?.term?.description;
 
-  const nonScheduled = info?.student?.isStudent ? (info.student.nonScheduledCourses ?? []) : [];
+  const nonScheduled = info?.student?.isStudent
+    ? (info.student.nonScheduledCourses ?? [])
+    : [];
 
   if (scheduleItems.length || nonScheduled.length) {
     md.push(`## Schedule${termDesc ? ` — ${termDesc}` : ""}\n`);
@@ -280,7 +305,10 @@ function PersonDetail({
       md.push("**Online / Unscheduled**");
       md.push(
         nonScheduled
-          .map((c) => `- ${demo ? "DEPT 000" : c.code} — ${demo ? "Course Name" : c.title} *(${c.methods})*`)
+          .map(
+            (c) =>
+              `- ${demo ? "DEPT 000" : c.code} — ${demo ? "Course Name" : c.title} *(${c.methods})*`,
+          )
           .join("\n"),
       );
     }
@@ -305,9 +333,9 @@ function PersonDetail({
               text={person.DepartmentDescription}
             />
           )}
-          {!!(isStaff ||
-            person.StudentClass ||
-            person.studentWorker) && <Detail.Metadata.Separator />}
+          {!!(isStaff || person.StudentClass || person.studentWorker) && (
+            <Detail.Metadata.Separator />
+          )}
           {isStaff ? (
             <Detail.Metadata.TagList title="Role">
               <Detail.Metadata.TagList.Item
@@ -352,10 +380,12 @@ function PersonDetail({
               />
             </Detail.Metadata.TagList>
           )}
-          {!!(person.DormName ||
+          {!!(
+            person.DormName ||
             person.OfficeBuildingName ||
             person.OfficePhone ||
-            info?.person?.box) && <Detail.Metadata.Separator />}
+            info?.person?.box
+          ) && <Detail.Metadata.Separator />}
           {person.DormName && (
             <Detail.Metadata.Label
               title="Dorm"
@@ -390,45 +420,84 @@ function PersonDetail({
               text={demo ? "ext. ****" : formatPhone(person.OfficePhone)}
             />
           )}
-          {!!(person.AddressCity || person.AddressState || info?.address?.addresslines?.length) && (
-            <Detail.Metadata.Separator />
-          )}
+          {!!(
+            person.AddressCity ||
+            person.AddressState ||
+            info?.address?.addresslines?.length
+          ) && <Detail.Metadata.Separator />}
           {!!(person.AddressCity || person.AddressState) && (
             <Detail.Metadata.Label
               title="Hometown"
-              text={demo ? "City, OH" : [person.AddressCity, person.AddressState].filter(Boolean).join(", ")}
+              text={
+                demo
+                  ? "City, OH"
+                  : [person.AddressCity, person.AddressState]
+                      .filter(Boolean)
+                      .join(", ")
+              }
             />
           )}
           {info?.address?.addresslines?.filter(Boolean).length ? (
             <Detail.Metadata.Label
               title="Address"
-              text={demo ? "123 Example St, City, OH 00000" : info.address.addresslines.filter(Boolean).join(", ")}
+              text={
+                demo
+                  ? "123 Example St, City, OH 00000"
+                  : info.address.addresslines.filter(Boolean).join(", ")
+              }
             />
           ) : null}
-          {info?.student?.isStudent && (() => {
-            const majors = info.student.majors.filter(m => m.desc?.trim());
-            const minors = info.student.minors.filter(m => m.desc?.trim());
-            const concentrations = info.student.concentrations.filter(c => c.desc?.trim());
-            const advisors = info.student.advisors.filter(a => a.advisor.name?.trim());
-            if (!majors.length && !minors.length && !concentrations.length && !advisors.length) return null;
-            return (
-              <>
-                <Detail.Metadata.Separator />
-                {majors.map((m) => (
-                  <Detail.Metadata.Label key={m.code} title="Major" text={m.desc} />
-                ))}
-                {minors.map((m) => (
-                  <Detail.Metadata.Label key={m.code} title="Minor" text={m.desc} />
-                ))}
-                {concentrations.map((c) => (
-                  <Detail.Metadata.Label key={c.code} title="Concentration" text={c.desc} />
-                ))}
-                {advisors.map((a) => (
-                  <Detail.Metadata.Label key={a.advisor.id} title="Advisor" text={demo ? "Advisor Name" : a.advisor.name} />
-                ))}
-              </>
-            );
-          })()}
+          {info?.student?.isStudent &&
+            (() => {
+              const majors = info.student.majors.filter((m) => m.desc?.trim());
+              const minors = info.student.minors.filter((m) => m.desc?.trim());
+              const concentrations = info.student.concentrations.filter((c) =>
+                c.desc?.trim(),
+              );
+              const advisors = info.student.advisors.filter((a) =>
+                a.advisor.name?.trim(),
+              );
+              if (
+                !majors.length &&
+                !minors.length &&
+                !concentrations.length &&
+                !advisors.length
+              )
+                return null;
+              return (
+                <>
+                  <Detail.Metadata.Separator />
+                  {majors.map((m) => (
+                    <Detail.Metadata.Label
+                      key={m.code}
+                      title="Major"
+                      text={m.desc}
+                    />
+                  ))}
+                  {minors.map((m) => (
+                    <Detail.Metadata.Label
+                      key={m.code}
+                      title="Minor"
+                      text={m.desc}
+                    />
+                  ))}
+                  {concentrations.map((c) => (
+                    <Detail.Metadata.Label
+                      key={c.code}
+                      title="Concentration"
+                      text={c.desc}
+                    />
+                  ))}
+                  {advisors.map((a) => (
+                    <Detail.Metadata.Label
+                      key={a.advisor.id}
+                      title="Advisor"
+                      text={demo ? "Advisor Name" : a.advisor.name}
+                    />
+                  ))}
+                </>
+              );
+            })()}
           {info?.faculty?.isFaculty && info.faculty.facultyDepts.length > 0 && (
             <>
               <Detail.Metadata.Separator />
@@ -442,7 +511,10 @@ function PersonDetail({
             </>
           )}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="ID" text={demo ? "000000000" : person.Id} />
+          <Detail.Metadata.Label
+            title="ID"
+            text={demo ? "000000000" : person.Id}
+          />
         </Detail.Metadata>
       }
       actions={
@@ -450,7 +522,9 @@ function PersonDetail({
           {person.Username && (
             <Action.CopyToClipboard
               title="Copy Email"
-              content={demo ? "username@cedarville.edu" : email(person.Username)}
+              content={
+                demo ? "username@cedarville.edu" : email(person.Username)
+              }
             />
           )}
           {!demo && person.Username && (
@@ -541,7 +615,12 @@ function PersonListItem({
   let badge: List.Item.Accessory | null = null;
   if (!isStudent) {
     const faculty = isFacultyHeuristic(person);
-    badge = { tag: { value: faculty ? "Faculty" : "Staff", color: faculty ? Color.Orange : Color.Green } };
+    badge = {
+      tag: {
+        value: faculty ? "Faculty" : "Staff",
+        color: faculty ? Color.Orange : Color.Green,
+      },
+    };
   } else if (person.StudentType === "DE") {
     badge = { tag: { value: "DE", color: Color.Orange } };
   } else if (person.StudentType === "GS" || person.StudentClass === "GS") {
@@ -599,7 +678,9 @@ function PersonListItem({
           {person.Username && (
             <Action.CopyToClipboard
               title="Copy Email"
-              content={demo ? "username@cedarville.edu" : email(person.Username)}
+              content={
+                demo ? "username@cedarville.edu" : email(person.Username)
+              }
             />
           )}
           {!demo && person.Username && (

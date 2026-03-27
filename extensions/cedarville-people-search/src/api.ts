@@ -76,7 +76,10 @@ export interface PersonInfo {
     majors: { code: string; desc: string }[];
     minors: { code: string; desc: string }[];
     concentrations: { code: string; desc: string }[];
-    advisors: { advisor: { id: string; name: string; email: string }; advisement: { type: string } }[];
+    advisors: {
+      advisor: { id: string; name: string; email: string };
+      advisement: { type: string };
+    }[];
     term: { key: string | null; description: string | null };
     nonScheduledCourses: { code: string; title: string; methods: string }[];
   };
@@ -144,7 +147,8 @@ export async function getPersonInfo(
 ): Promise<PersonInfo | null> {
   const url = `${BASE_URL}/CedarInfo/Info/Json?id=${id}&term=${term}`;
   const res = await fetch(url, { headers: makeHeaders(cookie) });
-  if (!res.ok || !res.headers.get("content-type")?.includes("json")) return null;
+  if (!res.ok || !res.headers.get("content-type")?.includes("json"))
+    return null;
   try {
     const data = await res.json();
     return data as PersonInfo;

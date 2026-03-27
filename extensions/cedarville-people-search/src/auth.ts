@@ -1,16 +1,15 @@
 import { environment, LocalStorage, showToast, Toast } from "@raycast/api";
-import { exec, spawn } from "child_process";
-import { mkdir, readFile, stat, symlink, unlink, writeFile } from "fs/promises";
+import { exec, execFile, spawn } from "child_process";
+import { mkdir, readFile, rm, stat, symlink, unlink, writeFile } from "fs/promises";
 import * as os from "os";
 import * as path from "path";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const COOKIE_KEY = "session_cookie";
 
-// Use /tmp directly (not os.tmpdir) so paths match the Swift binary's hardcoded path.
-// os.tmpdir() under Raycast returns /var/folders/…/T which differs from /tmp.
-const COOKIE_FILE = "/tmp/cedarsearch-cookie.txt";
+const COOKIE_FILE = path.join(environment.supportPath, "auth-cookie.txt");
 
 // ─── Cookie storage ────────────────────────────────────────────────────────
 
@@ -56,12 +55,14 @@ export async function launchAuthBrowser(): Promise<string> {
   await writeFile(COOKIE_FILE, "", { mode: 0o600 });
 
   await new Promise<void>((resolve, reject) => {
-    const proc = spawn("open", ["-n", "-W", appBundle], { stdio: "ignore" });
+    const proc = spawn("open", ["-n", "-W", appBundle, "--args", COOKIE_FILE], { stdio: "ignore" });
     proc.on("close", () => resolve());
     proc.on("error", reject);
   });
 
-  const cookie = await readFile(COOKIE_FILE, "utf-8").then((s) => s.trim()).catch(() => "");
+  const cookie = await readFile(COOKIE_FILE, "utf-8")
+    .then((s) => s.trim())
+    .catch(() => "");
   await unlink(COOKIE_FILE).catch(() => {});
 
   if (!cookie) throw new Error("Sign-in cancelled.");
@@ -75,14 +76,19 @@ async function ensureBinary(): Promise<string> {
   const binaryPath = path.join(environment.supportPath, "auth-browser");
   const swiftSrc = path.join(environment.assetsPath, "auth-browser.swift");
   try {
-    const [binStat, srcStat] = await Promise.all([stat(binaryPath), stat(swiftSrc)]);
+    const [binStat, srcStat] = await Promise.all([
+      stat(binaryPath),
+      stat(swiftSrc),
+    ]);
     if (binStat.mtimeMs >= srcStat.mtimeMs) return binaryPath;
     // source is newer — fall through to recompile
   } catch {
     // binary doesn't exist yet — fall through to compile
   }
 
-  const hasSwiftc = await execAsync("xcrun --find swiftc").then(() => true).catch(() => false);
+  const hasSwiftc = await execAsync("xcrun --find swiftc")
+    .then(() => true)
+    .catch(() => false);
   if (!hasSwiftc) {
     await showToast({
       style: Toast.Style.Failure,
@@ -94,11 +100,14 @@ async function ensureBinary(): Promise<string> {
 
   await mkdir(environment.supportPath, { recursive: true });
 
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Compiling sign-in helper…" });
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Compiling sign-in helper…",
+  });
   try {
     // Use `xcrun swiftc` (not the raw path) so xcrun sets up DEVELOPER_DIR and
     // the correct SDK — running the swiftc binary directly loses that context.
-    await execAsync(`xcrun swiftc -O "${swiftSrc}" -o "${binaryPath}"`);
+    await execFileAsync("xcrun", ["swiftc", "-O", swiftSrc, "-o", binaryPath]);
   } finally {
     await toast.hide();
   }
@@ -113,11 +122,13 @@ async function ensureAppBundle(binaryPath: string): Promise<string> {
   const bundledBinary = path.join(macosDir, "auth-browser");
 
   // Always recreate fresh so Launch Services sees a new bundle.
-  await execAsync(`rm -rf "${appDir}"`).catch(() => {});
+  await rm(appDir, { recursive: true, force: true }).catch(() => {});
   await mkdir(macosDir, { recursive: true });
   await symlink(binaryPath, bundledBinary);
 
-  await writeFile(plistPath, `<?xml version="1.0" encoding="UTF-8"?>
+  await writeFile(
+    plistPath,
+    `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -129,7 +140,8 @@ async function ensureAppBundle(binaryPath: string): Promise<string> {
 \t<key>NSHighResolutionCapable</key><true/>
 \t<key>LSMinimumSystemVersion</key><string>13.0</string>
 </dict>
-</plist>`);
+</plist>`,
+  );
 
   return appDir;
 }

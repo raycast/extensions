@@ -9,7 +9,10 @@
   "platforms": [
     "macOS"
   ],
-  "categories": ["Productivity", "Web"],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "commands": [
     {
       "name": "search-directory",
