@@ -54,7 +54,8 @@
       "name": "peon-ping-menu-bar",
       "title": "Peon Ping Menu Bar",
       "description": "Optional menu bar indicator for peon-ping status.",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ]
 }
