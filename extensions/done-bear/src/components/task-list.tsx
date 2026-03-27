@@ -7,8 +7,10 @@ import { useTasks } from "../hooks/use-tasks";
 import { TaskListItem } from "./task-list-item";
 import { useWorkspaceDropdown } from "./with-workspace";
 
+type NavigableView = Exclude<TaskView, "logbook">;
+
 interface TaskListProps {
-  view: TaskView;
+  view: NavigableView;
 }
 
 export default function TaskList({ view }: TaskListProps) {
