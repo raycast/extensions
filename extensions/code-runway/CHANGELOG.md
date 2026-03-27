@@ -1,6 +1,6 @@
 # Code Runway Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-03-27
 
 ### Added
 
