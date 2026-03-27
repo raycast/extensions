@@ -2,7 +2,8 @@ import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/a
 import { useCallback, useEffect, useState, useRef } from "react";
 import { useCurrentSelectedComic, maxNum } from "./xkcd";
 import { useAtom } from "jotai";
-import { currentComicAtom, lastViewedAtom, maxNumAtom, readStatusAtom, totalReadAtom } from "./atoms";
+import { currentComicAtom, historyAtom, lastViewedAtom, maxNumAtom, readStatusAtom, totalReadAtom } from "./atoms";
+import HistoryView from "./history";
 import getRandomUnread from "./get_random_unread";
 import OpenComicInBrowser from "./open_in_browser";
 import ExplainXkcd from "./explain_xkcd";
@@ -15,6 +16,7 @@ export default function main() {
   const [lastViewed, setLastViewed] = useAtom(lastViewedAtom);
   const [currentComicNumber, setCurrentComic] = useAtom(currentComicAtom);
   const [currentComic, loadingComic] = useCurrentSelectedComic(currentComicNumber);
+  const [history, setHistory] = useAtom(historyAtom);
   const selectedId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -25,6 +27,10 @@ export default function main() {
     LocalStorage.setItem("last_viewed", currentComic.num);
     setReadStatus({ ...readStatus, [currentComic.num]: true });
     setLastViewed(currentComic.num);
+    const newEntry = { num: currentComic.num, viewedAt: new Date().toISOString() };
+    const updated = [newEntry, ...history.filter((e) => e.num !== currentComic.num)].slice(0, 100);
+    setHistory(updated);
+    LocalStorage.setItem("history", JSON.stringify(updated));
   }, [currentComic]);
 
   useEffect(() => {
@@ -38,6 +44,13 @@ export default function main() {
           readStatus[comicNum] = val;
         } else if (key === "last_viewed") {
           setLastViewed(val);
+        } else if (key === "history") {
+          try {
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed)) setHistory(parsed);
+          } catch {
+            // ignore malformed history
+          }
         }
       }
       setReadStatus({ ...readStatus });
@@ -103,6 +116,7 @@ ${currentComic.alt}
               <ActionPanel>
                 <OpenComicInBrowser />
                 <ExplainXkcd />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
               </ActionPanel>
             }
           />
@@ -123,6 +137,7 @@ ${currentComic.alt}
                 />
                 <OpenComicInBrowser />
                 <ExplainXkcd />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
               </ActionPanel>
             }
             detail={detail}
@@ -143,6 +158,7 @@ ${currentComic.alt}
               />
               <OpenComicInBrowser />
               <ExplainXkcd />
+              <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
             </ActionPanel>
           }
           detail={detail}
@@ -156,6 +172,7 @@ ${currentComic.alt}
             <ActionPanel>
               <OpenComicInBrowser />
               <ExplainXkcd />
+              <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
             </ActionPanel>
           }
         />
@@ -174,6 +191,7 @@ ${currentComic.alt}
               <ActionPanel>
                 <OpenComicInBrowser />
                 <ExplainXkcd />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
               </ActionPanel>
             }
           />
