@@ -1,7 +1,14 @@
 import { getPreferenceValues } from "@raycast/api";
 import { fetchPrinterStats } from "../snmp-client";
 
-export default async function () {
+/**
+ * Tool: Ask Printer
+ * Fetches printer statistics using configured preferences and returns the result.
+ *
+ * @returns {Promise<any>} Printer stats object fetched via SNMP
+ * @throws {Error} When SNMP fetch fails
+ */
+export default async function askXeroxTool() {
   const preferences = getPreferenceValues<Preferences>();
   try {
     const stats = await fetchPrinterStats(preferences.printerIp, preferences.snmpCommunity || "public");

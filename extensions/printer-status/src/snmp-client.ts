@@ -27,15 +27,18 @@ const calculatePercentage = (currentVb: snmp.Varbind, maxVb: snmp.Varbind): stri
   if (currentStr == null || maxStr == null) return null;
   const current = parseInt(currentStr, 10);
   const max = parseInt(maxStr, 10);
+  if (isNaN(current) || isNaN(max)) return null;
   if (max > 0) {
     return Math.round((current / max) * 100).toString();
   }
-  return current.toString();
+  // When max is 0 or invalid, return 0% rather than a huge raw value
+  return "0";
 };
 
 export async function fetchPrinterStats(host: string, community: string = "public"): Promise<PrinterStats> {
   return new Promise((resolve, reject) => {
-    const session = snmp.createSession(host, community);
+    // Add sensible timeout and retry options to avoid hanging or extremely long waits
+    const session = snmp.createSession(host, community, { timeout: 5000, retries: 1 });
     const oidsList = [
       OIDS.TOTAL_PAGES,
       OIDS.BLACK_PAGES,

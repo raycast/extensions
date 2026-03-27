@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "printer-status",
-  "title": "Xerox",
-  "description": "Raycast extension to check Xerox printer status via SNMP",
+  "title": "Printer Status",
+  "description": "Check printer status (page counts, ink levels, device info) via SNMP",
   "icon": "printer-icon.png",
   "author": "davidyannick",
   "platforms": [
@@ -16,17 +16,17 @@
   "commands": [
     {
       "name": "xerox",
-      "title": "Xerox Printer Status",
+      "title": "Printer Status",
       "icon": "printer-icon.png",
-      "description": "Show the current page count of the Xerox printer",
+      "description": "Show current page counts and status for the configured printer",
       "mode": "view"
     }
   ],
   "tools": [
     {
       "name": "ask-xerox",
-      "title": "Ask Xerox",
-      "description": "Retrieve current status, ink levels, page counts, and device information from the Xerox printer"
+      "title": "Ask Printer",
+      "description": "Retrieve current status, ink levels, page counts, and device information from the configured printer"
     }
   ],
   "ai": {
@@ -64,12 +64,12 @@
       "type": "textfield",
       "required": true,
       "title": "Printer IP Address",
-      "description": "The IP address of your Xerox printer",
+      "description": "The IP address of your printer",
       "default": "192.168.1.10"
     },
     {
       "name": "snmpCommunity",
-      "type": "textfield",
+      "type": "password",
       "required": false,
       "title": "SNMP Community String",
       "description": "The SNMP community string for your printer (default: public)",

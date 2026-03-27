@@ -1,5 +1,6 @@
-import { List, showToast, Toast, Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { List, Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { useState, useEffect, useCallback } from "react";
 import { fetchPrinterStats, PrinterStats } from "./snmp-client";
 import { INK_COLORS, LABELS } from "./constants";
 
@@ -12,11 +13,10 @@ export default function Command() {
   const [stats, setStats] = useState<PrinterStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    async function getStats() {
+  const fetchStats = useCallback(
+    async (signal?: { aborted?: boolean }) => {
       if (!host) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Configuration Missing",
           message: "Please set the Printer IP in extension preferences.",
         });
@@ -26,20 +26,31 @@ export default function Command() {
 
       try {
         const data = await fetchPrinterStats(host, community);
+        // avoid updating state if component unmounted
+        if (signal && signal.aborted) return;
         setStats(data);
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
+        await showFailureToast({
           title: "Failed to fetch printer status",
           message: error instanceof Error ? error.message : String(error),
         });
       } finally {
-        setIsLoading(false);
+        if (!(signal && signal.aborted)) {
+          setIsLoading(false);
+        }
       }
-    }
+    },
+    [host, community],
+  );
 
-    getStats();
-  }, [host, community]);
+  useEffect(() => {
+    const controller = { aborted: false };
+    setIsLoading(true);
+    fetchStats(controller);
+    return () => {
+      controller.aborted = true;
+    };
+  }, [fetchStats]);
 
   const getInkIcon = (level: string | null, color: string) => {
     if (!level) return Icon.Circle;
@@ -48,6 +59,11 @@ export default function Command() {
 
     if (pct < 10) return { source: Icon.Warning, tintColor: "red" };
     return { source: Icon.CircleFilled, tintColor: color };
+  };
+
+  const handleRefresh = async () => {
+    setIsLoading(true);
+    await fetchStats();
   };
 
   return (
@@ -76,6 +92,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard content={host} title={labels.copyIp} />
+              <Action title="Refresh" onAction={handleRefresh} icon={Icon.RotateClockwise} />
             </ActionPanel>
           }
         />
@@ -206,6 +223,16 @@ export default function Command() {
           />
         )}
       </List.Section>
+      <List.EmptyView
+        title="No results"
+        description="No printer data available. Check preferences or try refreshing."
+        actions={
+          <ActionPanel>
+            <Action title="Refresh" onAction={handleRefresh} icon={Icon.RotateClockwise} />
+            <Action.CopyToClipboard content={host || ""} title={labels.copyIp} />
+          </ActionPanel>
+        }
+      />
     </List>
   );
 }
