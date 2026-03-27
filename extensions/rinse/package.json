@@ -15,19 +15,20 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "clean-clipboard",
-      "title": "Clean Clipboard",
+      "name": "clean-and-copy",
+      "title": "Clean & Copy",
       "description": "So fresh and so clean, clean.",
       "keywords": [
         "clean",
         "clipboard",
+        "copy",
         "strip"
       ],
       "mode": "no-view"
     },
     {
       "name": "clean-and-paste",
-      "title": "Clean & Paste Clipboard",
+      "title": "Clean & Paste",
       "description": "Straight bougie!",
       "keywords": [
         "clean",
@@ -39,7 +40,7 @@
     },
     {
       "name": "clean-and-review",
-      "title": "Clean & Review Clipboard",
+      "title": "Clean & Review",
       "description": "Confirm the baby. Toss the bathwater.",
       "keywords": [
         "clean",
@@ -70,7 +71,7 @@
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npm run pull-contributions && npx @raycast/api@latest publish",
+    "publish": "gh repo sync lukemcdonald/raycast-extensions && npm run pull-contributions && npx @raycast/api@latest publish",
     "pull-contributions": "npx @raycast/api@latest pull-contributions",
     "style": "npm run format:fix && npm run lint:fix",
     "test": "vitest",

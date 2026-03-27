@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { type CleanResult } from "./utils/cleaner";
-import { readAndClean } from "./utils/clipboard";
+import { HUD_EMPTY, HUD_UNCHANGED, buildHudText, readAndClean } from "./utils/clipboard";
 import {
   Action,
   ActionPanel,
@@ -21,12 +21,12 @@ function useClipboardClean(): { result: CleanResult | null; loading: boolean } {
     readAndClean().then((outcome) => {
       if (outcome.status === "empty") {
         setLoading(false);
-        showHUD("Nothing in the tub.").then(() => closeMainWindow());
+        showHUD(HUD_EMPTY).then(() => closeMainWindow());
         return;
       }
       if (outcome.status === "unchanged") {
         setLoading(false);
-        showHUD("Already clean. No bathwater to toss.").then(() => closeMainWindow());
+        showHUD(HUD_UNCHANGED).then(() => closeMainWindow());
         return;
       }
       setResult(outcome.result);
@@ -45,7 +45,7 @@ function CleanMetadata({ result }: { result: CleanResult }) {
   const { originalLineCount, cleanedLineCount } = result;
   return (
     <Detail.Metadata>
-      <Detail.Metadata.TagList title="Bathwater">
+      <Detail.Metadata.TagList title="Reduction">
         <Detail.Metadata.TagList.Item text={`${result.reductionPercent}% rinsed`} color={Color.Green} />
       </Detail.Metadata.TagList>
       <Detail.Metadata.Separator />
@@ -62,7 +62,7 @@ function CleanActions({ onCopy }: { onCopy: () => void }) {
         icon={Icon.Clipboard}
         onAction={onCopy}
         shortcut={{ modifiers: ["cmd"], key: "return" }}
-        title="Toss the Bathwater"
+        title="Copy to Clipboard"
       />
     </ActionPanel>
   );
@@ -78,7 +78,7 @@ export default function CleanAndReview() {
     }
     await Clipboard.copy(result.cleaned);
     pop();
-    await showHUD("✓ Baby saved. Bathwater tossed.");
+    await showHUD(buildHudText(result.reductionPercent));
   }
 
   if (loading || !result) {

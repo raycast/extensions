@@ -1,18 +1,18 @@
 import { Clipboard, closeMainWindow, showHUD } from "@raycast/api";
-import { buildHudText, readAndClean } from "./utils/clipboard";
+import { HUD_EMPTY, HUD_UNCHANGED, buildHudText, readAndClean } from "./utils/clipboard";
 
 export default async function main() {
   const outcome = await readAndClean();
 
   if (outcome.status === "empty") {
-    await showHUD("Clipboard is empty");
+    await showHUD(HUD_EMPTY);
     return;
   }
 
   if (outcome.status === "unchanged") {
     await closeMainWindow();
     await Clipboard.paste(outcome.text);
-    await showHUD("✓ Nothing to clean");
+    await showHUD(HUD_UNCHANGED);
     return;
   }
 

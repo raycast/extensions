@@ -2,38 +2,34 @@
 
 > Rinse the Claude off your clipboard.
 
-A [Raycast](https://raycast.com) extension.
+A [Raycast](https://raycast.com) extension that strips AI CLI formatting artifacts — ANSI codes, box-drawing characters, spinner noise, soft-wrapped lines — from whatever you just copied out of your terminal.
 
-You copy Claude's response out of your terminal. It's wrapped at 80 characters with a two-space indent on the continuation:
-
-```txt
-You don't need a library for this. Lift the state, pass it down, and call it
-  done.
-```
-
-Rinse joins and strips it:
+Claude answered your question. The answer is good. The packaging is not:
 
 ```txt
-You don't need a library for this. Lift the state, pass it down, and call it done.
+╭─ Claude ───────────────────────────╮
+│ ⠹ Thinking...                      │
+│ Strip the noise and toss the       │
+│   box, that's Rinse.               │
+╰────────────────────────────────────╯
 ```
 
-Or it's full AI CLI output with box-drawing and spinner noise:
+Or it word-wrapped at 80 columns with an indent on the continuation:
 
 ```txt
-╭─ Claude ──────────────────────╮
-│ ⠹ Thinking...                 │
-│ Just use a hook. You're done. │
-╰───────────────────────────────╯
+Strip the noise and rejoin the
+  lines, that's Rinse.
 ```
 
-Becomes:
+Rinse takes the baby, tosses the bathwater:
 
 ```txt
-Claude Thinking...
-Just use a hook. You're done.
+Strip the noise and toss the box, that's Rinse.
 ```
 
-Copy. Clean. Paste. Done.
+```txt
+Strip the noise and rejoin the lines, that's Rinse.
+```
 
 ## Install
 
@@ -44,23 +40,19 @@ Copy. Clean. Paste. Done.
 
 ## Commands
 
-### Clean Clipboard
+### Clean & Copy
 
-Silent and instant. Reads your clipboard, strips the noise, writes it back. You get a quick HUD confirmation and move on. No windows, no friction.
+Reads your clipboard, strips the noise, writes it back. Silent, instant, no window. A HUD flash tells you how much was rinsed, and you're back to what you were doing.
 
-> **"So fresh and so clean, clean."**
+### Clean & Paste
 
-### Clean & Paste Clipboard
+Same as Clean & Copy, but skips the clipboard. The cleaned text lands directly where your cursor is. Copy from Claude, trigger the command, paste is already done.
 
-Cleans your clipboard and pastes the result directly into the focused app in one shot. No intermediate step. Copy Claude's output, trigger the command, and clean text lands where your cursor is.
+### Clean & Review
 
-> **"Straight bougie!"**
+Opens a preview of the cleaned result before you commit. The sidebar shows character counts, line counts, and reduction percentage. One action copies it to your clipboard when you're ready.
 
-### Clean & Review Clipboard
-
-Opens a preview of the cleaned result before committing. The sidebar shows exactly how much was removed: character counts, line counts, reduction percentage. When you're happy, one action copies it to your clipboard.
-
-> **"Confirm the baby. Toss the bathwater."**
+> Confirm the baby. Toss the bathwater.
 
 ## What Gets Cleaned
 
@@ -88,6 +80,6 @@ Rinse is careful not to over-clean. It preserves:
 
 ## Tips
 
-- Assign a hotkey to **Clean Clipboard** (`Cmd+Shift+C`) to clean without opening Raycast.
+- Assign a hotkey to **Clean & Copy** (`Cmd+Shift+C`) to clean without opening Raycast.
 - Assign a hotkey to **Clean & Paste** (`Cmd+Shift+V`) to replace your paste with a clean paste.
 - Use **Clean & Review** when you want to see the diff before committing.

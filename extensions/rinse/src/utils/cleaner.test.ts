@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { cleanText, cleanWithStats } from "./cleaner";
+import {
+  classifyLines,
+  cleanText,
+  cleanWithStats,
+  dedentParagraphs,
+  joinWrappedLines,
+  normalizeSpacing,
+  stripArtifacts,
+} from "./cleaner";
 import {
   claudeBuildError,
   claudeCodeExplanation,
@@ -9,6 +17,267 @@ import {
   claudeWithMarkdown,
   npmInstallOutput,
 } from "./__fixtures__/cleaner";
+
+// ─── stripArtifacts ───────────────────────────────────────────────────────────
+
+describe("stripArtifacts", () => {
+  it("strips ANSI color codes", () => {
+    expect(stripArtifacts("\x1b[32mhello\x1b[0m")).toBe("hello");
+  });
+
+  it("strips cursor movement sequences", () => {
+    expect(stripArtifacts("\x1b[2Aloading\x1b[K")).toBe("loading");
+  });
+
+  it("strips bold and dim codes", () => {
+    expect(stripArtifacts("\x1b[1mbold\x1b[22m and \x1b[2mdim\x1b[22m")).toBe("bold and dim");
+  });
+
+  it("strips box-drawing characters", () => {
+    expect(stripArtifacts("┌──┐\n│hi│\n└──┘")).toBe("\nhi\n");
+  });
+
+  it("strips Braille spinner frames", () => {
+    expect(stripArtifacts("⠋ Loading...")).toBe(" Loading...");
+  });
+
+  it("leaves plain text unchanged", () => {
+    expect(stripArtifacts("hello world")).toBe("hello world");
+  });
+});
+
+// ─── dedentParagraphs ─────────────────────────────────────────────────────────
+
+describe("dedentParagraphs", () => {
+  it("removes uniform indent from a single paragraph", () => {
+    expect(dedentParagraphs("  foo\n  bar")).toBe("foo\nbar");
+  });
+
+  it("dedents each paragraph independently", () => {
+    const input = "  a\n  b\n\n    c\n    d";
+    expect(dedentParagraphs(input)).toBe("a\nb\n\nc\nd");
+  });
+
+  it("does not modify paragraphs with no common indent", () => {
+    expect(dedentParagraphs("foo\n  bar")).toBe("foo\n  bar");
+  });
+
+  it("skips blank lines when computing minimum indent", () => {
+    expect(dedentParagraphs("  foo\n\n  bar")).toBe("foo\n\nbar");
+  });
+
+  it("leaves already-zero-indented text unchanged", () => {
+    expect(dedentParagraphs("foo\nbar")).toBe("foo\nbar");
+  });
+});
+
+// ─── classifyLines ────────────────────────────────────────────────────────────
+
+describe("classifyLines", () => {
+  describe("table rows", () => {
+    it("tags a two-column row as table-row", () => {
+      const result = classifyLines(["| Name | Value |"]);
+      expect(result).toEqual([{ content: "| Name | Value |", kind: "table-row" }]);
+    });
+
+    it("tags a multi-column row as table-row", () => {
+      const result = classifyLines(["| A | B | C |"]);
+      expect(result).toEqual([{ content: "| A | B | C |", kind: "table-row" }]);
+    });
+
+    it("does not tag a single-column row as table-row", () => {
+      const result = classifyLines(["| content |"]);
+      expect(result[0].kind).toBe("text");
+    });
+  });
+
+  describe("separator lines", () => {
+    it("drops lines of only dashes", () => {
+      expect(classifyLines(["---"])).toEqual([]);
+    });
+
+    it("drops lines of only equals signs", () => {
+      expect(classifyLines(["==="])).toEqual([]);
+    });
+
+    it("drops lines of only tildes", () => {
+      expect(classifyLines(["~~~"])).toEqual([]);
+    });
+
+    it("drops a separator after pipe border stripping", () => {
+      expect(classifyLines(["| --- |"])).toEqual([]);
+    });
+  });
+
+  describe("pipe border stripping", () => {
+    it("strips leading pipe border from text lines", () => {
+      const result = classifyLines(["| content"]);
+      expect(result).toEqual([{ content: "content", kind: "text" }]);
+    });
+
+    it("strips trailing pipe border from text lines", () => {
+      const result = classifyLines(["content |"]);
+      expect(result).toEqual([{ content: "content", kind: "text" }]);
+    });
+
+    it("strips both pipe borders", () => {
+      const result = classifyLines(["| content |"]);
+      expect(result).toEqual([{ content: "content", kind: "text" }]);
+    });
+  });
+
+  describe("empty lines", () => {
+    it("preserves empty lines as text", () => {
+      expect(classifyLines([""])).toEqual([{ content: "", kind: "text" }]);
+    });
+  });
+
+  describe("does not mutate input", () => {
+    it("leaves the input array unchanged", () => {
+      const input = ["| Name | Value |", "---", "foo"];
+      const copy = [...input];
+      classifyLines(input);
+      expect(input).toEqual(copy);
+    });
+  });
+});
+
+// ─── joinWrappedLines ─────────────────────────────────────────────────────────
+
+describe("joinWrappedLines", () => {
+  const text = (content: string) => ({ content, kind: "text" as const });
+  const tableRow = (content: string) => ({ content, kind: "table-row" as const });
+
+  describe("basic joining", () => {
+    it("joins two consecutive text lines", () => {
+      expect(joinWrappedLines([text("hello"), text("world")])).toEqual(["hello world"]);
+    });
+
+    it("trims leading whitespace from the continued line", () => {
+      expect(joinWrappedLines([text("foo"), text("  bar")])).toEqual(["foo bar"]);
+    });
+
+    it("chains multiple soft-wrapped lines into one", () => {
+      expect(joinWrappedLines([text("a"), text("b"), text("c")])).toEqual(["a b c"]);
+    });
+  });
+
+  describe("sentence boundaries", () => {
+    it("does not join across a period", () => {
+      expect(joinWrappedLines([text("First."), text("Second.")])).toEqual(["First.", "Second."]);
+    });
+
+    it("does not join across a question mark", () => {
+      expect(joinWrappedLines([text("Done?"), text("Yes.")])).toEqual(["Done?", "Yes."]);
+    });
+
+    it("does not join across an exclamation mark", () => {
+      expect(joinWrappedLines([text("Done!"), text("Next.")])).toEqual(["Done!", "Next."]);
+    });
+
+    it("does not join across a colon", () => {
+      expect(joinWrappedLines([text("Example:"), text("item")])).toEqual(["Example:", "item"]);
+    });
+  });
+
+  describe("list items", () => {
+    it("does not join a dash list item onto the previous line", () => {
+      expect(joinWrappedLines([text("Options"), text("- one")])).toEqual(["Options", "- one"]);
+    });
+
+    it("does not join a numbered list item onto the previous line", () => {
+      expect(joinWrappedLines([text("Steps"), text("1. first")])).toEqual(["Steps", "1. first"]);
+    });
+  });
+
+  describe("empty lines", () => {
+    it("does not join across an empty line", () => {
+      expect(joinWrappedLines([text("para one"), text(""), text("para two")])).toEqual(["para one", "", "para two"]);
+    });
+
+    it("does not join when next is undefined (last line)", () => {
+      expect(joinWrappedLines([text("only")])).toEqual(["only"]);
+    });
+  });
+
+  describe("table rows", () => {
+    it("does not join a table row onto the previous line", () => {
+      expect(joinWrappedLines([text("intro"), tableRow("| A | B |")])).toEqual(["intro", "| A | B |"]);
+    });
+
+    it("does not join a text line onto a table row", () => {
+      expect(joinWrappedLines([tableRow("| A | B |"), text("footer")])).toEqual(["| A | B |", "footer"]);
+    });
+  });
+
+  describe("fenced code blocks", () => {
+    it("does not join lines inside a fence", () => {
+      const lines = [text("```"), text("line one"), text("line two"), text("```")];
+      expect(joinWrappedLines(lines)).toEqual(["```", "line one", "line two", "```"]);
+    });
+
+    it("does not join the opening fence delimiter with the next line", () => {
+      const lines = [text("```ts"), text("const x = 1;"), text("```")];
+      expect(joinWrappedLines(lines)).toEqual(["```ts", "const x = 1;", "```"]);
+    });
+  });
+
+  describe("indented code lines", () => {
+    it("does not join an indented line forward onto the next line", () => {
+      // isIndentedCode guards the current line from joining forward, not the next line.
+      expect(joinWrappedLines([text("  const x = 1;"), text("  const y = 2;")])).toEqual([
+        "  const x = 1;",
+        "  const y = 2;",
+      ]);
+    });
+  });
+
+  describe("CLI command lines", () => {
+    it("does not join a line containing ' -- ' onto the next line", () => {
+      expect(joinWrappedLines([text("npm run build -- --skipLibCheck"), text("npm test -- --timeout 10000")])).toEqual([
+        "npm run build -- --skipLibCheck",
+        "npm test -- --timeout 10000",
+      ]);
+    });
+  });
+
+  describe("does not mutate input", () => {
+    it("leaves the input array unchanged", () => {
+      const lines = [text("hello"), text("world")];
+      const copy = lines.map((l) => ({ ...l }));
+      joinWrappedLines(lines);
+      expect(lines).toEqual(copy);
+    });
+  });
+});
+
+// ─── normalizeSpacing ─────────────────────────────────────────────────────────
+
+describe("normalizeSpacing", () => {
+  it("trims leading whitespace from each line", () => {
+    expect(normalizeSpacing("  foo\n  bar")).toBe("foo\nbar");
+  });
+
+  it("trims trailing whitespace from each line", () => {
+    expect(normalizeSpacing("foo   \nbar   ")).toBe("foo\nbar");
+  });
+
+  it("collapses 3 blank lines to 2", () => {
+    expect(normalizeSpacing("a\n\n\nb")).toBe("a\n\nb");
+  });
+
+  it("collapses 4+ blank lines to 2", () => {
+    expect(normalizeSpacing("a\n\n\n\n\nb")).toBe("a\n\nb");
+  });
+
+  it("preserves a single blank line", () => {
+    expect(normalizeSpacing("a\n\nb")).toBe("a\n\nb");
+  });
+
+  it("strips leading and trailing whitespace from the full text", () => {
+    expect(normalizeSpacing("\n\nfoo\n\n")).toBe("foo");
+  });
+});
 
 // ─── cleanText ────────────────────────────────────────────────────────────────
 
@@ -28,20 +297,6 @@ describe("cleanText", () => {
     });
   });
 
-  describe("ANSI escape codes", () => {
-    it("strips color codes", () => {
-      expect(cleanText("\x1b[32mhello\x1b[0m")).toBe("hello");
-    });
-
-    it("strips cursor movement sequences", () => {
-      expect(cleanText("\x1b[2Aloading\x1b[K")).toBe("loading");
-    });
-
-    it("strips bold/dim codes", () => {
-      expect(cleanText("\x1b[1mbold\x1b[22m and \x1b[2mdim\x1b[22m")).toBe("bold and dim");
-    });
-  });
-
   describe("box-drawing characters", () => {
     it("strips horizontal and vertical box chars", () => {
       expect(cleanText("│ output │")).toBe("output");
@@ -53,12 +308,8 @@ describe("cleanText", () => {
   });
 
   describe("spinner and Braille characters", () => {
-    it("strips Braille spinner frames", () => {
+    it("strips Braille spinner frames and trims residual space", () => {
       expect(cleanText("⠋ Loading...")).toBe("Loading...");
-    });
-
-    it("strips multiple spinner chars", () => {
-      expect(cleanText("⠙⠹⠸ done")).toBe("done");
     });
   });
 
@@ -85,20 +336,6 @@ describe("cleanText", () => {
 
     it("keeps lines with meaningful content mixed with dashes", () => {
       expect(cleanText("hello-world")).toBe("hello-world");
-    });
-  });
-
-  describe("pipe borders", () => {
-    it("strips leading pipe borders", () => {
-      expect(cleanText("│ content")).toBe("content");
-    });
-
-    it("strips trailing pipe borders", () => {
-      expect(cleanText("content │")).toBe("content");
-    });
-
-    it("strips plain pipe borders", () => {
-      expect(cleanText("| content |")).toBe("content");
     });
   });
 
@@ -133,45 +370,17 @@ describe("cleanText", () => {
       expect(cleanText("First sentence.\nSecond sentence.")).toBe("First sentence.\nSecond sentence.");
     });
 
-    it("does not join across sentence-ending question mark", () => {
-      expect(cleanText("A question?\nAn answer.")).toBe("A question?\nAn answer.");
-    });
-
-    it("does not join across sentence-ending exclamation", () => {
-      expect(cleanText("Done!\nNext step.")).toBe("Done!\nNext step.");
-    });
-
-    it("does not join across sentence-ending colon", () => {
-      expect(cleanText("The following:\nitem one")).toBe("The following:\nitem one");
-    });
-
-    it("does not join list items onto the previous line", () => {
-      expect(cleanText("Options:\n- one\n- two")).toBe("Options:\n- one\n- two");
-    });
-
-    it("does not join numbered list items", () => {
-      expect(cleanText("Steps:\n1. first\n2. second")).toBe("Steps:\n1. first\n2. second");
-    });
-
     it("does not join indented (code) lines", () => {
       // Indentation prevents joining, but the final .trim() pass strips leading spaces
       expect(cleanText("Example:\n  const x = 1;\n  const y = 2;")).toBe("Example:\nconst x = 1;\nconst y = 2;");
-    });
-
-    it("does not join lines inside a fenced code block", () => {
-      expect(cleanText("```\nline one\nline two\n```")).toBe("```\nline one\nline two\n```");
     });
 
     it("does not join the fence delimiter with the following line", () => {
       expect(cleanText("```ts\nconst x = 1;\n```\nAfter.")).toBe("```ts\nconst x = 1;\n```\nAfter.");
     });
 
-    it("preserves blank lines as paragraph breaks", () => {
-      expect(cleanText("Para one.\n\nPara two.")).toBe("Para one.\n\nPara two.");
-    });
-
-    it("collapses 3+ blank lines to 2", () => {
-      expect(cleanText("a\n\n\n\nb")).toBe("a\n\nb");
+    it("joins soft-wrapped lines in later paragraphs when first paragraph has no leading indent", () => {
+      expect(cleanText("No indent.\n\n  Indented\n  paragraph.")).toBe("No indent.\n\nIndented paragraph.");
     });
 
     it("strips uniform leading indent and joins soft-wrapped lines", () => {
@@ -184,6 +393,24 @@ describe("cleanText", () => {
       expect(cleanText(input)).toBe(
         "npm run publish\n\nIt will pull contributions first, then open a GitHub auth prompt and create the PR in raycast/extensions automatically.",
       );
+    });
+  });
+
+  // ─── Idempotency ───────────────────────────────────────────────────────────
+
+  describe("idempotency", () => {
+    const cases = [
+      ["npm install output", npmInstallOutput],
+      ["claude prose explanation", claudeProseExplanation],
+      ["claude step-by-step", claudeStepByStep],
+      ["claude code explanation", claudeCodeExplanation],
+      ["claude terminal response", claudeTerminalResponse],
+      ["claude markdown response", claudeWithMarkdown],
+      ["claude build error", claudeBuildError],
+    ] as const;
+
+    it.each(cases)("%s is idempotent", (_, input) => {
+      expect(cleanText(cleanText(input))).toBe(cleanText(input));
     });
   });
 
@@ -242,10 +469,8 @@ describe("cleanWithStats", () => {
   });
 
   it("calculates reductionPercent correctly", () => {
-    // input: 10 chars, cleaned: 5 chars → 50% reduction
-    const result = cleanWithStats("\x1b[32mhello\x1b[0m"); // "\x1b[32m" (4) + "hello" (5) + "\x1b[0m" (4) = 13 chars → 5 chars
-    expect(result.reductionPercent).toBeGreaterThan(0);
-    expect(result.reductionPercent).toBeLessThanOrEqual(100);
+    const result = cleanWithStats("\x1b[32mhello\x1b[0m");
+    expect(result.reductionPercent).toBe(64);
   });
 
   it("preserves original in result", () => {

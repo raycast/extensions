@@ -22,13 +22,14 @@ export async function readAndClean(): Promise<ClipboardCleanResult> {
   return { status: "cleaned", result };
 }
 
+export const HUD_EMPTY = "Clipboard empty";
+export const HUD_UNCHANGED = "Nothing to clean";
+
 // reductionPercent can be 0 even when changed=true (e.g. tiny edits that round to <1%)
 export function buildHudText(reductionPercent: number): string {
-  const successText = `✓ Bougie!`;
-
   if (reductionPercent > 0) {
-    return `${successText} (${reductionPercent}% rinsed)`;
+    return `${reductionPercent}% rinsed`;
   }
 
-  return successText;
+  return "Rinsed";
 }

@@ -1,9 +1,9 @@
+import { stripVTControlCharacters } from "node:util";
+
+// ─── Regexes ──────────────────────────────────────────────────────────────────
+
 // Unicode box-drawing block: U+2500–U+257F
 const BOX_DRAWING_RE = /[\u2500-\u257F]/g;
-
-// ANSI escape sequences (colors, cursor movement, erase, etc.)
-// eslint-disable-next-line no-control-regex
-const ANSI_ESCAPE_RE = /\x1B\[[0-9;?]*[A-Za-z]|\x1B[()][AB012]|\x1B[=>]|\x1B[78]/g;
 
 // Spinner / progress characters (Braille + common spinner frames)
 const SPINNER_RE = /[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏⠁⠂⠄⡀⢀⠠⠐⠈]/g;
@@ -32,6 +32,17 @@ const FENCE_RE = /^```/;
 // check runs, so only ASCII | remains.
 const TABLE_ROW_RE = /^\s*\|(?:[^|]*\|){2,}\s*$/;
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type LineKind = "table-row" | "text";
+
+export interface TaggedLine {
+  content: string;
+  kind: LineKind;
+}
+
+// ─── Internal helpers ─────────────────────────────────────────────────────────
+
 function dedent(text: string): string {
   const lines = text.split("\n");
   let minIndent = Infinity;
@@ -52,65 +63,75 @@ function dedent(text: string): string {
     }
   }
 
-  if (!isFinite(minIndent) || minIndent === 0) {
+  if (!Number.isFinite(minIndent) || minIndent === 0) {
     return text;
   }
 
   return lines.map((l) => l.slice(minIndent)).join("\n");
 }
 
-export function cleanText(input: string): string {
-  if (!input.trim()) {
-    return input;
-  }
+// ─── Pipeline steps ───────────────────────────────────────────────────────────
 
-  let text = input;
+/** Strip ANSI/VT control sequences, box-drawing characters, and spinner glyphs. */
+export function stripArtifacts(text: string): string {
+  return stripVTControlCharacters(text).replace(BOX_DRAWING_RE, "").replace(SPINNER_RE, "");
+}
 
-  text = text.replace(ANSI_ESCAPE_RE, "");
-  text = text.replace(BOX_DRAWING_RE, "");
-  text = text.replace(SPINNER_RE, "");
-  text = dedent(text);
+/** Remove the minimum shared indent from each paragraph independently. */
+export function dedentParagraphs(text: string): string {
+  return text.split(/\n\n+/).map(dedent).join("\n\n");
+}
 
-  const lines = text.split("\n");
-  const cleaned: string[] = [];
-  const tableRowIndices = new Set<number>();
+/**
+ * Classify each line as a table row or regular text, stripping pipe borders and dropping
+ * pure separator lines. Must run after stripArtifacts so box-drawing │ chars are already
+ * gone and TABLE_ROW_RE only needs to match ASCII |.
+ */
+export function classifyLines(lines: string[]): TaggedLine[] {
+  const result: TaggedLine[] = [];
 
   for (const rawLine of lines) {
-    let line = rawLine;
-
-    if (TABLE_ROW_RE.test(line)) {
-      tableRowIndices.add(cleaned.length);
-    } else {
-      line = line.replace(LEADING_PIPE_RE, "");
-      line = line.replace(TRAILING_PIPE_RE, "");
-
-      if (SEPARATOR_LINE_RE.test(line)) {
-        continue;
-      }
+    if (TABLE_ROW_RE.test(rawLine)) {
+      result.push({ content: rawLine, kind: "table-row" });
+      continue;
     }
 
-    cleaned.push(line);
+    const stripped = rawLine.replace(LEADING_PIPE_RE, "").replace(TRAILING_PIPE_RE, "");
+
+    if (SEPARATOR_LINE_RE.test(stripped)) {
+      continue;
+    }
+
+    result.push({ content: stripped, kind: "text" });
   }
 
-  const joined: string[] = [];
+  return result;
+}
+
+/**
+ * Rejoin lines that were soft-wrapped at a fixed column width. Respects sentence
+ * boundaries, list markers, fenced code blocks, indented code, and table rows.
+ */
+export function joinWrappedLines(lines: TaggedLine[]): string[] {
+  const result: string[] = [];
+  // Copy so the input is not mutated when we promote merged content forward.
+  const copy = lines.slice();
   let inFence = false;
 
-  for (let i = 0; i < cleaned.length; i++) {
-    const current = cleaned[i];
-    const next = cleaned[i + 1];
+  for (let i = 0; i < copy.length; i++) {
+    const { content: current, kind } = copy[i];
+    const next = copy[i + 1];
 
     const isFenceDelimiter = FENCE_RE.test(current);
+    if (isFenceDelimiter) inFence = !inFence;
 
-    if (isFenceDelimiter) {
-      inFence = !inFence;
-    }
-
+    const isTableRow = kind === "table-row";
+    const isNextTableRow = next?.kind === "table-row";
+    const isNextEmpty = next === undefined || next.content === "";
     const isIndentedCode = !isFenceDelimiter && INDENTED_LINE_RE.test(current) && !LIST_MARKER_RE.test(current);
-    const isTableRow = tableRowIndices.has(i);
     const isClauseEnd = SENTENCE_END_RE.test(current);
-    const isNextEmpty = next === undefined || next === "";
-    const isNextTableRow = tableRowIndices.has(i + 1);
-    const isNextListItem = LIST_MARKER_RE.test(next);
+    const hasCliFlags = current.includes(" -- ");
+    const isNextListItem = next !== undefined && LIST_MARKER_RE.test(next.content);
 
     const canJoin =
       current !== "" &&
@@ -119,22 +140,48 @@ export function cleanText(input: string): string {
       !isIndentedCode &&
       !isTableRow &&
       !isClauseEnd &&
+      !hasCliFlags &&
       !isNextEmpty &&
       !isNextTableRow &&
       !isNextListItem;
 
-    if (canJoin) {
-      cleaned[i + 1] = `${current} ${next.trimStart()}`;
+    if (canJoin && next !== undefined) {
+      copy[i + 1] = {
+        content: `${current} ${next.content.trimStart()}`,
+        kind: next.kind,
+      };
     } else {
-      joined.push(current);
+      result.push(current);
     }
   }
 
-  return joined
+  return result;
+}
+
+/**
+ * Trim each line, collapse 3+ consecutive blank lines to 2, and strip
+ * leading/trailing whitespace from the full text.
+ */
+export function normalizeSpacing(text: string): string {
+  return text
+    .split("\n")
     .map((line) => line.trim())
     .join("\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+export function cleanText(input: string): string {
+  if (!input.trim()) {
+    return input;
+  }
+
+  const text = dedentParagraphs(stripArtifacts(input));
+  const tagged = classifyLines(text.split("\n"));
+  const joined = joinWrappedLines(tagged);
+  return normalizeSpacing(joined.join("\n"));
 }
 
 export interface CleanResult {

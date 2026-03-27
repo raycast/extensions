@@ -9,7 +9,7 @@ exports[`cleanText > snapshots > claude build error with fixed-width padding →
 Fix with:
 
 npm run build -- --skipLibCheck
-npm test -- --timeout 10000\\"
+npm test -- --timeout 10000"
 `;
 
 exports[`cleanText > snapshots > claude code explanation → paste to PR description or code comment 1`] = `

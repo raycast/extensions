@@ -95,5 +95,5 @@ export const claudeBuildError = [
   "  Fix with:".padEnd(79),
   " ".repeat(79),
   "      npm run build -- --skipLibCheck".padEnd(79),
-  "      npm test -- --timeout 10000\\",
+  "      npm test -- --timeout 10000".padEnd(79),
 ].join("\n");
