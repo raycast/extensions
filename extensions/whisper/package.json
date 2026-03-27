@@ -71,30 +71,6 @@
     }
   ],
   "ai": {
-    "tools": [
-      {
-        "name": "create-secret",
-        "title": "Create Secret Link",
-        "description": "Create an encrypted, expiring link for sharing a secret securely",
-        "arguments": {
-          "type": "object",
-          "properties": {
-            "secret": {
-              "type": "string"
-            },
-            "duration": {
-              "type": "string"
-            },
-            "selfDestruct": {
-              "type": "boolean"
-            }
-          },
-          "required": [
-            "secret"
-          ]
-        }
-      }
-    ],
     "evals": [
       {
         "input": "@create-secret Create a secret link for my-api-key and copy it to the clipboard.",
@@ -105,7 +81,12 @@
         },
         "expected": [
           {
-            "includes": "secret link"
+            "callsTool": {
+              "name": "create-secret",
+              "arguments": {
+                "secret": "my-api-key"
+              }
+            }
           }
         ]
       },
@@ -118,7 +99,14 @@
         },
         "expected": [
           {
-            "includes": "secrets"
+            "callsTool": {
+              "name": "create-secret",
+              "arguments": {
+                "secret": "my-api-key",
+                "duration": "24h",
+                "selfDestruct": false
+              }
+            }
           }
         ]
       },
@@ -131,7 +119,14 @@
         },
         "expected": [
           {
-            "includes": "password"
+            "callsTool": {
+              "name": "create-secret",
+              "arguments": {
+                "secret": "hunter2",
+                "duration": "7d",
+                "selfDestruct": false
+              }
+            }
           }
         ]
       }
