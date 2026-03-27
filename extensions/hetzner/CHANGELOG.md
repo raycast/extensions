@@ -1,5 +1,9 @@
 # Hetzner Changelog
 
+## [Add Windows Support] - {PR_MERGE_DATE}
+
+- Add Windows platform support
+
 ## [Update] - 2023-11-22
 
 - Fix server ipv4 nullable type
