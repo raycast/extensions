@@ -56,7 +56,7 @@ function isSprintLike(value: unknown): value is SprintLike {
   }
 
   const sprint = value as Record<string, unknown>;
-  return typeof sprint.name === "string" && typeof sprint.id !== "undefined";
+  return typeof sprint.name === "string" && typeof sprint.id !== "undefined" && typeof sprint.state === "string";
 }
 
 export function OpenIssues() {
@@ -65,11 +65,7 @@ export function OpenIssues() {
     showActiveSprintIssues = false,
     showAllSprintsIssues = false,
     showBacklogIssues = false,
-  } = getPreferenceValues<{
-    showActiveSprintIssues?: boolean;
-    showAllSprintsIssues?: boolean;
-    showBacklogIssues?: boolean;
-  }>();
+  } = getPreferenceValues<Preferences.OpenIssues>();
   const hasSectionSelection = showActiveSprintIssues || showAllSprintsIssues || showBacklogIssues;
   const showSplitSections = hasSectionSelection;
   const { issues, isLoading, mutate } = useIssues(
