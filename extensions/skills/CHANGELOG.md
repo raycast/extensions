@@ -1,6 +1,6 @@
 # Changelog
 
-## [Agent-Specific Skill Removal] - {PR_MERGE_DATE}
+## [Agent-Specific Skill Removal] - 2026-03-27
 
 - Support removing skills from specific agents instead of all agents at once
 - Show an agent picker form with checkboxes when a skill is installed in multiple agents
