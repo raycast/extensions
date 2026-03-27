@@ -1,4 +1,4 @@
-# Whisper
+# Whisper - Share Secrets
 
 A Raycast extension to share passwords, API keys, and private notes securely. Whisper creates encrypted links that expire or self-destruct after viewing, powered by the [Whisper](https://whisper.quentinvedrenne.com) service.
 

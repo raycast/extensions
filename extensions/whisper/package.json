@@ -70,9 +70,75 @@
       "description": "Create an encrypted, expiring link for sharing a secret securely"
     }
   ],
+  "ai": {
+    "tools": [
+      {
+        "name": "create-secret",
+        "title": "Create Secret Link",
+        "description": "Create an encrypted, expiring link for sharing a secret securely",
+        "arguments": {
+          "type": "object",
+          "properties": {
+            "secret": {
+              "type": "string"
+            },
+            "duration": {
+              "type": "string"
+            },
+            "selfDestruct": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "secret"
+          ]
+        }
+      }
+    ],
+    "evals": [
+      {
+        "input": "@create-secret Create a secret link for my-api-key and copy it to the clipboard.",
+        "mocks": {
+          "create-secret": [
+            "https://whisper.quentinvedrenne.com/s/abcd1234"
+          ]
+        },
+        "expected": [
+          {
+            "includes": "secret link"
+          }
+        ]
+      },
+      {
+        "input": "@create-secret Create a secret for \"my-api-key\" that expires in 24h and can be viewed multiple times.",
+        "mocks": {
+          "create-secret": [
+            "https://whisper.quentinvedrenne.com/s/efgh5678"
+          ]
+        },
+        "expected": [
+          {
+            "includes": "secrets"
+          }
+        ]
+      },
+      {
+        "input": "@create-secret Whisper my password: hunter2 7d false",
+        "mocks": {
+          "create-secret": [
+            "https://whisper.quentinvedrenne.com/s/ijkl9012"
+          ]
+        },
+        "expected": [
+          {
+            "includes": "password"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

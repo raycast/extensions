@@ -1,4 +1,4 @@
-# Whisper Changelog
+# Whisper - Share Secrets
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
