@@ -1,6 +1,6 @@
 # Whisper - Share Secrets
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-27
 
 - Quick command to create encrypted secret links directly from Raycast
 - Form-based command with expiration and self-destruct options
