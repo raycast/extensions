@@ -1,6 +1,6 @@
 # Raycast Browsers Profiles
 
-## [Add Vivaldi browser support] - {PR_MERGE_DATE}
+## [Add Vivaldi browser support] - 2026-03-27
 
 - Adding Vivaldi browser to supported browser list
 
