@@ -11,10 +11,17 @@ type Input = {
  */
 export default async function tool(input: Input) {
   try {
+    const query = input.query.toLowerCase().trim();
+    if (query === "") {
+      return {
+        success: false,
+        message: "Search query cannot be empty or whitespace-only. Provide a name or keyword to search for emojis.",
+      };
+    }
+
     const index = loadEmojiIndex();
     const vectors = loadEmojiVectors();
 
-    const query = input.query.toLowerCase().trim();
     const queryVec = getQueryVector(query);
 
     const results = Object.entries(index)
