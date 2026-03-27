@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Open Issues sprint/backlog split config] - 2026-03-27
+## [Open Issues sprint/backlog split config] - {PR_MERGE_DATE}
 
 - Added new `Open Issues` checkboxes to choose which sections to show: `Active Sprint`, `All Sprints`, and `Backlog`.
 - Updated the `All Sprints` view in `Open Issues` to split issues by sprint name instead of showing a single combined section.
