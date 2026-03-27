@@ -147,7 +147,7 @@ export default function IssueActions({
     }
   }
 
-  const { open_in, branch_name } = getPreferenceValues<Preferences>();
+  const { open_in } = getPreferenceValues<Preferences>();
 
   return (
     <ActionPanel title={issue.key}>
@@ -270,7 +270,7 @@ export default function IssueActions({
 
         <Action.CopyToClipboard
           title="Copy Git Branch Name"
-          content={generateBranchName(issue, branch_name)}
+          content={generateBranchName(issue)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
 

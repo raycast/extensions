@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "jira",
   "title": "Jira",
-  "description": "Create, access, and modify issues and sprints.",
+  "description": "Manage Jira issues with customizable views, sprint-aware sections, and quick actions.",
   "icon": "icon.png",
   "author": "thomaslombart",
   "contributors": [
@@ -23,13 +23,13 @@
     "jokeychen",
     "Murreey",
     "erayack",
-    "0xdhrv"
+    "0xdhrv",
+    "dytsou"
   ],
   "pastContributors": [
     "igor9silva",
     "mikybars"
   ],
-  "owner": "raycast",
   "access": "public",
   "categories": [
     "Productivity"
@@ -57,8 +57,37 @@
       "name": "open-issues",
       "title": "Open Issues",
       "subtitle": "Jira",
-      "description": "View and modify open issues that are assigned to you.",
-      "mode": "view"
+      "description": "View your open issues with optional Active Sprint, All Sprints, and Backlog sections.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showActiveSprintIssues",
+          "title": "Show Active Sprint",
+          "description": "Show only your open issues in currently active sprints as a dedicated section.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show Active Sprint section"
+        },
+        {
+          "name": "showAllSprintsIssues",
+          "title": "Show All Sprints",
+          "description": "Show your open issues that belong to any sprint, split into sections by sprint name.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show All Sprints section"
+        },
+        {
+          "name": "showBacklogIssues",
+          "title": "Show Backlog",
+          "description": "Show your open issues that are not assigned to any sprint in a Backlog section.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Show Backlog section"
+        }
+      ]
     },
     {
       "name": "reported-issues",
@@ -159,15 +188,6 @@
       "title": "Open Issues in",
       "required": false,
       "description": "Select the browser or application to open Issues with."
-    },
-    {
-      "name": "branch_name",
-      "title": "Git Branch Name",
-      "description": "The format for copying Git branch names.\nAvailable keys: {issueKey} {issueSummary} {issueSummaryShort} {issueType} {projectKey}",
-      "type": "textfield",
-      "required": false,
-      "default": "{issueKey}-{issueSummary}",
-      "placeholder": "{issueKey}-{issueSummary}"
     }
   ],
   "tools": [

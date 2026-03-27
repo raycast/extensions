@@ -136,6 +136,8 @@ export type Issue = {
     watches: IssueWatches;
     subtasks?: Issue[];
     parent?: Issue;
+    sprint?: { id: string; name: string; state: string } | null;
+    closedSprints?: { id: string; name: string; state: string }[];
   };
 };
 
@@ -167,6 +169,8 @@ export async function getIssues({ jql } = { jql: "" }) {
       "watches",
       "subtasks",
       "parent",
+      "sprint",
+      "closedSprints",
     ],
   };
 
