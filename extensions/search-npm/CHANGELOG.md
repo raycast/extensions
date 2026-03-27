@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Improvements] - {PR_MERGE_DATE}
+
+- Moved the package version to the subtitle to prevent truncation in the accessories
+
 ## [API usage optimization] - 2026-03-25
 
 - Debounce search API calls to avoid unnecessary requests while the user is typing.
