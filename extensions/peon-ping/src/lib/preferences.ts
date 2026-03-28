@@ -7,6 +7,7 @@ export function getResolvePeonPingPathsInputFromPreferences(): ResolvePeonPingPa
   return {
     raycastClaudeConfigDir: prefs.claudeConfigDir ?? null,
     claudeConfigDirEnv: process.env.CLAUDE_CONFIG_DIR ?? null,
+    claudePeonDirEnv: process.env.CLAUDE_PEON_DIR ?? null,
     homeDir: homedir(),
   };
 }

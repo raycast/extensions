@@ -1,28 +1,21 @@
-export type MenuBarIconToken = "on" | "off";
+export type MenuBarIconToken = "peonOn" | "peonOff";
 
 export type MenuBarPresentation = {
-  title: string;
   tooltip: string;
   iconToken: MenuBarIconToken;
 };
 
 export function getMenuBarPresentation(input: {
-  showMenuBarIcon: boolean;
   enabled: boolean;
-}): MenuBarPresentation | null {
-  if (!input.showMenuBarIcon) {
-    return null;
-  }
+}): MenuBarPresentation {
   if (input.enabled) {
     return {
-      title: "Peon Ping",
       tooltip: "Peon Ping is on",
-      iconToken: "on",
+      iconToken: "peonOn",
     };
   }
   return {
-    title: "Peon Ping",
     tooltip: "Peon Ping is off",
-    iconToken: "off",
+    iconToken: "peonOff",
   };
 }

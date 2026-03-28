@@ -1,27 +1,23 @@
-# Peon Ping (Raycast)
+<p align="center">
+    <img src="./assets/icon.png" width="150" height="150" />
+</p>
 
-Raycast extension to toggle peon-ping system-wide and optionally show a menu bar status icon.
+# Peon Ping
+
+Toggle peon-ping sound notifications on or off system-wide from Raycast, with an optional menu bar status indicator.
 
 ## Setup
 
-Install peon-ping locally so the hook script exists at:
+This extension requires [peon-ping](https://github.com/PeonPing/peon-ping) to be installed as a Claude Code hook. The extension expects the script at:
 
-`~/.claude/hooks/peon-ping/peon.sh`
+```
+~/.claude/hooks/peon-ping/peon.sh
+```
 
-(If you use a different Claude config root, the path is `<CLAUDE_CONFIG>/hooks/peon-ping/peon.sh`.)
+## Configuration
 
-**Config file:** `~/.claude/hooks/peon-ping/config.json` by default (same folder as `peon.sh`).
+| Preference | Description | Default |
+|---|---|---|
+| Claude config directory | Override the Claude config directory path | `~/.claude` |
 
-**Override Claude config directory:** In Raycast extension preferences, set **Claude config directory**, or set `CLAUDE_CONFIG_DIR` in your environment. Resolution order is preference → `CLAUDE_CONFIG_DIR` → `~/.claude`.
-
-**If `peon.sh` is missing:** Toggle shows an error that peon-ping is not installed at the expected script path.
-
-**Menu bar:** The optional menu bar command is **macOS-only** (Raycast menu bar commands are not supported on other platforms).
-
-## Development
-
-- `bun install`
-- `bun run dev` -- run in Raycast developer mode
-- `bun run test`
-- `bun run lint`
-- `bun run build`
+The config directory is resolved from: Raycast preference > `CLAUDE_CONFIG_DIR` env var > `~/.claude`.

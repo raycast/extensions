@@ -4,6 +4,45 @@ export type PeonPingStatus = {
   enabled: boolean;
 };
 
+export type PeonPingCategoryKey =
+  | "session.start"
+  | "task.acknowledge"
+  | "task.complete"
+  | "task.error"
+  | "input.required"
+  | "resource.limit"
+  | "user.spam";
+
+export type PeonPingPackRotationMode =
+  | "random"
+  | "round-robin"
+  | "session_override";
+
+export type PeonPingNotificationStyle = "overlay" | "standard";
+
+export type PeonPingNotificationPosition =
+  | "top-center"
+  | "top-right"
+  | "top-left"
+  | "bottom-right"
+  | "bottom-left"
+  | "bottom-center";
+
+export type PeonPingConfig = {
+  effectivelyEnabled: boolean;
+  volume: number;
+  activePack: string;
+  desktopNotifications: boolean;
+  headphonesOnly: boolean;
+  packRotationMode: PeonPingPackRotationMode;
+  categories: Record<PeonPingCategoryKey, boolean>;
+  notificationStyle: PeonPingNotificationStyle;
+  notificationPosition: PeonPingNotificationPosition;
+  notificationDismissSeconds: number;
+  mobileNotifyEnabled: boolean;
+  mobileNotifyConfigured: boolean;
+};
+
 export function getPeonPingStatus(
   configFilePath: string,
   pausedFilePath: string,
@@ -23,4 +62,11 @@ export function getPeonPingStatus(
   }
   const paused = existsSync(pausedFilePath);
   return { enabled: o.enabled && !paused };
+}
+
+export function getPeonPingConfig(
+  _configFilePath: string,
+  _pausedFilePath: string,
+): PeonPingConfig {
+  throw new Error("Not implemented");
 }

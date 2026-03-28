@@ -8,8 +8,6 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Menu bar - Show the Peon Ping status in the menu bar. */
-  "showMenuBarIcon": boolean,
   /** Claude config directory - Optional override for the Claude config directory. When empty, CLAUDE_CONFIG_DIR or ~/.claude is used. */
   "claudeConfigDir"?: string
 }

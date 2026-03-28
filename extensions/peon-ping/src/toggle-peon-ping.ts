@@ -24,16 +24,31 @@ export type RunTogglePeonPingCommandDeps = {
   }) => Promise<void>;
 };
 
+function isMenuBarNotActivatedError(error: unknown): boolean {
+  return (
+    error instanceof Error &&
+    error.message.includes(
+      "must be activated before it can be run in the background",
+    )
+  );
+}
+
 export async function runTogglePeonPingCommand(
   deps: RunTogglePeonPingCommandDeps,
 ): Promise<TogglePeonPingResult> {
   const result = deps.togglePeonPing(deps.paths, deps.run);
   const title = result.status.enabled ? "Peon Ping On" : "Peon Ping Off";
   await deps.showHUD(title);
-  await deps.launchCommand({
-    name: "peon-ping-menu-bar",
-    type: LaunchType.Background,
-  });
+  try {
+    await deps.launchCommand({
+      name: "peon-ping-menu-bar",
+      type: LaunchType.Background,
+    });
+  } catch (error) {
+    if (!isMenuBarNotActivatedError(error)) {
+      throw error;
+    }
+  }
   return result;
 }
 

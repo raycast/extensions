@@ -26,15 +26,6 @@
   },
   "preferences": [
     {
-      "name": "showMenuBarIcon",
-      "type": "checkbox",
-      "required": false,
-      "title": "Menu bar",
-      "description": "Show the Peon Ping status in the menu bar.",
-      "default": true,
-      "label": "Show menu bar icon"
-    },
-    {
       "name": "claudeConfigDir",
       "type": "textfield",
       "required": false,
@@ -48,12 +39,14 @@
       "name": "toggle-peon-ping",
       "title": "Toggle Peon Ping",
       "description": "Toggle peon-ping sounds on or off system-wide.",
+      "icon": "icon.png",
       "mode": "no-view"
     },
     {
       "name": "peon-ping-menu-bar",
       "title": "Peon Ping Menu Bar",
-      "description": "Optional menu bar indicator for peon-ping status.",
+      "description": "Menu bar status indicator and quick toggle for peon-ping.",
+      "icon": "icon.png",
       "mode": "menu-bar",
       "interval": "1m"
     }
