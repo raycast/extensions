@@ -2,11 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "peon-ping",
   "title": "Peon Ping",
-  "description": "Toggle peon-ping system-wide from Raycast with an optional menu bar indicator.",
+  "description": "Manage peon-ping from Raycast in one place: open Peon Ping for settings and controls, or use the optional menu bar for status and a quick toggle only.",
   "icon": "icon.png",
   "author": "garry_kasparov",
-  "platforms": ["macOS"],
-  "categories": ["Productivity", "Developer Tools"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",
@@ -18,8 +23,11 @@
     "@raycast/api": "^1.104.11"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
     "react-devtools": "6.1.1",
     "typescript": "^5.8.2",
     "vitest": "^3.0.0"
@@ -36,16 +44,16 @@
   ],
   "commands": [
     {
-      "name": "toggle-peon-ping",
-      "title": "Toggle Peon Ping",
-      "description": "Toggle peon-ping sounds on or off system-wide.",
+      "name": "peon-ping",
+      "title": "Peon Ping",
+      "description": "Open settings, status, and controls for peon-ping.",
       "icon": "icon.png",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "peon-ping-menu-bar",
       "title": "Peon Ping Menu Bar",
-      "description": "Menu bar status indicator and quick toggle for peon-ping.",
+      "description": "Status and quick toggle only. Open Peon Ping for full settings.",
       "icon": "icon.png",
       "mode": "menu-bar",
       "interval": "1m"

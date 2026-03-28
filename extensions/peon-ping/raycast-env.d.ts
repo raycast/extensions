@@ -16,15 +16,15 @@ type ExtensionPreferences = {
 declare type Preferences = ExtensionPreferences
 
 declare namespace Preferences {
-  /** Preferences accessible in the `toggle-peon-ping` command */
-  export type TogglePeonPing = ExtensionPreferences & {}
+  /** Preferences accessible in the `peon-ping` command */
+  export type PeonPing = ExtensionPreferences & {}
   /** Preferences accessible in the `peon-ping-menu-bar` command */
   export type PeonPingMenuBar = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
-  /** Arguments passed to the `toggle-peon-ping` command */
-  export type TogglePeonPing = {}
+  /** Arguments passed to the `peon-ping` command */
+  export type PeonPing = {}
   /** Arguments passed to the `peon-ping-menu-bar` command */
   export type PeonPingMenuBar = {}
 }

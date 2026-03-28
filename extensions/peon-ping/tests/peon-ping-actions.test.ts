@@ -1,21 +1,24 @@
 import { expect, test, vi } from "vitest";
+import { LaunchType, Toast } from "@raycast/api";
 import type { PeonPingConfig, PeonPingStatus } from "../src/lib/peon-ping-config";
 import type { PeonPingResolvedPaths } from "../src/lib/peon-ping-paths";
 import type { PeonPingCommandRunner } from "../src/lib/peon-ping-service";
 import {
-  runMenuBarNextPackAction,
-  runMenuBarSetActivePackAction,
-  runMenuBarSetDismissTimeAction,
-  runMenuBarSetNotificationPositionAction,
-  runMenuBarSetNotificationStyleAction,
-  runMenuBarSetRotationModeAction,
-  runMenuBarSetVolumeAction,
-  runMenuBarToggleAction,
-  runMenuBarToggleCategoryAction,
-  runMenuBarToggleHeadphonesOnlyAction,
-  runMenuBarToggleMobileAction,
-  runMenuBarToggleNotificationsAction,
-} from "../src/peon-ping-menu-bar";
+  runNextPackAction,
+  runSetActivePackAction,
+  runSetDismissTimeAction,
+  runSetNotificationPositionAction,
+  runSetNotificationStyleAction,
+  runSetRotationModeAction,
+  runStatusToggleAndRefreshMenuBarSafely,
+  runSetVolumeAction,
+  runStatusToggleAndRefreshMenuBar,
+  runToggleAction,
+  runToggleCategoryAction,
+  runToggleHeadphonesOnlyAction,
+  runToggleMobileAction,
+  runToggleNotificationsAction,
+} from "../src/lib/peon-ping-actions";
 
 const dummyPaths: PeonPingResolvedPaths = {
   claudeConfigDir: "/tmp/claude",
@@ -53,8 +56,14 @@ function makeConfig(overrides: Partial<PeonPingConfig> = {}): PeonPingConfig {
   };
 }
 
-test("runMenuBarToggleAction updates local status from the toggle result", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+function createRunStub(): { run: PeonPingCommandRunner } {
+  return {
+    run: vi.fn((_command: string, _args: readonly string[]): string => ""),
+  };
+}
+
+test("runToggleAction updates local status from the toggle result", () => {
+  const { run } = createRunStub();
   const status: PeonPingStatus = { enabled: false };
   const togglePeonPing = vi.fn(() => ({
     message: "peon-ping: sounds paused (run 'peon toggle' to unpause)",
@@ -62,7 +71,7 @@ test("runMenuBarToggleAction updates local status from the toggle result", () =>
   }));
   const setStatus = vi.fn();
 
-  const result = runMenuBarToggleAction({
+  const result = runToggleAction({
     paths: dummyPaths,
     run,
     togglePeonPing,
@@ -77,13 +86,109 @@ test("runMenuBarToggleAction updates local status from the toggle result", () =>
   });
 });
 
-test("runMenuBarSetVolumeAction calls setVolume and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runStatusToggleAndRefreshMenuBar awaits refresh and resolves when menu bar is not activated", async () => {
+  const { run } = createRunStub();
+  const status: PeonPingStatus = { enabled: false };
+  const togglePeonPing = vi.fn(() => ({
+    message: "ok",
+    status,
+  }));
+  const setStatus = vi.fn();
+  const launchCommand = vi.fn().mockRejectedValue(
+    new Error(
+      'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
+    ),
+  );
+
+  await expect(
+    runStatusToggleAndRefreshMenuBar(
+      { paths: dummyPaths, run, togglePeonPing, setStatus },
+      { launchCommand },
+    ),
+  ).resolves.toBeUndefined();
+
+  expect(launchCommand).toHaveBeenCalledWith({
+    name: "peon-ping-menu-bar",
+    type: LaunchType.Background,
+  });
+});
+
+test("runStatusToggleAndRefreshMenuBar propagates non-activation refresh failures", async () => {
+  const { run } = createRunStub();
+  const status: PeonPingStatus = { enabled: true };
+  const togglePeonPing = vi.fn(() => ({ message: "ok", status }));
+  const setStatus = vi.fn();
+  const failure = new Error("launch failed");
+  const launchCommand = vi.fn().mockRejectedValue(failure);
+
+  await expect(
+    runStatusToggleAndRefreshMenuBar(
+      { paths: dummyPaths, run, togglePeonPing, setStatus },
+      { launchCommand },
+    ),
+  ).rejects.toBe(failure);
+});
+
+test("runStatusToggleAndRefreshMenuBarSafely returns void and shows a failure toast for refresh errors", async () => {
+  const { run } = createRunStub();
+  const status: PeonPingStatus = { enabled: false };
+  const togglePeonPing = vi.fn(() => ({ message: "ok", status }));
+  const setStatus = vi.fn();
+  const launchCommand = vi.fn().mockRejectedValue(new Error("launch failed"));
+  const showToast = vi.fn().mockResolvedValue(undefined);
+
+  const result = runStatusToggleAndRefreshMenuBarSafely(
+    { paths: dummyPaths, run, togglePeonPing, setStatus },
+    { launchCommand },
+    { showToast },
+  );
+
+  expect(result).toBeUndefined();
+  expect(togglePeonPing).toHaveBeenCalledWith(dummyPaths, run);
+  expect(setStatus).toHaveBeenCalledWith(status);
+
+  await vi.waitFor(() => {
+    expect(showToast).toHaveBeenCalledWith({
+      style: Toast.Style.Failure,
+      title: "Failed to update Peon Ping",
+      message: "launch failed",
+    });
+  });
+});
+
+test("runStatusToggleAndRefreshMenuBarSafely does not show a toast for the ignored activation error", async () => {
+  const { run } = createRunStub();
+  const status: PeonPingStatus = { enabled: true };
+  const togglePeonPing = vi.fn(() => ({ message: "ok", status }));
+  const setStatus = vi.fn();
+  const launchCommand = vi.fn().mockRejectedValue(
+    new Error(
+      'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
+    ),
+  );
+  const showToast = vi.fn().mockResolvedValue(undefined);
+
+  const result = runStatusToggleAndRefreshMenuBarSafely(
+    { paths: dummyPaths, run, togglePeonPing, setStatus },
+    { launchCommand },
+    { showToast },
+  );
+
+  expect(result).toBeUndefined();
+
+  await Promise.resolve();
+  await Promise.resolve();
+
+  expect(showToast).not.toHaveBeenCalled();
+});
+
+test("runSetVolumeAction calls setVolume and updates config state", () => {
   const config = makeConfig({ volume: 0.75 });
   const setVolume = vi.fn(() => config);
   const setConfig = vi.fn();
+  const { run } = createRunStub();
 
-  const result = runMenuBarSetVolumeAction(
+  const result = runSetVolumeAction(
     { paths: dummyPaths, run, setVolume, setConfig },
     0.75,
   );
@@ -93,13 +198,13 @@ test("runMenuBarSetVolumeAction calls setVolume and updates config state", () =>
   expect(result).toEqual(config);
 });
 
-test("runMenuBarSetActivePackAction calls setActivePack and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runSetActivePackAction calls setActivePack and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ activePack: "glados" });
   const setActivePack = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarSetActivePackAction(
+  const result = runSetActivePackAction(
     { paths: dummyPaths, run, setActivePack, setConfig },
     "glados",
   );
@@ -109,13 +214,13 @@ test("runMenuBarSetActivePackAction calls setActivePack and updates config state
   expect(result).toEqual(config);
 });
 
-test("runMenuBarNextPackAction calls advanceToNextPack and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runNextPackAction calls advanceToNextPack and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ activePack: "glados" });
   const advanceToNextPack = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarNextPackAction({
+  const result = runNextPackAction({
     paths: dummyPaths,
     run,
     advanceToNextPack,
@@ -127,13 +232,13 @@ test("runMenuBarNextPackAction calls advanceToNextPack and updates config state"
   expect(result).toEqual(config);
 });
 
-test("runMenuBarToggleNotificationsAction calls setDesktopNotifications and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runToggleNotificationsAction calls setDesktopNotifications and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ desktopNotifications: false });
   const setDesktopNotifications = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarToggleNotificationsAction(
+  const result = runToggleNotificationsAction(
     { paths: dummyPaths, run, setDesktopNotifications, setConfig },
     false,
   );
@@ -143,12 +248,12 @@ test("runMenuBarToggleNotificationsAction calls setDesktopNotifications and upda
   expect(result).toEqual(config);
 });
 
-test("runMenuBarToggleHeadphonesOnlyAction calls setHeadphonesOnly and updates config state", () => {
+test("runToggleHeadphonesOnlyAction calls setHeadphonesOnly and updates config state", () => {
   const config = makeConfig({ headphonesOnly: true });
   const setHeadphonesOnly = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarToggleHeadphonesOnlyAction(
+  const result = runToggleHeadphonesOnlyAction(
     {
       configFilePath: dummyPaths.configFilePath,
       pausedFilePath: dummyPaths.pausedFilePath,
@@ -167,13 +272,13 @@ test("runMenuBarToggleHeadphonesOnlyAction calls setHeadphonesOnly and updates c
   expect(result).toEqual(config);
 });
 
-test("runMenuBarSetRotationModeAction calls setPackRotationMode and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runSetRotationModeAction calls setPackRotationMode and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ packRotationMode: "round-robin" });
   const setPackRotationMode = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarSetRotationModeAction(
+  const result = runSetRotationModeAction(
     { paths: dummyPaths, run, setPackRotationMode, setConfig },
     "round-robin",
   );
@@ -187,7 +292,7 @@ test("runMenuBarSetRotationModeAction calls setPackRotationMode and updates conf
   expect(result).toEqual(config);
 });
 
-test("runMenuBarToggleCategoryAction calls setCategoryEnabled and updates config state", () => {
+test("runToggleCategoryAction calls setCategoryEnabled and updates config state", () => {
   const config = makeConfig({
     categories: {
       ...makeConfig().categories,
@@ -197,7 +302,7 @@ test("runMenuBarToggleCategoryAction calls setCategoryEnabled and updates config
   const setCategoryEnabled = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarToggleCategoryAction(
+  const result = runToggleCategoryAction(
     {
       configFilePath: dummyPaths.configFilePath,
       pausedFilePath: dummyPaths.pausedFilePath,
@@ -218,13 +323,13 @@ test("runMenuBarToggleCategoryAction calls setCategoryEnabled and updates config
   expect(result).toEqual(config);
 });
 
-test("runMenuBarSetNotificationStyleAction calls setNotificationStyle and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runSetNotificationStyleAction calls setNotificationStyle and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ notificationStyle: "standard" });
   const setNotificationStyle = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarSetNotificationStyleAction(
+  const result = runSetNotificationStyleAction(
     { paths: dummyPaths, run, setNotificationStyle, setConfig },
     "standard",
   );
@@ -238,13 +343,13 @@ test("runMenuBarSetNotificationStyleAction calls setNotificationStyle and update
   expect(result).toEqual(config);
 });
 
-test("runMenuBarSetNotificationPositionAction calls setNotificationPosition and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runSetNotificationPositionAction calls setNotificationPosition and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ notificationPosition: "top-right" });
   const setNotificationPosition = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarSetNotificationPositionAction(
+  const result = runSetNotificationPositionAction(
     { paths: dummyPaths, run, setNotificationPosition, setConfig },
     "top-right",
   );
@@ -258,13 +363,13 @@ test("runMenuBarSetNotificationPositionAction calls setNotificationPosition and 
   expect(result).toEqual(config);
 });
 
-test("runMenuBarSetDismissTimeAction calls setNotificationDismissTime and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runSetDismissTimeAction calls setNotificationDismissTime and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({ notificationDismissSeconds: 8 });
   const setNotificationDismissTime = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarSetDismissTimeAction(
+  const result = runSetDismissTimeAction(
     { paths: dummyPaths, run, setNotificationDismissTime, setConfig },
     8,
   );
@@ -274,8 +379,8 @@ test("runMenuBarSetDismissTimeAction calls setNotificationDismissTime and update
   expect(result).toEqual(config);
 });
 
-test("runMenuBarToggleMobileAction calls setMobileNotifications and updates config state", () => {
-  const run = vi.fn() as unknown as PeonPingCommandRunner;
+test("runToggleMobileAction calls setMobileNotifications and updates config state", () => {
+  const { run } = createRunStub();
   const config = makeConfig({
     mobileNotifyEnabled: true,
     mobileNotifyConfigured: true,
@@ -283,7 +388,7 @@ test("runMenuBarToggleMobileAction calls setMobileNotifications and updates conf
   const setMobileNotifications = vi.fn(() => config);
   const setConfig = vi.fn();
 
-  const result = runMenuBarToggleMobileAction(
+  const result = runToggleMobileAction(
     { paths: dummyPaths, run, setMobileNotifications, setConfig },
     true,
   );

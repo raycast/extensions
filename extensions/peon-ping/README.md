@@ -4,7 +4,13 @@
 
 # Peon Ping
 
-Toggle peon-ping sound notifications on or off system-wide from Raycast, with an optional menu bar status indicator.
+Manage peon-ping from Raycast with a main command for status, global on/off, and supported settings, plus an optional menu bar quick toggle.
+
+## Commands
+
+**Peon Ping** is the main Raycast command. It includes the global on/off control and all supported settings (volume, packs, categories, notifications, and related preferences).
+
+**Peon Ping Menu Bar** shows status in the menu bar and offers a quick on/off toggle only—it does not duplicate the full settings UI.
 
 ## Setup
 

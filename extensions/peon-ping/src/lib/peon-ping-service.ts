@@ -1,11 +1,13 @@
-import { accessSync, constants } from "node:fs";
+import { accessSync, constants, readFileSync, writeFileSync } from "node:fs";
 import {
+  getPeonPingConfig,
   getPeonPingStatus,
   type PeonPingConfig,
   type PeonPingNotificationPosition,
   type PeonPingNotificationStyle,
   type PeonPingPackRotationMode,
   type PeonPingStatus,
+  type RawPeonPingConfig,
 } from "./peon-ping-config";
 import type { PeonPingResolvedPaths } from "./peon-ping-paths";
 
@@ -19,13 +21,8 @@ export type TogglePeonPingResult = {
   status: PeonPingStatus;
 };
 
-function isENOENT(e: unknown): boolean {
-  return (
-    typeof e === "object" &&
-    e !== null &&
-    "code" in e &&
-    (e as NodeJS.ErrnoException).code === "ENOENT"
-  );
+function isENOENT(e: NodeJS.ErrnoException): boolean {
+  return e.code === "ENOENT";
 }
 
 export function togglePeonPing(
@@ -35,7 +32,7 @@ export function togglePeonPing(
   try {
     accessSync(paths.scriptPath, constants.F_OK);
   } catch (e) {
-    if (isENOENT(e)) {
+    if (isENOENT(e as NodeJS.ErrnoException)) {
       throw new Error(`peon-ping is not installed at ${paths.scriptPath}`);
     }
     throw e;
@@ -44,7 +41,7 @@ export function togglePeonPing(
   try {
     stdout = run("bash", [paths.scriptPath, "toggle"]);
   } catch (e) {
-    if (isENOENT(e)) {
+    if (isENOENT(e as NodeJS.ErrnoException)) {
       throw new Error(`peon-ping is not installed at ${paths.scriptPath}`);
     }
     throw e;
@@ -55,90 +52,123 @@ export function togglePeonPing(
   };
 }
 
+function refreshConfig(paths: PeonPingResolvedPaths): PeonPingConfig {
+  return getPeonPingConfig(paths.configFilePath, paths.pausedFilePath);
+}
+
+function readRawConfig(configFilePath: string): RawPeonPingConfig {
+  return JSON.parse(readFileSync(configFilePath, "utf8")) as RawPeonPingConfig;
+}
+
+function writeRawConfig(
+  configFilePath: string,
+  config: RawPeonPingConfig,
+): void {
+  writeFileSync(configFilePath, JSON.stringify(config), "utf-8");
+}
+
 export function setVolume(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _volume: number,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  volume: number,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "volume", String(volume)]);
+  return refreshConfig(paths);
 }
 
 export function setActivePack(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _packName: string,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  packName: string,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "packs", "use", packName]);
+  return refreshConfig(paths);
 }
 
 export function advanceToNextPack(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "packs", "next"]);
+  return refreshConfig(paths);
 }
 
 export function setDesktopNotifications(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _enabled: boolean,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  enabled: boolean,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "notifications", enabled ? "on" : "off"]);
+  return refreshConfig(paths);
 }
 
 export function setHeadphonesOnly(
-  _configFilePath: string,
-  _pausedFilePath: string,
-  _enabled: boolean,
+  configFilePath: string,
+  pausedFilePath: string,
+  enabled: boolean,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  const config = readRawConfig(configFilePath);
+  config.headphones_only = enabled;
+  writeRawConfig(configFilePath, config);
+  return getPeonPingConfig(configFilePath, pausedFilePath);
 }
 
 export function setPackRotationMode(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _mode: PeonPingPackRotationMode,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  mode: PeonPingPackRotationMode,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "rotation", mode]);
+  return refreshConfig(paths);
 }
 
 export function setCategoryEnabled(
-  _configFilePath: string,
-  _pausedFilePath: string,
-  _category: string,
-  _enabled: boolean,
+  configFilePath: string,
+  pausedFilePath: string,
+  category: string,
+  enabled: boolean,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  const config = readRawConfig(configFilePath);
+  if (!config.categories) {
+    config.categories = {};
+  }
+  (config.categories as Record<string, boolean>)[category] = enabled;
+  writeRawConfig(configFilePath, config);
+  return getPeonPingConfig(configFilePath, pausedFilePath);
 }
 
 export function setNotificationStyle(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _style: PeonPingNotificationStyle,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  style: PeonPingNotificationStyle,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "notifications", style]);
+  return refreshConfig(paths);
 }
 
 export function setNotificationPosition(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _position: PeonPingNotificationPosition,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  position: PeonPingNotificationPosition,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "notifications", "position", position]);
+  return refreshConfig(paths);
 }
 
 export function setNotificationDismissTime(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _seconds: number,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  seconds: number,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "notifications", "dismiss", String(seconds)]);
+  return refreshConfig(paths);
 }
 
 export function setMobileNotifications(
-  _paths: PeonPingResolvedPaths,
-  _run: PeonPingCommandRunner,
-  _enabled: boolean,
+  paths: PeonPingResolvedPaths,
+  run: PeonPingCommandRunner,
+  enabled: boolean,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  run("bash", [paths.scriptPath, "mobile", enabled ? "on" : "off"]);
+  return refreshConfig(paths);
 }

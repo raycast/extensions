@@ -43,20 +43,36 @@ export type PeonPingConfig = {
   mobileNotifyConfigured: boolean;
 };
 
+type RawMobileNotify = {
+  enabled?: boolean;
+  service?: string;
+};
+
+export type RawPeonPingConfig = {
+  enabled?: boolean;
+  volume?: number;
+  default_pack?: string;
+  active_pack?: string;
+  desktop_notifications?: boolean;
+  headphones_only?: boolean;
+  pack_rotation_mode?: string;
+  categories?: Partial<Record<PeonPingCategoryKey, boolean>>;
+  notification_style?: string;
+  notification_position?: string;
+  notification_dismiss_seconds?: number;
+  mobile_notify?: RawMobileNotify;
+};
+
+function parseConfigFile(configFilePath: string): RawPeonPingConfig {
+  const raw = readFileSync(configFilePath, "utf8");
+  return JSON.parse(raw) as RawPeonPingConfig;
+}
+
 export function getPeonPingStatus(
   configFilePath: string,
   pausedFilePath: string,
 ): PeonPingStatus {
-  const raw = readFileSync(configFilePath, "utf8");
-  const parsed: unknown = JSON.parse(raw);
-  if (
-    typeof parsed !== "object" ||
-    parsed === null ||
-    Array.isArray(parsed)
-  ) {
-    throw new Error("peon-ping config is missing boolean enabled");
-  }
-  const o = parsed as Record<string, unknown>;
+  const o = parseConfigFile(configFilePath);
   if (typeof o.enabled !== "boolean") {
     throw new Error("peon-ping config is missing boolean enabled");
   }
@@ -64,9 +80,87 @@ export function getPeonPingStatus(
   return { enabled: o.enabled && !paused };
 }
 
+const DEFAULT_CATEGORIES: Record<PeonPingCategoryKey, boolean> = {
+  "session.start": true,
+  "task.acknowledge": false,
+  "task.complete": true,
+  "task.error": true,
+  "input.required": true,
+  "resource.limit": true,
+  "user.spam": true,
+};
+
+const CATEGORY_KEYS: PeonPingCategoryKey[] = Object.keys(
+  DEFAULT_CATEGORIES,
+) as PeonPingCategoryKey[];
+
+const PACK_ROTATION_MODES: PeonPingPackRotationMode[] = [
+  "random",
+  "round-robin",
+  "session_override",
+];
+
+const NOTIFICATION_STYLES: PeonPingNotificationStyle[] = [
+  "overlay",
+  "standard",
+];
+
+const NOTIFICATION_POSITIONS: PeonPingNotificationPosition[] = [
+  "top-center",
+  "top-right",
+  "top-left",
+  "bottom-right",
+  "bottom-left",
+  "bottom-center",
+];
+
 export function getPeonPingConfig(
-  _configFilePath: string,
-  _pausedFilePath: string,
+  configFilePath: string,
+  pausedFilePath: string,
 ): PeonPingConfig {
-  throw new Error("Not implemented");
+  const o = parseConfigFile(configFilePath);
+  if (typeof o.enabled !== "boolean") {
+    throw new Error("peon-ping config is missing boolean enabled");
+  }
+
+  const paused = existsSync(pausedFilePath);
+
+  const rawCategories = o.categories ?? {};
+  const categories = {} as Record<PeonPingCategoryKey, boolean>;
+  for (const key of CATEGORY_KEYS) {
+    categories[key] = rawCategories[key] ?? DEFAULT_CATEGORIES[key];
+  }
+
+  const mobileNotify = o.mobile_notify;
+  const mobileNotifyConfigured =
+    mobileNotify !== undefined && typeof mobileNotify.service === "string";
+  const mobileNotifyEnabled =
+    mobileNotifyConfigured && mobileNotify!.enabled === true;
+
+  return {
+    effectivelyEnabled: o.enabled && !paused,
+    volume: o.volume ?? 0.5,
+    activePack: o.default_pack ?? o.active_pack ?? "peon",
+    desktopNotifications: o.desktop_notifications ?? true,
+    headphonesOnly: o.headphones_only ?? false,
+    packRotationMode: PACK_ROTATION_MODES.includes(
+      o.pack_rotation_mode as PeonPingPackRotationMode,
+    )
+      ? (o.pack_rotation_mode as PeonPingPackRotationMode)
+      : "random",
+    categories,
+    notificationStyle: NOTIFICATION_STYLES.includes(
+      o.notification_style as PeonPingNotificationStyle,
+    )
+      ? (o.notification_style as PeonPingNotificationStyle)
+      : "overlay",
+    notificationPosition: NOTIFICATION_POSITIONS.includes(
+      o.notification_position as PeonPingNotificationPosition,
+    )
+      ? (o.notification_position as PeonPingNotificationPosition)
+      : "top-center",
+    notificationDismissSeconds: o.notification_dismiss_seconds ?? 4,
+    mobileNotifyEnabled,
+    mobileNotifyConfigured,
+  };
 }

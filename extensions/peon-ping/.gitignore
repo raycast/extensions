@@ -3,4 +3,4 @@ dist/
 .DS_Store
 *.log
 .raycast-swift-build/
-docs/plans/
+docs/
