@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix `fnm` macOS Path Resolution] - {PR_MERGE_DATE}
+## [Fix `fnm` macOS Path Resolution] - 2026-03-28
 
 - Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
 - Match the official `fnm` directory resolution preference order when resolving `fnm` paths.
