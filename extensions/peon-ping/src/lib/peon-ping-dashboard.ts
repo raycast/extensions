@@ -52,44 +52,53 @@ export type MetadataTagList = {
 
 export type MetadataEntry = MetadataLabel | MetadataSeparator | MetadataTagList;
 
+type DashboardActionBase = {
+  title: string;
+  subListTitle?: string;
+  isCurrent?: boolean;
+};
+
 export type DashboardAction =
-  | { kind: "toggleStatus"; title: string; nextEnabled: boolean }
-  | { kind: "setVolume"; title: string; volume: VolumeStep }
-  | { kind: "setActivePack"; title: string; packName: string }
-  | { kind: "advanceToNextPack"; title: string }
-  | {
+  | (DashboardActionBase & {
+      kind: "toggleStatus";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & { kind: "setVolume"; volume: VolumeStep })
+  | (DashboardActionBase & { kind: "setActivePack"; packName: string })
+  | (DashboardActionBase & { kind: "advanceToNextPack" })
+  | (DashboardActionBase & {
       kind: "setRotationMode";
-      title: string;
       mode: PeonPingPackRotationMode;
-    }
-  | {
+    })
+  | (DashboardActionBase & {
       kind: "toggleCategory";
-      title: string;
       categoryKey: PeonPingCategoryKey;
       nextEnabled: boolean;
-    }
-  | {
+    })
+  | (DashboardActionBase & {
       kind: "toggleDesktopNotifications";
-      title: string;
       nextEnabled: boolean;
-    }
-  | {
+    })
+  | (DashboardActionBase & {
       kind: "setNotificationStyle";
-      title: string;
       style: PeonPingNotificationStyle;
-    }
-  | {
+    })
+  | (DashboardActionBase & {
       kind: "setNotificationPosition";
-      title: string;
       position: PeonPingNotificationPosition;
-    }
-  | { kind: "cycleDismissTime"; title: string; nextSeconds: number }
-  | {
+    })
+  | (DashboardActionBase & {
+      kind: "cycleDismissTime";
+      nextSeconds: number;
+    })
+  | (DashboardActionBase & {
       kind: "toggleMobileNotifications";
-      title: string;
       nextEnabled: boolean;
-    }
-  | { kind: "toggleHeadphonesOnly"; title: string; nextEnabled: boolean };
+    })
+  | (DashboardActionBase & {
+      kind: "toggleHeadphonesOnly";
+      nextEnabled: boolean;
+    });
 
 export type DashboardItem = {
   id: DashboardItemId;
@@ -97,6 +106,7 @@ export type DashboardItem = {
   icon: string;
   accessoryText: string;
   accessoryTagColor?: "green" | "red";
+  drillable: boolean;
   metadata: MetadataEntry[];
   actions: DashboardAction[];
 };
@@ -164,6 +174,7 @@ function buildStatusItem(
     icon: enabled ? "pause" : "play",
     accessoryText: enabled ? "On" : "Off",
     accessoryTagColor: enabled ? "green" : "red",
+    drillable: false,
     metadata,
     actions: [
       {
@@ -197,10 +208,13 @@ function buildVolumeItem(config: PeonPingConfig): DashboardItem {
     title: "Volume",
     icon: "speakerOn",
     accessoryText: currentLabel,
+    drillable: true,
     metadata,
     actions: VOLUME_STEPS.map((step) => ({
       kind: "setVolume" as const,
       title: `Set to ${volumeLabel(step)}`,
+      subListTitle: volumeLabel(step),
+      isCurrent: config.volume === step,
       volume: step,
     })),
   };
@@ -235,6 +249,8 @@ function buildVoicePackItem(
       (pack): DashboardAction => ({
         kind: "setActivePack",
         title: `Use ${pack.displayName}`,
+        subListTitle: pack.displayName,
+        isCurrent: pack.name === config.activePack,
         packName: pack.name,
       }),
     ),
@@ -246,6 +262,7 @@ function buildVoicePackItem(
     title: "Voice Pack",
     icon: "music",
     accessoryText: activeDisplayName,
+    drillable: true,
     metadata,
     actions,
   };
@@ -275,10 +292,12 @@ function buildRotationItem(config: PeonPingConfig): DashboardItem {
     title: "Pack Rotation",
     icon: "arrowClockwise",
     accessoryText: currentLabel,
+    drillable: true,
     metadata,
     actions: ROTATION_MODES_ORDER.map((mode) => ({
       kind: "setRotationMode" as const,
       title: ROTATION_LABELS[mode],
+      isCurrent: config.packRotationMode === mode,
       mode,
     })),
   };
@@ -303,10 +322,13 @@ function buildCategoriesItem(config: PeonPingConfig): DashboardItem {
     title: "Sound Categories",
     icon: "bulletPoints",
     accessoryText: `${enabledCount}/${CATEGORY_KEYS_ORDER.length} enabled`,
+    drillable: true,
     metadata,
     actions: CATEGORY_KEYS_ORDER.map((key) => ({
       kind: "toggleCategory" as const,
       title: `${config.categories[key] ? "Disable" : "Enable"} ${CATEGORY_LABELS[key]}`,
+      subListTitle: CATEGORY_LABELS[key],
+      isCurrent: config.categories[key],
       categoryKey: key,
       nextEnabled: !config.categories[key],
     })),
@@ -353,6 +375,8 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
       title: config.desktopNotifications
         ? "Disable Desktop Notifications"
         : "Enable Desktop Notifications",
+      subListTitle: "Desktop Notifications",
+      isCurrent: config.desktopNotifications,
       nextEnabled: !config.desktopNotifications,
     },
     ...(
@@ -361,6 +385,8 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
       (style): DashboardAction => ({
         kind: "setNotificationStyle",
         title: `Style: ${STYLE_LABELS[style]}`,
+        subListTitle: `Style: ${STYLE_LABELS[style]}`,
+        isCurrent: config.notificationStyle === style,
         style,
       }),
     ),
@@ -368,12 +394,15 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
       (position): DashboardAction => ({
         kind: "setNotificationPosition",
         title: `Position: ${POSITION_LABELS[position]}`,
+        subListTitle: `Position: ${POSITION_LABELS[position]}`,
+        isCurrent: config.notificationPosition === position,
         position,
       }),
     ),
     {
       kind: "cycleDismissTime",
       title: `Dismiss: ${formatDismiss(nextDismissSeconds(config.notificationDismissSeconds))}`,
+      subListTitle: `Dismiss: ${formatDismiss(config.notificationDismissSeconds)}`,
       nextSeconds: nextDismissSeconds(config.notificationDismissSeconds),
     },
   ];
@@ -384,6 +413,8 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
       title: config.mobileNotifyEnabled
         ? "Disable Mobile Notifications"
         : "Enable Mobile Notifications",
+      subListTitle: "Mobile Notifications",
+      isCurrent: config.mobileNotifyEnabled,
       nextEnabled: !config.mobileNotifyEnabled,
     });
   }
@@ -393,6 +424,7 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
     title: "Notifications",
     icon: "bell",
     accessoryText: config.desktopNotifications ? "Desktop On" : "Desktop Off",
+    drillable: true,
     metadata,
     actions,
   };
@@ -404,6 +436,7 @@ function buildAudioItem(config: PeonPingConfig): DashboardItem {
     title: "Audio",
     icon: "headphones",
     accessoryText: config.headphonesOnly ? "Headphones Only" : "All Outputs",
+    drillable: false,
     metadata: [
       {
         kind: "label",

@@ -320,3 +320,99 @@ test("audio item shows All Outputs when headphones off", () => {
   const audio = findItem(items, "audio");
   expect(audio.accessoryText).toBe("All Outputs");
 });
+
+test("drillable is true for multi-choice items, false for toggles", () => {
+  const items = buildDashboardItems({ config: makeConfig(), packs: PACKS });
+  expect(findItem(items, "status").drillable).toBe(false);
+  expect(findItem(items, "volume").drillable).toBe(true);
+  expect(findItem(items, "voicePack").drillable).toBe(true);
+  expect(findItem(items, "rotation").drillable).toBe(true);
+  expect(findItem(items, "categories").drillable).toBe(true);
+  expect(findItem(items, "notifications").drillable).toBe(true);
+  expect(findItem(items, "audio").drillable).toBe(false);
+});
+
+test("volume actions carry subListTitle and isCurrent", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ volume: 0.75 }),
+    packs: [],
+  });
+  const vol = findItem(items, "volume");
+  const current = vol.actions.find((a) => a.isCurrent);
+  expect(current).toBeDefined();
+  expect(current!.subListTitle).toBe("75%");
+  const notCurrent = vol.actions.filter((a) => !a.isCurrent);
+  expect(notCurrent).toHaveLength(3);
+});
+
+test("voicePack actions carry subListTitle and isCurrent for active pack", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ activePack: "glados" }),
+    packs: PACKS,
+  });
+  const vp = findItem(items, "voicePack");
+  const active = vp.actions.find((a) => a.isCurrent);
+  expect(active).toBeDefined();
+  expect(active!.subListTitle).toBe("GLaDOS (Portal)");
+});
+
+test("rotation actions carry isCurrent for active mode", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ packRotationMode: "session_override" }),
+    packs: [],
+  });
+  const rot = findItem(items, "rotation");
+  const current = rot.actions.find((a) => a.isCurrent);
+  expect(current).toBeDefined();
+  expect(current!.title).toBe("Session Override");
+});
+
+test("category actions carry subListTitle and isCurrent for enabled state", () => {
+  const items = buildDashboardItems({
+    config: makeConfig(),
+    packs: [],
+  });
+  const cats = findItem(items, "categories");
+  const sessionStart = cats.actions.find(
+    (a) => a.kind === "toggleCategory" && a.categoryKey === "session.start",
+  );
+  expect(sessionStart!.isCurrent).toBe(true);
+  expect(sessionStart!.subListTitle).toBe("Session Start");
+
+  const taskAck = cats.actions.find(
+    (a) => a.kind === "toggleCategory" && a.categoryKey === "task.acknowledge",
+  );
+  expect(taskAck!.isCurrent).toBe(false);
+});
+
+test("notification actions carry isCurrent for current settings", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({
+      desktopNotifications: true,
+      notificationStyle: "overlay",
+      notificationPosition: "top-center",
+    }),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+
+  const desktop = notif.actions.find(
+    (a) => a.kind === "toggleDesktopNotifications",
+  );
+  expect(desktop!.isCurrent).toBe(true);
+
+  const overlayStyle = notif.actions.find(
+    (a) => a.kind === "setNotificationStyle" && a.style === "overlay",
+  );
+  expect(overlayStyle!.isCurrent).toBe(true);
+
+  const standardStyle = notif.actions.find(
+    (a) => a.kind === "setNotificationStyle" && a.style === "standard",
+  );
+  expect(standardStyle!.isCurrent).toBe(false);
+
+  const topCenter = notif.actions.find(
+    (a) => a.kind === "setNotificationPosition" && a.position === "top-center",
+  );
+  expect(topCenter!.isCurrent).toBe(true);
+});

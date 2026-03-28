@@ -176,6 +176,14 @@ export function Action(_props: ActionProps): null {
   return null;
 }
 
+Action.Push = function ActionPush(_props: {
+  title: string;
+  target: ReactNode;
+  icon?: Icon;
+}): null {
+  return null;
+};
+
 export function MenuBarExtra(_props: { children?: ReactNode }) {
   return null;
 }
