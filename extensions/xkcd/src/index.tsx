@@ -16,7 +16,7 @@ export default function main() {
   const [lastViewed, setLastViewed] = useAtom(lastViewedAtom);
   const [currentComicNumber, setCurrentComic] = useAtom(currentComicAtom);
   const [currentComic, loadingComic] = useCurrentSelectedComic(currentComicNumber);
-  const [history, setHistory] = useAtom(historyAtom);
+  const [, setHistory] = useAtom(historyAtom);
   const selectedId = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -27,10 +27,12 @@ export default function main() {
     LocalStorage.setItem("last_viewed", currentComic.num);
     setReadStatus({ ...readStatus, [currentComic.num]: true });
     setLastViewed(currentComic.num);
-    const newEntry = { num: currentComic.num, viewedAt: new Date().toISOString() };
-    const updated = [newEntry, ...history.filter((e) => e.num !== currentComic.num)].slice(0, 100);
-    setHistory(updated);
-    LocalStorage.setItem("history", JSON.stringify(updated));
+    setHistory((prev) => {
+      const newEntry = { num: currentComic.num, viewedAt: new Date().toISOString() };
+      const updated = [newEntry, ...prev.filter((e) => e.num !== currentComic.num)].slice(0, 100);
+      LocalStorage.setItem("history", JSON.stringify(updated));
+      return updated;
+    });
   }, [currentComic]);
 
   useEffect(() => {
@@ -116,7 +118,7 @@ ${currentComic.alt}
               <ActionPanel>
                 <OpenComicInBrowser />
                 <ExplainXkcd />
-                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
               </ActionPanel>
             }
           />
@@ -137,7 +139,7 @@ ${currentComic.alt}
                 />
                 <OpenComicInBrowser />
                 <ExplainXkcd />
-                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
               </ActionPanel>
             }
             detail={detail}
@@ -158,7 +160,7 @@ ${currentComic.alt}
               />
               <OpenComicInBrowser />
               <ExplainXkcd />
-              <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
             </ActionPanel>
           }
           detail={detail}
@@ -172,7 +174,7 @@ ${currentComic.alt}
             <ActionPanel>
               <OpenComicInBrowser />
               <ExplainXkcd />
-              <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
+              <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
             </ActionPanel>
           }
         />
@@ -191,7 +193,7 @@ ${currentComic.alt}
               <ActionPanel>
                 <OpenComicInBrowser />
                 <ExplainXkcd />
-                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView history={history} />} />
+                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
               </ActionPanel>
             }
           />
