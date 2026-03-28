@@ -1,6 +1,6 @@
 # Changelog
 
-## Initial release - 2026-03-28
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - Initial BetterAudio integration for Raycast via the `betteraudio` CLI.
