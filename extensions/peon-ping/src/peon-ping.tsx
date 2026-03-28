@@ -14,7 +14,6 @@ import {
   buildDashboardItems,
   type DashboardAction,
   type DashboardItem,
-  type DashboardItemId,
   type MetadataEntry,
 } from "./lib/peon-ping-dashboard";
 import { getInstalledPacks } from "./lib/peon-ping-packs";
@@ -66,6 +65,10 @@ const ICON_MAP: Record<string, Icon> = {
   bulletPoints: Icon.BulletPoints,
   bell: Icon.Bell,
   headphones: Icon.Headphones,
+  appWindowSidebarRight: Icon.AppWindowSidebarRight,
+  window: Icon.Window,
+  clock: Icon.Clock,
+  mobile: Icon.Mobile,
 };
 
 const COLOR_MAP = {
@@ -215,6 +218,20 @@ function actionKey(action: DashboardAction): string {
   }
 }
 
+function findItem(
+  items: DashboardItem[],
+  itemId: string,
+): DashboardItem | undefined {
+  for (const item of items) {
+    if (item.id === itemId) return item;
+    if (item.subItems) {
+      const found = findItem(item.subItems, itemId);
+      if (found) return found;
+    }
+  }
+  return undefined;
+}
+
 function OptionPicker({
   itemId,
   navigationTitle,
@@ -222,7 +239,7 @@ function OptionPicker({
   packs,
   deps,
 }: {
-  itemId: DashboardItemId;
+  itemId: string;
   navigationTitle: string;
   initialConfig: PeonPingConfig;
   packs: InstalledPack[];
@@ -230,7 +247,7 @@ function OptionPicker({
 }) {
   const [localConfig, setLocalConfig] = useState(initialConfig);
   const items = buildDashboardItems({ config: localConfig, packs });
-  const item = items.find((i) => i.id === itemId)!;
+  const item = findItem(items, itemId)!;
 
   return (
     <List navigationTitle={navigationTitle}>
@@ -264,6 +281,46 @@ function OptionPicker({
   );
 }
 
+function SubDashboard({
+  parentId,
+  navigationTitle,
+  initialConfig,
+  packs,
+  deps,
+}: {
+  parentId: string;
+  navigationTitle: string;
+  initialConfig: PeonPingConfig;
+  packs: InstalledPack[];
+  deps: ActionDeps;
+}) {
+  const [localConfig, setLocalConfig] = useState(initialConfig);
+  const items = buildDashboardItems({ config: localConfig, packs });
+  const parent = findItem(items, parentId)!;
+
+  const localDeps: ActionDeps = {
+    paths: deps.paths,
+    setConfig: (value) => {
+      deps.setConfig(value);
+      setLocalConfig(value as PeonPingConfig);
+    },
+  };
+
+  return (
+    <List isShowingDetail navigationTitle={navigationTitle}>
+      {parent.subItems!.map((subItem) => (
+        <DashboardListItem
+          key={subItem.id}
+          item={subItem}
+          config={localConfig}
+          packs={packs}
+          deps={localDeps}
+        />
+      ))}
+    </List>
+  );
+}
+
 function DashboardActionPanel({
   item,
   config,
@@ -276,6 +333,25 @@ function DashboardActionPanel({
   deps: ActionDeps;
 }) {
   const { paths, setConfig } = deps;
+
+  if (item.drillable && item.subItems) {
+    return (
+      <ActionPanel>
+        <Action.Push
+          title={item.title}
+          target={
+            <SubDashboard
+              parentId={item.id}
+              navigationTitle={item.title}
+              initialConfig={config}
+              packs={packs}
+              deps={deps}
+            />
+          }
+        />
+      </ActionPanel>
+    );
+  }
 
   if (item.drillable) {
     return (

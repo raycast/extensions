@@ -25,6 +25,7 @@ export enum Icon {
   CircleFilled = "circle-filled-16",
   Clock = "clock-16",
   Headphones = "headphones-16",
+  Mobile = "mobile-16",
   Music = "music-16",
   Pause = "pause-16",
   Play = "play-16",

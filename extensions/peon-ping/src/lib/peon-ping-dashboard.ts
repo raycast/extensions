@@ -101,12 +101,13 @@ export type DashboardAction =
     });
 
 export type DashboardItem = {
-  id: DashboardItemId;
+  id: string;
   title: string;
   icon: string;
   accessoryText: string;
   accessoryTagColor?: "green" | "red";
   drillable: boolean;
+  subItems?: DashboardItem[];
   metadata: MetadataEntry[];
   actions: DashboardAction[];
 };
@@ -335,6 +336,164 @@ function buildCategoriesItem(config: PeonPingConfig): DashboardItem {
   };
 }
 
+function buildNotificationSubItems(config: PeonPingConfig): DashboardItem[] {
+  const items: DashboardItem[] = [
+    {
+      id: "notif-desktop",
+      title: "Desktop Notifications",
+      icon: "bell",
+      accessoryText: config.desktopNotifications ? "On" : "Off",
+      accessoryTagColor: config.desktopNotifications ? "green" : "red",
+      drillable: false,
+      metadata: [
+        {
+          kind: "label",
+          title: "Desktop Notifications",
+          text: config.desktopNotifications ? "On" : "Off",
+          textColor: config.desktopNotifications ? "green" : "secondary",
+        },
+      ],
+      actions: [
+        {
+          kind: "toggleDesktopNotifications",
+          title: config.desktopNotifications
+            ? "Disable Desktop Notifications"
+            : "Enable Desktop Notifications",
+          nextEnabled: !config.desktopNotifications,
+        },
+      ],
+    },
+    {
+      id: "notif-style",
+      title: "Style",
+      icon: "appWindowSidebarRight",
+      accessoryText: STYLE_LABELS[config.notificationStyle],
+      drillable: true,
+      metadata: [
+        {
+          kind: "label",
+          title: "Current Style",
+          text: STYLE_LABELS[config.notificationStyle],
+        },
+        { kind: "separator" },
+        {
+          kind: "tagList",
+          title: "Options",
+          items: (["overlay", "standard"] as PeonPingNotificationStyle[]).map(
+            (s) => ({
+              text: STYLE_LABELS[s],
+              color:
+                config.notificationStyle === s
+                  ? ("green" as const)
+                  : ("secondary" as const),
+            }),
+          ),
+        },
+      ],
+      actions: (["overlay", "standard"] as PeonPingNotificationStyle[]).map(
+        (style) => ({
+          kind: "setNotificationStyle" as const,
+          title: `Set ${STYLE_LABELS[style]}`,
+          subListTitle: STYLE_LABELS[style],
+          isCurrent: config.notificationStyle === style,
+          style,
+        }),
+      ),
+    },
+    {
+      id: "notif-position",
+      title: "Position",
+      icon: "window",
+      accessoryText: POSITION_LABELS[config.notificationPosition],
+      drillable: true,
+      metadata: [
+        {
+          kind: "label",
+          title: "Current Position",
+          text: POSITION_LABELS[config.notificationPosition],
+        },
+        { kind: "separator" },
+        {
+          kind: "tagList",
+          title: "Positions",
+          items: POSITION_CYCLE.map((p) => ({
+            text: POSITION_LABELS[p],
+            color:
+              config.notificationPosition === p
+                ? ("green" as const)
+                : ("secondary" as const),
+          })),
+        },
+      ],
+      actions: POSITION_CYCLE.map((position) => ({
+        kind: "setNotificationPosition" as const,
+        title: `Set ${POSITION_LABELS[position]}`,
+        subListTitle: POSITION_LABELS[position],
+        isCurrent: config.notificationPosition === position,
+        position,
+      })),
+    },
+    {
+      id: "notif-dismiss",
+      title: "Auto-Dismiss",
+      icon: "clock",
+      accessoryText: formatDismiss(config.notificationDismissSeconds),
+      drillable: false,
+      metadata: [
+        {
+          kind: "label",
+          title: "Current",
+          text: formatDismiss(config.notificationDismissSeconds),
+        },
+        {
+          kind: "label",
+          title: "Next",
+          text: formatDismiss(
+            nextDismissSeconds(config.notificationDismissSeconds),
+          ),
+        },
+      ],
+      actions: [
+        {
+          kind: "cycleDismissTime" as const,
+          title: `Cycle to ${formatDismiss(nextDismissSeconds(config.notificationDismissSeconds))}`,
+          nextSeconds: nextDismissSeconds(config.notificationDismissSeconds),
+        },
+      ],
+    },
+  ];
+
+  if (config.mobileNotifyConfigured) {
+    items.push({
+      id: "notif-mobile",
+      title: "Mobile Notifications",
+      icon: "mobile",
+      accessoryText: config.mobileNotifyEnabled ? "On" : "Off",
+      accessoryTagColor: config.mobileNotifyEnabled ? "green" : "red",
+      drillable: false,
+      metadata: [
+        {
+          kind: "label",
+          title: "Mobile Notifications",
+          text: config.mobileNotifyEnabled ? "On" : "Off",
+          textColor: config.mobileNotifyEnabled ? "green" : "secondary",
+        },
+      ],
+      actions: [
+        {
+          kind: "toggleMobileNotifications",
+          title: config.mobileNotifyEnabled
+            ? "Disable Mobile Notifications"
+            : "Enable Mobile Notifications",
+          nextEnabled: !config.mobileNotifyEnabled,
+        },
+      ],
+    });
+  }
+
+  return items;
+}
+
 function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
   const metadata: MetadataEntry[] = [
     {
@@ -369,64 +528,15 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
     });
   }
 
-  const actions: DashboardAction[] = [
-    {
-      kind: "toggleDesktopNotifications",
-      title: config.desktopNotifications
-        ? "Disable Desktop Notifications"
-        : "Enable Desktop Notifications",
-      subListTitle: "Desktop Notifications",
-      isCurrent: config.desktopNotifications,
-      nextEnabled: !config.desktopNotifications,
-    },
-    ...(
-      ["overlay" as const, "standard" as const] as PeonPingNotificationStyle[]
-    ).map(
-      (style): DashboardAction => ({
-        kind: "setNotificationStyle",
-        title: `Style: ${STYLE_LABELS[style]}`,
-        subListTitle: `Style: ${STYLE_LABELS[style]}`,
-        isCurrent: config.notificationStyle === style,
-        style,
-      }),
-    ),
-    ...POSITION_CYCLE.map(
-      (position): DashboardAction => ({
-        kind: "setNotificationPosition",
-        title: `Position: ${POSITION_LABELS[position]}`,
-        subListTitle: `Position: ${POSITION_LABELS[position]}`,
-        isCurrent: config.notificationPosition === position,
-        position,
-      }),
-    ),
-    {
-      kind: "cycleDismissTime",
-      title: `Dismiss: ${formatDismiss(nextDismissSeconds(config.notificationDismissSeconds))}`,
-      subListTitle: `Dismiss: ${formatDismiss(config.notificationDismissSeconds)}`,
-      nextSeconds: nextDismissSeconds(config.notificationDismissSeconds),
-    },
-  ];
-
-  if (config.mobileNotifyConfigured) {
-    actions.push({
-      kind: "toggleMobileNotifications",
-      title: config.mobileNotifyEnabled
-        ? "Disable Mobile Notifications"
-        : "Enable Mobile Notifications",
-      subListTitle: "Mobile Notifications",
-      isCurrent: config.mobileNotifyEnabled,
-      nextEnabled: !config.mobileNotifyEnabled,
-    });
-  }
-
   return {
     id: "notifications",
     title: "Notifications",
     icon: "bell",
     accessoryText: config.desktopNotifications ? "Desktop On" : "Desktop Off",
     drillable: true,
+    subItems: buildNotificationSubItems(config),
     metadata,
-    actions,
+    actions: [],
   };
 }
 

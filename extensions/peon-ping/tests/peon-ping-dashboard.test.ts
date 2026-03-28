@@ -264,7 +264,82 @@ test("notifications metadata includes style, position, dismiss", () => {
   );
 });
 
-test("notifications omits mobile when unconfigured", () => {
+test("notifications has subItems instead of flat actions", () => {
+  const items = buildDashboardItems({
+    config: makeConfig(),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+  expect(notif.actions).toHaveLength(0);
+  expect(notif.subItems).toBeDefined();
+  expect(notif.subItems!.length).toBeGreaterThanOrEqual(4);
+});
+
+test("notification subItems include desktop, style, position, dismiss", () => {
+  const items = buildDashboardItems({
+    config: makeConfig(),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+  const subIds = notif.subItems!.map((s) => s.id);
+  expect(subIds).toContain("notif-desktop");
+  expect(subIds).toContain("notif-style");
+  expect(subIds).toContain("notif-position");
+  expect(subIds).toContain("notif-dismiss");
+});
+
+test("notification style subItem is drillable with isCurrent", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ notificationStyle: "standard" }),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+  const style = notif.subItems!.find((s) => s.id === "notif-style")!;
+  expect(style.drillable).toBe(true);
+  expect(style.accessoryText).toBe("Standard");
+  const current = style.actions.find((a) => a.isCurrent);
+  expect(current).toBeDefined();
+  expect(current!.subListTitle).toBe("Standard");
+});
+
+test("notification position subItem is drillable with 6 options", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ notificationPosition: "bottom-left" }),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+  const pos = notif.subItems!.find((s) => s.id === "notif-position")!;
+  expect(pos.drillable).toBe(true);
+  expect(pos.accessoryText).toBe("Bottom Left");
+  expect(pos.actions).toHaveLength(6);
+});
+
+test("notification desktop subItem is a direct toggle", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ desktopNotifications: true }),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+  const desktop = notif.subItems!.find((s) => s.id === "notif-desktop")!;
+  expect(desktop.drillable).toBe(false);
+  expect(desktop.accessoryTagColor).toBe("green");
+  expect(desktop.actions).toHaveLength(1);
+  expect(desktop.actions[0].kind).toBe("toggleDesktopNotifications");
+});
+
+test("notification dismiss subItem is a direct cycle action", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ notificationDismissSeconds: 4 }),
+    packs: [],
+  });
+  const notif = findItem(items, "notifications");
+  const dismiss = notif.subItems!.find((s) => s.id === "notif-dismiss")!;
+  expect(dismiss.drillable).toBe(false);
+  expect(dismiss.accessoryText).toBe("4s");
+  expect(dismiss.actions[0].kind).toBe("cycleDismissTime");
+});
+
+test("notifications omits mobile subItem when unconfigured", () => {
   const items = buildDashboardItems({
     config: makeConfig({ mobileNotifyConfigured: false }),
     packs: [],
@@ -274,13 +349,11 @@ test("notifications omits mobile when unconfigured", () => {
     (m) => m.kind === "label" && m.title === "Mobile",
   );
   expect(mobileLabel).toBeUndefined();
-  const mobileAction = notif.actions.find(
-    (a) => a.kind === "toggleMobileNotifications",
-  );
-  expect(mobileAction).toBeUndefined();
+  const mobileSub = notif.subItems!.find((s) => s.id === "notif-mobile");
+  expect(mobileSub).toBeUndefined();
 });
 
-test("notifications includes mobile when configured", () => {
+test("notifications includes mobile subItem when configured", () => {
   const items = buildDashboardItems({
     config: makeConfig({
       mobileNotifyConfigured: true,
@@ -293,10 +366,9 @@ test("notifications includes mobile when configured", () => {
     (m) => m.kind === "label" && m.title === "Mobile",
   );
   expect(mobileLabel).toBeDefined();
-  const mobileAction = notif.actions.find(
-    (a) => a.kind === "toggleMobileNotifications",
-  );
-  expect(mobileAction).toBeDefined();
+  const mobileSub = notif.subItems!.find((s) => s.id === "notif-mobile");
+  expect(mobileSub).toBeDefined();
+  expect(mobileSub!.accessoryTagColor).toBe("green");
 });
 
 test("audio item shows headphones only status", () => {
@@ -385,7 +457,7 @@ test("category actions carry subListTitle and isCurrent for enabled state", () =
   expect(taskAck!.isCurrent).toBe(false);
 });
 
-test("notification actions carry isCurrent for current settings", () => {
+test("notification subItems carry isCurrent for current settings", () => {
   const items = buildDashboardItems({
     config: makeConfig({
       desktopNotifications: true,
@@ -395,23 +467,19 @@ test("notification actions carry isCurrent for current settings", () => {
     packs: [],
   });
   const notif = findItem(items, "notifications");
-
-  const desktop = notif.actions.find(
-    (a) => a.kind === "toggleDesktopNotifications",
-  );
-  expect(desktop!.isCurrent).toBe(true);
-
-  const overlayStyle = notif.actions.find(
+  const style = notif.subItems!.find((s) => s.id === "notif-style")!;
+  const overlayAction = style.actions.find(
     (a) => a.kind === "setNotificationStyle" && a.style === "overlay",
   );
-  expect(overlayStyle!.isCurrent).toBe(true);
+  expect(overlayAction!.isCurrent).toBe(true);
 
-  const standardStyle = notif.actions.find(
+  const standardAction = style.actions.find(
     (a) => a.kind === "setNotificationStyle" && a.style === "standard",
   );
-  expect(standardStyle!.isCurrent).toBe(false);
+  expect(standardAction!.isCurrent).toBe(false);
 
-  const topCenter = notif.actions.find(
+  const pos = notif.subItems!.find((s) => s.id === "notif-position")!;
+  const topCenter = pos.actions.find(
     (a) => a.kind === "setNotificationPosition" && a.position === "top-center",
   );
   expect(topCenter!.isCurrent).toBe(true);
