@@ -97,6 +97,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
   const [isSettingsLoading, setIsSettingsLoading] = useState(true);
   const [settings, setSettings] = useState<AutoWallpaperSettings | null>(null);
   const [imageStatus, setImageStatus] = useState<ImageStatus>("loading");
+  const settingsRef = useRef<AutoWallpaperSettings | null>(null);
   const imageBufferRef = useRef<Buffer | null>(null);
   const { pop } = useNavigation();
   const isLoading = isSettingsLoading || imageStatus === "loading";
@@ -108,10 +109,12 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
       try {
         const savedSettings = await getAutoSettings();
         if (!cancelled) {
+          settingsRef.current = savedSettings;
           setSettings(savedSettings);
         }
       } catch (error) {
         if (!cancelled) {
+          settingsRef.current = DEFAULTS;
           setSettings(DEFAULTS);
           showToast({
             style: Toast.Style.Failure,
@@ -165,6 +168,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
   }, [artwork.objectID]);
 
   const persistSettings = useCallback(async (nextSettings: AutoWallpaperSettings) => {
+    settingsRef.current = nextSettings;
     setSettings(nextSettings);
 
     try {
@@ -246,7 +250,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
         id="colorMode"
         title="Color Mode"
         value={settings.colorMode}
-        onChange={(value) => void persistSettings({ ...settings, colorMode: value })}
+        onChange={(value) => void persistSettings({ ...(settingsRef.current ?? settings), colorMode: value })}
       >
         <Form.Dropdown.Item value="mono" title="Monochrome" icon={Icon.Eye} />
         <Form.Dropdown.Item value="color" title="Original Colors" icon={Icon.EyeDropper} />
@@ -256,7 +260,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
         id="backgroundColor"
         title="Background"
         value={settings.backgroundColor}
-        onChange={(value) => void persistSettings({ ...settings, backgroundColor: value })}
+        onChange={(value) => void persistSettings({ ...(settingsRef.current ?? settings), backgroundColor: value })}
       >
         <Form.Dropdown.Item value="#000000" title="Black" />
         <Form.Dropdown.Item value="#1a1a1a" title="Dark Gray" />
@@ -269,7 +273,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
         id="textColor"
         title="Text Color"
         value={settings.textColor}
-        onChange={(value) => void persistSettings({ ...settings, textColor: value })}
+        onChange={(value) => void persistSettings({ ...(settingsRef.current ?? settings), textColor: value })}
       >
         <Form.Dropdown.Item value="#ffffff" title="White" />
         <Form.Dropdown.Item value="#00ff00" title="Green (Matrix)" />
@@ -282,7 +286,7 @@ function WallpaperSettings({ artwork }: { artwork: Artwork }) {
         id="density"
         title="Density"
         value={settings.density}
-        onChange={(value) => void persistSettings({ ...settings, density: value })}
+        onChange={(value) => void persistSettings({ ...(settingsRef.current ?? settings), density: value })}
       >
         <Form.Dropdown.Item value="100" title="Low — 100 chars/row" />
         <Form.Dropdown.Item value="200" title="Medium — 200 chars/row" />
