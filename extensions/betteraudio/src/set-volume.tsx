@@ -19,7 +19,7 @@ export default function Command(
 
   if (levelArg) {
     const parsed = parseInt(levelArg, 10);
-    if (!isNaN(parsed) && parsed >= 0 && parsed <= 100) {
+    if (!isNaN(parsed) && parsed >= 0 && parsed <= 200) {
       return <SetVolumeImmediate level={parsed} />;
     }
   }
