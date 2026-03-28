@@ -14,11 +14,14 @@ export default function Command() {
       "Library/Containers/com.evernote.Evernote/Data/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com",
     ),
     resolve(homedir(), "Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com"),
+    resolve(homedir(), "AppData/Roaming/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com"),
   ];
 
   useEffect(() => {
     getApplications().then(async (applications) => {
-      const isEvernoteInstalled = applications.find(({ bundleId }) => bundleId === "com.evernote.Evernote");
+      const isEvernoteInstalled = applications.find(
+        ({ bundleId, name }) => bundleId === "com.evernote.Evernote" || name === "Evernote",
+      );
       if (!isEvernoteInstalled) {
         await popToRoot();
         await showToast({
@@ -51,7 +54,7 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: "Cannot find Evernote database.",
           message:
-            "The database should be in ~/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com, but can be somewhere else.",
+            "The database should be in the Evernote conduit-storage directory, but could not be found. Ensure the Evernote desktop client has been run at least once.",
         });
         return;
       }
@@ -65,7 +68,7 @@ export default function Command() {
           style: Toast.Style.Failure,
           title: "Cannot find Evernote database.",
           message:
-            "The database should be in ~/Library/Application Support/Evernote/conduit-storage/https%3A%2F%2Fwww.evernote.com, but can be somewhere else.",
+            "The database should be in the Evernote conduit-storage directory, but could not be found. Ensure the Evernote desktop client has been run at least once.",
         });
         return;
       }
