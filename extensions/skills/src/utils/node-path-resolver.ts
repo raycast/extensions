@@ -66,15 +66,12 @@ const scanVersionedNodePaths = async (
 export const resolveFnmBaseDir = async (home = process.env.HOME): Promise<string | null> => {
   if (!home) return null;
 
-  const fnmBaseDirCandidates = process.env.FNM_DIR ? [process.env.FNM_DIR] : [];
-  fnmBaseDirCandidates.push(join(home, ".fnm"));
-  if (process.env.XDG_DATA_HOME) {
-    fnmBaseDirCandidates.push(join(process.env.XDG_DATA_HOME, "fnm"));
-  }
+  const xdgBaseDir = join(process.env.XDG_DATA_HOME || join(home, ".local", "share"), "fnm");
+  const fnmBaseDirCandidates = [xdgBaseDir, join(home, ".fnm")];
+
   if (isMacOS) {
     fnmBaseDirCandidates.push(join(home, "Library", "Application Support", "fnm"));
   }
-  fnmBaseDirCandidates.push(join(home, ".local", "share", "fnm"));
 
   for (const dir of fnmBaseDirCandidates) {
     if (await pathExists(dir)) {
@@ -82,7 +79,8 @@ export const resolveFnmBaseDir = async (home = process.env.HOME): Promise<string
     }
   }
 
-  return null;
+  // Default to the XDG data dir even if it does not exist yet
+  return xdgBaseDir;
 };
 
 export const resolveVersionManagerPaths = async (): Promise<string[]> => {
