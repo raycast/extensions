@@ -10,8 +10,13 @@
     "mackid1993"
   ],
   "license": "MIT",
-  "categories": ["Productivity"],
-  "platforms": ["macOS", "Windows"],
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-notes",
@@ -21,22 +26,21 @@
       "mode": "view"
     },
     {
-        "name": "search-tasks",
-        "title": "Search Open Tasks",
-        "subtitle": "Search your Evernote tasks within notes",
-        "description": "Search your Evernote tasks within notes instantly using the local database of the official Evernote client.",
-        "mode": "view"
-      }
+      "name": "search-tasks",
+      "title": "Search Open Tasks",
+      "subtitle": "Search your Evernote tasks within notes",
+      "description": "Search your Evernote tasks within notes instantly using the local database of the official Evernote client.",
+      "mode": "view"
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.3"
-
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.0",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
