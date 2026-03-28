@@ -194,8 +194,16 @@ function agentDisplayNameToId(displayName: string): string {
   return AGENT_DISPLAY_TO_ID.get(displayName) ?? displayName.toLowerCase().replace(/\s+/g, "-");
 }
 
+/** Sorted known agent display names, used as synchronous initial data before the CLI responds. */
+export const KNOWN_AGENT_NAMES: string[] = [...AGENT_DISPLAY_TO_ID.keys()].sort();
+
 export interface AgentDiscoveryResult {
   agents: string[];
+  /**
+   * Maps installed skill name → agents it is installed on.
+   * Keyed by the CLI's `name` field from `skills list --json`, which matches
+   * the `skillId` used in `skills add source@skillId`.
+   */
   skillAgentMap: Record<string, string[]>;
 }
 

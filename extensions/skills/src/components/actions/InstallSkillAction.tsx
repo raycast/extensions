@@ -191,6 +191,8 @@ export function InstallSkillAction({ skill, prefetchedAuditResult }: InstallSkil
     shouldFetch: false,
     initialData: prefetchedAuditResult,
   });
+  // skillAgentMap is keyed by the CLI's installed skill name, which matches
+  // the skillId used in `skills add source@skillId`.
   const installedAgents = skillAgentMap[skill.skillId] ?? [];
 
   return (
