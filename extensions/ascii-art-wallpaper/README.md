@@ -27,3 +27,5 @@ The extension fetches artwork images from the Met Museum's public API, converts 
 | Density    | Number of characters per row (100–400)  |
 
 The wallpaper is rendered at 3840x2160 (4K) resolution by default.
+
+When you open **Search Artworks**, the wallpaper form waits for the artwork image to load before allowing submission, so wallpaper generation only starts once the selected artwork is ready.
