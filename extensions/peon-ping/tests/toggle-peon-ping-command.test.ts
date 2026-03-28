@@ -6,6 +6,9 @@ import { runTogglePeonPingCommand } from "../src/toggle-peon-ping";
 
 const dummyPaths: PeonPingResolvedPaths = {
   claudeConfigDir: "/tmp/claude",
+  installDir: "/tmp/claude/hooks/peon-ping",
+  peonDir: "/tmp/claude/hooks/peon-ping",
+  packsDir: "/tmp/claude/hooks/peon-ping/packs",
   configFilePath: "/tmp/claude/hooks/peon-ping/config.json",
   pausedFilePath: "/tmp/claude/hooks/peon-ping/.paused",
   scriptPath: "/tmp/claude/hooks/peon-ping/peon.sh",
@@ -58,4 +61,35 @@ test("runTogglePeonPingCommand shows Peon Ping Off HUD when effective state is o
     name: "peon-ping-menu-bar",
     type: LaunchType.Background,
   });
+});
+
+test("runTogglePeonPingCommand still succeeds when menu bar command is not activated", async () => {
+  const run = vi.fn() as unknown as PeonPingCommandRunner;
+  const togglePeonPing = vi.fn(() => ({
+    message: "toggled",
+    status: { enabled: true },
+  }));
+  const showHUD = vi.fn().mockResolvedValue(undefined);
+  const launchCommand = vi
+    .fn()
+    .mockRejectedValue(
+      new Error(
+        'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
+      ),
+    );
+
+  await expect(
+    runTogglePeonPingCommand({
+      paths: dummyPaths,
+      run,
+      togglePeonPing,
+      showHUD,
+      launchCommand,
+    }),
+  ).resolves.toEqual({
+    message: "toggled",
+    status: { enabled: true },
+  });
+
+  expect(showHUD).toHaveBeenCalledWith("Peon Ping On");
 });
