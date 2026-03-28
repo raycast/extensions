@@ -10,6 +10,8 @@
     "mackid1993"
   ],
   "license": "MIT",
+  "categories": ["Productivity"],
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "search-notes",
