@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "timer",
+  "title": "Timer",
+  "description": "Start, stop, and manage countdown timers instantly. No AI, no delays — just type and go.",
+  "icon": "command-icon.png",
+  "author": "didier",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-timer",
+      "title": "Start Timer",
+      "description": "Start a countdown timer instantly",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "input",
+          "type": "text",
+          "placeholder": "30s, 15m stretch",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "timer",
+        "countdown",
+        "stopwatch"
+      ]
+    },
+    {
+      "name": "manage-timers",
+      "title": "List Timers",
+      "description": "View and manage running timers",
+      "mode": "view",
+      "keywords": [
+        "timer",
+        "countdown",
+        "manage"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "prebuild": "npm run format",
+    "build": "ray build",
+    "prepublish": "npm run format",
+    "publish": "npx @raycast/api@latest publish",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
