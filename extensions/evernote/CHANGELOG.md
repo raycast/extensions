@@ -1,6 +1,6 @@
 # Evernote Changelog
 
-## [Update] - 2026-03-27
+## [Update] - {PR_MERGE_DATE}
 
 - Added Windows support with AppData database path detection
 - Updated app detection to work cross-platform
