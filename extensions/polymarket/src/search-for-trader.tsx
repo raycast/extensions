@@ -70,9 +70,19 @@ export default function Command() {
     >
       <List.EmptyView
         icon={Icon.MagnifyingGlass}
-        title={searchText.length > 0 ? "No profile found" : "Loading Leaderboard..."}
+        title={
+          searchText.length > 0
+            ? "No profile found"
+            : isLeaderboardLoading
+              ? "Loading Leaderboard..."
+              : "No traders available"
+        }
         description={
-          searchText.length > 0 ? "Try a different wallet address or username." : "Fetching today's top traders."
+          searchText.length > 0
+            ? "Try a different wallet address or username."
+            : isLeaderboardLoading
+              ? "Fetching today's top traders."
+              : "No leaderboard data could be loaded."
         }
       />
       {profilesToRender && profilesToRender.length > 0 && (

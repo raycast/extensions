@@ -377,7 +377,7 @@ export function ProfileDetail({ address, profile }: { address: string; profile?:
             key={`closed-${pos.asset}-${idx}`}
             title={pos.title}
             // Timestamp is returned in seconds, so multiply by 1000 for standard JavaScript Date parsing
-            subtitle={`Closed: ${new Date(pos.timestamp * 1000).toLocaleDateString()} • Entry: ${formatCurrency(pos.avgPrice)}`}
+            subtitle={`Closed: ${new Date(pos.timestamp * 1000).toLocaleDateString("en-US")} • Entry: ${formatCurrency(pos.avgPrice)}`}
             accessories={[
               { text: pos.outcome },
               { text: { value: `PnL: ${formatCurrency(pos.realizedPnl)}`, color: getPnlColor(pos.realizedPnl) } },
