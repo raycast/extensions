@@ -4,7 +4,9 @@
   "title": "Thaw",
   "description": "Thaw menu bar manager for Raycast",
   "icon": "extension-icon.png",
-  "categories": ["Applications"],
+  "categories": [
+    "Applications"
+  ],
   "version": "0.1.0",
   "author": "diazdesandi",
   "platforms": [
@@ -56,8 +58,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.8",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.8"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

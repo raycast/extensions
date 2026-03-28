@@ -1,4 +1,11 @@
-export const THAW_ACTIONS = [
+export interface ThawAction {
+  id: string;
+  title: string;
+  subtitle: string;
+  url: string;
+}
+
+export const THAW_ACTIONS: ThawAction[] = [
   {
     id: "toggle-hidden",
     title: "Toggle Hidden",
@@ -35,4 +42,4 @@ export const THAW_ACTIONS = [
     subtitle: "Open the Thaw settings window",
     url: "thaw://open-settings",
   },
-] as const;
+];
