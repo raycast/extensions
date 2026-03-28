@@ -31,22 +31,17 @@ export default function UnlockDatabase({
         style: Toast.Style.Animated,
         title: "Unlocking Database...",
       });
-      KeePassLoader.checkCredentials(value.password, value.keyFile[0]).then(() => {
+      KeePassLoader.checkCredentials(value.password || "", value.keyFile[0]).then(() => {
         showToast({
           style: Toast.Style.Success,
           title: "Database Unlocked",
         });
-        KeePassLoader.cacheCredentials(value.password, value.keyFile[0]);
-        KeePassLoader.setCredentials(value.password, value.keyFile[0]);
+        KeePassLoader.cacheCredentials(value.password || "", value.keyFile[0]);
+        KeePassLoader.setCredentials(value.password || "", value.keyFile[0]);
         setIsUnlocked(true);
       }, showToastKeepassxcCliErrors);
     },
-    validation: {
-      password: (value) => {
-        if (!value) {
-          return "Required";
-        }
-      },
+    // Password is optional to support passwordless vaults
     },
   });
 
@@ -62,7 +57,7 @@ export default function UnlockDatabase({
       <Form.PasswordField title="Database Password" {...itemProps.password} />
       <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
       <Form.Description
-        text={"ⓘ Your password and key file path will be stored in your Raycast's local encrypted storage."}
+        text={"ⓘ Password is optional for passwordless vaults. Credentials are stored in your Raycast's local encrypted storage."}
       />
     </Form>
   );
