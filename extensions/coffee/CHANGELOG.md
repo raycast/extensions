@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed zombie process accumulation: restored `exit` listener on spawned caffeinate process so libuv reaps it when killed. The listener introduced in [#26523](https://github.com/raycast/extensions/pull/26523) was inadvertently removed by [#26577](https://github.com/raycast/extensions/pull/26577).
+
 ## [Fix] - 2026-03-24
 
 - Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref

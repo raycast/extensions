@@ -17,6 +17,7 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
 
   const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
   const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
+  child.on("exit", () => {});
   child.unref();
 
   await update(updates, true);
