@@ -55,3 +55,10 @@ Optionally under **Actions** a mode can be selected (OpenVPN / WireGuard), using
 A profile can set to Autostart using the Actions menu. A UI indicator will be visible for a profile with Autostart enabled.
 
 ![](./media/autostart-toggle.png)
+
+### Enable PIN / TOTP prompt
+
+If your profile requires a password / PIN / TOTP to connect you can enable PIN prompt in the Actions menu.
+
+![](./media/pin-toggle.png)
+![](./media/pin-prompt.png)

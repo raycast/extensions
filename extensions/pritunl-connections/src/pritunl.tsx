@@ -9,6 +9,8 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   LocalStorage,
+  Form,
+  useNavigation,
 } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -76,18 +78,55 @@ function formatUptime(seconds: number): string {
   return [h ? `${h}h` : null, m ? `${m}m` : null, `${s}s`].filter(Boolean).join(" ");
 }
 
+function TwoFAForm({
+  profile,
+  protocol,
+  onSubmit,
+}: {
+  profile: Profile;
+  protocol: "ovpn" | "wg";
+  onSubmit: (code: string) => void;
+}) {
+  const { pop } = useNavigation();
+  return (
+    <Form
+      navigationTitle={`Connect ${profile.name}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Connect"
+            icon={Icon.Play}
+            onSubmit={(values: { code: string }) => {
+              pop();
+              onSubmit(values.code.trim());
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.Description text={`Profile: ${profile.name} · Mode: ${protocol.toUpperCase()}`} />
+      <Form.TextField id="code" title="PIN Code" placeholder="Enter your PIN / TOTP code" autoFocus />
+    </Form>
+  );
+}
+
 export default function Command() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [invalidCLI, setInvalidCLI] = useState(false);
   const [savedProtocols, setSavedProtocols] = useState<Record<string, "ovpn" | "wg">>({});
+  const [savedPIN, setSavedPIN] = useState<Record<string, boolean>>({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingRef = useRef<Map<string, PendingConnection>>(new Map());
   const isPollingRef = useRef(false);
+  const { push } = useNavigation();
 
   useEffect(() => {
     LocalStorage.getItem<string>("profileProtocols").then((raw) => {
       if (raw) setSavedProtocols(JSON.parse(raw));
+    });
+    LocalStorage.getItem<string>("profilePIN").then((raw) => {
+      if (raw) setSavedPIN(JSON.parse(raw));
     });
   }, []);
 
@@ -95,6 +134,16 @@ export default function Command() {
     const updated = { ...savedProtocols, [profileId]: protocol };
     setSavedProtocols(updated);
     await LocalStorage.setItem("profileProtocols", JSON.stringify(updated));
+  }
+
+  async function togglePIN(profileId: string) {
+    const updated = { ...savedPIN, [profileId]: !savedPIN[profileId] };
+    setSavedPIN(updated);
+    await LocalStorage.setItem("profilePIN", JSON.stringify(updated));
+    await showToast({
+      style: Toast.Style.Success,
+      title: updated[profileId] ? "PIN prompt enabled" : "PIN prompt disabled",
+    });
   }
 
   async function loadProfiles() {
@@ -208,7 +257,7 @@ export default function Command() {
     }
   }
 
-  async function toggleConnection(profile: Profile, overrideProtocol?: "ovpn" | "wg") {
+  async function toggleConnection(profile: Profile, overrideProtocol?: "ovpn" | "wg", totp?: string) {
     const isActive = profile.run_state === "Active";
     const effectiveProtocol = overrideProtocol ?? savedProtocols[profile.id] ?? "ovpn";
     if (overrideProtocol) {
@@ -222,7 +271,10 @@ export default function Command() {
     try {
       const cliPath = await getCLIPath();
       if (!isActive) {
-        await execAsync(`"${cliPath}" start ${profile.id} -m ${effectiveProtocol}`);
+        const startCmd = totp
+          ? `"${cliPath}" start ${profile.id} -m ${effectiveProtocol} -p ${totp}`
+          : `"${cliPath}" start ${profile.id} -m ${effectiveProtocol}`;
+        await execAsync(startCmd);
         pendingRef.current.set(profile.id, {
           protocol: effectiveProtocol,
           toast,
@@ -238,6 +290,25 @@ export default function Command() {
       toast.style = Toast.Style.Failure;
       toast.title = "Command failed";
       toast.message = String(err);
+    }
+  }
+
+  function handleConnectAction(profile: Profile, overrideProtocol?: "ovpn" | "wg") {
+    if (profile.run_state === "Active") {
+      toggleConnection(profile);
+      return;
+    }
+    if (savedPIN[profile.id]) {
+      const protocol = overrideProtocol ?? savedProtocols[profile.id] ?? "ovpn";
+      push(
+        <TwoFAForm
+          profile={profile}
+          protocol={protocol}
+          onSubmit={(code) => toggleConnection(profile, overrideProtocol, code)}
+        />,
+      );
+    } else {
+      toggleConnection(profile, overrideProtocol);
     }
   }
   const invalidCLIView = (
@@ -293,6 +364,14 @@ export default function Command() {
                           },
                         ]
                       : []),
+                    ...(savedPIN[profile.id]
+                      ? [
+                          {
+                            tag: { value: "PIN", color: Color.Purple },
+                            tooltip: "PIN prompt enabled",
+                          },
+                        ]
+                      : []),
                     ...(profile.connected && profile.status !== "Connecting"
                       ? [{ text: uptime, icon: Icon.Clock, tooltip: "Uptime" }]
                       : []),
@@ -303,7 +382,7 @@ export default function Command() {
                       <Action
                         title={isActive ? "Disconnect" : "Connect"}
                         icon={isActive ? Icon.XMarkCircle : Icon.Play}
-                        onAction={() => toggleConnection(profile)}
+                        onAction={() => handleConnectAction(profile)}
                       />
                       {!isActive && (
                         <ActionPanel.Section title="Select mode">
@@ -311,13 +390,13 @@ export default function Command() {
                             title="Connect with OpenVPN"
                             icon={Icon.Plug}
                             shortcut={{ modifiers: ["cmd"], key: "v" }}
-                            onAction={() => toggleConnection(profile, "ovpn")}
+                            onAction={() => handleConnectAction(profile, "ovpn")}
                           />
                           <Action
                             title="Connect with WireGuard"
                             icon={Icon.Plug}
                             shortcut={{ modifiers: ["cmd"], key: "g" }}
-                            onAction={() => toggleConnection(profile, "wg")}
+                            onAction={() => handleConnectAction(profile, "wg")}
                           />
                         </ActionPanel.Section>
                       )}
@@ -327,6 +406,14 @@ export default function Command() {
                           icon={Icon.Power}
                           shortcut={{ modifiers: ["cmd"], key: "e" }}
                           onAction={() => toggleAutostart(profile)}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="PIN">
+                        <Action
+                          title={savedPIN[profile.id] ? "Disable PIN Prompt" : "Enable PIN Prompt"}
+                          icon={Icon.Lock}
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                          onAction={() => togglePIN(profile.id)}
                         />
                       </ActionPanel.Section>
                       <Action
