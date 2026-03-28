@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "svg-new",
+  "title": "SVG.new",
+  "description": "Convert raster images (PNG, JPG, WebP) to clean SVG vectors using AI-powered tracing",
+  "icon": "extension-icon.png",
+  "author": "svgnew",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-to-svg",
+      "title": "Convert Image to SVG",
+      "subtitle": "svg.new",
+      "description": "Convert a selected image file to SVG vector",
+      "mode": "no-view"
+    },
+    {
+      "name": "convert-clipboard-to-svg",
+      "title": "Convert Clipboard Image to SVG",
+      "subtitle": "svg.new",
+      "description": "Convert an image from clipboard to SVG vector",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your svg.new API key from svg.new/account",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
