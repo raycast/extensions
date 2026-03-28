@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Search contacts with custom scoring (name, phone digits, email)
-- Quick actions: FaceTime Video/Audio, Phone, Message, Email
+- Quick actions: FaceTime Video/Audio, Phone, Message, Email, WhatsApp
 - Detail side panel with profile picture and organization name
 - Circular photo (from Swift) or colored initials (SVG) in detail pane
 - Favorites section with pin/unpin support

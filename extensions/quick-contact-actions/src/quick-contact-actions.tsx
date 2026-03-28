@@ -165,6 +165,39 @@ function ContactActions({ contact }: { contact: Contact }) {
         </List.Section>
       )}
 
+      {phones.length > 0 && (
+        <List.Section title="WhatsApp">
+          {phones.map((p, i) => (
+            <List.Item
+              key={`whatsapp-${i}`}
+              title={p.label}
+              subtitle={p.value}
+              icon={{ source: Icon.Message, tintColor: Color.Green }}
+              actions={
+                <ActionPanel>
+                  <Action.Open
+                    title="Send WhatsApp Message"
+                    icon={{ source: Icon.Message, tintColor: Color.Green }}
+                    target={`whatsapp://send?phone=${p.value.replace(/[^+\d]/g, "")}`}
+                  />
+                  <Action.Open
+                    title="WhatsApp Audio Call"
+                    icon={{ source: Icon.Phone, tintColor: Color.Green }}
+                    target={`whatsapp://send?phone=${p.value.replace(/[^+\d]/g, "")}`}
+                  />
+                  <Action.Open
+                    title="WhatsApp Video Call"
+                    icon={{ source: Icon.Video, tintColor: Color.Green }}
+                    target={`whatsapp://send?phone=${p.value.replace(/[^+\d]/g, "")}`}
+                  />
+                  <Action.CopyToClipboard title="Copy Number" content={p.value} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
+
       {emails.length > 0 && (
         <List.Section title="Email">
           {emails.map((e, i) => (
@@ -459,6 +492,14 @@ export default function Command(props: { arguments: { contact?: string } }) {
                   icon={Icon.Message}
                   target={`sms:${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
                   shortcut={{ modifiers: ["cmd"], key: "m" }}
+                />
+              )}
+              {contact.phones.length > 0 && (
+                <Action.Open
+                  title="WhatsApp"
+                  icon={{ source: Icon.Message, tintColor: Color.Green }}
+                  target={`whatsapp://send?phone=${contact.phones[0].value.replace(/[^+\d]/g, "")}`}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
                 />
               )}
               {contact.emails.length > 0 && (

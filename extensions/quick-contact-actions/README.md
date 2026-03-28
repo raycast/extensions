@@ -5,12 +5,12 @@ Search your macOS contacts and launch calls, messages, and emails instantly from
 ## Features
 
 - **Spotlight-style search** with smart scoring — matches by name, phone digits, or email
-- **Quick actions** — FaceTime Video/Audio, Phone Call, iMessage, Email
+- **Quick actions** — FaceTime Video/Audio, Phone Call, iMessage, Email, WhatsApp
 - **Detail panel** (⌘D) with profile picture, name, and organization
 - **Favorites** (⌘⇧S) — pin contacts to the top
 - **Frequently contacted** — your top 5 most-used contacts appear automatically
 - **Open/Edit in Contacts** — jump straight to the contact in Contacts.app
-- **Contact argument** — type `qca ana` to auto-navigate if there's a unique match
+- **Contact argument** — type `qca john` to auto-navigate if there's a unique match
 
 ## Keyboard Shortcuts
 
@@ -21,6 +21,7 @@ Search your macOS contacts and launch calls, messages, and emails instantly from
 | ⌘⇧C | Call |
 | ⌘M | Send Message |
 | ⌘E | Send Email |
+| ⌘⇧W | WhatsApp |
 | ⌘O | Open in Contacts |
 | ⌘⇧O | Edit in Contacts |
 | ⌘D | Toggle Detail Panel |
