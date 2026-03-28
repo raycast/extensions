@@ -12,6 +12,7 @@ import {
 } from "@raycast/api";
 import { dirname, join } from "path";
 import { getFileInfo, batchRename, checkConflicts } from "./lib/files";
+import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 
 export default function Command() {
@@ -23,7 +24,7 @@ export default function Command() {
     try {
       const selectedItems = await getSelectedFinderItems();
       const filePaths = selectedItems.map((file) => file.path);
-      console.log("Fetched files:", filePaths);
+      log.rename.debug("Fetched files", filePaths);
 
       if (filePaths.length === 0) {
         await showToast({
@@ -37,7 +38,7 @@ export default function Command() {
       const fileInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
       setFiles(fileInfos);
     } catch (error) {
-      console.error(error);
+      log.rename.error("Failed to fetch files", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch files",
@@ -53,6 +54,16 @@ export default function Command() {
 
   const renameFiles = async () => {
     try {
+      // Guard against empty search string — replaceAll("", x) inserts x between every character
+      if (replaceCharacter === "") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Nothing to replace",
+          message: "Please enter a character to replace",
+        });
+        return;
+      }
+
       // Build rename operations from the replace logic
       const operations: RenameOperation[] = files.map((fileInfo) => {
         const newBaseName = fileInfo.baseName.replaceAll(replaceCharacter, newCharacter);
@@ -99,7 +110,7 @@ export default function Command() {
         });
       }
     } catch (error) {
-      console.error(error);
+      log.rename.error("Failed to replace file characters", error);
 
       await showToast({
         style: Toast.Style.Failure,

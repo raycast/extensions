@@ -12,6 +12,7 @@ import {
 } from "@raycast/api";
 import { dirname, join } from "path";
 import { getFileInfo, batchRename, checkConflicts } from "./lib/files";
+import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 
 export default function Command() {
@@ -28,7 +29,7 @@ export default function Command() {
     try {
       const selectedItems = await getSelectedFinderItems();
       const filePaths = selectedItems.map((file) => file.path);
-      console.log("Fetched files:", filePaths);
+      log.rename.debug("Fetched files", filePaths);
 
       if (filePaths.length === 0) {
         await showToast({
@@ -42,7 +43,7 @@ export default function Command() {
       const fileInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
       setFiles(fileInfos);
     } catch (error) {
-      console.error(error);
+      log.rename.error("Failed to fetch files", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch files",
@@ -141,7 +142,7 @@ export default function Command() {
         });
       }
     } catch (error) {
-      console.error(error);
+      log.rename.error("Failed to rename files", error);
 
       await showToast({
         style: Toast.Style.Failure,
