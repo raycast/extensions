@@ -1,7 +1,7 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useAtom } from "jotai";
-import { currentComicAtom, HistoryEntry } from "./atoms";
+import { historyAtom } from "./atoms";
 import { useCurrentSelectedComic } from "./xkcd";
 import OpenComicInBrowser from "./open_in_browser";
 import ExplainXkcd from "./explain_xkcd";
@@ -17,24 +17,18 @@ function relativeTime(isoString: string): string {
   return `${days}d ago`;
 }
 
-interface Props {
-  history: HistoryEntry[];
-}
-
-export default function HistoryView({ history }: Props) {
-  const [currentComicNumber, setCurrentComic] = useAtom(currentComicAtom);
-  const [currentComic, loadingComic] = useCurrentSelectedComic(currentComicNumber);
+export default function HistoryView() {
+  const [history] = useAtom(historyAtom);
+  const [selectedNum, setSelectedNum] = useState<number>(-1);
+  const [currentComic, loadingComic] = useCurrentSelectedComic(selectedNum);
   const selectedId = useRef<string | undefined>(undefined);
 
-  const onSelectionChange = useCallback(
-    (id: string | undefined) => {
-      if (!id || selectedId.current === id) return;
-      selectedId.current = id;
-      const num = Number(id);
-      if (!isNaN(num)) setCurrentComic(num);
-    },
-    [setCurrentComic],
-  );
+  const onSelectionChange = useCallback((id: string | undefined) => {
+    if (!id || selectedId.current === id) return;
+    selectedId.current = id;
+    const num = Number(id);
+    if (!isNaN(num)) setSelectedNum(num);
+  }, []);
 
   const detail = (
     <List.Item.Detail
@@ -57,7 +51,7 @@ export default function HistoryView({ history }: Props) {
             id={entry.num.toString()}
             key={entry.num}
             title={`Comic #${entry.num}`}
-            accessoryTitle={relativeTime(entry.viewedAt)}
+            accessories={[{ text: relativeTime(entry.viewedAt) }]}
             detail={detail}
             actions={
               <ActionPanel>
