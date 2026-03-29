@@ -126,7 +126,7 @@ export const checkZsh = () => {
 };
 export const signIn = (account?: string) => {
   if (isWindows) {
-    execFileSync(getCliPath(), ["signin", ...(account ? [account] : [])], {
+    execFileSync(getCliPath(), ["signin", ...(account ? account.split(" ") : [])], {
       stdio: "inherit",
       timeout: 30000,
       env: windowsEnv,
