@@ -10,7 +10,7 @@ export enum LogLevel {
   ERROR = 3,
 }
 
-let currentLogLevel: LogLevel = LogLevel.DEBUG;
+let currentLogLevel: LogLevel = process.env.NODE_ENV === "development" ? LogLevel.DEBUG : LogLevel.WARN;
 const LOG_PREFIX = "[renaming]";
 
 export function setLogLevel(level: LogLevel): void {

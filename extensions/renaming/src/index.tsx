@@ -176,7 +176,7 @@ export default function Command() {
                 onChange={setPreserveName}
               />
             )}
-            {!preserveName && (
+            {(!preserveName || files.length === 1) && (
               <Form.TextField
                 id="newName"
                 title="New Name"

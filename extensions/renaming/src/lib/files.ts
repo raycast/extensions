@@ -103,6 +103,8 @@ export async function checkConflicts(operations: RenameOperation[]): Promise<str
     const normalizedNewPath = normalizePath(op.newPath);
     if (targetPaths.has(normalizedNewPath)) {
       conflicts.push(`Multiple files would be renamed to "${basename(op.newPath)}"`);
+      targetPaths.add(normalizedNewPath);
+      continue;
     }
     targetPaths.add(normalizedNewPath);
 
