@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notra",
+  "title": "Notra",
+  "description": "View, manage, and create content with Notra directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "dominikdev",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-posts",
+      "title": "List Posts",
+      "description": "Browse and manage your Notra posts",
+      "mode": "view"
+    },
+    {
+      "name": "create-post",
+      "title": "Create Content",
+      "description": "Create a new post using AI",
+      "mode": "view"
+    },
+    {
+      "name": "brand-identities",
+      "title": "List Brand Identities",
+      "description": "Browse and manage your Notra brand identities",
+      "mode": "view"
+    },
+    {
+      "name": "integrations",
+      "title": "List Integrations",
+      "description": "Browse and manage your Notra integrations",
+      "mode": "view"
+    },
+    {
+      "name": "create-brand-identity",
+      "title": "Create Brand Identity",
+      "description": "Generate a new brand identity from a website",
+      "mode": "view"
+    },
+    {
+      "name": "create-integration",
+      "title": "Create Integration",
+      "description": "Add a new GitHub integration",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Notra API key with read/write access",
+      "placeholder": "Enter your read/write Notra API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
