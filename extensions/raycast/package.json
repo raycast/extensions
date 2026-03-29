@@ -110,8 +110,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepare-publish": "node ../../scripts/raycast-lockfile.mjs",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\"prepublishOnly\\\" script and rerun \\\"npm publish\\\" again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
-    "publish": "pnpm dlx @raycast/api@latest publish",
+    "publish": "pnpm run prepare-publish && pnpm dlx @raycast/api@latest publish",
     "type-check": "tsc --noEmit"
   }
 }

@@ -4,6 +4,7 @@ import { buildAppUrl } from "./config";
 import type { AskAiResponse } from "./types";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
+import { stripHtml } from "./utils/stripHtml";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
@@ -63,7 +64,7 @@ function buildSourcesMarkdown(matches: AskAiResponse["matches"]) {
     const score = Math.round(match.score * 100);
     const webUrl = buildAppUrl(`/notes/${match.noteId}`);
     const title = match.title || "Untitled";
-    const snippet = match.snippet || "_No preview available._";
+    const snippet = stripHtml(match.snippet || "") || "_No preview available._";
     return `- [${match.sourceIndex}] [${title}](${webUrl}) (${score}%)\n  ${snippet}`;
   });
 
