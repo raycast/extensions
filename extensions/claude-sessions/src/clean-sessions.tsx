@@ -50,7 +50,7 @@ const CleanSessions = () => {
     })
     if (!confirmed) return
     try {
-      item.execute()
+      await item.execute()
       setItems((prev) => prev?.filter((i) => i.label !== item.label) ?? null)
       await showToast({ style: Toast.Style.Success, title: "Entry removed" })
     } catch (err) {
@@ -69,7 +69,7 @@ const CleanSessions = () => {
     })
     if (!confirmed) return
     try {
-      for (const item of group) item.execute()
+      for (const item of group) await item.execute()
       setItems((prev) => prev?.filter((i) => i.reason !== reason) ?? null)
       await showToast({
         style: Toast.Style.Success,

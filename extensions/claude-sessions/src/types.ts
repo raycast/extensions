@@ -11,5 +11,5 @@ export type Session = {
 export type CleanItem = {
   label: string
   reason: "ghost (directory deleted)" | "no history" | "orphaned history"
-  execute: () => void
+  execute: () => Promise<void>
 }

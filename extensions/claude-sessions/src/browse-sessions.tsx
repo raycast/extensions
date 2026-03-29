@@ -58,7 +58,7 @@ const NewChatForm = ({ onOpen }: { onOpen: (dir: string) => void }) => {
 }
 
 const BrowseSessions = () => {
-  const { terminalApp } = getPreferenceValues<{ terminalApp: string }>()
+  const { terminalApp } = getPreferenceValues<Preferences.BrowseSessions>()
   const { push } = useNavigation()
   const [sessions, setSessions] = useState<Session[] | null>(null)
   const [filter, setFilter] = useState<Filter>("all")
@@ -93,7 +93,7 @@ const BrowseSessions = () => {
     })
     if (!confirmed) return
     try {
-      deleteSession(session)
+      await deleteSession(session)
       setSessions((prev) => prev?.filter((s) => s.dir !== session.dir) ?? null)
       await showToast({ style: Toast.Style.Success, title: "Session removed" })
     } catch (err) {

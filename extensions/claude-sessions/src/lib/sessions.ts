@@ -1,8 +1,8 @@
 import { readdir, stat } from "fs/promises"
 import { existsSync, readFileSync, writeFileSync } from "fs"
 import { join } from "path"
-import { execSync } from "child_process"
 import { homedir } from "os"
+import { trash } from "@raycast/api"
 import type { Session } from "../types"
 
 export const HOME = homedir()
@@ -139,10 +139,10 @@ export const loadSessions = async (): Promise<Session[]> => {
   return unique.sort((a, b) => b.mtime - a.mtime)
 }
 
-export const deleteSession = (session: Session) => {
+export const deleteSession = async (session: Session) => {
   if (session.claudeProjectDir) {
     try {
-      execSync(`trash "${session.claudeProjectDir}"`)
+      await trash(session.claudeProjectDir)
     } catch {
       // noop
     }
@@ -150,7 +150,7 @@ export const deleteSession = (session: Session) => {
   }
   if (session.type === "chat") {
     try {
-      execSync(`trash "${session.dir}"`)
+      await trash(session.dir)
     } catch {
       // noop
     }

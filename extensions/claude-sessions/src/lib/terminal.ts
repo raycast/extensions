@@ -3,6 +3,8 @@ import { mkdirSync, writeFileSync } from "fs"
 
 const TMP_SCRIPT = "/tmp/claude-sessions-open.scpt"
 
+const shellEscape = (s: string) => s.replace(/'/g, "'\\''")
+
 const runAppleScript = (script: string) => {
   writeFileSync(TMP_SCRIPT, script)
   execSync(`osascript "${TMP_SCRIPT}"`)
@@ -41,7 +43,7 @@ export const openSession = (
 ): void => {
   mkdirSync(dir, { recursive: true })
   const claudeCmd = isNew ? "claude" : "claude --continue"
-  const cmd = `cd '${dir}' && ${claudeCmd}`
+  const cmd = `cd '${shellEscape(dir)}' && ${claudeCmd}`
 
   if (terminalApp === "iTerm") {
     runAppleScript(iTermScript(cmd))
@@ -54,7 +56,7 @@ export const openSession = (
   }
 
   if (terminalApp === "Ghostty") {
-    execSync(`open -na Ghostty --args --command='${cmd}'`)
+    execSync(`open -na Ghostty --args --command='${shellEscape(cmd)}'`)
     return
   }
 
