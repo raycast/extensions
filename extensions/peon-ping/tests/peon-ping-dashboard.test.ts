@@ -5,6 +5,7 @@ import type {
 } from "../src/lib/peon-ping-config";
 import {
   buildDashboardItems,
+  progressBar,
   type DashboardItem,
 } from "../src/lib/peon-ping-dashboard";
 import type { InstalledPack } from "../src/lib/peon-ping-packs";
@@ -105,7 +106,10 @@ test("status metadata includes overview of all settings", () => {
   const status = findItem(items, "status");
   const labels = status.metadata.filter((m) => m.kind === "label");
   expect(labels).toContainEqual(
-    expect.objectContaining({ title: "Volume", text: "75%" }),
+    expect.objectContaining({
+      title: "Volume",
+      text: `${progressBar(0.75)} 75%`,
+    }),
   );
   expect(labels).toContainEqual(
     expect.objectContaining({

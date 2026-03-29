@@ -117,6 +117,14 @@ export type BuildDashboardInput = {
   packs: InstalledPack[];
 };
 
+const PROGRESS_BAR_BLOCKS = 12;
+
+export function progressBar(fraction: number): string {
+  const filled = Math.round(fraction * PROGRESS_BAR_BLOCKS);
+  const empty = PROGRESS_BAR_BLOCKS - filled;
+  return "■".repeat(filled) + "□".repeat(empty);
+}
+
 function findPackDisplayName(
   packs: InstalledPack[],
   activePack: string,
@@ -144,7 +152,7 @@ function buildStatusItem(
     {
       kind: "label",
       title: "Volume",
-      text: `${Math.round(config.volume * 100)}%`,
+      text: `${progressBar(config.volume)} ${Math.round(config.volume * 100)}%`,
     },
     {
       kind: "label",
@@ -191,7 +199,11 @@ function buildVolumeItem(config: PeonPingConfig): DashboardItem {
   const currentLabel = `${Math.round(config.volume * 100)}%`;
 
   const metadata: MetadataEntry[] = [
-    { kind: "label", title: "Current Volume", text: currentLabel },
+    {
+      kind: "label",
+      title: "Volume",
+      text: `${progressBar(config.volume)} ${currentLabel}`,
+    },
     { kind: "separator" },
     {
       kind: "tagList",
