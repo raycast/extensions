@@ -256,6 +256,15 @@ export async function batchRename(
     if (tempPath) {
       return { ...op, oldPath: tempPath };
     }
+
+    // Re-parent if this op's oldPath is inside a directory that was temped
+    for (const [tIdx, tPath] of tempMap) {
+      const originalDir = operations[tIdx]!.oldPath + path.sep;
+      if (op.oldPath.startsWith(originalDir)) {
+        return { ...op, oldPath: tPath + op.oldPath.slice(operations[tIdx]!.oldPath.length) };
+      }
+    }
+
     return op;
   });
 
@@ -271,7 +280,7 @@ export async function batchRename(
     const { op, originalIndex } = indexed[i]!;
 
     if (onProgress) {
-      onProgress(i + 1, operations.length, basename(operations[originalIndex]!.oldPath));
+      onProgress(i + 1, indexed.length, basename(operations[originalIndex]!.oldPath));
     }
 
     const result = await renameFile(op.oldPath, op.newName);
