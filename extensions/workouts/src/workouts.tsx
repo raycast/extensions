@@ -3,7 +3,7 @@ import { useCachedPromise, usePromise, withAccessToken } from "@raycast/utils";
 import { PAGE_SIZE, getActivities, getActivity, provider } from "./api/client";
 import { useEffect, useMemo } from "react";
 import { StravaActivitySummary } from "./api/types";
-import { sportIcons, sportNames } from "./constants";
+import { sportIcons } from "./constants";
 import {
   formatAccessoryDate,
   formatDistance,
@@ -59,14 +59,15 @@ ${
 }
 
 export function Activity({ activity, isLoading }: { activity: StravaActivitySummary; isLoading: boolean }) {
-  const sportType = sportNames[activity.sport_type] ?? "Workout";
   const activityDate = parseLocalDate(activity.start_date_local);
   const formattedDuration = formatDuration(activity.elapsed_time);
   const formattedMovingTime = formatDuration(activity.moving_time);
   const formattedHeartRate = activity.average_heartrate ? `${Math.floor(activity.average_heartrate)} bpm` : undefined;
   const formattedKilojoules = activity.kilojoules ? `${activity.kilojoules} kJ` : undefined;
   const speedTitle = `Average ${["run", "swim"].includes(activity.type.toLowerCase()) ? "Pace" : "Speed"}`;
-  const formattedSpeed = activity.average_speed ? formatSpeedForSportType(activity.type, activity.average_speed) : undefined;
+  const formattedSpeed = activity.average_speed
+    ? formatSpeedForSportType(activity.type, activity.average_speed)
+    : undefined;
   const formattedDistance = formatDistance(activity.distance);
   const mapboxImage = generateMapboxImage(activity.map.summary_polyline);
   const elevationGain = formatElevationGain(activity.total_elevation_gain);
