@@ -1,17 +1,6 @@
 import { showHUD, getPreferenceValues } from "@raycast/api";
 import { startOverlay, stopOverlay, isRunning } from "./helper";
 
-interface Preferences {
-  displayMode: string;
-  position: string;
-  displayDuration: string;
-  fontSize: string;
-  uppercaseKeys: boolean;
-  showSpaceSymbol: boolean;
-  showMouseClicks: boolean;
-  appearance: string;
-}
-
 function buildConfig(prefs: Preferences) {
   return {
     displayMode: prefs.displayMode,
