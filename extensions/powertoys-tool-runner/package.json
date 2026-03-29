@@ -101,6 +101,14 @@
       "mode": "no-view",
       "subtitle": "PowerToys",
       "icon": "Environment Manager.png"
+    },
+    {
+      "name": "awake",
+      "title": "Awake",
+      "description": "Open PowerToys Awake settings to manage sleep behavior",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Awake.png"
     }
   ],
   "dependencies": {
