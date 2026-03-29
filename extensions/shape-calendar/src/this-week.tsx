@@ -229,7 +229,7 @@ export default function Command() {
           ) : (
             <List.Item
               title="Rest Day"
-              icon={{ source: Icon.Zzz, tintColor: Color.SecondaryText }}
+              icon={{ source: Icon.Moon, tintColor: Color.SecondaryText }}
             />
           )}
         </List.Section>

@@ -8,7 +8,7 @@ type Input = {
   id: string;
 };
 
-export const confirmation: Tool.Confirmation<Input> = (input) => {
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
   return {
     style: Action.Style.Destructive,
     message: `Are you sure you want to delete this activity (${input.id})?`,

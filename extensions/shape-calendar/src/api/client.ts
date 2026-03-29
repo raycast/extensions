@@ -2,6 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import {
   Activity,
   ActivityResponse,
+  BatchDeleteResponse,
   CreateActivityInput,
   DeleteResponse,
   ListActivitiesParams,

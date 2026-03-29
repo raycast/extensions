@@ -57,7 +57,7 @@ export default function Command() {
       const res = await getActivities(params);
       return res.activities;
     },
-    [sportFilter, from, to],
+    [sportFilter],
   );
 
   useEffect(() => {
