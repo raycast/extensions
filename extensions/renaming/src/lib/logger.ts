@@ -77,12 +77,5 @@ export function createLogger(module: string) {
 
 export const log = {
   files: createLogger("files"),
-  history: createLogger("history"),
   rename: createLogger("rename"),
-  ai: createLogger("ai"),
-  metadata: createLogger("metadata"),
-  presets: createLogger("presets"),
-  clipboard: createLogger("clipboard"),
-  thumbnails: createLogger("thumbnails"),
-  ui: createLogger("ui"),
 };

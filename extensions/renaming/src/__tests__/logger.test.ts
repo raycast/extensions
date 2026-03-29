@@ -122,21 +122,18 @@ describe("log data parameter", () => {
 });
 
 describe("log modules", () => {
-  it("has files, history, rename, ai, metadata loggers", () => {
+  it("has files and rename loggers", () => {
     expect(log.files).toBeDefined();
-    expect(log.history).toBeDefined();
     expect(log.rename).toBeDefined();
-    expect(log.ai).toBeDefined();
-    expect(log.metadata).toBeDefined();
   });
 
   it("each module logger tags output correctly", () => {
     const spy = vi.spyOn(console, "log").mockImplementation(() => {});
-    log.history.info("hist msg");
-    expect(spy.mock.calls[0]![0]).toContain("[history]");
+    log.files.info("files msg");
+    expect(spy.mock.calls[0]![0]).toContain("[files]");
 
-    log.ai.info("ai msg");
-    expect(spy.mock.calls[1]![0]).toContain("[ai]");
+    log.rename.info("rename msg");
+    expect(spy.mock.calls[1]![0]).toContain("[rename]");
   });
 });
 
