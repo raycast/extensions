@@ -1,21 +1,27 @@
-# Keyraycast
+<p align="center">
+  <img src="assets/command-icon.png" width="128" height="128" alt="Keyraycast icon" />
+</p>
 
-Show keystrokes on screen. A modern [KeyCastr](https://github.com/keycastr/keycastr) alternative as a Raycast extension.
+<h1 align="center">Keyraycast</h1>
 
-Great for screen recordings, live demos, presentations, and bug reports.
+<p align="center">
+  Show keystrokes on screen. A modern <a href="https://github.com/keycastr/keycastr">KeyCastr</a> alternative as a Raycast extension.
+  <br />
+  Great for screen recordings, live demos, presentations, and bug reports.
+</p>
 
 ![Liquid Glass on macOS 26](metadata/keyraycast-3.png)
 
 ## Features
 
-- **Three display modes** - All Keys, All Modified Keys, or Command Keys Only
-- **Mouse click visualization** - Shows modifier+clicks and right-clicks
-- **Multi-monitor support** - Overlay follows your cursor across screens
-- **Appearance themes** - Dark, Light, Auto (match system), or Liquid Glass (macOS 26+)
-- **Configurable position** - Six positions (top/bottom, left/center/right)
-- **Adjustable timing** - Display duration from 0.5s to 5.0s
-- **International keyboard support** - Correct character display for all layouts
-- **Smart pill grouping** - Continuous typing collapses into one pill, shortcuts get their own
+- **Three display modes** — All Keys, All Modified Keys, or Command Keys Only
+- **Mouse click visualization** — Shows modifier+clicks and right-clicks
+- **Multi-monitor support** — Overlay follows your cursor across screens
+- **Appearance themes** — Dark, Light, Auto (match system), or Liquid Glass (macOS 26+)
+- **Configurable position** — Six positions (top/bottom, left/center/right)
+- **Adjustable timing** — Display duration from 0.5s to 5.0s
+- **International keyboard support** — Correct character display for all layouts
+- **Smart pill grouping** — Continuous typing collapses into one pill, shortcuts get their own
 
 ## Setup
 
@@ -45,17 +51,10 @@ Change settings in Raycast preferences. Toggle the overlay off then on to apply 
 
 ## Preview
 
-![Keyraycast in Raycast](metadata/keyraycast-1.png)
-*Toggle command in Raycast*
-
-![Light theme](metadata/keyraycast-2.png)
-*Typed text with light theme*
-
-![Glass theme](metadata/keyraycast-3.png)
-*Liquid Glass on macOS 26*
-
-![Dark theme](metadata/keyraycast-4.png)
-*Shortcuts with dark theme*
+| | |
+|---|---|
+| ![Raycast command](metadata/keyraycast-1.png) *Toggle command in Raycast* | ![Light theme](metadata/keyraycast-2.png) *Typed text with light theme* |
+| ![Glass theme](metadata/keyraycast-3.png) *Liquid Glass on macOS 26* | ![Dark theme](metadata/keyraycast-4.png) *Shortcuts with dark theme* |
 
 ## How It Works
 
