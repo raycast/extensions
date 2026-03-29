@@ -1,8 +1,16 @@
-import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, environment, showToast, Toast, Color } from "@raycast/api";
 import { ActivityType, SportType } from "./api/types";
+import { workoutTypeLabels } from "./constants";
 import { createWriteStream } from "fs";
 import path, { resolve } from "path";
 import { homedir } from "os";
+
+const METERS_PER_MILE = 1609.344;
+const FEET_PER_METER = 3.28084;
+const KM_PER_MILE = 1.60934;
+const MS_TO_KMH = 3.6; // (1000 m/km) / (3600 s/hr)
+const MS_TO_MPH = 2.23694;
+const MS_TO_MIN_PER_KM = 0.06; // (1/1000) * 60
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -11,19 +19,17 @@ export const formatDuration = (duration: number) => {
 export const formatElevationGain = (elevationGain: number) => {
   const preferences = getPreferenceValues<Preferences>();
   if (preferences.distance_unit === "mi") {
-    return `${(elevationGain * 3.28084).toFixed(0)}ft`;
+    return `${(elevationGain * FEET_PER_METER).toFixed(0)} ft`;
   }
-  return `${Math.round(elevationGain)}m`;
+  return `${Math.round(elevationGain)} m`;
 };
 
 export const formatDistance = (distance: number) => {
-  const preferences = getPreferenceValues<Preferences>();
-
-  if (preferences.distance_unit === "km") {
+  const { distance_unit } = getPreferenceValues<Preferences>();
+  if (distance_unit === "km") {
     return `${(distance / 1000).toFixed(1)} km`;
-  } else {
-    return `${(distance / 1609.34).toFixed(2)} mi`;
   }
+  return `${(distance / METERS_PER_MILE).toFixed(2)} mi`;
 };
 export const formatSpeedForSportType = (sportType: ActivityType, speed: number) => {
   const preferences = getPreferenceValues<Preferences>();
@@ -34,13 +40,13 @@ export const formatSpeedForSportType = (sportType: ActivityType, speed: number) 
 
   switch (sportType) {
     case "Run": {
-      const pace = 1 / (speed * 0.06);
+      const pace = 1 / (speed * MS_TO_MIN_PER_KM);
       if (preferences.distance_unit === "km") {
         return `${Math.floor(pace)}:${Math.floor((pace % 1) * 60)
           .toString()
           .padStart(2, "0")}min/km`;
       } else {
-        const paceMiles = pace * 1.60934;
+        const paceMiles = pace * KM_PER_MILE;
         return `${Math.floor(paceMiles)}’${Math.floor((paceMiles % 1) * 60)
           .toString()
           .padStart(2, "0")}” min/mile`;
@@ -48,9 +54,9 @@ export const formatSpeedForSportType = (sportType: ActivityType, speed: number) 
     }
     default:
       if (preferences.distance_unit === "km") {
-        return `${(speed * 3.6).toFixed(1)} km/h`;
+        return `${(speed * MS_TO_KMH).toFixed(1)} km/h`;
       } else {
-        return `${(speed * 2.23694).toFixed(1)} mph`;
+        return `${(speed * MS_TO_MPH).toFixed(1)} mph`;
       }
   }
 };
@@ -109,6 +115,57 @@ export function getSportTypesFromActivityTypes(activityTypes: SportType[], local
   return sportTypes;
 }
 
+export function parseLocalDate(dateString: string): Date {
+  const [datePart, timePart] = dateString.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!timePart) return new Date(year, month - 1, day);
+  const [hours, minutes, seconds] = timePart.replace("Z", "").split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+}
+
+export function formatAccessoryDate(date: Date): string {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round((startOfToday.getTime() - startOfDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 1) {
+    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+    const label = rtf.format(-diffDays, "day");
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+  if (diffDays < 7) return date.toLocaleDateString(undefined, { weekday: "long" });
+  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+
+export function getWorkoutTypeLabel(activityType: ActivityType, workoutType?: number): string | undefined {
+  if (workoutType == null) return undefined;
+
+  const typeName = activityType.toString().toLowerCase();
+  let family: string | undefined;
+  if (typeName.includes("run")) {
+    family = "run";
+  } else if (typeName.includes("ride") || typeName === "velomobile" || typeName === "handcycle") {
+    family = "ride";
+  }
+
+  if (!family) return undefined;
+  return workoutTypeLabels[family]?.[workoutType];
+}
+
+export function getWorkoutTypeColor(label: string): Color {
+  switch (label) {
+    case "Race":
+      return Color.Red;
+    case "Long Run":
+      return Color.Blue;
+    case "Workout":
+      return Color.Orange;
+    default:
+      return Color.SecondaryText;
+  }
+}
+
 export function formatSportTypesText(input: string): string {
   input = input.replace(/(^E)([A-Z])/g, "E-$2");
   return input.replace(/([a-z0-9])([A-Z])/g, "$1 $2");
@@ -149,7 +206,7 @@ export function convertDistanceToMeters(distance: string, unit: string) {
     case "km":
       return value * 1000;
     case "mi":
-      return value * 1609.344;
+      return value * METERS_PER_MILE;
     default:
       throw new Error("Unsupported unit");
   }

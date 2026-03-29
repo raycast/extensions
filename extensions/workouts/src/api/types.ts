@@ -137,6 +137,10 @@ export type StravaActivitySummary = {
   trainer: boolean;
   commute: boolean;
   photo_count: number;
+  workout_type?: number;
+  kudos_count?: number;
+  achievement_count?: number;
+  pr_count?: number;
 };
 
 export type StravaActivity = StravaActivitySummary & {
