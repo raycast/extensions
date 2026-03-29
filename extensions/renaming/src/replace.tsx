@@ -80,13 +80,16 @@ export default function Command() {
         };
       });
 
-      // Guard against replacements that produce empty filenames
-      const emptyNames = operations.filter((op) => !op.newName || op.newName === "");
-      if (emptyNames.length > 0) {
+      // Guard against replacements that remove the entire base name
+      const emptyBases = files.filter((fileInfo) => {
+        const newBase = fileInfo.baseName.replaceAll(replaceCharacter, newCharacter);
+        return newBase === "";
+      });
+      if (emptyBases.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Replace would create empty filename",
-          message: `${emptyNames.length} file${emptyNames.length > 1 ? "s" : ""} would have no name`,
+          title: "Replace would remove base name",
+          message: `${emptyBases.length} file${emptyBases.length > 1 ? "s" : ""} would lose ${emptyBases.length > 1 ? "their" : "its"} base name`,
         });
         return;
       }

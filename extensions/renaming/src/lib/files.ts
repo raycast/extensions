@@ -34,8 +34,8 @@ export async function getFileInfo(filePath: string): Promise<FileInfo> {
   const isDirectory = stats.isDirectory();
   const fullName = basename(filePath);
   const ext = isDirectory ? "" : extname(filePath);
-  // Dotfiles like .gitignore: extname returns ".gitignore" (the whole name), baseName would be ""
-  const isDotfile = !isDirectory && fullName.startsWith(".") && ext === fullName;
+  // Dotfiles like .gitignore: extname returns "" so the whole name is the baseName
+  const isDotfile = !isDirectory && fullName.startsWith(".") && ext === "";
   const extension = isDotfile ? "" : ext;
   const baseName = isDirectory || isDotfile ? fullName : basename(filePath, extension);
 
