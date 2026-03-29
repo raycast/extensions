@@ -1,6 +1,6 @@
 # Workouts Changelog
 
-## [Improved Search Command Display] - {PR_MERGE_DATE}
+## [Improved Search Command Display] - 2026-03-29
 
 - Show activity name as the list item title instead of the sport type (which is already conveyed by the icon)
 - Group activities by month with section headers
