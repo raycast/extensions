@@ -97,7 +97,10 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
               {hasTags ? (
                 <List.Item.Detail.Metadata.TagList title="Tags">
                   {workoutLabel ? (
-                    <List.Item.Detail.Metadata.TagList.Item text={workoutLabel} color={getWorkoutTypeColor(workoutLabel)} />
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={workoutLabel}
+                      color={getWorkoutTypeColor(workoutLabel)}
+                    />
                   ) : null}
                   {activity.commute ? (
                     <List.Item.Detail.Metadata.TagList.Item text="Commute" color={Color.Green} />
@@ -121,25 +124,40 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
                     <List.Item.Detail.Metadata.Label title={speedTitle} text={formattedSpeed} />
                   ) : null}
                   {activity.max_speed ? (
-                    <List.Item.Detail.Metadata.Label title="Max Speed" text={formatSpeedForSportType(activity.type, activity.max_speed)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Max Speed"
+                      text={formatSpeedForSportType(activity.type, activity.max_speed)}
+                    />
                   ) : null}
                   {activity.average_watts ? (
                     <List.Item.Detail.Metadata.Label title="Average Power" text={`${activity.average_watts} W`} />
                   ) : null}
                   {activity.weighted_average_watts ? (
-                    <List.Item.Detail.Metadata.Label title="Weighted Average Power" text={`${activity.weighted_average_watts} W`} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Weighted Average Power"
+                      text={`${activity.weighted_average_watts} W`}
+                    />
                   ) : null}
                   {activity.average_cadence ? (
-                    <List.Item.Detail.Metadata.Label title="Average Cadence" text={`${Math.round(activity.average_cadence)} rpm`} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Average Cadence"
+                      text={`${Math.round(activity.average_cadence)} rpm`}
+                    />
                   ) : null}
                   {activity.total_elevation_gain ? (
                     <List.Item.Detail.Metadata.Label title="Elevation Gain" text={elevationGain} />
                   ) : null}
                   {activity.elev_high != null ? (
-                    <List.Item.Detail.Metadata.Label title="Max Elevation" text={formatElevationGain(activity.elev_high)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Max Elevation"
+                      text={formatElevationGain(activity.elev_high)}
+                    />
                   ) : null}
                   {activity.elev_low != null ? (
-                    <List.Item.Detail.Metadata.Label title="Min Elevation" text={formatElevationGain(activity.elev_low)} />
+                    <List.Item.Detail.Metadata.Label
+                      title="Min Elevation"
+                      text={formatElevationGain(activity.elev_low)}
+                    />
                   ) : null}
                   <List.Item.Detail.Metadata.Separator />
                 </>
@@ -161,7 +179,10 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
                 <List.Item.Detail.Metadata.Label title="Average Heart Rate" text={formattedHeartRate} />
               ) : null}
               {activity.max_heartrate ? (
-                <List.Item.Detail.Metadata.Label title="Max Heart Rate" text={`${Math.round(activity.max_heartrate)} bpm`} />
+                <List.Item.Detail.Metadata.Label
+                  title="Max Heart Rate"
+                  text={`${Math.round(activity.max_heartrate)} bpm`}
+                />
               ) : null}
               {activity.suffer_score ? (
                 <List.Item.Detail.Metadata.Label
@@ -181,10 +202,16 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.TagList title="Stats">
                     {activity.kudos_count ? (
-                      <List.Item.Detail.Metadata.TagList.Item text={`${activity.kudos_count} kudos`} color={Color.Orange} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={`${activity.kudos_count} kudos`}
+                        color={Color.Orange}
+                      />
                     ) : null}
                     {activity.achievement_count ? (
-                      <List.Item.Detail.Metadata.TagList.Item text={`${activity.achievement_count} achievements`} color={Color.Yellow} />
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={`${activity.achievement_count} achievements`}
+                        color={Color.Yellow}
+                      />
                     ) : null}
                     {activity.pr_count ? (
                       <List.Item.Detail.Metadata.TagList.Item text={`${activity.pr_count} PRs`} color={Color.Purple} />
@@ -218,7 +245,10 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
 function groupActivitiesByMonth(activities: StravaActivitySummary[]): [string, StravaActivitySummary[]][] {
   const groups = new Map<string, StravaActivitySummary[]>();
   for (const activity of activities) {
-    const key = parseLocalDate(activity.start_date_local).toLocaleDateString(undefined, { month: "long", year: "numeric" });
+    const key = parseLocalDate(activity.start_date_local).toLocaleDateString(undefined, {
+      month: "long",
+      year: "numeric",
+    });
     const existing = groups.get(key);
     if (existing) {
       existing.push(activity);
