@@ -64,8 +64,8 @@
       "type": "password",
       "required": true,
       "title": "API Key",
-      "description": "Your Notra API key with read/write access",
-      "placeholder": "Enter your read/write Notra API key"
+      "description": "Your Notra API key with read & write access",
+      "placeholder": "Enter your read & write Notra API key"
     }
   ],
   "dependencies": {
