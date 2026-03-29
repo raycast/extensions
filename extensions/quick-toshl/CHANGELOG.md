@@ -2,33 +2,27 @@
 
 All notable changes to this project are documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [1.4.1] - {PR_MERGE_DATE}
-
-### Fixed
-
-- **Raycast CI** – `tsc --noEmit` on the store pipeline: align `EntryEditDeleteSections` `push` / `pop` with `useNavigation()` types (duplicate `@types/react` `ReactNode`), and parse `Location` from Axios responses without incompatible header typings.
-
-## [1.4.0] - {PR_MERGE_DATE}
 
 ### Added
 
-- **My Profile** command – Toshl profile from `/me` (currency, locale, timezone, limits).
-- **AI tools**: `delete-category`, `delete-tag`, `delete-account`, `update-transfer`, `get-me`, `get-tag-sums`, `list-entry-locations`.
-- **`scripts/toshl-integration-test.cjs`** – optional live API smoke test (set `TOSHL_API_KEY` or rely on `op read "op://Code/Toshl API/credential"` when 1Password CLI is available).
+- **My Profile** (`my-profile`) – reads Toshl `/me` (main currency, locale, timezone, country, month start, API limit flags).
+- **Manage Categories / Tags / Accounts / Budgets** – create, edit, and delete flows in Raycast (aligned with Toshl plan limits where applicable).
+- **API Rate Limit** (`rate-limit`) – shows remaining quota when `GET /rate-limit` exists.
+- **AI tools** – `delete-category`, `delete-tag`, `delete-account`, `update-transfer`, `get-me`, `get-tag-sums`, `list-entry-locations` (plus existing create/update coverage for categories, tags, accounts, budgets).
+- **`scripts/toshl-integration-test.cjs`** – optional live API smoke test that creates disposable `QTT-TEST-*` resources and deletes them afterward (supports `TOSHL_API_KEY` or `op read` for the key).
 
 ### Changed
 
-- **Toshl client** – `POST` responses that return an empty body with a **`Location`** header (categories, tags, accounts, budgets, entries) now resolve the new resource id and return the full object (matches Toshl API v2 behavior).
-- **`get-tag-sums` (AI)** – sends required **`currency`** query parameter; defaults to the user’s main currency from `/me`.
-- **API Rate Limit** command – tolerates **`GET /rate-limit`** returning **404** and shows when quota is unavailable instead of failing.
-- **Documentation** – README expanded to list commands, AI tools, and development workflow.
+- **Toshl HTTP client** – after `POST` creates (categories, tags, accounts, budgets, expenses, incomes, transfers), resolves the new id from the `Location` header when the body is empty, then `GET`s the resource so callers always receive a full object with `id` (matches Toshl API behavior).
+- **`get-tag-sums` (AI)** – passes the API-required `currency` query parameter (defaults to main currency from `/me`).
+- **API Rate Limit UI** – if `GET /rate-limit` returns 404, the command shows that quota is unavailable instead of failing.
+- **README** – command list, AI tool list, configuration, and local dev notes (`build`, `lint`, `dev`, integration script).
 
 ### Fixed
 
-- Creating expenses, transfers, categories, tags, accounts, and budgets via the API no longer produced missing or invalid ids when the response body was empty.
+- **Store CI (`tsc --noEmit`)** – `EntryEditDeleteSections` now types `push` / `pop` with `ReturnType<typeof useNavigation>` so Raycast’s bundled React types match `useNavigation()` (fixes `recent-transactions` / `search-entries` build errors).
+- **Store CI** – `Location` header parsing uses a small `locationHeaderFrom()` helper so Axios response headers type-check under strict `tsc`.
 
 ## [1.1.3] - 2026-02-28
 
