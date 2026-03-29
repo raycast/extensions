@@ -1,5 +1,12 @@
 # 1Password Changelog
 
+## [Added Windows Support] - {PR_MERGE_DATE}
+
+- Added Windows platform support
+- Added Windows-compatible 1Password CLI path detection
+- Updated keyboard shortcuts for cross-platform compatibility
+- Updated setup guide for Windows (Windows Hello instead of Touch ID)
+
 ## [Chore] - 2025-11-15
 
 - Add stricter, opinionated eslint rules for clarity
