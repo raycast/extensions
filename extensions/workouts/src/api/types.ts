@@ -121,19 +121,19 @@ export type StravaActivitySummary = {
   map: {
     summary_polyline: string;
   };
-  average_speed: number;
-  max_speed: number;
-  average_cadence: number;
-  has_heartrate: boolean;
-  average_heartrate: number;
-  max_heartrate: number;
-  suffer_score: number;
-  average_watts: number;
-  max_watts: number;
-  weighted_average_watts: number;
-  kilojoules: number;
-  elev_high: number;
-  elev_low: number;
+  average_speed?: number;
+  max_speed?: number;
+  average_cadence?: number;
+  has_heartrate?: boolean;
+  average_heartrate?: number;
+  max_heartrate?: number;
+  suffer_score?: number;
+  average_watts?: number;
+  max_watts?: number;
+  weighted_average_watts?: number;
+  kilojoules?: number;
+  elev_high?: number;
+  elev_low?: number;
   trainer: boolean;
   commute: boolean;
   photo_count: number;
@@ -227,7 +227,7 @@ export type StravaClubActivity = {
   elapsed_time: number;
   total_elevation_gain: number;
   sport_type: SportType;
-  workout_type: number;
+  workout_type?: number;
 };
 
 export type StravaManualActivity = {

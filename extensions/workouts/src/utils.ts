@@ -131,12 +131,12 @@ export function formatAccessoryDate(date: Date): string {
   const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const diffDays = Math.round((startOfToday.getTime() - startOfDate.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (diffDays <= 1) {
+  if (diffDays >= 0 && diffDays <= 1) {
     const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
     const label = rtf.format(-diffDays, "day");
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
-  if (diffDays < 7) return date.toLocaleDateString(undefined, { weekday: "long" });
+  if (diffDays >= 2 && diffDays < 7) return date.toLocaleDateString(undefined, { weekday: "long" });
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
@@ -152,7 +152,8 @@ export function getWorkoutTypeLabel(sportType: SportType, workoutType?: number):
   }
 
   if (!family) return undefined;
-  return workoutTypeLabels[family]?.[workoutType];
+  const familyLabels = workoutTypeLabels[family as keyof typeof workoutTypeLabels];
+  return familyLabels?.[workoutType as keyof typeof familyLabels];
 }
 
 export function getWorkoutTypeColor(label: string): Color {

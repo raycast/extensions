@@ -66,7 +66,7 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
   const formattedHeartRate = activity.average_heartrate ? `${Math.floor(activity.average_heartrate)} bpm` : undefined;
   const formattedKilojoules = activity.kilojoules ? `${activity.kilojoules} kJ` : undefined;
   const speedTitle = `Average ${["run", "swim"].includes(activity.type.toLowerCase()) ? "Pace" : "Speed"}`;
-  const formattedSpeed = formatSpeedForSportType(activity.type, activity.average_speed);
+  const formattedSpeed = activity.average_speed ? formatSpeedForSportType(activity.type, activity.average_speed) : undefined;
   const formattedDistance = formatDistance(activity.distance);
   const mapboxImage = generateMapboxImage(activity.map.summary_polyline);
   const elevationGain = formatElevationGain(activity.total_elevation_gain);

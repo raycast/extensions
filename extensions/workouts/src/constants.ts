@@ -53,7 +53,7 @@ export const sportIcons: { [key: string]: string } = {
   Yoga: "yoga.svg",
 };
 
-export const workoutTypeLabels: Record<string, Record<number, string>> = {
+export const workoutTypeLabels = {
   run: {
     1: "Race",
     2: "Long Run",
@@ -63,7 +63,7 @@ export const workoutTypeLabels: Record<string, Record<number, string>> = {
     11: "Race",
     12: "Workout",
   },
-};
+} as const satisfies Record<string, Record<number, string>>;
 
 export const distancePresets = {
   Marathon: { km: "42.195", mi: "26.219" },
