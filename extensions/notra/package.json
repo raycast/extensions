@@ -11,43 +11,49 @@
   ],
   "categories": [
     "Developer Tools",
-    "Communication"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "view-posts",
       "title": "List Posts",
+      "subtitle": "Notra",
       "description": "Browse and manage your Notra posts",
       "mode": "view"
     },
     {
       "name": "create-post",
       "title": "Create Content",
+      "subtitle": "Notra",
       "description": "Create a new post using AI",
       "mode": "view"
     },
     {
       "name": "brand-identities",
       "title": "List Brand Identities",
+      "subtitle": "Notra",
       "description": "Browse and manage your Notra brand identities",
       "mode": "view"
     },
     {
       "name": "integrations",
       "title": "List Integrations",
+      "subtitle": "Notra",
       "description": "Browse and manage your Notra integrations",
       "mode": "view"
     },
     {
       "name": "create-brand-identity",
       "title": "Create Brand Identity",
+      "subtitle": "Notra",
       "description": "Generate a new brand identity from a website",
       "mode": "view"
     },
     {
       "name": "create-integration",
       "title": "Create Integration",
+      "subtitle": "Notra",
       "description": "Add a new GitHub integration",
       "mode": "view"
     }
