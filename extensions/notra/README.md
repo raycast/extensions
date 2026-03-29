@@ -1,13 +1,11 @@
 # Notra
 
-View, manage, and create content with Notra directly from Raycast.
+View, manage, and create content with [Notra](https://www.usenotra.com) directly from Raycast.
 
 ## Setup
 
-This extension requires a Notra API key with read/write access.
-
 1. Sign in to your account at [app.usenotra.com](https://app.usenotra.com)
-2. Navigate to the `API Keys` page and create an API key with read/write permissions
+2. Navigate to the `API Keys` page and create an API key with read & write permissions
 3. Open any Notra command in Raycast and enter your API key when prompted
 
 ## Commands
