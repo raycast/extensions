@@ -139,7 +139,7 @@ interface NotraRequestInit extends Omit<RequestInit, "headers"> {
 export { NOTRA_API_URL };
 
 export function getNotraRequestInit(init?: NotraRequestInit): RequestInit {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
 
   return {
     ...init,
@@ -200,10 +200,6 @@ export function setCachedValue<T>(key: string, value: T): void {
   cache.set(key, JSON.stringify(value));
 }
 
-function removeCachedValue(key: string): boolean {
-  return cache.remove(key);
-}
-
 function clearNotraCache(): void {
   cache.clear();
 }
@@ -244,7 +240,6 @@ export async function deletePost(postId: string): Promise<DeletePostResponse> {
   });
 
   clearNotraCache();
-  removeCachedValue(getPostCacheKey(postId));
   return response;
 }
 
