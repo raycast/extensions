@@ -1,5 +1,4 @@
-import { ActionPanel, Action, Icon } from "@raycast/api";
-import type { ReactElement } from "react";
+import { ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { TransactionForm } from "./TransactionForm";
 import { TransferForm } from "./TransferForm";
 import { toshl } from "../utils/toshl";
@@ -9,8 +8,9 @@ import { confirmEntryDeletion } from "./entry-delete";
 
 type Props = {
   transaction: Transaction;
-  push: (view: ReactElement) => void;
-  pop: () => void;
+  /** Same types as `useNavigation()` (avoids duplicate-`@types/react` ReactNode mismatches in CI). */
+  push: ReturnType<typeof useNavigation>["push"];
+  pop: ReturnType<typeof useNavigation>["pop"];
   revalidate: () => void;
   /** Perform delete after user confirmed in this component. */
   onDeleted: (transaction: Transaction, mode?: "one" | "tail" | "all") => Promise<void>;

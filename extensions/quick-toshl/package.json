@@ -3,7 +3,7 @@
   "name": "quick-toshl",
   "title": "Quick Toshl",
   "description": "Add expense and income to your Toshl account",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "icon": "extension-icon.png",
   "author": "hoando",
   "platforms": [

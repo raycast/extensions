@@ -56,15 +56,25 @@ function cleanParams<T extends Record<string, unknown>>(params: T): Record<strin
   );
 }
 
+/** Read `Location` from Axios/fetch-style headers (CI uses strict Axios header typings). */
+function locationHeaderFrom(headers: unknown): string | undefined {
+  if (!headers || typeof headers !== "object") return undefined;
+  const h = headers as Record<string, unknown>;
+  const raw = h["location"] ?? h["Location"];
+  if (raw == null) return undefined;
+  if (typeof raw === "string") return raw;
+  if (Array.isArray(raw) && raw[0] != null) return String(raw[0]);
+  return String(raw);
+}
+
 /** Toshl often returns `201` with an empty body; resource id is in `Location` (e.g. `/categories/123`). */
 function createdResourceId(
-  response: { headers: Record<string, string | string[] | undefined>; data: unknown },
+  response: { headers: unknown; data: unknown },
   segment: "categories" | "tags" | "accounts" | "entries" | "budgets",
 ): string | undefined {
-  const loc = response.headers["location"];
-  const locStr = Array.isArray(loc) ? loc[0] : loc;
+  const locStr = locationHeaderFrom(response.headers);
   if (locStr) {
-    const m = String(locStr).match(new RegExp(`/${segment}/([^/\\s?]+)`));
+    const m = locStr.match(new RegExp(`/${segment}/([^/\\s?]+)`));
     if (m) return m[1];
   }
   if (response.data && typeof response.data === "object" && response.data !== null && "id" in response.data) {
