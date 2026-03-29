@@ -94,10 +94,34 @@ export async function deleteTask(tasklist: string, id: string): Promise<void> {
   }
 }
 
+export function formatDueDate(date: Date | null): string | undefined {
+  if (!date) return undefined;
+
+  // Raycast DatePicker returns midnight LOCAL time
+  // Use local methods to get the correct date
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}T00:00:00.000Z`;
+}
+
+// Parse API date string (RFC 3339) to Date at midnight LOCAL time
+// This matches what Raycast DatePicker expects
+export function parseApiDate(dateString: string): Date {
+  const [datePart] = dateString.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export async function createTask(tasklist: string, task: TaskForm): Promise<void> {
+  const payload = {
+    title: task.title,
+    notes: task.notes,
+    due: formatDueDate(task.due),
+  };
   const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks`, {
     method: "POST",
-    body: JSON.stringify(task),
+    body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
@@ -109,9 +133,27 @@ export async function createTask(tasklist: string, task: TaskForm): Promise<void
   }
 }
 export async function editTask(tasklist: string, task: Task): Promise<void> {
+  // Handle due date - it might be a Date object from the form or a string
+  let formattedDue: string | undefined = undefined;
+  if (task.due) {
+    // At runtime, due will be a Date from the DatePicker (even though types say string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const dueValue = task.due as any;
+    if (dueValue instanceof Date) {
+      formattedDue = formatDueDate(dueValue);
+    } else if (typeof dueValue === "string") {
+      // Already formatted RFC 3339 string, pass through as-is
+      formattedDue = dueValue;
+    }
+  }
+
+  const payload = {
+    ...task,
+    due: formattedDue,
+  };
   const response = await fetch(`https://tasks.googleapis.com/tasks/v1/lists/${tasklist}/tasks/${task.id}`, {
     method: "PATCH",
-    body: JSON.stringify(task),
+    body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,

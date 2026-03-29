@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
 import { useCallback } from "react";
 import { Task } from "../types";
+import { parseApiDate } from "../api/endpoints";
 
 export default function EditTaskForm(props: {
   listId: string;
@@ -31,12 +32,13 @@ export default function EditTaskForm(props: {
       }
     >
       <Form.TextField id="title" title="Title" defaultValue={props.task.title} />
-      <Form.TextArea id="notes" title="Details" defaultValue={props.task.notes} />
       <Form.DatePicker
         id="due"
         title="Due Date"
-        defaultValue={props.task.due === undefined ? undefined : new Date(props.task.due)}
+        type={Form.DatePicker.Type.Date}
+        defaultValue={props.task.due === undefined ? undefined : parseApiDate(props.task.due)}
       />
+      <Form.TextArea id="notes" title="Details" defaultValue={props.task.notes} />
     </Form>
   );
 }

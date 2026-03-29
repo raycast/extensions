@@ -68,8 +68,8 @@ export default function CreateTaskForm(props: {
       }
     >
       <Form.TextField title="Title" {...itemProps.title} />
+      <Form.DatePicker title="Due Date" type={Form.DatePicker.Type.Date} {...itemProps.due} />
       <Form.TextArea title="Details" {...itemProps.notes} />
-      <Form.DatePicker title="Due Date" {...itemProps.due} />
       <Form.Dropdown title="Task List" {...itemProps.listId}>
         {lists.map((list) => {
           return <Form.Dropdown.Item value={list.id} title={list.title} key={list.id} />;

@@ -20,11 +20,21 @@ export async function authorize(): Promise<void> {
   const tokenSet = await client.getTokens();
   if (tokenSet?.accessToken) {
     if (tokenSet.refreshToken && tokenSet.isExpired()) {
-      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      try {
+        await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      } catch (error) {
+        console.error("Token refresh failed, re-authenticating:", error);
+        // Fall through to re-authentication below
+        return reAuthenticate();
+      }
     }
     return;
   }
 
+  return reAuthenticate();
+}
+
+async function reAuthenticate(): Promise<void> {
   const authRequest = await client.authorizationRequest({
     endpoint: "https://accounts.google.com/o/oauth2/v2/auth",
     clientId: clientId,
