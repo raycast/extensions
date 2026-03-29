@@ -42,7 +42,7 @@ const timeAgo = (mtime: number) => {
   if (h < 24) return `${h}h`
   if (d === 1) return "yesterday"
   if (d < 7) return `${d}d`
-  return new Date(mtime * 1000).toLocaleDateString("en-GB", {
+  return new Date(mtime * 1000).toLocaleDateString(undefined, {
     day: "2-digit",
     month: "short",
   })
@@ -141,18 +141,10 @@ export const loadSessions = async (): Promise<Session[]> => {
 
 export const deleteSession = async (session: Session) => {
   if (session.claudeProjectDir) {
-    try {
-      await trash(session.claudeProjectDir)
-    } catch {
-      // noop
-    }
+    await trash(session.claudeProjectDir)
     removeFromClaudeJson(session.dir)
   }
   if (session.type === "chat") {
-    try {
-      await trash(session.dir)
-    } catch {
-      // noop
-    }
+    await trash(session.dir)
   }
 }
