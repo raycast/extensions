@@ -8,9 +8,9 @@ import { homedir } from "os";
 const METERS_PER_MILE = 1609.344;
 const FEET_PER_METER = 3.28084;
 const KM_PER_MILE = 1.60934;
-const MS_TO_KMH = 3.6; // (1000 m/km) / (3600 s/hr)
+const MS_TO_KMH = 3.6; // (3600 s/hr) / (1000 m/km)
 const MS_TO_MPH = 2.23694;
-const MS_TO_MIN_PER_KM = 0.06; // (1/1000) * 60
+const MS_TO_KM_PER_MIN = 0.06; // (1/1000) * 60
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -40,7 +40,7 @@ export const formatSpeedForSportType = (sportType: ActivityType, speed: number) 
 
   switch (sportType) {
     case "Run": {
-      const pace = 1 / (speed * MS_TO_MIN_PER_KM);
+      const pace = 1 / (speed * MS_TO_KM_PER_MIN);
       if (preferences.distance_unit === "km") {
         return `${Math.floor(pace)}:${Math.floor((pace % 1) * 60)
           .toString()
@@ -115,6 +115,8 @@ export function getSportTypesFromActivityTypes(activityTypes: SportType[], local
   return sportTypes;
 }
 
+// Strava's start_date_local includes a trailing Z despite representing local time.
+// Strip it so JS constructs the Date in the system timezone.
 export function parseLocalDate(dateString: string): Date {
   const [datePart, timePart] = dateString.split("T");
   const [year, month, day] = datePart.split("-").map(Number);
@@ -138,10 +140,10 @@ export function formatAccessoryDate(date: Date): string {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function getWorkoutTypeLabel(activityType: ActivityType, workoutType?: number): string | undefined {
+export function getWorkoutTypeLabel(sportType: SportType, workoutType?: number): string | undefined {
   if (workoutType == null) return undefined;
 
-  const typeName = activityType.toString().toLowerCase();
+  const typeName = sportType.toLowerCase();
   let family: string | undefined;
   if (typeName.includes("run")) {
     family = "run";

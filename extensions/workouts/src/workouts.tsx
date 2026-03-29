@@ -63,14 +63,14 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
   const activityDate = parseLocalDate(activity.start_date_local);
   const formattedDuration = formatDuration(activity.elapsed_time);
   const formattedMovingTime = formatDuration(activity.moving_time);
-  const formattedHeartRate = `${Math.floor(activity.average_heartrate)} bpm`;
-  const formattedKilojoules = `${activity.kilojoules} kJ`;
+  const formattedHeartRate = activity.average_heartrate ? `${Math.floor(activity.average_heartrate)} bpm` : undefined;
+  const formattedKilojoules = activity.kilojoules ? `${activity.kilojoules} kJ` : undefined;
   const speedTitle = `Average ${["run", "swim"].includes(activity.type.toLowerCase()) ? "Pace" : "Speed"}`;
   const formattedSpeed = formatSpeedForSportType(activity.type, activity.average_speed);
   const formattedDistance = formatDistance(activity.distance);
   const mapboxImage = generateMapboxImage(activity.map.summary_polyline);
   const elevationGain = formatElevationGain(activity.total_elevation_gain);
-  const workoutLabel = getWorkoutTypeLabel(activity.type, activity.workout_type);
+  const workoutLabel = getWorkoutTypeLabel(activity.sport_type, activity.workout_type);
 
   const stravaLink = `https://www.strava.com/activities/${activity.id}/`;
 
@@ -135,10 +135,10 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
                   {activity.total_elevation_gain ? (
                     <List.Item.Detail.Metadata.Label title="Elevation Gain" text={elevationGain} />
                   ) : null}
-                  {activity.elev_high ? (
+                  {activity.elev_high != null ? (
                     <List.Item.Detail.Metadata.Label title="Max Elevation" text={formatElevationGain(activity.elev_high)} />
                   ) : null}
-                  {activity.elev_low ? (
+                  {activity.elev_low != null ? (
                     <List.Item.Detail.Metadata.Label title="Min Elevation" text={formatElevationGain(activity.elev_low)} />
                   ) : null}
                   <List.Item.Detail.Metadata.Separator />
