@@ -1,3 +1,7 @@
+/**
+ * Rename File(s) command — batch rename files with prefix, suffix, and numbering.
+ */
+
 import { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import {

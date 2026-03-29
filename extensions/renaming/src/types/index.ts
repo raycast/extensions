@@ -1,5 +1,5 @@
 /**
- * Shared type definitions for the renaming extension
+ * Shared type definitions for file operations and rename results.
  */
 
 import { ErrorCode } from "./enums";

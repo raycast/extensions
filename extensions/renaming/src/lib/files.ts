@@ -1,5 +1,5 @@
 /**
- * Shared file utilities for rename operations
+ * File utilities for rename operations using native fs.rename().
  */
 
 import { rename, stat, access, readdir } from "fs/promises";

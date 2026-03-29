@@ -1,6 +1,5 @@
 /**
- * Structured logging for the renaming extension.
- * Provides module-scoped loggers with log levels.
+ * Module-scoped structured logging with configurable log levels.
  */
 
 export enum LogLevel {

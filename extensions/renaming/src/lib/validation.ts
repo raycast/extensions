@@ -1,5 +1,5 @@
 /**
- * Filename validation utilities
+ * Filename validation for macOS compatibility.
  */
 
 import type { ValidationResult } from "../types";

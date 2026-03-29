@@ -1,6 +1,5 @@
 /**
- * Custom error hierarchy for the renaming extension.
- * Provides structured error types with user-friendly messages.
+ * Structured error types with user-friendly messages.
  */
 
 import { ErrorCode } from "../types/enums";

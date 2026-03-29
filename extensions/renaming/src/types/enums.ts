@@ -1,5 +1,5 @@
 /**
- * Enumerated types for the renaming extension
+ * Enumerated types for error classification.
  */
 
 export enum ErrorCode {

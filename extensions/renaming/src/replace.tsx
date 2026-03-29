@@ -1,3 +1,7 @@
+/**
+ * Replace File(s) Characters command — find and replace characters in file names.
+ */
+
 import { useEffect, useState } from "react";
 import {
   Form,
