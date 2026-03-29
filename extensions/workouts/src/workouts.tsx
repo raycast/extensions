@@ -166,7 +166,7 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
 
               <List.Item.Detail.Metadata.Label
                 title="Start Time"
-                text={activityDate.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
+                text={activityDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
               />
               {activity.moving_time && activity.moving_time !== activity.elapsed_time ? (
                 <List.Item.Detail.Metadata.Label title="Moving Time" text={formattedMovingTime} />
@@ -246,7 +246,7 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
 function groupActivitiesByMonth(activities: StravaActivitySummary[]): [string, StravaActivitySummary[]][] {
   const groups = new Map<string, StravaActivitySummary[]>();
   for (const activity of activities) {
-    const key = parseLocalDate(activity.start_date_local).toLocaleDateString(undefined, {
+    const key = parseLocalDate(activity.start_date_local).toLocaleDateString("en-US", {
       month: "long",
       year: "numeric",
     });

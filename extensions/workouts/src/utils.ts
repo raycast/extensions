@@ -132,12 +132,12 @@ export function formatAccessoryDate(date: Date): string {
   const diffDays = Math.round((startOfToday.getTime() - startOfDate.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays >= 0 && diffDays <= 1) {
-    const rtf = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
+    const rtf = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" });
     const label = rtf.format(-diffDays, "day");
     return label.charAt(0).toUpperCase() + label.slice(1);
   }
-  if (diffDays >= 2 && diffDays < 7) return date.toLocaleDateString(undefined, { weekday: "long" });
-  return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  if (diffDays >= 2 && diffDays < 7) return date.toLocaleDateString("en-US", { weekday: "long" });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export function getWorkoutTypeLabel(sportType: SportType, workoutType?: number): string | undefined {
