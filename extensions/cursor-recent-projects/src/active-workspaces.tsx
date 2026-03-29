@@ -92,8 +92,8 @@ async function getGitBranch(directoryPath: string): Promise<string | null> {
   }
 }
 
-async function getRecentEntriesMap(): Promise<Map<string, string>> {
-  const map = new Map<string, string>();
+async function getRecentEntriesMap(): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
   try {
     if (!fs.existsSync(DB_PATH)) return map;
     const { stdout } = await execFilePromise("sqlite3", [DB_PATH, RECENT_ENTRIES_QUERY]);
@@ -104,9 +104,8 @@ async function getRecentEntriesMap(): Promise<Map<string, string>> {
       if (uri && uri.startsWith("file://")) {
         const fsPath = fileURLToPath(uri);
         const name = basename(fsPath);
-        if (!map.has(name)) {
-          map.set(name, fsPath);
-        }
+        const existing = map.get(name) ?? [];
+        map.set(name, [...existing, fsPath]);
       }
     }
   } catch {
@@ -133,7 +132,8 @@ function useActiveWindows() {
       const parsed = titles.map(parseWindowTitle);
       const enriched = await Promise.all(
         parsed.map(async (win) => {
-          const resolvedPath = recentEntries.get(win.workspaceName) ?? null;
+          const candidates = recentEntries.get(win.workspaceName) ?? [];
+          const resolvedPath = candidates.length === 1 ? candidates[0] : null;
           const gitBranch = resolvedPath ? await getGitBranch(resolvedPath) : null;
           return { ...win, workspacePath: resolvedPath, gitBranch };
         })
