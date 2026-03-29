@@ -1,13 +1,12 @@
-import { List } from "@raycast/api";
+import { List, Toast, showToast } from "@raycast/api";
+import { useEffect } from "react";
 
-import type { TaskView } from "../api/types";
+import type { NavigableView } from "../api/types";
 import { VIEW_CONFIG } from "../helpers/constants";
 import { useProjects } from "../hooks/use-projects";
 import { useTasks } from "../hooks/use-tasks";
 import { TaskListItem } from "./task-list-item";
 import { useWorkspaceDropdown } from "./with-workspace";
-
-type NavigableView = Exclude<TaskView, "logbook">;
 
 interface TaskListProps {
   view: NavigableView;
@@ -23,8 +22,21 @@ export default function TaskList({ view }: TaskListProps) {
     isLoading: isLoadingWorkspace,
     dropdown,
   } = useWorkspaceDropdown();
-  const { tasks, isLoading: isLoadingTasks, revalidate } = useTasks(workspaceId, view, allWorkspaceIds);
-  const { projects } = useProjects(workspaceId, allWorkspaceIds);
+  const {
+    tasks,
+    isLoading: isLoadingTasks,
+    error: tasksError,
+    revalidate,
+  } = useTasks(workspaceId, view, allWorkspaceIds);
+  const { projects, error: projectsError } = useProjects(workspaceId, allWorkspaceIds);
+
+  const fetchError = tasksError ?? projectsError;
+
+  useEffect(() => {
+    if (fetchError) {
+      showToast(Toast.Style.Failure, "Failed to load tasks", fetchError.message);
+    }
+  }, [fetchError]);
 
   return (
     <List
@@ -32,18 +44,22 @@ export default function TaskList({ view }: TaskListProps) {
       searchBarAccessory={dropdown}
       searchBarPlaceholder={`Filter ${config.title.toLowerCase()} tasks...`}
     >
-      <List.Section subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`} title={config.title}>
-        {tasks.map((task) => (
-          <TaskListItem
-            key={task.id}
-            projects={projects}
-            revalidate={revalidate}
-            showWorkspaceTag={isAllWorkspaces}
-            task={task}
-            workspaces={workspaces}
-          />
-        ))}
-      </List.Section>
+      {fetchError ? (
+        <List.EmptyView icon="⚠️" title="Failed to load tasks" description={fetchError.message} />
+      ) : (
+        <List.Section subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`} title={config.title}>
+          {tasks.map((task) => (
+            <TaskListItem
+              key={task.id}
+              projects={projects}
+              revalidate={revalidate}
+              showWorkspaceTag={isAllWorkspaces}
+              task={task}
+              workspaces={workspaces}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

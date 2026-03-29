@@ -1,8 +1,12 @@
 # Done Bear Changelog
 
-## [Update] - 2026-03-26
+## [GraphQL API Migration] - {PR_MERGE_DATE}
 
-Updated extension icon.
+- Migrated workspace, task, project, and team fetches from deprecated REST endpoints to GraphQL API
+- Added cursor-based pagination for large datasets
+- Added support for recurring task templates
+- Updated date handling to use epoch timestamps
+- Updated extension icon
 
 ## [Initial Version] - 2026-03-24
 
