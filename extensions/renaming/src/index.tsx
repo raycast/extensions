@@ -88,9 +88,10 @@ export default function Command() {
     const prefixWithSeparator = prefix ? `${prefix}${separator}` : "";
     const suffixWithSeparator = suffix ? `${separator}${suffix}` : "";
 
+    const indexSuffix = files.length > 1 && !preserveName ? `${indexSeparator}${index + 1}` : "";
     const newBaseName = preserveName
       ? `${prefixWithSeparator}${fileInfo.baseName}${suffixWithSeparator}`
-      : `${prefixWithSeparator}${newName}${indexSeparator}${index + 1}${suffixWithSeparator}`;
+      : `${prefixWithSeparator}${newName}${indexSuffix}${suffixWithSeparator}`;
 
     return fileInfo.isDirectory || !fileInfo.extension ? newBaseName : `${newBaseName}${fileInfo.extension}`;
   };
@@ -165,14 +166,16 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        {files.length > 1 && (
+        {files.length > 0 && (
           <>
-            <Form.Checkbox
-              id="preserveName"
-              label="Preserve base name"
-              value={preserveName}
-              onChange={setPreserveName}
-            />
+            {files.length > 1 && (
+              <Form.Checkbox
+                id="preserveName"
+                label="Preserve base name"
+                value={preserveName}
+                onChange={setPreserveName}
+              />
+            )}
             {!preserveName && (
               <Form.TextField
                 id="newName"
@@ -191,7 +194,7 @@ export default function Command() {
               onChange={(newValue) => handleSeparatorChange("separator", newValue)}
               placeholder="Enter separator"
             />
-            {!preserveName && (
+            {!preserveName && files.length > 1 && (
               <Form.TextField
                 id="indexSeparator"
                 title="Index Separator"
