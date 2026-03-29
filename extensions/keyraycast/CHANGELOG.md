@@ -1,4 +1,4 @@
-## [Initial Release] - 2025-03-29
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Show keystrokes on screen with floating overlay pills
 - Three display modes: All Keys, All Modified Keys, Command Keys Only
