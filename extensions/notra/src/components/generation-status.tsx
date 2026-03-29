@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getBrandIdentityGenerationStatus, getPostGenerationStatus } from "../lib/notra";
-import { notraUrl } from "../schemas";
+import { notraUrl } from "../utils";
 import type { GenerationEvent, GenerationJobStatus } from "../types";
 import { BrandIdentityDetail } from "./brand-identity-detail";
 

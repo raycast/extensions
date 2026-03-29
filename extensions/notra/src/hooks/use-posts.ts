@@ -1,14 +1,7 @@
 import { useFetch } from "@raycast/utils";
-import type { ListPostsResponse } from "../lib/notra";
-import {
-  getCachedValue,
-  getNotraRequestInit,
-  getPostsCacheKey,
-  mapPost,
-  NOTRA_API_URL,
-  setCachedValue,
-} from "../lib/notra";
-import type { ContentTypeFilter, Post } from "../types";
+import { getNotraRequestInit, mapPost, NOTRA_API_URL } from "../lib/notra";
+import type { ContentTypeFilter, ListPostsResponse, Post } from "../types";
+import { getCachedValue, getPostsCacheKey, setCachedValue } from "../utils";
 
 const PAGE_SIZE = 20;
 

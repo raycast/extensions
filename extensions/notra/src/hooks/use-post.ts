@@ -1,14 +1,7 @@
 import { useFetch } from "@raycast/utils";
-import type { GetPostResponse } from "../lib/notra";
-import {
-  getCachedValue,
-  getNotraRequestInit,
-  getPostCacheKey,
-  mapPostDetails,
-  NOTRA_API_URL,
-  setCachedValue,
-} from "../lib/notra";
-import type { PostDetails } from "../types";
+import { getNotraRequestInit, mapPostDetails, NOTRA_API_URL } from "../lib/notra";
+import type { GetPostResponse, PostDetails } from "../types";
+import { getCachedValue, getPostCacheKey, setCachedValue } from "../utils";
 
 export function usePost(postId: string) {
   const cacheKey = getPostCacheKey(postId);

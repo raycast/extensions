@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { generateBrandIdentity } from "../lib/notra";
+import { getErrorMessage } from "../utils";
 import { GenerationStatus } from "./generation-status";
 
 export function CreateBrandIdentityForm({ onCreated }: { onCreated?: () => Promise<void> | void }) {
@@ -42,7 +43,7 @@ export function CreateBrandIdentityForm({ onCreated }: { onCreated?: () => Promi
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create brand identity";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     } finally {
       setIsSubmitting(false);
     }

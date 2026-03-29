@@ -12,7 +12,8 @@ import {
 } from "@raycast/api";
 import { usePost } from "../hooks/use-post";
 import { deletePost, updatePost } from "../lib/notra";
-import { CONTENT_TYPE_LABELS, notraUrl } from "../schemas";
+import { CONTENT_TYPE_LABELS } from "../schemas";
+import { getErrorMessage, notraUrl } from "../utils";
 import { EditPostForm } from "./edit-post-form";
 
 export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMutated?: () => Promise<void> | void }) {
@@ -51,7 +52,7 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not update post";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     }
   }
 
@@ -87,7 +88,7 @@ export function PostDetail({ postId, onPostMutated }: { postId: string; onPostMu
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not delete post";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     }
   }
 

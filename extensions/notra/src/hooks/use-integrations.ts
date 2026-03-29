@@ -1,6 +1,6 @@
 import { useFetch } from "@raycast/utils";
-import type { ListIntegrationsResponse } from "../lib/notra";
 import { getNotraRequestInit, NOTRA_API_URL } from "../lib/notra";
+import type { ListIntegrationsResponse } from "../types";
 
 export function useIntegrations() {
   return useFetch<ListIntegrationsResponse, ListIntegrationsResponse, ListIntegrationsResponse>(

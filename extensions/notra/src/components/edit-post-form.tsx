@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { updatePost } from "../lib/notra";
-import { notraUrl } from "../schemas";
 import type { Post } from "../types";
+import { getErrorMessage, notraUrl } from "../utils";
 
 interface EditPostFormValues {
   markdown: string;
@@ -54,7 +54,7 @@ export function EditPostForm({ post, onPostUpdated }: EditPostFormProps) {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not update post";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     } finally {
       setIsLoading(false);
     }

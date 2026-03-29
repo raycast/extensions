@@ -29,13 +29,6 @@ export const CONTENT_TYPE_ICONS: Record<string, Icon> = {
   linkedin_post: Icon.PersonLines,
 };
 
-const NOTRA_APP_URL = "https://app.usenotra.com";
-
-export function notraUrl(path: string): string {
-  const sep = path.includes("?") ? "&" : "?";
-  return `${NOTRA_APP_URL}${path}${sep}utm_source=raycast`;
-}
-
 export const LOOKBACK_WINDOW_OPTIONS = [
   { title: "Today", value: "current_day" },
   { title: "Yesterday", value: "yesterday" },

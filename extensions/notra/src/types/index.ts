@@ -107,3 +107,35 @@ export interface BrandIdentityGenerationJob {
   status: GenerationJobStatus;
   updatedAt: string;
 }
+
+export type ApiPost = Omit<Post, "status"> & {
+  status: string;
+};
+
+export interface ListPostsResponse {
+  organization: Organization;
+  pagination: Pagination;
+  posts: ApiPost[];
+}
+
+export interface GetPostResponse {
+  organization: Organization;
+  post: ApiPost | null;
+}
+
+export interface ListBrandIdentitiesResponse {
+  brandIdentities: BrandIdentity[];
+  organization: Organization;
+}
+
+export interface GetBrandIdentityResponse {
+  brandIdentity: BrandIdentity | null;
+  organization: Organization;
+}
+
+export interface ListIntegrationsResponse {
+  github: GitHubIntegration[];
+  linear: LinearIntegration[];
+  organization: Organization;
+  slack: unknown[];
+}

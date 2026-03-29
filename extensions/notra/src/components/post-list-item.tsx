@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
-import { CONTENT_TYPE_ICONS, CONTENT_TYPE_LABELS, notraUrl } from "../schemas";
+import { CONTENT_TYPE_ICONS, CONTENT_TYPE_LABELS } from "../schemas";
+import { notraUrl } from "../utils";
 import type { Post } from "../types";
 import { PostDetail } from "./post-detail";
 

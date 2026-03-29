@@ -3,6 +3,7 @@ import { useState } from "react";
 import { updateBrandIdentity } from "../lib/notra";
 import { TONE_PROFILE_OPTIONS } from "../schemas";
 import type { BrandIdentity } from "../types";
+import { getErrorMessage } from "../utils";
 
 interface EditBrandIdentityFormValues {
   audience: string;
@@ -60,7 +61,7 @@ export function EditBrandIdentityForm({ brandIdentity, onUpdated }: EditBrandIde
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not update brand identity";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     } finally {
       setIsLoading(false);
     }

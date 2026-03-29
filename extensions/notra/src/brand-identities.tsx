@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { BrandIdentityDetail } from "./components/brand-identity-detail";
 import { CreateBrandIdentityForm } from "./components/create-brand-identity-form";
 import { useBrandIdentities } from "./hooks/use-brand-identities";
-import { notraUrl } from "./schemas";
+import { notraUrl } from "./utils";
 
 export default function Command() {
   const { data: brandIdentities, isLoading, revalidate } = useBrandIdentities();

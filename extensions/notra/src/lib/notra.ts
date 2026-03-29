@@ -1,36 +1,19 @@
-import { Cache, getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import type {
-  BrandIdentity,
+  ApiPost,
   BrandIdentityGenerationJob,
   GenerationEvent,
   GenerationJob,
+  GetBrandIdentityResponse,
+  GetPostResponse,
   GitHubIntegration,
-  LinearIntegration,
   Organization,
-  Pagination,
   Post,
   PostDetails,
 } from "../types";
+import { clearNotraCache, getPostCacheKey, setCachedValue } from "../utils";
 
 const NOTRA_API_URL = "https://api.usenotra.com";
-const cache = new Cache({ namespace: "notra" });
-
-type ApiPost = Omit<Post, "status"> & {
-  status: string;
-};
-
-type ApiOrganization = Organization;
-
-export interface ListPostsResponse {
-  organization: ApiOrganization;
-  pagination: Pagination;
-  posts: ApiPost[];
-}
-
-export interface GetPostResponse {
-  organization: ApiOrganization;
-  post: ApiPost | null;
-}
 
 interface UpdatePostRequest {
   markdown: string;
@@ -41,7 +24,7 @@ interface UpdatePostRequest {
 
 interface DeletePostResponse {
   id: string;
-  organization: ApiOrganization;
+  organization: Organization;
 }
 
 interface GeneratePostRequest {
@@ -62,22 +45,12 @@ interface GeneratePostRequest {
 
 interface GeneratePostResponse {
   job: GenerationJob;
-  organization: ApiOrganization;
+  organization: Organization;
 }
 
 interface PostGenerationStatusResponse {
   events: GenerationEvent[];
   job: GenerationJob;
-}
-
-export interface ListBrandIdentitiesResponse {
-  brandIdentities: BrandIdentity[];
-  organization: ApiOrganization;
-}
-
-export interface GetBrandIdentityResponse {
-  brandIdentity: BrandIdentity | null;
-  organization: ApiOrganization;
 }
 
 interface UpdateBrandIdentityRequest {
@@ -95,7 +68,7 @@ interface UpdateBrandIdentityRequest {
 
 interface DeleteBrandIdentityResponse {
   id: string;
-  organization: ApiOrganization;
+  organization: Organization;
 }
 
 interface GenerateBrandIdentityRequest {
@@ -105,19 +78,12 @@ interface GenerateBrandIdentityRequest {
 
 interface GenerateBrandIdentityResponse {
   job: BrandIdentityGenerationJob;
-  organization: ApiOrganization;
+  organization: Organization;
 }
 
 interface BrandIdentityGenerationStatusResponse {
   job: BrandIdentityGenerationJob;
-  organization: ApiOrganization;
-}
-
-export interface ListIntegrationsResponse {
-  github: GitHubIntegration[];
-  linear: LinearIntegration[];
-  organization: ApiOrganization;
-  slack: unknown[];
+  organization: Organization;
 }
 
 interface CreateGitHubIntegrationRequest {
@@ -129,7 +95,7 @@ interface CreateGitHubIntegrationRequest {
 
 interface CreateGitHubIntegrationResponse {
   github: GitHubIntegration;
-  organization: ApiOrganization;
+  organization: Organization;
 }
 
 interface NotraRequestInit extends Omit<RequestInit, "headers"> {
@@ -172,36 +138,6 @@ export function mapPostDetails(response: GetPostResponse): PostDetails {
     organization: response.organization,
     post: response.post ? mapPost(response.post) : null,
   };
-}
-
-export function getPostCacheKey(postId: string): string {
-  return `post:${postId}`;
-}
-
-export function getPostsCacheKey(contentType: string): string {
-  return `posts:v2:${contentType}`;
-}
-
-export function getCachedValue<T>(key: string): T | undefined {
-  const value = cache.get(key);
-  if (!value) {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    cache.remove(key);
-    return undefined;
-  }
-}
-
-export function setCachedValue<T>(key: string, value: T): void {
-  cache.set(key, JSON.stringify(value));
-}
-
-function clearNotraCache(): void {
-  cache.clear();
 }
 
 async function notraRequest<T>(path: string, init?: NotraRequestInit): Promise<T> {

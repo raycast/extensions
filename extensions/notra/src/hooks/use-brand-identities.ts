@@ -1,7 +1,6 @@
 import { useFetch } from "@raycast/utils";
-import type { ListBrandIdentitiesResponse } from "../lib/notra";
 import { getNotraRequestInit, NOTRA_API_URL } from "../lib/notra";
-import type { BrandIdentity } from "../types";
+import type { BrandIdentity, ListBrandIdentitiesResponse } from "../types";
 
 export function useBrandIdentities() {
   return useFetch<ListBrandIdentitiesResponse, BrandIdentity[], BrandIdentity[]>(

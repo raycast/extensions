@@ -5,6 +5,7 @@ import { useBrandIdentities } from "./hooks/use-brand-identities";
 import { useIntegrations } from "./hooks/use-integrations";
 import { generatePost } from "./lib/notra";
 import { CONTENT_TYPE_OPTIONS, LOOKBACK_WINDOW_OPTIONS } from "./schemas";
+import { getErrorMessage } from "./utils";
 import type { ContentTypeValue } from "./types";
 
 interface GeneratePostFormValues {
@@ -67,7 +68,7 @@ export default function Command() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to queue generation";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     } finally {
       setIsSubmitting(false);
     }

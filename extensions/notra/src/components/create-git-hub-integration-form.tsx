@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { createGitHubIntegration } from "../lib/notra";
+import { getErrorMessage } from "../utils";
 
 export function CreateGitHubIntegrationForm({ onCreated }: { onCreated?: () => Promise<void> | void }) {
   const { pop } = useNavigation();
@@ -36,7 +37,7 @@ export function CreateGitHubIntegrationForm({ onCreated }: { onCreated?: () => P
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to create integration";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     } finally {
       setIsSubmitting(false);
     }

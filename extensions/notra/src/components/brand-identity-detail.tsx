@@ -11,10 +11,9 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import type { GetBrandIdentityResponse } from "../lib/notra";
 import { deleteBrandIdentity, getNotraRequestInit, NOTRA_API_URL, updateBrandIdentity } from "../lib/notra";
-import { notraUrl } from "../schemas";
-import type { BrandIdentity } from "../types";
+import type { BrandIdentity, GetBrandIdentityResponse } from "../types";
+import { getErrorMessage, notraUrl } from "../utils";
 import { EditBrandIdentityForm } from "./edit-brand-identity-form";
 
 function buildMarkdown(bi: BrandIdentity): string {
@@ -105,7 +104,7 @@ export function BrandIdentityDetail({
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not set as default";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     }
   }
 
@@ -135,7 +134,7 @@ export function BrandIdentityDetail({
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not delete brand identity";
-      toast.message = error instanceof Error ? error.message : "Unknown error";
+      toast.message = getErrorMessage(error);
     }
   }
 
