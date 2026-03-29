@@ -237,7 +237,7 @@ export function Activity({ activity, isLoading }: { activity: StravaActivitySumm
           ) : null}
         </ActionPanel>
       }
-      keywords={[activity.name, sportType]}
+      keywords={[activity.name]}
     />
   );
 }
