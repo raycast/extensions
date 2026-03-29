@@ -215,7 +215,7 @@ async function notraRequest<T>(path: string, init?: NotraRequestInit): Promise<T
     let message = `Request failed with status ${response.status}`;
 
     const body = await response.json().catch(() => null);
-    if (body?.error) {
+    if (body && typeof body === "object" && "error" in body && typeof body.error === "string") {
       message = body.error;
     }
 
