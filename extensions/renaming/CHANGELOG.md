@@ -1,5 +1,12 @@
 # Rename Changelog
 
+## [Security Fix] - {PR_MERGE_DATE}
+
+- Replace AppleScript-based renaming with native Node.js `fs.rename()` to fix shell injection vulnerability
+- Add per-file error handling with individual success/failure tracking
+- Add conflict detection to prevent overwriting existing files
+- Add filename validation for macOS compatibility
+
 ## [New Feature] - 2026-03-05
 
 ### Added
