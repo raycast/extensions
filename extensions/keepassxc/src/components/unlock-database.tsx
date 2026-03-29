@@ -41,8 +41,7 @@ export default function UnlockDatabase({
         setIsUnlocked(true);
       }, showToastKeepassxcCliErrors);
     },
-    // Password is optional to support passwordless vaults
-    },
+    // Password is optional to support passwordless vaults (key-file-only)
   });
 
   return (
@@ -57,7 +56,7 @@ export default function UnlockDatabase({
       <Form.PasswordField title="Database Password" {...itemProps.password} />
       <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
       <Form.Description
-        text={"ⓘ Password is optional for passwordless vaults. Credentials are stored in your Raycast's local encrypted storage."}
+        text={"ⓘ Your password and key file path will be stored in your Raycast's local encrypted storage."}
       />
     </Form>
   );
