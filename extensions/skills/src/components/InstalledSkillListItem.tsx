@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { useCachedPromise } from "@raycast/utils";
 import { type InstalledSkill, parseFrontmatter } from "../shared";
+import type { MutateSkills } from "../hooks/useInstalledSkills";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
 
@@ -79,6 +80,7 @@ interface InstalledSkillListItemProps {
   skill: InstalledSkill;
   isSelected: boolean;
   isShowingDetail: boolean;
+  mutate: MutateSkills;
   onToggleDetail: () => void;
   onUpdate: () => void;
 }
@@ -87,6 +89,7 @@ export function InstalledSkillListItem({
   skill,
   isSelected,
   isShowingDetail,
+  mutate,
   onToggleDetail,
   onUpdate,
 }: InstalledSkillListItemProps) {
@@ -144,7 +147,7 @@ export function InstalledSkillListItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}
-            <RemoveSkillAction skill={skill} onRemove={onUpdate} />
+            <RemoveSkillAction skill={skill} mutate={mutate} />
           </ActionPanel.Section>
           <Action
             title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}

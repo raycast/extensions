@@ -12,6 +12,7 @@ export {
   getAlbumsForArtist,
   getAlbumsForArtistPage,
   getArtists,
+  getRecentlyPlayed,
   getArtistsPage,
   getAudioPlaylists,
   getLibraryStats,

@@ -6,6 +6,7 @@ Raycast extension for browsing Plex music libraries and controlling a Plexamp pl
 
 - `Browse Library`: browse the selected Plex music library, artists, albums, playlists, and queue tracks or entire albums in Plexamp
 - `Search Library`: quickly search artists, albums, and tracks and play/queue them in Plexamp
+- `Recently Played`: browse the most recently played tracks from the selected Plex music library
 - `Now Playing`: see what's playing, control the transport and adjust the queue
 - `Now Playing Menubar`: show the current album art and a customizable now playing label in the macOS menu bar
 - `Plexamp Status`: inspect the connected Plexamp client and selected Plex music library
@@ -22,6 +23,7 @@ Raycast extension for browsing Plex music libraries and controlling a Plexamp pl
 
 - Sign in with Plex from Raycast using a managed Plex auth flow.
 - Browse artists, grouped artist releases, library-scoped playlists, and album track lists from the selected Plex music library.
+- Toggle between list and grid view for artist albums (`Cmd+Shift+V`), with albums grouped by release type (Albums, EPs, Singles, Compilations, etc.) and sorted by release year in grid view. Grid column count is configurable in extension preferences.
 - Search the library the way Plex does, with grouped results for artists, albums, and songs.
 - Play immediately in Plexamp, add to queue, or insert as play next from browse and search results.
 - Inspect the active Plexamp queue and use transport controls from Raycast in `Now Playing`.

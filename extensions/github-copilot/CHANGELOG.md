@@ -1,5 +1,11 @@
 # GitHub Copilot Changelog
 
+## [Improve repository picker] - 2026-03-26
+
+- Remember "Recently used" repositories in the repository picker
+- Show a more relevant list of repositories in the repository picker by default
+- Fix repository picker search filtering to only show matching repositories, hiding the previously selected repository if it doesn't match
+
 ## [Fix "Create Task" command error on successful creation] - 2026-03-20
 
 - Fix error when a task is created successfully with the "Create Task" command

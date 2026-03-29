@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@r
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, CustomAgentsDropdown, IssueDropdown, RepositoryDropdown } from "./components";
+import { BranchDropdown, CustomAgentsDropdown, IssueDropdown, RepositoryDropdown, cacheRepository } from "./components";
 import { ModelDropdown } from "./components/ModelDropdown";
 import { useRepositoryMetadata } from "./hooks/useRepositoryMetadata";
 import { useViewer } from "./hooks/useViewer";
@@ -69,6 +69,7 @@ function Command() {
           title: "Issue assigned to Copilot",
         });
 
+        cacheRepository(formValues.repository);
         await popToRoot();
       } catch (error) {
         await showFailureToast(error, { title: "Failed to assign issue" });

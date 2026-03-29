@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { showToast, Toast } from "@raycast/api";
-import { searchStocks, fetchQuotes, Quote, SearchResult } from "./google-finance";
+import { searchStocks, fetchQuote, Quote, SearchResult } from "./google-finance";
 
 export function useStockSearch(query: string) {
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -23,20 +23,34 @@ export function useStockSearch(query: string) {
         const searchResults = await searchStocks(query, controller.signal);
         if (searchResults.length > 0) {
           setResults(searchResults);
+          setQuotes(new Map());
           prevResultsRef.current = searchResults;
 
-          // Fetch quotes for search results
-          const quoteResults = await fetchQuotes(
-            searchResults.map((r) => ({
-              symbol: r.symbol,
-              exchange: r.exchange || undefined,
-            })),
-            controller.signal,
+          // Stream quote updates so the first rows render quickly.
+          const nextQuotes = new Map<string, Quote>();
+          const unresolved = [...searchResults];
+          const workerCount = Math.min(5, unresolved.length);
+
+          await Promise.all(
+            Array.from({ length: workerCount }, async () => {
+              while (unresolved.length > 0) {
+                const result = unresolved.shift();
+                if (!result) {
+                  return;
+                }
+
+                const quote = await fetchQuote(result.symbol, result.exchange || undefined, controller.signal);
+                if (quote) {
+                  nextQuotes.set(result.symbol, quote);
+                  setQuotes(new Map(nextQuotes));
+                }
+              }
+            }),
           );
-          setQuotes(quoteResults);
         } else {
           // Keep previous results while showing no new results
           setResults([]);
+          setQuotes(new Map());
         }
         setIsLoading(false);
       } catch (e) {

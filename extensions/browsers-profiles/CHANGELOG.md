@@ -1,5 +1,9 @@
 # Raycast Browsers Profiles
 
+## [Add Vivaldi browser support] - 2026-03-27
+
+- Adding Vivaldi browser to supported browser list
+
 ## [Add Arc browser support] - 2026-02-04
 
 - Adding Arc browser to supported browser list

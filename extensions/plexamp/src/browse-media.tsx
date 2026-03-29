@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Icon, LaunchProps, List, LocalStorage } from "@raycast/api";
 import { useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -141,6 +141,8 @@ function ArtistRow(props: {
 function AlbumRow(props: {
   album: MusicAlbum;
   sectionKey: string;
+  viewMode?: "list" | "grid";
+  onToggleView?: () => void;
   onPlay: (item: PlayableItem) => Promise<void>;
   onPlayNext: (item: PlayableItem) => Promise<void>;
   onQueue: (item: PlayableItem) => Promise<void>;
@@ -161,6 +163,9 @@ function AlbumRow(props: {
             icon={Icon.ArrowRight}
             onAction={() => push(<AlbumTrackList album={props.album} sectionKey={props.sectionKey} />)}
           />
+          {props.viewMode && props.onToggleView && (
+            <ToggleViewAction viewMode={props.viewMode} onToggle={props.onToggleView} />
+          )}
           <PlaybackActionItems
             item={props.album}
             onPlay={props.onPlay}
@@ -370,11 +375,13 @@ function RootContent() {
     () => (selectedLibrary ? getArtists(selectedLibrary.key) : Promise.resolve([])),
     selectedLibrary?.key ?? "no-library",
     [] as MusicArtist[],
+    selectedLibrary ? `artists-${selectedLibrary.key}` : undefined,
   );
   const playlists = useAsyncValue(
     () => (selectedLibrary ? getAudioPlaylists(selectedLibrary.key) : Promise.resolve([])),
     `playlists-${selectedLibrary?.key ?? "no-library"}`,
     [] as AudioPlaylist[],
+    selectedLibrary ? `playlists-${selectedLibrary.key}` : undefined,
   );
   const playback = usePlaybackActions();
 
@@ -440,8 +447,121 @@ function RootContent() {
 }
 
 // ---------------------------------------------------------------------------
-// AlbumList: paginated albums for an artist, server-side search
+// AlbumList: albums for an artist, toggleable between list and grid view
 // ---------------------------------------------------------------------------
+
+const ALBUM_VIEW_MODE_KEY = "albumViewMode";
+
+const RELEASE_TYPE_ORDER: Record<string, number> = {
+  album: 0,
+  ep: 1,
+  single: 2,
+  compilation: 3,
+  live: 4,
+  demo: 5,
+  remix: 6,
+};
+
+const RELEASE_TYPE_LABELS: Record<string, string> = {
+  album: "Albums",
+  ep: "EPs",
+  single: "Singles",
+  compilation: "Compilations",
+  live: "Live Albums",
+  demo: "Demos",
+  remix: "Remixes",
+};
+
+function groupAlbumsByReleaseType(albums: MusicAlbum[]): { type: string; label: string; albums: MusicAlbum[] }[] {
+  const groups = new Map<string, MusicAlbum[]>();
+  for (const album of albums) {
+    const type = (album.releaseType ?? "album").toLowerCase();
+    const existing = groups.get(type);
+    if (existing) {
+      existing.push(album);
+    } else {
+      groups.set(type, [album]);
+    }
+  }
+
+  return Array.from(groups.entries())
+    .sort(([a], [b]) => (RELEASE_TYPE_ORDER[a] ?? 99) - (RELEASE_TYPE_ORDER[b] ?? 99))
+    .map(([type, items]) => ({
+      type,
+      label: RELEASE_TYPE_LABELS[type] ?? type.charAt(0).toUpperCase() + type.slice(1) + "s",
+      albums: items.sort((a, b) => (b.year ?? 0) - (a.year ?? 0)),
+    }));
+}
+
+function useAlbumViewMode() {
+  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    LocalStorage.getItem<string>(ALBUM_VIEW_MODE_KEY).then((stored) => {
+      if (stored === "grid" || stored === "list") setViewMode(stored);
+      setIsLoaded(true);
+    });
+  }, []);
+
+  const toggleViewMode = useCallback(() => {
+    const next = viewMode === "list" ? "grid" : "list";
+    setViewMode(next);
+    LocalStorage.setItem(ALBUM_VIEW_MODE_KEY, next);
+  }, [viewMode]);
+
+  return { viewMode, toggleViewMode, isLoaded };
+}
+
+function ToggleViewAction(props: { viewMode: "list" | "grid"; onToggle: () => void }) {
+  return (
+    <Action
+      title={props.viewMode === "list" ? "Switch to Grid View" : "Switch to List View"}
+      icon={props.viewMode === "list" ? Icon.AppWindowGrid3x3 : Icon.AppWindowList}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      onAction={props.onToggle}
+    />
+  );
+}
+
+function AlbumGridItem(props: {
+  album: MusicAlbum;
+  sectionKey: string;
+  viewMode: "list" | "grid";
+  onToggleView: () => void;
+  onPlay: (item: PlayableItem) => Promise<void>;
+  onPlayNext: (item: PlayableItem) => Promise<void>;
+  onQueue: (item: PlayableItem) => Promise<void>;
+}) {
+  const { push } = useNavigation();
+
+  return (
+    <Grid.Item
+      key={props.album.ratingKey}
+      content={artworkSource(props.album.thumb)}
+      title={props.album.title}
+      subtitle={props.album.year?.toString()}
+      keywords={[props.album.parentTitle, props.album.year?.toString()].filter(Boolean) as string[]}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Browse Tracks"
+            icon={Icon.ArrowRight}
+            onAction={() => push(<AlbumTrackList album={props.album} sectionKey={props.sectionKey} />)}
+          />
+          <ToggleViewAction viewMode={props.viewMode} onToggle={props.onToggleView} />
+          <PlaybackActionItems
+            item={props.album}
+            onPlay={props.onPlay}
+            onPlayNext={props.onPlayNext}
+            onQueue={props.onQueue}
+            nowPlayingShortcut={{ modifiers: ["cmd"], key: "n" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
 
 export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
   const albums = useAsyncValue(
@@ -450,37 +570,95 @@ export function AlbumList(props: { artist: MusicArtist; sectionKey: string }) {
     [] as MusicAlbum[],
   );
   const playback = usePlaybackActions();
+  const { viewMode, toggleViewMode, isLoaded } = useAlbumViewMode();
+
+  const isLoading = !isLoaded || albums.isLoading || playback.isPerforming;
+
+  const errorView = albums.error ? (
+    viewMode === "list" ? (
+      <List.EmptyView
+        icon={Icon.ExclamationMark}
+        title="Unable to load albums"
+        description={albums.error}
+        actions={
+          <ActionPanel>
+            <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+            <PreferencesAction />
+          </ActionPanel>
+        }
+      />
+    ) : (
+      <Grid.EmptyView
+        icon={Icon.ExclamationMark}
+        title="Unable to load albums"
+        description={albums.error}
+        actions={
+          <ActionPanel>
+            <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+            <PreferencesAction />
+          </ActionPanel>
+        }
+      />
+    )
+  ) : null;
+
+  const defaultActions = (
+    <ActionPanel>
+      <ToggleViewAction viewMode={viewMode} onToggle={toggleViewMode} />
+      <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
+      <PreferencesAction />
+    </ActionPanel>
+  );
+
+  if (viewMode === "grid") {
+    const groups = groupAlbumsByReleaseType(albums.value);
+    const gridColumns = Number(getPreferenceValues<Preferences>().gridColumns) || 4;
+
+    return (
+      <Grid
+        columns={gridColumns}
+        aspectRatio="1"
+        isLoading={isLoading}
+        navigationTitle={props.artist.title}
+        searchBarPlaceholder="Filter albums"
+        actions={defaultActions}
+      >
+        {errorView}
+        {groups.map((group) => (
+          <Grid.Section key={group.type} title={group.label}>
+            {group.albums.map((album) => (
+              <AlbumGridItem
+                key={album.ratingKey}
+                album={album}
+                sectionKey={props.sectionKey}
+                viewMode={viewMode}
+                onToggleView={toggleViewMode}
+                onPlay={playback.play}
+                onPlayNext={playback.playNext}
+                onQueue={playback.queue}
+              />
+            ))}
+          </Grid.Section>
+        ))}
+      </Grid>
+    );
+  }
 
   return (
     <List
-      isLoading={albums.isLoading || playback.isPerforming}
+      isLoading={isLoading}
       navigationTitle={props.artist.title}
       searchBarPlaceholder="Filter albums"
-      actions={
-        <ActionPanel>
-          <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-          <PreferencesAction />
-        </ActionPanel>
-      }
+      actions={defaultActions}
     >
-      {albums.error ? (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Unable to load albums"
-          description={albums.error}
-          actions={
-            <ActionPanel>
-              <NowPlayingAction shortcut={{ modifiers: ["cmd"], key: "n" }} />
-              <PreferencesAction />
-            </ActionPanel>
-          }
-        />
-      ) : null}
+      {errorView}
       {albums.value.map((album) => (
         <AlbumRow
           key={album.ratingKey}
           album={album}
           sectionKey={props.sectionKey}
+          viewMode={viewMode}
+          onToggleView={toggleViewMode}
           onPlay={playback.play}
           onPlayNext={playback.playNext}
           onQueue={playback.queue}

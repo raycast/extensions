@@ -1,5 +1,15 @@
 # Changelog
 
+## [Fix `fnm` macOS Path Resolution] - 2026-03-28
+
+- Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
+- Match the official `fnm` directory resolution preference order when resolving `fnm` paths.
+
+## [Agent-Specific Skill Removal] - 2026-03-27
+
+- Support removing skills from specific agents instead of all agents at once
+- Show an agent picker form with checkboxes when a skill is installed in multiple agents
+
 ## [Lock File Metadata] - 2026-03-23
 
 - Show skill source, install date, and update date from the global lock file in the detail panel

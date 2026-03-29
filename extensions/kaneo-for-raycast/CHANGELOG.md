@@ -1,5 +1,11 @@
 # Kaneo Changelog
 
+## [Add Keyboard Shortcuts] - 2026-03-27
+
+- Added support for sub tasks in task details
+- Added keyboard shortcuts to move to parent task
+- Added keyboard shortcuts to move to a sub task
+
 ## [Fix Project Detail] - 2026-03-23
 
 - Fix the project details fetch that fails for version 2.3.12 and above

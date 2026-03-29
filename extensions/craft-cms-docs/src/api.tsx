@@ -1,8 +1,32 @@
-import type { DocsLink, DocsSearchResult, GlossaryTerm, RelatedTerm } from "./types";
+import type { CoreData, DocsLink, DocsSearchResult, GlossaryTerm, PluginStoreResponse, RelatedTerm } from "./types";
 
 const BASE = "https://craftcms.com/api/glossary";
 const DOCS_SEARCH_BASE = "https://craftcms.com/api/docs/search";
+const PLUGIN_STORE_BASE = "https://api.craftcms.com/v1/plugin-store";
 const DEFAULT_TIMEOUT = 8000;
+
+export async function fetchPluginStorePage(
+  page: number,
+  perPage = 96,
+  options?: { signal?: AbortSignal },
+): Promise<PluginStoreResponse> {
+  const params = new URLSearchParams({ page: String(page), perPage: String(perPage), orderBy: "popularity" });
+  const res = await fetch(`${PLUGIN_STORE_BASE}/plugins?${params}`, {
+    headers: { Accept: "application/json" },
+    signal: options?.signal,
+  });
+  if (!res.ok) throw new Error(`Plugin store fetch failed: ${res.status}`);
+  return res.json() as Promise<PluginStoreResponse>;
+}
+
+export async function fetchCoreData(options?: { signal?: AbortSignal }): Promise<CoreData> {
+  const res = await fetch(`${PLUGIN_STORE_BASE}/core-data`, {
+    headers: { Accept: "application/json" },
+    signal: options?.signal,
+  });
+  if (!res.ok) throw new Error(`Core data fetch failed: ${res.status}`);
+  return res.json() as Promise<CoreData>;
+}
 
 export async function searchGlossary(
   query: string,

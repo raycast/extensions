@@ -6,7 +6,7 @@ import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
 export default function Command() {
-  const { skills, isLoading, error, revalidate } = useInstalledSkills();
+  const { skills, isLoading, error, revalidate, mutate } = useInstalledSkills();
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
@@ -124,6 +124,7 @@ This is an npx resolution issue in the local CLI runtime.
                 skill={skill}
                 isSelected={selectedId === skill.name}
                 isShowingDetail={isShowingDetail}
+                mutate={mutate}
                 onToggleDetail={toggleDetail}
                 onUpdate={revalidate}
               />
