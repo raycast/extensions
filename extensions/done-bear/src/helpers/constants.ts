@@ -1,8 +1,11 @@
 import { Color, Icon } from "@raycast/api";
 
-import type { TaskView } from "../api/types";
+import type { NavigableView } from "../api/types";
 
-export const VIEW_CONFIG: Record<Exclude<TaskView, "logbook">, { title: string; icon: Icon; color: Color }> = {
+export const VIEW_CONFIG: Record<
+  NavigableView,
+  { title: string; icon: Icon; color: Color }
+> = {
   anytime: { color: Color.Green, icon: Icon.Calendar, title: "Anytime" },
   inbox: { color: Color.Blue, icon: Icon.Tray, title: "Inbox" },
   someday: { color: Color.Orange, icon: Icon.Cloud, title: "Someday" },

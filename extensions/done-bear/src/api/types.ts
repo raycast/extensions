@@ -67,5 +67,12 @@ export interface WorkspaceSummary {
   role: string;
 }
 
-export type TaskView = "inbox" | "today" | "anytime" | "upcoming" | "someday" | "logbook";
+export type TaskView =
+  | "inbox"
+  | "today"
+  | "anytime"
+  | "upcoming"
+  | "someday"
+  | "logbook";
+export type NavigableView = Exclude<TaskView, "logbook">;
 export type TaskState = "open" | "done" | "archived";
