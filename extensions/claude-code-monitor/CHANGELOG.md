@@ -1,8 +1,6 @@
 # Changelog
 
-## 1.0.0 — Initial Release
-
-### Features
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Real-time session monitoring with status tracking (Active, Waiting, Idle, Ended)
 - Menu bar icon with live session count and color-coded status
