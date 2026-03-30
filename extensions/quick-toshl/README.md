@@ -23,7 +23,6 @@ A Raycast extension for [Toshl Finance](https://toshl.com): add expenses, income
 | **Manage Tags** | Create, edit, or delete tags. |
 | **Manage Accounts** | Create, edit, or delete accounts. |
 | **Manage Budgets** | Create, edit, or delete budgets (respects Toshl plan limits). |
-| **API Rate Limit** | Remaining requests when `GET /rate-limit` is available; otherwise shows that quota is unknown. |
 | **My Profile** | Profile from `/me`: currency, locale, timezone, API-related limits. |
 
 ### Raycast AI tools

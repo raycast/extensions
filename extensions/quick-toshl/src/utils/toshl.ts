@@ -572,15 +572,6 @@ class ToshlClient {
     }
   }
 
-  async getRateLimitStatus() {
-    if (this.isDemo) return { limit: 1000, remaining: 999 };
-    const response = await this.api.get<{ limit: number; remaining: number }>("/rate-limit", {
-      validateStatus: (s) => s === 200 || s === 404,
-    });
-    if (response.status === 200) return response.data;
-    return { limit: 1000, remaining: -1 };
-  }
-
   /** Aggregated sums per tag for a period (`GET /tags/sums`). `currency` is required by the API (ISO code). */
   async getTagSums(params: { from: string; to: string; currency: string; type?: string }) {
     if (this.isDemo) return [];
