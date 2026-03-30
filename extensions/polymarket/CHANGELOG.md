@@ -1,6 +1,6 @@
 # Polymarket Changelog
 
-## [Trader Search, Profile Enhancements & Codebase Refactor] - {PR_MERGE_DATE}
+## [Trader Search, Profile Enhancements & Codebase Refactor] - 2026-03-30
 
 ### Added
 
