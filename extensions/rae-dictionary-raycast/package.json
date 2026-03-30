@@ -15,39 +15,29 @@
   "commands": [
     {
       "name": "query-rae-word",
-      "title": "Query Word In RAE",
+      "title": "Query Word in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query a word in the RAE dictionary",
       "mode": "view"
     },
     {
       "name": "query-rae-daily-word",
-      "title": "Query Word Of The Day In RAE",
+      "title": "Query Word of the Day in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query the RAE word of the day",
       "mode": "view"
     },
     {
       "name": "query-rae-random-word",
-      "title": "Query Random Word In RAE",
+      "title": "Query Random Word in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query a random word from the RAE dictionary",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.97.0",
-    "@raycast/utils": "^2.2.3",
-    "node-fetch": "^3.3.2"
-  },
-  "overrides": {
-    "minimatch": "^10.2.4",
-    "brace-expansion": "^5.0.5",
-    "picomatch": "^4.0.4",
-    "flatted": "^3.4.2",
-    "ajv": "^8.18.0",
-    "js-yaml": "^4.1.1",
-    "diff": "^8.0.4"
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.27.1",
