@@ -18,7 +18,8 @@
     "joshhayes747",
     "inovvia",
     "mateus_badalotti",
-    "pavzagor"
+    "pavzagor",
+    "CaffeineCat"
   ],
   "keywords": [
     "sound",
@@ -210,6 +211,24 @@
       "label": "Update system sounds output",
       "type": "checkbox",
       "default": false
+    },
+    {
+      "name": "volumeDisplay",
+      "required": false,
+      "title": "Volume Display Style",
+      "description": "How to display device volume: as a percentage (e.g. 50%) or as macOS volume steps (e.g. 8/16 Steps).",
+      "type": "dropdown",
+      "default": "percentage",
+      "data": [
+        {
+          "title": "Percentage (50%)",
+          "value": "percentage"
+        },
+        {
+          "title": "Steps (8/16)",
+          "value": "steps"
+        }
+      ]
     },
     {
       "name": "favourite",

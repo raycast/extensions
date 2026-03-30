@@ -1,5 +1,10 @@
 # Audio Device Changelog
 
+## [Volume display style] - {PR_MERGE_DATE}
+
+### Steps mode
+Added a "Volume Display Style" preference to show volume as macOS-style steps (e.g. 8/16 Steps) instead of percentages.
+
 ## [Major Update] - 2026-03-27
 
 ### Default device enforcement

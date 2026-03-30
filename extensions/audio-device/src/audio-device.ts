@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { TransportType, type AudioDevice, type IOType, isMacOS, isWindows, getAudioAPI } from "./platform";
 
 export { TransportType, type AudioDevice, type IOType, isMacOS, isWindows, getAudioAPI };
@@ -66,6 +67,25 @@ export async function setOutputDeviceVolume(deviceId: string, volume: number) {
   if (api.setOutputDeviceVolume) {
     return api.setOutputDeviceVolume(deviceId, volume);
   }
+}
+
+export const MAC_VOLUME_STEPS = 16;
+
+export function volumeToSteps(volume: number): number {
+  return Math.round(volume * MAC_VOLUME_STEPS);
+}
+
+/**
+ * Format a 0–100 percentage volume according to the user's volumeDisplay preference.
+ * Returns e.g. "50%" or "8/16 Steps".
+ */
+export function formatVolume(pct: number): string {
+  const { volumeDisplay } = getPreferenceValues();
+  if (volumeDisplay === "steps") {
+    const steps = Math.round((pct / 100) * MAC_VOLUME_STEPS);
+    return `${steps}/${MAC_VOLUME_STEPS} Steps`;
+  }
+  return `${pct}%`;
 }
 
 export async function getOutputDeviceMute(deviceId: string) {

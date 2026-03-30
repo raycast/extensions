@@ -1,4 +1,14 @@
-import { showToast, Toast, Form, ActionPanel, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
+import {
+  getPreferenceValues,
+  showToast,
+  Toast,
+  Form,
+  ActionPanel,
+  Action,
+  Icon,
+  launchCommand,
+  LaunchType,
+} from "@raycast/api";
 import { usePromise, useForm } from "@raycast/utils";
 import {
   type AudioDevice,
@@ -13,6 +23,8 @@ import {
   setInputDeviceVolume,
   setOutputDeviceMute,
   setInputDeviceMute,
+  formatVolume,
+  MAC_VOLUME_STEPS,
 } from "./audio-device";
 import { getPinnedVolume, setPinnedVolume, clearPinnedVolume } from "./device-preferences";
 import { useRef, useState } from "react";
@@ -54,6 +66,8 @@ interface VolumeFormValues {
 
 export function VolumeForm({ ioType }: { ioType: IOType }) {
   const config = ioConfig[ioType];
+  const useSteps = getPreferenceValues().volumeDisplay === "steps";
+  const maxInput = useSteps ? MAC_VOLUME_STEPS : 100;
   const devicesRef = useRef<AudioDevice[]>([]);
   const currentVolumeRef = useRef<number | null>(null);
   const [currentVolume, setCurrentVolume] = useState<number | null>(null);
@@ -63,14 +77,15 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
     onSubmit: async (formValues) => {
       const level = parseInt(formValues.level, 10);
       if (isNaN(level)) {
-        await showToast(Toast.Style.Failure, "Invalid input", "Enter a number 0-100");
+        await showToast(Toast.Style.Failure, "Invalid input", `Enter a number 0-${maxInput}`);
         return;
       }
 
       const deviceId = formValues.device;
       const device = devicesRef.current.find((d) => String(d.id) === deviceId);
       const name = device?.name ?? config.label;
-      const clamped = Math.max(0, Math.min(100, level));
+      const pct = useSteps ? Math.round((Math.max(0, Math.min(maxInput, level)) / MAC_VOLUME_STEPS) * 100) : level;
+      const clamped = Math.max(0, Math.min(100, pct));
 
       try {
         if (clamped > 0) await config.setMute(deviceId, false).catch(() => {});
@@ -84,12 +99,12 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
           }
         }
 
-        const old = currentVolumeRef.current != null ? `${currentVolumeRef.current}%` : "?";
+        const old = currentVolumeRef.current != null ? formatVolume(currentVolumeRef.current) : "?";
         const pinSuffix = formValues.pinVolume ? " (pinned)" : pinnedLevelRef.current != null ? " (unpinned)" : "";
         currentVolumeRef.current = clamped;
         setCurrentVolume(clamped);
         pinnedLevelRef.current = formValues.pinVolume ? clamped : undefined;
-        await showToast(Toast.Style.Success, `${name}: ${old} -> ${clamped}%${pinSuffix}`);
+        await showToast(Toast.Style.Success, `${name}: ${old} -> ${formatVolume(clamped)}${pinSuffix}`);
 
         if (formValues.pinVolume) {
           try {
@@ -127,7 +142,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
     pinnedLevelRef.current = pinned;
 
     setValue("device", String(current.id));
-    if (volPct != null) setValue("level", String(volPct));
+    if (volPct != null) setValue("level", String(useSteps ? Math.round((volPct / 100) * MAC_VOLUME_STEPS) : volPct));
     setValue("pinVolume", pinned != null);
 
     return { devices, current };
@@ -139,7 +154,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       const volPct = vol != null ? Math.round(vol * 100) : null;
       currentVolumeRef.current = volPct;
       setCurrentVolume(volPct);
-      if (volPct != null) setValue("level", String(volPct));
+      if (volPct != null) setValue("level", String(useSteps ? Math.round((volPct / 100) * MAC_VOLUME_STEPS) : volPct));
     } catch {
       currentVolumeRef.current = null;
       setCurrentVolume(null);
@@ -151,7 +166,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
     setValue("pinVolume", pinned != null);
   }
 
-  const volText = isLoading ? "Loading..." : currentVolume != null ? `${currentVolume}%` : "Unknown";
+  const volText = isLoading ? "Loading..." : currentVolume != null ? formatVolume(currentVolume) : "Unknown";
 
   return (
     <Form
@@ -191,8 +206,8 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       <Form.TextField
         {...itemProps.level}
         title={`New ${config.label} Volume`}
-        placeholder="0-100"
-        info="Enter 0-100"
+        placeholder={`0-${maxInput}`}
+        info={useSteps ? `Enter 0-${MAC_VOLUME_STEPS} (steps)` : "Enter 0-100"}
         autoFocus
       />
       <Form.Checkbox

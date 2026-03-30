@@ -1,5 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
-import { type AudioDevice, isWindows } from "./audio-device";
+import { type AudioDevice, isWindows, formatVolume } from "./audio-device";
 
 export type VolumeInfo = { volume: number | undefined; muted: boolean | undefined };
 
@@ -41,7 +41,8 @@ export function getAccessories(
     if (volumeInfo.muted) {
       accessories.push({ icon: Icon.SpeakerOff, tooltip: "Muted" });
     } else if (volumeInfo.volume != null) {
-      accessories.push({ text: `${Math.round(volumeInfo.volume * 100)}%`, tooltip: "Volume" });
+      const pct = Math.round(volumeInfo.volume * 100);
+      accessories.push({ text: formatVolume(pct), tooltip: "Volume" });
     } else {
       accessories.push({ text: "Volume controlled by device" });
     }
@@ -49,7 +50,7 @@ export function getAccessories(
 
   if (pinnedLevel != null) {
     accessories.push({
-      tag: { value: `Pinned: ${pinnedLevel}%`, color: Color.Orange },
+      tag: { value: `Pinned: ${formatVolume(pinnedLevel)}`, color: Color.Orange },
       tooltip: "Volume pinned — enforced automatically",
     });
   }

@@ -26,6 +26,7 @@ import {
   setDefaultInputDevice,
   isWindows,
   getAudioAPI,
+  formatVolume,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
 import {
@@ -545,7 +546,7 @@ function PinVolumeAction({
   if (pinnedLevel != null) {
     return (
       <Action
-        title={`Unpin Volume (${pinnedLevel}%)`}
+        title={`Unpin Volume (${formatVolume(pinnedLevel)})`}
         icon={Icon.PinDisabled}
         shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
         onAction={async () => {
@@ -560,7 +561,7 @@ function PinVolumeAction({
   const currentPct = volumeInfo?.volume != null ? Math.round(volumeInfo.volume * 100) : undefined;
   return (
     <Action
-      title={currentPct != null ? `Pin Volume at ${currentPct}%` : "Pin Volume"}
+      title={currentPct != null ? `Pin Volume at ${formatVolume(currentPct)}` : "Pin Volume"}
       icon={Icon.Pin}
       shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
       onAction={async () => {
@@ -570,7 +571,7 @@ function PinVolumeAction({
         }
         await setPinnedVolume(ioType, device.uid, currentPct);
         onAction();
-        await showToast(Toast.Style.Success, `Pinned ${device.name} at ${currentPct}%`);
+        await showToast(Toast.Style.Success, `Pinned ${device.name} at ${formatVolume(currentPct)}`);
         const enforceCmd = ioType === "input" ? "auto-switch-input" : "auto-switch-output";
         try {
           await launchCommand({ name: enforceCmd, type: LaunchType.Background });
