@@ -1,0 +1,1 @@
+@/Users/dustintchambers/Documents/dev/raycast-photo-ingest/src/components/ingest-status-view.tsx
