@@ -106,7 +106,7 @@ function serializeTaskDueDate<T extends { due?: string | Date | null }>(task: T)
   return {
     ...task,
     due: `${year}-${month}-${day}T00:00:00.000Z`,
-  };
+  } as T;
 }
 
 export async function createTask(tasklist: string, task: TaskForm): Promise<void> {
