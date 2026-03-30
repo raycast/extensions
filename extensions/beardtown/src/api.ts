@@ -1,5 +1,5 @@
 import { open, showToast, Toast } from "@raycast/api";
-import { API_HOST, DEFAULT_PAGE_SIZE, RESPONSE_CACHE_TTL_MS, UUID, responseCache } from "./config";
+import { DEFAULT_PAGE_SIZE, RESPONSE_CACHE_TTL_MS, UUID, responseCache } from "./config";
 import type { ApiRecord, ChallengeEntry, ChallengeFilter, PagedResult } from "./types";
 import {
   canWatchOnYouTube,
@@ -50,12 +50,12 @@ export async function requestJson(url: string): Promise<unknown> {
 }
 
 function readCachedJson(url: string): unknown | null {
-  try {
-    const raw = responseCache.get(url);
-    if (!raw) {
-      return null;
-    }
+  const raw = responseCache.get(url);
+  if (!raw) {
+    return null;
+  }
 
+  try {
     const parsed = JSON.parse(raw) as { at: number; value: unknown };
     if (Date.now() - parsed.at > RESPONSE_CACHE_TTL_MS) {
       return null;
@@ -132,7 +132,7 @@ export async function fetchAllEntriesForFilter(filter: ChallengeFilter): Promise
 }
 
 export async function hydrateChallengeRecords(records: ApiRecord[]): Promise<ApiRecord[]> {
-  return await Promise.all(
+  return Promise.all(
     records.map(async (record) => {
       const jsonUrl = getRecordJsonUrl(record);
       if (!jsonUrl) {
@@ -189,8 +189,4 @@ export async function openChallengeYouTube(record: ApiRecord): Promise<void> {
     toast.title = "Failed to load YouTube video";
     toast.message = error instanceof Error ? error.message : undefined;
   }
-}
-
-export function buildChallengeJsonUrl(id: string): string {
-  return `${API_HOST}/api/v1/challenges/${id}.json`;
 }

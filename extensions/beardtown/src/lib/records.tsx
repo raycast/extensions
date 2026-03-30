@@ -761,14 +761,12 @@ export function sortEntries(entries: ChallengeEntry[], filter: ChallengeFilter) 
         if (leftTimestamp !== rightTimestamp) return rightTimestamp - leftTimestamp;
       }
 
-      return left.title.localeCompare(right.title, undefined, { sensitivity: "base" });
+      return left.title.localeCompare(right.title, "en-US", { sensitivity: "base" });
     });
   }
 
   if (filter === "guests") {
-    return [...entries].sort((left, right) =>
-      left.title.localeCompare(right.title, undefined, { sensitivity: "base" }),
-    );
+    return [...entries].sort((left, right) => left.title.localeCompare(right.title, "en-US", { sensitivity: "base" }));
   }
 
   return [...entries].sort((left, right) => getChallengeCount(right.record) - getChallengeCount(left.record));

@@ -22,7 +22,7 @@ export default function Command() {
   const [allChallengeEntries, setAllChallengeEntries] = useState<ChallengeEntry[] | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<ChallengeFilter>("challenges");
   const [searchText, setSearchText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [nextUrl, setNextUrl] = useState<string | null>(null);
