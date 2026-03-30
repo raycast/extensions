@@ -1,6 +1,6 @@
 # QR Code Scanner Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-30
 
 - Replaced the npm `open` package with Raycast's built-in `open` from `@raycast/api` for URL handling. The npm package bypassed macOS's native URL dispatch, causing all URLs to open in the browser instead of their registered app handlers (deep-links). Using Raycast's `open` correctly delegates to macOS's `open` command, which respects universal links and custom URL scheme registrations.
 - Removed the "Open in Browser?" confirmation dialog — URLs now open immediately in the correct app without an extra prompt.
