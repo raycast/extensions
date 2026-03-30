@@ -3,8 +3,8 @@ Copyright © 2026 Sam Analytic Solutions
 All rights reserved.
 */
 
-module.exports = {
-  root: true,
-  extends: ["@raycast/eslint-config"],
-};
+import { defineConfig } from "eslint/config";
+import raycastConfig from "@raycast/eslint-config";
+
+export default defineConfig([...raycastConfig]);
 
