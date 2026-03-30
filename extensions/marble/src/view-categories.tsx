@@ -65,6 +65,7 @@ export default function Command() {
         page: String(options.page + 1),
         limit: "25",
       });
+      if (searchText) params.set("query", searchText);
       return `${BASE_URL}/categories?${params.toString()}`;
     },
     {
@@ -80,14 +81,6 @@ export default function Command() {
       initialData: [] as Category[],
     },
   );
-
-  const filtered = searchText
-    ? data.filter(
-        (c: Category) =>
-          c.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          c.slug.toLowerCase().includes(searchText.toLowerCase()),
-      )
-    : data;
 
   async function deleteCategory(category: Category) {
     if (
@@ -127,7 +120,7 @@ export default function Command() {
       throttle
     >
       <List.EmptyView title="No Categories Found" description="Try a different search" />
-      {filtered.map((category: Category) => (
+      {data.map((category: Category) => (
         <List.Item
           key={category.id}
           title={category.name}

@@ -65,6 +65,7 @@ export default function Command() {
         page: String(options.page + 1),
         limit: "25",
       });
+      if (searchText) params.set("query", searchText);
       return `${BASE_URL}/tags?${params.toString()}`;
     },
     {
@@ -80,14 +81,6 @@ export default function Command() {
       initialData: [] as Tag[],
     },
   );
-
-  const filtered = searchText
-    ? data.filter(
-        (t: Tag) =>
-          t.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          t.slug.toLowerCase().includes(searchText.toLowerCase()),
-      )
-    : data;
 
   async function deleteTag(tag: Tag) {
     if (
@@ -127,7 +120,7 @@ export default function Command() {
       throttle
     >
       <List.EmptyView title="No Tags Found" description="Try a different search" />
-      {filtered.map((tag: Tag) => (
+      {data.map((tag: Tag) => (
         <List.Item
           key={tag.id}
           title={tag.name}

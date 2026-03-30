@@ -70,6 +70,7 @@ export default function Command() {
         page: String(options.page + 1),
         limit: "25",
       });
+      if (searchText) params.set("query", searchText);
       return `${BASE_URL}/authors?${params.toString()}`;
     },
     {
@@ -85,14 +86,6 @@ export default function Command() {
       initialData: [] as Author[],
     },
   );
-
-  const filtered = searchText
-    ? data.filter(
-        (a: Author) =>
-          a.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          a.slug.toLowerCase().includes(searchText.toLowerCase()),
-      )
-    : data;
 
   async function deleteAuthor(author: Author) {
     if (
@@ -133,7 +126,7 @@ export default function Command() {
       throttle
     >
       <List.EmptyView title="No Authors Found" description="Try a different search" />
-      {filtered.map((author: Author) => (
+      {data.map((author: Author) => (
         <List.Item
           key={author.id}
           title={author.name}

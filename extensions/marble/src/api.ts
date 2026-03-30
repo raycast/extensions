@@ -2,14 +2,10 @@ import { getPreferenceValues, Cache } from "@raycast/api";
 
 export const BASE_URL = "https://api.marblecms.com/v1";
 
-interface Preferences {
-  apiKey: string;
-}
-
 const cache = new Cache({ namespace: "marble" });
 
 export function getHeaders(): Record<string, string> {
-  const { apiKey } = getPreferenceValues<Preferences>();
+  const { apiKey } = getPreferenceValues<ExtensionPreferences>();
   return {
     Authorization: apiKey,
     "Content-Type": "application/json",
