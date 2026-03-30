@@ -13,7 +13,7 @@ type Input = {
 
 export default async function updateBudget(input: Input) {
   const limit = parseFloat(input.limit);
-  if (isNaN(limit)) {
+  if (isNaN(limit) || limit <= 0) {
     return { success: false, message: "Invalid limit.", _instructions: AI_INSTRUCTIONS };
   }
   const today = new Date();

@@ -84,7 +84,7 @@ function EditBudgetForm({ budget, onSaved }: { budget: Budget; onSaved: () => vo
                 return;
               }
               const limit = parseFloat(v.limit);
-              if (isNaN(limit)) {
+              if (isNaN(limit) || limit <= 0) {
                 showToast({ style: Toast.Style.Failure, title: "Valid limit required" });
                 return;
               }
