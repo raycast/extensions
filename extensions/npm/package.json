@@ -60,7 +60,7 @@
       "name": "clean-up",
       "title": "Clean up",
       "subtitle": "npm",
-      "description": "Verify or clear the npm cache",
+      "title": "Clean Up",
       "mode": "view"
     }
   ],
