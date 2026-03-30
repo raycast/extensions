@@ -1,6 +1,6 @@
 # Shape Calendar Changelog
 
-## [Structured Workouts] - {PR_MERGE_DATE}
+## [Structured Workouts] - 2026-03-30
 
 - View structured workout steps (intervals, repeats, warmup/cooldown) in activity details
 - Create structured interval workouts via AI
