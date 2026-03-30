@@ -112,6 +112,21 @@ export default function Command() {
         };
       });
 
+      // Guard against renames that produce only an extension (e.g., ".txt")
+      const emptyBases = files.filter((fileInfo, i) => {
+        if (fileInfo.isDirectory || !fileInfo.extension) return false;
+        const newFileName = generateNewName(i);
+        return newFileName === fileInfo.extension;
+      });
+      if (emptyBases.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "New name cannot be empty",
+          message: "Please enter a name for the file",
+        });
+        return;
+      }
+
       // Check for conflicts before renaming
       const conflicts = await checkConflicts(operations);
       if (conflicts.length > 0) {
