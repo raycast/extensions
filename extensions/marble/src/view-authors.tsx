@@ -4,6 +4,7 @@ import {
   Action,
   List,
   Icon,
+  Image,
   Color,
   Form,
   useNavigation,
@@ -135,7 +136,7 @@ export default function Command() {
         <List.Item
           key={author.id}
           title={author.name}
-          icon={author.image ? { source: author.image, mask: "circle" as const } : Icon.Person}
+          icon={author.image ? { source: author.image, mask: Image.Mask.Circle } : Icon.Person}
           detail={
             <List.Item.Detail
               markdown={author.bio || "*No bio*"}
