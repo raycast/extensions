@@ -27,7 +27,10 @@ export default function Command() {
 
   const dnsMarkdown = status?.dnsServers?.length
     ? `\n## DNS Servers\n${status.dnsServers
-        .map((d) => `- **${d.domains.join(", ") || "All"}**: \`${d.servers.join(", ")}\` ${d.enabled ? "✅" : "❌"}`)
+        .map(
+          (d) =>
+            `- **${d.domains?.join(", ") || "All"}**: \`${d.servers?.join(", ") || ""}\` ${d.enabled ? "✅" : "❌"}`,
+        )
         .join("\n")}`
     : "";
 
