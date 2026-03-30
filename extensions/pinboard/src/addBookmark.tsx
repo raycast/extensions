@@ -1,5 +1,16 @@
-import { Form, ActionPanel, Action, showToast, Icon, Toast, popToRoot } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Icon,
+  Toast,
+  popToRoot,
+  getSelectedText,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
+import { useEffect, useState } from "react";
 import { Bookmark, BookmarkFormValues } from "./types";
 import { addBookmark } from "./api";
 import { usePinboardTags } from "./hooks/usePinboardTags";
@@ -7,8 +18,10 @@ import { isValidURL } from "./utils";
 
 export default function Command() {
   const { tags, isLoading: tagsLoading } = usePinboardTags();
+  const [isPrefilling, setIsPrefilling] = useState(false);
+  const { autoFill } = getPreferenceValues<{ autoFill: boolean }>();
 
-  const { handleSubmit, itemProps } = useForm<BookmarkFormValues>({
+  const { handleSubmit, itemProps, setValue, focus } = useForm<BookmarkFormValues>({
     async onSubmit(values) {
       const toast = await showToast({ title: "Pinning bookmark...", style: Toast.Style.Animated });
 
@@ -48,9 +61,52 @@ export default function Command() {
     },
   });
 
+  useEffect(() => {
+    if (!autoFill) return;
+    const controller = new AbortController();
+
+    async function prefillFromSelection() {
+      let selectedText: string;
+      try {
+        selectedText = await getSelectedText();
+      } catch {
+        return; // getSelectedText throws when nothing is selected
+      }
+
+      if (!isValidURL(selectedText)) return;
+      setValue("url", selectedText);
+      setIsPrefilling(true);
+
+      let focusField: "title" | "tags" = "title";
+      try {
+        const response = await fetch(selectedText, { signal: controller.signal });
+        if (response.ok) {
+          const html = await response.text();
+          const title = extractDocumentTitle(html);
+          if (title) {
+            setValue("title", title);
+            focusField = "tags";
+          }
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error("Could not fetch page title", error);
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          focus(focusField);
+          setIsPrefilling(false);
+        }
+      }
+    }
+
+    prefillFromSelection();
+    return () => controller.abort();
+  }, [autoFill, setValue, focus]);
+
   return (
     <Form
-      isLoading={tagsLoading}
+      isLoading={tagsLoading || isPrefilling}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add Bookmark" icon={{ source: Icon.Plus }} onSubmit={handleSubmit} />
@@ -74,4 +130,22 @@ export default function Command() {
       <Form.Checkbox title="" label="Read Later" storeValue {...itemProps.readLater} />
     </Form>
   );
+}
+
+function extractDocumentTitle(html: string): string {
+  const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+  if (!match) return "";
+  return decodeHtmlEntities(match[1].trim());
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, " ");
 }

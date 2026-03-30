@@ -20,7 +20,18 @@
       "title": "Add Bookmark",
       "subtitle": "Pinboard",
       "description": "Posts a new bookmark to Pinboard.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "autoFill",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "title": "Auto-fill",
+          "description": "Automatically fill URL and title from selected text",
+          "label": "Fill URL and title from selected text"
+        }
+      ]
     },
     {
       "name": "searchBookmarks",
