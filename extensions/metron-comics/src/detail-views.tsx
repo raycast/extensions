@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, open, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
   fetchIssueDetail,
@@ -197,10 +197,10 @@ export function IssueDetailView({ issue }: { issue: MetronIssue }) {
         actions={
           <ActionPanel>
             <ActionPanel.Section>
-              <Action
+              <Action.OpenInBrowser
                 title="Open on Metron"
                 icon={Icon.Globe}
-                onAction={() => open(`https://metron.cloud/issue/${issue.id}/`)}
+                url={`https://metron.cloud/issue/${issue.id}/`}
               />
               {seriesId ? (
                 <Action.Push
@@ -254,10 +254,10 @@ export function IssueListItemInner({ issue }: { issue: MetronIssue }) {
               icon={Icon.Sidebar}
               target={<IssueDetailView issue={issue} />}
             />
-            <Action
+            <Action.OpenInBrowser
               title="Open on Metron"
               icon={Icon.Globe}
-              onAction={() => open(`https://metron.cloud/issue/${issue.id}/`)}
+              url={`https://metron.cloud/issue/${issue.id}/`}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

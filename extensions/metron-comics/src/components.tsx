@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { formatDate, issueTitle, MetronIssue } from "./api";
 import { IssueDetailView } from "./detail-views";
 import type { WeekNav } from "./new-comics";
@@ -27,10 +27,10 @@ export function IssueListItem({ issue, showPublisher = true, weekNav }: IssueLis
               icon={Icon.Sidebar}
               target={<IssueDetailView issue={issue} />}
             />
-            <Action
+            <Action.OpenInBrowser
               title="Open on Metron"
               icon={Icon.Globe}
-              onAction={() => open(`https://metron.cloud/issue/${issue.id}/`)}
+              url={`https://metron.cloud/issue/${issue.id}/`}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

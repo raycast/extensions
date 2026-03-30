@@ -164,7 +164,7 @@ export async function fetchSeriesIssues(seriesId: number): Promise<MetronIssue[]
   while (url) {
     const data: MetronListResponse<MetronIssue> = await metronFetch<MetronListResponse<MetronIssue>>(url);
     all = all.concat(data.results);
-    url = data.next ? data.next.replace("https://metron.cloud/api", "") : null;
+    url = data.next ? data.next.replace(BASE, "") : null;
   }
   return all;
 }

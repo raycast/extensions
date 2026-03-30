@@ -15,6 +15,7 @@ export default function SearchComicsCommand() {
       setHasSearched(false);
       return;
     }
+    let cancelled = false;
     const timer = setTimeout(async () => {
       setIsLoading(true);
       setHasSearched(true);
@@ -23,20 +24,25 @@ export default function SearchComicsCommand() {
         const seriesName = parts?.[1]?.trim() ?? searchText.trim();
         const issueNumber = parts?.[2] ?? undefined;
         const results = await searchIssues(seriesName, issueNumber);
-        setIssues(results);
+        if (!cancelled) setIssues(results);
       } catch (err) {
         const message = err instanceof Error ? err.message : "Search failed.";
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Search Error",
-          message,
-        });
-        setIssues([]);
+        if (!cancelled) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Search Error",
+            message,
+          });
+          setIssues([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }, 600);
-    return () => clearTimeout(timer);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, [searchText]);
 
   return (
