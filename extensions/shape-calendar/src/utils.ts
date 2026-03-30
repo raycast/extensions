@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { Step } from "./api/types";
 
 export function formatDuration(seconds: number): string {
   const h = Math.floor(seconds / 3600);
@@ -93,4 +94,49 @@ export function getDateRange(
     from: from.toISOString().split("T")[0],
     to: to.toISOString().split("T")[0],
   };
+}
+function formatEndCondition(step: {
+  endCondition: string;
+  endConditionValue?: number | null;
+}): string {
+  if (!step.endConditionValue)
+    return step.endCondition === "open" ? "open" : "";
+  switch (step.endCondition) {
+    case "distance":
+      return step.endConditionValue >= 1000
+        ? `${(step.endConditionValue / 1000).toFixed(1)}km`
+        : `${step.endConditionValue}m`;
+    case "time":
+      return formatDuration(step.endConditionValue);
+    case "iterations":
+      return `${step.endConditionValue}x`;
+    default:
+      return String(step.endConditionValue);
+  }
+}
+
+function formatStepLine(step: {
+  stepType: string;
+  displayName?: string | null;
+  endCondition: string;
+  endConditionValue?: number | null;
+}): string {
+  const name = step.displayName || step.stepType;
+  const condition = formatEndCondition(step);
+  return condition ? `${name} — ${condition}` : name;
+}
+
+export function formatStepsMarkdown(steps: Step[]): string {
+  const lines: string[] = [];
+  for (const step of steps) {
+    if (step.stepType === "repeat") {
+      lines.push(`**${step.numberOfIterations}x Repeat:**`);
+      for (const sub of step.workoutSteps) {
+        lines.push(`  - ${formatStepLine(sub)}`);
+      }
+    } else {
+      lines.push(`- ${formatStepLine(step)}`);
+    }
+  }
+  return lines.join("  \n");
 }

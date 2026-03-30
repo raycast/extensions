@@ -1,3 +1,52 @@
+export type StepType =
+  | "warmup"
+  | "cooldown"
+  | "interval"
+  | "recovery"
+  | "repeat";
+
+export type EndCondition =
+  | "lap.button"
+  | "time"
+  | "distance"
+  | "iterations"
+  | "heart.rate"
+  | "power"
+  | "open";
+
+export type TargetType =
+  | "no.target"
+  | "heart.rate"
+  | "pace"
+  | "power"
+  | "speed"
+  | "cadence";
+
+export type WorkoutStep = {
+  stepType: Exclude<StepType, "repeat">;
+  displayName: string;
+  description?: string | null;
+  endCondition: EndCondition;
+  endConditionValue?: number | null;
+  targetType?: TargetType | null;
+  targetValueOne?: number | null;
+  targetValueTwo?: number | null;
+  zoneNumber?: number | null;
+  secondaryTargetType?: TargetType | null;
+  secondaryTargetValueOne?: number | null;
+  secondaryTargetValueTwo?: number | null;
+  secondaryZoneNumber?: number | null;
+};
+
+export type RepeatStep = {
+  stepType: "repeat";
+  numberOfIterations: number;
+  skipLastRestStep?: boolean | null;
+  workoutSteps: WorkoutStep[];
+};
+
+export type Step = WorkoutStep | RepeatStep;
+
 export type Activity = {
   id: string;
   date: string;
@@ -13,6 +62,7 @@ export type Activity = {
   elevationGain: number | null;
   completed: boolean;
   target: "distance" | "time" | "pace" | "steps" | null;
+  steps: Step[] | null;
   source: string | null;
   externalId: string | null;
   createdAt: number;
@@ -43,6 +93,7 @@ export type CreateActivityInput = {
   elevationGain?: number;
   completed?: boolean;
   target?: "distance" | "time" | "pace" | "steps";
+  steps?: Step[];
 };
 
 export type ListActivitiesParams = {

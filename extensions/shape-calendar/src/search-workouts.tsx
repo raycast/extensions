@@ -20,6 +20,7 @@ import {
   formatSpeed,
   formatElevationGain,
   formatDate,
+  formatStepsMarkdown,
   getDateRange,
 } from "./utils";
 
@@ -191,7 +192,16 @@ function ActivityItem({
       ]}
       detail={
         <List.Item.Detail
-          markdown={activity.description?.replace(/\n/g, "  \n") || undefined}
+          markdown={
+            [
+              activity.description?.replace(/\n/g, "  \n"),
+              activity.steps?.length
+                ? formatStepsMarkdown(activity.steps)
+                : null,
+            ]
+              .filter(Boolean)
+              .join("\n\n") || undefined
+          }
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
