@@ -36,7 +36,7 @@ function toLocalDateString(date: Date): string {
 }
 
 function getWeekRange(): { from: string; to: string; allDates: string[] } {
-  const { weekStartDay } = getPreferenceValues<{ weekStartDay: string }>();
+  const { weekStartDay } = getPreferenceValues<Preferences>();
   const startDay = weekStartDay === "sunday" ? 0 : 1;
 
   const now = new Date();
@@ -139,101 +139,109 @@ export default function Command() {
 
   return (
     <List searchBarPlaceholder="Search this week" isLoading={isLoading}>
-      {sections.map(({ date, activities }) => (
-        <List.Section
-          key={date}
-          title={formatWeekday(date)}
-          subtitle={
-            activities.length === 0
-              ? "Rest Day"
-              : `${activities.length} ${activities.length === 1 ? "activity" : "activities"}`
-          }
-        >
-          {activities.length > 0 ? (
-            activities.map((activity) => {
-              const sportName = sportNames[activity.sportType] ?? "Workout";
-              return (
-                <List.Item
-                  key={activity.id}
-                  title={sportName}
-                  subtitle={activity.title}
-                  icon={
-                    activity.completed
-                      ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                      : new Date(activity.date) <
-                          new Date(new Date().toISOString().split("T")[0])
-                        ? { source: Icon.XMarkCircle, tintColor: Color.Red }
-                        : { source: Icon.Calendar, tintColor: Color.Orange }
-                  }
-                  accessories={[
-                    ...(activity.load
-                      ? [
-                          {
-                            text: String(activity.load),
-                            icon: {
-                              source: Icon.Heartbeat,
-                              tintColor: Color.SecondaryText,
+      {error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load activities"
+          description={error.message}
+        />
+      ) : null}
+      {!error &&
+        sections.map(({ date, activities }) => (
+          <List.Section
+            key={date}
+            title={formatWeekday(date)}
+            subtitle={
+              activities.length === 0
+                ? "Rest Day"
+                : `${activities.length} ${activities.length === 1 ? "activity" : "activities"}`
+            }
+          >
+            {activities.length > 0 ? (
+              activities.map((activity) => {
+                const sportName = sportNames[activity.sportType] ?? "Workout";
+                return (
+                  <List.Item
+                    key={activity.id}
+                    title={sportName}
+                    subtitle={activity.title}
+                    icon={
+                      activity.completed
+                        ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                        : new Date(activity.date) <
+                            new Date(new Date().toISOString().split("T")[0])
+                          ? { source: Icon.XMarkCircle, tintColor: Color.Red }
+                          : { source: Icon.Calendar, tintColor: Color.Orange }
+                    }
+                    accessories={[
+                      ...(activity.load
+                        ? [
+                            {
+                              text: String(activity.load),
+                              icon: {
+                                source: Icon.Heartbeat,
+                                tintColor: Color.SecondaryText,
+                              },
                             },
-                          },
-                        ]
-                      : []),
-                    ...(activity.distance &&
-                    DISTANCE_SPORTS.has(activity.sportType)
-                      ? [
-                          {
-                            text: formatDistance(activity.distance),
-                            icon: {
-                              source: Icon.ArrowRight,
-                              tintColor: Color.SecondaryText,
+                          ]
+                        : []),
+                      ...(activity.distance &&
+                      DISTANCE_SPORTS.has(activity.sportType)
+                        ? [
+                            {
+                              text: formatDistance(activity.distance),
+                              icon: {
+                                source: Icon.ArrowRight,
+                                tintColor: Color.SecondaryText,
+                              },
                             },
-                          },
-                        ]
-                      : []),
-                    ...(activity.duration
-                      ? [
-                          {
-                            text: formatDuration(activity.duration),
-                            icon: {
-                              source: Icon.Clock,
-                              tintColor: Color.SecondaryText,
+                          ]
+                        : []),
+                      ...(activity.duration
+                        ? [
+                            {
+                              text: formatDuration(activity.duration),
+                              icon: {
+                                source: Icon.Clock,
+                                tintColor: Color.SecondaryText,
+                              },
                             },
-                          },
-                        ]
-                      : []),
-                  ]}
-                  actions={
-                    <ActionPanel>
-                      <Action
-                        title={
-                          activity.completed
-                            ? "Mark as Planned"
-                            : "Mark as Completed"
-                        }
-                        icon={
-                          activity.completed ? Icon.Circle : Icon.CheckCircle
-                        }
-                        onAction={() => handleToggleCompleted(activity)}
-                      />
-                      <Action
-                        title="Delete Activity"
-                        icon={Icon.Trash}
-                        style={Action.Style.Destructive}
-                        onAction={() => handleDelete(activity)}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                      />
-                    </ActionPanel>
-                  }
-                />
-              );
-            })
-          ) : (
-            <List.Item
-              title="Rest Day"
-              icon={{ source: Icon.Moon, tintColor: Color.SecondaryText }}
-            />
-          )}
-        </List.Section>
-      ))}
+                          ]
+                        : []),
+                    ]}
+                    actions={
+                      <ActionPanel>
+                        <Action
+                          title={
+                            activity.completed
+                              ? "Mark as Planned"
+                              : "Mark as Completed"
+                          }
+                          icon={
+                            activity.completed ? Icon.Circle : Icon.CheckCircle
+                          }
+                          onAction={() => handleToggleCompleted(activity)}
+                        />
+                        <Action
+                          title="Delete Activity"
+                          icon={Icon.Trash}
+                          style={Action.Style.Destructive}
+                          onAction={() => handleDelete(activity)}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                        />
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })
+            ) : (
+              <List.Item
+                title="Rest Day"
+                icon={{ source: Icon.Moon, tintColor: Color.SecondaryText }}
+              />
+            )}
+          </List.Section>
+        ))}
     </List>
   );
 }

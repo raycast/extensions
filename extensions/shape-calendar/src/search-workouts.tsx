@@ -140,14 +140,22 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {data?.map((activity) => (
-        <ActivityItem
-          key={activity.id}
-          activity={activity}
-          onDelete={() => handleDelete(activity)}
-          onToggleCompleted={() => handleToggleCompleted(activity)}
+      {error ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load activities"
+          description={error.message}
         />
-      ))}
+      ) : (
+        data?.map((activity) => (
+          <ActivityItem
+            key={activity.id}
+            activity={activity}
+            onDelete={() => handleDelete(activity)}
+            onToggleCompleted={() => handleToggleCompleted(activity)}
+          />
+        ))
+      )}
     </List>
   );
 }

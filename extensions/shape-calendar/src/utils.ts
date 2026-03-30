@@ -15,7 +15,7 @@ export function formatDuration(seconds: number): string {
 }
 
 export function formatDistance(meters: number): string {
-  const { distanceUnit } = getPreferenceValues<{ distanceUnit: string }>();
+  const { distanceUnit } = getPreferenceValues<Preferences>();
   if (distanceUnit === "mi") {
     return `${(meters / 1609.34).toFixed(2)} mi`;
   }
@@ -26,7 +26,7 @@ export function formatSpeed(
   metersPerSecond: number,
   sportType: string,
 ): string {
-  const { distanceUnit } = getPreferenceValues<{ distanceUnit: string }>();
+  const { distanceUnit } = getPreferenceValues<Preferences>();
 
   if (metersPerSecond === 0) return "";
 
@@ -46,7 +46,7 @@ export function formatSpeed(
 }
 
 export function formatElevationGain(meters: number): string {
-  const { distanceUnit } = getPreferenceValues<{ distanceUnit: string }>();
+  const { distanceUnit } = getPreferenceValues<Preferences>();
   if (distanceUnit === "mi") {
     return `${(meters * 3.28084).toFixed(0)} ft`;
   }
@@ -93,61 +93,4 @@ export function getDateRange(
     from: from.toISOString().split("T")[0],
     to: to.toISOString().split("T")[0],
   };
-}
-
-export function convertDistanceToMeters(
-  value: string,
-  unit: string,
-): number | undefined {
-  const num = parseFloat(value);
-  if (isNaN(num)) return undefined;
-  return unit === "mi" ? num * 1609.344 : num * 1000;
-}
-
-export function parseDuration(input: string): number | undefined {
-  const trimmed = input.trim().toLowerCase();
-
-  // HH:MM:SS
-  const hmsMatch = trimmed.match(/^(\d{1,2}):(\d{1,2}):(\d{1,2})$/);
-  if (hmsMatch) {
-    return (
-      parseInt(hmsMatch[1]) * 3600 +
-      parseInt(hmsMatch[2]) * 60 +
-      parseInt(hmsMatch[3])
-    );
-  }
-
-  // MM:SS
-  const msMatch = trimmed.match(/^(\d{1,3}):(\d{1,2})$/);
-  if (msMatch) {
-    return parseInt(msMatch[1]) * 60 + parseInt(msMatch[2]);
-  }
-
-  // Natural: 1h30m, 45m, 30s, etc.
-  let total = 0;
-  let matched = false;
-  const hourMatch = trimmed.match(/(\d+)\s*h/);
-  const minMatch = trimmed.match(/(\d+)\s*m(?:in)?(?!\s*s)/);
-  const secMatch = trimmed.match(/(\d+)\s*s/);
-
-  if (hourMatch) {
-    total += parseInt(hourMatch[1]) * 3600;
-    matched = true;
-  }
-  if (minMatch) {
-    total += parseInt(minMatch[1]) * 60;
-    matched = true;
-  }
-  if (secMatch) {
-    total += parseInt(secMatch[1]);
-    matched = true;
-  }
-
-  if (matched) return total;
-
-  // Plain number = minutes
-  const num = parseFloat(trimmed);
-  if (!isNaN(num)) return num * 60;
-
-  return undefined;
 }

@@ -10,10 +10,9 @@ import {
 } from "./types";
 
 const BASE_URL = "https://shapecalendar.com/api/v1";
-export const PAGE_SIZE = 50;
 
 function getToken(): string {
-  const { apiToken } = getPreferenceValues<{ apiToken: string }>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   return apiToken;
 }
 

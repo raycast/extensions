@@ -1,7 +1,7 @@
-import { LaunchType, updateCommandMetadata } from "@raycast/api";
+import { LaunchProps, LaunchType, updateCommandMetadata } from "@raycast/api";
 import { getActivities } from "./api/client";
 
-export default async function Command() {
+export default async function Command(props: LaunchProps) {
   const today = new Date().toISOString().split("T")[0];
 
   try {
@@ -19,9 +19,10 @@ export default async function Command() {
     });
 
     await updateCommandMetadata({ subtitle: parts.join(" · ") });
-  } catch {
-    if (LaunchType.Background) {
+  } catch (error) {
+    if (props.launchType === LaunchType.Background) {
       return;
     }
+    throw error;
   }
 }
