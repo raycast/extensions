@@ -17,6 +17,8 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
 
   const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
   const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
+  // Intentionally empty: keeps libuv's SIGCHLD/waitpid reaping for the detached child
+  // (preventing zombies) while still allowing `unref()` to let the event loop exit.
   child.on("exit", () => {});
   child.unref();
 

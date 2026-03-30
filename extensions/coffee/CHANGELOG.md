@@ -6,7 +6,7 @@
 
 ## [Fix] - 2026-03-24
 
-- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Attempted to mitigate zombie process accumulation by detaching the caffeinate process with `spawn({ detached: true })` and `unref()` (incomplete without `exit` listener; final fix landed in {PR_MERGE_DATE})
 - Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
 - Removed stale process filter in menu bar status
 
