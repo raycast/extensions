@@ -4,7 +4,7 @@
 
 ### Added
 
-- Support for passwordless vault (#26714).
+- Support for passwordless vaults (#26714).
 
 ## [1.9.0] - 2026-02-11
 
