@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, useNavigation, Icon, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { toshl } from "./utils/toshl";
 import { Transaction } from "./utils/types";
 import { format, startOfMonth } from "date-fns";
@@ -19,7 +19,7 @@ export default function RecentTransactions() {
     isLoading,
     revalidate,
     mutate,
-  } = useCachedPromise(() => toshl.getAllTransactions({ from: monthStart, to: todayStr }));
+  } = usePromise(async (from: string, to: string) => toshl.getAllTransactions({ from, to }), [monthStart, todayStr]);
   const { data: categories } = useCachedPromise(() => toshl.getCategories());
   const { data: tags } = useCachedPromise(() => toshl.getTags());
   const { data: accounts } = useCachedPromise(() => toshl.getAccounts());
@@ -140,7 +140,7 @@ export default function RecentTransactions() {
                       revalidate={revalidate}
                       onDeleted={async (t, mode) => {
                         await mutate(toshl.deleteTransaction(t.id, mode), {
-                          optimisticUpdate: (data) => data?.filter((x) => x.id !== t.id),
+                          optimisticUpdate: (data) => (data ?? []).filter((x) => x.id !== t.id),
                         });
                       }}
                     />

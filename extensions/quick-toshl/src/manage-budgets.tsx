@@ -10,7 +10,7 @@ import {
   Alert,
   confirmAlert,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { format, addDays, subDays, startOfMonth } from "date-fns";
 import { toshl } from "./utils/toshl";
 import type { Budget } from "./utils/types";
@@ -129,7 +129,7 @@ export default function ManageBudgets() {
   const from = format(subDays(today, 30), "yyyy-MM-dd");
   const to = format(addDays(today, 120), "yyyy-MM-dd");
 
-  const { data: budgets, isLoading, revalidate } = useCachedPromise(() => toshl.getBudgets({ from, to }));
+  const { data: budgets, isLoading, revalidate } = usePromise(() => toshl.getBudgets({ from, to }));
 
   async function remove(b: Budget) {
     if (

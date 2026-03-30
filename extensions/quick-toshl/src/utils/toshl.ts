@@ -23,7 +23,8 @@ import { MOCK_ACCOUNTS, MOCK_BUDGETS, MOCK_CATEGORIES, MOCK_PLANNING, MOCK_TAGS,
 
 const BASE_URL = "https://api.toshl.com";
 
-const CACHE_TTL = 14 * 24 * 60 * 60 * 1000;
+/** Max age for reusing metadata after an API error (not for normal ETag revalidation). */
+const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 interface CacheEntry<T> {
   data: T;
@@ -291,12 +292,24 @@ class ToshlClient {
     }
   }
 
+  /** Clears list caches for `/budgets?…` (keys `budgets:…`). */
+  private invalidateBudgetCaches() {
+    for (const key of [...this.cache.keys()]) {
+      if (key.startsWith("budgets:")) this.cache.delete(key);
+    }
+  }
+
   invalidateMetadataCache(which?: "categories" | "tags" | "accounts" | "currencies" | "all") {
     if (!which || which === "all") {
       this.cache.delete("categories");
       this.cache.delete("tags");
       this.cache.delete("accounts");
       this.cache.delete("currencies");
+      this.cache.delete("me");
+      this.invalidateBudgetCaches();
+      for (const key of [...this.cache.keys()]) {
+        if (key.startsWith("planning:")) this.cache.delete(key);
+      }
       return;
     }
     this.cache.delete(which);
@@ -498,8 +511,7 @@ class ToshlClient {
       };
     }
     try {
-      const response = await this.api.get("/me");
-      return response.data;
+      return await this.fetchWithCache<Record<string, unknown>>("me", "/me", {});
     } catch (e) {
       console.error("Failed to get me", e);
       throw e;
@@ -508,15 +520,10 @@ class ToshlClient {
 
   async getDefaultCurrency(): Promise<string> {
     if (this.isDemo) return "USD";
-    const cacheKey = "defaultCurrency";
-    const cached = this.getCacheEntry(cacheKey);
-    if (cached) return cached.data as string;
-
     try {
       const me = await this.getMe();
-      const currency = me?.currency?.main || "USD";
-      this.setCache(cacheKey, currency);
-      return currency;
+      const main = (me as { currency?: { main?: string } }).currency?.main;
+      return typeof main === "string" && main.length > 0 ? main : "USD";
     } catch (e) {
       console.error("Failed to get default currency", e);
       return "USD";
@@ -525,9 +532,12 @@ class ToshlClient {
 
   async getBudgets(params: { from?: string; to?: string; page?: number; per_page?: number } = {}) {
     if (this.isDemo) return MOCK_BUDGETS;
+    const clean = cleanParams(params as Record<string, unknown>);
+    const cacheKey = `budgets:${JSON.stringify(clean)}`;
     try {
-      const response = await this.api.get<Budget[]>("/budgets", { params });
-      return response.data.filter((b) => !b.deleted);
+      return await this.fetchWithCache<Budget[]>(cacheKey, "/budgets", clean, (data) =>
+        (data as Budget[]).filter((b) => !b.deleted),
+      );
     } catch (e) {
       console.error("Failed to get budgets", e);
       throw e;
@@ -537,6 +547,7 @@ class ToshlClient {
   async createBudget(input: BudgetCreateInput) {
     if (this.isDemo) return MOCK_BUDGETS[0];
     const response = await this.api.post<Budget | Record<string, never>>("/budgets", input);
+    this.invalidateBudgetCaches();
     const id = createdResourceId(response, "budgets");
     if (id) {
       const { data } = await this.api.get<Budget>(`/budgets/${id}`);
@@ -553,19 +564,22 @@ class ToshlClient {
     const { id, ...body } = input;
     const params = mode ? { update: mode } : {};
     const { data } = await this.api.put<Budget>(`/budgets/${id}`, { id, ...body }, { params });
+    this.invalidateBudgetCaches();
     return data;
   }
 
   async deleteBudget(id: string) {
     if (this.isDemo) return;
     await this.api.delete(`/budgets/${id}`);
+    this.invalidateBudgetCaches();
   }
 
   async getPlanning(params: { from: string; to: string }) {
     if (this.isDemo) return MOCK_PLANNING;
+    const clean = cleanParams(params as Record<string, unknown>);
+    const cacheKey = `planning:${params.from}:${params.to}`;
     try {
-      const response = await this.api.get<Planning>("/planning", { params });
-      return response.data;
+      return await this.fetchWithCache<Planning>(cacheKey, "/planning", clean);
     } catch (e) {
       console.error("Failed to get planning", e);
       throw e;

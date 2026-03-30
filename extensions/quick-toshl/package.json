@@ -113,7 +113,7 @@
     {
       "name": "search-entries",
       "title": "Search Entries",
-      "description": "Advanced search for Toshl entries with filtering. Supports date ranges (today, last_7_days, last_30_days, this_month, custom), entry type (expense/income/transfer/all), category names, tag names, account names, and description search. Returns entries with summary statistics. Use when user asks about spending history, transaction summary, or to find specific transactions."
+      "description": "Advanced search for Toshl entries with filtering. Use `from` and `to` (YYYY-MM-DD) for an explicit range; if either is set, they override `dateRange`. Otherwise use `dateRange` presets (today, last_7_days, this_month, etc.). Supports entry type, category/tag/account names, description search. Returns entries with optional summary statistics."
     },
     {
       "name": "get-planning",
@@ -231,7 +231,7 @@
     {
       "name": "forceRefreshCache",
       "title": "Force Refresh Cache",
-      "description": "Enable this, run any command, then disable it. This will refresh cached categories, tags, and accounts.",
+      "description": "Uses conditional requests on each load. If the API errors, the last successful metadata may be reused for up to 24 hours. Enable this, run any command once, then turn it off to clear the cache—e.g. after changes in the Toshl web app.",
       "type": "checkbox",
       "label": "Clear cache on next run",
       "required": false,

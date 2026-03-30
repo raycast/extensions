@@ -1,8 +1,10 @@
 /**
- * Live Toshl API smoke test using disposable resources.
+ * Manual smoke test only — hits the live Toshl API with your token. Not run by npm scripts or Raycast CI.
+ * Creates disposable QTT-TEST-* resources and deletes them at the end.
+ *
  * Toshl often returns `201` with an empty body; the new resource id is in the `Location` header.
  *
- * Run (do not echo the key). Prefer the long developer token:
+ * Run locally (do not echo the key). Prefer the long developer token:
  *   TOSHL_API_KEY=$(op read "op://Code/Toshl API/credential") node scripts/toshl-integration-test.cjs
  * Alternate login item (if password holds the token):
  *   TOSHL_API_KEY=$(op read "op://Code/ToshlAPI/password") node scripts/toshl-integration-test.cjs

@@ -62,7 +62,7 @@ Use **Raycast AI** (extension tools) for prompts like “add 50k lunch” or “
 
 ### Optional
 
-- **Force Refresh Cache** – Next launch clears cached metadata (categories, tags, accounts, currencies).
+- **Force Refresh Cache** – Each load uses conditional requests; if the API fails, the last successful metadata may be reused for up to **24 hours**. Enable, run any command once, then disable to clear the in-memory cache (e.g. after edits in Toshl elsewhere).
 - **Enable Demo Data** – Uses mock data instead of the API (for UI development).
 
 ## Development
@@ -76,7 +76,7 @@ npm run lint     # ESLint + Prettier
 npm run dev      # ray develop (watch mode)
 ```
 
-Optional **live API smoke test** (does not commit secrets; uses disposable `QTT-TEST-*` resources and deletes them):
+Optional **live API smoke test** — **manual only** (not part of `npm test` or CI). Calls the real Toshl API with your token; creates disposable `QTT-TEST-*` data and removes it at the end.
 
 ```bash
 node scripts/toshl-integration-test.cjs
