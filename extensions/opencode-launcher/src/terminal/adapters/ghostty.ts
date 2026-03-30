@@ -15,10 +15,10 @@ export const ghosttyAdapter: TerminalAdapter = {
     await execFileAsync("open", ["-a", "Ghostty"]);
     await runAppleScript(`
       tell application "Ghostty" to activate
-      delay 0.3
+      delay 0.5
       tell application "System Events"
         keystroke "n" using command down
-        delay 0.2
+        delay 1.5
         keystroke "${escaped}"
         key code 36
       end tell

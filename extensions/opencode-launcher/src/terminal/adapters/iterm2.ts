@@ -12,7 +12,7 @@ export const iTerm2Adapter: TerminalAdapter = {
       tell application "iTerm2"
         activate
         create window with default profile
-        delay 0.3
+        delay 1.5
         tell current session of current window
           write text "${escaped}"
         end tell
