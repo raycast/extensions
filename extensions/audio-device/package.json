@@ -221,11 +221,11 @@
       "default": "percentage",
       "data": [
         {
-          "title": "Percentage (50%)",
+          "title": "Percentage (0-100%)",
           "value": "percentage"
         },
         {
-          "title": "Steps (8/16)",
+          "title": "Steps (0-16)",
           "value": "steps"
         }
       ]
