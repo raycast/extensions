@@ -88,7 +88,7 @@ export class ApiService {
           "x-hp-key": auth.hpKey,
           "x-hp-val": auth.hpVal,
         },
-        body: JSON.stringify({ ...(data as Record<string, unknown>), [auth.hpKey as string]: auth.hpVal }),
+        body: JSON.stringify({ ...(data as Record<string, unknown>), [auth.hpKey]: auth.hpVal }),
         signal: config?.signal || controller?.signal,
       });
 
