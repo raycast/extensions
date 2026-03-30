@@ -1,10 +1,8 @@
 # RSS Reader Changelog
 
-## [Fix Package Metadata] - {PR_MERGE_DATE}
+## [Rename Subscriptions] - {PR_MERGE_DATE}
 
-- Fix package.json title case
-- Add version field
-- Remove invalid owner field
+- Rename feed subscriptions and restore original titles
 
 ## [Add Cache] - {PR_MERGE_DATE}
 
@@ -26,11 +24,6 @@
 - Filter Stories by their read status (read or unread) (ref: [Issue #16546](https://github.com/raycast/extensions/issues/16546))
 - Stories show an `Icon` to represent their read status
 - Add README.md
-
-## [Rename Subscriptions] - {PR_MERGE_DATE}
-
-- Rename Feeds (you can restore the Original Title using the same `Form`) [ref: [#16290](https://github.com/raycast/extensions/issues/16290)]
-- Make Remove Action `Destructive`
 
 ## [Add Favicons and Detail View] - {PR_MERGE_DATE}
 
