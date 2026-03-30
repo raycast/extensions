@@ -13,16 +13,7 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 import { AIExplanation } from "./components/AIExplanation";
-
-interface Preferences {
-  colorScheme: "blue" | "green" | "purple" | "orange" | "red";
-  showSanskrit: boolean;
-  apiSource: "vedic" | "gita";
-  apiKey?: string;
-  translationLanguage: string;
-}
 
 interface VedicChapter {
   chapter_number: number;
