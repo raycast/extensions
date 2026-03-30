@@ -2,7 +2,6 @@ import {
   List,
   Icon,
   getPreferenceValues,
-  Color,
   ActionPanel,
   Action,
   AI,
@@ -14,6 +13,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { AIExplanation } from "./components/AIExplanation";
+import { getErrorMessage, getThemeColor } from "./utils";
 
 interface VedicChapter {
   chapter_number: number;
@@ -57,33 +57,13 @@ interface RapidVerseResponse {
   translations?: Array<{ description?: string }>;
 }
 
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "string") return err;
-  return "Unknown error";
-}
+const VEDIC_VERSE_FETCH_BATCH = 8;
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const colorScheme = preferences.colorScheme;
   const isVedic = preferences.apiSource === "vedic";
   const canUseAI = environment.canAccess(AI);
-
-  const getThemeColor = (scheme: string) => {
-    switch (scheme) {
-      case "red":
-        return Color.Red;
-      case "green":
-        return Color.Green;
-      case "orange":
-        return Color.Orange;
-      case "purple":
-        return Color.Purple;
-      case "blue":
-      default:
-        return Color.Blue;
-    }
-  };
 
   const themeColor = getThemeColor(colorScheme);
 
@@ -103,20 +83,17 @@ export default function Command() {
     ? "https://vedicscriptures.github.io/chapters"
     : "https://bhagavad-gita3.p.rapidapi.com/v2/chapters/?limit=18";
 
-  const { isLoading, data, error } = useFetch<VedicChapter[] | RapidChapter[]>(
-    url,
-    {
-      ...options,
-      execute: isVedic || !!preferences.apiKey,
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch chapters",
-          message: err.message,
-        });
-      },
+  const { isLoading, data, error } = useFetch<VedicChapter[] | RapidChapter[]>(url, {
+    ...options,
+    execute: isVedic || !!preferences.apiKey,
+    onError: (err) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch chapters",
+        message: err.message,
+      });
     },
-  );
+  });
 
   if (error) {
     return (
@@ -126,10 +103,7 @@ export default function Command() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -158,12 +132,8 @@ export default function Command() {
               (ch as VedicChapter).translation,
               (ch as VedicChapter).meaning?.en,
               (ch as VedicChapter).meaning?.hi,
-            ].filter(
-              (v): v is string => typeof v === "string" && v.length > 0,
-            ) as string[])
-          : [(ch as RapidChapter).name_meaning].filter(
-              (v): v is string => typeof v === "string" && v.length > 0,
-            );
+            ].filter((v): v is string => typeof v === "string" && v.length > 0) as string[])
+          : [(ch as RapidChapter).name_meaning].filter((v): v is string => typeof v === "string" && v.length > 0);
 
         return (
           <List.Item
@@ -176,12 +146,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.Push
                   title="View Verses"
-                  target={
-                    <VersesList
-                      chapterNumber={ch.chapter_number}
-                      versesCount={ch.verses_count}
-                    />
-                  }
+                  target={<VersesList chapterNumber={ch.chapter_number} versesCount={ch.verses_count} />}
                 />
                 {canUseAI ? (
                   <Action.Push
@@ -202,10 +167,7 @@ export default function Command() {
                     url="https://www.raycast.com/pro"
                   />
                 )}
-                <Action
-                  title="Open Extension Preferences"
-                  onAction={openExtensionPreferences}
-                />
+                <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
               </ActionPanel>
             }
           />
@@ -222,10 +184,7 @@ export default function Command() {
           icon={Icon.MagnifyingGlass}
           actions={
             <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -234,61 +193,44 @@ export default function Command() {
   );
 }
 
-function VersesList({
-  chapterNumber,
-  versesCount,
-}: {
-  chapterNumber: number;
-  versesCount: number;
-}) {
+function VersesList({ chapterNumber, versesCount }: { chapterNumber: number; versesCount: number }) {
   const preferences = getPreferenceValues<Preferences>();
   const isVedic = preferences.apiSource === "vedic";
   const canUseAI = environment.canAccess(AI);
   const [verses, setVerses] = useState<Verse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const getThemeColor = (scheme: string) => {
-    switch (scheme) {
-      case "red":
-        return Color.Red;
-      case "green":
-        return Color.Green;
-      case "orange":
-        return Color.Orange;
-      case "purple":
-        return Color.Purple;
-      case "blue":
-      default:
-        return Color.Blue;
-    }
-  };
   const themeColor = getThemeColor(preferences.colorScheme);
 
-  // Load verses concurrently for Vedic API (which requires verse-by-verse fetch)
-  // Or fetch single chapter array for RapidAPI
+  // Vedic API: verse-by-verse fetch in small batches to limit concurrency.
+  // RapidAPI: single request. Cancellation avoids setState after unmount.
   useEffect(() => {
+    let cancelled = false;
+
     const fetchVerses = async () => {
       try {
         if (isVedic) {
-          const promises: Array<Promise<VedicSlokResponse>> = [];
-          for (let i = 1; i <= versesCount; i++) {
-            promises.push(
-              fetch(
-                `https://vedicscriptures.github.io/slok/${chapterNumber}/${i}`,
-              ).then((r) => r.json()),
-            );
+          const results: VedicSlokResponse[] = [];
+          for (let start = 1; start <= versesCount; start += VEDIC_VERSE_FETCH_BATCH) {
+            if (cancelled) return;
+            const end = Math.min(start + VEDIC_VERSE_FETCH_BATCH - 1, versesCount);
+            const batch: Array<Promise<VedicSlokResponse>> = [];
+            for (let i = start; i <= end; i++) {
+              batch.push(
+                fetch(`https://vedicscriptures.github.io/slok/${chapterNumber}/${i}`).then(
+                  (r) => r.json() as Promise<VedicSlokResponse>,
+                ),
+              );
+            }
+            const batchResults = await Promise.all(batch);
+            results.push(...batchResults);
           }
-          const results = await Promise.all(promises);
+          if (cancelled) return;
           const formatted: Verse[] = results.map((v) => ({
             chapter: v.chapter,
             verse: v.verse,
             sanskrit: v.slok,
-            translation:
-              v.siva?.et ||
-              v.tej?.ht ||
-              v.adi?.et ||
-              v.gambir?.et ||
-              "Translation not available",
+            translation: v.siva?.et || v.tej?.ht || v.adi?.et || v.gambir?.et || "Translation not available",
           }));
           setVerses(formatted);
         } else {
@@ -305,31 +247,37 @@ function VersesList({
             options,
           );
           const data = await response.json();
+          if (cancelled) return;
           // Map rapidapi data to Verse format
           if (Array.isArray(data)) {
-            const formatted: Verse[] = (data as RapidVerseResponse[]).map(
-              (v) => ({
-                chapter: v.chapter_number,
-                verse: v.verse_number,
-                sanskrit: v.text,
-                translation: v.translations?.[0]?.description || "",
-              }),
-            );
+            const formatted: Verse[] = (data as RapidVerseResponse[]).map((v) => ({
+              chapter: v.chapter_number,
+              verse: v.verse_number,
+              sanskrit: v.text,
+              translation: v.translations?.[0]?.description || "",
+            }));
             setVerses(formatted);
           }
         }
       } catch (err: unknown) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to fetch verses",
-          message: getErrorMessage(err),
-        });
+        if (!cancelled) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to fetch verses",
+            message: getErrorMessage(err),
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
-    fetchVerses();
+    void fetchVerses();
+    return () => {
+      cancelled = true;
+    };
   }, [chapterNumber, versesCount, isVedic, preferences.apiKey]);
 
   return (
@@ -398,10 +346,7 @@ function VersesList({
                   url="https://www.raycast.com/pro"
                 />
               )}
-              <Action
-                title="Open Extension Preferences"
-                onAction={openExtensionPreferences}
-              />
+              <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
