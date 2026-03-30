@@ -1,10 +1,18 @@
-import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, PopToRootType, showHUD, useNavigation } from "@raycast/api";
 import { nanoid } from "nanoid";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
 import { FormValidation, useForm } from "@raycast/utils";
+import { useMemo } from "react";
 
-export default function Main() {
+interface CreateProps {
+  connectionToEdit?: ISSHConnection;
+}
+
+export default function Main({ connectionToEdit }: CreateProps) {
+  const isEditing = useMemo(() => !!connectionToEdit, [connectionToEdit]);
+  const { pop } = useNavigation();
+
   const { handleSubmit, itemProps } = useForm<ISSHConnection>({
     onSubmit(values) {
       saveConnection(values);
@@ -12,16 +20,27 @@ export default function Main() {
     validation: {
       name: FormValidation.Required,
     },
+    initialValues: connectionToEdit ?? {},
   });
 
   async function saveConnection(connection: ISSHConnection) {
     const existingConnections = await getConnections();
+
+    if (isEditing) {
+      const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);
+      existingConnections.splice(existingConnectionIdx, 1);
+    }
     existingConnections.push({ ...connection, id: nanoid() });
 
     await saveConnections(existingConnections);
-    await showHUD(`✅ Connection [${connection.name}] saved!`, {
-      popToRootType: PopToRootType.Immediate,
-    });
+
+    if (isEditing) {
+      pop();
+    } else {
+      await showHUD(`✅ Connection [${connection.name}] saved!`, {
+        popToRootType: PopToRootType.Immediate,
+      });
+    }
   }
 
   return (

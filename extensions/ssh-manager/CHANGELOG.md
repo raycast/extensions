@@ -1,5 +1,10 @@
 # SSH Manager Changelog
 
+## [Edit existing connections] - {PR_MERGE_DATE}
+
+- Allow existing saved SSH connections to be edited
+- Add `.idea` folder to `.gitignore`
+
 ## [Select SSH Config File] - 2025-08-04
 
 - Select SSH Config File (ref: [Issue #19941](https://github.com/raycast/extensions/issues/19941))
