@@ -59,7 +59,7 @@ export default function MenuBarCommand() {
       icon={state.isPlaying ? { source: Icon.Music, tintColor: "#7C5CFC" } : Icon.Music}
       title={title}
       tooltip={
-        state.isPlaying ? `Trance — ${activeCount} sound${activeCount !== 1 ? "s" : ""} playing` : "Trance — Paused"
+        state.isPlaying ? `Moodist — ${activeCount} sound${activeCount !== 1 ? "s" : ""} playing` : "Moodist — Paused"
       }
       isLoading={isLoading}
     >

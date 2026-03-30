@@ -14,7 +14,7 @@ export default function MixSoundsCommand() {
       : undefined;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search sounds..." navigationTitle="Trance">
+    <List isLoading={isLoading} searchBarPlaceholder="Search sounds..." navigationTitle="Moodist">
       {subtitle && <List.EmptyView title="No matching sounds" description="Try a different search term" />}
       {SOUND_CATEGORIES.map((cat) => (
         <List.Section key={cat.id} title={cat.name} subtitle={`${getSoundsByCategory(cat.id).length} sounds`}>

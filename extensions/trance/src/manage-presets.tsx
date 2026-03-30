@@ -79,9 +79,11 @@ export default function ManagePresetsCommand() {
   const { state, loadPreset } = usePlayback();
   const { push } = useNavigation();
 
+  const hasActiveSounds = state.activeSounds.length > 0;
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search presets...">
-      {state.activeSounds.length > 0 && (
+    <List isLoading={isLoading} searchBarPlaceholder="Search presets..." navigationTitle="Presets">
+      {hasActiveSounds && (
         <List.Section title="Actions">
           <List.Item
             title="Save Current Mix as Preset"
@@ -197,25 +199,21 @@ export default function ManagePresetsCommand() {
 
       {presets.length === 0 && !isLoading && (
         <List.EmptyView
-          title={state.activeSounds.length === 0 ? "No Mix Active" : "No Presets Yet"}
+          title={hasActiveSounds ? "No Presets Yet" : "No Mix Active"}
           description={
-            state.activeSounds.length === 0
-              ? "Open the mixer to add sounds, then come back to save a preset"
-              : "Save your current mix using the action above"
+            hasActiveSounds
+              ? "Save your current mix as a preset above"
+              : "Add sounds in Mix Sounds, then save your mix here"
           }
           icon={Icon.Music}
           actions={
-            state.activeSounds.length === 0 ? (
+            !hasActiveSounds ? (
               <ActionPanel>
                 <Action
                   title="Open Mixer"
                   icon={Icon.AppWindowGrid3x3}
                   onAction={async () => {
-                    try {
-                      await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });
-                    } catch {
-                      await showToast({ style: Toast.Style.Failure, title: "Could not open mixer" });
-                    }
+                    await launchCommand({ name: "mix-sounds", type: LaunchType.UserInitiated });
                   }}
                 />
               </ActionPanel>

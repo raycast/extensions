@@ -14,6 +14,6 @@ export default async function TogglePlaybackCommand() {
   if (state.isPlaying) {
     await showHUD(`Playing ${state.activeSounds.length} sound${state.activeSounds.length !== 1 ? "s" : ""}`);
   } else {
-    await showHUD("Trance paused");
+    await showHUD("Moodist paused");
   }
 }
