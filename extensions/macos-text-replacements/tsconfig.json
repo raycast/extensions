@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "module": "CommonJS",
+    "target": "ES2022",
+    "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "outDir": "dist"
+  },
+  "include": ["src/**/*"]
+}
