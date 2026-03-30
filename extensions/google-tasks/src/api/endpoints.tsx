@@ -94,7 +94,7 @@ export async function deleteTask(tasklist: string, id: string): Promise<void> {
   }
 }
 
-function serializeTaskDueDate<T extends { due?: string | Date }>(task: T): T {
+function serializeTaskDueDate<T extends { due?: string | Date | null }>(task: T): T {
   if (!(task.due instanceof Date)) {
     return task;
   }
