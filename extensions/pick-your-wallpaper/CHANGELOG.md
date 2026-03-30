@@ -1,6 +1,6 @@
 # Pick Your Wallpaper Changelog
 
-## [AI Features] - {PR_MERGE_DATE}
+## [AI Features] - 2026-03-30
 
 - Added AI-powered image descriptions generated from actual pixel color data using `sips` and zlib decompression
 - Added Raycast AI Chat tools: `search-wallpapers`, `suggest-wallpaper`, and `set-wallpaper`
