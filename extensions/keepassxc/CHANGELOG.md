@@ -1,10 +1,11 @@
 # KeePassXC Extension Changelog
 
-n## [Unreleased]
+## [Unreleased]
 
 ### Fixed
 
-- Support passwordless vaults by making the password field optional (#26714).
+- Support passwordless vaults by making the password field optional and passing `--no-password` to the CLI when no password is provided (#26714).
+
 ## [1.9.0] - 2026-02-11
 
 ### Added
