@@ -91,7 +91,10 @@ export default async function addExpense(input: Input) {
       start: parsedDate,
     };
     if (input.repeatEndDate?.trim()) payload.repeat.end = input.repeatEndDate.trim();
-    if (input.repeatCount?.trim()) payload.repeat.count = parseInt(input.repeatCount, 10);
+    if (input.repeatCount?.trim()) {
+      const count = parseInt(input.repeatCount, 10);
+      if (!isNaN(count) && count > 0) payload.repeat.count = count;
+    }
   }
 
   // Use category ID if provided

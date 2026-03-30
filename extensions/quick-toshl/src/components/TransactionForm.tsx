@@ -109,7 +109,8 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
             start: entryDate,
           };
           if (values.endType === "count" && values.count) {
-            payload.repeat.count = parseInt(values.count);
+            const count = parseInt(values.count, 10);
+            if (!isNaN(count) && count > 0) payload.repeat.count = count;
           } else if (values.endType === "date" && values.endDate) {
             payload.repeat.end = format(values.endDate, "yyyy-MM-dd");
           }
