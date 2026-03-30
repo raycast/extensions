@@ -99,7 +99,7 @@ function formatEndCondition(step: {
   endCondition: string;
   endConditionValue?: number | null;
 }): string {
-  if (!step.endConditionValue)
+  if (step.endConditionValue == null)
     return step.endCondition === "open" ? "open" : "";
   switch (step.endCondition) {
     case "distance":

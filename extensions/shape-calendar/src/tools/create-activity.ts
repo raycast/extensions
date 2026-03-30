@@ -51,7 +51,17 @@ export default async function (input: Input) {
   const { stepsJson, ...rest } = input;
   const body = {
     ...rest,
-    ...(stepsJson ? { steps: JSON.parse(stepsJson) } : {}),
+    ...(stepsJson
+      ? (() => {
+          try {
+            return { steps: JSON.parse(stepsJson) };
+          } catch {
+            throw new Error(
+              "Invalid steps JSON — could not parse the structured workout steps.",
+            );
+          }
+        })()
+      : {}),
   };
   const activity = await createActivity(body);
   return activity;
