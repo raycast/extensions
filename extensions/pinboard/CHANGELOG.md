@@ -1,6 +1,6 @@
 # Changelog
 
-## [Rewrite] - 2026-02-17
+## [Rewrite] - {PR_MERGE_DATE}
 
 - Cache-based local search across title, URL, tags, and description (instant render, no more loading all bookmarks into the list)
 - `#tag` syntax for tag-only filtering
