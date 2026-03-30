@@ -1,6 +1,6 @@
 # Kaneo Changelog
 
-## [Add Keyboard Shortcuts] - 2026-03-27
+## [Add Subtasks Support] - 2026-03-27
 
 - Added support for sub tasks in task details
 - Added keyboard shortcuts to move to parent task
