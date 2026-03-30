@@ -17,7 +17,7 @@
   "commands": [
     {
       "name": "view-posts",
-      "title": "List Posts",
+      "title": "List Content",
       "subtitle": "Notra",
       "description": "Browse and manage your Notra posts",
       "mode": "view"
