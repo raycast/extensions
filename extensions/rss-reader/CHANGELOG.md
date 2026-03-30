@@ -1,5 +1,9 @@
 # RSS Reader Changelog
 
+## [Duplicate Subscriptions] - {PR_MERGE_DATE}
+
+- Duplicate feed subscriptions to quickly create variations with different URLs
+
 ## [Add Cache] - 2026-03-26
 
 - Prefill Add Subscription with the active browser tab URL when the Raycast Browser Extension is available

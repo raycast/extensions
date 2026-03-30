@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rss-reader",
-  "title": "RSS Reader",
+  "title": "Rss Reader",
   "description": "Browse latest news from your favourite sources",
   "icon": "command-icon.png",
   "author": "fuksman",
@@ -10,7 +10,8 @@
     "pernielsentikaer",
     "pomdtr",
     "xmok",
-    "alexi.build"
+    "alexi.build",
+    "degouville"
   ],
   "commands": [
     {
@@ -60,6 +61,11 @@
       "name": "rename-feed",
       "title": "Rename Feed",
       "description": "Rename an RSS feed subscription."
+    },
+    {
+      "name": "duplicate-feed",
+      "title": "Duplicate Feed",
+      "description": "Duplicate an RSS feed subscription with a new URL."
     },
     {
       "name": "mark-as-read",
