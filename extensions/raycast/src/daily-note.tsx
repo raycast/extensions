@@ -6,11 +6,7 @@ import { handleError } from "./utils/errors";
 
 export default async function DailyNote() {
   const today = new Date();
-  const title = today.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const title = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   try {
     showToast({

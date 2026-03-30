@@ -130,10 +130,11 @@ function FolderNotesList({
       let result: Note[] = [];
 
       if (filterType === "trash") {
-        result = await remoApi.listNotes({
+        const deletedNotes = await remoApi.listNotes({
           includeDeleted: true,
           limit: 50,
         });
+        result = deletedNotes.filter((note: Note) => note.deletedAt !== undefined);
       } else if (filterType === "quickCapture") {
         result = await remoApi.listNotes({
           quickCapturedOnly: true,

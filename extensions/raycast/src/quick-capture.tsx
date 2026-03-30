@@ -2,10 +2,6 @@ import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
 
-interface Preferences {
-  autoFormat: boolean;
-}
-
 export default async function Command() {
   try {
     const text = await Clipboard.readText();
@@ -17,7 +13,7 @@ export default async function Command() {
       return;
     }
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues();
 
     await showToast({
       style: Toast.Style.Animated,

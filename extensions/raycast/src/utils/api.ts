@@ -32,10 +32,6 @@ type ApiErrorPayload = {
   message?: string;
 };
 
-interface Preferences {
-  apiKey: string;
-}
-
 export class RemoApiError extends Error {
   status: number;
   code?: string;
@@ -48,7 +44,7 @@ export class RemoApiError extends Error {
 }
 
 function getApiKey() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const key = preferences.apiKey?.trim();
 
   if (!key) {

@@ -71,7 +71,7 @@ export default function Trash() {
                 ? []
                 : [
                     {
-                      text: `Deleted: ${new Date(note.updatedAt).toLocaleDateString()}`,
+                      text: `Deleted: ${new Date(note.deletedAt ?? note.updatedAt).toLocaleDateString()}`,
                       tooltip: "Date deleted",
                     },
                   ]
@@ -85,7 +85,7 @@ export default function Trash() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Deleted At"
-                      text={new Date(note.updatedAt).toLocaleString()}
+                      text={new Date(note.deletedAt ?? note.updatedAt).toLocaleString()}
                     />
                   </List.Item.Detail.Metadata>
                 }
