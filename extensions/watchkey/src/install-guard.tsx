@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useState } from "react";
-import { installWatchkey, isWatchkeyInstalled } from "./watchkey";
+import { isWatchkeyInstalled } from "./watchkey";
 
 export function useInstallGuard() {
   const [installed, setInstalled] = useState(isWatchkeyInstalled());
@@ -11,41 +11,16 @@ export function useInstallGuard() {
 
 This extension requires [watchkey](https://github.com/Etheirystech/watchkey) to be installed.
 
-Press **Enter** to install it automatically, or install manually:
-
-\`\`\`bash
-git clone https://github.com/Etheirystech/watchkey.git
-cd watchkey
-sudo make install
-\`\`\`
+Press **Enter** to open the GitHub repo and follow the installation instructions.
 `}
       actions={
         <ActionPanel>
-          <Action
-            title="Install Watchkey"
-            onAction={async () => {
-              const toast = await showToast({
-                style: Toast.Style.Animated,
-                title: "Installing watchkey...",
-                message: "Building from source",
-              });
-              try {
-                await installWatchkey();
-                toast.style = Toast.Style.Success;
-                toast.title = "watchkey installed";
-                setInstalled(true);
-              } catch (error) {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Installation failed";
-                toast.message = error instanceof Error ? error.message : String(error);
-              }
-            }}
-          />
           <Action.OpenInBrowser title="Open GitHub Repo" url="https://github.com/Etheirystech/watchkey" />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content="git clone https://github.com/Etheirystech/watchkey.git && cd watchkey && sudo make install"
           />
+          <Action title="Check Again" onAction={() => setInstalled(isWatchkeyInstalled())} />
         </ActionPanel>
       }
     />
