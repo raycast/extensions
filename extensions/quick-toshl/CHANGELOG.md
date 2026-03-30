@@ -30,7 +30,7 @@ All notable changes to this project are documented in this file.
 
 - **Dependencies** – Updated `@raycast/api`, `axios`, `react`, `@types/node`, `@types/react`, `prettier` for compatibility and security.
 
-## [1.1.2] - 2026-02-28
+## [1.1.2] - 2026-02-04
 
 ### Improved
 
