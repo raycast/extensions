@@ -154,12 +154,12 @@ export default function ManageTags() {
             icon={Icon.Tag}
             actions={
               <ActionPanel>
-                <Action title="Add Tag" icon={Icon.Plus} onAction={() => push(<AddTagForm onSaved={revalidate} />)} />
                 <Action
                   title="Edit"
                   icon={Icon.Pencil}
                   onAction={() => push(<EditTagForm tag={t} onSaved={revalidate} />)}
                 />
+                <Action title="Add Tag" icon={Icon.Plus} onAction={() => push(<AddTagForm onSaved={revalidate} />)} />
                 <Action title="Delete" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => remove(t)} />
               </ActionPanel>
             }

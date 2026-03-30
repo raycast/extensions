@@ -165,14 +165,14 @@ export default function ManageAccounts() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Add Account"
-                  icon={Icon.Plus}
-                  onAction={() => push(<AddAccountForm onSaved={revalidate} />)}
-                />
-                <Action
                   title="Edit"
                   icon={Icon.Pencil}
                   onAction={() => push(<EditAccountForm account={a} onSaved={revalidate} />)}
+                />
+                <Action
+                  title="Add Account"
+                  icon={Icon.Plus}
+                  onAction={() => push(<AddAccountForm onSaved={revalidate} />)}
                 />
                 <Action title="Delete" icon={Icon.Trash} style={Action.Style.Destructive} onAction={() => remove(a)} />
               </ActionPanel>

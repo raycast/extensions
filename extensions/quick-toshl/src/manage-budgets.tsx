@@ -174,14 +174,14 @@ export default function ManageBudgets() {
               actions={
                 <ActionPanel>
                   <Action
-                    title="Add Budget"
-                    icon={Icon.Plus}
-                    onAction={() => push(<AddBudgetForm onSaved={revalidate} />)}
-                  />
-                  <Action
                     title="Edit"
                     icon={Icon.Pencil}
                     onAction={() => push(<EditBudgetForm budget={b} onSaved={revalidate} />)}
+                  />
+                  <Action
+                    title="Add Budget"
+                    icon={Icon.Plus}
+                    onAction={() => push(<AddBudgetForm onSaved={revalidate} />)}
                   />
                   <Action
                     title="Delete"

@@ -148,15 +148,15 @@ export default function ManageCategories() {
             actions={
               <ActionPanel>
                 <Action
+                  title="Edit"
+                  icon={Icon.Pencil}
+                  onAction={() => push(<EditCategoryForm category={c} onSaved={revalidate} />)}
+                />
+                <Action
                   title="Add Category"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => push(<AddCategoryForm onSaved={revalidate} />)}
-                />
-                <Action
-                  title="Edit"
-                  icon={Icon.Pencil}
-                  onAction={() => push(<EditCategoryForm category={c} onSaved={revalidate} />)}
                 />
                 {c.type !== "system" && (
                   <Action
