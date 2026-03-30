@@ -8,7 +8,10 @@ async function rotateIfNeeded(): Promise<void> {
       const content = await readFile(LOG_FILE, "utf-8");
       const half = Math.floor(content.length / 2);
       const newlineAfterHalf = content.indexOf("\n", half);
-      const trimmed = newlineAfterHalf !== -1 ? content.slice(newlineAfterHalf + 1) : content.slice(half);
+      const trimmed =
+        newlineAfterHalf !== -1
+          ? content.slice(newlineAfterHalf + 1)
+          : content.slice(half);
       await writeFile(LOG_FILE, trimmed, "utf-8");
     }
   } catch {
@@ -21,7 +24,10 @@ export async function logLine(message: string): Promise<void> {
   await appendFile(LOG_FILE, `${timestamp}  ${message}\n`, "utf-8");
 }
 
-export async function logSessionStart(cards: string[], destination: string): Promise<void> {
+export async function logSessionStart(
+  cards: string[],
+  destination: string,
+): Promise<void> {
   await rotateIfNeeded();
   const divider = "=".repeat(60);
   await logLine(divider);

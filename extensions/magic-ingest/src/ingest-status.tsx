@@ -1,9 +1,19 @@
-import { updateCommandMetadata, launchCommand, LaunchType, environment } from "@raycast/api";
+import {
+  updateCommandMetadata,
+  launchCommand,
+  LaunchType,
+  environment,
+} from "@raycast/api";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 
-const PID_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.pid");
+const PID_FILE = path.join(
+  homedir(),
+  "Library",
+  "Logs",
+  "raycast-photo-ingest.pid",
+);
 
 const SHORT_LABELS: Record<string, string> = {
   scanning: "Scanning",
@@ -57,7 +67,9 @@ export default async function Command() {
       const bar = total > 0 ? progressBar(current, total) : "";
       const pct = total > 0 ? ` ${Math.round((current / total) * 100)}%` : "";
 
-      const fileSuffix = parsed.currentFile ? ` · ${parsed.currentFile} ${parsed.filePercent ?? 0}%` : "";
+      const fileSuffix = parsed.currentFile
+        ? ` · ${parsed.currentFile} ${parsed.filePercent ?? 0}%`
+        : "";
 
       await updateCommandMetadata({
         subtitle: `${label}  ${bar}${pct}${fileSuffix}`,

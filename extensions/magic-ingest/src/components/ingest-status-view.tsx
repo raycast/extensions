@@ -1,11 +1,30 @@
-import { List, ActionPanel, Action, Icon, Color, confirmAlert, Alert, showHUD } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  confirmAlert,
+  Alert,
+  showHUD,
+} from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 
-const PID_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.pid");
-const LOG_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.log");
+const PID_FILE = path.join(
+  homedir(),
+  "Library",
+  "Logs",
+  "raycast-photo-ingest.pid",
+);
+const LOG_FILE = path.join(
+  homedir(),
+  "Library",
+  "Logs",
+  "raycast-photo-ingest.log",
+);
 
 interface CardInfo {
   name: string;
@@ -56,7 +75,11 @@ function progressBar(current: number, total: number, width = 10): string {
   return "■".repeat(filled) + "□".repeat(width - filled);
 }
 
-export function IngestStatusView({ onNoActiveSession }: { onNoActiveSession?: () => void }) {
+export function IngestStatusView({
+  onNoActiveSession,
+}: {
+  onNoActiveSession?: () => void;
+}) {
   const [info, setInfo] = useState<ProgressInfo | null>(null);
   const [alive, setAlive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,7 +147,15 @@ export function IngestStatusView({ onNoActiveSession }: { onNoActiveSession?: ()
     );
   }
 
-  const { stage, progress, cards, destDir, startedAt, currentFile, filePercent } = info ?? {
+  const {
+    stage,
+    progress,
+    cards,
+    destDir,
+    startedAt,
+    currentFile,
+    filePercent,
+  } = info ?? {
     stage: "",
     progress: { current: 0, total: 0 },
     cards: [],
@@ -136,8 +167,12 @@ export function IngestStatusView({ onNoActiveSession }: { onNoActiveSession?: ()
 
   const stageLabel = STAGE_LABELS[stage] || stage;
   const elapsed = formatElapsed(new Date(startedAt));
-  const pct = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
-  const bar = progress.total > 0 ? progressBar(progress.current, progress.total, 20) : "";
+  const pct =
+    progress.total > 0
+      ? Math.round((progress.current / progress.total) * 100)
+      : 0;
+  const bar =
+    progress.total > 0 ? progressBar(progress.current, progress.total, 20) : "";
 
   const errorMsg = info?.error ?? null;
 
@@ -159,9 +194,18 @@ export function IngestStatusView({ onNoActiveSession }: { onNoActiveSession?: ()
           accessories={[{ text: elapsed, icon: Icon.Clock }]}
           actions={
             <ActionPanel>
-              <Action title="Stop Ingest" icon={Icon.Stop} style={Action.Style.Destructive} onAction={stopIngest} />
+              <Action
+                title="Stop Ingest"
+                icon={Icon.Stop}
+                style={Action.Style.Destructive}
+                onAction={stopIngest}
+              />
               <Action.ShowInFinder title="Show Destination" path={destDir} />
-              <Action.Open title="Open Log" target={LOG_FILE} icon={Icon.Document} />
+              <Action.Open
+                title="Open Log"
+                target={LOG_FILE}
+                icon={Icon.Document}
+              />
             </ActionPanel>
           }
         />
@@ -169,7 +213,10 @@ export function IngestStatusView({ onNoActiveSession }: { onNoActiveSession?: ()
 
       {errorMsg && (
         <List.Section title="Error">
-          <List.Item icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} title={errorMsg} />
+          <List.Item
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+            title={errorMsg}
+          />
         </List.Section>
       )}
 

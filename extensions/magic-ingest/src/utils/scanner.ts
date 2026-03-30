@@ -12,7 +12,10 @@ export interface ScannedFile {
   isSidecar: boolean;
 }
 
-export async function scanVolume(volumePath: string, volumeName: string): Promise<ScannedFile[]> {
+export async function scanVolume(
+  volumePath: string,
+  volumeName: string,
+): Promise<ScannedFile[]> {
   const files: ScannedFile[] = [];
   const extensionSet = new Set(ALL_EXTENSIONS);
 
@@ -54,7 +57,11 @@ export async function scanVolume(volumePath: string, volumeName: string): Promis
   return files;
 }
 
-export async function scanMultipleVolumes(volumes: Array<{ path: string; name: string }>): Promise<ScannedFile[]> {
-  const results = await Promise.all(volumes.map((v) => scanVolume(v.path, v.name)));
+export async function scanMultipleVolumes(
+  volumes: Array<{ path: string; name: string }>,
+): Promise<ScannedFile[]> {
+  const results = await Promise.all(
+    volumes.map((v) => scanVolume(v.path, v.name)),
+  );
   return results.flat();
 }
