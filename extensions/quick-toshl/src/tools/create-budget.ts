@@ -1,6 +1,6 @@
 import { toshl } from "../utils/toshl";
 import { AI_INSTRUCTIONS } from "../utils/helpers";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { format, startOfMonth } from "date-fns";
 
 type Input = {
   name: string;
@@ -26,7 +26,6 @@ export default async function createBudget(input: Input) {
       frequency: "monthly",
       interval: 1,
       start: format(startOfMonth(today), "yyyy-MM-dd"),
-      end: format(endOfMonth(today), "yyyy-MM-dd"),
     },
   });
   return {

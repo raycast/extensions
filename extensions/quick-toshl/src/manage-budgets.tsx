@@ -11,7 +11,7 @@ import {
   confirmAlert,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { format, addDays, subDays, startOfMonth, endOfMonth } from "date-fns";
+import { format, addDays, subDays, startOfMonth } from "date-fns";
 import { toshl } from "./utils/toshl";
 import type { Budget } from "./utils/types";
 import { formatCurrency } from "./utils/helpers";
@@ -50,7 +50,6 @@ function AddBudgetForm({ onSaved }: { onSaved: () => void }) {
                   frequency: "monthly",
                   interval: 1,
                   start: format(startOfMonth(today), "yyyy-MM-dd"),
-                  end: format(endOfMonth(today), "yyyy-MM-dd"),
                 },
               });
               showToast({ style: Toast.Style.Success, title: "Budget created" });

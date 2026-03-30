@@ -254,7 +254,7 @@ async function main() {
       categories: [created.categoryId],
       from,
       to,
-      recurrence: { frequency: "monthly", interval: 1, start: from, end: to },
+      recurrence: { frequency: "monthly", interval: 1, start: from },
       extra: { quick_toshl_test: true },
     });
     if (bud.status === 200 || bud.status === 201) {

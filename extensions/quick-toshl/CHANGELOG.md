@@ -1,6 +1,4 @@
-# Changelog
-
-All notable changes to this project are documented in this file.
+# Quick Toshl Changelog
 
 ## [1.4.1] - {PR_MERGE_DATE}
 
@@ -11,6 +9,7 @@ All notable changes to this project are documented in this file.
 - **API Rate Limit** (`rate-limit`) – shows remaining quota when `GET /rate-limit` exists.
 - **AI tools** – `delete-category`, `delete-tag`, `delete-account`, `update-transfer`, `get-me`, `get-tag-sums`, `list-entry-locations` (plus existing create/update coverage for categories, tags, accounts, budgets).
 - **`scripts/toshl-integration-test.cjs`** – optional live API smoke test that creates disposable `QTT-TEST-*` resources and deletes them afterward (supports `TOSHL_API_KEY` or `op read` for the key).
+- **Metadata** – extra store screenshots for the new view commands (`metadata/`).
 
 ### Changed
 
@@ -18,17 +17,11 @@ All notable changes to this project are documented in this file.
 - **`get-tag-sums` (AI)** – passes the API-required `currency` query parameter (defaults to main currency from `/me`).
 - **API Rate Limit UI** – if `GET /rate-limit` returns 404, the command shows that quota is unavailable instead of failing.
 - **README** – command list, AI tool list, configuration, and local dev notes (`build`, `lint`, `dev`, integration script).
+- **Budgets (AI + Manage Budgets)** – new monthly budgets use open-ended recurrence (`start` only) so they keep renewing each month instead of stopping at the current month’s end.
 
 ### Fixed
 
-- **Store CI (`tsc --noEmit`)** – `EntryEditDeleteSections` now types `push` / `pop` with `ReturnType<typeof useNavigation>` so Raycast’s bundled React types match `useNavigation()` (fixes `recent-transactions` / `search-entries` build errors).
-- **Store CI** – `Location` header parsing uses a small `locationHeaderFrom()` helper so Axios response headers type-check under strict `tsc`.
-
-## [1.1.3] - 2026-02-28
-
-### Changed
-
-- **Dependencies** – Updated `@raycast/api`, `axios`, `react`, `@types/node`, `@types/react`, `prettier` for compatibility and security.
+- **`search-entries`** – explicit `from` / `to` override `dateRange` when either date is provided (after trim).
 
 ## [1.1.2] - 2026-02-04
 

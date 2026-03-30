@@ -12,8 +12,8 @@ type Input = {
    */
   to?: string;
   /**
-   * Predefined date range shortcuts: "today", "yesterday", "this_week", "last_week", "this_month", "last_month", "last_7_days", "last_30_days", "last_90_days"
-   * If provided, overrides 'from' and 'to' parameters.
+   * Predefined date range shortcuts: "today", "yesterday", "this_week", …
+   * Used only when neither `from` nor `to` is set (explicit dates always win).
    */
   dateRange?:
     | "today"
@@ -65,11 +65,16 @@ function getDateRange(input: Input): { from: string; to: string } {
   const today = new Date();
   const formatDate = (d: Date) => format(d, "yyyy-MM-dd");
 
-  // Prioritize explicit from/to dates if provided
-  if (input.from || input.to) {
+  const fromTrim = input.from?.trim();
+  const toTrim = input.to?.trim();
+  const hasExplicitFrom = Boolean(fromTrim);
+  const hasExplicitTo = Boolean(toTrim);
+
+  // Explicit `from` / `to` always beat `dateRange` (even if only one is set).
+  if (hasExplicitFrom || hasExplicitTo) {
     return {
-      from: input.from || formatDate(subDays(today, 365)),
-      to: input.to || formatDate(today),
+      from: hasExplicitFrom ? fromTrim! : formatDate(subDays(today, 365)),
+      to: hasExplicitTo ? toTrim! : formatDate(today),
     };
   }
 
