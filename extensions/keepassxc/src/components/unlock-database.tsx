@@ -41,13 +41,6 @@ export default function UnlockDatabase({
         setIsUnlocked(true);
       }, showToastKeepassxcCliErrors);
     },
-    validation: {
-      password: (value) => {
-        if (!value) {
-          return "Required";
-        }
-      },
-    },
   });
 
   return (
@@ -61,9 +54,7 @@ export default function UnlockDatabase({
       <Form.Description text={"Your KeePass database is currently locked. Insert your credentials to unlock it."} />
       <Form.PasswordField title="Database Password" {...itemProps.password} />
       <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
-      <Form.Description
-        text={"ⓘ Your password and key file path will be stored in your Raycast's local encrypted storage."}
-      />
+      <Form.Description text={"ⓘ Credentials will be stored in Raycast's local encrypted storage."} />
     </Form>
   );
 }

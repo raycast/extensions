@@ -26,7 +26,7 @@ export default function Command(): JSX.Element {
 
   useEffect(() => {
     KeePassLoader.loadCredentialsCache().then((credentials) => {
-      if (credentials.databasePassword) {
+      if (credentials.databasePassword || credentials.keyFile) {
         if (lockAfterInactivity > 0) {
           InactivityTimer.hasRecentActivity().then((hasRecentActivity) => {
             if (hasRecentActivity) {

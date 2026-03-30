@@ -1,5 +1,11 @@
 # KeePassXC Extension Changelog
 
+## [1.10.0] - {PR_MERGE_DATE}
+
+### Added
+
+- Support for passwordless vault (#26714).
+
 ## [1.9.0] - 2026-02-11
 
 ### Added

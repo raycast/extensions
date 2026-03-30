@@ -170,10 +170,10 @@ class KeePassLoader {
   /**
    * Cache the given credentials for later use
    *
-   * @param password - The password to cache
-   * @param keyFile - The path to the key file to cache
+   * @param {string} password - The password to cache
+   * @param {string} keyFile - The path to the key file to cache
    */
-  static cacheCredentials = (password: string, keyFile = "") => {
+  static cacheCredentials = (password: string = "", keyFile: string = "") => {
     LocalStorage.setItem("databasePassword", password);
     LocalStorage.setItem("keyFile", keyFile);
   };
@@ -181,22 +181,25 @@ class KeePassLoader {
   /**
    * Checks the given credentials to see if they are valid
    *
-   * @param databasePassword - The password to unlock the KeePass database
-   * @param keyFile - The path to the key file to unlock the KeePass database
+   * @param {string} databasePassword - The password to unlock the KeePass database
+   * @param {string} keyFile - The path to the key file to unlock the KeePass database
    * @returns {Promise} - Promise that resolves if the credentials are valid, and rejects otherwise
    */
-  static checkCredentials = (databasePassword: string, keyFile: string) =>
+  static checkCredentials = (databasePassword: string = "", keyFile: string = "") =>
     KeePassLoader.findApplication().then(() => {
       return new Promise<void>((resolve, reject) => {
         const cli = this.spawn(`${this.keepassxcCli}`, [
           "db-info",
           ...this.convertIntoKeyFileOption(keyFile),
+          ...(databasePassword === "" ? ["--no-password"] : []),
           "-q",
           `${this.database}`,
         ]);
 
-        cli.stdin.write(`${databasePassword}\n`);
-        cli.stdin.end();
+        if (databasePassword !== "") {
+          cli.stdin.write(`${databasePassword}\n`);
+          cli.stdin.end();
+        }
         cli.on("error", reject);
         cli.stderr.on("data", this.cliStderrErrorHandler(reject));
         cli.on("exit", (code) => {
@@ -245,8 +248,10 @@ class KeePassLoader {
         let exited = false;
         let result: string;
 
-        cli.stdin.write(`${this.databasePassword}\n`);
-        cli.stdin.end();
+        if (this.databasePassword !== "") {
+          cli.stdin.write(`${this.databasePassword}\n`);
+          cli.stdin.end();
+        }
         cli.on("error", reject);
         cli.stderr.on("data", this.cliStderrErrorHandler(reject));
         cli.stdout.on("data", (chunck) => {
@@ -321,6 +326,7 @@ class KeePassLoader {
     this.execKeepassxcCli([
       "export",
       ...this.convertIntoKeyFileOption(this.keyFile),
+      ...(this.databasePassword === "" ? ["--no-password"] : []),
       "-q",
       "-f",
       "csv",
@@ -336,7 +342,7 @@ class KeePassLoader {
    * @param {string} password - The password for the KeePass database
    * @param {string} [keyFile=""] - The optional path to the key file
    */
-  static setCredentials = (password: string, keyFile: string = "") => {
+  static setCredentials = (password: string = "", keyFile: string = "") => {
     this.setDatabasePassword(password);
     this.setKeyFile(keyFile);
   };
