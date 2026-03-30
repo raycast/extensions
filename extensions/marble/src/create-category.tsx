@@ -30,7 +30,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="Create Category"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Category" icon={Icon.Plus} onSubmit={handleSubmit} />

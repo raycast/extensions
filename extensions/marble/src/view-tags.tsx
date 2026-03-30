@@ -126,6 +126,7 @@ export default function Command() {
       pagination={pagination}
       throttle
     >
+      <List.EmptyView title="No Tags Found" description="Try a different search" />
       {filtered.map((tag: Tag) => (
         <List.Item
           key={tag.id}

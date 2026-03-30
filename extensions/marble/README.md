@@ -1,36 +1,20 @@
 # Marble
 
-Manage your [Marble](https://marblecms.com) content directly from Raycast. View, create, edit, and delete posts, authors, categories, and tags without leaving your keyboard.
+[Marble](https://marblecms.com) is a modern headless CMS for blogs and content-driven websites — simple API, built-in SEO, and a beautiful editor.
+
+This extension lets you manage your Marble workspace directly from Raycast:
+
+- **Posts** — Browse, search, create, edit, and delete posts. Filter by published or draft status, view full markdown content with metadata sidebar, and manage categories, tags, and authors per post.
+- **Authors** — Browse, create, edit, and delete authors with bio, role, and social links.
+- **Categories** — Browse, create, edit, and delete content categories.
+- **Tags** — Browse, create, edit, and delete tags.
+
+All forms auto-generate slugs from titles and validate input before submission.
 
 ## Setup
 
-1. Get your API key from the [Marble workspace dashboard](https://marblecms.com)
+1. Get your API key from the [Marble dashboard](https://app.marblecms.com)
 2. Open any Marble command in Raycast
-3. Enter your API key when prompted (stored securely in Raycast preferences)
+3. Enter your API key when prompted
 
-**Note:** Write operations (create, update, delete) require a private API key. Public keys are read-only.
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| View Posts | List and manage posts with published/draft filtering and detail view |
-| Create Post | Create a new post with category, tags, and author selection |
-| View Authors | List and manage authors with bio preview |
-| Create Author | Create a new author with bio, role, and image |
-| View Categories | List and manage categories |
-| Create Category | Create a new category |
-| View Tags | List and manage tags |
-| Create Tag | Create a new tag |
-
-## Features
-
-- Paginated list views with search
-- Published/Draft status badges and filtering on posts
-- Full post detail view with markdown content and metadata sidebar
-- Inline editing and deletion for all resources
-- Optimistic UI updates on delete
-- Auto-generated slugs from titles
-- Zod schema validation on all form submissions
-- Cached data for instant loading on subsequent opens
-- Create new resources from within list views via Cmd+N
+Write operations (create, update, delete) require a private API key. Public keys are read-only.

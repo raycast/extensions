@@ -59,7 +59,6 @@ export default function Command() {
   return (
     <Form
       isLoading={categoriesLoading}
-      navigationTitle="Create Post"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Post" icon={Icon.Plus} onSubmit={handleSubmit} />

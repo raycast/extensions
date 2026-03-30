@@ -272,6 +272,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
+      <List.EmptyView title="No Posts Found" description="Try a different search or filter" />
       {data.map((post: Post) => (
         <List.Item
           key={post.id}

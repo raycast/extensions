@@ -132,6 +132,7 @@ export default function Command() {
       isShowingDetail
       throttle
     >
+      <List.EmptyView title="No Authors Found" description="Try a different search" />
       {filtered.map((author: Author) => (
         <List.Item
           key={author.id}

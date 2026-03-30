@@ -126,6 +126,7 @@ export default function Command() {
       pagination={pagination}
       throttle
     >
+      <List.EmptyView title="No Categories Found" description="Try a different search" />
       {filtered.map((category: Category) => (
         <List.Item
           key={category.id}
