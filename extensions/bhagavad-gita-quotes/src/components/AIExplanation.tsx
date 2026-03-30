@@ -13,41 +13,50 @@ export function AIExplanation({ prompt, title }: AIExplanationProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchAI() {
       if (!environment.canAccess(AI)) {
-        setError(
-          "Raycast AI is not available. You may need Raycast Pro, or AI may not be supported on your platform yet.",
-        );
-        setIsLoading(false);
+        if (!cancelled) {
+          setError(
+            "Raycast AI is not available. You may need Raycast Pro, or AI may not be supported on your platform yet.",
+          );
+          setIsLoading(false);
+        }
         return;
       }
 
       try {
         const answer = await AI.ask(prompt);
-        setData(answer);
+        if (!cancelled) setData(answer);
       } catch (err: unknown) {
-        console.error("AI Error:", err);
-        const msg = getErrorMessage(err);
-        if (msg.includes("Model is not supported") || msg.includes("Worker unloaded")) {
-          setError(
-            "**Raycast AI is not yet supported on Windows.**\n\n" +
-              "The AI API requires Raycast for macOS with a Pro subscription.\n\n" +
-              "As a workaround, you can use an external AI service. Check extension preferences for options.",
-          );
-        } else {
-          setError(`Failed to load AI response: ${msg}`);
+        if (!cancelled) {
+          console.error("AI Error:", err);
+          const msg = getErrorMessage(err);
+          if (msg.includes("Model is not supported") || msg.includes("Worker unloaded")) {
+            setError(
+              "**Raycast AI is not yet supported on Windows.**\n\n" +
+                "The AI API requires Raycast for macOS with a Pro subscription.\n\n" +
+                "As a workaround, you can use an external AI service. Check extension preferences for options.",
+            );
+          } else {
+            setError(`Failed to load AI response: ${msg}`);
+          }
+          showToast({
+            style: Toast.Style.Failure,
+            title: "AI Not Available",
+            message: "Raycast AI may not be supported on this platform.",
+          });
         }
-        showToast({
-          style: Toast.Style.Failure,
-          title: "AI Not Available",
-          message: "Raycast AI may not be supported on this platform.",
-        });
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
-    fetchAI();
+    void fetchAI();
+    return () => {
+      cancelled = true;
+    };
   }, [prompt]);
 
   return (

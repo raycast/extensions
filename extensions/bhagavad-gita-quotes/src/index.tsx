@@ -257,6 +257,12 @@ function VersesList({ chapterNumber, versesCount }: { chapterNumber: number; ver
               translation: v.translations?.[0]?.description || "",
             }));
             setVerses(formatted);
+          } else if (!cancelled) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to fetch verses",
+              message: "Unexpected response from RapidAPI. Check your API key.",
+            });
           }
         }
       } catch (err: unknown) {

@@ -20,7 +20,8 @@ export function getThemeColor(scheme: string): Color {
     case "purple":
       return Color.Purple;
     case "blue":
-    default:
       return Color.Blue;
+    default:
+      return Color.Orange;
   }
 }
