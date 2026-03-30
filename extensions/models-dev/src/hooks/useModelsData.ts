@@ -10,8 +10,9 @@ const CACHE_KEY = "models-data";
  * Hook to fetch models data from models.dev
  *
  * Uses direct fetch + Cache API instead of useCachedPromise to avoid
+ * Uses direct fetch + Cache API instead of useCachedPromise to avoid
  * memory spikes during fresh cache population. See:
- * https://github.com/raycast/utils/issues/XXX
+ * https://github.com/raycast/utils/issues/65
  */
 export function useModelsData() {
   const [data, setData] = useState<ModelsData | null>(() => {
