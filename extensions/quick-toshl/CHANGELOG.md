@@ -1,6 +1,6 @@
 # Quick Toshl Changelog
 
-## [1.4.1] - {PR_MERGE_DATE}
+## [1.4.1] - 2026-03-30
 
 ### Added
 
