@@ -1,10 +1,11 @@
-# OpenCode Sessions Changelog
+# Changelog
 
-## [Initial Version] - 2026-02-20
+## [1.0.0] - 2026-03-30
 
-- Browse sessions with time-grouped sections and project filtering
-- View full conversation transcripts with tool usage details
-- Generate AI-powered session summaries
-- Copy transcripts, session IDs, slugs, and resume commands
-- Open project directories and share links
-- Delete individual sessions or all sessions for a project
+### Added
+- Initial release
+- Session browser with search
+- New session and continue last session actions
+- Multi-terminal support: Terminal.app, iTerm2, Warp, Ghostty, Alacritty
+- Terminal preference in settings
+- Copy session ID action

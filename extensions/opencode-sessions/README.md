@@ -1,21 +1,24 @@
 # OpenCode Sessions
 
-Browse, search, and manage your [OpenCode](https://github.com/sst/opencode) sessions.
-
-View full transcripts, generate summaries, and manage session data directly from Raycast.
+Browse, resume, and launch [OpenCode](https://opencode.ai) sessions directly from Raycast.
 
 ## Features
 
-- Browse all sessions with time-grouped sections (Today, Yesterday, This Week, etc.)
-- Filter sessions by project
-- View full conversation transcripts with tool usage details
-- Generate AI-powered session summaries
-- Copy transcripts, session IDs, slugs, and resume commands
-- Open project directories and share links
-- Delete individual sessions or all sessions for a project
+- **Session Browser** — View all your OpenCode sessions with search
+- **Quick Resume** — Continue your last session with one keystroke
+- **New Session** — Start a fresh OpenCode session instantly
+- **Multi-Terminal** — Works with Terminal.app, iTerm2, Warp, Ghostty, and Alacritty
 
-## Configuration
+## Setup
 
-By default, the extension reads session data from `~/.local/share/opencode/storage`.
-You can override this path in the extension preferences if your OpenCode data is stored
-elsewhere.
+1. Install [OpenCode](https://opencode.ai) (`curl -fsSL https://opencode.ai/install | bash`)
+2. Install this extension from the Raycast Store
+3. Open Raycast and search for "OpenCode Sessions"
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Enter` | Open selected session in terminal |
+| `⌘ C` | Copy session ID |
+| `⌘ R` | Reload session list |
