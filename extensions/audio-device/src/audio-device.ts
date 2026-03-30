@@ -71,8 +71,21 @@ export async function setOutputDeviceVolume(deviceId: string, volume: number) {
 
 export const MAC_VOLUME_STEPS = 16;
 
-export function volumeToSteps(volume: number): number {
-  return Math.round(volume * MAC_VOLUME_STEPS);
+/**
+ * Convert percentage to steps
+ * @example pctToSteps(50) // returns 8
+ */
+export function pctToSteps(pct: number): number {
+  return Math.round((pct / 100) * MAC_VOLUME_STEPS);
+}
+
+/**
+ * Convert steps to percentage
+ *
+ * @example stepsToPct(8) // returns 50
+ */
+export function stepsToPct(steps: number): number {
+  return Math.round((steps / MAC_VOLUME_STEPS) * 100);
 }
 
 /**
@@ -82,7 +95,7 @@ export function volumeToSteps(volume: number): number {
 export function formatVolume(pct: number): string {
   const { volumeDisplay } = getPreferenceValues();
   if (volumeDisplay === "steps") {
-    const steps = Math.round((pct / 100) * MAC_VOLUME_STEPS);
+    const steps = pctToSteps(pct);
     return `${steps}/${MAC_VOLUME_STEPS} Steps`;
   }
   return `${pct}%`;

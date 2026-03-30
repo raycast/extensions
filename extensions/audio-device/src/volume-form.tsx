@@ -25,6 +25,8 @@ import {
   setInputDeviceMute,
   formatVolume,
   MAC_VOLUME_STEPS,
+  pctToSteps,
+  stepsToPct,
 } from "./audio-device";
 import { getPinnedVolume, setPinnedVolume, clearPinnedVolume } from "./device-preferences";
 import { useRef, useState } from "react";
@@ -84,7 +86,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       const deviceId = formValues.device;
       const device = devicesRef.current.find((d) => String(d.id) === deviceId);
       const name = device?.name ?? config.label;
-      const pct = useSteps ? Math.round((Math.max(0, Math.min(maxInput, level)) / MAC_VOLUME_STEPS) * 100) : level;
+      const pct = useSteps ? stepsToPct(Math.max(0, Math.min(maxInput, level))) : level;
       const clamped = Math.max(0, Math.min(100, pct));
 
       try {
@@ -142,7 +144,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
     pinnedLevelRef.current = pinned;
 
     setValue("device", String(current.id));
-    if (volPct != null) setValue("level", String(useSteps ? Math.round((volPct / 100) * MAC_VOLUME_STEPS) : volPct));
+    if (volPct != null) setValue("level", String(useSteps ? pctToSteps(volPct) : volPct));
     setValue("pinVolume", pinned != null);
 
     return { devices, current };
@@ -154,7 +156,7 @@ export function VolumeForm({ ioType }: { ioType: IOType }) {
       const volPct = vol != null ? Math.round(vol * 100) : null;
       currentVolumeRef.current = volPct;
       setCurrentVolume(volPct);
-      if (volPct != null) setValue("level", String(useSteps ? Math.round((volPct / 100) * MAC_VOLUME_STEPS) : volPct));
+      if (volPct != null) setValue("level", String(useSteps ? pctToSteps(volPct) : volPct));
     } catch {
       currentVolumeRef.current = null;
       setCurrentVolume(null);
