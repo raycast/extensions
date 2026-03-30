@@ -572,8 +572,6 @@ function GetAction({
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           onPaste={() => showHUD(`📝 Pasting conn. [${item.name}] to active app`)}
         />
-      </ActionPanel.Section>
-      <ActionPanel.Section title="Danger zone">
         <Action
           title="Edit Connection"
           icon={Icon.Pencil}
@@ -581,6 +579,8 @@ function GetAction({
           onAction={() => onItemEdit(item)}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
         />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="Danger zone">
         <Action
           title="Remove Connection"
           icon={Icon.Trash}

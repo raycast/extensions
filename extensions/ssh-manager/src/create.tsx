@@ -3,7 +3,6 @@ import { nanoid } from "nanoid";
 import { getConnections, saveConnections } from "./storage.api";
 import { ISSHConnection } from "./types";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useMemo } from "react";
 
 interface CreateProps {
   connectionToEdit?: ISSHConnection;
