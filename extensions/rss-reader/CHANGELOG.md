@@ -1,6 +1,8 @@
 # RSS Reader Changelog
 
-## [Add Cache] - 2026-03-26
+## [1.0.0] - 2026-03-30
+
+- Fix package.json metadata (title case, version, remove invalid owner)
 
 - Prefill Add Subscription with the active browser tab URL when the Raycast Browser Extension is available
 - Add 15 minutes cache for Read All Stories command selection
