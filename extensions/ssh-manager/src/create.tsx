@@ -10,7 +10,7 @@ interface CreateProps {
 }
 
 export default function Main({ connectionToEdit }: CreateProps) {
-  const isEditing = useMemo(() => !!connectionToEdit, [connectionToEdit]);
+  const isEditing = !!connectionToEdit;
   const { pop } = useNavigation();
 
   const { handleSubmit, itemProps } = useForm<ISSHConnection>({
@@ -30,7 +30,7 @@ export default function Main({ connectionToEdit }: CreateProps) {
       const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);
       existingConnections.splice(existingConnectionIdx, 1);
     }
-    existingConnections.push({ ...connection, id: nanoid() });
+    existingConnections.push({ ...connection, id: isEditing ? connectionToEdit!.id : nanoid() });
 
     await saveConnections(existingConnections);
 
