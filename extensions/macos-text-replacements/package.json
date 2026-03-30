@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "title": "macOS Text Replacements",
   "description": "Search, copy, add, edit, and delete your macOS text replacements",
-  "icon": "icon.png",
+  "icon": "assets/icon.png",
   "author": "jake-fowler-lego-nerd",
   "categories": [
     "System"
