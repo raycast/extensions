@@ -198,8 +198,8 @@ class KeePassLoader {
 
         if (databasePassword !== "") {
           cli.stdin.write(`${databasePassword}\n`);
-          cli.stdin.end();
         }
+        cli.stdin.end();
         cli.on("error", reject);
         cli.stderr.on("data", this.cliStderrErrorHandler(reject));
         cli.on("exit", (code) => {
@@ -250,8 +250,8 @@ class KeePassLoader {
 
         if (this.databasePassword !== "") {
           cli.stdin.write(`${this.databasePassword}\n`);
-          cli.stdin.end();
         }
+        cli.stdin.end();
         cli.on("error", reject);
         cli.stderr.on("data", this.cliStderrErrorHandler(reject));
         cli.stdout.on("data", (chunck) => {
