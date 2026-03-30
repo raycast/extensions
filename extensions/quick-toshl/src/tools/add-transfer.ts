@@ -17,7 +17,7 @@ export default async function addTransfer(input: Input) {
   const parsed = parseAmount(input.amount);
   const dateStr = input.date || format(new Date(), "yyyy-MM-dd");
 
-  if (input.fromAccountId === input.toAccountId) {
+  if (input.fromAccountId.trim() === input.toAccountId.trim()) {
     return {
       success: false,
       message: "From and to accounts must differ.",

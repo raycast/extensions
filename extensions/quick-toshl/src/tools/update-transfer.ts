@@ -16,6 +16,14 @@ type Input = {
 };
 
 export default async function updateTransfer(input: Input) {
+  if (input.fromAccountId.trim() === input.toAccountId.trim()) {
+    return {
+      success: false,
+      message: "From and to accounts must differ.",
+      _instructions: AI_INSTRUCTIONS,
+    };
+  }
+
   const entry = await toshl.getEntry(input.entryId);
   if (!isTransferEntry(entry)) {
     return {
