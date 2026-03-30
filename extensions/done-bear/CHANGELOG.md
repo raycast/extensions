@@ -1,6 +1,6 @@
 # Done Bear Changelog
 
-## [GraphQL API Migration] - {PR_MERGE_DATE}
+## [GraphQL API Migration] - 2026-03-30
 
 - Migrated workspace, task, project, and team fetches from deprecated REST endpoints to GraphQL API
 - Added cursor-based pagination for large datasets
