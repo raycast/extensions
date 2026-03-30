@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-code-monitor",
+  "title": "Claude Code Monitor",
+  "description": "Real-time monitoring for Claude Code sessions with status tracking, usage statistics, and quick actions",
+  "icon": "icon.png",
+  "author": "wuyuxiangX",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sessions",
+      "title": "Claude Code Sessions",
+      "subtitle": "Claude Code Monitor",
+      "description": "List all Claude Code sessions with real-time status tracking",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Claude Code Status",
+      "subtitle": "Claude Code Monitor",
+      "description": "Menu bar icon showing active Claude Code sessions",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "usage-dashboard",
+      "title": "Claude Code Usage",
+      "subtitle": "Claude Code Monitor",
+      "description": "Usage statistics dashboard with cost tracking and project breakdown",
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup Claude Code Hooks",
+      "subtitle": "Claude Code Monitor",
+      "description": "One-click setup for Claude Code hooks to enable real-time session monitoring",
+      "mode": "no-view"
+    },
+    {
+      "name": "plugins",
+      "title": "Claude Code Extensions",
+      "subtitle": "Claude Code Monitor",
+      "description": "Manage Claude Code extensions - plugins, skills, and MCP servers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultApp",
+      "title": "Default Application",
+      "description": "Fallback app to focus when session's launch app is unknown",
+      "type": "dropdown",
+      "required": false,
+      "default": "Apple_Terminal",
+      "data": [
+        { "title": "Terminal.app", "value": "Apple_Terminal" },
+        { "title": "iTerm2", "value": "iTerm.app" },
+        { "title": "Warp", "value": "WarpTerminal" },
+        { "title": "Ghostty", "value": "ghostty" },
+        { "title": "VS Code", "value": "vscode" },
+        { "title": "Cursor", "value": "cursor" },
+        { "title": "Zed", "value": "zed" },
+        { "title": "Windsurf", "value": "windsurf" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.7",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
