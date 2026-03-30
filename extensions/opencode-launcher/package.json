@@ -24,8 +24,7 @@
       "title": "Terminal Application",
       "description": "Choose your preferred terminal application",
       "type": "dropdown",
-      "required": false,
-      "default": "Terminal",
+      "required": true,
       "data": [
         {
           "title": "Terminal",
