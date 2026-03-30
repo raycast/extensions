@@ -1,1 +1,6 @@
-@/Users/dustintchambers/Documents/dev/raycast-photo-ingest/src/utils/types.ts
+export interface CopyResult {
+  sourcePath: string;
+  destPath: string;
+  success: boolean;
+  error?: string;
+}

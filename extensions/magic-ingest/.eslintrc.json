@@ -1,1 +1,4 @@
-@/Users/dustintchambers/Documents/dev/raycast-photo-ingest/.eslintrc.json
+{
+  "root": true,
+  "extends": ["@raycast"]
+}

@@ -1,1 +1,3 @@
-@/Users/dustintchambers/Documents/dev/raycast-photo-ingest/.gitignore
+node_modules/
+dist/
+.superpowers/
