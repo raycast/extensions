@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "opencode-sessions",
-  "title": "OpenCode Sessions",
+  "name": "opencode-launcher",
+  "title": "OpenCode Launcher",
   "description": "Browse, resume, and launch OpenCode sessions in your preferred terminal.",
   "icon": "icon.png",
   "author": "safar_Safarov",
