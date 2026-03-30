@@ -1,5 +1,15 @@
 # Link Cleaner Changelog
 
+## [Expand Rules, Add AI Fallback, and Manual Review Mode] - 2026-03-20
+
+- Expand site-specific rules from 6 to 30+ sites (search engines, video, music, social media, e-commerce, developer platforms)
+- Add Raycast AI fallback for URLs not matching any predefined rule (requires Pro; degrades gracefully to a built-in blacklist
+  of 80+ common tracking parameters)
+- Add "Manual Review" preference — when enabled, shows a Form with TagPicker so users can review and select which parameters to
+  keep before cleaning
+- Unify all notifications to `showToast` (previously mixed `showHUD` and `showToast`)
+- Remove redundant/dead code (`main.ts`, duplicate `rules.ts`, `try-catch.ts`)
+
 ## [Add options to close Raycast after cleaning] - 2025-09-09
 
 ## [Added Clean Selected Text Functionality] - 2025-04-15

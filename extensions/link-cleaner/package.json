@@ -20,13 +20,13 @@
       "name": "clean-selected-text",
       "title": "Clean Link from Selected Text",
       "description": "Remove tracking parameters from the selected URL link.",
-      "mode": "no-view"
+      "mode": "view"
     },
     {
       "name": "clean-clipboard-text",
       "title": "Clean Link from Clipboard",
       "description": "Remove tracking parameters from the URL link in clipboard.",
-      "mode": "no-view"
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -37,6 +37,14 @@
       "description": "Whether to exit Raycast after cleaning the link",
       "name": "exitAfterCleaning",
       "label": "Exit After Cleaning"
+    },
+    {
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "description": "Review and select which parameters to keep before cleaning",
+      "name": "manualReview",
+      "label": "Manual Review"
     }
   ],
   "dependencies": {

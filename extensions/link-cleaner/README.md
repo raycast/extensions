@@ -2,14 +2,18 @@
 
 Quickly remove tracking parameters in URLs.
 
-Supported:
+## Supported Sites
 
-1. Google Search
-2. Baidu Search
-3. Bing Search
-4. Netease Music
-5. Youtube
-6. Instagram
+| Category | Sites |
+|---|---|
+| Search Engines | Google, Baidu, Bing, DuckDuckGo |
+| Video | YouTube, Bilibili, TikTok, Douyin, Netflix |
+| Music | Netease Music, Spotify, Apple Music |
+| Social Media | Twitter/X, Instagram, Facebook, Reddit, Weibo, Zhihu, Xiaohongshu, Pinterest, LinkedIn, Threads |
+| E-commerce | Amazon, Taobao, Tmall, JD |
+| Developer | GitHub, Stack Overflow |
+
+For URLs not matching any rule above, Link Cleaner will use **Raycast AI** (requires Pro) to identify tracking parameters, or fall back to a built-in blacklist of common trackers (`utm_*`, `fbclid`, `gclid`, etc.).
 
 ## Example
 
