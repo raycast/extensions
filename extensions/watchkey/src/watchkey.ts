@@ -34,7 +34,7 @@ export async function watchkeyGet(service: string): Promise<string> {
   return new Promise((resolve, reject) => {
     execFile(WATCHKEY_PATH, ["get", service], (error, stdout, stderr) => {
       if (error) reject(new Error(stderr.trim() || error.message));
-      else resolve(stdout);
+      else resolve(stdout.trim());
     });
   });
 }
