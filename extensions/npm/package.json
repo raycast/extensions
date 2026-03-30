@@ -1,0 +1,109 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "npm",
+  "title": "npm",
+  "description": "Browse, search, upgrade, and remove global npm packages",
+  "author": "acxtrila",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "npm",
+    "node",
+    "packages",
+    "registry",
+    "cli"
+  ],
+  "license": "MIT",
+  "icon": "icon.png",
+  "commands": [
+    {
+      "name": "installed",
+      "title": "Show Installed",
+      "subtitle": "npm",
+      "description": "List globally installed npm packages",
+      "mode": "view"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "subtitle": "npm",
+      "description": "Search the npm registry",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showMetadataPanel",
+          "type": "checkbox",
+          "default": true,
+          "required": false,
+          "title": "Search View",
+          "label": "Show metadata panel in search results",
+          "description": "Display package details next to the search results list."
+        }
+      ]
+    },
+    {
+      "name": "outdated",
+      "title": "Show Outdated",
+      "subtitle": "npm",
+      "description": "Show globally installed packages with updates available",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade",
+      "subtitle": "npm",
+      "description": "Upgrade globally installed npm packages",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-up",
+      "title": "Clean up",
+      "subtitle": "npm",
+      "description": "Verify or clear the npm cache",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "customNpmPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom npm Executable Path",
+      "description": "Set this if your npm executable is in a non-standard location or Raycast cannot find it from your shell."
+    },
+    {
+      "name": "closeAfterAction",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Window Behavior",
+      "label": "Close immediately after action",
+      "description": "Close the Raycast window after installing, updating, or uninstalling a package."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
