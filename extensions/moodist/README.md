@@ -1,4 +1,4 @@
-# Trance
+# Moodist
 
 Ambient sound mixer for Raycast. Layer nature, urban, and electronic sounds to create your perfect focus or relaxation environment.
 
@@ -19,7 +19,7 @@ Ambient sound mixer for Raycast. Layer nature, urban, and electronic sounds to c
 | Toggle Playback | Quick play/pause |
 | Manage Presets | Save, load, and delete mixes |
 | Set Sleep Timer | Auto-stop timer |
-| Trance Menu Bar | Persistent menu bar controls |
+| Moodist Menu Bar | Persistent menu bar controls |
 
 ## Sound Categories
 

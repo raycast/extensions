@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-OUTDIR="/Users/chandler/Repos/trance/assets/sounds"
+OUTDIR="/Users/chandler/Repos/moodist/assets/sounds"
 DUR=45
 
 mkdir -p "$OUTDIR"
