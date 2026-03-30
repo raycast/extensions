@@ -1,6 +1,6 @@
 # Diccionario RAE Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-03-30
 
 - Updated API integration
 - Improved UI components
