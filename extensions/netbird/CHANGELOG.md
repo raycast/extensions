@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Status on empty dns] - {PR_MERGE_DATE}
+## [Status on empty dns] - 2026-03-30
 
 - Fixed status command error when user does not have netbird DNS enabled
 
