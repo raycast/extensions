@@ -16,17 +16,17 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "view-posts",
+      "name": "view-content",
       "title": "List Content",
       "subtitle": "Notra",
       "description": "Browse and manage your Notra content",
       "mode": "view"
     },
     {
-      "name": "create-post",
+      "name": "create-content",
       "title": "Create Content",
       "subtitle": "Notra",
-      "description": "Create a new post using AI",
+      "description": "Create a new content using AI",
       "mode": "view"
     },
     {
