@@ -1,6 +1,6 @@
 # Trimmy Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-30
 
 ### Added
 
