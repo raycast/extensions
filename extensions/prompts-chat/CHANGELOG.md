@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix] - 2026-03-30
+## [Fix] - {PR_MERGE_DATE}
 
 - Fix crash from upstream API field rename (content -> contentPreview)
 ## [Initial Version] - 2026-01-26
