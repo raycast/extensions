@@ -86,6 +86,15 @@ class KeePassLoader {
     keyFile != "" && keyFile != null ? ["-k", `${keyFile}`] : [];
 
   /**
+   * Returns `["--no-password"]` when the password is empty, so the CLI does not
+   * prompt for one. Returns an empty array when a password is provided.
+   *
+   * @param {string} password - The database password (may be empty for passwordless vaults)
+   * @returns {string[]} - `["--no-password"]` or `[]`
+   */
+  private static convertIntoNoPasswordOption = (password: string) => (password === "" ? ["--no-password"] : []);
+
+  /**
    * Converts a string from the KeePassXC CLI into a sorted array of strings
    *
    * The KeePassXC CLI returns a CSV string, which this function parses into an array
@@ -191,11 +200,15 @@ class KeePassLoader {
         const cli = this.spawn(`${this.keepassxcCli}`, [
           "db-info",
           ...this.convertIntoKeyFileOption(keyFile),
+          ...this.convertIntoNoPasswordOption(databasePassword),
           "-q",
           `${this.database}`,
         ]);
 
-        cli.stdin.write(`${databasePassword}\n`);
+        // Only write password to stdin when a password is provided
+        if (databasePassword !== "") {
+          cli.stdin.write(`${databasePassword}\n`);
+        }
         cli.stdin.end();
         cli.on("error", reject);
         cli.stderr.on("data", this.cliStderrErrorHandler(reject));
@@ -235,7 +248,9 @@ class KeePassLoader {
     KeePassLoader.findApplication().then(() => {
       return new Promise<string>((resolve, reject) => {
         const chuncks: Buffer[] = [];
-        const cli = this.spawn(`${this.keepassxcCli}`, options);
+        // Prepend --no-password flag when the stored password is empty (passwordless vault)
+        const noPasswordOption = this.convertIntoNoPasswordOption(this.databasePassword ?? "");
+        const cli = this.spawn(`${this.keepassxcCli}`, [...noPasswordOption, ...options]);
         const tryResolve = () => {
           if (ended && exited) {
             resolve(result);
@@ -245,7 +260,10 @@ class KeePassLoader {
         let exited = false;
         let result: string;
 
-        cli.stdin.write(`${this.databasePassword}\n`);
+        // Only write password to stdin when a password is provided
+        if (this.databasePassword !== "" && this.databasePassword != null) {
+          cli.stdin.write(`${this.databasePassword}\n`);
+        }
         cli.stdin.end();
         cli.on("error", reject);
         cli.stderr.on("data", this.cliStderrErrorHandler(reject));
