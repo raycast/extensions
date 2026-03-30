@@ -14,10 +14,6 @@ interface Session {
   updated: string;
 }
 
-interface CommandPreferences {
-  terminalApp: string;
-}
-
 function parseSessions(stdout: string): Session[] {
   const lines = stdout.split("\n");
   const sessions: Session[] = [];
@@ -37,7 +33,7 @@ function parseSessions(stdout: string): Session[] {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<CommandPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const terminalName = preferences.terminalApp;
   const terminalAdapter = getTerminalAdapter(terminalName);
 

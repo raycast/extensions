@@ -1,8 +1,8 @@
 import { runAppleScript } from "@raycast/utils";
 import { execFile } from "child_process";
-import { mkdtemp, writeFile } from "fs/promises";
+import { mkdtemp, writeFile, rm } from "fs/promises";
 import { join } from "path";
-import { tmpdir } from "os";
+import { homedir, tmpdir } from "os";
 import { promisify } from "util";
 import type { TerminalAdapter } from "../types";
 import { escapeAppleScript } from "../utils";
@@ -20,7 +20,7 @@ export const warpAdapter: TerminalAdapter = {
       "  - tabs:",
       "      - title: OpenCode",
       "        layout:",
-      `          cwd: ${JSON.stringify(process.cwd())}`,
+      `          cwd: ${JSON.stringify(process.env.HOME ?? homedir())}`,
       "        commands:",
       `          - exec: ${JSON.stringify(command)}`,
       "",
@@ -33,16 +33,18 @@ export const warpAdapter: TerminalAdapter = {
       return;
     } catch {
       await execFileAsync("open", ["-a", "Warp"]);
-    }
 
-    const escaped = escapeAppleScript(command);
-    await runAppleScript(`
-      tell application "Warp" to activate
-      delay 0.3
-      tell application "System Events"
-        keystroke "${escaped}"
-        key code 36
-      end tell
-    `);
+      const escaped = escapeAppleScript(command);
+      await runAppleScript(`
+        tell application "Warp" to activate
+        delay 0.3
+        tell application "System Events"
+          keystroke "${escaped}"
+          key code 36
+        end tell
+      `);
+    } finally {
+      await rm(directory, { recursive: true, force: true }).catch(() => undefined);
+    }
   },
 };
