@@ -12,7 +12,7 @@ interface PasswordForm {
 /**
  * Component for unlocking the KeePass database
  *
- * This component renders a form that requires a password and an optional key file
+ * This component renders a form that accepts an optional password and an optional key file
  * to unlock the KeePass database. Upon submission, it validates the credentials,
  * stores them securely, and updates the lock status of the database
  *
@@ -31,13 +31,13 @@ export default function UnlockDatabase({
         style: Toast.Style.Animated,
         title: "Unlocking Database...",
       });
-      KeePassLoader.checkCredentials(value.password || "", value.keyFile[0]).then(() => {
+      KeePassLoader.checkCredentials(value.password ?? "", value.keyFile[0]).then(() => {
         showToast({
           style: Toast.Style.Success,
           title: "Database Unlocked",
         });
-        KeePassLoader.cacheCredentials(value.password || "", value.keyFile[0]);
-        KeePassLoader.setCredentials(value.password || "", value.keyFile[0]);
+        KeePassLoader.cacheCredentials(value.password ?? "", value.keyFile[0]);
+        KeePassLoader.setCredentials(value.password ?? "", value.keyFile[0]);
         setIsUnlocked(true);
       }, showToastKeepassxcCliErrors);
     },
@@ -56,7 +56,7 @@ export default function UnlockDatabase({
       <Form.PasswordField title="Database Password" {...itemProps.password} />
       <Form.FilePicker id="keyFile" title="Key File" allowMultipleSelection={false} />
       <Form.Description
-        text={"ⓘ Your password and key file path will be stored in your Raycast's local encrypted storage."}
+        text={"ⓘ Your password and key file path will be stored in Raycast's local encrypted storage."}
       />
     </Form>
   );
