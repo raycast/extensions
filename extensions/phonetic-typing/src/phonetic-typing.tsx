@@ -1,12 +1,16 @@
 import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+// Keep in sync with the `preferences[].data` array in package.json
 const LANGUAGES = [
   { code: "am", name: "Amharic", native: "አማርኛ" },
   { code: "ar", name: "Arabic", native: "العربية" },
+  { code: "be", name: "Belarusian", native: "Беларуская" },
   { code: "bn", name: "Bengali", native: "বাংলা" },
+  { code: "bg", name: "Bulgarian", native: "Български" },
   { code: "el", name: "Greek", native: "Ελληνικά" },
   { code: "gu", name: "Gujarati", native: "ગુજરાતી" },
+  { code: "he", name: "Hebrew", native: "עברית" },
   { code: "hi", name: "Hindi", native: "हिन्दी" },
   { code: "kn", name: "Kannada", native: "ಕನ್ನಡ" },
   { code: "ml", name: "Malayalam", native: "മലയാളം" },
@@ -22,6 +26,7 @@ const LANGUAGES = [
   { code: "ta", name: "Tamil", native: "தமிழ்" },
   { code: "te", name: "Telugu", native: "తెలుగు" },
   { code: "ti", name: "Tigrinya", native: "ትግርኛ" },
+  { code: "uk", name: "Ukrainian", native: "Українська" },
   { code: "ur", name: "Urdu", native: "اردو" },
 ];
 
@@ -38,11 +43,21 @@ async function fetchSuggestions(text: string, langCode: string): Promise<string[
   });
 
   const res = await fetch(`https://inputtools.google.com/request?${params}`);
+
+  if (!res.ok) {
+    throw new Error(`Google API returned ${res.status}: ${res.statusText}`);
+  }
+
   const data = (await res.json()) as [string, Array<[string, string[]]>];
 
-  if (data[0] === "SUCCESS" && data[1]?.[0]?.[1]?.length) {
+  if (data[0] !== "SUCCESS") {
+    throw new Error(`Transliteration failed with status: ${data[0]}`);
+  }
+
+  if (data[1]?.[0]?.[1]?.length) {
     return data[1][0][1];
   }
+
   return [text];
 }
 
@@ -66,7 +81,6 @@ export default function PhoneticTyping() {
 
   const handleSearchChange = useCallback(
     (text: string) => {
-      // Space at end → auto-commit top cached suggestion (like Google Input Tools)
       if (text.endsWith(" ") && text.trim().length > 0) {
         const word = text.trim();
         const key = `${lang}:${word}`;
@@ -113,7 +127,7 @@ export default function PhoneticTyping() {
         }
       } catch (err) {
         if (!controller.signal.aborted) {
-          await showToast({ style: Toast.Style.Failure, title: "Transliteration failed", message: String(err) });
+          await showToast({ style: Toast.Style.Failure, title: "Transliteration Failed", message: String(err) });
         }
       } finally {
         if (!controller.signal.aborted) setIsLoading(false);
@@ -150,7 +164,6 @@ export default function PhoneticTyping() {
         </List.Dropdown>
       }
     >
-      {/* Suggestions while the user is typing a word */}
       {isTyping && suggestions.length > 0 && (
         <List.Section title="Suggestions" subtitle={composedText ? `Composed: ${composedText}` : "Space = commit top"}>
           {suggestions.map((word, i) => {
@@ -205,7 +218,6 @@ export default function PhoneticTyping() {
         </List.Section>
       )}
 
-      {/* Composed text ready to use (search bar empty, words committed) */}
       {!isTyping && composedText && (
         <List.Section title="Composed Text">
           <List.Item
@@ -238,7 +250,6 @@ export default function PhoneticTyping() {
         </List.Section>
       )}
 
-      {/* Empty welcome state */}
       {!isTyping && !composedText && (
         <List.EmptyView
           icon={Icon.Keyboard}
