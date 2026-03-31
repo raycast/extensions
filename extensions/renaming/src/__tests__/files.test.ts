@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { tmpdir } from "os";
-import { mkdtemp, writeFile, rm, mkdir } from "fs/promises";
+import { mkdtemp, writeFile, readFile, rm, mkdir, readdir } from "fs/promises";
 import { join } from "path";
 import { getFileInfo, fileExists, checkConflicts, renameFile, batchRename, generateUniqueFilename } from "../lib/files";
 import type { RenameOperation } from "../types";
@@ -339,10 +339,95 @@ describe("files", () => {
         { oldPath: file2, newName: "c.txt", newPath: join(testDir, "c.txt") },
       ]);
 
-      // No temp files should remain
-      const { readdir } = await import("fs/promises");
       const remaining = await readdir(testDir);
       expect(remaining.every((f) => !f.startsWith(".tmp_rename_"))).toBe(true);
+    });
+
+    it("should preserve file contents through chain rename (A→B, B→C)", async () => {
+      const fileA = join(testDir, "A.txt");
+      const fileB = join(testDir, "B.txt");
+      await writeFile(fileA, "content-A");
+      await writeFile(fileB, "content-B");
+
+      const results = await batchRename([
+        { oldPath: fileA, newName: "B.txt", newPath: fileB },
+        { oldPath: fileB, newName: "C.txt", newPath: join(testDir, "C.txt") },
+      ]);
+
+      expect(results.every((r) => r.success)).toBe(true);
+      expect(await readFile(fileB, "utf-8")).toBe("content-A");
+      expect(await readFile(join(testDir, "C.txt"), "utf-8")).toBe("content-B");
+      expect(await fileExists(fileA)).toBe(false);
+    });
+
+    it("should preserve file contents through three-way rotation (A→B, B→C, C→A)", async () => {
+      const fileA = join(testDir, "A.txt");
+      const fileB = join(testDir, "B.txt");
+      const fileC = join(testDir, "C.txt");
+      await writeFile(fileA, "content-A");
+      await writeFile(fileB, "content-B");
+      await writeFile(fileC, "content-C");
+
+      const results = await batchRename([
+        { oldPath: fileA, newName: "B.txt", newPath: fileB },
+        { oldPath: fileB, newName: "C.txt", newPath: fileC },
+        { oldPath: fileC, newName: "A.txt", newPath: fileA },
+      ]);
+
+      expect(results.every((r) => r.success)).toBe(true);
+      expect(await readFile(fileA, "utf-8")).toBe("content-C");
+      expect(await readFile(fileB, "utf-8")).toBe("content-A");
+      expect(await readFile(fileC, "utf-8")).toBe("content-B");
+    });
+
+    it("should restore temp file when both operations fail and slot is free", async () => {
+      // A→B (A doesn't exist), B→invalid (bad filename)
+      // B is needsTemp because A targets its path. Both ops fail,
+      // so B's slot stays free and Phase 3 can restore B from temp.
+      const fileA = join(testDir, "A.txt"); // does not exist on disk
+      const fileB = join(testDir, "B.txt");
+      await writeFile(fileB, "content-B");
+
+      const results = await batchRename([
+        { oldPath: fileA, newName: "B.txt", newPath: fileB },
+        { oldPath: fileB, newName: "invalid/name.txt", newPath: join(testDir, "invalid/name.txt") },
+      ]);
+
+      expect(results[0]!.success).toBe(false);
+      expect(results[1]!.success).toBe(false);
+      // B should be restored to its original path (no temp files stranded)
+      expect(await readFile(fileB, "utf-8")).toBe("content-B");
+      const remaining = await readdir(testDir);
+      expect(remaining.every((f) => !f.startsWith(".tmp_rename_"))).toBe(true);
+    });
+
+    it("should handle partial failure when needsTemp target is blocked", async () => {
+      // A→B, B→C where C already exists (not part of the batch).
+      // B is needsTemp because A targets its slot. If B→C fails, Phase 3
+      // must NOT overwrite the successful A→B rename at B's slot.
+      const fileA = join(testDir, "A.txt");
+      const fileB = join(testDir, "B.txt");
+      const fileC = join(testDir, "C.txt");
+      await writeFile(fileA, "content-A");
+      await writeFile(fileB, "content-B");
+      await writeFile(fileC, "blocker");
+
+      const results = await batchRename([
+        { oldPath: fileA, newName: "B.txt", newPath: fileB },
+        { oldPath: fileB, newName: "C.txt", newPath: fileC },
+      ]);
+
+      // B→C should fail (target exists)
+      expect(results[1]!.success).toBe(false);
+      // A→B should succeed — and Phase 3 must not overwrite it
+      expect(results[0]!.success).toBe(true);
+      expect(await readFile(fileB, "utf-8")).toBe("content-A");
+      // Original blocker at C is untouched
+      expect(await readFile(fileC, "utf-8")).toBe("blocker");
+      // Original B is stranded at a temp path (slot occupied), but not lost
+      const remaining = await readdir(testDir);
+      const tempFiles = remaining.filter((f) => f.startsWith(".tmp_rename_"));
+      expect(tempFiles).toHaveLength(1);
     });
   });
 

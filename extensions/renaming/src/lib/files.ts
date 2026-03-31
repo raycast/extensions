@@ -309,11 +309,18 @@ export async function batchRename(
   }
 
   // --- Phase 3: Cleanup failed temp renames ---
-  // If a file was moved to temp but its final rename failed, restore it
+  // If a file was moved to temp but its final rename failed, restore it.
+  // But only if another successful operation hasn't since claimed the slot
+  // (fs.rename on POSIX overwrites, so restoring blindly would destroy data).
+  const occupiedPaths = new Set(results.filter((r) => r?.success).map((r) => normalizePath(r!.newPath)));
   for (const [idx, tempPath] of tempMap) {
     if (results[idx] && !results[idx]!.success) {
+      const originalPath = operations[idx]!.oldPath;
+      if (occupiedPaths.has(normalizePath(originalPath))) {
+        log.files.warn("Cannot restore temp file — slot occupied by another rename", { tempPath, originalPath });
+        continue;
+      }
       try {
-        const originalPath = operations[idx]!.oldPath;
         await rename(tempPath, originalPath);
         log.files.info("Restored temp file", { tempPath, originalPath });
       } catch {
