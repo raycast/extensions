@@ -15,7 +15,8 @@ import {
   getSelectedFinderItems,
 } from "@raycast/api";
 import { dirname, join } from "path";
-import { getFileInfo, batchRename, checkConflicts } from "./lib/files";
+import { getFileInfo } from "./lib/files";
+import { batchRename, checkConflicts } from "./lib/batch";
 import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 

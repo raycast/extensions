@@ -14,7 +14,7 @@ import { useState } from "react";
 import { useFileSelection, usePreview } from "./lib/hooks";
 import { RenameRule } from "./lib/rules";
 import AddRuleForm from "./components/AddRuleForm";
-import { batchRename, checkConflicts } from "./lib/files";
+import { batchRename, checkConflicts } from "./lib/batch";
 import { getUserFriendlyErrorMessage } from "./lib/errors";
 import type { RenameOperation } from "./types";
 import path from "path";
