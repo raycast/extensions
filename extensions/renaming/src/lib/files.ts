@@ -2,7 +2,7 @@
  * File utilities for rename operations using native fs.rename().
  */
 
-import { rename, stat, access, readdir } from "fs/promises";
+import { rename, stat, access, readdir, realpath } from "fs/promises";
 import { randomUUID } from "crypto";
 import { constants } from "fs";
 import path, { basename, dirname, extname, join, resolve } from "path";
@@ -13,14 +13,25 @@ import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
 
 /**
- * Validate that a new path stays within the expected directory (prevents path traversal)
+ * Validate that a new path stays within the expected directory (prevents path traversal).
+ * Resolves symlinks so a symlinked parent can't bypass the check.
  */
-function validatePathTraversal(oldPath: string, newPath: string): string | null {
-  const oldDir = resolve(dirname(oldPath));
-  const newDir = resolve(dirname(newPath));
+async function validatePathTraversal(oldPath: string, newPath: string): Promise<string | null> {
+  try {
+    const oldDir = await realpath(dirname(oldPath));
+    const newDir = await realpath(dirname(newPath));
 
-  if (oldDir !== newDir) {
-    return "Path traversal detected: new filename would move file to different directory";
+    if (oldDir !== newDir) {
+      return "Path traversal detected: new filename would move file to different directory";
+    }
+  } catch {
+    // If realpath fails (e.g. broken symlink), fall back to resolve()
+    const oldDir = resolve(dirname(oldPath));
+    const newDir = resolve(dirname(newPath));
+
+    if (oldDir !== newDir) {
+      return "Path traversal detected: new filename would move file to different directory";
+    }
   }
 
   return null;
@@ -93,7 +104,7 @@ export async function checkConflicts(operations: RenameOperation[]): Promise<str
 
   for (const op of operations) {
     // Check for path traversal attempts
-    const traversalError = validatePathTraversal(op.oldPath, op.newPath);
+    const traversalError = await validatePathTraversal(op.oldPath, op.newPath);
     if (traversalError) {
       conflicts.push(`"${basename(op.oldPath)}": ${traversalError}`);
       continue;
@@ -140,7 +151,7 @@ export async function renameFile(oldPath: string, newName: string): Promise<Rena
   }
 
   // Validate path traversal (security check)
-  const traversalError = validatePathTraversal(oldPath, newPath);
+  const traversalError = await validatePathTraversal(oldPath, newPath);
   if (traversalError) {
     return {
       oldPath,
@@ -278,14 +289,21 @@ export async function batchRename(
     const aIsTemp = needsTemp.has(a.originalIndex) ? 0 : 1;
     const bIsTemp = needsTemp.has(b.originalIndex) ? 0 : 1;
     if (aIsTemp !== bIsTemp) return aIsTemp - bIsTemp;
-    return path.normalize(b.op.oldPath).split(path.sep).length - path.normalize(a.op.oldPath).split(path.sep).length;
+    const depthDiff =
+      path.normalize(b.op.oldPath).split(path.sep).length - path.normalize(a.op.oldPath).split(path.sep).length;
+    if (depthDiff !== 0) return depthDiff;
+    return a.originalIndex - b.originalIndex;
   });
 
   for (let i = 0; i < indexed.length; i++) {
     const { op, originalIndex } = indexed[i]!;
 
     if (onProgress) {
-      await onProgress(i + 1, indexed.length, basename(operations[originalIndex]!.oldPath));
+      try {
+        await onProgress(i + 1, indexed.length, basename(operations[originalIndex]!.oldPath));
+      } catch (e) {
+        log.files.warn("Progress callback failed", { error: e });
+      }
     }
 
     const result = await renameFile(op.oldPath, op.newName);
