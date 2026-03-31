@@ -1,6 +1,6 @@
 # Google Tasks Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-03-31
 
 - Fix due date timezone shift for UTC+ users
 
