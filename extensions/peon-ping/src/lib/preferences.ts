@@ -1,0 +1,13 @@
+import { homedir } from "node:os";
+import { getPreferenceValues } from "@raycast/api";
+import type { ResolvePeonPingPathsInput } from "./peon-ping-paths";
+
+export function getResolvePeonPingPathsInputFromPreferences(): ResolvePeonPingPathsInput {
+  const prefs = getPreferenceValues<Preferences.PeonPing>();
+  return {
+    raycastClaudeConfigDir: prefs.claudeConfigDir ?? null,
+    claudeConfigDirEnv: process.env.CLAUDE_CONFIG_DIR ?? null,
+    claudePeonDirEnv: process.env.CLAUDE_PEON_DIR ?? null,
+    homeDir: homedir(),
+  };
+}

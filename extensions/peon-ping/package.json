@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "peon-ping",
+  "title": "Peon Ping",
+  "description": "Manage peon-ping from Raycast in one place: open Peon Ping for settings and controls, or use the optional menu bar for status and a quick toggle only.",
+  "icon": "icon.png",
+  "author": "garry_kasparov",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "build": "ray build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "react-devtools": "6.1.1",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.0"
+  },
+  "preferences": [
+    {
+      "name": "claudeConfigDir",
+      "type": "textfield",
+      "required": false,
+      "title": "Claude config directory",
+      "description": "Optional override for the Claude config directory. When empty, CLAUDE_CONFIG_DIR or ~/.claude is used.",
+      "placeholder": "Leave empty for default"
+    }
+  ],
+  "commands": [
+    {
+      "name": "peon-ping",
+      "title": "Peon Ping",
+      "description": "Open settings, status, and controls for peon-ping.",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "peon-ping-menu-bar",
+      "title": "Peon Ping Menu Bar",
+      "description": "Status and quick toggle only. Open Peon Ping for full settings.",
+      "icon": "icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ]
+}
