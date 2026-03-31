@@ -261,8 +261,8 @@ export default function Command() {
     if (values.targetType === "calendar" && !values.calendarId) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "캘린더 선택 필요",
-        message: "등록할 캘린더를 먼저 선택해 주세요.",
+        title: "Calendar Selection Required",
+        message: "Please select a calendar before submitting.",
       });
       return;
     }
@@ -270,8 +270,8 @@ export default function Command() {
     if (values.targetType === "reminder" && !values.reminderListId) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "미리알림 폴더 선택 필요",
-        message: "등록할 미리알림 폴더를 먼저 선택해 주세요.",
+        title: "Reminder List Selection Required",
+        message: "Please select a reminder list before submitting.",
       });
       return;
     }
@@ -280,8 +280,8 @@ export default function Command() {
     if (submitBatch.tooManyItems) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "문장 분해 제한",
-        message: `한 번에 최대 ${MAX_BATCH_ITEMS}개 문장만 등록할 수 있습니다.`,
+        title: "Batch Item Limit Reached",
+        message: `You can submit up to ${MAX_BATCH_ITEMS} clauses at a time.`,
       });
       return;
     }
@@ -289,8 +289,8 @@ export default function Command() {
     if (submitBatch.items.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "파싱 실패",
-        message: submitBatch.errors[0]?.error ?? "일정 문장을 인식하지 못했습니다.",
+        title: "Parsing Failed",
+        message: submitBatch.errors[0]?.error ?? "Could not parse the schedule sentence.",
       });
       return;
     }
@@ -298,8 +298,8 @@ export default function Command() {
     if (values.targetType === "reminder" && submitBatch.items.some((item) => item.value.recurrence)) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "반복 일정 제한",
-        message: "반복 일정은 현재 Apple Calendar 일정으로만 등록할 수 있습니다.",
+        title: "Recurring Events Not Supported for Reminders",
+        message: "Recurring events can currently be created only in Apple Calendar.",
       });
       return;
     }
@@ -361,8 +361,8 @@ export default function Command() {
       if (successCount === 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "일정 등록 실패",
-          message: failures[0] ?? "등록된 항목이 없습니다.",
+          title: "Failed to Create Items",
+          message: failures[0] ?? "No items were created.",
         });
         return;
       }
@@ -370,17 +370,15 @@ export default function Command() {
       if (failures.length > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: `부분 성공 (${successCount}건 성공, ${failures.length}건 실패)`,
+          title: `Partial Success (${successCount} succeeded, ${failures.length} failed)`,
           message: failures[0],
         });
       } else {
         const baseTitle =
-          values.targetType === "reminder"
-            ? `미리알림 등록 완료 (${successCount}건)`
-            : `일정 등록 완료 (${successCount}건)`;
+          values.targetType === "reminder" ? `Reminders Created (${successCount})` : `Events Created (${successCount})`;
         await showToast({
           style: Toast.Style.Success,
-          title: openCalendarFailedMessage ? `${baseTitle}, 캘린더 열기 실패` : baseTitle,
+          title: openCalendarFailedMessage ? `${baseTitle}, Failed to Open Calendar` : baseTitle,
           message: openCalendarFailedMessage,
         });
       }
@@ -425,26 +423,26 @@ export default function Command() {
           {targetType === "reminder" ? (
             <Action.SubmitForm<FormValues>
               icon={Icon.Bell}
-              title={parsedCount > 1 ? `미리알림에 등록 (${parsedCount}건)` : "미리알림에 등록"}
+              title={parsedCount > 1 ? `Add to Reminders (${parsedCount})` : "Add to Reminders"}
               onSubmit={(values) => handleSubmit(values, { openCalendarAfterCreate: false })}
             />
           ) : (
             <>
               <Action.SubmitForm<FormValues>
                 icon={Icon.Calendar}
-                title={parsedCount > 1 ? `Apple Calendar에 등록 (${parsedCount}건)` : "Apple Calendar에 등록"}
+                title={parsedCount > 1 ? `Add to Apple Calendar (${parsedCount})` : "Add to Apple Calendar"}
                 onSubmit={(values) => handleSubmit(values, { openCalendarAfterCreate: false })}
               />
               <Action.SubmitForm<FormValues>
                 icon={Icon.AppWindow}
-                title={parsedCount > 1 ? `등록 후 캘린더 열기 (${parsedCount}건)` : "등록 후 캘린더 열기"}
+                title={parsedCount > 1 ? `Add and Open Calendar (${parsedCount})` : "Add and Open Calendar"}
                 onSubmit={(values) => handleSubmit(values, { openCalendarAfterCreate: true })}
               />
             </>
           )}
           <Action
             icon={Icon.ArrowClockwise}
-            title="목록 새로고침"
+            title="Reload Lists"
             onAction={() => {
               void loadCalendars();
               void loadReminderLists();
@@ -455,103 +453,103 @@ export default function Command() {
     >
       <Form.TextArea
         id="sentence"
-        title="일정 문장"
-        placeholder="예) 다음주 화요일 오후 3시 반에 강남에서 팀 미팅"
-        info={`한국어 자연어 파싱 (복합 입력 최대 ${MAX_BATCH_ITEMS}건)`}
+        title="Schedule Sentence"
+        placeholder="e.g. Next Tuesday 3:30 PM team meeting in Gangnam"
+        info={`Korean natural-language parsing (up to ${MAX_BATCH_ITEMS} clauses)`}
         value={sentence}
         onChange={handleSentenceChange}
       />
 
-      <Form.Description title="파싱 상태" text={parseStatusText} />
+      <Form.Description title="Parse Status" text={parseStatusText} />
       {parsedPreview && (
-        <Form.Description title="파싱 요약" text={formatPreviewSummary(parsedPreview, previewLocation)} />
+        <Form.Description title="Parse Summary" text={formatPreviewSummary(parsedPreview, previewLocation)} />
       )}
       {parsedBatch.isBatch && parsedBatch.items.length > 0 && (
-        <Form.Description title="분해 미리보기" text={formatBatchPreview(parsedBatch.items)} />
+        <Form.Description title="Batch Preview" text={formatBatchPreview(parsedBatch.items)} />
       )}
       {parsedBatch.errors.length > 0 && (
-        <Form.Description title="분해 오류" text={formatBatchErrors(parsedBatch.errors)} />
+        <Form.Description title="Batch Errors" text={formatBatchErrors(parsedBatch.errors)} />
       )}
       {recommendedTargetType && (
         <Form.Description
-          title="추천 대상"
+          title="Recommended Target"
           text={
             isTargetManuallyOverridden
-              ? `${recommendedTargetType === "reminder" ? "미리알림 항목" : "Apple Calendar 일정"} (수동 선택 유지)`
-              : `${recommendedTargetType === "reminder" ? "미리알림 항목" : "Apple Calendar 일정"} (자동 적용)`
+              ? `${recommendedTargetType === "reminder" ? "Reminder Item" : "Apple Calendar Event"} (manual selection kept)`
+              : `${recommendedTargetType === "reminder" ? "Reminder Item" : "Apple Calendar Event"} (auto-applied)`
           }
         />
       )}
 
       <Form.TextField
         id="location"
-        title="장소 (선택)"
-        placeholder="예) 강남역 1번 출구"
-        info="입력하면 문장 파싱 장소보다 우선 적용됩니다"
+        title="Location (Optional)"
+        placeholder="e.g. Gangnam Station Exit 1"
+        info="Manual input overrides the parsed location from the sentence."
         value={location}
         onChange={setLocation}
       />
 
-      <Form.Dropdown id="targetType" title="등록 대상" value={targetType} onChange={handleTargetTypeChange}>
-        <Form.Dropdown.Item value="calendar" title="Apple Calendar 일정" />
-        <Form.Dropdown.Item value="reminder" title="미리알림 항목" />
+      <Form.Dropdown id="targetType" title="Target" value={targetType} onChange={handleTargetTypeChange}>
+        <Form.Dropdown.Item value="calendar" title="Apple Calendar Event" />
+        <Form.Dropdown.Item value="reminder" title="Reminder Item" />
       </Form.Dropdown>
 
       {targetType === "calendar" ? (
         <Form.Dropdown
           id="calendarId"
-          title="캘린더"
-          info="목록에서 등록할 캘린더를 선택하세요"
+          title="Calendar"
+          info="Select the calendar to create events in."
           value={calendarId}
           onChange={handleCalendarChange}
         >
           {isLoadingCalendars ? (
-            <Form.Dropdown.Item value="" title="캘린더 목록 불러오는 중..." />
+            <Form.Dropdown.Item value="" title="Loading calendars..." />
           ) : calendars.length > 0 ? (
             calendars.map((calendar) => (
               <Form.Dropdown.Item
                 key={calendar.id}
                 value={calendar.id}
-                title={calendar.isDefault ? `${calendar.title} (기본)` : calendar.title}
+                title={calendar.isDefault ? `${calendar.title} (Default)` : calendar.title}
                 keywords={[calendar.sourceTitle]}
               />
             ))
           ) : (
-            <Form.Dropdown.Item value="" title="선택 가능한 캘린더가 없습니다" />
+            <Form.Dropdown.Item value="" title="No writable calendars available" />
           )}
         </Form.Dropdown>
       ) : (
         <Form.Dropdown
           id="reminderListId"
-          title="미리알림 폴더"
-          info="등록할 미리알림 폴더를 선택하세요"
+          title="Reminder List"
+          info="Select the reminder list to add items to."
           value={reminderListId}
           onChange={handleReminderListChange}
         >
           {isLoadingReminderLists ? (
-            <Form.Dropdown.Item value="" title="미리알림 폴더 목록 불러오는 중..." />
+            <Form.Dropdown.Item value="" title="Loading reminder lists..." />
           ) : reminderLists.length > 0 ? (
             reminderLists.map((reminderList) => (
               <Form.Dropdown.Item
                 key={reminderList.id}
                 value={reminderList.id}
-                title={reminderList.isDefault ? `${reminderList.title} (기본)` : reminderList.title}
+                title={reminderList.isDefault ? `${reminderList.title} (Default)` : reminderList.title}
                 keywords={[reminderList.sourceTitle]}
               />
             ))
           ) : (
-            <Form.Dropdown.Item value="" title="선택 가능한 미리알림 폴더가 없습니다" />
+            <Form.Dropdown.Item value="" title="No writable reminder lists available" />
           )}
         </Form.Dropdown>
       )}
 
       {isRecurringPreview && (
         <Form.Description
-          title="반복 감지"
+          title="Recurrence Detected"
           text={
             targetType === "calendar"
-              ? "반복 일정은 Apple Calendar로 등록됩니다. 종료 방식(횟수/종료일)을 선택해 주세요."
-              : "반복 일정은 현재 Apple Calendar 일정으로만 등록할 수 있습니다."
+              ? "Recurring events will be created in Apple Calendar. Choose how the recurrence ends."
+              : "Recurring events can currently be created only in Apple Calendar."
           }
         />
       )}
@@ -560,27 +558,27 @@ export default function Command() {
         <>
           <Form.Dropdown
             id="recurrenceEndType"
-            title="반복 종료 방식"
+            title="Recurrence End"
             value={recurrenceEndType}
             onChange={handleRecurrenceEndTypeChange}
           >
-            <Form.Dropdown.Item value="count" title="횟수로 종료" />
-            <Form.Dropdown.Item value="until" title="종료일로 종료" />
+            <Form.Dropdown.Item value="count" title="End by count" />
+            <Form.Dropdown.Item value="until" title="End by date" />
           </Form.Dropdown>
 
           {recurrenceEndType === "count" ? (
             <Form.TextField
               id="recurrenceCount"
-              title="반복 횟수"
-              info={`1~${MAX_RECURRENCE_COUNT}회`}
+              title="Recurrence Count"
+              info={`1-${MAX_RECURRENCE_COUNT} times`}
               value={recurrenceCount}
               onChange={handleRecurrenceCountChange}
             />
           ) : (
             <Form.DatePicker
               id="recurrenceUntil"
-              title="반복 종료일"
-              info="시작일 이후, 최대 1년 이내"
+              title="Recurrence End Date"
+              info="Must be after the start date, within 1 year"
               value={recurrenceUntil}
               onChange={handleRecurrenceUntilChange}
             />
@@ -588,8 +586,8 @@ export default function Command() {
         </>
       )}
 
-      {calendarLoadError && <Form.Description title="캘린더 오류" text={calendarLoadError} />}
-      {reminderLoadError && <Form.Description title="미리알림 오류" text={reminderLoadError} />}
+      {calendarLoadError && <Form.Description title="Calendar Error" text={calendarLoadError} />}
+      {reminderLoadError && <Form.Description title="Reminder Error" text={reminderLoadError} />}
     </Form>
   );
 }
@@ -603,7 +601,7 @@ function buildRecurrenceForSubmit(parsed: ParsedSchedule, values: FormValues): C
   if (values.recurrenceEndType === "count") {
     const count = Number.parseInt(values.recurrenceCount, 10);
     if (Number.isNaN(count) || count < 1 || count > MAX_RECURRENCE_COUNT) {
-      return new Error(`반복 횟수는 1~${MAX_RECURRENCE_COUNT} 사이 값으로 입력해 주세요.`);
+      return new Error(`Recurrence count must be between 1 and ${MAX_RECURRENCE_COUNT}.`);
     }
     return {
       ...recurrence,
@@ -617,17 +615,17 @@ function buildRecurrenceForSubmit(parsed: ParsedSchedule, values: FormValues): C
 
   const until = values.recurrenceUntil ? new Date(values.recurrenceUntil) : null;
   if (!until || Number.isNaN(until.getTime())) {
-    return new Error("반복 종료일을 선택해 주세요.");
+    return new Error("Please select a recurrence end date.");
   }
 
   if (until.getTime() < parsed.start.getTime()) {
-    return new Error("반복 종료일은 시작일 이후여야 합니다.");
+    return new Error("Recurrence end date must be after the start date.");
   }
 
   const oneYearAfterStart = new Date(parsed.start);
   oneYearAfterStart.setFullYear(oneYearAfterStart.getFullYear() + 1);
   if (until.getTime() > oneYearAfterStart.getTime()) {
-    return new Error("반복 종료일은 시작일 기준 1년 이내로 설정해 주세요.");
+    return new Error("Recurrence end date must be within 1 year of the start date.");
   }
 
   return {
@@ -650,33 +648,33 @@ function buildParseStatusText({
   parseResult: ReturnType<typeof firstBatchParseResult>;
 }): string {
   if (!sentence.trim()) {
-    return "문장을 입력하면 미리보기를 표시합니다.";
+    return "Enter a sentence to preview parsing.";
   }
 
   if (parsedBatch.tooManyItems) {
-    return `한 번에 최대 ${MAX_BATCH_ITEMS}개 문장까지 지원합니다.`;
+    return `Up to ${MAX_BATCH_ITEMS} clauses are supported at once.`;
   }
 
   if (parsedBatch.items.length > 0 && parsedBatch.errors.length > 0) {
-    return `부분 해석 성공 (${parsedBatch.items.length}건 성공, ${parsedBatch.errors.length}건 실패)`;
+    return `Partially parsed (${parsedBatch.items.length} succeeded, ${parsedBatch.errors.length} failed)`;
   }
 
   if (parseResult?.ok) {
-    return parsedBatch.isBatch ? `${parsedBatch.items.length}건 등록 가능` : "등록 가능";
+    return parsedBatch.isBatch ? `${parsedBatch.items.length} items ready` : "Ready to submit";
   }
 
   if (parseResult && !parseResult.ok) {
-    return `오류: ${parseResult.error}`;
+    return `Error: ${parseResult.error}`;
   }
 
-  return "파싱 결과가 없습니다.";
+  return "No parse result.";
 }
 
 function formatBatchPreview(items: ParsedBatchItem[]): string {
   return items
     .map((item, index) => {
-      const recurrence = item.value.recurrence ? ` / 반복:${formatRecurrence(item.value.recurrence)}` : "";
-      const inherited = item.inheritedDate ? " (날짜 상속)" : "";
+      const recurrence = item.value.recurrence ? ` / recurrence:${formatRecurrence(item.value.recurrence)}` : "";
+      const inherited = item.inheritedDate ? " (date inherited)" : "";
       return `${index + 1}. ${item.value.title} - ${formatDate(item.value.start, item.value.allDay)}${recurrence}${inherited}`;
     })
     .join(" | ");
@@ -687,34 +685,34 @@ function formatBatchErrors(errors: ParsedBatchError[]): string {
 }
 
 function formatPreviewSummary(parsedPreview: ParsedSchedule, location: string | undefined): string {
-  const typeText = parsedPreview.intent === "deadline" ? "마감" : "일정";
-  const timeLabel = parsedPreview.intent === "deadline" ? "마감" : "시간";
+  const typeText = parsedPreview.intent === "deadline" ? "Deadline" : "Event";
+  const timeLabel = parsedPreview.intent === "deadline" ? "Due" : "Time";
   const timeText =
     parsedPreview.intent === "deadline"
       ? formatDate(parsedPreview.start, parsedPreview.allDay)
       : parsedPreview.allDay
-        ? `${formatDate(parsedPreview.start, true)} (종일)`
+        ? `${formatDate(parsedPreview.start, true)} (all day)`
         : `${formatDate(parsedPreview.start, false)} ~ ${formatDate(parsedPreview.end, false)}`;
-  const locationText = location || "(없음)";
-  const recurrenceText = parsedPreview.recurrence ? ` | 반복: ${formatRecurrence(parsedPreview.recurrence)}` : "";
-  return `유형: ${typeText} | 제목: ${parsedPreview.title} | ${timeLabel}: ${timeText} | 장소: ${locationText}${recurrenceText}`;
+  const locationText = location || "(none)";
+  const recurrenceText = parsedPreview.recurrence ? ` | Recurrence: ${formatRecurrence(parsedPreview.recurrence)}` : "";
+  return `Type: ${typeText} | Title: ${parsedPreview.title} | ${timeLabel}: ${timeText} | Location: ${locationText}${recurrenceText}`;
 }
 
 function formatRecurrence(recurrence: ParsedRecurrence): string {
   if (recurrence.frequency === "daily") {
-    return "매일";
+    return "Daily";
   }
   if (recurrence.frequency === "weekly") {
-    const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const weekday = weekdays[recurrence.weekday ?? 0];
-    return `매주 ${weekday}`;
+    return `Weekly ${weekday}`;
   }
-  return `매월 ${recurrence.dayOfMonth ?? 1}일`;
+  return `Monthly ${recurrence.dayOfMonth ?? 1}`;
 }
 
 function formatDate(value: Date, allDay: boolean): string {
   if (allDay) {
-    return new Intl.DateTimeFormat("ko-KR", {
+    return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -722,7 +720,7 @@ function formatDate(value: Date, allDay: boolean): string {
     }).format(value);
   }
 
-  return new Intl.DateTimeFormat("ko-KR", {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
