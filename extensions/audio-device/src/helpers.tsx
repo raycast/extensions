@@ -10,6 +10,7 @@ import {
   LaunchType,
   List,
   popToRoot,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -354,7 +355,7 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
           onSelection?.(device.uid);
           await closeMainWindow({ clearRootSearch: true });
           await popToRoot({ clearSearchBar: true });
-          await showToast(Toast.Style.Success, `Set "${device.name}" as ${type} device`);
+          await showHUD(`Set "${device.name}" as ${type} device`);
         } catch (e) {
           console.error(e);
           showToast(Toast.Style.Failure, `Failed setting "${device.name}" as ${type} device`);
