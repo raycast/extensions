@@ -1,6 +1,6 @@
 # Changelog
 
-## [Remove Trending Skills Command] - {PR_MERGE_DATE}
+## [Remove Trending Skills Command] - 2026-03-31
 
 - Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills
 
