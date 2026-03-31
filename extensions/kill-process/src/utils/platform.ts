@@ -92,8 +92,14 @@ export function getKillCommand(pid: number, force = false): string {
  */
 export function getKillAllCommand(processName: string, force = false): string {
   if (isWindows) {
-    const escaped = processName.replace(/"/g, '\\"');
-    return force ? `taskkill /F /IM "${escaped}"` : `taskkill /IM "${escaped}"`;
+    // Use PowerShell Stop-Process by name which accepts the process name without needing the
+    // .exe suffix and handles common name matching (e.g. names from Get-Process).
+    // Escape single quotes for a safe single-quoted PowerShell string.
+    const psName = processName.replace(/'/g, "''");
+    const psScript = `Get-Process -Name '${psName}' -ErrorAction SilentlyContinue | Stop-Process ${
+      force ? "-Force" : ""
+    }`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(psScript)}`;
   }
   const escaped = processName.replace(/'/g, "'\\''");
   return force ? `PROC_NAME='${escaped}' zsh -c 'sudo killall "$PROC_NAME"'` : `killall '${escaped}'`;
