@@ -118,7 +118,7 @@ export function purgeExpiredEphemeral(courses: Course[]): Course[] {
     if (!course.expiresAt) {
       return true;
     }
-    return course.expiresAt < today;
+    return course.expiresAt >= today;
   });
 }
 

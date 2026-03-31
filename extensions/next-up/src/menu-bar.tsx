@@ -67,12 +67,12 @@ export default function MenuBar() {
           title="Open Today"
           icon={Icon.Eye}
           shortcut={{ modifiers: ["cmd"], key: "o" }}
-          onAction={() => open("raycast://extensions/adrianbonpin/nextup/what-s-next")}
+          onAction={() => open("raycast://extensions/adrianbonpin/next-up/what-s-next")}
         />
         <MenuBarExtra.Item
           title="Manage Schedules"
           icon={Icon.Gear}
-          onAction={() => open("raycast://extensions/adrianbonpin/nextup/manage-schedules")}
+          onAction={() => open("raycast://extensions/adrianbonpin/next-up/manage-schedules")}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

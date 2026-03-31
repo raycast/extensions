@@ -398,7 +398,7 @@ export function CourseForm({
           id="expiresAt"
           title="Expires At"
           value={expiresAt ? new Date(expiresAt) : undefined}
-          onChange={(date) => setExpiresAt(date ? date.toISOString() : "")}
+          onChange={(date) => setExpiresAt(date ? date.toISOString().split("T")[0] : "")}
         />
       )}
     </Form>
