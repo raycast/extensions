@@ -29,7 +29,7 @@ const CREATE_FOLDER_OPTION = "__create__";
 const REMOVE_FOLDER_OPTION = "__remove__";
 
 function formatDate(value: string): string {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -43,7 +43,7 @@ function entryAccessories(entry: NotionIdHistoryEntry): List.Item.Accessory[] {
         value: formatDate(entry.lastCopiedAt),
         color: Color.SecondaryText,
       },
-      tooltip: `Last copied ${new Date(entry.lastCopiedAt).toLocaleString()}`,
+      tooltip: `Last copied ${new Date(entry.lastCopiedAt).toLocaleString("en-US")}`,
     },
   ];
 
