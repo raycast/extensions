@@ -16,7 +16,7 @@ With this update, Code Execution now has the full powers of Python Modules, the 
 * There are new, clearer icons for Bash, Python, and AppleScript tools so that the language you are running is clear on a glance
 
 
-## [Initial Version] - December 5, 2024
+## [Initial Version] - 2024-12-05
 
 The powers of Python and Bash, in the comfort of Raycast!
 
