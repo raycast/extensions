@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-03-31
 
 - Added Play/Pause, Next Track, and Previous Track controls
 - Added Search & Play with smart "Artist - Track" and "Track by Artist" parsing
