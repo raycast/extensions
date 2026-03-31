@@ -1,3 +1,3 @@
 # Cilium Changelog
 
- ## [Initial Release] - 2023-11-06
+## [Initial Release] - 2023-11-06
