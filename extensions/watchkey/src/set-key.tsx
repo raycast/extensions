@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useInstallGuard } from "./install-guard";
 import { watchkeySet } from "./watchkey";
@@ -37,7 +37,7 @@ export default function SetKey() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Store Secret" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Store Secret" icon={Icon.Key} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
