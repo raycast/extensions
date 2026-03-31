@@ -1,4 +1,4 @@
-import { Icon, List, getPreferenceValues, showToast } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { truncateDeviceID, timestampToReadableTime } from "./utils";
@@ -42,30 +42,27 @@ async function getDevices(
   API_KEY: string,
   BASE_URL: string,
 ): Promise<Device[] | void> {
-  // Call Syncthing API to get devices
-
   const headers = {
     "X-API-Key": API_KEY,
     Accept: "application/json",
   };
 
   try {
-    // Fetch stats for time
     const statsRes = await fetch(BASE_URL + "/stats/device", { headers });
+    if (!statsRes.ok) {
+      throw new Error(`Failed to fetch device stats: ${statsRes.status}`);
+    }
     const statsData = (await statsRes.json()) as Record<
       string,
       SyncthingDeviceStatsApi
     >;
-    console.log("Stats data: ", statsData);
-
-    // Fetch devices
     const devicesRes = await fetch(BASE_URL + "/config/devices", {
       headers,
     });
+    if (!devicesRes.ok) {
+      throw new Error(`Failed to fetch devices: ${devicesRes.status}`);
+    }
     const devicesData = (await devicesRes.json()) as SyncthingDeviceConfigApi[];
-    console.log("Devices data: ", devicesData);
-
-    // Combine device info with stats
     const devices: Device[] = devicesData.map((device) => {
       const deviceStats = statsData[device.deviceID] || {};
       return {
@@ -84,13 +81,8 @@ async function getDevices(
         },
       };
     });
-    showToast({
-      title: "Devices fetched successfully",
-      message: `Fetched ${devices.length} devices.`,
-    });
     return devices;
-  } catch (error) {
-    console.error("Error fetching devices: ", error);
+  } catch {
     showFailureToast("Failed to fetch devices.");
   }
 }
@@ -135,6 +127,10 @@ export default function Command() {
       searchBarPlaceholder="Search devices..."
       isShowingDetail
     >
+      <List.EmptyView
+        title="No devices found"
+        description="Syncthing has no devices to show."
+      />
       {devices.map((device) => (
         <List.Item
           key={device.deviceID}

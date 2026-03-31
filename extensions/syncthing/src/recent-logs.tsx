@@ -8,6 +8,7 @@ import {
   List,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { timestampToReadableTime } from "./utils";
 
@@ -15,7 +16,7 @@ interface Log {
   time: string;
   message: string;
   level: string;
-  id?: string; // Optional ID for better keying in the list
+  id?: string;
 }
 
 interface SyncthingLogApi {
@@ -39,16 +40,16 @@ async function getRecentLogs(
 
   try {
     const res = await fetch(BASE_URL + "/system/log", { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to fetch logs: ${res.status}`);
+    }
     const data = (await res.json()) as SyncthingLogResponse;
     const logs = [...(data.messages || [])];
-    console.log("Logs data [0:3]: ", logs.slice(0, 3));
 
     if (logs.length === 0) {
-      console.log("No recent logs found.");
       return [];
     }
 
-    // sort logs by time, newest first
     logs.sort(
       (a: SyncthingLogApi, b: SyncthingLogApi) =>
         new Date(b.when).getTime() - new Date(a.when).getTime(),
@@ -58,10 +59,10 @@ async function getRecentLogs(
       time: log.when,
       message: log.message,
       level: log.level,
-      id: crypto.randomUUID(), // Multiple similar messages can exist @ same timestamp
+      id: crypto.randomUUID(),
     }));
-  } catch (error) {
-    console.error("Error fetching recent logs:", error);
+  } catch {
+    showFailureToast("Failed to fetch logs.");
     return [];
   }
 }
@@ -84,11 +85,13 @@ function LogDetail(log: Log) {
 export default function Command() {
   const [logs, setLogs] = useState<Log[]>([]);
   const [levelFilter, setLevelFilter] = useState<string>("all");
+  const [isLoading, setIsLoading] = useState(true);
   const { push } = useNavigation();
   useEffect(() => {
     const API_KEY = getPreferenceValues().api_key;
     const BASE_URL = getPreferenceValues().base_url;
     getRecentLogs(API_KEY, BASE_URL).then((fetchedLogs) => {
+      setIsLoading(false);
       if (fetchedLogs) {
         setLogs(fetchedLogs);
       }
@@ -97,6 +100,7 @@ export default function Command() {
   return (
     <List
       filtering
+      isLoading={isLoading}
       searchBarAccessory={
         <>
           <List.Dropdown
@@ -112,6 +116,10 @@ export default function Command() {
         </>
       }
     >
+      <List.EmptyView
+        title="No logs found"
+        description="Syncthing has no recent logs."
+      />
       {logs
         .filter((log) => levelFilter === "all" || log.level === levelFilter)
         .map((log) => (

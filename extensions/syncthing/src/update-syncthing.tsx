@@ -23,7 +23,6 @@ interface SyncthingUpgradeApiResponse {
 }
 
 async function checkForUpdates(): Promise<UpdateInfo | undefined> {
-  // Check if an update is available
   const API_KEY = getPreferenceValues().api_key;
   const BASE_URL = getPreferenceValues().base_url;
 
@@ -34,28 +33,23 @@ async function checkForUpdates(): Promise<UpdateInfo | undefined> {
 
   try {
     const res = await fetch(BASE_URL + "/system/upgrade", { headers });
+    if (!res.ok) {
+      throw new Error(`Failed to check for updates: ${res.status}`);
+    }
     const data = (await res.json()) as SyncthingUpgradeApiResponse;
-    console.log("Upgrade check data: ", data);
     const updateInfo: UpdateInfo = {
       currVersion: data.running,
       newVersion: data.latest,
       newer: data.newer,
       majorNewer: data.majorNewer,
     };
-    if (updateInfo.newer) {
-      console.log(
-        `Update available: ${updateInfo.currVersion} -> ${updateInfo.newVersion}`,
-      );
-    }
     return updateInfo;
-  } catch (error) {
-    console.error("Error checking for updates:", error);
+  } catch {
     return undefined;
   }
 }
 
 async function applyUpdate() {
-  // Apply the update
   const API_KEY = getPreferenceValues().api_key;
   const BASE_URL = getPreferenceValues().base_url;
   const headers = {
@@ -69,14 +63,12 @@ async function applyUpdate() {
       headers,
     });
     if (res.ok) {
-      console.log("Update applied successfully.");
       showToast({
         title: "Update Applied",
         message: "Syncthing has been updated successfully.",
         style: Toast.Style.Success,
       });
     } else {
-      console.error("Failed to apply update. Status: ", res.status);
       showToast({
         title: "Update Failed",
         message:
@@ -84,8 +76,7 @@ async function applyUpdate() {
         style: Toast.Style.Failure,
       });
     }
-  } catch (error) {
-    console.error("Error applying update: ", error);
+  } catch {
     showToast({
       title: "Error",
       message:
@@ -95,18 +86,7 @@ async function applyUpdate() {
   }
 }
 
-async function generateUpdateDetail() {
-  const updateInfo = await checkForUpdates();
-  if (!updateInfo) {
-    await showToast({
-      title: "Error",
-      message:
-        "Failed to check for updates. Please check the console for more details.",
-      style: Toast.Style.Failure,
-    });
-    return "# Error\n\nFailed to check for updates.";
-  }
-
+function buildUpdateMarkdown(updateInfo: UpdateInfo) {
   return `
 # ${updateInfo.newer ? (updateInfo.majorNewer ? "Major Update Available!" : "Update Available!") : "Syncthing is Up to Date"}
 
@@ -118,11 +98,24 @@ async function generateUpdateDetail() {
 export default function Command() {
   const [markdown, setMarkdown] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo>();
 
   useEffect(() => {
-    generateUpdateDetail()
-      .then(setMarkdown)
-      .then(() => setLoading(false));
+    const loadUpdateInfo = async () => {
+      try {
+        const info = await checkForUpdates();
+        if (!info) {
+          setMarkdown("# Error\n\nFailed to check for updates.");
+          return;
+        }
+        setUpdateInfo(info);
+        setMarkdown(buildUpdateMarkdown(info));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUpdateInfo();
   }, []);
 
   return (
@@ -131,12 +124,14 @@ export default function Command() {
       isLoading={loading}
       actions={
         <ActionPanel>
-          <Action
-            title="Update Syncthing"
-            onAction={async () => {
-              await applyUpdate();
-            }}
-          />
+          {updateInfo?.newer ? (
+            <Action
+              title="Update Syncthing"
+              onAction={async () => {
+                await applyUpdate();
+              }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

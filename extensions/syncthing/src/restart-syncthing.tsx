@@ -12,22 +12,15 @@ async function restartSyncthing(): Promise<void> {
       },
     });
     if (res.ok) {
-      console.log("Syncthing restart triggered successfully.");
       showHUD("✅ Syncthing restart triggered!");
     } else {
-      console.error(
-        "Failed to trigger Syncthing restart. Status: ",
-        res.status,
-      );
       showHUD("❌ Failed to trigger Syncthing restart.");
     }
-  } catch (error) {
-    console.error("Error triggering Syncthing restart: ", error);
+  } catch {
     showHUD("❌ Error triggering Syncthing restart.");
   }
 }
 
 export default async function Command() {
-  // No UI, just restart syncthing
   await restartSyncthing();
 }

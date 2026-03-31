@@ -1,4 +1,4 @@
-import { Icon, List, getPreferenceValues, showToast } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { timestampToReadableTime } from "./utils";
@@ -48,57 +48,76 @@ async function getFolders(
   API_KEY: string,
   BASE_URL: string,
 ): Promise<Folder[] | void> {
-  // Call Syncthing API to get folders
-
   const headers = {
     "X-API-Key": API_KEY,
     Accept: "application/json",
   };
 
   try {
-    // Fetch folder configuration
     const configRes = await fetch(BASE_URL + "/config/folders", {
       headers,
     });
+    if (!configRes.ok) {
+      throw new Error(`Failed to fetch folders: ${configRes.status}`);
+    }
     const configData = (await configRes.json()) as SyncthingFolderConfigApi[];
 
-    // Fetch status for each folder
     const folders: Folder[] = await Promise.all(
       configData.map(async (folder) => {
-        const statusRes = await fetch(
-          BASE_URL + "/db/status?folder=" + encodeURIComponent(folder.id),
-          { headers },
-        );
-        const statusData = (await statusRes.json()) as SyncthingFolderStatusApi;
+        try {
+          const statusRes = await fetch(
+            BASE_URL + "/db/status?folder=" + encodeURIComponent(folder.id),
+            { headers },
+          );
+          if (!statusRes.ok) {
+            throw new Error(`Failed to fetch status: ${statusRes.status}`);
+          }
+          const statusData =
+            (await statusRes.json()) as SyncthingFolderStatusApi;
 
-        return {
-          id: folder.id,
-          label: folder.label || folder.id,
-          path: folder.path,
-          type: folder.type || "sendreceive",
-          status: {
-            state: statusData.state || "unknown",
-            stateChanged: statusData.stateChanged || "N/A",
-            globalBytes: statusData.globalBytes || 0,
-            globalFiles: statusData.globalFiles || 0,
-            localBytes: statusData.localBytes || 0,
-            localFiles: statusData.localFiles || 0,
-            needBytes: statusData.needBytes || 0,
-            needFiles: statusData.needFiles || 0,
-            pullErrors: statusData.pullErrors || 0,
-            version: statusData.version || 0,
-          },
-        };
+          return {
+            id: folder.id,
+            label: folder.label || folder.id,
+            path: folder.path,
+            type: folder.type || "sendreceive",
+            status: {
+              state: statusData.state || "unknown",
+              stateChanged: statusData.stateChanged || "N/A",
+              globalBytes: statusData.globalBytes || 0,
+              globalFiles: statusData.globalFiles || 0,
+              localBytes: statusData.localBytes || 0,
+              localFiles: statusData.localFiles || 0,
+              needBytes: statusData.needBytes || 0,
+              needFiles: statusData.needFiles || 0,
+              pullErrors: statusData.pullErrors || 0,
+              version: statusData.version || 0,
+            },
+          };
+        } catch {
+          return {
+            id: folder.id,
+            label: folder.label || folder.id,
+            path: folder.path,
+            type: folder.type || "sendreceive",
+            status: {
+              state: "error",
+              stateChanged: "N/A",
+              globalBytes: 0,
+              globalFiles: 0,
+              localBytes: 0,
+              localFiles: 0,
+              needBytes: 0,
+              needFiles: 0,
+              pullErrors: 0,
+              version: 0,
+            },
+          };
+        }
       }),
     );
 
-    showToast({
-      title: "Folders fetched successfully",
-      message: `Fetched ${folders.length} folders.`,
-    });
     return folders;
-  } catch (error) {
-    console.error("Error fetching folders: ", error);
+  } catch {
     showFailureToast("Failed to fetch folders.");
   }
 }
@@ -142,7 +161,6 @@ function getFolderTypeLabel(type: string): string {
 }
 
 function generateDetailMarkdown(folder: Folder): string {
-  console.log("Folder.status: ", folder.status);
   const syncPercentage =
     folder.status.globalBytes > 0
       ? (
@@ -197,6 +215,10 @@ export default function Command() {
       searchBarPlaceholder="Search folders..."
       isShowingDetail
     >
+      <List.EmptyView
+        title="No folders found"
+        description="Syncthing has no folders to show."
+      />
       {folders.map((folder) => (
         <List.Item
           key={folder.id}
