@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-03-31
+
+- `Toggle Peon Ping` no-view command for quick on/off from Raycast search
+
 ## Initial Version - 2026-03-28
 
 - Main `Peon Ping` command with status, global on/off, and supported settings

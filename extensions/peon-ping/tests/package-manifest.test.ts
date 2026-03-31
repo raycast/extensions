@@ -17,10 +17,10 @@ function readManifest(): Manifest {
   return JSON.parse(readFileSync(packageJsonPath, "utf8")) as Manifest;
 }
 
-test("package manifest exposes Peon Ping and one menu bar command", () => {
+test("package manifest exposes Peon Ping, menu bar, and toggle commands", () => {
   const manifest = readManifest();
 
-  expect(manifest.commands).toHaveLength(2);
+  expect(manifest.commands).toHaveLength(3);
   expect(manifest.commands).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
@@ -33,10 +33,11 @@ test("package manifest exposes Peon Ping and one menu bar command", () => {
         title: "Peon Ping Menu Bar",
         mode: "menu-bar",
       }),
+      expect.objectContaining({
+        name: "toggle-peon-ping",
+        title: "Toggle Peon Ping",
+        mode: "no-view",
+      }),
     ]),
   );
-
-  expect(
-    manifest.commands.some((command) => command.name === "toggle-peon-ping"),
-  ).toBe(false);
 });

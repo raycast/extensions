@@ -57,6 +57,13 @@
       "icon": "icon.png",
       "mode": "menu-bar",
       "interval": "1m"
+    },
+    {
+      "name": "toggle-peon-ping",
+      "title": "Toggle Peon Ping",
+      "description": "Turn peon-ping on or off.",
+      "icon": "icon.png",
+      "mode": "no-view"
     }
   ]
 }
