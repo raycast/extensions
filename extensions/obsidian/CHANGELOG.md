@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix Open in New Obsidian Tab failing on Windows due to path separator handling
+
 ## [Silent Mode No Longer Activates Obsidian] - 2026-03-31
 
 - Fix: Append to Daily Note, Append Task, and custom actions with silent mode enabled no longer bring Obsidian to the foreground

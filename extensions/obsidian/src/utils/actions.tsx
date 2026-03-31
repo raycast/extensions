@@ -277,6 +277,11 @@ export function OpenPathInObsidianAction(props: { path: string }) {
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
 
+  const relativePath = note.path
+    .replace(vault.path, "")
+    .replace(/^[\\/]+/, "")
+    .replace(/\\/g, "/");
+
   return (
     <Action.Open
       title="Open in New Obsidian Tab"
@@ -284,7 +289,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
         "obsidian://advanced-uri?vault=" +
         encodeURIComponent(vault.name) +
         "&filepath=" +
-        encodeURIComponent(note.path.replace(vault.path, "")) +
+        encodeURIComponent(relativePath) +
         "&newpane=true"
       }
       icon={ObsidianIcon}
