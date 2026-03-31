@@ -46,6 +46,9 @@ export default function Command() {
       }
 
       const fileInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
+      if (fileInfos.length === 1) {
+        setPreserveName(false);
+      }
       setFiles(fileInfos);
     } catch (error) {
       log.rename.error("Failed to fetch files", error);

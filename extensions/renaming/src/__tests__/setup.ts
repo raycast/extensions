@@ -6,7 +6,6 @@
  */
 
 import { vi, beforeEach } from "vitest";
-import "@testing-library/jest-dom/vitest";
 
 // Mock Raycast modules globally
 vi.mock("@raycast/api", () => import("./__mocks__/@raycast/api"));

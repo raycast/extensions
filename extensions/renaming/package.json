@@ -53,8 +53,6 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "@vitest/coverage-v8": "^4.0.18",

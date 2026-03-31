@@ -7,10 +7,9 @@ import { constants } from "fs";
 import { basename, dirname, extname, join } from "path";
 import type { FileInfo, RenameResult } from "../types";
 import { validateFilename } from "./validation";
-import { MAX_UNIQUE_FILENAME_ATTEMPTS } from "./constants";
 import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
-import { validatePathTraversal, isSamePath, normalizePath } from "./paths";
+import { validatePathTraversal, isSamePath } from "./paths";
 
 /**
  * Get detailed file info
@@ -115,38 +114,4 @@ export async function renameFile(oldPath: string, newName: string): Promise<Rena
       error: getUserFriendlyErrorMessage(error),
     };
   }
-}
-
-/**
- * Deduplicate file paths (case-insensitive on macOS)
- */
-export function deduplicatePaths(paths: string[]): string[] {
-  const seen = new Set<string>();
-  return paths.filter((p) => {
-    const key = normalizePath(p);
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-/**
- * Generate a unique filename by appending a number if conflict exists
- * e.g., "file.txt" -> "file (1).txt" -> "file (2).txt"
- */
-export async function generateUniqueFilename(dir: string, baseName: string, extension: string): Promise<string> {
-  let candidate = extension ? `${baseName}${extension}` : baseName;
-  let counter = 1;
-
-  while (await fileExists(join(dir, candidate))) {
-    candidate = extension ? `${baseName} (${counter})${extension}` : `${baseName} (${counter})`;
-    counter++;
-
-    // Safety limit to prevent infinite loops
-    if (counter > MAX_UNIQUE_FILENAME_ATTEMPTS) {
-      throw new Error(`Could not generate unique filename after ${MAX_UNIQUE_FILENAME_ATTEMPTS} attempts`);
-    }
-  }
-
-  return candidate;
 }

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { tmpdir } from "os";
 import { mkdtemp, writeFile, rm, mkdir } from "fs/promises";
 import { join } from "path";
-import { getFileInfo, fileExists, renameFile, generateUniqueFilename } from "../lib/files";
+import { getFileInfo, fileExists, renameFile } from "../lib/files";
 
 describe("getFileInfo", () => {
   let testDir: string;
@@ -171,45 +171,5 @@ describe("renameFile", () => {
     expect(result.success).toBe(false);
     // Either path traversal or invalid character error is acceptable
     expect(result.error).toMatch(/traversal|cannot contain/i);
-  });
-});
-
-describe("generateUniqueFilename", () => {
-  let testDir: string;
-
-  beforeEach(async () => {
-    testDir = await mkdtemp(join(tmpdir(), "renaming-test-"));
-  });
-
-  afterEach(async () => {
-    await rm(testDir, { recursive: true, force: true });
-  });
-
-  it("should return original name when no conflict", async () => {
-    const name = await generateUniqueFilename(testDir, "unique", ".txt");
-    expect(name).toBe("unique.txt");
-  });
-
-  it("should append number when conflict exists", async () => {
-    await writeFile(join(testDir, "file.txt"), "content");
-
-    const name = await generateUniqueFilename(testDir, "file", ".txt");
-    expect(name).toBe("file (1).txt");
-  });
-
-  it("should increment number for multiple conflicts", async () => {
-    await writeFile(join(testDir, "file.txt"), "content");
-    await writeFile(join(testDir, "file (1).txt"), "content");
-    await writeFile(join(testDir, "file (2).txt"), "content");
-
-    const name = await generateUniqueFilename(testDir, "file", ".txt");
-    expect(name).toBe("file (3).txt");
-  });
-
-  it("should handle files without extension", async () => {
-    await writeFile(join(testDir, "README"), "content");
-
-    const name = await generateUniqueFilename(testDir, "README", "");
-    expect(name).toBe("README (1)");
   });
 });
