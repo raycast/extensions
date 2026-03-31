@@ -2,12 +2,14 @@ import {
   Action,
   ActionPanel,
   Cache,
+  closeMainWindow,
   Color,
   Icon,
   Keyboard,
   launchCommand,
   LaunchType,
   List,
+  popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -350,6 +352,8 @@ function SetAudioDeviceAction({ device, type, onSelection }: SetAudioDeviceActio
           await (type === "input" ? setDefaultInputDevice(device.id) : setOutputAndSystemDevice(device.id));
           await setGraceUntil(type, Date.now() + 60_000);
           onSelection?.(device.uid);
+          await closeMainWindow({ clearRootSearch: true });
+          await popToRoot({ clearSearchBar: true });
           await showToast(Toast.Style.Success, `Set "${device.name}" as ${type} device`);
         } catch (e) {
           console.error(e);
