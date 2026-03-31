@@ -204,7 +204,7 @@ export async function renameFile(oldPath: string, newName: string): Promise<Rena
  */
 export async function batchRename(
   operations: RenameOperation[],
-  onProgress?: (current: number, total: number, fileName: string) => void,
+  onProgress?: (current: number, total: number, fileName: string) => void | Promise<void>,
 ): Promise<RenameResult[]> {
   const results: RenameResult[] = new Array(operations.length);
 
@@ -280,7 +280,7 @@ export async function batchRename(
     const { op, originalIndex } = indexed[i]!;
 
     if (onProgress) {
-      onProgress(i + 1, indexed.length, basename(operations[originalIndex]!.oldPath));
+      await onProgress(i + 1, indexed.length, basename(operations[originalIndex]!.oldPath));
     }
 
     const result = await renameFile(op.oldPath, op.newName);
