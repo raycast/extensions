@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Silent Mode No Longer Activates Obsidian] - {PR_MERGE_DATE}
+## [Silent Mode No Longer Activates Obsidian] - 2026-03-31
 
 - Fix: Append to Daily Note, Append Task, and custom actions with silent mode enabled no longer bring Obsidian to the foreground
 - Fix: Multi-vault Append Task was missing the silent flag, causing Obsidian to always activate on vault selection
