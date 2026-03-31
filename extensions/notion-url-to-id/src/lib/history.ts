@@ -10,6 +10,7 @@ export interface NotionIdHistoryEntry {
   pageName: string;
   sourceUrl?: string;
   folder?: string;
+  nameLocked?: boolean;
   createdAt: string;
   lastCopiedAt: string;
   pinned: boolean;
@@ -20,6 +21,8 @@ interface RecordHistoryEntryInput {
   pageName: string;
   sourceUrl?: string | null;
 }
+
+const FALLBACK_PAGE_NAME_PATTERN = /^notion page [a-f0-9]{8}$/i;
 
 function isHistoryEntry(value: unknown): value is NotionIdHistoryEntry {
   if (!value || typeof value !== "object") {
@@ -32,10 +35,15 @@ function isHistoryEntry(value: unknown): value is NotionIdHistoryEntry {
     typeof entry.notionId === "string" &&
     typeof entry.pageName === "string" &&
     (typeof entry.folder === "undefined" || typeof entry.folder === "string") &&
+    (typeof entry.nameLocked === "undefined" || typeof entry.nameLocked === "boolean") &&
     typeof entry.createdAt === "string" &&
     typeof entry.lastCopiedAt === "string" &&
     typeof entry.pinned === "boolean"
   );
+}
+
+function isFallbackPageName(value: string): boolean {
+  return FALLBACK_PAGE_NAME_PATTERN.test(value.trim());
 }
 
 function getEntryActivityDate(entry: NotionIdHistoryEntry): string {
@@ -108,7 +116,12 @@ export async function recordHistoryEntry(input: RecordHistoryEntryInput): Promis
   const existing = entries.find((entry) => entry.notionId === input.notionId);
 
   if (existing) {
-    existing.pageName = input.pageName || existing.pageName;
+    const incomingName = input.pageName.trim();
+    if (!existing.nameLocked && incomingName) {
+      if (isFallbackPageName(existing.pageName) || !isFallbackPageName(incomingName)) {
+        existing.pageName = incomingName;
+      }
+    }
     existing.sourceUrl = input.sourceUrl ?? existing.sourceUrl;
     existing.lastCopiedAt = now;
   } else {
@@ -177,6 +190,21 @@ export async function setHistoryEntryFolder(
   }
 
   entry.folder = folder?.trim() || undefined;
+  await saveHistoryEntries(entries);
+  return sortHistoryEntries(entries);
+}
+
+export async function renameHistoryEntry(notionId: string, pageName: string): Promise<NotionIdHistoryEntry[]> {
+  const trimmedName = pageName.trim();
+  const entries = await getHistoryEntries();
+  const entry = entries.find((item) => item.notionId === notionId);
+
+  if (!entry || !trimmedName) {
+    return entries;
+  }
+
+  entry.pageName = trimmedName;
+  entry.nameLocked = true;
   await saveHistoryEntries(entries);
   return sortHistoryEntries(entries);
 }

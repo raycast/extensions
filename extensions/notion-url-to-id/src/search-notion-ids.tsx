@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Clipboard,
   Color,
   Form,
   Icon,
@@ -20,6 +21,7 @@ import {
   getHistoryEntries,
   markHistoryEntryCopied,
   NotionIdHistoryEntry,
+  renameHistoryEntry,
   setHistoryEntryFolder,
   togglePinnedHistoryEntry,
 } from "./lib/history";
@@ -120,6 +122,29 @@ function FolderForm(props: {
   );
 }
 
+function RenameForm(props: { entry: NotionIdHistoryEntry; onSubmit: (name: string) => Promise<void> }) {
+  const { pop } = useNavigation();
+
+  return (
+    <Form
+      navigationTitle="Rename Page"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Save Name"
+            onSubmit={async (values: { pageName: string }) => {
+              await props.onSubmit(values.pageName);
+              pop();
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="pageName" title="Page Name" defaultValue={props.entry.pageName} />
+    </Form>
+  );
+}
+
 export default function Command() {
   const [entries, setEntries] = useState<NotionIdHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,6 +174,7 @@ export default function Command() {
   }, []);
 
   const handleCopy = useCallback(async (entry: NotionIdHistoryEntry) => {
+    await Clipboard.copy(entry.notionId);
     const updatedEntries = await markHistoryEntryCopied(entry.notionId);
     setEntries(updatedEntries);
 
@@ -188,6 +214,25 @@ export default function Command() {
     await showToast({
       style: Toast.Style.Success,
       title: folder?.trim() ? `Saved to ${folder.trim()}` : `Removed folder from ${entry.notionId}`,
+    });
+  }, []);
+
+  const handleRename = useCallback(async (entry: NotionIdHistoryEntry, pageName: string) => {
+    const trimmedName = pageName.trim();
+    if (!trimmedName) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Page name cannot be empty",
+      });
+      return;
+    }
+
+    const updatedEntries = await renameHistoryEntry(entry.notionId, trimmedName);
+    setEntries(updatedEntries);
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Renamed ${entry.notionId}`,
     });
   }, []);
 
@@ -283,11 +328,7 @@ export default function Command() {
           accessories={entryAccessories(entry)}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                title="Copy Notion ID"
-                content={entry.notionId}
-                onCopy={() => handleCopy(entry)}
-              />
+              <Action title="Copy Notion ID" onAction={() => handleCopy(entry)} />
               <Action
                 title={entry.pinned ? "Unpin Notion ID" : "Pin Notion ID"}
                 icon={entry.pinned ? Icon.StarDisabled : Icon.Star}
@@ -303,6 +344,11 @@ export default function Command() {
                 target={
                   <FolderForm entry={entry} folders={folders} onSubmit={(folder) => handleSetFolder(entry, folder)} />
                 }
+              />
+              <Action.Push
+                title="Rename Page"
+                icon={Icon.Pencil}
+                target={<RenameForm entry={entry} onSubmit={(pageName) => handleRename(entry, pageName)} />}
               />
               {selectedFolder !== ALL_FOLDERS_FILTER ? (
                 <Action
