@@ -1,5 +1,9 @@
 # Changelog
 
+## [Remove Trending Skills Command] - {PR_MERGE_DATE}
+
+- Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills
+
 ## [Agent-Specific Skill Installation] - 2026-03-31
 
 - Support installing skills to specific agents instead of all agents at once
