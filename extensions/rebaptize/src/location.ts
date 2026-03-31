@@ -87,7 +87,8 @@ export async function extractGps(filePath: string): Promise<{ lat: number; lon: 
     const exif = exifReader(exifBuffer);
 
     // exif-reader v2 uses "GPSInfo", older versions use "gps"
-    const gps = exif.GPSInfo || exif.gps;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const gps = exif.GPSInfo || (exif as any).gps;
     if (!gps) return null;
     const lat = gps.GPSLatitude;
     const lon = gps.GPSLongitude;

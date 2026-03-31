@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/icon.png" width="128" height="128" alt="Rebaptize icon" />
+</p>
+
 # Rebaptize
 
 Bulk rename and organize files directly from Raycast. 30 commands covering everything from instant one-shot case conversion to smart TV show episode organization with metadata from TMDB and TheTVDB.
@@ -29,15 +33,15 @@ breaking.bad.s01e02.720p.BluRay.x264-DEMAND.mkv  Breaking Bad S01E02.mkv
 Breaking.Bad.S01E03.HDTV.XviD-LOL.avi            Breaking Bad S01E03.avi
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Show Name | Name of the show (required) | Auto-detected from filenames |
-| Override season/episode | When off, preserves existing `S01E01` info from filenames. When on, forces all files to the season and start episode below. | Off |
-| Season / Default Season | Season number. When override is off, only used for files without season info. | `1` |
-| Start Episode / Default Start Episode | First episode number. When override is off, only used for files without episode info. | `1` |
-| Word Separator | Space, Dot, Underscore, Dash, or Custom | Space |
-| Custom Separator | Any string (shown when Custom is selected) | — |
-| Suffix | Text added after `S01E01` (e.g. `1080p`, `PROPER`) | — |
+| Option                                | Description                                                                                                                 | Default                      |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| Show Name                             | Name of the show (required)                                                                                                 | Auto-detected from filenames |
+| Override season/episode               | When off, preserves existing `S01E01` info from filenames. When on, forces all files to the season and start episode below. | Off                          |
+| Season / Default Season               | Season number. When override is off, only used for files without season info.                                               | `1`                          |
+| Start Episode / Default Start Episode | First episode number. When override is off, only used for files without episode info.                                       | `1`                          |
+| Word Separator                        | Space, Dot, Underscore, Dash, or Custom                                                                                     | Space                        |
+| Custom Separator                      | Any string (shown when Custom is selected)                                                                                  | —                            |
+| Suffix                                | Text added after `S01E01` (e.g. `1080p`, `PROPER`)                                                                          | —                            |
 
 ### Anime
 
@@ -50,12 +54,12 @@ Before       After
 003.mkv      [SubsPlease] Demon Slayer - 03 [1080p].mkv
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Anime Name | Name of the anime (required) | Auto-detected from filenames |
-| Start Episode | First episode number | `1` |
-| Sub Group | Fansub group name (optional) | — |
-| Quality | Quality tag (optional, e.g. `1080p`) | — |
+| Option        | Description                          | Default                      |
+| ------------- | ------------------------------------ | ---------------------------- |
+| Anime Name    | Name of the anime (required)         | Auto-detected from filenames |
+| Start Episode | First episode number                 | `1`                          |
+| Sub Group     | Fansub group name (optional)         | —                            |
+| Quality       | Quality tag (optional, e.g. `1080p`) | —                            |
 
 ### Movie
 
@@ -70,12 +74,12 @@ inception.2010.brrip.x264.mkv      Interstellar 2014 1080p.mkv
 
 Note: All files in the folder are renamed to the same movie name you provide.
 
-| Option | Description | Default |
-|---|---|---|
-| Movie Name | Name of the movie (required) | Auto-detected from filenames |
-| Year | Release year (optional) | — |
-| Quality | Quality tag (optional, e.g. `1080p`) | — |
-| Word Separator | Space, Dot, Underscore, Dash, or Custom | Space |
+| Option         | Description                             | Default                      |
+| -------------- | --------------------------------------- | ---------------------------- |
+| Movie Name     | Name of the movie (required)            | Auto-detected from filenames |
+| Year           | Release year (optional)                 | —                            |
+| Quality        | Quality tag (optional, e.g. `1080p`)    | —                            |
+| Word Separator | Space, Dot, Underscore, Dash, or Custom | Space                        |
 
 ### Sequential
 
@@ -88,12 +92,12 @@ IMG_0002.jpg     Beach-Trip-002.jpg
 DSC_3345.jpg     Beach-Trip-003.jpg
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Prefix | Text before the number (required) | — |
-| Start Number | First number | `1` |
-| Zero Padding | Number of digits (e.g. 3 = `001`) | `3` |
-| Separator | Dash, Underscore, Dot, or Space | Dash |
+| Option       | Description                       | Default |
+| ------------ | --------------------------------- | ------- |
+| Prefix       | Text before the number (required) | —       |
+| Start Number | First number                      | `1`     |
+| Zero Padding | Number of digits (e.g. 3 = `001`) | `3`     |
+| Separator    | Dash, Underscore, Dot, or Space   | Dash    |
 
 ### Date-Based
 
@@ -105,10 +109,10 @@ IMG_0001.jpg     Lisbon-2025-01-15_09-00-00-001.jpg
 IMG_0002.jpg     Lisbon-2025-01-15_14-00-00-002.jpg
 ```
 
-| Option | Description | Default |
-|---|---|---|
+| Option      | Description                                 | Default      |
+| ----------- | ------------------------------------------- | ------------ |
 | Date Format | `YYYY-MM-DD`, `DD-MM-YYYY`, or `MM-DD-YYYY` | `YYYY-MM-DD` |
-| Prefix | Text before the date (optional) | — |
+| Prefix      | Text before the date (optional)             | —            |
 
 Uses the file's creation date. Falls back to modification date if creation date is unavailable.
 
@@ -123,10 +127,10 @@ lowercase:      My Show Name.mkv         →  my show name.mkv
 Sentence case:  MY SHOW NAME.mkv         →  My show name.mkv
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Case | Title Case, UPPERCASE, lowercase, or Sentence case | Title Case |
-| Collapse multiple spaces | Merge extra spaces into one | On |
+| Option                   | Description                                        | Default    |
+| ------------------------ | -------------------------------------------------- | ---------- |
+| Case                     | Title Case, UPPERCASE, lowercase, or Sentence case | Title Case |
+| Collapse multiple spaces | Merge extra spaces into one                        | On         |
 
 Title Case keeps common words lowercase (a, an, the, and, but, or, for, in, on, at, to, by, of, etc.) unless they are the first word.
 
@@ -140,10 +144,10 @@ Spaces to underscores:   My Show S01E01.mkv         →  My_Show_S01E01.mkv
 Underscores to dashes:   my_vacation_photo.jpg      →  my-vacation-photo.jpg
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| From | Character(s) to find | `.` |
-| To | Replacement character(s) | ` ` (space) |
+| Option | Description              | Default     |
+| ------ | ------------------------ | ----------- |
+| From   | Character(s) to find     | `.`         |
+| To     | Replacement character(s) | ` ` (space) |
 
 ### Auto Enumerate
 
@@ -157,12 +161,12 @@ By file size:      (smallest first) → 001.jpg, 002.jpg, 003.jpg
 By name length:    (shortest name first) → 001.jpg, 002.jpg, 003.jpg
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Prefix | Text before the number (optional — omit for just `001.ext`) | — |
-| Start Number | First number | `1` |
-| Zero Padding | Number of digits | `3` |
-| Separator | Dash, Underscore, Dot, or Space | Dash |
+| Option        | Description                                                             | Default   |
+| ------------- | ----------------------------------------------------------------------- | --------- |
+| Prefix        | Text before the number (optional — omit for just `001.ext`)             | —         |
+| Start Number  | First number                                                            | `1`       |
+| Zero Padding  | Number of digits                                                        | `3`       |
+| Separator     | Dash, Underscore, Dot, or Space                                         | Dash      |
 | Sort Files By | File Name (A-Z), Date Created, Date Modified, File Size, or Name Length | File Name |
 
 ### Change Extension
@@ -174,10 +178,10 @@ Bulk convert file extensions. Optionally filter to only change files with a spec
 *.txt  → *.md
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| From Extension | Only change files with this extension (leave empty for all) | — |
-| New Extension | The target extension (required) | — |
+| Option         | Description                                                 | Default |
+| -------------- | ----------------------------------------------------------- | ------- |
+| From Extension | Only change files with this extension (leave empty for all) | —       |
+| New Extension  | The target extension (required)                             | —       |
 
 ### Find & Replace
 
@@ -187,11 +191,11 @@ Plain text or regex find and replace on filenames. Extension is preserved by def
 Remove quality tags:  My.Show.S01E01.720p.BluRay.x264-GROUP.mkv  →  My.Show.S01E01.mkv
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Find | Pattern to search for | — |
-| Replace With | Replacement text (supports `$1`, `$2` capture groups in regex mode) | — |
-| Use Regular Expression | Toggle regex mode | Off |
+| Option                 | Description                                                         | Default |
+| ---------------------- | ------------------------------------------------------------------- | ------- |
+| Find                   | Pattern to search for                                               | —       |
+| Replace With           | Replacement text (supports `$1`, `$2` capture groups in regex mode) | —       |
+| Use Regular Expression | Toggle regex mode                                                   | Off     |
 
 ---
 
@@ -211,28 +215,28 @@ Before (flat folder):         After:
 
 The episode parser recognizes 9 different formats:
 
-| Pattern | Example |
-|---|---|
-| Standard TV | `S01E01`, `s01e01`, `S1E5` |
-| Cross-format | `1x01`, `01x05` |
-| Anime fansub | `[SubsPlease] Show Name - 01 [1080p]` |
-| E-only | `Show.Name.E01`, `Show Name - E01` |
-| Verbose | `Episode 01`, `Ep 01`, `EP01` |
-| Bare after separator | `Show Name - 001` |
-| Pure numeric | `001.mkv` (entire filename minus extension is a number) |
-| Leading number | `01 - Title.mkv`, `001 Something.mkv` |
-| Trailing number | `Something_01.mkv` |
+| Pattern              | Example                                                 |
+| -------------------- | ------------------------------------------------------- |
+| Standard TV          | `S01E01`, `s01e01`, `S1E5`                              |
+| Cross-format         | `1x01`, `01x05`                                         |
+| Anime fansub         | `[SubsPlease] Show Name - 01 [1080p]`                   |
+| E-only               | `Show.Name.E01`, `Show Name - E01`                      |
+| Verbose              | `Episode 01`, `Ep 01`, `EP01`                           |
+| Bare after separator | `Show Name - 001`                                       |
+| Pure numeric         | `001.mkv` (entire filename minus extension is a number) |
+| Leading number       | `01 - Title.mkv`, `001 Something.mkv`                   |
+| Trailing number      | `Something_01.mkv`                                      |
 
 ### Options
 
-| Option | Description | Default |
-|---|---|---|
-| Show / Anime Name | Name used in output filenames (required) | Auto-detected from filenames or folder name |
-| Metadata Source | Manual, TMDB (free), or TheTVDB ($12/year) | Manual |
-| Season Episodes | Per-season episode counts (Manual mode only). Press `Cmd+N` to add seasons, `Cmd+Delete` to remove. | Season 1: 12 |
-| Start season at 00 | When enabled, first season is numbered 00 instead of 01 | Off |
-| Folder Template | Output folder name pattern | `Season {season}` |
-| File Template | Output filename pattern (extension added automatically) | `{show}.S{season}E{episode}` |
+| Option             | Description                                                                                         | Default                                     |
+| ------------------ | --------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Show / Anime Name  | Name used in output filenames (required)                                                            | Auto-detected from filenames or folder name |
+| Metadata Source    | Manual, TMDB (free), or TheTVDB ($12/year)                                                          | Manual                                      |
+| Season Episodes    | Per-season episode counts (Manual mode only). Press `Cmd+N` to add seasons, `Cmd+Delete` to remove. | Season 1: 12                                |
+| Start season at 00 | When enabled, first season is numbered 00 instead of 01                                             | Off                                         |
+| Folder Template    | Output folder name pattern                                                                          | `Season {season}`                           |
+| File Template      | Output filename pattern (extension added automatically)                                             | `{show}.S{season}E{episode}`                |
 
 **Template variables:** `{show}`, `{season}` (zero-padded), `{episode}` (zero-padded)
 
@@ -272,14 +276,14 @@ My.Show.S01E03.1080p.HDTV.x264-FLEET.mkv
 notes.txt  (filtered out — not *.mkv)                 Result: My.Show.S01E01.mkv, My.Show.S01E02.mkv, ...
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| File Filter | Glob pattern to target specific files (e.g. `*.mkv`, `*.{mkv,mp4}`, `photo_*`) | — (all files) |
-| Include file extension | Whether find/replace operates on the extension too | Off |
-| Rule 1-3: Find | Pattern to search for | — |
-| Rule 1-3: Replace | Replacement text (supports `$1`, `$2` in regex mode) | — |
-| Rule 1-3: Regular Expression | Toggle regex mode per rule | Off |
-| Rule 1-3: Case Sensitive | Toggle case sensitivity per rule | On |
+| Option                       | Description                                                                    | Default       |
+| ---------------------------- | ------------------------------------------------------------------------------ | ------------- |
+| File Filter                  | Glob pattern to target specific files (e.g. `*.mkv`, `*.{mkv,mp4}`, `photo_*`) | — (all files) |
+| Include file extension       | Whether find/replace operates on the extension too                             | Off           |
+| Rule 1-3: Find               | Pattern to search for                                                          | —             |
+| Rule 1-3: Replace            | Replacement text (supports `$1`, `$2` in regex mode)                           | —             |
+| Rule 1-3: Regular Expression | Toggle regex mode per rule                                                     | Off           |
+| Rule 1-3: Case Sensitive     | Toggle case sensitivity per rule                                               | On            |
 
 Rules are applied in sequence: Rule 1 output feeds into Rule 2, which feeds into Rule 3. The form includes a live preview and regex tips.
 
@@ -297,10 +301,10 @@ IMG_0003.jpg (Feb 20)        2025-02/IMG_0003.jpg
 IMG_0004.jpg (Mar 10)        2025-03/IMG_0004.jpg
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Group By | Day (`2025-01-15`), Month (`2025-01`), or Year (`2025`) | Month |
-| File Action | Move or Copy files | Move |
+| Option      | Description                                             | Default |
+| ----------- | ------------------------------------------------------- | ------- |
+| Group By    | Day (`2025-01-15`), Month (`2025-01`), or Year (`2025`) | Month   |
+| File Action | Move or Copy files                                      | Move    |
 
 Uses file creation date. Falls back to modification date if creation date is unavailable.
 
@@ -318,10 +322,10 @@ IMG_1003.jpg (Tokyo)   Tokyo/IMG_1003.jpg
 IMG_1004.jpg (no GPS)  (stays in original folder)
 ```
 
-| Option | Description | Default |
-|---|---|---|
-| Group By | City, State/Region, or Country | City |
-| File Action | Move or Copy files | Move |
+| Option      | Description                    | Default |
+| ----------- | ------------------------------ | ------- |
+| Group By    | City, State/Region, or Country | City    |
+| File Action | Move or Copy files             | Move    |
 
 City resolution uses a fallback chain: city → town → village → municipality → county.
 
@@ -348,25 +352,25 @@ Build reusable rename pipelines that combine a file filter with a sequence of re
 
 **Available step types (13):**
 
-| Category | Step Types |
-|---|---|
-| Case | UPPERCASE, lowercase, Title Case, Sentence Case |
-| Clean Up | Collapse Multiple Spaces, Swap Delimiter, Find & Replace, Change Extension |
+| Category      | Step Types                                                                               |
+| ------------- | ---------------------------------------------------------------------------------------- |
+| Case          | UPPERCASE, lowercase, Title Case, Sentence Case                                          |
+| Clean Up      | Collapse Multiple Spaces, Swap Delimiter, Find & Replace, Change Extension               |
 | Rename Format | Rename as TV Show, Rename as Anime, Rename as Movie, Rename Sequentially, Auto Enumerate |
 
 Each step type has the same configuration options as its corresponding preset in the Rename Files command. The TV Show and Anime steps auto-detect episode numbers from the current filename (after previous steps have been applied).
 
 **Keyboard shortcuts in the script builder:**
 
-| Shortcut | Action |
-|---|---|
-| `Enter` | Edit selected step |
-| `Cmd + N` | Add new step |
-| `Cmd + Shift + Up Arrow` | Move step up |
-| `Cmd + Shift + Down Arrow` | Move step down |
-| `Cmd + Backspace` | Remove step |
-| `Cmd + Shift + P` | Preview against current Finder folder |
-| `Cmd + S` | Save script |
+| Shortcut                   | Action                                |
+| -------------------------- | ------------------------------------- |
+| `Enter`                    | Edit selected step                    |
+| `Cmd + N`                  | Add new step                          |
+| `Cmd + Shift + Up Arrow`   | Move step up                          |
+| `Cmd + Shift + Down Arrow` | Move step down                        |
+| `Cmd + Backspace`          | Remove step                           |
+| `Cmd + Shift + P`          | Preview against current Finder folder |
+| `Cmd + S`                  | Save script                           |
 
 **Example pipeline** — clean up messy TV downloads:
 
@@ -385,12 +389,12 @@ Result: `breaking.bad.s01e01.720p.bluray.mkv` → `Breaking Bad S01E01.mkv`
 
 The script list shows each script's name, description, file filter, and step count. Scripts are stored persistently and survive Raycast restarts.
 
-| Shortcut | Action |
-|---|---|
-| `Enter` | Run script (with preview) |
-| `Cmd + E` | Edit script |
-| `Cmd + K` → View Steps | View the pipeline |
-| `Cmd + Backspace` | Delete script |
+| Shortcut               | Action                    |
+| ---------------------- | ------------------------- |
+| `Enter`                | Run script (with preview) |
+| `Cmd + E`              | Edit script               |
+| `Cmd + K` → View Steps | View the pipeline         |
+| `Cmd + Backspace`      | Delete script             |
 
 After running a script, undo state is saved — use **Undo Last Rename** to revert.
 
@@ -400,17 +404,17 @@ After running a script, undo state is saved — use **Undo Last Rename** to reve
 
 Each preset from Rename Files is also available as a standalone command for direct access. These open the same form but pre-select the preset — useful for assigning aliases.
 
-| Command | Output Format |
-|---|---|
-| Rename as TV Show | `Show Name S01E01.ext` |
-| Rename as Anime | `[Group] Name - 01 [Quality].ext` |
-| Rename as Movie | `Name Year Quality.ext` |
-| Rename Sequentially | `Prefix-001.ext` |
-| Rename by Date | `Prefix-2025-01-15_09-00-00-001.ext` |
-| Change Filename Case | UPPERCASE / lowercase / Title Case / Sentence case |
-| Swap Filename Delimiter | Replace any delimiter with another |
-| Auto Enumerate Files | Number files by name, date, size, or name length |
-| Change File Extension | `.jpeg` to `.jpg`, `.txt` to `.md` |
+| Command                 | Output Format                                      |
+| ----------------------- | -------------------------------------------------- |
+| Rename as TV Show       | `Show Name S01E01.ext`                             |
+| Rename as Anime         | `[Group] Name - 01 [Quality].ext`                  |
+| Rename as Movie         | `Name Year Quality.ext`                            |
+| Rename Sequentially     | `Prefix-001.ext`                                   |
+| Rename by Date          | `Prefix-2025-01-15_09-00-00-001.ext`               |
+| Change Filename Case    | UPPERCASE / lowercase / Title Case / Sentence case |
+| Swap Filename Delimiter | Replace any delimiter with another                 |
+| Auto Enumerate Files    | Number files by name, date, size, or name length   |
+| Change File Extension   | `.jpeg` to `.jpg`, `.txt` to `.md`                 |
 
 ---
 
@@ -422,38 +426,38 @@ Zero-UI commands that execute immediately against the current Finder folder. No 
 
 All case commands also collapse multiple spaces into single spaces automatically.
 
-| Command | Example |
-|---|---|
-| Uppercase All Filenames | `my vacation photo.jpg` → `MY VACATION PHOTO.jpg` |
-| Lowercase All Filenames | `My Vacation PHOTO.jpg` → `my vacation photo.jpg` |
-| Title Case All Filenames | `my vacation photo.jpg` → `My Vacation Photo.jpg` |
+| Command                     | Example                                           |
+| --------------------------- | ------------------------------------------------- |
+| Uppercase All Filenames     | `my vacation photo.jpg` → `MY VACATION PHOTO.jpg` |
+| Lowercase All Filenames     | `My Vacation PHOTO.jpg` → `my vacation photo.jpg` |
+| Title Case All Filenames    | `my vacation photo.jpg` → `My Vacation Photo.jpg` |
 | Sentence Case All Filenames | `MY VACATION PHOTO.jpg` → `My vacation photo.jpg` |
 
 ### Delimiter Conversion
 
-| Command | Example |
-|---|---|
-| Replace Dots with Spaces | `My.Show.S01E01.mkv` → `My Show S01E01.mkv` |
-| Replace Spaces with Dots | `My Show.mkv` → `My.Show.mkv` |
-| Replace Underscores with Spaces | `my_file.jpg` → `my file.jpg` |
-| Replace Spaces with Underscores | `my file.jpg` → `my_file.jpg` |
-| Replace Dashes with Spaces | `my-file.jpg` → `my file.jpg` |
-| Replace Spaces with Dashes | `my file.jpg` → `my-file.jpg` |
+| Command                         | Example                                     |
+| ------------------------------- | ------------------------------------------- |
+| Replace Dots with Spaces        | `My.Show.S01E01.mkv` → `My Show S01E01.mkv` |
+| Replace Spaces with Dots        | `My Show.mkv` → `My.Show.mkv`               |
+| Replace Underscores with Spaces | `my_file.jpg` → `my file.jpg`               |
+| Replace Spaces with Underscores | `my file.jpg` → `my_file.jpg`               |
+| Replace Dashes with Spaces      | `my-file.jpg` → `my file.jpg`               |
+| Replace Spaces with Dashes      | `my file.jpg` → `my-file.jpg`               |
 
 ### Utility
 
-| Command | Example |
-|---|---|
-| Collapse Multiple Spaces | `my   show  name.mkv` → `my show name.mkv` |
-| Enumerate Files by Name | Alphabetical (natural sort) → `001.ext`, `002.ext`, `003.ext` |
-| Enumerate Files by Date Created | Oldest first → `001.ext`, `002.ext`, `003.ext` |
+| Command                         | Example                                                       |
+| ------------------------------- | ------------------------------------------------------------- |
+| Collapse Multiple Spaces        | `my   show  name.mkv` → `my show name.mkv`                    |
+| Enumerate Files by Name         | Alphabetical (natural sort) → `001.ext`, `002.ext`, `003.ext` |
+| Enumerate Files by Date Created | Oldest first → `001.ext`, `002.ext`, `003.ext`                |
 
 Both enumerate commands use 3-digit zero-padded numbers. Enumerate by Date uses creation date, falling back to modification date.
 
 ### Undo
 
-| Command | Description |
-|---|---|
+| Command          | Description                                                                                                |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- |
 | Undo Last Rename | Reverts the last rename or organize operation. Available within 5 minutes. Single use — cannot undo twice. |
 
 Every command in Rebaptize saves undo state — including Rename Files, Smart Organize Episodes, Smart Find & Replace, Sort Files by Date, Sort Photos by Location, Run Rename Script, and all instant commands. For organize commands that move files into subfolders, undo moves them back and cleans up the empty folders.
