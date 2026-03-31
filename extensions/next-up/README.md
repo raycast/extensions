@@ -2,7 +2,7 @@
 
 > A simple all-in-one class schedule manager for Raycast. See what's coming up next, browse your full week, and join meetings — all without leaving your keyboard.
 
-![Today command showing today's schedule](./metadata/next-up-5.png)
+![Today command showing today's schedule](./images/next-up-5.png)
 
 ---
 
@@ -36,7 +36,7 @@ Open **Manage Schedules** → press `↵` (Enter) → select **Create New Group*
 
 Your first group is automatically set as the **active group** — this is the group used by all other commands.
 
-![Creating a schedule group](./metadata/next-up-1.png)
+![Creating a schedule group](./images/next-up-1.png)
 
 ### 2. Add Courses
 
@@ -52,7 +52,7 @@ Fill in:
 
 Press `⌘↵` to save.
 
-![Course form with schedule slot](./metadata/next-up-3.png)
+![Course form with schedule slot](./images/next-up-3.png)
 
 ### 3. Add Multiple Time Slots
 
