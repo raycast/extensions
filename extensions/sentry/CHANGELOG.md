@@ -1,6 +1,6 @@
 # Sentry Changelog
 
-## [List Latest Releases] - {PR_MERGE_DATE}
+## [List Latest Releases] - 2026-03-31
 
 - Added new command to list latest releases per project.
 - Shows version, release date, new issues count, and crash-free session rate.
