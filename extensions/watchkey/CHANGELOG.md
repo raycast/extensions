@@ -1,6 +1,6 @@
 # Watchkey Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-03-31
 
 - Set, get, delete, and import keychain secrets via Raycast
 - Touch ID & Apple Watch authentication via watchkey CLI
