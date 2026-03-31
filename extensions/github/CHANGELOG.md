@@ -2,7 +2,7 @@
 
 ## [Fix PR List Accessories Alignment] - {PR_MERGE_DATE}
 
-- Pull Requests: Move PR number from subtitle to accessories for consistent column alignment
+- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
 - Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
 - Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
 - Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
