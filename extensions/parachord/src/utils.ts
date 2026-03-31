@@ -31,12 +31,8 @@ export async function openParachord(
     const response = await fetch(httpUrl);
 
     if (!response.ok) {
-      const data = await response
-        .json()
-        .catch(() => ({}) as { error?: string });
-      throw new Error(
-        (data as { error?: string }).error || `HTTP ${response.status}`,
-      );
+      const data = await response.json().catch(() => ({}) as { error?: string });
+      throw new Error((data as { error?: string }).error || `HTTP ${response.status}`);
     }
 
     if (hudMessage) {
@@ -65,9 +61,7 @@ export async function openParachord(
 /**
  * Parse "Artist - Track" format into separate parts
  */
-export function parseArtistTrack(
-  input: string,
-): { artist: string; title: string } | null {
+export function parseArtistTrack(input: string): { artist: string; title: string } | null {
   // Try "Artist - Track" format first
   const dashMatch = input.match(/^(.+?)\s*[-–—]\s*(.+)$/);
   if (dashMatch) {

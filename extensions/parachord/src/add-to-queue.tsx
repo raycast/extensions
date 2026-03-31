@@ -1,20 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showHUD,
-  showToast,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { openParachord, parseArtistTrack } from "./utils";
 
-interface Arguments {
-  query?: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.AddToQueue }>) {
   const initialQuery = props.arguments?.query || "";
   const [query, setQuery] = useState(initialQuery);
   const [artist, setArtist] = useState("");
@@ -42,11 +30,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       return;
     }
 
-    await openParachord("queue", ["add"], {
-      artist: finalArtist,
-      title: finalTitle,
-    });
-    await showHUD(`Added "${finalTitle}" by ${finalArtist} to queue`);
+    await openParachord(
+      "queue",
+      ["add"],
+      { artist: finalArtist, title: finalTitle },
+      `Added "${finalTitle}" by ${finalArtist} to queue`,
+    );
   };
 
   return (
@@ -73,13 +62,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         value={artist}
         onChange={setArtist}
       />
-      <Form.TextField
-        id="title"
-        title="Track"
-        placeholder="Track title (required)"
-        value={title}
-        onChange={setTitle}
-      />
+      <Form.TextField id="title" title="Track" placeholder="Track title (required)" value={title} onChange={setTitle} />
     </Form>
   );
 }

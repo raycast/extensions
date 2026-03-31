@@ -1,10 +1,6 @@
-import { Action, ActionPanel, Form, showHUD, LaunchProps } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { openParachord } from "./utils";
-
-interface Arguments {
-  prompt?: string;
-}
 
 const QUICK_PROMPTS = [
   { title: "Play something chill", value: "play something chill" },
@@ -35,24 +31,20 @@ const QUICK_PROMPTS = [
   },
 ];
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.AiChat }>) {
   const initialPrompt = props.arguments?.prompt || "";
   const [prompt, setPrompt] = useState(initialPrompt);
 
   const handleSubmit = async () => {
     if (prompt.trim()) {
-      await openParachord("chat", [], { prompt: prompt.trim() });
-      await showHUD(`Sent to AI DJ: "${prompt.trim().slice(0, 30)}..."`);
+      await openParachord("chat", [], { prompt: prompt.trim() }, `Sent to AI DJ: "${prompt.trim().slice(0, 30)}..."`);
     } else {
-      // Just open chat without a prompt
-      await openParachord("chat", [], {});
-      await showHUD("Opening AI DJ chat");
+      await openParachord("chat", [], {}, "Opening AI DJ chat");
     }
   };
 
   const handleQuickPrompt = async (value: string) => {
-    await openParachord("chat", [], { prompt: value });
-    await showHUD(`Sent to AI DJ: "${value.slice(0, 30)}..."`);
+    await openParachord("chat", [], { prompt: value }, `Sent to AI DJ: "${value.slice(0, 30)}..."`);
   };
 
   return (
@@ -62,11 +54,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
           <Action.SubmitForm title="Send to AI DJ" onSubmit={handleSubmit} />
           <ActionPanel.Section title="Quick Prompts">
             {QUICK_PROMPTS.map((qp) => (
-              <Action
-                key={qp.value}
-                title={qp.title}
-                onAction={() => handleQuickPrompt(qp.value)}
-              />
+              <Action key={qp.value} title={qp.title} onAction={() => handleQuickPrompt(qp.value)} />
             ))}
           </ActionPanel.Section>
         </ActionPanel>

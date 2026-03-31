@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, showHUD } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { openParachord } from "./utils";
 
 const VOLUME_LEVELS = [
@@ -17,8 +17,7 @@ const VOLUME_LEVELS = [
 
 export default function Command() {
   const handleSelect = async (value: number) => {
-    await openParachord("volume", [value.toString()], {});
-    await showHUD(`Volume set to ${value}%`);
+    await openParachord("volume", [value.toString()], {}, `Volume set to ${value}%`);
   };
 
   return (
@@ -30,10 +29,7 @@ export default function Command() {
           icon={level.icon}
           actions={
             <ActionPanel>
-              <Action
-                title="Set Volume"
-                onAction={() => handleSelect(level.value)}
-              />
+              <Action title="Set Volume" onAction={() => handleSelect(level.value)} />
             </ActionPanel>
           }
         />

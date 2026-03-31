@@ -1,20 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showHUD,
-  showToast,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { openParachord, parseArtistTrack } from "./utils";
 
-interface Arguments {
-  query?: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchPlay }>) {
   const initialQuery = props.arguments?.query || "";
   const [query, setQuery] = useState(initialQuery);
   const [artist, setArtist] = useState("");
@@ -44,16 +32,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     }
 
     if (finalArtist && finalTitle) {
-      // Direct play with artist and title
-      await openParachord("play", [], {
-        artist: finalArtist,
-        title: finalTitle,
-      });
-      await showHUD(`Playing "${finalTitle}" by ${finalArtist}`);
+      await openParachord(
+        "play",
+        [],
+        { artist: finalArtist, title: finalTitle },
+        `Playing "${finalTitle}" by ${finalArtist}`,
+      );
     } else {
-      // Open search in Parachord
-      await openParachord("search", [], { q: query.trim() });
-      await showHUD(`Searching for "${query.trim()}"`);
+      await openParachord("search", [], { q: query.trim() }, `Searching for "${query.trim()}"`);
     }
   };
 
@@ -74,20 +60,8 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
         info="Enter 'Artist - Track' for direct play, or any text to search"
       />
       <Form.Separator />
-      <Form.TextField
-        id="artist"
-        title="Artist"
-        placeholder="Artist name"
-        value={artist}
-        onChange={setArtist}
-      />
-      <Form.TextField
-        id="title"
-        title="Track"
-        placeholder="Track title"
-        value={title}
-        onChange={setTitle}
-      />
+      <Form.TextField id="artist" title="Artist" placeholder="Artist name" value={artist} onChange={setArtist} />
+      <Form.TextField id="title" title="Track" placeholder="Track title" value={title} onChange={setTitle} />
     </Form>
   );
 }

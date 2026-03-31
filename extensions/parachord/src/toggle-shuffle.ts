@@ -1,5 +1,5 @@
 import { openParachord } from "./utils";
-import { LocalStorage, showHUD } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 
 const SHUFFLE_STATE_KEY = "parachord-shuffle-state";
 
@@ -9,6 +9,5 @@ export default async function Command() {
   const newState = !currentState;
 
   await LocalStorage.setItem(SHUFFLE_STATE_KEY, newState);
-  await openParachord("shuffle", [newState ? "on" : "off"], {});
-  await showHUD(`Shuffle ${newState ? "on" : "off"}`);
+  await openParachord("shuffle", [newState ? "on" : "off"], {}, `Shuffle ${newState ? "on" : "off"}`);
 }

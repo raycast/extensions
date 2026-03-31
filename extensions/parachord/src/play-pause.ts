@@ -1,6 +1,16 @@
 import { openParachord } from "./utils";
+import { LocalStorage } from "@raycast/api";
+
+const PLAYING_STATE_KEY = "parachord-playing-state";
 
 export default async function Command() {
-  // Since we can't detect current state, we use resume which toggles
-  await openParachord("control", ["resume"], {}, "Toggled playback");
+  const isPlaying = await LocalStorage.getItem<boolean>(PLAYING_STATE_KEY);
+  const newState = !isPlaying;
+
+  await LocalStorage.setItem(PLAYING_STATE_KEY, newState);
+  if (newState) {
+    await openParachord("control", ["resume"], {}, "Resumed playback");
+  } else {
+    await openParachord("control", ["pause"], {}, "Paused playback");
+  }
 }

@@ -1,20 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showHUD,
-  showToast,
-  Toast,
-  LaunchProps,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { openParachord } from "./utils";
 
-interface Arguments {
-  artist?: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.OpenArtist }>) {
   const [artist, setArtist] = useState(props.arguments?.artist || "");
 
   const handleSubmit = async () => {
@@ -26,8 +14,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
       return;
     }
 
-    await openParachord("artist", [artist.trim()], {});
-    await showHUD(`Opening ${artist.trim()}`);
+    await openParachord("artist", [artist.trim()], {}, `Opening ${artist.trim()}`);
   };
 
   return (
