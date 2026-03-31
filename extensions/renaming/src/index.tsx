@@ -112,11 +112,11 @@ export default function Command() {
         };
       });
 
-      // Guard against renames that produce only an extension (e.g., ".txt")
-      const emptyBases = files.filter((fileInfo, i) => {
-        if (fileInfo.isDirectory || !fileInfo.extension) return false;
-        const newFileName = generateNewName(i);
-        return newFileName === fileInfo.extension;
+      // Guard against renames that produce an empty base name
+      const emptyBases = operations.filter((op, i) => {
+        const ext = files[i].extension || "";
+        const base = ext ? op.newName.slice(0, -ext.length) : op.newName;
+        return base === "";
       });
       if (emptyBases.length > 0) {
         await showToast({
