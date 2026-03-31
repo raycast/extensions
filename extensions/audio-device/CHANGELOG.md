@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix Raycast window not closing after selecting an audio device
+
 ## [Major Update] - 2026-03-27
 
 ### Default device enforcement
