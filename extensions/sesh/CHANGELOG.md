@@ -32,6 +32,6 @@
 
 - Add error message if tmux is not running
 
-## [Initial Version] - 2024-01-10
+## [Initial Version] - 2024-01-23
 
 - Add `Connect to Session` command
