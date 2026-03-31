@@ -35,8 +35,8 @@ View, update, and remove installed skills. Outdated skills are highlighted with 
 
 ## Screenshots
 
-![Trending Skills](assets/skills-1.png)
-![Trending Skills - Actions](assets/skills-2.png)
-![Search Skills](assets/skills-3.png)
-![Search Skills - Owner Filter](assets/skills-4.png)
-![Manage Skills](assets/skills-5.png)
+![Trending Skills](metadata/skills-1.png)
+![Trending Skills - Actions](metadata/skills-2.png)
+![Search Skills](metadata/skills-3.png)
+![Search Skills - Owner Filter](metadata/skills-4.png)
+![Manage Skills](metadata/skills-5.png)
