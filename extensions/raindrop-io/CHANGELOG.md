@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-03-31
 
 - Fix loading collections in the Save Browser Tab form by building the dropdown options directly from the collections API response.
 
