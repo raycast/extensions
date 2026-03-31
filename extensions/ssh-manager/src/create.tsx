@@ -26,8 +26,10 @@ export default function Main({ connectionToEdit }: CreateProps) {
     const existingConnections = await getConnections();
 
     if (isEditing) {
-      const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);
+    const existingConnectionIdx = existingConnections.findIndex((conn) => conn.id === connectionToEdit!.id);
+    if (existingConnectionIdx !== -1) {
       existingConnections.splice(existingConnectionIdx, 1);
+    }
     }
     existingConnections.push({ ...connection, id: isEditing ? connectionToEdit!.id : nanoid() });
 
