@@ -3,7 +3,6 @@
 ## [Fix PR List Accessories Alignment] - {PR_MERGE_DATE}
 
 - Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
-- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
 - Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
 - Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
 - Pull Requests: Add placeholder icon for rows without a review decision to keep CI check column aligned
