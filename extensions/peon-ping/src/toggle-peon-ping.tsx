@@ -22,5 +22,7 @@ export default async function Command() {
       name: "peon-ping-menu-bar",
       type: LaunchType.Background,
     });
-  } catch {}
+  } catch {
+    // menu bar command may not be active
+  }
 }
