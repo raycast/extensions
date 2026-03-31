@@ -268,13 +268,18 @@ export async function batchRename(
     return op;
   });
 
-  // Sort by path depth descending so children are renamed before parents
+  // Sort so needsTemp operations execute first (landing their temp file at the
+  // final path before another operation can occupy the original slot), then by
+  // path depth descending so children are renamed before parents.
   const indexed = adjustedOps
     .map((op, i) => ({ op, originalIndex: i }))
     .filter(({ originalIndex }) => !results[originalIndex]); // skip already-failed
-  indexed.sort(
-    (a, b) => path.normalize(b.op.oldPath).split(path.sep).length - path.normalize(a.op.oldPath).split(path.sep).length,
-  );
+  indexed.sort((a, b) => {
+    const aIsTemp = needsTemp.has(a.originalIndex) ? 0 : 1;
+    const bIsTemp = needsTemp.has(b.originalIndex) ? 0 : 1;
+    if (aIsTemp !== bIsTemp) return aIsTemp - bIsTemp;
+    return path.normalize(b.op.oldPath).split(path.sep).length - path.normalize(a.op.oldPath).split(path.sep).length;
+  });
 
   for (let i = 0; i < indexed.length; i++) {
     const { op, originalIndex } = indexed[i]!;
