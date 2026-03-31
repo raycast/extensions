@@ -11,7 +11,7 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
-import { execFileSync, execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { homedir, tmpdir } from "os";
 import { join } from "path";
 import { writeFileSync } from "fs";
@@ -57,19 +57,19 @@ function loadReplacements(): Replacement[] {
 }
 
 function insertReplacement(phrase: string, replacement: string): void {
-  const seqMax = parseInt(query("SELECT Z_MAX FROM Z_PRIMARYKEY WHERE Z_ENT=1;").trim()) || 0;
-  const tableMax = parseInt(query("SELECT MAX(Z_PK) FROM ZTEXTREPLACEMENTENTRY;").trim()) || 0;
-  const nextPK = Math.max(seqMax, tableMax) + 1;
   const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   // CoreData timestamps are seconds since 2001-01-01, not Unix epoch
   const timestamp = Date.now() / 1000 - 978307200;
 
+  // Read seqMax and tableMax inside the same BEGIN IMMEDIATE transaction to
+  // avoid a TOCTOU race if another process inserts concurrently.
   const script = `
-BEGIN;
+BEGIN IMMEDIATE;
+UPDATE Z_PRIMARYKEY SET Z_MAX = MAX(Z_MAX, (SELECT MAX(Z_PK) FROM ZTEXTREPLACEMENTENTRY)) + 1 WHERE Z_ENT = 1;
 INSERT INTO ZTEXTREPLACEMENTENTRY
   (Z_PK, Z_ENT, Z_OPT, ZNEEDSSAVETOCLOUD, ZWASDELETED, ZTIMESTAMP, ZPHRASE, ZSHORTCUT, ZUNIQUENAME)
-VALUES (${nextPK}, 1, 1, 1, 0, ${timestamp}, ${sql(replacement)}, ${sql(phrase)}, ${sql(uniqueName)});
-UPDATE Z_PRIMARYKEY SET Z_MAX=${nextPK} WHERE Z_ENT=1;
+SELECT Z_MAX, 1, 1, 1, 0, ${timestamp}, ${sql(replacement)}, ${sql(phrase)}, ${sql(uniqueName)}
+FROM Z_PRIMARYKEY WHERE Z_ENT = 1;
 COMMIT;`;
 
   execFileSync("/usr/bin/sqlite3", [DB_PATH], { input: script, encoding: "utf8", timeout: 5000 });
@@ -113,12 +113,9 @@ ${itemsXml}
   writeFileSync(tmpFile, plist, "utf8");
   execFileSync("/usr/bin/defaults", ["import", "-g", tmpFile], { timeout: 5000 });
 
-  // Prompt the keyboard services daemon to reload
+  // Prompt the keyboard services daemon to reload via WAL checkpoint
   try {
-    execSync(
-      `osascript -e 'do shell script "/usr/bin/sqlite3 \\"${DB_PATH}\\" \\"PRAGMA wal_checkpoint(PASSIVE);\\"" '`,
-      { timeout: 3000 }
-    );
+    execFileSync("/usr/bin/sqlite3", [DB_PATH, "PRAGMA wal_checkpoint(PASSIVE);"], { timeout: 3000 });
   } catch {
     // non-fatal
   }
@@ -141,7 +138,7 @@ function ReplacementForm({
 
   async function handleSubmit(values: { phrase: string; replacement: string }) {
     const phrase = values.phrase.trim();
-    const replacement = values.replacement.trim();
+    const replacement = values.replacement; // preserve intentional leading/trailing spaces
     if (!phrase) {
       await showToast({ style: Toast.Style.Failure, title: "Shortcut cannot be empty" });
       return;
