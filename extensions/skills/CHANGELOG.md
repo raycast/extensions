@@ -1,6 +1,6 @@
 # Changelog
 
-## [Agent-Specific Skill Installation] - {PR_MERGE_DATE}
+## [Agent-Specific Skill Installation] - 2026-03-31
 
 - Support installing skills to specific agents instead of all agents at once
 - Show all 43 supported agents with already-installed agents marked as read-only
