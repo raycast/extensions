@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const BASE_URL = "https://api.voicenotes.com/api/integrations/obsidian-sync";
 
-interface Preferences {
-  token: string;
-}
-
 export interface VoiceNote {
   id: string;
   recording_id: string;
