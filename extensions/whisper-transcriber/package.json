@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "whisper-transcriber",
+  "title": "Whisper Transcriber",
+  "description": "Transcribe local audio and video files with OpenAI Whisper.",
+  "icon": "extension-icon.png",
+  "author": "alex_valdez",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "keywords": [
+    "whisper",
+    "transcription",
+    "transcribe",
+    "audio",
+    "video",
+    "speech-to-text"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "model",
+      "title": "Whisper Model",
+      "description": "Choose the Whisper model to use for new transcriptions.",
+      "type": "dropdown",
+      "required": true,
+      "default": "base",
+      "data": [
+        {
+          "title": "Tiny",
+          "value": "tiny"
+        },
+        {
+          "title": "Base",
+          "value": "base"
+        },
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        },
+        {
+          "title": "Turbo",
+          "value": "turbo"
+        }
+      ]
+    },
+    {
+      "name": "outputMode",
+      "title": "Output Location",
+      "description": "Choose where TXT transcripts should be saved.",
+      "type": "dropdown",
+      "required": true,
+      "default": "temp",
+      "data": [
+        {
+          "title": "Temporary Folder",
+          "value": "temp"
+        },
+        {
+          "title": "Same Folder as Source",
+          "value": "source"
+        },
+        {
+          "title": "Custom Output Directory",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "outputDirectory",
+      "title": "Custom Output Directory",
+      "description": "Choose the folder to use when Output Location is set to Custom Output Directory.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "whisperPath",
+      "title": "Whisper CLI Path",
+      "description": "Optional path to the whisper CLI binary. Leave empty to auto-detect it.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "FFmpeg Path",
+      "description": "Optional path to the ffmpeg binary. Leave empty to auto-detect it.",
+      "type": "file",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "transcribe",
+      "title": "Transcribe File",
+      "subtitle": "Whisper",
+      "description": "Transcribe a local audio or video file with Whisper.",
+      "mode": "view",
+      "keywords": [
+        "audio",
+        "video",
+        "subtitle",
+        "captions",
+        "speech"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
