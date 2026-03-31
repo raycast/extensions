@@ -3,8 +3,7 @@ import { getAccessToken } from "@raycast/utils";
 import { deleteContact, getContact, starContact, unstarContact } from "../api";
 import { getContactUrl, getDisplayName, getPrimaryEmail, getPrimaryPhone, isStarred } from "../helpers";
 import { SortField } from "../helpers";
-import { ContactGroup, Person } from "../types";
-import { ViewMode } from "../search-contacts";
+import { ContactGroup, Person, ViewMode } from "../types";
 import ContactForm from "./ContactForm";
 
 interface ContactActionsProps {

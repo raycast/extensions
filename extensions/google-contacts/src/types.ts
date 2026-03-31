@@ -1,3 +1,15 @@
+import { Icon } from "@raycast/api";
+
+// UI types
+
+export type ViewMode = "list" | "detail" | "grid";
+
+export const VIEW_MODE_OPTIONS: { title: string; value: ViewMode; icon: Icon }[] = [
+  { title: "List", value: "list", icon: Icon.AppWindowList },
+  { title: "Detail", value: "detail", icon: Icon.AppWindowSidebarRight },
+  { title: "Grid", value: "grid", icon: Icon.AppWindowGrid3x3 },
+];
+
 // Google People API response types
 
 export interface FieldMetadata {

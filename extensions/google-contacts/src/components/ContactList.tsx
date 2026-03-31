@@ -10,8 +10,7 @@ import {
   isStarred,
   SortField,
 } from "../helpers";
-import { ContactGroup, Person } from "../types";
-import { ViewMode } from "../search-contacts";
+import { ContactGroup, Person, ViewMode, VIEW_MODE_OPTIONS } from "../types";
 import ContactActions from "./ContactActions";
 import ContactForm from "./ContactForm";
 
@@ -33,9 +32,9 @@ interface ContactListProps {
 function ViewModeDropdown({ value, onChange }: { value: ViewMode; onChange: (value: string) => void }) {
   return (
     <List.Dropdown tooltip="View" storeValue value={value} onChange={onChange}>
-      <List.Dropdown.Item title="List" value="list" icon={Icon.AppWindowList} />
-      <List.Dropdown.Item title="Detail" value="detail" icon={Icon.AppWindowSidebarRight} />
-      <List.Dropdown.Item title="Grid" value="grid" icon={Icon.AppWindowGrid3x3} />
+      {VIEW_MODE_OPTIONS.map((opt) => (
+        <List.Dropdown.Item key={opt.value} title={opt.title} value={opt.value} icon={opt.icon} />
+      ))}
     </List.Dropdown>
   );
 }

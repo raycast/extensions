@@ -5,10 +5,9 @@ import { google } from "./oauth";
 import { SortOrder } from "./api";
 import { matchesGroup, SortField } from "./helpers";
 import { useContacts, useContactGroups } from "./hooks";
+import { ViewMode } from "./types";
 import ContactList from "./components/ContactList";
 import ContactGrid from "./components/ContactGrid";
-
-export type ViewMode = "list" | "detail" | "grid";
 
 function SearchContacts() {
   const { defaultView } = getPreferenceValues<Preferences>();
