@@ -346,7 +346,6 @@ export const AskDustQuestion = withPickedWorkspace(
       }
       // Note: context is intentionally omitted — it's a new object reference on every render
       // and is guaranteed to be non-null when isLoadingContext is false.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [question, isLoadingContext]);
 
     const dustAssistantUrl = `${dustApi.apiUrl()}/w/${dustApi.workspaceId()}/assistant`;
