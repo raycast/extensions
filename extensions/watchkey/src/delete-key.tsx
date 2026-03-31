@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot, confirmAlert, Alert } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot, confirmAlert, Alert } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useInstallGuard } from "./install-guard";
 import { watchkeyDelete } from "./watchkey";
@@ -42,7 +42,7 @@ export default function DeleteKey() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Delete Secret" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Delete Secret" icon={Icon.Trash} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
