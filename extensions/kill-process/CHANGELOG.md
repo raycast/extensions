@@ -3,6 +3,7 @@
 ## [Added Kill All action] - {PR_MERGE_DATE}
 
 - Added action to kill all processes with the same name
+- Added AI tool `killall-process` to allow natural-language "kill all <process>" commands via AI
 
 ## [UX Improvements] - 2026-02-11
 
