@@ -3,11 +3,19 @@ import { Course, DayOfWeek, ScheduleSlot } from "./types";
 import { DAYS_OF_WEEK, COLOR_DEFINITIONS } from "./constants";
 
 const RAYCAST_COLOR_MAP: Record<string, Color> = Object.fromEntries(COLOR_DEFINITIONS.map((c) => [c.value, c.raycast]));
+const COLOR_HEX_MAP: Record<string, string> = Object.fromEntries(COLOR_DEFINITIONS.map((c) => [c.value, c.hex]));
 
 export function resolveRaycastColor(colorName: string | undefined): Color | string | undefined {
   if (!colorName) return undefined;
   const mapped = RAYCAST_COLOR_MAP[colorName.toLowerCase()];
-  if (mapped) return mapped;
+  if (mapped) {
+    // For colors that map to a semantic color like SecondaryText, return the hex instead
+    const hex = COLOR_HEX_MAP[colorName.toLowerCase()];
+    if (hex && mapped === Color.SecondaryText) {
+      return hex;
+    }
+    return mapped;
+  }
   // Pass hex strings through — Raycast accepts them as tintColor
   if (/^#[0-9A-Fa-f]{6}$/.test(colorName)) return colorName;
   return undefined;
@@ -20,7 +28,7 @@ export interface ScheduleOccurrence {
 }
 
 export function parseTime(hhmm: string): number {
-  if (!hhmm || !/^\d{2}:\d{2}$/.test(hhmm)) return NaN;
+  if (!hhmm || !/^\d{1,2}:\d{2}$/.test(hhmm)) return NaN;
   const [hours, minutes] = hhmm.split(":").map(Number);
   return hours * 60 + minutes;
 }
@@ -115,9 +123,9 @@ export function purgeExpiredEphemeral(courses: Course[]): Course[] {
 }
 
 /**
- * Returns true if the string is a valid 24-hour time in HH:MM format.
- * Valid range: 00:00 – 23:59
+ * Returns true if the string is a valid 24-hour time in H:MM or HH:MM format.
+ * Valid range: 0:00 – 23:59
  */
 export function isValidTime(hhmm: string): boolean {
-  return /^([01]\d|2[0-3]):([0-5]\d)$/.test(hhmm);
+  return /^([01]?\d|2[0-3]):([0-5]\d)$/.test(hhmm);
 }

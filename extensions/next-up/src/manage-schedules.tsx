@@ -472,10 +472,10 @@ export default function ManageSchedules() {
               }${filterMode !== "all" ? ` · Filter: ${filterMode}` : ""}`}
             >
               <List.Item
-                title="Group Settings"
-                subtitle={group.id === data.activeGroupId ? "Active Group · Tap to manage" : "Tap to manage"}
+                title={group.name}
+                subtitle={group.id === data.activeGroupId ? "✓ Active Group · View Options" : "View Options"}
                 icon={{
-                  source: Icon.Folder,
+                  source: group.id === data.activeGroupId ? Icon.CheckCircle : Icon.Folder,
                   tintColor: group.id === data.activeGroupId ? Color.Green : Color.SecondaryText,
                 }}
                 actions={

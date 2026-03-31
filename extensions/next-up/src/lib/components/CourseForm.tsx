@@ -50,7 +50,11 @@ export function CourseForm({
     initialValues?.color && !initialValues.color.startsWith("#") ? initialValues.color : COLOR_OPTIONS[0]?.value,
   );
   const [customHex, setCustomHex] = useState(initialValues?.color?.startsWith("#") ? initialValues.color : "");
-  const [icon, setIcon] = useState(initialValues?.icon || ICON_OPTIONS[0]?.value);
+  const [icon, setIcon] = useState(
+    initialValues?.icon
+      ? initialValues.icon.charAt(0).toUpperCase() + initialValues.icon.slice(1).toLowerCase()
+      : ICON_OPTIONS[0]?.value,
+  );
   const [classLink, setClassLink] = useState(initialValues?.classLink || "");
   const [extraLink, setExtraLink] = useState(initialValues?.extraLink || "");
   const [professorName, setProfessorName] = useState(initialValues?.professor?.name || "");
@@ -101,7 +105,7 @@ export function CourseForm({
         await showToast({
           style: Toast.Style.Failure,
           title: `${label}: Invalid start time`,
-          message: "Use HH:MM format (e.g. 09:00 or 14:30)",
+          message: "Use H:MM or HH:MM format (e.g. 9:00, 09:00, or 14:30)",
         });
         return;
       }
@@ -109,7 +113,7 @@ export function CourseForm({
         await showToast({
           style: Toast.Style.Failure,
           title: `${label}: Invalid end time`,
-          message: "Use HH:MM format (e.g. 10:30 or 16:00)",
+          message: "Use H:MM or HH:MM format (e.g. 10:30, 9:00, or 16:00)",
         });
         return;
       }
