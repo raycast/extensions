@@ -2,6 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "parachord",
   "title": "Parachord",
+  "platforms": [
+    "macOS"
+  ],
   "description": "Control Parachord music player - play, pause, skip, search, and chat with the AI DJ",
   "icon": "extension-icon.png",
   "author": "parachord",
@@ -10,7 +13,7 @@
     "Productivity"
   ],
   "license": "MIT",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "commands": [
     {
       "name": "play-pause",
@@ -195,19 +198,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "eslint": "^8.57.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.2"
+    "@raycast/api": "^1.104.11"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14"
   }
 }

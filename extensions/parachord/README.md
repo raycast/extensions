@@ -1,4 +1,4 @@
-# Parachord Raycast Extension
+# Parachord
 
 Control Parachord music player directly from Raycast.
 
@@ -19,10 +19,12 @@ Control Parachord music player directly from Raycast.
 
 1. Clone this repository
 2. Install dependencies:
+
    ```bash
    cd raycast-extension
    npm install
    ```
+
 3. Import into Raycast:
    - Open Raycast
    - Go to Extensions
@@ -54,14 +56,17 @@ npm run dev
 ## Usage Tips
 
 ### Search & Play
+
 - Use "Artist - Track" format for direct play: `Radiohead - Karma Police`
 - Or just type a search query to open search in Parachord
 
 ### AI DJ Chat
+
 - Use quick prompts from the action menu (`⌘ K`)
 - Or type your own request like "play something chill"
 
 ### Keyboard Shortcuts
+
 Set up your own shortcuts in Raycast Preferences → Extensions → Parachord
 
 ## Requirements

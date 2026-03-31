@@ -21,7 +21,7 @@ export default function Command() {
   };
 
   return (
-    <List>
+    <List isLoading={false}>
       {VOLUME_LEVELS.map((level) => (
         <List.Item
           key={level.value}
