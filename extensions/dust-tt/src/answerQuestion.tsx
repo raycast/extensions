@@ -214,6 +214,7 @@ async function answerQuestion({
           title: "Thinking...",
         });
 
+        let streamError = false;
         const processEvent = (eventData: Record<string, unknown>) => {
           const event = eventData.data as Record<string, unknown> | undefined;
           if (!event || !event.type) return;
@@ -223,12 +224,14 @@ async function answerQuestion({
               const error = event.error as { code: string; message: string };
               console.error(`User message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**User message error** ${error.message}`);
+              streamError = true;
               break;
             }
             case "agent_error": {
               const error = event.error as { code: string; message: string };
               console.error(`Agent message error: code: ${error.code} message: ${error.message}`);
               setDustAnswer(`**Dust API error** ${error.message}`);
+              streamError = true;
               break;
             }
             case "agent_action_success": {
@@ -291,6 +294,7 @@ async function answerQuestion({
 
         const decoder = new TextDecoder();
         for await (const chunk of res.body) {
+          if (streamError) break;
           parser.feed(decoder.decode(chunk as Buffer, { stream: true }));
         }
       } catch (error) {
