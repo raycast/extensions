@@ -1,6 +1,6 @@
 # Whisper Transcriber Changelog
 
-## [Initial Version] - 2026-03-31
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added local audio and video transcription with Whisper
 - Added configurable model selection and transcript output location preferences

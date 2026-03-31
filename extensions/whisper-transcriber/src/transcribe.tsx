@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Form, Toast, getPreferenceValues, showToast, useNavigation } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { spawn } from "node:child_process";
+import { useEffect, useRef, useState } from "react";
+import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -15,12 +15,8 @@ interface TranscriptResult {
   model: string;
 }
 
-interface ExtensionPreferences {
-  model: string;
-  outputMode: "temp" | "source" | "custom";
-  outputDirectory?: string;
-  whisperPath?: string;
-  ffmpegPath?: string;
+interface TranscriptionOptions {
+  onSpawn?: (child: ChildProcessWithoutNullStreams) => void;
 }
 
 export default function Command() {
@@ -61,6 +57,9 @@ export default function Command() {
 }
 
 function TranscriptView({ filePath }: { filePath: string }) {
+  const processRef = useRef<ChildProcessWithoutNullStreams | null>(null);
+  const runTokenRef = useRef(0);
+  const processRunTokenRef = useRef<number | null>(null);
   const [state, setState] = useState<{
     isLoading: boolean;
     markdown: string;
@@ -73,12 +72,44 @@ function TranscriptView({ filePath }: { filePath: string }) {
   });
 
   useEffect(() => {
-    void runTranscription();
-  }, []);
+    const runToken = runTokenRef.current + 1;
+    runTokenRef.current = runToken;
+    void runTranscription(runToken);
 
-  async function runTranscription() {
+    return () => {
+      // Invalidate this run so stale async handlers (common in dev-mode remounts) are ignored.
+      if (runTokenRef.current === runToken) {
+        runTokenRef.current = runToken + 1;
+      }
+
+      if (processRunTokenRef.current === runToken) {
+        processRef.current?.kill();
+        processRef.current = null;
+        processRunTokenRef.current = null;
+      }
+    };
+  }, [filePath]);
+
+  function isCurrentRun(runToken: number) {
+    return runTokenRef.current === runToken;
+  }
+
+  async function runTranscription(runToken: number) {
     try {
-      const result = await transcribeWithWhisperCli(filePath);
+      const result = await transcribeWithWhisperCli(filePath, {
+        onSpawn: (child) => {
+          if (!isCurrentRun(runToken)) {
+            child.kill();
+            return;
+          }
+          processRef.current = child;
+          processRunTokenRef.current = runToken;
+        },
+      });
+
+      if (!isCurrentRun(runToken)) {
+        return;
+      }
 
       setState({
         isLoading: false,
@@ -102,6 +133,10 @@ function TranscriptView({ filePath }: { filePath: string }) {
         title: "Transcript ready",
       });
     } catch (error) {
+      if (!isCurrentRun(runToken)) {
+        return;
+      }
+
       const message = error instanceof Error ? error.message : "Unknown error";
 
       setState({
@@ -115,6 +150,11 @@ function TranscriptView({ filePath }: { filePath: string }) {
         title: "Transcription failed",
         message,
       });
+    } finally {
+      if (processRunTokenRef.current === runToken) {
+        processRef.current = null;
+        processRunTokenRef.current = null;
+      }
     }
   }
 
@@ -134,7 +174,7 @@ function TranscriptView({ filePath }: { filePath: string }) {
   );
 }
 
-async function transcribeWithWhisperCli(filePath: string): Promise<TranscriptResult> {
+async function transcribeWithWhisperCli(filePath: string, options?: TranscriptionOptions): Promise<TranscriptResult> {
   if (!fs.existsSync(filePath)) {
     throw new Error("That file does not exist anymore.");
   }
@@ -145,7 +185,7 @@ async function transcribeWithWhisperCli(filePath: string): Promise<TranscriptRes
   const baseName = path.basename(filePath, path.extname(filePath));
   const args = [filePath, "--model", preferences.model, "--output_format", "txt", "--output_dir", outputDir];
 
-  const processOutput = await runProcess(resolveWhisperCommand(preferences), args, preferences);
+  const processOutput = await runProcess(resolveWhisperCommand(preferences), args, preferences, options?.onSpawn);
   const dependencyError = extractDependencyError(processOutput);
   if (dependencyError) {
     throw new Error(dependencyError);
@@ -170,8 +210,8 @@ async function transcribeWithWhisperCli(filePath: string): Promise<TranscriptRes
   return { text, txtPath, model: preferences.model };
 }
 
-function getExtensionPreferences(): ExtensionPreferences {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+function getExtensionPreferences(): Preferences {
+  const preferences = getPreferenceValues<Preferences>();
 
   return {
     model: preferences.model || "base",
@@ -187,7 +227,7 @@ function normalizeOptionalPath(value?: string) {
   return normalized ? normalized : undefined;
 }
 
-function resolveOutputDirectory(filePath: string, preferences: ExtensionPreferences) {
+function resolveOutputDirectory(filePath: string, preferences: Preferences) {
   if (preferences.outputMode === "source") {
     return path.dirname(filePath);
   }
@@ -209,7 +249,7 @@ function resolveOutputDirectory(filePath: string, preferences: ExtensionPreferen
   return fs.mkdtempSync(path.join(os.tmpdir(), "raycast-whisper-transcript-"));
 }
 
-function resolveWhisperCommand(preferences: ExtensionPreferences) {
+function resolveWhisperCommand(preferences: Preferences) {
   const candidates = [
     preferences.whisperPath,
     process.env.WHISPER_PATH,
@@ -227,7 +267,7 @@ function resolveWhisperCommand(preferences: ExtensionPreferences) {
   return "whisper";
 }
 
-function resolveFfmpegCommand(preferences: ExtensionPreferences) {
+function resolveFfmpegCommand(preferences: Preferences) {
   const candidates = [
     preferences.ffmpegPath,
     process.env.FFMPEG_PATH,
@@ -293,7 +333,7 @@ function getBinaryDirectory(binaryPath: string) {
   return path.dirname(binaryPath);
 }
 
-function buildProcessEnv(preferences: ExtensionPreferences) {
+function buildProcessEnv(preferences: Preferences) {
   const ffmpegCommand = resolveFfmpegCommand(preferences);
   const extraPathEntries = [
     getBinaryDirectory(ffmpegCommand),
@@ -313,12 +353,18 @@ function buildProcessEnv(preferences: ExtensionPreferences) {
   };
 }
 
-function runProcess(command: string, args: string[], preferences: ExtensionPreferences) {
+function runProcess(
+  command: string,
+  args: string[],
+  preferences: Preferences,
+  onSpawn?: (child: ChildProcessWithoutNullStreams) => void,
+) {
   return new Promise<{ stdout: string; stderr: string }>((resolve, reject) => {
     const child = spawn(command, args, {
       env: buildProcessEnv(preferences),
       stdio: "pipe",
     });
+    onSpawn?.(child);
 
     let stdout = "";
     let stderr = "";
@@ -339,7 +385,7 @@ function runProcess(command: string, args: string[], preferences: ExtensionPrefe
       );
     });
 
-    child.on("close", (code) => {
+    child.on("close", (code, signal) => {
       if (code === 0) {
         resolve({ stdout, stderr });
       } else {
@@ -354,7 +400,17 @@ function runProcess(command: string, args: string[], preferences: ExtensionPrefe
           return;
         }
 
-        reject(new Error(errorMessage || `Whisper exited with code ${code}`));
+        if (signal) {
+          const interruptedMessage =
+            signal === "SIGTERM" || signal === "SIGINT"
+              ? "Transcription was cancelled before Whisper finished. This usually happens if you close the command or Raycast reloads the extension while running in dev mode."
+              : `Whisper was interrupted by signal ${signal}.`;
+
+          reject(new Error(errorMessage || interruptedMessage));
+          return;
+        }
+
+        reject(new Error(errorMessage || `Whisper exited with code ${code}.`));
       }
     });
   });
