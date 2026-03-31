@@ -1,6 +1,6 @@
 # Extension Changelog
 
-## [2026-03-16]
+## [Initial Version] - 2026-03-16
 
 ### Added
 

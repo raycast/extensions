@@ -1,6 +1,6 @@
 # Code Execution Changelog
 
-## [Python Modules & AppleScript] - December 7, 2024
+## [Python Modules & AppleScript] - 2024-12-07
 
 With this update, Code Execution now has the full powers of Python Modules, the Command Line, and also AppleScript. Anything you can dream, Code Execution can do.
 
