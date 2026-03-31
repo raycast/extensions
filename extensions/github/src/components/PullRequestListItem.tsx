@@ -71,12 +71,6 @@ export default function PullRequestListItem({
     }
   }
 
-  // Insert #number and optional author before the date (rightmost)
-  accessories.splice(accessories.length - 1, 0, {
-    text: { value: `#${pullRequest.number}`, color: Color.SecondaryText },
-    tooltip: `Repository: ${pullRequest.repository.nameWithOwner}`,
-  });
-
   if (author) {
     accessories.splice(accessories.length - 1, 0, {
       icon: author.icon,
@@ -94,6 +88,7 @@ export default function PullRequestListItem({
     <List.Item
       key={pullRequest.id}
       title={pullRequest.title}
+      subtitle={{ value: `#${pullRequest.number}`, tooltip: `Repository: ${pullRequest.repository.nameWithOwner}` }}
       icon={{ value: status.icon, tooltip: `Status: ${status.text}` }}
       keywords={keywords}
       accessories={accessories}
