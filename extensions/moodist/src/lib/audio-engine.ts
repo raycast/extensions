@@ -1,4 +1,5 @@
 import { spawn, execSync } from "child_process";
+import { environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import type { PidEntry, PidRegistry } from "../types";
@@ -6,9 +7,11 @@ import { PID_REGISTRY_FILENAME } from "./constants";
 
 export class AudioEngine {
   private registryPath: string;
+  private looperPath: string;
 
   constructor(supportPath: string) {
     this.registryPath = path.join(supportPath, PID_REGISTRY_FILENAME);
+    this.looperPath = path.join(environment.assetsPath, "looper");
   }
 
   // --- PID Registry ---
@@ -39,9 +42,8 @@ export class AudioEngine {
   private isProcessAlive(pid: number): boolean {
     try {
       process.kill(pid, 0);
-      // Verify it's actually our shell loop
       const comm = execSync(`ps -p ${pid} -o comm= 2>/dev/null`, { encoding: "utf-8" }).trim();
-      return comm.includes("sh");
+      return comm.endsWith("looper");
     } catch {
       return false;
     }
@@ -64,21 +66,19 @@ export class AudioEngine {
       return null;
     }
 
-    const afplayVolume = Math.max(0, Math.min(1, volume / 100));
-    const child = spawn("sh", ["-c", `while true; do afplay -v ${afplayVolume} "${filePath}"; done`], {
+    const looperVolume = Math.max(0, Math.min(1, volume / 100));
+    const child = spawn(this.looperPath, [filePath, String(looperVolume)], {
       detached: true,
       stdio: "ignore",
     });
 
     if (!child.pid) {
-      console.error(`[AudioEngine] Failed to spawn afplay for ${soundId}`);
+      console.error(`[AudioEngine] Failed to spawn looper for ${soundId}`);
       return null;
     }
     child.unref();
 
-    // Register PID
     const registry = this.readRegistry();
-    // Remove any existing entry for this sound
     registry.entries = registry.entries.filter((e) => e.soundId !== soundId);
     registry.entries.push({
       soundId,
@@ -97,7 +97,7 @@ export class AudioEngine {
     if (!entry) return;
 
     try {
-      process.kill(-entry.pid, "SIGTERM");
+      process.kill(entry.pid, "SIGTERM");
     } catch {
       // Process already dead
     }
@@ -110,12 +110,11 @@ export class AudioEngine {
     const registry = this.readRegistry();
     for (const entry of registry.entries) {
       try {
-        process.kill(-entry.pid, "SIGTERM");
+        process.kill(entry.pid, "SIGTERM");
       } catch {
         // Process already dead
       }
     }
-
     this.writeRegistry({ entries: [], lastUpdated: Date.now() });
   }
 
@@ -124,15 +123,15 @@ export class AudioEngine {
     const entry = registry.entries.find((e) => e.soundId === soundId);
 
     if (entry && this.isProcessAlive(entry.pid)) {
-      // Stop old process group, then start new
-      try {
-        process.kill(-entry.pid, "SIGTERM");
-      } catch {
-        // Already dead
+      const newPid = this.startSound(soundId, filePath, newVolume);
+      if (newPid) {
+        try {
+          process.kill(entry.pid, "SIGTERM");
+        } catch {
+          // Already dead
+        }
       }
-      this.startSound(soundId, filePath, newVolume);
     } else {
-      // Not currently playing, just start fresh
       this.startSound(soundId, filePath, newVolume);
     }
   }
