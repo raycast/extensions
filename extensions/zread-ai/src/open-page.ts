@@ -3,11 +3,7 @@ import { showFailureToast } from "@raycast/utils";
 import { getRepoIdentifierFromArgumentOrCurrentTab } from "./get-repo-identifier";
 import { normalizeToZreadUrl } from "./repository";
 
-type OpenPageArguments = {
-  repoIdentifier?: string;
-};
-
-export default async function Command(props: LaunchProps<{ arguments: OpenPageArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.OpenPage }>) {
   try {
     const repoIdentifier = await getRepoIdentifierFromArgumentOrCurrentTab(props.arguments.repoIdentifier);
 
