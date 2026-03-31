@@ -59,7 +59,7 @@ type BookmarkFormProps = {
 export const BookmarkForm = (props: BookmarkFormProps) => {
   const mode = props.bookmarkId ? "edit" : "create";
   const preferences = getPreferenceValues<Preferences>();
-  const { data: collectionsData, isLoading: isLoadingCollections } = useCollections();
+  const { data: collectionsData, isLoading: isLoadingCollections, error: collectionsError } = useCollections();
   const { data: tags } = useTags();
   const [dropdownValue, setDropdownValue] = useState(props.defaultValues?.collection ?? "-1");
   const [showCollectionCreation, setShowCollectionCreation] = useState(false);
@@ -176,14 +176,23 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         <Form.Dropdown.Item key="-2" value="-2" title="Create Collection" icon={Icon.Plus} />
         <Form.Dropdown.Item key="-1" value="-1" title="Unsorted" icon={Icon.Tray} />
         <Form.Dropdown.Section title="Collections">
-          {collections.map(({ value, label, name, cover }) => (
+          {collectionsError ? (
             <Form.Dropdown.Item
-              key={value}
-              value={`${value ?? "-1"}`}
-              title={name && name !== label ? `${name} (${label})` : label}
-              icon={cover ? { source: cover } : { source: Icon.Folder }}
+              key="collections-error"
+              value="-1"
+              title="Unable to load collections"
+              icon={Icon.ExclamationMark}
             />
-          ))}
+          ) : (
+            collections.map(({ value, label, name, cover }) => (
+              <Form.Dropdown.Item
+                key={value}
+                value={`${value ?? "-1"}`}
+                title={name && name !== label ? `${name} (${label})` : label}
+                icon={cover ? { source: cover } : { source: Icon.Folder }}
+              />
+            ))
+          )}
         </Form.Dropdown.Section>
       </Form.Dropdown>
       {showCollectionCreation && (
