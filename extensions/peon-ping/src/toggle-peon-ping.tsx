@@ -1,11 +1,11 @@
 import { launchCommand, LaunchType, showHUD } from "@raycast/api";
 import { execFileSync } from "node:child_process";
-import { getResolvePeonPingPathsInputFromPreferences } from "./lib/extensions/peon-ping/preferences";
-import { resolvePeonPingPaths } from "./lib/extensions/peon-ping/peon-ping-paths";
+import { getResolvePeonPingPathsInputFromPreferences } from "./lib/preferences";
+import { resolvePeonPingPaths } from "./lib/peon-ping-paths";
 import {
   togglePeonPing,
   type PeonPingCommandRunner,
-} from "./lib/extensions/peon-ping/peon-ping-service";
+} from "./lib/peon-ping-service";
 
 const run: PeonPingCommandRunner = (command, args) =>
   execFileSync(command, [...args], { encoding: "utf8" });
