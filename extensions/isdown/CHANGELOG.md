@@ -1,6 +1,6 @@
 # IsDown
 
-## [Added Windows Support] - {PR_MERGE_DATE}
+## [Added Windows Support] - 2026-03-31
 
 - Added Windows to supported platforms
 
