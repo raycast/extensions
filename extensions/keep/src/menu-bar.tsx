@@ -1,6 +1,6 @@
-import { Icon, MenuBarExtra, open } from "@raycast/api";
+import { Icon, MenuBarExtra, open, getPreferenceValues } from "@raycast/api";
 import { getFavicon, useCachedPromise } from "@raycast/utils";
-import { fetchUnreadSummary, getItemHost } from "./api";
+import { fetchUnreadSummary, getItemHost, normalizeBaseUrl } from "./api";
 
 export default function UnreadLinks() {
   const { data, isLoading } = useCachedPromise(() => fetchUnreadSummary(5), []);
@@ -34,7 +34,7 @@ export default function UnreadLinks() {
         <MenuBarExtra.Item
           title="Open Keep"
           icon={Icon.Globe}
-          onAction={() => open("https://keep.md")}
+          onAction={() => open(normalizeBaseUrl(getPreferenceValues().baseUrl))}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

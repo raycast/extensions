@@ -1,6 +1,6 @@
-# Keep for Raycast
+# Keep
 
-Keep for Raycast lets you search saved links, save new ones, save the active browser tab, save from the clipboard, mark links read or unread, delete links, and track unread count in the menu bar.
+Keep lets you search saved links, save new ones, save the active browser tab, save from the clipboard, mark links read or unread, delete links, and track unread count in the menu bar.
 
 ## Setup
 
@@ -19,19 +19,17 @@ Keep for Raycast lets you search saved links, save new ones, save the active bro
 ## Local Development
 
 ```sh
-pnpm -C apps/raycast dev
+pnpm dev
 ```
 
 ## Build
 
 ```sh
-pnpm -C apps/raycast build
+pnpm build
 ```
 
 ## Prepare for Submission
 
 ```sh
-pnpm submit:raycast
+pnpm run submit:prepare
 ```
-
-That runs a production build and stages a standalone submission copy in `apps/raycast/.submit` with a clean `package-lock.json`. Use that staged folder when copying into the public Raycast extensions repo or when doing a final publish pass outside this monorepo.

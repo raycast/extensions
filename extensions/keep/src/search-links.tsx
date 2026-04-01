@@ -7,6 +7,7 @@ import {
   confirmAlert,
   Icon,
   List,
+  open,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -28,7 +29,7 @@ export default function SearchLinks() {
   const [searchText, setSearchText] = useState("");
   const [showDetail, setShowDetail] = useState(true);
 
-  const { data, isLoading, revalidate } = useCachedPromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     (nextFilter: LinkFilter, nextSearch: string) =>
       fetchLinks({
         filter: nextFilter,
@@ -39,6 +40,76 @@ export default function SearchLinks() {
   );
 
   const links = data?.items ?? [];
+
+  const handleSaveFromClipboard = async () => {
+    const clipboard = (await Clipboard.readText())?.trim();
+    if (!clipboard) {
+      await showToast(Toast.Style.Failure, "Clipboard is empty");
+      return;
+    }
+
+    const toast = await showToast(Toast.Style.Animated, "Saving link...");
+
+    try {
+      const result = await saveLink({
+        url: clipboard,
+        source: "raycast:clipboard",
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = result.added ? "Link saved" : "Link updated";
+      toast.message = result.normalizedUrl;
+      await revalidate();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to save";
+      toast.message = String((error as Error).message || error);
+    }
+  };
+
+  if (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return (
+      <List
+        isLoading={false}
+        isShowingDetail={showDetail}
+        filtering={false}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        searchBarPlaceholder="Search Keep links..."
+        searchBarAccessory={
+          <List.Dropdown
+            tooltip="Filter"
+            value={filter}
+            onChange={(value) => setFilter(value as LinkFilter)}
+          >
+            <List.Dropdown.Item title="All" value="all" />
+            <List.Dropdown.Item title="Unread" value="unread" />
+            <List.Dropdown.Item title="Read" value="read" />
+          </List.Dropdown>
+        }
+        throttle
+      >
+        <List.EmptyView
+          title="Error fetching links"
+          description={message}
+          actions={
+            <ActionPanel>
+              <Action title="Retry" onAction={() => revalidate()} />
+              <Action
+                title="Open Preferences"
+                onAction={() => open("raycast://preferences/extensions")}
+              />
+              <Action
+                title="Save Link from Clipboard"
+                icon={Icon.Clipboard}
+                onAction={handleSaveFromClipboard}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
 
   const handleToggleRead = async (item: KeepItem) => {
     const nextProcessed = !item.processedAt;
@@ -81,31 +152,6 @@ export default function SearchLinks() {
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to delete";
-      toast.message = String((error as Error).message || error);
-    }
-  };
-
-  const handleSaveFromClipboard = async () => {
-    const clipboard = (await Clipboard.readText())?.trim();
-    if (!clipboard) {
-      await showToast(Toast.Style.Failure, "Clipboard is empty");
-      return;
-    }
-
-    const toast = await showToast(Toast.Style.Animated, "Saving link...");
-
-    try {
-      const result = await saveLink({
-        url: clipboard,
-        source: "raycast:clipboard",
-      });
-      toast.style = Toast.Style.Success;
-      toast.title = result.added ? "Link saved" : "Link updated";
-      toast.message = result.normalizedUrl;
-      await revalidate();
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to save";
       toast.message = String((error as Error).message || error);
     }
   };

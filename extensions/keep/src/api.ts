@@ -21,7 +21,7 @@ const FRONTMATTER_IMAGE_KEYS = [
 
 const getPreferences = () => getPreferenceValues<Preferences>();
 
-const normalizeBaseUrl = (input?: string) => {
+export const normalizeBaseUrl = (input?: string) => {
   const value = input?.trim() || DEFAULT_BASE_URL;
   const withoutTrailingSlash = value.replace(/\/+$/, "");
   return withoutTrailingSlash.endsWith("/api")
@@ -64,7 +64,10 @@ const readApiError = async (response: Response) => {
 
 const request = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const { apiKey } = getPreferences();
-  const response = await fetch(buildUrl(path).toString(), {
+  const isAbsoluteUrl = /^(?:[a-z]+:)?\/\//i.test(path);
+  const url = isAbsoluteUrl ? path : buildUrl(path).toString();
+
+  const response = await fetch(url, {
     ...init,
     headers: {
       Authorization: `Bearer ${apiKey}`,
@@ -228,15 +231,70 @@ export const fetchLinks = async (params: {
   const search = params.search?.trim();
 
   if (params.filter === "unread") {
+    // Request unread items from the feed endpoint and include content so
+    // the detail view has the markdown available.
     return request<KeepItemsResponse>(
       buildUrl("/api/feed", {
         limit,
+        include: "content",
         q: search || undefined,
       }).toString(),
     );
   }
 
   const path = search ? "/api/items/search" : "/api/items";
+  if (params.filter === "read") {
+    // If the caller wants only read items, page through server results and
+    // accumulate items that have `processedAt` until we have `limit` items
+    // or the server has no more items. This avoids returning a small number
+    // of read items when most items are unread.
+    const pageSize = 100;
+    let offset = 0;
+    const collected: KeepItem[] = [];
+    let total = 0;
+
+    while (true) {
+      const resp = await request<KeepItemsResponse>(
+        buildUrl(path, {
+          limit: pageSize,
+          offset,
+          include: "content",
+          q: search || undefined,
+        }).toString(),
+      );
+
+      total = resp.total ?? resp.count ?? total;
+      const readItems = resp.items.filter((item) => Boolean(item.processedAt));
+      collected.push(...readItems);
+
+      if (collected.length >= limit) {
+        collected.length = limit;
+        return {
+          ...resp,
+          items: collected,
+          count: collected.length,
+          total,
+        };
+      }
+
+      if (!resp.items.length || resp.items.length < pageSize) {
+        break;
+      }
+
+      offset += pageSize;
+      // Safety guard to avoid pathological loops on unexpected APIs.
+      if (offset > 10000) break;
+    }
+
+    return {
+      items: collected,
+      limit,
+      offset: 0,
+      count: collected.length,
+      total,
+    };
+  }
+
   const response = await request<KeepItemsResponse>(
     buildUrl(path, {
       limit,
@@ -258,7 +316,9 @@ export const fetchLinks = async (params: {
 };
 
 export const fetchUnreadSummary = async (limit = 5) =>
-  request<KeepItemsResponse>(buildUrl("/api/feed", { limit }).toString());
+  request<KeepItemsResponse>(
+    buildUrl("/api/feed", { limit, include: "content" }).toString(),
+  );
 
 export const saveLink = async (params: {
   url: string;

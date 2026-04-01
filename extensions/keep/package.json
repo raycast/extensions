@@ -43,6 +43,7 @@
       "name": "search-links",
       "title": "Search Links",
       "description": "Browse, filter, and manage your saved Keep links",
+      "subtitle": "Search your Keep installation",
       "mode": "view",
       "keywords": [
         "keep",
@@ -56,6 +57,7 @@
       "name": "save-link",
       "title": "Save Link",
       "description": "Save a URL to Keep",
+      "subtitle": "Add a link to your Keep library",
       "mode": "no-view",
       "keywords": [
         "keep",
@@ -82,6 +84,7 @@
       "name": "save-clipboard",
       "title": "Save Link from Clipboard",
       "description": "Save the current clipboard URL to Keep",
+      "subtitle": "Save clipboard URL to Keep",
       "mode": "no-view",
       "keywords": [
         "keep",
@@ -94,6 +97,7 @@
       "name": "save-tab",
       "title": "Save Current Tab",
       "description": "Save the active browser tab to Keep",
+      "subtitle": "Save the active browser tab to Keep",
       "mode": "no-view",
       "keywords": [
         "keep",
@@ -107,6 +111,7 @@
       "name": "menu-bar",
       "title": "Unread Links",
       "description": "Show unread Keep links in the menu bar",
+      "subtitle": "Quick access to unread links",
       "mode": "menu-bar",
       "interval": "5m"
     }
