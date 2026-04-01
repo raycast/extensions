@@ -3,8 +3,6 @@
 ## [Added Restart Action] - {PR_MERGE_DATE}
 
 - Added `Restart` and `Force Restart` actions for restartable processes
-- Added cross-platform restart support for macOS and Windows
-- Improved restart reliability by waiting for the process tree to fully exit before relaunching
 
 ## [Added Kill All action] - 2026-04-01
 
