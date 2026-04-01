@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactElement } from "react";
 import { Action, ActionPanel, Color, Detail, Icon, Toast, showToast } from "@raycast/api";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { api, type Article } from "./api";
@@ -74,7 +74,7 @@ interface ArticleDetailProps {
   article: Article;
   onToggleRead?: (article: Article, markRead: boolean) => void;
   onToggleStar?: (article: Article, star: boolean) => void;
-  extraActions?: JSX.Element;
+  extraActions?: ReactElement;
 }
 
 export default function ArticleDetail({ article, onToggleRead, onToggleStar, extraActions }: ArticleDetailProps) {
