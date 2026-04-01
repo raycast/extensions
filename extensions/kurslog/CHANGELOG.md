@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 — Initial Release
+## [Initial Release] - {PR_MERGE_DATE}
 
 - **Exchange Rates**: Browse popular crypto exchange directions with best rates
 - **Quick Search**: Type currency names to instantly find exchange rates (e.g. "usdt trc20 monobank")

@@ -1,31 +1,11 @@
-import { getPreferenceValues, environment } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import type { Locale } from "../api/types";
-
-interface Preferences {
-  locale: Locale;
-}
 
 const SUPPORTED: Locale[] = ["uk", "ru", "en"];
 
-/** Detect locale: user preference → system language → "en" */
 export function getLocale(): Locale {
-  // 1. Explicit user preference
-  const pref = getPreferenceValues<Preferences>().locale;
+  const pref = getPreferenceValues<ExtensionPreferences>().locale;
   if (pref && SUPPORTED.includes(pref)) return pref;
-
-  // 2. System language from Raycast environment
-  try {
-    const env = environment as unknown as Record<string, string>;
-    const sysLang = env.locale || env.languageCode || "";
-    const code = sysLang.toLowerCase().slice(0, 2);
-    if (code === "uk") return "uk";
-    if (code === "ru") return "ru";
-    if (code === "en") return "en";
-  } catch {
-    // environment fields may not exist in older Raycast versions
-  }
-
-  // 3. Default
   return "en";
 }
 

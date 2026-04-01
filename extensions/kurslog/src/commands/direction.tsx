@@ -66,22 +66,11 @@ export default function DirectionView({
   const [amount, setAmount] = useState<number | undefined>(initialAmount);
   const { push } = useNavigation();
 
-  if (!from || !to) {
-    return (
-      <List>
-        <List.EmptyView
-          title={t("noRates", locale)}
-          description="Use 'Exchange Rates' or 'Check Rate' to select a direction first."
-          icon={Icon.MagnifyingGlass}
-        />
-      </List>
-    );
-  }
-
   const favs = favExchangers || [];
   const blocked = blacklist || [];
 
   const sortedRates = useMemo(() => {
+    if (!from || !to) return [];
     if (!rates) return [];
     const filtered = rates.filter(
       (r) => !blocked.includes(r.exchanger_internal_url),

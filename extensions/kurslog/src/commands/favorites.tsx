@@ -36,8 +36,10 @@ export default function Favorites() {
     useFavoriteDirections();
   const { data: favExchangerUrls, revalidate: revalidateFavEx } =
     useFavoriteExchangers();
-  const { data: directions, isLoading: dirsLoading } =
-    usePopularDirections(locale);
+  const { data: directions, isLoading: dirsLoading } = usePopularDirections(
+    locale,
+    100,
+  );
   const { data: exchangers, isLoading: exLoading } = useExchangers(locale);
 
   const favDirections = useMemo(() => {
