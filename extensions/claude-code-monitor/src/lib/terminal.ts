@@ -23,7 +23,6 @@ const TERMINAL_APPS: Record<string, string> = {
   kitty: "kitty",
 };
 
-
 function shellQuote(s: string): string {
   return "'" + s.replace(/'/g, "'\\''") + "'";
 }
