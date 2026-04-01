@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Claude config directory - Optional override for the Claude config directory. When empty, CLAUDE_CONFIG_DIR or ~/.claude is used. */
+  /** Claude Config Directory - Optional override for the Claude config directory. When empty, CLAUDE_CONFIG_DIR or ~/.claude is used. */
   "claudeConfigDir"?: string
 }
 

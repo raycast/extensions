@@ -37,7 +37,7 @@
       "name": "claudeConfigDir",
       "type": "textfield",
       "required": false,
-      "title": "Claude config directory",
+      "title": "Claude Config Directory",
       "description": "Optional override for the Claude config directory. When empty, CLAUDE_CONFIG_DIR or ~/.claude is used.",
       "placeholder": "Leave empty for default"
     }
