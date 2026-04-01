@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Support Droid Encrypted Auth v2] - {PR_MERGE_DATE}
+
+### Improvements
+
+- Support Factory Droid's new encrypted auth v2 format with backward compatibility for legacy auth files
+
 ## [Progress Bars & Zero-Config Auth] - 2026-03-16
 
 ### New Features
