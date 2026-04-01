@@ -1,5 +1,12 @@
 # Myanimelist search Changelog
 
+## [New Addition and views] - 2026-02-05
+
+- Added a new AnimeDetail component with comprehensive anime information (broadcast schedule, source, studios, premiere date, duration, etc.)
+- Extended the API schema to support new fields (broadcast, source, typed studios array)
+- Added "View Full Details" action to push to the new detailed view
+- Enhanced existing list detail with additional metadata (Aired From/To, Studios)
+
 ## [New Addition] - 2025-12-01
 
 - Added windows support

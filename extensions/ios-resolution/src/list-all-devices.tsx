@@ -1,10 +1,11 @@
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
 import devices from "./data/devices.json";
 import { Device } from "./types";
 
 const FAMILY_ICONS: Record<Device["family"], Icon> = {
   iPhone: Icon.Mobile,
+  MacBook: Icon.Monitor,
   iPad: Icon.Window,
   "iPod touch": Icon.Music,
   "Apple Watch": Icon.Clock,
@@ -97,6 +98,7 @@ export default function Command() {
         <List.Dropdown tooltip="Filter by Family" value={familyFilter} onChange={setFamilyFilter}>
           <List.Dropdown.Item title="All Devices" value="all" />
           <List.Dropdown.Item title="iPhone" value="iPhone" icon={Icon.Mobile} />
+          <List.Dropdown.Item title="MacBook" value="MacBook" icon={Icon.Monitor} />
           <List.Dropdown.Item title="iPad" value="iPad" icon={Icon.Window} />
           <List.Dropdown.Item title="iPod touch" value="iPod touch" icon={Icon.Music} />
           <List.Dropdown.Item title="Apple Watch" value="Apple Watch" icon={Icon.Clock} />

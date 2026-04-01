@@ -5,13 +5,6 @@
   "description": "Search your code and public repositories with Sourcegraph.",
   "icon": "command-icon.png",
   "author": "bobheadxi",
-  "license": "MIT",
-  "categories": [
-    "Developer Tools",
-    "Productivity",
-    "Documentation",
-    "Web"
-  ],
   "keywords": [
     "sourcegraph",
     "search",
@@ -19,54 +12,16 @@
     "codesearch",
     "ai"
   ],
-  "preferences": [
-    {
-      "name": "customInstance",
-      "title": "Sourcegraph connection: URL",
-      "description": "Required to use 'Sourcegraph' commands - Sourcegraph URL you want to connect to.",
-      "placeholder": "https://example.sourcegraph.app",
-      "required": false,
-      "type": "textfield"
-    },
-    {
-      "name": "customInstanceToken",
-      "title": "Sourcegraph connection: Access token",
-      "description": "If set, takes precedence over OAuth login. Available under 'Profile' -> 'Access token' in Sourcegraph.",
-      "required": false,
-      "type": "password"
-    },
-    {
-      "name": "customInstanceProxy",
-      "title": "Sourcegraph connection: Proxy",
-      "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
-      "required": false,
-      "type": "textfield"
-    },
-    {
-      "name": "cloudToken",
-      "title": "Public code on Sourcegraph.com: Access token",
-      "description": "Configures 'Sourcegraph.com' commands - available under 'Profile' -> 'Access token' on Sourcegraph.com",
-      "required": false,
-      "type": "password"
-    },
-    {
-      "name": "featureSearchPatternDropdown",
-      "title": "Additional features",
-      "label": "Search pattern dropdown",
-      "description": "Toggle the search pattern dropdown in the search command.",
-      "required": false,
-      "type": "checkbox",
-      "default": true
-    },
-    {
-      "name": "featureDisableTelemetry",
-      "label": "Disable telemetry",
-      "description": "Telemetry is only reported to the connected Sourcegraph instance or workspace, but can be disabled with this toggle.",
-      "required": false,
-      "type": "checkbox",
-      "default": false
-    }
+  "platforms": [
+    "macOS"
   ],
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Documentation",
+    "Web"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "deepSearchInstance",
@@ -192,9 +147,57 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "customInstance",
+      "title": "Sourcegraph URL",
+      "description": "Sourcegraph URL you want to connect to: visit https://workspaces.sourcegraph.com to get your own Sourcegraph subscription.\n\nIf you just want to use 'Search Public Code', you can enter an arbitrary value here.",
+      "placeholder": "https://example.sourcegraph.app",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "customInstanceToken",
+      "title": "Sourcegraph access token (optional)",
+      "description": "If set, takes precedence over OAuth login. Available under 'Profile' -> 'Access token' in Sourcegraph.",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "customInstanceProxy",
+      "title": "Sourcegraph connection proxy",
+      "description": "Optional proxy to use when using a custom Sourcegraph connection - presently, only Unix domain sockets are supported.",
+      "required": false,
+      "type": "textfield"
+    },
+    {
+      "name": "cloudToken",
+      "title": "Public code search access token (optional)",
+      "description": "Configures 'Search Public Code' and 'Search Public Code History' - available under 'Profile' -> 'Access token' on Sourcegraph.com",
+      "required": false,
+      "type": "password"
+    },
+    {
+      "name": "featureSearchPatternDropdown",
+      "title": "Additional features",
+      "label": "Search pattern dropdown",
+      "description": "Toggle the search pattern dropdown in the search command.",
+      "required": false,
+      "type": "checkbox",
+      "default": true
+    },
+    {
+      "name": "featureDisableTelemetry",
+      "label": "Disable telemetry",
+      "description": "Telemetry is only reported to the connected Sourcegraph instance or workspace, but can be disabled with this toggle.",
+      "required": false,
+      "type": "checkbox",
+      "default": false
+    }
+  ],
   "dependencies": {
     "@apollo/client": "^3.11.10",
-    "@raycast/api": "^1.103.7",
+    "@raycast/api": "^1.104.7",
     "@raycast/utils": "^2.2.2",
     "@sourcegraph/telemetry": "^0.18.0",
     "@types/uuid": "^10.0.0",
@@ -233,8 +236,5 @@
     "raycast-publish": ".scripts/raycast-publish.sh",
     "gql": "graphql-codegen --config graphql-codegen.yml && npm run fmt",
     "postinstall": "patch-package"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

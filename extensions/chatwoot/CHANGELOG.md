@@ -1,5 +1,13 @@
 # Chatwoot Changelog
 
+## [Add "Settings" with Canned Responses & Teams] - 2026-02-06
+
+### Canned Responses
+- list, add, delete
+
+### Teams
+- list, add, delete
+
 ## [Fix "List Messages"] - 2025-11-17
 
 ### Messages

@@ -16,7 +16,9 @@
     "litomore",
     "ridemountainpig",
     "dbrooks",
-    "YourMCGeek"
+    "YourMCGeek",
+    "kodie",
+    "tim.shilov"
   ],
   "license": "MIT",
   "categories": [
@@ -116,6 +118,10 @@
         {
           "title": "Skypack.dev Package Page",
           "value": "skypackPackagePage"
+        },
+        {
+          "title": "npmx Package Page",
+          "value": "npmxPackagePage"
         }
       ],
       "title": "Default Open Action",
@@ -145,8 +151,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
     "dedupe": "^4.0.3",
     "git-url-parse": "^16.1.0",
     "tiny-relative-date": "^2.0.2",

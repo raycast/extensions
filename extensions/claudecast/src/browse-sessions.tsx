@@ -30,7 +30,7 @@ export default function BrowseSessions() {
 
   async function loadSessions() {
     setIsLoading(true);
-    const allSessions = await listAllSessions();
+    const allSessions = await listAllSessions({ limit: 200 });
     // Deduplicate sessions by ID (same session can exist across multiple project directories)
     // Keep the most recent one when duplicates exist
     const seenIds = new Map<string, SessionMetadata>();

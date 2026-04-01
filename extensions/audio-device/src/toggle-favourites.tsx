@@ -28,7 +28,8 @@ export default async () => {
 
       await setOutputAndSystemDevice(selectedDeviceId);
       await showHUD(`Active output audio device set to ${selectedDeviceName}`);
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Favourite output audio device could not be set",

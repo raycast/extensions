@@ -117,6 +117,7 @@ export function Err<E = Error>(error: E): Failure<E> {
 }
 
 export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
+export function tryCatch<T, E = Error>(fn: () => Promise<T>): Promise<Result<T, E>>;
 export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
 /**
  * Executes a function or a promise safely inside a try/catch and

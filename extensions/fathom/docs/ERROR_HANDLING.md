@@ -36,15 +36,18 @@ The system recognizes and handles these error categories:
 ### API Layer
 
 **Files Modified**:
+
 - `src/fathom/api.ts`
 - `src/fathom/client.ts`
 
 **Changes**:
+
 - API errors now include error type prefixes (e.g., `API_KEY_MISSING:`, `RATE_LIMIT:`)
 - HTTP status codes mapped to user-friendly messages
 - Rate limiting errors provide clear guidance to wait and retry
 
 **Example**:
+
 ```typescript
 // Before
 throw new Error("Invalid API Key. Please check your Fathom API Key in Extension Preferences.");
@@ -56,14 +59,17 @@ throw new Error("API_KEY_INVALID: Invalid API Key. Please check your Fathom API 
 ### Action Files
 
 **Files Modified**:
+
 - `src/actions/TeamMemberActions.tsx`
 - `src/actions/TeamActions.tsx`
 
 **Changes**:
+
 - Replaced raw error messages with `showContextualError()`
 - Provides action context (e.g., "export member details", "open meetings")
 
 **Example**:
+
 ```typescript
 // Before
 catch (error) {
@@ -88,6 +94,7 @@ catch (error) {
 **File Modified**: `src/utils/export.ts`
 
 **Changes**:
+
 - Export operations now show user-friendly error messages
 - File system errors are properly classified
 
@@ -96,6 +103,7 @@ catch (error) {
 **File Modified**: `src/utils/cacheManager.ts`
 
 **Changes**:
+
 - Cache refresh errors display helpful messages
 - Network issues clearly communicated to users
 
@@ -104,6 +112,7 @@ catch (error) {
 **File Modified**: `src/search-meetings.tsx`
 
 **Changes**:
+
 - Summary and transcript loading errors use `getUserFriendlyError()`
 - Error messages are consistent across the UI
 
@@ -112,10 +121,12 @@ catch (error) {
 ### API Key Errors
 
 **Missing API Key**:
+
 - Title: "API Key Required"
 - Message: "Please configure your Fathom API Key in Extension Preferences."
 
 **Invalid API Key**:
+
 - Title: "Invalid API Key"
 - Message: "Please check your Fathom API Key in Extension Preferences."
 
@@ -167,7 +178,7 @@ Shows a contextual error toast with action-specific messaging.
 await showContextualError(error, {
   action: "export meeting",
   fallbackTitle: "Export Failed",
-  fallbackMessage: "Optional custom message for unknown errors"
+  fallbackMessage: "Optional custom message for unknown errors",
 });
 ```
 

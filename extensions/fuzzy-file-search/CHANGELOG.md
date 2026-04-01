@@ -1,5 +1,9 @@
 # Fuzzy File Search Changelog
 
+## [Open With Action] - 2026-03-12
+
+- Add "Open With" action to open files with a specific application (Cmd+O).
+
 ## [Rework] - 2025-10-05
 
 - Use fzf CLI tool for fuzzy finding.

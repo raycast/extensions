@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
-import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
+import { RepositoryDirectoryActions, RepositoryQuickLinkAction } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
 import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
@@ -48,24 +48,8 @@ export default function ManageRepositories() {
   // Use view hook only for regular repositories
   const { displayedRepositories } = useRepositoriesView(currentRepositories);
 
-  const handleRemove = async (repoName: string, repoPath: string) => {
-    const confirmed = await confirmAlert({
-      title: "Remove from recent?",
-      message: `Are you sure you want to remove "${repoName}" from the recent repositories list?`,
-      primaryAction: {
-        title: "Remove",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      await removeRepository(repoPath);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Repository removed",
-        message: `"${repoName}" removed from recent list`,
-      });
-    }
+  const handleRemove = async (repoPath: string) => {
+    await removeRepository(repoPath);
   };
 
   const handleKillClone = async (repoPath: string) => {
@@ -113,7 +97,7 @@ export default function ManageRepositories() {
                 key={repo.id}
                 repo={repo}
                 onOpen={() => visitRepository(repo.path)}
-                onRemove={() => handleRemove(repo.name, repo.path)}
+                onRemove={() => handleRemove(repo.path)}
                 onAddRepository={addRepository}
               />
             ))}
@@ -153,7 +137,7 @@ function RepositoryListItem({
     }
 
     return result;
-  }, [repo.languageStats, remotes]);
+  }, [remotes]);
 
   const icon: Image.ImageLike = useMemo(() => {
     if (repo.languageStats && repo.languageStats.length > 0 && repo.languageStats[0].color) {
@@ -162,6 +146,26 @@ function RepositoryListItem({
 
     return { source: `git-project.svg`, tintColor: Color.SecondaryText };
   }, [repo.languageStats]);
+
+  const handleRemove = async () => {
+    const confirmed = await confirmAlert({
+      title: "Remove from recent?",
+      message: `Are you sure you want to remove "${repo.name}" from the recent repositories list?`,
+      primaryAction: {
+        title: "Remove",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      onRemove();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Repository removed",
+        message: `"${repo.name}" removed from recent list`,
+      });
+    }
+  };
 
   return (
     <List.Item
@@ -199,23 +203,15 @@ function RepositoryListItem({
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
-            <Action.CreateQuicklink
-              title="Create Quicklink"
-              quicklink={{
-                link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(
-                  JSON.stringify({ path: repo.path }),
-                )}`,
-                name: `Show ${repo.name} in Git`,
-              }}
-            />
+            <RepositoryQuickLinkAction repositoryPath={repo.path} />
             <Action
               title="Remove from List"
-              onAction={onRemove}
+              onAction={handleRemove}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
             />
-            <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+            <Action.Trash paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
           <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
@@ -516,7 +512,7 @@ function CloningRepositoryListItem({
                 onAction={onRemove}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
-              <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+              <Action.Trash paths={[repo.path]} onTrash={onRemove} />
             </>
           ) : (
             <>

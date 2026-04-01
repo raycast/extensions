@@ -106,6 +106,12 @@
       "title": "Search AI Gateway Models",
       "description": "Search for AI models available in the Vercel AI Gateway",
       "mode": "view"
+    },
+    {
+      "name": "search-ai-gateway-logs",
+      "title": "Search AI Gateway Logs",
+      "description": "View AI Gateway inference request logs from the past 12 hours",
+      "mode": "view"
     }
   ],
   "tools": [

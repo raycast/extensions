@@ -5,6 +5,7 @@ export type Todo = {
   name: string;
   status: 'open' | 'completed' | 'canceled';
   tags: string;
+  areaTags: string | null;
   project?: Project;
   area?: Area;
   dueDate: string;

@@ -16,9 +16,14 @@ export default function Command() {
   const [type, setType] = useState<string>(initialType);
   const [query, setQuery] = useState<string>("");
 
-  const { accessToken, isLoading: isAccessTokenLoading, executeDataLoading } = useAccessToken(API_TOKEN);
-  const { isLoading: isDataLoading, data } = useData(accessToken, executeDataLoading, query, type);
-  const { kits, isLoading: isKitsLoading } = useKits(accessToken, executeDataLoading && account === "pro", kitFilter);
+  const { accessToken, cacheScope, isLoading: isAccessTokenLoading, executeDataLoading } = useAccessToken(API_TOKEN);
+  const { isLoading: isDataLoading, data } = useData(accessToken, cacheScope, executeDataLoading, query, type);
+  const { kits, isLoading: isKitsLoading } = useKits(
+    accessToken,
+    cacheScope,
+    executeDataLoading && account === "pro",
+    kitFilter,
+  );
 
   return (
     <Grid

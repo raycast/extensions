@@ -1,5 +1,11 @@
 # Font Awesome Changelog
 
+## [Fix pro token refresh and kit loading] - 2026-03-27
+
+- Fixed pro icon searches after changing the API token by scoping cached access tokens and expiry timestamps to the selected API token, which prevents the extension from continuing to use the default free token after a pro token is added (ref: [Issue #26096](https://github.com/raycast/extensions/issues/26096#issuecomment-4013620785)).
+- Scoped cached icon and kit data to the active token/style selection so custom kit results and pro search results no longer bleed across token changes.
+- Updated custom kit handling to rely on Font Awesome kit tokens instead of a nonexistent `Kit.id` field when filtering, selecting, and loading kit uploads.
+
 ## [Added Custom Kits Support for Pro accounts] - 2025-11-25
 
 - Added support for browsing and searching custom kit icons

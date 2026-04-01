@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "devcontainer-features",
+  "title": "DevContainer Features",
+  "description": "Search and browse devcontainer features from the official registry",
+  "icon": "icon.png",
+  "author": "keito4",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "devcontainer",
+    "docker",
+    "container",
+    "features",
+    "vscode"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-features",
+      "title": "Search Features",
+      "description": "Search devcontainer features by name or description",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "githubToken",
+      "type": "password",
+      "required": false,
+      "title": "GitHub Personal Access Token",
+      "description": "Optional: Increases API rate limit from 60 to 5000 requests/hour. Create at github.com/settings/tokens"
+    },
+    {
+      "name": "cacheTtlHours",
+      "type": "dropdown",
+      "required": false,
+      "title": "Cache Duration",
+      "description": "How long to cache feature data",
+      "default": "24",
+      "data": [
+        {
+          "title": "1 hour",
+          "value": "1"
+        },
+        {
+          "title": "6 hours",
+          "value": "6"
+        },
+        {
+          "title": "24 hours (default)",
+          "value": "24"
+        },
+        {
+          "title": "7 days",
+          "value": "168"
+        }
+      ]
+    },
+    {
+      "name": "concurrency",
+      "type": "dropdown",
+      "required": false,
+      "title": "Fetch Concurrency",
+      "description": "Number of parallel API requests when fetching collections",
+      "default": "10",
+      "data": [
+        {
+          "title": "5 (slower, fewer API calls)",
+          "value": "5"
+        },
+        {
+          "title": "10 (balanced, default)",
+          "value": "10"
+        },
+        {
+          "title": "20 (faster, more API calls)",
+          "value": "20"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "yaml": "^2.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.1",
+    "@types/react": "^19.2.13",
+    "eslint": "^9.22.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

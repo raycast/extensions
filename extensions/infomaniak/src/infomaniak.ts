@@ -6,11 +6,10 @@ import {
   ActivityFileV3,
   Comment,
   CursorResult,
-  DirectoryV3,
   ErrorResult,
-  FileV3,
   InviteUser,
   PaginatedResult,
+  ResultV3,
   SingleResult,
   Team,
   User,
@@ -58,6 +57,12 @@ export const infomaniak = {
   },
   drives: {
     files: {
+      favorites: {
+        list: (params: { driveId: number; cursor?: string }) =>
+          makeRequest<CursorResult<ResultV3>>(
+            `3/drive/${params.driveId}/files/favorites?with=is_favorite${params.cursor ? `&cursor=${params.cursor}` : ""}`,
+          ),
+      },
       getActivities: (params: { driveId: number; fileId: number; cursor?: string }) =>
         makeRequest<CursorResult<ActivityFileV3>>(
           `3/drive/${params.driveId}/files/${params.fileId}/activities${params.cursor ? `?cursor=${params.cursor}` : ""}`,
@@ -70,8 +75,8 @@ export const infomaniak = {
     list: (params: { page: number }) =>
       makeRequest<PaginatedResult<AccountDrive>>(`2/drive?account_id=${account_id}&page=${params.page}`),
     search: (params: { driveId: number; query: string; cursor?: string }) =>
-      makeRequest<CursorResult<DirectoryV3 | FileV3>>(
-        `3/drive/${params.driveId}/files/search?query=${params.query}${params.cursor ? `&cursor=${params.cursor}` : ""}`,
+      makeRequest<CursorResult<ResultV3>>(
+        `3/drive/${params.driveId}/files/search?with=is_favorite&query=${params.query}${params.cursor ? `&cursor=${params.cursor}` : ""}`,
       ),
   },
 };

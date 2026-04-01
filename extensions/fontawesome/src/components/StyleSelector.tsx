@@ -71,9 +71,9 @@ export const StyleSelector = ({ setType, STYLE_PREFERENCE, account, kits }: Styl
             <Grid.Dropdown.Section title="Custom Kits">
               {kits.map((kit) => (
                 <Grid.Dropdown.Item
-                  key={`kit:${kit.id ?? kit.token}`}
+                  key={`kit:${kit.token}`}
                   title={kit.name}
-                  value={`kit:${kit.id ?? kit.token}`}
+                  value={`kit:${kit.token}`}
                   icon={{ source: iconForStyle("fas"), tintColor: Color.SecondaryText }}
                 />
               ))}

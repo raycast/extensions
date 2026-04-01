@@ -35,6 +35,7 @@ import {
   getNeoFinderSelection,
   getPathFinderSelection,
   getQSpaceSelection,
+  splitPaths,
 } from "./scripts/file-selection";
 
 /**
@@ -43,7 +44,7 @@ import {
  */
 export const addItemToRemove = async (item: string) => {
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  await LocalStorage.setItem("itemsToRemove", itemsToRemove + ", " + item);
+  await LocalStorage.setItem("itemsToRemove", itemsToRemove + "\n" + item);
 };
 
 /**
@@ -87,7 +88,7 @@ export const getScopedTempDirectory = async (name: string) => {
  */
 export const cleanup = async () => {
   const itemsToRemove = (await LocalStorage.getItem("itemsToRemove")) ?? "";
-  const itemsToRemoveArray = itemsToRemove.toString().split(", ");
+  const itemsToRemoveArray = itemsToRemove.toString().split("\n").filter(Boolean);
   for (const item of itemsToRemoveArray) {
     if (fs.existsSync(item)) {
       await fs.promises.rm(item, { recursive: true });
@@ -112,8 +113,8 @@ export const getSelectedImages = async (): Promise<string[]> => {
   if (inputMethod == "Clipboard") {
     // Extract images from clipboard
     try {
-      const clipboardImages = (await getClipboardImages()).split(", ");
-      await LocalStorage.setItem("itemsToRemove", clipboardImages.join(", "));
+      const clipboardImages = splitPaths(await getClipboardImages());
+      await LocalStorage.setItem("itemsToRemove", clipboardImages.join("\n"));
       if (clipboardImages.filter((i) => i.trim().length > 0).length > 0) {
         return clipboardImages;
       }
@@ -125,7 +126,7 @@ export const getSelectedImages = async (): Promise<string[]> => {
   }
 
   // Get name of frontmost application
-  let activeApp = inputMethod;
+  let activeApp: string = inputMethod;
   try {
     activeApp = (await getFrontmostApplication()).name as typeof inputMethod;
   } catch (error) {
@@ -167,12 +168,12 @@ export const getSelectedImages = async (): Promise<string[]> => {
 
   // Attempt to get selected images from QSpace Pro
   try {
-    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro") {
+    if (inputMethod == ImageInputSource.QSpaceSelection || activeApp == "QSpace Pro" || activeApp == "QSpace") {
       selectedImages = await getQSpaceSelection();
     }
   } catch (error) {
-    // Error getting images from QSpace Pro, fall back to Finder
-    console.error(`Couldn't get images from QSpace Pro: ${error}`);
+    // Error getting images from QSpace , fall back to ForkLift
+    console.error(`Couldn't get images from ${activeApp}: ${error}`);
     inputMethodError = true;
   }
 

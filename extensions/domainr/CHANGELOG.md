@@ -1,5 +1,9 @@
 # Domainr Changelog
 
+## [Unreleased] - 2026-02-05
+
+- Renamed "Domainr (Fastly Domain Search)" to "Fastly Domain Search"
+
 ## [Updated README and Tweaked UI] - 2025-12-24
 
 - Updated README to require enabling Fastly Domain Research API

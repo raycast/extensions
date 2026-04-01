@@ -118,6 +118,7 @@ export default function Command() {
                         shortcut={Keyboard.Shortcut.Common.RemoveAll}
                         onAction={deleteAllHistory}
                         icon={Icon.Trash}
+                        style={Action.Style.Destructive}
                       />
                     )}
                     {/* Additional actions... */}
@@ -182,6 +183,15 @@ export default function Command() {
                       }}
                       icon={{ source: Icon.Globe }}
                     />
+                    {searchText.length === 0 && (
+                      <Action
+                        title="Delete History"
+                        shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                        onAction={deleteAllHistory}
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                      />
+                    )}
                   </ActionPanel.Section>
                 )}
               </ActionPanel>

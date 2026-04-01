@@ -1,5 +1,55 @@
 # Media Converter Changelog
 
+## [1.5.4] - 2026-03-05
+
+### Added
+
+- New extension preferences:
+  - `Default Image Output Format`
+  - `Default JPG Quality`
+  - `Default WEBP Quality`
+  - `Default PNG Variant`
+  - `Default HEIC Quality (macOS only)`
+  - `Default TIFF Compression`
+  - `Default AVIF Quality`
+  - `Default Audio Output Format`
+  - `Default Audio Quality Preset (Simple Mode)`
+  - `Default Video Output Format`
+  - `Default Video Quality Preset (Simple Mode)`
+
+### Fixed
+
+- In simple mode, video quality now stays aligned with the selected simple quality level when changing output format (instead of resetting to the default level).
+- Non-macOS image default output format now safely falls back from `.heic` to `.jpg` to avoid invalid dropdown states.
+- Image default quality now reads directly from per-format preferences instead of cross-format mapping heuristics.
+
+### API Changes
+
+- Added `src/config/image-preferences.json` as the single source of truth for image preference metadata and value domains.
+- Added `scripts/generate-image-preferences.mjs` to generate/check image preferences in `package.json`.
+- Refactored `getDefaultImageQuality()` to resolve defaults by output format (`.jpg`, `.webp`, `.png`, `.heic`, `.tiff`, `.avif`) and validate configured values against shared domains.
+
+## [1.5.3] - 2026-02-25
+
+### Added
+
+- New extension preferences:
+  - `Default Image Output Format`
+  - `Default Image Quality`
+  - `Default Video Output Format`
+  - `Default Video Quality Preset (Simple Mode)`
+- `Default Image Quality` now supports detailed values (`Lossless (when supported)`, `100` to `0`, `PNG-24`, `PNG-8`, `TIFF Deflate`, `TIFF LZW`) to better match the in-form quality choices.
+
+### Fixed
+
+- In simple mode, video quality now stays aligned with the selected simple quality level when changing output format (instead of resetting to the default level).
+- Non-macOS image default output format now safely falls back from `.heic` to `.jpg` to avoid invalid dropdown states.
+- Format-specific image quality values now fall back to each format's `DEFAULT_QUALITIES` when the selected value is not applicable to the current output format.
+
+### API Changes
+
+- Added centralized image preference parsing in `getDefaultImageQuality()` to map preference values into format-specific quality settings while preserving legacy preset compatibility (`lowest` to `highest`).
+
 ## [1.5.2] - 2025-10-31
 
 ### Added

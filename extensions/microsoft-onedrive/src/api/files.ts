@@ -1,4 +1,4 @@
-import { Clipboard, closeMainWindow, showToast, Toast } from "@raycast/api";
+import { Alert, Clipboard, closeMainWindow, confirmAlert, Icon, showToast, Toast } from "@raycast/api";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
@@ -8,6 +8,184 @@ import { BATCH_SIZE, DRIVE_ITEM_SELECT, getDrivePrefix, GRAPH_API_BASE, graphReq
 
 const SIMPLE_UPLOAD_LIMIT = 4 * 1024 * 1024; // 4MB
 const CHUNK_SIZE = 327680; // 320KB chunks for resumable upload
+
+interface FileToUpload {
+  absolutePath: string;
+  relativePath: string; // relative to the selected item (empty for direct files)
+}
+
+interface FolderInfo {
+  id: string;
+  name: string;
+}
+
+interface CollectedItems {
+  files: FileToUpload[];
+  emptyFolders: string[]; // relative paths of empty folders
+}
+
+/**
+ * Convert path to use forward slashes (required by Graph API)
+ */
+function toApiPath(p: string): string {
+  return p.replace(/\\/g, "/");
+}
+
+/**
+ * Recursively collect all files and empty folders from a directory
+ */
+async function collectFilesRecursively(dirPath: string, basePath: string = ""): Promise<CollectedItems> {
+  const files: FileToUpload[] = [];
+  const emptyFolders: string[] = [];
+  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+
+  if (entries.length === 0 && basePath) {
+    emptyFolders.push(basePath);
+  }
+
+  for (const entry of entries) {
+    const fullPath = path.join(dirPath, entry.name);
+    // Use forward slashes for Graph API compatibility (path.join uses \\ on Windows)
+    const relativePath = basePath ? toApiPath(path.join(basePath, entry.name)) : entry.name;
+
+    if (entry.isDirectory()) {
+      const subItems = await collectFilesRecursively(fullPath, relativePath);
+      files.push(...subItems.files);
+      emptyFolders.push(...subItems.emptyFolders);
+    } else if (entry.isFile()) {
+      files.push({ absolutePath: fullPath, relativePath });
+    }
+  }
+
+  return { files, emptyFolders };
+}
+
+/**
+ * Create a folder in OneDrive, optionally renaming if it already exists
+ */
+async function ensureFolderExists(
+  drivePrefix: string,
+  parentFolderId: string,
+  folderName: string,
+  conflictBehavior: "replace" | "rename" = "replace",
+): Promise<FolderInfo> {
+  const parentPath = parentFolderId === "root" ? "/root" : `/items/${parentFolderId}`;
+  const endpoint = `${drivePrefix}${parentPath}/children`;
+
+  const response = await graphRequest(endpoint, {
+    method: "POST",
+    body: JSON.stringify({
+      name: folderName,
+      folder: {},
+      "@microsoft.graph.conflictBehavior": conflictBehavior,
+    }),
+  });
+
+  const folder = (await response.json()) as DriveItem;
+  return { id: folder.id, name: folder.name };
+}
+
+/**
+ * Ensure all folders in a path exist, creating them if needed
+ * Returns the ID of the deepest folder
+ */
+async function ensureFolderPathExists(
+  drivePrefix: string,
+  rootFolderId: string,
+  folderPath: string,
+  folderCache: Map<string, string>,
+): Promise<string> {
+  if (!folderPath) return rootFolderId;
+
+  const cacheKey = `${rootFolderId}/${folderPath}`;
+  if (folderCache.has(cacheKey)) {
+    return folderCache.get(cacheKey)!;
+  }
+
+  const parts = folderPath.split("/");
+  let currentFolderId = rootFolderId;
+  let currentPath = "";
+
+  for (const part of parts) {
+    currentPath = currentPath ? `${currentPath}/${part}` : part;
+    const partCacheKey = `${rootFolderId}/${currentPath}`;
+
+    if (folderCache.has(partCacheKey)) {
+      currentFolderId = folderCache.get(partCacheKey)!;
+    } else {
+      const folder = await ensureFolderExists(drivePrefix, currentFolderId, part);
+      currentFolderId = folder.id;
+      folderCache.set(partCacheKey, currentFolderId);
+    }
+  }
+
+  return currentFolderId;
+}
+
+// ============================================================================
+// CONFLICT HANDLING
+// ============================================================================
+
+/**
+ * Check if an item with the given name exists in a folder.
+ */
+async function itemExistsInFolder(drivePrefix: string, folderId: string, itemName: string): Promise<boolean> {
+  try {
+    const accessToken = await getAccessToken();
+    const folderPath = folderId === "root" ? "/root" : `/items/${folderId}`;
+    const endpoint = `${GRAPH_API_BASE}${drivePrefix}${folderPath}:/${encodeURIComponent(itemName)}:`;
+    const response = await fetch(endpoint, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Rename paths that start with oldName to use newName instead
+ */
+function renamePaths(oldName: string, newName: string, files: FileToUpload[], folders: string[]): void {
+  const prefix = oldName + "/";
+  for (const file of files) {
+    if (file.relativePath.startsWith(prefix) || file.relativePath === oldName) {
+      file.relativePath = file.relativePath.replace(oldName, newName);
+    }
+  }
+  for (let i = 0; i < folders.length; i++) {
+    if (folders[i].startsWith(prefix) || folders[i] === oldName) {
+      folders[i] = folders[i].replace(oldName, newName);
+    }
+  }
+}
+
+type ConflictResolution = "keep-both" | "stop";
+
+/**
+ * Prompt user for conflict resolution when files already exist
+ */
+async function promptConflictResolution(conflictingFiles: string[]): Promise<ConflictResolution> {
+  const isSingle = conflictingFiles.length === 1;
+  const message = isSingle
+    ? `"${conflictingFiles[0]}" already exists in this location. Do you want to keep both versions?`
+    : `${conflictingFiles.length} selected items already exist in this location. Do you want to keep both versions?`;
+
+  const confirmed = await confirmAlert({
+    title: isSingle ? "Item already exists" : "Items already exist",
+    message,
+    icon: Icon.Warning,
+    primaryAction: {
+      title: "Keep Both",
+      style: Alert.ActionStyle.Default,
+    },
+    dismissAction: {
+      title: "Stop",
+    },
+  });
+
+  return confirmed ? "keep-both" : "stop";
+}
 
 // ============================================================================
 // THUMBNAILS
@@ -165,7 +343,7 @@ export async function searchFiles(
     console.error("Search error:", error);
     await showToast({
       style: Toast.Style.Failure,
-      title: "Search Failed",
+      title: "Search failed",
       message: error instanceof Error ? error.message : "Unknown error occurred",
     });
     return { items: [] };
@@ -203,7 +381,7 @@ export async function getFolderContents(folderId: string, driveId?: string): Pro
     console.error("Get folder contents error:", error);
     await showToast({
       style: Toast.Style.Failure,
-      title: "Failed to Load Folder",
+      title: "Failed to load folder",
       message: error instanceof Error ? error.message : "Unknown error occurred",
     });
     return { items: [] };
@@ -234,7 +412,7 @@ export async function loadNextPage(nextLink: string): Promise<PaginatedResult> {
     console.error("Load next page error:", error);
     await showToast({
       style: Toast.Style.Failure,
-      title: "Failed to Load More",
+      title: "Failed to load more",
       message: error instanceof Error ? error.message : "Unknown error occurred",
     });
     return { items: [] };
@@ -286,7 +464,7 @@ export async function deleteFile(item: DriveItem): Promise<boolean> {
   } catch (error) {
     console.error("Delete error:", error);
     toast.style = Toast.Style.Failure;
-    toast.title = "Delete Failed";
+    toast.title = "Delete failed";
     toast.message = error instanceof Error ? error.message : "Unknown error occurred";
     return false;
   }
@@ -371,12 +549,12 @@ export async function downloadFile(item: DriveItem): Promise<void> {
     await fs.writeFile(downloadsPath, Buffer.from(buffer));
 
     toast.style = Toast.Style.Success;
-    toast.title = "Download Complete";
+    toast.title = "Download complete";
     toast.message = "File downloaded successfully";
   } catch (error) {
     console.error("Download error:", error);
     toast.style = Toast.Style.Failure;
-    toast.title = "Download Failed";
+    toast.title = "Download failed";
     toast.message = error instanceof Error ? error.message : "Unknown error occurred";
   }
 }
@@ -389,45 +567,131 @@ export async function uploadFiles(
   destinationFolder: DriveItem,
   driveId: string,
 ): Promise<boolean> {
-  const totalFiles = filePaths.length;
-  const fileNames = filePaths.map((fp) => path.basename(fp)).join(", ");
-  const displayMessage = totalFiles === 1 ? fileNames : `${totalFiles} files`;
-
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Uploading…",
-    message: displayMessage,
+    title: "Preparing upload…",
   });
 
   try {
+    // Collect files and empty folders, expanding directories recursively
+    const filesToUpload: FileToUpload[] = [];
+    const emptyFoldersToCreate: string[] = [];
+    const rootItems: { name: string; isDirectory: boolean }[] = [];
+
+    for (const selectedPath of filePaths) {
+      const stats = await fs.stat(selectedPath);
+      const itemName = path.basename(selectedPath);
+
+      if (stats.isDirectory()) {
+        rootItems.push({ name: itemName, isDirectory: true });
+        const collected = await collectFilesRecursively(selectedPath, itemName);
+        filesToUpload.push(...collected.files);
+        emptyFoldersToCreate.push(...collected.emptyFolders);
+        if (collected.files.length === 0 && collected.emptyFolders.length === 0) {
+          emptyFoldersToCreate.push(itemName);
+        }
+      } else {
+        rootItems.push({ name: itemName, isDirectory: false });
+        filesToUpload.push({ absolutePath: selectedPath, relativePath: "" });
+      }
+    }
+
+    const totalFiles = filesToUpload.length;
+    const totalEmptyFolders = emptyFoldersToCreate.length;
+    const hasContent = totalFiles > 0 || totalEmptyFolders > 0;
+
+    if (!hasContent) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Nothing to upload";
+      toast.message = "No files or folders selected";
+      return false;
+    }
+
+    const displayMessage =
+      totalFiles > 0
+        ? totalFiles === 1
+          ? path.basename(filesToUpload[0].absolutePath)
+          : `${totalFiles} files`
+        : `${totalEmptyFolders} empty folder${totalEmptyFolders !== 1 ? "s" : ""}`;
+
+    // Check for conflicts
+    const drivePrefix = getDrivePrefix(driveId);
+    const folderCache = new Map<string, string>();
+    const conflictingItems: { name: string; isDirectory: boolean }[] = [];
+
+    for (const item of rootItems) {
+      const exists = await itemExistsInFolder(drivePrefix, destinationFolder.id, item.name);
+      if (exists) {
+        conflictingItems.push(item);
+      }
+    }
+
+    if (conflictingItems.length > 0) {
+      const resolution = await promptConflictResolution(conflictingItems.map((i) => i.name));
+      if (resolution === "stop") {
+        toast.hide();
+        return false;
+      }
+
+      // Create conflicting folders with rename behavior and update paths
+      // (files are renamed during upload with conflictBehavior=rename)
+      for (const item of conflictingItems) {
+        if (item.isDirectory) {
+          const folder = await ensureFolderExists(drivePrefix, destinationFolder.id, item.name, "rename");
+          if (folder.name !== item.name) {
+            renamePaths(item.name, folder.name, filesToUpload, emptyFoldersToCreate);
+          }
+          folderCache.set(`${destinationFolder.id}/${folder.name}`, folder.id);
+        }
+      }
+    }
+
+    toast.title = "Uploading…";
+    toast.message = displayMessage;
+
+    // Calculate total size for progress
     const fileSizes = await Promise.all(
-      filePaths.map(async (filePath) => {
-        const stats = await fs.stat(filePath);
+      filesToUpload.map(async (file) => {
+        const stats = await fs.stat(file.absolutePath);
         return stats.size;
       }),
     );
     const totalBytes = fileSizes.reduce((sum, size) => sum + size, 0);
     let uploadedBytes = 0;
 
-    for (const filePath of filePaths) {
-      const fileName = path.basename(filePath);
-      const fileContent = await fs.readFile(filePath);
+    for (let fileIndex = 0; fileIndex < filesToUpload.length; fileIndex++) {
+      const file = filesToUpload[fileIndex];
+      const fileName = path.basename(file.absolutePath);
+
+      // Determine the target folder - create subfolders if needed
+      let targetFolderId = destinationFolder.id;
+      if (file.relativePath) {
+        const folderPath = toApiPath(path.dirname(file.relativePath));
+        if (folderPath && folderPath !== ".") {
+          targetFolderId = await ensureFolderPathExists(drivePrefix, destinationFolder.id, folderPath, folderCache);
+        }
+      }
+
+      const fileContent = await fs.readFile(file.absolutePath);
       const fileSize = fileContent.length;
 
-      const drivePrefix = getDrivePrefix(driveId);
-      const folderPath = destinationFolder.id === "root" ? "/root" : `/items/${destinationFolder.id}`;
+      const itemPath = targetFolderId === "root" ? "/root" : `/items/${targetFolderId}`;
 
       if (fileSize < SIMPLE_UPLOAD_LIMIT) {
-        const endpoint = `${drivePrefix}${folderPath}:/${encodeURIComponent(fileName)}:/content`;
+        const endpoint = `${drivePrefix}${itemPath}:/${encodeURIComponent(fileName)}:/content?@microsoft.graph.conflictBehavior=rename`;
         await graphRequest(endpoint, {
           method: "PUT",
           body: fileContent,
           headers: { "Content-Type": "application/octet-stream" },
         });
         uploadedBytes += fileSize;
+        if (totalBytes > 0) {
+          const progress = Math.round((uploadedBytes / totalBytes) * 100);
+          toast.message = `${progress}% complete`;
+        }
       } else {
         // Resumable upload for large files
-        const sessionEndpoint = `${drivePrefix}${folderPath}:/${encodeURIComponent(fileName)}:/createUploadSession`;
+        const sessionEndpoint = `${drivePrefix}${itemPath}:/${encodeURIComponent(fileName)}:/createUploadSession`;
         const sessionResponse = await graphRequest(sessionEndpoint, {
           method: "POST",
           body: JSON.stringify({ item: { "@microsoft.graph.conflictBehavior": "rename" } }),
@@ -445,23 +709,28 @@ export async function uploadFiles(
             body: chunk,
           });
           uploadedBytes += chunk.length;
-          const progress = Math.round((uploadedBytes / totalBytes) * 100);
-          toast.message = `${progress}% complete`;
+          if (totalBytes > 0) {
+            const progress = Math.round((uploadedBytes / totalBytes) * 100);
+            toast.message = `${progress}% complete`;
+          }
         }
       }
+    }
 
-      const progress = Math.round((uploadedBytes / totalBytes) * 100);
-      toast.message = `${progress}% complete`;
+    // Create empty folders
+    for (const folderPath of emptyFoldersToCreate) {
+      await ensureFolderPathExists(drivePrefix, destinationFolder.id, folderPath, folderCache);
     }
 
     toast.style = Toast.Style.Success;
-    toast.title = "Upload Complete";
-    toast.message = `${totalFiles} file${totalFiles > 1 ? "s" : ""} uploaded successfully`;
+    toast.title = "Upload complete";
+    const itemCount = filesToUpload.length + emptyFoldersToCreate.length;
+    toast.message = `${itemCount} item${itemCount !== 1 ? "s" : ""} uploaded successfully`;
     return true;
   } catch (error) {
     console.error("Upload error:", error);
     toast.style = Toast.Style.Failure;
-    toast.title = "Upload Failed";
+    toast.title = "Upload failed";
     toast.message = error instanceof Error ? error.message : "Unknown error occurred";
     return false;
   }

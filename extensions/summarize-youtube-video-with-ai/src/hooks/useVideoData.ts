@@ -11,21 +11,26 @@ export function useVideoData(videoURL: string | null | undefined) {
   useEffect(() => {
     if (!videoURL) return;
 
-    getVideoData(videoURL)
-      .then((data) => {
+    let cancelled = false;
+
+    Promise.all([getVideoData(videoURL), getVideoTranscript(videoURL)])
+      .then(([data, t]) => {
+        if (cancelled) return;
         setVideoData(data);
-        return getVideoTranscript(videoURL);
-      })
-      .then((t) => {
         setTranscript(t);
       })
       .catch((error: Error) => {
+        if (cancelled) return;
         showToast({
           style: Toast.Style.Failure,
           title: ALERT.title,
           message: `Error fetching video data or transcript: ${error.message}`,
         });
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [videoURL]);
 
   return { videoData, transcript };

@@ -4,11 +4,27 @@ import { uniqBy } from "lodash";
 import {
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
+  PullRequestMergeMethod,
   PullRequestReviewDecision,
   StatusState,
 } from "../generated/graphql";
 
 import { getGitHubUser } from "./users";
+
+export function getMergeMethodTitle(method: PullRequestMergeMethod): string {
+  switch (method) {
+    case PullRequestMergeMethod.Merge:
+      return "Create Merge Commit";
+    case PullRequestMergeMethod.Squash:
+      return "Squash and Merge";
+    case PullRequestMergeMethod.Rebase:
+      return "Rebase and Merge";
+    default: {
+      const _exhaustive: never = method;
+      throw new Error(`Unknown merge method: ${_exhaustive}`);
+    }
+  }
+}
 
 export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
   if (pullRequest.merged) {
