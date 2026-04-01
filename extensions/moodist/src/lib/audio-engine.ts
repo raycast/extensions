@@ -14,8 +14,6 @@ export class AudioEngine {
     this.looperPath = path.join(environment.assetsPath, "looper");
   }
 
-  // --- PID Registry ---
-
   readRegistry(): PidRegistry {
     try {
       if (!fs.existsSync(this.registryPath)) {
@@ -57,8 +55,6 @@ export class AudioEngine {
     }
     return alive;
   }
-
-  // --- Process Management ---
 
   startSound(soundId: string, filePath: string, volume: number): number | null {
     if (!fs.existsSync(filePath)) {
