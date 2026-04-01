@@ -296,6 +296,7 @@ test("pathRules item shows the configured rule count", () => {
   });
   const pathRules = findItem(items, "pathRules");
   expect(pathRules.accessoryText).toBe("2 rules");
+  expect(pathRules.drillable).toBe(true);
 });
 
 test("pathRules metadata shows pattern to pack mapping", () => {
@@ -323,11 +324,39 @@ test("pathRules actions remove configured rules", () => {
     packs: PACKS,
   });
   const pathRules = findItem(items, "pathRules");
-  expect(pathRules.actions).toContainEqual(
-    expect.objectContaining({
-      kind: "removePathRule",
-      pattern: "*/client-a/*",
-    }),
+  expect(pathRules.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "path-rule-*/client-a/*",
+        title: "*/client-a/*",
+        drillable: false,
+        actions: [
+          expect.objectContaining({
+            kind: "removePathRule",
+            pattern: "*/client-a/*",
+          }),
+        ],
+      }),
+    ]),
+  );
+});
+
+test("pathRules shows an empty-state subitem when no rules exist", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ pathRules: [] }),
+    packs: PACKS,
+  });
+  const pathRules = findItem(items, "pathRules");
+  expect(pathRules.drillable).toBe(true);
+  expect(pathRules.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "path-rules-empty",
+        title: "No Path Rules",
+        drillable: false,
+        actions: [],
+      }),
+    ]),
   );
 });
 
@@ -517,10 +546,21 @@ test("audio item shows headphones only status", () => {
   });
   const audio = findItem(items, "audio");
   expect(audio.accessoryText).toBe("Headphones Only");
-  expect(audio.actions[0]).toMatchObject({
-    kind: "toggleHeadphonesOnly",
-    nextEnabled: false,
-  });
+  expect(audio.drillable).toBe(true);
+  expect(audio.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "audio-headphones",
+        actions: [
+          expect.objectContaining({
+            kind: "toggleHeadphonesOnly",
+            nextEnabled: false,
+          }),
+        ],
+      }),
+      expect.objectContaining({ id: "audio-effects-device" }),
+    ]),
+  );
 });
 
 test("audio item shows All Outputs when headphones off", () => {
@@ -545,11 +585,18 @@ test("audio metadata includes use sound effects device state", () => {
       text: "On",
     }),
   );
-  expect(audio.actions).toContainEqual(
-    expect.objectContaining({
-      kind: "toggleUseSoundEffectsDevice",
-      nextEnabled: false,
-    }),
+  expect(audio.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "audio-effects-device",
+        actions: [
+          expect.objectContaining({
+            kind: "toggleUseSoundEffectsDevice",
+            nextEnabled: false,
+          }),
+        ],
+      }),
+    ]),
   );
 });
 
@@ -579,16 +626,35 @@ test("behavior item shows advanced toggle state and read-only timing metadata", 
       text: "45s",
     }),
   );
-  expect(behavior.actions).toEqual(
+  expect(behavior.subItems).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        kind: "toggleMeetingDetect",
-        nextEnabled: false,
+        id: "behavior-meeting-detect",
+        actions: [
+          expect.objectContaining({
+            kind: "toggleMeetingDetect",
+            nextEnabled: false,
+          }),
+        ],
       }),
       expect.objectContaining({
-        kind: "toggleSuppressSubagentComplete",
-        nextEnabled: false,
+        id: "behavior-subagent-complete",
+        actions: [
+          expect.objectContaining({
+            kind: "toggleSuppressSubagentComplete",
+            nextEnabled: false,
+          }),
+        ],
       }),
+    ]),
+  );
+  expect(behavior.drillable).toBe(true);
+  expect(behavior.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ id: "behavior-meeting-detect" }),
+      expect.objectContaining({ id: "behavior-subagent-complete" }),
+      expect.objectContaining({ id: "behavior-silent-window", actions: [] }),
+      expect.objectContaining({ id: "behavior-session-start-cooldown", actions: [] }),
     ]),
   );
 });
@@ -622,18 +688,29 @@ test("trainer item shows current trainer state and goals", () => {
   });
   const trainer = findItem(items, "trainer");
   expect(trainer.accessoryText).toBe("On");
-  expect(trainer.actions).toContainEqual(
-    expect.objectContaining({
-      kind: "toggleTrainerEnabled",
-      nextEnabled: false,
-    }),
-  );
   expect(trainer.metadata).toContainEqual(
     expect.objectContaining({
       kind: "label",
       title: "Goals",
       text: "pushups: 100, squats: 120",
     }),
+  );
+  expect(trainer.drillable).toBe(true);
+  expect(trainer.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "trainer-enabled",
+        actions: [
+          expect.objectContaining({
+            kind: "toggleTrainerEnabled",
+            nextEnabled: false,
+          }),
+        ],
+      }),
+      expect.objectContaining({ id: "trainer-goals", actions: [] }),
+      expect.objectContaining({ id: "trainer-reminder-interval", actions: [] }),
+      expect.objectContaining({ id: "trainer-min-gap", actions: [] }),
+    ]),
   );
 });
 
@@ -644,13 +721,13 @@ test("drillable is true for multi-choice items, false for toggles", () => {
   expect(findItem(items, "voicePack").drillable).toBe(true);
   expect(findItem(items, "rotation").drillable).toBe(true);
   expect(findItem(items, "rotationPacks").drillable).toBe(true);
-  expect(findItem(items, "pathRules").drillable).toBe(false);
+  expect(findItem(items, "pathRules").drillable).toBe(true);
   expect(findItem(items, "categories").drillable).toBe(true);
   expect(findItem(items, "notifications").drillable).toBe(true);
-  expect(findItem(items, "behavior").drillable).toBe(false);
-  expect(findItem(items, "audio").drillable).toBe(false);
+  expect(findItem(items, "behavior").drillable).toBe(true);
+  expect(findItem(items, "audio").drillable).toBe(true);
   expect(findItem(items, "debug").drillable).toBe(false);
-  expect(findItem(items, "trainer").drillable).toBe(false);
+  expect(findItem(items, "trainer").drillable).toBe(true);
 });
 
 test("volume actions carry subListTitle and isCurrent", () => {

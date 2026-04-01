@@ -447,22 +447,68 @@ function buildPathRulesItem(
           }),
         );
 
+  const subItems: DashboardItem[] =
+    config.pathRules.length === 0
+      ? [
+          {
+            id: "path-rules-empty",
+            title: "No Path Rules",
+            icon: "bulletPoints",
+            accessoryText: "Manage in CLI",
+            drillable: false,
+            metadata: [
+              {
+                kind: "label",
+                title: "Status",
+                text: "No path rules configured",
+                textColor: "secondary",
+              },
+              {
+                kind: "label",
+                title: "Add Rules",
+                text: "Use peon packs bind or peon packs bind --pattern",
+              },
+            ],
+            actions: [],
+          },
+        ]
+      : config.pathRules.map((rule) => ({
+          id: `path-rule-${rule.pattern}`,
+          title: rule.pattern,
+          icon: "bulletPoints",
+          accessoryText: findPackDisplayName(packs, rule.pack),
+          drillable: false,
+          metadata: [
+            {
+              kind: "label",
+              title: "Pattern",
+              text: rule.pattern,
+            },
+            {
+              kind: "label",
+              title: "Pack",
+              text: findPackDisplayName(packs, rule.pack),
+              textColor: "green",
+            },
+          ],
+          actions: [
+            {
+              kind: "removePathRule" as const,
+              title: `Remove ${rule.pattern}`,
+              pattern: rule.pattern,
+            },
+          ],
+        }));
+
   return {
     id: "pathRules",
     title: "Path Rules",
     icon: "bulletPoints",
     accessoryText: formatRuleCount(config.pathRules.length),
-    drillable: config.pathRules.length > 0,
+    drillable: true,
+    subItems,
     metadata,
-    actions: config.pathRules.map(
-      (rule): DashboardAction => ({
-        kind: "removePathRule",
-        title: `Remove ${rule.pattern}`,
-        subListTitle: rule.pattern,
-        isCurrent: true,
-        pattern: rule.pattern,
-      }),
-    ),
+    actions: [],
   };
 }
 
@@ -746,7 +792,59 @@ function buildAudioItem(config: PeonPingConfig): DashboardItem {
     title: "Audio",
     icon: "headphones",
     accessoryText: config.headphonesOnly ? "Headphones Only" : "All Outputs",
-    drillable: false,
+    drillable: true,
+    subItems: [
+      {
+        id: "audio-headphones",
+        title: "Headphones Only",
+        icon: "headphones",
+        accessoryText: config.headphonesOnly ? "On" : "Off",
+        accessoryTagColor: config.headphonesOnly ? "green" : "red",
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Headphones Only",
+            text: config.headphonesOnly ? "On" : "Off",
+            textColor: config.headphonesOnly ? "green" : "secondary",
+          },
+        ],
+        actions: [
+          {
+            kind: "toggleHeadphonesOnly",
+            title: config.headphonesOnly
+              ? "Disable Headphones Only"
+              : "Enable Headphones Only",
+            nextEnabled: !config.headphonesOnly,
+          },
+        ],
+      },
+      {
+        id: "audio-effects-device",
+        title: "Sound Effects Device",
+        icon: "speakerOn",
+        accessoryText: config.useSoundEffectsDevice ? "On" : "Off",
+        accessoryTagColor: config.useSoundEffectsDevice ? "green" : "red",
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Sound Effects Device",
+            text: config.useSoundEffectsDevice ? "On" : "Off",
+            textColor: config.useSoundEffectsDevice ? "green" : "secondary",
+          },
+        ],
+        actions: [
+          {
+            kind: "toggleUseSoundEffectsDevice",
+            title: config.useSoundEffectsDevice
+              ? "Disable Sound Effects Device"
+              : "Enable Sound Effects Device",
+            nextEnabled: !config.useSoundEffectsDevice,
+          },
+        ],
+      },
+    ],
     metadata: [
       {
         kind: "label",
@@ -761,22 +859,7 @@ function buildAudioItem(config: PeonPingConfig): DashboardItem {
         textColor: config.useSoundEffectsDevice ? "green" : "secondary",
       },
     ],
-    actions: [
-      {
-        kind: "toggleHeadphonesOnly",
-        title: config.headphonesOnly
-          ? "Disable Headphones Only"
-          : "Enable Headphones Only",
-        nextEnabled: !config.headphonesOnly,
-      },
-      {
-        kind: "toggleUseSoundEffectsDevice",
-        title: config.useSoundEffectsDevice
-          ? "Disable Sound Effects Device"
-          : "Enable Sound Effects Device",
-        nextEnabled: !config.useSoundEffectsDevice,
-      },
-    ],
+    actions: [],
   };
 }
 
@@ -791,7 +874,89 @@ function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
     title: "Behavior",
     icon: "clock",
     accessoryText: `${enabledCount}/2 enabled`,
-    drillable: false,
+    drillable: true,
+    subItems: [
+      {
+        id: "behavior-meeting-detect",
+        title: "Meeting Detect",
+        icon: "clock",
+        accessoryText: config.meetingDetect ? "On" : "Off",
+        accessoryTagColor: config.meetingDetect ? "green" : "red",
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Meeting Detect",
+            text: config.meetingDetect ? "On" : "Off",
+            textColor: config.meetingDetect ? "green" : "secondary",
+          },
+        ],
+        actions: [
+          {
+            kind: "toggleMeetingDetect",
+            title: config.meetingDetect
+              ? "Disable Meeting Detect"
+              : "Enable Meeting Detect",
+            nextEnabled: !config.meetingDetect,
+          },
+        ],
+      },
+      {
+        id: "behavior-subagent-complete",
+        title: "Subagent Complete",
+        icon: "clock",
+        accessoryText: config.suppressSubagentComplete ? "Suppressed" : "On",
+        accessoryTagColor: config.suppressSubagentComplete ? "red" : "green",
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Suppress Subagent Complete",
+            text: config.suppressSubagentComplete ? "On" : "Off",
+            textColor: config.suppressSubagentComplete ? "green" : "secondary",
+          },
+        ],
+        actions: [
+          {
+            kind: "toggleSuppressSubagentComplete",
+            title: config.suppressSubagentComplete
+              ? "Enable Subagent Complete Sounds"
+              : "Suppress Subagent Complete Sounds",
+            nextEnabled: !config.suppressSubagentComplete,
+          },
+        ],
+      },
+      {
+        id: "behavior-silent-window",
+        title: "Silent Window",
+        icon: "clock",
+        accessoryText: `${config.silentWindowSeconds}s`,
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Silent Window",
+            text: `${config.silentWindowSeconds}s`,
+          },
+        ],
+        actions: [],
+      },
+      {
+        id: "behavior-session-start-cooldown",
+        title: "Session Start Cooldown",
+        icon: "clock",
+        accessoryText: `${config.sessionStartCooldownSeconds}s`,
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Session Start Cooldown",
+            text: `${config.sessionStartCooldownSeconds}s`,
+          },
+        ],
+        actions: [],
+      },
+    ],
     metadata: [
       {
         kind: "label",
@@ -816,22 +981,7 @@ function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
         text: `${config.sessionStartCooldownSeconds}s`,
       },
     ],
-    actions: [
-      {
-        kind: "toggleMeetingDetect",
-        title: config.meetingDetect
-          ? "Disable Meeting Detect"
-          : "Enable Meeting Detect",
-        nextEnabled: !config.meetingDetect,
-      },
-      {
-        kind: "toggleSuppressSubagentComplete",
-        title: config.suppressSubagentComplete
-          ? "Enable Subagent Complete Sounds"
-          : "Suppress Subagent Complete Sounds",
-        nextEnabled: !config.suppressSubagentComplete,
-      },
-    ],
+    actions: [],
   };
 }
 
@@ -881,7 +1031,79 @@ function buildTrainerItem(config: PeonPingConfig): DashboardItem {
     icon: "headphones",
     accessoryText: config.trainer.enabled ? "On" : "Off",
     accessoryTagColor: config.trainer.enabled ? "green" : "red",
-    drillable: false,
+    drillable: true,
+    subItems: [
+      {
+        id: "trainer-enabled",
+        title: "Trainer",
+        icon: "headphones",
+        accessoryText: config.trainer.enabled ? "On" : "Off",
+        accessoryTagColor: config.trainer.enabled ? "green" : "red",
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Trainer",
+            text: config.trainer.enabled ? "On" : "Off",
+            textColor: config.trainer.enabled ? "green" : "secondary",
+          },
+        ],
+        actions: [
+          {
+            kind: "toggleTrainerEnabled",
+            title: config.trainer.enabled
+              ? "Disable Trainer"
+              : "Enable Trainer",
+            nextEnabled: !config.trainer.enabled,
+          },
+        ],
+      },
+      {
+        id: "trainer-goals",
+        title: "Goals",
+        icon: "bulletPoints",
+        accessoryText: formatTrainerGoals(config.trainer.exercises),
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Goals",
+            text: formatTrainerGoals(config.trainer.exercises),
+          },
+        ],
+        actions: [],
+      },
+      {
+        id: "trainer-reminder-interval",
+        title: "Reminder Interval",
+        icon: "clock",
+        accessoryText: `${config.trainer.reminderIntervalMinutes} min`,
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Reminder Interval",
+            text: `${config.trainer.reminderIntervalMinutes} min`,
+          },
+        ],
+        actions: [],
+      },
+      {
+        id: "trainer-min-gap",
+        title: "Minimum Gap",
+        icon: "clock",
+        accessoryText: `${config.trainer.reminderMinGapMinutes} min`,
+        drillable: false,
+        metadata: [
+          {
+            kind: "label",
+            title: "Minimum Gap",
+            text: `${config.trainer.reminderMinGapMinutes} min`,
+          },
+        ],
+        actions: [],
+      },
+    ],
     metadata: [
       {
         kind: "label",
@@ -905,13 +1127,7 @@ function buildTrainerItem(config: PeonPingConfig): DashboardItem {
         text: `${config.trainer.reminderMinGapMinutes} min`,
       },
     ],
-    actions: [
-      {
-        kind: "toggleTrainerEnabled",
-        title: config.trainer.enabled ? "Disable Trainer" : "Enable Trainer",
-        nextEnabled: !config.trainer.enabled,
-      },
-    ],
+    actions: [],
   };
 }
 
