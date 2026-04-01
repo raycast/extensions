@@ -3,7 +3,6 @@
 ## [2.3.1] - {PR_MERGE_DATE}
 
 - Fixed an issue where typing an existing tag name in the Add New Tag picker would not add it to the Tags list
-- Updated dependencies
 
 ## [2.3.0] - 2026-03-22
 
