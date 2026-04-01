@@ -71,7 +71,7 @@ interface ArticleDetailProps {
   article: Article;
   onToggleRead?: (article: Article, markRead: boolean) => void;
   onToggleStar?: (article: Article, star: boolean) => void;
-  extraActions?: React.ReactNode;
+  extraActions?: React.JSX.Element;
 }
 
 export default function ArticleDetail({ article, onToggleRead, onToggleStar, extraActions }: ArticleDetailProps) {
