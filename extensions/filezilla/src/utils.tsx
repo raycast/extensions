@@ -1,23 +1,54 @@
-import { getApplications, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { showToast, Toast } from "@raycast/api";
+import { exec, execSync } from "child_process";
 import { XMLParser } from "fast-xml-parser";
-import { homedir } from "os";
-import { readFile } from "fs/promises";
+import { readFile, access } from "fs/promises";
+import { accessSync } from "fs";
+import { homedir, platform } from "os";
 import { ContentToCheck, Server, Folder, XMLFileContent } from "./types";
+
+const IS_WINDOWS = platform() === "win32";
+
+function getFileZillaPath(): string {
+  if (IS_WINDOWS) {
+    const commonPaths = [
+      "C:\\Program Files\\FileZilla FTP Client\\filezilla.exe",
+      "C:\\Program Files (x86)\\FileZilla FTP Client\\filezilla.exe",
+    ];
+
+    for (const path of commonPaths) {
+      try {
+        accessSync(path);
+        return path;
+      } catch {
+        continue;
+      }
+    }
+
+    try {
+      return execSync("where filezilla", { encoding: "utf8" }).trim().split("\n")[0];
+    } catch {
+      return commonPaths[0];
+    }
+  } else {
+    return "/Applications/FileZilla.app";
+  }
+}
+
+const FILEZILLA_EXE = getFileZillaPath();
+
+const FILEZILLA_CONFIG = IS_WINDOWS ? `${homedir()}\\AppData\\Roaming\\FileZilla` : `${homedir()}/.config/filezilla`;
+
+const CONFIG_SEP = IS_WINDOWS ? "\\" : "/";
 
 /**
  * Checks if FileZilla is installed on the device
  * @returns True if FileZilla is installed, false if it isn't;
  */
 export async function isFileZillaInstalled(): Promise<boolean> {
-  // I wanted to make custom hook out of it, but for some reason I get
-  // TypeError: Cannot read properties of null (reading 'useState') error
-  // Hence, I just use this function in every Command component
   try {
-    const applications = await getApplications();
-    return applications.some(({ bundleId }) => bundleId === "org.filezilla-project.filezilla");
-  } catch (error) {
-    handleError(error);
+    await access(FILEZILLA_EXE);
+    return true;
+  } catch {
     return false;
   }
 }
@@ -26,9 +57,11 @@ export async function isFileZillaInstalled(): Promise<boolean> {
  * Opens FileZilla's site manager
  */
 export function openSiteManager(): void {
-  // Unfortunatelly FileZilla does not provide a way to change current state of the working app via it's API.
-  // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec("(pkill -x filezilla; open /Applications/FileZilla.app --args -s)");
+  if (IS_WINDOWS) {
+    exec(`taskkill /IM filezilla.exe /F & start "" "${FILEZILLA_EXE}" -s`);
+  } else {
+    exec("(pkill -x filezilla; open /Applications/FileZilla.app --args -s)");
+  }
 }
 
 /**
@@ -93,10 +126,8 @@ function isServer(contentToCheck: ContentToCheck): contentToCheck is Server {
  * @returns After going through recurrency, should return Servers or arrays of them
  */
 function getAvailableServers(content: ContentToCheck, folderPath?: string): ContentToCheck {
-  // If empty folder we return nothing
   if (typeof content !== "object") return;
 
-  // If it's a singular server, we just return it in proper form
   if (isServer(content)) {
     modifyServerPath(content, folderPath);
     return content;
@@ -110,7 +141,6 @@ function getAvailableServers(content: ContentToCheck, folderPath?: string): Cont
   }
 
   if (Array.isArray(content)) {
-    // If it's array of servers, we just return them in proper form
     if (isServer(content[0])) {
       return ([] as Server[]).concat(...content.map((server) => modifyServerPath(server as Server, folderPath)));
     }
@@ -139,7 +169,7 @@ export async function getServers(location: "sitemanager" | "recentservers"): Pro
     const serversFolder = location === "sitemanager" ? "Servers" : "RecentServers";
     const parser = new XMLParser();
     const xmlFileContent = parser.parse(
-      await readFile(homedir() + `/.config/filezilla/${location}.xml`, {
+      await readFile(`${FILEZILLA_CONFIG}${CONFIG_SEP}${location}.xml`, {
         flag: "r",
       }),
     );
@@ -155,6 +185,9 @@ export async function getServers(location: "sitemanager" | "recentservers"): Pro
 
     return ([] as Server[]).concat(...(allServers as Server[])).filter((server) => typeof server !== "undefined");
   } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === "ENOENT") {
+      return [];
+    }
     handleError(error);
     return [];
   }
@@ -165,7 +198,9 @@ export async function getServers(location: "sitemanager" | "recentservers"): Pro
  * @param server Server to which we want to connect
  */
 export function connectToTheServer(server: Server): void {
-  // Unfortunatelly FileZilla does not provide a way to change connections inside a currently working app via it's API.
-  // Hence we need to reopen the app every time we want to perform some action in FileZilla via Raycast
-  exec(`(pkill -x filezilla; open /Applications/FileZilla.app --args --site=${server.Path})`);
+  if (IS_WINDOWS) {
+    exec(`taskkill /IM filezilla.exe /F & start "" "${FILEZILLA_EXE}" --site=${server.Path}`);
+  } else {
+    exec(`(pkill -x filezilla; open /Applications/FileZilla.app --args --site=${server.Path})`);
+  }
 }
