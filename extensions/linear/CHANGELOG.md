@@ -1,5 +1,10 @@
 # Linear Changelog
 
+## [OAuth Client Unification] - {PR_MERGE_DATE}
+
+- Unified OAuth usage in all commands by switching remaining direct token paths to the shared `getLinearClient()` flow.
+- Ensures all command auth runs through the same `withAccessToken` / `OAuthService.linear` lifecycle, including refresh-token handling.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
