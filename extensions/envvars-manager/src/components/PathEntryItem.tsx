@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { spawn } from "node:child_process";
-import { expandEnvVars } from "../utils/path-utils";
-import { PathEntry } from "../utils/types";
+import { expandEnvVars } from "../utils/path-utils.js";
+import { PathEntry } from "../utils/types.js";
 
 interface PathEntryItemProps {
   entry: PathEntry;
@@ -10,7 +10,7 @@ interface PathEntryItemProps {
   onMoveDown: () => void;
   onRemove: () => void;
   addForm: React.JSX.Element;
-  onRefresh: () => void;
+  onRefresh: () => void | Promise<void>;
 }
 
 export function PathEntryItem({
@@ -56,7 +56,7 @@ export function PathEntryItem({
             />
             {entry.index > 0 && (
               <Action
-                title="Move Up"
+                title="Move up"
                 icon={Icon.ArrowUp}
                 shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
                 onAction={onMoveUp}

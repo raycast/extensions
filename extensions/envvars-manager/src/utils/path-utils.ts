@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { EnvScope, PathEntry } from "./types";
+import { EnvScope, PathEntry } from "./types.js";
 
 /**
  * Expand Windows-style %VARIABLE% references in a path string

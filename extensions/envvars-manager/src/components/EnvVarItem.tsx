@@ -12,23 +12,23 @@ import {
   Toast,
 } from "@raycast/api";
 import { spawn } from "node:child_process";
-import { deleteEnvVar } from "../utils/powershell";
+import { deleteEnvVar } from "../utils/powershell.js";
 import {
   EnvVar,
   PROTECTED_VARIABLES,
   SENSITIVE_PATTERNS,
-} from "../utils/types";
-import { AddEnvVarForm } from "./AddEnvVarForm";
-import { EditEnvVarForm } from "./EditEnvVarForm";
+} from "../utils/types.js";
+import { AddEnvVarForm } from "./AddEnvVarForm.js";
+import { EditEnvVarForm } from "./EditEnvVarForm.js";
 
 interface EnvVarItemProps {
   envVar: EnvVar;
-  onRefresh: () => void;
+  onRefresh: () => void | Promise<void>;
 }
 
 function isSensitive(name: string): boolean {
   const upper = name.toUpperCase();
-  return SENSITIVE_PATTERNS.some((p) => upper.includes(p));
+  return SENSITIVE_PATTERNS.some((p: string) => upper.includes(p));
 }
 
 function formatDetailMarkdown(envVar: EnvVar): string {
@@ -37,8 +37,10 @@ function formatDetailMarkdown(envVar: EnvVar): string {
     envVar.name.toUpperCase() === "PATHEXT";
 
   if (isPath) {
-    const entries = envVar.value.split(";").filter((e) => e.trim() !== "");
-    const list = entries.map((e) => `- \`${e}\``).join("\n");
+    const entries = envVar.value
+      .split(";")
+      .filter((e: string) => e.trim() !== "");
+    const list = entries.map((e: string) => `- \`${e}\``).join("\n");
     return `## ${envVar.name}\n\n${list}`;
   }
 
@@ -81,7 +83,7 @@ export function EnvVarItem({ envVar, onRefresh }: EnvVarItemProps) {
           message: "Approve the UAC prompt",
         });
       }
-      deleteEnvVar(envVar.name, envVar.scope);
+      await deleteEnvVar(envVar.name, envVar.scope);
       await showToast({
         style: Toast.Style.Success,
         title: "Variable deleted",

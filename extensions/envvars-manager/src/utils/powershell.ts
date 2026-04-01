@@ -1,36 +1,42 @@
-import { execSync } from "node:child_process";
-import { EnvScope, EnvVar } from "./types";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { EnvScope, EnvVar } from "./types.js";
+
+const execFileAsync = promisify(execFile);
 
 /**
  * Execute a PowerShell command using UTF-16LE base64 encoded command.
  * This avoids all escaping issues with special characters.
  */
-export function runPowerShell(command: string): string {
+export async function runPowerShell(command: string): Promise<string> {
   const encoded = Buffer.from(command, "utf16le").toString("base64");
-  return execSync(
-    `powershell -NoProfile -NonInteractive -EncodedCommand ${encoded}`,
+  const { stdout } = (await execFileAsync(
+    "powershell",
+    ["-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
     {
-      encoding: "utf-8",
+      encoding: "utf8",
       timeout: 15000,
     },
-  ).trim();
+  )) as { stdout: string };
+  return (stdout ?? "").trim();
 }
 
 /**
  * Execute a PowerShell command with elevated (admin) privileges.
  * Will trigger a UAC prompt for the user.
+ * Uses -EncodedCommand for the inner PowerShell to avoid escaping issues.
  */
-export function runPowerShellElevated(command: string): void {
-  const escapedCommand = command.replace(/'/g, "''");
-  const wrapper = `Start-Process powershell -Verb RunAs -Wait -ArgumentList '-NoProfile','-NonInteractive','-Command','${escapedCommand}'`;
-  runPowerShell(wrapper);
+export async function runPowerShellElevated(command: string): Promise<void> {
+  const innerEncoded = Buffer.from(command, "utf16le").toString("base64");
+  const wrapper = `Start-Process powershell -Verb RunAs -Wait -ArgumentList '-NoProfile','-NonInteractive','-EncodedCommand','${innerEncoded}'`;
+  await runPowerShell(wrapper);
 }
 
 /**
  * Retrieve all environment variables for a given scope.
  * Returns them sorted alphabetically by name.
  */
-export function getAllEnvVars(scope: EnvScope): EnvVar[] {
+export async function getAllEnvVars(scope: EnvScope): Promise<EnvVar[]> {
   const ps = `
 $vars = [System.Environment]::GetEnvironmentVariables('${scope}')
 $result = @()
@@ -40,7 +46,7 @@ foreach ($key in $vars.Keys) {
 $result | ConvertTo-Json -Compress
 `.trim();
 
-  const output = runPowerShell(ps);
+  const output = await runPowerShell(ps);
   if (!output || output === "") return [];
 
   const parsed = JSON.parse(output);
@@ -61,10 +67,13 @@ $result | ConvertTo-Json -Compress
  * Get a single environment variable value.
  * Returns null if the variable does not exist.
  */
-export function getEnvVar(name: string, scope: EnvScope): string | null {
+export async function getEnvVar(
+  name: string,
+  scope: EnvScope,
+): Promise<string | null> {
   const safeName = name.replace(/'/g, "''");
   const ps = `[System.Environment]::GetEnvironmentVariable('${safeName}', '${scope}')`;
-  const output = runPowerShell(ps);
+  const output = await runPowerShell(ps);
   return output === "" ? null : output;
 }
 
@@ -72,42 +81,49 @@ export function getEnvVar(name: string, scope: EnvScope): string | null {
  * Set (create or update) an environment variable.
  * Machine-scope variables require elevation (UAC prompt).
  */
-export function setEnvVar(name: string, value: string, scope: EnvScope): void {
+export async function setEnvVar(
+  name: string,
+  value: string,
+  scope: EnvScope,
+): Promise<void> {
   const safeName = name.replace(/'/g, "''");
   const safeValue = value.replace(/'/g, "''");
   const ps = `[System.Environment]::SetEnvironmentVariable('${safeName}', '${safeValue}', '${scope}')`;
 
   if (scope === "Machine") {
-    runPowerShellElevated(ps);
+    await runPowerShellElevated(ps);
   } else {
-    runPowerShell(ps);
+    await runPowerShell(ps);
   }
 
-  broadcastSettingChange();
+  await broadcastSettingChange();
 }
 
 /**
  * Delete an environment variable by setting it to null.
  * Machine-scope variables require elevation (UAC prompt).
  */
-export function deleteEnvVar(name: string, scope: EnvScope): void {
+export async function deleteEnvVar(
+  name: string,
+  scope: EnvScope,
+): Promise<void> {
   const safeName = name.replace(/'/g, "''");
   const ps = `[System.Environment]::SetEnvironmentVariable('${safeName}', $null, '${scope}')`;
 
   if (scope === "Machine") {
-    runPowerShellElevated(ps);
+    await runPowerShellElevated(ps);
   } else {
-    runPowerShell(ps);
+    await runPowerShell(ps);
   }
 
-  broadcastSettingChange();
+  await broadcastSettingChange();
 }
 
 /**
  * Broadcast WM_SETTINGCHANGE to all top-level windows so running
  * applications pick up the environment variable changes immediately.
  */
-export function broadcastSettingChange(): void {
+export async function broadcastSettingChange(): Promise<void> {
   const ps = `
 try {
   if (-not ([System.Management.Automation.PSTypeName]'Win32.NativeMethods').Type) {
@@ -132,7 +148,7 @@ public static extern IntPtr SendMessageTimeout(
 `.trim();
 
   try {
-    runPowerShell(ps);
+    await runPowerShell(ps);
   } catch {
     // Non-critical: don't fail the main operation if broadcast fails
   }

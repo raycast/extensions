@@ -1,4 +1,4 @@
-# Environment Variables Manager Changelog
+# Environment Variables Manager
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

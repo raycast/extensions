@@ -16,10 +16,10 @@ import {
   isDuplicate,
   movePathEntry,
   parsePath,
-} from "./utils/path-utils";
-import { getEnvVar, setEnvVar } from "./utils/powershell";
-import { EnvScope, PathEntry } from "./utils/types";
-import { PathEntryItem } from "./components/PathEntryItem";
+} from "./utils/path-utils.js";
+import { getEnvVar, setEnvVar } from "./utils/powershell.js";
+import { EnvScope, PathEntry } from "./utils/types.js";
+import { PathEntryItem } from "./components/PathEntryItem.js";
 
 function AddPathEntryForm({
   scope,
@@ -28,7 +28,7 @@ function AddPathEntryForm({
 }: {
   scope: EnvScope;
   entries: PathEntry[];
-  onAdded: () => void;
+  onAdded: () => void | Promise<void>;
 }) {
   const { pop } = useNavigation();
 
@@ -52,7 +52,7 @@ function AddPathEntryForm({
     }
 
     try {
-      const currentPath = getEnvVar("PATH", scope) ?? "";
+      const currentPath = (await getEnvVar("PATH", scope)) ?? "";
       const newFullPath = currentPath ? `${currentPath};${newPath}` : newPath;
 
       if (scope === "Machine") {
@@ -63,7 +63,7 @@ function AddPathEntryForm({
         });
       }
 
-      setEnvVar("PATH", newFullPath, scope);
+      await setEnvVar("PATH", newFullPath, scope);
       await showToast({
         style: Toast.Style.Success,
         title: "Path entry added",
@@ -107,11 +107,13 @@ export default function EditPath() {
   const loadPaths = useCallback(async () => {
     setIsLoading(true);
     try {
-      const userPath = getEnvVar("PATH", "User") ?? "";
-      const machinePath = getEnvVar("PATH", "Machine") ?? "";
+      const [userPath, machinePath] = await Promise.all([
+        getEnvVar("PATH", "User"),
+        getEnvVar("PATH", "Machine"),
+      ]);
 
-      setUserEntries(parsePath(userPath, "User"));
-      setMachineEntries(parsePath(machinePath, "Machine"));
+      setUserEntries(parsePath(userPath ?? "", "User"));
+      setMachineEntries(parsePath(machinePath ?? "", "Machine"));
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
       await showToast({
@@ -129,9 +131,20 @@ export default function EditPath() {
   }, [loadPaths]);
 
   async function backupPath(scope: EnvScope) {
-    const key = `path-backup-${scope}-${Date.now()}`;
-    const currentPath = getEnvVar("PATH", scope) ?? "";
-    await LocalStorage.setItem(key, currentPath);
+    const key = `path-backups-${scope}`;
+    try {
+      const currentPath = (await getEnvVar("PATH", scope)) ?? "";
+      const raw = await LocalStorage.getItem<string>(key);
+      const backups = raw
+        ? (JSON.parse(raw) as { ts: number; value: string }[])
+        : [];
+      backups.push({ ts: Date.now(), value: currentPath });
+      const max = 10;
+      if (backups.length > max) backups.splice(0, backups.length - max);
+      await LocalStorage.setItem(key, JSON.stringify(backups));
+    } catch {
+      // ignore LocalStorage errors
+    }
   }
 
   async function savePath(entries: PathEntry[], scope: EnvScope) {
@@ -147,7 +160,7 @@ export default function EditPath() {
         });
       }
 
-      setEnvVar("PATH", newPath, scope);
+      await setEnvVar("PATH", newPath, scope);
       await showToast({ style: Toast.Style.Success, title: "PATH updated" });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";

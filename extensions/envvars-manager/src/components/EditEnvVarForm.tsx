@@ -7,12 +7,12 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
-import { setEnvVar } from "../utils/powershell";
-import { EnvVar } from "../utils/types";
+import { setEnvVar } from "../utils/powershell.js";
+import { EnvVar } from "../utils/types.js";
 
 interface EditEnvVarFormProps {
   envVar: EnvVar;
-  onSaved: () => void;
+  onSaved: () => void | Promise<void>;
 }
 
 export function EditEnvVarForm({ envVar, onSaved }: EditEnvVarFormProps) {
@@ -28,7 +28,7 @@ export function EditEnvVarForm({ envVar, onSaved }: EditEnvVarFormProps) {
           message: "Approve the UAC prompt",
         });
       }
-      setEnvVar(envVar.name, value, envVar.scope);
+      await setEnvVar(envVar.name, value, envVar.scope);
       await showToast({
         style: Toast.Style.Success,
         title: "Variable updated",

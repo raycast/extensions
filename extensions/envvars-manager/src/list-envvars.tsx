@@ -1,8 +1,8 @@
 import { List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { EnvVarItem } from "./components/EnvVarItem";
-import { getAllEnvVars } from "./utils/powershell";
-import { EnvVar } from "./utils/types";
+import { EnvVarItem } from "./components/EnvVarItem.js";
+import { getAllEnvVars } from "./utils/powershell.js";
+import { EnvVar } from "./utils/types.js";
 
 type FilterScope = "All" | "User" | "Machine";
 
@@ -14,8 +14,10 @@ export default function ListEnvVars() {
   const loadVars = useCallback(async () => {
     setIsLoading(true);
     try {
-      const userVars = getAllEnvVars("User");
-      const machineVars = getAllEnvVars("Machine");
+      const [userVars, machineVars] = await Promise.all([
+        getAllEnvVars("User"),
+        getAllEnvVars("Machine"),
+      ]);
       setVars([...userVars, ...machineVars]);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";
@@ -79,12 +81,15 @@ export default function ListEnvVars() {
           ))}
         </List.Section>
       )}
-      {!isLoading && vars.length === 0 && (
-        <List.EmptyView
-          title="No environment variables"
-          description="No variables found"
-        />
-      )}
+      {!isLoading &&
+        ((showUser && !showMachine && userVars.length === 0) ||
+          (!showUser && showMachine && machineVars.length === 0) ||
+          (showUser && showMachine && vars.length === 0)) && (
+          <List.EmptyView
+            title="No environment variables"
+            description="No variables found for the selected filter"
+          />
+        )}
     </List>
   );
 }

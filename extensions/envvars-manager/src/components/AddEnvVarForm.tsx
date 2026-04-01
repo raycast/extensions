@@ -9,11 +9,11 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
-import { getEnvVar, setEnvVar } from "../utils/powershell";
-import { EnvScope } from "../utils/types";
+import { getEnvVar, setEnvVar } from "../utils/powershell.js";
+import { EnvScope } from "../utils/types.js";
 
 interface AddEnvVarFormProps {
-  onSaved?: () => void;
+  onSaved?: () => void | Promise<void>;
 }
 
 export function AddEnvVarForm({ onSaved }: AddEnvVarFormProps) {
@@ -47,7 +47,7 @@ export function AddEnvVarForm({ onSaved }: AddEnvVarFormProps) {
     const scope = values.scope as EnvScope;
 
     try {
-      const existing = getEnvVar(values.name, scope);
+      const existing = await getEnvVar(values.name, scope);
       if (existing !== null) {
         const confirmed = await confirmAlert({
           title: `Overwrite "${values.name}"?`,
@@ -68,7 +68,7 @@ export function AddEnvVarForm({ onSaved }: AddEnvVarFormProps) {
         });
       }
 
-      setEnvVar(values.name, values.value, scope);
+      await setEnvVar(values.name, values.value, scope);
       await showToast({
         style: Toast.Style.Success,
         title: "Variable created",
