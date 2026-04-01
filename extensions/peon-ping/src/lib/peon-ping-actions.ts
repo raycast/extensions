@@ -6,7 +6,7 @@ import type {
   PeonPingPackRotationMode,
   PeonPingStatus,
 } from "./peon-ping-config";
-import type { PeonPingResolvedPaths } from "./peon-ping-paths";
+import type { PeonPingCommandPaths } from "./peon-ping-command-target";
 import {
   advanceToNextPack,
   setActivePack,
@@ -42,7 +42,7 @@ type ThrownValue =
 const STATUS_TOGGLE_FAILURE_TITLE = "Failed to update Peon Ping";
 
 export type RunToggleActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   togglePeonPing: typeof togglePeonPing;
   setStatus: (status: PeonPingStatus) => void;
@@ -129,7 +129,7 @@ export function runStatusToggleAndRefreshMenuBarSafely(
 }
 
 export type RunSetVolumeActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setVolume: typeof setVolume;
   setConfig: SetConfig;
@@ -145,7 +145,7 @@ export function runSetVolumeAction(
 }
 
 export type RunSetActivePackActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setActivePack: typeof setActivePack;
   setConfig: SetConfig;
@@ -161,7 +161,7 @@ export function runSetActivePackAction(
 }
 
 export type RunNextPackActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   advanceToNextPack: typeof advanceToNextPack;
   setConfig: SetConfig;
@@ -174,7 +174,7 @@ export function runNextPackAction(deps: RunNextPackActionDeps): PeonPingConfig {
 }
 
 export type RunToggleNotificationsActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setDesktopNotifications: typeof setDesktopNotifications;
   setConfig: SetConfig;
@@ -210,7 +210,7 @@ export function runToggleHeadphonesOnlyAction(
 }
 
 export type RunSetRotationModeActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setPackRotationMode: typeof setPackRotationMode;
   setConfig: SetConfig;
@@ -248,7 +248,7 @@ export function runToggleCategoryAction(
 }
 
 export type RunSetNotificationStyleActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setNotificationStyle: typeof setNotificationStyle;
   setConfig: SetConfig;
@@ -264,7 +264,7 @@ export function runSetNotificationStyleAction(
 }
 
 export type RunSetNotificationPositionActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setNotificationPosition: typeof setNotificationPosition;
   setConfig: SetConfig;
@@ -280,7 +280,7 @@ export function runSetNotificationPositionAction(
 }
 
 export type RunSetDismissTimeActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setNotificationDismissTime: typeof setNotificationDismissTime;
   setConfig: SetConfig;
@@ -296,7 +296,7 @@ export function runSetDismissTimeAction(
 }
 
 export type RunToggleMobileActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
   setMobileNotifications: typeof setMobileNotifications;
   setConfig: SetConfig;

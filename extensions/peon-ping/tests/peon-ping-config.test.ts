@@ -19,6 +19,27 @@ const defaultCategories = {
   "user.spam": true,
 } as const;
 
+const defaultAdvancedConfig = {
+  packRotation: [],
+  pathRules: [],
+  useSoundEffectsDevice: false,
+  silentWindowSeconds: 0,
+  sessionStartCooldownSeconds: 30,
+  suppressSubagentComplete: false,
+  meetingDetect: false,
+  notificationAllScreens: true,
+  notificationTitleOverride: "",
+  notificationTemplates: {},
+  debugEnabled: false,
+  debugRetentionDays: 7,
+  trainer: {
+    enabled: false,
+    exercises: { pushups: 300, squats: 300 },
+    reminderIntervalMinutes: 20,
+    reminderMinGapMinutes: 5,
+  },
+} as const;
+
 test("resolvePeonPingPaths prefers Raycast preference over env and home default", () => {
   const homeDir = mkdtempSync(join(tmpdir(), "peon-ping-home-"));
   const envDir = mkdtempSync(join(tmpdir(), "peon-ping-env-"));
@@ -183,6 +204,7 @@ test("getPeonPingConfig reads all Tier 1 fields from config.json", () => {
     notificationDismissSeconds: 4,
     mobileNotifyEnabled: false,
     mobileNotifyConfigured: false,
+    ...defaultAdvancedConfig,
   });
 });
 
@@ -231,6 +253,65 @@ test("getPeonPingConfig reads all Tier 2 fields from config.json", () => {
     notificationDismissSeconds: 8,
     mobileNotifyEnabled: true,
     mobileNotifyConfigured: true,
+    ...defaultAdvancedConfig,
+  });
+});
+
+test("getPeonPingConfig reads advanced parity fields from config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    pack_rotation: ["peon", "glados"],
+    path_rules: [
+      { pattern: "*/client-a/*", pack: "glados" },
+      { pattern: "*/personal/*", pack: "peon" },
+    ],
+    use_sound_effects_device: true,
+    silent_window_seconds: 12,
+    session_start_cooldown_seconds: 45,
+    suppress_subagent_complete: true,
+    meeting_detect: true,
+    notification_all_screens: false,
+    notification_title_override: "Client A",
+    notification_templates: {
+      stop: "{project}: done",
+      permission: "{project}: needs approval",
+    },
+    debug: true,
+    debug_retention_days: 30,
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminder_interval_minutes: 30,
+      reminder_min_gap_minutes: 10,
+    },
+  });
+
+  expect(getPeonPingConfig(fx.configFilePath, fx.pausedFilePath)).toMatchObject({
+    packRotation: ["peon", "glados"],
+    pathRules: [
+      { pattern: "*/client-a/*", pack: "glados" },
+      { pattern: "*/personal/*", pack: "peon" },
+    ],
+    useSoundEffectsDevice: true,
+    silentWindowSeconds: 12,
+    sessionStartCooldownSeconds: 45,
+    suppressSubagentComplete: true,
+    meetingDetect: true,
+    notificationAllScreens: false,
+    notificationTitleOverride: "Client A",
+    notificationTemplates: {
+      stop: "{project}: done",
+      permission: "{project}: needs approval",
+    },
+    debugEnabled: true,
+    debugRetentionDays: 30,
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminderIntervalMinutes: 30,
+      reminderMinGapMinutes: 10,
+    },
   });
 });
 
@@ -264,6 +345,7 @@ test("getPeonPingConfig uses defaults for optional fields", () => {
     notificationDismissSeconds: 4,
     mobileNotifyEnabled: false,
     mobileNotifyConfigured: false,
+    ...defaultAdvancedConfig,
   });
 });
 

@@ -17,8 +17,11 @@ import {
   type MetadataEntry,
 } from "./lib/peon-ping-dashboard";
 import { getInstalledPacks } from "./lib/peon-ping-packs";
+import {
+  withPeonPingCommandTarget,
+  type PeonPingCommandPaths,
+} from "./lib/peon-ping-command-target";
 import { getResolvePeonPingPathsInputFromPreferences } from "./lib/preferences";
-import type { PeonPingResolvedPaths } from "./lib/peon-ping-paths";
 import { resolvePeonPingPaths } from "./lib/peon-ping-paths";
 import {
   advanceToNextPack,
@@ -121,7 +124,7 @@ function DashboardDetail({ metadata }: { metadata: MetadataEntry[] }) {
 }
 
 type ActionDeps = {
-  paths: PeonPingResolvedPaths;
+  paths: PeonPingCommandPaths;
   setConfig: Dispatch<SetStateAction<PeonPingConfig>>;
 };
 
@@ -302,7 +305,7 @@ function SubDashboard({
     paths: deps.paths,
     setConfig: (value) => {
       deps.setConfig(value);
-      setLocalConfig(value as PeonPingConfig);
+      setLocalConfig(value);
     },
   };
 
@@ -454,8 +457,8 @@ function DashboardListItem({
 }
 
 export default function Command() {
-  const paths = resolvePeonPingPaths(
-    getResolvePeonPingPathsInputFromPreferences(),
+  const paths = withPeonPingCommandTarget(
+    resolvePeonPingPaths(getResolvePeonPingPathsInputFromPreferences()),
   );
   const [config, setConfig] = useState(() =>
     getPeonPingConfig(paths.configFilePath, paths.pausedFilePath),

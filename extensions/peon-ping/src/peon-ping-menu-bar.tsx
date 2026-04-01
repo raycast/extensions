@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { useState } from "react";
 import { getPeonPingConfig } from "./lib/peon-ping-config";
 import { getMenuBarPresentation } from "./lib/menu-bar-presentation";
+import { withPeonPingCommandTarget } from "./lib/peon-ping-command-target";
 import { getResolvePeonPingPathsInputFromPreferences } from "./lib/preferences";
 import { resolvePeonPingPaths } from "./lib/peon-ping-paths";
 import {
@@ -15,8 +16,8 @@ const run: PeonPingCommandRunner = (command, args) =>
   execFileSync(command, [...args], { encoding: "utf8" });
 
 export default function Command() {
-  const paths = resolvePeonPingPaths(
-    getResolvePeonPingPathsInputFromPreferences(),
+  const paths = withPeonPingCommandTarget(
+    resolvePeonPingPaths(getResolvePeonPingPathsInputFromPreferences()),
   );
   const [config, setConfig] = useState(() =>
     getPeonPingConfig(paths.configFilePath, paths.pausedFilePath),

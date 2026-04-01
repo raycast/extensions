@@ -20,6 +20,7 @@ import {
   togglePeonPing,
   type PeonPingCommandRunner,
 } from "../src/lib/peon-ping-service";
+import { resolvePeonPingCommandTarget } from "../src/lib/peon-ping-command-target";
 import { createClaudeConfigFixture } from "./helpers/claude-config-fixture";
 
 function expectedConfig(overrides: Partial<PeonPingConfig> = {}): PeonPingConfig {
@@ -44,6 +45,24 @@ function expectedConfig(overrides: Partial<PeonPingConfig> = {}): PeonPingConfig
     notificationDismissSeconds: 4,
     mobileNotifyEnabled: false,
     mobileNotifyConfigured: false,
+    packRotation: [],
+    pathRules: [],
+    useSoundEffectsDevice: false,
+    silentWindowSeconds: 0,
+    sessionStartCooldownSeconds: 30,
+    suppressSubagentComplete: false,
+    meetingDetect: false,
+    notificationAllScreens: true,
+    notificationTitleOverride: "",
+    notificationTemplates: {},
+    debugEnabled: false,
+    debugRetentionDays: 7,
+    trainer: {
+      enabled: false,
+      exercises: { pushups: 300, squats: 300 },
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 5,
+    },
     ...overrides,
   };
 }
@@ -106,6 +125,33 @@ test("setVolume calls peon.sh volume <n> and returns refreshed config", () => {
   };
 
   expect(setVolume(paths, run, 0.75)).toEqual(
+    expectedConfig({ volume: 0.75 }),
+  );
+});
+
+test("setVolume prefers the peon CLI when available", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, volume: 0.5 });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["volume", "0.75"]);
+    fx.writeConfigJson({ enabled: true, volume: 0.75 });
+    return "";
+  };
+
+  expect(setVolume(runtimePaths, run, 0.75)).toEqual(
     expectedConfig({ volume: 0.75 }),
   );
 });
