@@ -13,14 +13,12 @@
     "Developer Tools"
   ],
   "license": "MIT",
-  "commands": [
     {
       "name": "url-parse",
       "title": "URL Parse",
-      "description": "从剪贴板解析并查看 URL 查询参数",
+      "description": "Parse and inspect URL query parameters from the clipboard",
       "mode": "view"
     }
-  ],
   "dependencies": {
     "@raycast/api": "^1.104.11",
     "@raycast/utils": "^1.17.0"
