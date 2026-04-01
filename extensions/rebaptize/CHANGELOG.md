@@ -8,6 +8,10 @@
 - Add optional prefix and suffix fields
 - Start number and zero padding are only shown for numeric format
 - Instant enumerate commands (by name and by date) now also preserve original filenames
+- Add Custom Template mode with up to 3 independent counters for advanced enumeration patterns
+- Each counter has its own format (numeric/alphabetic), start value, zero padding, and increment frequency
+- Template uses `{1}`, `{2}`, `{3}` for counters and `{name}` for the original filename
+- Live preview shows first 3 resulting filenames in Custom Template mode
 
 ## [TMDB Support and Metadata Sources] - {PR_MERGE_DATE}
 

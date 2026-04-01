@@ -13,7 +13,14 @@ import {
 import { useState, useEffect } from "react";
 import { readdir, rename, stat } from "fs/promises";
 import { join } from "path";
-import { type RenameMode, type RenameOptions, type RenamePreview, generatePreviews } from "./rename";
+import {
+  type RenameMode,
+  type RenameOptions,
+  type RenamePreview,
+  type EnumCounter,
+  generatePreviews,
+  formatIndex,
+} from "./rename";
 import { getFinderFolder } from "./finder";
 import { saveUndoState } from "./instant-runner";
 import { analyzeFolder, type FileAnalysis } from "./file-analyzer";
@@ -153,6 +160,26 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
   const [enumPosition, setEnumPosition] = useState<"before" | "after">("before");
   const [enumFormat, setEnumFormat] = useState<"numeric" | "alpha" | "alpha-upper">("numeric");
   const [enumSuffix, setEnumSuffix] = useState("");
+  // Custom template enumerate
+  const [enumCustomTemplate, setEnumCustomTemplate] = useState(false);
+  const [enumTemplate, setEnumTemplate] = useState("{1} - {name}");
+  // Counter 1
+  const [c1Format, setC1Format] = useState<"numeric" | "alpha" | "alpha-upper">("numeric");
+  const [c1Start, setC1Start] = useState("1");
+  const [c1Pad, setC1Pad] = useState("0");
+  const [c1Every, setC1Every] = useState("1");
+  // Counter 2
+  const [c2Enabled, setC2Enabled] = useState(false);
+  const [c2Format, setC2Format] = useState<"numeric" | "alpha" | "alpha-upper">("numeric");
+  const [c2Start, setC2Start] = useState("1");
+  const [c2Pad, setC2Pad] = useState("0");
+  const [c2Every, setC2Every] = useState("10");
+  // Counter 3
+  const [c3Enabled, setC3Enabled] = useState(false);
+  const [c3Format, setC3Format] = useState<"numeric" | "alpha" | "alpha-upper">("numeric");
+  const [c3Start, setC3Start] = useState("1");
+  const [c3Pad, setC3Pad] = useState("0");
+  const [c3Every, setC3Every] = useState("100");
 
   // Find & Replace
   const [find, setFind] = useState("");
@@ -339,15 +366,49 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
           options.toDelimiter = toDelimiter;
           break;
         case "enumerate":
-          options.enumPrefix = enumPrefix.trim();
-          options.enumStart = parseInt(enumStart) || 1;
-          options.enumPad = parseInt(enumPad) || 3;
-          options.enumSeparator = enumSeparator;
+          options.enumCustomTemplate = enumCustomTemplate;
+          if (enumCustomTemplate) {
+            if (!enumTemplate.trim()) {
+              await showToast({ style: Toast.Style.Failure, title: "Template is required" });
+              return;
+            }
+            options.enumTemplate = enumTemplate.trim();
+            const counters: EnumCounter[] = [
+              {
+                format: c1Format,
+                start: parseInt(c1Start) || 1,
+                pad: parseInt(c1Pad) || 0,
+                every: parseInt(c1Every) || 1,
+              },
+            ];
+            if (c2Enabled) {
+              counters.push({
+                format: c2Format,
+                start: parseInt(c2Start) || 1,
+                pad: parseInt(c2Pad) || 0,
+                every: parseInt(c2Every) || 1,
+              });
+            }
+            if (c3Enabled) {
+              counters.push({
+                format: c3Format,
+                start: parseInt(c3Start) || 1,
+                pad: parseInt(c3Pad) || 0,
+                every: parseInt(c3Every) || 1,
+              });
+            }
+            options.enumCounters = counters;
+          } else {
+            options.enumPrefix = enumPrefix.trim();
+            options.enumStart = parseInt(enumStart) || 1;
+            options.enumPad = parseInt(enumPad) || 3;
+            options.enumSeparator = enumSeparator;
+            options.enumKeepName = enumKeepName;
+            options.enumPosition = enumPosition;
+            options.enumFormat = enumFormat;
+            options.enumSuffix = enumSuffix.trim();
+          }
           options.enumSortBy = enumSortBy;
-          options.enumKeepName = enumKeepName;
-          options.enumPosition = enumPosition;
-          options.enumFormat = enumFormat;
-          options.enumSuffix = enumSuffix.trim();
           // Sort files before generating previews
           if (enumSortBy !== "name") {
             const fileStats = await Promise.all(
@@ -744,65 +805,201 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
       {mode === "enumerate" && (
         <>
           <Form.Checkbox
-            id="enumKeepName"
-            label="Keep Original Filename"
-            value={enumKeepName}
-            onChange={setEnumKeepName}
-            info="When on, the number is added before or after the original filename. When off, the filename is replaced entirely."
+            id="enumCustomTemplate"
+            label="Custom Template"
+            value={enumCustomTemplate}
+            onChange={setEnumCustomTemplate}
+            info="Use a template with multiple counters for advanced enumeration patterns."
           />
-          {enumKeepName && (
-            <Form.Dropdown
-              id="enumPosition"
-              title="Number Position"
-              value={enumPosition}
-              onChange={(v) => setEnumPosition(v as "before" | "after")}
-            >
-              <Form.Dropdown.Item value="before" title="Before Name" />
-              <Form.Dropdown.Item value="after" title="After Name" />
-            </Form.Dropdown>
-          )}
-          <Form.Dropdown
-            id="enumFormat"
-            title="Number Format"
-            value={enumFormat}
-            onChange={(v) => setEnumFormat(v as "numeric" | "alpha" | "alpha-upper")}
-          >
-            <Form.Dropdown.Item value="numeric" title="Numeric (001, 002, 003)" />
-            <Form.Dropdown.Item value="alpha-upper" title="Alphabetic A, B, C" />
-            <Form.Dropdown.Item value="alpha" title="Alphabetic a, b, c" />
-          </Form.Dropdown>
-          <Form.TextField
-            id="enumPrefix"
-            title="Prefix (Optional)"
-            placeholder="photo"
-            value={enumPrefix}
-            onChange={setEnumPrefix}
-          />
-          <Form.TextField
-            id="enumSuffix"
-            title="Suffix (Optional)"
-            placeholder="final"
-            value={enumSuffix}
-            onChange={setEnumSuffix}
-          />
-          {enumFormat === "numeric" && (
+
+          {!enumCustomTemplate && (
             <>
-              <Form.TextField
-                id="enumStart"
-                title="Start Number"
-                placeholder="1"
-                value={enumStart}
-                onChange={setEnumStart}
+              <Form.Checkbox
+                id="enumKeepName"
+                label="Keep Original Filename"
+                value={enumKeepName}
+                onChange={setEnumKeepName}
+                info="When on, the number is added before or after the original filename. When off, the filename is replaced entirely."
               />
-              <Form.TextField id="enumPad" title="Zero Padding" placeholder="3" value={enumPad} onChange={setEnumPad} />
+              {enumKeepName && (
+                <Form.Dropdown
+                  id="enumPosition"
+                  title="Number Position"
+                  value={enumPosition}
+                  onChange={(v) => setEnumPosition(v as "before" | "after")}
+                >
+                  <Form.Dropdown.Item value="before" title="Before Name" />
+                  <Form.Dropdown.Item value="after" title="After Name" />
+                </Form.Dropdown>
+              )}
+              <Form.Dropdown
+                id="enumFormat"
+                title="Number Format"
+                value={enumFormat}
+                onChange={(v) => setEnumFormat(v as "numeric" | "alpha" | "alpha-upper")}
+              >
+                <Form.Dropdown.Item value="numeric" title="Numeric (001, 002, 003)" />
+                <Form.Dropdown.Item value="alpha-upper" title="Alphabetic A, B, C" />
+                <Form.Dropdown.Item value="alpha" title="Alphabetic a, b, c" />
+              </Form.Dropdown>
+              <Form.TextField
+                id="enumPrefix"
+                title="Prefix (Optional)"
+                placeholder="photo"
+                value={enumPrefix}
+                onChange={setEnumPrefix}
+              />
+              <Form.TextField
+                id="enumSuffix"
+                title="Suffix (Optional)"
+                placeholder="final"
+                value={enumSuffix}
+                onChange={setEnumSuffix}
+              />
+              {enumFormat === "numeric" && (
+                <>
+                  <Form.TextField
+                    id="enumStart"
+                    title="Start Number"
+                    placeholder="1"
+                    value={enumStart}
+                    onChange={setEnumStart}
+                  />
+                  <Form.TextField
+                    id="enumPad"
+                    title="Zero Padding"
+                    placeholder="3"
+                    value={enumPad}
+                    onChange={setEnumPad}
+                  />
+                </>
+              )}
+              <Form.Dropdown id="enumSeparator" title="Separator" value={enumSeparator} onChange={setEnumSeparator}>
+                <Form.Dropdown.Item value="-" title="Dash (-)" />
+                <Form.Dropdown.Item value="_" title="Underscore (_)" />
+                <Form.Dropdown.Item value="." title="Dot (.)" />
+                <Form.Dropdown.Item value=" " title="Space" />
+              </Form.Dropdown>
             </>
           )}
-          <Form.Dropdown id="enumSeparator" title="Separator" value={enumSeparator} onChange={setEnumSeparator}>
-            <Form.Dropdown.Item value="-" title="Dash (-)" />
-            <Form.Dropdown.Item value="_" title="Underscore (_)" />
-            <Form.Dropdown.Item value="." title="Dot (.)" />
-            <Form.Dropdown.Item value=" " title="Space" />
-          </Form.Dropdown>
+
+          {enumCustomTemplate && (
+            <>
+              <Form.TextField
+                id="enumTemplate"
+                title="Template"
+                placeholder="{1} - {name}"
+                value={enumTemplate}
+                onChange={setEnumTemplate}
+                info="Use {1}, {2}, {3} for counters and {name} for the original filename. Extension is added automatically."
+              />
+              <Form.Separator />
+              <Form.Description title="Counter {1}" text="Always active. Referenced as {1} in the template." />
+              <Form.Dropdown
+                id="c1Format"
+                title="{1} Format"
+                value={c1Format}
+                onChange={(v) => setC1Format(v as "numeric" | "alpha" | "alpha-upper")}
+              >
+                <Form.Dropdown.Item value="numeric" title="Numeric (1, 2, 3)" />
+                <Form.Dropdown.Item value="alpha-upper" title="Alphabetic A, B, C" />
+                <Form.Dropdown.Item value="alpha" title="Alphabetic a, b, c" />
+              </Form.Dropdown>
+              <Form.TextField id="c1Start" title="{1} Start" placeholder="1" value={c1Start} onChange={setC1Start} />
+              {c1Format === "numeric" && (
+                <Form.TextField id="c1Pad" title="{1} Zero Padding" placeholder="0" value={c1Pad} onChange={setC1Pad} />
+              )}
+              <Form.TextField
+                id="c1Every"
+                title="{1} Increment Every"
+                placeholder="1"
+                value={c1Every}
+                onChange={setC1Every}
+                info="Increment this counter every N files. 1 = every file."
+              />
+              <Form.Separator />
+              <Form.Checkbox id="c2Enabled" label="Enable Counter {2}" value={c2Enabled} onChange={setC2Enabled} />
+              {c2Enabled && (
+                <>
+                  <Form.Dropdown
+                    id="c2Format"
+                    title="{2} Format"
+                    value={c2Format}
+                    onChange={(v) => setC2Format(v as "numeric" | "alpha" | "alpha-upper")}
+                  >
+                    <Form.Dropdown.Item value="numeric" title="Numeric (1, 2, 3)" />
+                    <Form.Dropdown.Item value="alpha-upper" title="Alphabetic A, B, C" />
+                    <Form.Dropdown.Item value="alpha" title="Alphabetic a, b, c" />
+                  </Form.Dropdown>
+                  <Form.TextField
+                    id="c2Start"
+                    title="{2} Start"
+                    placeholder="1"
+                    value={c2Start}
+                    onChange={setC2Start}
+                  />
+                  {c2Format === "numeric" && (
+                    <Form.TextField
+                      id="c2Pad"
+                      title="{2} Zero Padding"
+                      placeholder="0"
+                      value={c2Pad}
+                      onChange={setC2Pad}
+                    />
+                  )}
+                  <Form.TextField
+                    id="c2Every"
+                    title="{2} Increment Every"
+                    placeholder="10"
+                    value={c2Every}
+                    onChange={setC2Every}
+                    info="Increment this counter every N files."
+                  />
+                </>
+              )}
+              <Form.Separator />
+              <Form.Checkbox id="c3Enabled" label="Enable Counter {3}" value={c3Enabled} onChange={setC3Enabled} />
+              {c3Enabled && (
+                <>
+                  <Form.Dropdown
+                    id="c3Format"
+                    title="{3} Format"
+                    value={c3Format}
+                    onChange={(v) => setC3Format(v as "numeric" | "alpha" | "alpha-upper")}
+                  >
+                    <Form.Dropdown.Item value="numeric" title="Numeric (1, 2, 3)" />
+                    <Form.Dropdown.Item value="alpha-upper" title="Alphabetic A, B, C" />
+                    <Form.Dropdown.Item value="alpha" title="Alphabetic a, b, c" />
+                  </Form.Dropdown>
+                  <Form.TextField
+                    id="c3Start"
+                    title="{3} Start"
+                    placeholder="1"
+                    value={c3Start}
+                    onChange={setC3Start}
+                  />
+                  {c3Format === "numeric" && (
+                    <Form.TextField
+                      id="c3Pad"
+                      title="{3} Zero Padding"
+                      placeholder="0"
+                      value={c3Pad}
+                      onChange={setC3Pad}
+                    />
+                  )}
+                  <Form.TextField
+                    id="c3Every"
+                    title="{3} Increment Every"
+                    placeholder="100"
+                    value={c3Every}
+                    onChange={setC3Every}
+                    info="Increment this counter every N files."
+                  />
+                </>
+              )}
+            </>
+          )}
+
           <Form.Dropdown
             id="enumSortBy"
             title="Sort Files By"
@@ -818,6 +1015,53 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
           <Form.Description
             title="Preview"
             text={(() => {
+              if (enumCustomTemplate) {
+                const tmpl = enumTemplate || "{1} - {name}";
+                const sampleName = "filename";
+                // Show first 3 files as preview
+                const lines: string[] = [];
+                for (let fi = 0; fi < 3; fi++) {
+                  let result = tmpl;
+                  const allCounters = [
+                    {
+                      format: c1Format,
+                      start: parseInt(c1Start) || 1,
+                      pad: parseInt(c1Pad) || 0,
+                      every: parseInt(c1Every) || 1,
+                    },
+                    ...(c2Enabled
+                      ? [
+                          {
+                            format: c2Format,
+                            start: parseInt(c2Start) || 1,
+                            pad: parseInt(c2Pad) || 0,
+                            every: parseInt(c2Every) || 1,
+                          },
+                        ]
+                      : []),
+                    ...(c3Enabled
+                      ? [
+                          {
+                            format: c3Format,
+                            start: parseInt(c3Start) || 1,
+                            pad: parseInt(c3Pad) || 0,
+                            every: parseInt(c3Every) || 1,
+                          },
+                        ]
+                      : []),
+                  ];
+                  for (let c = 0; c < allCounters.length; c++) {
+                    const cnt = allCounters[c];
+                    const every = Math.max(1, cnt.every);
+                    const val = cnt.start + Math.floor(fi / every);
+                    const formatted = formatIndex(val, cnt.format, cnt.pad);
+                    result = result.replace(new RegExp(`\\{${c + 1}\\}`, "g"), formatted);
+                  }
+                  result = result.replace(/\{name\}/g, sampleName);
+                  lines.push(`${result}.ext`);
+                }
+                return lines.join(",  ");
+              }
               const p = enumPrefix.trim();
               const sf = enumSuffix.trim();
               const s = enumSeparator || "-";

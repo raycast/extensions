@@ -174,6 +174,45 @@ With suffix:          apple.txt → 001-apple-final.txt
 | Separator              | Dash, Underscore, Dot, or Space                                         | Dash      |
 | Sort Files By          | File Name (A-Z), Date Created, Date Modified, File Size, or Name Length | File Name |
 
+#### Custom Template Mode
+
+Toggle **Custom Template** on for advanced patterns with multiple independent counters. Write a template using placeholders and configure up to 3 counters, each with its own format, start value, padding, and increment frequency.
+
+**Template placeholders:**
+
+- `{1}`, `{2}`, `{3}` -- counter references
+- `{name}` -- original filename (without extension)
+- Extension is added automatically
+
+**Counter options (up to 3):**
+
+| Option          | Description                                                  | Default |
+| --------------- | ------------------------------------------------------------ | ------- |
+| Format          | Numeric (1, 2, 3), Alphabetic A, B, C, or Alphabetic a, b, c | Numeric |
+| Start           | Starting value                                               | `1`     |
+| Zero Padding    | Number of digits (numeric only, 0 = no padding)              | `0`     |
+| Increment Every | How many files before incrementing (1 = every file)          | `1`     |
+
+**Examples:**
+
+```
+Template: {1} - {name}
+  Counter {1}: numeric, every 1
+  → 1 - apple.txt, 2 - banana.txt, 3 - cherry.txt
+
+Template: {1}_{name}_{2}
+  Counter {1}: numeric, every 1
+  Counter {2}: numeric, every 3
+  → 1_apple_1.txt, 2_banana_1.txt, 3_cherry_1.txt, 4_donut_2.txt, 5_eclair_2.txt
+
+Template: {1}{2} - {name}
+  Counter {1}: alpha-upper, every 3
+  Counter {2}: numeric, pad 2, every 1
+  → A01 - apple.txt, A02 - banana.txt, A03 - cherry.txt, B04 - donut.txt
+```
+
+The preview shows the first 3 resulting filenames so you can verify the pattern before applying.
+
 ### Change Extension
 
 Bulk convert file extensions. Optionally filter to only change files with a specific current extension.

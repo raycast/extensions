@@ -100,10 +100,21 @@ export interface RenameOptions {
   enumPosition?: "before" | "after"; // number position relative to original name
   enumFormat?: "numeric" | "alpha" | "alpha-upper"; // numbering format
   enumSuffix?: string; // text after everything (before extension)
+  // Custom template enumerate
+  enumCustomTemplate?: boolean; // use custom template mode
+  enumTemplate?: string; // template string with {1}, {2}, {3}, {name} placeholders
+  enumCounters?: EnumCounter[]; // up to 3 counter configs
   // Find & Replace mode
   find?: string;
   replace?: string;
   useRegex?: boolean;
+}
+
+export interface EnumCounter {
+  format: "numeric" | "alpha" | "alpha-upper";
+  start: number;
+  pad: number;
+  every: number; // increment every N files (1 = every file)
 }
 
 export interface RenamePreview {
@@ -314,7 +325,7 @@ function indexToAlpha(index: number, upper: boolean): string {
   return result;
 }
 
-function formatIndex(index: number, format: string, pad: number): string {
+export function formatIndex(index: number, format: string, pad: number): string {
   switch (format) {
     case "alpha":
       return indexToAlpha(index, false);
@@ -358,6 +369,35 @@ export function generateEnumerateName(
     return `${prefix}${separator}${num}${suffixPart}${ext}`;
   }
   return `${num}${suffixPart}${ext}`;
+}
+
+// Custom template enumerate with multiple counters
+// Template uses {1}, {2}, {3} for counters and {name} for original filename
+export function generateTemplateEnumerateName(
+  fileName: string,
+  template: string,
+  fileIndex: number,
+  counters: EnumCounter[],
+): string {
+  const ext = extname(fileName);
+  const originalName = fileName.slice(0, fileName.length - ext.length);
+
+  let result = template;
+
+  // Replace counter placeholders
+  for (let c = 0; c < counters.length; c++) {
+    const counter = counters[c];
+    const every = Math.max(1, counter.every);
+    // Calculate this counter's value: increments every N files
+    const counterValue = counter.start + Math.floor(fileIndex / every);
+    const formatted = formatIndex(counterValue, counter.format, counter.pad);
+    result = result.replace(new RegExp(`\\{${c + 1}\\}`, "g"), formatted);
+  }
+
+  // Replace {name} placeholder
+  result = result.replace(/\{name\}/g, originalName);
+
+  return result + ext;
 }
 
 // Find & Replace on the filename (preserves extension)
@@ -465,17 +505,21 @@ export async function generatePreviews(
         renamed = generateSwapDelimiterName(fileName, options.fromDelimiter ?? ".", options.toDelimiter ?? " ");
         break;
       case "enumerate":
-        renamed = generateEnumerateName(
-          fileName,
-          options.enumPrefix ?? "",
-          (options.enumStart ?? 1) + i,
-          options.enumPad ?? 3,
-          options.enumSeparator ?? "-",
-          options.enumKeepName ?? true,
-          options.enumPosition ?? "before",
-          options.enumFormat ?? "numeric",
-          options.enumSuffix ?? "",
-        );
+        if (options.enumCustomTemplate && options.enumTemplate && options.enumCounters?.length) {
+          renamed = generateTemplateEnumerateName(fileName, options.enumTemplate, i, options.enumCounters);
+        } else {
+          renamed = generateEnumerateName(
+            fileName,
+            options.enumPrefix ?? "",
+            (options.enumStart ?? 1) + i,
+            options.enumPad ?? 3,
+            options.enumSeparator ?? "-",
+            options.enumKeepName ?? true,
+            options.enumPosition ?? "before",
+            options.enumFormat ?? "numeric",
+            options.enumSuffix ?? "",
+          );
+        }
         break;
     }
 

@@ -11,6 +11,8 @@ import {
   generateFindReplaceName,
   generateChangedExtension,
   generateEnumerateName,
+  generateTemplateEnumerateName,
+  type EnumCounter,
 } from "./rename";
 import { parseEpisode } from "./episode-parser";
 
@@ -68,6 +70,10 @@ export interface ScriptStep {
   position?: "before" | "after";
   format?: "numeric" | "alpha" | "alpha-upper";
   enumSuffix?: string;
+  // Custom template enumerate
+  customTemplate?: boolean;
+  template?: string;
+  counters?: EnumCounter[];
 }
 
 export interface RenameScript {
@@ -205,6 +211,9 @@ function applyStep(fileName: string, step: ScriptStep, index: number): string {
         step.separator ?? "-",
       );
     case "enumerate":
+      if (step.customTemplate && step.template && step.counters?.length) {
+        return generateTemplateEnumerateName(fileName, step.template, index, step.counters);
+      }
       return generateEnumerateName(
         fileName,
         step.prefix ?? "",
@@ -280,6 +289,9 @@ export function stepLabel(step: ScriptStep): string {
     case "sequential":
       return `Sequential: ${step.prefix}-###`;
     case "enumerate":
+      if (step.customTemplate && step.template) {
+        return `Enumerate: ${step.template}`;
+      }
       return `Enumerate: ${step.prefix ? step.prefix + "-" : ""}###`;
     default:
       return step.type;
