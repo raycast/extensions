@@ -754,6 +754,21 @@ test("behavior timing subitems expose fixed choice actions", () => {
   );
 });
 
+test("behavior suppress subagent complete uses On accessory text when enabled", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ suppressSubagentComplete: true }),
+    packs: [],
+  });
+  const behavior = findItem(items, "behavior");
+  const suppressSubagentComplete = behavior.subItems!.find(
+    (item) => item.id === "behavior-subagent-complete",
+  );
+
+  expect(suppressSubagentComplete).toBeDefined();
+  expect(suppressSubagentComplete!.accessoryText).toBe("On");
+  expect(suppressSubagentComplete!.accessoryTagColor).toBe("green");
+});
+
 test("debug item shows current logging state and toggle action", () => {
   const items = buildDashboardItems({
     config: makeConfig({ debugEnabled: true, debugRetentionDays: 30 }),

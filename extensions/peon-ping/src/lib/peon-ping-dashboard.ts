@@ -964,8 +964,8 @@ function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
         id: "behavior-subagent-complete",
         title: "Subagent Complete",
         icon: "clock",
-        accessoryText: config.suppressSubagentComplete ? "Suppressed" : "On",
-        accessoryTagColor: config.suppressSubagentComplete ? "red" : "green",
+        accessoryText: config.suppressSubagentComplete ? "On" : "Off",
+        accessoryTagColor: config.suppressSubagentComplete ? "green" : "red",
         drillable: false,
         metadata: [
           {
