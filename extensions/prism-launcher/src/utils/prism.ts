@@ -57,11 +57,11 @@ export async function getVersions(instanceId: string): Promise<Array<Accessory>>
     const mmcPack = JSON.parse(mmcPackContent) as MMCPack;
     const versions: Accessory[] = [];
 
-    const mc = mmcPack.components.find((c) => c.uid === "net.minecraft")!;
+    const mc = mmcPack.components.find((c) => c.uid === "net.minecraft");
     const forge = mmcPack.components.find((c) => c.uid === "net.minecraftforge");
     const fabric = mmcPack.components.find((c) => c.uid === "net.fabricmc.fabric-loader");
 
-    versions.push({ version: mc.cachedVersion, icon: path.join(environment.assetsPath, "minecraft.png") });
+    if (mc) versions.push({ version: mc.cachedVersion, icon: path.join(environment.assetsPath, "minecraft.png") });
     if (forge) versions.push({ version: forge.cachedVersion, icon: path.join(environment.assetsPath, "forge.png") });
     if (fabric) versions.push({ version: fabric.cachedVersion, icon: path.join(environment.assetsPath, "fabric.png") });
 
