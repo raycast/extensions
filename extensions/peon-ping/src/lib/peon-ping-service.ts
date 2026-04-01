@@ -64,7 +64,9 @@ function writeRawConfig(
   configFilePath: string,
   config: RawPeonPingConfig,
 ): void {
-  writeFileSync(configFilePath, JSON.stringify(config), "utf-8");
+  const existing = readFileSync(configFilePath, "utf-8");
+  const indent = existing.match(/\n([ \t]+)/)?.[1];
+  writeFileSync(configFilePath, JSON.stringify(config, null, indent), "utf-8");
 }
 
 export function setVolume(
