@@ -151,23 +151,28 @@ Underscores to dashes:   my_vacation_photo.jpg      →  my-vacation-photo.jpg
 
 ### Auto Enumerate
 
-Number files sequentially. The sort order controls which file gets which number.
+Number files sequentially. By default, the number is prepended to the original filename. The sort order controls which file gets which number.
 
 ```
-By name:           photo-a.jpg → 001.jpg, photo-b.jpg → 002.jpg
-By date created:   (oldest first) → 001.jpg, 002.jpg, 003.jpg
-By date modified:  (most recently changed last) → 001.jpg, 002.jpg, 003.jpg
-By file size:      (smallest first) → 001.jpg, 002.jpg, 003.jpg
-By name length:    (shortest name first) → 001.jpg, 002.jpg, 003.jpg
+Keep name (before):   apple.txt → 001-apple.txt, banana.txt → 002-banana.txt
+Keep name (after):    apple.txt → apple-001.txt, banana.txt → banana-002.txt
+Replace name:         apple.txt → 001.txt, banana.txt → 002.txt
+Alphabetic:           apple.txt → A-apple.txt, banana.txt → B-banana.txt
+With prefix:          apple.txt → photo-001-apple.txt
+With suffix:          apple.txt → 001-apple-final.txt
 ```
 
-| Option        | Description                                                             | Default   |
-| ------------- | ----------------------------------------------------------------------- | --------- |
-| Prefix        | Text before the number (optional — omit for just `001.ext`)             | —         |
-| Start Number  | First number                                                            | `1`       |
-| Zero Padding  | Number of digits                                                        | `3`       |
-| Separator     | Dash, Underscore, Dot, or Space                                         | Dash      |
-| Sort Files By | File Name (A-Z), Date Created, Date Modified, File Size, or Name Length | File Name |
+| Option                 | Description                                                             | Default   |
+| ---------------------- | ----------------------------------------------------------------------- | --------- |
+| Keep Original Filename | Prepend/append number to original name instead of replacing it          | On        |
+| Number Position        | Before Name or After Name (shown when Keep Original Filename is on)     | Before    |
+| Number Format          | Numeric (001), Alphabetic A, B, C, or Alphabetic a, b, c                | Numeric   |
+| Prefix                 | Text before the number (optional)                                       | --        |
+| Suffix                 | Text after the name (optional)                                          | --        |
+| Start Number           | First number (numeric format only)                                      | `1`       |
+| Zero Padding           | Number of digits (numeric format only)                                  | `3`       |
+| Separator              | Dash, Underscore, Dot, or Space                                         | Dash      |
+| Sort Files By          | File Name (A-Z), Date Created, Date Modified, File Size, or Name Length | File Name |
 
 ### Change Extension
 
@@ -446,13 +451,13 @@ All case commands also collapse multiple spaces into single spaces automatically
 
 ### Utility
 
-| Command                         | Example                                                       |
-| ------------------------------- | ------------------------------------------------------------- |
-| Collapse Multiple Spaces        | `my   show  name.mkv` → `my show name.mkv`                    |
-| Enumerate Files by Name         | Alphabetical (natural sort) → `001.ext`, `002.ext`, `003.ext` |
-| Enumerate Files by Date Created | Oldest first → `001.ext`, `002.ext`, `003.ext`                |
+| Command                         | Example                                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| Collapse Multiple Spaces        | `my   show  name.mkv` → `my show name.mkv`                                        |
+| Enumerate Files by Name         | Alphabetical (natural sort) → `001-apple.ext`, `002-banana.ext`, `003-cherry.ext` |
+| Enumerate Files by Date Created | Oldest first → `001-oldest.ext`, `002-middle.ext`, `003-newest.ext`               |
 
-Both enumerate commands use 3-digit zero-padded numbers. Enumerate by Date uses creation date, falling back to modification date.
+Both enumerate commands prepend a 3-digit zero-padded number to the original filename. Enumerate by Date uses creation date, falling back to modification date.
 
 ### Undo
 

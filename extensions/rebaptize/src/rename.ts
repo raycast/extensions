@@ -96,6 +96,10 @@ export interface RenameOptions {
   enumPad?: number;
   enumSeparator?: string;
   enumSortBy?: "name" | "created" | "modified" | "size" | "name-length";
+  enumKeepName?: boolean; // prepend/append number to original name instead of replacing
+  enumPosition?: "before" | "after"; // number position relative to original name
+  enumFormat?: "numeric" | "alpha" | "alpha-upper"; // numbering format
+  enumSuffix?: string; // text after everything (before extension)
   // Find & Replace mode
   find?: string;
   replace?: string;
@@ -298,20 +302,62 @@ export function generateSwapDelimiterName(fileName: string, fromDel: string, toD
   return name + ext;
 }
 
-// Enumerate: prefix-001.ext (index passed in, sorting handled externally)
+// Convert a 1-based index to alphabetic: 1→A, 2→B, ..., 26→Z, 27→AA, 28→AB
+function indexToAlpha(index: number, upper: boolean): string {
+  let result = "";
+  let n = index;
+  while (n > 0) {
+    n--;
+    result = String.fromCharCode((upper ? 65 : 97) + (n % 26)) + result;
+    n = Math.floor(n / 26);
+  }
+  return result;
+}
+
+function formatIndex(index: number, format: string, pad: number): string {
+  switch (format) {
+    case "alpha":
+      return indexToAlpha(index, false);
+    case "alpha-upper":
+      return indexToAlpha(index, true);
+    case "numeric":
+    default:
+      return String(index).padStart(pad, "0");
+  }
+}
+
+// Enumerate: flexible naming with optional original name preservation
 export function generateEnumerateName(
   fileName: string,
   prefix: string,
   index: number,
   pad: number,
   separator: string,
+  keepName = false,
+  position: "before" | "after" = "before",
+  format = "numeric",
+  suffix = "",
 ): string {
   const ext = extname(fileName);
-  const num = String(index).padStart(pad, "0");
-  if (prefix) {
-    return `${prefix}${separator}${num}${ext}`;
+  const originalName = fileName.slice(0, fileName.length - ext.length);
+  const num = formatIndex(index, format, pad);
+  const suffixPart = suffix ? `${separator}${suffix}` : "";
+
+  if (keepName) {
+    if (position === "before") {
+      const prefixPart = prefix ? `${prefix}${separator}` : "";
+      return `${prefixPart}${num}${separator}${originalName}${suffixPart}${ext}`;
+    } else {
+      const prefixPart = prefix ? `${prefix}${separator}` : "";
+      return `${prefixPart}${originalName}${separator}${num}${suffixPart}${ext}`;
+    }
   }
-  return `${num}${ext}`;
+
+  // Original behavior: replace name entirely
+  if (prefix) {
+    return `${prefix}${separator}${num}${suffixPart}${ext}`;
+  }
+  return `${num}${suffixPart}${ext}`;
 }
 
 // Find & Replace on the filename (preserves extension)
@@ -425,6 +471,10 @@ export async function generatePreviews(
           (options.enumStart ?? 1) + i,
           options.enumPad ?? 3,
           options.enumSeparator ?? "-",
+          options.enumKeepName ?? true,
+          options.enumPosition ?? "before",
+          options.enumFormat ?? "numeric",
+          options.enumSuffix ?? "",
         );
         break;
     }

@@ -63,6 +63,11 @@ export interface ScriptStep {
   startNumber?: number;
   zeroPad?: number;
   separator?: string;
+  // Enumerate extras
+  keepName?: boolean;
+  position?: "before" | "after";
+  format?: "numeric" | "alpha" | "alpha-upper";
+  enumSuffix?: string;
 }
 
 export interface RenameScript {
@@ -206,6 +211,10 @@ function applyStep(fileName: string, step: ScriptStep, index: number): string {
         (step.startNumber ?? 1) + index,
         step.zeroPad ?? 3,
         step.separator ?? "-",
+        step.keepName ?? true,
+        step.position ?? "before",
+        step.format ?? "numeric",
+        step.enumSuffix ?? "",
       );
     default:
       return fileName;

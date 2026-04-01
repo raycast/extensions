@@ -1,5 +1,14 @@
 # Rebaptize Changelog
 
+## [Enhanced Enumerate] - {PR_MERGE_DATE}
+
+- Enumerate now preserves original filenames by default (e.g. `001-apple.txt` instead of `001.txt`)
+- Add number format options: numeric with zero padding, uppercase alphabetic (A, B, C), lowercase alphabetic (a, b, c)
+- Add number position option: before or after the original filename
+- Add optional prefix and suffix fields
+- Start number and zero padding are only shown for numeric format
+- Instant enumerate commands (by name and by date) now also preserve original filenames
+
 ## [TMDB Support and Metadata Sources] - {PR_MERGE_DATE}
 
 - Add TMDB (The Movie Database) as a free metadata source for Smart Organize Episodes

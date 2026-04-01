@@ -149,6 +149,10 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
   const [enumPad, setEnumPad] = useState("3");
   const [enumSeparator, setEnumSeparator] = useState("-");
   const [enumSortBy, setEnumSortBy] = useState<"name" | "created" | "modified" | "size" | "name-length">("name");
+  const [enumKeepName, setEnumKeepName] = useState(true);
+  const [enumPosition, setEnumPosition] = useState<"before" | "after">("before");
+  const [enumFormat, setEnumFormat] = useState<"numeric" | "alpha" | "alpha-upper">("numeric");
+  const [enumSuffix, setEnumSuffix] = useState("");
 
   // Find & Replace
   const [find, setFind] = useState("");
@@ -340,6 +344,10 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
           options.enumPad = parseInt(enumPad) || 3;
           options.enumSeparator = enumSeparator;
           options.enumSortBy = enumSortBy;
+          options.enumKeepName = enumKeepName;
+          options.enumPosition = enumPosition;
+          options.enumFormat = enumFormat;
+          options.enumSuffix = enumSuffix.trim();
           // Sort files before generating previews
           if (enumSortBy !== "name") {
             const fileStats = await Promise.all(
@@ -735,6 +743,34 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
 
       {mode === "enumerate" && (
         <>
+          <Form.Checkbox
+            id="enumKeepName"
+            label="Keep Original Filename"
+            value={enumKeepName}
+            onChange={setEnumKeepName}
+            info="When on, the number is added before or after the original filename. When off, the filename is replaced entirely."
+          />
+          {enumKeepName && (
+            <Form.Dropdown
+              id="enumPosition"
+              title="Number Position"
+              value={enumPosition}
+              onChange={(v) => setEnumPosition(v as "before" | "after")}
+            >
+              <Form.Dropdown.Item value="before" title="Before Name" />
+              <Form.Dropdown.Item value="after" title="After Name" />
+            </Form.Dropdown>
+          )}
+          <Form.Dropdown
+            id="enumFormat"
+            title="Number Format"
+            value={enumFormat}
+            onChange={(v) => setEnumFormat(v as "numeric" | "alpha" | "alpha-upper")}
+          >
+            <Form.Dropdown.Item value="numeric" title="Numeric (001, 002, 003)" />
+            <Form.Dropdown.Item value="alpha-upper" title="Alphabetic A, B, C" />
+            <Form.Dropdown.Item value="alpha" title="Alphabetic a, b, c" />
+          </Form.Dropdown>
           <Form.TextField
             id="enumPrefix"
             title="Prefix (Optional)"
@@ -743,13 +779,24 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
             onChange={setEnumPrefix}
           />
           <Form.TextField
-            id="enumStart"
-            title="Start Number"
-            placeholder="1"
-            value={enumStart}
-            onChange={setEnumStart}
+            id="enumSuffix"
+            title="Suffix (Optional)"
+            placeholder="final"
+            value={enumSuffix}
+            onChange={setEnumSuffix}
           />
-          <Form.TextField id="enumPad" title="Zero Padding" placeholder="3" value={enumPad} onChange={setEnumPad} />
+          {enumFormat === "numeric" && (
+            <>
+              <Form.TextField
+                id="enumStart"
+                title="Start Number"
+                placeholder="1"
+                value={enumStart}
+                onChange={setEnumStart}
+              />
+              <Form.TextField id="enumPad" title="Zero Padding" placeholder="3" value={enumPad} onChange={setEnumPad} />
+            </>
+          )}
           <Form.Dropdown id="enumSeparator" title="Separator" value={enumSeparator} onChange={setEnumSeparator}>
             <Form.Dropdown.Item value="-" title="Dash (-)" />
             <Form.Dropdown.Item value="_" title="Underscore (_)" />
@@ -772,9 +819,27 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
             title="Preview"
             text={(() => {
               const p = enumPrefix.trim();
+              const sf = enumSuffix.trim();
               const s = enumSeparator || "-";
-              const n = (enumStart || "1").padStart(parseInt(enumPad) || 3, "0");
-              return p ? `${p}${s}${n}.ext` : `${n}.ext`;
+              const sampleName = "filename";
+              let num: string;
+              if (enumFormat === "numeric") {
+                num = (enumStart || "1").padStart(parseInt(enumPad) || 3, "0");
+              } else {
+                num = enumFormat === "alpha-upper" ? "A" : "a";
+              }
+              const suffixPart = sf ? `${s}${sf}` : "";
+              if (enumKeepName) {
+                if (enumPosition === "before") {
+                  const prefixPart = p ? `${p}${s}` : "";
+                  return `${prefixPart}${num}${s}${sampleName}${suffixPart}.ext`;
+                } else {
+                  const prefixPart = p ? `${p}${s}` : "";
+                  return `${prefixPart}${sampleName}${s}${num}${suffixPart}.ext`;
+                }
+              }
+              if (p) return `${p}${s}${num}${suffixPart}.ext`;
+              return `${num}${suffixPart}.ext`;
             })()}
           />
         </>

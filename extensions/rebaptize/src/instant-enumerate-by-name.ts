@@ -7,10 +7,14 @@ export default async function () {
   try {
     const { folderPath, files } = await getFinderFiles();
 
-    const results = files.map((f, i) => ({
-      original: f,
-      renamed: `${String(i + 1).padStart(3, "0")}${extname(f)}`,
-    }));
+    const results = files.map((f, i) => {
+      const ext = extname(f);
+      const name = f.slice(0, f.length - ext.length);
+      return {
+        original: f,
+        renamed: `${i + 1} - ${name}${ext}`,
+      };
+    });
 
     const changed = results.filter((r) => r.original !== r.renamed);
     if (changed.length === 0) {
