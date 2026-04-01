@@ -48,7 +48,10 @@ export function resolvePeonPingCommandTarget(
   input: ResolvePeonPingCommandTargetInput = {},
 ): PeonPingCommandTarget {
   const hasExecutable = input.hasExecutable ?? existsSync;
-  const cliPath = findPeonExecutable(input.pathEnv ?? process.env.PATH, hasExecutable);
+  const cliPath = findPeonExecutable(
+    input.pathEnv ?? process.env.PATH,
+    hasExecutable,
+  );
 
   if (cliPath) {
     return {

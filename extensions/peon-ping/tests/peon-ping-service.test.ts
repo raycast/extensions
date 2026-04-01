@@ -9,17 +9,24 @@ import {
   addPackToRotation,
   advanceToNextPack,
   clearPackRotation,
+  removePathRule,
   removePackFromRotation,
   setActivePack,
+  setDebugEnabled,
   setCategoryEnabled,
   setDesktopNotifications,
   setHeadphonesOnly,
   setMobileNotifications,
   setNotificationDismissTime,
+  setNotificationAllScreens,
   setNotificationPosition,
   setNotificationStyle,
   setPackRotationMode,
+  setTrainerEnabled,
+  setUseSoundEffectsDevice,
   setVolume,
+  setMeetingDetect,
+  setSuppressSubagentComplete,
   togglePeonPing,
   type PeonPingCommandRunner,
 } from "../src/lib/peon-ping-service";
@@ -246,6 +253,17 @@ test("setHeadphonesOnly preserves other config fields", () => {
   });
 });
 
+test("setUseSoundEffectsDevice writes use_sound_effects_device to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, use_sound_effects_device: false });
+
+  expect(
+    setUseSoundEffectsDevice(fx.configFilePath, fx.pausedFilePath, true),
+  ).toMatchObject({
+    useSoundEffectsDevice: true,
+  });
+});
+
 test("setPackRotationMode calls peon.sh rotation <mode> and returns refreshed config", () => {
   const fx = createClaudeConfigFixture();
   fx.writeConfigJson({ enabled: true, pack_rotation_mode: "random" });
@@ -344,6 +362,111 @@ test("clearPackRotation calls peon packs rotation clear", () => {
 
   expect(clearPackRotation(runtimePaths, run)).toEqual(
     expectedConfig({ packRotation: [] }),
+  );
+});
+
+test("removePathRule calls peon packs unbind --pattern <glob>", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    path_rules: [
+      { pattern: "*/client-a/*", pack: "glados" },
+      { pattern: "*/personal/*", pack: "peon" },
+    ],
+  });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["packs", "unbind", "--pattern", "*/client-a/*"]);
+    fx.writeConfigJson({
+      enabled: true,
+      path_rules: [{ pattern: "*/personal/*", pack: "peon" }],
+    });
+    return "";
+  };
+
+  expect(removePathRule(runtimePaths, run, "*/client-a/*")).toEqual(
+    expectedConfig({
+      pathRules: [{ pattern: "*/personal/*", pack: "peon" }],
+    }),
+  );
+});
+
+test("setDebugEnabled calls peon debug on", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, debug: false });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["debug", "on"]);
+    fx.writeConfigJson({ enabled: true, debug: true });
+    return "";
+  };
+
+  expect(setDebugEnabled(runtimePaths, run, true)).toEqual(
+    expectedConfig({ debugEnabled: true }),
+  );
+});
+
+test("setTrainerEnabled calls peon trainer off", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    trainer: { enabled: true, exercises: { pushups: 100, squats: 120 } },
+  });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["trainer", "off"]);
+    fx.writeConfigJson({
+      enabled: true,
+      trainer: { enabled: false, exercises: { pushups: 100, squats: 120 } },
+    });
+    return "";
+  };
+
+  expect(setTrainerEnabled(runtimePaths, run, false)).toEqual(
+    expectedConfig({
+      trainer: {
+        enabled: false,
+        exercises: { pushups: 100, squats: 120 },
+        reminderIntervalMinutes: 20,
+        reminderMinGapMinutes: 5,
+      },
+    }),
   );
 });
 
@@ -592,4 +715,37 @@ test("setMobileNotifications calls peon.sh mobile off", () => {
   expect(setMobileNotifications(paths, run, false)).toEqual(
     expectedConfig({ mobileNotifyEnabled: false, mobileNotifyConfigured: true }),
   );
+});
+
+test("setNotificationAllScreens writes notification_all_screens to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, notification_all_screens: true });
+
+  expect(
+    setNotificationAllScreens(fx.configFilePath, fx.pausedFilePath, false),
+  ).toMatchObject({
+    notificationAllScreens: false,
+  });
+});
+
+test("setMeetingDetect writes meeting_detect to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, meeting_detect: false });
+
+  expect(setMeetingDetect(fx.configFilePath, fx.pausedFilePath, true)).toMatchObject(
+    {
+      meetingDetect: true,
+    },
+  );
+});
+
+test("setSuppressSubagentComplete writes suppress_subagent_complete to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, suppress_subagent_complete: false });
+
+  expect(
+    setSuppressSubagentComplete(fx.configFilePath, fx.pausedFilePath, true),
+  ).toMatchObject({
+    suppressSubagentComplete: true,
+  });
 });

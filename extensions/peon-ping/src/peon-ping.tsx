@@ -27,16 +27,23 @@ import {
   addPackToRotation,
   advanceToNextPack,
   clearPackRotation,
+  removePathRule,
   removePackFromRotation,
   setActivePack,
+  setDebugEnabled,
   setCategoryEnabled,
   setDesktopNotifications,
   setHeadphonesOnly,
+  setMeetingDetect,
   setMobileNotifications,
+  setNotificationAllScreens,
   setNotificationDismissTime,
   setNotificationPosition,
   setNotificationStyle,
   setPackRotationMode,
+  setSuppressSubagentComplete,
+  setTrainerEnabled,
+  setUseSoundEffectsDevice,
   setVolume,
   togglePeonPing,
   type PeonPingCommandRunner,
@@ -45,18 +52,25 @@ import {
   runAddPackToRotationAction,
   runClearPackRotationAction,
   runNextPackAction,
+  runRemovePathRuleAction,
   runRemovePackFromRotationAction,
   runSetActivePackAction,
+  runSetDebugEnabledAction,
   runSetDismissTimeAction,
   runSetNotificationPositionAction,
   runSetNotificationStyleAction,
   runSetRotationModeAction,
   runSetVolumeAction,
   runStatusToggleAndRefreshMenuBarSafely,
+  runToggleMeetingDetectAction,
   runToggleCategoryAction,
   runToggleHeadphonesOnlyAction,
   runToggleMobileAction,
+  runToggleNotificationAllScreensAction,
   runToggleNotificationsAction,
+  runToggleSuppressSubagentCompleteAction,
+  runToggleUseSoundEffectsDeviceAction,
+  runSetTrainerEnabledAction,
 } from "./lib/peon-ping-actions";
 import type { PeonPingConfig } from "./lib/peon-ping-config";
 import type { InstalledPack } from "./lib/peon-ping-packs";
@@ -174,6 +188,11 @@ function executeAction(
         clearPackRotation,
         setConfig,
       });
+    case "removePathRule":
+      return runRemovePathRuleAction(
+        { paths, run, removePathRule, setConfig },
+        action.pattern,
+      );
     case "toggleCategory":
       return runToggleCategoryAction(
         {
@@ -210,6 +229,16 @@ function executeAction(
         { paths, run, setMobileNotifications, setConfig },
         action.nextEnabled,
       );
+    case "toggleNotificationAllScreens":
+      return runToggleNotificationAllScreensAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setNotificationAllScreens,
+          setConfig,
+        },
+        action.nextEnabled,
+      );
     case "toggleHeadphonesOnly":
       return runToggleHeadphonesOnlyAction(
         {
@@ -218,6 +247,46 @@ function executeAction(
           setHeadphonesOnly,
           setConfig,
         },
+        action.nextEnabled,
+      );
+    case "toggleUseSoundEffectsDevice":
+      return runToggleUseSoundEffectsDeviceAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setUseSoundEffectsDevice,
+          setConfig,
+        },
+        action.nextEnabled,
+      );
+    case "toggleMeetingDetect":
+      return runToggleMeetingDetectAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setMeetingDetect,
+          setConfig,
+        },
+        action.nextEnabled,
+      );
+    case "toggleSuppressSubagentComplete":
+      return runToggleSuppressSubagentCompleteAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setSuppressSubagentComplete,
+          setConfig,
+        },
+        action.nextEnabled,
+      );
+    case "toggleDebugEnabled":
+      return runSetDebugEnabledAction(
+        { paths, run, setDebugEnabled, setConfig },
+        action.nextEnabled,
+      );
+    case "toggleTrainerEnabled":
+      return runSetTrainerEnabledAction(
+        { paths, run, setTrainerEnabled, setConfig },
         action.nextEnabled,
       );
     case "toggleStatus":
@@ -237,6 +306,8 @@ function actionKey(action: DashboardAction): string {
       return `rotation-add-${action.packName}`;
     case "removePackFromRotation":
       return `rotation-remove-${action.packName}`;
+    case "removePathRule":
+      return `path-rule-${action.pattern}`;
     case "toggleCategory":
       return `cat-${action.categoryKey}`;
     case "setNotificationStyle":

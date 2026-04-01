@@ -12,6 +12,7 @@ import {
   CATEGORY_LABELS,
   formatPackCount,
   formatDismiss,
+  formatRuleCount,
   nextDismissSeconds,
   POSITION_CYCLE,
   POSITION_LABELS,
@@ -28,9 +29,13 @@ export type DashboardItemId =
   | "voicePack"
   | "rotation"
   | "rotationPacks"
+  | "pathRules"
   | "categories"
   | "notifications"
-  | "audio";
+  | "behavior"
+  | "audio"
+  | "debug"
+  | "trainer";
 
 export type MetadataLabel = {
   kind: "label";
@@ -82,6 +87,10 @@ export type DashboardAction =
     })
   | (DashboardActionBase & { kind: "clearPackRotation" })
   | (DashboardActionBase & {
+      kind: "removePathRule";
+      pattern: string;
+    })
+  | (DashboardActionBase & {
       kind: "toggleCategory";
       categoryKey: PeonPingCategoryKey;
       nextEnabled: boolean;
@@ -108,6 +117,30 @@ export type DashboardAction =
     })
   | (DashboardActionBase & {
       kind: "toggleHeadphonesOnly";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "toggleUseSoundEffectsDevice";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "toggleNotificationAllScreens";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "toggleMeetingDetect";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "toggleSuppressSubagentComplete";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "toggleDebugEnabled";
+      nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "toggleTrainerEnabled";
       nextEnabled: boolean;
     });
 
@@ -341,12 +374,14 @@ function buildRotationPacksItem(
             textColor: "secondary",
           },
         ]
-      : config.packRotation.map((packName, index): MetadataLabel => ({
-          kind: "label",
-          title: String(index + 1),
-          text: findPackDisplayName(packs, packName),
-          textColor: "green",
-        }));
+      : config.packRotation.map(
+          (packName, index): MetadataLabel => ({
+            kind: "label",
+            title: String(index + 1),
+            text: findPackDisplayName(packs, packName),
+            textColor: "green",
+          }),
+        );
 
   const actions: DashboardAction[] = [
     ...config.packRotation.map(
@@ -386,6 +421,48 @@ function buildRotationPacksItem(
     drillable: true,
     metadata,
     actions,
+  };
+}
+
+function buildPathRulesItem(
+  config: PeonPingConfig,
+  packs: InstalledPack[],
+): DashboardItem {
+  const metadata: MetadataEntry[] =
+    config.pathRules.length === 0
+      ? [
+          {
+            kind: "label",
+            title: "Path Rules",
+            text: "None configured",
+            textColor: "secondary",
+          },
+        ]
+      : config.pathRules.map(
+          (rule): MetadataLabel => ({
+            kind: "label",
+            title: rule.pattern,
+            text: findPackDisplayName(packs, rule.pack),
+            textColor: "green",
+          }),
+        );
+
+  return {
+    id: "pathRules",
+    title: "Path Rules",
+    icon: "bulletPoints",
+    accessoryText: formatRuleCount(config.pathRules.length),
+    drillable: config.pathRules.length > 0,
+    metadata,
+    actions: config.pathRules.map(
+      (rule): DashboardAction => ({
+        kind: "removePathRule",
+        title: `Remove ${rule.pattern}`,
+        subListTitle: rule.pattern,
+        isCurrent: true,
+        pattern: rule.pattern,
+      }),
+    ),
   };
 }
 
@@ -519,6 +596,31 @@ function buildNotificationSubItems(config: PeonPingConfig): DashboardItem[] {
       })),
     },
     {
+      id: "notif-all-screens",
+      title: "All Screens",
+      icon: "window",
+      accessoryText: config.notificationAllScreens ? "On" : "Off",
+      accessoryTagColor: config.notificationAllScreens ? "green" : "red",
+      drillable: false,
+      metadata: [
+        {
+          kind: "label",
+          title: "All Screens",
+          text: config.notificationAllScreens ? "On" : "Off",
+          textColor: config.notificationAllScreens ? "green" : "secondary",
+        },
+      ],
+      actions: [
+        {
+          kind: "toggleNotificationAllScreens",
+          title: config.notificationAllScreens
+            ? "Disable All Screens"
+            : "Enable All Screens",
+          nextEnabled: !config.notificationAllScreens,
+        },
+      ],
+    },
+    {
       id: "notif-dismiss",
       title: "Auto-Dismiss",
       icon: "clock",
@@ -602,6 +704,19 @@ function buildNotificationsItem(config: PeonPingConfig): DashboardItem {
       title: "Dismiss",
       text: formatDismiss(config.notificationDismissSeconds),
     },
+    {
+      kind: "label",
+      title: "Title Override",
+      text: config.notificationTitleOverride || "Auto",
+    },
+    {
+      kind: "label",
+      title: "Templates",
+      text:
+        Object.keys(config.notificationTemplates).length === 0
+          ? "Default"
+          : `${Object.keys(config.notificationTemplates).length} customized`,
+    },
   ];
 
   if (config.mobileNotifyConfigured) {
@@ -639,6 +754,12 @@ function buildAudioItem(config: PeonPingConfig): DashboardItem {
         text: config.headphonesOnly ? "On" : "Off",
         textColor: config.headphonesOnly ? "green" : "secondary",
       },
+      {
+        kind: "label",
+        title: "Sound Effects Device",
+        text: config.useSoundEffectsDevice ? "On" : "Off",
+        textColor: config.useSoundEffectsDevice ? "green" : "secondary",
+      },
     ],
     actions: [
       {
@@ -647,6 +768,148 @@ function buildAudioItem(config: PeonPingConfig): DashboardItem {
           ? "Disable Headphones Only"
           : "Enable Headphones Only",
         nextEnabled: !config.headphonesOnly,
+      },
+      {
+        kind: "toggleUseSoundEffectsDevice",
+        title: config.useSoundEffectsDevice
+          ? "Disable Sound Effects Device"
+          : "Enable Sound Effects Device",
+        nextEnabled: !config.useSoundEffectsDevice,
+      },
+    ],
+  };
+}
+
+function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
+  const enabledCount = [
+    config.meetingDetect,
+    config.suppressSubagentComplete,
+  ].filter(Boolean).length;
+
+  return {
+    id: "behavior",
+    title: "Behavior",
+    icon: "clock",
+    accessoryText: `${enabledCount}/2 enabled`,
+    drillable: false,
+    metadata: [
+      {
+        kind: "label",
+        title: "Meeting Detect",
+        text: config.meetingDetect ? "On" : "Off",
+        textColor: config.meetingDetect ? "green" : "secondary",
+      },
+      {
+        kind: "label",
+        title: "Suppress Subagent Complete",
+        text: config.suppressSubagentComplete ? "On" : "Off",
+        textColor: config.suppressSubagentComplete ? "green" : "secondary",
+      },
+      {
+        kind: "label",
+        title: "Silent Window",
+        text: `${config.silentWindowSeconds}s`,
+      },
+      {
+        kind: "label",
+        title: "Session Start Cooldown",
+        text: `${config.sessionStartCooldownSeconds}s`,
+      },
+    ],
+    actions: [
+      {
+        kind: "toggleMeetingDetect",
+        title: config.meetingDetect
+          ? "Disable Meeting Detect"
+          : "Enable Meeting Detect",
+        nextEnabled: !config.meetingDetect,
+      },
+      {
+        kind: "toggleSuppressSubagentComplete",
+        title: config.suppressSubagentComplete
+          ? "Enable Subagent Complete Sounds"
+          : "Suppress Subagent Complete Sounds",
+        nextEnabled: !config.suppressSubagentComplete,
+      },
+    ],
+  };
+}
+
+function buildDebugItem(config: PeonPingConfig): DashboardItem {
+  return {
+    id: "debug",
+    title: "Debug Logging",
+    icon: "bell",
+    accessoryText: config.debugEnabled ? "On" : "Off",
+    accessoryTagColor: config.debugEnabled ? "green" : "red",
+    drillable: false,
+    metadata: [
+      {
+        kind: "label",
+        title: "Debug Logging",
+        text: config.debugEnabled ? "On" : "Off",
+        textColor: config.debugEnabled ? "green" : "secondary",
+      },
+      {
+        kind: "label",
+        title: "Retention",
+        text: `${config.debugRetentionDays} days`,
+      },
+    ],
+    actions: [
+      {
+        kind: "toggleDebugEnabled",
+        title: config.debugEnabled
+          ? "Disable Debug Logging"
+          : "Enable Debug Logging",
+        nextEnabled: !config.debugEnabled,
+      },
+    ],
+  };
+}
+
+function formatTrainerGoals(exercises: Record<string, number>): string {
+  return Object.entries(exercises)
+    .map(([name, goal]) => `${name}: ${goal}`)
+    .join(", ");
+}
+
+function buildTrainerItem(config: PeonPingConfig): DashboardItem {
+  return {
+    id: "trainer",
+    title: "Trainer",
+    icon: "headphones",
+    accessoryText: config.trainer.enabled ? "On" : "Off",
+    accessoryTagColor: config.trainer.enabled ? "green" : "red",
+    drillable: false,
+    metadata: [
+      {
+        kind: "label",
+        title: "Trainer",
+        text: config.trainer.enabled ? "On" : "Off",
+        textColor: config.trainer.enabled ? "green" : "secondary",
+      },
+      {
+        kind: "label",
+        title: "Goals",
+        text: formatTrainerGoals(config.trainer.exercises),
+      },
+      {
+        kind: "label",
+        title: "Reminder Interval",
+        text: `${config.trainer.reminderIntervalMinutes} min`,
+      },
+      {
+        kind: "label",
+        title: "Minimum Gap",
+        text: `${config.trainer.reminderMinGapMinutes} min`,
+      },
+    ],
+    actions: [
+      {
+        kind: "toggleTrainerEnabled",
+        title: config.trainer.enabled ? "Disable Trainer" : "Enable Trainer",
+        nextEnabled: !config.trainer.enabled,
       },
     ],
   };
@@ -662,8 +925,12 @@ export function buildDashboardItems(
     buildVoicePackItem(config, packs),
     buildRotationItem(config),
     buildRotationPacksItem(config, packs),
+    buildPathRulesItem(config, packs),
     buildCategoriesItem(config),
     buildNotificationsItem(config),
+    buildBehaviorItem(config),
     buildAudioItem(config),
+    buildDebugItem(config),
+    buildTrainerItem(config),
   ];
 }

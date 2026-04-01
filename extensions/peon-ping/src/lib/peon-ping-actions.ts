@@ -11,16 +11,23 @@ import {
   addPackToRotation,
   advanceToNextPack,
   clearPackRotation,
+  removePathRule,
   removePackFromRotation,
   setActivePack,
+  setDebugEnabled,
   setCategoryEnabled,
   setDesktopNotifications,
   setHeadphonesOnly,
+  setMeetingDetect,
   setMobileNotifications,
+  setNotificationAllScreens,
   setNotificationDismissTime,
   setNotificationPosition,
   setNotificationStyle,
   setPackRotationMode,
+  setSuppressSubagentComplete,
+  setTrainerEnabled,
+  setUseSoundEffectsDevice,
   setVolume,
   togglePeonPing,
   type PeonPingCommandRunner,
@@ -212,6 +219,26 @@ export function runToggleHeadphonesOnlyAction(
   return config;
 }
 
+export type RunToggleUseSoundEffectsDeviceActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setUseSoundEffectsDevice: typeof setUseSoundEffectsDevice;
+  setConfig: SetConfig;
+};
+
+export function runToggleUseSoundEffectsDeviceAction(
+  deps: RunToggleUseSoundEffectsDeviceActionDeps,
+  enabled: boolean,
+): PeonPingConfig {
+  const config = deps.setUseSoundEffectsDevice(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    enabled,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
 export type RunSetRotationModeActionDeps = {
   paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
@@ -271,6 +298,54 @@ export function runClearPackRotationAction(
   deps: RunClearPackRotationActionDeps,
 ): PeonPingConfig {
   const config = deps.clearPackRotation(deps.paths, deps.run);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunRemovePathRuleActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  removePathRule: typeof removePathRule;
+  setConfig: SetConfig;
+};
+
+export function runRemovePathRuleAction(
+  deps: RunRemovePathRuleActionDeps,
+  pattern: string,
+): PeonPingConfig {
+  const config = deps.removePathRule(deps.paths, deps.run, pattern);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunSetDebugEnabledActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  setDebugEnabled: typeof setDebugEnabled;
+  setConfig: SetConfig;
+};
+
+export function runSetDebugEnabledAction(
+  deps: RunSetDebugEnabledActionDeps,
+  enabled: boolean,
+): PeonPingConfig {
+  const config = deps.setDebugEnabled(deps.paths, deps.run, enabled);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunSetTrainerEnabledActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  setTrainerEnabled: typeof setTrainerEnabled;
+  setConfig: SetConfig;
+};
+
+export function runSetTrainerEnabledAction(
+  deps: RunSetTrainerEnabledActionDeps,
+  enabled: boolean,
+): PeonPingConfig {
+  const config = deps.setTrainerEnabled(deps.paths, deps.run, enabled);
   deps.setConfig(config);
   return config;
 }
@@ -357,6 +432,66 @@ export function runToggleMobileAction(
   enabled: boolean,
 ): PeonPingConfig {
   const config = deps.setMobileNotifications(deps.paths, deps.run, enabled);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunToggleNotificationAllScreensActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setNotificationAllScreens: typeof setNotificationAllScreens;
+  setConfig: SetConfig;
+};
+
+export function runToggleNotificationAllScreensAction(
+  deps: RunToggleNotificationAllScreensActionDeps,
+  enabled: boolean,
+): PeonPingConfig {
+  const config = deps.setNotificationAllScreens(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    enabled,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunToggleMeetingDetectActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setMeetingDetect: typeof setMeetingDetect;
+  setConfig: SetConfig;
+};
+
+export function runToggleMeetingDetectAction(
+  deps: RunToggleMeetingDetectActionDeps,
+  enabled: boolean,
+): PeonPingConfig {
+  const config = deps.setMeetingDetect(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    enabled,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunToggleSuppressSubagentCompleteActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setSuppressSubagentComplete: typeof setSuppressSubagentComplete;
+  setConfig: SetConfig;
+};
+
+export function runToggleSuppressSubagentCompleteAction(
+  deps: RunToggleSuppressSubagentCompleteActionDeps,
+  enabled: boolean,
+): PeonPingConfig {
+  const config = deps.setSuppressSubagentComplete(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    enabled,
+  );
   deps.setConfig(config);
   return config;
 }

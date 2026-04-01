@@ -104,6 +104,17 @@ function writeRawConfig(
   writeFileSync(configFilePath, JSON.stringify(config, null, indent), "utf-8");
 }
 
+function updateRawConfig(
+  configFilePath: string,
+  pausedFilePath: string,
+  update: (config: RawPeonPingConfig) => void,
+): PeonPingConfig {
+  const config = readRawConfig(configFilePath);
+  update(config);
+  writeRawConfig(configFilePath, config);
+  return getPeonPingConfig(configFilePath, pausedFilePath);
+}
+
 export function setVolume(
   paths: PeonPingCommandPaths,
   run: PeonPingCommandRunner,
@@ -135,10 +146,7 @@ export function setDesktopNotifications(
   run: PeonPingCommandRunner,
   enabled: boolean,
 ): PeonPingConfig {
-  runPeonCommand(paths, run, [
-    "notifications",
-    enabled ? "on" : "off",
-  ]);
+  runPeonCommand(paths, run, ["notifications", enabled ? "on" : "off"]);
   return refreshConfig(paths);
 }
 
@@ -147,10 +155,19 @@ export function setHeadphonesOnly(
   pausedFilePath: string,
   enabled: boolean,
 ): PeonPingConfig {
-  const config = readRawConfig(configFilePath);
-  config.headphones_only = enabled;
-  writeRawConfig(configFilePath, config);
-  return getPeonPingConfig(configFilePath, pausedFilePath);
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.headphones_only = enabled;
+  });
+}
+
+export function setUseSoundEffectsDevice(
+  configFilePath: string,
+  pausedFilePath: string,
+  enabled: boolean,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.use_sound_effects_device = enabled;
+  });
 }
 
 export function setPackRotationMode(
@@ -188,19 +205,45 @@ export function clearPackRotation(
   return refreshConfig(paths);
 }
 
+export function removePathRule(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  pattern: string,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["packs", "unbind", "--pattern", pattern]);
+  return refreshConfig(paths);
+}
+
+export function setDebugEnabled(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  enabled: boolean,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["debug", enabled ? "on" : "off"]);
+  return refreshConfig(paths);
+}
+
+export function setTrainerEnabled(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  enabled: boolean,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["trainer", enabled ? "on" : "off"]);
+  return refreshConfig(paths);
+}
+
 export function setCategoryEnabled(
   configFilePath: string,
   pausedFilePath: string,
   category: string,
   enabled: boolean,
 ): PeonPingConfig {
-  const config = readRawConfig(configFilePath);
-  if (!config.categories) {
-    config.categories = {};
-  }
-  (config.categories as Record<string, boolean>)[category] = enabled;
-  writeRawConfig(configFilePath, config);
-  return getPeonPingConfig(configFilePath, pausedFilePath);
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    if (!config.categories) {
+      config.categories = {};
+    }
+    (config.categories as Record<string, boolean>)[category] = enabled;
+  });
 }
 
 export function setNotificationStyle(
@@ -226,11 +269,7 @@ export function setNotificationDismissTime(
   run: PeonPingCommandRunner,
   seconds: number,
 ): PeonPingConfig {
-  runPeonCommand(paths, run, [
-    "notifications",
-    "dismiss",
-    String(seconds),
-  ]);
+  runPeonCommand(paths, run, ["notifications", "dismiss", String(seconds)]);
   return refreshConfig(paths);
 }
 
@@ -241,4 +280,34 @@ export function setMobileNotifications(
 ): PeonPingConfig {
   runPeonCommand(paths, run, ["mobile", enabled ? "on" : "off"]);
   return refreshConfig(paths);
+}
+
+export function setNotificationAllScreens(
+  configFilePath: string,
+  pausedFilePath: string,
+  enabled: boolean,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.notification_all_screens = enabled;
+  });
+}
+
+export function setMeetingDetect(
+  configFilePath: string,
+  pausedFilePath: string,
+  enabled: boolean,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.meeting_detect = enabled;
+  });
+}
+
+export function setSuppressSubagentComplete(
+  configFilePath: string,
+  pausedFilePath: string,
+  enabled: boolean,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.suppress_subagent_complete = enabled;
+  });
 }

@@ -293,9 +293,7 @@ export function getPeonPingConfig(
     meetingDetect: o.meeting_detect ?? false,
     notificationAllScreens: o.notification_all_screens ?? true,
     notificationTitleOverride: o.notification_title_override ?? "",
-    notificationTemplates: parseNotificationTemplates(
-      o.notification_templates,
-    ),
+    notificationTemplates: parseNotificationTemplates(o.notification_templates),
     debugEnabled: o.debug ?? false,
     debugRetentionDays: o.debug_retention_days ?? 7,
     trainer: parseTrainerConfig(o.trainer),

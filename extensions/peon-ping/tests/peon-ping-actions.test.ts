@@ -7,13 +7,17 @@ import {
   runAddPackToRotationAction,
   runClearPackRotationAction,
   runNextPackAction,
+  runRemovePathRuleAction,
   runRemovePackFromRotationAction,
   runSetActivePackAction,
+  runSetDebugEnabledAction,
   runSetDismissTimeAction,
   runSetNotificationPositionAction,
   runSetNotificationStyleAction,
   runSetRotationModeAction,
   runStatusToggleAndRefreshMenuBarSafely,
+  runToggleMeetingDetectAction,
+  runToggleNotificationAllScreensAction,
   runSetVolumeAction,
   runStatusToggleAndRefreshMenuBar,
   runToggleAction,
@@ -21,6 +25,9 @@ import {
   runToggleHeadphonesOnlyAction,
   runToggleMobileAction,
   runToggleNotificationsAction,
+  runSetTrainerEnabledAction,
+  runToggleSuppressSubagentCompleteAction,
+  runToggleUseSoundEffectsDeviceAction,
 } from "../src/lib/peon-ping-actions";
 
 const dummyPaths: PeonPingResolvedPaths = {
@@ -293,6 +300,30 @@ test("runToggleHeadphonesOnlyAction calls setHeadphonesOnly and updates config s
   expect(result).toEqual(config);
 });
 
+test("runToggleUseSoundEffectsDeviceAction calls setUseSoundEffectsDevice and updates config state", () => {
+  const config = makeConfig({ useSoundEffectsDevice: true });
+  const setUseSoundEffectsDevice = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runToggleUseSoundEffectsDeviceAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setUseSoundEffectsDevice,
+      setConfig,
+    },
+    true,
+  );
+
+  expect(setUseSoundEffectsDevice).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    true,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
 test("runSetRotationModeAction calls setPackRotationMode and updates config state", () => {
   const { run } = createRunStub();
   const config = makeConfig({ packRotationMode: "round-robin" });
@@ -363,6 +394,67 @@ test("runClearPackRotationAction calls clearPackRotation and updates config stat
   });
 
   expect(clearPackRotation).toHaveBeenCalledWith(dummyPaths, run);
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runRemovePathRuleAction calls removePathRule and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({
+    pathRules: [{ pattern: "*/personal/*", pack: "peon" }],
+  });
+  const removePathRule = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runRemovePathRuleAction(
+    { paths: dummyPaths, run, removePathRule, setConfig },
+    "*/client-a/*",
+  );
+
+  expect(removePathRule).toHaveBeenCalledWith(
+    dummyPaths,
+    run,
+    "*/client-a/*",
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetDebugEnabledAction calls setDebugEnabled and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({ debugEnabled: true });
+  const setDebugEnabled = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetDebugEnabledAction(
+    { paths: dummyPaths, run, setDebugEnabled, setConfig },
+    true,
+  );
+
+  expect(setDebugEnabled).toHaveBeenCalledWith(dummyPaths, run, true);
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetTrainerEnabledAction calls setTrainerEnabled and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 5,
+    },
+  });
+  const setTrainerEnabled = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetTrainerEnabledAction(
+    { paths: dummyPaths, run, setTrainerEnabled, setConfig },
+    true,
+  );
+
+  expect(setTrainerEnabled).toHaveBeenCalledWith(dummyPaths, run, true);
   expect(setConfig).toHaveBeenCalledWith(config);
   expect(result).toEqual(config);
 });
@@ -469,6 +561,78 @@ test("runToggleMobileAction calls setMobileNotifications and updates config stat
   );
 
   expect(setMobileNotifications).toHaveBeenCalledWith(dummyPaths, run, true);
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runToggleNotificationAllScreensAction calls setNotificationAllScreens and updates config state", () => {
+  const config = makeConfig({ notificationAllScreens: false });
+  const setNotificationAllScreens = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runToggleNotificationAllScreensAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setNotificationAllScreens,
+      setConfig,
+    },
+    false,
+  );
+
+  expect(setNotificationAllScreens).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    false,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runToggleMeetingDetectAction calls setMeetingDetect and updates config state", () => {
+  const config = makeConfig({ meetingDetect: true });
+  const setMeetingDetect = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runToggleMeetingDetectAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setMeetingDetect,
+      setConfig,
+    },
+    true,
+  );
+
+  expect(setMeetingDetect).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    true,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runToggleSuppressSubagentCompleteAction calls setSuppressSubagentComplete and updates config state", () => {
+  const config = makeConfig({ suppressSubagentComplete: true });
+  const setSuppressSubagentComplete = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runToggleSuppressSubagentCompleteAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setSuppressSubagentComplete,
+      setConfig,
+    },
+    true,
+  );
+
+  expect(setSuppressSubagentComplete).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    true,
+  );
   expect(setConfig).toHaveBeenCalledWith(config);
   expect(result).toEqual(config);
 });

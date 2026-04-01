@@ -224,6 +224,10 @@ export function formatPackCount(count: number): string {
   return count === 1 ? "1 pack" : `${count} packs`;
 }
 
+export function formatRuleCount(count: number): string {
+  return count === 1 ? "1 rule" : `${count} rules`;
+}
+
 export function buildSettingsSections(
   input: BuildSettingsSectionsInput,
 ): SettingsSection[] {
