@@ -18,15 +18,7 @@ import {
 } from "./sources";
 import type { InputSource } from "./sources";
 
-// In `ray dev`, __dirname is inside the extension's src/ directory.
-// In the built extension, the binary lives next to the compiled JS in dist/.
-// We resolve relative to the package root either way.
-const HELPER_PATH = path.resolve(
-  environment.assetsPath,
-  "..",
-  "build",
-  "InputSourceHelper",
-);
+const HELPER_PATH = path.join(environment.assetsPath, "InputSourceHelper");
 
 function switchSource(source: InputSource): void {
   execFileSync(HELPER_PATH, ["switch", source.id]);
