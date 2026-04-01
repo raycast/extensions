@@ -1,6 +1,6 @@
 # Hetzner Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2026-04-01
 
 - Add Windows platform support
 
