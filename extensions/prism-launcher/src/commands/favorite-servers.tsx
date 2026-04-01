@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  Color,
   Icon,
   Keyboard,
   List,
@@ -15,6 +16,7 @@ import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
 import type { Instance, Server } from "../types";
 import { joinServer } from "../utils/instance";
+import { pingServer } from "../utils/ping";
 import {
   isPrismLauncherInstalled,
   loadFavoriteInstanceIds,
@@ -79,7 +81,8 @@ export default function FavoriteServers() {
       (server, index, self) => index === self.findIndex((s) => s.address === server.address),
     );
 
-    setServers(sortServers(uniqueServers, storedFavorites));
+    const pinged = await Promise.all(uniqueServers.map(async (s) => ({ ...s, ...(await pingServer(s)) })));
+    setServers(sortServers(pinged, storedFavorites));
   };
 
   useAsyncEffect(async () => {
@@ -97,8 +100,18 @@ export default function FavoriteServers() {
             <List.Item
               key={`fav-server-${index}`}
               title={server.name}
-              subtitle={server.address}
-              accessories={[{ text: server.instanceName }, ...(server.favorite ? [{ icon: Icon.Star }] : [])]}
+              subtitle={server.instanceName}
+              accessories={[
+                ...(server.online
+                  ? [
+                      {
+                        tag: { value: `${server.playersOnline}/${server.playersMax}`, color: Color.Green },
+                        tooltip: server.version,
+                      },
+                    ]
+                  : [{ tag: { value: "Offline", color: Color.Red } }]),
+                ...(server.favorite ? [{ icon: Icon.Star }] : []),
+              ]}
               icon={server.icon ? { source: server.icon } : Icon.Network}
               actions={
                 <ActionPanel>

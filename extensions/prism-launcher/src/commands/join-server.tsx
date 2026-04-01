@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   closeMainWindow,
+  Color,
   environment,
   Icon,
   Keyboard,
@@ -17,6 +18,7 @@ import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
 import type { Instance, Server } from "../types";
 import { joinServer, launchInstance } from "../utils/instance";
+import { pingServer } from "../utils/ping";
 import {
   isPrismLauncherInstalled,
   loadFavoriteInstanceIds,
@@ -68,8 +70,8 @@ export default function JoinServer() {
       favorite: favoriteAddresses.includes(server.address),
     }));
 
-    // Sort servers with favorites at the top
-    setServers(sortServers(serversWithFavorites, favoriteAddresses));
+    const pinged = await Promise.all(serversWithFavorites.map(async (s) => ({ ...s, ...(await pingServer(s)) })));
+    setServers(sortServers(pinged, favoriteAddresses));
   };
 
   const revalidateInstances = async () => {
@@ -106,7 +108,17 @@ export default function JoinServer() {
               key={`server-${index}`}
               title={server.name}
               subtitle={server.address}
-              accessories={server.favorite ? [{ icon: Icon.Star }] : []}
+              accessories={[
+                ...(server.online
+                  ? [
+                      {
+                        tag: { value: `${server.playersOnline}/${server.playersMax}`, color: Color.Green },
+                        tooltip: server.version,
+                      },
+                    ]
+                  : [{ tag: { value: "Offline", color: Color.Red } }]),
+                ...(server.favorite ? [{ icon: Icon.Star }] : []),
+              ]}
               icon={
                 server.icon
                   ? {
