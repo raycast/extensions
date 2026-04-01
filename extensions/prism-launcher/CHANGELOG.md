@@ -1,5 +1,9 @@
 # Prism Launcher Changelog
 
+## [New Addition] - {PR_MERGE_DATE}
+
+- Added instance versions info to instace picker
+
 ## [New Addition] - 2026-04-01
 
 - Added support for showing live server status in the servers list

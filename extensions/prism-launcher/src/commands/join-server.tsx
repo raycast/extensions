@@ -199,36 +199,42 @@ export default function JoinServer() {
       {...(isPrismInstalled ? { isLoading: instances === undefined } : { isLoading: isPrismInstalledLoading })}
     >
       <When condition={isPrismInstalled}>
-        {instances?.map((instance, index) => (
-          <List.Item
-            key={`instance-${index}`}
-            title={instance.name}
-            accessories={instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
-            icon={{
-              source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
-            }}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="View Servers"
-                  icon={Icon.AppWindowList}
-                  onAction={() => handleInstanceSelect(instance)}
-                />
-                <Action
-                  title="Launch Instance"
-                  icon={Icon.Rocket}
-                  onAction={async () => {
-                    await launchInstance(instance.id);
-                    await closeMainWindow({
-                      popToRootType: PopToRootType.Immediate,
-                      clearRootSearch: true,
-                    });
-                  }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+        {instances?.map((instance, index) => {
+          const versions = instance.accessories.map((acc) => ({ text: acc.version, icon: acc.icon }));
+          const favorite = instance.favorite ? { icon: Icon.Star, tooltip: "Favorited" } : null;
+          const accessories = [...versions, favorite].filter(Boolean) as List.Item.Accessory[];
+
+          return (
+            <List.Item
+              key={`instance-${index}`}
+              title={instance.name}
+              accessories={accessories}
+              icon={{
+                source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
+              }}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="View Servers"
+                    icon={Icon.AppWindowList}
+                    onAction={() => handleInstanceSelect(instance)}
+                  />
+                  <Action
+                    title="Launch Instance"
+                    icon={Icon.Rocket}
+                    onAction={async () => {
+                      await launchInstance(instance.id);
+                      await closeMainWindow({
+                        popToRootType: PopToRootType.Immediate,
+                        clearRootSearch: true,
+                      });
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
       </When>
       <Unless condition={isPrismInstalled}>
         <NoInstall />

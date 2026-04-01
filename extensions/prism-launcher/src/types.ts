@@ -4,6 +4,12 @@ export type Instance = {
   icon?: string;
   favorite?: boolean;
   hasServers?: boolean;
+  accessories: Accessory[];
+};
+
+export type Accessory = {
+  version: string;
+  icon: string;
 };
 
 export type Server = {
@@ -19,4 +25,12 @@ export type Server = {
   playersOnline?: number;
   playersMax?: number;
   version?: string;
+};
+
+export type MMCPack = {
+  components: Array<{
+    cachedName: string;
+    cachedVersion: string;
+    uid: string;
+  }>;
 };

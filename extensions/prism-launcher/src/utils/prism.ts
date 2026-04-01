@@ -3,9 +3,10 @@ import * as fs from "fs-extra";
 import * as async from "modern-async";
 import * as path from "path";
 import nbt from "prismarine-nbt";
-import type { Instance, Server } from "../types";
+import type { Accessory, Instance, MMCPack, Server } from "../types";
 import { getPreferences } from "./preferences";
 import { getShortcutTargetPath } from "./powershell";
+import { environment } from "@raycast/api";
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -39,6 +40,35 @@ export async function isPrismLauncherInstalled(): Promise<boolean> {
   const [prismLauncherPath, instancesPath] = await Promise.all([getPrismLauncherPath(), getInstancesPath()]);
 
   return prismLauncherPath !== null && instancesPath !== null;
+}
+
+export async function getVersions(instanceId: string): Promise<Array<Accessory>> {
+  const instancesPath = await getInstancesPath();
+
+  if (!instancesPath) return [];
+
+  const mmcPackPath = path.join(instancesPath, instanceId, "mmc-pack.json");
+
+  if (!(await fs.pathExists(mmcPackPath))) return [];
+
+  const mmcPackContent = await fs.readFile(mmcPackPath, "utf-8");
+
+  try {
+    const mmcPack = JSON.parse(mmcPackContent) as MMCPack;
+    const versions: Accessory[] = [];
+
+    const mc = mmcPack.components.find((c) => c.uid === "net.minecraft")!;
+    const forge = mmcPack.components.find((c) => c.uid === "net.minecraftforge");
+    const fabric = mmcPack.components.find((c) => c.uid === "net.fabricmc.fabric-loader");
+
+    versions.push({ version: mc.cachedVersion, icon: path.join(environment.assetsPath, "minecraft.png") });
+    if (forge) versions.push({ version: forge.cachedVersion, icon: path.join(environment.assetsPath, "forge.png") });
+    if (fabric) versions.push({ version: fabric.cachedVersion, icon: path.join(environment.assetsPath, "fabric.png") });
+
+    return versions;
+  } catch {
+    return [];
+  }
 }
 
 /**
@@ -80,6 +110,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     const instanceFolder = path.join(instancesPath, instanceId);
     const instanceCfgStr = (await fs.readFile(path.join(instanceFolder, "instance.cfg"))).toString("utf-8");
     const instanceCfg = parser.parse(instanceCfgStr);
+    const versions = await getVersions(instanceId);
 
     const paths = await async.asyncMap(["minecraft", ".minecraft"], async (subfolder: string) =>
       path.join(instanceFolder, subfolder, "icon.png"),
@@ -99,6 +130,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
       id: instanceId,
       icon: iconPath,
       favorite: favoriteIds.includes(instanceId),
+      accessories: versions,
       ...(onlyWithServers ? { hasServers } : {}),
     };
   });
