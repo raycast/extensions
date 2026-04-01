@@ -216,6 +216,83 @@
       "subtitle": "Rebaptize",
       "description": "Revert the last instant rename command (available for 5 minutes after execution)",
       "mode": "no-view"
+    },
+    {
+      "name": "instant-remove-accents",
+      "title": "Remove Accents from Filenames",
+      "subtitle": "Rebaptize",
+      "description": "Remove diacritics and accents: café → cafe, über → uber",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-strip-digits",
+      "title": "Strip Digits from Filenames",
+      "subtitle": "Rebaptize",
+      "description": "Remove all digits from filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-strip-special",
+      "title": "Strip Special Characters",
+      "subtitle": "Rebaptize",
+      "description": "Remove brackets, symbols, and special characters from filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-trim",
+      "title": "Trim Filenames",
+      "subtitle": "Rebaptize",
+      "description": "Remove leading and trailing spaces, dashes, dots, and underscores from filenames",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-pad-numbers",
+      "title": "Add Zero Padding to Numbers",
+      "subtitle": "Rebaptize",
+      "description": "Pad numbers in filenames to 3 digits: file1 → file001",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-unpad-numbers",
+      "title": "Remove Zero Padding from Numbers",
+      "subtitle": "Rebaptize",
+      "description": "Remove leading zeros from numbers: file001 → file1",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-parent-folder",
+      "title": "Prepend Parent Folder Name",
+      "subtitle": "Rebaptize",
+      "description": "Add the parent folder name before each filename: NYC/img.jpg → NYC - img.jpg",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-swap-parts",
+      "title": "Swap Filename Parts",
+      "subtitle": "Rebaptize",
+      "description": "Swap two parts of a filename around \" - \" separator: Artist - Song → Song - Artist",
+      "mode": "no-view"
+    },
+    {
+      "name": "instant-transliterate",
+      "title": "Transliterate to Latin",
+      "subtitle": "Rebaptize",
+      "description": "Convert Cyrillic, accented, and non-Latin characters to ASCII equivalents",
+      "mode": "no-view"
+    },
+    {
+      "name": "exif-rename",
+      "title": "Rename Photos by EXIF",
+      "subtitle": "Rebaptize",
+      "description": "Rename photos using EXIF metadata: date taken, camera model, ISO, focal length",
+      "mode": "view"
+    },
+    {
+      "name": "rename-from-csv",
+      "title": "Rename from CSV",
+      "subtitle": "Rebaptize",
+      "description": "Rename files using a CSV mapping of old names to new names",
+      "mode": "view"
     }
   ],
   "preferences": [

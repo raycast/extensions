@@ -400,6 +400,253 @@ export function generateTemplateEnumerateName(
   return result + ext;
 }
 
+// ─── Utility rename functions ─────────────────────────────────────────────────
+
+// Remove accents/diacritics: café → cafe, über → uber
+export function removeAccents(fileName: string): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const cleaned = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  return cleaned + ext;
+}
+
+// Strip digits from filename
+export function stripDigits(fileName: string): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const cleaned = name
+    .replace(/\d/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return (cleaned || name) + ext;
+}
+
+// Strip special characters (keep letters, digits, spaces, dashes, underscores)
+export function stripSpecialChars(fileName: string): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const cleaned = name
+    .replace(/[^a-zA-Z0-9\s\-_]/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return (cleaned || name) + ext;
+}
+
+// Trim leading/trailing whitespace, dashes, dots, underscores from filename
+export function trimFilename(fileName: string): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const cleaned = name.replace(/^[\s.\-_]+|[\s.\-_]+$/g, "");
+  return (cleaned || name) + ext;
+}
+
+// Add zero padding to numbers in filename: file1 → file001
+export function padNumbersInName(fileName: string, width = 3): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const padded = name.replace(/\d+/g, (match) => match.padStart(width, "0"));
+  return padded + ext;
+}
+
+// Remove zero padding from numbers: file001 → file1
+export function unpadNumbersInName(fileName: string): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const unpadded = name.replace(/\d+/g, (match) => String(parseInt(match)));
+  return unpadded + ext;
+}
+
+// Prepend parent folder name: folder "NYC", file "img.jpg" → "NYC - img.jpg"
+export function prependParentFolder(fileName: string, parentName: string, separator = " - "): string {
+  return `${parentName}${separator}${fileName}`;
+}
+
+// Swap two parts around a separator: "Artist - Song" → "Song - Artist"
+export function swapParts(fileName: string, separator = " - "): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const idx = name.indexOf(separator);
+  if (idx === -1) return fileName; // no separator found, no change
+  const left = name.slice(0, idx);
+  const right = name.slice(idx + separator.length);
+  return `${right}${separator}${left}${ext}`;
+}
+
+// Transliterate common non-Latin characters to ASCII
+const TRANSLIT_MAP: Record<string, string> = {
+  // Cyrillic
+  А: "A",
+  Б: "B",
+  В: "V",
+  Г: "G",
+  Д: "D",
+  Е: "E",
+  Ё: "Yo",
+  Ж: "Zh",
+  З: "Z",
+  И: "I",
+  Й: "Y",
+  К: "K",
+  Л: "L",
+  М: "M",
+  Н: "N",
+  О: "O",
+  П: "P",
+  Р: "R",
+  С: "S",
+  Т: "T",
+  У: "U",
+  Ф: "F",
+  Х: "Kh",
+  Ц: "Ts",
+  Ч: "Ch",
+  Ш: "Sh",
+  Щ: "Shch",
+  Ъ: "",
+  Ы: "Y",
+  Ь: "",
+  Э: "E",
+  Ю: "Yu",
+  Я: "Ya",
+  а: "a",
+  б: "b",
+  в: "v",
+  г: "g",
+  д: "d",
+  е: "e",
+  ё: "yo",
+  ж: "zh",
+  з: "z",
+  и: "i",
+  й: "y",
+  к: "k",
+  л: "l",
+  м: "m",
+  н: "n",
+  о: "o",
+  п: "p",
+  р: "r",
+  с: "s",
+  т: "t",
+  у: "u",
+  ф: "f",
+  х: "kh",
+  ц: "ts",
+  ч: "ch",
+  ш: "sh",
+  щ: "shch",
+  ъ: "",
+  ы: "y",
+  ь: "",
+  э: "e",
+  ю: "yu",
+  я: "ya",
+  // German
+  ä: "ae",
+  ö: "oe",
+  ü: "ue",
+  ß: "ss",
+  Ä: "Ae",
+  Ö: "Oe",
+  Ü: "Ue",
+  // Nordic
+  å: "a",
+  Å: "A",
+  æ: "ae",
+  Æ: "AE",
+  ø: "o",
+  Ø: "O",
+  // Polish
+  ą: "a",
+  ć: "c",
+  ę: "e",
+  ł: "l",
+  ń: "n",
+  ś: "s",
+  ź: "z",
+  ż: "z",
+  Ą: "A",
+  Ć: "C",
+  Ę: "E",
+  Ł: "L",
+  Ń: "N",
+  Ś: "S",
+  Ź: "Z",
+  Ż: "Z",
+  // Turkish
+  ğ: "g",
+  ı: "i",
+  ş: "s",
+  Ğ: "G",
+  İ: "I",
+  Ş: "S",
+  // Czech/Slovak
+  č: "c",
+  ď: "d",
+  ě: "e",
+  ň: "n",
+  ř: "r",
+  š: "s",
+  ť: "t",
+  ů: "u",
+  ž: "z",
+  Č: "C",
+  Ď: "D",
+  Ě: "E",
+  Ň: "N",
+  Ř: "R",
+  Š: "S",
+  Ť: "T",
+  Ů: "U",
+  Ž: "Z",
+  // Romanian
+  ă: "a",
+  â: "a",
+  î: "i",
+  ș: "s",
+  ț: "t",
+  Ă: "A",
+  Â: "A",
+  Î: "I",
+  Ș: "S",
+  Ț: "T",
+  // Portuguese/Spanish
+  ã: "a",
+  õ: "o",
+  ñ: "n",
+  Ã: "A",
+  Õ: "O",
+  Ñ: "N",
+};
+
+export function transliterate(fileName: string): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  // First remove diacritics via normalize, then apply manual map for remaining
+  let result = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  result = result.replace(/./g, (ch) => TRANSLIT_MAP[ch] ?? ch);
+  return result + ext;
+}
+
+// Insert text at a specific position in the filename
+export function insertAtPosition(fileName: string, text: string, position: number, fromEnd = false): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const pos = fromEnd ? Math.max(0, name.length - position) : Math.min(position, name.length);
+  return name.slice(0, pos) + text + name.slice(pos) + ext;
+}
+
+// Remove characters at a specific position range
+export function removeAtPosition(fileName: string, start: number, count: number, fromEnd = false): string {
+  const ext = extname(fileName);
+  const name = fileName.slice(0, fileName.length - ext.length);
+  const s = fromEnd ? Math.max(0, name.length - start - count) : Math.min(start, name.length);
+  const e = Math.min(s + count, name.length);
+  return (name.slice(0, s) + name.slice(e) || name) + ext;
+}
+
+// ─── End utility rename functions ─────────────────────────────────────────────
+
 // Find & Replace on the filename (preserves extension)
 export function generateFindReplaceName(fileName: string, find: string, replace: string, useRegex: boolean): string {
   const ext = extname(fileName);

@@ -1,5 +1,26 @@
 # Rebaptize Changelog
 
+## [New Commands and Features] - {PR_MERGE_DATE}
+
+### New Commands
+
+- **Rename Photos by EXIF** — rename photos using date taken, camera model, ISO, focal length (template-based)
+- **Rename from CSV** — bulk rename files using a mapping of old names to new names
+- **Remove Accents from Filenames** — strip diacritics: café → cafe, über → uber
+- **Strip Digits from Filenames** — remove all numbers from filenames
+- **Strip Special Characters** — remove brackets, symbols, and special chars
+- **Trim Filenames** — remove leading/trailing spaces, dashes, dots, underscores
+- **Add Zero Padding to Numbers** — file1 → file001
+- **Remove Zero Padding from Numbers** — file001 → file1
+- **Prepend Parent Folder Name** — NYC/img.jpg → NYC - img.jpg
+- **Swap Filename Parts** — swap around " - " separator: Artist - Song → Song - Artist
+- **Transliterate to Latin** — convert Cyrillic, accented, and non-Latin characters to ASCII
+
+### New Script Step Types
+
+- All 11 new operations available as step types in Create Rename Script
+- Insert at Position and Remove at Position steps for precise character manipulation
+
 ## [Enhanced Enumerate] - {PR_MERGE_DATE}
 
 - Enumerate now preserves original filenames by default (e.g. `001-apple.txt` instead of `001.txt`)

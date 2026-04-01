@@ -17,9 +17,11 @@ Every function is its own Raycast command — assign aliases and hotkeys to the 
 - [Smart Find & Replace](#smart-find--replace)
 - [Sort Files by Date](#sort-files-by-date)
 - [Sort Photos by Location](#sort-photos-by-location)
+- [Rename Photos by EXIF](#rename-photos-by-exif)
+- [Rename from CSV](#rename-from-csv)
 - [Custom Rename Scripts](#custom-rename-scripts)
 - [Preset Shortcuts](#preset-shortcuts)
-- [Instant Commands](#instant-commands) — Case, Delimiter, Utility, Undo
+- [Instant Commands](#instant-commands) — Case, Delimiter, Clean Up, Utility, Undo
 - [Smart Detection](#smart-detection)
 - [Finder Detection](#finder-detection)
 - [Metadata Integration](#metadata-integration-optional) — TMDB, TheTVDB
@@ -398,6 +400,49 @@ Photos without GPS data are shown in the preview but left untouched during organ
 
 ---
 
+## Rename Photos by EXIF
+
+Rename photos using embedded EXIF metadata -- date taken, camera make/model, ISO, focal length, and resolution.
+
+**Template placeholders:**
+
+- `{date}` -- date taken (format configurable)
+- `{make}` -- camera manufacturer (Canon, Nikon, etc.)
+- `{model}` -- camera model (EOS R5, Z9, etc.)
+- `{iso}` -- ISO speed
+- `{focal}` -- focal length (e.g. 85mm)
+- `{width}`, `{height}` -- image dimensions
+- `{name}` -- original filename
+- `{i}` -- index (001, 002, etc.)
+
+**Date formats:** `2026-03-31_14-30-00`, `2026-03-31`, `20260331`, `31-03-2026`
+
+```
+Template: {date}_{i}         → 2026-03-31_14-30-00_001.jpg
+Template: {model}_{date}_{i} → EOS R5_2026-03-31_001.jpg
+Template: {date}_{name}      → 2026-03-31_DSC_0001.jpg
+```
+
+Files are automatically sorted by EXIF date taken. Supports JPEG, TIFF, HEIC, RAW (ARW, CR2, NEF, DNG), and more.
+
+---
+
+## Rename from CSV
+
+Rename files using a mapping of old names to new names. Paste the mappings directly or copy from a spreadsheet.
+
+**Supported separators:** Comma, Tab, Semicolon, Pipe, Arrow (`->`)
+
+```
+old-name.txt,new-name.txt
+photo.jpg,vacation-001.jpg
+report.pdf,Q1-2026-report.pdf
+```
+
+Files that don't exist in the folder are skipped with a warning. Preview is shown before any changes are applied.
+
+---
+
 ## Custom Rename Scripts
 
 Build reusable rename pipelines that combine a file filter with a sequence of rename steps. Save them and run later with a single action.
@@ -505,15 +550,29 @@ All case commands also collapse multiple spaces into single spaces automatically
 | Replace Dashes with Spaces      | `my-file.jpg` → `my file.jpg`               |
 | Replace Spaces with Dashes      | `my file.jpg` → `my-file.jpg`               |
 
+### Clean Up
+
+| Command                       | Example                                   |
+| ----------------------------- | ----------------------------------------- |
+| Remove Accents from Filenames | `café résumé.txt` → `cafe resume.txt`     |
+| Strip Digits from Filenames   | `file123name456.txt` → `filename.txt`     |
+| Strip Special Characters      | `file (copy) [2].txt` → `file copy 2.txt` |
+| Trim Filenames                | ` - file - .txt` → `file.txt`             |
+| Transliterate to Latin        | `Москва.txt` → `Moskva.txt`               |
+
 ### Utility
 
-| Command                         | Example                                                                           |
-| ------------------------------- | --------------------------------------------------------------------------------- |
-| Collapse Multiple Spaces        | `my   show  name.mkv` → `my show name.mkv`                                        |
-| Enumerate Files by Name         | Alphabetical (natural sort) → `001-apple.ext`, `002-banana.ext`, `003-cherry.ext` |
-| Enumerate Files by Date Created | Oldest first → `001-oldest.ext`, `002-middle.ext`, `003-newest.ext`               |
+| Command                          | Example                                           |
+| -------------------------------- | ------------------------------------------------- |
+| Collapse Multiple Spaces         | `my   show  name.mkv` → `my show name.mkv`        |
+| Enumerate Files by Name          | Alphabetical → `1 - apple.ext`, `2 - banana.ext`  |
+| Enumerate Files by Date Created  | Oldest first → `1 - oldest.ext`, `2 - middle.ext` |
+| Add Zero Padding to Numbers      | `file1.txt` → `file001.txt`                       |
+| Remove Zero Padding from Numbers | `file001.txt` → `file1.txt`                       |
+| Prepend Parent Folder Name       | In folder `NYC`: `img.jpg` → `NYC - img.jpg`      |
+| Swap Filename Parts              | `Artist - Song.mp3` → `Song - Artist.mp3`         |
 
-Both enumerate commands prepend a 3-digit zero-padded number to the original filename. Enumerate by Date uses creation date, falling back to modification date.
+Enumerate commands prepend the number to the original filename. Enumerate by Date uses creation date, falling back to modification date.
 
 ### Undo
 

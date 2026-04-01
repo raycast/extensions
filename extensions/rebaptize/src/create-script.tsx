@@ -79,6 +79,14 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
   const [c3Start, setC3Start] = useState(String(existing?.counters?.[2]?.start ?? 1));
   const [c3Pad, setC3Pad] = useState(String(existing?.counters?.[2]?.pad ?? 0));
   const [c3Every, setC3Every] = useState(String(existing?.counters?.[2]?.every ?? 100));
+  // New step types
+  const [swapSeparator, setSwapSeparator] = useState(existing?.swapSeparator ?? " - ");
+  const [padWidth, setPadWidth] = useState(String(existing?.padWidth ?? 3));
+  const [parentSep, setParentSep] = useState(existing?.parentSeparator ?? " - ");
+  const [insertText, setInsertText] = useState(existing?.insertText ?? "");
+  const [posIndex, setPosIndex] = useState(String(existing?.positionIndex ?? 0));
+  const [posFromEnd, setPosFromEnd] = useState(existing?.positionFromEnd ?? false);
+  const [removeCount, setRemoveCount] = useState(String(existing?.removeCount ?? 1));
 
   function buildStep(): ScriptStep {
     const step: ScriptStep = { type: stepType };
@@ -161,6 +169,26 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
           step.enumSuffix = enumSuffix;
         }
         break;
+      case "swap-parts":
+        step.swapSeparator = swapSeparator;
+        break;
+      case "pad-numbers":
+        step.padWidth = parseInt(padWidth) || 3;
+        break;
+      case "parent-folder":
+        step.prefix = prefix || "Folder";
+        step.parentSeparator = parentSep;
+        break;
+      case "insert-at-position":
+        step.insertText = insertText;
+        step.positionIndex = parseInt(posIndex) || 0;
+        step.positionFromEnd = posFromEnd;
+        break;
+      case "remove-at-position":
+        step.positionIndex = parseInt(posIndex) || 0;
+        step.removeCount = parseInt(removeCount) || 1;
+        step.positionFromEnd = posFromEnd;
+        break;
     }
     return step;
   }
@@ -193,6 +221,19 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
           <Form.Dropdown.Item value="swap-delimiter" title="Swap Delimiter" />
           <Form.Dropdown.Item value="find-replace" title="Find & Replace" />
           <Form.Dropdown.Item value="change-extension" title="Change Extension" />
+          <Form.Dropdown.Item value="remove-accents" title="Remove Accents" />
+          <Form.Dropdown.Item value="strip-digits" title="Strip Digits" />
+          <Form.Dropdown.Item value="strip-special" title="Strip Special Characters" />
+          <Form.Dropdown.Item value="trim" title="Trim Filename" />
+          <Form.Dropdown.Item value="transliterate" title="Transliterate to Latin" />
+        </Form.Dropdown.Section>
+        <Form.Dropdown.Section title="Transform">
+          <Form.Dropdown.Item value="pad-numbers" title="Add Zero Padding" />
+          <Form.Dropdown.Item value="unpad-numbers" title="Remove Zero Padding" />
+          <Form.Dropdown.Item value="parent-folder" title="Prepend Parent Folder" />
+          <Form.Dropdown.Item value="swap-parts" title="Swap Parts" />
+          <Form.Dropdown.Item value="insert-at-position" title="Insert at Position" />
+          <Form.Dropdown.Item value="remove-at-position" title="Remove at Position" />
         </Form.Dropdown.Section>
         <Form.Dropdown.Section title="Rename Format">
           <Form.Dropdown.Item value="tv-show" title="Rename as TV Show" />
@@ -582,10 +623,104 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
         </>
       )}
 
-      {/* No-config steps */}
-      {["uppercase", "lowercase", "titlecase", "sentencecase", "collapse-spaces"].includes(stepType) && (
-        <Form.Description title="" text="This step has no additional configuration." />
+      {stepType === "swap-parts" && (
+        <Form.TextField
+          id="swapSeparator"
+          title="Separator"
+          placeholder=" - "
+          value={swapSeparator}
+          onChange={setSwapSeparator}
+          info='Swap the two parts of the filename around this separator. E.g. "Artist - Song" becomes "Song - Artist".'
+        />
       )}
+
+      {stepType === "pad-numbers" && (
+        <Form.TextField
+          id="padWidth"
+          title="Pad Width"
+          placeholder="3"
+          value={padWidth}
+          onChange={setPadWidth}
+          info="Pad numbers in filenames to this many digits. E.g. 3 turns file1 into file001."
+        />
+      )}
+
+      {stepType === "parent-folder" && (
+        <>
+          <Form.TextField
+            id="parentPrefix"
+            title="Folder Name"
+            placeholder="Folder"
+            value={prefix}
+            onChange={setPrefix}
+            info="The folder name to prepend. When run in a script, this uses the value you type here."
+          />
+          <Form.TextField
+            id="parentSep"
+            title="Separator"
+            placeholder=" - "
+            value={parentSep}
+            onChange={setParentSep}
+          />
+        </>
+      )}
+
+      {stepType === "insert-at-position" && (
+        <>
+          <Form.TextField
+            id="insertText"
+            title="Text to Insert"
+            placeholder="prefix_"
+            value={insertText}
+            onChange={setInsertText}
+          />
+          <Form.TextField
+            id="posIndex"
+            title="Position"
+            placeholder="0"
+            value={posIndex}
+            onChange={setPosIndex}
+            info="Character position to insert at. 0 = beginning of filename."
+          />
+          <Form.Checkbox id="posFromEnd" label="Count from End" value={posFromEnd} onChange={setPosFromEnd} />
+        </>
+      )}
+
+      {stepType === "remove-at-position" && (
+        <>
+          <Form.TextField
+            id="posIndex"
+            title="Start Position"
+            placeholder="0"
+            value={posIndex}
+            onChange={setPosIndex}
+            info="Character position to start removing from."
+          />
+          <Form.TextField
+            id="removeCount"
+            title="Characters to Remove"
+            placeholder="1"
+            value={removeCount}
+            onChange={setRemoveCount}
+          />
+          <Form.Checkbox id="posFromEnd" label="Count from End" value={posFromEnd} onChange={setPosFromEnd} />
+        </>
+      )}
+
+      {/* No-config steps */}
+      {[
+        "uppercase",
+        "lowercase",
+        "titlecase",
+        "sentencecase",
+        "collapse-spaces",
+        "remove-accents",
+        "strip-digits",
+        "strip-special",
+        "trim",
+        "unpad-numbers",
+        "transliterate",
+      ].includes(stepType) && <Form.Description title="" text="This step has no additional configuration." />}
     </Form>
   );
 }
