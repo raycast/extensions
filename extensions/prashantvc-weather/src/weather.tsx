@@ -281,7 +281,10 @@ async function reverseGeocode(lat: string, lon: string) {
     );
 
     if (!response.ok) {
-      return fallback;
+      return {
+        placeName: fallback,
+        countryCode: null,
+      };
     }
 
     const data = (await response.json()) as ReverseGeocodeResponse;

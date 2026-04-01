@@ -11,7 +11,7 @@
   "commands": [
     {
       "name": "weather",
-      "title": "Weather For",
+      "title": "Weather for",
       "description": "Show weather for a typed city, address, or coordinates.",
       "mode": "view",
       "keywords": [
