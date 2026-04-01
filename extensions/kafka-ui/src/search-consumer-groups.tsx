@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
@@ -28,11 +28,21 @@ function aggregateByTopic(groupId: string, partitions: ConsumerGroupPartition[])
 }
 
 function ConsumerGroupDetailView({ env, group }: { env: StoredEnvironment; group: ConsumerGroupOverview }) {
-  const { isLoading, data, revalidate } = useCachedPromise(fetchConsumerGroupDetail, [
+  const { isLoading, data, revalidate, error } = useCachedPromise(fetchConsumerGroupDetail, [
     env.kafkaUiUrl,
     env.clusterName,
     group.groupId,
   ]);
+
+  useEffect(() => {
+    if (error) {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch consumer group details",
+        message: String(error),
+      });
+    }
+  }, [error]);
 
   const topicSummaries = data ? aggregateByTopic(group.groupId, data.partitions ?? []) : [];
   const sortedSummaries = topicSummaries.sort((a, b) => b.totalLag - a.totalLag);
@@ -167,9 +177,20 @@ export default function SearchConsumerGroups() {
     isLoading: dataLoading,
     data: groups = [],
     revalidate,
+    error: groupsError,
   } = useCachedPromise(fetchConsumerGroups, [selectedEnv?.kafkaUiUrl ?? "", selectedEnv?.clusterName ?? ""], {
     execute: !!selectedEnv,
   });
+
+  useEffect(() => {
+    if (groupsError) {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch consumer groups",
+        message: String(groupsError),
+      });
+    }
+  }, [groupsError]);
 
   const isLoading = envsLoading || dataLoading;
 

@@ -1,21 +1,8 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { EnvColorValue, StoredEnvironment } from "./types";
+import { StoredEnvironment } from "./types";
 import { getEnvironments } from "./storage";
-
-const COLOR_MAP: Record<EnvColorValue, Color> = {
-  Blue: Color.Blue,
-  Green: Color.Green,
-  Orange: Color.Orange,
-  Red: Color.Red,
-  Purple: Color.Purple,
-  Yellow: Color.Yellow,
-  Magenta: Color.Magenta,
-};
-
-export function resolveEnvColor(env: StoredEnvironment): Color {
-  return COLOR_MAP[env.color] ?? Color.Blue;
-}
+import { resolveEnvColor } from "./colors";
 
 export function useEnvironments() {
   return useCachedPromise(getEnvironments);

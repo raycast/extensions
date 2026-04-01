@@ -1,4 +1,4 @@
-# Kafka UI - Raycast Extension
+# Kafka UI
 
 A Raycast extension for inspecting Apache Kafka consumer group lag and browsing topics through [Kafbat UI](https://github.com/kafbat/kafka-ui) (formerly Provectus Kafka UI).
 
@@ -29,12 +29,12 @@ This extension is powered by the [Kafbat UI](https://github.com/kafbat/kafka-ui)
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|---|---|
-| Cmd+O | Open in Kafka UI browser |
-| Cmd+Shift+O | Open consumer groups page / topic in Kafka UI |
-| Cmd+R | Refresh data |
-| Cmd+C | Copy item to clipboard |
+| Shortcut    | Action                                                |
+| ----------- | ----------------------------------------------------- |
+| Cmd+O       | Open in Kafka UI browser                              |
+| Cmd+Shift+O | Open consumer groups page / topic in Kafka UI         |
+| Cmd+R       | Refresh data                                          |
+| Cmd+C       | Copy item to clipboard                                |
 | Cmd+Shift+F | Toggle deep search (all topics vs. filtered prefixes) |
 
 ## Requirements

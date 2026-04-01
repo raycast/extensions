@@ -1,4 +1,4 @@
-# Kafka UI Changelog
+# Kafka UI
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

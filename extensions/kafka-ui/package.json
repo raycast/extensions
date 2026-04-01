@@ -6,31 +6,53 @@
   "icon": "command-icon.png",
   "author": "nir",
   "license": "MIT",
-  "categories": ["Developer Tools"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "commands": [
     {
       "name": "search-consumer-groups",
-      "title": "Kafka Search Consumer Groups",
+      "title": "Search Consumer Groups",
       "subtitle": "Kafka UI",
       "description": "Search consumer groups, inspect lag per topic and partition",
       "mode": "view",
-      "keywords": ["kafka", "consumer", "group", "lag", "search"]
+      "keywords": [
+        "kafka",
+        "consumer",
+        "group",
+        "lag",
+        "search"
+      ]
     },
     {
       "name": "search-topics",
-      "title": "Kafka Search Topics",
+      "title": "Search Topics",
       "subtitle": "Kafka UI",
       "description": "Search and browse Kafka topics with partition and replication details",
       "mode": "view",
-      "keywords": ["kafka", "topic", "search", "browse"]
+      "keywords": [
+        "kafka",
+        "topic",
+        "search",
+        "browse"
+      ]
     },
     {
       "name": "manage-environments",
-      "title": "Kafka Configuration Manager",
+      "title": "Configuration Manager",
       "subtitle": "Kafka UI",
       "description": "Add, edit, or remove Kafka UI environments and cluster connections",
       "mode": "view",
-      "keywords": ["kafka", "environment", "cluster", "config", "settings"]
+      "keywords": [
+        "kafka",
+        "environment",
+        "cluster",
+        "config",
+        "settings"
+      ]
     }
   ],
   "preferences": [

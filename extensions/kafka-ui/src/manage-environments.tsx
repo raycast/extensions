@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Color,
   confirmAlert,
   Form,
   Icon,
@@ -14,17 +13,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { getEnvironments, addEnvironment, updateEnvironment, deleteEnvironment, generateId } from "./storage";
 import { ENV_COLOR_OPTIONS, EnvColorValue, StoredEnvironment } from "./types";
-import { resolveEnvColor } from "./env-actions";
-
-const COLOR_ICON_MAP: Record<EnvColorValue, Color> = {
-  Blue: Color.Blue,
-  Green: Color.Green,
-  Orange: Color.Orange,
-  Red: Color.Red,
-  Purple: Color.Purple,
-  Yellow: Color.Yellow,
-  Magenta: Color.Magenta,
-};
+import { resolveEnvColor, COLOR_ICON_MAP } from "./colors";
 
 interface EnvironmentFormValues {
   name: string;

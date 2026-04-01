@@ -7,19 +7,19 @@ function normalizeUrl(url: string): string {
 async function fetchJson<T>(url: string): Promise<T> {
   console.log(`[kafka-ui] GET ${url}`);
   const response = await fetch(url);
-  const contentType = response.headers.get("content-type") ?? "";
+  // First handle HTTP errors so we can include status and body in logs.
+  if (!response.ok) {
+    const body = await response.text();
+    console.error(`[kafka-ui] API error: ${response.status} ${response.statusText} - ${body}`);
+    throw new Error(`Kafka UI API ${response.status}: ${response.statusText}. URL: ${url}`);
+  }
 
+  const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) {
     const body = await response.text();
     console.error(`[kafka-ui] Expected JSON but got "${contentType}" from ${url}`);
     console.error(`[kafka-ui] Response body (first 500 chars): ${body.substring(0, 500)}`);
     throw new Error(`Kafka UI returned non-JSON response. Verify your Kafka UI URL and Cluster Name. URL: ${url}`);
-  }
-
-  if (!response.ok) {
-    const body = await response.text();
-    console.error(`[kafka-ui] API error: ${response.status} ${response.statusText} - ${body}`);
-    throw new Error(`Kafka UI API ${response.status}: ${response.statusText}. URL: ${url}`);
   }
 
   return response.json() as Promise<T>;

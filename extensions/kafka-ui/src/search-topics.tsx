@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { fetchTopicConsumerGroupsWithLag, fetchTopics, buildConsumerGroupUrl, buildTopicUrl } from "./api";
@@ -64,7 +64,18 @@ function TopicDetailView({ env, topic }: { env: StoredEnvironment; topic: TopicO
     isLoading,
     data: consumers = [],
     revalidate,
+    error,
   } = useCachedPromise(fetchTopicConsumerGroupsWithLag, [env.kafkaUiUrl, env.clusterName, topic.name]);
+
+  useEffect(() => {
+    if (error) {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch consumer groups for topic",
+        message: String(error),
+      });
+    }
+  }, [error]);
   const sorted = [...consumers].sort((a, b) => (b.messagesBehind ?? 0) - (a.messagesBehind ?? 0));
 
   return (
@@ -198,9 +209,20 @@ export default function SearchTopics() {
     isLoading: dataLoading,
     data: topics = [],
     revalidate,
+    error: topicsError,
   } = useCachedPromise(fetchTopics, [selectedEnv?.kafkaUiUrl ?? "", selectedEnv?.clusterName ?? ""], {
     execute: !!selectedEnv,
   });
+
+  useEffect(() => {
+    if (topicsError) {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch topics",
+        message: String(topicsError),
+      });
+    }
+  }, [topicsError]);
 
   const isLoading = envsLoading || dataLoading;
 
