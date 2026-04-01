@@ -38,18 +38,14 @@ export default function ReadArticle(props: LaunchProps<{ arguments: Arguments }>
         markdown={`# Error\n\n${error}`}
         actions={
           <ActionPanel>
-            {url && isValidUrl(url) && (
-              <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(url)} />
-            )}
+            {url && isValidUrl(url) && <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(url)} />}
           </ActionPanel>
         }
       />
     );
   }
 
-  const markdown = article
-    ? formatArticle(article)
-    : "Loading article...";
+  const markdown = article ? formatArticle(article) : "Loading article...";
 
   return (
     <Detail
@@ -72,8 +68,16 @@ export default function ReadArticle(props: LaunchProps<{ arguments: Arguments }>
           <ActionPanel>
             <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(article.url)} />
             <Action.OpenInBrowser title="Open Original" url={article.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <Action.CopyToClipboard title="Copy Article Text" content={article.textContent} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-            <Action.CopyToClipboard title="Copy URL" content={article.url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+            <Action.CopyToClipboard
+              title="Copy Article Text"
+              content={article.textContent}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={article.url}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
           </ActionPanel>
         ) : undefined
       }

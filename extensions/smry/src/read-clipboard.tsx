@@ -53,9 +53,7 @@ export default function ReadClipboard() {
     );
   }
 
-  const markdown = article
-    ? formatArticle(article)
-    : "Loading article from clipboard URL...";
+  const markdown = article ? formatArticle(article) : "Loading article from clipboard URL...";
 
   return (
     <Detail
@@ -77,7 +75,11 @@ export default function ReadClipboard() {
           <ActionPanel>
             <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(article.url)} />
             <Action.OpenInBrowser title="Open Original" url={article.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <Action.CopyToClipboard title="Copy Article Text" content={article.textContent} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+            <Action.CopyToClipboard
+              title="Copy Article Text"
+              content={article.textContent}
+              shortcut={{ modifiers: ["cmd"], key: "c" }}
+            />
           </ActionPanel>
         ) : undefined
       }

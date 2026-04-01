@@ -53,7 +53,6 @@ export async function fetchArticle(url: string): Promise<Article> {
   return { ...data.article, url };
 }
 
-
 export function getSmryUrl(articleUrl: string): string {
   const baseUrl = getBaseUrl();
   return `${baseUrl}/${articleUrl}`;
@@ -95,7 +94,13 @@ export function htmlToMarkdown(html: string): string {
   md = md.replace(/<li[^>]*>(.*?)<\/li>/gi, "- $1\n");
   // Blockquotes
   md = md.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gis, (_, content) => {
-    return content.trim().split("\n").map((line: string) => `> ${line}`).join("\n") + "\n\n";
+    return (
+      content
+        .trim()
+        .split("\n")
+        .map((line: string) => `> ${line}`)
+        .join("\n") + "\n\n"
+    );
   });
   // Code blocks
   md = md.replace(/<pre[^>]*><code[^>]*>(.*?)<\/code><\/pre>/gis, "```\n$1\n```\n\n");

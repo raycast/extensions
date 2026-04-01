@@ -51,19 +51,13 @@ export default function SummarizeArticle(props: LaunchProps<{ arguments: Argumen
       <Detail
         markdown={`# Error\n\n${error}`}
         actions={
-          <ActionPanel>
-            {url && (
-              <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(url)} />
-            )}
-          </ActionPanel>
+          <ActionPanel>{url && <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(url)} />}</ActionPanel>
         }
       />
     );
   }
 
-  const markdown = summary
-    ? `# ${title}\n\n## Summary\n\n${summary}`
-    : "Generating summary...";
+  const markdown = summary ? `# ${title}\n\n## Summary\n\n${summary}` : "Generating summary...";
 
   return (
     <Detail
@@ -76,7 +70,11 @@ export default function SummarizeArticle(props: LaunchProps<{ arguments: Argumen
             <Action.CopyToClipboard title="Copy Summary" content={summary} />
             <Action.OpenInBrowser title="Read Full Article in SMRY" url={getSmryUrl(url)} />
             <Action.OpenInBrowser title="Open Original" url={url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-            <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} />
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={url}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            />
           </ActionPanel>
         ) : undefined
       }

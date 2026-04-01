@@ -5,7 +5,10 @@
   "description": "Read and summarize articles with smry.ai - clean reader mode, AI summaries, and more",
   "icon": "extension-icon.png",
   "author": "smry",
-  "categories": ["Productivity", "Web"],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -72,7 +75,7 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.13.14",
     "@types/react": "19.0.12",
     "eslint": "^9.22.0",
