@@ -841,7 +841,7 @@ export default function Command(
   const [storedDefaultLocation, setStoredDefaultLocation] = useState<
     string | undefined
   >(undefined);
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Weather>();
   const unit = preferences.unit || "celsius";
   const requestedLocation = normalizeLocationText(props.arguments.location);
   const fallbackLocation = normalizeLocationText(props.fallbackText);
