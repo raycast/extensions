@@ -20,18 +20,16 @@ function effectiveVolume(soundVolume: number, masterVolume: number): number {
 export async function reconcile(): Promise<void> {
   const engine = getEngine();
   const state = await getPlaybackState();
-  const running = engine.getRunningEntries();
+  const running = await engine.getRunningEntries();
   const runningIds = new Set(running.map((r) => r.soundId));
 
   if (!state.isPlaying) {
-    // Should not be playing - stop everything
     if (running.length > 0) {
-      engine.stopAll();
+      await engine.stopAll();
     }
     return;
   }
 
-  // Start sounds that should be playing but aren't
   for (const as of state.activeSounds) {
     const sound = getSoundById(as.soundId);
     if (!sound) continue;
@@ -39,21 +37,19 @@ export async function reconcile(): Promise<void> {
     const targetVol = effectiveVolume(as.volume, state.masterVolume);
 
     if (!runningIds.has(as.soundId)) {
-      engine.startSound(as.soundId, getSoundFilePath(sound), targetVol);
+      await engine.startSound(as.soundId, getSoundFilePath(sound), targetVol);
     } else {
-      // Check if volume needs updating
       const entry = running.find((r) => r.soundId === as.soundId);
       if (entry && Math.abs(entry.volume - targetVol) > 2) {
-        engine.changeVolume(as.soundId, getSoundFilePath(sound), targetVol);
+        await engine.changeVolume(as.soundId, getSoundFilePath(sound), targetVol);
       }
     }
   }
 
-  // Stop sounds that are running but shouldn't be
   const desiredIds = new Set(state.activeSounds.map((s) => s.soundId));
   for (const entry of running) {
     if (!desiredIds.has(entry.soundId)) {
-      engine.stopSound(entry.soundId);
+      await engine.stopSound(entry.soundId);
     }
   }
 }
@@ -68,7 +64,7 @@ export async function play(): Promise<PlaybackState> {
 
 export async function pause(): Promise<PlaybackState> {
   const engine = getEngine();
-  engine.stopAll();
+  await engine.stopAll();
   const state = await getPlaybackState();
   state.isPlaying = false;
   await setPlaybackState(state);
@@ -92,7 +88,6 @@ export async function addSound(soundId: string, volume: number): Promise<Playbac
   } else {
     state.activeSounds.push({ soundId, volume });
   }
-  // Auto-play when adding sounds
   state.isPlaying = true;
   await setPlaybackState(state);
   await reconcile();
@@ -101,7 +96,7 @@ export async function addSound(soundId: string, volume: number): Promise<Playbac
 
 export async function removeSound(soundId: string): Promise<PlaybackState> {
   const engine = getEngine();
-  engine.stopSound(soundId);
+  await engine.stopSound(soundId);
   const state = await getPlaybackState();
   state.activeSounds = state.activeSounds.filter((s) => s.soundId !== soundId);
   await setPlaybackState(state);
@@ -133,7 +128,7 @@ export async function setMasterVolume(volume: number): Promise<PlaybackState> {
 
 export async function loadPreset(preset: Preset): Promise<PlaybackState> {
   const engine = getEngine();
-  engine.stopAll();
+  await engine.stopAll();
   const state = await getPlaybackState();
   state.activeSounds = [...preset.sounds];
   state.masterVolume = preset.masterVolume;

@@ -1,7 +1,7 @@
 export const STORAGE_KEYS = {
-  PLAYBACK_STATE: "trance-playback-state",
-  PRESETS: "trance-presets",
-  TIMER: "trance-timer",
+  PLAYBACK_STATE: "moodist-playback-state",
+  PRESETS: "moodist-presets",
+  TIMER: "moodist-timer",
 } as const;
 
 export const PID_REGISTRY_FILENAME = "pid-registry.json";
