@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="512" height="512" rx="112" fill="#18181B"/>
+
+  <!-- 左侧 { 括号 -->
+  <path d="M 180 120 C 140 120 120 148 120 180 L 120 230 C 120 248 108 256 96 256 C 108 256 120 264 120 282 L 120 332 C 120 364 140 392 180 392"
+    stroke="#4F8EF7" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 右侧 } 括号 -->
+  <path d="M 332 120 C 372 120 392 148 392 180 L 392 230 C 392 248 404 256 416 256 C 404 256 392 264 392 282 L 392 332 C 392 364 372 392 332 392"
+    stroke="#4F8EF7" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- 中间斜线 -->
+  <line x1="290" y1="148" x2="222" y2="364" stroke="#FF9F0A" stroke-width="36" stroke-linecap="round"/>
+</svg>
