@@ -4,8 +4,8 @@ import { LagStatus } from "./types";
 export function getLagThresholds(): { warning: number; critical: number } {
   const prefs = getPreferenceValues<Preferences>();
   return {
-    warning: parseInt(prefs.lagThresholdWarning, 10) || 1000,
-    critical: parseInt(prefs.lagThresholdCritical, 10) || 10000,
+    warning: isNaN(parseInt(prefs.lagThresholdWarning, 10)) ? 1000 : parseInt(prefs.lagThresholdWarning, 10),
+    critical: isNaN(parseInt(prefs.lagThresholdCritical, 10)) ? 10000 : parseInt(prefs.lagThresholdCritical, 10),
   };
 }
 
