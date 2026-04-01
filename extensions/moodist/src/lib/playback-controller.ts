@@ -139,7 +139,13 @@ export async function loadPreset(preset: Preset): Promise<PlaybackState> {
 }
 
 export async function stopAll(): Promise<PlaybackState> {
-  return pause();
+  const engine = getEngine();
+  engine.stopAll();
+  const state = await getPlaybackState();
+  state.isPlaying = false;
+  state.activeSounds = [];
+  await setPlaybackState(state);
+  return state;
 }
 
 export async function getCurrentState(): Promise<PlaybackState> {

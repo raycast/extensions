@@ -1,4 +1,4 @@
-import { spawn, execSync } from "child_process";
+import { spawn } from "child_process";
 import { environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
@@ -40,8 +40,7 @@ export class AudioEngine {
   private isProcessAlive(pid: number): boolean {
     try {
       process.kill(pid, 0);
-      const comm = execSync(`ps -p ${pid} -o comm= 2>/dev/null`, { encoding: "utf-8" }).trim();
-      return comm.endsWith("looper");
+      return true;
     } catch {
       return false;
     }
@@ -59,6 +58,11 @@ export class AudioEngine {
   startSound(soundId: string, filePath: string, volume: number): number | null {
     if (!fs.existsSync(filePath)) {
       console.error(`[AudioEngine] Sound file not found: ${filePath}`);
+      return null;
+    }
+
+    if (!fs.existsSync(this.looperPath)) {
+      console.error(`[AudioEngine] Looper binary not found: ${this.looperPath}. Run 'npm run build' to compile it.`);
       return null;
     }
 

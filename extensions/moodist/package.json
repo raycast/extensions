@@ -42,6 +42,12 @@
       "mode": "view"
     },
     {
+      "name": "stop-all",
+      "title": "Stop All Sounds",
+      "description": "Stop all playing sounds and kill any orphaned processes",
+      "mode": "no-view"
+    },
+    {
       "name": "keep-alive",
       "title": "Keep Alive",
       "description": "Background task that restarts sounds if they stop unexpectedly",
@@ -82,9 +88,9 @@
     "typescript": "^5.8.0"
   },
   "scripts": {
-    "prebuild": "cd native/looper && swift build -c release && cp .build/release/looper ../../assets/looper",
+    "prebuild": "cd native/looper && swift build && cp .build/debug/looper ../../assets/looper",
     "build": "ray build",
-    "predev": "cd native/looper && swift build -c release && cp .build/release/looper ../../assets/looper",
+    "predev": "cd native/looper && swift build && cp .build/debug/looper ../../assets/looper",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
