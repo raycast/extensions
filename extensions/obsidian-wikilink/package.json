@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "obsidian-wikilink",
+  "title": "Obsidian WikiLinker",
+  "description": "Fuzzy-search your Obsidian vault and paste [[wikilinks]] into any app",
+  "version": "1.0.0",
+  "icon": "command-icon.png",
+  "author": "geodeo42",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Obsidian Wikilink",
+      "description": "Search notes and paste [[wikilink]] into the focused app",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "vaultPath",
+          "title": "Vault Path",
+          "description": "Absolute path to your Obsidian vault folder",
+          "type": "textfield",
+          "required": true,
+          "default": "~/vaults/Notes"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
