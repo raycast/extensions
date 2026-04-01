@@ -1,6 +1,6 @@
 # Picgo Changelog
 
-## [Bugfix: Plugin Search Error] - {PR_MERGE_DATE}
+## [Bugfix: Plugin Search Error] - 2026-04-01
 
 - Fix error when a plugin package data has no `description` field.
 
