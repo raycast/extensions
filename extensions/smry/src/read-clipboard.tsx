@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Detail, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Article, fetchArticle, getSmryUrl, isValidUrl } from "./api";
+import { Article, fetchArticle, getSmryUrl, htmlToMarkdown, isValidUrl, normalizeUrl } from "./api";
 
 export default function ReadClipboard() {
   const [article, setArticle] = useState<Article | null>(null);
@@ -12,7 +12,8 @@ export default function ReadClipboard() {
     async function run() {
       try {
         const text = await Clipboard.readText();
-        const url = text?.trim() || "";
+        const raw = text?.trim() || "";
+        const url = raw ? normalizeUrl(raw) : "";
 
         if (!url || !isValidUrl(url)) {
           setError("No valid URL found in clipboard. Copy an article URL first.");
@@ -95,6 +96,6 @@ function formatArticle(article: Article): string {
   } else if (article.siteName) {
     md += `*${article.siteName}*\n\n---\n\n`;
   }
-  md += article.textContent;
+  md += htmlToMarkdown(article.content);
   return md;
 }

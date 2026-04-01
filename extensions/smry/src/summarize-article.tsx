@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Detail, LaunchProps, showToast, Toast } from "@raycast/api";
+import { AI, Action, ActionPanel, Detail, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { fetchArticle, fetchSummary, getSmryUrl, isValidUrl } from "./api";
+import { fetchArticle, getSmryUrl, normalizeUrl } from "./api";
 
 interface Arguments {
   url: string;
 }
 
 export default function SummarizeArticle(props: LaunchProps<{ arguments: Arguments }>) {
-  const url = props.arguments.url?.trim();
+  const url = props.arguments.url ? normalizeUrl(props.arguments.url) : "";
   const [title, setTitle] = useState<string>("");
   const [summary, setSummary] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,12 +20,6 @@ export default function SummarizeArticle(props: LaunchProps<{ arguments: Argumen
       return;
     }
 
-    if (!isValidUrl(url)) {
-      setError("Invalid URL. Please provide a valid HTTP/HTTPS URL.");
-      setIsLoading(false);
-      return;
-    }
-
     async function run() {
       try {
         showToast({ style: Toast.Style.Animated, title: "Extracting article..." });
@@ -33,7 +27,11 @@ export default function SummarizeArticle(props: LaunchProps<{ arguments: Argumen
         setTitle(article.title);
 
         showToast({ style: Toast.Style.Animated, title: "Generating summary..." });
-        const result = await fetchSummary(article.textContent, article.title);
+        const text = article.textContent.slice(0, 12000);
+        const result = await AI.ask(
+          `Summarize the following article in 3-5 concise bullet points. Focus on the key ideas and takeaways.\n\nTitle: ${article.title}\n\nArticle:\n${text}`,
+          { creativity: 0.3 },
+        );
         setSummary(result);
         setIsLoading(false);
         showToast({ style: Toast.Style.Success, title: "Summary ready" });
@@ -54,7 +52,7 @@ export default function SummarizeArticle(props: LaunchProps<{ arguments: Argumen
         markdown={`# Error\n\n${error}`}
         actions={
           <ActionPanel>
-            {url && isValidUrl(url) && (
+            {url && (
               <Action.OpenInBrowser title="Open in SMRY" url={getSmryUrl(url)} />
             )}
           </ActionPanel>

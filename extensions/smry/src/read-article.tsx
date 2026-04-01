@@ -1,13 +1,13 @@
 import { Action, ActionPanel, Detail, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Article, fetchArticle, getSmryUrl, isValidUrl } from "./api";
+import { Article, fetchArticle, getSmryUrl, htmlToMarkdown, isValidUrl, normalizeUrl } from "./api";
 
 interface Arguments {
   url: string;
 }
 
 export default function ReadArticle(props: LaunchProps<{ arguments: Arguments }>) {
-  const url = props.arguments.url?.trim();
+  const url = props.arguments.url ? normalizeUrl(props.arguments.url) : "";
   const [article, setArticle] = useState<Article | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,12 +19,7 @@ export default function ReadArticle(props: LaunchProps<{ arguments: Arguments }>
       return;
     }
 
-    if (!isValidUrl(url)) {
-      setError("Invalid URL. Please provide a valid HTTP/HTTPS URL.");
-      setIsLoading(false);
-      return;
-    }
-
+    showToast({ style: Toast.Style.Animated, title: "Reading article..." });
     fetchArticle(url)
       .then((data) => {
         setArticle(data);
@@ -103,9 +98,7 @@ function formatArticle(article: Article): string {
     md += `*${article.siteName}*\n\n---\n\n`;
   }
 
-  // Convert HTML content to a readable format
-  // Raycast Detail supports markdown, so we use textContent
-  md += article.textContent;
+  md += htmlToMarkdown(article.content);
 
   return md;
 }
