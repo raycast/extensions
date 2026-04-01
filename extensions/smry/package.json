@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smry",
+  "title": "SMRY",
+  "description": "Read and summarize articles with smry.ai - clean reader mode, AI summaries, and more",
+  "icon": "extension-icon.png",
+  "author": "smry",
+  "categories": ["Productivity", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "read-article",
+      "title": "Read Article",
+      "description": "Extract and read an article in clean reader mode",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Article URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "summarize-article",
+      "title": "Summarize Article",
+      "description": "Get an AI summary of any article",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Article URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "read-clipboard",
+      "title": "Read Clipboard URL",
+      "description": "Read the article URL from your clipboard",
+      "mode": "view"
+    },
+    {
+      "name": "open-in-smry",
+      "title": "Open in SMRY",
+      "description": "Open a URL in smry.ai in your browser",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Article URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "SMRY Base URL",
+      "description": "Base URL for SMRY instance (default: https://smry.ai)",
+      "type": "textfield",
+      "default": "https://smry.ai",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npx @raycast/api@latest publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
