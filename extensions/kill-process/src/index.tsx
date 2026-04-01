@@ -504,7 +504,7 @@ export default function ProcessList() {
                     {canRestartProcess ? (
                       <Action
                         title="Restart"
-                        icon={Icon.ArrowClockwise}
+                        icon={Icon.RotateAntiClockwise}
                         shortcut={{ modifiers: ["cmd"], key: "r" }}
                         onAction={() => restartProcess(process)}
                       />
