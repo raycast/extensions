@@ -8,11 +8,20 @@ func stringProperty(_ source: TISInputSource, _ key: CFString) -> String? {
     return (Unmanaged<CFString>.fromOpaque(ptr).takeUnretainedValue()) as String
 }
 
-/// Returns all enabled sources whose category is TISCategoryKeyboardInputSource.
-/// This excludes CharacterPalette, PressAndHold, Ink, and other non-keyboard sources.
+/// Returns all enabled keyboard input sources.
+///
+/// Uses `includeAllInstalled: true` so the TIS call succeeds in subprocess contexts where
+/// the login-session state (which backs the `includeAllInstalled: false` fast path) may not
+/// be available. Enabled status is then checked explicitly via kTISPropertyInputSourceIsEnabled.
 func keyboardSources() -> [TISInputSource] {
-    let all = TISCreateInputSourceList(nil, false).takeRetainedValue() as! [TISInputSource]
+    let all = TISCreateInputSourceList(nil, true).takeRetainedValue() as! [TISInputSource]
     return all.filter { source in
+        // Must be enabled (visible in the Input Sources menu)
+        guard
+            let enabledPtr = TISGetInputSourceProperty(source, kTISPropertyInputSourceIsEnabled),
+            CFBooleanGetValue(Unmanaged<CFBoolean>.fromOpaque(enabledPtr).takeUnretainedValue())
+        else { return false }
+        // Must be a keyboard source (excludes CharacterPalette, PressAndHold, Ink, etc.)
         guard let category = stringProperty(source, kTISPropertyInputSourceCategory) else {
             return false
         }

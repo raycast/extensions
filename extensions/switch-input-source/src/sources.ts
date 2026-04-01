@@ -17,7 +17,7 @@ const DISPLAY_NAME_OVERRIDES: Readonly<Record<string, string>> = {
   "com.apple.keylayout.Byelorussian": "Belarusian",
   "com.apple.inputmethod.SCIM.ITABC": "Pinyin — Simplified Chinese",
   "com.apple.inputmethod.Kotoeri.RomajiTyping": "Japanese (Romaji)",
-  "com.apple.keylayout.US-Extended": "English (US Extended)",
+  "com.apple.keylayout.USExtended": "English (US Extended)",
   "com.apple.keylayout.Ukrainian-PC": "Ukrainian (PC)",
   "com.apple.keylayout.PolishPro": "Polish (Pro)",
 };
@@ -30,7 +30,7 @@ const ALIAS_MAP: Readonly<Record<string, readonly string[]>> = {
   "com.apple.keylayout.Byelorussian": ["belarusian", "byelorussian", "by", "bel"],
   "com.apple.inputmethod.SCIM.ITABC": ["pinyin", "zh", "chinese", "cn", "simplified"],
   "com.apple.inputmethod.Kotoeri.RomajiTyping": ["japanese", "jp", "romaji", "ja"],
-  "com.apple.keylayout.US-Extended": ["english", "us", "en", "latin"],
+  "com.apple.keylayout.USExtended": ["english", "us", "en", "latin"],
   "com.apple.keylayout.Ukrainian-PC": ["ukrainian", "uk", "ua"],
   "com.apple.keylayout.PolishPro": ["polish", "pl"],
   "com.apple.keylayout.Russian": ["russian", "ru"],
