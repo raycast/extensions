@@ -32,8 +32,8 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState(ALL_CATEGORIES);
   const { push } = useNavigation();
-  const prefixOverride = getPreferenceValues<{ prefix: string }>().prefix;
-  const prefix = prefixOverride || detectPrefix() || "C-b";
+  const prefixOverride = getPreferenceValues<Preferences>().prefix;
+  const prefix = useMemo(() => prefixOverride || detectPrefix() || "C-b", [prefixOverride]);
 
   const debouncedSearchText = useDebounce(searchText, 100);
 
