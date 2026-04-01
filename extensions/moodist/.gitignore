@@ -2,3 +2,6 @@ node_modules/
 dist/
 .DS_Store
 *.tgz
+assets/looper
+swift/*/.build/
+swift/*/Package.resolved

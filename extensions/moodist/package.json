@@ -44,9 +44,10 @@
     {
       "name": "keep-alive",
       "title": "Keep Alive",
-      "description": "Restarts stopped sounds",
+      "description": "Background task that restarts sounds if they stop unexpectedly",
       "mode": "no-view",
-      "interval": "20s"
+      "interval": "20s",
+      "disabledByDefault": true
     }
   ],
   "preferences": [
@@ -81,7 +82,9 @@
     "typescript": "^5.8.0"
   },
   "scripts": {
+    "prebuild": "cd swift/looper && swift build -c release && cp .build/release/looper ../../assets/looper",
     "build": "ray build",
+    "predev": "cd swift/looper && swift build -c release && cp .build/release/looper ../../assets/looper",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
