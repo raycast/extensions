@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "delink",
   "title": "Delink",
-  "description": "从剪贴板快速解析并查看 URL 查询参数。",
+  "description": "Quickly parse and inspect URL query parameters from the clipboard.",
   "icon": "icon.png",
   "author": "ariesly15",
   "platforms": [
