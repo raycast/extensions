@@ -7,7 +7,7 @@ export default function Command() {
   const series = data?.series ?? [];
   const title =
     series.length > 0
-      ? series.map((entry) => `${entry.generation} $${entry.latest.avgPricePerGb}`).join(" · ")
+      ? series.map((entry) => `${entry.generation} ${formatUsdPerGb(entry.latest.avgPricePerGb)}`).join(" · ")
       : "RAM Trends";
 
   return (

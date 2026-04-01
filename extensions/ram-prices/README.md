@@ -7,6 +7,8 @@ Track DDR4 and DDR5 market pricing from [RamRadar](https://ramradar.app) in Rayc
 - `Show Market Trends` shows DDR4 and DDR5 pricing in a searchable list.
 - `Market Trends Menu Bar` shows the latest prices in the Raycast menu bar.
 
+Note: The `Market Trends Menu Bar` command is only available on macOS.
+
 ## Show Market Trends
 
 The main command includes:
