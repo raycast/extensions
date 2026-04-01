@@ -1,5 +1,6 @@
-import { ActionPanel, Action, List, showHUD, environment } from "@raycast/api";
-import { execSync } from "child_process";
+import { ActionPanel, Action, List, showHUD, showToast, Toast, environment } from "@raycast/api";
+import { execFileSync } from "child_process";
+import { useEffect, useState } from "react";
 import path from "path";
 import { displayName, isKeyboardSource, parseSources, searchTerms } from "./sources";
 import type { InputSource } from "./sources";
@@ -9,22 +10,28 @@ import type { InputSource } from "./sources";
 // We resolve relative to the package root either way.
 const HELPER_PATH = path.resolve(environment.assetsPath, "..", "build", "InputSourceHelper");
 
-function listSources(): InputSource[] {
-  const output = execSync(`"${HELPER_PATH}" list`, { encoding: "utf8" });
-  const all = parseSources(output);
-  return all.filter(isKeyboardSource);
-}
-
 function switchSource(source: InputSource): void {
-  execSync(`"${HELPER_PATH}" switch "${source.id}"`);
+  execFileSync(HELPER_PATH, ["switch", source.id]);
   showHUD(`Switched to ${displayName(source)}`);
 }
 
 export default function Command() {
-  const sources = listSources();
+  const [sources, setSources] = useState<InputSource[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    try {
+      const output = execFileSync(HELPER_PATH, ["list"], { encoding: "utf8" });
+      setSources(parseSources(output).filter(isKeyboardSource));
+    } catch (e) {
+      showToast({ style: Toast.Style.Failure, title: "Failed to load input sources", message: String(e) });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   return (
-    <List searchBarPlaceholder="Type a layout name — English, Russian, Pinyin…">
+    <List isLoading={isLoading} searchBarPlaceholder="Type a layout name — English, Russian, Pinyin…">
       {sources.map((source) => (
         <List.Item
           key={source.id}
