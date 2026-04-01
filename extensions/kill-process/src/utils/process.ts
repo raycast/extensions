@@ -2,16 +2,67 @@ import { exec } from "child_process";
 import { Process } from "../types";
 import {
   isWindows,
+  getKillAllCommand,
+  getKillCommand,
+  getKillTreeCommand,
   getProcessListCommand,
   getProcessPerformanceCommand,
+  getProcessRunningCheckCommand,
+  getRestartCommand,
+  getPlatformSpecificErrorHelp,
   parseProcessLine,
   parseWindowsProcesses,
   parseWindowsPerformanceData,
   getProcessType,
   getAppName,
+  isProcessRestartable,
 } from "./platform";
 
 const EXEC_OPTIONS = { maxBuffer: 10 * 1024 * 1024 };
+const PROCESS_EXIT_POLL_INTERVAL_MS = 250;
+const PROCESS_EXIT_TIMEOUT_MS = 5000;
+
+function executeCommand(command: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    exec(command, EXEC_OPTIONS, (error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
+function waitForProcessToExit(): Promise<void> {
+  return new Promise((resolve) => {
+    setTimeout(resolve, PROCESS_EXIT_POLL_INTERVAL_MS);
+  });
+}
+
+async function isProcessRunning(processId: number): Promise<boolean> {
+  try {
+    await executeCommand(getProcessRunningCheckCommand(processId));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function waitForProcessExit(processId: number): Promise<void> {
+  const timeoutAt = Date.now() + PROCESS_EXIT_TIMEOUT_MS;
+
+  while (Date.now() < timeoutAt) {
+    if (!(await isProcessRunning(processId))) {
+      return;
+    }
+
+    await waitForProcessToExit();
+  }
+
+  throw new Error("The process did not fully exit before restart.");
+}
 
 /**
  * Fetch all running processes
@@ -74,4 +125,46 @@ export async function fetchProcessPerformance(): Promise<Map<number, number>> {
       resolve(parseWindowsPerformanceData(stdout));
     });
   });
+}
+
+export async function terminateProcess(processId: number, force = false): Promise<void> {
+  await executeCommand(getKillCommand(processId, force));
+}
+
+export async function terminateProcessesByName(processName: string, force = false): Promise<void> {
+  await executeCommand(getKillAllCommand(processName, force));
+}
+
+export async function terminateProcessTree(processId: number, force = false): Promise<void> {
+  await executeCommand(getKillTreeCommand(processId, force));
+}
+
+export async function relaunchProcess(process: Process): Promise<void> {
+  if (!isProcessRestartable(process)) {
+    throw new Error("The selected process cannot be restarted because its launch path is unavailable.");
+  }
+
+  const restartCommand = getRestartCommand(process);
+  if (!restartCommand) {
+    throw new Error("The selected process does not have a supported restart command on this platform.");
+  }
+
+  await executeCommand(restartCommand);
+}
+
+export async function restartProcess(process: Process, force = false): Promise<void> {
+  if (!isProcessRestartable(process)) {
+    throw new Error("The selected process cannot be restarted because its launch path is unavailable.");
+  }
+
+  try {
+    await terminateProcessTree(process.id, force);
+  } catch (error) {
+    const help = getPlatformSpecificErrorHelp(force);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    throw new Error(`${help.title}: ${message}`);
+  }
+
+  await waitForProcessExit(process.id);
+  await relaunchProcess(process);
 }

@@ -1,4 +1,5 @@
 import { Image } from "@raycast/api";
+import { existsSync } from "fs";
 import { Process } from "../types";
 
 /**
@@ -14,6 +15,14 @@ export const isWindows = platform === "win32";
  */
 function encodePowerShellCommand(script: string): string {
   return Buffer.from(script, "utf16le").toString("base64");
+}
+
+function quotePosixShellArgument(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function escapePowerShellSingleQuotedString(value: string): string {
+  return value.replace(/'/g, "''");
 }
 
 /**
@@ -82,6 +91,131 @@ export function getKillCommand(pid: number, force = false): string {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
   }
   return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
+}
+
+export function getKillTreeCommand(pid: number, force = false): string {
+  if (isWindows) {
+    return force ? `taskkill /F /T /PID ${pid}` : `taskkill /T /PID ${pid}`;
+  }
+
+  const signal = force ? "-9" : "-TERM";
+  const killCommand = force ? "sudo kill" : "kill";
+  const script = `
+kill_tree() {
+  local target_pid="$1"
+  local child_pid
+  for child_pid in $(pgrep -P "$target_pid"); do
+    kill_tree "$child_pid"
+  done
+  ${killCommand} ${signal} "$target_pid" 2>/dev/null || true
+}
+kill_tree ${pid}
+`;
+
+  return `zsh -c ${quotePosixShellArgument(script)}`;
+}
+
+/**
+ * Get command to kill all processes matching a name.
+ *
+ * It shell-escapes the process name quotes to avoid breakage with names
+ * containing quotes or special characters (e.g. "Foo's Bar").
+ */
+export function getKillAllCommand(processName: string, force = false): string {
+  if (isWindows) {
+    // Use PowerShell Stop-Process by name which accepts the process name without needing the
+    // .exe suffix and handles common name matching (e.g. names from Get-Process).
+    // Escape single quotes for a safe single-quoted PowerShell string.
+    const psName = processName.replace(/'/g, "''");
+    const psScript = `Get-Process -Name '${psName}' -ErrorAction SilentlyContinue | Stop-Process ${
+      force ? "-Force" : ""
+    }`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(psScript)}`;
+  }
+  const escaped = processName.replace(/'/g, "'\\''");
+  return force ? `PROC_NAME='${escaped}' zsh -c 'sudo killall "$PROC_NAME"'` : `killall '${escaped}'`;
+}
+
+function getMacBundlePath(path: string, extension: ".app" | ".prefPane"): string | null {
+  const bundlePath = path.match(new RegExp(`(.+\\${extension})(?:\\/.*)?$`))?.[1];
+  return bundlePath ?? null;
+}
+
+function getLaunchPath(process: Process): string | null {
+  const path = process.path.trim();
+  if (!path || path === "-") {
+    return null;
+  }
+
+  if (isMac) {
+    if (process.type === "app" || process.type === "aggregatedApp") {
+      return getMacBundlePath(path, ".app") ?? path;
+    }
+
+    if (process.type === "prefPane") {
+      return getMacBundlePath(path, ".prefPane") ?? path;
+    }
+
+    return path.startsWith("/") ? path : null;
+  }
+
+  if (isWindows) {
+    return path;
+  }
+
+  return null;
+}
+
+export function isProcessRestartable(process: Process): boolean {
+  const launchPath = getLaunchPath(process);
+  return launchPath !== null && existsSync(launchPath);
+}
+
+export function getRestartCommand(process: Process): string | null {
+  const launchPath = getLaunchPath(process);
+  if (!launchPath) {
+    return null;
+  }
+
+  if (isMac) {
+    if (process.type === "app" || process.type === "aggregatedApp" || process.type === "prefPane") {
+      return `open ${quotePosixShellArgument(launchPath)}`;
+    }
+
+    return `nohup ${quotePosixShellArgument(launchPath)} >/dev/null 2>&1 &`;
+  }
+
+  if (isWindows) {
+    const escapedPath = escapePowerShellSingleQuotedString(launchPath);
+    const script = `
+$path = '${escapedPath}'
+if (-not (Test-Path -LiteralPath $path)) {
+  throw "Launch path not found: $path"
+}
+$workingDirectory = Split-Path -LiteralPath $path -Parent
+if ([string]::IsNullOrWhiteSpace($workingDirectory)) {
+  Start-Process -FilePath $path
+} else {
+  Start-Process -FilePath $path -WorkingDirectory $workingDirectory
+}
+`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
+  }
+
+  return null;
+}
+
+export function getProcessRunningCheckCommand(pid: number): string {
+  if (isWindows) {
+    const script = `
+$process = Get-Process -Id ${pid} -ErrorAction SilentlyContinue
+if ($null -eq $process) { exit 1 }
+exit 0
+`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
+  }
+
+  return `kill -0 ${pid}`;
 }
 
 /**

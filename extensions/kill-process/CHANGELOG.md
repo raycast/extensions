@@ -1,5 +1,23 @@
 # Kill Process Changelog
 
+## [Added Kill All action] - 2026-04-01
+
+- Added action to kill all processes with the same name
+- Added AI tool `killall-process` to allow natural-language "kill all <process>" commands via AI
+
+## [UX Improvements] - 2026-02-11
+
+- Removed the redundant **Default Sort By** preference (sorting is now persisted via the command dropdown)
+
+## [UX Improvements] - 2026-02-10
+
+- Reorganized preferences into clearer sections
+- Avoid showing a redundant subtitle when it matches the process name
+
+## [Preferences] - 2026-02-04
+
+- Added preference to skip kill confirmation dialogs
+
 ## [Fixes and Improvements] - 2026-01-13
 
 - Added shortcut for the **Copy Path** action
