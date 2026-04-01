@@ -4,6 +4,7 @@
 
 - Unified OAuth usage in all commands by switching remaining direct token paths to the shared `getLinearClient()` flow.
 - Ensures all command auth runs through the same `withAccessToken` / `OAuthService.linear` lifecycle, including refresh-token handling.
+- Fix `quick-add-comment-to-issue`: validate API result before treating the operation as successful (check `newComment` instead of the input `comment`).
 
 ## [Security Fix] - 2026-03-17
 

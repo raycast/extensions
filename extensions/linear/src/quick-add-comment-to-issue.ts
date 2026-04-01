@@ -36,7 +36,7 @@ const command = async (props: { arguments: Arguments.QuickAddCommentToIssue }) =
 
     const newComment = await payload.comment;
 
-    if (!payload.success || !comment) {
+    if (!payload.success || !newComment) {
       throw Error("Something went wrong");
     }
 
