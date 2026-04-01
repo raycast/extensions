@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, List, open, PopToRootType, showHUD, useNavigation } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
 import { Project, Service } from "clockodo";
+import { useEffect } from "react";
 import { clockodo, getServices } from "./clockodo";
 import { useGroupedProjects } from "./hooks";
 
@@ -21,7 +22,7 @@ const Details = ({ project, service }: { project: Project; service: Service }) =
         popToRootType: PopToRootType.Immediate,
       });
     } catch (error) {
-      showFailureToast(error, { title: "Failed to start clock" });
+      await showFailureToast(error, { title: "Failed to start clock" });
     }
   }
 
@@ -42,9 +43,11 @@ const SelectService = ({ project }: { project: Project }) => {
   const { push } = useNavigation();
   const { data, error, isLoading } = usePromise(() => getServices());
 
-  if (error) {
-    showFailureToast(error, { title: "Failed to fetch services" });
-  }
+  useEffect(() => {
+    if (error) {
+      void showFailureToast(error, { title: "Failed to fetch services" });
+    }
+  }, [error]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Services...">
@@ -64,6 +67,7 @@ const SelectService = ({ project }: { project: Project }) => {
           }
         />
       ))}
+      <List.EmptyView title="No Services" description="No active services found in Clockodo." />
     </List>
   );
 };
@@ -72,33 +76,39 @@ export default function Command() {
   const { push } = useNavigation();
   const { data, error, isLoading } = useGroupedProjects();
 
-  if (error) {
-    showFailureToast(error, { title: "Failed to fetch projects" });
-  }
+  useEffect(() => {
+    if (error) {
+      void showFailureToast(error, { title: "Failed to fetch projects" });
+    }
+  }, [error]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Projects...">
       {data &&
-        Object.entries(data).map(([customerName, projects]) => (
-          <List.Section key={customerName} title={customerName}>
-            {(projects ?? []).map((project) => (
-              <List.Item
-                key={project.id}
-                title={project.name}
-                keywords={[customerName]}
-                actions={
-                  <ActionPanel>
-                    <Action title="Select Service" onAction={() => push(<SelectService project={project} />)} />
-                    <Action
-                      title="Open Project Report"
-                      onAction={() => open(`https://my.clockodo.com/projects/${project.id}/`)}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        ))}
+        Object.entries(data).map(([customerName, projects]) => {
+          const projectList = Array.isArray(projects) ? projects : [];
+          return (
+            <List.Section key={customerName} title={customerName}>
+              {projectList.map((project) => (
+                <List.Item
+                  key={project.id}
+                  title={project.name}
+                  keywords={[customerName]}
+                  actions={
+                    <ActionPanel>
+                      <Action title="Select Service" onAction={() => push(<SelectService project={project} />)} />
+                      <Action
+                        title="Open Project Report"
+                        onAction={() => open(`https://my.clockodo.com/projects/${project.id}/`)}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
+            </List.Section>
+          );
+        })}
+      <List.EmptyView title="No Projects" description="No active projects found in Clockodo." />
     </List>
   );
 }

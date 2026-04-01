@@ -7,6 +7,7 @@ type Input = {
   customerId: number;
 };
 
+/** Loads a Clockodo customer by id (includes its name). */
 export default async function (input: Input) {
   return getCustomer(input.customerId);
 }

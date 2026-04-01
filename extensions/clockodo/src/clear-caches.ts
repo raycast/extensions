@@ -1,7 +1,7 @@
 import { showHUD } from "@raycast/api";
 import { clearAllCaches } from "./clockodo";
 
-export default function () {
+export default async function () {
   clearAllCaches();
-  showHUD("Caches cleared");
+  await showHUD("Caches cleared");
 }

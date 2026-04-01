@@ -11,6 +11,7 @@ type Input = {
   timeUntil: string;
 };
 
+/** Lists the current user's Clockodo time entries in the given date range (inclusive). */
 export default async function (input: Input) {
   const user = await getMe();
   const entries = await clockodo.getEntries({

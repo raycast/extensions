@@ -7,6 +7,7 @@ type Input = {
   projectId: number;
 };
 
+/** Loads a Clockodo project by id (includes its name). */
 export default async function (input: Input) {
   return getProject(input.projectId);
 }

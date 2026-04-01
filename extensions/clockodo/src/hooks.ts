@@ -59,7 +59,7 @@ export const useWeekOverview = () => {
 export const useGroupedProjects = () => {
   return usePromise(async () => {
     const projects = await getProjects();
-    const sortedProjects = projects.data.sort((a, b) => a.name.localeCompare(b.name));
+    const sortedProjects = projects.data.toSorted((a, b) => a.name.localeCompare(b.name));
     const projectsWithCustomerName = await Promise.all(
       sortedProjects.map(async (project) => {
         const customer = await getCustomer(project.customersId);
