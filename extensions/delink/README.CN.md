@@ -10,6 +10,7 @@
 - 📦 **JSON 格式化** — 自动美化 JSON 格式的参数值，方便阅读
 - 📌 **多种复制方式** — 一键复制解码值、原始值或 `key=value` 格式
 - 🔄 **随时重新解析** — 按 `⌘V` 可随时重新读取剪贴板中的 URL
+- 🌐 **界面语言** — 在插件偏好设置中可切换中文 / 英文界面
 
 ## 使用方法
 
@@ -36,6 +37,12 @@ npm install
 
 # 启动开发服务器
 npm run dev
+```
+
+## 测试链接
+
+```
+https://demo.com/test?description=加厚一次性真空浴巾加大压缩毛巾出差旅行旅游便携吸水酒店纯棉%20颜色分类:%20（加厚真空大毛巾24条）30x70cm&itemId=1831499&imgCount=2&price=MOP19&imageInfos=%5B%7B%22major%22:true,%22url%22:%22https://demo.com/test-01.png%22%7D,%7B%22major%22:false,%22url%22:%22https://demo.com/test-15.png%22%7D%5D&_routeId_=F1130F97-14E7-42EF-B380-5DF32EE4510D
 ```
 
 ## 开源协议

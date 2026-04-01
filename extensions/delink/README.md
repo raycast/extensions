@@ -12,6 +12,7 @@ A [Raycast](https://raycast.com) extension that instantly parses query parameter
 - 📦 **JSON Formatting** — Automatically pretty-prints JSON-formatted parameter values for easy reading
 - 📌 **Multiple Copy Options** — One-click copy of decoded value, raw value, or `key=value` format
 - 🔄 **Re-parse Anytime** — Press `⌘V` to re-read the URL from your clipboard at any time
+- 🌐 **Interface Language** — Switch between English and Chinese via extension preferences
 
 ## Usage
 
@@ -38,6 +39,12 @@ npm install
 
 # Start development server
 npm run dev
+```
+
+## Test
+
+```
+https://demo.com/test?description=Use%20the%20action%20panel%20to%20copy%20the%20parameter%20value%20in%20your%20preferred%20format%2030x70cm&itemId=1831499&imgCount=2&price=MOP19&imageInfos=%5B%7B%22major%22:true,%22url%22:%22https://demo.com/test-01.png%22%7D,%7B%22major%22:false,%22url%22:%22https://demo.com/test-15.png%22%7D%5D&_routeId_=F1130F97-14E7-42EF-B380-5DF32EE4510D
 ```
 
 ## License
