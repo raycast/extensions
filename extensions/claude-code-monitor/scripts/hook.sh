@@ -119,7 +119,7 @@ if event == 'SessionEnd':
     session['ended_at'] = now
 
 # Capture first prompt for label generation
-LABEL_PREFIX = '用不超过10个字概括这个请求的核心目的'
+LABEL_PREFIX = 'Summarize this request in 5 words or less'
 if event == 'UserPromptSubmit' and not session.get('first_prompt'):
     prompt_text = hook_input.get('prompt', '')
     if prompt_text and not prompt_text.startswith(LABEL_PREFIX):
@@ -184,7 +184,7 @@ for sid, s in data.get('sessions', {}).items():
     try:
         result = subprocess.run(
             ['claude', '-p', '--model', 'haiku',
-             '用不超过10个字概括这个请求的核心目的，只输出概括不要任何其他内容：' + prompt[:200]],
+             'Summarize this request in 5 words or less, output only the summary: ' + prompt[:200]],
             capture_output=True, text=True, timeout=30
         )
         label = result.stdout.strip()

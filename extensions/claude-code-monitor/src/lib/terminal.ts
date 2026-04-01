@@ -23,9 +23,6 @@ const TERMINAL_APPS: Record<string, string> = {
   kitty: "kitty",
 };
 
-interface Preferences {
-  defaultApp?: string;
-}
 
 function shellQuote(s: string): string {
   return "'" + s.replace(/'/g, "'\\''") + "'";

@@ -230,7 +230,7 @@ async function handleUninstallSkill(skill: SkillInfo, revalidate: () => void) {
   if (!confirmed) return;
 
   try {
-    uninstallSkill(skill.dirName);
+    await uninstallSkill(skill.dirName);
     revalidate();
     await showToast({
       style: Toast.Style.Success,

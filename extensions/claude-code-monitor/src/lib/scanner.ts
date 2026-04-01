@@ -11,7 +11,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { calculateEntryCost } from "./pricing";
-import { getProjectName } from "./session-parser";
+import { getProjectName, resolveProjectPath } from "./session-parser";
 import {
   RE_INPUT_TOKENS,
   RE_OUTPUT_TOKENS,
@@ -77,8 +77,8 @@ async function main() {
       continue;
     }
 
-    // Resolve project path (simple decode)
-    const projectPath = "/" + dir.name.slice(1).replace(/-/g, "/");
+    // Resolve project path using multi-strategy resolution
+    const projectPath = await resolveProjectPath(dir.name);
     const projectName = getProjectName(projectPath);
 
     for (const file of files) {

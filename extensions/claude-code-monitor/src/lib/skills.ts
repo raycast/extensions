@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { trash } from "@raycast/api";
 import type { SkillInfo, InstalledPluginsFile } from "../types";
 import { readJsonFile } from "./fs-utils";
 
@@ -212,7 +213,7 @@ export async function loadAllSkills(): Promise<SkillInfo[]> {
   return skills;
 }
 
-export function uninstallSkill(dirName: string): void {
+export async function uninstallSkill(dirName: string): Promise<void> {
   if (!dirName || dirName === "." || dirName === "..") {
     throw new Error("Invalid skill path");
   }
@@ -221,11 +222,5 @@ export function uninstallSkill(dirName: string): void {
   if (!fullPath.startsWith(SKILLS_DIR + path.sep) && fullPath !== SKILLS_DIR) {
     throw new Error("Invalid skill path");
   }
-  const lstat = fs.lstatSync(fullPath);
-
-  if (lstat.isSymbolicLink()) {
-    fs.unlinkSync(fullPath);
-  } else {
-    fs.rmSync(fullPath, { recursive: true, force: true });
-  }
+  await trash(fullPath);
 }

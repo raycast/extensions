@@ -50,21 +50,48 @@ function mergeSessions(
 
 async function generateLabel(prompt: string): Promise<string> {
   const result = await AI.ask(
-    `用不超过10个字概括这个请求的核心目的，只输出概括不要任何其他内容：${prompt.slice(0, 200)}`,
+    `Summarize this request in 5 words or less, output only the summary: ${prompt.slice(0, 200)}`,
     { model: AI.Model["Anthropic_Claude_4.5_Haiku"], creativity: "none" },
   );
   return result.trim().slice(0, 30);
 }
 
 export function useSessions(pollInterval: number = 3000) {
+  const knownSessionIds = useRef(new Set<string>());
   const pendingLabels = useRef(new Set<string>());
-  const labelsGeneratedRef = useRef(new Set<string>());
 
   const { data, isLoading, revalidate } = useCachedPromise(async () => {
     const hookSessions = readHookSessions();
     // Only load recent JSONL sessions for metadata enrichment
     const jsonlSessions = await listAllSessions({ limit: 50 });
     const merged = mergeSessions(hookSessions, jsonlSessions);
+
+    // Generate labels only for newly discovered sessions
+    for (const session of merged) {
+      if (knownSessionIds.current.has(session.session_id)) continue;
+      knownSessionIds.current.add(session.session_id);
+
+      if (
+        session.first_prompt &&
+        !session.label &&
+        !pendingLabels.current.has(session.session_id)
+      ) {
+        pendingLabels.current.add(session.session_id);
+        generateLabel(session.first_prompt)
+          .then((label) => {
+            if (label) {
+              updateSessionLabel(session.session_id, label);
+              revalidate();
+            }
+          })
+          .catch(() => {
+            // Label generation failed, won't retry — not critical
+          })
+          .finally(() => {
+            pendingLabels.current.delete(session.session_id);
+          });
+      }
+    }
 
     const active = merged.filter((s) => s.state === "active");
     const waiting = merged.filter((s) => s.state === "waiting");
@@ -73,41 +100,6 @@ export function useSessions(pollInterval: number = 3000) {
 
     return { all: merged, active, waiting, idle, ended };
   }, []);
-
-  // Generate labels for sessions that have first_prompt but no label
-  useEffect(() => {
-    if (!data?.all) return;
-    const sessions = data.all.filter(
-      (s) =>
-        s.first_prompt &&
-        !s.label &&
-        !pendingLabels.current.has(s.session_id) &&
-        !labelsGeneratedRef.current.has(s.session_id),
-    );
-    if (sessions.length === 0) return;
-
-    // Process up to 3 at a time to avoid overwhelming the AI API
-    const batch = sessions.slice(0, 3);
-    for (const session of batch) {
-      pendingLabels.current.add(session.session_id);
-    }
-    (async () => {
-      for (const session of batch) {
-        try {
-          if (labelsGeneratedRef.current.has(session.session_id)) continue;
-          const label = await generateLabel(session.first_prompt!);
-          if (label) {
-            updateSessionLabel(session.session_id, label);
-            labelsGeneratedRef.current.add(session.session_id);
-          }
-        } catch {
-          // Label generation failed, will retry on next cycle
-        } finally {
-          pendingLabels.current.delete(session.session_id);
-        }
-      }
-    })();
-  }, [data?.all]);
 
   // Poll for updates
   useEffect(() => {

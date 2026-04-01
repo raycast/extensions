@@ -26,7 +26,7 @@ function mutateHookState(
 }
 
 const WORKTREE_PATTERN = /\/\.claude\/worktrees\/([^/]+)$/;
-const LABEL_PROMPT_PREFIX = "用不超过10个字概括这个请求的核心目的";
+const LABEL_PROMPT_PREFIX = "Summarize this request in 5 words or less";
 
 const STATE_DIR = join(homedir(), ".claude", "claude-code-monitor");
 const STATE_FILE = join(STATE_DIR, "sessions.json");
