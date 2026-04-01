@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Grid, Icon, Toast, showToast, Clipboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 interface Registry {
   items: Array<{ name: string }>;
@@ -73,27 +73,32 @@ const INSTALL_COMMANDS: Record<PackageManager, (name: string) => string> = {
   bun: (name) => `bunx --bun shadcn@latest add https://lucide-animated.com/r/${name}`,
 };
 
+async function fetchTsxSource(name: string): Promise<string> {
+  const response = await fetch(`${REGISTRY_BASE}/${name}.json`);
+  const data = (await response.json()) as RegistryItem;
+  return data?.files?.[0]?.content ?? "";
+}
+
 function IconActions({ name, packageManager }: { name: string; packageManager: PackageManager }) {
-  const { data } = useFetch<RegistryItem>(`${REGISTRY_BASE}/${name}.json`, {
-    parseResponse: async (response) => response.json() as Promise<RegistryItem>,
-  });
-  const tsxSource = data?.files?.[0]?.content ?? "";
+  const cacheRef = useRef<string | null>(null);
+
+  const copyTsx = async () => {
+    try {
+      if (!cacheRef.current) {
+        await showToast({ style: Toast.Style.Animated, title: "Fetching source..." });
+        cacheRef.current = await fetchTsxSource(name);
+      }
+      await Clipboard.copy(cacheRef.current);
+      await showToast({ style: Toast.Style.Success, title: "TSX Copied!" });
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to fetch source" });
+    }
+  };
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action
-          title="Copy TSX Code"
-          icon={Icon.Clipboard}
-          onAction={async () => {
-            if (!tsxSource) {
-              await showToast({ style: Toast.Style.Failure, title: "Source not loaded yet" });
-              return;
-            }
-            await Clipboard.copy(tsxSource);
-            await showToast({ style: Toast.Style.Success, title: "TSX copied!" });
-          }}
-        />
+        <Action title="Copy TSX Code" icon={Icon.Clipboard} onAction={copyTsx} />
         <Action
           title={`Copy ${packageManager} Install Command`}
           icon={Icon.Terminal}
@@ -108,12 +113,6 @@ function IconActions({ name, packageManager }: { name: string; packageManager: P
           icon={Icon.Globe}
           shortcut={{ modifiers: ["cmd"], key: "v" }}
           url={`https://v0.dev/chat?q=use+the+${name}+icon+from+lucide-animated`}
-        />
-        <Action.OpenInBrowser
-          title="Open on Lucide Animated"
-          icon={Icon.Globe}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
-          url="https://lucide-animated.com"
         />
       </ActionPanel.Section>
     </ActionPanel>
