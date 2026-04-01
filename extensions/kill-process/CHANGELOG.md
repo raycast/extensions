@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Added Kill All action] - {PR_MERGE_DATE}
+## [Added Kill All action] - 2026-04-01
 
 - Added action to kill all processes with the same name
 - Added AI tool `killall-process` to allow natural-language "kill all <process>" commands via AI
