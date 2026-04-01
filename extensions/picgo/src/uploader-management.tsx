@@ -1,11 +1,19 @@
 import { List, Icon, ActionPanel, Action, confirmAlert, Alert, Color } from "@raycast/api";
 import getPicGoContext from "./util/context";
-import { IPluginConfig, IUploaderConfigItem } from "picgo";
+import type { IPluginConfig, IUploaderConfigItem } from "picgo";
 import ConfigEditForm from "./components/ConfigEditForm";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 
+/**
+ * Render the uploader configuration management UI listing configs grouped by uploader type and exposing actions to create, edit, duplicate, set default, open, and delete configurations.
+ *
+ * Renders an empty state when no configurations exist and a detail-enabled list when configs are present. Actions update local state to trigger refreshes and surface errors via a failure toast.
+ *
+ * @returns The Raycast List JSX element showing uploader configurations and their management actions.
+ */
 export default function Command() {
+    const picgo = getPicGoContext();
     const {
         getActiveUploaderType,
         getUploaderConfigItemDetails,
@@ -15,10 +23,8 @@ export default function Command() {
         setActiveConfig,
         copyConfig,
         removeConfig,
-        renameConfig,
-        createOrUpdateConfig,
         ctx,
-    } = getPicGoContext();
+    } = picgo;
 
     const [error, setError] = useState<Error | undefined>(undefined);
     const [updated, setUpdated] = useState<boolean>(false);
@@ -77,15 +83,7 @@ export default function Command() {
                                 onPop={() => {
                                     setUpdated(!updated);
                                 }}
-                                target={
-                                    <ConfigEditForm
-                                        type={getUploaderTypeList()[0]}
-                                        getUploaderTypeList={getUploaderTypeList}
-                                        getConfigItems={getUploaderConfigItemDetails}
-                                        createOrUpdateConfig={createOrUpdateConfig}
-                                        renameConfig={renameConfig}
-                                    />
-                                }
+                                target={<ConfigEditForm mode="create" type={getUploaderTypeList()[0]} picgo={picgo} />}
                             />
                         </ActionPanel>
                     }
@@ -146,12 +144,10 @@ export default function Command() {
                                         }}
                                         target={
                                             <ConfigEditForm
+                                                mode="update"
                                                 type={type}
-                                                getConfigItems={getUploaderConfigItemDetails}
-                                                getUploaderTypeList={getUploaderTypeList}
-                                                createOrUpdateConfig={createOrUpdateConfig}
-                                                renameConfig={renameConfig}
                                                 config={{ ...cfg }}
+                                                picgo={picgo}
                                             />
                                         }
                                     ></Action.Push>
@@ -162,15 +158,7 @@ export default function Command() {
                                         onPop={() => {
                                             setUpdated(!updated);
                                         }}
-                                        target={
-                                            <ConfigEditForm
-                                                type={type}
-                                                getUploaderTypeList={getUploaderTypeList}
-                                                getConfigItems={getUploaderConfigItemDetails}
-                                                createOrUpdateConfig={createOrUpdateConfig}
-                                                renameConfig={renameConfig}
-                                            />
-                                        }
+                                        target={<ConfigEditForm mode="create" type={type} picgo={picgo} />}
                                     />
 
                                     <Action
