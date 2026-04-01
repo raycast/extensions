@@ -1,0 +1,86 @@
+{
+  "name": "prashantvc-weather",
+  "title": "Weather",
+  "description": "Weather and forecast for your location",
+  "icon": "command-icon.png",
+  "author": "b596y9jwgf_privaterelay_appleid_com",
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "weather",
+      "title": "Weather For",
+      "description": "Show weather for a typed city, address, or coordinates.",
+      "mode": "view",
+      "keywords": [
+        "forecast",
+        "temperature",
+        "weather in"
+      ],
+      "arguments": [
+        {
+          "name": "location",
+          "placeholder": "Sapporo, Bangalore, or 35.6762,139.6503",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultLocation",
+      "title": "Default Location",
+      "description": "Fallback weather location as latitude, longitude",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "37.3346,-122.0090"
+    },
+    {
+      "name": "unit",
+      "title": "Temperature Unit",
+      "description": "Select your preferred temperature unit.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "Celsius",
+          "value": "celsius"
+        },
+        {
+          "title": "Fahrenheit",
+          "value": "fahrenheit"
+        }
+      ],
+      "default": "celsius"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "node scripts/dev-windows.mjs",
+    "dev:raycast": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\n\\n  Please use \\\"npm run publish\\\" instead.\\n\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "eslintConfig": {
+    "extends": "@raycast"
+  }
+}
