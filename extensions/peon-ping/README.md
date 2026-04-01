@@ -4,7 +4,7 @@
 
 # Peon Ping
 
-Manage peon-ping from Raycast with a main command for status, global on/off, and supported settings, plus an optional menu bar quick toggle.
+Manage peon-ping from Raycast with a main command for status, global on/off, pack rotation and path rules, notifications, trainer/debug toggles, and other supported settings, plus an optional menu bar quick toggle.
 
 ## Commands
 
@@ -16,7 +16,9 @@ Manage peon-ping from Raycast with a main command for status, global on/off, and
 
 ## Setup
 
-This extension requires [peon-ping](https://github.com/PeonPing/peon-ping) to be installed as a Claude Code hook. The extension expects the script at:
+This extension requires [peon-ping](https://github.com/PeonPing/peon-ping) to be installed. It now prefers the `peon` CLI when it is available on `PATH` or in common Homebrew/Linuxbrew install locations, and falls back to the hook script when the CLI is not available.
+
+The fallback script location is:
 
 ```
 ~/.claude/hooks/peon-ping/peon.sh
@@ -28,4 +30,46 @@ This extension requires [peon-ping](https://github.com/PeonPing/peon-ping) to be
 |---|---|---|
 | Claude config directory | Override the Claude config directory path | `~/.claude` |
 
-The config directory is resolved from: Raycast preference > `CLAUDE_CONFIG_DIR` env var > `~/.claude`.
+The Claude config directory is resolved from: Raycast preference > `CLAUDE_CONFIG_DIR` env var > `~/.claude`.
+
+The peon install and data paths follow the current peon-ping rules:
+
+- prefer `CLAUDE_PEON_DIR` when it points at an install with packs
+- otherwise use the Claude hook directory for script/config in hook installs
+- otherwise fall back to `~/.openpeon` data for default home installs
+
+## What Raycast Can Change
+
+The main command now covers:
+
+- global on/off
+- volume
+- active pack
+- rotation mode
+- rotation member list add/remove/clear
+- category toggles
+- desktop notifications, style, position, dismiss time, mobile notifications, all-screens
+- headphones only
+- sound effects device
+- path rule visibility and removal
+- debug on/off
+- trainer on/off
+- meeting detect
+- suppress subagent completion sounds
+
+The extension uses the `peon` CLI or `peon.sh` when a setter command exists. It only writes `config.json` directly for settings that still do not expose setter commands in the current install, such as:
+
+- categories
+- headphones only
+- sound effects device
+- notification all screens
+- meeting detect
+- suppress subagent complete
+
+Some newer config fields are shown as read-only metadata today so you can inspect them from Raycast without losing parity context:
+
+- notification title override
+- notification template count
+- silent window seconds
+- session start cooldown seconds
+- debug retention days

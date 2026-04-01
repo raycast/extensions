@@ -39,3 +39,17 @@ test("resolvePeonPingCommandTarget falls back to bash peon.sh", () => {
     argsPrefix: [paths.scriptPath],
   });
 });
+
+test("resolvePeonPingCommandTarget checks common install locations before falling back", () => {
+  const target = resolvePeonPingCommandTarget(paths, {
+    pathEnv: "",
+    hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+  });
+
+  expect(target).toEqual({
+    source: "cli",
+    command: "/opt/homebrew/bin/peon",
+    executablePath: "/opt/homebrew/bin/peon",
+    argsPrefix: [],
+  });
+});

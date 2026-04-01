@@ -18,6 +18,12 @@ type ResolvePeonPingCommandTargetInput = {
   hasExecutable?: (candidate: string) => boolean;
 };
 
+const COMMON_PEON_PATHS = [
+  "/opt/homebrew/bin/peon",
+  "/usr/local/bin/peon",
+  "/home/linuxbrew/.linuxbrew/bin/peon",
+] as const;
+
 function splitPathEntries(pathEnv: string | null | undefined): string[] {
   if (!pathEnv) {
     return [];
@@ -35,6 +41,12 @@ function findPeonExecutable(
 ): string | null {
   for (const entry of splitPathEntries(pathEnv)) {
     const candidate = join(entry, "peon");
+    if (hasExecutable(candidate)) {
+      return candidate;
+    }
+  }
+
+  for (const candidate of COMMON_PEON_PATHS) {
     if (hasExecutable(candidate)) {
       return candidate;
     }
