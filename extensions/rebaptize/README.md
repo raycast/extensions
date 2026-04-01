@@ -8,6 +8,23 @@ Bulk rename and organize files directly from Raycast. 30 commands covering every
 
 Every function is its own Raycast command — assign aliases and hotkeys to the ones you use most. All commands auto-detect the current Finder folder.
 
+## Table of Contents
+
+- [Getting Started](#getting-started)
+- [Rename Files](#rename-files) — TV Show, Anime, Movie, Sequential, Date-Based, Change Case, Swap Delimiter, Auto Enumerate, Change Extension, Find & Replace
+  - [Custom Template Mode](#custom-template-mode)
+- [Smart Organize Episodes](#smart-organize-episodes)
+- [Smart Find & Replace](#smart-find--replace)
+- [Sort Files by Date](#sort-files-by-date)
+- [Sort Photos by Location](#sort-photos-by-location)
+- [Custom Rename Scripts](#custom-rename-scripts)
+- [Preset Shortcuts](#preset-shortcuts)
+- [Instant Commands](#instant-commands) — Case, Delimiter, Utility, Undo
+- [Smart Detection](#smart-detection)
+- [Finder Detection](#finder-detection)
+- [Metadata Integration](#metadata-integration-optional) — TMDB, TheTVDB
+- [Tips](#tips)
+
 ## Getting Started
 
 1. Install from the Raycast Store
