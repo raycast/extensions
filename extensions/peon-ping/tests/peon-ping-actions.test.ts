@@ -1,6 +1,9 @@
 import { expect, test, vi } from "vitest";
 import { LaunchType, Toast } from "@raycast/api";
-import type { PeonPingConfig, PeonPingStatus } from "../src/lib/peon-ping-config";
+import type {
+  PeonPingConfig,
+  PeonPingStatus,
+} from "../src/lib/peon-ping-config";
 import type { PeonPingResolvedPaths } from "../src/lib/peon-ping-paths";
 import type { PeonPingCommandRunner } from "../src/lib/peon-ping-service";
 import {
@@ -9,12 +12,18 @@ import {
   runNextPackAction,
   runRemovePathRuleAction,
   runRemovePackFromRotationAction,
+  runSetPathRulePackAction,
+  runSetSessionStartCooldownSecondsAction,
+  runSetSilentWindowSecondsAction,
   runSetActivePackAction,
   runSetDebugEnabledAction,
   runSetDismissTimeAction,
   runSetNotificationPositionAction,
   runSetNotificationStyleAction,
   runSetRotationModeAction,
+  runSetTrainerExerciseGoalAction,
+  runSetTrainerReminderIntervalMinutesAction,
+  runSetTrainerReminderMinGapMinutesAction,
   runStatusToggleAndRefreshMenuBarSafely,
   runToggleMeetingDetectAction,
   runToggleNotificationAllScreensAction,
@@ -122,11 +131,13 @@ test("runStatusToggleAndRefreshMenuBar awaits refresh and resolves when menu bar
     status,
   }));
   const setStatus = vi.fn();
-  const launchCommand = vi.fn().mockRejectedValue(
-    new Error(
-      'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
-    ),
-  );
+  const launchCommand = vi
+    .fn()
+    .mockRejectedValue(
+      new Error(
+        'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
+      ),
+    );
 
   await expect(
     runStatusToggleAndRefreshMenuBar(
@@ -189,11 +200,13 @@ test("runStatusToggleAndRefreshMenuBarSafely does not show a toast for the ignor
   const status: PeonPingStatus = { enabled: true };
   const togglePeonPing = vi.fn(() => ({ message: "ok", status }));
   const setStatus = vi.fn();
-  const launchCommand = vi.fn().mockRejectedValue(
-    new Error(
-      'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
-    ),
-  );
+  const launchCommand = vi
+    .fn()
+    .mockRejectedValue(
+      new Error(
+        'Command "Peon Ping Menu Bar" must be activated before it can be run in the background',
+      ),
+    );
   const showToast = vi.fn().mockResolvedValue(undefined);
 
   const result = runStatusToggleAndRefreshMenuBarSafely(
@@ -411,10 +424,30 @@ test("runRemovePathRuleAction calls removePathRule and updates config state", ()
     "*/client-a/*",
   );
 
-  expect(removePathRule).toHaveBeenCalledWith(
+  expect(removePathRule).toHaveBeenCalledWith(dummyPaths, run, "*/client-a/*");
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetPathRulePackAction calls setPathRulePack and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({
+    pathRules: [{ pattern: "*/client-a/*", pack: "peon" }],
+  });
+  const setPathRulePack = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetPathRulePackAction(
+    { paths: dummyPaths, run, setPathRulePack, setConfig },
+    "*/client-a/*",
+    "peon",
+  );
+
+  expect(setPathRulePack).toHaveBeenCalledWith(
     dummyPaths,
     run,
     "*/client-a/*",
+    "peon",
   );
   expect(setConfig).toHaveBeenCalledWith(config);
   expect(result).toEqual(config);
@@ -455,6 +488,35 @@ test("runSetTrainerEnabledAction calls setTrainerEnabled and updates config stat
   );
 
   expect(setTrainerEnabled).toHaveBeenCalledWith(dummyPaths, run, true);
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetTrainerExerciseGoalAction calls setTrainerExerciseGoal and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 120, squats: 150 },
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 5,
+    },
+  });
+  const setTrainerExerciseGoal = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetTrainerExerciseGoalAction(
+    { paths: dummyPaths, run, setTrainerExerciseGoal, setConfig },
+    "pushups",
+    120,
+  );
+
+  expect(setTrainerExerciseGoal).toHaveBeenCalledWith(
+    dummyPaths,
+    run,
+    "pushups",
+    120,
+  );
   expect(setConfig).toHaveBeenCalledWith(config);
   expect(result).toEqual(config);
 });
@@ -613,6 +675,54 @@ test("runToggleMeetingDetectAction calls setMeetingDetect and updates config sta
   expect(result).toEqual(config);
 });
 
+test("runSetSilentWindowSecondsAction calls setSilentWindowSeconds and updates config state", () => {
+  const config = makeConfig({ silentWindowSeconds: 15 });
+  const setSilentWindowSeconds = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetSilentWindowSecondsAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setSilentWindowSeconds,
+      setConfig,
+    },
+    15,
+  );
+
+  expect(setSilentWindowSeconds).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    15,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetSessionStartCooldownSecondsAction calls setSessionStartCooldownSeconds and updates config state", () => {
+  const config = makeConfig({ sessionStartCooldownSeconds: 60 });
+  const setSessionStartCooldownSeconds = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetSessionStartCooldownSecondsAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setSessionStartCooldownSeconds,
+      setConfig,
+    },
+    60,
+  );
+
+  expect(setSessionStartCooldownSeconds).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    60,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
 test("runToggleSuppressSubagentCompleteAction calls setSuppressSubagentComplete and updates config state", () => {
   const config = makeConfig({ suppressSubagentComplete: true });
   const setSuppressSubagentComplete = vi.fn(() => config);
@@ -632,6 +742,68 @@ test("runToggleSuppressSubagentCompleteAction calls setSuppressSubagentComplete 
     dummyPaths.configFilePath,
     dummyPaths.pausedFilePath,
     true,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetTrainerReminderIntervalMinutesAction calls setTrainerReminderIntervalMinutes and updates config state", () => {
+  const config = makeConfig({
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminderIntervalMinutes: 30,
+      reminderMinGapMinutes: 5,
+    },
+  });
+  const setTrainerReminderIntervalMinutes = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetTrainerReminderIntervalMinutesAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setTrainerReminderIntervalMinutes,
+      setConfig,
+    },
+    30,
+  );
+
+  expect(setTrainerReminderIntervalMinutes).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    30,
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runSetTrainerReminderMinGapMinutesAction calls setTrainerReminderMinGapMinutes and updates config state", () => {
+  const config = makeConfig({
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 10,
+    },
+  });
+  const setTrainerReminderMinGapMinutes = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runSetTrainerReminderMinGapMinutesAction(
+    {
+      configFilePath: dummyPaths.configFilePath,
+      pausedFilePath: dummyPaths.pausedFilePath,
+      setTrainerReminderMinGapMinutes,
+      setConfig,
+    },
+    10,
+  );
+
+  expect(setTrainerReminderMinGapMinutes).toHaveBeenCalledWith(
+    dummyPaths.configFilePath,
+    dummyPaths.pausedFilePath,
+    10,
   );
   expect(setConfig).toHaveBeenCalledWith(config);
   expect(result).toEqual(config);

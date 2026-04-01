@@ -29,6 +29,9 @@ import {
   clearPackRotation,
   removePathRule,
   removePackFromRotation,
+  setPathRulePack,
+  setSessionStartCooldownSeconds,
+  setSilentWindowSeconds,
   setActivePack,
   setDebugEnabled,
   setCategoryEnabled,
@@ -43,6 +46,9 @@ import {
   setPackRotationMode,
   setSuppressSubagentComplete,
   setTrainerEnabled,
+  setTrainerExerciseGoal,
+  setTrainerReminderIntervalMinutes,
+  setTrainerReminderMinGapMinutes,
   setUseSoundEffectsDevice,
   setVolume,
   togglePeonPing,
@@ -54,12 +60,18 @@ import {
   runNextPackAction,
   runRemovePathRuleAction,
   runRemovePackFromRotationAction,
+  runSetPathRulePackAction,
+  runSetSessionStartCooldownSecondsAction,
+  runSetSilentWindowSecondsAction,
   runSetActivePackAction,
   runSetDebugEnabledAction,
   runSetDismissTimeAction,
   runSetNotificationPositionAction,
   runSetNotificationStyleAction,
   runSetRotationModeAction,
+  runSetTrainerExerciseGoalAction,
+  runSetTrainerReminderIntervalMinutesAction,
+  runSetTrainerReminderMinGapMinutesAction,
   runSetVolumeAction,
   runStatusToggleAndRefreshMenuBarSafely,
   runToggleMeetingDetectAction,
@@ -193,6 +205,12 @@ function executeAction(
         { paths, run, removePathRule, setConfig },
         action.pattern,
       );
+    case "setPathRulePack":
+      return runSetPathRulePackAction(
+        { paths, run, setPathRulePack, setConfig },
+        action.pattern,
+        action.packName,
+      );
     case "toggleCategory":
       return runToggleCategoryAction(
         {
@@ -269,6 +287,26 @@ function executeAction(
         },
         action.nextEnabled,
       );
+    case "setSilentWindowSeconds":
+      return runSetSilentWindowSecondsAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setSilentWindowSeconds,
+          setConfig,
+        },
+        action.seconds,
+      );
+    case "setSessionStartCooldownSeconds":
+      return runSetSessionStartCooldownSecondsAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setSessionStartCooldownSeconds,
+          setConfig,
+        },
+        action.seconds,
+      );
     case "toggleSuppressSubagentComplete":
       return runToggleSuppressSubagentCompleteAction(
         {
@@ -289,6 +327,32 @@ function executeAction(
         { paths, run, setTrainerEnabled, setConfig },
         action.nextEnabled,
       );
+    case "setTrainerExerciseGoal":
+      return runSetTrainerExerciseGoalAction(
+        { paths, run, setTrainerExerciseGoal, setConfig },
+        action.exercise,
+        action.goal,
+      );
+    case "setTrainerReminderIntervalMinutes":
+      return runSetTrainerReminderIntervalMinutesAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setTrainerReminderIntervalMinutes,
+          setConfig,
+        },
+        action.minutes,
+      );
+    case "setTrainerReminderMinGapMinutes":
+      return runSetTrainerReminderMinGapMinutesAction(
+        {
+          configFilePath: paths.configFilePath,
+          pausedFilePath: paths.pausedFilePath,
+          setTrainerReminderMinGapMinutes,
+          setConfig,
+        },
+        action.minutes,
+      );
     case "toggleStatus":
       throw new Error("toggleStatus should not go through executeAction");
   }
@@ -308,12 +372,24 @@ function actionKey(action: DashboardAction): string {
       return `rotation-remove-${action.packName}`;
     case "removePathRule":
       return `path-rule-${action.pattern}`;
+    case "setPathRulePack":
+      return `path-rule-pack-${action.pattern}-${action.packName}`;
     case "toggleCategory":
       return `cat-${action.categoryKey}`;
     case "setNotificationStyle":
       return `style-${action.style}`;
     case "setNotificationPosition":
       return `pos-${action.position}`;
+    case "setSilentWindowSeconds":
+      return `silent-window-${action.seconds}`;
+    case "setSessionStartCooldownSeconds":
+      return `session-start-cooldown-${action.seconds}`;
+    case "setTrainerExerciseGoal":
+      return `trainer-goal-${action.exercise}-${action.goal}`;
+    case "setTrainerReminderIntervalMinutes":
+      return `trainer-reminder-interval-${action.minutes}`;
+    case "setTrainerReminderMinGapMinutes":
+      return `trainer-min-gap-${action.minutes}`;
     default:
       return action.kind;
   }

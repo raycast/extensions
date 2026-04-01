@@ -13,6 +13,9 @@ import {
   clearPackRotation,
   removePathRule,
   removePackFromRotation,
+  setPathRulePack,
+  setSessionStartCooldownSeconds,
+  setSilentWindowSeconds,
   setActivePack,
   setDebugEnabled,
   setCategoryEnabled,
@@ -27,6 +30,9 @@ import {
   setPackRotationMode,
   setSuppressSubagentComplete,
   setTrainerEnabled,
+  setTrainerExerciseGoal,
+  setTrainerReminderIntervalMinutes,
+  setTrainerReminderMinGapMinutes,
   setUseSoundEffectsDevice,
   setVolume,
   togglePeonPing,
@@ -318,6 +324,23 @@ export function runRemovePathRuleAction(
   return config;
 }
 
+export type RunSetPathRulePackActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  setPathRulePack: typeof setPathRulePack;
+  setConfig: SetConfig;
+};
+
+export function runSetPathRulePackAction(
+  deps: RunSetPathRulePackActionDeps,
+  pattern: string,
+  packName: string,
+): PeonPingConfig {
+  const config = deps.setPathRulePack(deps.paths, deps.run, pattern, packName);
+  deps.setConfig(config);
+  return config;
+}
+
 export type RunSetDebugEnabledActionDeps = {
   paths: PeonPingCommandPaths;
   run: PeonPingCommandRunner;
@@ -346,6 +369,28 @@ export function runSetTrainerEnabledAction(
   enabled: boolean,
 ): PeonPingConfig {
   const config = deps.setTrainerEnabled(deps.paths, deps.run, enabled);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunSetTrainerExerciseGoalActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  setTrainerExerciseGoal: typeof setTrainerExerciseGoal;
+  setConfig: SetConfig;
+};
+
+export function runSetTrainerExerciseGoalAction(
+  deps: RunSetTrainerExerciseGoalActionDeps,
+  exercise: string,
+  goal: number,
+): PeonPingConfig {
+  const config = deps.setTrainerExerciseGoal(
+    deps.paths,
+    deps.run,
+    exercise,
+    goal,
+  );
   deps.setConfig(config);
   return config;
 }
@@ -476,6 +521,46 @@ export function runToggleMeetingDetectAction(
   return config;
 }
 
+export type RunSetSilentWindowSecondsActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setSilentWindowSeconds: typeof setSilentWindowSeconds;
+  setConfig: SetConfig;
+};
+
+export function runSetSilentWindowSecondsAction(
+  deps: RunSetSilentWindowSecondsActionDeps,
+  seconds: number,
+): PeonPingConfig {
+  const config = deps.setSilentWindowSeconds(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    seconds,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunSetSessionStartCooldownSecondsActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setSessionStartCooldownSeconds: typeof setSessionStartCooldownSeconds;
+  setConfig: SetConfig;
+};
+
+export function runSetSessionStartCooldownSecondsAction(
+  deps: RunSetSessionStartCooldownSecondsActionDeps,
+  seconds: number,
+): PeonPingConfig {
+  const config = deps.setSessionStartCooldownSeconds(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    seconds,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
 export type RunToggleSuppressSubagentCompleteActionDeps = {
   configFilePath: string;
   pausedFilePath: string;
@@ -491,6 +576,46 @@ export function runToggleSuppressSubagentCompleteAction(
     deps.configFilePath,
     deps.pausedFilePath,
     enabled,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunSetTrainerReminderIntervalMinutesActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setTrainerReminderIntervalMinutes: typeof setTrainerReminderIntervalMinutes;
+  setConfig: SetConfig;
+};
+
+export function runSetTrainerReminderIntervalMinutesAction(
+  deps: RunSetTrainerReminderIntervalMinutesActionDeps,
+  minutes: number,
+): PeonPingConfig {
+  const config = deps.setTrainerReminderIntervalMinutes(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    minutes,
+  );
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunSetTrainerReminderMinGapMinutesActionDeps = {
+  configFilePath: string;
+  pausedFilePath: string;
+  setTrainerReminderMinGapMinutes: typeof setTrainerReminderMinGapMinutes;
+  setConfig: SetConfig;
+};
+
+export function runSetTrainerReminderMinGapMinutesAction(
+  deps: RunSetTrainerReminderMinGapMinutesActionDeps,
+  minutes: number,
+): PeonPingConfig {
+  const config = deps.setTrainerReminderMinGapMinutes(
+    deps.configFilePath,
+    deps.pausedFilePath,
+    minutes,
   );
   deps.setConfig(config);
   return config;

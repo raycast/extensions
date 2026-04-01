@@ -91,6 +91,11 @@ export type DashboardAction =
       pattern: string;
     })
   | (DashboardActionBase & {
+      kind: "setPathRulePack";
+      pattern: string;
+      packName: string;
+    })
+  | (DashboardActionBase & {
       kind: "toggleCategory";
       categoryKey: PeonPingCategoryKey;
       nextEnabled: boolean;
@@ -132,6 +137,14 @@ export type DashboardAction =
       nextEnabled: boolean;
     })
   | (DashboardActionBase & {
+      kind: "setSilentWindowSeconds";
+      seconds: number;
+    })
+  | (DashboardActionBase & {
+      kind: "setSessionStartCooldownSeconds";
+      seconds: number;
+    })
+  | (DashboardActionBase & {
       kind: "toggleSuppressSubagentComplete";
       nextEnabled: boolean;
     })
@@ -142,6 +155,19 @@ export type DashboardAction =
   | (DashboardActionBase & {
       kind: "toggleTrainerEnabled";
       nextEnabled: boolean;
+    })
+  | (DashboardActionBase & {
+      kind: "setTrainerExerciseGoal";
+      exercise: string;
+      goal: number;
+    })
+  | (DashboardActionBase & {
+      kind: "setTrainerReminderIntervalMinutes";
+      minutes: number;
+    })
+  | (DashboardActionBase & {
+      kind: "setTrainerReminderMinGapMinutes";
+      minutes: number;
     });
 
 export type DashboardItem = {
@@ -162,11 +188,36 @@ export type BuildDashboardInput = {
 };
 
 const PROGRESS_BAR_BLOCKS = 12;
+const SILENT_WINDOW_OPTIONS = [0, 5, 10, 15, 30, 60, 120] as const;
+const SESSION_START_COOLDOWN_OPTIONS = [0, 10, 30, 60, 120, 300] as const;
+const TRAINER_REMINDER_INTERVAL_OPTIONS = [5, 10, 15, 20, 30, 45, 60] as const;
+const TRAINER_REMINDER_MIN_GAP_OPTIONS = [0, 5, 10, 15, 20, 30] as const;
+const DEFAULT_TRAINER_GOAL_OPTIONS = [
+  25, 50, 75, 100, 150, 200, 300, 500,
+] as const;
 
 export function progressBar(fraction: number): string {
   const filled = Math.round(fraction * PROGRESS_BAR_BLOCKS);
   const empty = PROGRESS_BAR_BLOCKS - filled;
   return "■".repeat(filled) + "□".repeat(empty);
+}
+
+function formatSecondsOption(seconds: number): string {
+  return seconds === 0 ? "Off" : `${seconds}s`;
+}
+
+function formatMinutesOption(minutes: number): string {
+  return `${minutes} min`;
+}
+
+function formatGoalOption(goal: number): string {
+  return `${goal} reps`;
+}
+
+function trainerGoalOptions(currentGoal: number): number[] {
+  return [...new Set([...DEFAULT_TRAINER_GOAL_OPTIONS, currentGoal])].sort(
+    (left, right) => left - right,
+  );
 }
 
 function findPackDisplayName(
@@ -477,7 +528,7 @@ function buildPathRulesItem(
           title: rule.pattern,
           icon: "bulletPoints",
           accessoryText: findPackDisplayName(packs, rule.pack),
-          drillable: false,
+          drillable: true,
           metadata: [
             {
               kind: "label",
@@ -492,6 +543,14 @@ function buildPathRulesItem(
             },
           ],
           actions: [
+            ...packs.map((pack) => ({
+              kind: "setPathRulePack" as const,
+              title: `Use ${pack.displayName}`,
+              subListTitle: pack.displayName,
+              isCurrent: rule.pack === pack.name,
+              pattern: rule.pattern,
+              packName: pack.name,
+            })),
             {
               kind: "removePathRule" as const,
               title: `Remove ${rule.pattern}`,
@@ -931,7 +990,7 @@ function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
         title: "Silent Window",
         icon: "clock",
         accessoryText: `${config.silentWindowSeconds}s`,
-        drillable: false,
+        drillable: true,
         metadata: [
           {
             kind: "label",
@@ -939,14 +998,20 @@ function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
             text: `${config.silentWindowSeconds}s`,
           },
         ],
-        actions: [],
+        actions: SILENT_WINDOW_OPTIONS.map((seconds) => ({
+          kind: "setSilentWindowSeconds" as const,
+          title: `Set Silent Window to ${formatSecondsOption(seconds)}`,
+          subListTitle: formatSecondsOption(seconds),
+          isCurrent: config.silentWindowSeconds === seconds,
+          seconds,
+        })),
       },
       {
         id: "behavior-session-start-cooldown",
         title: "Session Start Cooldown",
         icon: "clock",
         accessoryText: `${config.sessionStartCooldownSeconds}s`,
-        drillable: false,
+        drillable: true,
         metadata: [
           {
             kind: "label",
@@ -954,7 +1019,13 @@ function buildBehaviorItem(config: PeonPingConfig): DashboardItem {
             text: `${config.sessionStartCooldownSeconds}s`,
           },
         ],
-        actions: [],
+        actions: SESSION_START_COOLDOWN_OPTIONS.map((seconds) => ({
+          kind: "setSessionStartCooldownSeconds" as const,
+          title: `Set Session Start Cooldown to ${formatSecondsOption(seconds)}`,
+          subListTitle: formatSecondsOption(seconds),
+          isCurrent: config.sessionStartCooldownSeconds === seconds,
+          seconds,
+        })),
       },
     ],
     metadata: [
@@ -1025,6 +1096,36 @@ function formatTrainerGoals(exercises: Record<string, number>): string {
 }
 
 function buildTrainerItem(config: PeonPingConfig): DashboardItem {
+  const goalSubItems: DashboardItem[] = Object.entries(
+    config.trainer.exercises,
+  ).map(([exercise, goal]) => ({
+    id: `trainer-goal-${exercise}`,
+    title: exercise,
+    icon: "bulletPoints",
+    accessoryText: formatGoalOption(goal),
+    drillable: true,
+    metadata: [
+      {
+        kind: "label",
+        title: "Exercise",
+        text: exercise,
+      },
+      {
+        kind: "label",
+        title: "Goal",
+        text: formatGoalOption(goal),
+      },
+    ],
+    actions: trainerGoalOptions(goal).map((candidateGoal) => ({
+      kind: "setTrainerExerciseGoal" as const,
+      title: `Set ${exercise} Goal to ${formatGoalOption(candidateGoal)}`,
+      subListTitle: formatGoalOption(candidateGoal),
+      isCurrent: goal === candidateGoal,
+      exercise,
+      goal: candidateGoal,
+    })),
+  }));
+
   return {
     id: "trainer",
     title: "Trainer",
@@ -1063,7 +1164,8 @@ function buildTrainerItem(config: PeonPingConfig): DashboardItem {
         title: "Goals",
         icon: "bulletPoints",
         accessoryText: formatTrainerGoals(config.trainer.exercises),
-        drillable: false,
+        drillable: true,
+        subItems: goalSubItems,
         metadata: [
           {
             kind: "label",
@@ -1078,7 +1180,7 @@ function buildTrainerItem(config: PeonPingConfig): DashboardItem {
         title: "Reminder Interval",
         icon: "clock",
         accessoryText: `${config.trainer.reminderIntervalMinutes} min`,
-        drillable: false,
+        drillable: true,
         metadata: [
           {
             kind: "label",
@@ -1086,14 +1188,20 @@ function buildTrainerItem(config: PeonPingConfig): DashboardItem {
             text: `${config.trainer.reminderIntervalMinutes} min`,
           },
         ],
-        actions: [],
+        actions: TRAINER_REMINDER_INTERVAL_OPTIONS.map((minutes) => ({
+          kind: "setTrainerReminderIntervalMinutes" as const,
+          title: `Set Reminder Interval to ${formatMinutesOption(minutes)}`,
+          subListTitle: formatMinutesOption(minutes),
+          isCurrent: config.trainer.reminderIntervalMinutes === minutes,
+          minutes,
+        })),
       },
       {
         id: "trainer-min-gap",
         title: "Minimum Gap",
         icon: "clock",
         accessoryText: `${config.trainer.reminderMinGapMinutes} min`,
-        drillable: false,
+        drillable: true,
         metadata: [
           {
             kind: "label",
@@ -1101,7 +1209,13 @@ function buildTrainerItem(config: PeonPingConfig): DashboardItem {
             text: `${config.trainer.reminderMinGapMinutes} min`,
           },
         ],
-        actions: [],
+        actions: TRAINER_REMINDER_MIN_GAP_OPTIONS.map((minutes) => ({
+          kind: "setTrainerReminderMinGapMinutes" as const,
+          title: `Set Minimum Gap to ${formatMinutesOption(minutes)}`,
+          subListTitle: formatMinutesOption(minutes),
+          isCurrent: config.trainer.reminderMinGapMinutes === minutes,
+          minutes,
+        })),
       },
     ],
     metadata: [

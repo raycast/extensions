@@ -235,7 +235,9 @@ test("rotationPacks metadata lists active rotation members by display name", () 
     packs: PACKS,
   });
   const rotationPacks = findItem(items, "rotationPacks");
-  const labels = rotationPacks.metadata.filter((entry) => entry.kind === "label");
+  const labels = rotationPacks.metadata.filter(
+    (entry) => entry.kind === "label",
+  );
   expect(labels).toContainEqual(
     expect.objectContaining({
       title: "1",
@@ -329,13 +331,45 @@ test("pathRules actions remove configured rules", () => {
       expect.objectContaining({
         id: "path-rule-*/client-a/*",
         title: "*/client-a/*",
-        drillable: false,
-        actions: [
-          expect.objectContaining({
-            kind: "removePathRule",
-            pattern: "*/client-a/*",
-          }),
-        ],
+        drillable: true,
+      }),
+    ]),
+  );
+});
+
+test("pathRules subitems can reassign packs and remove the rule", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({
+      pathRules: [{ pattern: "*/client-a/*", pack: "glados" }],
+    }),
+    packs: PACKS,
+  });
+  const pathRules = findItem(items, "pathRules");
+  const rule = pathRules.subItems!.find(
+    (item) => item.id === "path-rule-*/client-a/*",
+  );
+
+  expect(rule).toBeDefined();
+  expect(rule!.drillable).toBe(true);
+  expect(rule!.actions).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "setPathRulePack",
+        pattern: "*/client-a/*",
+        packName: "glados",
+        isCurrent: true,
+        subListTitle: "GLaDOS (Portal)",
+      }),
+      expect.objectContaining({
+        kind: "setPathRulePack",
+        pattern: "*/client-a/*",
+        packName: "peon",
+        isCurrent: false,
+        subListTitle: "Peon (Warcraft III)",
+      }),
+      expect.objectContaining({
+        kind: "removePathRule",
+        pattern: "*/client-a/*",
       }),
     ]),
   );
@@ -653,8 +687,69 @@ test("behavior item shows advanced toggle state and read-only timing metadata", 
     expect.arrayContaining([
       expect.objectContaining({ id: "behavior-meeting-detect" }),
       expect.objectContaining({ id: "behavior-subagent-complete" }),
-      expect.objectContaining({ id: "behavior-silent-window", actions: [] }),
-      expect.objectContaining({ id: "behavior-session-start-cooldown", actions: [] }),
+      expect.objectContaining({
+        id: "behavior-silent-window",
+        drillable: true,
+      }),
+      expect.objectContaining({
+        id: "behavior-session-start-cooldown",
+        drillable: true,
+      }),
+    ]),
+  );
+});
+
+test("behavior timing subitems expose fixed choice actions", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({
+      silentWindowSeconds: 15,
+      sessionStartCooldownSeconds: 60,
+    }),
+    packs: [],
+  });
+  const behavior = findItem(items, "behavior");
+  const silentWindow = behavior.subItems!.find(
+    (item) => item.id === "behavior-silent-window",
+  );
+  const sessionStartCooldown = behavior.subItems!.find(
+    (item) => item.id === "behavior-session-start-cooldown",
+  );
+
+  expect(silentWindow).toBeDefined();
+  expect(silentWindow!.drillable).toBe(true);
+  expect(silentWindow!.actions).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "setSilentWindowSeconds",
+        seconds: 15,
+        isCurrent: true,
+        subListTitle: "15s",
+      }),
+      expect.objectContaining({
+        kind: "setSilentWindowSeconds",
+        seconds: 0,
+        isCurrent: false,
+        subListTitle: "Off",
+      }),
+    ]),
+  );
+
+  expect(sessionStartCooldown).toBeDefined();
+  expect(sessionStartCooldown!.drillable).toBe(true);
+  expect(sessionStartCooldown!.actions).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "setSessionStartCooldownSeconds",
+        seconds: 60,
+        isCurrent: true,
+        subListTitle: "60s",
+      }),
+      expect.objectContaining({
+        kind: "setSessionStartCooldownSeconds",
+        seconds: 0,
+        isCurrent: false,
+        subListTitle: "Off",
+      }),
     ]),
   );
 });
@@ -707,9 +802,120 @@ test("trainer item shows current trainer state and goals", () => {
           }),
         ],
       }),
-      expect.objectContaining({ id: "trainer-goals", actions: [] }),
-      expect.objectContaining({ id: "trainer-reminder-interval", actions: [] }),
-      expect.objectContaining({ id: "trainer-min-gap", actions: [] }),
+      expect.objectContaining({ id: "trainer-goals", drillable: true }),
+      expect.objectContaining({
+        id: "trainer-reminder-interval",
+        drillable: true,
+      }),
+      expect.objectContaining({ id: "trainer-min-gap", drillable: true }),
+    ]),
+  );
+});
+
+test("trainer goals drills into per-exercise goal choices", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({
+      trainer: {
+        enabled: true,
+        exercises: { pushups: 120, squats: 150 },
+        reminderIntervalMinutes: 20,
+        reminderMinGapMinutes: 5,
+      },
+    }),
+    packs: [],
+  });
+  const trainer = findItem(items, "trainer");
+  const goals = trainer.subItems!.find((item) => item.id === "trainer-goals");
+
+  expect(goals).toBeDefined();
+  expect(goals!.drillable).toBe(true);
+  expect(goals!.subItems).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        id: "trainer-goal-pushups",
+        title: "pushups",
+        accessoryText: "120 reps",
+        drillable: true,
+        actions: expect.arrayContaining([
+          expect.objectContaining({
+            kind: "setTrainerExerciseGoal",
+            exercise: "pushups",
+            goal: 120,
+            isCurrent: true,
+            subListTitle: "120 reps",
+          }),
+          expect.objectContaining({
+            kind: "setTrainerExerciseGoal",
+            exercise: "pushups",
+            goal: 100,
+            isCurrent: false,
+            subListTitle: "100 reps",
+          }),
+        ]),
+      }),
+      expect.objectContaining({
+        id: "trainer-goal-squats",
+        title: "squats",
+        accessoryText: "150 reps",
+        drillable: true,
+      }),
+    ]),
+  );
+});
+
+test("trainer reminder settings expose fixed choice actions", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({
+      trainer: {
+        enabled: true,
+        exercises: { pushups: 100, squats: 120 },
+        reminderIntervalMinutes: 30,
+        reminderMinGapMinutes: 10,
+      },
+    }),
+    packs: [],
+  });
+  const trainer = findItem(items, "trainer");
+  const reminderInterval = trainer.subItems!.find(
+    (item) => item.id === "trainer-reminder-interval",
+  );
+  const minGap = trainer.subItems!.find(
+    (item) => item.id === "trainer-min-gap",
+  );
+
+  expect(reminderInterval).toBeDefined();
+  expect(reminderInterval!.actions).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "setTrainerReminderIntervalMinutes",
+        minutes: 30,
+        isCurrent: true,
+        subListTitle: "30 min",
+      }),
+      expect.objectContaining({
+        kind: "setTrainerReminderIntervalMinutes",
+        minutes: 20,
+        isCurrent: false,
+        subListTitle: "20 min",
+      }),
+    ]),
+  );
+
+  expect(minGap).toBeDefined();
+  expect(minGap!.actions).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "setTrainerReminderMinGapMinutes",
+        minutes: 10,
+        isCurrent: true,
+        subListTitle: "10 min",
+      }),
+      expect.objectContaining({
+        kind: "setTrainerReminderMinGapMinutes",
+        minutes: 5,
+        isCurrent: false,
+        subListTitle: "5 min",
+      }),
     ]),
   );
 });

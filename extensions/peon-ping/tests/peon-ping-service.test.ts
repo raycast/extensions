@@ -11,6 +11,9 @@ import {
   clearPackRotation,
   removePathRule,
   removePackFromRotation,
+  setPathRulePack,
+  setSessionStartCooldownSeconds,
+  setSilentWindowSeconds,
   setActivePack,
   setDebugEnabled,
   setCategoryEnabled,
@@ -23,6 +26,9 @@ import {
   setNotificationStyle,
   setPackRotationMode,
   setTrainerEnabled,
+  setTrainerExerciseGoal,
+  setTrainerReminderIntervalMinutes,
+  setTrainerReminderMinGapMinutes,
   setUseSoundEffectsDevice,
   setVolume,
   setMeetingDetect,
@@ -33,7 +39,9 @@ import {
 import { resolvePeonPingCommandTarget } from "../src/lib/peon-ping-command-target";
 import { createClaudeConfigFixture } from "./helpers/claude-config-fixture";
 
-function expectedConfig(overrides: Partial<PeonPingConfig> = {}): PeonPingConfig {
+function expectedConfig(
+  overrides: Partial<PeonPingConfig> = {},
+): PeonPingConfig {
   return {
     effectivelyEnabled: true,
     volume: 0.5,
@@ -134,9 +142,7 @@ test("setVolume calls peon.sh volume <n> and returns refreshed config", () => {
     return "";
   };
 
-  expect(setVolume(paths, run, 0.75)).toEqual(
-    expectedConfig({ volume: 0.75 }),
-  );
+  expect(setVolume(paths, run, 0.75)).toEqual(expectedConfig({ volume: 0.75 }));
 });
 
 test("setVolume prefers the peon CLI when available", () => {
@@ -403,6 +409,47 @@ test("removePathRule calls peon packs unbind --pattern <glob>", () => {
   );
 });
 
+test("setPathRulePack calls peon packs bind <pack> --pattern <glob>", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    path_rules: [{ pattern: "*/client-a/*", pack: "glados" }],
+  });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual([
+      "packs",
+      "bind",
+      "peon",
+      "--pattern",
+      "*/client-a/*",
+    ]);
+    fx.writeConfigJson({
+      enabled: true,
+      path_rules: [{ pattern: "*/client-a/*", pack: "peon" }],
+    });
+    return "";
+  };
+
+  expect(setPathRulePack(runtimePaths, run, "*/client-a/*", "peon")).toEqual(
+    expectedConfig({
+      pathRules: [{ pattern: "*/client-a/*", pack: "peon" }],
+    }),
+  );
+});
+
 test("setDebugEnabled calls peon debug on", () => {
   const fx = createClaudeConfigFixture();
   fx.writeConfigJson({ enabled: true, debug: false });
@@ -463,6 +510,56 @@ test("setTrainerEnabled calls peon trainer off", () => {
       trainer: {
         enabled: false,
         exercises: { pushups: 100, squats: 120 },
+        reminderIntervalMinutes: 20,
+        reminderMinGapMinutes: 5,
+      },
+    }),
+  );
+});
+
+test("setTrainerExerciseGoal calls peon trainer goal <exercise> <n>", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminder_interval_minutes: 20,
+      reminder_min_gap_minutes: 5,
+    },
+  });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["trainer", "goal", "pushups", "120"]);
+    fx.writeConfigJson({
+      enabled: true,
+      trainer: {
+        enabled: true,
+        exercises: { pushups: 120, squats: 120 },
+        reminder_interval_minutes: 20,
+        reminder_min_gap_minutes: 5,
+      },
+    });
+    return "";
+  };
+
+  expect(setTrainerExerciseGoal(runtimePaths, run, "pushups", 120)).toEqual(
+    expectedConfig({
+      trainer: {
+        enabled: true,
+        exercises: { pushups: 120, squats: 120 },
         reminderIntervalMinutes: 20,
         reminderMinGapMinutes: 5,
       },
@@ -713,7 +810,10 @@ test("setMobileNotifications calls peon.sh mobile off", () => {
   };
 
   expect(setMobileNotifications(paths, run, false)).toEqual(
-    expectedConfig({ mobileNotifyEnabled: false, mobileNotifyConfigured: true }),
+    expectedConfig({
+      mobileNotifyEnabled: false,
+      mobileNotifyConfigured: true,
+    }),
   );
 });
 
@@ -732,11 +832,33 @@ test("setMeetingDetect writes meeting_detect to config.json", () => {
   const fx = createClaudeConfigFixture();
   fx.writeConfigJson({ enabled: true, meeting_detect: false });
 
-  expect(setMeetingDetect(fx.configFilePath, fx.pausedFilePath, true)).toMatchObject(
-    {
-      meetingDetect: true,
-    },
-  );
+  expect(
+    setMeetingDetect(fx.configFilePath, fx.pausedFilePath, true),
+  ).toMatchObject({
+    meetingDetect: true,
+  });
+});
+
+test("setSilentWindowSeconds writes silent_window_seconds to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, silent_window_seconds: 0 });
+
+  expect(
+    setSilentWindowSeconds(fx.configFilePath, fx.pausedFilePath, 15),
+  ).toMatchObject({
+    silentWindowSeconds: 15,
+  });
+});
+
+test("setSessionStartCooldownSeconds writes session_start_cooldown_seconds to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, session_start_cooldown_seconds: 30 });
+
+  expect(
+    setSessionStartCooldownSeconds(fx.configFilePath, fx.pausedFilePath, 60),
+  ).toMatchObject({
+    sessionStartCooldownSeconds: 60,
+  });
 });
 
 test("setSuppressSubagentComplete writes suppress_subagent_complete to config.json", () => {
@@ -747,5 +869,49 @@ test("setSuppressSubagentComplete writes suppress_subagent_complete to config.js
     setSuppressSubagentComplete(fx.configFilePath, fx.pausedFilePath, true),
   ).toMatchObject({
     suppressSubagentComplete: true,
+  });
+});
+
+test("setTrainerReminderIntervalMinutes writes trainer.reminder_interval_minutes to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminder_interval_minutes: 20,
+      reminder_min_gap_minutes: 5,
+    },
+  });
+
+  expect(
+    setTrainerReminderIntervalMinutes(fx.configFilePath, fx.pausedFilePath, 30),
+  ).toMatchObject({
+    trainer: expect.objectContaining({
+      reminderIntervalMinutes: 30,
+      reminderMinGapMinutes: 5,
+    }),
+  });
+});
+
+test("setTrainerReminderMinGapMinutes writes trainer.reminder_min_gap_minutes to config.json", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({
+    enabled: true,
+    trainer: {
+      enabled: true,
+      exercises: { pushups: 100, squats: 120 },
+      reminder_interval_minutes: 20,
+      reminder_min_gap_minutes: 5,
+    },
+  });
+
+  expect(
+    setTrainerReminderMinGapMinutes(fx.configFilePath, fx.pausedFilePath, 10),
+  ).toMatchObject({
+    trainer: expect.objectContaining({
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 10,
+    }),
   });
 });

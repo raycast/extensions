@@ -214,6 +214,16 @@ export function removePathRule(
   return refreshConfig(paths);
 }
 
+export function setPathRulePack(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  pattern: string,
+  packName: string,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["packs", "bind", packName, "--pattern", pattern]);
+  return refreshConfig(paths);
+}
+
 export function setDebugEnabled(
   paths: PeonPingCommandPaths,
   run: PeonPingCommandRunner,
@@ -302,6 +312,26 @@ export function setMeetingDetect(
   });
 }
 
+export function setSilentWindowSeconds(
+  configFilePath: string,
+  pausedFilePath: string,
+  seconds: number,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.silent_window_seconds = seconds;
+  });
+}
+
+export function setSessionStartCooldownSeconds(
+  configFilePath: string,
+  pausedFilePath: string,
+  seconds: number,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    config.session_start_cooldown_seconds = seconds;
+  });
+}
+
 export function setSuppressSubagentComplete(
   configFilePath: string,
   pausedFilePath: string,
@@ -309,5 +339,47 @@ export function setSuppressSubagentComplete(
 ): PeonPingConfig {
   return updateRawConfig(configFilePath, pausedFilePath, (config) => {
     config.suppress_subagent_complete = enabled;
+  });
+}
+
+export function setTrainerExerciseGoal(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  exercise: string,
+  goal: number,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["trainer", "goal", exercise, String(goal)]);
+  return refreshConfig(paths);
+}
+
+function updateTrainerConfig(
+  configFilePath: string,
+  pausedFilePath: string,
+  update: (trainer: NonNullable<RawPeonPingConfig["trainer"]>) => void,
+): PeonPingConfig {
+  return updateRawConfig(configFilePath, pausedFilePath, (config) => {
+    const trainer = config.trainer ?? {};
+    update(trainer);
+    config.trainer = trainer;
+  });
+}
+
+export function setTrainerReminderIntervalMinutes(
+  configFilePath: string,
+  pausedFilePath: string,
+  minutes: number,
+): PeonPingConfig {
+  return updateTrainerConfig(configFilePath, pausedFilePath, (trainer) => {
+    trainer.reminder_interval_minutes = minutes;
+  });
+}
+
+export function setTrainerReminderMinGapMinutes(
+  configFilePath: string,
+  pausedFilePath: string,
+  minutes: number,
+): PeonPingConfig {
+  return updateTrainerConfig(configFilePath, pausedFilePath, (trainer) => {
+    trainer.reminder_min_gap_minutes = minutes;
   });
 }
