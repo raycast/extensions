@@ -1,6 +1,6 @@
 # Tmux Cheatsheet Changelog
 
-## [Added Keybinding Detection, Category Filter, and Key Symbols] - {PR_MERGE_DATE}
+## [Added Keybinding Detection, Category Filter, and Key Symbols] - 2026-04-01
 
 - Auto-detect custom keybindings from `~/.tmux.conf` and show them instead of defaults
 - Category filter dropdown to narrow commands by section
