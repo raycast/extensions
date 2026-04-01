@@ -123,12 +123,6 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
         step.movieQuality = movieQuality;
         step.wordDelimiter = wordDel;
         break;
-      case "sequential":
-        step.prefix = prefix;
-        step.startNumber = parseInt(startNum) || 1;
-        step.zeroPad = parseInt(zeroPad) || 3;
-        step.separator = separator;
-        break;
       case "enumerate":
         step.customTemplate = customTemplate;
         if (customTemplate) {
@@ -239,7 +233,7 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
           <Form.Dropdown.Item value="tv-show" title="Rename as TV Show" />
           <Form.Dropdown.Item value="anime" title="Rename as Anime" />
           <Form.Dropdown.Item value="movie" title="Rename as Movie" />
-          <Form.Dropdown.Item value="sequential" title="Rename Sequentially" />
+
           <Form.Dropdown.Item value="enumerate" title="Auto Enumerate" />
         </Form.Dropdown.Section>
       </Form.Dropdown>
@@ -365,20 +359,6 @@ function StepForm({ onSubmit, existing }: { onSubmit: (step: ScriptStep) => void
             value={movieQuality}
             onChange={setMovieQuality}
           />
-        </>
-      )}
-
-      {stepType === "sequential" && (
-        <>
-          <Form.TextField id="prefix" title="Prefix" placeholder="photo" value={prefix} onChange={setPrefix} />
-          <Form.TextField id="startNum" title="Start Number" placeholder="1" value={startNum} onChange={setStartNum} />
-          <Form.TextField id="zeroPad" title="Zero Padding" placeholder="3" value={zeroPad} onChange={setZeroPad} />
-          <Form.Dropdown id="separator" title="Separator" value={separator} onChange={setSeparator}>
-            <Form.Dropdown.Item value="-" title="Dash (-)" />
-            <Form.Dropdown.Item value="_" title="Underscore (_)" />
-            <Form.Dropdown.Item value="." title="Dot (.)" />
-            <Form.Dropdown.Item value=" " title="Space" />
-          </Form.Dropdown>
         </>
       )}
 

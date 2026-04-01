@@ -17,7 +17,7 @@
     {
       "name": "rebaptize",
       "title": "Rename Files",
-      "description": "Bulk rename files using presets for TV shows, anime, movies, sequential, date, or find & replace",
+      "description": "Bulk rename files using presets for TV shows, anime, movies, auto enumerate, date, or find & replace",
       "mode": "view"
     },
     {
@@ -75,13 +75,6 @@
       "title": "Rename as Movie",
       "subtitle": "Rebaptize",
       "description": "Rename files into movie format (Name Year Quality)",
-      "mode": "view"
-    },
-    {
-      "name": "preset-sequential",
-      "title": "Rename Sequentially",
-      "subtitle": "Rebaptize",
-      "description": "Rename files with a prefix and sequential number (Prefix-001)",
       "mode": "view"
     },
     {

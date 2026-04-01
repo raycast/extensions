@@ -2,6 +2,12 @@
 
 ## [New Commands and Features] - {PR_MERGE_DATE}
 
+### Changes
+
+- Remove Sequential preset (replaced by Auto Enumerate which covers all its functionality)
+- Remove Smart Detection auto-suggest from Rename Files (form now defaults to Find & Replace)
+- Rename Files defaults to Find & Replace preset
+
 ### New Commands
 
 - **Rename Photos by EXIF** — rename photos using date taken, camera model, ISO, focal length (template-based)

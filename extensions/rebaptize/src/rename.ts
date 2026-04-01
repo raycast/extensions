@@ -44,7 +44,6 @@ export type RenameMode =
   | "tv-show"
   | "anime"
   | "movie"
-  | "sequential"
   | "date"
   | "find-replace"
   | "change-extension"
@@ -69,11 +68,6 @@ export interface RenameOptions {
   movieName?: string;
   year?: string;
   movieQuality?: string;
-  // Sequential mode
-  prefix?: string;
-  startNumber?: number;
-  zeroPad?: number;
-  separator?: string;
   // Date mode
   dateFormat?: "YYYY-MM-DD" | "DD-MM-YYYY" | "MM-DD-YYYY";
   datePrefix?: string;
@@ -188,18 +182,6 @@ export function generateMovieName(
   if (year) parts.push(year);
   if (quality) parts.push(quality);
   return parts.join(delimiter) + ext;
-}
-
-// Sequential: Prefix-001.ext
-export function generateSequentialName(
-  fileName: string,
-  prefix: string,
-  number: number,
-  zeroPad: number,
-  separator: string,
-): string {
-  const ext = extname(fileName);
-  return `${prefix}${separator}${padNumber(number, zeroPad)}${ext}`;
 }
 
 // Date: Prefix-2026-03-30_14-30-00-001.ext
@@ -714,15 +696,6 @@ export async function generatePreviews(
           options.year ?? "",
           options.movieQuality ?? "",
           options.wordDelimiter ?? " ",
-        );
-        break;
-      case "sequential":
-        renamed = generateSequentialName(
-          fileName,
-          options.prefix || "file",
-          (options.startNumber ?? 1) + i,
-          options.zeroPad ?? 3,
-          options.separator ?? "-",
         );
         break;
       case "date":

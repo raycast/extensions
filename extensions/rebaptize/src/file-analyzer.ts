@@ -2,7 +2,7 @@ import { readdir, stat } from "fs/promises";
 import { join, extname, basename } from "path";
 import { parseEpisode } from "./episode-parser";
 
-export type SuggestedMode = "tv-show" | "anime" | "movie" | "sequential" | "date" | "find-replace" | "unknown";
+export type SuggestedMode = "tv-show" | "anime" | "movie" | "enumerate" | "date" | "find-replace" | "unknown";
 
 export interface FileAnalysis {
   totalFiles: number;
@@ -271,10 +271,10 @@ export async function analyzeFolder(folderPath: string): Promise<FileAnalysis> {
     suggestedMode = "movie";
     confidence = movieCount / files.length;
   } else if (files.length > 0) {
-    // No clear pattern — suggest sequential or find-replace
+    // No clear pattern — suggest enumerate or find-replace
     const allSameExt = extensions.size === 1;
     if (allSameExt && files.length > 3) {
-      suggestedMode = "sequential";
+      suggestedMode = "enumerate";
       confidence = 0.4;
     } else {
       suggestedMode = "find-replace";

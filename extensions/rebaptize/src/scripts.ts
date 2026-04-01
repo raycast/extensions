@@ -7,7 +7,6 @@ import {
   generateTvShowName,
   generateAnimeName,
   generateMovieName,
-  generateSequentialName,
   generateFindReplaceName,
   generateChangedExtension,
   generateEnumerateName,
@@ -41,7 +40,6 @@ export type StepType =
   | "tv-show"
   | "anime"
   | "movie"
-  | "sequential"
   | "enumerate"
   | "remove-accents"
   | "strip-digits"
@@ -235,14 +233,6 @@ function applyStep(fileName: string, step: ScriptStep, index: number): string {
         step.movieQuality ?? "",
         step.wordDelimiter ?? " ",
       );
-    case "sequential":
-      return generateSequentialName(
-        fileName,
-        step.prefix ?? "file",
-        (step.startNumber ?? 1) + index,
-        step.zeroPad ?? 3,
-        step.separator ?? "-",
-      );
     case "enumerate":
       if (step.customTemplate && step.template && step.counters?.length) {
         return generateTemplateEnumerateName(fileName, step.template, index, step.counters);
@@ -341,8 +331,6 @@ export function stepLabel(step: ScriptStep): string {
       return `Anime: ${step.animeName}`;
     case "movie":
       return `Movie: ${step.movieName}`;
-    case "sequential":
-      return `Sequential: ${step.prefix}-###`;
     case "enumerate":
       if (step.customTemplate && step.template) {
         return `Enumerate: ${step.template}`;
@@ -388,7 +376,6 @@ export function stepTypeLabel(type: StepType): string {
     "tv-show": "Rename as TV Show",
     anime: "Rename as Anime",
     movie: "Rename as Movie",
-    sequential: "Rename Sequentially",
     enumerate: "Auto Enumerate",
     "remove-accents": "Remove Accents",
     "strip-digits": "Strip Digits",

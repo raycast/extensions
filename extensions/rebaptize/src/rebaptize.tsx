@@ -23,7 +23,6 @@ import {
 } from "./rename";
 import { getFinderFolder } from "./finder";
 import { saveUndoState } from "./instant-runner";
-import { analyzeFolder, type FileAnalysis } from "./file-analyzer";
 
 function isHidden(fileName: string): boolean {
   return fileName.startsWith(".");
@@ -99,11 +98,9 @@ function PreviewList({ folderPath, previews }: { folderPath: string; previews: R
 export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } = {}) {
   const { push } = useNavigation();
 
-  const lockedMode = initialMode !== undefined;
   const [folderPath, setFolderPath] = useState<string | null>(null);
 
-  const [mode, setMode] = useState<RenameMode>(initialMode ?? "sequential");
-  const [suggestionNote, setSuggestionNote] = useState("");
+  const [mode, setMode] = useState<RenameMode>(initialMode ?? "find-replace");
 
   // Word delimiter (shared by TV show & Movie)
   const [wordDelimiter, setWordDelimiter] = useState(" ");
@@ -127,12 +124,6 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
   const [movieName, setMovieName] = useState("");
   const [year, setYear] = useState("");
   const [movieQuality, setMovieQuality] = useState("");
-
-  // Sequential
-  const [prefix, setPrefix] = useState("");
-  const [startNumber, setStartNumber] = useState("1");
-  const [zeroPad, setZeroPad] = useState("3");
-  const [separator, setSeparator] = useState("-");
 
   // Date
   const [dateFormat, setDateFormat] = useState<"YYYY-MM-DD" | "DD-MM-YYYY" | "MM-DD-YYYY">("YYYY-MM-DD");
@@ -192,79 +183,13 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
       const folder = await getFinderFolder();
       if (folder) {
         setFolderPath(folder);
-        await runAnalysis(folder);
       }
     })();
   }, []);
 
-  async function runAnalysis(folder: string) {
-    try {
-      const result = await analyzeFolder(folder);
-      applySmartDefaults(result);
-    } catch {
-      // Analysis failed, continue with defaults
-    }
-  }
-
-  function applySmartDefaults(a: FileAnalysis) {
-    const notes: string[] = [];
-
-    // Set suggested mode (only if not locked to a specific preset)
-    if (!lockedMode && a.suggestedMode !== "unknown") {
-      setMode(a.suggestedMode);
-      const confidence = Math.round(a.confidence * 100);
-      notes.push(`Detected ${a.suggestedMode.replace("-", " ")} pattern (${confidence}% confidence)`);
-    }
-
-    // Auto-fill based on mode
-    const name = a.detectedShowName || "";
-
-    switch (a.suggestedMode) {
-      case "tv-show":
-        setShowName(name);
-        if (a.detectedSeasons.length === 1) {
-          setSeason(String(a.detectedSeasons[0]));
-        }
-        if (name) notes.push(`Show name: "${name}"`);
-        if (a.detectedSeasons.length > 1) {
-          notes.push(
-            `${a.detectedSeasons.length} seasons detected (${a.detectedSeasons.join(", ")}) — use Smart Organize Episodes for multi-season sorting`,
-          );
-        } else if (a.detectedSeasons.length === 1) {
-          notes.push(`Season ${a.detectedSeasons[0]}`);
-        }
-        break;
-      case "anime":
-        setAnimeName(name);
-        if (name) notes.push(`Anime name: "${name}"`);
-        break;
-      case "movie":
-        setMovieName(name);
-        if (name) notes.push(`Movie name: "${name}"`);
-        break;
-      case "sequential":
-        if (name) {
-          setPrefix(name.replace(/\s+/g, "-"));
-          notes.push(`Prefix: "${name.replace(/\s+/g, "-")}"`);
-        }
-        break;
-      default:
-        break;
-    }
-
-    notes.push(`${a.totalFiles} files in folder`);
-    if (a.detectedEpisodeCount > 0) {
-      notes.push(`${a.detectedEpisodeCount} episodes detected`);
-    }
-
-    setSuggestionNote(notes.join(" · "));
-  }
-
-  // Re-analyze when folder changes via picker
-  async function onFolderChange(paths: string[]) {
+  function onFolderChange(paths: string[]) {
     if (paths.length > 0 && paths[0] !== folderPath) {
       setFolderPath(paths[0]);
-      await runAnalysis(paths[0]);
     }
   }
 
@@ -321,16 +246,6 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
           options.year = year.trim();
           options.movieQuality = movieQuality.trim();
           options.wordDelimiter = effectiveDelimiter();
-          break;
-        case "sequential":
-          if (!prefix.trim()) {
-            await showToast({ style: Toast.Style.Failure, title: "Prefix is required" });
-            return;
-          }
-          options.prefix = prefix.trim();
-          options.startNumber = parseInt(startNumber) || 1;
-          options.zeroPad = parseInt(zeroPad) || 3;
-          options.separator = separator;
           break;
         case "date":
           options.dateFormat = dateFormat;
@@ -473,13 +388,6 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
     return parts.join(d) + ".ext";
   }
 
-  function seqPreview(): string {
-    const p = prefix.trim() || "file";
-    const s = separator || "-";
-    const n = (startNumber || "1").padStart(parseInt(zeroPad) || 3, "0");
-    return `${p}${s}${n}.ext`;
-  }
-
   function datePreview(): string {
     const p = datePrefix.trim() ? `${datePrefix.trim()}-` : "";
     return `${p}2026-03-30_14-30-00-001.ext`;
@@ -510,8 +418,6 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
         </ActionPanel>
       }
     >
-      {suggestionNote && <Form.Description title="Smart Detection" text={suggestionNote} />}
-
       <Form.FilePicker
         id="folder"
         title="Folder"
@@ -529,7 +435,7 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
         <Form.Dropdown.Item value="tv-show" title="TV Show (S01E01)" icon={Icon.Monitor} />
         <Form.Dropdown.Item value="anime" title="Anime ([Group] Name - 01)" icon={Icon.Stars} />
         <Form.Dropdown.Item value="movie" title="Movie (Name.Year.Quality)" icon={Icon.FilmStrip} />
-        <Form.Dropdown.Item value="sequential" title="Sequential (Prefix-001)" icon={Icon.NumberList} />
+
         <Form.Dropdown.Item value="date" title="Date-Based" icon={Icon.Calendar} />
         <Form.Dropdown.Item value="change-case" title="Change Case" icon={Icon.Text} />
         <Form.Dropdown.Item value="swap-delimiter" title="Swap Delimiter" icon={Icon.Switch} />
@@ -681,27 +587,6 @@ export default function Rebaptize({ initialMode }: { initialMode?: RenameMode } 
             />
           )}
           <Form.Description title="Preview" text={moviePreview()} />
-        </>
-      )}
-
-      {mode === "sequential" && (
-        <>
-          <Form.TextField id="prefix" title="Prefix" placeholder="Vacation" value={prefix} onChange={setPrefix} />
-          <Form.TextField
-            id="startNumber"
-            title="Start Number"
-            placeholder="1"
-            value={startNumber}
-            onChange={setStartNumber}
-          />
-          <Form.TextField id="zeroPad" title="Zero Padding" placeholder="3" value={zeroPad} onChange={setZeroPad} />
-          <Form.Dropdown id="separator" title="Separator" value={separator} onChange={setSeparator}>
-            <Form.Dropdown.Item value="-" title="Dash (-)" />
-            <Form.Dropdown.Item value="_" title="Underscore (_)" />
-            <Form.Dropdown.Item value="." title="Dot (.)" />
-            <Form.Dropdown.Item value=" " title="Space" />
-          </Form.Dropdown>
-          <Form.Description title="Preview" text={seqPreview()} />
         </>
       )}
 

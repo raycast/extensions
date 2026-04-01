@@ -11,7 +11,7 @@ Every function is its own Raycast command — assign aliases and hotkeys to the 
 ## Table of Contents
 
 - [Getting Started](#getting-started)
-- [Rename Files](#rename-files) — TV Show, Anime, Movie, Sequential, Date-Based, Change Case, Swap Delimiter, Auto Enumerate, Change Extension, Find & Replace
+- [Rename Files](#rename-files) — TV Show, Anime, Movie, Date-Based, Change Case, Swap Delimiter, Auto Enumerate, Change Extension, Find & Replace
   - [Custom Template Mode](#custom-template-mode)
 - [Smart Organize Episodes](#smart-organize-episodes)
 - [Smart Find & Replace](#smart-find--replace)
@@ -22,7 +22,6 @@ Every function is its own Raycast command — assign aliases and hotkeys to the 
 - [Custom Rename Scripts](#custom-rename-scripts)
 - [Preset Shortcuts](#preset-shortcuts)
 - [Instant Commands](#instant-commands) — Case, Delimiter, Clean Up, Utility, Undo
-- [Smart Detection](#smart-detection)
 - [Finder Detection](#finder-detection)
 - [Metadata Integration](#metadata-integration-optional) — TMDB, TheTVDB
 - [Tips](#tips)
@@ -39,7 +38,7 @@ No additional setup required. To enable online metadata lookup for episode organ
 
 ## Rename Files
 
-The main command. Select a preset, configure options, preview all renames, then confirm. Smart detection analyzes the folder on launch and auto-suggests the best preset, auto-fills show names and season numbers.
+The main command. Select a preset, configure options, preview all renames, then confirm. Defaults to Find & Replace.
 
 ### TV Show
 
@@ -99,24 +98,6 @@ Note: All files in the folder are renamed to the same movie name you provide.
 | Year           | Release year (optional)                 | —                            |
 | Quality        | Quality tag (optional, e.g. `1080p`)    | —                            |
 | Word Separator | Space, Dot, Underscore, Dash, or Custom | Space                        |
-
-### Sequential
-
-Prefix with incrementing number.
-
-```
-Before           After
-IMG_0001.jpg     Beach-Trip-001.jpg
-IMG_0002.jpg     Beach-Trip-002.jpg
-DSC_3345.jpg     Beach-Trip-003.jpg
-```
-
-| Option       | Description                       | Default |
-| ------------ | --------------------------------- | ------- |
-| Prefix       | Text before the number (required) | —       |
-| Start Number | First number                      | `1`     |
-| Zero Padding | Number of digits (e.g. 3 = `001`) | `3`     |
-| Separator    | Dash, Underscore, Dot, or Space   | Dash    |
 
 ### Date-Based
 
@@ -463,7 +444,7 @@ Build reusable rename pipelines that combine a file filter with a sequence of re
 | Case          | UPPERCASE, lowercase, Title Case, Sentence Case                                                                                                                           |
 | Clean Up      | Collapse Multiple Spaces, Swap Delimiter, Find & Replace, Change Extension, Remove Accents, Strip Digits, Strip Special Characters, Trim Filename, Transliterate to Latin |
 | Transform     | Add Zero Padding, Remove Zero Padding, Prepend Parent Folder, Swap Parts, Insert at Position, Remove at Position                                                          |
-| Rename Format | Rename as TV Show, Rename as Anime, Rename as Movie, Rename Sequentially, Auto Enumerate                                                                                  |
+| Rename Format | Rename as TV Show, Rename as Anime, Rename as Movie, Auto Enumerate                                                                                                       |
 
 Steps with configuration options (e.g. Swap Parts lets you set the separator, Insert at Position lets you set text and position) show their options when added. No-config steps like Remove Accents or Trim just run as-is. The TV Show and Anime steps auto-detect episode numbers from the current filename (after previous steps have been applied).
 
@@ -516,7 +497,6 @@ Each preset from Rename Files is also available as a standalone command for dire
 | Rename as TV Show       | `Show Name S01E01.ext`                             |
 | Rename as Anime         | `[Group] Name - 01 [Quality].ext`                  |
 | Rename as Movie         | `Name Year Quality.ext`                            |
-| Rename Sequentially     | `Prefix-001.ext`                                   |
 | Rename by Date          | `Prefix-2025-01-15_09-00-00-001.ext`               |
 | Change Filename Case    | UPPERCASE / lowercase / Title Case / Sentence case |
 | Swap Filename Delimiter | Replace any delimiter with another                 |
@@ -582,20 +562,6 @@ Enumerate commands prepend the number to the original filename. Enumerate by Dat
 | Undo Last Rename | Reverts the last rename or organize operation. Available within 5 minutes. Single use — cannot undo twice. |
 
 Every command in Rebaptize saves undo state — including Rename Files, Smart Organize Episodes, Smart Find & Replace, Sort Files by Date, Sort Photos by Location, Run Rename Script, and all instant commands. For organize commands that move files into subfolders, undo moves them back and cleans up the empty folders.
-
----
-
-## Smart Detection
-
-When you open Rename Files or Smart Organize Episodes, the extension analyzes the files in the folder and auto-fills fields:
-
-- **Show name** — detected from the most common filename prefix, parsed episode data, or the folder name as a last resort (excluding system folders like Downloads, Desktop, Documents)
-- **Preset suggestion** — if most files look like TV episodes, selects TV Show; if they match anime fansub format, selects Anime; if they contain year + quality keywords, selects Movie; otherwise defaults to Sequential
-- **Season numbers** — extracted from `SxxExx` patterns in filenames. If multiple seasons are detected, suggests using Smart Organize Episodes instead
-- **Episodes per season** — estimated from the number of episodes per detected season
-- **Confidence score** — shown in the Smart Detection note at the top of the form
-
-All auto-filled values can be overridden manually.
 
 ---
 
