@@ -24,7 +24,10 @@ import {
 import { getResolvePeonPingPathsInputFromPreferences } from "./lib/preferences";
 import { resolvePeonPingPaths } from "./lib/peon-ping-paths";
 import {
+  addPackToRotation,
   advanceToNextPack,
+  clearPackRotation,
+  removePackFromRotation,
   setActivePack,
   setCategoryEnabled,
   setDesktopNotifications,
@@ -39,7 +42,10 @@ import {
   type PeonPingCommandRunner,
 } from "./lib/peon-ping-service";
 import {
+  runAddPackToRotationAction,
+  runClearPackRotationAction,
   runNextPackAction,
+  runRemovePackFromRotationAction,
   runSetActivePackAction,
   runSetDismissTimeAction,
   runSetNotificationPositionAction,
@@ -151,6 +157,23 @@ function executeAction(
         { paths, run, setPackRotationMode, setConfig },
         action.mode,
       );
+    case "addPackToRotation":
+      return runAddPackToRotationAction(
+        { paths, run, addPackToRotation, setConfig },
+        action.packName,
+      );
+    case "removePackFromRotation":
+      return runRemovePackFromRotationAction(
+        { paths, run, removePackFromRotation, setConfig },
+        action.packName,
+      );
+    case "clearPackRotation":
+      return runClearPackRotationAction({
+        paths,
+        run,
+        clearPackRotation,
+        setConfig,
+      });
     case "toggleCategory":
       return runToggleCategoryAction(
         {
@@ -210,6 +233,10 @@ function actionKey(action: DashboardAction): string {
       return `pack-${action.packName}`;
     case "setRotationMode":
       return `rot-${action.mode}`;
+    case "addPackToRotation":
+      return `rotation-add-${action.packName}`;
+    case "removePackFromRotation":
+      return `rotation-remove-${action.packName}`;
     case "toggleCategory":
       return `cat-${action.categoryKey}`;
     case "setNotificationStyle":

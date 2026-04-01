@@ -34,6 +34,24 @@ function makeConfig(overrides: Partial<PeonPingConfig> = {}): PeonPingConfig {
     notificationDismissSeconds: 4,
     mobileNotifyEnabled: false,
     mobileNotifyConfigured: false,
+    packRotation: [],
+    pathRules: [],
+    useSoundEffectsDevice: false,
+    silentWindowSeconds: 0,
+    sessionStartCooldownSeconds: 30,
+    suppressSubagentComplete: false,
+    meetingDetect: false,
+    notificationAllScreens: true,
+    notificationTitleOverride: "",
+    notificationTemplates: {},
+    debugEnabled: false,
+    debugRetentionDays: 7,
+    trainer: {
+      enabled: false,
+      exercises: { pushups: 300, squats: 300 },
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 5,
+    },
   };
   return {
     ...base,
@@ -59,13 +77,14 @@ function findItem(
   return item;
 }
 
-test("buildDashboardItems returns exactly 7 items in order", () => {
+test("buildDashboardItems returns exactly 8 items in order", () => {
   const items = buildDashboardItems({ config: makeConfig(), packs: PACKS });
   expect(items.map((i) => i.id)).toEqual([
     "status",
     "volume",
     "voicePack",
     "rotation",
+    "rotationPacks",
     "categories",
     "notifications",
     "audio",
@@ -195,6 +214,70 @@ test("rotation item shows current mode", () => {
   const rot = findItem(items, "rotation");
   expect(rot.accessoryText).toBe("Round Robin");
   expect(rot.actions).toHaveLength(3);
+});
+
+test("rotationPacks item shows the current pack count", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ packRotation: ["peon", "glados"] }),
+    packs: PACKS,
+  });
+  const rotationPacks = findItem(items, "rotationPacks");
+  expect(rotationPacks.accessoryText).toBe("2 packs");
+});
+
+test("rotationPacks metadata lists active rotation members by display name", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ packRotation: ["glados", "peon"] }),
+    packs: PACKS,
+  });
+  const rotationPacks = findItem(items, "rotationPacks");
+  const labels = rotationPacks.metadata.filter((entry) => entry.kind === "label");
+  expect(labels).toContainEqual(
+    expect.objectContaining({
+      title: "1",
+      text: "GLaDOS (Portal)",
+    }),
+  );
+  expect(labels).toContainEqual(
+    expect.objectContaining({
+      title: "2",
+      text: "Peon (Warcraft III)",
+    }),
+  );
+});
+
+test("rotationPacks actions include remove for current packs and add for missing packs", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ packRotation: ["peon"] }),
+    packs: PACKS,
+  });
+  const rotationPacks = findItem(items, "rotationPacks");
+  expect(rotationPacks.drillable).toBe(true);
+  expect(rotationPacks.actions).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        kind: "removePackFromRotation",
+        packName: "peon",
+        isCurrent: true,
+      }),
+      expect.objectContaining({
+        kind: "addPackToRotation",
+        packName: "glados",
+        isCurrent: false,
+      }),
+    ]),
+  );
+});
+
+test("rotationPacks includes a clear action when rotation is not empty", () => {
+  const items = buildDashboardItems({
+    config: makeConfig({ packRotation: ["peon"] }),
+    packs: PACKS,
+  });
+  const rotationPacks = findItem(items, "rotationPacks");
+  expect(rotationPacks.actions).toContainEqual(
+    expect.objectContaining({ kind: "clearPackRotation" }),
+  );
 });
 
 test("categories item shows enabled count", () => {

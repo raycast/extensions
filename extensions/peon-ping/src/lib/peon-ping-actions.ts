@@ -8,7 +8,10 @@ import type {
 } from "./peon-ping-config";
 import type { PeonPingCommandPaths } from "./peon-ping-command-target";
 import {
+  addPackToRotation,
   advanceToNextPack,
+  clearPackRotation,
+  removePackFromRotation,
   setActivePack,
   setCategoryEnabled,
   setDesktopNotifications,
@@ -221,6 +224,53 @@ export function runSetRotationModeAction(
   mode: PeonPingPackRotationMode,
 ): PeonPingConfig {
   const config = deps.setPackRotationMode(deps.paths, deps.run, mode);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunAddPackToRotationActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  addPackToRotation: typeof addPackToRotation;
+  setConfig: SetConfig;
+};
+
+export function runAddPackToRotationAction(
+  deps: RunAddPackToRotationActionDeps,
+  packName: string,
+): PeonPingConfig {
+  const config = deps.addPackToRotation(deps.paths, deps.run, packName);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunRemovePackFromRotationActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  removePackFromRotation: typeof removePackFromRotation;
+  setConfig: SetConfig;
+};
+
+export function runRemovePackFromRotationAction(
+  deps: RunRemovePackFromRotationActionDeps,
+  packName: string,
+): PeonPingConfig {
+  const config = deps.removePackFromRotation(deps.paths, deps.run, packName);
+  deps.setConfig(config);
+  return config;
+}
+
+export type RunClearPackRotationActionDeps = {
+  paths: PeonPingCommandPaths;
+  run: PeonPingCommandRunner;
+  clearPackRotation: typeof clearPackRotation;
+  setConfig: SetConfig;
+};
+
+export function runClearPackRotationAction(
+  deps: RunClearPackRotationActionDeps,
+): PeonPingConfig {
+  const config = deps.clearPackRotation(deps.paths, deps.run);
   deps.setConfig(config);
   return config;
 }

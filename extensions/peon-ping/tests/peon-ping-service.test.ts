@@ -6,7 +6,10 @@ import {
 } from "../src/lib/peon-ping-config";
 import { resolvePeonPingPaths } from "../src/lib/peon-ping-paths";
 import {
+  addPackToRotation,
   advanceToNextPack,
+  clearPackRotation,
+  removePackFromRotation,
   setActivePack,
   setCategoryEnabled,
   setDesktopNotifications,
@@ -260,6 +263,87 @@ test("setPackRotationMode calls peon.sh rotation <mode> and returns refreshed co
 
   expect(setPackRotationMode(paths, run, "round-robin")).toEqual(
     expectedConfig({ packRotationMode: "round-robin" }),
+  );
+});
+
+test("addPackToRotation calls peon packs rotation add <name>", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, pack_rotation: ["peon"] });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["packs", "rotation", "add", "glados"]);
+    fx.writeConfigJson({ enabled: true, pack_rotation: ["peon", "glados"] });
+    return "";
+  };
+
+  expect(addPackToRotation(runtimePaths, run, "glados")).toEqual(
+    expectedConfig({ packRotation: ["peon", "glados"] }),
+  );
+});
+
+test("removePackFromRotation calls peon packs rotation remove <name>", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, pack_rotation: ["peon", "glados"] });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["packs", "rotation", "remove", "glados"]);
+    fx.writeConfigJson({ enabled: true, pack_rotation: ["peon"] });
+    return "";
+  };
+
+  expect(removePackFromRotation(runtimePaths, run, "glados")).toEqual(
+    expectedConfig({ packRotation: ["peon"] }),
+  );
+});
+
+test("clearPackRotation calls peon packs rotation clear", () => {
+  const fx = createClaudeConfigFixture();
+  fx.writeConfigJson({ enabled: true, pack_rotation: ["peon", "glados"] });
+  const paths = resolvePeonPingPaths({
+    homeDir: "/unused",
+    raycastClaudeConfigDir: fx.claudeConfigDir,
+  });
+  const runtimePaths = {
+    ...paths,
+    commandTarget: resolvePeonPingCommandTarget(paths, {
+      pathEnv: "/opt/homebrew/bin:/usr/bin",
+      hasExecutable: (candidate) => candidate === "/opt/homebrew/bin/peon",
+    }),
+  };
+
+  const run: PeonPingCommandRunner = (command, args) => {
+    expect(command).toBe("/opt/homebrew/bin/peon");
+    expect(args).toEqual(["packs", "rotation", "clear"]);
+    fx.writeConfigJson({ enabled: true, pack_rotation: [] });
+    return "";
+  };
+
+  expect(clearPackRotation(runtimePaths, run)).toEqual(
+    expectedConfig({ packRotation: [] }),
   );
 });
 

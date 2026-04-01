@@ -4,7 +4,10 @@ import type { PeonPingConfig, PeonPingStatus } from "../src/lib/peon-ping-config
 import type { PeonPingResolvedPaths } from "../src/lib/peon-ping-paths";
 import type { PeonPingCommandRunner } from "../src/lib/peon-ping-service";
 import {
+  runAddPackToRotationAction,
+  runClearPackRotationAction,
   runNextPackAction,
+  runRemovePackFromRotationAction,
   runSetActivePackAction,
   runSetDismissTimeAction,
   runSetNotificationPositionAction,
@@ -52,6 +55,24 @@ function makeConfig(overrides: Partial<PeonPingConfig> = {}): PeonPingConfig {
     notificationDismissSeconds: 4,
     mobileNotifyEnabled: false,
     mobileNotifyConfigured: false,
+    packRotation: [],
+    pathRules: [],
+    useSoundEffectsDevice: false,
+    silentWindowSeconds: 0,
+    sessionStartCooldownSeconds: 30,
+    suppressSubagentComplete: false,
+    meetingDetect: false,
+    notificationAllScreens: true,
+    notificationTitleOverride: "",
+    notificationTemplates: {},
+    debugEnabled: false,
+    debugRetentionDays: 7,
+    trainer: {
+      enabled: false,
+      exercises: { pushups: 300, squats: 300 },
+      reminderIntervalMinutes: 20,
+      reminderMinGapMinutes: 5,
+    },
     ...overrides,
   };
 }
@@ -288,6 +309,60 @@ test("runSetRotationModeAction calls setPackRotationMode and updates config stat
     run,
     "round-robin",
   );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runAddPackToRotationAction calls addPackToRotation and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({ packRotation: ["peon", "glados"] });
+  const addPackToRotation = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runAddPackToRotationAction(
+    { paths: dummyPaths, run, addPackToRotation, setConfig },
+    "glados",
+  );
+
+  expect(addPackToRotation).toHaveBeenCalledWith(dummyPaths, run, "glados");
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runRemovePackFromRotationAction calls removePackFromRotation and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({ packRotation: ["peon"] });
+  const removePackFromRotation = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runRemovePackFromRotationAction(
+    { paths: dummyPaths, run, removePackFromRotation, setConfig },
+    "glados",
+  );
+
+  expect(removePackFromRotation).toHaveBeenCalledWith(
+    dummyPaths,
+    run,
+    "glados",
+  );
+  expect(setConfig).toHaveBeenCalledWith(config);
+  expect(result).toEqual(config);
+});
+
+test("runClearPackRotationAction calls clearPackRotation and updates config state", () => {
+  const { run } = createRunStub();
+  const config = makeConfig({ packRotation: [] });
+  const clearPackRotation = vi.fn(() => config);
+  const setConfig = vi.fn();
+
+  const result = runClearPackRotationAction({
+    paths: dummyPaths,
+    run,
+    clearPackRotation,
+    setConfig,
+  });
+
+  expect(clearPackRotation).toHaveBeenCalledWith(dummyPaths, run);
   expect(setConfig).toHaveBeenCalledWith(config);
   expect(result).toEqual(config);
 });

@@ -162,6 +162,32 @@ export function setPackRotationMode(
   return refreshConfig(paths);
 }
 
+export function addPackToRotation(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  packName: string,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["packs", "rotation", "add", packName]);
+  return refreshConfig(paths);
+}
+
+export function removePackFromRotation(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+  packName: string,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["packs", "rotation", "remove", packName]);
+  return refreshConfig(paths);
+}
+
+export function clearPackRotation(
+  paths: PeonPingCommandPaths,
+  run: PeonPingCommandRunner,
+): PeonPingConfig {
+  runPeonCommand(paths, run, ["packs", "rotation", "clear"]);
+  return refreshConfig(paths);
+}
+
 export function setCategoryEnabled(
   configFilePath: string,
   pausedFilePath: string,

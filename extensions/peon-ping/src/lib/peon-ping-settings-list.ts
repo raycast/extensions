@@ -220,6 +220,10 @@ export function volumeLabel(step: VolumeStep): string {
   return `${Math.round(step * 100)}%`;
 }
 
+export function formatPackCount(count: number): string {
+  return count === 1 ? "1 pack" : `${count} packs`;
+}
+
 export function buildSettingsSections(
   input: BuildSettingsSectionsInput,
 ): SettingsSection[] {

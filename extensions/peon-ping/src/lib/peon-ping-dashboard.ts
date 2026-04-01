@@ -10,6 +10,7 @@ import type { VolumeStep } from "./peon-ping-settings-list";
 import {
   CATEGORY_KEYS_ORDER,
   CATEGORY_LABELS,
+  formatPackCount,
   formatDismiss,
   nextDismissSeconds,
   POSITION_CYCLE,
@@ -26,6 +27,7 @@ export type DashboardItemId =
   | "volume"
   | "voicePack"
   | "rotation"
+  | "rotationPacks"
   | "categories"
   | "notifications"
   | "audio";
@@ -70,6 +72,15 @@ export type DashboardAction =
       kind: "setRotationMode";
       mode: PeonPingPackRotationMode;
     })
+  | (DashboardActionBase & {
+      kind: "addPackToRotation";
+      packName: string;
+    })
+  | (DashboardActionBase & {
+      kind: "removePackFromRotation";
+      packName: string;
+    })
+  | (DashboardActionBase & { kind: "clearPackRotation" })
   | (DashboardActionBase & {
       kind: "toggleCategory";
       categoryKey: PeonPingCategoryKey;
@@ -313,6 +324,68 @@ function buildRotationItem(config: PeonPingConfig): DashboardItem {
       isCurrent: config.packRotationMode === mode,
       mode,
     })),
+  };
+}
+
+function buildRotationPacksItem(
+  config: PeonPingConfig,
+  packs: InstalledPack[],
+): DashboardItem {
+  const metadata: MetadataEntry[] =
+    config.packRotation.length === 0
+      ? [
+          {
+            kind: "label",
+            title: "Rotation Packs",
+            text: "None configured",
+            textColor: "secondary",
+          },
+        ]
+      : config.packRotation.map((packName, index): MetadataLabel => ({
+          kind: "label",
+          title: String(index + 1),
+          text: findPackDisplayName(packs, packName),
+          textColor: "green",
+        }));
+
+  const actions: DashboardAction[] = [
+    ...config.packRotation.map(
+      (packName): DashboardAction => ({
+        kind: "removePackFromRotation",
+        title: `Remove ${findPackDisplayName(packs, packName)}`,
+        subListTitle: findPackDisplayName(packs, packName),
+        isCurrent: true,
+        packName,
+      }),
+    ),
+    ...packs
+      .filter((pack) => !config.packRotation.includes(pack.name))
+      .map(
+        (pack): DashboardAction => ({
+          kind: "addPackToRotation",
+          title: `Add ${pack.displayName}`,
+          subListTitle: pack.displayName,
+          isCurrent: false,
+          packName: pack.name,
+        }),
+      ),
+  ];
+
+  if (config.packRotation.length > 0) {
+    actions.push({
+      kind: "clearPackRotation",
+      title: "Clear Rotation",
+    });
+  }
+
+  return {
+    id: "rotationPacks",
+    title: "Rotation Packs",
+    icon: "arrowClockwise",
+    accessoryText: formatPackCount(config.packRotation.length),
+    drillable: true,
+    metadata,
+    actions,
   };
 }
 
@@ -588,6 +661,7 @@ export function buildDashboardItems(
     buildVolumeItem(config),
     buildVoicePackItem(config, packs),
     buildRotationItem(config),
+    buildRotationPacksItem(config, packs),
     buildCategoriesItem(config),
     buildNotificationsItem(config),
     buildAudioItem(config),
