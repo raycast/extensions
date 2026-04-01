@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "freshrss",
+  "title": "FreshRSS",
+  "description": "Browse and manage your FreshRSS articles",
+  "icon": "extension-icon.png",
+  "author": "semyon_surkov",
+  "categories": [
+    "News"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Browse Articles",
+      "description": "Browse, search and manage your FreshRSS reading list",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "today",
+      "title": "Today's Articles",
+      "description": "Quickly see today's unread articles",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "starred",
+      "title": "Starred Articles",
+      "description": "Browse your starred/bookmarked articles",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "random",
+      "title": "Random Article",
+      "description": "Discover a random unread article",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "feeds",
+      "title": "Feed List",
+      "description": "Browse your subscriptions and read articles by feed",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "FreshRSS Base URL",
+      "description": "The base URL of your FreshRSS instance (e.g., https://rss.example.com)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://rss.example.com"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your FreshRSS username",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "alice"
+    },
+    {
+      "name": "apiPassword",
+      "title": "API Password",
+      "description": "Your FreshRSS API password (configured in FreshRSS account settings)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "debugLogging",
+      "title": "Debug Logging",
+      "description": "Enable verbose FreshRSS request logs in Raycast developer logs for troubleshooting.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable Debug Logging"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "bcryptjs": "^3.0.3",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and retry publishing again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
