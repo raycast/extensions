@@ -12,6 +12,7 @@ A [Raycast](https://raycast.com) extension that instantly parses query parameter
 - 📦 **JSON Formatting** — Automatically pretty-prints JSON-formatted parameter values for easy reading
 - 📌 **Multiple Copy Options** — One-click copy of decoded value, raw value, or `key=value` format
 - 🔄 **Re-parse Anytime** — Press `⌘V` to re-read the URL from your clipboard at any time
+- 🌐 **Interface Language** — Switch between English and Chinese via extension preferences
 
 ## Usage
 

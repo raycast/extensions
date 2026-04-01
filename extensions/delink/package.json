@@ -19,7 +19,21 @@
       "name": "url-parse",
       "title": "URL Parse",
       "description": "Parse and inspect URL query parameters from the clipboard",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "language",
+          "title": "Interface Language",
+          "description": "Choose the language for the extension UI",
+          "type": "dropdown",
+          "required": false,
+          "default": "en",
+          "data": [
+            { "title": "English", "value": "en" },
+            { "title": "中文", "value": "zh" }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
