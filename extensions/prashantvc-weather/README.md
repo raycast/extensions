@@ -1,38 +1,36 @@
-# Weather Extension (Apple WeatherKit)
+# Weather
 
-A secure Raycast extension to check weather using the Apple WeatherKit API.
+Check the weather in Raycast with current conditions, hourly forecast, daily forecast, next-hour rain details, and alerts.
 
-## Architecture
+## What It Does
 
-This extension uses a **Secure Proxy Architecture** to protect sensitive Apple Developer credentials. Instead of bundling your private `.p8` key in the extension, the extension fetches data through a private Cloudflare Worker proxy.
+- Shows current weather for your saved default location
+- Lets you search any city or coordinates on demand
+- Includes hourly and 7-day forecasts
+- Shows next-hour precipitation when available
+- Displays weather alerts for the selected location
 
-## Setup Instructions
+## Getting Started
 
-### 1. Deploy the Proxy (Backend)
-The proxy ensures your `.p8` key remains hidden from the public.
+When you open the command for the first time, you can save a default location directly in the extension.
 
-1.  Go to the `proxy/` directory.
-2.  Run `npx wrangler login` to authenticate with Cloudflare.
-3.  Run `npm run deploy` to publish the proxy.
-4.  Set your secrets in Cloudflare:
-    ```bash
-    npx wrangler secret put APPLE_TEAM_ID
-    npx wrangler secret put APPLE_KEY_ID
-    npx wrangler secret put APPLE_SERVICE_ID
-    npx wrangler secret put APPLE_PRIVATE_KEY
-    ```
-5.  Copy the **Worker URL** provided by Cloudflare (e.g., `https://weather-proxy.yourname.workers.dev`).
+You can enter:
 
-### 2. Configure the Extension (Raycast)
-1.  Open Raycast and go to the Weather extension preferences.
-2.  Set your default location and temperature unit if needed.
+- A city name, like `Tokyo`
+- Coordinates, like `35.6762,139.6503`
 
-The extension is zero-config for end users. The proxy URL is baked into the extension code, so there is no "Proxy URL" preference to fill in.
+You can also update your default location later in the command preferences.
 
-## Features
-- [x] Current weather display.
-- [x] Secure API key handling via Proxy.
-- [x] 10-hour hourly forecast.
-- [x] 7-day daily forecast.
-- [x] Location search and coordinate support.
-- [x] Weather alerts.
+## Usage
+
+Use the `Weather for` command to:
+
+- Open weather for your saved default location
+- Enter a city name to check another place
+- Enter coordinates if you want exact location-based weather
+
+## Notes
+
+- Weather data is fetched through a secure backend proxy
+- Recent responses are cached briefly based on the provider expiry time
+- Some data, such as next-hour precipitation, may only be available in supported regions

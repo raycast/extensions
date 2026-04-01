@@ -1,9 +1,0 @@
-name = "weather-proxy"
-main = "src/index.ts"
-compatibility_date = "2024-05-29"
-
-# [vars]
-# APPLE_TEAM_ID = ""
-# APPLE_KEY_ID = ""
-# APPLE_SERVICE_ID = ""
-# APPLE_PRIVATE_KEY = ""

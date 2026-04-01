@@ -8,10 +8,15 @@
   "platforms": [
     "Windows"
   ],
+  "categories": [
+    "Web",
+    "News",
+    "Other"
+  ],
   "commands": [
     {
       "name": "weather",
-      "title": "Weather for",
+      "title": "Weather For",
       "description": "Show weather for a typed city, address, or coordinates.",
       "mode": "view",
       "keywords": [
@@ -59,7 +64,6 @@
   "dependencies": {
     "@raycast/api": "^1.83.2",
     "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

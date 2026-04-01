@@ -15,12 +15,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { join } from "node:path";
-import fetch from "node-fetch";
-
-interface Preferences {
-  defaultLocation?: string;
-  unit?: "celsius" | "fahrenheit";
-}
 
 const PROXY_URL = "https://weather-proxy.pvc-ed2.workers.dev";
 
@@ -150,12 +144,12 @@ function getAssetPath(...segments: string[]) {
   return join(__dirname, "assets", ...segments);
 }
 
-const systemHourFormatter = new Intl.DateTimeFormat(undefined, {
+const systemHourFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "2-digit",
 });
 
-const systemWeekdayFormatter = new Intl.DateTimeFormat(undefined, {
+const systemWeekdayFormatter = new Intl.DateTimeFormat("en-US", {
   weekday: "short",
 });
 
@@ -1097,7 +1091,7 @@ ${dailyMarkdown}
           <Detail.Metadata.Link
             title="Support"
             target="https://github.com/sponsors/prashantvc"
-            text="GitHub Sponsors"
+            text="Sponsor the Developer"
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
@@ -1110,18 +1104,9 @@ ${dailyMarkdown}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser
-            title="Buy Me a Coffee"
-            icon={Icon.MugSteam}
-            url="https://buymeacoffee.com/n9sq9nshww8"
-          />
-          <Action.OpenInBrowser
-            title="GitHub Sponsors"
+            title="Sponsor the Developer"
             icon={Icon.Heart}
             url="https://github.com/sponsors/prashantvc"
-          />
-          <Action.CopyToClipboard
-            title="Copy Raw Weatherkit JSON"
-            content={JSON.stringify(viewState.weather, null, 2)}
           />
           <Action
             title="Open Command Preferences"

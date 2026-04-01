@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Switched the extension from a Bring Your Own Key setup to a proxy-backed architecture using a Cloudflare Worker.
 - Removed Apple Developer credential fields from the Raycast preferences UI.
