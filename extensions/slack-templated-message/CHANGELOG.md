@@ -1,6 +1,6 @@
 # Slack Templated Message Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-01
 
 Fixed `{date}` template variable using UTC instead of local timezone
 
