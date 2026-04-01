@@ -70,8 +70,18 @@ export default function JoinServer() {
       favorite: favoriteAddresses.includes(server.address),
     }));
 
-    const pinged = await Promise.all(serversWithFavorites.map(async (s) => ({ ...s, ...(await pingServer(s)) })));
-    setServers(sortServers(pinged, favoriteAddresses));
+    // Show the list immediately, then fill in status badges as pings resolve
+    setServers(sortServers(serversWithFavorites, favoriteAddresses));
+
+    for (const server of serversWithFavorites) {
+      pingServer(server).then((pingResult) => {
+        setServers((prev) => {
+          if (!prev) return prev;
+          const updated = prev.map((s) => (s.address === server.address ? { ...s, ...pingResult } : s));
+          return sortServers(updated, favoriteAddresses);
+        });
+      });
+    }
   };
 
   const revalidateInstances = async () => {
@@ -109,14 +119,16 @@ export default function JoinServer() {
               title={server.name}
               subtitle={server.address}
               accessories={[
-                ...(server.online
+                ...(server.online === true
                   ? [
                       {
                         tag: { value: `${server.playersOnline}/${server.playersMax}`, color: Color.Green },
                         tooltip: server.version,
                       },
                     ]
-                  : [{ tag: { value: "Offline", color: Color.Red } }]),
+                  : server.online === false
+                    ? [{ tag: { value: "Offline", color: Color.Red } }]
+                    : [{ tag: { value: "Checking…", color: Color.SecondaryText } }]),
                 ...(server.favorite ? [{ icon: Icon.Star }] : []),
               ]}
               icon={

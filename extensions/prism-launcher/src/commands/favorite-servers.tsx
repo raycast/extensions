@@ -81,8 +81,18 @@ export default function FavoriteServers() {
       (server, index, self) => index === self.findIndex((s) => s.address === server.address),
     );
 
-    const pinged = await Promise.all(uniqueServers.map(async (s) => ({ ...s, ...(await pingServer(s)) })));
-    setServers(sortServers(pinged, storedFavorites));
+    // Show the list immediately, then fill in status badges as pings resolve
+    setServers(sortServers(uniqueServers, storedFavorites));
+
+    for (const server of uniqueServers) {
+      pingServer(server).then((pingResult) => {
+        setServers((prev) => {
+          if (!prev) return prev;
+          const updated = prev.map((s) => (s.address === server.address ? { ...s, ...pingResult } : s));
+          return sortServers(updated, storedFavorites);
+        });
+      });
+    }
   };
 
   useAsyncEffect(async () => {
@@ -102,14 +112,16 @@ export default function FavoriteServers() {
               title={server.name}
               subtitle={server.instanceName}
               accessories={[
-                ...(server.online
+                ...(server.online === true
                   ? [
                       {
                         tag: { value: `${server.playersOnline}/${server.playersMax}`, color: Color.Green },
                         tooltip: server.version,
                       },
                     ]
-                  : [{ tag: { value: "Offline", color: Color.Red } }]),
+                  : server.online === false
+                    ? [{ tag: { value: "Offline", color: Color.Red } }]
+                    : [{ tag: { value: "Checking…", color: Color.SecondaryText } }]),
                 ...(server.favorite ? [{ icon: Icon.Star }] : []),
               ]}
               icon={server.icon ? { source: server.icon } : Icon.Network}
