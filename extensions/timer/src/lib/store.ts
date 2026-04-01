@@ -14,7 +14,11 @@ const STORAGE_KEY = "timers"
 export async function getTimers(): Promise<Timer[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY)
   if (!raw) return []
-  return JSON.parse(raw)
+  try {
+    return JSON.parse(raw)
+  } catch {
+    return []
+  }
 }
 
 export async function saveTimers(timers: Timer[]): Promise<void> {

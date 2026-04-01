@@ -1,6 +1,6 @@
 # Timer Changelog
 
-## [Initial Version] - 2026-03-28
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Start timers instantly with natural time parsing (30m, 3s, 1h30m)
 - Optional labels: `5m check slack`

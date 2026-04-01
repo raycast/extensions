@@ -49,7 +49,7 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.13.14",
     "@types/react": "19.0.12",
-    "eslint": "^8.57.1",
+    "eslint": "^8.57.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },

@@ -81,11 +81,7 @@ export default function ManageTimers() {
       ))}
 
       {timers.length === 0 && (
-        <List.EmptyView
-          title="No Timers"
-          description={'Type "timer 30m check slack" to start one'}
-          icon={Icon.Clock}
-        />
+        <List.EmptyView title="No Timers" description={'Type "timer 30m check slack" to start one'} icon={Icon.Clock} />
       )}
     </List>
   )

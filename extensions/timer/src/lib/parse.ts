@@ -23,7 +23,7 @@ export function parseTime(input: string): ParsedTime | null {
     lastTimeEnd = Math.max(lastTimeEnd, hourMatch.index! + hourMatch[0].length)
   }
 
-  const minMatch = lower.match(/(\d+)\s*(?:m|min|mins|minute|minutes)(?!\s*\d)/)
+  const minMatch = lower.match(/(\d+)\s*(?:m|min|mins|minute|minutes)/)
   if (minMatch) {
     minutes = parseInt(minMatch[1])
     matched = true
