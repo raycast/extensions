@@ -1,6 +1,6 @@
 # Clockodo Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-01
 
 - Implement commands: start clock, stop clock, get recent entries
 - Implement tools: get entries, get project, get customer
