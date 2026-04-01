@@ -456,15 +456,16 @@ Build reusable rename pipelines that combine a file filter with a sequence of re
    - **File Filter** — glob pattern to target specific files (e.g. `*.mkv`, leave empty for all files)
 3. Add steps to the pipeline — each step transforms the filename and passes the result to the next step
 
-**Available step types (13):**
+**Available step types (24):**
 
-| Category      | Step Types                                                                               |
-| ------------- | ---------------------------------------------------------------------------------------- |
-| Case          | UPPERCASE, lowercase, Title Case, Sentence Case                                          |
-| Clean Up      | Collapse Multiple Spaces, Swap Delimiter, Find & Replace, Change Extension               |
-| Rename Format | Rename as TV Show, Rename as Anime, Rename as Movie, Rename Sequentially, Auto Enumerate |
+| Category      | Step Types                                                                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Case          | UPPERCASE, lowercase, Title Case, Sentence Case                                                                                                                           |
+| Clean Up      | Collapse Multiple Spaces, Swap Delimiter, Find & Replace, Change Extension, Remove Accents, Strip Digits, Strip Special Characters, Trim Filename, Transliterate to Latin |
+| Transform     | Add Zero Padding, Remove Zero Padding, Prepend Parent Folder, Swap Parts, Insert at Position, Remove at Position                                                          |
+| Rename Format | Rename as TV Show, Rename as Anime, Rename as Movie, Rename Sequentially, Auto Enumerate                                                                                  |
 
-Each step type has the same configuration options as its corresponding preset in the Rename Files command. The TV Show and Anime steps auto-detect episode numbers from the current filename (after previous steps have been applied).
+Steps with configuration options (e.g. Swap Parts lets you set the separator, Insert at Position lets you set text and position) show their options when added. No-config steps like Remove Accents or Trim just run as-is. The TV Show and Anime steps auto-detect episode numbers from the current filename (after previous steps have been applied).
 
 **Keyboard shortcuts in the script builder:**
 
