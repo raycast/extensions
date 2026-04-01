@@ -70,7 +70,6 @@ export default function DirectionView({
   const blocked = blacklist || [];
 
   const sortedRates = useMemo(() => {
-    if (!from || !to) return [];
     if (!rates) return [];
     const filtered = rates.filter(
       (r) => !blocked.includes(r.exchanger_internal_url),
