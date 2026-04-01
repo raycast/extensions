@@ -362,22 +362,30 @@ export default function ArticleList({
                   title={isRead ? "Mark as Unread" : "Mark as Read"}
                   icon={isRead ? Icon.Circle : Icon.CheckCircle}
                   onAction={async () => {
-                    if (isRead) {
-                      await api.markAsUnread(article.id);
-                    } else {
-                      await api.markAsRead(article.id);
+                    try {
+                      if (isRead) {
+                        await api.markAsUnread(article.id);
+                      } else {
+                        await api.markAsRead(article.id);
+                      }
+                      updateArticle(article.id, (currentArticle) => ({
+                        ...currentArticle,
+                        categories: isRead
+                          ? currentArticle.categories.filter((category) => category !== "user/-/state/com.google/read")
+                          : [
+                              ...currentArticle.categories.filter(
+                                (category) => category !== "user/-/state/com.google/read",
+                              ),
+                              "user/-/state/com.google/read",
+                            ],
+                      }));
+                    } catch (err) {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed",
+                        message: err instanceof Error ? err.message : String(err),
+                      });
                     }
-                    updateArticle(article.id, (currentArticle) => ({
-                      ...currentArticle,
-                      categories: isRead
-                        ? currentArticle.categories.filter((category) => category !== "user/-/state/com.google/read")
-                        : [
-                            ...currentArticle.categories.filter(
-                              (category) => category !== "user/-/state/com.google/read",
-                            ),
-                            "user/-/state/com.google/read",
-                          ],
-                    }));
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
@@ -385,22 +393,32 @@ export default function ArticleList({
                   title={isStarred ? "Unstar" : "Star"}
                   icon={Icon.Star}
                   onAction={async () => {
-                    if (isStarred) {
-                      await api.unstar(article.id);
-                    } else {
-                      await api.star(article.id);
-                    }
-                    updateArticle(article.id, (currentArticle) => ({
-                      ...currentArticle,
-                      categories: isStarred
-                        ? currentArticle.categories.filter((category) => category !== "user/-/state/com.google/starred")
-                        : [
-                            ...currentArticle.categories.filter(
+                    try {
+                      if (isStarred) {
+                        await api.unstar(article.id);
+                      } else {
+                        await api.star(article.id);
+                      }
+                      updateArticle(article.id, (currentArticle) => ({
+                        ...currentArticle,
+                        categories: isStarred
+                          ? currentArticle.categories.filter(
                               (category) => category !== "user/-/state/com.google/starred",
-                            ),
-                            "user/-/state/com.google/starred",
-                          ],
-                    }));
+                            )
+                          : [
+                              ...currentArticle.categories.filter(
+                                (category) => category !== "user/-/state/com.google/starred",
+                              ),
+                              "user/-/state/com.google/starred",
+                            ],
+                      }));
+                    } catch (err) {
+                      showToast({
+                        style: Toast.Style.Failure,
+                        title: "Failed",
+                        message: err instanceof Error ? err.message : String(err),
+                      });
+                    }
                   }}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
                 />
