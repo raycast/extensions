@@ -3,5 +3,5 @@ dist/
 .DS_Store
 *.tgz
 assets/looper
-swift/*/.build/
-swift/*/Package.resolved
+native/*/.build/
+native/*/Package.resolved
