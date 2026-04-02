@@ -133,6 +133,10 @@ export function formatNetbirdError(error: unknown): string {
     return "No internet connection detected. Please check your network.";
   }
 
+  if (message.includes("failed to connect to daemon") || message.includes("context deadline exceeded")) {
+    return "NetBird daemon is not running. Run `netbird service install` and `netbird service start`.";
+  }
+
   if (
     message.includes("is not running") ||
     message.includes("connection refused") ||
@@ -203,6 +207,105 @@ export async function netbirdDown(): Promise<void> {
   const bin = await getNetbirdBin();
   try {
     await execAsync(`${bin} down`);
+  } catch (error: unknown) {
+    throw new Error(formatNetbirdError(error));
+  }
+}
+
+export interface NetbirdNetworkRoute {
+  id: string;
+  /**
+   * Display label for the route in UI:
+   * - network routes: CIDR (e.g. `10.0.0.0/24`)
+   * - domain routes: domains list (e.g. `app.example.com, *.example.com`)
+   */
+  route: string | null;
+  selected: boolean;
+}
+
+function shellEscapeSingleQuotes(value: string): string {
+  // Shell-safe quoting for `child_process.exec` commands.
+  // Example: "Default Subnet" -> 'Default Subnet'
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function parseNetbirdNetworksList(output: string): NetbirdNetworkRoute[] {
+  if (/no networks available/i.test(output) || /no routes available/i.test(output)) {
+    return [];
+  }
+
+  const routes: NetbirdNetworkRoute[] = [];
+  const lines = output.split(/\r?\n/);
+
+  let current: { id: string; route: string | null; selected?: boolean } | null = null;
+
+  for (const line of lines) {
+    const idMatch = /^\s*-\s*ID:\s*(.+)\s*$/.exec(line);
+    if (idMatch) {
+      if (current) {
+        routes.push({
+          id: current.id,
+          route: current.route,
+          selected: current.selected ?? false,
+        });
+      }
+
+      current = {
+        id: idMatch[1].trim(),
+        route: null,
+      };
+      continue;
+    }
+
+    if (!current) continue;
+
+    const networkOrDomainsMatch = /^\s*(Network|Domains):\s*(.+)\s*$/.exec(line);
+    if (networkOrDomainsMatch) {
+      current.route = networkOrDomainsMatch[2].trim();
+      continue;
+    }
+
+    const statusMatch = /^\s*Status:\s*(Selected|Not Selected)\s*$/.exec(line);
+    if (statusMatch) {
+      current.selected = statusMatch[1] === "Selected";
+      continue;
+    }
+  }
+
+  if (current) {
+    routes.push({
+      id: current.id,
+      route: current.route,
+      selected: current.selected ?? false,
+    });
+  }
+
+  return routes;
+}
+
+export async function getNetbirdNetworks(): Promise<NetbirdNetworkRoute[]> {
+  const bin = await getNetbirdBin();
+  try {
+    const { stdout } = await execAsync(`${bin} networks list`);
+    return parseNetbirdNetworksList(stdout);
+  } catch (error: unknown) {
+    throw new Error(formatNetbirdError(error));
+  }
+}
+
+export async function netbirdNetworksSelect(id: string): Promise<void> {
+  const bin = await getNetbirdBin();
+  try {
+    await execAsync(`${bin} networks select ${shellEscapeSingleQuotes(id)}`);
+  } catch (error: unknown) {
+    throw new Error(formatNetbirdError(error));
+  }
+}
+
+export async function netbirdNetworksDeselect(id: string): Promise<void> {
+  const bin = await getNetbirdBin();
+  try {
+    await execAsync(`${bin} networks deselect ${shellEscapeSingleQuotes(id)}`);
   } catch (error: unknown) {
     throw new Error(formatNetbirdError(error));
   }
