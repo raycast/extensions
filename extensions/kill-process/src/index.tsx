@@ -501,6 +501,22 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
+                    {canRestartProcess ? (
+                      <Action
+                        title="Restart"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+                        onAction={() => restartProcess(process)}
+                      />
+                    ) : null}
+                    {canRestartProcess ? (
+                      <Action
+                        title="Force Restart"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "r" }}
+                        onAction={() => restartProcess(process, true)}
+                      />
+                    ) : null}
                     <Action
                       title="Kill All"
                       icon={Icon.XMarkCircleFilled}
@@ -532,22 +548,6 @@ export default function ProcessList() {
                       shortcut={{ modifiers: ["shift"], key: "tab" }}
                       onAction={toggleAppGrouping}
                     />
-                    {canRestartProcess ? (
-                      <Action
-                        title="Restart"
-                        icon={Icon.RotateAntiClockwise}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
-                        onAction={() => restartProcess(process)}
-                      />
-                    ) : null}
-                    {canRestartProcess ? (
-                      <Action
-                        title="Force Restart"
-                        icon={Icon.RotateAntiClockwise}
-                        shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "r" }}
-                        onAction={() => restartProcess(process, true)}
-                      />
-                    ) : null}
                   </ActionPanel>
                 }
               />
