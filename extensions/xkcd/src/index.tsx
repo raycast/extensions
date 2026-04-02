@@ -160,7 +160,7 @@ ${currentComic.alt}
               />
               <OpenComicInBrowser />
               <ExplainXkcd />
-                <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
+              <Action.Push title="View History" icon={Icon.Clock} target={<HistoryView />} />
             </ActionPanel>
           }
           detail={detail}

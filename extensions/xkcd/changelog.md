@@ -1,4 +1,4 @@
-# XKCD Changelog
+# XKCD Comics
 
 ## [Added screenshots] - 2022-11-17
 

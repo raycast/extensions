@@ -55,8 +55,8 @@ export default function HistoryView() {
             detail={detail}
             actions={
               <ActionPanel>
-                <OpenComicInBrowser />
-                <ExplainXkcd />
+                <OpenComicInBrowser comic={entry.num} />
+                <ExplainXkcd comic={entry.num} />
               </ActionPanel>
             }
           />
