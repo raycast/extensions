@@ -17,7 +17,7 @@
     {
       "name": "fuzzy-search-files",
       "title": "Fuzzy Search Files",
-      "description": "Searches the entire filesystem using fuzzy queries",
+      "description": "Fuzzy search the filesystem. Use .png .jpg to filter by extension, in:~/Desktop to search in a folder.",
       "icon": "command-icon.png",
       "mode": "view"
     },
