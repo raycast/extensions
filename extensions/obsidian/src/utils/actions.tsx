@@ -429,13 +429,13 @@ export function NoteActions(props: {
       <CopyNoteAction note={note} />
       <CopyNoteTitleAction note={note} />
       <CopyNotePathAction note={note} />
-      <CopyWikilinkAction note={note} />
-      <PasteWikilinkAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} onDelete={onDelete} />
       <AppendTaskAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      <CopyWikilinkAction note={note} />
+      <PasteWikilinkAction note={note} />
     </>
   );
 }
