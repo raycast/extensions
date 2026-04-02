@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "snapline",
+  "title": "Snapline",
+  "description": "The fastest tool for measuring anything on your screen",
+  "icon": "extension-icon.png",
+  "author": "devsargam",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "measure",
+      "title": "Measure Screen",
+      "subtitle": "Snapline",
+      "description": "Measure any element on screen with drag-to-select",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "required": false,
+      "name": "edgeTolerance",
+      "title": "Edge Tolerance",
+      "description": "Sensitivity for edge detection (higher = less sensitive, handles shadows/blur)",
+      "type": "textfield",
+      "default": "40",
+      "placeholder": "20-100"
+    },
+    {
+      "required": false,
+      "name": "copyToClipboard",
+      "title": "Copy to Clipboard",
+      "description": "Automatically copy measurements to clipboard",
+      "type": "checkbox",
+      "label": "Copy measurements to clipboard",
+      "default": true
+    },
+    {
+      "required": false,
+      "name": "showCrosshair",
+      "title": "Show Crosshair",
+      "description": "Show crosshair guides while measuring",
+      "type": "checkbox",
+      "label": "Show crosshair guides",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.77.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.9.0",
+    "@types/react": "18.2.37",
+    "eslint": "^8.53.0",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
