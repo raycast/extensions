@@ -18,10 +18,6 @@ import { ReviewSession } from "./ReviewSession";
 const RECENT_DIRS_KEY = "recentDirectories";
 const MAX_RECENT = 5;
 
-interface Preferences {
-  defaultDirectory?: string;
-}
-
 async function getRecentDirs(): Promise<string[]> {
   const stored = await LocalStorage.getItem<string>(RECENT_DIRS_KEY);
   return stored ? JSON.parse(stored) : [];

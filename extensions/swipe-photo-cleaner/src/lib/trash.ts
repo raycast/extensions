@@ -64,10 +64,18 @@ export async function commitPendingTrash(
 
       const originalOccupied = await fileExists(entry.originalPath);
       if (originalOccupied) {
+        // Original path is taken (e.g. user replaced the file), just trash the staged copy
         await trash(entry.pendingPath);
       } else {
+        // Move back to original location so macOS "Put Back" works, then trash
         await moveFile(entry.pendingPath, entry.originalPath);
-        await trash(entry.originalPath);
+        try {
+          await trash(entry.originalPath);
+        } catch {
+          // trash() failed after move — move back to staging so the file isn't silently left at original
+          await moveFile(entry.originalPath, entry.pendingPath);
+          await trash(entry.pendingPath);
+        }
       }
     } catch {
       // File disappeared between check and operation — skip
