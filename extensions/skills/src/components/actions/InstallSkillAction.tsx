@@ -1,5 +1,6 @@
 import { Action, Icon, showToast, Toast, confirmAlert } from "@raycast/api";
 import type { Skill } from "../../shared";
+import { getErrorMessage } from "../../utils/errors";
 import { installSkill } from "../../utils/skills-cli";
 
 interface InstallSkillActionProps {
@@ -31,9 +32,10 @@ export function InstallSkillAction({ skill }: InstallSkillActionProps) {
       toast.title = "Skill installed successfully";
       toast.message = `${skill.name} is now available`;
     } catch (error) {
+      const message = getErrorMessage(error);
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to install skill";
-      toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+      toast.message = message;
     }
   };
 

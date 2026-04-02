@@ -7,7 +7,11 @@ import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 
 export function InstalledSkillDetail({ skill, onRemove }: { skill: InstalledSkill; onRemove: () => void }) {
   const { pop } = useNavigation();
-  const { data: content, isLoading } = useCachedPromise(
+  const {
+    data: content,
+    isLoading,
+    error,
+  } = useCachedPromise(
     async (path: string) => {
       const raw = await readFile(join(path, "SKILL.md"), "utf-8");
       return removeFrontmatter(raw);
@@ -15,7 +19,13 @@ export function InstalledSkillDetail({ skill, onRemove }: { skill: InstalledSkil
     [skill.path],
   );
 
-  const markdown = isLoading ? `# ${skill.name}\n\nLoading...` : (content ?? `# ${skill.name}\n\nNo SKILL.md found.`);
+  const markdown = isLoading
+    ? `# ${skill.name}\n\nLoading...`
+    : error
+      ? `# ${skill.name}\n\n*Could not load SKILL.md.*\n\n> ${error.message.replace(/\n/g, "\n> ")}`
+      : content
+        ? content
+        : `# ${skill.name}\n\nNo SKILL.md found.`;
 
   return (
     <Detail

@@ -27,12 +27,12 @@ const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
  * Strip ANSI escape codes from CLI output.
  * The skills CLI forces colors with no --no-color or --json option.
  */
-function stripAnsi(str: string): string {
+export function stripAnsi(str: string): string {
   return str.replace(ANSI_REGEX, "");
 }
 
 /** Escape a value for safe use as a shell argument. */
-function shellEscape(arg: string): string {
+export function shellEscape(arg: string): string {
   if (isWindows) {
     return `"${arg.replace(/"/g, '\\"')}"`;
   }
@@ -48,7 +48,7 @@ function shellEscape(arg: string): string {
  *   skill-name ~/.agents/skills/skill-name
  *   Agents: Claude Code, Cline, Codex, Command Code, Continue +19 more
  */
-function parseSkillsList(raw: string): InstalledSkill[] {
+export function parseSkillsList(raw: string): InstalledSkill[] {
   const clean = stripAnsi(raw);
   const skills: InstalledSkill[] = [];
   const lines = clean.split("\n");

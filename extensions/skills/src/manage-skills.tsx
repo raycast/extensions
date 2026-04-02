@@ -1,4 +1,4 @@
-import { List, Icon, Detail, ActionPanel, Action } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
@@ -50,8 +50,24 @@ export default function Command() {
       {skills.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Installed Skills"
-          description="Install skills using the search or trending commands"
+          description="Search or browse trending skills to find and install your first skill."
           icon={Icon.Box}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+            </ActionPanel>
+          }
+        />
+      ) : filteredSkills.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Skills for This Agent"
+          description={`No installed skills match the "${selectedAgent}" filter. Try selecting a different agent.`}
+          icon={Icon.Filter}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.Section title="Installed Skills" subtitle={`${filteredSkills.length} skills`}>

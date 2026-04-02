@@ -1,5 +1,6 @@
 import { Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import type { InstalledSkill } from "../../shared";
+import { getErrorMessage } from "../../utils/errors";
 import { removeSkill } from "../../utils/skills-cli";
 
 interface RemoveSkillActionProps {
@@ -29,9 +30,10 @@ export function RemoveSkillAction({ skill, onRemove }: RemoveSkillActionProps) {
           toast.title = "Skill removed";
           onRemove();
         } catch (error) {
+          const message = getErrorMessage(error);
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to remove skill";
-          toast.message = error instanceof Error ? error.message : "Unknown error occurred";
+          toast.message = message;
         }
       }}
     />

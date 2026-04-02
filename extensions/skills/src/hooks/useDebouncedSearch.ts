@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { type SearchResponse, API_BASE_URL, deduplicateSkills } from "../shared";
+import { type SearchResponse, API_BASE_URL } from "../shared";
+import { fetchSkillsSearch } from "../api";
 
 export function useDebouncedSearch(searchText: string, delay = 300) {
   const [data, setData] = useState<SearchResponse | undefined>();
@@ -9,13 +10,7 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
   const abortRef = useRef<AbortController | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchSkills = useCallback(async (query: string, signal: AbortSignal) => {
-    const url = `${API_BASE_URL}/search?q=${encodeURIComponent(query)}&limit=50`;
-    const res = await fetch(url, { signal });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = (await res.json()) as SearchResponse;
-    return { ...data, skills: deduplicateSkills(data.skills) };
-  }, []);
+  const fetchSkills = useCallback(async (query: string, signal: AbortSignal) => fetchSkillsSearch(query, signal), []);
 
   const executeSearch = useCallback(
     async (query: string) => {
