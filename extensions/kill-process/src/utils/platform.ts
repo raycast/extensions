@@ -215,6 +215,10 @@ exit 0
     return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
   }
 
+  if (isMac) {
+    return `ps -p ${pid} >/dev/null 2>&1`;
+  }
+
   return `kill -0 ${pid}`;
 }
 
