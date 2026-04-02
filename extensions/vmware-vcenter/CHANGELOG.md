@@ -1,5 +1,9 @@
 # VMware vCenter Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- [Improvement] Added 'Parallels Client' as RDP Client for macOS.
+
 ## [Improvement] - 2025-11-24
 
 - [Improvement] New Liquid Glass Icon.
@@ -8,7 +12,7 @@
 
 ## [Improvement] - 2025-06-11
 
-- Implement AI tools that can: list virtual machines, retrieve detailed information about them, open the virtual machine console, and shut down, restart, or power on virtual machines. 
+- Implement AI tools that can: list virtual machines, retrieve detailed information about them, open the virtual machine console, and shut down, restart, or power on virtual machines.
 
 ## [BugFix] - 2024-05-28
 

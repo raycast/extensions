@@ -35,6 +35,7 @@ import {
   Cache,
   getPreferenceValues,
   open,
+  getApplications,
 } from "@raycast/api";
 import { runPowerShellScript, usePromise } from "@raycast/utils";
 import ServerView from "./api/ServerView";
@@ -366,17 +367,39 @@ export default function Command(): JSX.Element {
       ip.match(/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)
     );
 
+    // Open Rdp Connection
     if (process.platform === "darwin") {
-      await open(`rdp://full%20address=s%3A${ip}`).catch((err) => {
-        showToast({ style: Toast.Style.Failure, title: "Error with RDP Session", message: err.message });
-      });
+      const apps = await getApplications();
+      const urls: Record<string, string> = {
+        "com.2X.Client.Mac": `tuxclient://?Command=LaunchApp&ConnType=2&Server=${ip}`,
+        "com.microsoft.rdc.macos": `rdp://full%20address=s%3A${ip}`,
+      };
+      let appAvailable = false;
+      for (const [app, url] of Object.entries(urls)) {
+        if (apps.findIndex((v) => v.bundleId === app) !== -1) {
+          appAvailable = true;
+          await open(url).catch((err) => {
+            showToast({ style: Toast.Style.Failure, title: "Error with RDP Session", message: err.message });
+            appAvailable = false;
+          });
+          if (appAvailable) break;
+        }
+      }
+      if (!appAvailable) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error with RDP Session",
+          message: "Install 'Windows App' or 'Parallels Client' for this feature",
+        });
+      } else {
+        showToast({ style: Toast.Style.Success, title: "RDP Session Started" });
+      }
     } else if (process.platform === "win32") {
       await runPowerShellScript(`Start-Process mstsc /v:${ip}`).catch((err) => {
         showToast({ style: Toast.Style.Failure, title: "Error with RDP Session", message: err.message });
       });
+      showToast({ style: Toast.Style.Success, title: "RDP Session Started" });
     }
-
-    showToast({ style: Toast.Style.Success, title: "RDP Session Started" });
   }
 
   /**
