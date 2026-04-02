@@ -3,10 +3,6 @@ import { readdirSync, statSync } from "fs";
 import { join, basename, relative } from "path";
 import { homedir } from "os";
 
-interface Preferences {
-  vaultPath: string;
-}
-
 function resolveVaultPath(raw: string): string {
   return raw.startsWith("~/") ? join(homedir(), raw.slice(2)) : raw;
 }
@@ -24,10 +20,14 @@ function getMarkdownFiles(dir: string, files: string[] = []): string[] {
   for (const entry of entries) {
     if (entry.startsWith(".") || EXCLUDED.has(entry)) continue;
     const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
-      getMarkdownFiles(full, files);
-    } else if (entry.endsWith(".md")) {
-      files.push(full);
+    try {
+      if (statSync(full).isDirectory()) {
+        getMarkdownFiles(full, files);
+      } else if (entry.endsWith(".md")) {
+        files.push(full);
+      }
+    } catch {
+      // skip broken symlinks, permission errors, etc.
     }
   }
   return files;
