@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Catch Invalid session token error
+
 ## [Fix & Improvements] - 2026-03-24
 
 - Catch error when unlinking data.json file
