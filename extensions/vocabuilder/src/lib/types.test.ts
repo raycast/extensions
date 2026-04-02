@@ -1,31 +1,55 @@
 import { describe, it, expect } from "vitest";
-import { GeminiResponseSchema, TranslationSchema } from "./types";
+import { FlashcardProgressSchema, GeminiWordResponseSchema, TranslationSchema, WordSenseSchema } from "./types";
 
-describe("GeminiResponseSchema", () => {
-  const validResponse = {
+describe("WordSenseSchema", () => {
+  const valid = {
     translation: "привіт",
     partOfSpeech: "interjection",
-    example: "Hello!",
-    exampleTranslation: "Привіт!",
+    example: "Привіт!",
+    exampleTranslation: "Hello!",
+  };
+
+  it("accepts a valid sense", () => {
+    expect(() => WordSenseSchema.parse(valid)).not.toThrow();
+  });
+
+  it("rejects sense missing translation", () => {
+    const incomplete: Record<string, unknown> = { ...valid };
+    delete incomplete.translation;
+    expect(() => WordSenseSchema.parse(incomplete)).toThrow();
+  });
+});
+
+describe("GeminiWordResponseSchema", () => {
+  const sense = {
+    translation: "привіт",
+    partOfSpeech: "interjection",
+    example: "Привіт!",
+    exampleTranslation: "Hello!",
   };
 
   it("accepts valid response without correctedWord", () => {
-    const result = GeminiResponseSchema.parse(validResponse);
+    const result = GeminiWordResponseSchema.parse({ senses: [sense] });
+    expect(result.senses).toHaveLength(1);
     expect(result.correctedWord).toBeUndefined();
   });
 
-  it("accepts valid response with correctedWord", () => {
-    const result = GeminiResponseSchema.parse({
-      ...validResponse,
+  it("accepts multiple senses and correctedWord", () => {
+    const result = GeminiWordResponseSchema.parse({
+      senses: [sense, { ...sense, translation: "ало", partOfSpeech: "noun" }],
       correctedWord: "hello",
     });
+    expect(result.senses).toHaveLength(2);
     expect(result.correctedWord).toBe("hello");
   });
 
-  it("rejects response missing required field", () => {
-    const incomplete: Record<string, unknown> = { ...validResponse };
-    delete incomplete.translation;
-    expect(() => GeminiResponseSchema.parse(incomplete)).toThrow();
+  it("rejects empty senses array", () => {
+    expect(() => GeminiWordResponseSchema.parse({ senses: [] })).toThrow();
+  });
+
+  it("rejects more than five senses", () => {
+    const senses = Array.from({ length: 6 }, () => ({ ...sense }));
+    expect(() => GeminiWordResponseSchema.parse({ senses })).toThrow();
   });
 });
 
@@ -63,5 +87,26 @@ describe("TranslationSchema", () => {
     const noTimestamp: Record<string, unknown> = { ...validTranslation };
     delete noTimestamp.timestamp;
     expect(() => TranslationSchema.parse(noTimestamp)).toThrow();
+  });
+});
+
+describe("FlashcardProgressSchema", () => {
+  const valid = {
+    word: "hello",
+    translationId: "hello-1",
+    easeFactor: 2.5,
+    interval: 1,
+    repetitions: 0,
+    nextReviewDate: 0,
+  };
+
+  it("requires translationId", () => {
+    const incomplete: Record<string, unknown> = { ...valid };
+    delete incomplete.translationId;
+    expect(() => FlashcardProgressSchema.parse(incomplete)).toThrow();
+  });
+
+  it("accepts valid progress", () => {
+    expect(() => FlashcardProgressSchema.parse(valid)).not.toThrow();
   });
 });

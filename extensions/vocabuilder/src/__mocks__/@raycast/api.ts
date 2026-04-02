@@ -21,3 +21,5 @@ export const getPreferenceValues = vi.fn(() => ({
   sourceLanguage: "en",
   targetLanguage: "uk",
 }));
+
+export const closeMainWindow = vi.fn(async () => {});

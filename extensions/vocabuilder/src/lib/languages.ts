@@ -38,6 +38,10 @@ export function storageKeyPrefix(pair: LanguagePair): string {
   return `${pair.source.code}-${pair.target.code}`;
 }
 
+export function swapLanguagePair(pair: LanguagePair): LanguagePair {
+  return { source: pair.target, target: pair.source };
+}
+
 export function getLanguagePair(): LanguagePair {
   const { sourceLanguage = "en", targetLanguage = "uk" } = getPreferenceValues<Preferences>();
   if (sourceLanguage === targetLanguage) {

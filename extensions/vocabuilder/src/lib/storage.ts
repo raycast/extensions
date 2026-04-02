@@ -46,6 +46,24 @@ async function parseStoredArray<T>(
   }
 }
 
+/** True when b describes the same saved sense as a (lemma + gloss + POS for words). */
+function senseMatchesStoredTranslation(a: Translation, b: Translation): boolean {
+  if (a.type !== b.type) return false;
+  if (a.type === "text") {
+    return a.word === b.word;
+  }
+  return (
+    a.word === b.word &&
+    a.translation.trim().toLowerCase() === b.translation.trim().toLowerCase() &&
+    a.partOfSpeech.trim().toLowerCase() === b.partOfSpeech.trim().toLowerCase()
+  );
+}
+
+/** LocalStorage map key for a flashcard progress row — matches `Translation.id`. */
+function flashcardProgressStorageKey(p: FlashcardProgress): string {
+  return p.translationId;
+}
+
 export async function getHistory(pair: LanguagePair): Promise<Translation[]> {
   const key = historyKey(pair);
   const raw = await LocalStorage.getItem<string>(key);
@@ -54,17 +72,19 @@ export async function getHistory(pair: LanguagePair): Promise<Translation[]> {
   return parsed ?? [];
 }
 
-export async function saveTranslation(t: Translation, pair: LanguagePair): Promise<boolean> {
+export async function saveTranslation(t: Translation, pair: LanguagePair): Promise<Translation | null> {
   const key = historyKey(pair);
   const raw = await LocalStorage.getItem<string>(key);
   const history = raw
     ? await parseStoredArray(key, historyCorruptBackupKey(pair), raw, z.array(TranslationSchema))
     : [];
-  if (!history) return false;
+  if (!history) return null;
 
-  const updated = [t, ...history.filter((h) => h.word !== t.word)];
+  const existing = history.find((h) => senseMatchesStoredTranslation(h, t));
+  const merged: Translation = existing ? { ...t, id: existing.id, timestamp: Date.now() } : t;
+  const updated = [merged, ...history.filter((h) => h.id !== merged.id)];
   await LocalStorage.setItem(key, JSON.stringify(updated));
-  return true;
+  return merged;
 }
 
 export async function deleteTranslation(id: string, pair: LanguagePair): Promise<boolean> {
@@ -89,7 +109,7 @@ async function getFlashcardProgress(pair: LanguagePair): Promise<Map<string, Fla
   const raw = await LocalStorage.getItem<string>(key);
   if (!raw) return new Map();
   const arr = await parseStoredArray(key, flashcardCorruptBackupKey(pair), raw, z.array(FlashcardProgressSchema));
-  return new Map((arr ?? []).map((p) => [p.word, p]));
+  return new Map((arr ?? []).map((p) => [flashcardProgressStorageKey(p), p]));
 }
 
 export async function saveFlashcardProgress(progress: FlashcardProgress, pair: LanguagePair): Promise<boolean> {
@@ -100,10 +120,19 @@ export async function saveFlashcardProgress(progress: FlashcardProgress, pair: L
     : [];
   if (!arr) return false;
 
-  const map = new Map(arr.map((p) => [p.word, p]));
-  map.set(progress.word, progress);
+  const map = new Map(arr.map((p) => [flashcardProgressStorageKey(p), p]));
+  map.set(flashcardProgressStorageKey(progress), progress);
   await LocalStorage.setItem(key, JSON.stringify([...map.values()]));
   return true;
+}
+
+function progressForWordCard(t: Translation, rawMap: Map<string, FlashcardProgress>): FlashcardProgress | undefined {
+  if (t.type !== "word") return undefined;
+  return rawMap.get(t.id);
+}
+
+function normalizeProgressForCard(p: FlashcardProgress, card: Translation): FlashcardProgress {
+  return { ...p, word: card.word, translationId: card.id };
 }
 
 interface SessionData {
@@ -121,23 +150,31 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export async function getSessionCards(pair: LanguagePair): Promise<SessionData> {
-  const [allHistory, progressMap] = await Promise.all([getHistory(pair), getFlashcardProgress(pair)]);
+  const [allHistory, rawProgressMap] = await Promise.all([getHistory(pair), getFlashcardProgress(pair)]);
   const history = allHistory.filter((t) => t.type !== "text");
   const now = Date.now();
 
   const due = history
     .filter((t) => {
-      const p = progressMap.get(t.word);
+      const p = progressForWordCard(t, rawProgressMap);
       return p !== undefined && p.nextReviewDate <= now;
     })
     .sort((a, b) => {
-      const pa = progressMap.get(a.word)!;
-      const pb = progressMap.get(b.word)!;
+      const pa = progressForWordCard(a, rawProgressMap)!;
+      const pb = progressForWordCard(b, rawProgressMap)!;
       return pa.nextReviewDate - pb.nextReviewDate;
     });
 
-  const unseen = history.filter((t) => !progressMap.has(t.word));
+  const unseen = history.filter((t) => progressForWordCard(t, rawProgressMap) === undefined);
 
   const sessionCards = shuffle([...due, ...unseen].slice(0, 10));
+
+  const progressMap = new Map<string, FlashcardProgress>();
+  for (const t of sessionCards) {
+    const p = progressForWordCard(t, rawProgressMap);
+    if (p) {
+      progressMap.set(t.id, normalizeProgressForCard(p, t));
+    }
+  }
   return { sessionCards, progressMap };
 }

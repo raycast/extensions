@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { getLanguageByCode, storageKeyPrefix, getLanguagePair, LANGUAGES } from "./languages";
+import { getLanguageByCode, storageKeyPrefix, getLanguagePair, swapLanguagePair, LANGUAGES } from "./languages";
 import { getPreferenceValues } from "@raycast/api";
 
 describe("getLanguageByCode", () => {
@@ -25,6 +25,35 @@ describe("storageKeyPrefix", () => {
       source: { code: "en", name: "English" },
       target: { code: "uk", name: "Ukrainian" },
     };
+    expect(storageKeyPrefix(pair)).toBe("en-uk");
+  });
+});
+
+describe("swapLanguagePair", () => {
+  it("swaps source and target", () => {
+    const pair = {
+      source: { code: "en", name: "English" },
+      target: { code: "uk", name: "Ukrainian" },
+    };
+    const swapped = swapLanguagePair(pair);
+    expect(swapped.source).toEqual({ code: "uk", name: "Ukrainian" });
+    expect(swapped.target).toEqual({ code: "en", name: "English" });
+  });
+
+  it("is its own inverse", () => {
+    const pair = {
+      source: { code: "de", name: "German" },
+      target: { code: "fr", name: "French" },
+    };
+    expect(swapLanguagePair(swapLanguagePair(pair))).toEqual(pair);
+  });
+
+  it("produces a different storage key prefix", () => {
+    const pair = {
+      source: { code: "en", name: "English" },
+      target: { code: "uk", name: "Ukrainian" },
+    };
+    expect(storageKeyPrefix(swapLanguagePair(pair))).toBe("uk-en");
     expect(storageKeyPrefix(pair)).toBe("en-uk");
   });
 });

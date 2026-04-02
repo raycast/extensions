@@ -33,10 +33,14 @@ afterEach(() => {
 describe("translateWord", () => {
   it("parses a valid Gemini response", async () => {
     const payload = {
-      translation: "привіт",
-      partOfSpeech: "interjection",
-      example: "Hello!",
-      exampleTranslation: "Привіт!",
+      senses: [
+        {
+          translation: "привіт",
+          partOfSpeech: "interjection",
+          example: "Привіт!",
+          exampleTranslation: "Hello!",
+        },
+      ],
     };
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify(geminiJsonBody(payload)), {
@@ -46,8 +50,73 @@ describe("translateWord", () => {
     );
 
     const result = await translateWord("hello", API_KEY, pair);
-    expect(result.translation).toBe("привіт");
-    expect(result.partOfSpeech).toBe("interjection");
+    expect(result.senses).toHaveLength(1);
+    expect(result.senses[0].translation).toBe("привіт");
+    expect(result.senses[0].partOfSpeech).toBe("interjection");
+  });
+
+  it("dedupes senses with same translation+POS even if examples differ", async () => {
+    const dup = {
+      translation: "привіт",
+      partOfSpeech: "interjection",
+      example: "A",
+      exampleTranslation: "B",
+    };
+    const payload = {
+      senses: [dup, { ...dup, example: "C", exampleTranslation: "D" }],
+    };
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(geminiJsonBody(payload)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const result = await translateWord("hello", API_KEY, pair);
+    expect(result.senses).toHaveLength(1);
+  });
+
+  it("removes byte-for-byte duplicate senses from the model", async () => {
+    const s = {
+      translation: "привіт",
+      partOfSpeech: "interjection",
+      example: "A",
+      exampleTranslation: "B",
+    };
+    const payload = { senses: [s, s] };
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(geminiJsonBody(payload)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const result = await translateWord("hello", API_KEY, pair);
+    expect(result.senses).toHaveLength(1);
+  });
+
+  it("keeps same target gloss when part of speech differs", async () => {
+    const base = {
+      translation: "процент",
+      example: "E1",
+      exampleTranslation: "E1en",
+    };
+    const payload = {
+      senses: [
+        { ...base, partOfSpeech: "noun" },
+        { ...base, partOfSpeech: "verb", example: "E2", exampleTranslation: "E2en" },
+      ],
+    };
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify(geminiJsonBody(payload)), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
+
+    const result = await translateWord("hello", API_KEY, pair);
+    expect(result.senses).toHaveLength(2);
+    expect(result.senses.map((x) => x.partOfSpeech).sort()).toEqual(["noun", "verb"]);
   });
 
   it("throws INVALID_API_KEY on 401", async () => {

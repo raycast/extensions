@@ -1,10 +1,14 @@
 import { z } from "zod";
 
-export const GeminiResponseSchema = z.object({
+export const WordSenseSchema = z.object({
   translation: z.string(),
   partOfSpeech: z.string(),
   example: z.string(),
   exampleTranslation: z.string(),
+});
+
+export const GeminiWordResponseSchema = z.object({
+  senses: z.array(WordSenseSchema).min(1).max(5),
   correctedWord: z.string().optional(),
 });
 
@@ -33,12 +37,14 @@ export const TranslationSchema = z.object({
   type: z.enum(["word", "text"]),
 });
 
-export type GeminiResponse = z.infer<typeof GeminiResponseSchema>;
+export type WordSense = z.infer<typeof WordSenseSchema>;
+export type GeminiWordResponse = z.infer<typeof GeminiWordResponseSchema>;
 export type GeminiTextResponse = z.infer<typeof GeminiTextResponseSchema>;
 export type Translation = z.infer<typeof TranslationSchema>;
 
 export const FlashcardProgressSchema = z.object({
   word: z.string(),
+  translationId: z.string(),
   easeFactor: z.number(),
   interval: z.number(),
   repetitions: z.number(),

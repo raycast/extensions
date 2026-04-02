@@ -58,7 +58,7 @@ describe("saveTranslation", () => {
   it("saves a new translation", async () => {
     const t = makeTranslation();
     const result = await saveTranslation(t, pair);
-    expect(result).toBe(true);
+    expect(result).toEqual(expect.objectContaining({ word: "hello", id: "id-1" }));
 
     const stored = (LocalStorage as unknown as { _store: Map<string, string> })._store.get(HISTORY_KEY);
     const parsed = JSON.parse(stored!);
@@ -66,23 +66,62 @@ describe("saveTranslation", () => {
     expect(parsed[0].word).toBe("hello");
   });
 
-  it("deduplicates by word — keeps newest at front", async () => {
+  it("reuses id when saving the same lemma + gloss + POS", async () => {
     const old = makeTranslation({ id: "id-old", timestamp: 1000 });
     (LocalStorage as unknown as { _store: Map<string, string> })._store.set(HISTORY_KEY, JSON.stringify([old]));
 
     const updated = makeTranslation({ id: "id-new", timestamp: 2000 });
-    await saveTranslation(updated, pair);
+    const merged = await saveTranslation(updated, pair);
 
     const stored = (LocalStorage as unknown as { _store: Map<string, string> })._store.get(HISTORY_KEY);
     const parsed = JSON.parse(stored!);
     expect(parsed).toHaveLength(1);
-    expect(parsed[0].id).toBe("id-new");
+    expect(parsed[0].id).toBe("id-old");
+    expect(parsed[0].timestamp).toBeGreaterThan(1000);
+    expect(merged?.id).toBe("id-old");
   });
 
-  it("returns false when storage is corrupted", async () => {
+  it("keeps two history rows for the same lemma when gloss or POS differs", async () => {
+    const first = makeTranslation({
+      id: "id-a",
+      word: "play",
+      translation: "гра",
+      partOfSpeech: "noun",
+      timestamp: 1,
+    });
+    const second = makeTranslation({
+      id: "id-b",
+      word: "play",
+      translation: "грати",
+      partOfSpeech: "verb",
+      timestamp: 2,
+    });
+    await saveTranslation(first, pair);
+    await saveTranslation(second, pair);
+
+    const stored = (LocalStorage as unknown as { _store: Map<string, string> })._store.get(HISTORY_KEY);
+    const parsed = JSON.parse(stored!);
+    expect(parsed).toHaveLength(2);
+    expect(new Set(parsed.map((p: Translation) => p.translation))).toEqual(new Set(["гра", "грати"]));
+  });
+
+  it("dedupes text translations by source text only, ignoring translation wording", async () => {
+    const first = makeTranslation({ id: "t1", word: "hello world", translation: "привіт світ", type: "text" });
+    const second = makeTranslation({ id: "t2", word: "hello world", translation: "привіт, світ!", type: "text" });
+    await saveTranslation(first, pair);
+    await saveTranslation(second, pair);
+
+    const stored = (LocalStorage as unknown as { _store: Map<string, string> })._store.get(HISTORY_KEY);
+    const parsed = JSON.parse(stored!);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].id).toBe("t1");
+    expect(parsed[0].translation).toBe("привіт, світ!");
+  });
+
+  it("returns null when storage is corrupted", async () => {
     (LocalStorage as unknown as { _store: Map<string, string> })._store.set(HISTORY_KEY, "corrupted");
     const result = await saveTranslation(makeTranslation(), pair);
-    expect(result).toBe(false);
+    expect(result).toBeNull();
   });
 });
 
@@ -136,6 +175,7 @@ describe("getSessionCards", () => {
     const progress = [
       {
         word: "review-me",
+        translationId: "w1",
         easeFactor: 2.5,
         interval: 1,
         repetitions: 1,
