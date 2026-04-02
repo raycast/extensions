@@ -94,10 +94,7 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
               detail={<ParamMetadata param={param} />}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard
-                    title="Copy Decoded Value"
-                    content={param.decodedValue}
-                  />
+                  <Action.CopyToClipboard title="Copy Decoded Value" content={param.decodedValue} />
                   <Action.CopyToClipboard
                     title="Copy Raw Value"
                     content={param.value}
