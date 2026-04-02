@@ -1,6 +1,6 @@
 # Dust.tt Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-04-02
 
 - Fix SSE streaming: replace client library streaming with direct undici fetch to fix incompatibility with Raycast's Node.js environment.
 - Fix AbortController lifecycle causing the stream to abort mid-flight on React re-renders.
