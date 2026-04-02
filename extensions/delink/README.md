@@ -12,7 +12,6 @@ A [Raycast](https://raycast.com) extension that instantly parses query parameter
 - 📦 **JSON Formatting** — Automatically pretty-prints JSON-formatted parameter values for easy reading
 - 📌 **Multiple Copy Options** — One-click copy of decoded value, raw value, or `key=value` format
 - 🔄 **Re-parse Anytime** — Press `⌘V` to re-read the URL from your clipboard at any time
-- 🌐 **Interface Language** — Switch between English and Chinese via extension preferences
 
 ## Usage
 
@@ -24,12 +23,12 @@ A [Raycast](https://raycast.com) extension that instantly parses query parameter
 
 ## Actions
 
-| Action | Shortcut | Description |
-|--------|----------|-------------|
-| Copy Decoded Value | `↵` | Copy the URL-decoded parameter value |
-| Copy Raw Value | `⌘⌥C` | Copy the original encoded parameter value |
-| Copy key=value | `⌘⇧C` | Copy the full `key=value` pair |
-| Paste from Clipboard | `⌘V` | Re-read the URL from clipboard |
+| Action               | Shortcut | Description                               |
+| -------------------- | -------- | ----------------------------------------- |
+| Copy Decoded Value   | `↵`      | Copy the URL-decoded parameter value      |
+| Copy Raw Value       | `⌘⌥C`    | Copy the original encoded parameter value |
+| Copy key=value       | `⌘⇧C`    | Copy the full `key=value` pair            |
+| Paste from Clipboard | `⌘V`     | Re-read the URL from clipboard            |
 
 ## Local Development
 

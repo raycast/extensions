@@ -1,16 +1,14 @@
 import { Action, ActionPanel, Clipboard, List, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getTranslations } from "./i18n";
 import { ParsedParam, ParsedUrl, parseUrl, tryFormatJson } from "./utils";
 
 function ParamMetadata({ param }: { param: ParsedParam }) {
-  const t = getTranslations();
   const isEncoded = param.value !== param.decodedValue;
   const formattedValue = tryFormatJson(param.decodedValue);
   const isJson = formattedValue !== param.decodedValue;
 
   const markdownLines = [
-    isJson ? t.decodedValueJson : t.decodedValue,
+    isJson ? "**Decoded Value** *(JSON)*" : "**Decoded Value**",
     ``,
     isJson ? "```json" : "```",
     formattedValue,
@@ -18,23 +16,22 @@ function ParamMetadata({ param }: { param: ParsedParam }) {
   ];
 
   if (isEncoded) {
-    markdownLines.push(``, t.rawValue, ``, "```", param.value, "```");
+    markdownLines.push(``, "**Raw Value** *(URL Encoded)*", ``, "```", param.value, "```");
   }
 
   return <List.Item.Detail markdown={markdownLines.join("\n")} />;
 }
 
 function UrlInfoMetadata({ parsedUrl }: { parsedUrl: ParsedUrl }) {
-  const t = getTranslations();
   return (
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title={t.protocol} text={parsedUrl.protocol.replace(":", "")} />
+          <List.Item.Detail.Metadata.Label title="Protocol" text={parsedUrl.protocol.replace(":", "")} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title={t.host} text={parsedUrl.host} />
+          <List.Item.Detail.Metadata.Label title="Host" text={parsedUrl.host} />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title={t.path} text={parsedUrl.pathname || "/"} />
+          <List.Item.Detail.Metadata.Label title="Path" text={parsedUrl.pathname || "/"} />
           {parsedUrl.hash && (
             <>
               <List.Item.Detail.Metadata.Separator />
@@ -42,7 +39,7 @@ function UrlInfoMetadata({ parsedUrl }: { parsedUrl: ParsedUrl }) {
             </>
           )}
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title={t.paramCount} text={String(parsedUrl.params.length)} />
+          <List.Item.Detail.Metadata.Label title="Param Count" text={String(parsedUrl.params.length)} />
         </List.Item.Detail.Metadata>
       }
     />
@@ -54,26 +51,25 @@ interface UrlParamListProps {
   onPasteFromClipboard: () => void;
 }
 function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
-  const t = getTranslations();
   const allParamsText = parsedUrl.params.map((p) => `${p.key}=${p.decodedValue}`).join("\n");
 
   const pasteAction = (
-    <Action title={t.pasteFromClipboard} onAction={onPasteFromClipboard} shortcut={{ modifiers: ["cmd"], key: "v" }} />
+    <Action title="Paste from Clipboard" onAction={onPasteFromClipboard} shortcut={{ modifiers: ["cmd"], key: "v" }} />
   );
 
   return (
     <List navigationTitle="URL Parser" searchBarPlaceholder="Filter parameters..." isShowingDetail>
       <List.Section title={`${parsedUrl.host}${parsedUrl.pathname || "/"}`}>
         <List.Item
-          title={t.urlInfo}
-          accessories={[{ text: t.paramsCount(parsedUrl.params.length) }]}
+          title="URL Info"
+          accessories={[{ text: `${parsedUrl.params.length} params` }]}
           detail={<UrlInfoMetadata parsedUrl={parsedUrl} />}
           actions={
             <ActionPanel>
               {pasteAction}
-              <Action.CopyToClipboard title={t.copyHost} content={parsedUrl.host} />
+              <Action.CopyToClipboard title="Copy Host" content={parsedUrl.host} />
               <Action.CopyToClipboard
-                title={t.copyAllParams}
+                title="Copy All Params"
                 content={allParamsText}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
               />
@@ -85,8 +81,8 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
       <List.Section title="Query Parameters">
         {parsedUrl.params.length === 0 ? (
           <List.Item
-            title={t.noParams}
-            detail={<List.Item.Detail markdown={t.noParamsDetail} />}
+            title="No query parameters"
+            detail={<List.Item.Detail markdown="This URL has no query parameters." />}
             actions={<ActionPanel>{pasteAction}</ActionPanel>}
           />
         ) : (
@@ -99,22 +95,22 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard
-                    title={t.copyDecodedValue}
+                    title="Copy Decoded Value"
                     content={param.decodedValue}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    title={t.copyRawValue}
+                    title="Copy Raw Value"
                     content={param.value}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    title={t.copyKeyValue}
+                    title="Copy as Key=Value"
                     content={`${param.key}=${param.decodedValue}`}
                     shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    title={t.copyAllParams}
+                    title="Copy All Params"
                     content={allParamsText}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
                   />
@@ -130,7 +126,6 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
 }
 
 export default function Command() {
-  const t = getTranslations();
   const [parsedUrl, setParsedUrl] = useState<ParsedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -138,18 +133,18 @@ export default function Command() {
     try {
       const clipboardText = await Clipboard.readText();
       if (!clipboardText) {
-        await showToast({ style: Toast.Style.Failure, title: t.clipboardEmpty });
+        await showToast({ style: Toast.Style.Failure, title: "Clipboard is empty" });
         return;
       }
       const parsed = parseUrl(clipboardText);
       if (!parsed) {
-        await showToast({ style: Toast.Style.Failure, title: t.noValidUrl });
+        await showToast({ style: Toast.Style.Failure, title: "No valid URL found in clipboard" });
         return;
       }
       setParsedUrl(parsed);
-      await showToast({ style: Toast.Style.Success, title: t.parseSuccess, message: parsed.host });
+      await showToast({ style: Toast.Style.Success, title: "Parsed successfully", message: parsed.host });
     } catch {
-      await showToast({ style: Toast.Style.Failure, title: t.clipboardReadFailed });
+      await showToast({ style: Toast.Style.Failure, title: "Failed to read clipboard" });
     }
   }
 
@@ -169,12 +164,12 @@ export default function Command() {
     <List isLoading={isLoading}>
       {!isLoading && (
         <List.EmptyView
-          title={t.noUrlFound}
-          description={t.noUrlDescription}
+          title="No URL found in clipboard"
+          description="Copy a URL then press ⌘V to parse"
           actions={
             <ActionPanel>
               <Action
-                title={t.pasteFromClipboard}
+                title="Paste from Clipboard"
                 onAction={pasteFromClipboard}
                 shortcut={{ modifiers: ["cmd"], key: "v" }}
               />
