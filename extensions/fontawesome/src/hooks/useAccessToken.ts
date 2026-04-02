@@ -10,7 +10,10 @@ import {
 export const useAccessToken = (API_TOKEN: string, validateApiToken: boolean) => {
   const { tokenFingerprint, accessTokenKey, expiryKey } = getAccessTokenStorageKeys(API_TOKEN);
   const [accessToken, setAccessToken] = useCachedState<string>(accessTokenKey, "");
-  const [scopes, setScopes] = useCachedState<string[]>(buildScopedCacheKey("tokenScopes", tokenFingerprint), []);
+  const [scopes, setScopes] = useCachedState<string[] | undefined>(
+    buildScopedCacheKey("tokenScopes", tokenFingerprint),
+    undefined,
+  );
 
   const {
     value: tokenTimeStart,
@@ -35,7 +38,7 @@ export const useAccessToken = (API_TOKEN: string, validateApiToken: boolean) => 
     },
     onError: () => {
       setAccessToken("");
-      setScopes([]);
+      setScopes(undefined);
     },
     method: "POST",
     headers: {

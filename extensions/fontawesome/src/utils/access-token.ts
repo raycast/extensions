@@ -35,8 +35,8 @@ export function shouldRefreshAccessToken({
   return !accessToken || !tokenTimeStart || now - tokenTimeStart >= ttlMs;
 }
 
-export function getApiTokenConfigurationError(scopes: string[], shouldValidate = true) {
-  if (!shouldValidate) {
+export function getApiTokenConfigurationError(scopes: string[] | undefined, shouldValidate = true) {
+  if (!shouldValidate || scopes === undefined) {
     return undefined;
   }
 

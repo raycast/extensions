@@ -62,3 +62,7 @@ test("accepts a correctly configured pro token", () => {
 test("does not report missing permissions when token validation is disabled", () => {
   assert.equal(getApiTokenConfigurationError(["public", "kits_read"], false), undefined);
 });
+
+test("does not report missing permissions before scopes are loaded", () => {
+  assert.equal(getApiTokenConfigurationError(undefined), undefined);
+});
