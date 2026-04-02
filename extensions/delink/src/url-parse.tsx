@@ -97,7 +97,6 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
                   <Action.CopyToClipboard
                     title="Copy Decoded Value"
                     content={param.decodedValue}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
                   />
                   <Action.CopyToClipboard
                     title="Copy Raw Value"
