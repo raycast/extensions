@@ -38,12 +38,7 @@ interface HopHistory {
   connections: HistoryEntry[];
 }
 
-// Preferences interface is auto-generated from package.json by Raycast
-type Preferences = {
-  terminal: string;
-  customTerminal: string;
-  configPath: string;
-};
+// Preferences interface is auto-generated from package.json by Raycast (do not redefine locally)
 
 function expandTilde(filePath: string): string {
   if (filePath.startsWith("~/")) {
@@ -56,7 +51,7 @@ function expandTilde(filePath: string): string {
 }
 
 export function getConfigPath(): string {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   if (preferences.configPath) return expandTilde(preferences.configPath);
 
   const envPath = process.env.HOP_CONFIG;
@@ -169,7 +164,7 @@ export function buildSSHCommand(conn: Connection): string {
 }
 
 export function getTerminalApp(): string | undefined {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   const terminalMap: Record<string, string> = {
     terminal: "Terminal",
@@ -177,6 +172,7 @@ export function getTerminalApp(): string | undefined {
     warp: "Warp",
     alacritty: "Alacritty",
     kitty: "kitty",
+    ghostty: "Ghostty",
   };
 
   if (preferences.terminal === "other" && preferences.customTerminal) {

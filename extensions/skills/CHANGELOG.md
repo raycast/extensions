@@ -1,5 +1,11 @@
 # Changelog
 
+## [Improve Maintainability] - 2026-04-02
+
+- Add `vitest`-based unit tests and an opt-in live API test for the `skills` extension
+- Extract search and skill content loading logic into reusable helpers for easier testing and maintenance
+- Improve empty states in the search and manage flows while keeping the current upstream behavior intact
+
 ## [Remove Trending Skills Command] - 2026-03-31
 
 - Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills

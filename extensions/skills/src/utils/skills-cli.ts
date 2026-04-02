@@ -46,12 +46,12 @@ const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
  * Strip ANSI escape codes from CLI output.
  * Used by checkForUpdates() which does not have a --json option.
  */
-function stripAnsi(str: string): string {
+export function stripAnsi(str: string): string {
   return str.replace(ANSI_REGEX, "");
 }
 
 /** Escape a value for safe use as a shell argument. */
-function shellEscape(arg: string): string {
+export function shellEscape(arg: string): string {
   if (isWindows) {
     return `"${arg.replace(/"/g, '\\"')}"`;
   }
@@ -108,7 +108,7 @@ interface SkillsListJsonEntry {
   agents: string[];
 }
 
-function parseSkillsListJson(stdout: string): InstalledSkill[] {
+export function parseSkillsListJson(stdout: string): InstalledSkill[] {
   const entries: unknown = JSON.parse(stdout);
   if (!Array.isArray(entries)) {
     throw new Error("Expected JSON array");
