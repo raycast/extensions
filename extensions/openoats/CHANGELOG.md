@@ -1,4 +1,4 @@
-# OpenOats Changelog
+# OpenOats
 
 ## [Prepared Initial Store Submission] - {PR_MERGE_DATE}
 

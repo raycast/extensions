@@ -1,4 +1,4 @@
-# OpenOats Raycast Extension
+# OpenOats
 
 This extension targets the OpenOats deeplinks merged in [OpenOats PR #39](https://github.com/yazinsai/OpenOats/pull/39) and the current app behavior in the upstream repository.
 

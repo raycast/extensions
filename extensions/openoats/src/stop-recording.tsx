@@ -11,9 +11,17 @@ async function stopRecording() {
   try {
     await closeMainWindow();
     await openOpenOatsUrl(makeStopRecordingUrl());
-    await showToast({ style: Toast.Style.Success, title: "OpenOats stop requested" });
+    await showToast({
+      style: Toast.Style.Success,
+      title: "OpenOats stop requested",
+    });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Could not open OpenOats.";
-    await showToast({ style: Toast.Style.Failure, title: "OpenOats stop failed", message });
+    const message =
+      error instanceof Error ? error.message : "Could not open OpenOats.";
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "OpenOats stop failed",
+      message,
+    });
   }
 }
