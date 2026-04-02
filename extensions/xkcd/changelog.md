@@ -1,4 +1,4 @@
-# XKCD Comics
+# XKCD Changelog
 
 ## [Add viewing history] - {PR_MERGE_DATE}
 
