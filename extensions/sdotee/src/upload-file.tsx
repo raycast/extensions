@@ -14,23 +14,41 @@ import { getDefaultFileDomain } from "./lib/sdk";
 import { addHistoryItem } from "./lib/history";
 import { getShareableFileUrl } from "./lib/file-url";
 
-import { readFileSync } from "fs";
+import { readFile } from "fs/promises";
 import { basename } from "path";
 
 function UploadFileCommand() {
   const [domain, setDomain] = useState("");
 
-  const { data: domains, isLoading: domainsLoading } = usePromise(
-    async () => (await getFileDomains()).data.domains,
-  );
+  const {
+    data: domains,
+    isLoading: domainsLoading,
+    error: domainsError,
+  } = usePromise(async () => (await getFileDomains()).data.domains);
 
   useEffect(() => {
     if (!domains) return;
+    let cancelled = false;
     getDefaultFileDomain().then((d) => {
+      if (cancelled) return;
       if (d && domains.includes(d)) setDomain(d);
       else if (domains.length > 0) setDomain(domains[0]);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [domains]);
+
+  if (domainsError) {
+    return (
+      <Form>
+        <Form.Description
+          title="Error"
+          text={`Failed to load domains: ${domainsError.message}`}
+        />
+      </Form>
+    );
+  }
 
   async function handleSubmit(values: {
     file: string[];
@@ -52,7 +70,7 @@ function UploadFileCommand() {
     });
 
     try {
-      const fileBuffer = readFileSync(filePath);
+      const fileBuffer = await readFile(filePath);
       const fileName = basename(filePath);
       const blob = new Blob([new Uint8Array(fileBuffer)]);
       const formData = new FormData();

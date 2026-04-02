@@ -17,17 +17,35 @@ function CreateTextShareCommand() {
   const [titleError, setTitleError] = useState<string | undefined>();
   const [domain, setDomain] = useState("");
 
-  const { data: domains, isLoading: domainsLoading } = usePromise(
-    async () => (await getTextDomains()).data.domains,
-  );
+  const {
+    data: domains,
+    isLoading: domainsLoading,
+    error: domainsError,
+  } = usePromise(async () => (await getTextDomains()).data.domains);
 
   useEffect(() => {
     if (!domains) return;
+    let cancelled = false;
     getDefaultTextDomain().then((d) => {
+      if (cancelled) return;
       if (d && domains.includes(d)) setDomain(d);
       else if (domains.length > 0) setDomain(domains[0]);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [domains]);
+
+  if (domainsError) {
+    return (
+      <Form>
+        <Form.Description
+          title="Error"
+          text={`Failed to load domains: ${domainsError.message}`}
+        />
+      </Form>
+    );
+  }
 
   async function handleSubmit(values: {
     content: string;

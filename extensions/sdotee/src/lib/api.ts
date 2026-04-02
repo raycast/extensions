@@ -36,8 +36,6 @@ async function request<T>(
   return json as T;
 }
 
-// ── Short URL ──
-
 export interface CreateShortUrlRequest {
   target_url: string;
   domain: string;
@@ -57,15 +55,6 @@ export interface ShortUrlResponse {
 
 export function createShortUrl(req: CreateShortUrlRequest) {
   return request<ShortUrlResponse>("POST", "/shorten", req);
-}
-
-export function updateShortUrl(req: {
-  domain: string;
-  slug: string;
-  target_url: string;
-  title: string;
-}) {
-  return request<unknown>("PUT", "/shorten", req);
 }
 
 export function deleteShortUrl(req: { domain: string; slug: string }) {
@@ -97,24 +86,6 @@ export function getTags() {
   return request<TagsResponse>("GET", "/tags");
 }
 
-export interface VisitStatResponse {
-  code: number;
-  data: { visit_count: number };
-  message: string;
-}
-
-export function getVisitStat(
-  domain: string,
-  slug: string,
-  period?: "daily" | "monthly" | "totally",
-) {
-  const params = new URLSearchParams({ domain, slug });
-  if (period) params.set("period", period);
-  return request<VisitStatResponse>("GET", `/link/visit-stat?${params}`);
-}
-
-// ── Text Sharing ──
-
 export interface CreateTextRequest {
   content: string;
   title: string;
@@ -136,15 +107,6 @@ export function createText(req: CreateTextRequest) {
   return request<TextResponse>("POST", "/text", req);
 }
 
-export function updateText(req: {
-  content: string;
-  domain: string;
-  slug: string;
-  title: string;
-}) {
-  return request<unknown>("PUT", "/text", req);
-}
-
 export function deleteText(req: { domain: string; slug: string }) {
   return request<unknown>("DELETE", "/text", req);
 }
@@ -152,8 +114,6 @@ export function deleteText(req: { domain: string; slug: string }) {
 export function getTextDomains() {
   return request<DomainsResponse>("GET", "/text/domains");
 }
-
-// ── File Sharing ──
 
 export interface FileUploadResponse {
   code: number;
@@ -188,35 +148,4 @@ export function deleteFile(hash: string) {
 
 export function getFileDomains() {
   return request<DomainsResponse>("GET", "/file/domains");
-}
-
-export interface FileHistoryResponse {
-  code: number;
-  data: FileUploadResponse["data"][];
-  message: string;
-  success: boolean;
-}
-
-export function getFileHistory(page = 1) {
-  return request<FileHistoryResponse>("GET", `/files?page=${page}`);
-}
-
-export function getPrivateFileDownloadUrl(fileId: number) {
-  return request<{
-    code: number;
-    data: { file_id: number; url: string; expires_at: number };
-    message: string;
-  }>("GET", `/file/private/download-url?file_id=${fileId}`);
-}
-
-// ── General ──
-
-export interface UsageResponse {
-  code: number;
-  data: Record<string, number | string>;
-  message: string;
-}
-
-export function getUsage() {
-  return request<UsageResponse>("GET", "/usage");
 }

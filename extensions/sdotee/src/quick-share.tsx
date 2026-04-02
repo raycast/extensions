@@ -25,7 +25,8 @@ import {
 import { addHistoryItem } from "./lib/history";
 import { getShareableFileUrl } from "./lib/file-url";
 
-import { readFileSync, existsSync, statSync } from "fs";
+import { readFile } from "fs/promises";
+import { existsSync, statSync } from "fs";
 import { basename, extname } from "path";
 import { fileURLToPath } from "url";
 
@@ -36,7 +37,6 @@ function resolveFilePath(path: string): string {
   try {
     return decodeURIComponent(path);
   } catch {
-    // Keep original path when it contains raw '%' characters.
     return path;
   }
 }
@@ -46,7 +46,7 @@ function detectType(text: string): ShareType {
     const url = new URL(text.trim());
     if (url.protocol === "http:" || url.protocol === "https:") return "url";
   } catch {
-    // not a URL
+    // Not a valid URL
   }
   const trimmed = text.trim();
   if (
@@ -93,9 +93,11 @@ function QuickShareCommand() {
   const [isSharing, setIsSharing] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     (async () => {
       try {
         const finderItems = await getSelectedFinderItems();
+        if (cancelled) return;
         if (finderItems.length > 0) {
           const resolved = resolveFilePath(finderItems[0].path);
           setFilePath(resolved);
@@ -105,10 +107,11 @@ function QuickShareCommand() {
           return;
         }
       } catch {
-        // No Finder selection
+        // No Finder selection available
       }
 
       const clipboardContent = await Clipboard.read();
+      if (cancelled) return;
       if (clipboardContent.file) {
         const resolved = resolveFilePath(clipboardContent.file);
         setFilePath(resolved);
@@ -127,6 +130,9 @@ function QuickShareCommand() {
       }
       setIsReady(true);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function shareUrlOrFile() {
@@ -155,7 +161,7 @@ function QuickShareCommand() {
       } else {
         const path = filePath || content;
         const domain = await getDefaultFileDomain();
-        const fileBuffer = readFileSync(path);
+        const fileBuffer = await readFile(path);
         const fileName = basename(path);
         const blob = new Blob([new Uint8Array(fileBuffer)]);
         const formData = new FormData();

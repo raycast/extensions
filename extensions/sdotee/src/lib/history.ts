@@ -12,6 +12,7 @@ export interface HistoryItem {
 }
 
 const HISTORY_KEY = "history";
+const MAX_HISTORY_ITEMS = 500;
 
 export async function getHistory(): Promise<HistoryItem[]> {
   const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
@@ -22,7 +23,8 @@ export async function getHistory(): Promise<HistoryItem[]> {
 export async function addHistoryItem(item: HistoryItem): Promise<void> {
   const history = await getHistory();
   history.unshift(item);
-  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  const trimmed = history.slice(0, MAX_HISTORY_ITEMS);
+  await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
 }
 
 export async function removeHistoryItem(

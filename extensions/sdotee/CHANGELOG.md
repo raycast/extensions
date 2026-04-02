@@ -1,4 +1,4 @@
-# S.EE Changelog
+# S.EE
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

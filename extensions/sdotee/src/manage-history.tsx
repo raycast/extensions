@@ -24,7 +24,12 @@ function buildDetailMarkdown(item: HistoryItem): string {
 }
 
 function ManageHistoryCommand() {
-  const { data: history, isLoading, revalidate } = usePromise(getHistory);
+  const {
+    data: history,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(getHistory);
 
   const urlItems = history?.filter((item) => item.type === "url") ?? [];
   const textItems = history?.filter((item) => item.type === "text") ?? [];
@@ -112,7 +117,7 @@ function ManageHistoryCommand() {
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
                   title="Created"
-                  text={new Date(item.createdAt).toLocaleString()}
+                  text={new Date(item.createdAt).toLocaleString("en-US")}
                 />
                 {item.hash ? (
                   <List.Item.Detail.Metadata.Label
@@ -132,7 +137,6 @@ function ManageHistoryCommand() {
             </ActionPanel.Section>
             <ActionPanel.Section>
               <Action
-                // eslint-disable-next-line @raycast/prefer-title-case
                 title="Delete from S.EE"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
@@ -173,7 +177,14 @@ function ManageHistoryCommand() {
           {fileItems.map(renderItem)}
         </List.Section>
       )}
-      {!isLoading && history?.length === 0 && (
+      {error && (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Failed to Load History"
+          description={error.message}
+        />
+      )}
+      {!isLoading && !error && history?.length === 0 && (
         <List.EmptyView
           icon={Icon.Clock}
           title="No History"

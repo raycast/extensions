@@ -15,23 +15,54 @@ import { addHistoryItem } from "./lib/history";
 
 function CreateShortURLCommand() {
   const [domain, setDomain] = useState("");
+  const [urlError, setUrlError] = useState<string | undefined>();
 
-  const { data: domains, isLoading: domainsLoading } = usePromise(
-    async () => (await getUrlDomains()).data.domains,
-  );
+  const {
+    data: domains,
+    isLoading: domainsLoading,
+    error: domainsError,
+  } = usePromise(async () => (await getUrlDomains()).data.domains);
 
-  const { data: tags, isLoading: tagsLoading } = usePromise(async () => {
+  const {
+    data: tags,
+    isLoading: tagsLoading,
+    error: tagsError,
+  } = usePromise(async () => {
     const res = await getTags();
     return res.data.data.tags;
   });
 
   useEffect(() => {
     if (!domains) return;
+    let cancelled = false;
     getDefaultUrlDomain().then((d) => {
+      if (cancelled) return;
       if (d && domains.includes(d)) setDomain(d);
       else if (domains.length > 0) setDomain(domains[0]);
     });
+    return () => {
+      cancelled = true;
+    };
   }, [domains]);
+
+  function validateUrl(value: string): boolean {
+    if (!value.trim()) {
+      setUrlError("Target URL is required");
+      return false;
+    }
+    try {
+      const url = new URL(value);
+      if (url.protocol !== "http:" && url.protocol !== "https:") {
+        setUrlError("URL must start with http:// or https://");
+        return false;
+      }
+    } catch {
+      setUrlError("Please enter a valid URL");
+      return false;
+    }
+    setUrlError(undefined);
+    return true;
+  }
 
   async function handleSubmit(values: {
     target_url: string;
@@ -41,6 +72,8 @@ function CreateShortURLCommand() {
     expire_at: Date | null;
     tag_ids: string[];
   }) {
+    if (!validateUrl(values.target_url)) return;
+
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Creating short URL...",
@@ -80,6 +113,17 @@ function CreateShortURLCommand() {
     }
   }
 
+  if (domainsError || tagsError) {
+    return (
+      <Form>
+        <Form.Description
+          title="Error"
+          text={`Failed to load: ${(domainsError || tagsError)?.message}`}
+        />
+      </Form>
+    );
+  }
+
   return (
     <Form
       isLoading={domainsLoading || tagsLoading}
@@ -93,6 +137,8 @@ function CreateShortURLCommand() {
         id="target_url"
         title="Target URL"
         placeholder="https://example.com"
+        error={urlError}
+        onChange={() => urlError && setUrlError(undefined)}
       />
       <Form.Dropdown
         id="domain"
