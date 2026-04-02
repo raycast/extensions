@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, List, Toast, showToast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ParsedParam, ParsedUrl, parseUrl, tryFormatJson } from "./utils";
 
 function ParamMetadata({ param }: { param: ParsedParam }) {
@@ -51,7 +51,10 @@ interface UrlParamListProps {
   onPasteFromClipboard: () => void;
 }
 function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
-  const allParamsText = parsedUrl.params.map((p) => `${p.key}=${p.decodedValue}`).join("\n");
+  // Decoded form: human-readable, suitable for display and debugging.
+  // Raw form: preserves percent-encoding, suitable for reconstructing a query string.
+  const allParamsDecoded = parsedUrl.params.map((p) => `${p.key}=${p.decodedValue}`).join("\n");
+  const allParamsRaw = parsedUrl.params.map((p) => `${p.key}=${p.value}`).join("&");
 
   const pasteAction = (
     <Action title="Paste from Clipboard" onAction={onPasteFromClipboard} shortcut={{ modifiers: ["cmd"], key: "v" }} />
@@ -69,9 +72,14 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
               {pasteAction}
               <Action.CopyToClipboard title="Copy Host" content={parsedUrl.host} />
               <Action.CopyToClipboard
-                title="Copy All Params"
-                content={allParamsText}
+                title="Copy All Params (Decoded)"
+                content={allParamsDecoded}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              />
+              <Action.CopyToClipboard
+                title="Copy All Params (Raw)"
+                content={allParamsRaw}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
               />
             </ActionPanel>
           }
@@ -106,9 +114,14 @@ function UrlParamList({ parsedUrl, onPasteFromClipboard }: UrlParamListProps) {
                     shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                   />
                   <Action.CopyToClipboard
-                    title="Copy All Params"
-                    content={allParamsText}
+                    title="Copy All Params (Decoded)"
+                    content={allParamsDecoded}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy All Params (Raw)"
+                    content={allParamsRaw}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                   />
                   {pasteAction}
                 </ActionPanel>
@@ -125,7 +138,7 @@ export default function Command() {
   const [parsedUrl, setParsedUrl] = useState<ParsedUrl | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function pasteFromClipboard() {
+  const pasteFromClipboard = useCallback(async () => {
     try {
       const clipboardText = await Clipboard.readText();
       if (!clipboardText) {
@@ -142,7 +155,7 @@ export default function Command() {
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to read clipboard" });
     }
-  }
+  }, []);
 
   useEffect(() => {
     async function init() {
@@ -150,7 +163,7 @@ export default function Command() {
       setIsLoading(false);
     }
     init();
-  }, []);
+  }, [pasteFromClipboard]);
 
   if (parsedUrl) {
     return <UrlParamList parsedUrl={parsedUrl} onPasteFromClipboard={pasteFromClipboard} />;
