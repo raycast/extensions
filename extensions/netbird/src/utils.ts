@@ -306,12 +306,13 @@ export async function netbirdNetworksDeselect(id: string): Promise<void> {
 }
 
 /**
- * Tries to determine the NetBird admin dashboard URL using config files. Using management URL as last fallback.
+ * Tries to determine the NetBird admin dashboard URL using netbird status command or preferences.
+ * Using management URL as last fallback.
  *
  * @returns full admin url
  */
 export async function getAdminUrl(): Promise<string> {
-  const prefs = getPreferenceValues<{ adminUrl?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   if (prefs.adminUrl) {
     return prefs.adminUrl;
   }
