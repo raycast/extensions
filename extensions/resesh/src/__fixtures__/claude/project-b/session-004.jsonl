@@ -1,0 +1,4 @@
+{"type":"user","message":{"content":"Set up the CI pipeline"},"cwd":"/home/user/projects/webapp","timestamp":"2025-01-16T09:00:00Z","gitBranch":"feature/ci"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"I will create a GitHub Actions workflow for CI."}]},"timestamp":"2025-01-16T09:00:05Z"}
+{"type":"user","message":{"content":"Add deployment steps too"},"timestamp":"2025-01-16T09:01:00Z"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Adding deployment steps to the workflow."}]},"timestamp":"2025-01-16T09:01:10Z"}

@@ -1,0 +1,3 @@
+{"timestamp":"2025-01-15T14:00:00Z","type":"session_meta","payload":{"id":"11111111-2222-3333-4444-555555555555","cwd":"/home/user/projects/webapp"}}
+{"timestamp":"2025-01-15T14:00:01Z","type":"event_msg","payload":{"type":"user_message","message":"Fix the login page styling"}}
+{"timestamp":"2025-01-15T14:00:05Z","type":"event_msg","payload":{"type":"agent_message","message":"I will update the CSS for the login page to match the design mockup."}}

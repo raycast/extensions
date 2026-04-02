@@ -1,0 +1,5 @@
+{"timestamp":"2025-01-15T10:00:00Z","type":"session_meta","payload":{"id":"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee","cwd":"/home/user/projects/myapp"}}
+{"timestamp":"2025-01-15T10:00:01Z","type":"event_msg","payload":{"type":"user_message","message":"Explain the main function"}}
+{"timestamp":"2025-01-15T10:00:05Z","type":"event_msg","payload":{"type":"agent_message","message":"The main function initializes the application and starts the server on port 3000."}}
+{"timestamp":"2025-01-15T10:01:00Z","type":"event_msg","payload":{"type":"user_message","message":"How do I add a new route?"}}
+{"timestamp":"2025-01-15T10:01:05Z","type":"event_msg","payload":{"type":"agent_message","message":"You can add a new route by creating a handler function and registering it with the router."}}

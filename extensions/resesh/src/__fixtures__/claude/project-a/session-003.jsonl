@@ -1,0 +1,5 @@
+{"type":"user","message":{"content":"What is this function doing?"},"cwd":"/home/user/projects/myapp","timestamp":"2025-01-15T12:00:00Z"}
+THIS IS NOT VALID JSON
+{"type":"assistant","message":{"content":[{"type":"text","text":"This function parses the configuration file and returns a settings object."}]},"timestamp":"2025-01-15T12:00:05Z"}
+ANOTHER BAD LINE {{{
+{"type":"user","message":{"content":"Can you add error handling?"},"timestamp":"2025-01-15T12:01:00Z"}

@@ -1,0 +1,7 @@
+{"type":"user","message":{"content":"Help me debug this error"},"cwd":"/home/user/projects/myapp","timestamp":"2025-01-15T10:00:00Z"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"I can help you debug that. Let me look at the error log."}]},"timestamp":"2025-01-15T10:00:05Z"}
+{"type":"user","message":{"content":"The error says connection refused on port 3000"},"timestamp":"2025-01-15T10:01:00Z"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"That usually means the server is not running. Try starting it with npm start."}]},"timestamp":"2025-01-15T10:01:10Z"}
+{"type":"custom-title","customTitle":"Debugging connection error"}
+{"type":"user","message":{"content":"That fixed it, thanks!"},"timestamp":"2025-01-15T10:02:00Z"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"Great! Glad it worked out."}]},"timestamp":"2025-01-15T10:02:05Z"}

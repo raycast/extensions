@@ -1,0 +1,7 @@
+{"type":"user","message":{"content":"Run all the tests"},"cwd":"/home/user/projects/myapp","timestamp":"2025-01-15T11:00:00Z","isMeta":true}
+{"type":"user","message":{"content":"<command-name>test</command-name>"},"timestamp":"2025-01-15T11:00:01Z"}
+{"type":"user","message":{"content":"<command-message>Running tests...</command-message>"},"timestamp":"2025-01-15T11:00:02Z"}
+{"type":"user","message":{"content":"<local-command-output>All tests passed</local-command-output>"},"timestamp":"2025-01-15T11:00:03Z"}
+{"type":"user","message":{"content":"<task-notification>Task completed</task-notification>"},"timestamp":"2025-01-15T11:00:04Z"}
+{"type":"user","message":{"content":"Now refactor the auth module"},"timestamp":"2025-01-15T11:01:00Z"}
+{"type":"assistant","message":{"content":[{"type":"text","text":"I will refactor the auth module for better separation of concerns."}]},"timestamp":"2025-01-15T11:01:05Z"}
