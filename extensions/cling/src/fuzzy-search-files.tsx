@@ -4,6 +4,7 @@ import {
   Application,
   Detail,
   Icon,
+  LaunchProps,
   List,
   getPreferenceValues,
   showToast,
@@ -13,7 +14,7 @@ import { useExec } from "@raycast/utils";
 import { basename, dirname, extname } from "path";
 import { execFileSync } from "child_process";
 import { homedir } from "os";
-import { useState, useMemo } from "react";
+import { useCallback, useState, useMemo } from "react";
 import { closeSync, existsSync, openSync, readSync, readdirSync, statSync } from "fs";
 
 const CLING = "/Applications/Cling.app/Contents/SharedSupport/ClingCLI";
@@ -93,7 +94,7 @@ function getEditorApp(): string {
   return vscode ?? "TextEdit";
 }
 const MAX_PREVIEW_BYTES = 20_000;
-const MAX_PREVIEW_LINES = 200;
+const MAX_PREVIEW_LINES = 80;
 
 function readHead(filePath: string, maxBytes: number): string {
   const fd = openSync(filePath, "r");
@@ -296,7 +297,19 @@ function FileDetail({ filePath, isDir }: { filePath: string; isDir: boolean }) {
   );
 }
 
-function FileActions({ filePath, isDir, name }: { filePath: string; isDir: boolean; name: string }) {
+function FileActions({
+  filePath,
+  isDir,
+  name,
+  searchText,
+  onRemove,
+}: {
+  filePath: string;
+  isDir: boolean;
+  name: string;
+  searchText: string;
+  onRemove: (path: string) => void;
+}) {
   const terminalDir = isDir ? filePath : dirname(filePath);
   const terminal = getTerminalApp();
   const editor = getEditorApp();
@@ -363,13 +376,16 @@ function FileActions({ filePath, isDir, name }: { filePath: string; isDir: boole
       )}
 
       <ActionPanel.Section title="Other">
-        <Action.CreateQuicklink
-          quicklink={{
-            link: `raycast://extensions/lowtechguys/cling/fuzzy-search-files?arguments=${encodeURIComponent(JSON.stringify({ query: name }))}`,
-            name: name,
-          }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-        />
+        {searchText && (
+          <Action.CreateQuicklink
+            title="Save as Quick Filter"
+            quicklink={{
+              link: `raycast://extensions/lowtechguys/cling/fuzzy-search-files?fallbackText=${encodeURIComponent(searchText)}`,
+              name: `Cling: ${searchText}`,
+            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+          />
+        )}
         <Action
           title="Exclude from Index"
           icon={Icon.EyeDisabled}
@@ -377,20 +393,26 @@ function FileActions({ filePath, isDir, name }: { filePath: string; isDir: boole
           onAction={async () => {
             try {
               execFileSync(CLING, ["index", "remove", filePath]);
+              onRemove(filePath);
               await showToast({ style: Toast.Style.Success, title: "Excluded from index", message: name });
             } catch {
               await showToast({ style: Toast.Style.Failure, title: "Failed to exclude from index" });
             }
           }}
         />
-        <Action.Trash paths={filePath} shortcut={{ modifiers: ["cmd"], key: "backspace" }} />
+        <Action.Trash
+          paths={filePath}
+          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          onTrash={() => onRemove(filePath)}
+        />
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
-export default function Command() {
-  const [searchText, setSearchText] = useState("");
+export default function Command(props: LaunchProps) {
+  const [searchText, setSearchText] = useState(props.fallbackText ?? "");
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
 
   const { isLoading, data } = useExec(
     CLING,
@@ -407,8 +429,13 @@ export default function Command() {
         const isDir = raw.endsWith("/");
         const filePath = isDir ? raw.slice(0, -1) : raw;
         return { filePath, isDir, name: basename(filePath), dir: tildify(dirname(filePath)) };
-      });
-  }, [data]);
+      })
+      .filter(({ filePath }) => !hidden.has(filePath));
+  }, [data, hidden]);
+
+  const onRemove = useCallback((path: string) => {
+    setHidden((prev) => new Set(prev).add(path));
+  }, []);
 
   return (
     <List
@@ -428,7 +455,9 @@ export default function Command() {
           subtitle={dir}
           accessories={isDir ? [{ icon: Icon.Folder, tooltip: "Directory" }] : []}
           quickLook={{ path: filePath }}
-          actions={<FileActions filePath={filePath} isDir={isDir} name={name} />}
+          actions={
+            <FileActions filePath={filePath} isDir={isDir} name={name} searchText={searchText} onRemove={onRemove} />
+          }
         />
       ))}
     </List>
