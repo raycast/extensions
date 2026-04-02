@@ -10,6 +10,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 import {
   EnsureCliBinError,
   InstalledCLINotFoundError,
+  InvalidSessionTokenError,
   ManuallyThrownError,
   NotLoggedInError,
   PremiumFeatureError,
@@ -746,15 +747,24 @@ export class Bitwarden {
   }
 
   private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
-    const errorMessage = (error as ExecaError).stderr;
-    if (!errorMessage) return {};
+    if (!(error instanceof Error)) return {};
 
-    if (/not logged in/i.test(errorMessage)) {
+    const stderr = (error as ExecaError).stderr;
+    const message = error.message;
+    if (!stderr && !message) return {};
+
+    const errorContent = [stderr, message].filter(Boolean).join(",");
+
+    if (/not logged in/i.test(errorContent)) {
       await this.handlePostLogout();
       return { error: new NotLoggedInError("Not logged in") };
     }
-    if (/Premium status/i.test(errorMessage)) {
+    if (/Premium status/i.test(errorContent)) {
       return { error: new PremiumFeatureError() };
+    }
+    if (/Invalid session token/i.test(errorContent)) {
+      await this.handlePostLogout();
+      return { error: new InvalidSessionTokenError() };
     }
     return {};
   }

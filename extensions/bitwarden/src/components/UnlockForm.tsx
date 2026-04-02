@@ -5,6 +5,7 @@ import { LOCAL_STORAGE_KEY } from "~/constants/general";
 import { useBitwarden } from "~/context/bitwarden";
 import { treatError } from "~/utils/debug";
 import { captureException } from "~/utils/development";
+import { InvalidSessionTokenError } from "~/utils/errors";
 import useVaultMessages from "~/utils/hooks/useVaultMessages";
 import { useLocalStorageItem } from "~/utils/localstorage";
 import { platform } from "~/utils/platform";
@@ -25,7 +26,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
-  async function onSubmit() {
+  async function onSubmit(args?: { retry?: boolean }) {
     if (password.length === 0) return;
 
     try {
@@ -34,7 +35,11 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
 
       await pendingAction;
 
-      const toast = await showToast({ title: "Validating...", message: "Please wait", style: Toast.Style.Animated });
+      const toast = await showToast({
+        title: args?.retry ? "Retrying..." : "Validating...",
+        message: "Please wait",
+        style: Toast.Style.Animated,
+      });
 
       const { error, result: vaultState } = await bitwarden.status();
       if (error) throw error;
@@ -55,6 +60,11 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       toast.title = "Unlocking vault...";
       const { error: unlockError } = await bitwarden.unlock(password);
       if (unlockError) {
+        if (unlockError instanceof InvalidSessionTokenError) {
+          toast.title = "Clearing session and retrying...";
+          await bitwarden.logout({ reason: "Invalid session token" });
+          return onSubmit();
+        }
         return handleUnlockError(unlockError, {
           title: "Failed to unlock vault",
           fallbackMessage: "Please check your credentials",
