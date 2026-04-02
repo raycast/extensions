@@ -63,7 +63,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
         if (unlockError instanceof InvalidSessionTokenError) {
           toast.title = "Clearing session and retrying...";
           await bitwarden.logout({ reason: "Invalid session token" });
-          return onSubmit();
+          return onSubmit({ retry: true });
         }
         return handleUnlockError(unlockError, {
           title: "Failed to unlock vault",
