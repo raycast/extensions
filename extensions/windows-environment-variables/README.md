@@ -1,4 +1,4 @@
-# Environment Variables Manager
+# Windows Environment Variables
 
 A keyboard-first alternative to the Windows Environment Variables dialog. Browse, search, edit, create, and delete Windows environment variables and PATH entries directly from Raycast.
 

@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "envvars-manager",
+  "name": "windows-environment-variables",
   "type": "module",
-  "title": "Environment Variables Manager",
+  "title": "Windows Environment Variables",
   "description": "View, search, edit and manage Windows environment variables and PATH entries. A keyboard-first alternative to the Windows Environment Variables dialog.",
   "icon": "icon.png",
   "author": "ohmycodedev",
@@ -18,7 +18,7 @@
     {
       "name": "list-envvars",
       "title": "List Environment Variables",
-      "subtitle": "EnvVars Manager",
+      "subtitle": "Windows Environment Variables",
       "description": "Browse, search, copy, edit and delete Windows environment variables",
       "mode": "view",
       "keywords": [
@@ -32,7 +32,7 @@
     {
       "name": "edit-path",
       "title": "Edit PATH Variable",
-      "subtitle": "EnvVars Manager",
+      "subtitle": "Windows Environment Variables",
       "description": "View, add, remove and reorder PATH entries with validation",
       "mode": "view",
       "keywords": [
@@ -45,7 +45,7 @@
     {
       "name": "add-envvar",
       "title": "Add Environment Variable",
-      "subtitle": "EnvVars Manager",
+      "subtitle": "Windows Environment Variables",
       "description": "Create a new user or system environment variable",
       "mode": "view",
       "keywords": [

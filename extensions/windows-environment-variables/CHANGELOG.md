@@ -1,4 +1,4 @@
-# Environment Variables Manager
+# Windows Environment Variables
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
