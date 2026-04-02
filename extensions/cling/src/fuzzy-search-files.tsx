@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Application,
   Detail,
   Icon,
   LaunchProps,
@@ -19,12 +18,6 @@ import { closeSync, existsSync, openSync, readSync, readdirSync, statSync } from
 
 const CLING = "/Applications/Cling.app/Contents/SharedSupport/ClingCLI";
 const HOME = homedir();
-
-interface Preferences {
-  terminalApp?: Application;
-  editorApp?: Application;
-  shelfApp?: Application;
-}
 
 const SHELF_BUNDLE_IDS = [
   "at.EternalStorms.Yoink",

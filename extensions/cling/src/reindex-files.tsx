@@ -4,10 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 const CLING = "/Applications/Cling.app/Contents/SharedSupport/ClingCLI";
 
-const SCOPES = ["home", "library", "applications", "system", "root"] as const;
-type Scope = (typeof SCOPES)[number];
-
-export default function Command(props: LaunchProps<{ arguments: { scope: string } }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ReindexFiles }>) {
   const scope = props.arguments.scope?.trim() || "";
   const isAll = !scope;
   const label = isAll ? "all scopes" : scope;
@@ -16,7 +13,7 @@ export default function Command(props: LaunchProps<{ arguments: { scope: string 
 
   useEffect(() => {
     const args = ["reindex", "--wait"];
-    if (!isAll && SCOPES.includes(scope as Scope)) {
+    if (!isAll) {
       args.push("--scope", scope);
     }
 
