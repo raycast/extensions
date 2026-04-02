@@ -1,6 +1,6 @@
 # Finder File Actions Changelog
 
-## [Fix copy-to-folder command] - {PR_MERGE_DATE}
+## [Fix copy-to-folder command] - 2026-04-02
 
 - Fixed "Copy to Folder" failing when "Move to Folder" command is disabled
 - Fixed large same-volume moves falling back to slow streamed copy instead of instant rename
