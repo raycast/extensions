@@ -16,12 +16,14 @@
     {
       "name": "log-food",
       "title": "Log Food",
+      "subtitle": "Caaals",
       "description": "Log food to your diary using AI text analysis",
       "mode": "view"
     },
     {
       "name": "browse-diary",
       "title": "Browse Diary",
+      "subtitle": "Caaals",
       "description": "View and manage recent diary entries",
       "mode": "view"
     }

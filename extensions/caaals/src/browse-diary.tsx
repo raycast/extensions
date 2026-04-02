@@ -110,7 +110,7 @@ export default function BrowseDiary() {
           subtitle={`${summary.totals.calories} kcal total`}
         >
           {summary.entries.map((entry) => {
-            const serving = getDefaultServing(entry.food);
+            const serving = entry.food.servings.find((s) => s.id === entry.servingId) ?? getDefaultServing(entry.food);
             return (
               <List.Item
                 key={entry.id}
@@ -175,7 +175,7 @@ function mealColor(meal: string): Color {
 
 function EntryDetail({ entry }: { entry: DiaryEntry }) {
   const { food, nutrition, meal, quantity } = entry;
-  const serving = getDefaultServing(food);
+  const serving = food.servings.find((s) => s.id === entry.servingId) ?? getDefaultServing(food);
   const fn = food.nutrition;
   const multiplier = serving.multiplier * quantity;
 
@@ -193,7 +193,7 @@ ${fn.sodium != null ? `| Sodium | ${Math.round(fn.sodium * multiplier * 10) / 10
 
 **Serving:** ${formatServingWithQuantity(serving, quantity)}
 **Meal:** ${MEAL_ICONS[meal]} ${formatMealType(meal)}
-**Logged:** ${new Date(entry.loggedAt).toLocaleString()}`;
+**Logged:** ${new Date(entry.loggedAt).toLocaleString("en-US")}`;
 
   return (
     <Detail

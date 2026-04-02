@@ -3,15 +3,6 @@ import type { AIFoodAnalysisResult, DailySummary, DiaryEntry, DiaryEntryFromSnap
 
 const API_BASE_PATH = "/api/v1";
 
-interface Preferences {
-  apiUrl: string;
-  apiToken: string;
-}
-
-function getPrefs(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 interface FetchOptions {
   method?: string;
   body?: unknown;
@@ -20,7 +11,7 @@ interface FetchOptions {
 
 async function apiFetch<T>(path: string, opts: FetchOptions = {}): Promise<T> {
   const { method = "GET", body, quiet = false } = opts;
-  const prefs = getPrefs();
+  const prefs = getPreferenceValues<Preferences>();
   const baseUrl = prefs.apiUrl.replace(/\/+$/, "");
   const url = `${baseUrl}${API_BASE_PATH}${path}`;
 
