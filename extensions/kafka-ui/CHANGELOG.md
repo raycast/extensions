@@ -1,6 +1,6 @@
 # Kafka UI
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-02
 
 - Search consumer groups and inspect lag per topic and partition
 - Browse Kafka topics grouped by prefix with partition and replication details
