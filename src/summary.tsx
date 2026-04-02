@@ -184,7 +184,9 @@ export default function Command() {
       })}
 
       {filteredTimers.length === 0 && !isLoading && (
-        <List.EmptyView title="No Timers Found" description="No tracked time for this period" icon={Icon.Clock} />
+        <List.Section title="No Timers Found">
+          <List.Item title="No tracked time for this period" icon={Icon.Clock} />
+        </List.Section>
       )}
     </List>
   );
