@@ -76,7 +76,7 @@ export default function Command() {
         ? prefs.pythonPath
         : path.join(agentRoot, ".venv", "bin", "python3");
     const rawLimit = prefs.recentLimit;
-    const parsedLimit = typeof rawLimit === "number" ? rawLimit : parseInt(String(rawLimit ?? "").trim(), 10);
+    const parsedLimit = parseInt(String(rawLimit ?? "").trim(), 10);
     const recentLimit = Number.isNaN(parsedLimit) || parsedLimit < 1 ? DEFAULT_LIMIT : Math.min(parsedLimit, 500);
     return {
       configPath,

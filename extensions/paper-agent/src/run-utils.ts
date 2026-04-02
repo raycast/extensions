@@ -7,6 +7,39 @@ import { applyPaperDirOverride } from "./config-utils";
 
 type YamlObject = Record<string, unknown>;
 
+interface Prefs {
+  // common string prefs
+  pythonPath?: string;
+  paperDir?: string;
+  configPath?: string;
+  maxPapersPerDay?: string;
+  lookbackDays?: string;
+  keyphrases?: string;
+  allowCategories?: string;
+  denyCategories?: string;
+  excludeKeywords?: string;
+  summarizeProvider?: string;
+  summarizeModel?: string;
+  summarizeLanguage?: string;
+  openaiApiKey?: string;
+
+  // boolean prefs
+  summarizeEnabled?: boolean;
+  scholarEnabled?: boolean;
+
+  // scholar / email prefs
+  scholarProvider?: string;
+  scholarImapHost?: string;
+  scholarImapUser?: string;
+  scholarImapPasswordEnv?: string;
+  scholarGmailLabel?: string;
+  scholarFromAddresses?: string;
+  scholarImapPassword?: string;
+
+  // any other arbitrary preference keys
+  [key: string]: string | boolean | undefined;
+}
+
 export const DAILY_SCHEDULE_HOUR = 4;
 export const DAILY_SCHEDULE_LABEL = "com.paperagent.daily";
 const ENV_VAR_NAME_RE = /^[A-Za-z_][A-Za-z0-9_]*$/;
@@ -44,7 +77,7 @@ export function getAgentRoot(configPath: string): string {
   return configPath.trim().length > 0 ? path.dirname(configPath.trim()) : "";
 }
 
-export function getPythonBin(prefs: Preferences.RunPipeline, agentRoot: string): string {
+export function getPythonBin(prefs: Prefs, agentRoot: string): string {
   return prefs.pythonPath && prefs.pythonPath.trim().length > 0
     ? prefs.pythonPath.trim()
     : path.join(agentRoot, ".venv", "bin", "python3");
@@ -166,7 +199,7 @@ function loadBaseConfig(configPath: string): YamlObject {
   return loaded as YamlObject;
 }
 
-function mergeConfig(base: YamlObject, prefs: Preferences.RunPipeline): YamlObject {
+function mergeConfig(base: YamlObject, prefs: Prefs): YamlObject {
   const merged = applyPaperDirOverride(base, prefs.paperDir?.trim() ?? "");
 
   if (!merged.direction || typeof merged.direction !== "object") {
@@ -233,7 +266,7 @@ function mergeConfig(base: YamlObject, prefs: Preferences.RunPipeline): YamlObje
   return merged;
 }
 
-export function buildRunEnv(prefs: Preferences.RunPipeline): NodeJS.ProcessEnv {
+export function buildRunEnv(prefs: Prefs): NodeJS.ProcessEnv {
   const env = { ...process.env };
   const openaiKey = prefs.openaiApiKey?.trim();
   if (openaiKey) {
@@ -252,7 +285,7 @@ export function buildRunEnv(prefs: Preferences.RunPipeline): NodeJS.ProcessEnv {
   return env;
 }
 
-export function buildScheduleSecrets(prefs: Preferences.RunPipeline): Record<string, string> {
+export function buildScheduleSecrets(prefs: Prefs): Record<string, string> {
   const env: Record<string, string> = {};
   const openaiKey = prefs.openaiApiKey?.trim() || process.env.OPENAI_API_KEY?.trim();
   if (openaiKey) {
@@ -271,7 +304,7 @@ export function buildScheduleSecrets(prefs: Preferences.RunPipeline): Record<str
   return env;
 }
 
-export function prepareRun(prefs: Preferences.RunPipeline, options?: { persistConfigPath?: string }): PreparedRun {
+export function prepareRun(prefs: Prefs, options?: { persistConfigPath?: string }): PreparedRun {
   const configPath = prefs.configPath?.trim() ?? "";
   if (!configPath) {
     throw new Error("Set Config file path in extension Preferences.");

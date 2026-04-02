@@ -1,9 +1,10 @@
-<h1 align="center"><img src="assets/extension-icon.png" width="23" height="23" alt="" style="vertical-align: middle;" /> Paper Agent Raycast Extension</h1>
+<h1 align="center"><img src="assets/extension-icon.png" width="23" height="23" alt="" style="vertical-align: middle;" /> Paper Agent</h1>
 
 A [Raycast](https://www.raycast.com/) extension for the [Paper Agent](https://github.com/galleonli/paper-agent) workflow: run the pipeline, browse today’s and recent papers, search your library, manage favorites and a reading queue, and schedule daily runs on macOS.
 
 > [!IMPORTANT]
 > **Repository references**
+>
 > - **Paper Agent core repo (main workflow):** https://github.com/galleonli/paper-agent
 > - **Paper Agent Raycast extension repo (this project):** https://github.com/galleonli/paper-agent-raycast
 >
@@ -44,11 +45,11 @@ Then run the pipeline once (e.g. `./.venv/bin/python -m paper_agent run --config
 
 Open **Raycast → Extensions → Paper Agent → Preferences** and set:
 
-| Preference           | Description |
-| -------------------- | ----------- |
-| **Config File Path** | Full path to the core `config.yaml` (e.g. `/path/to/paper-agent/config.yaml`). |
-| **Paper Directory**  | Your `delivery.paper_dir`: where notes, digests, and `library/` live. |
-| **Python Executable**| Optional. Leave empty to use `<config_dir>/.venv/bin/python3`. |
+| Preference            | Description                                                                    |
+| --------------------- | ------------------------------------------------------------------------------ |
+| **Config File Path**  | Full path to the core `config.yaml` (e.g. `/path/to/paper-agent/config.yaml`). |
+| **Paper Directory**   | Your `delivery.paper_dir`: where notes, digests, and `library/` live.          |
+| **Python Executable** | Optional. Leave empty to use `<config_dir>/.venv/bin/python3`.                 |
 
 When you use **Run Paper Pipeline** or **Install Daily Schedule**, the extension builds runtime config (direction, delivery, summarize, sources, policy) from these preferences; values in `config.yaml` for those sections are overridden. Other sections (e.g. interests, export, prompts) are still read from `config.yaml`.
 
@@ -56,19 +57,19 @@ When you use **Run Paper Pipeline** or **Install Daily Schedule**, the extension
 
 ## Commands
 
-| Command | Description |
-| --------| ----------- |
-| **Run Paper Pipeline** | Start the full pipeline in background: fetch, filter, summarize, and write local notes/library plus daily/weekly digests. Runtime fields come from Preferences (direction, delivery, summarize, sources); shared sections still come from `config.yaml`. |
-| **Today Papers** | Browse today’s papers from your local library. Detail view: title, authors, abstract, “Why this paper,” optional research summary. Actions: open paper/note, related papers, mark read, favorites, reading queue. |
-| **Recent Papers** | Browse recently added papers (count-based). Same detail and actions as Today Papers. Limit is set in Preferences (**Recent Papers Limit**). |
-| **Search Papers** | Search the local library by title, authors, abstract, categories, date. Same list actions as above. |
-| **Favorite Papers** | Papers you’ve added to favorites from any list. Stored locally in the extension. |
-| **Reading Queue** | Papers you’ve queued for reading. Stored locally; same open/read/favorite actions. |
-| **Install Daily Schedule** | Install a macOS `launchd` job that runs Paper Agent daily at **04:00** and catches up once after boot/login if 04:00 was missed. Re-run after changing Preferences that affect the pipeline. |
-| **Remove Daily Schedule** | Uninstall the daily `launchd` job. Logs and status history are kept. |
-| **Check Run Status** | View whether the daily schedule is installed, today’s result, last successful day, and last run metadata. Actions: open config directory, log directory, state directory, and last run log (when available). |
-| **Open Paper Directory** | Open the configured paper directory in Finder (notes, `library/`, digests). |
-| **Open Config Directory** | Open the folder that contains your `config.yaml` (core repo root) in Finder. Also available as an action in **Run Paper Pipeline** (Core not found) and **Check Run Status** when **Config File Path** is set. |
+| Command                    | Description                                                                                                                                                                                                                                              |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Run Paper Pipeline**     | Start the full pipeline in background: fetch, filter, summarize, and write local notes/library plus daily/weekly digests. Runtime fields come from Preferences (direction, delivery, summarize, sources); shared sections still come from `config.yaml`. |
+| **Today Papers**           | Browse today’s papers from your local library. Detail view: title, authors, abstract, “Why this paper,” optional research summary. Actions: open paper/note, related papers, mark read, favorites, reading queue.                                        |
+| **Recent Papers**          | Browse recently added papers (count-based). Same detail and actions as Today Papers. Limit is set in Preferences (**Recent Papers Limit**).                                                                                                              |
+| **Search Papers**          | Search the local library by title, authors, abstract, categories, date. Same list actions as above.                                                                                                                                                      |
+| **Favorite Papers**        | Papers you’ve added to favorites from any list. Stored locally in the extension.                                                                                                                                                                         |
+| **Reading Queue**          | Papers you’ve queued for reading. Stored locally; same open/read/favorite actions.                                                                                                                                                                       |
+| **Install Daily Schedule** | Install a macOS `launchd` job that runs Paper Agent daily at **04:00** and catches up once after boot/login if 04:00 was missed. Re-run after changing Preferences that affect the pipeline.                                                             |
+| **Remove Daily Schedule**  | Uninstall the daily `launchd` job. Logs and status history are kept.                                                                                                                                                                                     |
+| **Check Run Status**       | View whether the daily schedule is installed, today’s result, last successful day, and last run metadata. Actions: open config directory, log directory, state directory, and last run log (when available).                                             |
+| **Open Paper Directory**   | Open the configured paper directory in Finder (notes, `library/`, digests).                                                                                                                                                                              |
+| **Open Config Directory**  | Open the folder that contains your `config.yaml` (core repo root) in Finder. Also available as an action in **Run Paper Pipeline** (Core not found) and **Check Run Status** when **Config File Path** is set.                                           |
 
 ### Daily schedule: when does the LaunchAgent run?
 
