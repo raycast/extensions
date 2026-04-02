@@ -772,7 +772,13 @@ export class Bitwarden {
     }
     if (/Invalid session token/i.test(errorContent)) {
       if (!skipInvalidSessionTokenLogout) {
-        await this.logout({ reason: "Invalid session token", immediate: true });
+        // Avoid running the full logout lifecycle here (which fires logout listeners).
+        // Clear the session token and mark the vault as unauthenticated so callers
+        // can perform an explicit `bitwarden.logout()` when they want the full
+        // logout side-effects (listeners, storage updates, etc.). This prevents
+        // duplicate listener invocations.
+        this.clearSessionToken();
+        await this.saveLastVaultStatus("handleCommonErrors:InvalidSessionToken", "unauthenticated");
       }
       return { error: new InvalidSessionTokenError() };
     }
