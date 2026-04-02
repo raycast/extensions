@@ -1,6 +1,6 @@
 # S.EE
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-02
 
 - Add URL shortening with custom slugs, password protection, expiry dates, and tags
 - Add text sharing with support for plain text, source code, and Markdown
