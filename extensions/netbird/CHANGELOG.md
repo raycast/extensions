@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Networks management] - {PR_MERGE_DATE}
+## [Networks management] - 2026-04-02
 
 - Added `Show Networks` command to list network routes and select/deselect them from Raycast.
 - Fixed error which failed update command during asking for administrator permissions.
