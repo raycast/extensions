@@ -26,7 +26,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   const [password, setPassword] = useState("");
   const [lockReason, { remove: clearLockReason }] = useLocalStorageItem(LOCAL_STORAGE_KEY.VAULT_LOCK_REASON);
 
-  async function onSubmit(args?: { retry?: boolean }) {
+  async function onSubmit(args?: { retryInvalidSessionToken?: boolean }) {
     if (password.length === 0) return;
 
     try {
@@ -36,7 +36,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       await pendingAction;
 
       const toast = await showToast({
-        title: args?.retry ? "Retrying..." : "Validating...",
+        title: args?.retryInvalidSessionToken ? "Clearing session and retrying..." : "Validating...",
         message: "Please wait",
         style: Toast.Style.Animated,
       });
@@ -61,9 +61,7 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       const { error: unlockError } = await bitwarden.unlock(password);
       if (unlockError) {
         if (unlockError instanceof InvalidSessionTokenError) {
-          toast.title = "Clearing session and retrying...";
-          await bitwarden.logout({ reason: "Invalid session token" });
-          return onSubmit({ retry: true });
+          return onSubmit({ retryInvalidSessionToken: true });
         }
         return handleUnlockError(unlockError, {
           title: "Failed to unlock vault",

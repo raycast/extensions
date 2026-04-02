@@ -385,7 +385,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }
@@ -421,11 +421,14 @@ export class Bitwarden {
         resetVaultTimeout: true,
         env: { BW_PASSWORD: password },
       });
+
       const sessionToken = result.stdout;
-      if (!sessionToken.trim()) throw new Error("Invalid session token");
+      if (!sessionToken.trim()) throw new InvalidSessionTokenError();
+
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
       await this.callActionListeners("unlock", password, sessionToken);
+
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -746,7 +749,10 @@ export class Bitwarden {
     await this.callActionListeners("logout", reason);
   }
 
-  private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
+  private async handleCommonErrors(
+    error: any,
+    options?: { skipInvalidSessionTokenLogout?: boolean }
+  ): Promise<{ error?: ManuallyThrownError }> {
     if (!(error instanceof Error)) return {};
 
     const stderr = (error as ExecaError).stderr;
@@ -755,15 +761,19 @@ export class Bitwarden {
 
     const errorContent = [stderr, message].filter(Boolean).join(",");
 
+    const { skipInvalidSessionTokenLogout = false } = options ?? {};
+
     if (/not logged in/i.test(errorContent)) {
-      await this.handlePostLogout();
+      await this.handlePostLogout("Not logged in");
       return { error: new NotLoggedInError("Not logged in") };
     }
     if (/Premium status/i.test(errorContent)) {
       return { error: new PremiumFeatureError() };
     }
     if (/Invalid session token/i.test(errorContent)) {
-      await this.handlePostLogout();
+      if (!skipInvalidSessionTokenLogout) {
+        await this.logout({ reason: "Invalid session token", immediate: true });
+      }
       return { error: new InvalidSessionTokenError() };
     }
     return {};
