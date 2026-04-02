@@ -5,6 +5,10 @@ const STORAGE_KEY = "kafka-ui-environments";
 
 export async function getEnvironments(): Promise<StoredEnvironment[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+  if (!raw) {
+    return [];
+  }
+
   try {
     return JSON.parse(raw) as StoredEnvironment[];
   } catch {
