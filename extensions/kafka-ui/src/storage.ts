@@ -5,8 +5,12 @@ const STORAGE_KEY = "kafka-ui-environments";
 
 export async function getEnvironments(): Promise<StoredEnvironment[]> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
-  if (!raw) return [];
-  return JSON.parse(raw) as StoredEnvironment[];
+  try {
+    return JSON.parse(raw) as StoredEnvironment[];
+  } catch {
+    console.error("[kafka-ui] Failed to parse environments from storage, resetting:", raw);
+    return [];
+  }
 }
 
 export async function saveEnvironments(envs: StoredEnvironment[]): Promise<void> {
