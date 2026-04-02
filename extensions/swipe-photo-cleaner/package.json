@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "swipe-photo-cleaner",
+  "title": "Swipe Photo Cleaner",
+  "description": "Clean your photo library with fast swipe decisions",
+  "icon": "icon.png",
+  "author": "nazarlysyi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "defaultDirectory",
+      "type": "directory",
+      "title": "Default Photos Directory",
+      "description": "Default folder to scan when starting a review session",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "review-photos",
+      "title": "Review Photos",
+      "description": "Review photos in a folder: keep or trash",
+      "mode": "view"
+    },
+    {
+      "name": "review-finder-selection",
+      "title": "Review Finder Selection",
+      "description": "Review currently selected images in Finder",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.0",
+    "eslint": "^9.39.4",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
