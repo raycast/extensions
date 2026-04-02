@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { showFailureToast, usePromise } from "@raycast/utils";
 import { getNetbirdNetworks, getNetbirdStatus, netbirdNetworksDeselect, netbirdNetworksSelect } from "./utils";
 import type { NetbirdNetworkRoute } from "./utils";
 
@@ -128,11 +128,7 @@ export default function Command() {
                         await revalidate();
                       } catch (e) {
                         await toast.hide();
-                        await showToast({
-                          style: Toast.Style.Failure,
-                          title: "Failed",
-                          message: e instanceof Error ? e.message : String(e),
-                        });
+                        await showFailureToast(e, { title: "Failed" });
                       }
                     }}
                   />

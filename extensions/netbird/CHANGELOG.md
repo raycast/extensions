@@ -3,6 +3,7 @@
 ## [Networks management] - {PR_MERGE_DATE}
 
 - Added `Show Networks` command to list network routes and select/deselect them from Raycast.
+- Fixed error which failed update command during asking for administrator permissions.
 
 ## [Status on empty dns] - 2026-03-30
 
