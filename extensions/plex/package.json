@@ -8,7 +8,8 @@
   "contributors": [
     "AndersDigital",
     "xmok",
-    "timoransky"
+    "timoransky",
+    "trommens35"
   ],
   "categories": [
     "Media",
@@ -72,6 +73,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
