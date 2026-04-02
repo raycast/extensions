@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aws-sso-profiles",
+  "title": "AWS SSO Profiles",
+  "description": "Quickly switch between AWS SSO accounts by opening them in the browser",
+  "icon": "icon.png",
+  "author": "patrickwerz",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-profiles",
+      "title": "List AWS SSO Profiles",
+      "description": "Browse and open your AWS SSO accounts in the browser",
+      "mode": "view",
+      "keywords": [
+        "aws",
+        "sso",
+        "accounts",
+        "profiles",
+        "console",
+        "switch"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "awsConfigPath",
+      "title": "AWS Config File Path",
+      "description": "Path to your AWS config file (defaults to ~/.aws/config)",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.aws/config",
+      "placeholder": "~/.aws/config"
+    },
+    {
+      "name": "additionalRegions",
+      "title": "Additional Regions",
+      "description": "Comma-separated list of extra regions to show for each role (e.g., 'us-east-2, us-west-2'). Roles will be listed once per region.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "us-east-2, eu-west-1"
+    },
+    {
+      "name": "showUsageCount",
+      "title": "Show Usage Count",
+      "description": "Display how many times each account and role has been opened",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show usage count badges"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
