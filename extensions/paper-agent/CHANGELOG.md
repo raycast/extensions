@@ -1,6 +1,6 @@
 # Paper Agent
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-04-02
 
 - **Run & automation:** Run Paper Agent pipeline (fetch, filter, summarize, deliver); Install / Remove Daily Schedule (launchd 04:00 + catch-up); Check Run Status (schedule, today’s result, last run metadata).
 - **Browse & search:** Today Papers and Recent Papers with detail view; Search Papers across your local library.
