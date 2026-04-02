@@ -84,7 +84,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search networks by ID...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search networks...">
       {data?.routes.map((route) => {
         const isSelected = route.selected;
         const subtitle = route.route ?? undefined;
