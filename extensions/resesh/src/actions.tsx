@@ -12,11 +12,6 @@ import { exec, execFile } from "child_process";
 import { wslUncPath } from "./providers/wsl";
 import type { SessionInfo } from "./types";
 
-interface Preferences {
-  terminal: string;
-  ide: string;
-}
-
 const isMac = process.platform === "darwin";
 
 const MAC_ONLY_TERMINALS = new Set(["terminal", "iterm", "ghostty"]);

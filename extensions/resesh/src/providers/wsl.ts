@@ -10,7 +10,7 @@ let distroCache: string[] | null = null;
 
 export function wslEnabled(): boolean {
   if (!isWindows) return false;
-  return !!getPreferenceValues<{ includeWsl?: boolean }>().includeWsl;
+  return !!getPreferenceValues<Preferences>().includeWsl;
 }
 
 export async function listWslDistros(): Promise<string[]> {
