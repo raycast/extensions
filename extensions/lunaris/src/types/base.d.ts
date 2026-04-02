@@ -1,19 +1,6 @@
-type GenshinElement =
-  | "Cryo"
-  | "Pyro"
-  | "Hydro"
-  | "Electro"
-  | "Anemo"
-  | "Geo"
-  | "Dendro"
-  | "Unknown";
+type GenshinElement = "Cryo" | "Pyro" | "Hydro" | "Electro" | "Anemo" | "Geo" | "Dendro" | "Unknown";
 
-type GenshinWeaponType =
-  | "WEAPON_SWORD_ONE_HAND"
-  | "WEAPON_CLAYMORE"
-  | "WEAPON_POLE"
-  | "WEAPON_BOW"
-  | "WEAPON_CATALYST";
+type GenshinWeaponType = "WEAPON_SWORD_ONE_HAND" | "WEAPON_CLAYMORE" | "WEAPON_POLE" | "WEAPON_BOW" | "WEAPON_CATALYST";
 
 type GenshinQualityType =
   | "QUALITY_WHITE"

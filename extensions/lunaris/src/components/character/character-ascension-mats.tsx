@@ -36,19 +36,14 @@ export default function CharacterAscensionMaterials({ character }: Props) {
   ];
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle={`${character.info.name} / Materials`}
-      isShowingDetail
-    >
+    <List isLoading={isLoading} navigationTitle={`${character.info.name} / Materials`} isShowingDetail>
       <MaterialItem
         id="202"
         amount={Number(character.ascension["202"])}
         item={
           {
             enName: "Mora",
-            enDescription:
-              "Common currency. The one language everybody speaks.",
+            enDescription: "Common currency. The one language everybody speaks.",
             icon: "UI_ItemIcon_202",
           } as MaterialItemData
         }
@@ -58,12 +53,7 @@ export default function CharacterAscensionMaterials({ character }: Props) {
         <List.Section key={group.title} title={group.title}>
           {group.items.flatMap((section) =>
             Object.entries(section.data).map(([id, amount]) => (
-              <MaterialItem
-                key={id}
-                id={id}
-                amount={amount}
-                item={materials?.[id]}
-              />
+              <MaterialItem key={id} id={id} amount={amount} item={materials?.[id]} />
             )),
           )}
         </List.Section>
@@ -72,18 +62,8 @@ export default function CharacterAscensionMaterials({ character }: Props) {
   );
 }
 
-function MaterialItem({
-  id,
-  amount,
-  item,
-}: {
-  id: string;
-  amount: number;
-  item?: MaterialItemData;
-}) {
-  const iconUrl = item?.icon
-    ? `https://api.lunaris.moe/data/assets/items/${item.icon}.webp`
-    : "";
+function MaterialItem({ id, amount, item }: { id: string; amount: number; item?: MaterialItemData }) {
+  const iconUrl = item?.icon ? `https://api.lunaris.moe/data/assets/items/${item.icon}.webp` : "";
 
   const cleanDescription = (item?.enDescription || "")
     .replace(/<color=[^>]+>(.*?)<\/color>/gi, "**$1**")

@@ -13,12 +13,7 @@ type Props = {
   setPinned: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-export default function CharacterGridItem({
-  id,
-  character,
-  pinned,
-  setPinned,
-}: Props) {
+export default function CharacterGridItem({ id, character, pinned, setPinned }: Props) {
   const [cardPath, setCardPath] = useState<string>("");
   const { push } = useNavigation();
 
@@ -38,29 +33,18 @@ export default function CharacterGridItem({
     <Grid.Item
       content={{ source: cardPath, tooltip: character.enName }}
       id={character.enName}
-      keywords={[
-        character.enName,
-        id,
-        character.element,
-        WEAPON_TYPE[character.weaponType],
-      ]}
+      keywords={[character.enName, id, character.element, WEAPON_TYPE[character.weaponType]]}
       actions={
         <ActionPanel>
           <Action
             title="Detailed Information"
             icon={Icon.Person}
-            onAction={() =>
-              push(<SingleCharacter id={id} character={character} />)
-            }
+            onAction={() => push(<SingleCharacter id={id} character={character} />)}
           />
           <Action
             title={pinned.includes(id) ? "Unpin Character" : "Pin Character"}
             icon={pinned.includes(id) ? Icon.PinDisabled : Icon.Pin}
-            style={
-              pinned.includes(id)
-                ? Action.Style.Destructive
-                : Action.Style.Regular
-            }
+            style={pinned.includes(id) ? Action.Style.Destructive : Action.Style.Regular}
             onAction={() => {
               setPinned(
                 (prev) =>

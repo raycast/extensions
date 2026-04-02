@@ -17,9 +17,7 @@ export default function SingleCharacter({ id, character }: Props) {
     const gameVersion = await getGameVersion();
     if (!gameVersion) return undefined;
 
-    const res = await fetch(
-      `https://api.lunaris.moe/data/${gameVersion}/en/char/${id}.json`,
-    );
+    const res = await fetch(`https://api.lunaris.moe/data/${gameVersion}/en/char/${id}.json`);
     if (!res.ok) return undefined;
     const characterData = (await res.json()) as GenshinCharacterSingle;
     return characterData;
@@ -66,15 +64,10 @@ ${getLevel10Table(data.skills.elementalburst.multipliers)}
       navigationTitle={data.info.name}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Rarity"
-            text={"★".repeat(RARITY[character.qualityType])}
-          />
+          <Detail.Metadata.Label title="Rarity" text={"★".repeat(RARITY[character.qualityType])} />
           <Detail.Metadata.TagList title="Element & Weapon">
             <Detail.Metadata.TagList.Item
-              text={
-                character.element === "Unknown" ? "Adaptive" : character.element
-              }
+              text={character.element === "Unknown" ? "Adaptive" : character.element}
               icon={`elements/${character.element === "Unknown" ? "adaptive" : character.element.toLowerCase()}.png`}
               color={ELEMENT_COLORS[character.element]}
             />
@@ -85,15 +78,9 @@ ${getLevel10Table(data.skills.elementalburst.multipliers)}
             />
           </Detail.Metadata.TagList>
           <Detail.Metadata.TagList title="Base Stats (Level 90)">
-            <Detail.Metadata.TagList.Item
-              text={`HP: ${maxLevelStats.hp.toLocaleString("en-US")}`}
-            />
-            <Detail.Metadata.TagList.Item
-              text={`ATK: ${maxLevelStats.atk.toLocaleString("en-US")}`}
-            />
-            <Detail.Metadata.TagList.Item
-              text={`DEF: ${maxLevelStats.def.toLocaleString("en-US")}`}
-            />
+            <Detail.Metadata.TagList.Item text={`HP: ${maxLevelStats.hp.toLocaleString("en-US")}`} />
+            <Detail.Metadata.TagList.Item text={`ATK: ${maxLevelStats.atk.toLocaleString("en-US")}`} />
+            <Detail.Metadata.TagList.Item text={`DEF: ${maxLevelStats.def.toLocaleString("en-US")}`} />
             <Detail.Metadata.TagList.Item
               text={`${maxLevelStats.specialStatName}: ${maxLevelStats.specialStatValue}`}
               color={Color.Yellow}
@@ -101,10 +88,7 @@ ${getLevel10Table(data.skills.elementalburst.multipliers)}
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Birthday" text={data.info.birthday} />
-          <Detail.Metadata.Label
-            title="Constellation"
-            text={data.info.constellation}
-          />
+          <Detail.Metadata.Label title="Constellation" text={data.info.constellation} />
         </Detail.Metadata>
       }
       actions={
@@ -114,11 +98,7 @@ ${getLevel10Table(data.skills.elementalburst.multipliers)}
             target={<CharacterAscensionMaterials character={data} />}
             icon={Icon.PlusSquare}
           />
-          <Action.Push
-            title="Constellations"
-            target={<CharacterConstellations character={data} />}
-            icon={Icon.Stars}
-          />
+          <Action.Push title="Constellations" target={<CharacterConstellations character={data} />} icon={Icon.Stars} />
           <Action.OpenInBrowser url={`https://lunaris.moe/character/${id}`} />
         </ActionPanel>
       }
@@ -127,14 +107,10 @@ ${getLevel10Table(data.skills.elementalburst.multipliers)}
 }
 
 export function getLevel90Profile(charData: GenshinCharacterSingle) {
-  const stats =
-    charData.info.attributes.find((a) => a.level === 90) ||
-    charData.info.attributes[0];
+  const stats = charData.info.attributes.find((a) => a.level === 90) || charData.info.attributes[0];
 
   const standardKeys = ["level", "ascension", "hp", "atk", "def"];
-  const specialKey = Object.keys(stats).find(
-    (key) => !standardKeys.includes(key),
-  );
+  const specialKey = Object.keys(stats).find((key) => !standardKeys.includes(key));
 
   return {
     hp: stats.hp,

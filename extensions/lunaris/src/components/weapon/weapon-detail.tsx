@@ -15,9 +15,7 @@ export default function WeaponDetail({ id, weapon, refinementLevel }: Props) {
     const gameVersion = await getGameVersion();
     if (!gameVersion) return undefined;
 
-    const res = await fetch(
-      `https://api.lunaris.moe/data/${gameVersion}/en/weapon/${id}.json`,
-    );
+    const res = await fetch(`https://api.lunaris.moe/data/${gameVersion}/en/weapon/${id}.json`);
     if (!res.ok) return undefined;
     const characterData = (await res.json()) as GenshinWeaponDetail;
     return characterData;
@@ -64,10 +62,7 @@ ${data.passive.refinements[refinementLevel]
             />
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.TagList title="Ascension Stats (Lv. 90)">
-            <List.Item.Detail.Metadata.TagList.Item
-              text={`ATK: ${ascensionStats.baseAtk}`}
-              color={"#ffffff"}
-            />
+            <List.Item.Detail.Metadata.TagList.Item text={`ATK: ${ascensionStats.baseAtk}`} color={"#ffffff"} />
             {ascensionStats.secondaryStat && (
               <List.Item.Detail.Metadata.TagList.Item
                 text={`${ascensionStats.secondaryStat.label}: ${ascensionStats.secondaryStat.value}`}

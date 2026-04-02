@@ -9,9 +9,7 @@ export default function WeaponAscensionMaterials({ id }: Props) {
     const gameVersion = await getGameVersion();
     if (!gameVersion) return undefined;
 
-    const res = await fetch(
-      `https://api.lunaris.moe/data/${gameVersion}/en/weapon/${id}.json`,
-    );
+    const res = await fetch(`https://api.lunaris.moe/data/${gameVersion}/en/weapon/${id}.json`);
     if (!res.ok) return undefined;
     const characterData = (await res.json()) as GenshinWeaponDetail;
     return characterData;
@@ -23,12 +21,7 @@ export default function WeaponAscensionMaterials({ id }: Props) {
 
   const materialList = weapon.ascension.map(({ count, icon }) => {
     const materialID = icon.split("_").at(-1);
-    if (
-      !materials ||
-      !materialID ||
-      isNaN(Number(materialID)) ||
-      !materials[materialID]
-    )
+    if (!materials || !materialID || isNaN(Number(materialID)) || !materials[materialID])
       return {
         id: "-1",
         name: "???",
@@ -47,11 +40,7 @@ export default function WeaponAscensionMaterials({ id }: Props) {
   });
 
   return (
-    <List
-      isLoading={isLoading || loadingWeapon}
-      navigationTitle={`${weapon.name} / Materials`}
-      isShowingDetail
-    >
+    <List isLoading={isLoading || loadingWeapon} navigationTitle={`${weapon.name} / Materials`} isShowingDetail>
       {materialList.map(
         (item, index) =>
           item && (

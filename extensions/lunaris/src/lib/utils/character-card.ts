@@ -4,10 +4,7 @@ import { join } from "path";
 
 import { generate_character_card } from "rust:../../../rust";
 
-export async function getCachedCard(
-  id: string,
-  char: GenshinCharacter,
-): Promise<string> {
+export async function getCachedCard(id: string, char: GenshinCharacter): Promise<string> {
   const cacheDir = join(environment.supportPath, "generated_cards");
   const outputPath = join(cacheDir, `${id}.webp`);
 
@@ -19,19 +16,10 @@ export async function getCachedCard(
 
   const rarity = char.qualityType;
   const avatarFile = `${char.CardImg.replace("UI_Gacha_", "UI_")}.png`;
-  const bgPath = join(
-    environment.assetsPath,
-    "rarity_background",
-    `${rarity}.png`,
-  );
+  const bgPath = join(environment.assetsPath, "rarity_background", `${rarity}.png`);
 
   try {
-    const result = await generate_character_card(
-      id,
-      avatarFile,
-      bgPath,
-      outputPath,
-    );
+    const result = await generate_character_card(id, avatarFile, bgPath, outputPath);
     return `file://${result.replace(/\\/g, "/")}`;
   } catch (error) {
     console.error("Rust Bridge Error:", error);

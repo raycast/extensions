@@ -1,16 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Grid,
-  Icon,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Grid, Icon } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
-import {
-  getAllCharacters,
-  getBanners,
-  getGameVersion,
-} from "./lib/utils/lunaris";
+import { getAllCharacters, getBanners, getGameVersion } from "./lib/utils/lunaris";
 import { useEffect, useMemo, useState } from "react";
 import SingleCharacter from "./components/character/single-character";
 import { API_ENDPOINT } from "./lib/constants";
@@ -18,36 +8,30 @@ import { API_ENDPOINT } from "./lib/constants";
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { data: characters } = usePromise(getAllCharacters);
-  const { isLoading, data: banners } = useCachedPromise(
-    async (): Promise<BannerInformation[]> => {
-      const gameVersion = await getGameVersion();
-      const allBanners = await getBanners();
-      if (!allBanners) return [];
+  const { isLoading, data: banners } = useCachedPromise(async (): Promise<BannerInformation[]> => {
+    const gameVersion = await getGameVersion();
+    const allBanners = await getBanners();
+    if (!allBanners) return [];
 
-      const bannerInformation: BannerInformation[] = Object.entries(
-        allBanners.version,
-      )
-        .filter(([version]) => {
-          const vNum = parseFloat(version);
-          const gvNum = gameVersion ? parseFloat(gameVersion) : 0;
+    const bannerInformation: BannerInformation[] = Object.entries(allBanners.version)
+      .filter(([version]) => {
+        const vNum = parseFloat(version);
+        const gvNum = gameVersion ? parseFloat(gameVersion) : 0;
 
-          if (!preferences.allowUnreleased && gvNum > 0 && vNum > gvNum) {
-            return false;
-          }
-          return true;
-        })
-        .map(([version, characters]) => ({
-          version,
-          characters,
-        }));
+        if (!preferences.allowUnreleased && gvNum > 0 && vNum > gvNum) {
+          return false;
+        }
+        return true;
+      })
+      .map(([version, characters]) => ({
+        version,
+        characters,
+      }));
 
-      return bannerInformation;
-    },
-  );
+    return bannerInformation;
+  });
 
-  const [selectedVersion, setSelectedVersion] = useState(
-    banners && banners[0] ? banners[0].version : null,
-  );
+  const [selectedVersion, setSelectedVersion] = useState(banners && banners[0] ? banners[0].version : null);
 
   useEffect(() => {
     if (banners && banners.length > 0 && !selectedVersion) {
@@ -68,27 +52,16 @@ export default function Command() {
       aspectRatio="9/16"
       navigationTitle={`Banners / ${selectedVersion || "Loading..."}`}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Select version"
-          onChange={(newValue) => setSelectedVersion(newValue)}
-        >
+        <Grid.Dropdown tooltip="Select version" onChange={(newValue) => setSelectedVersion(newValue)}>
           {banners &&
-            banners.map(({ version }) => (
-              <Grid.Dropdown.Item
-                key={version}
-                title={version}
-                value={version}
-              />
-            ))}
+            banners.map(({ version }) => <Grid.Dropdown.Item key={version} title={version} value={version} />)}
         </Grid.Dropdown>
       }
     >
       {activeBanner &&
         characters &&
         selectedVersion &&
-        activeBanner.characters.map((id) => (
-          <GridCharacterItem key={id} characters={characters} id={id} />
-        ))}
+        activeBanner.characters.map((id) => <GridCharacterItem key={id} characters={characters} id={id} />)}
     </Grid>
   );
 }
@@ -117,9 +90,7 @@ function GridCharacterItem({ characters, id }: GridCharacterItemProps) {
           <Action.Push
             title="Detailed Information"
             icon={Icon.Person}
-            target={
-              <SingleCharacter id={id.toString()} character={character} />
-            }
+            target={<SingleCharacter id={id.toString()} character={character} />}
           />
         </ActionPanel>
       }

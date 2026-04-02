@@ -1,10 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  List,
-} from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 
 import { getArtifacts } from "@/lib/utils/lunaris";
@@ -22,23 +16,12 @@ export default function Command() {
       isLoading={isLoading}
       isShowingDetail
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter Artifacts"
-          onChange={(newValue) => setFilter(newValue)}
-        >
+        <List.Dropdown tooltip="Filter Artifacts" onChange={(newValue) => setFilter(newValue)}>
           <List.Dropdown.Item key={"All"} title={"All"} value={"All"} />
           <List.Dropdown.Section title="Rarity">
-            {["QUALITY_ORANGE", "QUALITY_PURPLE", "QUALITY_BLUE"].map(
-              (type) => {
-                return (
-                  <List.Dropdown.Item
-                    key={type}
-                    title={`${RARITY[type as keyof typeof RARITY]}★`}
-                    value={type}
-                  />
-                );
-              },
-            )}
+            {["QUALITY_ORANGE", "QUALITY_PURPLE", "QUALITY_BLUE"].map((type) => {
+              return <List.Dropdown.Item key={type} title={`${RARITY[type as keyof typeof RARITY]}★`} value={type} />;
+            })}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -51,42 +34,21 @@ export default function Command() {
               return pinned.includes(id);
             })
             .map(([id, artifact]) => (
-              <ArtifactListItem
-                key={id}
-                id={id}
-                artifact={artifact}
-                pinned={pinned}
-                setPinned={setPinned}
-              />
+              <ArtifactListItem key={id} id={id} artifact={artifact} pinned={pinned} setPinned={setPinned} />
             ))}
       </List.Section>
-      <List.Section
-        title={pinned && pinned.length > 0 ? "All Artifacts" : undefined}
-      >
+      <List.Section title={pinned && pinned.length > 0 ? "All Artifacts" : undefined}>
         {artifacts &&
           Object.entries(artifacts)
             .reverse()
             .filter(([id, artifact]) => {
               const releaseTimeMs = artifact.releaseDate * 1000;
-              const isAllowed =
-                preferences.allowUnreleased || releaseTimeMs <= Date.now();
-              const matchesFilter =
-                !filter || filter === "All" || artifact.qualityType === filter;
-              return (
-                isAllowed &&
-                matchesFilter &&
-                !pinned.includes(id) &&
-                artifact.enName.length > 0
-              );
+              const isAllowed = preferences.allowUnreleased || releaseTimeMs <= Date.now();
+              const matchesFilter = !filter || filter === "All" || artifact.qualityType === filter;
+              return isAllowed && matchesFilter && !pinned.includes(id) && artifact.enName.length > 0;
             })
             .map(([id, artifact]) => (
-              <ArtifactListItem
-                key={id}
-                id={id}
-                artifact={artifact}
-                pinned={pinned}
-                setPinned={setPinned}
-              />
+              <ArtifactListItem key={id} id={id} artifact={artifact} pinned={pinned} setPinned={setPinned} />
             ))}
       </List.Section>
     </List>
@@ -100,12 +62,7 @@ type ArtifactListItemProps = {
   setPinned: React.Dispatch<React.SetStateAction<string[]>>;
 };
 
-function ArtifactListItem({
-  id,
-  artifact,
-  pinned,
-  setPinned,
-}: ArtifactListItemProps) {
+function ArtifactListItem({ id, artifact, pinned, setPinned }: ArtifactListItemProps) {
   return (
     <List.Item
       icon={{
@@ -136,11 +93,7 @@ ${artifact.enBonuses["4pc"] ? `**4pc bonus:** ${artifact.enBonuses["4pc"]}` : ""
           <Action
             title={pinned.includes(id) ? "Unpin Artifact" : "Pin Artifact"}
             icon={pinned.includes(id) ? Icon.PinDisabled : Icon.Pin}
-            style={
-              pinned.includes(id)
-                ? Action.Style.Destructive
-                : Action.Style.Regular
-            }
+            style={pinned.includes(id) ? Action.Style.Destructive : Action.Style.Regular}
             onAction={() => {
               setPinned(
                 (prev) =>

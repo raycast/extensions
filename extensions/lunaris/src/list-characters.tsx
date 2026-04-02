@@ -19,34 +19,17 @@ export default function Command() {
       isLoading={isLoading}
       inset={Grid.Inset.Zero}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter characters"
-          onChange={(newValue) => setFilter(newValue)}
-        >
+        <Grid.Dropdown tooltip="Filter characters" onChange={(newValue) => setFilter(newValue)}>
           <Grid.Dropdown.Item key={"All"} title={"All"} value={"All"} />
           <Grid.Dropdown.Section title="Elements">
-            {["Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo", "Dendro"].map(
-              (type) => (
-                <Grid.Dropdown.Item
-                  key={type}
-                  title={type}
-                  value={type}
-                  icon={`elements/${type.toLowerCase()}.png`}
-                />
-              ),
-            )}
+            {["Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo", "Dendro"].map((type) => (
+              <Grid.Dropdown.Item key={type} title={type} value={type} icon={`elements/${type.toLowerCase()}.png`} />
+            ))}
           </Grid.Dropdown.Section>
           <Grid.Dropdown.Section title="Weapons">
             {Object.keys(WEAPON_TYPE).map((type) => {
               const key = type as keyof typeof WEAPON_TYPE;
-              return (
-                <Grid.Dropdown.Item
-                  key={key}
-                  title={WEAPON_TYPE[key]}
-                  value={key}
-                  icon={`weapons/${type}.png`}
-                />
-              );
+              return <Grid.Dropdown.Item key={key} title={WEAPON_TYPE[key]} value={key} icon={`weapons/${type}.png`} />;
             })}
           </Grid.Dropdown.Section>
         </Grid.Dropdown>
@@ -60,18 +43,10 @@ export default function Command() {
               return pinned.includes(id);
             })
             .map(([id, char]) => (
-              <CharacterGridItem
-                key={id}
-                id={id}
-                character={char}
-                pinned={pinned}
-                setPinned={setPinned}
-              />
+              <CharacterGridItem key={id} id={id} character={char} pinned={pinned} setPinned={setPinned} />
             ))}
       </Grid.Section>
-      <Grid.Section
-        title={pinned && pinned.length > 0 ? "All Characters" : undefined}
-      >
+      <Grid.Section title={pinned && pinned.length > 0 ? "All Characters" : undefined}>
         {characters &&
           Object.entries(characters)
             .reverse()
@@ -84,21 +59,12 @@ export default function Command() {
                 char.enName !== "Traveler";
 
               const matchesFilter =
-                !filter ||
-                filter === "All" ||
-                char.element === filter ||
-                char.weaponType === filter;
+                !filter || filter === "All" || char.element === filter || char.weaponType === filter;
 
               return isAllowed && matchesFilter && !pinned.includes(id);
             })
             .map(([id, char]) => (
-              <CharacterGridItem
-                key={id}
-                id={id}
-                character={char}
-                pinned={pinned}
-                setPinned={setPinned}
-              />
+              <CharacterGridItem key={id} id={id} character={char} pinned={pinned} setPinned={setPinned} />
             ))}
       </Grid.Section>
     </Grid>

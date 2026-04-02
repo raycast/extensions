@@ -29,14 +29,10 @@ async function fetchVersionedData<T>(fileName: string): Promise<T | undefined> {
   }
 }
 
-export const getAllCharacters = () =>
-  fetchVersionedData<CharactersMap>("charlist.json");
-export const getAllWeapons = () =>
-  fetchVersionedData<WeaponsMap>("weaponlist.json");
-export const getMaterials = () =>
-  fetchVersionedData<MaterialItemMap>("materiallist.json");
-export const getArtifacts = () =>
-  fetchVersionedData<ArtifactsMap>("artifactlist.json");
+export const getAllCharacters = () => fetchVersionedData<CharactersMap>("charlist.json");
+export const getAllWeapons = () => fetchVersionedData<WeaponsMap>("weaponlist.json");
+export const getMaterials = () => fetchVersionedData<MaterialItemMap>("materiallist.json");
+export const getArtifacts = () => fetchVersionedData<ArtifactsMap>("artifactlist.json");
 export const getBanners = async () => {
   try {
     const res = await fetch("https://lunaris.moe/data/banners.json");
