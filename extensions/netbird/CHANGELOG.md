@@ -1,5 +1,10 @@
 # NetBird Changelog
 
+## [Custom Admin URL] - {PR_MERGE_DATE}
+
+- Added option to overwrite Admin Panel URL in preferences.
+- Added more screenshots, changed all to dark mode.
+
 ## [Networks management] - 2026-04-02
 
 - Added `Show Networks` command to list network routes and select/deselect them from Raycast.

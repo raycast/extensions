@@ -66,6 +66,15 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "adminUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Admin Panel URL",
+      "description": "Overwrite the default admin panel URL"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.9",
     "@raycast/utils": "^1.17.0"

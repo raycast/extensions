@@ -1,7 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import fs from "fs";
-import { open } from "@raycast/api";
+import { open, getPreferenceValues } from "@raycast/api";
 
 const execAsync = promisify(exec);
 
@@ -91,9 +90,6 @@ export interface NetbirdStatus {
 }
 /** Default paths for the NetBird binary */
 const NETBIRD_BIN_PATHS = ["/usr/local/bin/netbird", "/usr/bin/netbird", "/opt/homebrew/bin/netbird"];
-
-/** Default paths for netbird config (from version 55+) */
-const NETBIRD_CONFIG_PATHS = ["/var/lib/netbird"];
 
 async function getNetbirdBin(): Promise<string> {
   try {
@@ -315,48 +311,12 @@ export async function netbirdNetworksDeselect(id: string): Promise<void> {
  * @returns full admin url
  */
 export async function getAdminUrl(): Promise<string> {
-  const config_filenames = ["active_profile.json", "default.json"];
+  const prefs = getPreferenceValues<{ adminUrl?: string }>();
+  if (prefs.adminUrl) {
+    return prefs.adminUrl;
+  }
 
   try {
-    for (const folder_path of NETBIRD_CONFIG_PATHS) {
-      for (const filename of config_filenames) {
-        const fullPath = `${folder_path}/${filename}`;
-
-        if (fs.existsSync(fullPath)) {
-          try {
-            const configContent = await fs.promises.readFile(fullPath, "utf-8");
-            const config = JSON.parse(configContent);
-
-            // check AdminURL first
-            if (config.AdminURL) {
-              if (typeof config.AdminURL === "string") {
-                return config.AdminURL;
-              } else if (config.AdminURL.Scheme && config.AdminURL.Host) {
-                return `${config.AdminURL.Scheme}://${config.AdminURL.Host}`;
-              }
-            }
-
-            // ManagementURL as fallback
-            if (config.ManagementURL) {
-              let url: string | undefined;
-
-              if (typeof config.ManagementURL === "string") {
-                url = config.ManagementURL;
-              } else if (config.ManagementURL.Scheme && config.ManagementURL.Host) {
-                url = `${config.ManagementURL.Scheme}://${config.ManagementURL.Host}`;
-              }
-
-              if (url && (url.includes("api.netbird.io") || url.includes("api.wiretrustee.com"))) {
-                return "https://app.netbird.io";
-              }
-            }
-          } catch {
-            // ignore read/parse errors
-          }
-        }
-      }
-    }
-
     const status = await getNetbirdStatus();
     const managementUrl = status.management.url;
 
@@ -366,6 +326,7 @@ export async function getAdminUrl(): Promise<string> {
     }
 
     // For self-hosted, the dashboard is often at the same URL as the management service
+    // if it is not, it can be changed in command settings
     return managementUrl;
   } catch {
     return "https://app.netbird.io";
