@@ -16,7 +16,7 @@
 - Restructured README for better readability and removed inaccurate documentation
 - Removed dead code and unused exports
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-04-01
 
 - Custom bundles to organize applications, websites, and nested bundles
 - Custom icons from 100+ Raycast icons

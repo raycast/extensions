@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs";
+import { existsSync, mkdirSync } from "fs";
+import { readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import { Folder } from "./types";
@@ -25,7 +26,7 @@ async function readFromBackend(): Promise<string | undefined> {
   if (useICloud) {
     if (!existsSync(BUNDLES_FILE)) return undefined;
     try {
-      return readFileSync(BUNDLES_FILE, "utf-8");
+      return await readFile(BUNDLES_FILE, "utf-8");
     } catch {
       return undefined;
     }
@@ -41,7 +42,7 @@ async function writeToBackend(json: string): Promise<void> {
     if (!existsSync(BUNDLES_DIR)) {
       mkdirSync(BUNDLES_DIR, { recursive: true });
     }
-    writeFileSync(BUNDLES_FILE, json, "utf-8");
+    await writeFile(BUNDLES_FILE, json, "utf-8");
   } else {
     await LocalStorage.setItem(STORAGE_KEY, json);
   }
