@@ -39,16 +39,15 @@ export default function NeedsRsvpCommand() {
       TENTATIVE: "Maybe",
     };
     const targetId = forSeries && item.event.series ? item.event.series : item.event.id;
-    let removed: NeedsRsvpItem[];
-    setItems((prev) => {
-      removed =
-        forSeries && item.event.series
-          ? prev.filter((i) => i.event.series === item.event.series)
-          : prev.filter((i) => i.event.id === item.event.id);
-      return forSeries && item.event.series
+    const removed: NeedsRsvpItem[] =
+      forSeries && item.event.series
+        ? items.filter((i) => i.event.series === item.event.series)
+        : items.filter((i) => i.event.id === item.event.id);
+    setItems((prev) =>
+      forSeries && item.event.series
         ? prev.filter((i) => i.event.series !== item.event.series)
-        : prev.filter((i) => i.event.id !== item.event.id);
-    });
+        : prev.filter((i) => i.event.id !== item.event.id),
+    );
     try {
       await rsvpToEvent(targetId, status);
       await showToast({
@@ -68,16 +67,15 @@ export default function NeedsRsvpCommand() {
 
   const handleHide = async (item: NeedsRsvpItem, forSeries = false) => {
     const targetId = forSeries && item.event.series ? item.event.series : item.event.id;
-    let removed: NeedsRsvpItem[];
-    setItems((prev) => {
-      removed =
-        forSeries && item.event.series
-          ? prev.filter((i) => i.event.series === item.event.series)
-          : prev.filter((i) => i.event.id === item.event.id);
-      return forSeries && item.event.series
+    const removed: NeedsRsvpItem[] =
+      forSeries && item.event.series
+        ? items.filter((i) => i.event.series === item.event.series)
+        : items.filter((i) => i.event.id === item.event.id);
+    setItems((prev) =>
+      forSeries && item.event.series
         ? prev.filter((i) => i.event.series !== item.event.series)
-        : prev.filter((i) => i.event.id !== item.event.id);
-    });
+        : prev.filter((i) => i.event.id !== item.event.id),
+    );
     try {
       await hideRsvpPrompt(targetId);
     } catch {
