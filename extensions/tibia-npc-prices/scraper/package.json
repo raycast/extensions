@@ -1,0 +1,15 @@
+{
+  "name": "tibia-wiki-scraper",
+  "version": "1.0.0",
+  "description": "Scraper for Tibia Wiki NPC buy prices",
+  "type": "module",
+  "scripts": {
+    "scrape": "node scraper.js",
+    "scrape:category": "node scrape-category.js"
+  },
+  "dependencies": {
+    "cheerio": "1.0.0-rc.10",
+    "gif-frames": "^1.0.1",
+    "node-fetch": "^2.7.0"
+  }
+}
