@@ -1,6 +1,6 @@
 # Mirror Displays Changelog
 
-## [New Features & Bugfixes] - {PR_MERGE_DATE}
+## [New Features & Bugfixes] - 2026-04-02
 
 - Modernized UI to use a full-page Raycast List view instead of a background shortcut.
 - Added ability to choose which display mirrors which (Mac -> External or External -> Mac).
