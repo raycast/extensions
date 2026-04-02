@@ -1,4 +1,4 @@
-# Paper Agent Changelog
+# Paper Agent
 
 ## [Initial Release] - {PR_MERGE_DATE}
 

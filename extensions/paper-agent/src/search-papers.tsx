@@ -82,10 +82,8 @@ export default function Command() {
     const libraryDir = prefPaperDir ? path.join(prefPaperDir, "library") : "";
     const hasPaperDir = prefPaperDir.length > 0;
     const agentRoot = hasConfig ? path.dirname(configPath) : "";
-    const pythonBin =
-      prefs.pythonPath && prefs.pythonPath.trim().length > 0
-        ? prefs.pythonPath
-        : path.join(agentRoot, ".venv", "bin", "python3");
+    const pythonPathTrim = prefs.pythonPath?.trim() ?? "";
+    const pythonBin = pythonPathTrim.length > 0 ? pythonPathTrim : path.join(agentRoot, ".venv", "bin", "python3");
     return {
       configPath,
       hasConfig,
