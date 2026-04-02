@@ -24,6 +24,15 @@
           "type": "textfield",
           "required": true,
           "default": "~/vaults/Notes"
+        },
+        {
+          "name": "useFullPath",
+          "title": "Default Link Format",
+          "description": "Use full path [[Folder/Note]] instead of just [[Note]]",
+          "type": "checkbox",
+          "label": "Use full path by default",
+          "required": false,
+          "default": false
         }
       ]
     }

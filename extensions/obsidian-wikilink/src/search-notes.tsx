@@ -7,7 +7,8 @@ function resolveVaultPath(raw: string): string {
   return raw.startsWith("~/") ? join(homedir(), raw.slice(2)) : raw;
 }
 
-const VAULT = resolveVaultPath(getPreferenceValues<Preferences>().vaultPath);
+const { vaultPath, useFullPath } = getPreferenceValues<Preferences>();
+const VAULT = resolveVaultPath(vaultPath);
 const EXCLUDED = new Set([".trash", ".smart-env", "Templates"]);
 
 function getMarkdownFiles(dir: string, files: string[] = []): string[] {
@@ -54,15 +55,15 @@ export default function Command() {
             <ActionPanel>
               <Action
                 title="Paste Wikilink"
-                onAction={() => Clipboard.paste(`[[${name}]]`)}
+                onAction={() => Clipboard.paste(`[[${useFullPath ? rel : name}]]`)}
               />
               <Action
-                title="Paste Wikilink with Path"
-                onAction={() => Clipboard.paste(`[[${rel}]]`)}
+                title={useFullPath ? "Paste Wikilink (Name Only)" : "Paste Wikilink with Path"}
+                onAction={() => Clipboard.paste(`[[${useFullPath ? name : rel}]]`)}
               />
               <Action
                 title="Copy Wikilink"
-                onAction={() => Clipboard.copy(`[[${name}]]`)}
+                onAction={() => Clipboard.copy(`[[${useFullPath ? rel : name}]]`)}
               />
             </ActionPanel>
           }
