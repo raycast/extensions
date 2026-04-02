@@ -1,6 +1,6 @@
 # Changelog
 
-## [Improve Maintainability] - {PR_MERGE_DATE}
+## [Improve Maintainability] - 2026-04-02
 
 - Add `vitest`-based unit tests and an opt-in live API test for the `skills` extension
 - Extract search and skill content loading logic into reusable helpers for easier testing and maintenance
