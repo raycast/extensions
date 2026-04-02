@@ -1134,6 +1134,7 @@
   "gdsmith/jwt-decoder": "jwt-decoder",
   "heerthees/kaalam": "kaalam",
   "fonimus/kafka": "kafka",
+  "nir/kafka-ui": "kafka-ui",
   "http.james/kagi-fastgpt": "kagi-fastgpt",
   "mickaphd/kagi-news": "kagi-news",
   "fearoffish/kagi-search": "kagi-search",
