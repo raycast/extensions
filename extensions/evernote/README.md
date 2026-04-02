@@ -16,5 +16,3 @@ Evernote stores your notes in a SQLite database. On macOS this is in `Library/Ap
 - Run the extension. It will automatically detect the path to your Evernote database.
 - Search for your notes and open tasks for the keywords in titles.
 - Profit
-
-
