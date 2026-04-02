@@ -26,8 +26,8 @@ A [Raycast](https://raycast.com) extension that instantly parses query parameter
 | Action               | Shortcut | Description                               |
 | -------------------- | -------- | ----------------------------------------- |
 | Copy Decoded Value   | `↵`      | Copy the URL-decoded parameter value      |
-| Copy Raw Value       | `⌘⌥C`    | Copy the original encoded parameter value |
-| Copy key=value       | `⌘⇧C`    | Copy the full `key=value` pair            |
+| Copy Raw Value       | `⌘⇧C`    | Copy the original encoded parameter value |
+| Copy key=value       | `⌘⌥C`    | Copy the full `key=value` pair            |
 | Paste from Clipboard | `⌘V`     | Re-read the URL from clipboard            |
 
 ## Local Development
