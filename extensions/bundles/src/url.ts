@@ -1,6 +1,5 @@
 /**
- * URL utilities for website handling
- * Favicon fetching is handled by @raycast/utils getFavicon
+ * URL utilities: parsing, validation, normalization, and title fetching
  */
 
 /**
@@ -35,8 +34,6 @@ export function isValidUrl(url: string): boolean {
  * Handles: discorddotcom → discord.com, jadotmt → ja.mt, githubdotcodotuk → github.co.uk
  */
 function convertDotText(input: string): string {
-  // Match "dot" surrounded by alphanumeric characters (case-insensitive)
-  // This converts "discorddotcom" → "discord.com" but won't break actual words
   return input.replace(/([a-z0-9])dot([a-z0-9])/gi, "$1.$2");
 }
 

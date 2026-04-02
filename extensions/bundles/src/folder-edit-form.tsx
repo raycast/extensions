@@ -20,9 +20,8 @@ import {
   getFolderIcon,
   createApplicationItem,
   createNestedFolderItem,
-  isValidHexColor,
-  normalizeHexColor,
 } from "./utils";
+import { isValidHexColor, normalizeHexColor } from "./css-colors";
 import { useApplicationsData, useFoldersData, useNestedFolderCreation } from "./hooks";
 import {
   getFolderParentMap,
