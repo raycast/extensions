@@ -2,7 +2,6 @@ import { Action, ActionPanel, List, Toast, closeMainWindow, popToRoot, showToast
 import { spawnSync } from "child_process";
 import { getConfig, handleConfigError } from "./utils/config";
 import { env } from "./utils/appSwitcher";
-import { extractKeyboardShortcuts } from "./utils/shortcuts";
 
 function getWorkspaceNames() {
   const result = spawnSync("aerospace", ["list-workspaces", "--all"], {
@@ -44,19 +43,28 @@ function getWorkspaceShortcuts() {
     return {};
   }
 
-  const shortcuts = extractKeyboardShortcuts(config);
+  // Build the shortcut map directly from raw config bindings instead of using
+  // extractKeyboardShortcuts, which replaces dashes with spaces in descriptions
+  // and would cause "my-project" to never match "my project".
   const workspaceShortcuts: Record<string, string> = {};
 
-  Object.values(shortcuts).forEach((shortcut) => {
-    if (!shortcut.description.startsWith("workspace ")) {
-      return;
+  if (config.mode) {
+    for (const mode of Object.keys(config.mode)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bindings: Record<string, any> | undefined = config.mode[mode]?.binding as any;
+      if (bindings) {
+        for (const key of Object.keys(bindings)) {
+          const command: string = String(bindings[key]);
+          if (command.startsWith("workspace ")) {
+            const workspaceName = command.slice("workspace ".length).trim();
+            if (!workspaceShortcuts[workspaceName]) {
+              workspaceShortcuts[workspaceName] = key;
+            }
+          }
+        }
+      }
     }
-
-    const workspaceName = shortcut.description.slice("workspace ".length).trim();
-    if (!workspaceShortcuts[workspaceName]) {
-      workspaceShortcuts[workspaceName] = shortcut.shortcut;
-    }
-  });
+  }
 
   return workspaceShortcuts;
 }
