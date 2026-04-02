@@ -180,6 +180,7 @@ export async function importTimersFromCSV(csvContent: string): Promise<number> {
   const lines = csvContent.trim().split("\n");
   if (lines.length < 2) return 0;
 
+  const { commaReplacement } = getPreferenceValues<ExtensionPreferences>();
   const header = lines[0];
   const timers = await getTimers();
   let imported = 0;
@@ -226,6 +227,12 @@ export async function importTimersFromCSV(csvContent: string): Promise<number> {
     // Skip if this timer already exists
     if (timers[id]) continue;
 
+    // Reverse comma replacement applied during export
+    if (commaReplacement) {
+      name = name.replaceAll(commaReplacement, ",");
+      tag = tag.replaceAll(commaReplacement, ",");
+    }
+
     timers[id] = {
       id,
       name: name || null,
@@ -239,7 +246,7 @@ export async function importTimersFromCSV(csvContent: string): Promise<number> {
   await LocalStorage.setItem("projecttimer.timers", JSON.stringify(timers));
   if (skipped > 0) {
     await showToast({
-      style: Toast.Style.Animated,
+      style: Toast.Style.Failure,
       title: `${skipped} row(s) skipped`,
       message: "Some rows had invalid data (possibly commas in names/tags)",
     });
