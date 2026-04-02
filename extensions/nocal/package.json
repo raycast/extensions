@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "nocal-raycast-extension",
-  "title": "Nocal",
+  "name": "nocal",
+  "title": "nocal",
   "description": "Search notes and manage your day from Raycast with nocal.",
   "version": "1.0.0",
   "author": "brianmuse",
