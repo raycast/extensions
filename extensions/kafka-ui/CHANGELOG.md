@@ -1,5 +1,9 @@
 # Kafka UI
 
+## [Fix] - 2026-04-02
+
+- Fixed author username in package.json
+
 ## [Initial Version] - 2026-04-02
 
 - Search consumer groups and inspect lag per topic and partition
