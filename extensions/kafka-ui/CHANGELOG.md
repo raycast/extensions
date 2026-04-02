@@ -1,6 +1,6 @@
 # Kafka UI
 
-## [Fix] - 2026-04-02
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed author username in package.json
 
