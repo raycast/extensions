@@ -120,7 +120,7 @@
 /extensions/ars-technica                                            @edwin-dd-ong
 /extensions/arxiv                                                   @koayon @pernielsentikaer @osteele
 /extensions/asana                                                   @thomaslombart @spaceDolph1n @tuzemec @xmok @abcd-ca
-/extensions/ascii-art-wallpaper                                     @theodaguier
+/extensions/ascii-art-wallpaper                                     @theodaguier @alexibuild
 /extensions/asciimath-to-latex-converter                            @Nebow
 /extensions/asoiaf                                                  @xmok
 /extensions/aspect-raytio                                           @ickas
@@ -1681,6 +1681,7 @@
 /extensions/pangu-for-raycast                                       @beviz
 /extensions/papago-translate                                        @Rita-Mordio @jaeyeonling @hongmono
 /extensions/paper                                                   @luctst
+/extensions/paper-agent                                             @galleonli
 /extensions/paperform                                               @parterburn
 /extensions/paperless-ngx                                           @Padamdam @ibrikin @csigritz
 /extensions/papermatch                                              @marlonjames71 @AndrewMonty
