@@ -19,7 +19,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"jsx": "react-jsx",
 		"resolveJsonModule": true,
-		"ignoreDeprecations": "6.0",
 		"baseUrl": ".",
 		"paths": {
 			"@/*": [
