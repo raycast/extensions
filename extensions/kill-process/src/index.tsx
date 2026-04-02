@@ -428,7 +428,7 @@ export default function ProcessList() {
 
   return (
     <List
-      isLoading={state.length === 0}
+      isLoading={visibleProcesses.length === 0}
       searchBarPlaceholder="Filter by name"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
