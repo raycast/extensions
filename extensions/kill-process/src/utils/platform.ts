@@ -8,6 +8,7 @@ import { Process } from "../types";
 export const platform = process.platform;
 export const isMac = platform === "darwin";
 export const isWindows = platform === "win32";
+type ProcessAction = "kill" | "restart";
 
 /**
  * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
@@ -345,30 +346,39 @@ export function getFileIcon(process: Process): Image.ImageLike {
 }
 
 /**
- * Get error help message for failed kill attempts
+ * Get platform-specific error help for kill and restart actions.
  */
-export function getPlatformSpecificErrorHelp(isForceKill: boolean): {
+export function getPlatformSpecificErrorHelp(
+  action: ProcessAction,
+  isForceAction: boolean,
+): {
   title: string;
   message?: string;
   helpUrl?: string;
 } {
-  if (isMac && isForceKill) {
+  const actionLabel = action === "restart" ? "Restart" : "Kill";
+  const baseFailureMessage =
+    action === "restart"
+      ? "The process could not be restarted. It may have already exited or require elevated privileges."
+      : "The process could not be terminated. It may have already exited or require elevated privileges.";
+
+  if (isMac && isForceAction) {
     return {
-      title: "Failed to Force Kill Process",
+      title: `Failed to Force ${actionLabel} Process`,
       message: "Please ensure that touch ID/password prompt is enabled for sudo",
       helpUrl: "https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
     };
   }
 
-  if (isWindows && isForceKill) {
+  if (isWindows && isForceAction) {
     return {
-      title: "Failed to Force Kill Process",
+      title: `Failed to Force ${actionLabel} Process`,
       message: "Administrative privileges may be required. Try running as administrator.",
     };
   }
 
   return {
-    title: "Failed to Kill Process",
-    message: "The process could not be terminated. It may have already exited or require elevated privileges.",
+    title: `Failed to ${actionLabel} Process`,
+    message: baseFailureMessage,
   };
 }

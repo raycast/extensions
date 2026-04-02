@@ -160,9 +160,10 @@ export async function restartProcess(process: Process, force = false): Promise<v
   try {
     await terminateProcessTree(process.id, force);
   } catch (error) {
-    const help = getPlatformSpecificErrorHelp(force);
-    const message = error instanceof Error ? error.message : "Unknown error";
-    throw new Error(`${help.title}: ${message}`);
+    const help = getPlatformSpecificErrorHelp("restart", force);
+    const details = error instanceof Error ? error.message : "Unknown error";
+    const message = help.message ? `${help.message}: ${details}` : details;
+    throw new Error(message);
   }
 
   await waitForProcessExit(process.id);

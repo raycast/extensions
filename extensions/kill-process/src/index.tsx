@@ -29,6 +29,7 @@ import {
 } from "./utils/process";
 
 type SortBy = "cpu" | "memory";
+type VisibleProcess = Process & { canRestartProcess: boolean };
 
 const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
 const SORT_BY_DROPDOWN_ID = "kill-process.sort-by";
@@ -53,7 +54,7 @@ const isSortBy = (value: unknown): value is SortBy => {
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
-  const [state, setState] = useState<Process[]>([]);
+  const [visibleProcesses, setVisibleProcesses] = useState<VisibleProcess[]>([]);
   const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
@@ -135,10 +136,11 @@ export default function ProcessList() {
 
   useInterval(fetchProcesses, refreshDuration);
   useEffect(() => {
-    let processes = fetchResult;
+    let processes = [...fetchResult];
     if (isAppGroupingEnabled) {
       processes = aggregate(processes);
     }
+
     processes.sort((a, b) => {
       if (sortBy === "memory") {
         return a.mem > b.mem ? -1 : 1;
@@ -146,7 +148,13 @@ export default function ProcessList() {
         return a.cpu > b.cpu ? -1 : 1;
       }
     });
-    setState(processes);
+
+    setVisibleProcesses(
+      processes.map((process) => ({
+        ...process,
+        canRestartProcess: isProcessRestartable(process),
+      })),
+    );
   }, [fetchResult, sortBy, isAppGroupingEnabled]);
 
   const fileIcon = (process: Process) => {
@@ -154,7 +162,7 @@ export default function ProcessList() {
   };
 
   const handleKillError = (force: boolean) => {
-    const errorHelp = getPlatformSpecificErrorHelp(force);
+    const errorHelp = getPlatformSpecificErrorHelp("kill", force);
     if (force && errorHelp.helpUrl) {
       confirmAlert({
         title: errorHelp.title,
@@ -416,7 +424,7 @@ export default function ProcessList() {
     await showToast({ title: `${nextValue ? "Enabled" : "Disabled"} App Grouping` });
   };
 
-  const processCount = state.length;
+  const processCount = visibleProcesses.length;
 
   return (
     <List
@@ -444,7 +452,7 @@ export default function ProcessList() {
       }
     >
       <List.Section title="Processes" subtitle={`${processCount} running`}>
-        {state
+        {visibleProcesses
           .filter((process) => {
             if (query === "") {
               return true;
@@ -475,7 +483,6 @@ export default function ProcessList() {
           })
           .map((process, index) => {
             const icon = fileIcon(process);
-            const canRestartProcess = isProcessRestartable(process);
             return (
               <List.Item
                 key={index}
@@ -501,7 +508,7 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
-                    {canRestartProcess ? (
+                    {process.canRestartProcess ? (
                       <Action
                         title="Restart"
                         icon={Icon.RotateAntiClockwise}
@@ -509,7 +516,7 @@ export default function ProcessList() {
                         onAction={() => restartProcess(process)}
                       />
                     ) : null}
-                    {canRestartProcess ? (
+                    {process.canRestartProcess ? (
                       <Action
                         title="Force Restart"
                         icon={Icon.RotateAntiClockwise}
