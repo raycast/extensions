@@ -339,7 +339,12 @@
       "description": "Quickly start playing a song from Apple Music based on your query.",
       "mode": "no-view",
       "disabledByDefault": true,
-      "keywords": ["search", "play", "song", "catalog"],
+      "keywords": [
+        "search",
+        "play",
+        "song",
+        "catalog"
+      ],
       "arguments": [
         {
           "name": "query",
