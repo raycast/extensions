@@ -19,7 +19,7 @@ interface Preferences {
 
 const isMac = process.platform === "darwin";
 
-const MAC_ONLY_TERMINALS = new Set(["terminal", "iterm", "ghostty", "kitty"]);
+const MAC_ONLY_TERMINALS = new Set(["terminal", "iterm", "ghostty"]);
 const WIN_ONLY_TERMINALS = new Set(["wt", "powershell", "cmd"]);
 
 export function resolveTerminal(pref: string): string {
@@ -41,8 +41,6 @@ const IDE_APPS: Record<string, { name: string; cmd: string }> = {
   vscode: { name: "Visual Studio Code", cmd: "code" },
   cursor: { name: "Cursor", cmd: "cursor" },
   zed: { name: "Zed", cmd: "zed" },
-  webstorm: { name: "WebStorm", cmd: "webstorm" },
-  intellij: { name: "IntelliJ IDEA", cmd: "idea" },
 };
 
 function toastOnError(label: string) {
@@ -102,23 +100,6 @@ function openInTerminal(session: SessionInfo, resumeCmd: string) {
           toastOnError("Ghostty"),
         );
         return;
-      case "kitty":
-        execFile(
-          "kitty",
-          ["--single-instance", "--directory", dir, "/bin/bash", "-lc", bashCmd],
-          toastOnError("Kitty"),
-        );
-        return;
-      case "alacritty":
-        execFile(
-          "alacritty",
-          ["--working-directory", dir, "-e", "/bin/bash", "-lc", bashCmd],
-          toastOnError("Alacritty"),
-        );
-        return;
-      case "wezterm":
-        execFile("wezterm", ["start", "--cwd", dir, "--", "/bin/bash", "-lc", bashCmd], toastOnError("WezTerm"));
-        return;
     }
   } else {
     // Windows: for WSL sessions resumeCmd already contains the full `wsl -d ...` command,
@@ -143,30 +124,6 @@ function openInTerminal(session: SessionInfo, resumeCmd: string) {
         exec(
           winDir ? `start cmd /k "cd /d ${winDir} && ${resumeCmd}"` : `start cmd /k "${resumeCmd}"`,
           toastOnError("Command Prompt"),
-        );
-        return;
-      case "warp":
-        exec(
-          winDir
-            ? `warp-terminal.exe --working-directory ${escapeShellArg(winDir)} -e cmd /k "${resumeCmd}"`
-            : `warp-terminal.exe -e cmd /k "${resumeCmd}"`,
-          toastOnError("Warp"),
-        );
-        return;
-      case "alacritty":
-        exec(
-          winDir
-            ? `alacritty --working-directory ${escapeShellArg(winDir)} -e cmd /k "${resumeCmd}"`
-            : `alacritty -e cmd /k "${resumeCmd}"`,
-          toastOnError("Alacritty"),
-        );
-        return;
-      case "wezterm":
-        exec(
-          winDir
-            ? `wezterm start --cwd ${escapeShellArg(winDir)} -- cmd /k "${resumeCmd}"`
-            : `wezterm start -- cmd /k "${resumeCmd}"`,
-          toastOnError("WezTerm"),
         );
         return;
     }

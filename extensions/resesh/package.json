@@ -54,20 +54,8 @@
           "value": "ghostty"
         },
         {
-          "title": "Kitty (macOS)",
-          "value": "kitty"
-        },
-        {
           "title": "Warp",
           "value": "warp"
-        },
-        {
-          "title": "Alacritty",
-          "value": "alacritty"
-        },
-        {
-          "title": "WezTerm",
-          "value": "wezterm"
         },
         {
           "title": "Windows Terminal (Windows)",
@@ -111,14 +99,6 @@
         {
           "title": "Zed",
           "value": "zed"
-        },
-        {
-          "title": "WebStorm",
-          "value": "webstorm"
-        },
-        {
-          "title": "IntelliJ IDEA",
-          "value": "intellij"
         }
       ]
     }

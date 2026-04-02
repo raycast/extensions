@@ -69,9 +69,11 @@ describe("resolveTerminal", () => {
 
   it("returns valid terminal as-is", async () => {
     const { resolveTerminal } = await import("./actions");
-    // alacritty and wezterm are cross-platform
-    expect(resolveTerminal("alacritty")).toBe("alacritty");
-    expect(resolveTerminal("wezterm")).toBe("wezterm");
+    if (isMac) {
+      expect(resolveTerminal("ghostty")).toBe("ghostty");
+    } else {
+      expect(resolveTerminal("powershell")).toBe("powershell");
+    }
   });
 
   it("falls back for invalid platform terminal", async () => {

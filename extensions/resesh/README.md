@@ -29,6 +29,6 @@ No API keys or credentials required. The extension reads session files stored lo
 | Include WSL Sessions | Also search for sessions inside WSL distributions (Windows only, minor performance impact) | Off |
 | IDE | IDE used to open project directories | VS Code |
 
-**Supported terminals:** Terminal.app, iTerm2, Ghostty, Kitty, Warp, Alacritty, WezTerm, Windows Terminal, PowerShell, Command Prompt
+**Supported terminals:** Terminal.app, iTerm2, Ghostty, Warp, Windows Terminal, PowerShell, Command Prompt
 
-**Supported IDEs:** VS Code, Cursor, Zed, WebStorm, IntelliJ IDEA
+**Supported IDEs:** VS Code, Cursor, Zed
