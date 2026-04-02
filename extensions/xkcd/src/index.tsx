@@ -187,8 +187,7 @@ ${currentComic.alt}
             title={`Comic #${num - idx}`}
             keywords={[num - idx + ""]}
             detail={detail}
-            accessoryIcon={readStatus[num - idx] ? undefined : { source: Icon.Dot, tintColor: Color.Blue }}
-            accessoryTitle={readStatus[num - idx] ? "" : "unread"}
+            accessories={readStatus[num - idx] ? undefined : [{ text: "unread" }]}
             actions={
               <ActionPanel>
                 <OpenComicInBrowser />
