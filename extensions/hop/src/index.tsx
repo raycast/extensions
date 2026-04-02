@@ -250,8 +250,21 @@ function getAppleScript(terminal: string | undefined, command: string): string {
         end tell
       `;
 
+    case "Ghostty":
+      return `
+        tell application "Ghostty"
+          activate
+        end tell
+        delay 0.5
+        tell application "System Events"
+          tell process "Ghostty"
+            keystroke "${escapedCommand}"
+            key code 36
+          end tell
+        end tell
+      `;
+
     case "Terminal":
-    default:
       return `
         tell application "Terminal"
           activate
@@ -260,6 +273,21 @@ function getAppleScript(terminal: string | undefined, command: string): string {
           else
             do script "${escapedCommand}" in front window
           end if
+        end tell
+      `;
+
+    default:
+      // Generic handler for custom terminals
+      return `
+        tell application "${terminal}"
+          activate
+        end tell
+        delay 0.5
+        tell application "System Events"
+          tell process "${terminal}"
+            keystroke "${escapedCommand}"
+            key code 36
+          end tell
         end tell
       `;
   }

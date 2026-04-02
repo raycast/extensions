@@ -177,6 +177,7 @@ export function getTerminalApp(): string | undefined {
     warp: "Warp",
     alacritty: "Alacritty",
     kitty: "kitty",
+    ghostty: "Ghostty",
   };
 
   if (preferences.terminal === "other" && preferences.customTerminal) {
