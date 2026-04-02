@@ -1135,6 +1135,7 @@
 /extensions/jwt-decoder                                             @gdsmith @zhhanging @JoaoGFdev @YourMCGeek @pernielsentikaer
 /extensions/kaalam                                                  @heertheeswaran @ridemountainpig
 /extensions/kafka                                                   @fonimus
+/extensions/kafka-ui                                                @NirRosh
 /extensions/kagi-fastgpt                                            @httpjamesm
 /extensions/kagi-news                                               @mickaphd @pernielsentikaer
 /extensions/kagi-search                                             @fearoffish @jg33 @ridemountainpig @xmok
