@@ -58,7 +58,7 @@ function normalizeISBN(isbn: string): string {
  */
 function isValidISBN(isbn: string): boolean {
   const normalized = normalizeISBN(isbn);
-  return /^\d{10}$/.test(normalized) || /^\d{13}$/.test(normalized);
+  return /^\d{9}[\dX]$/i.test(normalized) || /^\d{13}$/.test(normalized);
 }
 
 /**
@@ -729,13 +729,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
         const tocAvailable = await checkContentAvailable(tocUrl);
 
         if (!tocAvailable) {
-          await toast.hide();
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Table of Contents Not Available",
-            message: "No digitized table of contents available for this book",
-          });
-          await open(baseUrl);
+          const textAvailable = await checkContentAvailable(textUrl);
+          if (textAvailable) {
+            await open(textUrl);
+            await toast.hide();
+            await showHUD("Content Text opened");
+          } else {
+            await toast.hide();
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "No Digitized Content Available",
+              message: "No digitized content available for this book",
+            });
+            await open(baseUrl);
+          }
           setIsLoading(false);
           return;
         }
