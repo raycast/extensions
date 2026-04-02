@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { type SearchResponse, API_BASE_URL } from "../shared";
-import { fetchSkillsSearch } from "../api";
+import { type SearchResponse } from "../shared";
+import { fetchSkillsSearch, buildSkillsSearchUrl } from "../api";
 
 export function useDebouncedSearch(searchText: string, delay = 300) {
   const [data, setData] = useState<SearchResponse | undefined>();
@@ -64,7 +64,7 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
     await executeSearch(searchText);
   }, [searchText, executeSearch]);
 
-  const searchUrl = searchText.length >= 2 ? `${API_BASE_URL}/search?q=${encodeURIComponent(searchText)}&limit=50` : "";
+  const searchUrl = searchText.length >= 2 ? buildSkillsSearchUrl(searchText) : "";
 
   return { data, isLoading, error, revalidate, searchUrl };
 }
