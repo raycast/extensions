@@ -153,7 +153,13 @@ export const fsAsync = {
         }
         // Small cross-volume file: retry with copy+delete (no progress needed)
         await fs.copy(sourcePath, destPath, { overwrite: options.overwrite });
-        await fs.remove(sourcePath);
+        try {
+          await fs.remove(sourcePath);
+        } catch (removeErr) {
+          // Roll back destination if we couldn't remove the source
+          await fs.remove(destPath).catch(() => {});
+          throw removeErr; // let outer catch handle it and report failure
+        }
         return { success: true };
       }
     } catch (error) {
