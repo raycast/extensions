@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-02
 
 - Catch Invalid session token error
 
