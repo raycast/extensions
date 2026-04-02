@@ -93,6 +93,22 @@ This is an npx resolution issue in the local CLI runtime.
           title="No Installed Skills"
           description="Install skills using the Search Skills command"
           icon={Icon.Box}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+            </ActionPanel>
+          }
+        />
+      ) : filteredSkills.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Skills for This Agent"
+          description={`No installed skills match the "${selectedAgent}" filter. Try selecting a different agent.`}
+          icon={Icon.Filter}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+            </ActionPanel>
+          }
         />
       ) : (
         <>

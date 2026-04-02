@@ -65,9 +65,18 @@ export default function Command() {
         <List.EmptyView
           title={searchText.length >= 2 ? "No Skills Found" : "Search Skills"}
           description={
-            searchText.length >= 2 ? `No results for "${searchText}"` : "Type at least 2 characters to search"
+            searchText.length >= 2
+              ? `No results for "${searchText}". Try different keywords.`
+              : "Type at least 2 characters to search"
           }
-          icon={Icon.MagnifyingGlass}
+          icon={searchText.length >= 2 ? Icon.XMarkCircle : Icon.MagnifyingGlass}
+          actions={
+            searchText.length >= 2 ? (
+              <ActionPanel>
+                <Action title="Clear Cache & Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+              </ActionPanel>
+            ) : undefined
+          }
         />
       ) : (
         <List.Section title={`Results for "${searchText}"`} subtitle={`${skills.length} skills`}>
