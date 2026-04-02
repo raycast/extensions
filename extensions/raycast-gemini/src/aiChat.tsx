@@ -51,8 +51,11 @@ export default function Chat({ launchContext }: LaunchProps<{ launchContext: Cha
     });
   };
 
-  const { apiKey, defaultModel, model, prompt, titleModel } = getPreferenceValues<Preferences.AiChat>();
+  const { apiKey, defaultModel, model, prompt } = getPreferenceValues<Preferences.AiChat>();
   const aiChatModel = model === "default" ? defaultModel : model;
+  // Temporary hardcoded title model. Google marks gemini-2.5-flash-lite as
+  // "July 22, 2026" for shutdown, and recommend to switch to "gemini-3.1-flash-lite-preview"
+  const titleModel = "gemini-2.5-flash-lite";
   const genAI = new GoogleGenAI({ apiKey });
   const createNewChatName = (chats: ChatEntry[], prefix = "New Chat ") => {
     const existingChatNames = chats.map((x) => x.name);
