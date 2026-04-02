@@ -4,13 +4,8 @@
 
 ### Added
 
-- Copy All Params action (`⌘⇧A`) to copy all query parameters at once
-- Chinese README (`README.CN.md`) with a link from the main README
-
-### Fixed
-
-- Fixed double-decoding bug: `URLSearchParams.forEach()` already percent-decodes values, so the previous `decodeURIComponent()` call caused incorrect results. Raw (percent-encoded) values are now extracted directly from the original query string, and duplicate keys are handled correctly via occurrence tracking.
-
-### Changed
-
-- Extracted URL parsing logic and JSON formatting into `src/utils.ts` for better separation of concerns
+- Parse and inspect URL query parameters directly from clipboard
+- Copy All Params action (⌘⇧A) to copy all query parameters at once
+- Chinese README (README.CN.md) with a link from the main README
+- Raw (percent-encoded) values extracted directly from the original query string, with correct handling of duplicate keys
+- URL parsing logic and JSON formatting extracted into src/utils.ts
