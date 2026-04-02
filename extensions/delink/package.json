@@ -19,7 +19,6 @@
       "name": "url-parse",
       "title": "URL Parse",
       "description": "Parse and inspect URL query parameters from the clipboard",
-      "icon": "icon-slash.svg",
       "mode": "view"
     }
   ],
