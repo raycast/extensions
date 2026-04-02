@@ -60,10 +60,17 @@ export async function getVersions(instanceId: string): Promise<Array<Accessory>>
     const mc = mmcPack.components.find((c) => c.uid === "net.minecraft");
     const forge = mmcPack.components.find((c) => c.uid === "net.minecraftforge");
     const fabric = mmcPack.components.find((c) => c.uid === "net.fabricmc.fabric-loader");
+    const neoforge = mmcPack.components.find((c) => c.uid === "net.neoforged");
+    const quilt = mmcPack.components.find((c) => c.uid === "org.quiltmc.quilt-loader");
+    const liteloader = mmcPack.components.find((c) => c.uid === "com.mumfrey.liteloader");
 
-    if (mc) versions.push({ version: mc.cachedVersion, icon: path.join(environment.assetsPath, "minecraft.png") });
-    if (forge) versions.push({ version: forge.cachedVersion, icon: path.join(environment.assetsPath, "forge.png") });
-    if (fabric) versions.push({ version: fabric.cachedVersion, icon: path.join(environment.assetsPath, "fabric.png") });
+    if (mc) versions.push({ version: mc.version, icon: path.join(environment.assetsPath, "minecraft.png") });
+    if (forge) versions.push({ version: forge.version, icon: path.join(environment.assetsPath, "forge.png") });
+    if (fabric) versions.push({ version: fabric.version, icon: path.join(environment.assetsPath, "fabric.png") });
+    if (neoforge) versions.push({ version: neoforge.version, icon: path.join(environment.assetsPath, "neoforge.png") });
+    if (quilt) versions.push({ version: quilt.version, icon: path.join(environment.assetsPath, "quilt.png") });
+    if (liteloader)
+      versions.push({ version: liteloader.version, icon: path.join(environment.assetsPath, "liteloader.png") });
 
     return versions;
   } catch {

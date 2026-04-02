@@ -30,7 +30,8 @@ export type Server = {
 export type MMCPack = {
   components: Array<{
     cachedName: string;
-    cachedVersion: string;
+    cachedVersion?: string;
+    version: string;
     uid: string;
   }>;
 };
