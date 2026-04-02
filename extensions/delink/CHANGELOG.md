@@ -1,6 +1,6 @@
 # Delink Changelog
 
-## [1.0.0] - 2026-04-02
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
