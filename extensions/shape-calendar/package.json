@@ -1,0 +1,373 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shape-calendar",
+  "title": "Shape Calendar",
+  "description": "Plan your active life with Shape Calendar — search, create, and manage your training activities",
+  "icon": "logo.png",
+  "license": "MIT",
+  "author": "samuelkraft",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "tags": ["shape", "calendar", "training", "workouts", "activities", "fitness", "endurance"],
+  "commands": [
+    {
+      "name": "search-workouts",
+      "title": "Search Activities",
+      "description": "Search and browse your planned and completed activities",
+      "mode": "view",
+      "keywords": ["shape", "activities", "workouts", "training"]
+    },
+    {
+      "name": "today",
+      "title": "Today's Workout",
+      "description": "Shows today's planned or completed workout",
+      "mode": "no-view",
+      "interval": "1h",
+      "keywords": ["shape", "today", "workout"]
+    },
+    {
+      "name": "this-week",
+      "title": "This Week",
+      "description": "See your training plan for the current week",
+      "mode": "view",
+      "keywords": ["shape", "week", "plan", "training"]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-activities",
+      "title": "Get Activities",
+      "description": "Get activities from Shape Calendar for the current user, optionally filtered by date range, sport type, or completion status"
+    },
+    {
+      "name": "get-latest-activity",
+      "title": "Get Latest Activity",
+      "description": "Get the most recent completed activity from Shape Calendar"
+    },
+    {
+      "name": "get-upcoming-activities",
+      "title": "Get Upcoming Activities",
+      "description": "Get planned (not yet completed) activities for the next two weeks from Shape Calendar"
+    },
+    {
+      "name": "create-activity",
+      "title": "Create Activity",
+      "description": "Create a new training activity in Shape Calendar. Requires date, title, and sport type. Distance is in meters, duration in seconds."
+    },
+    {
+      "name": "delete-activity",
+      "title": "Delete Activity",
+      "description": "Delete an activity from Shape Calendar by its ID"
+    },
+    {
+      "name": "batch-create-activities",
+      "title": "Batch Create Activities",
+      "description": "Create multiple training activities at once in Shape Calendar (up to 100). Each requires date, title, and sport type. Distance is in meters, duration in seconds."
+    },
+    {
+      "name": "batch-delete-activities",
+      "title": "Batch Delete Activities",
+      "description": "Delete multiple activities at once from Shape Calendar by their IDs (up to 100)"
+    },
+    {
+      "name": "batch-update-activities",
+      "title": "Batch Update Activities",
+      "description": "Update multiple activities at once in Shape Calendar (up to 100). Each must include an id plus any fields to change."
+    }
+  ],
+  "ai": {
+    "instructions": "Help with Shape Calendar training tasks. Use get-activities for questions about past workouts or training over a specific period. Use get-latest-activity when asked about the most recent workout. Use get-upcoming-activities for questions about what's planned or coming up. Use create-activity to schedule a single workout. Use batch-create-activities when creating multiple workouts at once (e.g. a training plan or week of workouts). Use batch-update-activities to modify multiple activities at once (e.g. mark all as completed, reschedule a week). Use delete-activity to remove a single activity — always confirm with the user first and use get-activities to find the ID. Use batch-delete-activities to remove multiple activities at once. Distance is always in meters, duration in seconds. Sport types are: run, bike, swim, hike, yoga, nordicski, strength, other. For structured interval workouts (e.g. 5x400m repeats), set target to 'steps' and include a steps array with warmup, interval, recovery, repeat, and cooldown steps. Only use steps for workouts with specific interval structure — not for simple runs or strength training. Keep titles short without distance/duration.",
+    "evals": [
+      {
+        "input": "@shape-calendar what did I do this week?",
+        "mocks": {
+          "get-activities": [
+            {
+              "id": "abc-1",
+              "date": "2026-03-25",
+              "title": "Easy morning run",
+              "sportType": "run",
+              "distance": 8000,
+              "duration": 2700,
+              "completed": true
+            },
+            {
+              "id": "abc-2",
+              "date": "2026-03-27",
+              "title": "Tempo intervals",
+              "sportType": "run",
+              "distance": 10000,
+              "duration": 3000,
+              "completed": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar how was my last workout?",
+        "mocks": {
+          "get-latest-activity": {
+            "id": "abc-3",
+            "date": "2026-03-28",
+            "title": "Long run",
+            "sportType": "run",
+            "distance": 21000,
+            "duration": 6300,
+            "heartRate": 152,
+            "completed": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-latest-activity"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar what do I have planned for next week?",
+        "mocks": {
+          "get-upcoming-activities": [
+            {
+              "id": "abc-4",
+              "date": "2026-03-30",
+              "title": "Recovery run",
+              "sportType": "run",
+              "distance": 5000,
+              "duration": 1800,
+              "completed": false
+            },
+            {
+              "id": "abc-5",
+              "date": "2026-04-01",
+              "title": "Bike ride",
+              "sportType": "bike",
+              "distance": 40000,
+              "duration": 5400,
+              "completed": false
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-upcoming-activities"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar schedule a 10k run for tomorrow",
+        "mocks": {
+          "create-activity": {
+            "id": "abc-6",
+            "date": "2026-03-30",
+            "title": "10K Run",
+            "sportType": "run",
+            "distance": 10000,
+            "completed": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-activity"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar how much have I biked this month?",
+        "mocks": {
+          "get-activities": [
+            {
+              "id": "abc-7",
+              "date": "2026-03-05",
+              "title": "Morning ride",
+              "sportType": "bike",
+              "distance": 30000,
+              "duration": 3600,
+              "completed": true
+            },
+            {
+              "id": "abc-8",
+              "date": "2026-03-15",
+              "title": "Long ride",
+              "sportType": "bike",
+              "distance": 60000,
+              "duration": 7200,
+              "completed": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar plan a yoga session for Friday",
+        "mocks": {
+          "create-activity": {
+            "id": "abc-9",
+            "date": "2026-04-03",
+            "title": "Yoga Session",
+            "sportType": "yoga",
+            "completed": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "create-activity"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar delete my morning run from yesterday",
+        "mocks": {
+          "get-activities": [
+            {
+              "id": "abc-10",
+              "date": "2026-03-28",
+              "title": "Morning run",
+              "sportType": "run",
+              "distance": 5000,
+              "completed": true
+            }
+          ],
+          "delete-activity": {
+            "deleted": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          },
+          {
+            "callsTool": "delete-activity"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar create a training plan for next week with a run on Monday, bike on Wednesday, and swim on Friday",
+        "mocks": {
+          "batch-create-activities": [
+            {
+              "id": "abc-11",
+              "date": "2026-03-30",
+              "title": "Monday Run",
+              "sportType": "run",
+              "completed": false
+            },
+            {
+              "id": "abc-12",
+              "date": "2026-04-01",
+              "title": "Wednesday Bike",
+              "sportType": "bike",
+              "completed": false
+            },
+            {
+              "id": "abc-13",
+              "date": "2026-04-03",
+              "title": "Friday Swim",
+              "sportType": "swim",
+              "completed": false
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "batch-create-activities"
+          }
+        ]
+      },
+      {
+        "input": "@shape-calendar clear all my planned activities for this week",
+        "mocks": {
+          "get-activities": [
+            {
+              "id": "abc-14",
+              "date": "2026-03-30",
+              "title": "Easy run",
+              "sportType": "run",
+              "completed": false
+            },
+            {
+              "id": "abc-15",
+              "date": "2026-04-01",
+              "title": "Bike ride",
+              "sportType": "bike",
+              "completed": false
+            }
+          ],
+          "batch-delete-activities": {
+            "deleted": 2
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-activities"
+          },
+          {
+            "callsTool": "batch-delete-activities"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Your Shape Calendar API token (starts with shape_)",
+      "type": "password",
+      "required": true,
+      "placeholder": "shape_..."
+    },
+    {
+      "name": "distanceUnit",
+      "title": "Distance Unit",
+      "description": "Choose unit for displaying distance",
+      "type": "dropdown",
+      "default": "km",
+      "required": true,
+      "data": [
+        { "value": "km", "title": "Kilometers" },
+        { "value": "mi", "title": "Miles" }
+      ]
+    },
+    {
+      "name": "weekStartDay",
+      "title": "Week Starts On",
+      "description": "First day of the week",
+      "type": "dropdown",
+      "default": "monday",
+      "required": true,
+      "data": [
+        { "value": "monday", "title": "Monday" },
+        { "value": "sunday", "title": "Sunday" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

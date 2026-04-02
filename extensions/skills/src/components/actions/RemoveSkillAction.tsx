@@ -114,7 +114,7 @@ export function RemoveSkillAction({ skill, mutate }: RemoveSkillActionProps) {
   if (skill.agents.length > 1) {
     return (
       <Action.Push
-        title="Remove Skill…"
+        title="Remove Skill"
         icon={{ source: Icon.Trash, tintColor: Color.Red }}
         shortcut={{ modifiers: ["ctrl"], key: "x" }}
         target={<AgentPickerForm skill={skill} mutate={mutate} />}

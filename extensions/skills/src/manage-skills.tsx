@@ -91,7 +91,7 @@ This is an npx resolution issue in the local CLI runtime.
       {skills.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Installed Skills"
-          description="Install skills using the search or trending commands"
+          description="Install skills using the Search Skills command"
           icon={Icon.Box}
         />
       ) : (

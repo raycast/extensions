@@ -1,4 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { useCallback } from "react";
+
 import { completeTask, reopenTask } from "../api/mutations";
 import type { ProjectRecord, TaskRecord } from "../api/types";
 import { formatDate, getTaskState } from "../helpers/task-helpers";
@@ -29,6 +31,48 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
     }
   }
 
+  const handleComplete = useCallback(async () => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Completing task...",
+      });
+      await completeTask(task.id);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Task completed",
+      });
+      revalidate();
+    } catch (error) {
+      await showToast({
+        message: error instanceof Error ? error.message : "Unknown error",
+        style: Toast.Style.Failure,
+        title: "Failed to complete task",
+      });
+    }
+  }, [task.id, revalidate]);
+
+  const handleReopen = useCallback(async () => {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Reopening task...",
+      });
+      await reopenTask(task.id);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Task reopened",
+      });
+      revalidate();
+    } catch (error) {
+      await showToast({
+        message: error instanceof Error ? error.message : "Unknown error",
+        style: Toast.Style.Failure,
+        title: "Failed to reopen task",
+      });
+    }
+  }, [task.id, revalidate]);
+
   return (
     <Detail
       actions={
@@ -36,54 +80,16 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
           {state === "open" && (
             <Action
               icon={Icon.CheckCircle}
-              onAction={async () => {
-                try {
-                  await showToast({
-                    style: Toast.Style.Animated,
-                    title: "Completing task...",
-                  });
-                  await completeTask(task.id);
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Task completed",
-                  });
-                  revalidate();
-                } catch (error) {
-                  await showToast({
-                    message: error instanceof Error ? error.message : "Unknown error",
-                    style: Toast.Style.Failure,
-                    title: "Failed to complete task",
-                  });
-                }
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={handleComplete}
+              shortcut={{ key: "d", modifiers: ["cmd"] }}
               title="Mark as Completed"
             />
           )}
           {state === "done" && (
             <Action
               icon={Icon.ArrowCounterClockwise}
-              onAction={async () => {
-                try {
-                  await showToast({
-                    style: Toast.Style.Animated,
-                    title: "Reopening task...",
-                  });
-                  await reopenTask(task.id);
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Task reopened",
-                  });
-                  revalidate();
-                } catch (error) {
-                  await showToast({
-                    message: error instanceof Error ? error.message : "Unknown error",
-                    style: Toast.Style.Failure,
-                    title: "Failed to reopen task",
-                  });
-                }
-              }}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={handleReopen}
+              shortcut={{ key: "d", modifiers: ["cmd"] }}
               title="Reopen Task"
             />
           )}

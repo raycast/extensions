@@ -201,6 +201,25 @@ export function cosineSimilarity(v1: Float32Array | number[], v2: Float32Array |
   return norm2 > 0 ? dot / Math.sqrt(norm2) : 0;
 }
 
+/** Name/keyword boosts apply even when an emoji has no embedding (missing from vectors.json). */
+export function scoreEmojiSearchMatch(
+  meta: { a: string; k: string[] },
+  unicode: string,
+  queryLower: string,
+  queryVec: Float32Array,
+  vectors: Record<string, number[]>,
+): number {
+  const vec = vectors[unicode];
+  let score = vec ? cosineSimilarity(queryVec, vec) : 0;
+
+  if (meta.a.toLowerCase() === queryLower) score += 0.5;
+  else if (meta.a.toLowerCase().includes(queryLower)) score += 0.2;
+  else if (meta.k.some((k) => k === queryLower)) score += 0.15;
+  else if (meta.k.some((k) => k.includes(queryLower))) score += 0.05;
+
+  return score;
+}
+
 export function formatEmojiName(name: string): string {
   return name
     .split(/[-_]/)

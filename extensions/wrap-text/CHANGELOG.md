@@ -1,5 +1,8 @@
 # Wrap Text Changelog
 
+## [Fix] - 2026-03-30
+
+- Fix clipboard race condition: add delay before restoring previous clipboard content
 ## [Initial Version] - 2026-03-23
 
 - Added 6 individual wrap commands: Brackets, Single Quotes, Double Quotes, Curly Brackets, Parentheses, and Wrap with Custom Characters

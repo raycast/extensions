@@ -4,7 +4,7 @@
 
 - Added a preferences to enable search by file permissions
 
-## [Fixes] - 2025-02-29
+## [Fixes] - 2025-01-30
 
 - Fixed shell command errors caused by filenames containing single quotes.
 

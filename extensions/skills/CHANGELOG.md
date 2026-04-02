@@ -1,5 +1,19 @@
 # Changelog
 
+## [Remove Trending Skills Command] - 2026-03-31
+
+- Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills
+
+## [Agent-Specific Skill Installation] - 2026-03-31
+
+- Support installing skills to specific agents instead of all agents at once
+- Show all 43 supported agents with already-installed agents marked as read-only
+
+## [Fix `fnm` macOS Path Resolution] - 2026-03-28
+
+- Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
+- Match the official `fnm` directory resolution preference order when resolving `fnm` paths.
+
 ## [Agent-Specific Skill Removal] - 2026-03-27
 
 - Support removing skills from specific agents instead of all agents at once

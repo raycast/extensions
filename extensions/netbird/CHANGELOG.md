@@ -1,5 +1,9 @@
 # NetBird Changelog
 
+## [Status on empty dns] - 2026-03-30
+
+- Fixed status command error when user does not have netbird DNS enabled
+
 ## [UX Improvements] - 2026-03-27
 
 - Status screen now shows empty screen during loading instead of empty data

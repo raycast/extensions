@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { useForm, withAccessToken } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { withAccessToken } from "@raycast/utils";
+import { useCallback, useState } from "react";
+
 import { createChecklistItem, createTask } from "./api/mutations";
 import type { TaskView } from "./api/types";
 import { dateOnlyEpochFromLocalDate } from "./helpers/date-codecs";
@@ -18,92 +19,78 @@ interface FormValues {
   projectId: string;
   teamId: string;
   checklistItems: string;
-  workspaceId: string;
+  workspaceId?: string;
 }
 
-async function submitChecklistItems(workspaceId: string, taskId: string, raw: string | undefined) {
+const validateFormValues = (values: FormValues, targetWorkspaceId: string | null | undefined): string | null => {
+  if (!values.title.trim()) {
+    return "Title is required";
+  }
+  if (!targetWorkspaceId) {
+    return "No workspace selected";
+  }
+  return null;
+};
+
+const submitChecklistItems = async (workspaceId: string, taskId: string, raw: string | undefined) => {
   const lines = (raw || "")
     .split("\n")
     .map((line) => line.trim())
     .filter((line) => line.length > 0);
 
-  for (let i = 0; i < lines.length; i++) {
+  for (let i = 0; i < lines.length; i += 1) {
     await createChecklistItem(workspaceId, taskId, lines[i], i);
   }
-}
+};
 
-function CreateTask() {
+const CreateTask = () => {
   const { workspaces, workspaceId: selectedWorkspaceId, isLoading: isLoadingWorkspace } = useWorkspaces();
   const isAll = selectedWorkspaceId === ALL_WORKSPACES_ID;
+  const [formWorkspaceId, setFormWorkspaceId] = useState<string>("");
+  const effectiveWorkspaceId = isAll ? formWorkspaceId || workspaces[0]?.id || null : selectedWorkspaceId;
+  const { projects, isLoading: isLoadingProjects } = useProjects(effectiveWorkspaceId);
+  const { teams, isLoading: isLoadingTeams } = useTeams(effectiveWorkspaceId);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [whenValue, setWhenValue] = useState("today");
 
-  const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
-    initialValues: {
-      title: "",
-      description: "",
-      when: "today",
-      startDate: null,
-      deadline: null,
-      projectId: "",
-      teamId: "",
-      checklistItems: "",
-      workspaceId: "",
-    },
-    validation: {
-      title: (value) => (!value?.trim() ? "Title is required" : undefined),
-      workspaceId: (value) => {
-        if (isAll && workspaces.length > 1 && !value?.trim()) {
-          return "Workspace is required";
-        }
-        return undefined;
-      },
-    },
-    async onSubmit(values) {
+  const handleSubmit = useCallback(
+    async (values: FormValues) => {
       const targetWorkspaceId = isAll ? values.workspaceId || workspaces[0]?.id : selectedWorkspaceId;
 
-      if (!targetWorkspaceId) {
-        await showToast({ style: Toast.Style.Failure, title: "No workspace selected" });
+      const validationError = validateFormValues(values, targetWorkspaceId);
+      if (validationError) {
+        await showToast({ style: Toast.Style.Failure, title: validationError });
         return;
       }
 
       setIsSubmitting(true);
       try {
-        const taskId = await createTask(targetWorkspaceId, {
-          title: values.title.trim(),
-          description: values.description?.trim() || undefined,
-          view: (values.when as TaskView) || "today",
-          startDate: values.startDate ? dateOnlyEpochFromLocalDate(values.startDate) : undefined,
+        const taskId = await createTask(targetWorkspaceId as string, {
           deadlineAt: values.deadline ? dateOnlyEpochFromLocalDate(values.deadline) : undefined,
+          description: values.description?.trim() || undefined,
           projectId: values.projectId || undefined,
+          startDate: values.startDate ? dateOnlyEpochFromLocalDate(values.startDate) : undefined,
           teamId: values.teamId || undefined,
+          title: values.title.trim(),
+          view: (values.when as TaskView) || "today",
         });
 
-        await submitChecklistItems(targetWorkspaceId, taskId, values.checklistItems);
+        await submitChecklistItems(targetWorkspaceId as string, taskId, values.checklistItems);
 
         await showToast({ style: Toast.Style.Success, title: "Task created" });
         await popToRoot();
       } catch (error) {
         await showToast({
+          message: error instanceof Error ? error.message : "Unknown error",
           style: Toast.Style.Failure,
           title: "Failed to create task",
-          message: error instanceof Error ? error.message : "Unknown error",
         });
       } finally {
         setIsSubmitting(false);
       }
     },
-  });
-
-  useEffect(() => {
-    if (!isAll || !workspaces[0]?.id) {
-      return;
-    }
-    setValue("workspaceId", (current) => current || workspaces[0]!.id);
-  }, [isAll, workspaces, setValue]);
-
-  const effectiveWorkspaceId = isAll ? values.workspaceId || workspaces[0]?.id || null : selectedWorkspaceId;
-  const { projects, isLoading: isLoadingProjects } = useProjects(effectiveWorkspaceId);
-  const { teams, isLoading: isLoadingTeams } = useTeams(effectiveWorkspaceId);
+    [isAll, workspaces, selectedWorkspaceId],
+  );
 
   return (
     <Form
@@ -114,40 +101,45 @@ function CreateTask() {
       }
       isLoading={isLoadingWorkspace || isLoadingProjects || isLoadingTeams || isSubmitting}
     >
-      <Form.TextField autoFocus placeholder="Task title..." title="Title" {...itemProps.title} />
-      <Form.TextArea placeholder="Task description..." title="Description" {...itemProps.description} />
+      <Form.TextField autoFocus id="title" placeholder="Task title..." title="Title" />
+      <Form.TextArea id="description" placeholder="Task description..." title="Description" />
       <Form.Separator />
       {isAll && workspaces.length > 1 && (
-        <Form.Dropdown title="Workspace" {...itemProps.workspaceId}>
+        <Form.Dropdown
+          defaultValue={workspaces[0]?.id}
+          id="workspaceId"
+          onChange={setFormWorkspaceId}
+          title="Workspace"
+        >
           {workspaces.map((w) => (
             <Form.Dropdown.Item key={w.id} title={w.name} value={w.id} />
           ))}
         </Form.Dropdown>
       )}
-      <Form.Dropdown title="When" {...itemProps.when}>
+      <Form.Dropdown defaultValue="today" id="when" onChange={setWhenValue} title="When">
         <Form.Dropdown.Item title="Inbox" value="inbox" />
         <Form.Dropdown.Item title="Today" value="today" />
         <Form.Dropdown.Item title="Anytime" value="anytime" />
         <Form.Dropdown.Item title="Upcoming" value="upcoming" />
         <Form.Dropdown.Item title="Someday" value="someday" />
       </Form.Dropdown>
-      {values.when === "upcoming" && <Form.DatePicker title="Start Date" {...itemProps.startDate} />}
-      <Form.DatePicker title="Deadline" {...itemProps.deadline} />
-      <Form.Dropdown title="Project" {...itemProps.projectId}>
+      {whenValue === "upcoming" && <Form.DatePicker id="startDate" title="Start Date" />}
+      <Form.DatePicker id="deadline" title="Deadline" />
+      <Form.Dropdown defaultValue="" id="projectId" title="Project">
         <Form.Dropdown.Item title="No Project" value="" />
         {projects.map((p) => (
           <Form.Dropdown.Item key={p.id} title={p.name} value={p.id} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown title="Team" {...itemProps.teamId}>
+      <Form.Dropdown defaultValue="" id="teamId" title="Team">
         <Form.Dropdown.Item title="No Team" value="" />
         {teams.map((t) => (
           <Form.Dropdown.Item key={t.id} title={t.name} value={t.id} />
         ))}
       </Form.Dropdown>
-      <Form.TextArea placeholder="One item per line..." title="Checklist Items" {...itemProps.checklistItems} />
+      <Form.TextArea id="checklistItems" placeholder="One item per line..." title="Checklist Items" />
     </Form>
   );
-}
+};
 
 export default withAccessToken(oauthService)(CreateTask);

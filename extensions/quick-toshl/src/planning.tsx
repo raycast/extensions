@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { toshl } from "./utils/toshl";
 import { format, startOfMonth, endOfMonth, startOfYear, endOfYear } from "date-fns";
 import { useState } from "react";
@@ -33,11 +33,7 @@ export default function Planning() {
     data: planning,
     isLoading,
     error,
-  } = useCachedPromise(
-    async (from: string, to: string) => toshl.getPlanning({ from, to }),
-    [dateRange.from, dateRange.to],
-    { keepPreviousData: true },
-  );
+  } = usePromise(async (from: string, to: string) => toshl.getPlanning({ from, to }), [dateRange.from, dateRange.to]);
 
   const formatAmount = (amount: number) => {
     const absAmount = Math.abs(amount);

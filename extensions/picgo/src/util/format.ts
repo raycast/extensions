@@ -1,5 +1,5 @@
-import { IImgInfo } from "picgo";
-import { ImgUrlExportFormat } from "../types/type";
+import { type IImgInfo } from "picgo";
+import type { ImgUrlExportFormat } from "../types/type";
 import { getPreferenceValues } from "@raycast/api";
 
 const { customFormat } = getPreferenceValues<Preferences>();

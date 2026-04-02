@@ -130,26 +130,98 @@ export async function listInstalledSkills(): Promise<InstalledSkill[]> {
   }
 }
 
-export async function installSkill(skill: Skill): Promise<void> {
-  await runSkillsCli(["add", `${skill.source}@${skill.skillId}`, "-g", "-y"]);
+export async function installSkill(skill: Skill, agentDisplayNames?: string[]): Promise<void> {
+  const args = ["add", `${skill.source}@${skill.skillId}`, "-g"];
+  if (agentDisplayNames && agentDisplayNames.length > 0) {
+    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+  }
+  args.push("-y");
+  await runSkillsCli(args);
 }
 
 /**
- * Map of display names (from `skills list --json`) to CLI agent IDs
- * (expected by `skills remove -a`).
- * Only entries that differ from the default transform (lowercase + space→hyphen)
- * need to be listed here.
+ * Display name → CLI agent ID for all agents supported by the Skills CLI.
+ * Sourced from https://github.com/vercel-labs/skills/blob/main/src/agents.ts
+ * Dynamically discovered agents fall back to the default transform (lowercase + space→hyphen).
  */
-const AGENT_DISPLAY_TO_ID: Record<string, string> = {
-  "Cortex Code": "cortex",
-  "Deep Agents": "deepagents",
-  "Kilo Code": "kilo",
-  "Kimi Code CLI": "kimi-cli",
-  "Roo Code": "roo",
-};
+const AGENT_DISPLAY_TO_ID = new Map<string, string>([
+  ["AdaL", "adal"],
+  ["Amp", "amp"],
+  ["Antigravity", "antigravity"],
+  ["Augment", "augment"],
+  ["Claude Code", "claude-code"],
+  ["Cline", "cline"],
+  ["CodeBuddy", "codebuddy"],
+  ["Codex", "codex"],
+  ["Command Code", "command-code"],
+  ["Continue", "continue"],
+  ["Cortex Code", "cortex"],
+  ["Crush", "crush"],
+  ["Cursor", "cursor"],
+  ["Deep Agents", "deepagents"],
+  ["Droid", "droid"],
+  ["Firebender", "firebender"],
+  ["Gemini CLI", "gemini-cli"],
+  ["GitHub Copilot", "github-copilot"],
+  ["Goose", "goose"],
+  ["iFlow CLI", "iflow-cli"],
+  ["Junie", "junie"],
+  ["Kilo Code", "kilo"],
+  ["Kimi Code CLI", "kimi-cli"],
+  ["Kiro CLI", "kiro-cli"],
+  ["Kode", "kode"],
+  ["MCPJam", "mcpjam"],
+  ["Mistral Vibe", "mistral-vibe"],
+  ["Mux", "mux"],
+  ["Neovate", "neovate"],
+  ["OpenClaw", "openclaw"],
+  ["OpenCode", "opencode"],
+  ["OpenHands", "openhands"],
+  ["Pi", "pi"],
+  ["Pochi", "pochi"],
+  ["Qoder", "qoder"],
+  ["Qwen Code", "qwen-code"],
+  ["Replit", "replit"],
+  ["Roo Code", "roo"],
+  ["Trae", "trae"],
+  ["Trae CN", "trae-cn"],
+  ["Warp", "warp"],
+  ["Windsurf", "windsurf"],
+  ["Zencoder", "zencoder"],
+]);
 
 function agentDisplayNameToId(displayName: string): string {
-  return AGENT_DISPLAY_TO_ID[displayName] ?? displayName.toLowerCase().replace(/\s+/g, "-");
+  return AGENT_DISPLAY_TO_ID.get(displayName) ?? displayName.toLowerCase().replace(/\s+/g, "-");
+}
+
+/** Sorted known agent display names, used as synchronous initial data before the CLI responds. */
+export const KNOWN_AGENT_NAMES: string[] = [...AGENT_DISPLAY_TO_ID.keys()].sort();
+
+export interface AgentDiscoveryResult {
+  agents: string[];
+  /**
+   * Maps installed skill name → agents it is installed on.
+   * Keyed by the CLI's `name` field from `skills list --json`, which matches
+   * the `skillId` used in `skills add source@skillId`.
+   */
+  skillAgentMap: Record<string, string[]>;
+}
+
+export async function discoverAgents(): Promise<AgentDiscoveryResult> {
+  const agentSet = new Set<string>(AGENT_DISPLAY_TO_ID.keys());
+  const skillAgentMap: Record<string, string[]> = {};
+  try {
+    const skills = await listInstalledSkills();
+    for (const skill of skills) {
+      skillAgentMap[skill.name] = skill.agents;
+      for (const agent of skill.agents) {
+        agentSet.add(agent);
+      }
+    }
+  } catch {
+    // Fall back to the hardcoded list.
+  }
+  return { agents: [...agentSet].sort(), skillAgentMap };
 }
 
 export async function removeSkill(skillName: string, agentDisplayNames?: string[]): Promise<void> {

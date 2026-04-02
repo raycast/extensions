@@ -1,31 +1,30 @@
 import { randomUUID } from "node:crypto";
+
 import { instantEpochFromDate } from "../helpers/date-codecs";
 import { buildTaskStartFields } from "../helpers/task-helpers";
 import { getUserId, syncMutate } from "./client";
 import type { TaskView } from "./types";
 
-function buildMutateRequest(
+const buildMutateRequest = (
   modelName: string,
   modelId: string,
   action: "INSERT" | "UPDATE" | "ARCHIVE" | "UNARCHIVE",
   payload: Record<string, unknown>,
-) {
-  return {
-    batchId: randomUUID(),
-    transactions: [
-      {
-        clientTxId: randomUUID(),
-        clientId: randomUUID(),
-        modelName,
-        modelId,
-        action,
-        payload,
-      },
-    ],
-  };
-}
+) => ({
+  batchId: randomUUID(),
+  transactions: [
+    {
+      action,
+      clientId: randomUUID(),
+      clientTxId: randomUUID(),
+      modelId,
+      modelName,
+      payload,
+    },
+  ],
+});
 
-export async function createTask(
+export const createTask = async (
   workspaceId: string,
   fields: {
     title: string;
@@ -37,14 +36,14 @@ export async function createTask(
     teamId?: string;
     assigneeId?: string;
   },
-): Promise<string> {
+): Promise<string> => {
   const id = randomUUID();
   const startFields = buildTaskStartFields(fields.view || "inbox");
 
   const payload: Record<string, unknown> = {
+    creatorId: await getUserId(),
     id,
     title: fields.title,
-    creatorId: await getUserId(),
     workspaceId,
     ...startFields,
   };
@@ -52,10 +51,10 @@ export async function createTask(
   if (fields.description) {
     payload.description = fields.description;
   }
-  if (typeof fields.startDate !== "undefined") {
+  if (fields.startDate !== undefined) {
     payload.startDate = fields.startDate;
   }
-  if (typeof fields.deadlineAt !== "undefined") {
+  if (fields.deadlineAt !== undefined) {
     payload.deadlineAt = fields.deadlineAt;
   }
   if (fields.projectId) {
@@ -70,29 +69,29 @@ export async function createTask(
 
   await syncMutate(buildMutateRequest("Task", id, "INSERT", payload));
   return id;
-}
+};
 
-export async function completeTask(taskId: string): Promise<void> {
+export const completeTask = async (taskId: string): Promise<void> => {
   await syncMutate(
     buildMutateRequest("Task", taskId, "UPDATE", {
       completedAt: instantEpochFromDate(new Date()),
     }),
   );
-}
+};
 
-export async function reopenTask(taskId: string): Promise<void> {
+export const reopenTask = async (taskId: string): Promise<void> => {
   await syncMutate(buildMutateRequest("Task", taskId, "UPDATE", { completedAt: null }));
-}
+};
 
-export async function archiveTask(taskId: string): Promise<void> {
+export const archiveTask = async (taskId: string): Promise<void> => {
   await syncMutate(buildMutateRequest("Task", taskId, "ARCHIVE", {}));
-}
+};
 
-export async function unarchiveTask(taskId: string): Promise<void> {
+export const unarchiveTask = async (taskId: string): Promise<void> => {
   await syncMutate(buildMutateRequest("Task", taskId, "UNARCHIVE", {}));
-}
+};
 
-export async function createProject(
+export const createProject = async (
   workspaceId: string,
   fields: {
     name: string;
@@ -100,45 +99,45 @@ export async function createProject(
     description?: string;
     targetDate?: number;
   },
-): Promise<string> {
+): Promise<string> => {
   const id = randomUUID();
 
   const payload: Record<string, unknown> = {
-    id,
-    name: fields.name,
-    key: fields.key,
     creatorId: await getUserId(),
+    id,
+    key: fields.key,
+    name: fields.name,
     workspaceId,
   };
 
   if (fields.description) {
     payload.description = fields.description;
   }
-  if (typeof fields.targetDate !== "undefined") {
+  if (fields.targetDate !== undefined) {
     payload.targetDate = fields.targetDate;
   }
 
   await syncMutate(buildMutateRequest("Project", id, "INSERT", payload));
   return id;
-}
+};
 
-export async function createChecklistItem(
+export const createChecklistItem = async (
   workspaceId: string,
   taskId: string,
   title: string,
   sortOrder: number,
-): Promise<string> {
+): Promise<string> => {
   const id = randomUUID();
 
   await syncMutate(
     buildMutateRequest("TaskChecklistItem", id, "INSERT", {
       id,
-      title,
-      taskId,
-      workspaceId,
       sortOrder,
+      taskId,
+      title,
+      workspaceId,
     }),
   );
 
   return id;
-}
+};

@@ -1,5 +1,9 @@
 # Karakeep Changelog
 
+## [2.3.1] - 2026-04-01
+
+- Fixed an issue where typing an existing tag name in the Add New Tag picker would not add it to the Tags list
+
 ## [2.3.0] - 2026-03-22
 
 ### New Features

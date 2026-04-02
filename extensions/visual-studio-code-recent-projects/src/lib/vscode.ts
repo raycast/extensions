@@ -84,6 +84,7 @@ function cliPaths(): Record<string, string> {
       VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
       "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "bin", "codium-insiders.cmd"),
       Windsurf: path.join(programsFolder, "Windsurf", "bin", "windsurf.cmd"),
+      Lingma: path.join(programsFolder, "Lingma", "bin", "lingma.cmd"),
     };
   }
 
@@ -100,6 +101,7 @@ function cliPaths(): Record<string, string> {
       VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
       "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/bin/codium-insiders",
       Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/bin/windsurf",
+      Lingma: "/Applications/Lingma.app/Contents/Resources/app/bin/code",
     };
   }
 
@@ -230,6 +232,7 @@ const buildSchemes: Record<string, string> = {
   Windsurf: "windsurf",
   Trae: "trae",
   "Trae CN": "trae-cn",
+  Lingma: "lingma",
 };
 
 export function getBuildScheme(): string {
