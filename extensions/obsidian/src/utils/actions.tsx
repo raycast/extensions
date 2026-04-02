@@ -139,6 +139,30 @@ export function CopyNotePathAction(props: { note: Note }) {
   );
 }
 
+export function CopyWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{ modifiers: ["opt"], key: "w" }}
+    />
+  );
+}
+
+export function PasteWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.Paste
+      title="Paste Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{ modifiers: ["opt", "shift"], key: "w" }}
+    />
+  );
+}
+
 export function PasteNoteAction(props: { note: NoteWithContent }) {
   const { note } = props;
   return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
@@ -405,6 +429,8 @@ export function NoteActions(props: {
       <CopyNoteAction note={note} />
       <CopyNoteTitleAction note={note} />
       <CopyNotePathAction note={note} />
+      <CopyWikilinkAction note={note} />
+      <PasteWikilinkAction note={note} />
       <PasteNoteAction note={note} />
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
