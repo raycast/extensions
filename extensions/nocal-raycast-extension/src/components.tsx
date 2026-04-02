@@ -22,14 +22,14 @@ export function formatDateTime(value: string, isAllDay: boolean) {
   const date = new Date(value);
 
   if (isAllDay) {
-    return new Intl.DateTimeFormat(undefined, {
+    return new Intl.DateTimeFormat("en-US", {
       weekday: "short",
       month: "short",
       day: "numeric",
     }).format(date);
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -46,12 +46,12 @@ function relativeDayLabel(date: Date, now: Date): string {
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
   if (diffDays > 1 && diffDays < 7) {
-    return new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(date);
+    return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
   }
   if (diffDays >= 7 && diffDays < 14) {
-    return "Next " + new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(date);
+    return "Next " + new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
   }
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -65,7 +65,7 @@ export function formatRelativeEventTime(value: string, isAllDay: boolean): strin
 
   if (isAllDay) return label;
 
-  const time = new Intl.DateTimeFormat(undefined, {
+  const time = new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);

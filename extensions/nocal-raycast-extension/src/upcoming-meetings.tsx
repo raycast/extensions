@@ -131,7 +131,7 @@ export default function UpcomingMeetingsCommand() {
                     />
                   ) : (
                     <Action
-                      title="Open in nocal"
+                      title="Open in Nocal"
                       onAction={() =>
                         openNocalDeepLink(
                           `event?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`,
@@ -149,7 +149,7 @@ export default function UpcomingMeetingsCommand() {
                   ) : null}
                   {isActive ? (
                     <Action
-                      title="Open in nocal"
+                      title="Open in Nocal"
                       onAction={() =>
                         openNocalDeepLink(
                           `event?id=${encodeURIComponent(meeting.id)}&calendar=${encodeURIComponent(meeting.calendar)}`,

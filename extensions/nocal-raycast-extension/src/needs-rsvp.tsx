@@ -179,7 +179,7 @@ export default function NeedsRsvpCommand() {
                   {rsvpAction("Maybe", { source: Icon.MinusCircle, tintColor: Color.Orange }, "TENTATIVE")}
                   {hideAction}
                   <Action
-                    title="Open in nocal"
+                    title="Open in Nocal"
                     icon={Icon.Calendar}
                     onAction={() =>
                       openNocalDeepLink(

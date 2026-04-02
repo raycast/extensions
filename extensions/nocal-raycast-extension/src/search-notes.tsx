@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { type NoteSearchResult, searchNotes } from "./api";
 import { ErrorState, noteSnippetMarkdown, openNocalDeepLink } from "./components";
 
@@ -66,24 +66,39 @@ export default function SearchNotesCommand() {
   const [results, setResults] = useState<NoteSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const latestRequestRef = useRef(0);
 
   useEffect(() => {
-    if (searchText.trim().length < 2) {
+    const term = searchText.trim();
+
+    if (term.length < 2) {
+      latestRequestRef.current += 1; // cancel any in-flight requests
       setResults([]);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
+    // Start a new search cycle: bump sequence so older in-flight responses are ignored
+    const sequence = ++latestRequestRef.current;
+    // Show loading immediately during debounce
+    setIsLoading(true);
+
     const timeoutId = setTimeout(async () => {
       try {
-        setIsLoading(true);
         setError(null);
-        const response = await searchNotes(searchText.trim());
-        setResults(response.results);
+        const response = await searchNotes(term);
+        if (sequence === latestRequestRef.current) {
+          setResults(response.results);
+        }
       } catch (newError) {
-        setError(newError);
+        if (sequence === latestRequestRef.current) {
+          setError(newError);
+        }
       } finally {
-        setIsLoading(false);
+        if (sequence === latestRequestRef.current) {
+          setIsLoading(false);
+        }
       }
     }, 250);
 
@@ -119,11 +134,11 @@ export default function SearchNotesCommand() {
                   <List.Item.Detail.Metadata.Label title="Title" text={result.note.title || "Untitled"} />
                   <List.Item.Detail.Metadata.Label
                     title="Last Modified"
-                    text={new Date(result.note.last_modified_date).toLocaleString()}
+                    text={new Date(result.note.last_modified_date).toLocaleString("en-US")}
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Created"
-                    text={new Date(result.note.creation_date).toLocaleString()}
+                    text={new Date(result.note.creation_date).toLocaleString("en-US")}
                   />
                   {result.note.folder_breadcrumbs.length ? (
                     <List.Item.Detail.Metadata.Label
@@ -137,7 +152,7 @@ export default function SearchNotesCommand() {
           }
           actions={
             <ActionPanel>
-              <Action title="Open in nocal" onAction={() => openNocalDeepLink(`note?id=${result.note.id}`)} />
+              <Action title="Open in Nocal" onAction={() => openNocalDeepLink(`note?id=${result.note.id}`)} />
               <Action.CopyToClipboard title="Copy Note ID" content={result.note.id} />
               <Action title="Open Notes View" onAction={() => openNocalDeepLink("notes")} />
             </ActionPanel>
