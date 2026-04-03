@@ -17,12 +17,6 @@ import { randomInt } from "crypto";
 import jsQR from "jsqr";
 import { useEffect, useRef } from "react";
 
-interface Preferences {
-  captureMode: "area" | "fullscreen";
-  silence: boolean;
-  openUrlAfterScan: boolean;
-}
-
 const NO_QR_FOUND_MESSAGE = "Found No Data in the QR Code :(";
 const NO_QR_ANY_SCREEN_MESSAGE = "No QR Code Found on Any Screen :(";
 const IMAGE_DECODING_ERROR_MESSAGE = "Image decoding error...";
@@ -58,7 +52,6 @@ async function qrDecode(filepath: string): Promise<string | null> {
     const result = jsQR(new Uint8ClampedArray(image.bitmap.data.buffer), image.bitmap.width, image.bitmap.height, {
       inversionAttempts: "attemptBoth",
     });
-    await removeFile(filepath);
 
     if (result) {
       const decoder = new TextDecoder("shift-jis");
@@ -71,6 +64,8 @@ async function qrDecode(filepath: string): Promise<string | null> {
       await showToast(Toast.Style.Failure, IMAGE_DECODING_ERROR_MESSAGE);
     }
     return null;
+  } finally {
+    await removeFile(filepath);
   }
 }
 
@@ -82,7 +77,8 @@ function getOpenTarget(value: string): string | null {
 
   try {
     const parsed = new URL(trimmed);
-    return parsed.protocol.length > 0 ? parsed.toString() : null;
+    const safeProtocols = ["http:", "https:", "ftp:", "mailto:"];
+    return safeProtocols.includes(parsed.protocol) ? parsed.toString() : null;
   } catch {
     const hasNoWhitespace = !/\s/.test(trimmed);
     const looksLikeDomain = /^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(trimmed);
