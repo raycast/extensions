@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { Action, ActionPanel, Detail, getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import { getDirectoryData, createItem, getStartDirectory, iCloudDrivePath, escapeShellArg } from "../utils";
 import { FileDataType } from "../types";
 import parser, { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
@@ -74,7 +74,7 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
               icon={{ source: "icloud.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} ignores={ignores} />} />
+                  <Action.Push title="Open ICloud" target={<Directory path={iCloudDrivePath()} ignores={ignores} />} />
                 </ActionPanel>
               }
             />
@@ -101,7 +101,7 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
             icon={{ source: "icloud.png" }}
             actions={
               <ActionPanel>
-                <Action.Push title="Open iCloud" target={<Directory path={iCloudDrivePath()} ignores={ignores} />} />
+                <Action.Push title="Open ICloud" target={<Directory path={iCloudDrivePath()} ignores={ignores} />} />
               </ActionPanel>
             }
           />
