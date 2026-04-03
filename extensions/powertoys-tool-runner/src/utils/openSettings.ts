@@ -25,7 +25,8 @@ export async function openPowerToysSettings(moduleName: string): Promise<void> {
       return;
     }
 
-    const psCommand = `Start-Process '${installPath}\\PowerToys.exe' -ArgumentList '--open-settings=${moduleName}'`;
+    const escapedPath = installPath.replace(/'/g, "''");
+    const psCommand = `Start-Process '${escapedPath}\\PowerToys.exe' -ArgumentList '--open-settings=${moduleName}'`;
 
     await runPowerShellScript(psCommand, {
       timeout: 5000,
