@@ -81,7 +81,13 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
               icon={{ source: "icloud.png" }}
               actions={
                 <ActionPanel>
-                  <Action.Push title="Open ICloud" target={<Directory path={iCloudDrivePath()} ignores={ignores} />} />
+                  <Action.Push
+                    title={
+                      /* eslint-disable-next-line @raycast/prefer-title-case*/
+                      "Open iCloud"
+                    }
+                    target={<Directory path={iCloudDrivePath()} ignores={ignores} />}
+                  />
                 </ActionPanel>
               }
             />
@@ -106,7 +112,13 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
             icon={{ source: "icloud.png" }}
             actions={
               <ActionPanel>
-                <Action.Push title="Open ICloud" target={<Directory path={iCloudDrivePath()} ignores={ignores} />} />
+                <Action.Push
+                  title={
+                    /* eslint-disable-next-line @raycast/prefer-title-case*/
+                    "Open iCloud"
+                  }
+                  target={<Directory path={iCloudDrivePath()} ignores={ignores} />}
+                />
               </ActionPanel>
             }
           />
