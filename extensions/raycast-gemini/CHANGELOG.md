@@ -1,6 +1,6 @@
 # Google Gemini Changelog
 
-## [AI Chat UX & Naming Improvements] - {PR_MERGE_DATE}
+## [AI Chat UX & Naming Improvements] - 2026-04-03
 
 - 💬 Make `Enter` send messages in AI Chat instead of copying the current answer.
 - ⚙️ Add shared `System Prompt`, default `Model`, and `Title Model` preferences for the `AI Chat` command.
