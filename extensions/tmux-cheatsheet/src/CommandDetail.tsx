@@ -1,11 +1,19 @@
-import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Detail, ActionPanel, Action } from "@raycast/api";
 import { TmuxCommand } from "./tmuxCommands";
+import { prettifyKey } from "./formatKeys";
 
 interface CommandDetailProps {
   command: TmuxCommand;
+  prefix: string;
 }
 
-export default function CommandDetail({ command }: CommandDetailProps) {
+export default function CommandDetail({ command, prefix }: CommandDetailProps) {
+  const shortcutDisplay = command.shortcut ? `${prettifyKey(prefix)} ${prettifyKey(command.shortcut)}` : "None";
+
+  const shortcutSection = command.shortcut
+    ? `## ⌨️ Shortcut:\n\`${shortcutDisplay}\``
+    : `## ⌨️ Shortcut:\nNo default shortcut`;
+
   const markdown = `
 # ⚙️ ${command.id}
 ---
@@ -15,15 +23,10 @@ export default function CommandDetail({ command }: CommandDetailProps) {
 ${command.command}
 \`\`\`
 
-## ⌨️ Keyboard Shortcut & Usage:
-${command.description}
+${shortcutSection}
 
 ${command.benefit ? `## 💡 Why Use This Command?\n${command.benefit}\n` : ""}
-
----
-
-*Tip:* If you remap your prefix from \`<C-b>\` to \`<Leader>\`, substitute accordingly.
-  `;
+`;
 
   return (
     <Detail
@@ -31,13 +34,8 @@ ${command.benefit ? `## 💡 Why Use This Command?\n${command.benefit}\n` : ""}
       navigationTitle={command.id}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard
-            title="Copy Command"
-            content={command.command}
-            onCopy={async () => {
-              await showToast({ style: Toast.Style.Success, title: "Command copied!" });
-            }}
-          />
+          <Action.CopyToClipboard title="Copy Command" content={command.command} />
+          <Action.Paste title="Paste to Terminal" content={command.command} />
         </ActionPanel>
       }
     />

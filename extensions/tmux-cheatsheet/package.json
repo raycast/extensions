@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tmux-cheatsheet",
   "title": "Tmux Cheatsheet",
-  "description": "Provides easy acess to tmux cheatsheet documentation for when you forget a command, or are just learning.",
+  "description": "Provides easy access to tmux cheatsheet documentation for when you forget a command, or are just learning.",
   "icon": "extension-icon.png",
-  "author": "alikhatibak",
+  "author": "proprocrastinator",
+  "contributors": [
+    "alikhatibak"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation",
@@ -12,6 +15,17 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "prefix",
+      "type": "textfield",
+      "title": "Tmux Prefix Override",
+      "description": "Override the auto-detected prefix from ~/.tmux.conf. Leave blank to auto-detect.",
+      "required": false,
+      "default": "",
+      "placeholder": "Auto-detected from tmux.conf"
+    }
+  ],
   "commands": [
     {
       "name": "tmux-cheatsheet",
@@ -40,5 +54,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

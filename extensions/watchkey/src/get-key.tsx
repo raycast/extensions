@@ -1,0 +1,46 @@
+import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, popToRoot } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+import { useInstallGuard } from "./install-guard";
+import { watchkeyGet } from "./watchkey";
+
+interface FormValues {
+  service: string;
+}
+
+export default function GetKey() {
+  const { installed, installView } = useInstallGuard();
+
+  const { handleSubmit, itemProps } = useForm<FormValues>({
+    onSubmit: async (values) => {
+      const toast = await showToast({ style: Toast.Style.Animated, title: "Retrieving secret..." });
+      try {
+        const value = await watchkeyGet(values.service);
+        await Clipboard.copy(value);
+        toast.style = Toast.Style.Success;
+        toast.title = `Copied "${values.service}" to clipboard`;
+        await popToRoot();
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to retrieve secret";
+        toast.message = error instanceof Error ? error.message : String(error);
+      }
+    },
+    validation: {
+      service: FormValidation.Required,
+    },
+  });
+
+  if (!installed) return installView;
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Get Secret" icon={Icon.Key} onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Key Name" placeholder="DOPPLER_TOKEN_DEV" {...itemProps.service} />
+    </Form>
+  );
+}

@@ -38,15 +38,6 @@ export interface Task {
   updated: string;
 }
 
-export const PRIORITY_MAP: Record<number, string> = {
-  0: "Unset",
-  1: "Low",
-  2: "Medium",
-  3: "High",
-  4: "Urgent",
-  5: "DO NOW",
-};
-
 export interface TaskInput {
   title: string;
   description?: string;
@@ -86,31 +77,8 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function fetchAllPages<T>(
-  buildPath: (page: number) => string,
-): Promise<T[]> {
-  const perPage = 100;
-  const results: T[] = [];
-  let page = 1;
-
-  while (true) {
-    const pageItems = await request<T[]>(buildPath(page));
-    results.push(...pageItems);
-
-    if (pageItems.length < perPage) {
-      break;
-    }
-
-    page += 1;
-  }
-
-  return results;
-}
-
 export async function getProjects(includeArchived = false): Promise<Project[]> {
-  const projects = await fetchAllPages<Project>(
-    (page) => `/projects?page=${page}&per_page=100`,
-  );
+  const projects = await request<Project[]>("/projects");
   return includeArchived ? projects : projects.filter((p) => !p.is_archived);
 }
 
@@ -136,7 +104,7 @@ export async function deleteProject(projectId: number): Promise<void> {
 }
 
 export async function getLabels(): Promise<Label[]> {
-  return fetchAllPages<Label>((page) => `/labels?page=${page}&per_page=100`);
+  return request<Label[]>("/labels");
 }
 
 export async function createTask(
@@ -161,23 +129,50 @@ export async function addLabelToTask(
   });
 }
 
+export async function removeLabelFromTask(
+  taskId: number,
+  labelId: number,
+): Promise<void> {
+  await request(`/tasks/${taskId}/labels/${labelId}`, { method: "DELETE" });
+}
+
 export async function addLabelsToTask(
   taskId: number,
   labelIds: number[],
 ): Promise<void> {
-  await Promise.all(labelIds.map((labelId) => addLabelToTask(taskId, labelId)));
+  for (const labelId of labelIds) {
+    await addLabelToTask(taskId, labelId);
+  }
+}
+
+export async function updateTaskLabels(
+  taskId: number,
+  oldLabelIds: number[],
+  newLabelIds: number[],
+): Promise<void> {
+  const toRemove = oldLabelIds.filter((id) => !newLabelIds.includes(id));
+  const toAdd = newLabelIds.filter((id) => !oldLabelIds.includes(id));
+  for (const labelId of toRemove) {
+    await removeLabelFromTask(taskId, labelId);
+  }
+  for (const labelId of toAdd) {
+    await addLabelToTask(taskId, labelId);
+  }
 }
 
 export async function getProjectTasks(projectId: number): Promise<Task[]> {
-  return fetchAllPages<Task>(
-    (page) =>
-      `/projects/${projectId}/tasks?sort_by=done&order_by=asc&page=${page}&per_page=100`,
+  return request<Task[]>(
+    `/projects/${projectId}/tasks?sort_by=done&order_by=asc`,
   );
 }
 
 export async function getAllTasks(): Promise<Task[]> {
-  return fetchAllPages<Task>(
-    (page) => `/tasks?sort_by=done&order_by=asc&page=${page}&per_page=100`,
+  return request<Task[]>("/tasks?sort_by=done&order_by=asc");
+}
+
+export async function searchTasks(query: string): Promise<Task[]> {
+  return request<Task[]>(
+    `/tasks?s=${encodeURIComponent(query)}&sort_by=done&order_by=asc`,
   );
 }
 

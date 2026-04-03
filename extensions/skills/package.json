@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "skills",
   "title": "Skills",
-  "description": "Browse, search, and manage AI agent skills from Skills",
+  "description": "Search and manage AI agent skills from Skills",
   "icon": "icon.png",
   "author": "keito4",
   "contributors": [
@@ -26,13 +26,6 @@
       "title": "Search Skills",
       "subtitle": "Skills",
       "description": "Search for agent skills",
-      "mode": "view"
-    },
-    {
-      "name": "trending-skills",
-      "title": "Trending Skills",
-      "subtitle": "Skills",
-      "description": "Browse trending skills",
       "mode": "view"
     },
     {
@@ -75,13 +68,19 @@
     "eslint": "^10.0.0",
     "eslint-plugin-n": "^17.24.0",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:api-live": "vitest run --config vitest.live.config.ts",
+    "typecheck": "tsc --noEmit",
+    "validate": "npm run lint && npm run typecheck && npm run test"
   }
 }

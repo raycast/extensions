@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nocal",
+  "title": "nocal",
+  "description": "Search notes and manage your day from Raycast with nocal.",
+  "version": "1.0.0",
+  "author": "brianmuse",
+  "access": "public",
+  "license": "MIT",
+  "private": false,
+  "icon": "nocal-icon.png",
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API Base URL",
+      "description": "Override the nocal API base URL (leave blank to use the default).",
+      "default": "https://api.nocal.app"
+    },
+    {
+      "name": "authBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Auth Base URL",
+      "description": "Override the nocal OAuth server URL (leave blank to use the default).",
+      "default": "https://auth.nocal.app"
+    }
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "nocal",
+      "description": "Browse and search your nocal notes with live preview",
+      "mode": "view",
+      "icon": "nocal-icon.png"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "subtitle": "nocal",
+      "description": "Quickly capture a new note in nocal",
+      "mode": "view",
+      "icon": "nocal-icon.png"
+    },
+    {
+      "name": "needs-rsvp",
+      "title": "Pending RSVPs",
+      "subtitle": "nocal",
+      "description": "Review calendar events awaiting your response and RSVP directly from Raycast",
+      "mode": "view",
+      "icon": "nocal-icon.png"
+    },
+    {
+      "name": "upcoming-meetings",
+      "title": "Upcoming Meetings",
+      "subtitle": "nocal",
+      "description": "View your next meetings and join video calls without switching apps",
+      "mode": "view",
+      "icon": "nocal-icon.png"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.100.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

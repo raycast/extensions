@@ -1,5 +1,5 @@
-import { Action, ActionPanel, LaunchProps, List, getPreferenceValues } from "@raycast/api";
-import { Windows, focusWindow, getWindows } from "./utils/appSwitcher";
+import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
+import { Windows, focusWindow, getWindows, pullWindowToCurrentWorkspace } from "./utils/appSwitcher";
 import { useEffect, useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
@@ -74,6 +74,14 @@ export default function Command(
                       title="Focus Window"
                       onAction={() => {
                         focusWindow(window["window-id"].toString());
+                      }}
+                    />
+                    <Action
+                      title="Pull to Current Workspace"
+                      icon={Icon.ArrowDown}
+                      shortcut={{ modifiers: ["shift"], key: "enter" }}
+                      onAction={async () => {
+                        await pullWindowToCurrentWorkspace(window["window-id"].toString());
                       }}
                     />
                   </ActionPanel>

@@ -38,6 +38,13 @@
       "subtitle": "Vikunja",
       "description": "Browse and manage your Vikunja projects",
       "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "subtitle": "Vikunja",
+      "description": "Search across all your Vikunja tasks",
+      "mode": "view"
     }
   ],
   "preferences": [

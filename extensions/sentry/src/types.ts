@@ -243,3 +243,20 @@ export type Team = {
   type: "team";
   name: string;
 };
+
+export type Release = {
+  version: string;
+  shortVersion: string;
+  dateCreated: string;
+  dateReleased: string | null;
+  newGroups: number;
+  projects: {
+    slug: string;
+    name: string;
+    healthData?: {
+      crashFreeUsers?: number;
+      crashFreeSessions?: number;
+    };
+  }[];
+  baseUrl?: string;
+};

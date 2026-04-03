@@ -1,5 +1,9 @@
 # Changelog
 
+## [Security: Refresh Lockfile] - 2026-03-27
+
+- Refreshed `package-lock.json` to update transitive `rollup` to `4.60.0` and address security advisories.
+
 ## [1.0.0] - 2026-02-17
 
 > First public release of the bunq extension for Raycast

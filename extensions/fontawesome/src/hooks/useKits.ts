@@ -1,9 +1,11 @@
 import { useCachedState, useFetch } from "@raycast/utils";
 import type { Kit, KitsResult } from "@/types";
+import { buildScopedCacheKey } from "@/utils/access-token";
+import { filterKits } from "@/utils/kits";
 import { kitsQuery } from "@/utils/query";
 
-export const useKits = (accessToken: string, execute: boolean, kitFilter?: string) => {
-  const [cachedKits, setCachedKits] = useCachedState<Kit[]>("kits", []);
+export const useKits = (accessToken: string, cacheScope: string, execute: boolean, kitFilter?: string) => {
+  const [cachedKits, setCachedKits] = useCachedState<Kit[]>(buildScopedCacheKey("kits", cacheScope), []);
 
   const { isLoading, data, revalidate } = useFetch<KitsResult>("https://api.fontawesome.com", {
     execute: !!(accessToken && execute),
@@ -21,26 +23,5 @@ export const useKits = (accessToken: string, execute: boolean, kitFilter?: strin
   });
 
   const allKits = (cachedKits && cachedKits.length > 0 ? cachedKits : data?.data?.me?.kits) ?? [];
-
-  const trimmedFilter = kitFilter?.trim();
-  let filteredKits: Kit[] = allKits;
-
-  if (trimmedFilter && allKits.length > 0) {
-    const tokensOrNames = trimmedFilter
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map((s) => s.toLowerCase());
-
-    if (tokensOrNames.length > 0) {
-      filteredKits = allKits.filter((kit) => {
-        const nameLower = kit.name?.toLowerCase() ?? "";
-        const tokenLower = kit.token?.toLowerCase() ?? "";
-        const idLower = kit.id?.toLowerCase() ?? "";
-        return tokensOrNames.some((value) => value === tokenLower || value === idLower || value === nameLower);
-      });
-    }
-  }
-
-  return { kits: filteredKits, isLoading, revalidate };
+  return { kits: filterKits(allKits, kitFilter), isLoading, revalidate };
 };

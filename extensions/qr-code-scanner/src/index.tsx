@@ -1,8 +1,8 @@
 import {
   Clipboard,
   closeMainWindow,
-  confirmAlert,
   getPreferenceValues,
+  open,
   popToRoot,
   PopToRootType,
   showHUD,
@@ -10,24 +10,21 @@ import {
   Toast,
 } from "@raycast/api";
 import { exec } from "child_process";
-import open from "open";
-import { read as decodeImage } from "jimp";
+import { Jimp } from "jimp";
 import { randomInt } from "crypto";
 import jsQR from "jsqr";
 
 interface Preferences {
   captureMode: "area" | "fullscreen";
   silence: boolean;
+  openUrlAfterScan: boolean;
 }
 
-function qrDecode(filepath: string, callback: (data: string | boolean) => void) {
-  decodeImage(filepath, (err, image) => {
+async function qrDecode(filepath: string, callback: (data: string | boolean) => void) {
+  try {
+    const image = await Jimp.read(filepath);
     if (!image) {
       popToRoot();
-      return;
-    }
-    if (err) {
-      showToast(Toast.Style.Failure, "Image decoder error...");
       return;
     }
     const result = jsQR(new Uint8ClampedArray(image.bitmap.data.buffer), image.bitmap.width, image.bitmap.height, {
@@ -36,12 +33,19 @@ function qrDecode(filepath: string, callback: (data: string | boolean) => void) 
     exec(`rm ${filepath}`);
     if (result) {
       const decoder = new TextDecoder("shift-jis");
-      const code = decoder.decode(Uint8Array.from(result?.binaryData).buffer);
+      const code = decoder.decode(Uint8Array.from(result.binaryData).buffer);
       callback(code);
       return;
     }
     callback(false);
-  });
+  } catch {
+    showToast(Toast.Style.Failure, "Image decoder error...");
+    return;
+  }
+}
+
+function isUrl(value: string): boolean {
+  return /^[a-zA-Z][a-zA-Z\d+.-]*:\/\/\S+$/i.test(value);
 }
 
 function trigger(randName: string, preferences: Preferences, displayNumber = 1) {
@@ -71,22 +75,9 @@ function trigger(randName: string, preferences: Preferences, displayNumber = 1) 
         popToRoot();
       } else if (typeof data === "string") {
         Clipboard.copy(data);
-        if (data.match(/[a-zA-z]+:\/\/[^\s]*/)) {
-          confirmAlert({
-            title: "Open in Browser?",
-            message: data,
-            primaryAction: {
-              title: "Open",
-              onAction: () => {
-                open(data).then(() => {
-                  closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
-                });
-              },
-            },
-            dismissAction: {
-              title: "Cancel",
-              onAction: () => popToRoot(),
-            },
+        if (preferences.openUrlAfterScan && isUrl(data)) {
+          open(data).then(() => {
+            closeMainWindow({ clearRootSearch: true, popToRootType: PopToRootType.Immediate });
           });
         } else {
           showHUD("Copied: " + (data.length > 20 ? data.substring(0, 30) + "..." : data));

@@ -20,7 +20,13 @@ import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
-import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
+import {
+  getFileIcon,
+  getKillAllCommand,
+  getKillCommand,
+  getPlatformSpecificErrorHelp,
+  isWindows,
+} from "./utils/platform";
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
 
 type SortBy = "cpu" | "memory";
@@ -148,6 +154,32 @@ export default function ProcessList() {
     return getFileIcon(process);
   };
 
+  const handleKillError = (force: boolean) => {
+    const errorHelp = getPlatformSpecificErrorHelp(force);
+    if (force && errorHelp.helpUrl) {
+      confirmAlert({
+        title: errorHelp.title,
+        message: errorHelp.message,
+        primaryAction: {
+          title: "Open Help",
+          onAction: () => open(errorHelp.helpUrl!),
+        },
+      });
+    } else {
+      showToast({
+        title: errorHelp.title,
+        message: errorHelp.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  };
+
+  const performPostKillActions = () => {
+    if (closeWindowAfterKill) closeMainWindow();
+    if (goToRootAfterKill) popToRoot({ clearSearchBar: clearSearchBarAfterKill });
+    if (clearSearchBarAfterKill) clearSearchBar({ forceScrollToTop: true });
+  };
+
   const killProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
     if (!skipConfirmation) {
@@ -168,24 +200,7 @@ export default function ProcessList() {
     const command = getKillCommand(process.id, force);
     exec(command, (error) => {
       if (error) {
-        const errorHelp = getPlatformSpecificErrorHelp(force);
-
-        if (force && errorHelp.helpUrl) {
-          confirmAlert({
-            title: errorHelp.title,
-            message: errorHelp.message,
-            primaryAction: {
-              title: "Open Help",
-              onAction: () => open(errorHelp.helpUrl!),
-            },
-          });
-        } else {
-          showToast({
-            title: errorHelp.title,
-            message: errorHelp.message,
-            style: Toast.Style.Failure,
-          });
-        }
+        handleKillError(force);
         return;
       }
 
@@ -193,18 +208,52 @@ export default function ProcessList() {
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
-    });
 
-    setFetchResult(state.filter((p) => p.id !== process.id));
-    if (closeWindowAfterKill) {
-      closeMainWindow();
+      setFetchResult((prev) => prev.filter((p) => p.id !== process.id));
+      performPostKillActions();
+    });
+  };
+
+  const killAllProcesses = async (process: Process, force: boolean = false) => {
+    const processName = process.processName;
+    if (processName === "-") {
+      showToast({
+        title: "Cannot Kill All for unnamed processes",
+        style: Toast.Style.Failure,
+      });
+      return;
     }
-    if (goToRootAfterKill) {
-      popToRoot({ clearSearchBar: clearSearchBarAfterKill });
+
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Kill all "${processName}" processes?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Kill All ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
     }
-    if (clearSearchBarAfterKill) {
-      clearSearchBar({ forceScrollToTop: true });
-    }
+
+    const command = getKillAllCommand(processName, force);
+    exec(command, (error) => {
+      if (error) {
+        handleKillError(force);
+        return;
+      }
+
+      showToast({
+        title: `Killed all "${processName}" processes`,
+        style: Toast.Style.Success,
+      });
+
+      setFetchResult((prev) => prev.filter((p) => p.processName !== processName));
+      performPostKillActions();
+    });
   };
 
   const subtitleString = (process: Process): string | undefined => {
@@ -416,6 +465,18 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
+                    <Action
+                      title="Kill All"
+                      icon={Icon.XMarkCircleFilled}
+                      shortcut={{ modifiers: ["opt"], key: "return" }}
+                      onAction={() => killAllProcesses(process)}
+                    />
+                    <Action
+                      title="Force Kill All"
+                      icon={Icon.XMarkCircleFilled}
+                      shortcut={{ modifiers: ["opt", "shift"], key: "return" }}
+                      onAction={() => killAllProcesses(process, true)}
+                    />
                     {process.path == null ? null : (
                       <Action.CopyToClipboard
                         title="Copy Path"

@@ -1,3 +1,47 @@
+# Plexamp CHANGELOG
+
+## [Recently Played] - 2026-03-26
+
+- Added the `Recently Played` command to browse the 50 most recently played tracks from the selected Plex music library.
+- Recently played data is cached for instant startup on repeat opens.
+
+## [Instant Library Startup Cache] - 2026-03-26
+
+- Added stale-while-revalidate caching for the Browse Library artist and playlist lists using Raycast's Cache API, so repeat opens show content instantly while refreshing in the background.
+- Cached data is preserved on reload and on transient server errors instead of resetting to an empty list.
+
+## [Album Grid View] - 2026-03-26
+
+- Added a toggleable Grid view for artist album pages showing album art in a square grid with release year subtitles.
+- Added release type grouping in Grid view: albums are organized into sections (Albums, EPs, Singles, Compilations, Live, Demos, Remixes) sorted by release year descending.
+- Added Grid/List toggle action (`Cmd+Shift+V`) with the preference persisted across sessions.
+- Added the `Album View Grid Columns` extension preference to configure grid columns (3-6, default 4).
+
+## [Large Library Performance Fixes] - 2026-03-25
+
+- Fixed "JS heap out of memory" crashes when browsing large music libraries by paginating all Plex API requests so no single XML response can exceed the Raycast worker memory limit.
+- Fixed playlist section resolution causing excessive memory usage by removing the N+1 metadata lookup per playlist and filtering by the explicit library section key instead.
+- Added paginated API fetching for artists, albums, tracks, and playlists so each request loads a bounded page of results.
+- Added smart track loading for playlists and albums: lists with 1,000 or fewer tracks load fully for scoped client-side filtering; larger lists paginate and fall back to library-wide server-side search.
+- Added server-side search fallback for large playlist track lists using the Plex `/hubs/search` endpoint.
+- Added play queue windowing so the Now Playing view loads at most 200 tracks around the current position instead of the entire queue.
+- Added `@raycast/utils` dependency for `usePromise` pagination support.
+
+## [Server Connection Fixes] - 2026-03-25
+
+- Fixed "All promises were rejected" error on Browse Library, Search Library, and Status commands by saving the verified working connection URL from library selection instead of an untested preferred URL.
+- Fixed the Now Playing Menubar not showing track information by using the server address from Plexamp's timeline response instead of the saved server URL.
+
+## [Library Selection Fixes] - 2026-03-24
+
+- Fixed music library detection failing silently when the preferred server connection is unreachable by trying all connections concurrently.
+- Fixed the library selection screen hanging for minutes when remote server connections timeout.
+- Fixed the "Sign in to Plex" screen flashing briefly on the Plexamp Status command while the initial load completes.
+- Added progressive loading to the library selection screen so libraries appear as each server responds instead of waiting for all servers.
+- Added local server prioritization so nearby servers appear first during library selection.
+- Removed servers without music libraries from the library selection screen.
+- Removed the LAN badge and "Shared By" accessories from library selection items.
+
 ## [Plex Sign-In, Now Playing, and Search Improvements] - 2026-03-22
 
 - Added managed Plex sign-in, server selection, and music library selection inside Raycast.
