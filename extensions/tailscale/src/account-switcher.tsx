@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { ErrorDetails, getErrorDetails, tailscale } from "./shared";
 
 interface User {
+  id: string;
   active: boolean;
   name: string;
   tailnet: string | undefined;
@@ -36,22 +37,26 @@ function loadUsers(unparsedUsers: string[]) {
     if (unparsedUserList.length == 3) {
       // accounts with 'ID Tailnet Account'
       user = {
+        id: unparsedUserList[0],
         name: unparsedUserList[2].replace(/\*$/, ""),
         active: unparsedUserList[2].includes("*"),
         tailnet: unparsedUserList[1],
       };
     } else if (unparsedUserList.length == 2) {
       // accounts without ID column: '<tailnet> <account>'
+      const name = unparsedUserList[1].replace(/\*$/, "");
       user = {
-        name: unparsedUserList[1].replace(/\*$/, ""),
+        id: name,
+        name,
         active: unparsedUserList[1].includes("*"),
         tailnet: unparsedUserList[0] || undefined,
       };
-    }
-    if (unparsedUserList.length == 1) {
+    } else if (unparsedUserList.length == 1) {
       // older clients
+      const name = unparsedUserList[0].replace(/\*$/, "");
       user = {
-        name: unparsedUserList[0].replace(/\*$/, ""),
+        id: name,
+        name,
         active: unparsedUserList[0].includes("*"),
         tailnet: undefined,
       };
@@ -82,6 +87,11 @@ export default function AccountSwitchList() {
   const activeUserIcon = { source: Icon.PersonCircle, tintColor: Color.Green };
   const inactiveUserIcon = { source: Icon.PersonCircle };
 
+  // see if user is logged in to multiple tailnets
+  // if only one, then there's no need to show "on tailnet" because it's redundant
+  const multipleTailnets = new Set((users ?? []).map((u) => u.tailnet).filter(Boolean)).size > 1;
+  const userLabel = (user: User) => (multipleTailnets && user.tailnet ? `${user.name} on ${user.tailnet}` : user.name);
+
   // return a list of users, starting with all of the inactive users.
   // output the active user last.
   return (
@@ -94,7 +104,7 @@ export default function AccountSwitchList() {
           .map((user) => (
             <List.Item
               title={user.name}
-              key={user.name}
+              key={user.id}
               icon={user.active ? activeUserIcon : inactiveUserIcon}
               subtitle={user.tailnet}
               actions={
@@ -105,16 +115,16 @@ export default function AccountSwitchList() {
                       await showToast({
                         style: Toast.Style.Animated,
                         title: "Switching user account",
-                        message: `${user.name}`,
+                        message: userLabel(user),
                       });
                       popToRoot();
                       closeMainWindow();
-                      const ret = tailscale(`switch ${user.name}`);
+                      const ret = tailscale(`switch ${user.id}`);
 
                       if (ret.includes("Success") || ret.includes("Already")) {
-                        showHUD(`Active Tailscale user is ${user.name}`);
+                        showHUD(`Active Tailscale user is ${userLabel(user)}`);
                       } else {
-                        showHUD(`Tailscale user failed to switch to ${user.name}`);
+                        showHUD(`Tailscale user failed to switch to ${userLabel(user)}`);
                       }
                     }}
                   />
