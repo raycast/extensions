@@ -1,6 +1,6 @@
 # Changelog
 
-## [Follow Up on Maintainability] - 2026-04-03
+## [Follow Up on Maintainability]
 
 - Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
 - Standardize `search` and `manage` empty/error states with shared retry handling and clearer recovery copy
