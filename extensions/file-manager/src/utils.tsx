@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { filesize } from "filesize";
 import fs from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { useState } from "react";
 import { DirectoryItem } from "./components/directory-item";
@@ -67,7 +67,7 @@ export function getFileSize(fileData: FileDataType): string {
 export function getStartDirectory(): string {
   let { startDirectory } = getPreferenceValues();
   if (startDirectory.startsWith("~")) {
-    startDirectory = startDirectory.replace("~", homedir());
+    startDirectory = homedir() + startDirectory.slice(1);
   }
   return resolve(startDirectory);
 }
@@ -78,7 +78,7 @@ export function createItem(
   preferences: Preferences,
   ignores: GitIgnoreHelper[],
 ) {
-  const filePath = `${fileData.path}/${fileData.name}`;
+  const filePath = join(fileData.path, fileData.name);
   if (fileData.type === "directory") {
     return (
       <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} ignores={ignores} />
@@ -111,7 +111,7 @@ export function getDirectoryData(path: string): FileDataType[] {
   const data: FileDataType[] = [];
 
   for (const file of files) {
-    const fileData = fs.lstatSync(`${path}/${file}`);
+    const fileData = fs.lstatSync(join(path, file));
     let fileType: FileType = "other";
     if (fileData.isDirectory()) fileType = "directory";
     if (fileData.isFile()) fileType = "file";
@@ -140,7 +140,7 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
   const { pop } = useNavigation();
 
   function renameItem() {
-    const newFilePath = `${dirname(props.filePath)}/${itemName}`;
+    const newFilePath = join(dirname(props.filePath), itemName);
     if (props.filePath !== newFilePath) {
       fs.renameSync(props.filePath, newFilePath);
       showToast(Toast.Style.Success, `${props.typeName} Renamed`, `${basename(props.filePath)} -> ${itemName}`);

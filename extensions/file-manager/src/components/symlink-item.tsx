@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { join, resolve } from "node:path";
 import { DirectoryItem } from "./directory-item";
 import { FileItem } from "./file-item";
 import { FileDataType } from "../types";
@@ -10,9 +11,9 @@ export function SymlinkItem(props: {
   preferences: Preferences;
   ignores: GitIgnoreHelper[];
 }) {
-  const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const filePath = join(props.fileData.path, props.fileData.name);
   const a = fs.readlinkSync(filePath);
-  const originalPath = a.startsWith("/") ? a : `${props.fileData.path}/${a}`;
+  const originalPath = resolve(props.fileData.path, a);
   const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
   if (originalFileData?.isDirectory() ?? false) {
     return (

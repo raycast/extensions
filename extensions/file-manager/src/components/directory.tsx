@@ -2,6 +2,7 @@ import fs from "node:fs";
 import { Action, ActionPanel, Detail, getPreferenceValues, List } from "@raycast/api";
 import { useState } from "react";
 import { execSync } from "node:child_process";
+import { join } from "node:path";
 import { getDirectoryData, createItem, getStartDirectory, iCloudDrivePath, escapeShellArg } from "../utils";
 import { FileDataType } from "../types";
 import parser, { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
