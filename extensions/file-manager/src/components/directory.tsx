@@ -54,14 +54,18 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
     });
 
     if (!preferences.showHiddenFiles && filtered.length > 0) {
-      // use a single stat call
-      const escapedPaths = filtered.map((f) => escapeShellArg(join(props.path, f.name)));
-      const statOutput = execSync(`stat -f%f ${escapedPaths.join(" ")}`, { encoding: "utf8" });
-      const flags = statOutput
-        .trim()
-        .split("\n")
-        .map((line) => parseInt(line, 10));
-      return filtered.filter((_, i) => !(flags[i] & (1 << 15)));
+      try {
+        // use a single stat call
+        const escapedPaths = filtered.map((f) => escapeShellArg(join(props.path, f.name)));
+        const statOutput = execSync(`stat -f%f ${escapedPaths.join(" ")}`, { encoding: "utf8" });
+        const flags = statOutput
+          .trim()
+          .split("\n")
+          .map((line) => parseInt(line, 10));
+        return filtered.filter((_, i) => !(flags[i] & (1 << 15)));
+      } catch {
+        return filtered;
+      }
     }
 
     return filtered;
