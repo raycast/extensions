@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, getAccessToken, useForm } from "@raycast/utils";
 import { createContact, updateContact } from "../api";
-import { buildPersonBody, contactToFormValues } from "../helpers";
+import { buildPersonBody, contactToFormValues, SYSTEM_CONTACT_GROUPS } from "../helpers";
 import { useContactGroups } from "../hooks";
 import { ContactFormValues, Person } from "../types";
 
@@ -54,7 +54,9 @@ export default function ContactForm({ contact, onSaved }: ContactFormProps) {
           // Preserve system group memberships (starred, myContacts) that aren't shown in the form
           const systemMemberships =
             contact.memberships?.filter((m) =>
-              m.contactGroupMembership?.contactGroupResourceName?.startsWith("contactGroups/"),
+              m.contactGroupMembership?.contactGroupResourceName
+                ? SYSTEM_CONTACT_GROUPS.has(m.contactGroupMembership.contactGroupResourceName)
+                : false,
             ) ?? [];
           const mergedMemberships = [...(body.memberships ?? []), ...systemMemberships];
           const mergedBody = { ...body, memberships: mergedMemberships.length > 0 ? mergedMemberships : undefined };

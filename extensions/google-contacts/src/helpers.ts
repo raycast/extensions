@@ -1,5 +1,16 @@
 import { ContactFormValues, Person } from "./types";
 
+export const SYSTEM_CONTACT_GROUPS = new Set([
+  "contactGroups/myContacts",
+  "contactGroups/starred",
+  "contactGroups/chatBuddies",
+  "contactGroups/all",
+  "contactGroups/blocked",
+  "contactGroups/family",
+  "contactGroups/friends",
+  "contactGroups/coworkers",
+]);
+
 export function getDisplayName(person: Person): string {
   const name = person.names?.[0];
   if (name?.displayName) return name.displayName;
@@ -72,7 +83,7 @@ export function contactToFormValues(person: Person): ContactFormValues {
       .filter(
         (m) =>
           m.contactGroupMembership?.contactGroupResourceName &&
-          !m.contactGroupMembership.contactGroupResourceName.startsWith("contactGroups/"),
+          !SYSTEM_CONTACT_GROUPS.has(m.contactGroupMembership.contactGroupResourceName),
       )
       .map((m) => m.contactGroupMembership!.contactGroupResourceName!),
   };

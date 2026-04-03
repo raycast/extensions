@@ -119,6 +119,7 @@ export default async function tool(input: Input) {
 
     case "create": {
       const fullName = [input.firstName, input.lastName].filter(Boolean).join(" ");
+      const contact = await createContact(token, buildCreateBody(input));
       if (fullName) {
         const existing = await searchContacts(token, fullName);
         const isDuplicate = existing.some(
@@ -128,12 +129,12 @@ export default async function tool(input: Input) {
         );
         if (isDuplicate) {
           return {
-            warning: `A contact named "${fullName}" already exists. The contact was still created, but you may want to inform the user about the duplicate.`,
-            contact: await createContact(token, buildCreateBody(input)),
+            warning: `A contact named "${fullName}" already existed. A new contact was still created, but you may want to inform the user about the duplicate.`,
+            contact,
           };
         }
       }
-      return await createContact(token, buildCreateBody(input));
+      return { contact };
     }
 
     case "update": {
