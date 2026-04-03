@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Settings Shortcut] - {PR_MERGE_DATE}
+
+### Improvements
+
+- Add a default keyboard shortcut for `Open … Settings` actions using Raycast’s `Keyboard.Shortcut.Common.Open`
+
 ## [Progress Bars & Zero-Config Auth] - 2026-03-16
 
 ### New Features

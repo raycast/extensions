@@ -1,4 +1,14 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Accessory, AgentDefinition, AgentId, UsageState } from "./agents/types";
@@ -378,7 +388,11 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         <Action title="Run Gemini Re-Authentication" icon={Icon.Key} onAction={handleGeminiReauth} />
                       )}
                       {agent.settingsUrl && (
-                        <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
+                        <Action.OpenInBrowser
+                          title={`Open ${agent.name} Settings`}
+                          url={agent.settingsUrl}
+                          shortcut={Keyboard.Shortcut.Common.Open}
+                        />
                       )}
                     </>
                   )}

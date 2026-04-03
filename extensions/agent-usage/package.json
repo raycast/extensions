@@ -5,6 +5,9 @@
   "description": "Monitor AI coding agent usage across Amp, Claude, Codex, Droid, Gemini, Kimi, Antigravity, and z.ai",
   "icon": "extension-icon.png",
   "author": "thuggyduck",
+  "contributors": [
+    "alexi.build"
+  ],
   "platforms": [
     "macOS"
   ],
