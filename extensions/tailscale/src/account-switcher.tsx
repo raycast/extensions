@@ -16,6 +16,7 @@ import { ErrorDetails, getErrorDetails, tailscale } from "./shared";
 interface User {
   active: boolean;
   name: string;
+  tailnet: string | undefined;
 }
 
 function loadUsers(unparsedUsers: string[]) {
@@ -28,19 +29,23 @@ function loadUsers(unparsedUsers: string[]) {
 
   for (const unparsedUser of unparsedUsers as string[]) {
     const unparsedUserList: string[] = unparsedUser.split(" ").filter(Boolean);
+    // if no accounts, fail nicely
+    if (unparsedUserList.length === 0) continue;
     let user = {} as User;
 
     if (unparsedUserList.length == 3) {
       // accounts with 'ID Tailnet Account'
       user = {
-        name: unparsedUserList[1],
+        name: unparsedUserList[2].replace(/\*$/, ""),
         active: unparsedUserList[2].includes("*"),
+        tailnet: unparsedUserList[1],
       };
     } else if (unparsedUserList.length == 2) {
-      // accounts with empty tailnet name
+      // accounts without ID column: '<tailnet> <account>'
       user = {
         name: unparsedUserList[1].replace(/\*$/, ""),
         active: unparsedUserList[1].includes("*"),
+        tailnet: unparsedUserList[0] || undefined,
       };
     }
     if (unparsedUserList.length == 1) {
@@ -48,6 +53,7 @@ function loadUsers(unparsedUsers: string[]) {
       user = {
         name: unparsedUserList[0].replace(/\*$/, ""),
         active: unparsedUserList[0].includes("*"),
+        tailnet: undefined,
       };
     }
 
@@ -90,7 +96,7 @@ export default function AccountSwitchList() {
               title={user.name}
               key={user.name}
               icon={user.active ? activeUserIcon : inactiveUserIcon}
-              subtitle={user.active ? "Active user" : ""}
+              subtitle={user.tailnet}
               actions={
                 <ActionPanel>
                   <Action
