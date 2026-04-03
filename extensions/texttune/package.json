@@ -49,9 +49,7 @@
       "data": [
         { "title": "OpenAI", "value": "openai" },
         { "title": "Anthropic (Claude)", "value": "anthropic" },
-        { "title": "Groq (Free)", "value": "groq" },
-        { "title": "Ollama (Local)", "value": "ollama" },
-        { "title": "OpenAI Compatible", "value": "openai-compatible" }
+        { "title": "Groq (Free)", "value": "groq" }
       ]
     },
     {
@@ -59,23 +57,15 @@
       "title": "API Key",
       "description": "Your API key (not needed for Ollama)",
       "type": "password",
-      "required": false
+      "required": true
     },
     {
       "name": "model",
       "title": "Model",
-      "description": "Model name. Leave empty for defaults: gpt-4o-mini (OpenAI), claude-sonnet-4-20250514 (Anthropic), llama-3.3-70b-versatile (Groq), llama3.2 (Ollama)",
+      "description": "Model name. Leave empty for defaults: gpt-4o-mini (OpenAI), claude-sonnet-4-20250514 (Anthropic), llama-3.3-70b-versatile (Groq)",
       "type": "textfield",
       "required": false,
       "placeholder": "Leave empty for provider default"
-    },
-    {
-      "name": "customApiUrl",
-      "title": "Custom API URL",
-      "description": "Base URL for Ollama or OpenAI Compatible provider (e.g., http://localhost:11434/v1)",
-      "type": "textfield",
-      "required": false,
-      "placeholder": "http://localhost:11434/v1"
     },
     {
       "name": "tone",

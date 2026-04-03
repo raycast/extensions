@@ -6,15 +6,12 @@ export interface RewriteOptions {
   provider: string;
   apiKey: string;
   model: string;
-  customApiUrl: string;
 }
 
 const DEFAULT_MODELS: Record<string, string> = {
   openai: "gpt-4o-mini",
   anthropic: "claude-sonnet-4-20250514",
   groq: "llama-3.3-70b-versatile",
-  ollama: "llama3.2",
-  "openai-compatible": "gpt-4o-mini",
 };
 
 const PROVIDER_URLS: Record<string, string> = {
@@ -43,38 +40,13 @@ export async function rewriteText(
     case "anthropic":
       return callAnthropic({ ...options, model }, systemPrompt, signal);
 
-    case "ollama":
-      return callOpenAICompatible(
-        normalizeUrl(options.customApiUrl || "http://localhost:11434/v1"),
-        { ...options, model, apiKey: "" },
-        systemPrompt,
-        signal,
-      );
-
-    case "openai-compatible":
-      if (!options.customApiUrl) {
-        throw new Error(
-          "Custom API URL is required for OpenAI Compatible provider. Set it in extension preferences.",
-        );
-      }
-      return callOpenAICompatible(
-        normalizeUrl(options.customApiUrl),
-        { ...options, model },
-        systemPrompt,
-        signal,
-      );
-
     default:
       throw new Error(`Unknown provider: ${provider}`);
   }
 }
 
-function normalizeUrl(url: string): string {
-  return url.replace(/\/+$/, "");
-}
-
 function sanitizeError(message: string, apiKey: string): string {
-  if (!apiKey) return message;
+  if (!apiKey || apiKey.trim().length === 0) return message;
   return message.replaceAll(apiKey, "[REDACTED]");
 }
 
@@ -86,16 +58,12 @@ async function callOpenAICompatible(
 ): Promise<string> {
   const { text, apiKey, model } = options;
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  if (apiKey) {
-    headers["Authorization"] = `Bearer ${apiKey}`;
-  }
-
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
-    headers,
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
     body: JSON.stringify({
       model,
       messages: [
@@ -131,12 +99,6 @@ async function callAnthropic(
   signal?: AbortSignal,
 ): Promise<string> {
   const { text, apiKey, model } = options;
-
-  if (!apiKey) {
-    throw new Error(
-      "API key is required for Anthropic. Set it in extension preferences.",
-    );
-  }
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

@@ -34,8 +34,6 @@ Instantly rewrite selected text using AI, right from Raycast. Works across all m
 | **OpenAI** | Required | `gpt-4o-mini` | |
 | **Anthropic** | Required | `claude-sonnet-4-20250514` | |
 | **Groq** | Required (free) | `llama-3.3-70b-versatile` | Free tier at [groq.com](https://groq.com) |
-| **Ollama** | Not needed | `llama3.2` | Runs locally, fully private |
-| **OpenAI Compatible** | Varies | `gpt-4o-mini` | OpenRouter, Together.ai, etc. |
 
 ## Rewrite Tones
 
@@ -53,7 +51,7 @@ Instantly rewrite selected text using AI, right from Raycast. Works across all m
 - Selected text is sent only to your configured AI provider over HTTPS
 - No text is logged, cached, or sent anywhere else
 - API keys are redacted from error messages
-- Use **Ollama** for fully local, private rewrites with zero data leaving your machine
+- Text payload is capped at ~20,000 characters to prevent accidental large requests
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 # TextTune Changelog
 
-## [1.0.0] - 2026-04-04
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - Rewrite selected text from any macOS app using AI

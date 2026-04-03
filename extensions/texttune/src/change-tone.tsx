@@ -18,7 +18,7 @@ const TONE_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function ChangeTone() {
-  const preferences = getPreferenceValues<{ tone: string }>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
 
   return (
     <List navigationTitle="Change Rewrite Tone">

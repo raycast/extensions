@@ -24,6 +24,7 @@ Thumbs.db
 .env.*
 *.key
 *.pem
+.mcp.json
 
 # TypeScript
 *.tsbuildinfo
