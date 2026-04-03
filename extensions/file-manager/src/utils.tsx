@@ -154,14 +154,14 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
       navigationTitle={basename(props.filePath)}
       actions={
         <ActionPanel>
-          <Action title={`RenameForm ${props.typeName}`} onAction={renameItem} icon={Icon.Pencil} />
+          <Action title={`Rename ${props.typeName}`} onAction={renameItem} icon={Icon.Pencil} />
           <Action title="Cancel" shortcut={{ modifiers: ["cmd"], key: "." }} onAction={pop} icon={Icon.Undo} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="itemName"
-        title={`RenameForm ${props.typeName}`}
+        title={`Rename ${props.typeName}`}
         placeholder="Enter new name"
         value={itemName}
         onChange={setItemName}

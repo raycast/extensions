@@ -61,7 +61,7 @@ export function DirectoryItem(props: {
           <ActionPanel.Section>
             <Action.Push
               target={<RenameForm filePath={filePath} refresh={props.refresh} typeName={typeName} />}
-              title={`RenameForm ${typeName}`}
+              title={`Rename ${typeName}`}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               icon={Icon.Pencil}
             />
