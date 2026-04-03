@@ -277,7 +277,6 @@ async function fetchWikipediaInfo(title: string, author: string): Promise<Extern
  * All external sources are always fetched when isbn is available.
  */
 async function generateVerifiedKlappentext(
-  tocUrl: string,
   isbn: string,
   title: string,
   author: string,
@@ -472,14 +471,12 @@ function KlappentextView({
   isbn,
   title,
   author,
-  tocFromClipboard,
 }: {
   result: KlappentextResult;
   tocUrl: string;
   isbn: string;
   title: string;
   author: string;
-  tocFromClipboard: string | null;
 }) {
   const getConfidenceColor = (conf: number): Color => {
     if (conf >= 70) return Color.Green;
@@ -557,7 +554,6 @@ ${result.sources.map((s) => `- **${s.name}** (Confidence: ${s.confidence}%)${s.u
             icon={{ source: getConfidenceIcon(result.confidence), tintColor: getConfidenceColor(result.confidence) }}
           />
           <Detail.Metadata.Label title="Sources" text={result.sources.length.toString()} />
-          <Detail.Metadata.Label title="TOC Source" text={tocFromClipboard ? "Clipboard" : "Not Available"} />
           <Detail.Metadata.Separator />
           {tocUrl ? <Detail.Metadata.Link title="DNB" text="Table of Contents" target={tocUrl} /> : null}
         </Detail.Metadata>
@@ -580,7 +576,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
     title: string;
     author: string;
     tocUrl: string;
-    tocFromClipboard: string | null;
     isbn: string;
   } | null>(null);
 
@@ -689,7 +684,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
 
           try {
             const klappentextResult = await generateVerifiedKlappentext(
-              tocUrl,
               normalizeISBN(effectiveIsbn),
               title,
               author,
@@ -700,7 +694,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
               title,
               author,
               tocUrl,
-              tocFromClipboard: null,
               isbn: normalizeISBN(effectiveIsbn),
             });
             setResult(klappentextResult);
@@ -779,7 +772,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
         isbn={bookInfo.isbn}
         title={bookInfo.title}
         author={bookInfo.author}
-        tocFromClipboard={bookInfo.tocFromClipboard}
       />
     );
   }
