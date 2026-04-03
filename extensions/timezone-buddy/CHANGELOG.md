@@ -1,6 +1,6 @@
 # Timezone Buddy Changelog
 
-## [Windows Keyboard Shortcuts Support] - {PR_MERGE_DATE}
+## [Windows Keyboard Shortcuts Support] - 2026-04-03
 
 - Added Windows-specific keyboard shortcuts (`Ctrl` equivalents) for all actions
 
