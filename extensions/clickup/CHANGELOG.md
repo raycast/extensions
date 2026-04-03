@@ -1,6 +1,6 @@
 # ClickUp Changelog
 
-## [New "View Default List" Command] - {PR_MERGE_DATE}
+## [New "View Default List" Command] - 2026-04-03
 
 ### New Feature
 - Add "View Default List" command to quickly view your default list
