@@ -16,7 +16,7 @@ type Input = {
  */
 export default async function tool(input: Input): Promise<string> {
   /* Throw Error if API Key isn't configured */
-  if (key === undefined) throw new Error("Ollama Api Key need to be configured on Raycast Command Extension");
+  if (!key) throw new Error("Ollama Api Key need to be configured on Raycast Command Extension");
 
   /* Ollama Web Fetch */
   try {
@@ -33,7 +33,7 @@ export default async function tool(input: Input): Promise<string> {
     /* Check Response Code */
     if (!response.ok) {
       const errorMsg = await response.text();
-      throw new Error(`HTTP Error, Status: ${response.status}, Message: ${errorMsg} </error>`);
+      throw new Error(`HTTP Error, Status: ${response.status}, Message: ${errorMsg}`);
     }
 
     /* Stringify JSON */
