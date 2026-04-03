@@ -1,7 +1,6 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, Detail, Icon } from "@raycast/api";
 import { useState } from "react";
 
-import { CommandEmptyView, CommandErrorDetail, RetryAction } from "./components/CommandStates";
 import { SkillListItem } from "./components/SkillListItem";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
@@ -19,13 +18,11 @@ export default function Command() {
 
   if (error && !data) {
     return (
-      <CommandErrorDetail
-        title="Unable to Load Search Results"
-        message={error.message}
-        detailsMarkdown="The Skills API request failed, so the primary search content could not be shown.\n\nRetry the search. If the problem persists, report it on GitHub."
+      <Detail
+        markdown={`# Unable to Load Search Results\n\n**Error:** ${error.message}\n\n---\n\nThe Skills API request failed, so the primary search content could not be shown.\n\nRetry the search. If the problem persists, report it on GitHub.`}
         actions={
           <ActionPanel>
-            <RetryAction onAction={revalidate} />
+            <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
             <Action.OpenInBrowser
               title="Report Issue on GitHub"
               url={buildGithubIssueUrl({
@@ -65,19 +62,19 @@ export default function Command() {
       }
     >
       {searchText.length < 2 ? (
-        <CommandEmptyView
+        <List.EmptyView
           title="Search Skills"
           description="Type at least 2 characters to search."
           icon={Icon.MagnifyingGlass}
         />
       ) : skills.length === 0 && !isLoading ? (
-        <CommandEmptyView
+        <List.EmptyView
           title="No Search Results"
           description={`No results found for "${searchText}". Try different keywords.`}
           icon={Icon.MagnifyingGlass}
           actions={
             <ActionPanel>
-              <RetryAction onAction={revalidate} />
+              <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
             </ActionPanel>
           }
         />
