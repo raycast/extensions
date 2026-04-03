@@ -104,6 +104,8 @@ export function getDirectoryData(path: string): FileDataType[] {
     files = files.sort((a: string, b: string) =>
       a.toLowerCase().localeCompare(b.toLowerCase(), undefined, { numeric: true }),
     );
+  } else {
+    files = files.sort((a: string, b: string) => a.localeCompare(b, undefined, { numeric: true }));
   }
 
   const data: FileDataType[] = [];
