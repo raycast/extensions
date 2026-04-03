@@ -1,6 +1,6 @@
 # NetBird Changelog
 
-## [Custom Admin URL] - {PR_MERGE_DATE}
+## [Custom Admin URL] - 2026-04-03
 
 - Added option to overwrite Admin Panel URL in preferences.
 - Added more screenshots, changed all to dark mode.
