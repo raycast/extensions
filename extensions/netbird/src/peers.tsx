@@ -31,6 +31,23 @@ export default function Command() {
     );
   }
 
+  if (status && !status.management.connected) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="NetBird is not connected"
+          description="Your NetBird client is not connected to the management server. Please check your connection and try again."
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser title="Get Help" url="https://netbird.io/docs" />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   const peers = status?.peers?.details || [];
 
   return (

@@ -1,5 +1,5 @@
-import { List } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { List, LocalStorage } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { FavoritesList } from "./favorites-list";
 import { useFavorites, useFavoritesQuotes } from "./favorites-store";
 import { SearchList } from "./search-list";
@@ -8,6 +8,7 @@ import { useStockSearch } from "./use-stock-search";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const [isShowingDetail, setIsShowingDetail] = useState(true);
   const {
     favorites,
     isLoading: favoritesLoading,
@@ -34,10 +35,29 @@ export default function Command() {
 
   const isLoading = favoritesLoading || favQuotesLoading || searchLoading;
 
+  useEffect(() => {
+    async function loadDetailViewPreference() {
+      const storedValue = await LocalStorage.getItem<string>("is-showing-detail-view");
+      if (storedValue == null) {
+        return;
+      }
+
+      setIsShowingDetail(storedValue === "true");
+    }
+
+    loadDetailViewPreference();
+  }, []);
+
+  async function handleToggleDetailView() {
+    const nextValue = !isShowingDetail;
+    setIsShowingDetail(nextValue);
+    await LocalStorage.setItem("is-showing-detail-view", String(nextValue));
+  }
+
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail
+      isShowingDetail={isShowingDetail}
       searchBarPlaceholder="Search stocks..."
       onSearchTextChange={setSearchText}
       throttle
@@ -47,6 +67,8 @@ export default function Command() {
           results={searchResults}
           quotes={searchQuotes}
           financials={financials}
+          isShowingDetail={isShowingDetail}
+          onToggleDetailView={handleToggleDetailView}
           isFavorite={isFavorite}
           onAddFavorite={addFavorite}
           onRemoveFavorite={removeFavorite}
@@ -56,6 +78,8 @@ export default function Command() {
           favorites={favorites}
           quotes={favQuotes}
           financials={financials}
+          isShowingDetail={isShowingDetail}
+          onToggleDetailView={handleToggleDetailView}
           isFavorite={isFavorite}
           onRemoveFavorite={removeFavorite}
           onMoveUp={moveUp}

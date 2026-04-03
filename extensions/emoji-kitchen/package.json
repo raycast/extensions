@@ -6,7 +6,8 @@
   "icon": "icon.png",
   "author": "corey_o_neal",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
   ],
   "categories": [
     "Fun",
@@ -29,17 +30,249 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-emojis",
+      "title": "Search Emojis",
+      "description": "Search for emojis by name or keyword. Returns a list of matching emojis with their characters, names, and categories. Use this to find emojis before combining them."
+    },
+    {
+      "name": "combine-emojis",
+      "title": "Combine Two Emojis",
+      "description": "Combine two emojis into a Google Emoji Kitchen mashup. Provide two emoji characters and get back the mashup image URL. If the combination doesn't exist, returns an error."
+    },
+    {
+      "name": "explore-mashups",
+      "title": "Explore Emoji Mashups",
+      "description": "Get all available mashup combinations for a given emoji character. Returns a list of emojis that can be combined with the input emoji, along with the mashup image URLs."
+    }
+  ],
+  "ai": {
+    "instructions": "You are an Emoji Kitchen assistant. You help users discover and create fun emoji mashups using Google's Emoji Kitchen. Always use the extension tools (search-emojis, combine-emojis, explore-mashups) to answer—do not guess URLs or use the web. Use the tools to search for emojis, combine them into mashups, and explore what's possible. When presenting results, always show the actual emoji characters and describe the mashup. If a combination doesn't exist, suggest similar alternatives.",
+    "evals": [
+      {
+        "input": "@emoji-kitchen search for a happy emoji",
+        "mocks": {
+          "search-emojis": {
+            "success": true,
+            "results": [
+              {
+                "emoji": "😀",
+                "name": "grinning-face",
+                "category": "smileys & emotion",
+                "keywords": [
+                  "smile",
+                  "happy"
+                ]
+              },
+              {
+                "emoji": "😄",
+                "name": "grinning-face-with-smiling-eyes",
+                "category": "smileys & emotion",
+                "keywords": [
+                  "smile",
+                  "happy",
+                  "joy"
+                ]
+              },
+              {
+                "emoji": "😊",
+                "name": "smiling-face-with-smiling-eyes",
+                "category": "smileys & emotion",
+                "keywords": [
+                  "smile",
+                  "happy",
+                  "blush"
+                ]
+              }
+            ],
+            "message": "Found 3 emojis matching \"happy\""
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-emojis",
+              "arguments": {
+                "query": {
+                  "includes": "happy"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@emoji-kitchen combine 😂 and 🔥",
+        "mocks": {
+          "combine-emojis": {
+            "success": true,
+            "emoji1": "😂",
+            "emoji2": "🔥",
+            "emoji1Name": "face-with-tears-of-joy",
+            "emoji2Name": "fire",
+            "mashupUrl": "https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f602/u1f602_u1f525.png",
+            "message": "Mashup created: 😂 + 🔥"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "combine-emojis"
+          }
+        ]
+      },
+      {
+        "input": "@emoji-kitchen what can I combine with a cat emoji 🐱?",
+        "mocks": {
+          "explore-mashups": {
+            "success": true,
+            "baseEmoji": "🐱",
+            "baseEmojiName": "cat-face",
+            "mashups": [
+              {
+                "emoji1": "🐱",
+                "emoji2": "😈",
+                "emoji2Name": "smiling-face-with-horns",
+                "mashupUrl": "https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f431/u1f431_u1f608.png"
+              },
+              {
+                "emoji1": "🐱",
+                "emoji2": "🤮",
+                "emoji2Name": "face-vomiting",
+                "mashupUrl": "https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f431/u1f431_u1f922.png"
+              }
+            ],
+            "total": 2,
+            "message": "Found 2 mashups for 🐱 (cat-face)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "explore-mashups",
+              "arguments": {
+                "emoji": "🐱"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@emoji-kitchen I want to see a mashup of a dog and a house",
+        "mocks": {
+          "search-emojis": {
+            "success": true,
+            "results": [
+              {
+                "emoji": "🐶",
+                "name": "dog-face",
+                "category": "animals & nature",
+                "keywords": [
+                  "dog",
+                  "puppy",
+                  "pet"
+                ]
+              },
+              {
+                "emoji": "🏠",
+                "name": "house",
+                "category": "travel & places",
+                "keywords": [
+                  "house",
+                  "home",
+                  "building"
+                ]
+              }
+            ],
+            "message": "Found 2 emojis matching \"dog\""
+          },
+          "combine-emojis": {
+            "success": true,
+            "emoji1": "🐶",
+            "emoji2": "🏠",
+            "emoji1Name": "dog-face",
+            "emoji2Name": "house",
+            "mashupUrl": "https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f436/u1f436_u1f3e0.png",
+            "message": "Mashup created: 🐶 + 🏠"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-emojis"
+          },
+          {
+            "callsTool": "combine-emojis"
+          }
+        ]
+      },
+      {
+        "input": "@emoji-kitchen mash up an astronaut and a unicorn",
+        "mocks": {
+          "search-emojis": {
+            "success": true,
+            "results": [
+              {
+                "emoji": "🧑‍🚀",
+                "name": "astronaut",
+                "category": "people & body",
+                "keywords": [
+                  "astronaut",
+                  "space",
+                  "rocket"
+                ]
+              },
+              {
+                "emoji": "🦄",
+                "name": "unicorn",
+                "category": "animals & nature",
+                "keywords": [
+                  "unicorn",
+                  "horse",
+                  "magic"
+                ]
+              }
+            ],
+            "message": "Found 2 emojis matching \"astronaut\""
+          },
+          "combine-emojis": {
+            "success": false,
+            "emoji1": "🧑‍🚀",
+            "emoji2": "🦄",
+            "emoji1Name": "astronaut",
+            "emoji2Name": "unicorn",
+            "message": "No mashup exists for 🧑‍🚀 + 🦄"
+          },
+          "explore-mashups": {
+            "success": true,
+            "baseEmoji": "🧑‍🚀",
+            "baseEmojiName": "astronaut",
+            "mashups": [],
+            "total": 0,
+            "message": "Found 0 mashups for 🧑‍🚀 (astronaut)"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-emojis"
+          },
+          {
+            "callsTool": "combine-emojis"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.104.0",
+    "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -50,6 +283,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -1,0 +1,357 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paper-agent",
+  "title": "Paper Agent",
+  "description": "Discover, triage, and manage papers from your local Paper Agent workflow in Raycast.",
+  "icon": "extension-icon.png",
+  "author": "marvel940804836",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "configPath",
+      "type": "textfield",
+      "title": "Config File Path",
+      "description": "Path to the Paper Agent core config.yaml.",
+      "placeholder": "/path/to/your/paper-agent/config.yaml",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "paperDir",
+      "type": "textfield",
+      "title": "Paper Directory",
+      "description": "Root directory for papers (daily digest and notes). Library is stored under paper_dir/library. Maps to delivery.paper_dir.",
+      "placeholder": "/path/to/your/paper/repo",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "pythonPath",
+      "type": "textfield",
+      "title": "Python Executable",
+      "description": "Optional override for Python binary (defaults to .venv/bin/python3 in the Paper Agent repo).",
+      "placeholder": "/Users/you/.venv/bin/python3",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "recentLimit",
+      "type": "textfield",
+      "title": "Recent Papers Limit",
+      "description": "Maximum number of papers shown in Recent Papers (used as --limit for the list CLI).",
+      "placeholder": "30",
+      "default": "30",
+      "required": false
+    },
+    {
+      "name": "maxPapersPerDay",
+      "type": "textfield",
+      "title": "Max Papers Per Day",
+      "description": "Maps to direction.max_papers_per_day in config.yaml.",
+      "placeholder": "12",
+      "default": "12",
+      "required": false
+    },
+    {
+      "name": "lookbackDays",
+      "type": "textfield",
+      "title": "Lookback Days",
+      "description": "Maps to direction.lookback_days (catch-up window).",
+      "placeholder": "5",
+      "default": "5",
+      "required": false
+    },
+    {
+      "name": "keyphrases",
+      "type": "textfield",
+      "title": "Required Keywords",
+      "description": "OR match: at least one keyword must appear in title or abstract (not all). Comma-separated; maps to direction.include_keywords.",
+      "placeholder": "continual learning, lifelong learning, incremental learning",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "allowCategories",
+      "type": "textfield",
+      "title": "Allow Categories",
+      "description": "Comma-separated arXiv categories to include (maps to direction.allow_categories).",
+      "placeholder": "cs.LG, cs.AI",
+      "default": "cs.LG, cs.AI, cs.CL, stat.ML, cs.CV",
+      "required": false
+    },
+    {
+      "name": "denyCategories",
+      "type": "textfield",
+      "title": "Deny Categories",
+      "description": "Comma-separated categories to exclude (maps to direction.deny_categories).",
+      "placeholder": "stat.ML",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "excludeKeywords",
+      "type": "textfield",
+      "title": "Exclude Keywords",
+      "description": "Comma-separated keywords; papers matching these are excluded (maps to direction.exclude_keywords).",
+      "placeholder": "survey, tutorial, point cloud",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "policyType",
+      "type": "dropdown",
+      "title": "Discovery Policy",
+      "description": "Off: select by required-keyword match only (title first, then abstract). No scoring policy.",
+      "data": [
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ],
+      "default": "off",
+      "required": false
+    },
+    {
+      "name": "summarizeEnabled",
+      "type": "checkbox",
+      "title": "Enable LLM Research Summary",
+      "label": "Enable LLM Research Summary",
+      "description": "When on, the three options below are used to generate research summaries. When off, they are ignored.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "summarizeProvider",
+      "type": "textfield",
+      "title": "Summary Provider",
+      "description": "Only used when \"Enable LLM research summary\" is on. LLM provider (e.g. openai).",
+      "placeholder": "openai",
+      "default": "openai",
+      "required": false
+    },
+    {
+      "name": "summarizeModel",
+      "type": "textfield",
+      "title": "Summary Model",
+      "description": "Only used when \"Enable LLM research summary\" is on. Model name (e.g. gpt-4o-mini).",
+      "placeholder": "gpt-4o-mini",
+      "default": "gpt-4o-mini",
+      "required": false
+    },
+    {
+      "name": "summarizeLanguage",
+      "type": "dropdown",
+      "title": "Summary Language",
+      "description": "Only used when \"Enable LLM research summary\" is on. Maps to summarize.language.",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        }
+      ],
+      "default": "en",
+      "required": false
+    },
+    {
+      "name": "openaiApiKey",
+      "type": "password",
+      "title": "OpenAI API Key",
+      "description": "Optional. Used for LLM summaries when set. Leave empty to use OPENAI_API_KEY from your environment.",
+      "placeholder": "sk-...",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "scholarEnabled",
+      "type": "checkbox",
+      "title": "Enable Scholar Inbox",
+      "label": "Enable Scholar Inbox",
+      "description": "Toggle Google Scholar Alerts (email only).",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "scholarProvider",
+      "type": "textfield",
+      "title": "Scholar Email Provider",
+      "description": "Email source for extension runs: imap or gmail.",
+      "placeholder": "imap",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "scholarImapHost",
+      "type": "textfield",
+      "title": "Scholar IMAP Host",
+      "description": "IMAP host for Scholar Alerts (e.g. imap.gmail.com).",
+      "placeholder": "imap.gmail.com",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "scholarImapUser",
+      "type": "textfield",
+      "title": "Scholar IMAP User",
+      "description": "IMAP user / email for Scholar Alerts.",
+      "placeholder": "your@gmail.com",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "scholarImapPasswordEnv",
+      "type": "textfield",
+      "title": "Scholar IMAP Password Env Var",
+      "description": "Environment variable name for IMAP password (e.g. IMAP_PASSWORD).",
+      "placeholder": "IMAP_PASSWORD",
+      "default": "IMAP_PASSWORD",
+      "required": false
+    },
+    {
+      "name": "scholarImapPassword",
+      "type": "password",
+      "title": "Scholar IMAP Password",
+      "description": "Optional. If set, used as the IMAP password (env var name above). All whitespace is removed, so Google app passwords work whether pasted with or without spaces. Leave empty to use the value from your environment.",
+      "placeholder": "Optional",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "scholarGmailLabel",
+      "type": "textfield",
+      "title": "Scholar Gmail Label",
+      "description": "Gmail label/mailbox to read (e.g. scholar-alerts).",
+      "placeholder": "scholar-alerts",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "scholarFromAddresses",
+      "type": "textfield",
+      "title": "Scholar From Addresses",
+      "description": "Comma-separated sender addresses to filter (e.g. scholaralerts-noreply@google.com). Empty = no filter.",
+      "placeholder": "scholaralerts-noreply@google.com",
+      "default": "",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "today-papers",
+      "title": "Browse Today's Papers",
+      "subtitle": "Paper Agent",
+      "description": "Show today's papers from your local Paper Agent workflow and open notes or paper links.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-papers",
+      "title": "Browse Recent Papers",
+      "subtitle": "Paper Agent",
+      "description": "Show recently discovered papers from your Paper Agent library.",
+      "mode": "view"
+    },
+    {
+      "name": "search-papers",
+      "title": "Search Papers",
+      "subtitle": "Paper Agent",
+      "description": "Search papers in your local library by title, authors, summary, and more.",
+      "mode": "view"
+    },
+    {
+      "name": "favorite-papers",
+      "title": "Browse Favorite Papers",
+      "subtitle": "Paper Agent",
+      "description": "Open papers you have added to favorites from the Paper Agent extension.",
+      "mode": "view"
+    },
+    {
+      "name": "reading-queue",
+      "title": "Browse Reading Queue",
+      "subtitle": "Paper Agent",
+      "description": "Open papers you have added to your reading queue from the Paper Agent extension.",
+      "mode": "view"
+    },
+    {
+      "name": "run-pipeline",
+      "title": "Run Paper Pipeline",
+      "subtitle": "Paper Agent",
+      "description": "Runs the full Paper Agent pipeline with Raycast Preferences applied at runtime (overriding runtime YAML fields), then updates local notes, library JSON, and daily/weekly digests.",
+      "mode": "view"
+    },
+    {
+      "name": "install-daily-schedule",
+      "title": "Install Daily Schedule",
+      "subtitle": "Paper Agent",
+      "description": "Installs or updates a macOS launchd job that runs Paper Agent daily at 04:00 and catches up after boot/login if missed.",
+      "mode": "no-view"
+    },
+    {
+      "name": "remove-daily-schedule",
+      "title": "Remove Daily Schedule",
+      "subtitle": "Paper Agent",
+      "description": "Unloads and removes the macOS launchd job for the daily Paper Agent run while keeping logs and status history.",
+      "mode": "no-view"
+    },
+    {
+      "name": "check-run-status",
+      "title": "Check Run Status",
+      "subtitle": "Paper Agent",
+      "description": "Shows run status for both scheduled (launchd) and manual runs: whether the daily schedule is installed, today's result, last successful day, and the most recent run metadata with actions to open log or state directory.",
+      "mode": "view"
+    },
+    {
+      "name": "open-paper-repo",
+      "title": "Open Paper Directory",
+      "subtitle": "Paper Agent",
+      "description": "Opens the Paper directory folder from Preferences in Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-config-directory",
+      "title": "Open Config Directory",
+      "subtitle": "Paper Agent",
+      "description": "Opens the folder that contains your config.yaml (the core repo root) in Finder.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^1.17.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

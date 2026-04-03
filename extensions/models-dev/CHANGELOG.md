@@ -1,5 +1,16 @@
 # models.dev Changelog
 
+## [Bug Fix] - 2026-03-31
+
+### Fixed
+
+- Fixed JS heap out of memory crash on first launch caused by `useCachedPromise` memory overhead
+- Replaced `useCachedPromise` with direct fetch + Cache API to reduce peak memory usage
+
+### Changed
+
+- Removed `@raycast/utils` dependency (no longer needed)
+
 ## [Bug Fixes] - 2026-03-16
 
 ### Changed

@@ -1,4 +1,5 @@
 import { Color, Icon, List } from "@raycast/api";
+
 import type { ProjectRecord, TaskRecord, WorkspaceSummary } from "../api/types";
 import { TASK_STATE_ICONS } from "../helpers/constants";
 import { getTaskState, isOverdue } from "../helpers/task-helpers";
@@ -12,7 +13,7 @@ interface TaskListItemProps {
   showWorkspaceTag?: boolean;
 }
 
-export function TaskListItem({ task, projects, revalidate, workspaces, showWorkspaceTag }: TaskListItemProps) {
+export const TaskListItem = ({ task, projects, revalidate, workspaces, showWorkspaceTag }: TaskListItemProps) => {
   const state = getTaskState(task);
   const project = task.projectId ? projects.find((p) => p.id === task.projectId) : undefined;
   const overdue = isOverdue(task);
@@ -22,12 +23,12 @@ export function TaskListItem({ task, projects, revalidate, workspaces, showWorks
   if (showWorkspaceTag && workspaces) {
     const ws = workspaces.find((w) => w.id === task.workspaceId);
     if (ws) {
-      accessories.push({ tag: ws.name, icon: Icon.Building });
+      accessories.push({ icon: Icon.Building, tag: ws.name });
     }
   }
 
   if (project) {
-    accessories.push({ tag: project.name, icon: Icon.Folder });
+    accessories.push({ icon: Icon.Folder, tag: project.name });
   }
 
   if (task.deadlineAt) {
@@ -46,4 +47,4 @@ export function TaskListItem({ task, projects, revalidate, workspaces, showWorks
       title={task.title}
     />
   );
-}
+};

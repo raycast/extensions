@@ -1,15 +1,9 @@
-export function dateOnlyEpochFromLocalDate(value: Date): number {
-  return Date.UTC(value.getFullYear(), value.getMonth(), value.getDate());
-}
+export const dateOnlyEpochFromLocalDate = (value: Date): number =>
+  Date.UTC(value.getFullYear(), value.getMonth(), value.getDate());
 
-export function instantEpochFromDate(value: Date): number {
-  return value.getTime();
-}
+export const instantEpochFromDate = (value: Date): number => value.getTime();
 
-export function todayDateOnlyEpoch(now = new Date()): number {
-  return dateOnlyEpochFromLocalDate(now);
-}
+export const todayDateOnlyEpoch = (now = new Date()): number => dateOnlyEpochFromLocalDate(now);
 
-export function tomorrowDateOnlyEpoch(now = new Date()): number {
-  return Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-}
+export const tomorrowDateOnlyEpoch = (now = new Date()): number =>
+  Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1);

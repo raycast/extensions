@@ -1,6 +1,6 @@
 import { Toast, showToast, showHUD } from "@raycast/api";
 import { getProfileNames, startFocusWithProfile25, startFocus25, getActiveProfileName } from "./utils";
-import { ensureFocusIsRunning } from "./helpers";
+import { ensureFocusIsInstalled } from "./helpers";
 
 export default async function Command() {
   const toast = await showToast({
@@ -8,7 +8,7 @@ export default async function Command() {
     title: "Starting Focus (25 minutes)...",
   });
 
-  if (!(await ensureFocusIsRunning())) {
+  if (!(await ensureFocusIsInstalled())) {
     return;
   }
 

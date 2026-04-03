@@ -1,6 +1,6 @@
 # Raycast PM2
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-03-16
 
 - Update transitive `systeminformation` dependency to 5.31.4 to address command injection CVEs
 

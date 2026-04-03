@@ -10,6 +10,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 import {
   EnsureCliBinError,
   InstalledCLINotFoundError,
+  InvalidSessionTokenError,
   ManuallyThrownError,
   NotLoggedInError,
   PremiumFeatureError,
@@ -384,7 +385,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }
@@ -420,11 +421,14 @@ export class Bitwarden {
         resetVaultTimeout: true,
         env: { BW_PASSWORD: password },
       });
+
       const sessionToken = result.stdout;
-      if (!sessionToken.trim()) throw new Error("Invalid session token");
+      if (!sessionToken.trim()) throw new InvalidSessionTokenError();
+
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
       await this.callActionListeners("unlock", password, sessionToken);
+
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -745,16 +749,38 @@ export class Bitwarden {
     await this.callActionListeners("logout", reason);
   }
 
-  private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
-    const errorMessage = (error as ExecaError).stderr;
-    if (!errorMessage) return {};
+  private async handleCommonErrors(
+    error: any,
+    options?: { skipInvalidSessionTokenLogout?: boolean }
+  ): Promise<{ error?: ManuallyThrownError }> {
+    if (!(error instanceof Error)) return {};
 
-    if (/not logged in/i.test(errorMessage)) {
-      await this.handlePostLogout();
+    const stderr = (error as ExecaError).stderr;
+    const message = error.message;
+    if (!stderr && !message) return {};
+
+    const errorContent = [stderr, message].filter(Boolean).join(",");
+
+    const { skipInvalidSessionTokenLogout = false } = options ?? {};
+
+    if (/not logged in/i.test(errorContent)) {
+      await this.handlePostLogout("Not logged in");
       return { error: new NotLoggedInError("Not logged in") };
     }
-    if (/Premium status/i.test(errorMessage)) {
+    if (/Premium status/i.test(errorContent)) {
       return { error: new PremiumFeatureError() };
+    }
+    if (/Invalid session token/i.test(errorContent)) {
+      if (!skipInvalidSessionTokenLogout) {
+        // Avoid running the full logout lifecycle here (which fires logout listeners).
+        // Clear the session token and mark the vault as unauthenticated so callers
+        // can perform an explicit `bitwarden.logout()` when they want the full
+        // logout side-effects (listeners, storage updates, etc.). This prevents
+        // duplicate listener invocations.
+        this.clearSessionToken();
+        await this.saveLastVaultStatus("handleCommonErrors:InvalidSessionToken", "unauthenticated");
+      }
+      return { error: new InvalidSessionTokenError() };
     }
     return {};
   }

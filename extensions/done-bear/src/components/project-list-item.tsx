@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+
 import type { ProjectRecord } from "../api/types";
 import { PROJECT_STATUS_ICONS } from "../helpers/constants";
 
@@ -6,7 +7,7 @@ interface ProjectListItemProps {
   project: ProjectRecord;
 }
 
-export function ProjectListItem({ project }: ProjectListItemProps) {
+export const ProjectListItem = ({ project }: ProjectListItemProps) => {
   const icon = PROJECT_STATUS_ICONS[project.status] || Icon.Folder;
   const accessories: List.Item.Accessory[] = [];
 
@@ -23,12 +24,12 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
         <ActionPanel>
           <Action.CopyToClipboard
             content={project.name}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{ key: "c", modifiers: ["cmd"] }}
             title="Copy Name"
           />
           <Action.CopyToClipboard
             content={project.id}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
             title="Copy ID"
           />
           <Action.CopyToClipboard content={project.key} title="Copy Key" />
@@ -39,4 +40,4 @@ export function ProjectListItem({ project }: ProjectListItemProps) {
       title={project.name}
     />
   );
-}
+};

@@ -63,6 +63,14 @@ export class PremiumFeatureError extends ManuallyThrownError {
     this.name = "PremiumFeatureError";
   }
 }
+
+export class InvalidSessionTokenError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "Invalid session token", stack);
+    this.name = "InvalidSessionTokenError";
+  }
+}
+
 export class SendNeedsPasswordError extends ManuallyThrownError {
   constructor(message?: string, stack?: string) {
     super(message ?? "This Send has a is protected by a password", stack);

@@ -1,16 +1,23 @@
 import { useCachedState, useFetch, useLocalStorage } from "@raycast/utils";
 import { TokenData } from "@/types";
+import { getAccessTokenStorageKeys, shouldRefreshAccessToken } from "@/utils/access-token";
 
 export const useAccessToken = (API_TOKEN: string) => {
-  const [accessToken, setAccessToken] = useCachedState<string>("accessToken", "");
+  const { tokenFingerprint, accessTokenKey, expiryKey } = getAccessTokenStorageKeys(API_TOKEN);
+  const [accessToken, setAccessToken] = useCachedState<string>(accessTokenKey, "");
 
   const {
     value: tokenTimeStart,
     setValue: setTokenTimerStart,
     isLoading: isTokenTimerLoading,
-  } = useLocalStorage<number>("token-expiry-start");
+  } = useLocalStorage<number>(expiryKey);
 
-  const executeTokenFetch = !isTokenTimerLoading && (!tokenTimeStart || Date.now() - (tokenTimeStart || 0) >= 3600000);
+  const executeTokenFetch =
+    !isTokenTimerLoading &&
+    shouldRefreshAccessToken({
+      accessToken,
+      tokenTimeStart,
+    });
 
   // Fetch access token, store expiry info in local storage and state and store access token
   const { isLoading: isTokenLoading } = useFetch<TokenData>("https://api.fontawesome.com/token", {
@@ -28,5 +35,5 @@ export const useAccessToken = (API_TOKEN: string) => {
   const isLoading = isTokenTimerLoading || isTokenLoading;
   const executeDataLoading = !!(accessToken && !isLoading);
 
-  return { accessToken, isLoading, executeDataLoading };
+  return { accessToken, cacheScope: tokenFingerprint, isLoading, executeDataLoading };
 };

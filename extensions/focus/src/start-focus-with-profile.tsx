@@ -1,13 +1,13 @@
 import { Toast, showToast, showHUD, List, ActionPanel, Action, Icon, closeMainWindow } from "@raycast/api";
 import { getProfileNames, startFocusWithProfile, getActiveProfileName, openPreferences } from "./utils";
 import { useCachedPromise } from "@raycast/utils";
-import { ensureFocusIsRunning } from "./helpers";
+import { ensureFocusIsInstalled } from "./helpers";
 
 export default function Command() {
   const { data: profiles = [], isLoading } = useCachedPromise(getProfileNames);
 
   async function handleProfileSelection(profileName: string) {
-    if (!(await ensureFocusIsRunning())) {
+    if (!(await ensureFocusIsInstalled())) {
       return;
     }
 

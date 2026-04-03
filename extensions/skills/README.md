@@ -1,10 +1,9 @@
 # Skills
 
-Browse, search, and manage AI agent skills from [Skills](https://skills.sh) directly in Raycast.
+Search and manage AI agent skills from [Skills](https://skills.sh) directly in Raycast.
 
 ## Features
 
-- Browse top skills ranked by total installs
 - Search for specific skills
 - Filter available skills by owner
 - Install skills for all supported agents
@@ -25,18 +24,20 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 
 Search for agent skills from skills.sh with real-time results. View skill details in the inline panel, including security audit status when available.
 
-### Trending Skills
-
-View the top skills ranked by total installs. Browse skill details without leaving the list and review audit signals before installing.
-
 ### Manage Skills
 
 View, update, and remove installed skills. Outdated skills are highlighted with an orange icon and grouped in the "Updates Available" section. Filter by agent to see which skills are available for each AI agent.
 
+## Development
+
+- `npm run validate` runs lint, typecheck, and unit tests.
+- `npm run build` confirms the Raycast extension still builds.
+- `npm run test:api-live` runs the opt-in live API check against `skills.sh`.
+- `test/raycast-api.ts` provides the `@raycast/api` stub used by Vitest.
+- [TESTING.md](./TESTING.md) contains the manual UI smoke checklist.
+
 ## Screenshots
 
-![Trending Skills](assets/skills-1.png)
-![Trending Skills - Actions](assets/skills-2.png)
-![Search Skills](assets/skills-3.png)
-![Search Skills - Owner Filter](assets/skills-4.png)
-![Manage Skills](assets/skills-5.png)
+![Search Skills](metadata/skills-1.png)
+![Search Skills - Owner Filter](metadata/skills-2.png)
+![Manage Skills](metadata/skills-3.png)

@@ -1,22 +1,24 @@
+// oxlint-disable no-use-before-define -- helper functions grouped after main exports
 import { getAccessToken } from "@raycast/utils";
-import { VIEWER_QUERY } from "./queries";
+
+import { MY_WORKSPACES_QUERY, VIEWER_QUERY } from "./queries";
 import type { WorkspaceSummary } from "./types";
 
 const API_URL = "https://api.donebear.com";
 
-async function getToken(): Promise<string> {
+const getToken = async (): Promise<string> => {
   const { token } = await getAccessToken();
   return token;
-}
+};
 
-let cachedUserIdForToken: { token: string; userId: string } | null = null;
+let cachedUserId: string | null = null;
 
-export async function getUserId(): Promise<string> {
-  const token = await getToken();
-
-  if (cachedUserIdForToken?.token === token) {
-    return cachedUserIdForToken.userId;
+export const getUserId = async (): Promise<string> => {
+  if (cachedUserId) {
+    return cachedUserId;
   }
+
+  const token = await getToken();
 
   // JWT: decode user ID from payload
   const parts = token.split(".");
@@ -24,8 +26,8 @@ export async function getUserId(): Promise<string> {
     try {
       const payload = JSON.parse(atob(parts[1])) as { sub?: string };
       if (payload.sub) {
-        cachedUserIdForToken = { token, userId: payload.sub };
-        return payload.sub;
+        cachedUserId = payload.sub;
+        return cachedUserId;
       }
     } catch {
       // Not a valid JWT, fall through to viewer query
@@ -34,9 +36,9 @@ export async function getUserId(): Promise<string> {
 
   // Fallback: fetch from viewer query
   const data = await graphqlRequest<{ viewer: { id: string } }>(VIEWER_QUERY);
-  cachedUserIdForToken = { token, userId: data.viewer.id };
-  return data.viewer.id;
-}
+  cachedUserId = data.viewer.id;
+  return cachedUserId;
+};
 
 interface GraphqlError {
   message?: string;
@@ -47,15 +49,15 @@ interface GraphqlResponse<T> {
   errors?: GraphqlError[];
 }
 
-export async function graphqlRequest<T>(query: string, variables: Record<string, unknown> = {}): Promise<T> {
+export const graphqlRequest = async <T>(query: string, variables: Record<string, unknown> = {}): Promise<T> => {
   const token = await getToken();
   const response = await fetch(`${API_URL}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify({ query, variables }),
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
   });
 
   if (!response.ok) {
@@ -74,37 +76,28 @@ export async function graphqlRequest<T>(query: string, variables: Record<string,
   }
 
   return json.data;
-}
+};
 
-export async function fetchWorkspaces(): Promise<WorkspaceSummary[]> {
-  const token = await getToken();
-  const response = await fetch(`${API_URL}/api/workspaces`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch workspaces: ${response.status}`);
-  }
-
-  const data = (await response.json()) as { workspaces: WorkspaceSummary[] };
-  return data.workspaces;
-}
+export const fetchWorkspaces = async (): Promise<WorkspaceSummary[]> => {
+  const data = await graphqlRequest<{ myWorkspaces: WorkspaceSummary[] }>(MY_WORKSPACES_QUERY);
+  return data.myWorkspaces;
+};
 
 interface PaginatedResponse<T> {
   nodes: T[];
   pageInfo: { hasNextPage: boolean; endCursor: string | null };
 }
 
-export async function paginateGraphql<T>(options: {
+export const paginateGraphql = async <T>(options: {
   query: string;
   variables: Record<string, unknown>;
   nodeKey: string;
-}): Promise<T[]> {
+}): Promise<T[]> => {
   const results: T[] = [];
   let after: string | null = null;
 
-  for (let page = 0; page < 100; page++) {
-    const variables = { first: 100, after, ...options.variables };
+  for (let page = 0; page < 100; page += 1) {
+    const variables = { after, first: 100, ...options.variables };
     const data: Record<string, PaginatedResponse<T>> = await graphqlRequest(options.query, variables);
 
     const connection: PaginatedResponse<T> = data[options.nodeKey];
@@ -117,7 +110,7 @@ export async function paginateGraphql<T>(options: {
   }
 
   return results;
-}
+};
 
 interface SyncMutateTransaction {
   clientTxId: string;
@@ -136,23 +129,23 @@ interface SyncMutateRequest {
 interface SyncMutateResponse {
   success: boolean;
   lastSyncId: string;
-  results: Array<{
+  results: {
     clientTxId: string;
     success: boolean;
     syncId?: string;
     error?: string;
-  }>;
+  }[];
 }
 
-export async function syncMutate(request: SyncMutateRequest): Promise<void> {
+export const syncMutate = async (request: SyncMutateRequest): Promise<void> => {
   const token = await getToken();
   const response = await fetch(`${API_URL}/sync/mutate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
     body: JSON.stringify(request),
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    method: "POST",
   });
 
   if (!response.ok) {
@@ -166,4 +159,4 @@ export async function syncMutate(request: SyncMutateRequest): Promise<void> {
     const error = data.results.find((r) => !r.success);
     throw new Error(error?.error || "Sync mutation failed");
   }
-}
+};

@@ -25,3 +25,7 @@ export async function getAutoSettings(): Promise<AutoWallpaperSettings> {
     return DEFAULTS;
   }
 }
+
+export async function setAutoSettings(settings: AutoWallpaperSettings): Promise<void> {
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
