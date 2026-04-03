@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Raycast generated
+raycast-env.d.ts
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment & secrets
+.env
+.env.*
+*.key
+*.pem
+
+# TypeScript
+*.tsbuildinfo
+
+# Temporary files
+/tmp/
+*.tmp

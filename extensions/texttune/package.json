@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "texttune",
+  "version": "1.0.0",
+  "title": "TextTune",
+  "description": "Instantly rewrite selected text using AI. Works across all macOS apps — Slack, Gmail, editors, and more.",
+  "icon": "icon.png",
+  "author": "deepak_singh",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Rewrite This",
+      "subtitle": "TextTune",
+      "description": "Rewrite selected text using AI",
+      "mode": "view"
+    },
+    {
+      "name": "change-tone",
+      "title": "Change Rewrite Tone",
+      "subtitle": "TextTune",
+      "description": "Switch the default rewriting tone",
+      "mode": "view"
+    },
+    {
+      "name": "change-provider",
+      "title": "Change AI Provider",
+      "subtitle": "TextTune",
+      "description": "Switch AI provider, model, and API key",
+      "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "TextTune Settings",
+      "subtitle": "TextTune",
+      "description": "Open all TextTune settings",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "AI Provider",
+      "description": "Choose your AI provider",
+      "type": "dropdown",
+      "required": true,
+      "default": "openai",
+      "data": [
+        { "title": "OpenAI", "value": "openai" },
+        { "title": "Anthropic (Claude)", "value": "anthropic" },
+        { "title": "Groq (Free)", "value": "groq" },
+        { "title": "Ollama (Local)", "value": "ollama" },
+        { "title": "OpenAI Compatible", "value": "openai-compatible" }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key (not needed for Ollama)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model name. Leave empty for defaults: gpt-4o-mini (OpenAI), claude-sonnet-4-20250514 (Anthropic), llama-3.3-70b-versatile (Groq), llama3.2 (Ollama)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave empty for provider default"
+    },
+    {
+      "name": "customApiUrl",
+      "title": "Custom API URL",
+      "description": "Base URL for Ollama or OpenAI Compatible provider (e.g., http://localhost:11434/v1)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:11434/v1"
+    },
+    {
+      "name": "tone",
+      "title": "Default Tone",
+      "description": "Default rewriting style",
+      "type": "dropdown",
+      "required": false,
+      "default": "professional",
+      "data": [
+        { "title": "Professional", "value": "professional" },
+        { "title": "Casual", "value": "casual" },
+        { "title": "Fix Grammar", "value": "grammar" },
+        { "title": "Concise", "value": "concise" },
+        { "title": "Friendly", "value": "friendly" },
+        { "title": "Formal", "value": "formal" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~22.13.4",
+    "@types/react": "^19.0.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
