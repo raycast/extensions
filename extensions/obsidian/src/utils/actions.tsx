@@ -18,7 +18,7 @@ import { SearchNotePreferences } from "./preferences";
 import { updateNoteInCache, deleteNoteFromCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
 import { Note, NoteWithContent, Obsidian, ObsidianTargetType, ObsidianVault, Vault } from "@/obsidian";
-import { getCodeBlocks } from "./utils";
+import { getCodeBlocks, normalizeRelativePath } from "./utils";
 import { useVaultPluginCheck } from "./hooks";
 import { appendSelectedTextTo } from "@/api/append-note";
 
@@ -277,10 +277,7 @@ export function OpenPathInObsidianAction(props: { path: string }) {
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
 
-  const relativePath = note.path
-    .replace(vault.path, "")
-    .replace(/^[\\/]+/, "")
-    .replace(/\\/g, "/");
+  const relativePath = normalizeRelativePath(note.path, vault.path);
 
   return (
     <Action.Open
