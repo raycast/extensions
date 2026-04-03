@@ -358,7 +358,7 @@ export default function Command() {
         {Object.entries(stats.byCategory)
           .sort((a, b) => b[1] - a[1])
           .map(([category, amount]) => {
-            const percentage = stats.netExpenses > 0 ? (amount / stats.netExpenses) * 100 : 0;
+            const percentage = stats.grossExpenses > 0 ? (amount / stats.grossExpenses) * 100 : 0;
             return (
               <List.Item
                 key={category}
