@@ -31,9 +31,13 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmSync(filePath);
-        refresh();
-        showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
+        try {
+          fs.rmSync(filePath);
+          refresh();
+          showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
+        } catch (e) {
+          showToast(Toast.Style.Failure, "Failed to Delete", e instanceof Error ? e.message : String(e));
+        }
       },
     },
   };
@@ -50,9 +54,13 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmSync(folderPath, { recursive: true, force: true });
-        refresh();
-        showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
+        try {
+          fs.rmSync(folderPath, { recursive: true, force: true });
+          refresh();
+          showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
+        } catch (e) {
+          showToast(Toast.Style.Failure, "Failed to Delete", e instanceof Error ? e.message : String(e));
+        }
       },
     },
   };
@@ -142,10 +150,14 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
   function renameItem() {
     const newFilePath = join(dirname(props.filePath), itemName);
     if (props.filePath !== newFilePath) {
-      fs.renameSync(props.filePath, newFilePath);
-      showToast(Toast.Style.Success, `${props.typeName} Renamed`, `${basename(props.filePath)} -> ${itemName}`);
-      props.refresh();
-      pop();
+      try {
+        fs.renameSync(props.filePath, newFilePath);
+        showToast(Toast.Style.Success, `${props.typeName} Renamed`, `${basename(props.filePath)} -> ${itemName}`);
+        props.refresh();
+        pop();
+      } catch (e) {
+        showToast(Toast.Style.Failure, "Failed to Rename", e instanceof Error ? e.message : String(e));
+      }
     }
   }
 
