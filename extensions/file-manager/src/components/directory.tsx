@@ -41,27 +41,30 @@ export function Directory(props: { path: string; ignores: GitIgnoreHelper[]; ini
 
   function getFilteredData(): FileDataType[] {
     const data = getDirectoryData(props.path);
-    return data.filter((f) => {
+
+    // apply ignore filters
+    const filtered = data.filter((f) => {
       const path = f.name + (f.type === "directory" ? "/" : "");
       for (const ignore of ignores) {
         if (ignore.denies(path)) {
           return false;
         }
       }
-      if (!preferences.showHiddenFiles) {
-        const fullPath = join(props.path, f.name);
-        const escapedPath = escapeShellArg(fullPath);
-        const statOutput = execSync(`stat -f%f ${escapedPath}`, {
-          encoding: "utf8",
-        }).trim();
-        const fileFlags = parseInt(statOutput, 10);
-
-        if (fileFlags & (1 << 15)) {
-          return false;
-        }
-      }
       return true;
     });
+
+    if (!preferences.showHiddenFiles && filtered.length > 0) {
+      // use a single stat call
+      const escapedPaths = filtered.map((f) => escapeShellArg(join(props.path, f.name)));
+      const statOutput = execSync(`stat -f%f ${escapedPaths.join(" ")}`, { encoding: "utf8" });
+      const flags = statOutput
+        .trim()
+        .split("\n")
+        .map((line) => parseInt(line, 10));
+      return filtered.filter((_, i) => !(flags[i] & (1 << 15)));
+    }
+
+    return filtered;
   }
 
   const [directoryData, setDirectoryData] = useState<FileDataType[]>(() => getFilteredData());
