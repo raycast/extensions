@@ -32,6 +32,12 @@
       "title": "Remove Repo",
       "description": "Safely remove a local git repository from your filesystem",
       "mode": "view"
+    },
+    {
+      "name": "clone-repo",
+      "title": "Clone Repo",
+      "description": "Clone a git repository into one of your configured scan directories",
+      "mode": "view"
     }
   ],
   "preferences": [

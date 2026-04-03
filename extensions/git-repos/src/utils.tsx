@@ -44,15 +44,11 @@ interface GitRemote {
   url: string;
 }
 
-function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export class GitRepoService {
   private static favoritesStorageKey = "git-repos-favorites";
 
   static async gitRepos(): Promise<GitRepo[]> {
-    const preferences = getPreferences();
+    const preferences = getPreferenceValues<Preferences>();
     if (preferences.repoScanPath.length == 0) {
       showToast(Toast.Style.Failure, "", "Directories to scan has not been defined in settings");
       return [];
