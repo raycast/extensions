@@ -16,7 +16,7 @@ function resolvePath(filePath: string): string {
 /**
  * Parse an AWS-style INI config file without treating dots as nested keys.
  * The standard `ini` npm package splits dots in section names into nested objects,
- * which breaks profile names like `Files-Assets.OpsRW.Stag-showpad-staging`.
+ * which breaks profile names like `Files-Assets.OpsRW.Stag-myorg-staging`.
  */
 function parseIni(content: string): Record<string, Record<string, string>> {
   const result: Record<string, Record<string, string>> = {};
@@ -190,8 +190,8 @@ export function groupByAccount(profiles: SSOProfile[]): AccountGroup[] {
  * The common suffix is "stag-libraries".
  *
  * For a single profile like:
- *   LogPrivileged-showpad-logs
- * We strip the role name prefix to get "showpad-logs".
+ *   LogPrivileged-myorg-logs
+ * We strip the role name prefix to get "myorg-logs".
  */
 function deriveAccountName(roles: SSOProfile[]): string {
   // Filter out "default" profile for derivation — it doesn't follow naming conventions
@@ -258,7 +258,7 @@ const STAGE_MAP: { pattern: RegExp; label: string }[] = [
   { pattern: /^test-|^test$/i, label: "test" },
   { pattern: /^qa-|^qa$/i, label: "qa" },
   { pattern: /^uat-|^uat$/i, label: "uat" },
-  // Also match stage embedded in names like "showpad-staging", "showpad-production"
+  // Also match stage embedded in names like "myorg-staging", "myorg-production"
   { pattern: /[-]production$|[-]prod$/i, label: "prod" },
   { pattern: /[-]staging$|[-]stag$/i, label: "stag" },
   { pattern: /[-]development$|[-]dev$/i, label: "dev" },
@@ -266,7 +266,7 @@ const STAGE_MAP: { pattern: RegExp; label: string }[] = [
 
 /**
  * Derive stage from the account name.
- * e.g., "stag-libraries" → "stag", "showpad-production" → "prod"
+ * e.g., "stag-libraries" → "stag", "myorg-production" → "prod"
  */
 function deriveStage(accountName: string): string | undefined {
   for (const { pattern, label } of STAGE_MAP) {
