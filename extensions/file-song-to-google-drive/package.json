@@ -1,0 +1,38 @@
+{
+  "name": "file-song-to-google-drive",
+  "title": "File Song to Google Drive",
+  "description": "File a demo recording into the vnclm_ Google Drive",
+  "icon": "command-icon.png",
+  "author": "timothyjones",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "file-demo",
+      "title": "File Song to Google Drive",
+      "description": "Upload a demo recording to the vnclm_ shared Drive",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.4.5",
+    "vitest": "^2.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "test": "vitest run"
+  }
+}
