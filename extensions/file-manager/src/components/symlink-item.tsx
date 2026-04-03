@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { join, resolve } from "node:path";
+import { Icon, List } from "@raycast/api";
 import { DirectoryItem } from "./directory-item";
 import { FileItem } from "./file-item";
 import { FileDataType } from "../types";
@@ -15,7 +16,11 @@ export function SymlinkItem(props: {
   const a = fs.readlinkSync(filePath);
   const originalPath = resolve(props.fileData.path, a);
   const originalFileData = fs.lstatSync(originalPath, { throwIfNoEntry: false });
-  if (originalFileData?.isDirectory() ?? false) {
+  if (originalFileData === undefined) {
+    // handle broken symlink
+    return <List.Item title={props.fileData.name} subtitle="Broken symlink" icon={Icon.Warning} />;
+  }
+  if (originalFileData.isDirectory()) {
     return (
       <DirectoryItem
         fileData={props.fileData}
