@@ -54,6 +54,8 @@ function getUserFacingErrorMessage(errorCode: string): string {
     case "GEMINI_EMPTY_RESPONSE":
     case "GEMINI_INVALID_RESPONSE":
       return "Gemini returned an unexpected response. Please try again.";
+    case "NETWORK_OFFLINE":
+      return "You appear to be offline. Check your connection and try again.";
     case "INVALID_WORD_INPUT":
       return `Enter one word (letters, apostrophe, hyphen, max ${MAX_WORD_LENGTH} chars).`;
     case "INVALID_TEXT_INPUT":
@@ -88,6 +90,7 @@ export default function Translate() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<Translation | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] = useState<string | null>(null);
   const [recentHistory, setRecentHistory] = useState<Translation[]>([]);
   const [pendingWord, setPendingWord] = useState<PendingWordTranslation | null>(null);
   const [languagePair, setLanguagePair] = useState<LanguagePair | null>(langResult.pair);
@@ -150,6 +153,7 @@ export default function Translate() {
     clearDebounce();
     setResult(null);
     setError(null);
+    setErrorCode(null);
     setIsLoading(false);
     setSearchText("");
     setPendingWord(null);
@@ -196,6 +200,7 @@ export default function Translate() {
     setResult(null);
     setPendingWord(null);
     setIsLoading(false);
+    setErrorCode("INVALID_TEXT_INPUT");
     setError(getUserFacingErrorMessage("INVALID_TEXT_INPUT"));
   }
 
@@ -242,12 +247,14 @@ export default function Translate() {
       setResult(null);
       setPendingWord(null);
       setError(null);
+      setErrorCode(null);
       setIsLoading(false);
       return;
     }
 
     setRecentShowingDetail(false);
     setError(null);
+    setErrorCode(null);
     setResult(null);
     setPendingWord(null);
     setIsLoading(false);
@@ -302,6 +309,7 @@ export default function Translate() {
 
     setIsLoading(true);
     setError(null);
+    setErrorCode(null);
     setResult(null);
     setPendingWord(null);
 
@@ -321,13 +329,14 @@ export default function Translate() {
     } catch (err) {
       if (controller.signal.aborted) return;
 
-      const errorCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
-      const userMessage = getUserFacingErrorMessage(errorCode);
+      const rawCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
+      const userMessage = getUserFacingErrorMessage(rawCode);
+      setErrorCode(rawCode);
       setError(userMessage);
 
       await showToast({
         style: Toast.Style.Failure,
-        title: "Translation failed",
+        title: rawCode === "NETWORK_OFFLINE" ? "No Internet Connection" : "Translation failed",
         message: userMessage,
       });
     } finally {
@@ -345,6 +354,7 @@ export default function Translate() {
 
     setIsLoading(true);
     setError(null);
+    setErrorCode(null);
     setResult(null);
     setPendingWord(null);
 
@@ -379,13 +389,14 @@ export default function Translate() {
     } catch (err) {
       if (controller.signal.aborted) return;
 
-      const errorCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
-      const userMessage = getUserFacingErrorMessage(errorCode);
+      const rawCode = err instanceof Error ? err.message : "UNKNOWN_ERROR";
+      const userMessage = getUserFacingErrorMessage(rawCode);
+      setErrorCode(rawCode);
       setError(userMessage);
 
       await showToast({
         style: Toast.Style.Failure,
-        title: "Translation failed",
+        title: rawCode === "NETWORK_OFFLINE" ? "No Internet Connection" : "Translation failed",
         message: userMessage,
       });
     } finally {
@@ -416,11 +427,14 @@ export default function Translate() {
     >
       {error ? (
         <List.EmptyView
-          title="Translation Error"
+          title={errorCode === "NETWORK_OFFLINE" ? "No Internet Connection" : "Translation Error"}
           description={error}
-          icon={Icon.ExclamationMark}
+          icon={errorCode === "NETWORK_OFFLINE" ? Icon.WifiDisabled : Icon.ExclamationMark}
           actions={
             <ActionPanel>
+              {errorCode === "NETWORK_OFFLINE" && searchText.trim() && (
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => submitTranslation(searchText)} />
+              )}
               {error.includes("API key") && (
                 <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
               )}
@@ -429,10 +443,7 @@ export default function Translate() {
           }
         />
       ) : showSensePicker && pendingWord ? (
-        <List.Section
-          title="Choose Translation"
-          subtitle="Primary action saves to history, flashcards, and copies — Enter"
-        >
+        <List.Section title="Choose Translation">
           {pendingWord.senses.map((sense, index) => {
             const detailTranslation: Translation = {
               id: `pick-${index}`,
@@ -448,14 +459,12 @@ export default function Translate() {
             return (
               <List.Item
                 key={`${sense.translation}-${index}`}
-                title={sense.translation}
-                subtitle={sense.partOfSpeech}
+                title={`${index + 1}. ${sense.translation}`}
                 accessories={[
                   ...(index === 0 && pendingWord.effectiveWord !== pendingWord.originalInput
-                    ? [{ tag: { value: `corrected from "${pendingWord.originalInput}"`, color: Color.Orange } }]
+                    ? [{ tag: { value: `corrected → "${pendingWord.effectiveWord}"`, color: Color.Orange } }]
                     : []),
                   { tag: { value: sense.partOfSpeech, color: posColor(sense.partOfSpeech) } },
-                  { text: `#${index + 1}` },
                 ]}
                 detail={
                   <List.Item.Detail

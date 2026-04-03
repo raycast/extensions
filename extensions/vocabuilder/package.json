@@ -107,6 +107,14 @@
         {
           "title": "Turkish",
           "value": "tr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be"
         }
       ]
     },
@@ -177,6 +185,14 @@
         {
           "title": "Turkish",
           "value": "tr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be"
         }
       ]
     },

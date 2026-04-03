@@ -15,17 +15,25 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 async function callGemini(prompt: string, apiKey: string, signal?: AbortSignal): Promise<string> {
   const url = `${BASE_URL}/${MODEL}:generateContent`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-goog-api-key": apiKey,
-    },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-    }),
-    signal,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+      }),
+      signal,
+    });
+  } catch (err) {
+    if (err instanceof TypeError) {
+      throw new Error("NETWORK_OFFLINE");
+    }
+    throw err;
+  }
 
   if (response.status === 401 || response.status === 403) {
     throw new Error("INVALID_API_KEY");

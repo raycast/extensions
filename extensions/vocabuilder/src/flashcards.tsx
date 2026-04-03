@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useReducer, useState } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
 import { useLanguagePair } from "./hooks/useLanguagePair";
@@ -208,6 +208,11 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
           description={description}
           actions={
             <ActionPanel>
+              <Action
+                title="Close"
+                icon={Icon.XMarkCircle}
+                onAction={() => closeMainWindow({ clearRootSearch: true })}
+              />
               <ToggleLanguagesAction />
             </ActionPanel>
           }

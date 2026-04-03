@@ -158,6 +158,11 @@ describe("translateWord", () => {
   it("throws INVALID_WORD_INPUT for empty input", async () => {
     await expect(translateWord("", API_KEY, pair)).rejects.toThrow("INVALID_WORD_INPUT");
   });
+
+  it("throws NETWORK_OFFLINE when fetch fails with a network TypeError", async () => {
+    vi.mocked(fetch).mockRejectedValue(new TypeError("fetch failed"));
+    await expect(translateWord("hello", API_KEY, pair)).rejects.toThrow("NETWORK_OFFLINE");
+  });
 });
 
 describe("translateText", () => {
@@ -176,5 +181,10 @@ describe("translateText", () => {
 
   it("throws INVALID_TEXT_INPUT for empty input", async () => {
     await expect(translateText("", API_KEY, pair)).rejects.toThrow("INVALID_TEXT_INPUT");
+  });
+
+  it("throws NETWORK_OFFLINE when fetch fails with a network TypeError", async () => {
+    vi.mocked(fetch).mockRejectedValue(new TypeError("fetch failed"));
+    await expect(translateText("Hello world", API_KEY, pair)).rejects.toThrow("NETWORK_OFFLINE");
   });
 });
