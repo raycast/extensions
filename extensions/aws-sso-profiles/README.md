@@ -80,6 +80,5 @@ region = eu-central-1
 ## Requirements
 
 - **macOS** — This extension is macOS-only
-- **Google Chrome** — Console URLs are opened in Chrome
 - **AWS SSO configured** — Your `~/.aws/config` must contain SSO profiles with `sso_account_id` and `sso_role_name`
 - **Active SSO session** — Log in via `aws sso login` or your SSO tool before using the extension

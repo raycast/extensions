@@ -79,9 +79,7 @@ export function AccountListItem({
   }
 
   // Show usage count (only if preference enabled)
-  const { showUsageCount } = getPreferenceValues<{
-    showUsageCount?: boolean;
-  }>();
+  const { showUsageCount } = getPreferenceValues<Preferences>();
   if (showUsageCount && usageCount > 0) {
     accessories.push({
       tag: { value: `${usageCount}×`, color: Color.Purple },
@@ -109,7 +107,7 @@ export function AccountListItem({
 
   const handleOpen = async (url: string, shouldTrack = false) => {
     try {
-      openUrl(url);
+      await openUrl(url);
       if (shouldTrack) {
         await trackUsage(
           defaultProfile.ssoAccountId,
@@ -221,7 +219,7 @@ export function AccountListItem({
 
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy Account Id"
+              title="Copy Account ID"
               content={account.accountId}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -229,7 +227,7 @@ export function AccountListItem({
 
           <ActionPanel.Section title="Login">
             <Action
-              title="Sso Login in Browser"
+              title="SSO Login in Browser"
               icon={Icon.Key}
               shortcut={{ modifiers: ["cmd"], key: "l" }}
               onAction={() => handleOpen(account.ssoStartUrl)}

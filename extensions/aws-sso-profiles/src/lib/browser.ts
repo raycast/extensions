@@ -1,8 +1,8 @@
-import { execSync } from "child_process";
+import { open } from "@raycast/api";
 
 /**
- * Open a URL in Google Chrome.
+ * Open a URL in the user's default browser.
  */
-export function openUrl(url: string): void {
-  execSync(`open -a "Google Chrome" "${url}"`);
+export async function openUrl(url: string): Promise<void> {
+  await open(url);
 }

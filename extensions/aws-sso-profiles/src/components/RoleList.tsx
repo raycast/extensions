@@ -73,7 +73,7 @@ function formatRoleName(roleName: string): string {
  * Parse the additionalRegions preference into a list of region codes.
  */
 function getAdditionalRegions(): string[] {
-  const prefs = getPreferenceValues<{ additionalRegions?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   if (!prefs.additionalRegions) return [];
   return prefs.additionalRegions
     .split(",")
@@ -196,9 +196,7 @@ function RoleListItem({
 }: RoleListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
-  const { showUsageCount } = getPreferenceValues<{
-    showUsageCount?: boolean;
-  }>();
+  const { showUsageCount } = getPreferenceValues<Preferences>();
   if (showUsageCount && usageCount > 0) {
     accessories.push({
       tag: { value: `${usageCount}×`, color: Color.Purple },
@@ -227,7 +225,7 @@ function RoleListItem({
 
   const handleOpen = async (url: string, shouldTrack = true) => {
     try {
-      openUrl(url);
+      await openUrl(url);
       if (shouldTrack) {
         await trackUsage(profile.ssoAccountId, profile.ssoRoleName, region);
         onUsageTracked();
@@ -260,7 +258,7 @@ function RoleListItem({
               onAction={() => handleOpen(consoleUrl)}
             />
             <Action
-              title="Open Sso Portal"
+              title="Open SSO Portal"
               icon={Icon.Link}
               onAction={() => handleOpen(getSSOPortalUrl(profile), false)}
             />
@@ -283,7 +281,7 @@ function RoleListItem({
           </ActionPanel.Submenu>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy Account Id"
+              title="Copy Account ID"
               content={profile.ssoAccountId}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -305,7 +303,7 @@ function RoleListItem({
           </ActionPanel.Section>
           <ActionPanel.Section title="Login">
             <Action
-              title="Sso Login in Browser"
+              title="SSO Login in Browser"
               icon={Icon.Key}
               shortcut={{ modifiers: ["cmd"], key: "l" }}
               onAction={() => handleOpen(profile.ssoStartUrl)}

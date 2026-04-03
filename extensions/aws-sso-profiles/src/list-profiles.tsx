@@ -18,10 +18,6 @@ import {
   type UsageData,
 } from "./lib/usage-tracker";
 
-interface Preferences {
-  awsConfigPath?: string;
-}
-
 const MAX_MULTI_SESSIONS = 5;
 
 export default function ListProfiles() {
@@ -101,7 +97,7 @@ export default function ListProfiles() {
     for (const account of toOpen) {
       const defaultProfile = account.roles[0]!;
       try {
-        openUrl(getDirectConsoleUrl(defaultProfile));
+        await openUrl(getDirectConsoleUrl(defaultProfile));
       } catch (e) {
         await showToast({
           style: Toast.Style.Failure,
