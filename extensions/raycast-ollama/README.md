@@ -18,6 +18,13 @@ Use [Ollama](https://ollama.ai) for local llama inference on Raycast. This appli
 
 ## How to Use
 
+### AI Extension: Ollama Search API
+
+Use [Ollama Web Search](https://ollama.com/blog/web-search) on Raycast Quick AI and Chat.
+
+> [!WARNING]
+> For this feature an Ollama API Key is required. Create it from your [Ollama Account](https://ollama.com/settings/keys) and copy it on Extension Setting "Ollama API Key".
+
 ### Command: Manage Models
 
 View, add, and remove models that are installed locally or on a configured remote Ollama Server. To manage and utilize models from the remote server, use the ***Add Server*** action.

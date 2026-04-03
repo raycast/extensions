@@ -3,6 +3,7 @@ export interface Preferences {
   ollamaResultViewInputFallback: boolean;
   ollamaChatHistoryMessagesNumber: string;
   ollamaCertificateValidation: string;
+  ollamaApiKey: string;
 }
 
 export interface RaycastArgumentsOllamaCommandCustom {

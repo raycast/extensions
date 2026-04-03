@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Added AI Extension "Web Search" and "Web Fetch". This feature requires the Ollama Web Search API Key.
+
 ## [Improvement and Fix] - 2026-02-02
 
 - [Improvement] Command "Manage Models": added "Load Model on Memory" action, which loads the model on memory with no expiration date.
