@@ -17,7 +17,7 @@ Instantly rewrite selected text using AI, right from Raycast. Works across all m
 |---------|-------------|
 | **Rewrite This** | Rewrite selected text with AI. Press Enter to paste back. |
 | **Change Rewrite Tone** | Switch between Professional, Casual, Fix Grammar, Concise, Friendly, Formal |
-| **Change AI Provider** | Switch between OpenAI, Claude, Groq, Ollama, or any OpenAI-compatible API |
+| **Change AI Provider** | Switch between OpenAI, Claude, and Groq |
 | **TextTune Settings** | Open all settings |
 
 ## Setup

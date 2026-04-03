@@ -69,7 +69,7 @@ export default function Command() {
           tone: activeTone,
           provider: preferences.provider,
           apiKey: preferences.apiKey,
-          model: preferences.model,
+          model: preferences.model ?? "",
         };
 
         const result = await rewriteText(options, controller.signal);
