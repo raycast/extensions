@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { parseSkillsListJson, stripAnsi } from "./skills-cli";
+import {
+  NpxResolutionError,
+  agentDisplayNameToId,
+  normalizeCliError,
+  parseSkillsListJson,
+  stripAnsi,
+} from "./skills-cli";
 
 describe("stripAnsi", () => {
   it("removes ANSI escape codes", () => {
@@ -67,5 +73,52 @@ describe("parseSkillsListJson", () => {
         agentCount: 0,
       },
     ]);
+  });
+});
+
+describe("normalizeCliError", () => {
+  it("classifies a shell command-not-found error as npx resolution failure", () => {
+    const error = new Error("command not found: npx");
+
+    const normalized = normalizeCliError(error, "npx");
+
+    expect(normalized).toBeInstanceOf(NpxResolutionError);
+  });
+
+  it("classifies a spawn ENOENT error as npx resolution failure", () => {
+    const normalized = normalizeCliError(
+      {
+        message: "spawn /opt/homebrew/bin/npx ENOENT",
+        code: "ENOENT",
+      },
+      "/opt/homebrew/bin/npx",
+    );
+
+    expect(normalized).toBeInstanceOf(NpxResolutionError);
+  });
+
+  it("classifies a Windows-style not-found error as npx resolution failure", () => {
+    const error = new Error("'npx' is not recognized as an internal or external command");
+
+    const normalized = normalizeCliError(error, "npx.exe");
+
+    expect(normalized).toBeInstanceOf(NpxResolutionError);
+  });
+
+  it("returns regular Error instances unchanged when the failure is unrelated", () => {
+    const error = new Error("skills list failed");
+
+    expect(normalizeCliError(error, "npx")).toBe(error);
+  });
+});
+
+describe("agentDisplayNameToId", () => {
+  it("maps known agent display names to the expected CLI ids", () => {
+    expect(agentDisplayNameToId("Claude Code")).toBe("claude-code");
+    expect(agentDisplayNameToId("Deep Agents")).toBe("deepagents");
+  });
+
+  it("falls back to lowercase kebab-case for unknown agents", () => {
+    expect(agentDisplayNameToId("My Custom Agent")).toBe("my-custom-agent");
   });
 });

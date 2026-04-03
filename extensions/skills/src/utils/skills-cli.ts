@@ -58,7 +58,7 @@ export function shellEscape(arg: string): string {
   return `'${arg.replace(/'/g, "'\\''")}'`;
 }
 
-function normalizeCliError(error: unknown, npxCommand: string): Error {
+export function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
       "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in Extension Preferences under 'Custom npx Path'.",
@@ -190,7 +190,7 @@ const AGENT_DISPLAY_TO_ID = new Map<string, string>([
   ["Zencoder", "zencoder"],
 ]);
 
-function agentDisplayNameToId(displayName: string): string {
+export function agentDisplayNameToId(displayName: string): string {
   return AGENT_DISPLAY_TO_ID.get(displayName) ?? displayName.toLowerCase().replace(/\s+/g, "-");
 }
 

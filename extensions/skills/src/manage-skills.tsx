@@ -1,5 +1,6 @@
-import { List, Icon, Detail, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
+import { List, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
+import { CommandEmptyView, CommandErrorDetail, RetryAction } from "./components/CommandStates";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
 import { isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
@@ -14,42 +15,18 @@ export default function Command() {
   const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
 
   if (error && skills.length === 0) {
-    let errorMarkdown = `# Error Loading Installed Skills
-
-**Error:** ${error?.message}
-
----
-
-This is a local skills CLI execution failure.
-
-If this persists:
-
-1. Retry the command.
-2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.
-3. Run \`npx -y skills@latest list -g\` in Terminal to inspect the underlying CLI error.
-`;
-
-    if (hasNpxResolutionError) {
-      errorMarkdown = `# Error Loading Installed Skills
-
-**Error:** ${error?.message}
-
----
-
-This is an npx resolution issue in the local CLI runtime.
-
-1. Run \`which npx\` in Terminal.
-2. Open Extension Preferences (\`Cmd+Shift+,\`).
-3. Set **Custom npx Path** to the path from step 1, then retry.
-`;
-    }
-
     return (
-      <Detail
-        markdown={errorMarkdown}
+      <CommandErrorDetail
+        title="Unable to Load Installed Skills"
+        message={error.message}
+        detailsMarkdown={
+          hasNpxResolutionError
+            ? "This is an `npx` resolution issue in the local CLI runtime.\n\n1. Run `which npx` in Terminal.\n2. Open Extension Preferences (`Cmd+Shift+,`).\n3. Set **Custom npx Path** to the path from step 1, then retry."
+            : "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.\n3. Run `npx -y skills@latest list -g` in Terminal to inspect the underlying CLI error."
+        }
         actions={
           <ActionPanel>
-            <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+            <RetryAction onAction={revalidate} />
             <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
           </ActionPanel>
         }
@@ -89,24 +66,24 @@ This is an npx resolution issue in the local CLI runtime.
       }
     >
       {skills.length === 0 && !isLoading ? (
-        <List.EmptyView
+        <CommandEmptyView
           title="No Installed Skills"
-          description="Install skills using the Search Skills command"
+          description="Install skills from Search Skills to manage them here."
           icon={Icon.Box}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <RetryAction onAction={revalidate} />
             </ActionPanel>
           }
         />
       ) : filteredSkills.length === 0 && !isLoading ? (
-        <List.EmptyView
-          title="No Skills for This Agent"
+        <CommandEmptyView
+          title="No Results for Current Filter"
           description={`No installed skills match the "${selectedAgent}" filter. Try selecting a different agent.`}
           icon={Icon.Filter}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <RetryAction onAction={revalidate} />
             </ActionPanel>
           }
         />

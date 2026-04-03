@@ -1,7 +1,17 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { useCachedPromise } from "@raycast/utils";
 import type { Skill } from "../shared";
-import { buildSkillContentUrls, fetchSkillContent } from "./skill-content";
+import { fetchSkillContent } from "./skill-content";
+import { useSkillContent } from "./useSkillContent";
+
+vi.mock("@raycast/utils", () => ({
+  useCachedPromise: vi.fn(),
+}));
+
+vi.mock("./skill-content", () => ({
+  fetchSkillContent: vi.fn(),
+}));
 
 const sampleSkill: Skill = {
   id: "vercel-labs/example",
@@ -11,88 +21,88 @@ const sampleSkill: Skill = {
   source: "vercel-labs/agent-skills",
 };
 
-describe("buildSkillContentUrls", () => {
-  it("builds candidate URLs for SKILL.md and README.md", () => {
-    const { skillUrls, readmeUrls } = buildSkillContentUrls(sampleSkill);
-
-    expect(skillUrls).toContain(
-      "https://raw.githubusercontent.com/vercel-labs/agent-skills/main/skills/vercel-example-skill/SKILL.md",
-    );
-    expect(skillUrls).toContain(
-      "https://raw.githubusercontent.com/vercel-labs/agent-skills/main/skills/example-skill/SKILL.md",
-    );
-    expect(readmeUrls).toEqual([
-      "https://raw.githubusercontent.com/vercel-labs/agent-skills/main/README.md",
-      "https://raw.githubusercontent.com/vercel-labs/agent-skills/master/README.md",
-    ]);
-  });
-});
-
-describe("fetchSkillContent", () => {
+describe("useSkillContent", () => {
   beforeEach(() => {
-    vi.stubGlobal("fetch", vi.fn());
+    vi.mocked(useCachedPromise).mockReset();
+    vi.mocked(fetchSkillContent).mockReset();
   });
 
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
+  it("returns content and frontmatter from cached data", () => {
+    vi.mocked(useCachedPromise).mockReturnValue({
+      data: {
+        body: "# Skill Body",
+        frontmatter: { title: "Example", description: "Sample skill" },
+      },
+      isLoading: false,
+    } as ReturnType<typeof useCachedPromise>);
 
-  it("returns SKILL.md content when available", async () => {
-    const fetchMock = vi.mocked(fetch);
-    fetchMock.mockImplementation(async (input) => {
-      const url = String(input);
-      if (url.includes("/SKILL.md")) {
-        return {
-          ok: true,
-          headers: new Headers({ "content-type": "text/plain" }),
-          text: async () => "---\ntitle: Example\n---\n# Skill Body",
-        } as Response;
-      }
-      return {
-        ok: false,
-        headers: new Headers({ "content-type": "text/plain" }),
-        text: async () => "",
-      } as Response;
-    });
+    const result = useSkillContent(sampleSkill);
 
-    await expect(fetchSkillContent(sampleSkill)).resolves.toEqual({
-      frontmatter: { title: "Example" },
-      body: "# Skill Body",
+    expect(result).toEqual({
+      content: "# Skill Body",
+      frontmatter: { title: "Example", description: "Sample skill" },
+      isLoading: false,
     });
   });
 
-  it("falls back to README.md when all SKILL.md attempts fail", async () => {
-    const fetchMock = vi.mocked(fetch);
-    fetchMock.mockImplementation(async (input) => {
-      const url = String(input);
-      if (url.includes("/README.md")) {
-        return {
-          ok: true,
-          headers: new Headers({ "content-type": "text/plain" }),
-          text: async () => "# README Body",
-        } as Response;
-      }
-      return {
-        ok: false,
-        headers: new Headers({ "content-type": "text/plain" }),
-        text: async () => "",
-      } as Response;
-    });
+  it("falls back to an empty frontmatter object when data is unavailable", () => {
+    vi.mocked(useCachedPromise).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as ReturnType<typeof useCachedPromise>);
 
-    await expect(fetchSkillContent(sampleSkill)).resolves.toEqual({
+    const result = useSkillContent(sampleSkill);
+
+    expect(result).toEqual({
+      content: undefined,
       frontmatter: {},
-      body: "# README Body",
+      isLoading: false,
     });
   });
 
-  it("returns undefined when every candidate fails", async () => {
-    const fetchMock = vi.mocked(fetch);
-    fetchMock.mockResolvedValue({
-      ok: false,
-      headers: new Headers({ "content-type": "text/plain" }),
-      text: async () => "",
-    } as Response);
+  it("passes through the loading state", () => {
+    vi.mocked(useCachedPromise).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    } as ReturnType<typeof useCachedPromise>);
 
-    await expect(fetchSkillContent(sampleSkill)).resolves.toBeUndefined();
+    const result = useSkillContent(sampleSkill);
+
+    expect(result.isLoading).toBe(true);
+  });
+
+  it("forwards the execute option to useCachedPromise", () => {
+    vi.mocked(useCachedPromise).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as ReturnType<typeof useCachedPromise>);
+
+    useSkillContent(sampleSkill, false);
+
+    expect(useCachedPromise).toHaveBeenCalledWith(expect.any(Function), [sampleSkill], {
+      keepPreviousData: true,
+      execute: false,
+    });
+  });
+
+  it("uses fetchSkillContent as the cached promise factory", async () => {
+    vi.mocked(useCachedPromise).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as ReturnType<typeof useCachedPromise>);
+    vi.mocked(fetchSkillContent).mockResolvedValue({
+      body: "# Skill Body",
+      frontmatter: {},
+    });
+
+    useSkillContent(sampleSkill);
+
+    const [loader] = vi.mocked(useCachedPromise).mock.calls[0];
+
+    await expect(loader(sampleSkill)).resolves.toEqual({
+      body: "# Skill Body",
+      frontmatter: {},
+    });
+    expect(fetchSkillContent).toHaveBeenCalledWith(sampleSkill);
   });
 });
