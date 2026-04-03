@@ -219,7 +219,7 @@ export function AccountListItem({
 
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy Account ID"
+              title="Copy Account Id"
               content={account.accountId}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -227,7 +227,7 @@ export function AccountListItem({
 
           <ActionPanel.Section title="Login">
             <Action
-              title="SSO Login in Browser"
+              title="Sso Login in Browser"
               icon={Icon.Key}
               shortcut={{ modifiers: ["cmd"], key: "l" }}
               onAction={() => handleOpen(account.ssoStartUrl)}

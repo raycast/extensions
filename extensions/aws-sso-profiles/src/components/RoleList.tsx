@@ -258,7 +258,7 @@ function RoleListItem({
               onAction={() => handleOpen(consoleUrl)}
             />
             <Action
-              title="Open SSO Portal"
+              title="Open Sso Portal"
               icon={Icon.Link}
               onAction={() => handleOpen(getSSOPortalUrl(profile), false)}
             />
@@ -281,7 +281,7 @@ function RoleListItem({
           </ActionPanel.Submenu>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy Account ID"
+              title="Copy Account Id"
               content={profile.ssoAccountId}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -303,7 +303,7 @@ function RoleListItem({
           </ActionPanel.Section>
           <ActionPanel.Section title="Login">
             <Action
-              title="SSO Login in Browser"
+              title="Sso Login in Browser"
               icon={Icon.Key}
               shortcut={{ modifiers: ["cmd"], key: "l" }}
               onAction={() => handleOpen(profile.ssoStartUrl)}
