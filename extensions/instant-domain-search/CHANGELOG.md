@@ -1,6 +1,6 @@
 # Instant Domain Search Changelog
 
-## [Updated Extension Icon] - {PR_MERGE_DATE}
+## [Updated Extension Icon] - 2026-04-03
 
 - Updated the extension icon
 
