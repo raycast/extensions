@@ -47,15 +47,44 @@ function getRashidLocation(): {
 } {
   // Get current time in CET/CEST (Europe/Berlin timezone)
   const now = new Date();
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    weekday: "long",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    formatter.formatToParts(now).map((p) => [p.type, p.value]),
+  );
+  const currentHour = parseInt(parts.hour, 10);
+  const dayName = parts.weekday;
+
+  // Construct Date in CET timezone
   const cetTime = new Date(
-    now.toLocaleString("en-US", {
-      timeZone: "Europe/Berlin",
-    }),
+    parseInt(parts.year, 10),
+    parseInt(parts.month, 10) - 1,
+    parseInt(parts.day, 10),
+    parseInt(parts.hour, 10),
+    parseInt(parts.minute, 10),
+    parseInt(parts.second, 10),
   );
 
   // Get the day of week (0 = Sunday, 1 = Monday, etc.)
-  let dayIndex = cetTime.getDay();
-  const currentHour = cetTime.getHours();
+  const dayMap: Record<string, number> = {
+    Sunday: 0,
+    Monday: 1,
+    Tuesday: 2,
+    Wednesday: 3,
+    Thursday: 4,
+    Friday: 5,
+    Saturday: 6,
+  };
+  let dayIndex = dayMap[dayName];
 
   // Rashid moves at 10:00 CET/CEST each day
   // If it's before 10:00, he's still in yesterday's city
