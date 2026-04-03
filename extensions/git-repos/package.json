@@ -120,10 +120,7 @@
       "required": true,
       "title": "Open with (required), shortcut: ⌘⏎",
       "description": "Open with",
-      "default": {
-        "macOS": "Finder",
-        "Windows": "File Explorer"
-      }
+      "default": "Finder"
     },
     {
       "name": "openWith3",

@@ -240,6 +240,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
         maxDepth,
         follow: true,
         withFileTypes: true,
+        dot: true,
       }) as Path[];
       const gitDirs = gitEntries.filter((p) => p.isDirectory()).map((p) => p.fullpath());
       const gitFiles = gitEntries.filter((p) => p.isFile()).map((p) => p.fullpath());
@@ -263,6 +264,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
       } else {
         foundRepos = foundRepos.concat(repos);
       }
+      // Only add if this worktree path hasn't already been added as a regular repo
       worktrees.forEach((worktree) => {
         if (foundRepos.findIndex((r) => r.fullPath === worktree.fullPath) === -1) {
           foundRepos.push(worktree);
