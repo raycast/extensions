@@ -13,9 +13,7 @@ import {
   environment,
   Icon,
   Color,
-  Clipboard,
   getSelectedText,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 
@@ -145,17 +143,17 @@ async function checkContentAvailable(url: string): Promise<boolean> {
 
 /**
  * Assesses the quality of a table of contents for generating a book description.
- * Returns poor/hasEnoughInfo=false immediately if tocText is empty (no AI call).
+ * Returns poor/hasEnoughInfo=false immediately if input is empty (no AI call).
  */
-async function assessTOCQuality(tocText: string): Promise<TOCQuality> {
-  if (!tocText.trim()) {
+async function assessTOCQuality(toc: string): Promise<TOCQuality> {
+  if (!toc.trim()) {
     return { quality: "poor", confidence: 0, reason: "No TOC text available", hasEnoughInfo: false };
   }
 
   const prompt = `Bewerte die Qualität dieses Inhaltsverzeichnisses für die Klappentext-Generierung.
 
 Inhaltsverzeichnis:
-${tocText}
+${toc}
 
 Antworte NUR mit folgendem JSON-Format (keine Markdown-Codeblöcke):
 {
@@ -275,7 +273,7 @@ async function fetchWikipediaInfo(title: string, author: string): Promise<Extern
 }
 
 /**
- * Generates a book description using clipboard TOC and/or external sources.
+ * Generates a book description using external sources (Google Books, Wikipedia).
  * All external sources are always fetched when isbn is available.
  */
 async function generateVerifiedKlappentext(
@@ -283,13 +281,13 @@ async function generateVerifiedKlappentext(
   isbn: string,
   title: string,
   author: string,
-  clipboardToc: string,
+  toc: string,
 ): Promise<KlappentextResult> {
   const sources: ExternalSource[] = [];
 
-  // 1. Assess TOC quality from clipboard text (no AI call if empty)
-  const hasTOCText = clipboardToc.trim().length > 0;
-  const tocQuality = await assessTOCQuality(clipboardToc);
+  // 1. Assess TOC quality (no AI call if empty)
+  const hasTOCText = toc.trim().length > 0;
+  const tocQuality = await assessTOCQuality(toc);
 
   // 2. Always fetch all external sources when isbn is available
   if (isbn) {
@@ -371,7 +369,7 @@ ${sources.map((s) => `\n${s.name}:\n${s.snippet}\nURL: ${s.url}\n`).join("\n")}`
 }
 
 INHALTSVERZEICHNIS (SEKUNDÄR - nur zur Strukturierung):
-${clipboardToc}
+${toc}
 
 QUALITÄT DES INHALTSVERZEICHNISSES:
 ${tocQuality.reason}
@@ -588,15 +586,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
 
   useEffect(() => {
     async function runCommand() {
-      // Read clipboard once for both ISBN auto-fill and TOC detection
-      let clipboardText: string | undefined;
-      try {
-        clipboardText = (await Clipboard.readText()) ?? undefined;
-      } catch {
-        // silent fail
-      }
-
-      // Auto-fill ISBN: arg → selected text → clipboard
+      // Auto-fill ISBN: arg → selected text
       let effectiveIsbn = argIsbn?.trim() || "";
       if (!effectiveIsbn) {
         try {
@@ -609,84 +599,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           // silent fail – no selected text available
         }
       }
-      if (!effectiveIsbn && clipboardText) {
-        const match = clipboardText.replace(/[-\s]/g, "").match(/\d{10,13}/);
-        if (match && isValidISBN(match[0])) {
-          effectiveIsbn = match[0];
-        }
-      }
 
-      // Determine TOC text: from clipboard (only if not an ISBN-like string)
-      const isClipboardTOC =
-        !!clipboardText && clipboardText.length > 100 && !/^\d[\d\s-]{8,}$/.test(clipboardText.trim());
-      const tocFromClipboard = isClipboardTOC ? clipboardText : null;
-      const effectiveTocText = tocFromClipboard || "";
-
-      // Case C: No ISBN and no TOC → prompt user
-      if (!effectiveIsbn && !effectiveTocText) {
+      if (!effectiveIsbn) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "No Input",
-          message: "Please enter an ISBN or paste a table of contents",
+          title: "ISBN Required",
+          message: "Please enter an ISBN-10 or ISBN-13",
         });
         setIsLoading(false);
         return;
       }
 
-      // Case A: TOC present but generation disabled → point to preferences
-      if (!effectiveIsbn && effectiveTocText && !preferences.generateKlappentext) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Generation Disabled",
-          message: "Enable 'Generate Book Description' in Preferences",
-          primaryAction: {
-            title: "Open Preferences",
-            onAction: () => openExtensionPreferences(),
-          },
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Case B: TOC present and generation enabled → generate without DNB lookup
-      if (!effectiveIsbn && effectiveTocText && preferences.generateKlappentext) {
-        if (!environment.canAccess(AI)) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Raycast Pro Required",
-            message: "Book description generation requires Raycast Pro or BYOK",
-          });
-          setIsLoading(false);
-          return;
-        }
-
-        const toast = await showToast({
-          style: Toast.Style.Animated,
-          title: "Generating book description...",
-          message: "Using TOC from clipboard",
-        });
-
-        try {
-          const klappentextResult = await generateVerifiedKlappentext("", "", "", "", effectiveTocText);
-          setBookInfo({ title: "", author: "", tocUrl: "", tocFromClipboard: tocFromClipboard ?? null, isbn: "" });
-          setResult(klappentextResult);
-          setShowDetail(true);
-          await toast.hide();
-          setIsLoading(false);
-        } catch (error) {
-          console.error("Klappentext generation failed:", error);
-          await toast.hide();
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Book Description Generation Failed",
-            message: error instanceof Error ? error.message : "An unexpected error occurred",
-          });
-          setIsLoading(false);
-        }
-        return;
-      }
-
-      // Normal flow: ISBN present
       if (!isValidISBN(effectiveIsbn)) {
         await showToast({
           style: Toast.Style.Failure,
@@ -762,12 +685,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
             return;
           }
 
-          const tocTextForGen = tocFromClipboard || "";
-          if (tocFromClipboard) {
-            toast.message = "TOC from clipboard detected – generating book description...";
-          } else {
-            toast.message = "Checking sources and generating book description...";
-          }
+          toast.message = "Checking sources and generating book description...";
 
           try {
             const klappentextResult = await generateVerifiedKlappentext(
@@ -775,14 +693,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
               normalizeISBN(effectiveIsbn),
               title,
               author,
-              tocTextForGen,
+              "",
             );
 
             setBookInfo({
               title,
               author,
               tocUrl,
-              tocFromClipboard: tocFromClipboard ?? null,
+              tocFromClipboard: null,
               isbn: normalizeISBN(effectiveIsbn),
             });
             setResult(klappentextResult);

@@ -21,7 +21,7 @@
           "name": "isbn",
           "placeholder": "ISBN-10 or ISBN-13",
           "type": "text",
-          "required": true
+          "required": false
         }
       ],
       "preferences": [
