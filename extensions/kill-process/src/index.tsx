@@ -19,7 +19,7 @@ import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
-import { getFileIcon, getPlatformSpecificErrorHelp, isProcessRestartable, isWindows } from "./utils/platform";
+import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
 import {
   fetchProcessPerformance,
   fetchRunningProcesses,
@@ -152,7 +152,7 @@ export default function ProcessList() {
     setVisibleProcesses(
       processes.map((process) => ({
         ...process,
-        canRestartProcess: isProcessRestartable(process),
+        canRestartProcess: hasRestartLaunchPath(process),
       })),
     );
   }, [fetchResult, sortBy, isAppGroupingEnabled]);
@@ -267,7 +267,7 @@ export default function ProcessList() {
 
   const restartProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}` : process.processName;
-    if (!isProcessRestartable(process)) {
+    if (!hasRestartLaunchPath(process)) {
       handleRestartError(processName, new Error("A launchable executable or app bundle path is required."));
       return;
     }

@@ -1,4 +1,6 @@
 import { exec } from "child_process";
+import { constants } from "fs";
+import { access } from "fs/promises";
 import { Process } from "../types";
 import {
   isWindows,
@@ -8,6 +10,7 @@ import {
   getProcessListCommand,
   getProcessPerformanceCommand,
   getProcessRunningCheckCommand,
+  getRestartLaunchPath,
   getRestartCommand,
   getPlatformSpecificErrorHelp,
   parseProcessLine,
@@ -15,7 +18,7 @@ import {
   parseWindowsPerformanceData,
   getProcessType,
   getAppName,
-  isProcessRestartable,
+  hasRestartLaunchPath,
 } from "./platform";
 
 const EXEC_OPTIONS = { maxBuffer: 10 * 1024 * 1024 };
@@ -35,7 +38,7 @@ function executeCommand(command: string): Promise<void> {
   });
 }
 
-function waitForProcessToExit(): Promise<void> {
+function sleepForProcessExitPollInterval(): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, PROCESS_EXIT_POLL_INTERVAL_MS);
   });
@@ -58,10 +61,23 @@ async function waitForProcessExit(processId: number): Promise<void> {
       return;
     }
 
-    await waitForProcessToExit();
+    await sleepForProcessExitPollInterval();
   }
 
   throw new Error("The process did not fully exit before restart.");
+}
+
+async function assertRestartLaunchPathExists(process: Process): Promise<void> {
+  const launchPath = getRestartLaunchPath(process);
+  if (!launchPath) {
+    throw new Error("The selected process cannot be restarted because its launch path is unavailable.");
+  }
+
+  try {
+    await access(launchPath, constants.F_OK);
+  } catch {
+    throw new Error("The selected process cannot be restarted because its launch path no longer exists.");
+  }
 }
 
 /**
@@ -140,9 +156,11 @@ export async function terminateProcessTree(processId: number, force = false): Pr
 }
 
 export async function relaunchProcess(process: Process): Promise<void> {
-  if (!isProcessRestartable(process)) {
+  if (!hasRestartLaunchPath(process)) {
     throw new Error("The selected process cannot be restarted because its launch path is unavailable.");
   }
+
+  await assertRestartLaunchPathExists(process);
 
   const restartCommand = getRestartCommand(process);
   if (!restartCommand) {
@@ -153,7 +171,7 @@ export async function relaunchProcess(process: Process): Promise<void> {
 }
 
 export async function restartProcess(process: Process, force = false): Promise<void> {
-  if (!isProcessRestartable(process)) {
+  if (!hasRestartLaunchPath(process)) {
     throw new Error("The selected process cannot be restarted because its launch path is unavailable.");
   }
 

@@ -1,5 +1,4 @@
 import { Image } from "@raycast/api";
-import { existsSync } from "fs";
 import { Process } from "../types";
 
 /**
@@ -142,7 +141,7 @@ function getMacBundlePath(path: string, extension: ".app" | ".prefPane"): string
   return bundlePath ?? null;
 }
 
-function getLaunchPath(process: Process): string | null {
+export function getRestartLaunchPath(process: Process): string | null {
   const path = process.path.trim();
   if (!path || path === "-") {
     return null;
@@ -167,13 +166,12 @@ function getLaunchPath(process: Process): string | null {
   return null;
 }
 
-export function isProcessRestartable(process: Process): boolean {
-  const launchPath = getLaunchPath(process);
-  return launchPath !== null && existsSync(launchPath);
+export function hasRestartLaunchPath(process: Process): boolean {
+  return getRestartLaunchPath(process) !== null;
 }
 
 export function getRestartCommand(process: Process): string | null {
-  const launchPath = getLaunchPath(process);
+  const launchPath = getRestartLaunchPath(process);
   if (!launchPath) {
     return null;
   }
