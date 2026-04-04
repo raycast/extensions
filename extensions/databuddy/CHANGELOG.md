@@ -1,6 +1,6 @@
 # Databuddy
 
-## [Open Website Directly in Databuddy] - {PR_MERGE_DATE}
+## [Open Website Directly in Databuddy] - 2026-04-04
 
 - Deep link website "Open in Databuddy" actions to the selected website page
 
