@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Improvements] - 2026-04-04
+## [Improvements] - {PR_MERGE_DATE}
 
 ### New Features
 
