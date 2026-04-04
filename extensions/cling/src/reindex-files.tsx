@@ -156,7 +156,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Reinde
       try {
         const data = JSON.parse(stdout) as ClingStatus;
         setBody(renderStatus(data));
-      } catch (e) {
+      } catch {
         setBody(`Failed to parse status:\n\n\`\`\`\n${stdout}\n\`\`\``);
       }
     });
@@ -196,7 +196,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Reinde
       cancelledEffect = true;
       stopPolling();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const cancelReindex = async () => {
