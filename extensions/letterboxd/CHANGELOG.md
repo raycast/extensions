@@ -1,6 +1,6 @@
 # letterboxd Changelog
 
-## [Fix] - 2026-04-04
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed genre tag color for better visibility in light mode
 
