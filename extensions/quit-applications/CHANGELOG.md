@@ -1,6 +1,6 @@
 # Quit Applications Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-04-04
 
 - Fixed error when a foreground process has no file property (error -1728)
 
