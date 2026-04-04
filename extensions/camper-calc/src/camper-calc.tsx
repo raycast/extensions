@@ -366,7 +366,7 @@ export default function Command() {
                 accessories={[
                   {
                     text: `${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                    tooltip: `${percentage.toFixed(1)}% of net cost`,
+                    tooltip: `${percentage.toFixed(1)}% of total`,
                   },
                 ]}
               />
@@ -575,8 +575,13 @@ function AddExpenseForm({ onAdd }: { onAdd: (expense: Expense) => void }) {
       setYearError("Please enter a valid year (1900–2100)");
       return;
     }
-    if (isNaN(amountNum) || amountNum <= 0) {
-      setAmountError("Please enter a valid amount (greater than 0)");
+     const isResidual = values.category === "Residual Value";
+    if (isNaN(amountNum) || (!isResidual && amountNum <= 0) || amountNum < 0) {
+    setAmountError(
+      isResidual
+        ? "Please enter a valid amount (0 or greater)"
+        : "Please enter a valid amount (greater than 0)"
+    );
       return;
     }
 
