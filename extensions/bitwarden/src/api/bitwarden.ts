@@ -102,11 +102,11 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2025.11.0",
+  version: "2026.2.0",
   get sha256() {
-    if (platform === "windows") return "0484bae6306762881678097406d6bf00a58e291720dbc7d62f044e5f4d8286ed";
-    if (process.arch === "arm64") return "59eac955be7b15bfc21c81101a194a9fbba32f48a61154b4f4b6e007efab6fd6";
-    return "213108a65eeb7294ffcd7303f8fe5308dc2af970735aefeb4d23fc9753a2ac01";
+    if (platform === "windows") return "6e7fe65ef0d0401af20bb739cb81469a0c001d9ee249ceea4a86974ae27a4c46";
+    if (process.arch === "arm64") return "63c736b74620280e422ce238bdbcbc267689a0ff831168959ef2124588fcc1e5";
+    return "60cc5109b1cdad560231e02098f1ab2d16efa821d51c6ec089cb5c3cc351b2e5";
   },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
@@ -363,7 +363,7 @@ export class Bitwarden {
   async login(): Promise<MaybeError> {
     try {
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
-      await this.saveLastVaultStatus("login", "unlocked");
+      await this.saveLastVaultStatus("login", "locked");
       await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {

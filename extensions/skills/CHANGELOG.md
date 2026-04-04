@@ -1,5 +1,11 @@
 # Changelog
 
+## [Follow Up on Maintainability] - 2026-04-03
+
+- Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
+- Standardize `search` and `manage` empty/error states with shared retry handling and clearer recovery copy
+- Document the maintainer validation workflow in `README.md` and add a manual smoke checklist in `TESTING.md`
+
 ## [Improve Maintainability] - 2026-04-02
 
 - Add `vitest`-based unit tests and an opt-in live API test for the `skills` extension

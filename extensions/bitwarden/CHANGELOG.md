@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Fix] - 2026-04-03
+
+- Update bundled Bitwarden CLI from v2025.11.0 to v2026.2.0 to fix "Invalid session token" error caused by server-side KDF upgrades
+- Fix incorrect vault status saved after API key login
 ## [Fix] - 2026-04-02
 
 - Catch Invalid session token error
