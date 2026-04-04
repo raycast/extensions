@@ -1,0 +1,152 @@
+import { BeeperAccount, BeeperService } from "./types";
+
+export interface MockChatItem {
+  id: string;
+  name: string;
+  type: "single" | "group" | "space";
+  service: BeeperService;
+  networkRaw: string;
+  accountId: string;
+  lastMessageAt?: string;
+  unreadCount?: number;
+  isMuted?: boolean;
+  isArchived?: boolean;
+}
+
+export const MOCK_CHATS: MockChatItem[] = [
+  {
+    id: "mock-chat-1",
+    name: "Sarah Chen",
+    type: "single",
+    service: "whatsapp",
+    networkRaw: "whatsapp",
+    accountId: "whatsapp-1",
+    lastMessageAt: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+    unreadCount: 3,
+  },
+  {
+    id: "mock-chat-2",
+    name: "Family Group",
+    type: "group",
+    service: "whatsapp",
+    networkRaw: "whatsapp",
+    accountId: "whatsapp-1",
+    lastMessageAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    unreadCount: 12,
+  },
+  {
+    id: "mock-chat-3",
+    name: "Alex Rivera",
+    type: "single",
+    service: "telegram",
+    networkRaw: "telegram",
+    accountId: "telegram-1",
+    lastMessageAt: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+    isMuted: true,
+  },
+  {
+    id: "mock-chat-4",
+    name: "Design Team",
+    type: "group",
+    service: "slack",
+    networkRaw: "slack",
+    accountId: "slack-1",
+    lastMessageAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    unreadCount: 5,
+  },
+  {
+    id: "mock-chat-5",
+    name: "Mom",
+    type: "single",
+    service: "imessage",
+    networkRaw: "imessage",
+    accountId: "imessage-1",
+    lastMessageAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+  },
+  {
+    id: "mock-chat-6",
+    name: "Jordan Taylor",
+    type: "single",
+    service: "signal",
+    networkRaw: "signal",
+    accountId: "signal-1",
+    lastMessageAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+    unreadCount: 1,
+  },
+];
+
+export const MOCK_ACCOUNTS: BeeperAccount[] = [
+  { id: "whatsapp-1", service: "whatsapp", displayName: "Sarah Chen", isConnected: true, username: "+1 555 123 4567" },
+  { id: "telegram-1", service: "telegram", displayName: "Alex Rivera", isConnected: true, username: "@alex_r" },
+  { id: "imessage-1", service: "imessage", displayName: "Mom", isConnected: true, username: "mom@icloud.com" },
+  { id: "slack-1", service: "slack", displayName: "Work", isConnected: true, username: "you@company.com" },
+  { id: "signal-1", service: "signal", displayName: "Jordan Taylor", isConnected: true, username: "+1 555 987 6543" },
+  { id: "discord-1", service: "discord", displayName: "Gaming", isConnected: true, username: "gamer#1234" },
+];
+
+export interface MockMessageResult {
+  id: string;
+  text: string;
+  senderName: string;
+  chatId: string;
+  accountId: string;
+  timestamp: string;
+  service: BeeperService;
+  isSender: boolean;
+  isUnread?: boolean;
+}
+
+export const MOCK_MESSAGES: MockMessageResult[] = [
+  {
+    id: "mock-msg-1",
+    text: "Hey! Are we still on for dinner tomorrow? I found a great new place downtown.",
+    senderName: "Sarah Chen",
+    chatId: "mock-chat-1",
+    accountId: "whatsapp-1",
+    timestamp: new Date(Date.now() - 2 * 60 * 1000).toISOString(),
+    service: "whatsapp",
+    isSender: false,
+    isUnread: true,
+  },
+  {
+    id: "mock-msg-2",
+    text: "Yes! 7pm works perfectly. Can't wait to try it.",
+    senderName: "You",
+    chatId: "mock-chat-1",
+    accountId: "whatsapp-1",
+    timestamp: new Date(Date.now() - 1 * 60 * 1000).toISOString(),
+    service: "whatsapp",
+    isSender: true,
+  },
+  {
+    id: "mock-msg-3",
+    text: "Don't forget the design review is at 3pm today. I'll share the Figma link in the channel.",
+    senderName: "Alex Rivera",
+    chatId: "mock-chat-4",
+    accountId: "slack-1",
+    timestamp: new Date(Date.now() - 45 * 60 * 1000).toISOString(),
+    service: "slack",
+    isSender: false,
+    isUnread: true,
+  },
+  {
+    id: "mock-msg-4",
+    text: "Thanks for the heads up! I'll be there.",
+    senderName: "You",
+    chatId: "mock-chat-4",
+    accountId: "slack-1",
+    timestamp: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+    service: "slack",
+    isSender: true,
+  },
+  {
+    id: "mock-msg-5",
+    text: "Happy birthday! Hope you have an amazing day!",
+    senderName: "Mom",
+    chatId: "mock-chat-5",
+    accountId: "imessage-1",
+    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    service: "imessage",
+    isSender: false,
+  },
+];
