@@ -1,6 +1,6 @@
 # PowerToys Tool Runner Changelog
 
-## [Added Awake Command] - {PR_MERGE_DATE}
+## [Added Awake Command] - 2026-04-04
 
 - Added Awake command to open PowerToys Awake settings
 
