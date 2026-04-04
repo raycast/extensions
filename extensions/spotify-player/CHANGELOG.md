@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix OAuth PKCE invalid_grant] - {PR_MERGE_DATE}
+## [Fix OAuth PKCE invalid_grant] - 2026-04-04
 
 - Clear corrupted tokens on invalid_grant error so the user is prompted to re-authenticate instead of being stuck
 
