@@ -59,7 +59,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.11",
     "@raycast/utils": "^1.17.0",
-    "@taulo1999/kanpla-api": "^1.0.3"
+    "@taulo1999/kanpla-api": "^1.0.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
