@@ -7,18 +7,28 @@ export enum ModelType {
 }
 
 export function detectModelType(model: string): ModelType {
-  if (model.includes("gpt-oss")) {
+  const normalizedModel = model.toLowerCase();
+
+  if (normalizedModel.includes("gpt-oss")) {
     return ModelType.GPT_OSS;
   }
 
-  if (
-    model.includes("llama") ||
-    model.includes("mistral") ||
-    model.includes("granite") ||
-    model.includes("qwen") ||
-    model.includes("gemma") ||
-    model.includes("phi")
-  ) {
+  const chatFamilyKeywords = [
+    "llama",
+    "mistral",
+    "granite",
+    "qwen",
+    "gemma",
+    "phi",
+    "kimi",
+    "glm",
+    "internlm",
+    "baichuan",
+    "deepseek",
+    "moonshot",
+  ];
+
+  if (chatFamilyKeywords.some((keyword) => normalizedModel.includes(keyword))) {
     return ModelType.CHAT;
   }
 

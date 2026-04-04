@@ -6,6 +6,18 @@ import { fetchCloudflareModels, queryCloudflareAI } from "./api";
 import { ConversationView } from "./components/ConversationView";
 import { useConversations } from "./hooks/useConversations";
 
+function resolveInitialModel(models: ModelDropdownItem[], preferredModel?: string): string {
+  if (models.length === 0) {
+    return "";
+  }
+
+  if (preferredModel && models.some((model) => model.value === preferredModel)) {
+    return preferredModel;
+  }
+
+  return models[0].value;
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
@@ -21,10 +33,7 @@ export default function Command() {
       try {
         const fetchedModels = await fetchCloudflareModels();
         setModels(fetchedModels);
-        // Set default model
-        const defaultModel =
-          fetchedModels.find((m) => m.value === preferences.defaultModel)?.value || fetchedModels[0]?.value || "";
-        setSelectedModel(defaultModel);
+        setSelectedModel(resolveInitialModel(fetchedModels, preferences.defaultModel));
       } catch (error) {
         showToast({
           style: Toast.Style.Failure,

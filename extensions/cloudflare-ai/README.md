@@ -44,6 +44,8 @@ npm run dev
    - **API Token**: The token you created
    - **Default Model** (optional): Choose your preferred AI model
 
+Note: The command applies your default model when it is available for your account. If your account cannot access that model, the first available model is selected automatically.
+
 ## Usage
 
 ### Start a New Conversation

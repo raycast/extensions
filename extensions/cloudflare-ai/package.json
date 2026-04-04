@@ -57,20 +57,100 @@
       "default": "@cf/meta/llama-3.1-8b-instruct",
       "data": [
         {
-          "title": "Llama 3.3 70B Instruct FP8",
+          "title": "Kimi K2.5",
+          "value": "@cf/moonshotai/kimi-k2.5"
+        },
+        {
+          "title": "GLM 4.7 Flash",
+          "value": "@cf/zai-org/glm-4.7-flash"
+        },
+        {
+          "title": "GPT OSS 120B",
+          "value": "@cf/openai/gpt-oss-120b"
+        },
+        {
+          "title": "GPT OSS 20B",
+          "value": "@cf/openai/gpt-oss-20b"
+        },
+        {
+          "title": "Llama 4 Scout 17B 16E Instruct",
+          "value": "@cf/meta/llama-4-scout-17b-16e-instruct"
+        },
+        {
+          "title": "Nemotron 3 120B A12B",
+          "value": "@cf/nvidia/nemotron-3-120b-a12b"
+        },
+        {
+          "title": "Granite 4.0 H Micro",
+          "value": "@cf/ibm-granite/granite-4.0-h-micro"
+        },
+        {
+          "title": "Gemma SEA Lion V4 27B Instruct",
+          "value": "@cf/aisingapore/gemma-sea-lion-v4-27b-it"
+        },
+        {
+          "title": "Qwen3 30B A3B FP8",
+          "value": "@cf/qwen/qwen3-30b-a3b-fp8"
+        },
+        {
+          "title": "QwQ 32B",
+          "value": "@cf/qwen/qwq-32b"
+        },
+        {
+          "title": "Qwen2.5 Coder 32B Instruct",
+          "value": "@cf/qwen/qwen2.5-coder-32b-instruct"
+        },
+        {
+          "title": "Gemma 3 12B Instruct",
+          "value": "@cf/google/gemma-3-12b-it"
+        },
+        {
+          "title": "Mistral Small 3.1 24B Instruct",
+          "value": "@cf/mistralai/mistral-small-3.1-24b-instruct"
+        },
+        {
+          "title": "DeepSeek R1 Distill Qwen 32B",
+          "value": "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b"
+        },
+        {
+          "title": "Llama Guard 3 8B",
+          "value": "@cf/meta/llama-guard-3-8b"
+        },
+        {
+          "title": "Llama 3.3 70B Instruct FP8 Fast",
           "value": "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+        },
+        {
+          "title": "Llama 3.2 11B Vision Instruct",
+          "value": "@cf/meta/llama-3.2-11b-vision-instruct"
+        },
+        {
+          "title": "Llama 3.2 3B Instruct",
+          "value": "@cf/meta/llama-3.2-3b-instruct"
+        },
+        {
+          "title": "Llama 3.2 1B Instruct",
+          "value": "@cf/meta/llama-3.2-1b-instruct"
         },
         {
           "title": "Llama 3.1 70B Instruct",
           "value": "@cf/meta/llama-3.1-70b-instruct"
         },
         {
-          "title": "Llama 3.1 8B Instruct (Recommended)",
+          "title": "Llama 3.1 8B Instruct",
           "value": "@cf/meta/llama-3.1-8b-instruct"
+        },
+        {
+          "title": "Llama 3.1 8B Instruct Fast",
+          "value": "@cf/meta/llama-3.1-8b-instruct-fast"
         },
         {
           "title": "Llama 3.1 8B Instruct FP8",
           "value": "@cf/meta/llama-3.1-8b-instruct-fp8"
+        },
+        {
+          "title": "Llama 3.1 8B Instruct AWQ",
+          "value": "@cf/meta/llama-3.1-8b-instruct-awq"
         },
         {
           "title": "Llama 3 8B Instruct",
@@ -81,56 +161,60 @@
           "value": "@cf/meta/llama-3-8b-instruct-awq"
         },
         {
-          "title": "Llama 2 7B Chat FP16",
-          "value": "@cf/meta/llama-2-7b-chat-fp16"
-        },
-        {
           "title": "Mistral 7B Instruct v0.1",
           "value": "@cf/mistral/mistral-7b-instruct-v0.1"
         },
         {
-          "title": "Mistral 7B Instruct v0.2",
+          "title": "Mistral 7B Instruct v0.2 LoRA",
           "value": "@cf/mistral/mistral-7b-instruct-v0.2-lora"
         },
         {
-          "title": "Mistral Nemo 12B Instruct",
-          "value": "@cf/mistral/mistral-nemo-12b-instruct-2407-lora"
+          "title": "Gemma 7B Instruct LoRA",
+          "value": "@cf/google/gemma-7b-it-lora"
         },
         {
-          "title": "Qwen 1.5 7B Chat AWQ",
-          "value": "@cf/qwen/qwen1.5-7b-chat-awq"
+          "title": "Gemma 2B Instruct LoRA",
+          "value": "@cf/google/gemma-2b-it-lora"
         },
         {
           "title": "Qwen 1.5 14B Chat AWQ",
           "value": "@cf/qwen/qwen1.5-14b-chat-awq"
         },
         {
-          "title": "GPT OSS 120B",
-          "value": "@cf/openai/gpt-oss-120b"
+          "title": "Qwen 1.5 7B Chat AWQ",
+          "value": "@cf/qwen/qwen1.5-7b-chat-awq"
         },
         {
-          "title": "Gemma 7B Instruct",
-          "value": "@cf/google/gemma-7b-it-lora"
+          "title": "Qwen 1.5 1.8B Chat",
+          "value": "@cf/qwen/qwen1.5-1.8b-chat"
         },
         {
-          "title": "Granite 8B Code Instruct",
-          "value": "@cf/ibm/granite-8b-code-instruct-128k"
+          "title": "Qwen 1.5 0.5B Chat",
+          "value": "@cf/qwen/qwen1.5-0.5b-chat"
         },
         {
-          "title": "DeepSeek Coder 6.7B Instruct",
-          "value": "@cf/deepseek-ai/deepseek-coder-6.7b-instruct-awq"
+          "title": "Phi 2",
+          "value": "@cf/microsoft/phi-2"
+        },
+        {
+          "title": "Llama 2 7B Chat FP16",
+          "value": "@cf/meta/llama-2-7b-chat-fp16"
+        },
+        {
+          "title": "Llama 2 7B Chat Int8",
+          "value": "@cf/meta/llama-2-7b-chat-int8"
+        },
+        {
+          "title": "Llama 2 7B Chat HF LoRA",
+          "value": "@cf/meta-llama/llama-2-7b-chat-hf-lora"
         },
         {
           "title": "DeepSeek Math 7B Instruct",
           "value": "@cf/deepseek-ai/deepseek-math-7b-instruct"
         },
         {
-          "title": "Hermes 2 Pro Mistral 7B",
-          "value": "@hf/nousresearch/hermes-2-pro-mistral-7b"
-        },
-        {
-          "title": "Starling LM 7B Beta",
-          "value": "@hf/nexusflow/starling-lm-7b-beta"
+          "title": "SQLCoder 7B 2",
+          "value": "@cf/defog/sqlcoder-7b-2"
         }
       ]
     }
@@ -154,6 +238,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

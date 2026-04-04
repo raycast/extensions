@@ -31,6 +31,14 @@ export function parseAIResponse(data: AIResponse): string {
     }
   }
 
+  // Format 3b: object payloads with top-level content/text
+  if (typeof result === "object" && result !== null && "content" in result && typeof result.content === "string") {
+    return result.content;
+  }
+  if (typeof result === "object" && result !== null && "text" in result && typeof result.text === "string") {
+    return result.text;
+  }
+
   // Format 4: result as string directly
   if (typeof result === "string") {
     return result;
