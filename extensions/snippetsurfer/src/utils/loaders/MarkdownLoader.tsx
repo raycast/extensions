@@ -42,9 +42,8 @@ function extractMetadataContent(
   }
 
   // Extract the first code block content
-  const firstCodeBlock = codeBlockStart !== -1 && codeBlockEnd !== -1
-    ? lines.slice(codeBlockStart, codeBlockEnd).join("\n").trim()
-    : "";
+  const firstCodeBlock =
+    codeBlockStart !== -1 && codeBlockEnd !== -1 ? lines.slice(codeBlockStart, codeBlockEnd).join("\n").trim() : "";
 
   let metadata;
   let tags: string[] = [];
@@ -54,7 +53,7 @@ function extractMetadataContent(
 
     // Parse tags (case-insensitive)
     const tagsKey = getCaseInsensitiveKey(metadata, "tags") || "Tags";
-    const rawTags = tagsKey ? metadata[tagsKey] : [];
+    const rawTags = metadata?.[tagsKey] ?? [];
     if (!Array.isArray(rawTags) || rawTags.some((tag) => typeof tag !== "string")) {
       tags = [];
       error = new Error(`Invalid tags. All tags must be a string for ${relativePath}`);

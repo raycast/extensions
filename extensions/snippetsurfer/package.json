@@ -52,13 +52,13 @@
     "required": false,
     "default": "pasteScopeFull",
     "data": [{
-      "title": "Paste full content",
+      "title": "Paste Full Content",
       "value": "pasteScopeFull"
     }, {
-      "title": "Paste first code block",
+      "title": "Paste First Code Block",
       "value": "pasteScopeFirstCodeBlock"
     }],
-    "title": "Select paste content scope"
+    "title": "Select Paste Content Scope"
   }],
   "dependencies": {
     "@raycast/api": "^1.44.0",

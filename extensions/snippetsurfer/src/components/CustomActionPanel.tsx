@@ -20,9 +20,10 @@ const CustomActionPanel = ({
   paths: string[];
 }) => {
   const useFirstCodeBlock = pasteContentScope === "pasteScopeFirstCodeBlock";
-  const pasteContent = useFirstCodeBlock && snippet.content?.firstCodeBlock
-    ? snippet.content.firstCodeBlock
-    : getPastableContent(snippet.content?.content);
+  const pasteContent =
+    useFirstCodeBlock && snippet.content?.firstCodeBlock
+      ? snippet.content.firstCodeBlock
+      : getPastableContent(snippet.content?.content);
 
   const actions = [
     <Action.CopyToClipboard
