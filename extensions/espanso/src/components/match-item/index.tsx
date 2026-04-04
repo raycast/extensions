@@ -98,7 +98,7 @@ export default function MatchItem({ id, match, sectionKey, application, separato
                     onAction={() => Clipboard.paste(expandedReplace)}
                   />
                   <Action.CopyToClipboard title="Copy Content" content={expandedReplace} />
-                  {isDynamic && <Action icon={Icon.ArrowClockwise} title="Re-evaluate" onAction={refresh} />}
+                  {isDynamic && <Action icon={Icon.ArrowClockwise} title="Re-Evaluate" onAction={refresh} />}
                 </>
               )}
             </>

@@ -2,15 +2,7 @@ import fse from "fs-extra";
 import YAML from "yaml";
 import path from "node:path";
 import { exec, execSync } from "node:child_process";
-import type {
-  EspansoMatch,
-  EspansoVar,
-  MultiTrigger,
-  Label,
-  Replacement,
-  NormalizedEspansoMatch,
-  EspansoConfig,
-} from "./types";
+import type { EspansoMatch, EspansoVar, MultiTrigger, Label, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { capitalCase } from "change-case";
 
