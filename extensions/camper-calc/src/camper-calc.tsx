@@ -575,13 +575,10 @@ function AddExpenseForm({ onAdd }: { onAdd: (expense: Expense) => void }) {
       setYearError("Please enter a valid year (1900–2100)");
       return;
     }
-     const isResidual = values.category === "Residual Value";
+
+    const isResidual = values.category === "Residual Value";
     if (isNaN(amountNum) || (!isResidual && amountNum <= 0) || amountNum < 0) {
-    setAmountError(
-      isResidual
-        ? "Please enter a valid amount (0 or greater)"
-        : "Please enter a valid amount (greater than 0)"
-    );
+      setAmountError(isResidual ? "Please enter a valid amount (0 or greater)" : "Please enter a valid amount (greater than 0)");
       return;
     }
 
@@ -641,8 +638,10 @@ function EditExpenseForm({ expense, onSave }: { expense: Expense; onSave: (expen
       setYearError("Please enter a valid year (1900–2100)");
       return;
     }
-    if (isNaN(amountNum) || amountNum <= 0) {
-      setAmountError("Please enter a valid amount (greater than 0)");
+
+    const isResidual = values.category === "Residual Value";
+    if (isNaN(amountNum) || (!isResidual && amountNum <= 0) || amountNum < 0) {
+      setAmountError(isResidual ? "Please enter a valid amount (0 or greater)" : "Please enter a valid amount (greater than 0)");
       return;
     }
 
