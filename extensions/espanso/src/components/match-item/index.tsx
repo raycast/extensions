@@ -1,24 +1,52 @@
+import { useEffect, useState } from "react";
 import { Application, Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
 import { FormattedMatch } from "../../lib/types";
-import { formatCategoryName } from "../../lib/utils";
+import { formatCategoryName, expandMatch, resolveImagePath, getEspansoConfig } from "../../lib/utils";
 
 interface MatchItemProps {
+  id: string;
   match: FormattedMatch;
   sectionKey: string;
   application: Application | undefined;
   separator: string;
+  isSelected: boolean;
 }
 
-export default function MatchItem({ match, sectionKey, application, separator }: MatchItemProps) {
-  const { triggers, replace, form, label, filePath, profile } = match;
+export default function MatchItem({ id, match, sectionKey, application, separator, isSelected }: MatchItemProps) {
+  const { triggers, replace, image_path, form, label, filePath, profile, vars } = match;
+  const [expandedReplace, setExpandedReplace] = useState(replace ?? "");
+  const [resolvedImagePath, setResolvedImagePath] = useState<string | undefined>(undefined);
+
+  const isDynamic = !!vars?.length;
+  const isImage = !!image_path;
+
+  const refresh = () => expandMatch(replace, vars).then(setExpandedReplace);
+
+  useEffect(() => {
+    if (!isSelected) return;
+
+    if (isImage) {
+      try {
+        const { config } = getEspansoConfig();
+        setResolvedImagePath(resolveImagePath(image_path, config));
+      } catch {
+        setResolvedImagePath(image_path);
+      }
+    } else {
+      refresh();
+    }
+  }, [isSelected]);
+
+  const imageMarkdown = resolvedImagePath ? `![](file://${encodeURI(resolvedImagePath)})` : "_Loading image…_";
 
   return (
     <List.Item
+      id={id}
       title={label ?? triggers.join(", ")}
       subtitle={profile ? formatCategoryName(profile, separator) : ""}
       detail={
         <List.Item.Detail
-          markdown={form ? "`form` is not supported yet." : replace}
+          markdown={form ? "`form` is not supported yet." : isImage ? imageMarkdown : expandedReplace}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.TagList title="Triggers">
@@ -54,12 +82,25 @@ export default function MatchItem({ match, sectionKey, application, separator }:
         <ActionPanel>
           {!form && (
             <>
-              <Action
-                icon={Icon.Desktop}
-                title={`Paste to ${application?.name}`}
-                onAction={() => Clipboard.paste(replace)}
-              />
-              <Action.CopyToClipboard title="Copy Content" content={replace} />
+              {isImage ? (
+                resolvedImagePath && (
+                  <Action
+                    icon={Icon.Clipboard}
+                    title="Copy Image"
+                    onAction={() => Clipboard.copy({ file: resolvedImagePath })}
+                  />
+                )
+              ) : (
+                <>
+                  <Action
+                    icon={Icon.Desktop}
+                    title={`Paste to ${application?.name}`}
+                    onAction={() => Clipboard.paste(expandedReplace)}
+                  />
+                  <Action.CopyToClipboard title="Copy Content" content={expandedReplace} />
+                  {isDynamic && <Action icon={Icon.ArrowClockwise} title="Re-evaluate" onAction={refresh} />}
+                </>
+              )}
             </>
           )}
           <Action.CopyToClipboard title="Copy Triggers" content={triggers.join(", ")} />

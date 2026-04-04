@@ -22,6 +22,7 @@ export default function Command() {
   const [selectedProfile, setSelectedProfile] = useState<string>("all");
   const [error, setError] = useState<Error | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   useEffect(() => {
     getFrontmostApplication().then(setApplication);
@@ -177,8 +178,8 @@ export default function Command() {
         const subcategoryCompare = a.subcategory.localeCompare(b.subcategory);
         if (subcategoryCompare !== 0) return subcategoryCompare;
       }
-      const labelA = a.label ?? a.replace;
-      const labelB = b.label ?? b.replace;
+      const labelA = a.label ?? a.replace ?? a.triggers[0];
+      const labelB = b.label ?? b.replace ?? b.triggers[0];
       return labelA.localeCompare(labelB);
     });
   };
@@ -187,6 +188,7 @@ export default function Command() {
     <List
       isShowingDetail
       isLoading={isLoading}
+      onSelectionChange={setSelectedItemId}
       searchBarAccessory={
         <>
           {profiles.length > 1 && (
@@ -200,15 +202,20 @@ export default function Command() {
         const sortedItems = sortItems(sections[sectionKey]);
         return (
           <List.Section key={sectionKey} title={formatCategoryName(sectionKey, separator)}>
-            {sortedItems.map((match, index) => (
-              <MatchItem
-                key={match.filePath + index}
-                match={match}
-                sectionKey={sectionKey}
-                application={application}
-                separator={separator}
-              />
-            ))}
+            {sortedItems.map((match, index) => {
+              const id = `${match.filePath}-${index}`;
+              return (
+                <MatchItem
+                  key={id}
+                  id={id}
+                  match={match}
+                  sectionKey={sectionKey}
+                  application={application}
+                  separator={separator}
+                  isSelected={selectedItemId === id}
+                />
+              );
+            })}
           </List.Section>
         );
       })}
