@@ -31,7 +31,11 @@ if CommandLine.arguments.count > 2 && (CommandLine.arguments[1] == "--open" || C
     let keys = [CNContactGivenNameKey as CNKeyDescriptor, CNContactFamilyNameKey as CNKeyDescriptor]
     let contact = try openStore.unifiedContact(withIdentifier: contactId, keysToFetch: keys)
     let name = "\(contact.givenName) \(contact.familyName)".trimmingCharacters(in: .whitespaces)
-    let escaped = name.replacingOccurrences(of: "\"", with: "\\\"")
+    let escaped = name
+      .replacingOccurrences(of: "\\", with: "\\\\")
+      .replacingOccurrences(of: "\"", with: "\\\"")
+      .replacingOccurrences(of: "\n", with: " ")
+      .replacingOccurrences(of: "\r", with: " ")
     var script = "tell application \"Contacts\"\nset thePeople to every person whose name is \"\(escaped)\"\nif (count of thePeople) > 0 then\nset selection to item 1 of thePeople\nend if\nactivate\nend tell"
     if isEdit {
       script += "\ndelay 0.1\ntell application \"System Events\" to keystroke \"l\" using command down"
