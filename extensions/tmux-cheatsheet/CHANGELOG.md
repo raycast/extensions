@@ -1,6 +1,6 @@
 # Tmux Cheatsheet Changelog
 
-## [Fixed author mismatch] - {PR_MERGE_DATE}
+## [Fixed author mismatch] - 2026-04-04
 
 - Fixed author mismatch in extension package configuration
 
