@@ -5,6 +5,7 @@ Search and manage AI agent skills from [Skills](https://skills.sh) directly in R
 ## Features
 
 - Search for specific skills
+- See which search results are already installed with a green "Installed" badge
 - Filter available skills by owner
 - Install skills for all supported agents
 - View security audit status from `skills.sh` before installing

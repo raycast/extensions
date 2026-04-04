@@ -17,6 +17,7 @@ Run these checks in Raycast before shipping UI-affecting changes.
 
 - Enter fewer than 2 characters and confirm the guidance empty state is shown.
 - Run a normal search and confirm results render with the detail panel.
+- Confirm installed skills show a green "Installed" tag in both detail and compact views.
 - Search for a query with no matches and confirm the empty result copy is shown.
 - Trigger an API failure and confirm the error detail view shows `Retry` and `Report Issue on GitHub`.
 
