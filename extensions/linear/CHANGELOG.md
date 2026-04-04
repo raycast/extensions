@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [OAuth Client Unification] - {PR_MERGE_DATE}
+## [OAuth Client Unification] - 2026-04-04
 
 - Unified OAuth usage in all commands by switching remaining direct token paths to the shared `getLinearClient()` flow.
 - Ensures all command auth runs through the same `withAccessToken` / `OAuthService.linear` lifecycle, including refresh-token handling.
