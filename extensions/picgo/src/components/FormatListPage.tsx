@@ -3,13 +3,14 @@ import { type IImgInfo } from "picgo";
 import { Action, ActionPanel, Icon, List, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 import { exportFormats } from "../util/format";
 import ImagesMetadataPanel from "./ImagesMetadataPanel";
+import ImagesPreviewPage from "./ImagesPreviewPage";
 
 interface Props {
     result: IImgInfo[];
 }
 
-export default function UploadResultPage({ result }: Props) {
-    const { autoCopyAfterUpload } = getPreferenceValues<Preferences>();
+export default function FormatListPage({ result }: Props) {
+    const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const imgs = result.filter((r) => r.imgUrl);
     if (imgs.length === 0)
         return (
@@ -37,6 +38,11 @@ export default function UploadResultPage({ result }: Props) {
                                     content={f.generate(imgs)}
                                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                                 ></Action.CopyToClipboard>
+                                <Action.Push
+                                    title="Switch to Image Grid View"
+                                    icon={Icon.Switch}
+                                    target={<ImagesPreviewPage imgs={imgs} />}
+                                ></Action.Push>
                             </ActionPanel>
                         }
                         detail={

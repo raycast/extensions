@@ -7,7 +7,8 @@ import { getPreferenceValues } from "@raycast/api";
 import { withTimeout } from "./util";
 
 export default function () {
-    const { npmPath, uploadTimeout, npmMirror, npmProxy, proxy } = getPreferenceValues<Preferences>();
+    const { npmPath, npmMirror, npmProxy } = getPreferenceValues<Preferences.PluginManagement>();
+    const { uploadTimeout, proxy } = getPreferenceValues<Preferences.UploadImages>();
     const processEnv = {
         ...env,
         PATH: [npmPath, env.PATH].join(path.delimiter),

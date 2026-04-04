@@ -3,13 +3,6 @@ import getPicGoContext from "./util/context";
 import { useMemo, useState } from "react";
 import ConfigEditForm from "./components/ConfigEditForm";
 
-/**
- * Renders a Raycast command that lists installed PicGo plugins and provides actions to add configuration, update, or uninstall each plugin.
- *
- * The component manages internal error and refresh state, shows progress and result toasts for plugin update/uninstall operations, and opens the config creation form for a selected plugin.
- *
- * @returns A React element containing a list of installed PicGo plugins with actions to add config, update, and uninstall each plugin.
- */
 export default function Command() {
     const picgo = getPicGoContext();
     const { getInstalledPluginNameList, getPlugin, updatePlugin, uninstallPlugin } = picgo;
