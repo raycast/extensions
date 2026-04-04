@@ -1,5 +1,9 @@
 # Changelog
 
+## [Show Installed Badge in Search Results] - {PR_MERGE_DATE}
+
+- Show a green "Installed" tag on search results for skills that are already installed locally
+
 ## [Follow Up on Maintainability] - 2026-04-03
 
 - Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
