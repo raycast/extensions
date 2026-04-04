@@ -483,7 +483,7 @@ export default function Command() {
                       <EditUsageDaysForm
                         usageDays={usage}
                         onSave={async (updated) => {
-                          const newUsageDays = usageDays.map((u) => (u.year === updated.year ? updated : u));
+                          const newUsageDays = usageDays.map((u) => (u.year === usage.year ? updated : u));
                           setUsageDays(newUsageDays);
                           await saveData(expenses, newUsageDays);
                           void showToast(Toast.Style.Success, "Usage days updated");
@@ -591,7 +591,7 @@ function AddExpenseForm({ onAdd }: { onAdd: (expense: Expense) => void }) {
     }
 
     const expense: Expense = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       year: yearNum,
       category: values.category,
       description: values.description,
