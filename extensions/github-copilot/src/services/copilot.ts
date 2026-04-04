@@ -20,6 +20,7 @@ type AssignIssueToCopilotResult = {
 // Task artifact from Copilot API
 type TaskArtifact = {
   provider: string;
+  type: string;
   data: {
     id: number;
     type: "pull";
@@ -56,11 +57,6 @@ type Task = {
 type ListTasksResponse = {
   tasks: Task[];
   has_next_page: boolean;
-};
-
-// Response from creating a task
-type CreateTaskResponse = {
-  task: Task;
 };
 
 // A pull request returned from the GitHub GraphQL API
@@ -158,19 +154,21 @@ async function createTask(
   branch: string,
   model: string | null,
   customAgent: string | null,
-): Promise<{ taskUrl: string }> {
+): Promise<{ taskUrl: string; taskId: string }> {
   const { token } = getAccessToken();
 
   // Parse repository into owner and repo name
   const [ownerName, repoName] = repository.split("/");
 
   const body: {
+    event_content: string;
     problem_statement: string;
     create_pull_request: boolean;
     base_ref: string;
     model?: string;
     custom_agent?: string;
   } = {
+    event_content: prompt,
     problem_statement: prompt,
     create_pull_request: true,
     base_ref: branch,
@@ -205,12 +203,12 @@ async function createTask(
     }
   }
 
-  const createTaskResult = (await createTaskResponse.json()) as CreateTaskResponse;
+  const task = (await createTaskResponse.json()) as Task;
 
   // URL format: https://github.com/{owner}/{repo}/tasks/{task_id}
-  const taskUrl = `https://github.com/${ownerName}/${repoName}/tasks/${createTaskResult.task.id}`;
+  const taskUrl = `https://github.com/${ownerName}/${repoName}/tasks/${task.id}`;
 
-  return { taskUrl };
+  return { taskUrl, taskId: task.id };
 }
 
 const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {

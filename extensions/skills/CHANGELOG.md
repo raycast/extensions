@@ -1,5 +1,48 @@
 # Changelog
 
+## [Follow Up on Maintainability] - 2026-04-03
+
+- Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
+- Standardize `search` and `manage` empty/error states with shared retry handling and clearer recovery copy
+- Document the maintainer validation workflow in `README.md` and add a manual smoke checklist in `TESTING.md`
+
+## [Improve Maintainability] - 2026-04-02
+
+- Add `vitest`-based unit tests and an opt-in live API test for the `skills` extension
+- Extract search and skill content loading logic into reusable helpers for easier testing and maintenance
+- Improve empty states in the search and manage flows while keeping the current upstream behavior intact
+
+## [Remove Trending Skills Command] - 2026-03-31
+
+- Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills
+
+## [Agent-Specific Skill Installation] - 2026-03-31
+
+- Support installing skills to specific agents instead of all agents at once
+- Show all 43 supported agents with already-installed agents marked as read-only
+
+## [Fix `fnm` macOS Path Resolution] - 2026-03-28
+
+- Detect additional macOS `fnm` install locations, including `~/Library/Application Support/fnm`
+- Match the official `fnm` directory resolution preference order when resolving `fnm` paths.
+
+## [Agent-Specific Skill Removal] - 2026-03-27
+
+- Support removing skills from specific agents instead of all agents at once
+- Show an agent picker form with checkboxes when a skill is installed in multiple agents
+
+## [Lock File Metadata] - 2026-03-23
+
+- Show skill source, install date, and update date from the global lock file in the detail panel
+- Add "Open on GitHub" action for installed skills
+- Add "Copy Source URL" action for installed skills
+
+## [Improve macOS `npx` Path Resolution] - 2026-03-20
+
+- Run the Skills CLI without spawning a login shell by building an explicit PATH for Homebrew and common Node.js version-manager installs
+- Add a custom `npx` path preference for non-standard setups
+- Show clearer recovery guidance for `npx` and Skills CLI failures, including a shortcut to open Extension Preference
+
 ## [Fix Incomplete Agent List] - 2026-03-17
 
 - Use `skills list --json` for structured output instead of parsing ANSI text

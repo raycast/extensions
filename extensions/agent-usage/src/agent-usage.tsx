@@ -4,6 +4,7 @@ import {
   Color,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
   LocalStorage,
   showToast,
@@ -553,7 +554,11 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                           <Action title="Run Gemini Re-Authentication" icon={Icon.Key} onAction={handleGeminiReauth} />
                         )}
                         {agent.settingsUrl && (
-                          <Action.OpenInBrowser title={`Open ${agent.name} Settings`} url={agent.settingsUrl} />
+                          <Action.OpenInBrowser
+                            title={`Open ${agent.name} Settings`}
+                            url={agent.settingsUrl}
+                            shortcut={Keyboard.Shortcut.Common.Open}
+                          />
                         )}
                       </>
                     )}
@@ -653,6 +658,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                                 : "Synthetic"
                         } Settings`}
                         url={view.settingsUrl}
+                        shortcut={Keyboard.Shortcut.Common.Open}
                       />
                     )}
                     <ActionPanel.Section title="Reorder">

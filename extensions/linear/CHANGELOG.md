@@ -1,5 +1,9 @@
 # Linear Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Search Custom Views] - 2026-03-16
 
 - Added new "Search Custom Views" command to browse custom views and their issues directly within Raycast

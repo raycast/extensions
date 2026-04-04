@@ -1,5 +1,10 @@
 # Wispr Flow Changelog
 
+## [Update] - 2026-03-23
+
+### Transcription History
+- Added a Paste Last Transcript command to paste the latest unarchived Wispr Flow transcript into the active app
+
 ## [Initial Release] - 2026-03-04
 
 ### Transcription History

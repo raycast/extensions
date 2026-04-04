@@ -6,27 +6,9 @@ import fs from "fs";
 import { promisify } from "util";
 import { exec } from "child_process";
 const execp = promisify(exec);
-import parseGitConfig = require("parse-git-config");
-import parseGithubURL = require("parse-github-url");
+import parseGitConfig from "parse-git-config";
+import parseGithubURL from "parse-github-url";
 import getDefaultBrowser from "default-browser";
-
-export interface OpenWith {
-  name: string;
-  path: string;
-  bundleId: string;
-}
-
-export interface Preferences {
-  repoScanPath: string;
-  repoScanDepth?: number;
-  includeSubmodules?: boolean;
-  searchKeys?: string;
-  openWith1?: OpenWith;
-  openWith2?: OpenWith;
-  openWith3?: OpenWith;
-  openWith4?: OpenWith;
-  openWith5?: OpenWith;
-}
 
 export enum GitRepoType {
   All = "All",
@@ -54,15 +36,11 @@ interface GitRemote {
   url: string;
 }
 
-function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export class GitRepoService {
   private static favoritesStorageKey = "git-repos-favorites";
 
   static async gitRepos(): Promise<GitRepo[]> {
-    const preferences = getPreferences();
+    const preferences = getPreferenceValues<ExtensionPreferences>();
     if (preferences.repoScanPath.length == 0) {
       showToast(Toast.Style.Failure, "", "Directories to scan has not been defined in settings");
       return [];
@@ -72,10 +50,14 @@ export class GitRepoService {
       showToast(
         Toast.Style.Failure,
         "",
-        `Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`
+        `Director${unresolvedPaths.length === 1 ? "y" : "ies"} not found: ${unresolvedPaths}`,
       );
     }
-    const repos = await findRepos(repoPaths, preferences.repoScanDepth ?? 3, preferences.includeSubmodules ?? false);
+    const repos = await findRepos(
+      repoPaths,
+      parseInt(preferences.repoScanDepth, 10) || 3,
+      preferences.includeSubmodules ?? false,
+    );
 
     return repos;
   }
@@ -182,7 +164,7 @@ export function parsePath(path: string): [string[], string[]] {
     try {
       fs.accessSync(pathToVerify, fs.constants.R_OK);
       resolvedPaths.push(pathToVerify);
-    } catch (err) {
+    } catch {
       unresolvedPaths.push(path);
     }
   });
@@ -227,7 +209,7 @@ async function findSubmodules(path: string): Promise<string[]> {
   const { stdout } = await execp(
     `grep -E "^\\s+path\\s*="  ${
       path.replace(/(\s+)/g, "\\$1") + "/.gitmodules"
-    } | sed -E "s%[[:space:]]+path[[:space:]]*=[[:space:]]*%\${1%/.git}/%g"`
+    } | sed -E "s%[[:space:]]+path[[:space:]]*=[[:space:]]*%\${1%/.git}/%g"`,
   );
   const paths = stdout.split("\n").filter((e) => e);
   const submodulePaths = paths.map((subPath) => {
@@ -260,7 +242,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
     paths.map(async (path) => {
       const findCmd = `find -L ${path.replace(
         /(\s+)/g,
-        "\\$1"
+        "\\$1",
       )} -maxdepth ${maxDepth} -type d -name .git -print || true`;
       const { stdout, stderr } = await execp(findCmd);
       const filteredStderr = stderr
@@ -281,7 +263,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
             if (subP.length > 0) {
               subRepoPaths = subRepoPaths.concat(subP);
             }
-          })
+          }),
         );
         const subRepos = parseRepoPaths(path, subRepoPaths, true);
         foundRepos = foundRepos.concat(repos.concat(subRepos));
@@ -297,7 +279,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
           foundRepos.push(worktree);
         }
       });
-    })
+    }),
   );
   foundRepos.sort((a, b) => {
     const fa = a.name.toLowerCase(),
@@ -315,7 +297,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
     foundRepos.map((repo) => {
       repo.defaultBrowserId = defaultBrowser.id;
     });
-  } catch (e) {
+  } catch {
     // ignore, repo.defaultBrowserId will stay as ""
   }
 

@@ -1,8 +1,20 @@
 # Focus Changelog
-## [Enhancement] - {PR_MERGE_DATE}
+
+## [Enhancement] - 2026-03-30
+
+- Added `@Focus` AI extension support — type `@Focus` in Raycast AI Chat to start/stop sessions and take breaks using natural language.
+- Start commands now automatically launch the Focus app if it isn't running, instead of showing an error.
+
+## [Fix] - 2026-03-18
+
+- Fixed a timeout error when opening Focus preferences from the "No profiles found" state.
+
+## [Enhancement] - 2026-03-16
+
 - Commands now close the Raycast window automatically on success, showing a brief HUD notification instead of keeping the window open.
 
 ## [Enhancement] - 2026-03-12
+
 - Fixed an issue where Focus app icon would appear in the Dock when running commands.
 - Improved profile list loading to use caching, so profiles appear instantly on repeat opens.
 - Fixed a bug where stopping a break with a profile would send the unbreak command twice.
@@ -14,11 +26,13 @@
 - Updated dependencies.
 
 ## [Fix] - 2024-08-27
+
 - Fixed some bugs where commands would fail on V1 of the Focus app.
 - Updated error handling.
 - Renamed commands.
 
 ## [Enhancement] - 2024-08-27
+
 - Fixed an issue where the extension would fail to start Focus in V2.
 - Added a new "Start Focus with Profile" command.
 - Improved error handling when Focus app is not installed.

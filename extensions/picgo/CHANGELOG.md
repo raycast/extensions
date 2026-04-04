@@ -1,5 +1,9 @@
 # Picgo Changelog
 
+## [Bugfix: Plugin Search Error] - 2026-04-01
+
+- Fix error when a plugin package data has no `description` field.
+
 ## [New Preferences] - 2026-02-21
 
 - Add preference `Auto Copy URLs` to control whether to copy right after uploads complete.

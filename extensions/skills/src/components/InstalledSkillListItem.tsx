@@ -1,10 +1,17 @@
 import { ActionPanel, Action, Icon, Keyboard, List, Color } from "@raycast/api";
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { useCachedPromise } from "@raycast/utils";
 import { type InstalledSkill, parseFrontmatter } from "../shared";
+import type { MutateSkills } from "../hooks/useInstalledSkills";
 import { RemoveSkillAction } from "./actions/RemoveSkillAction";
 import { UpdateSkillAction } from "./actions/UpdateSkillAction";
+
+function formatDate(iso: string): string | undefined {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return undefined;
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
 
 function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected: boolean }) {
   const { data: parsed, isLoading } = useCachedPromise(
@@ -39,6 +46,24 @@ function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected
               <List.Item.Detail.Metadata.TagList.Item text="Update available" color={Color.Orange} />
             </List.Item.Detail.Metadata.TagList>
           )}
+          {skill.sourceUrl && (
+            <List.Item.Detail.Metadata.Link
+              title="Source"
+              text={skill.source ?? skill.sourceUrl}
+              target={skill.sourceUrl}
+            />
+          )}
+          {skill.installedAt && formatDate(skill.installedAt) && (
+            <List.Item.Detail.Metadata.Label
+              title="Installed"
+              text={formatDate(skill.installedAt)!}
+              icon={Icon.Calendar}
+            />
+          )}
+          {skill.updatedAt && formatDate(skill.updatedAt) && (
+            <List.Item.Detail.Metadata.Label title="Updated" text={formatDate(skill.updatedAt)!} icon={Icon.Clock} />
+          )}
+          {(skill.sourceUrl || skill.installedAt) && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.TagList title="Agents">
             {skill.agents.map((agent) => (
               <List.Item.Detail.Metadata.TagList.Item key={agent} text={agent} color={Color.Blue} />
@@ -55,6 +80,7 @@ interface InstalledSkillListItemProps {
   skill: InstalledSkill;
   isSelected: boolean;
   isShowingDetail: boolean;
+  mutate: MutateSkills;
   onToggleDetail: () => void;
   onUpdate: () => void;
 }
@@ -63,6 +89,7 @@ export function InstalledSkillListItem({
   skill,
   isSelected,
   isShowingDetail,
+  mutate,
   onToggleDetail,
   onUpdate,
 }: InstalledSkillListItemProps) {
@@ -89,13 +116,21 @@ export function InstalledSkillListItem({
               { icon: Icon.ComputerChip, text: `${skill.agentCount}`, tooltip: agentsText },
             ]
       }
-      keywords={[skill.name, ...skill.agents]}
+      keywords={[skill.name, ...skill.agents, ...(skill.source ? [skill.source] : [])]}
       id={skill.name}
       detail={<InlineDetail skill={skill} isSelected={isSelected} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Open">
             <Action.ShowInFinder path={skill.path} icon={Icon.Finder} />
+            {skill.sourceUrl && (
+              <Action.OpenInBrowser
+                title="Open on GitHub"
+                url={skill.sourceUrl}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd"], key: "g" }}
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
@@ -108,10 +143,11 @@ export function InstalledSkillListItem({
               content={skill.path}
               shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
+            {skill.sourceUrl && <Action.CopyToClipboard title="Copy Source URL" content={skill.sourceUrl} />}
           </ActionPanel.Section>
           <ActionPanel.Section>
             {skill.hasUpdate && <UpdateSkillAction onUpdate={onUpdate} />}
-            <RemoveSkillAction skill={skill} onRemove={onUpdate} />
+            <RemoveSkillAction skill={skill} mutate={mutate} />
           </ActionPanel.Section>
           <Action
             title={isShowingDetail ? "Hide Detail Panel" : "Show Detail Panel"}

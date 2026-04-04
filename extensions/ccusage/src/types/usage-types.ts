@@ -126,7 +126,35 @@ export const LimitWindowSchema = z.object({
 export const UsageLimitDataSchema = z.object({
   five_hour: LimitWindowSchema,
   seven_day: LimitWindowSchema,
+  seven_day_sonnet: LimitWindowSchema.nullish(),
+  seven_day_opus: LimitWindowSchema.nullish(),
+  extra_usage: z
+    .object({
+      is_enabled: z.boolean(),
+      used_credits: z.number().nullable(),
+      monthly_limit: z.number().nullable(),
+    })
+    .nullish(),
 });
+
+export const BlockSchema = z.object({
+  id: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  actualEndTime: z.string().nullable(),
+  isActive: z.boolean(),
+  isGap: z.boolean(),
+  totalTokens: z.number(),
+  costUSD: z.number(),
+  models: z.array(z.string()),
+});
+
+export const BlocksCommandResponseSchema = z.object({
+  blocks: z.array(BlockSchema),
+});
+
+export type Block = z.infer<typeof BlockSchema>;
+export type BlocksCommandResponse = z.infer<typeof BlocksCommandResponseSchema>;
 
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
 export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
