@@ -1,6 +1,6 @@
 # Marble Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-04
 
 - Added Search Posts command with detail preview and pagination
 - Added Create Post command with category, tag, and author selection
