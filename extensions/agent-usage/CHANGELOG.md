@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Settings Shortcut] - {PR_MERGE_DATE}
+## [Settings Shortcut] - 2026-04-04
 
 ### Improvements
 
