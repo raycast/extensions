@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import { pathToFileURL } from "node:url";
 import { Application, Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
 import { FormattedMatch } from "../../lib/types";
-import { formatCategoryName, expandMatch, resolveImagePath, getEspansoConfig } from "../../lib/utils";
+import { formatCategoryName, expandMatch, resolveImagePath } from "../../lib/utils";
 
 interface MatchItemProps {
   id: string;
@@ -10,9 +11,18 @@ interface MatchItemProps {
   application: Application | undefined;
   separator: string;
   isSelected: boolean;
+  configPath: string;
 }
 
-export default function MatchItem({ id, match, sectionKey, application, separator, isSelected }: MatchItemProps) {
+export default function MatchItem({
+  id,
+  match,
+  sectionKey,
+  application,
+  separator,
+  isSelected,
+  configPath,
+}: MatchItemProps) {
   const { triggers, replace, image_path, form, label, filePath, profile, vars } = match;
   const [expandedReplace, setExpandedReplace] = useState(replace ?? "");
   const [resolvedImagePath, setResolvedImagePath] = useState<string | undefined>(undefined);
@@ -26,18 +36,13 @@ export default function MatchItem({ id, match, sectionKey, application, separato
     if (!isSelected) return;
 
     if (isImage) {
-      try {
-        const { config } = getEspansoConfig();
-        setResolvedImagePath(resolveImagePath(image_path, config));
-      } catch {
-        setResolvedImagePath(image_path);
-      }
+      setResolvedImagePath(resolveImagePath(image_path, configPath));
     } else {
       refresh();
     }
   }, [isSelected]);
 
-  const imageMarkdown = resolvedImagePath ? `![](file://${encodeURI(resolvedImagePath)})` : "_Loading image…_";
+  const imageMarkdown = resolvedImagePath ? `![](${pathToFileURL(resolvedImagePath).href})` : "_Loading image…_";
 
   return (
     <List.Item

@@ -1,7 +1,8 @@
 import fse from "fs-extra";
 import YAML from "yaml";
 import path from "node:path";
-import { exec, execSync } from "node:child_process";
+import { exec, execFile, execSync } from "node:child_process";
+import { promisify } from "node:util";
 import type { EspansoMatch, EspansoVar, MultiTrigger, Label, NormalizedEspansoMatch, EspansoConfig } from "./types";
 import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { capitalCase } from "change-case";
@@ -89,17 +90,8 @@ export function getEspansoCmd(): string {
   return espansoPath && espansoPath.trim() !== "" ? espansoPath : "espanso";
 }
 
-export function execPromise(cmd: string): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (_error, stdout, stderr) => {
-      if (_error) {
-        reject(new Error(stderr || _error.message));
-      } else {
-        resolve({ stdout, stderr });
-      }
-    });
-  });
-}
+export const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
 
 function lastUpdatedDate(file: string) {
   const { mtime } = fse.statSync(file);
@@ -297,7 +289,7 @@ const evaluateVar = async (v: EspansoVar): Promise<string> => {
       const args = v.params?.args;
       if (!args?.length) return `{{${v.name}}}`;
       try {
-        const { stdout } = await execPromise(args.join(" "));
+        const { stdout } = await execFilePromise(args[0], args.slice(1));
         return stdout.trim();
       } catch {
         return `{{${v.name}}}`;

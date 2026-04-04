@@ -23,6 +23,7 @@ export default function Command() {
   const [error, setError] = useState<Error | null>(null);
   const [application, setApplication] = useState<Application | undefined>(undefined);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [configPath, setConfigPath] = useState<string>("");
 
   useEffect(() => {
     getFrontmostApplication().then(setApplication);
@@ -31,7 +32,8 @@ export default function Command() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { packages: packageFilesDirectory, match: matchFilesDirectory } = getEspansoConfig();
+        const { config, packages: packageFilesDirectory, match: matchFilesDirectory } = getEspansoConfig();
+        setConfigPath(config);
 
         const combinedMatches = [
           ...getMatches(packageFilesDirectory, { packagePath: true }),
@@ -213,6 +215,7 @@ export default function Command() {
                   application={application}
                   separator={separator}
                   isSelected={selectedItemId === id}
+                  configPath={configPath}
                 />
               );
             })}
