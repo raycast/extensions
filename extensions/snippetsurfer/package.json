@@ -45,6 +45,20 @@
       "value": "pasteToActiveApp"
     }],
     "title": "Select primary action"
+  }, {
+    "name": "pasteContentScope",
+    "description": "Select the scope of the content to paste.",
+    "type": "dropdown",
+    "required": false,
+    "default": "pasteScopeFull",
+    "data": [{
+      "title": "Paste full content",
+      "value": "pasteScopeFull"
+    }, {
+      "title": "Paste first code block",
+      "value": "pasteScopeFirstCodeBlock"
+    }],
+    "title": "Select paste content scope"
   }],
   "dependencies": {
     "@raycast/api": "^1.44.0",
