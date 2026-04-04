@@ -1,6 +1,6 @@
 # QR Code Scanner Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-04
 
 - Updated URL handling behavior and preference defaults:
 - **Old behavior:** scanned URLs opened automatically by default.
