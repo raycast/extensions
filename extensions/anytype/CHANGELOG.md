@@ -1,5 +1,10 @@
 # Anytype Changelog
 
+## [Dependency Updates] - {PR_MERGE_DATE}
+
+- Update dependencies to latest versions
+- Update metadata images
+
 ## [Windows Support] - 2026-02-23
 
 - Add support for Windows platform
