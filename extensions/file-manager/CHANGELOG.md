@@ -1,6 +1,6 @@
 # File Manager Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-04-04
 
 - Improved sorting to use natural numeric order.
 - Added broken symlink detection and display.
