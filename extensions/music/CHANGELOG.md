@@ -1,6 +1,6 @@
 # Apple Music Changelog
 
-## [Just Play Command] - {PR_MERGE_DATE}
+## [Just Play Command] - 2026-04-04
 
 - Added a new "Just Play" no-view command that takes a text query and immediately plays the best matching track from your library, with HUD feedback.
 
