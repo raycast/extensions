@@ -1,6 +1,7 @@
 import { getBeeperClient } from "./beeper-client";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
-import { parseService, BeeperService } from "../utils/types";
+import { parseService, parseServiceFromAccountID, BeeperService } from "../utils/types";
+import { getServiceDisplayName } from "../utils/service-icons";
 
 interface SendMessageOptions {
   chatId?: string;
@@ -36,7 +37,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
         allMatches.push({
           id: chat.id,
           title: chat.title || "",
-          network: chat.network || "",
+          network: getServiceDisplayName(parseServiceFromAccountID(chat.accountID)),
         });
         if (allMatches.length >= 20) break;
       }

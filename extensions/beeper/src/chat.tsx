@@ -33,6 +33,8 @@ import {
   getRaycastFocusLink,
   useBeeperDesktop,
 } from "./api";
+import { parseServiceFromAccountID } from "./utils/types";
+import { getServiceDisplayName } from "./utils/service-icons";
 
 type InboxFilter = "all" | "inbox" | "primary" | "low-priority" | "archive";
 type ChatTypeFilter = "any" | "single" | "group";
@@ -117,7 +119,6 @@ const mergeIndexedChats = (base: IndexedChat[], updates: IndexedChat[]) => {
 const summarizeChatForIndex = (chat: BeeperDesktop.Chat): BeeperDesktop.Chat => ({
   id: chat.id,
   accountID: chat.accountID,
-  network: chat.network ?? "",
   participants: {
     hasMore: false,
     items: MAX_PARTICIPANTS_STORED > 0 ? (chat.participants?.items ?? []).slice(0, MAX_PARTICIPANTS_STORED) : [],
@@ -125,7 +126,6 @@ const summarizeChatForIndex = (chat: BeeperDesktop.Chat): BeeperDesktop.Chat => 
   },
   type: chat.type,
   unreadCount: chat.unreadCount ?? 0,
-  description: chat.description ?? undefined,
   isArchived: chat.isArchived ?? false,
   isMuted: chat.isMuted ?? false,
   isPinned: chat.isPinned ?? false,
@@ -289,7 +289,7 @@ class ThreadSearchIndex {
 
 const buildSearchFields = (chat: BeeperDesktop.Chat): ChatSearchFields => {
   const title = normalizeSearchValue(chat.title || "");
-  const network = normalizeSearchValue(chat.network || "");
+  const network = normalizeSearchValue(getServiceDisplayName(parseServiceFromAccountID(chat.accountID)) || "");
   const participants =
     chat.participants?.items
       ?.slice(0, MAX_PARTICIPANTS_INDEXED)
@@ -717,17 +717,20 @@ export function ChatListView({
         key={chat.id}
         icon={chat.type === "group" ? Icon.TwoPeople : Icon.Person}
         title={chat.title || "Unnamed Chat"}
-        subtitle={chat.network}
+        subtitle={getServiceDisplayName(parseServiceFromAccountID(chat.accountID))}
         accessories={accessories}
         detail={
           isShowingDetail ? (
             <List.Item.Detail
-              markdown={`# ${chat.title || "Chat"}\n\n${chat.network}\n\n**Unread:** ${chat.unreadCount}`}
+              markdown={`# ${chat.title || "Chat"}\n\n${getServiceDisplayName(parseServiceFromAccountID(chat.accountID))}\n\n**Unread:** ${chat.unreadCount}`}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Chat ID" text={chat.id} />
                   <List.Item.Detail.Metadata.Label title="Account ID" text={chat.accountID} />
-                  <List.Item.Detail.Metadata.Label title="Network" text={chat.network} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Network"
+                    text={getServiceDisplayName(parseServiceFromAccountID(chat.accountID))}
+                  />
                   <List.Item.Detail.Metadata.Label title="Type" text={chat.type} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.TagList title="Status">
@@ -1359,7 +1362,7 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
       isLoading={isLoading}
       markdown={`# ${data?.title || chat.title || "Chat"}\n\n**Chat ID:** ${chat.id}\n**Account ID:** ${
         chat.accountID
-      }\n**Network:** ${chat.network}\n**Type:** ${chat.type}\n**Unread:** ${
+      }\n**Network:** ${getServiceDisplayName(parseServiceFromAccountID(chat.accountID))}\n**Type:** ${chat.type}\n**Unread:** ${
         chat.unreadCount
       }\n**Pinned:** ${chat.isPinned ? "Yes" : "No"}\n**Muted:** ${
         chat.isMuted ? "Yes" : "No"

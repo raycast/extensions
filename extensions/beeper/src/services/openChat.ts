@@ -1,7 +1,8 @@
 import { closeMainWindow } from "@raycast/api";
 import { getBeeperClient } from "./beeper-client";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
-import { BeeperChat, parseService } from "../utils/types";
+import { BeeperChat, parseService, parseServiceFromAccountID } from "../utils/types";
+import { getServiceDisplayName } from "../utils/service-icons";
 
 interface OpenChatOptions {
   chatId?: string;
@@ -45,7 +46,7 @@ export async function openChat(options: OpenChatOptions): Promise<OpenChatResult
         allMatches.push({
           id: chat.id,
           title: chat.title || "",
-          network: chat.network || "",
+          network: getServiceDisplayName(parseServiceFromAccountID(chat.accountID)),
           accountID: chat.accountID,
           type: chat.type,
           lastActivity: chat.lastActivity,

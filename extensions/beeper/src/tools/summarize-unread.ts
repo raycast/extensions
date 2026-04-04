@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getBeeperClient, checkBeeperConnection } from "../services/beeper-client";
 import { getServiceDisplayName } from "../utils/service-icons";
-import { parseService } from "../utils/types";
+import { parseService, parseServiceFromAccountID } from "../utils/types";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
 
@@ -76,7 +76,7 @@ export default async function (input: Input): Promise<SummarizeResult> {
     allMatches.push({
       id: chat.id,
       title: chat.title || "",
-      network: chat.network || "",
+      network: getServiceDisplayName(parseServiceFromAccountID(chat.accountID)),
       accountID: chat.accountID,
       type: chat.type,
       lastActivity: chat.lastActivity,
@@ -180,7 +180,7 @@ async function getAllUnreadChatsSummary(
     allChats.push({
       id: chat.id,
       title: chat.title || "",
-      network: chat.network || "",
+      network: getServiceDisplayName(parseServiceFromAccountID(chat.accountID)),
       type: chat.type,
       lastActivity: chat.lastActivity,
       unreadCount: chat.unreadCount,
