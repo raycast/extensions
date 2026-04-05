@@ -28,15 +28,7 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "apiKey",
-      "title": "API Key",
-      "description": "Your Keeply API key. Generate one at app.keeply.tools/settings → Developer",
-      "type": "password",
-      "required": true
-    }
-  ],
+  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.19.0"
