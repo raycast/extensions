@@ -1,46 +1,43 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, popToRoot } from "@raycast/api";
-import { useForm, FormValidation } from "@raycast/utils";
+import { Action, ActionPanel, List, showToast, Toast, Clipboard, popToRoot, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useInstallGuard } from "./install-guard";
-import { watchkeyGet } from "./watchkey";
-
-interface FormValues {
-  service: string;
-}
+import { watchkeyGet, watchkeyList } from "./watchkey";
 
 export default function GetKey() {
   const { installed, installView } = useInstallGuard();
-
-  const { handleSubmit, itemProps } = useForm<FormValues>({
-    onSubmit: async (values) => {
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Retrieving secret..." });
-      try {
-        const value = await watchkeyGet(values.service);
-        await Clipboard.copy(value);
-        toast.style = Toast.Style.Success;
-        toast.title = `Copied "${values.service}" to clipboard`;
-        await popToRoot();
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Failed to retrieve secret";
-        toast.message = error instanceof Error ? error.message : String(error);
-      }
-    },
-    validation: {
-      service: FormValidation.Required,
-    },
-  });
+  const { data: keys, isLoading } = usePromise(watchkeyList, [], { execute: installed });
 
   if (!installed) return installView;
 
+  async function handleGet(service: string) {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Retrieving secret..." });
+    try {
+      const value = await watchkeyGet(service);
+      await Clipboard.copy(value);
+      toast.style = Toast.Style.Success;
+      toast.title = `Copied "${service}" to clipboard`;
+      await popToRoot();
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to retrieve secret";
+      toast.message = error instanceof Error ? error.message : String(error);
+    }
+  }
+
   return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Get Secret" icon={Icon.Key} onSubmit={handleSubmit} />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField title="Key Name" placeholder="DOPPLER_TOKEN_DEV" {...itemProps.service} />
-    </Form>
+    <List isLoading={isLoading} searchBarPlaceholder="Search keys...">
+      {keys?.map((key) => (
+        <List.Item
+          key={key}
+          title={key}
+          icon={Icon.Key}
+          actions={
+            <ActionPanel>
+              <Action title="Get Secret" icon={Icon.Clipboard} onAction={() => handleGet(key)} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
   );
 }

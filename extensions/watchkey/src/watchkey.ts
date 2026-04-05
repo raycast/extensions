@@ -55,6 +55,41 @@ export async function watchkeyDelete(service: string): Promise<void> {
   });
 }
 
+function execPromise(cmd: string, args: string[]): Promise<string> {
+  return new Promise((resolve, reject) => {
+    execFile(cmd, args, (error, stdout, stderr) => {
+      if (error) reject(new Error(stderr.trim() || error.message));
+      else resolve(stdout);
+    });
+  });
+}
+
+export async function watchkeyList(): Promise<string[]> {
+  const output = await execPromise("/usr/bin/security", ["dump-keychain"]);
+  const services: string[] = [];
+  const blocks = output.split("keychain:");
+
+  for (const block of blocks) {
+    const lines = block.split("\n");
+    let svce = "";
+    let isWatchkey = false;
+
+    for (const line of lines) {
+      const svceMatch = line.match(/"svce"<blob>="(.+?)"/);
+      if (svceMatch) svce = svceMatch[1];
+
+      const acctMatch = line.match(/"acct"<blob>="(.+?)"/);
+      if (acctMatch && acctMatch[1] === "watchkey") isWatchkey = true;
+    }
+
+    if (isWatchkey && svce) {
+      services.push(svce);
+    }
+  }
+
+  return [...new Set(services)].sort();
+}
+
 export async function watchkeyImport(service: string): Promise<void> {
   return new Promise((resolve, reject) => {
     execFile(WATCHKEY_PATH!, ["set", service, "--import"], (error, _stdout, stderr) => {
