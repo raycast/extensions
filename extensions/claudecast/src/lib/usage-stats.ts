@@ -159,8 +159,7 @@ export async function getAllTimeStats(): Promise<UsageStats> {
     }
   }
 
-  // Calculate fresh stats (cap at 1000 most recent to prevent OOM)
-  const allSessions = await listAllSessions({ limit: 1000 });
+  const allSessions = await listAllSessions();
   const stats = calculateStats(allSessions);
 
   // Cache the result
