@@ -1,5 +1,9 @@
 # Port from Project Name Changelog
 
+## [Port History Improvements] - {PR_MERGE_DATE}
+
+- Remove actions from empty state view in port history
+
 ## [Edit Port Feature] - 2025-12-03
 
 - Add ability to manually edit ports to any value (1000-9999)
