@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2026-04-05
 
 - Add "Open PDF in System Viewer" action to open the attachment with the system's default viewer
 
