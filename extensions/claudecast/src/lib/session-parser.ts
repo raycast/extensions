@@ -40,6 +40,7 @@ interface JSONLEntry {
   uuid?: string;
   message?: {
     role: string;
+    model?: string;
     content: string | Array<{ type: string; text?: string }>;
     usage?: {
       input_tokens?: number;
@@ -412,8 +413,9 @@ async function parseSessionMetadataFast(
             entry.message.usage.cache_creation_input_tokens || 0;
         }
 
-        if (entry.model) {
-          result.model = entry.model;
+        const entryModel = entry.message?.model || entry.model;
+        if (entryModel) {
+          result.model = entryModel;
         }
       } catch {
         // Skip unparseable lines silently to avoid memory accumulation from console.warn
@@ -938,7 +940,8 @@ async function searchSingleSession(
           cacheCreationTokens +=
             entry.message.usage.cache_creation_input_tokens || 0;
         }
-        if (entry.model) model = entry.model;
+        const entryModel = entry.message?.model || entry.model;
+        if (entryModel) model = entryModel;
 
         // Check for match in content and summary, capture snippet on first hit
         if (!found) {
