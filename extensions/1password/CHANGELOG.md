@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Enhancements] - 2026-04-05
+
+- Improved search: queries now match across all item fields (title, username/email, URLs, vault name). For example, searching "m@ goo" now finds a Google login with email "m@example.com".
+
 ## [Chore] - 2025-11-15
 
 - Add stricter, opinionated eslint rules for clarity

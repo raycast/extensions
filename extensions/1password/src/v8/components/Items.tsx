@@ -16,8 +16,32 @@ import { Categories, DEFAULT_CATEGORY } from "./Categories";
 import { Error as ErrorGuide } from "./Error";
 import { ItemActionPanel } from "./ItemActionPanel";
 
+function getSearchableStrings(item: Item): string[] {
+  const strings = [item.title];
+  if (item.additional_information) strings.push(item.additional_information);
+  if (item.urls) {
+    for (const url of item.urls) {
+      try {
+        strings.push(new URL(url.href).hostname);
+      } catch {
+        strings.push(url.href);
+      }
+    }
+  }
+  if (item.vault?.name) strings.push(item.vault.name);
+  return strings;
+}
+
+function matchesSearch(item: Item, query: string): boolean {
+  if (!query) return true;
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const searchable = getSearchableStrings(item).map((s) => s.toLowerCase());
+  return tokens.every((token) => searchable.some((s) => s.includes(token)));
+}
+
 export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
+  const [searchText, setSearchText] = useState("");
   const [passwords, setPasswords] = useState<Item[]>([]);
   const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
   const {
@@ -28,9 +52,12 @@ export function Items({ flags }: { flags?: string[] }) {
 
   useMemo(() => {
     if (!items) return;
-    if (category === DEFAULT_CATEGORY) return setPasswords(items);
-    setPasswords(items?.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase()));
-  }, [items, category]);
+    const byCategory =
+      category === DEFAULT_CATEGORY
+        ? items
+        : items.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase());
+    setPasswords(byCategory.filter((item) => matchesSearch(item, searchText)));
+  }, [items, category, searchText]);
 
   const onCategoryChange = (newCategory: string) => {
     if (category !== newCategory) setCategory(newCategory);
@@ -53,7 +80,9 @@ export function Items({ flags }: { flags?: string[] }) {
 
   return (
     <List
+      filtering={false}
       isLoading={itemsIsLoading || accountIsLoading}
+      onSearchTextChange={setSearchText}
       searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
     >
       <List.EmptyView
@@ -78,7 +107,6 @@ export function Items({ flags }: { flags?: string[] }) {
                 }}
                 id={item.id}
                 key={item.id}
-                keywords={item.additional_information ? [item.additional_information] : []}
                 subtitle={item.additional_information}
                 title={item.title}
               />
