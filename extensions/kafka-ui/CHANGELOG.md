@@ -1,6 +1,6 @@
 # Kafka UI
 
-## [Fix] - 2026-04-05
+## [Fix] - {PR_MERGE_DATE}
 
 - Fixed environment dropdown showing stale data when multiple environments are configured
 - Added cmd+e shortcut to Edit Environment action in Configuration Manager
