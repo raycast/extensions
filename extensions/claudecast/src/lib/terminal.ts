@@ -7,6 +7,19 @@ import { join } from "path";
 
 const execFilePromise = promisify(execFile);
 
+/**
+ * Expand shell-style ~ prefix to the user's home directory.
+ * Node fs APIs do not perform tilde expansion, so paths like ~/foo
+ * must be resolved before passing to existsSync, mkdirSync, or cd.
+ */
+export function expandTilde(inputPath: string): string {
+  const trimmed = inputPath.trim();
+  if (trimmed === "~") return process.env.HOME || "/";
+  if (trimmed.startsWith("~/"))
+    return (process.env.HOME || "") + trimmed.slice(1);
+  return trimmed;
+}
+
 type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
 
 /**
@@ -23,7 +36,7 @@ export async function openTerminalWithCommand(
   const terminal = (options.terminalApp ||
     preferences.terminalApp ||
     "Terminal") as TerminalApp;
-  const cwd = options.cwd || process.env.HOME || "/";
+  const cwd = expandTilde(options.cwd || "") || process.env.HOME || "/";
 
   try {
     switch (terminal) {

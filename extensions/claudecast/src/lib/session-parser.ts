@@ -15,6 +15,7 @@ export interface SessionMetadata {
   turnCount: number;
   cost: number;
   model?: string;
+  matchSnippet?: string;
 }
 
 export interface SessionMessage {
@@ -40,6 +41,73 @@ interface JSONLEntry {
   costUSD?: number;
   model?: string;
   timestamp?: string;
+}
+
+/**
+ * Replace lone UTF-16 surrogates with U+FFFD (REPLACEMENT CHARACTER).
+ * Session JSONL may contain lone surrogates that crash Raycast's
+ * render tree serializer with "Cannot parse render tree JSON".
+ */
+function sanitizeString(str: string): string {
+  return str.replace(
+    /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
+    "\uFFFD",
+  );
+}
+
+/**
+ * Truncate a string without splitting UTF-16 surrogate pairs.
+ * If the cut point lands on a high surrogate, backs off by one character.
+ */
+export function safeTruncate(str: string, maxLen: number, suffix = ""): string {
+  if (str.length <= maxLen) return str;
+  let end = maxLen;
+  const code = str.charCodeAt(end - 1);
+  if (code >= 0xd800 && code <= 0xdbff) {
+    end--;
+  }
+  return str.slice(0, end) + suffix;
+}
+
+/**
+ * Extract a short contextual snippet around the first occurrence of a query.
+ * Normalizes whitespace so multiline session content produces clean subtitles.
+ */
+function extractSnippet(
+  text: string,
+  query: string,
+  contextWords = 15,
+): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  const lower = normalized.toLowerCase();
+  const idx = lower.indexOf(query.toLowerCase());
+  if (idx === -1) return "";
+
+  let start = idx;
+  let wordsFound = 0;
+  while (start > 0 && wordsFound < contextWords) {
+    start--;
+    if (normalized[start] === " ") wordsFound++;
+  }
+  if (start > 0) start++;
+
+  let end = idx + query.length;
+  wordsFound = 0;
+  while (end < normalized.length && wordsFound < contextWords) {
+    if (normalized[end] === " ") wordsFound++;
+    end++;
+  }
+
+  const prefix = start > 0 ? "..." : "";
+  const suffix = end < normalized.length ? "..." : "";
+
+  // Build snippet with the matched portion wrapped in **bold** for highlighting
+  const before = normalized.slice(start, idx);
+  const match = normalized.slice(idx, idx + query.length);
+  const after = normalized.slice(idx + query.length, end);
+  const snippet =
+    prefix + before + "**" + match + "**" + after.trimEnd() + suffix;
+  return safeTruncate(snippet, 300);
 }
 
 const CLAUDE_DIR = path.join(os.homedir(), ".claude");
@@ -298,7 +366,7 @@ async function parseSessionMetadataFast(
         const entry: JSONLEntry = JSON.parse(line);
 
         if (entry.type === "summary") {
-          result.summary = entry.summary || "";
+          result.summary = sanitizeString(entry.summary || "");
           result.id = entry.leafUuid || path.basename(filePath, ".jsonl");
         }
 
@@ -307,10 +375,12 @@ async function parseSessionMetadataFast(
           if (!result.firstMessage && entry.message?.content) {
             const content = entry.message.content;
             if (typeof content === "string") {
-              result.firstMessage = content.slice(0, 200);
+              result.firstMessage = sanitizeString(safeTruncate(content, 200));
             } else if (Array.isArray(content)) {
               const textBlock = content.find((b) => b.type === "text");
-              result.firstMessage = textBlock?.text?.slice(0, 200) || "";
+              result.firstMessage = sanitizeString(
+                safeTruncate(textBlock?.text || "", 200),
+              );
             }
           }
         }
@@ -402,23 +472,25 @@ async function parseFullSession(
         const entry: JSONLEntry = JSON.parse(line);
 
         if (entry.type === "summary") {
-          summary = entry.summary || "";
+          summary = sanitizeString(entry.summary || "");
           id = entry.leafUuid || id;
         }
 
         if (entry.type === "user" || entry.type === "human") {
           let content = "";
           if (typeof entry.message?.content === "string") {
-            content = entry.message.content;
+            content = sanitizeString(entry.message.content);
           } else if (Array.isArray(entry.message?.content)) {
-            content = entry.message.content
-              .filter((b) => b.type === "text")
-              .map((b) => b.text)
-              .join("\n");
+            content = sanitizeString(
+              entry.message.content
+                .filter((b) => b.type === "text")
+                .map((b) => b.text)
+                .join("\n"),
+            );
           }
 
           if (!firstMessage) {
-            firstMessage = content.slice(0, 200);
+            firstMessage = safeTruncate(content, 200);
           }
 
           messages.push({
@@ -433,7 +505,7 @@ async function parseFullSession(
           let hasToolUse = false;
 
           if (typeof entry.message?.content === "string") {
-            content = entry.message.content;
+            content = sanitizeString(entry.message.content);
           } else if (Array.isArray(entry.message?.content)) {
             for (const block of entry.message.content) {
               if (block.type === "text") {
@@ -442,6 +514,7 @@ async function parseFullSession(
                 hasToolUse = true;
               }
             }
+            content = sanitizeString(content);
           }
 
           messages.push({
@@ -688,6 +761,7 @@ export async function searchSessionContent(
         turnCount: match.turnCount,
         cost: match.cost,
         model: match.model,
+        matchSnippet: match.matchSnippet,
       });
     }
   }
@@ -710,6 +784,7 @@ async function searchSingleSession(
   turnCount: number;
   cost: number;
   model?: string;
+  matchSnippet?: string;
 } | null> {
   type MatchResult = {
     id: string;
@@ -718,10 +793,12 @@ async function searchSingleSession(
     turnCount: number;
     cost: number;
     model?: string;
+    matchSnippet?: string;
   };
 
   return new Promise<MatchResult | null>((resolve) => {
     let found = false;
+    let matchSnippet = "";
     let summary = "";
     let id = path.basename(filePath, ".jsonl");
     let firstMessage = "";
@@ -771,7 +848,7 @@ async function searchSingleSession(
         const entry: JSONLEntry = JSON.parse(line);
 
         if (entry.type === "summary") {
-          summary = entry.summary || "";
+          summary = sanitizeString(entry.summary || "");
           id = entry.leafUuid || id;
         }
 
@@ -779,19 +856,21 @@ async function searchSingleSession(
         let content = "";
         if (entry.message?.content) {
           if (typeof entry.message.content === "string") {
-            content = entry.message.content;
+            content = sanitizeString(entry.message.content);
           } else if (Array.isArray(entry.message.content)) {
-            content = entry.message.content
-              .filter((b) => b.type === "text")
-              .map((b) => b.text || "")
-              .join(" ");
+            content = sanitizeString(
+              entry.message.content
+                .filter((b) => b.type === "text")
+                .map((b) => b.text || "")
+                .join(" "),
+            );
           }
         }
 
         if (entry.type === "user" || entry.type === "human") {
           turnCount++;
           if (!firstMessage && content) {
-            firstMessage = content.slice(0, 200);
+            firstMessage = safeTruncate(content, 200);
           }
         }
 
@@ -802,13 +881,17 @@ async function searchSingleSession(
         if (entry.costUSD) totalCost += entry.costUSD;
         if (entry.model) model = entry.model;
 
-        // Check for match in content and summary
+        // Check for match in content and summary, capture snippet on first hit
         if (!found) {
-          if (
-            (content && content.toLowerCase().includes(lowerQuery)) ||
-            (summary && summary.toLowerCase().includes(lowerQuery))
-          ) {
+          const matchSource =
+            content && content.toLowerCase().includes(lowerQuery)
+              ? content
+              : summary && summary.toLowerCase().includes(lowerQuery)
+                ? summary
+                : null;
+          if (matchSource) {
             found = true;
+            matchSnippet = extractSnippet(matchSource, lowerQuery);
           }
         }
       } catch {
@@ -820,7 +903,15 @@ async function searchSingleSession(
       signal?.removeEventListener("abort", onAbort);
       safeResolve(
         found
-          ? { id, summary, firstMessage, turnCount, cost: totalCost, model }
+          ? {
+              id,
+              summary,
+              firstMessage,
+              turnCount,
+              cost: totalCost,
+              model,
+              matchSnippet,
+            }
           : null,
       );
     });

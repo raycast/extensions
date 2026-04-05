@@ -12,6 +12,7 @@ import {
   UsageStats,
   DailyStats,
 } from "./lib/usage-stats";
+import { safeTruncate } from "./lib/session-parser";
 
 type TimeRange = "today" | "week" | "month" | "all";
 
@@ -188,8 +189,7 @@ function generateDashboardMarkdown(
 
     for (const session of stats.topSessions.slice(0, 5)) {
       const preview = session.firstMessage
-        ? session.firstMessage.slice(0, 40) +
-          (session.firstMessage.length > 40 ? "..." : "")
+        ? safeTruncate(session.firstMessage, 40, "...")
         : "No message";
       md += `| ${session.projectName} | ${preview} | ${formatCost(session.cost)} |\n`;
     }

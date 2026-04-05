@@ -1,5 +1,25 @@
 # ClaudeCast Changelog
 
+## [1.3.0] - {PR_MERGE_DATE}
+
+### Added
+
+- **Deep Search Match Snippets**: Search results now show contextual match snippets in a detail side panel
+  - Displays 15 words before and after the matched phrase with the match highlighted in bold
+  - Shows full session prompt, summary, project path, turns, cost, and last modified date
+  - Split-pane layout: results list on the left, match context on the right
+
+### Fixed
+
+- **Render Tree JSON Crash**: Fixed "Cannot parse render tree JSON: expected low-surrogate code point" error
+  - Added `sanitizeString()` to strip lone UTF-16 surrogates from session JSONL data at ingress
+  - Added `safeTruncate()` to prevent `.slice()` from splitting valid surrogate pairs at preview boundaries
+  - Applied across browse-sessions, deep-search-sessions, and usage-dashboard
+- **Tilde Expansion in Project Paths**: Fixed `~/path` not expanding in Ask Claude and Prompt Library
+  - Node fs APIs don't do shell-style `~` expansion, so `~/ky` was treated as a literal path
+  - Added `expandTilde()` helper applied at Ask Claude, Prompt Library (including Ralph Loop), and the shared terminal launcher
+  - Added error handling with toast notifications for the "Open Full Session" action
+
 ## [1.2.0] - 2026-02-20
 
 ### Added
