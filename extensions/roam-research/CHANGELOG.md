@@ -1,6 +1,6 @@
 # Roam Research Changelog
 
-## [v2] - 2026-03
+## [v2] - {PR_MERGE_DATE}
 
 ### New Features
 - **Capture Template System** -- Create reusable capture presets per graph with customizable page, nesting, tags, and content template. Manage via the "Manage Capture Templates" command. Includes a global default template that can be customized. Subsumes the old TODO Quick Capture request.
