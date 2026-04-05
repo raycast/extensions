@@ -16,6 +16,10 @@ export interface SessionMetadata {
   cost: number;
   model?: string;
   matchSnippet?: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
 }
 
 export interface SessionMessage {
@@ -37,8 +41,13 @@ interface JSONLEntry {
   message?: {
     role: string;
     content: string | Array<{ type: string; text?: string }>;
+    usage?: {
+      input_tokens?: number;
+      output_tokens?: number;
+      cache_read_input_tokens?: number;
+      cache_creation_input_tokens?: number;
+    };
   };
-  costUSD?: number;
   model?: string;
   timestamp?: string;
 }
@@ -329,7 +338,10 @@ async function parseSessionMetadataFast(
     const result: Partial<SessionMetadata> = {};
     let lineCount = 0;
     let turnCount = 0;
-    let totalCost = 0;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let cacheCreationTokens = 0;
     let resolved = false;
 
     // Helper to safely resolve only once and clean up
@@ -337,7 +349,10 @@ async function parseSessionMetadataFast(
       if (resolved) return;
       resolved = true;
       result.turnCount = turnCount;
-      result.cost = totalCost;
+      result.inputTokens = inputTokens;
+      result.outputTokens = outputTokens;
+      result.cacheReadTokens = cacheReadTokens;
+      result.cacheCreationTokens = cacheCreationTokens;
       resolve(result);
     };
 
@@ -389,8 +404,12 @@ async function parseSessionMetadataFast(
           turnCount++;
         }
 
-        if (entry.costUSD) {
-          totalCost += entry.costUSD;
+        if (entry.message?.usage) {
+          inputTokens += entry.message.usage.input_tokens || 0;
+          outputTokens += entry.message.usage.output_tokens || 0;
+          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
+          cacheCreationTokens +=
+            entry.message.usage.cache_creation_input_tokens || 0;
         }
 
         if (entry.model) {
@@ -458,9 +477,12 @@ async function parseFullSession(
     const messages: SessionMessage[] = [];
     let summary = "";
     let id = path.basename(filePath, ".jsonl");
-    let totalCost = 0;
     let model: string | undefined;
     let firstMessage = "";
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let cacheCreationTokens = 0;
 
     const stream = fs.createReadStream(filePath, { encoding: "utf8" });
     const rl = readline.createInterface({ input: stream });
@@ -525,8 +547,12 @@ async function parseFullSession(
           });
         }
 
-        if (entry.costUSD) {
-          totalCost += entry.costUSD;
+        if (entry.message?.usage) {
+          inputTokens += entry.message.usage.input_tokens || 0;
+          outputTokens += entry.message.usage.output_tokens || 0;
+          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
+          cacheCreationTokens +=
+            entry.message.usage.cache_creation_input_tokens || 0;
         }
 
         if (entry.model) {
@@ -551,9 +577,13 @@ async function parseFullSession(
           firstMessage,
           lastModified: stat.mtime,
           turnCount: messages.length,
-          cost: totalCost,
+          cost: 0,
           model,
           messages,
+          inputTokens,
+          outputTokens,
+          cacheReadTokens,
+          cacheCreationTokens,
         });
       } catch (err) {
         reject(err);
@@ -636,6 +666,10 @@ export async function listAllSessions(options?: {
         turnCount: metadata.turnCount || 0,
         cost: metadata.cost || 0,
         model: metadata.model,
+        inputTokens: metadata.inputTokens || 0,
+        outputTokens: metadata.outputTokens || 0,
+        cacheReadTokens: metadata.cacheReadTokens || 0,
+        cacheCreationTokens: metadata.cacheCreationTokens || 0,
       });
     } catch {
       // Skip files we can't read
@@ -676,6 +710,10 @@ export async function listProjectSessions(
           turnCount: metadata.turnCount || 0,
           cost: metadata.cost || 0,
           model: metadata.model,
+          inputTokens: metadata.inputTokens || 0,
+          outputTokens: metadata.outputTokens || 0,
+          cacheReadTokens: metadata.cacheReadTokens || 0,
+          cacheCreationTokens: metadata.cacheCreationTokens || 0,
         });
       } catch {
         // Skip files we can't read
@@ -762,6 +800,10 @@ export async function searchSessionContent(
         cost: match.cost,
         model: match.model,
         matchSnippet: match.matchSnippet,
+        inputTokens: match.inputTokens,
+        outputTokens: match.outputTokens,
+        cacheReadTokens: match.cacheReadTokens,
+        cacheCreationTokens: match.cacheCreationTokens,
       });
     }
   }
@@ -785,6 +827,10 @@ async function searchSingleSession(
   cost: number;
   model?: string;
   matchSnippet?: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
 } | null> {
   type MatchResult = {
     id: string;
@@ -794,6 +840,10 @@ async function searchSingleSession(
     cost: number;
     model?: string;
     matchSnippet?: string;
+    inputTokens: number;
+    outputTokens: number;
+    cacheReadTokens: number;
+    cacheCreationTokens: number;
   };
 
   return new Promise<MatchResult | null>((resolve) => {
@@ -803,9 +853,12 @@ async function searchSingleSession(
     let id = path.basename(filePath, ".jsonl");
     let firstMessage = "";
     let turnCount = 0;
-    let totalCost = 0;
     let model: string | undefined;
     let resolved = false;
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let cacheCreationTokens = 0;
 
     const safeResolve = (value: MatchResult | null) => {
       if (resolved) return;
@@ -878,7 +931,13 @@ async function searchSingleSession(
           turnCount++;
         }
 
-        if (entry.costUSD) totalCost += entry.costUSD;
+        if (entry.message?.usage) {
+          inputTokens += entry.message.usage.input_tokens || 0;
+          outputTokens += entry.message.usage.output_tokens || 0;
+          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
+          cacheCreationTokens +=
+            entry.message.usage.cache_creation_input_tokens || 0;
+        }
         if (entry.model) model = entry.model;
 
         // Check for match in content and summary, capture snippet on first hit
@@ -908,9 +967,13 @@ async function searchSingleSession(
               summary,
               firstMessage,
               turnCount,
-              cost: totalCost,
+              cost: 0,
               model,
               matchSnippet,
+              inputTokens,
+              outputTokens,
+              cacheReadTokens,
+              cacheCreationTokens,
             }
           : null,
       );

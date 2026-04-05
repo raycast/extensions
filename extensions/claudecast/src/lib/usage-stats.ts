@@ -4,8 +4,62 @@ import { listAllSessions, SessionMetadata } from "./session-parser";
 export interface UsageStats {
   totalSessions: number;
   totalCost: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCacheReadTokens: number;
+  totalCacheCreationTokens: number;
   sessionsByProject: Record<string, { count: number; cost: number }>;
   topSessions: SessionMetadata[];
+}
+
+const MODEL_PRICING: Record<
+  string,
+  {
+    inputPerMTok: number;
+    outputPerMTok: number;
+    cacheReadPerMTok: number;
+    cacheWritePerMTok: number;
+  }
+> = {
+  opus: {
+    inputPerMTok: 15,
+    outputPerMTok: 75,
+    cacheReadPerMTok: 3.75,
+    cacheWritePerMTok: 18.75,
+  },
+  sonnet: {
+    inputPerMTok: 3,
+    outputPerMTok: 15,
+    cacheReadPerMTok: 0.3,
+    cacheWritePerMTok: 3.75,
+  },
+  haiku: {
+    inputPerMTok: 0.8,
+    outputPerMTok: 4,
+    cacheReadPerMTok: 0.08,
+    cacheWritePerMTok: 1,
+  },
+};
+
+const DEFAULT_PRICING = MODEL_PRICING.sonnet;
+
+function resolvePricing(model?: string) {
+  if (!model) return DEFAULT_PRICING;
+  const lower = model.toLowerCase();
+  for (const [key, pricing] of Object.entries(MODEL_PRICING)) {
+    if (lower.includes(key)) return pricing;
+  }
+  return DEFAULT_PRICING;
+}
+
+export function calculateSessionCost(session: SessionMetadata): number {
+  const p = resolvePricing(session.model);
+  return (
+    (session.inputTokens / 1_000_000) * p.inputPerMTok +
+    (session.outputTokens / 1_000_000) * p.outputPerMTok +
+    (session.cacheReadTokens / 1_000_000) * p.cacheReadPerMTok +
+    (session.cacheCreationTokens / 1_000_000) * p.cacheWritePerMTok
+  );
 }
 
 export interface DailyStats {
@@ -174,15 +228,26 @@ export async function getDailyStats(days: number = 7): Promise<DailyStats[]> {
  */
 function calculateStats(sessions: SessionMetadata[]): UsageStats {
   let totalCostCents = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let totalCacheReadTokens = 0;
+  let totalCacheCreationTokens = 0;
   const sessionsByProject: Record<string, { count: number; cost: number }> = {};
   const projectCostCents: Record<string, number> = {};
 
   for (const session of sessions) {
-    // Convert to cents (integer) to avoid floating point errors
-    const costCents = Math.round((session.cost || 0) * 10000);
+    // Compute cost from tokens
+    const cost = calculateSessionCost(session);
+    session.cost = cost;
+
+    const costCents = Math.round(cost * 10000);
     totalCostCents += costCents;
 
-    // Group by project
+    totalInputTokens += session.inputTokens;
+    totalOutputTokens += session.outputTokens;
+    totalCacheReadTokens += session.cacheReadTokens;
+    totalCacheCreationTokens += session.cacheCreationTokens;
+
     if (!sessionsByProject[session.projectName]) {
       sessionsByProject[session.projectName] = { count: 0, cost: 0 };
       projectCostCents[session.projectName] = 0;
@@ -191,12 +256,10 @@ function calculateStats(sessions: SessionMetadata[]): UsageStats {
     projectCostCents[session.projectName] += costCents;
   }
 
-  // Convert project costs back to dollars
   for (const projectName of Object.keys(sessionsByProject)) {
     sessionsByProject[projectName].cost = projectCostCents[projectName] / 10000;
   }
 
-  // Sort sessions by cost to get top expensive ones
   const topSessions = [...sessions]
     .filter((s) => s.cost > 0)
     .sort((a, b) => b.cost - a.cost)
@@ -204,7 +267,11 @@ function calculateStats(sessions: SessionMetadata[]): UsageStats {
 
   return {
     totalSessions: sessions.length,
-    totalCost: totalCostCents / 10000, // Convert back to dollars
+    totalCost: totalCostCents / 10000,
+    totalInputTokens,
+    totalOutputTokens,
+    totalCacheReadTokens,
+    totalCacheCreationTokens,
     sessionsByProject,
     topSessions,
   };
@@ -218,6 +285,16 @@ export function formatCost(cost: number): string {
     return `$${cost.toFixed(4)}`;
   }
   return `$${cost.toFixed(2)}`;
+}
+
+export function formatTokens(count: number): string {
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`;
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1)}K`;
+  }
+  return `${count}`;
 }
 
 /**

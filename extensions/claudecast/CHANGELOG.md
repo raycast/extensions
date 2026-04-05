@@ -11,13 +11,17 @@
 
 ### Fixed
 
+- **Usage Dashboard Cost Calculation**: Fixed costs always showing $0.00
+  - Previously read a nonexistent `costUSD` field from session data
+  - Now computes costs from actual token counts (input, output, cache read, cache write) using per-model pricing
+  - Usage Dashboard summary table now shows token breakdowns (input, output, cache read, cache write) with K/M formatting
+  - Supports Opus, Sonnet, and Haiku pricing tiers
 - **Render Tree JSON Crash**: Fixed "Cannot parse render tree JSON: expected low-surrogate code point" error
   - Added `sanitizeString()` to strip lone UTF-16 surrogates from session JSONL data at ingress
   - Added `safeTruncate()` to prevent `.slice()` from splitting valid surrogate pairs at preview boundaries
   - Applied across browse-sessions, deep-search-sessions, and usage-dashboard
 - **Tilde Expansion in Project Paths**: Fixed `~/path` not expanding in Ask Claude and Prompt Library
-  - Node fs APIs don't do shell-style `~` expansion, so `~/ky` was treated as a literal path
-  - Added `expandTilde()` helper applied at Ask Claude, Prompt Library (including Ralph Loop), and the shared terminal launcher
+  - Added `expandTilde()` helper using `os.homedir()` applied at Ask Claude, Prompt Library (including Ralph Loop), and the shared terminal launcher
   - Added error handling with toast notifications for the "Open Full Session" action
 
 ## [1.2.0] - 2026-02-20

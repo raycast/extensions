@@ -2,7 +2,7 @@ import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { writeFileSync } from "fs";
-import { tmpdir } from "os";
+import { tmpdir, homedir } from "os";
 import { join } from "path";
 
 const execFilePromise = promisify(execFile);
@@ -14,9 +14,9 @@ const execFilePromise = promisify(execFile);
  */
 export function expandTilde(inputPath: string): string {
   const trimmed = inputPath.trim();
-  if (trimmed === "~") return process.env.HOME || "/";
-  if (trimmed.startsWith("~/"))
-    return (process.env.HOME || "") + trimmed.slice(1);
+  const home = homedir();
+  if (trimmed === "~") return home;
+  if (trimmed.startsWith("~/")) return home + trimmed.slice(1);
   return trimmed;
 }
 
@@ -36,7 +36,7 @@ export async function openTerminalWithCommand(
   const terminal = (options.terminalApp ||
     preferences.terminalApp ||
     "Terminal") as TerminalApp;
-  const cwd = expandTilde(options.cwd || "") || process.env.HOME || "/";
+  const cwd = expandTilde(options.cwd || "") || homedir() || "/";
 
   try {
     switch (terminal) {

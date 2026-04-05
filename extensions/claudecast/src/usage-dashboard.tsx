@@ -7,6 +7,7 @@ import {
   getAllTimeStats,
   getDailyStats,
   formatCost,
+  formatTokens,
   generateCostChart,
   generateProjectTable,
   UsageStats,
@@ -165,7 +166,11 @@ function generateDashboardMarkdown(
   md += `|--------|-------|\n`;
   md += `| Total Sessions | ${stats.totalSessions} |\n`;
   md += `| Total Cost | ${formatCost(stats.totalCost)} |\n`;
-  md += `| Avg Cost/Session | ${formatCost(stats.totalSessions > 0 ? stats.totalCost / stats.totalSessions : 0)} |\n\n`;
+  md += `| Avg Cost/Session | ${formatCost(stats.totalSessions > 0 ? stats.totalCost / stats.totalSessions : 0)} |\n`;
+  md += `| Input Tokens | ${formatTokens(stats.totalInputTokens)} |\n`;
+  md += `| Output Tokens | ${formatTokens(stats.totalOutputTokens)} |\n`;
+  md += `| Cache Read | ${formatTokens(stats.totalCacheReadTokens)} |\n`;
+  md += `| Cache Write | ${formatTokens(stats.totalCacheCreationTokens)} |\n\n`;
 
   // Daily chart
   if (dailyStats.length > 0) {
