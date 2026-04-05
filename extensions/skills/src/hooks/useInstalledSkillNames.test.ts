@@ -77,4 +77,23 @@ describe("useInstalledSkillNames", () => {
     await expect(loader()).resolves.toEqual(["skill-a", "skill-b"]);
     expect(listInstalledSkills).toHaveBeenCalled();
   });
+
+  it("matches by skillId only — id and name alone must not match", () => {
+    // CLI returns skill names that correspond to the search API's skillId field.
+    // The search API Skill type has three distinct fields: id, skillId, and name.
+    // Only skillId should match; id and name must not produce false positives.
+    vi.mocked(useCachedPromise).mockReturnValue({
+      data: ["vercel-example-skill"],
+      isLoading: false,
+    } as ReturnType<typeof useCachedPromise>);
+
+    const { installedNames } = useInstalledSkillNames();
+
+    // skillId — should match
+    expect(installedNames.has("vercel-example-skill")).toBe(true);
+    // id (e.g. "owner/repo") — must not match
+    expect(installedNames.has("vercel-labs/example")).toBe(false);
+    // display name (e.g. "example-skill") — must not match
+    expect(installedNames.has("example-skill")).toBe(false);
+  });
 });
