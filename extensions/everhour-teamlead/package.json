@@ -1,0 +1,47 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "everhour-teamlead",
+  "title": "Everhour Teamlead",
+  "description": "View your team's tracked time in Everhour.",
+  "icon": "everhour.png",
+  "author": "st0mich",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "title": "API Key",
+      "description": "Your Everhour API key. Find it in your Everhour profile under Application Access.",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "team-overview",
+      "title": "Team Overview",
+      "description": "View tracked time for all team members by week.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0",
+    "@raycast/utils": "^1.19.1",
+    "axios": "^1.8.4",
+    "date-fns": "^4.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
