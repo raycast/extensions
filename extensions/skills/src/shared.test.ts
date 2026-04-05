@@ -54,4 +54,11 @@ describe("formatRelativeDate", () => {
   it("returns 'Unknown' for future dates", () => {
     expect(formatRelativeDate("2027-01-01T00:00:00Z")).toBe("Unknown");
   });
+
+  it("returns '1 year ago' at the 360-day boundary instead of '12 months ago'", () => {
+    // 364 days ago: months = floor(364/30) = 12, years = floor(12/12) = 1
+    const d = new Date("2026-04-05T12:00:00Z");
+    d.setDate(d.getDate() - 364);
+    expect(formatRelativeDate(d.toISOString())).toBe("1 year ago");
+  });
 });

@@ -153,7 +153,7 @@ export function formatRelativeDate(isoDate: string): string {
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
   const months = Math.floor(days / 30);
-  const years = Math.floor(days / 365);
+  const years = Math.floor(months / 12);
 
   if (years > 0) return `${years} year${years > 1 ? "s" : ""} ago`;
   if (months > 0) return `${months} month${months > 1 ? "s" : ""} ago`;
