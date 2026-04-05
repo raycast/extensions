@@ -8,7 +8,10 @@ import {
   Clipboard,
   closeMainWindow,
   showHUD,
+  open,
 } from "@raycast/api";
+import { homedir } from "os";
+import { dirname, join } from "path";
 import { RefData, Preferences } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
@@ -61,6 +64,17 @@ const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key:
 const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
+
+function resolveAttachmentPath(item: RefData, zoteroPath: string): string | null {
+  if (!item.attachment?.path || !item.attachment?.key) return null;
+  const attachmentPath = item.attachment.path;
+  if (!attachmentPath.startsWith("storage:")) {
+    return attachmentPath;
+  }
+  const filename = attachmentPath.slice("storage:".length);
+  const expandedZoteroPath = zoteroPath.replace(/^~/, homedir());
+  return join(dirname(expandedZoteroPath), "storage", item.attachment.key, filename);
+}
 
 function getURL(item: RefData): string {
   return `${
@@ -247,6 +261,20 @@ export const View = ({
                         onOpen={onOpen}
                       />
                     )}
+                    {item.attachment &&
+                      item.attachment.key &&
+                      item.attachment.key !== `` &&
+                      resolveAttachmentPath(item, preferences.zotero_path) && (
+                        <Action
+                          icon={Icon.ArrowRightCircleFilled}
+                          title="Open PDF in System Viewer"
+                          onAction={async () => {
+                            const filePath = resolveAttachmentPath(item, preferences.zotero_path)!;
+                            await open(filePath);
+                            closeMainWindow();
+                          }}
+                        />
+                      )}
                     <Action.OpenInBrowser
                       icon={Icon.Link}
                       title="Open in Zotero"
