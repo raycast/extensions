@@ -17,42 +17,72 @@ export interface UsageStats {
   topSessions: SessionMetadata[];
 }
 
-const MODEL_PRICING: Record<
-  string,
+// Pricing per million tokens from https://docs.anthropic.com/en/docs/about-claude/pricing
+// Cache read = 0.1x base input, cache write (5-min TTL) = 1.25x base input
+// Ordered most-specific first for substring matching
+const MODEL_PRICING: Array<{
+  match: string;
+  inputPerMTok: number;
+  outputPerMTok: number;
+  cacheReadPerMTok: number;
+  cacheWritePerMTok: number;
+}> = [
+  // Opus 4.5/4.6 ($5/$25 tier)
   {
-    inputPerMTok: number;
-    outputPerMTok: number;
-    cacheReadPerMTok: number;
-    cacheWritePerMTok: number;
-  }
-> = {
-  opus: {
+    match: "opus-4-5",
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheReadPerMTok: 0.5,
+    cacheWritePerMTok: 6.25,
+  },
+  {
+    match: "opus-4-6",
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheReadPerMTok: 0.5,
+    cacheWritePerMTok: 6.25,
+  },
+  // Opus 4/4.1 ($15/$75 tier)
+  {
+    match: "opus",
     inputPerMTok: 15,
     outputPerMTok: 75,
-    cacheReadPerMTok: 3.75,
+    cacheReadPerMTok: 1.5,
     cacheWritePerMTok: 18.75,
   },
-  sonnet: {
+  // All Sonnet 4.x ($3/$15 tier)
+  {
+    match: "sonnet",
     inputPerMTok: 3,
     outputPerMTok: 15,
     cacheReadPerMTok: 0.3,
     cacheWritePerMTok: 3.75,
   },
-  haiku: {
+  // Haiku 4.5 ($1/$5 tier)
+  {
+    match: "haiku-4",
+    inputPerMTok: 1,
+    outputPerMTok: 5,
+    cacheReadPerMTok: 0.1,
+    cacheWritePerMTok: 1.25,
+  },
+  // Haiku 3.5 ($0.80/$4 tier)
+  {
+    match: "haiku",
     inputPerMTok: 0.8,
     outputPerMTok: 4,
     cacheReadPerMTok: 0.08,
     cacheWritePerMTok: 1,
   },
-};
+];
 
-const DEFAULT_PRICING = MODEL_PRICING.sonnet;
+const DEFAULT_PRICING = MODEL_PRICING.find((p) => p.match === "sonnet")!;
 
 function resolvePricing(model?: string) {
   if (!model) return DEFAULT_PRICING;
   const lower = model.toLowerCase();
-  for (const [key, pricing] of Object.entries(MODEL_PRICING)) {
-    if (lower.includes(key)) return pricing;
+  for (const pricing of MODEL_PRICING) {
+    if (lower.includes(pricing.match)) return pricing;
   }
   return DEFAULT_PRICING;
 }
