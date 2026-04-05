@@ -1,5 +1,5 @@
 # Bluetooth Devices Changelog
 
-## [Initial Version] - 2026-04-05
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release
