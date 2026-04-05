@@ -82,8 +82,6 @@
     "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.3",
     "@types/uuid": "^11.0.0",
-    "cross-fetch": "^4.1.0",
-    "raycast": "^1.0.8",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

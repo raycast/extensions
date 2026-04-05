@@ -1,3 +1,3 @@
 # Apfel Changelog
 
-## [Initial Version] - 2026-03-05
+## [Initial Version] - {PR_MERGE_DATE}

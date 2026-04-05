@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, getPreferenceValues, List, useNavigation } from "@raycast/api";
+import { ActionPanel, Detail, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -15,23 +15,23 @@ import { ChatView } from "./views/chat";
 import IntelligenceNotReadyView from "./views/intelligence-not-ready";
 import { ModelDropdown } from "./views/model/dropdown";
 import NotFoundView from "./views/not-found";
-import { QuestionForm } from "./views/question/form";
 
-export default function Chat(props: { conversation?: Conversation }) {
+export default function Command(props: { conversation?: Conversation }) {
   const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
 
   if (isCheckingAvailability) return <Detail isLoading />;
-  else if (!availabilityData?.apfel) {
-    return <NotFoundView />;
-  } else if (!availabilityData?.appleIntelligence) {
-    return <IntelligenceNotReadyView />;
-  }
+  if (!availabilityData?.apfel) return <NotFoundView />;
+  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
 
+  return <Chat {...props} />;
+}
+
+function Chat(props: { conversation?: Conversation }) {
   const conversations = useConversations();
   const models = useModel();
 
   const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
-  const question = useQuestion({ initialQuestion: "", disableAutoLoad: props.conversation ? true : false });
+  const question = useQuestion({ initialQuestion: "" });
 
   const [conversation, setConversation] = useState<Conversation>(
     props.conversation ?? {
@@ -44,41 +44,9 @@ export default function Chat(props: { conversation?: Conversation }) {
     },
   );
 
-  const [isLoading, setLoading] = useState<boolean>(true);
-
   const [selectedModelId, setSelectedModelId] = useState<string>(
     props.conversation ? props.conversation.model.id : "default",
   );
-
-  const [isAutoFullInput] = useState(() => {
-    return getPreferenceValues<{
-      isAutoFullInput: string;
-    }>().isAutoFullInput;
-  });
-
-  const { push, pop } = useNavigation();
-
-  useEffect(() => {
-    if (
-      isAutoFullInput &&
-      (conversation.chats.length === 0 || (conversation.chats.length > 0 && question.data.length > 0))
-    ) {
-      push(
-        <QuestionForm
-          initialQuestion={question.data}
-          onSubmit={(question) => {
-            chats.ask(question, conversation.model);
-            pop();
-          }}
-          models={models.data}
-          selectedModel={selectedModelId}
-          onModelChange={setSelectedModelId}
-        />,
-      );
-    }
-
-    setLoading(false);
-  }, [question.data, models.data]);
 
   useEffect(() => {
     if (props.conversation?.id !== conversation.id || conversations.data.length === 0) {
@@ -130,7 +98,7 @@ export default function Chat(props: { conversation?: Conversation }) {
       searchText={question.data}
       isShowingDetail={chats.data.length > 0 ? true : false}
       filtering={false}
-      isLoading={isLoading ? isLoading : question.isLoading ? question.isLoading : chats.isLoading}
+      isLoading={question.isLoading ? question.isLoading : chats.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
       navigationTitle={"Ask"}

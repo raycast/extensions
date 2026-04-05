@@ -11,16 +11,17 @@ import { ModelForm } from "./views/model/form";
 import { ModelListItem, ModelListView } from "./views/model/list";
 import NotFoundView from "./views/not-found";
 
-export default function Model() {
+export default function Command() {
   const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
 
   if (isCheckingAvailability) return <Detail isLoading />;
-  else if (!availabilityData?.apfel) {
-    return <NotFoundView />;
-  } else if (!availabilityData?.appleIntelligence) {
-    return <IntelligenceNotReadyView />;
-  }
+  if (!availabilityData?.apfel) return <NotFoundView />;
+  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
 
+  return <Model />;
+}
+
+function Model() {
   const models = useModel();
   const [searchText, setSearchText] = useState<string>("");
   const [selectedModelId, setSelectedModelId] = useState<string | null>(null);

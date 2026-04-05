@@ -11,16 +11,17 @@ import { getFinderSelection, isDirectory } from "./utils/finder";
 import IntelligenceNotReadyView from "./views/intelligence-not-ready";
 import NotFoundView from "./views/not-found";
 
-export default function ExplainDirectory() {
+export default function Command() {
   const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
 
   if (isCheckingAvailability) return <Detail isLoading />;
-  else if (!availabilityData?.apfel) {
-    return <NotFoundView />;
-  } else if (!availabilityData?.appleIntelligence) {
-    return <IntelligenceNotReadyView />;
-  }
+  if (!availabilityData?.apfel) return <NotFoundView />;
+  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
 
+  return <ExplainDirectory />;
+}
+
+function ExplainDirectory() {
   const history = useHistory();
 
   const { isLoading, data } = usePromise(async () => {
