@@ -6,6 +6,8 @@ import { ChannelView } from "./channel";
 
 type Values = {
   content: string;
+  title?: string;
+  description?: string;
 };
 
 export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
@@ -17,6 +19,8 @@ export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
         .block()
         .create(channel.slug, {
           content: values.content,
+          title: values.title,
+          description: values.description,
         })
         .then(() => {
           showToast({ title: "Submitted form", message: `Block successfully created and added to ${channel.title}` });
@@ -50,6 +54,8 @@ export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
     >
       <Form.Description text="Add Block" />
       <Form.TextArea title="Content" placeholder="Enter the content of the Block" {...itemProps.content} />
+      <Form.TextField title="Title (Optional)" placeholder="Custom title for this block" {...itemProps.title} />
+      <Form.TextArea title="Description (Optional)" placeholder="Markdown description" {...itemProps.description} />
     </Form>
   );
 }
