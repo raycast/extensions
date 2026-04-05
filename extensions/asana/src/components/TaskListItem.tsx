@@ -14,12 +14,15 @@ type TaskListItemProps = {
 
 export default function TaskListItem({ task, workspace, mutateList }: TaskListItemProps) {
   // Add section name and individual words from section name as keywords for better filtering
-  const sectionWords = task.assignee_section.name
-    .toLowerCase()
-    .split(/[\s[\]()\-_]+/)
-    .filter(Boolean);
+  const keywords: string[] = [];
 
-  const keywords = [task.assignee_section.name, ...sectionWords];
+  if (task.assignee_section?.name) {
+    const sectionWords = task.assignee_section.name
+      .toLowerCase()
+      .split(/[\s[\]()\-_]+/)
+      .filter(Boolean);
+    keywords.push(task.assignee_section.name, ...sectionWords);
+  }
 
   // Add project sections to keywords
   if (task.memberships && task.memberships.length > 0) {

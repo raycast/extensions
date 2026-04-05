@@ -60,16 +60,17 @@ export type Task = {
   completed: boolean;
   permalink_url: string;
   projects: Project[];
-  assignee_section: AssigneeSection;
+  assignee_section?: AssigneeSection;
   assignee: Assignee | null;
   custom_fields: CustomField[];
   memberships: Membership[];
   tags: Tag[];
   parent: Parent | null;
+  modified_at?: string;
 };
 
 const taskFields =
-  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name";
+  "id,name,due_on,due_at,start_on,completed,projects.name,projects.color,assignee_section.name,permalink_url,custom_fields,assignee.name,memberships.project.name,memberships.section.name,tags.name,parent.name,modified_at";
 
 export async function getMyTasks(workspace: string, showCompletedTasks: boolean) {
   const {
@@ -179,6 +180,18 @@ export async function removeTaskParent(taskId: string) {
     method: "POST",
     data: { data: { parent: null } },
   });
+  return data.data;
+}
+
+export async function searchAllTasks(workspace: string, query: string) {
+  const { data } = await request<{ data: Task[] }>(`/workspaces/${workspace}/tasks/search`, {
+    params: {
+      text: query,
+      opt_fields: taskFields,
+      is_subtask: false,
+    },
+  });
+
   return data.data;
 }
 

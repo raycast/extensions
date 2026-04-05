@@ -30,6 +30,27 @@ export async function getProjects(workspace: string) {
   return data.data;
 }
 
+export type SearchProject = {
+  gid: string;
+  name: string;
+  permalink_url: string;
+  color: string | null;
+  icon: string | null;
+  modified_at: string;
+};
+
+export async function searchProjects(workspace: string, query: string) {
+  const { data } = await request<{ data: SearchProject[] }>(`/workspaces/${workspace}/typeahead`, {
+    params: {
+      resource_type: "project",
+      query,
+      opt_fields: "gid,name,permalink_url,color,icon,modified_at",
+    },
+  });
+
+  return data.data;
+}
+
 export async function addProject(taskId: string, projectId: string) {
   const payload = { project: projectId };
   const { data } = await request<{ data: Task }>(`/tasks/${taskId}/addProject`, {

@@ -43,6 +43,12 @@
       ]
     },
     {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search all tasks in your workspace.",
+      "mode": "view"
+    },
+    {
       "name": "my-tasks",
       "title": "My Tasks",
       "description": "List of your tasks.",
