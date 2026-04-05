@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pro-management",
+  "title": "Pro Management",
+  "description": "快速管理和打开本地项目目录，支持多 IDE 一键启动、置顶和收藏",
+  "icon": "extension-icon.png",
+  "author": "louis",
+  "categories": ["Developer Tools", "Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "scanDirectories",
+      "title": "扫描目录",
+      "description": "项目根目录列表，逗号分隔。会自动递归扫描这些目录中的 Git 仓库 (默认深度 4)。例如: ~/project,~/work",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/project,~/work"
+    },
+    {
+      "name": "customCommands",
+      "title": "自定义命令",
+      "description": "追加自定义 IDE/工具命令，格式: name:template，逗号分隔。例如: code:code {path},cursor:cursor {path}",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "code:code {path},cursor:cursor {path}"
+    },
+    {
+      "name": "globalSkillDirectory",
+      "title": "Global Skill Directory",
+      "description": "全局 AI 技能 Canonical 仓库（对齐 vercel-labs/skills 标准）。安装时自动 symlink 分发到 Non-Universal Agent（如 Claude Code）。",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/.agents/skills",
+      "default": "~/.agents/skills"
+    },
+    {
+      "name": "backupDirectory",
+      "title": "Skill Backup Directory",
+      "description": "技能备份目录。设置后，所有 skill 会自动同步一份副本到此目录用于版本管理或灾备。",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/backup/skills"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Pro Management",
+      "description": "搜索并管理本地项目，一键用 IDE 或工具打开",
+      "mode": "view"
+    },
+    {
+      "name": "manage-skills",
+      "title": "Manage Skills",
+      "subtitle": "Pro Management",
+      "description": "统一管理多重 AI Agent (Claude Code/Antigravity/Codex) 的自动化技能，支持快速查阅与执行",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

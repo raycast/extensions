@@ -1,0 +1,10 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-empty": "off",
+    "@raycast/prefer-title-case": "off"
+  }
+}
