@@ -1,5 +1,4 @@
-import { Color } from "@raycast/api";
-import { List } from "@raycast/api";
+import { Color, List } from "@raycast/api";
 
 const DAY_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
@@ -29,10 +28,7 @@ function formatShort(seconds: number): string {
   return `${h}:${String(m).padStart(2, "0")}`;
 }
 
-export function weekDayAccessories(
-  dailySeconds: Record<string, number>,
-  weekDays: string[],
-): List.Item.Accessory[] {
+export function weekDayAccessories(dailySeconds: Record<string, number>, weekDays: string[]): List.Item.Accessory[] {
   const values = weekDays.map((d) => dailySeconds[d] ?? 0);
   const max = Math.max(...values, 1);
 

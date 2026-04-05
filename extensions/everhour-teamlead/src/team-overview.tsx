@@ -25,10 +25,7 @@ export default function TeamOverview() {
     return map;
   }, [projects]);
 
-  const totalSeconds = useMemo(
-    () => entries?.reduce((sum, e) => sum + e.time, 0) ?? 0,
-    [entries],
-  );
+  const totalSeconds = useMemo(() => entries?.reduce((sum, e) => sum + e.time, 0) ?? 0, [entries]);
 
   const memberData = useMemo(() => {
     if (!entries || !users) return [];
@@ -91,36 +88,34 @@ export default function TeamOverview() {
           actions={<ActionPanel>{navActions}</ActionPanel>}
         />
       ) : (
-        memberData.map(
-          ({ user, entries: userEntries, total, dailySeconds }) => (
-            <List.Item
-              key={user.id}
-              icon={getAvatarIcon(user.name)}
-              title={user.name}
-              subtitle={formatDuration(total)}
-              accessories={weekDayAccessories(dailySeconds, days)}
-              keywords={[user.name]}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Show Time Entries"
-                    icon={Icon.Sidebar}
-                    target={
-                      <MemberDetail
-                        user={user}
-                        entries={userEntries}
-                        weekDays={days}
-                        isCurrentWeek={weekOffset === 0}
-                        projectMap={projectMap}
-                      />
-                    }
-                  />
-                  {navActions}
-                </ActionPanel>
-              }
-            />
-          ),
-        )
+        memberData.map(({ user, entries: userEntries, total, dailySeconds }) => (
+          <List.Item
+            key={user.id}
+            icon={getAvatarIcon(user.name)}
+            title={user.name}
+            subtitle={formatDuration(total)}
+            accessories={weekDayAccessories(dailySeconds, days)}
+            keywords={[user.name]}
+            actions={
+              <ActionPanel>
+                <Action.Push
+                  title="Show Time Entries"
+                  icon={Icon.Sidebar}
+                  target={
+                    <MemberDetail
+                      user={user}
+                      entries={userEntries}
+                      weekDays={days}
+                      isCurrentWeek={weekOffset === 0}
+                      projectMap={projectMap}
+                    />
+                  }
+                />
+                {navActions}
+              </ActionPanel>
+            }
+          />
+        ))
       )}
     </List>
   );

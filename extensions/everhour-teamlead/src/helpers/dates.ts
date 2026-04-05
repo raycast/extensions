@@ -1,10 +1,4 @@
-import {
-  addWeeks,
-  startOfWeek,
-  endOfWeek,
-  format,
-  eachDayOfInterval,
-} from "date-fns";
+import { addWeeks, startOfWeek, endOfWeek, format, eachDayOfInterval } from "date-fns";
 
 export function getWeekRange(offset: number) {
   const now = new Date();

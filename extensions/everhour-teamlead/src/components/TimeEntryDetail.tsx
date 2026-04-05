@@ -13,9 +13,7 @@ type Props = {
 
 export default function TimeEntryDetail({ entry, user, projectMap }: Props) {
   const taskName = entry.task?.name || "No Task";
-  const projectName = entry.task?.projects?.[0]
-    ? projectMap.get(entry.task.projects[0]) || entry.task.projects[0]
-    : "";
+  const projectName = entry.task?.projects?.[0] ? projectMap.get(entry.task.projects[0]) || entry.task.projects[0] : "";
   const comment = entry.comment;
   const estimate = entry.task?.estimate?.total;
   const totalTracked = entry.task?.time?.total;
@@ -25,9 +23,7 @@ export default function TimeEntryDetail({ entry, user, projectMap }: Props) {
   if (estimate) {
     const ratio = (totalTracked ?? 0) / estimate;
     const status = ratio >= 1.0 ? "🚫" : ratio >= 0.8 ? "⚠️" : "✅";
-    parts.push(
-      `**Budget:** ${formatDuration(totalTracked ?? 0)} / ${formatDuration(estimate)} ${status}`,
-    );
+    parts.push(`**Budget:** ${formatDuration(totalTracked ?? 0)} / ${formatDuration(estimate)} ${status}`);
   }
   parts.push("");
   parts.push(comment ? `> ${comment}` : "_No comment_");
@@ -38,36 +34,12 @@ export default function TimeEntryDetail({ entry, user, projectMap }: Props) {
       markdown={parts.join("\n\n")}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Duration"
-            text={formatDuration(entry.time)}
-            icon={Icon.Clock}
-          />
-          <Detail.Metadata.Label
-            title="Date"
-            text={formatDayLabel(entry.date)}
-            icon={Icon.Calendar}
-          />
+          <Detail.Metadata.Label title="Duration" text={formatDuration(entry.time)} icon={Icon.Clock} />
+          <Detail.Metadata.Label title="Date" text={formatDayLabel(entry.date)} icon={Icon.Calendar} />
           <Detail.Metadata.Separator />
-          {user && (
-            <Detail.Metadata.Label
-              title="Team Member"
-              text={user.name}
-              icon={getAvatarIcon(user.name)}
-            />
-          )}
-          {projectName && (
-            <Detail.Metadata.Label
-              title="Project"
-              text={projectName}
-              icon={Icon.Folder}
-            />
-          )}
-          <Detail.Metadata.Label
-            title="Task"
-            text={taskName}
-            icon={Icon.Document}
-          />
+          {user && <Detail.Metadata.Label title="Team Member" text={user.name} icon={getAvatarIcon(user.name)} />}
+          {projectName && <Detail.Metadata.Label title="Project" text={projectName} icon={Icon.Folder} />}
+          <Detail.Metadata.Label title="Task" text={taskName} icon={Icon.Document} />
           {estimate && (
             <>
               <Detail.Metadata.Separator />
@@ -81,21 +53,13 @@ export default function TimeEntryDetail({ entry, user, projectMap }: Props) {
           {comment && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label
-                title="Comment"
-                text={comment}
-                icon={Icon.Bubble}
-              />
+              <Detail.Metadata.Label title="Comment" text={comment} icon={Icon.Bubble} />
             </>
           )}
         </Detail.Metadata>
       }
       actions={
-        <ActionPanel>
-          {entry.task?.url && (
-            <Action.OpenInBrowser title="Open Task" url={entry.task.url} />
-          )}
-        </ActionPanel>
+        <ActionPanel>{entry.task?.url && <Action.OpenInBrowser title="Open Task" url={entry.task.url} />}</ActionPanel>
       }
     />
   );

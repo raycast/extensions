@@ -24,13 +24,7 @@ type Section = {
   entries: TimeEntry[];
 };
 
-export default function MemberDetail({
-  user,
-  entries,
-  weekDays,
-  isCurrentWeek,
-  projectMap,
-}: Props) {
+export default function MemberDetail({ user, entries, weekDays, isCurrentWeek, projectMap }: Props) {
   const [filter, setFilter] = useState<FilterMode>("all");
 
   const today = format(new Date(), "yyyy-MM-dd");
@@ -66,36 +60,20 @@ export default function MemberDetail({
       searchBarAccessory={
         <List.Dropdown tooltip="View" value={filter} onChange={setFilter}>
           <List.Dropdown.Item icon={Icon.List} title="All Days" value="all" />
-          <List.Dropdown.Item
-            icon={Icon.Folder}
-            title="By Project"
-            value="by-project"
-          />
+          <List.Dropdown.Item icon={Icon.Folder} title="By Project" value="by-project" />
           <List.Dropdown.Section title="By Day">
             {[...relevantDays].reverse().map((day) => (
-              <List.Dropdown.Item
-                key={day}
-                icon={Icon.Calendar}
-                title={formatDayLabel(day)}
-                value={day}
-              />
+              <List.Dropdown.Item key={day} icon={Icon.Calendar} title={formatDayLabel(day)} value={day} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
     >
       {sections.length === 0 ? (
-        <List.EmptyView
-          title="No entries"
-          description="No time tracked for this filter."
-        />
+        <List.EmptyView title="No entries" description="No time tracked for this filter." />
       ) : (
         sections.map((section) => (
-          <List.Section
-            key={section.key}
-            title={section.title}
-            subtitle={section.subtitle}
-          >
+          <List.Section key={section.key} title={section.title} subtitle={section.subtitle}>
             {section.entries.map((entry) => (
               <EntryItem
                 key={entry.id}
@@ -133,10 +111,7 @@ function buildDaySections(entries: TimeEntry[], days: string[]): Section[] {
     });
 }
 
-function buildProjectSections(
-  entries: TimeEntry[],
-  projectMap: Map<string, string>,
-): Section[] {
+function buildProjectSections(entries: TimeEntry[], projectMap: Map<string, string>): Section[] {
   const grouped = new Map<string, TimeEntry[]>();
   for (const entry of entries) {
     const projectId = entry.task?.projects?.[0] ?? "__none__";
@@ -148,10 +123,7 @@ function buildProjectSections(
     .map(([projectId, projectEntries]) => {
       const sorted = projectEntries.sort((a, b) => b.time - a.time);
       const total = sorted.reduce((s, e) => s + e.time, 0);
-      const name =
-        projectId === "__none__"
-          ? "No Project"
-          : projectMap.get(projectId) || projectId;
+      const name = projectId === "__none__" ? "No Project" : projectMap.get(projectId) || projectId;
       return {
         key: projectId,
         title: name,
@@ -163,9 +135,7 @@ function buildProjectSections(
     .sort((a, b) => b.total - a.total);
 }
 
-function budgetIcon(
-  task: TimeEntry["task"],
-): { icon: string; tooltip: string } | null {
+function budgetIcon(task: TimeEntry["task"]): { icon: string; tooltip: string } | null {
   if (!task?.estimate?.total || !task?.time?.total) return null;
   const ratio = task.time.total / task.estimate.total;
   if (ratio >= 1.0) {
@@ -239,17 +209,9 @@ function EntryItem({
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
-            target={
-              <TimeEntryDetail
-                entry={entry}
-                user={user}
-                projectMap={projectMap}
-              />
-            }
+            target={<TimeEntryDetail entry={entry} user={user} projectMap={projectMap} />}
           />
-          {entry.task?.url && (
-            <Action.OpenInBrowser title="Open Task" url={entry.task.url} />
-          )}
+          {entry.task?.url && <Action.OpenInBrowser title="Open Task" url={entry.task.url} />}
         </ActionPanel>
       }
     />
