@@ -1,0 +1,42 @@
+import { Detail, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
+import { isApfelInstalled } from "./api/apfel";
+import NotFoundView from "./views/not-found";
+import { apfelExplain } from "./api/apfel/explain";
+import { usePromise } from "@raycast/utils";
+import { useHistory } from "./hooks/useHistory";
+import { v4 as uuidv4 } from "uuid";
+
+export default function Explain() {
+  if (!isApfelInstalled()) {
+    return <NotFoundView />;
+  }
+
+  const history = useHistory();
+
+  const { isLoading, data } = usePromise(async () => {
+    const text = await getSelectedText();
+    const trimmed = text?.trim();
+
+    if (!trimmed) {
+      await showHUD("No text selected");
+      return;
+    }
+
+    await showToast({ style: Toast.Style.Animated, title: "Getting your explanation..." });
+
+    const explanation = await apfelExplain(trimmed);
+
+    await history.add({
+      id: uuidv4(),
+      created_at: new Date().toISOString(),
+      answer: explanation,
+      question: `Explain Text: ${trimmed}`,
+    });
+
+    await showToast({ style: Toast.Style.Success, title: "Got your explanation!" });
+
+    return explanation;
+  });
+
+  return <Detail isLoading={isLoading} markdown={data} />;
+}
