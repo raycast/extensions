@@ -23,7 +23,13 @@ function updateProgress(progress: FlashcardProgress, rating: Rating, now: number
     easeFactor = Math.max(1.3, prevEaseFactor - 0.2);
   } else {
     repetitions = prevRepetitions + 1;
-    interval = repetitions < 2 ? (repetitions === 1 ? 6 : 1) : Math.round(prevInterval * prevEaseFactor);
+    if (repetitions === 1) {
+      interval = 1;
+    } else if (repetitions === 2) {
+      interval = 6;
+    } else {
+      interval = Math.round(prevInterval * prevEaseFactor);
+    }
 
     if (rating === "easy") {
       interval = Math.round(interval * 1.3);
@@ -271,6 +277,37 @@ if (import.meta.vitest) {
     exampleTranslation: "",
     timestamp: Date.now(),
     type: "word",
+  });
+
+  describe("updateProgress", () => {
+    const base: FlashcardProgress = {
+      word: "hi",
+      translationId: "hi-1",
+      easeFactor: 2.5,
+      interval: 1,
+      repetitions: 0,
+      nextReviewDate: 0,
+    };
+
+    it("first correct answer gives interval 1", () => {
+      const result = updateProgress(base, "good", 0);
+      expect(result.interval).toBe(1);
+      expect(result.repetitions).toBe(1);
+    });
+
+    it("second correct answer gives interval 6", () => {
+      const after1 = updateProgress(base, "good", 0);
+      const after2 = updateProgress(after1, "good", 0);
+      expect(after2.interval).toBe(6);
+      expect(after2.repetitions).toBe(2);
+    });
+
+    it("again resets interval and repetitions", () => {
+      const after1 = updateProgress(base, "good", 0);
+      const reset = updateProgress(after1, "again", 0);
+      expect(reset.interval).toBe(1);
+      expect(reset.repetitions).toBe(0);
+    });
   });
 
   describe("flashcards reducer", () => {
