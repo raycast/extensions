@@ -4,7 +4,7 @@
   "title": "Everhour Teamlead",
   "description": "View your team's tracked time in Everhour.",
   "icon": "everhour.png",
-  "author": "st0mich",
+  "author": "michael_stoffels",
   "categories": ["Productivity"],
   "license": "MIT",
   "preferences": [
