@@ -5,7 +5,7 @@
 <h1 align="center">Apple Intelligence for Raycast!</h1>
 
 <h3 align="center">
-  Interact with Apple Intelligence within Raycast via [Apfel](https://apfel.franzai.com)!
+  Interact with Apple Intelligence within Raycast via <a href="https://apfel.franzai.com" target="_blank">Apfel</a>
 </h3>
 
 <p align="center">
