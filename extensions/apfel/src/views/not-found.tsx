@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, popToRoot, showToast, Toast } from "@raycast/api";
-import { cpus, homedir } from "os";
 import { execFile } from "child_process";
+import { cpus, homedir } from "os";
 import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);

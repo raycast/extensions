@@ -1,21 +1,21 @@
 import { ActionPanel, Detail, getPreferenceValues, List, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
 import { PreferencesActionSection } from "./actions/preferences";
+import { isApfelInstalled } from "./api/apfel";
 import { useChat } from "./hooks/useChat";
 import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
 import type { Chat, Conversation, Model } from "./type";
 import { ChatView } from "./views/chat";
-import { ModelDropdown } from "./views/model/dropdown";
-import { QuestionForm } from "./views/question/form";
-import { isApfelInstalled } from "./api/apfel";
-import NotFoundView from "./views/not-found";
-import { usePromise } from "@raycast/utils";
 import IntelligenceNotReadyView from "./views/intelligence-not-ready";
+import { ModelDropdown } from "./views/model/dropdown";
+import NotFoundView from "./views/not-found";
+import { QuestionForm } from "./views/question/form";
 
 export default function Chat(props: { conversation?: Conversation }) {
   const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);

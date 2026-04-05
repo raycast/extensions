@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { Model } from "../../type";
 import type { JSX } from "react";
+import { Model } from "../../type";
 
 export const ModelListView = ({
   title,

@@ -1,19 +1,26 @@
-import { ActionPanel, Icon, List } from "@raycast/api";
+import { ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { DestructiveAction } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
 import { SaveActionSection } from "./actions/save";
+import { isApfelInstalled } from "./api/apfel";
 import { useHistory } from "./hooks/useHistory";
 import { useSavedChat } from "./hooks/useSavedChat";
 import type { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
-import { isApfelInstalled } from "./api/apfel";
+import IntelligenceNotReadyView from "./views/intelligence-not-ready";
 import NotFoundView from "./views/not-found";
 
 export default function History() {
-  if (!isApfelInstalled()) {
+  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
+
+  if (isCheckingAvailability) return <Detail isLoading />;
+  else if (!availabilityData?.apfel) {
     return <NotFoundView />;
+  } else if (!availabilityData?.appleIntelligence) {
+    return <IntelligenceNotReadyView />;
   }
 
   const savedChat = useSavedChat();

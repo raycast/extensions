@@ -23,7 +23,7 @@ Once enabled, reopen this command.
           <Action
             title="Open Apple Intelligence Settings"
             icon={Icon.Gear}
-            onAction={() => open("x-apple.systempreferences:com.apple.preference.security?Privacy_AppleIntelligence")}
+            onAction={() => open("x-apple.systempreferences:com.apple.Siri-Settings.extension")}
           />
         </ActionPanel>
       }

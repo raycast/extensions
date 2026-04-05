@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { Conversation } from "../type";
 import type { JSX } from "react";
+import { Conversation } from "../type";
 
 export const ConversationListView = (props: {
   title: string;

@@ -1,17 +1,23 @@
-import { useState } from "react";
-import { Action, ActionPanel, Form, Keyboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Keyboard, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useDebouncedValue } from "./hooks/useDebouncedValue";
-import { apfelTranslate } from "./api/apfel/translate";
-import { getSupportedLanguages } from "./api/apfel/supported-languages";
-import { isApfelInstalled } from "./api/apfel";
-import NotFoundView from "./views/not-found";
-import { useHistory } from "./hooks/useHistory";
+import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { isApfelInstalled } from "./api/apfel";
+import { getSupportedLanguages } from "./api/apfel/supported-languages";
+import { apfelTranslate } from "./api/apfel/translate";
+import { useDebouncedValue } from "./hooks/useDebouncedValue";
+import { useHistory } from "./hooks/useHistory";
+import IntelligenceNotReadyView from "./views/intelligence-not-ready";
+import NotFoundView from "./views/not-found";
 
 export default function Translate() {
-  if (!isApfelInstalled()) {
+  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
+
+  if (isCheckingAvailability) return <Detail isLoading />;
+  else if (!availabilityData?.apfel) {
     return <NotFoundView />;
+  } else if (!availabilityData?.appleIntelligence) {
+    return <IntelligenceNotReadyView />;
   }
 
   const history = useHistory();

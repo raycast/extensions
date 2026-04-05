@@ -1,21 +1,24 @@
 import { ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
+import { isApfelInstalled } from "./api/apfel";
 import Chat from "./chat";
 import { useConversations } from "./hooks/useConversations";
 import type { Conversation } from "./type";
 import { ConversationListView } from "./views/conversation-list";
-import { isApfelInstalled } from "./api/apfel";
+import IntelligenceNotReadyView from "./views/intelligence-not-ready";
 import NotFoundView from "./views/not-found";
-import { usePromise } from "@raycast/utils";
 
 export default function Conversation() {
-  const { data: isAvailable, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
+  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
 
   if (isCheckingAvailability) return <Detail isLoading />;
-  else if (!isAvailable) {
+  else if (!availabilityData?.apfel) {
     return <NotFoundView />;
+  } else if (!availabilityData?.appleIntelligence) {
+    return <IntelligenceNotReadyView />;
   }
 
   const conversations = useConversations();

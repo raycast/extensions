@@ -1,17 +1,24 @@
-import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { DestructiveAction, PinAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
+import { isApfelInstalled } from "./api/apfel";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import type { Model } from "./type";
+import IntelligenceNotReadyView from "./views/intelligence-not-ready";
 import { ModelForm } from "./views/model/form";
 import { ModelListItem, ModelListView } from "./views/model/list";
-import { isApfelInstalled } from "./api/apfel";
 import NotFoundView from "./views/not-found";
 
 export default function Model() {
-  if (!isApfelInstalled()) {
+  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
+
+  if (isCheckingAvailability) return <Detail isLoading />;
+  else if (!availabilityData?.apfel) {
     return <NotFoundView />;
+  } else if (!availabilityData?.appleIntelligence) {
+    return <IntelligenceNotReadyView />;
   }
 
   const models = useModel();
