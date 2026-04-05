@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "raycast-bluetooth-devices",
+
+      "include-component-in-tag": false,
+      "tag-separator": "",
+
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        { "type": "feat",     "section": "✨ Features" },
+        { "type": "fix",      "section": "🐛 Bug Fixes" },
+        { "type": "perf",     "section": "⚡ Performance" },
+        { "type": "revert",   "section": "⏪ Reverts" },
+        { "type": "docs",     "section": "📖 Documentation" },
+        { "type": "refactor", "section": "♻️  Refactoring" },
+        { "type": "chore",    "hidden": true },
+        { "type": "build",    "hidden": true },
+        { "type": "ci",       "hidden": true },
+        { "type": "test",     "hidden": true }
+      ]
+    }
+  }
+}

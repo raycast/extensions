@@ -45,7 +45,7 @@
   },
   "scripts": {
     "generate-icon": "node generate-icon.js",
-    "prebuild": "node generate-icon.js && cd ../WinBluetoothCli && \"C:\\Program Files\\dotnet\\dotnet.exe\" publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ../raycast-bluetooth/assets/cli",
+    "prebuild": "node generate-icon.js && \"C:\\Program Files\\dotnet\\dotnet.exe\" publish WinBluetoothCli.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./assets/cli",
     "predev": "npm run prebuild",
     "build": "ray build -e dist",
     "dev": "ray develop",

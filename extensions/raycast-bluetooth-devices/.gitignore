@@ -1,0 +1,20 @@
+### Node
+node_modules/
+*.log
+
+### Build
+dist/
+build/
+assets/cli/WinBluetoothCli.exe
+assets/cli/WinBluetoothCli.pdb
+
+### C# / .NET
+bin/
+obj/
+
+### OS
+.DS_Store
+Thumbs.db
+
+### Claude
+.claude/
