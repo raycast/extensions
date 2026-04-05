@@ -74,11 +74,13 @@ function SearchTasks() {
             </List.Section>
           )}
 
-          <List.Section title="Tasks" subtitle={`${sortedTasks.length}`}>
-            {sortedTasks.map((task) => (
-              <TaskListItem key={task.gid} task={task} workspace={workspace} mutateList={mutateList} />
-            ))}
-          </List.Section>
+          {sortedTasks.length > 0 && (
+            <List.Section title="Tasks" subtitle={`${sortedTasks.length}`}>
+              {sortedTasks.map((task) => (
+                <TaskListItem key={task.gid} task={task} workspace={workspace} mutateList={mutateList} />
+              ))}
+            </List.Section>
+          )}
 
           {sortedProjects.length === 0 && sortedTasks.length === 0 && (
             <List.EmptyView

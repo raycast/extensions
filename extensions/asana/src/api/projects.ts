@@ -36,7 +36,7 @@ export type SearchProject = {
   permalink_url: string;
   color: string | null;
   icon: string | null;
-  modified_at: string;
+  modified_at: string | null;
 };
 
 export async function searchProjects(workspace: string, query: string) {
