@@ -27,7 +27,7 @@ export async function authorize(): Promise<string> {
   const tokenSet = await fetchTokens(authRequest, authorizationCode);
   await oauthClient.setTokens(tokenSet);
 
-  return tokenSet.accessToken;
+  return tokenSet.access_token;
 }
 
 async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string): Promise<OAuth.TokenResponse> {
@@ -47,5 +47,5 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string
   }
 
   const data = (await res.json()) as { accessToken: string };
-  return { accessToken: data.accessToken };
+  return { access_token: data.accessToken };
 }
