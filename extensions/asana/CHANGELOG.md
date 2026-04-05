@@ -1,5 +1,10 @@
 # Asana Changelog
 
+## [Enhancements] - 2026-04-05
+
+- Added new "Search Tasks" command to search across all tasks and projects in a workspace
+- Search results show projects and tasks in separate sections, sorted by last activity
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
