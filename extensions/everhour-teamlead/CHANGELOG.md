@@ -1,6 +1,6 @@
 # Everhour Teamlead Changelog
 
-## [Initial Version] - 2026-04-05
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Added "Team Overview" command showing tracked time for all team members by week
 - Week navigation with Cmd+Left/Right and Cmd+T for current week

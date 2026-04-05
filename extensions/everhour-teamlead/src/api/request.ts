@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { getPreferenceValues } from "@raycast/api";
 
 function getApiKey(): string {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return apiKey;
 }
 

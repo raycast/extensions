@@ -1,7 +1,7 @@
 import { Color } from "@raycast/api";
 import { List } from "@raycast/api";
 
-const DAY_LABELS = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const DAY_LABELS = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 const INTENSITY_COLORS: Color[] = [
   Color.SecondaryText, // 0 - no time

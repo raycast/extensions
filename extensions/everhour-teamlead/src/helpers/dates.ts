@@ -5,7 +5,6 @@ import {
   format,
   eachDayOfInterval,
 } from "date-fns";
-import { de } from "date-fns/locale";
 
 export function getWeekRange(offset: number) {
   const now = new Date();
@@ -22,14 +21,14 @@ export function getWeekRange(offset: number) {
 
 export function formatWeekLabel(offset: number): string {
   const { start, end } = getWeekRange(offset);
-  const startStr = format(start, "d. MMM", { locale: de });
-  const endStr = format(end, "d. MMM yyyy", { locale: de });
+  const startStr = format(start, "d MMM");
+  const endStr = format(end, "d MMM yyyy");
   return `${startStr} – ${endStr}`;
 }
 
 export function formatDayLabel(dateStr: string): string {
   const date = new Date(dateStr);
-  return format(date, "EEEE, d. MMM", { locale: de });
+  return format(date, "EEEE, d MMM");
 }
 
 export function getWeekDays(offset: number): string[] {
