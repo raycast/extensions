@@ -18,8 +18,15 @@ export default function ScanDevices() {
 
   const scan = useCallback(async () => {
     setIsLoading(true);
-    const devs = await scanDevices();
-    setDevices(devs);
+    const result = await scanDevices();
+    if (!result.success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Scan failed",
+        message: result.error,
+      });
+    }
+    setDevices(result.data ?? []);
     setLastScanned(new Date());
     setIsLoading(false);
   }, []);
@@ -121,7 +128,7 @@ export default function ScanDevices() {
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                     <Action.CopyToClipboard
-                      title="Copy Device Id"
+                      title="Copy Device ID"
                       content={d.id}
                     />
                     {d.deviceAddress && (

@@ -73,8 +73,7 @@ export function runCli<T = unknown>(
 
 // ── API surface ───────────────────────────────────────────────────────────────
 
-export const listDevices = () =>
-  runCli<Device[]>("list").then((r) => r.data ?? []);
+export const listDevices = () => runCli<Device[]>("list");
 
 export const connectDevice = (id: string) => runCli("connect", id);
 
@@ -90,13 +89,11 @@ export const toggleBluetooth = () =>
 export const getStatus = () => runCli<BluetoothStatus>("status");
 
 // scan does active radio inquiry — allow up to 15 s (CLI hard-caps at 10 s internally)
-export const scanDevices = () =>
-  runCli<Device[]>("scan", { timeout: 15_000 }).then((r) => r.data ?? []);
+export const scanDevices = () => runCli<Device[]>("scan", { timeout: 15_000 });
 
 export const getDeviceInfo = (id: string) => runCli("info", id);
 
-export const listAudioEndpoints = () =>
-  runCli<AudioEndpoint[]>("audio-list").then((r) => r.data ?? []);
+export const listAudioEndpoints = () => runCli<AudioEndpoint[]>("audio-list");
 
 export const setAudioDefault = (endpointId: string) =>
   runCli("set-audio", endpointId);

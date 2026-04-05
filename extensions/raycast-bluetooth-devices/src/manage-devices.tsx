@@ -34,14 +34,31 @@ export default function ManageDevices() {
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    const [devs, st, audio] = await Promise.all([
+    const [devsResult, st, audioResult] = await Promise.all([
       listDevices(),
       getStatus(),
       listAudioEndpoints(),
     ]);
-    setDevices(devs);
+
+    if (!devsResult.success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to list devices",
+        message: devsResult.error,
+      });
+    }
+
+    if (!audioResult.success) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to list audio endpoints",
+        message: audioResult.error,
+      });
+    }
+
+    setDevices(devsResult.data ?? []);
     setStatus(st.data ?? null);
-    setAudioEndpoints(audio);
+    setAudioEndpoints(audioResult.data ?? []);
     setIsLoading(false);
   }, []);
 
@@ -350,7 +367,7 @@ function DeviceItem({
               shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
             />
             <Action.CopyToClipboard
-              title="Copy Device Id"
+              title="Copy Device ID"
               content={device.id}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
