@@ -25,15 +25,17 @@ function MyTasks() {
   const sections = uniqBy(
     tasks?.map((task) => task.assignee_section),
     "gid",
-  ).filter(Boolean).map((section) => {
-    const tasks = tasksBySection[section!.gid];
+  )
+    .filter(Boolean)
+    .map((section) => {
+      const tasks = tasksBySection[section!.gid];
 
-    return {
-      ...section!,
-      subtitle: tasks.length === 1 ? "1 task" : `${tasks.length} tasks`,
-      tasks: sortBy(tasksBySection[section!.gid], "due_on", "due_at"),
-    };
-  });
+      return {
+        ...section!,
+        subtitle: tasks.length === 1 ? "1 task" : `${tasks.length} tasks`,
+        tasks: sortBy(tasksBySection[section!.gid], "due_on", "due_at"),
+      };
+    });
 
   return (
     <List
