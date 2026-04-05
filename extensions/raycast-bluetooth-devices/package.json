@@ -1,0 +1,56 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-bluetooth-devices",
+  "title": "Bluetooth Devices",
+  "description": "Manage Windows Bluetooth devices: connect, disconnect, pair, unpair, and toggle the adapter.",
+  "icon": "command-icon.png",
+  "version": "1.0.0",
+  "author": "athndev",
+  "license": "MIT",
+  "categories": ["System"],
+  "keywords": ["bluetooth", "windows", "connect", "wireless", "headphones", "keyboard", "mouse"],
+  "commands": [
+    {
+      "name": "manage-devices",
+      "title": "Manage Bluetooth Devices",
+      "description": "View, connect, disconnect, and remove paired Bluetooth devices.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "toggle-bluetooth",
+      "title": "Toggle Bluetooth",
+      "description": "Turn the Bluetooth adapter on or off instantly.",
+      "mode": "no-view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "scan-devices",
+      "title": "Scan for Bluetooth Devices",
+      "description": "Discover and pair nearby Bluetooth devices.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "generate-icon": "node generate-icon.js",
+    "prebuild": "node generate-icon.js && cd ../WinBluetoothCli && \"C:\\Program Files\\dotnet\\dotnet.exe\" publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ../raycast-bluetooth/assets/cli",
+    "predev": "npm run prebuild",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
