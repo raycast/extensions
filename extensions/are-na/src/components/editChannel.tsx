@@ -11,10 +11,12 @@ type Values = {
   description: string;
 };
 
-export function EditChannelView({ channel }: { channel: MinimalChannel }) {
+type EditChannelProps = MinimalChannel & { status?: ChannelStatus };
+
+export function EditChannelView({ channel }: { channel: EditChannelProps }) {
   const arena = useArena();
   const { push } = useNavigation();
-  const [status, setStatus] = useState<ChannelStatus>(channel.open ? "public" : "closed");
+  const [status, setStatus] = useState<ChannelStatus>(channel.status ?? (channel.open ? "public" : "closed"));
   const { handleSubmit, itemProps } = useForm<Values>({
     initialValues: {
       title: channel.title,
