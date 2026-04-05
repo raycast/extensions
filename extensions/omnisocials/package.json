@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omnisocials",
+  "title": "OmniSocials",
+  "description": "Create, schedule, and manage social media posts across Instagram, LinkedIn, TikTok, X, YouTube, and more from Raycast.",
+  "icon": "icon.png",
+  "author": "robert_ligthart",
+  "access": "public",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-post",
+      "title": "New Post",
+      "subtitle": "OmniSocials",
+      "description": "Create a new social media post across multiple platforms.",
+      "keywords": [
+        "create",
+        "compose",
+        "write",
+        "post",
+        "publish",
+        "schedule"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-drafts",
+      "title": "View Drafts",
+      "subtitle": "OmniSocials",
+      "description": "View your draft posts.",
+      "keywords": [
+        "drafts",
+        "unpublished",
+        "pending"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-scheduled",
+      "title": "View Scheduled",
+      "subtitle": "OmniSocials",
+      "description": "View your scheduled posts.",
+      "keywords": [
+        "scheduled",
+        "queue",
+        "upcoming",
+        "planned"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-published",
+      "title": "View Published",
+      "subtitle": "OmniSocials",
+      "description": "View your published posts.",
+      "keywords": [
+        "published",
+        "posted",
+        "sent",
+        "history"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "view-accounts",
+      "title": "View Accounts",
+      "subtitle": "OmniSocials",
+      "description": "Browse your connected social media accounts.",
+      "keywords": [
+        "accounts",
+        "profiles",
+        "channels",
+        "platforms"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "analytics",
+      "title": "Analytics Overview",
+      "subtitle": "OmniSocials",
+      "description": "View your social media analytics overview.",
+      "keywords": [
+        "analytics",
+        "stats",
+        "metrics",
+        "performance"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "manage-workspaces",
+      "title": "Manage Workspaces",
+      "subtitle": "OmniSocials",
+      "description": "Add, remove, and manage workspace API key profiles.",
+      "keywords": [
+        "workspace",
+        "api key",
+        "manage",
+        "configure",
+        "settings"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "switch-workspace",
+      "title": "Switch Workspace",
+      "subtitle": "OmniSocials",
+      "description": "Quickly switch between workspace profiles.",
+      "keywords": [
+        "workspace",
+        "switch",
+        "change",
+        "select"
+      ],
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "description": "Create a new social media post on OmniSocials. Provide content text and optionally specify target accounts, schedule time, and media URLs. Supports Instagram, Facebook, LinkedIn, YouTube, TikTok, X, Pinterest, Bluesky, Threads, and Mastodon."
+    },
+    {
+      "name": "list-posts",
+      "title": "List Posts",
+      "description": "List social media posts from OmniSocials. Filter by status: draft, scheduled, posted, or failed."
+    },
+    {
+      "name": "list-accounts",
+      "title": "List Accounts",
+      "description": "List connected social media accounts on OmniSocials."
+    },
+    {
+      "name": "get-analytics",
+      "title": "Get Analytics",
+      "description": "Get social media analytics overview from OmniSocials for a given time period (7d, 30d, or 90d)."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your OmniSocials API key. Get it at app.omnisocials.com > Settings > API. For multiple workspaces, use the Manage Workspaces command instead.",
+      "placeholder": "omsk_live_...",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
