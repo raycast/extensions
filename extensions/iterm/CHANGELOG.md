@@ -10,6 +10,7 @@
 - Added it2api availability warning on split commands when iTerm2 is not installed at the default path
 - Fixed `useMemo` dependency array in core hook
 - Fixed TypeScript node type definitions
+- Updated dependencies: `@raycast/api` 1.79 → 1.104, `typescript` 5 → 6, `eslint` 9 → 10, `@types/node` 22 → 25
 
 ## [New Feature] - 2026-01-07
 
