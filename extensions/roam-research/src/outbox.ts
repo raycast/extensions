@@ -215,7 +215,6 @@ export async function processOutboxQueue(graphsConfig: GraphsConfigMap): Promise
         await updateItemInPlace(item.id, {
           status: "synced",
           errorMessage: undefined,
-          retryCount: item.retryCount + 1,
         });
         synced++;
       } catch (e) {

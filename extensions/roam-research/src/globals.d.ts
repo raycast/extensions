@@ -1,10 +1,3 @@
-interface Preferences {
-  openIn: "web" | "desktop-app";
-  hideCodeBlocksInSearch: boolean;
-  quickCaptureTemplate: string;
-  quickCaptureTagTodayDnp: boolean;
-}
-
 type BlockParentPull = {
   ":block/uid": string;
   ":block/string"?: string;

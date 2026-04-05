@@ -36,9 +36,9 @@ function ItemMetadata({ item }: { item: OutboxItem }) {
         icon={{ source: config.icon, tintColor: config.tint }}
       />
       <List.Item.Detail.Metadata.Separator />
-      <List.Item.Detail.Metadata.Label title="Captured" text={new Date(item.createdAt).toLocaleString()} />
+      <List.Item.Detail.Metadata.Label title="Captured" text={new Date(item.createdAt).toLocaleString("en-US")} />
       {item.updatedAt !== item.createdAt && (
-        <List.Item.Detail.Metadata.Label title="Last Updated" text={new Date(item.updatedAt).toLocaleString()} />
+        <List.Item.Detail.Metadata.Label title="Last Updated" text={new Date(item.updatedAt).toLocaleString("en-US")} />
       )}
       {item.templateName && <List.Item.Detail.Metadata.Label title="Template" text={item.templateName} />}
       {item.retryCount > 0 && <List.Item.Detail.Metadata.Label title="Retries" text={String(item.retryCount)} />}
