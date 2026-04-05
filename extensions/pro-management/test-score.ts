@@ -38,18 +38,18 @@ function fuzzyMatchScore(keyword: string, target: string): number {
 
 const keyword = "proman";
 
-const t1 = "pro-management";
-const p1 = "/Users/louis.ning/project/macos-project/pro-management";
+const t1 = "test-management";
+const p1 = "/Users/admin/project/demo-project/test-management";
 
-const t2 = "maglev-config-model";
-const p2 = "/Users/louis.ning/project/maglev/maglev-config-model";
+const t2 = "example-project-a";
+const p2 = "/Users/admin/project/demo/example-project-a";
 
-console.log("---- pro-management ----");
+console.log("---- test-management ----");
 const nameScore1 = fuzzyMatchScore(keyword, t1);
 const pathScore1 = fuzzyMatchScore(keyword, p1) * 0.5;
 console.log("name:", nameScore1, "path:", pathScore1, "final:", nameScore1 > 0 ? nameScore1 * 2 : pathScore1);
 
-console.log("---- maglev-config-model ----");
+console.log("---- example-project-a ----");
 const nameScore2 = fuzzyMatchScore(keyword, t2);
 const pathScore2 = fuzzyMatchScore(keyword, p2) * 0.5;
 console.log("name:", nameScore2, "path:", pathScore2, "final:", nameScore2 > 0 ? nameScore2 * 2 : pathScore2);

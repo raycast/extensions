@@ -37,8 +37,8 @@ function fuzzyMatchScore(keyword: string, target: string): number {
 }
 
 const projects = [
-  { name: "maglev-config-model", path: "/Users/louis.ning/project/maglev/maglev-config-model" },
-  { name: "pro-management", path: "/Users/louis.ning/project/macos-project/pro-management" }
+  { name: "example-project-a", path: "/Users/admin/project/demo/example-project-a" },
+  { name: "test-management", path: "/Users/admin/project/demo-project/test-management" }
 ];
 
 const searchText = "proman";
