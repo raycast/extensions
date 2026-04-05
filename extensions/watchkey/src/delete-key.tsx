@@ -1,10 +1,12 @@
 import { Action, ActionPanel, List, showToast, Toast, confirmAlert, Alert, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useInstallGuard } from "./install-guard";
+import { useUpdateCheck } from "./use-update-check";
 import { watchkeyDelete, watchkeyList } from "./watchkey";
 
 export default function DeleteKey() {
   const { installed, installView } = useInstallGuard();
+  useUpdateCheck();
   const { data: keys, isLoading, revalidate } = usePromise(watchkeyList, [], { execute: installed });
 
   if (!installed) return installView;
@@ -32,6 +34,7 @@ export default function DeleteKey() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search keys...">
+      <List.EmptyView title="No Keys Found" description="Use Set Key to store a secret first." />
       {keys?.map((key) => (
         <List.Item
           key={key}

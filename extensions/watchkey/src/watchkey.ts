@@ -64,7 +64,12 @@ function execPromise(cmd: string, args: string[]): Promise<string> {
   });
 }
 
-export async function watchkeyList(): Promise<string[]> {
+async function listViaCli(): Promise<string[]> {
+  const output = await execPromise(WATCHKEY_PATH!, ["list"]);
+  return output.trim().split("\n").filter(Boolean);
+}
+
+async function listViaKeychain(): Promise<string[]> {
   const output = await execPromise("/usr/bin/security", ["dump-keychain"]);
   const services: string[] = [];
   const blocks = output.split("keychain:");
@@ -88,6 +93,47 @@ export async function watchkeyList(): Promise<string[]> {
   }
 
   return [...new Set(services)].sort();
+}
+
+export async function watchkeyList(): Promise<string[]> {
+  try {
+    return await listViaCli();
+  } catch {
+    return await listViaKeychain();
+  }
+}
+
+const WATCHKEY_REPO = "Etheirystech/watchkey";
+
+async function getInstalledVersion(): Promise<string | null> {
+  try {
+    const output = await execPromise(WATCHKEY_PATH!, ["--version"]);
+    return output.trim();
+  } catch {
+    return null;
+  }
+}
+
+async function getLatestVersion(): Promise<string | null> {
+  try {
+    const output = await execPromise("/usr/bin/curl", [
+      "-s",
+      "-H",
+      "Accept: application/vnd.github+json",
+      `https://api.github.com/repos/${WATCHKEY_REPO}/releases/latest`,
+    ]);
+    const match = output.match(/"tag_name"\s*:\s*"v?([^"]+)"/);
+    return match ? match[1] : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function checkForUpdate(): Promise<{ installed: string; latest: string } | null> {
+  const [installed, latest] = await Promise.all([getInstalledVersion(), getLatestVersion()]);
+  if (!latest) return null;
+  if (!installed || installed !== latest) return { installed: installed ?? "unknown", latest };
+  return null;
 }
 
 export async function watchkeyImport(service: string): Promise<void> {

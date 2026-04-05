@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, List, showToast, Toast, popToRoot, Icon } from "@raycast/api";
 import { useForm, usePromise, FormValidation } from "@raycast/utils";
 import { useInstallGuard } from "./install-guard";
+import { useUpdateCheck } from "./use-update-check";
 import { watchkeySet, watchkeyList } from "./watchkey";
 
 function UpdateForm({ service }: { service: string }) {
@@ -39,12 +40,14 @@ function UpdateForm({ service }: { service: string }) {
 
 export default function UpdateKey() {
   const { installed, installView } = useInstallGuard();
+  useUpdateCheck();
   const { data: keys, isLoading } = usePromise(watchkeyList, [], { execute: installed });
 
   if (!installed) return installView;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search keys...">
+      <List.EmptyView title="No Keys Found" description="Use Set Key to store a secret first." />
       {keys?.map((key) => (
         <List.Item
           key={key}
