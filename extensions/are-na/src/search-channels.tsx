@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { List, Grid, ActionPanel, Action, Alert, Icon, confirmAlert, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedPromise, withAccessToken } from "@raycast/utils";
-import { Arena } from "./api/arena";
 import { useArena } from "./hooks/useArena";
 import { useViewMode } from "./hooks/useViewMode";
 import type { ApiMeta, Channel, SearchSort } from "./api/types";
@@ -11,20 +10,6 @@ import { addRecentQuery, toggleSavedQuery } from "./utils/searchHistory";
 import { EditChannelView } from "./components/editChannel";
 import { arenaOAuth } from "./api/oauth";
 import { getDefaultSort, getPageSize } from "./utils/preferences";
-
-async function enrichChannels(arena: Arena, channels: Channel[]): Promise<Channel[]> {
-  return Promise.all(
-    channels.map(async (c) => {
-      const id = c.slug || c.id;
-      if (!id) return c;
-      try {
-        return await arena.channel(id).get();
-      } catch {
-        return c;
-      }
-    }),
-  );
-}
 
 function ToggleViewAction({ mode, toggle }: { mode: "list" | "grid"; toggle: () => void }) {
   return (
@@ -139,13 +124,12 @@ function Command() {
     (q: string, sortArg: SearchSort) =>
       async ({ page }) => {
         const response = await arena.search(q).channels({ page: page + 1, per: pageSize, sort: sortArg });
-        const enriched = await enrichChannels(arena, response.channels);
         if (page === 0) {
           await addRecentQuery(q);
           setListMeta(response.meta);
         }
         const seen = new Set<number>();
-        const unique = enriched.filter((c) => {
+        const unique = response.channels.filter((c) => {
           if (seen.has(c.id)) return false;
           seen.add(c.id);
           return true;

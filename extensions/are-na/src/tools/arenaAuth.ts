@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { Arena } from "../api/arena";
 import { arenaOAuth } from "../api/oauth";
 
-interface Preferences {
-  accessToken?: string;
-}
-
 /**
  * Arena client for AI tools: uses Personal Access Token from preferences if set,
  * otherwise OAuth (may open the browser to sign in).

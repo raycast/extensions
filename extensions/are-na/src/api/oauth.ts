@@ -1,9 +1,5 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  accessToken?: string;
-}
-
 const CLIENT_ID = "lzVrY-PAr2pU1GH6cDVrr9_8rW1k7dis3vKuyrO1mvw";
 const REDIRECT_URI = "https://raycast.com/redirect/extension";
 

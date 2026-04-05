@@ -31,7 +31,7 @@ type Input = {
  */
 export default async function tool(input: Input) {
   try {
-    const prefs = getPreferenceValues<{ defaultPageSize?: string; defaultSearchSort?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     const defaultPer = Math.min(100, Math.max(1, parseInt(prefs.defaultPageSize ?? "24", 10) || 24));
     const per = Math.min(100, Math.max(1, input.per ?? defaultPer));
     const page = Math.max(1, input.page ?? 1);

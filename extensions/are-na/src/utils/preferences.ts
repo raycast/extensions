@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  accessToken?: string;
-  defaultPageSize?: string;
-  defaultSearchSort?: string;
-}
-
 export function getPageSize(): number {
   const prefs = getPreferenceValues<Preferences>();
   const raw = parseInt(prefs.defaultPageSize ?? "24", 10);

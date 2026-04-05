@@ -23,7 +23,7 @@ type Input = {
  */
 export default async function tool(input: Input = {}) {
   try {
-    const prefs = getPreferenceValues<{ defaultSearchSort?: string }>();
+    const prefs = getPreferenceValues<Preferences>();
     const page = Math.max(1, input.page ?? 1);
     const per = Math.min(100, Math.max(1, input.per ?? 100));
     const sort = input.sort ?? (prefs.defaultSearchSort as SearchSort) ?? "updated_at_desc";
