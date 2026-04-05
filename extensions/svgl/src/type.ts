@@ -32,8 +32,8 @@ export type SvgActionKey =
   | "copyVueComponent"
   | "copySvelteComponent"
   | "copyAngularComponent"
-  | "copyAstroComponent"
   | "copySvgUrl"
   | "copySvgWordmarkUrl"
+  | "copyAstroComponent"
   | "operation"
   | "svgInfo";
