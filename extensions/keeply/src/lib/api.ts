@@ -1,33 +1,28 @@
-import { getPreferenceValues } from "@raycast/api";
+import { authorize } from "./auth";
 import type { Bookmark, CreateBookmarkPayload, Folder, SidebarData, Tag, UpdateBookmarkPayload } from "./types";
 
 export class KeeplyApi {
-  private readonly apiKey: string;
   private readonly baseUrl = "https://api.keeply.tools";
 
-  constructor() {
-    const prefs = getPreferenceValues<Preferences>();
-    this.apiKey = prefs.apiKey;
-  }
-
-  private get headers(): Record<string, string> {
+  private async getHeaders(): Promise<Record<string, string>> {
+    const token = await authorize();
     return {
       "Content-Type": "application/json",
-      Authorization: `ApiKey ${this.apiKey}`,
+      Authorization: `ApiKey ${token}`,
     };
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, { ...init, headers: { ...this.headers, ...init?.headers } });
+    const headers = await this.getHeaders();
+    const res = await fetch(`${this.baseUrl}${path}`, { ...init, headers: { ...headers, ...init?.headers } });
 
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { message?: string | string[] };
       const raw = body.message;
       const msg = Array.isArray(raw) ? raw.join(", ") : (raw ?? `HTTP ${res.status}`);
 
-      if (res.status === 401) throw new Error("Invalid API key. Update it in Extension Preferences.");
-      if (res.status === 403)
-        throw new Error("Missing required API key scope. Re-generate your key at app.keeply.tools/settings.");
+      if (res.status === 401) throw new Error("Session expired. Please re-authenticate.");
+      if (res.status === 403) throw new Error("Access denied.");
       throw new Error(msg);
     }
 
