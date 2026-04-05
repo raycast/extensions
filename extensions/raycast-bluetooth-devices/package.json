@@ -8,6 +8,7 @@
   "author": "athndev",
   "license": "MIT",
   "categories": ["System"],
+  "platforms": ["Windows"],
   "keywords": ["bluetooth", "windows", "connect", "wireless", "headphones", "keyboard", "mouse"],
   "commands": [
     {
@@ -36,10 +37,10 @@
     "@raycast/api": "^1.64.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
     "@types/react": "^19.2.14",
-    "eslint": "^8.51.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
