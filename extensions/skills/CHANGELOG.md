@@ -1,5 +1,9 @@
 # Changelog
 
+## [Show Last Updated Date in Search Results] - {PR_MERGE_DATE}
+
+- Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
+
 ## [Follow Up on Maintainability] - 2026-04-03
 
 - Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
