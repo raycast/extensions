@@ -134,6 +134,16 @@
         "status",
         "monitor",
         "usage"
+      ],
+      "preferences": [
+        {
+          "name": "showCostInMenuBar",
+          "type": "checkbox",
+          "default": false,
+          "label": "Show Cost in Menu Bar",
+          "description": "Display today's cost next to the menu bar icon",
+          "required": false
+        }
       ]
     },
     {

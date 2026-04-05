@@ -1,5 +1,10 @@
 import { LocalStorage } from "@raycast/api";
-import { listAllSessions, SessionMetadata } from "./session-parser";
+import {
+  listAllSessions,
+  streamSessionUsage,
+  SessionMetadata,
+  SessionUsage,
+} from "./session-parser";
 
 export interface UsageStats {
   totalSessions: number;
@@ -52,13 +57,13 @@ function resolvePricing(model?: string) {
   return DEFAULT_PRICING;
 }
 
-export function calculateSessionCost(session: SessionMetadata): number {
-  const p = resolvePricing(session.model);
+function calculateUsageCost(usage: SessionUsage): number {
+  const p = resolvePricing(usage.model);
   return (
-    (session.inputTokens / 1_000_000) * p.inputPerMTok +
-    (session.outputTokens / 1_000_000) * p.outputPerMTok +
-    (session.cacheReadTokens / 1_000_000) * p.cacheReadPerMTok +
-    (session.cacheCreationTokens / 1_000_000) * p.cacheWritePerMTok
+    (usage.inputTokens / 1_000_000) * p.inputPerMTok +
+    (usage.outputTokens / 1_000_000) * p.outputPerMTok +
+    (usage.cacheReadTokens / 1_000_000) * p.cacheReadPerMTok +
+    (usage.cacheCreationTokens / 1_000_000) * p.cacheWritePerMTok
   );
 }
 
@@ -68,7 +73,7 @@ export interface DailyStats {
   cost: number;
 }
 
-const STATS_CACHE_KEY = "claudecast-stats-cache";
+const STATS_CACHE_KEY = "claudecast-stats-v2";
 const STATS_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 // In-memory cache for today's stats to prevent repeated disk reads
@@ -106,7 +111,7 @@ export async function getTodayStats(): Promise<UsageStats> {
 
   // Only load sessions modified today - much more efficient
   const todaySessions = await listAllSessions({ afterDate: today });
-  const stats = calculateStats(todaySessions);
+  const stats = await calculateStatsWithUsage(todaySessions, today);
 
   // Update in-memory cache
   todayStatsCache = {
@@ -129,7 +134,7 @@ export async function getWeekStats(): Promise<UsageStats> {
   // Only load sessions from the past week
   const weekSessions = await listAllSessions({ afterDate: weekAgo });
 
-  return calculateStats(weekSessions);
+  return calculateStatsWithUsage(weekSessions, weekAgo);
 }
 
 /**
@@ -143,7 +148,7 @@ export async function getMonthStats(): Promise<UsageStats> {
   // Only load sessions from the past month
   const monthSessions = await listAllSessions({ afterDate: monthAgo });
 
-  return calculateStats(monthSessions);
+  return calculateStatsWithUsage(monthSessions, monthAgo);
 }
 
 /**
@@ -160,7 +165,7 @@ export async function getAllTimeStats(): Promise<UsageStats> {
   }
 
   const allSessions = await listAllSessions();
-  const stats = calculateStats(allSessions);
+  const stats = await calculateStatsWithUsage(allSessions);
 
   // Cache the result
   await LocalStorage.setItem(
@@ -195,26 +200,32 @@ export async function getDailyStats(days: number = 7): Promise<DailyStats[]> {
   // Only load sessions from the requested period
   const allSessions = await listAllSessions({ afterDate: startDate });
 
-  const dailyStats: DailyStats[] = [];
+  // Scan each session for usage within the date range
+  const dailyMap = new Map<string, { sessions: Set<string>; cost: number }>();
 
+  for (const session of allSessions) {
+    const usage = await streamSessionUsage(session.filePath, startDate);
+    const cost = calculateUsageCost(usage);
+    const dateStr = session.lastModified.toISOString().split("T")[0];
+    const existing = dailyMap.get(dateStr) || {
+      sessions: new Set<string>(),
+      cost: 0,
+    };
+    existing.sessions.add(session.id);
+    existing.cost += cost;
+    dailyMap.set(dateStr, existing);
+  }
+
+  const dailyStats: DailyStats[] = [];
   for (let i = 0; i < days; i++) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    date.setHours(0, 0, 0, 0);
-
-    const nextDate = new Date(date);
-    nextDate.setDate(nextDate.getDate() + 1);
-
-    const daySessions = allSessions.filter(
-      (s) => s.lastModified >= date && s.lastModified < nextDate,
-    );
-
-    const stats = calculateStats(daySessions);
-
+    const dateStr = date.toISOString().split("T")[0];
+    const entry = dailyMap.get(dateStr);
     dailyStats.push({
-      date: date.toISOString().split("T")[0],
-      sessions: stats.totalSessions,
-      cost: stats.totalCost,
+      date: dateStr,
+      sessions: entry?.sessions.size || 0,
+      cost: entry?.cost || 0,
     });
   }
 
@@ -222,10 +233,13 @@ export async function getDailyStats(days: number = 7): Promise<DailyStats[]> {
 }
 
 /**
- * Calculate stats from a list of sessions
- * Uses integer cents internally to avoid floating point precision errors
+ * Calculate stats by streaming each session file for accurate token totals.
+ * afterDate filters tokens to entries within the time range.
  */
-function calculateStats(sessions: SessionMetadata[]): UsageStats {
+async function calculateStatsWithUsage(
+  sessions: SessionMetadata[],
+  afterDate?: Date,
+): Promise<UsageStats> {
   let totalCostCents = 0;
   let totalInputTokens = 0;
   let totalOutputTokens = 0;
@@ -235,17 +249,17 @@ function calculateStats(sessions: SessionMetadata[]): UsageStats {
   const projectCostCents: Record<string, number> = {};
 
   for (const session of sessions) {
-    // Compute cost from tokens
-    const cost = calculateSessionCost(session);
+    const usage = await streamSessionUsage(session.filePath, afterDate);
+    const cost = calculateUsageCost(usage);
     session.cost = cost;
 
     const costCents = Math.round(cost * 10000);
     totalCostCents += costCents;
 
-    totalInputTokens += session.inputTokens;
-    totalOutputTokens += session.outputTokens;
-    totalCacheReadTokens += session.cacheReadTokens;
-    totalCacheCreationTokens += session.cacheCreationTokens;
+    totalInputTokens += usage.inputTokens;
+    totalOutputTokens += usage.outputTokens;
+    totalCacheReadTokens += usage.cacheReadTokens;
+    totalCacheCreationTokens += usage.cacheCreationTokens;
 
     if (!sessionsByProject[session.projectName]) {
       sessionsByProject[session.projectName] = { count: 0, cost: 0 };

@@ -16,10 +16,6 @@ export interface SessionMetadata {
   cost: number;
   model?: string;
   matchSnippet?: string;
-  inputTokens: number;
-  outputTokens: number;
-  cacheReadTokens: number;
-  cacheCreationTokens: number;
 }
 
 export interface SessionMessage {
@@ -339,21 +335,12 @@ async function parseSessionMetadataFast(
     const result: Partial<SessionMetadata> = {};
     let lineCount = 0;
     let turnCount = 0;
-    let inputTokens = 0;
-    let outputTokens = 0;
-    let cacheReadTokens = 0;
-    let cacheCreationTokens = 0;
     let resolved = false;
 
-    // Helper to safely resolve only once and clean up
     const safeResolve = () => {
       if (resolved) return;
       resolved = true;
       result.turnCount = turnCount;
-      result.inputTokens = inputTokens;
-      result.outputTokens = outputTokens;
-      result.cacheReadTokens = cacheReadTokens;
-      result.cacheCreationTokens = cacheCreationTokens;
       resolve(result);
     };
 
@@ -403,14 +390,6 @@ async function parseSessionMetadataFast(
 
         if (entry.type === "assistant") {
           turnCount++;
-        }
-
-        if (entry.message?.usage) {
-          inputTokens += entry.message.usage.input_tokens || 0;
-          outputTokens += entry.message.usage.output_tokens || 0;
-          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
-          cacheCreationTokens +=
-            entry.message.usage.cache_creation_input_tokens || 0;
         }
 
         const entryModel = entry.message?.model || entry.model;
@@ -481,10 +460,6 @@ async function parseFullSession(
     let id = path.basename(filePath, ".jsonl");
     let model: string | undefined;
     let firstMessage = "";
-    let inputTokens = 0;
-    let outputTokens = 0;
-    let cacheReadTokens = 0;
-    let cacheCreationTokens = 0;
 
     const stream = fs.createReadStream(filePath, { encoding: "utf8" });
     const rl = readline.createInterface({ input: stream });
@@ -549,16 +524,9 @@ async function parseFullSession(
           });
         }
 
-        if (entry.message?.usage) {
-          inputTokens += entry.message.usage.input_tokens || 0;
-          outputTokens += entry.message.usage.output_tokens || 0;
-          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
-          cacheCreationTokens +=
-            entry.message.usage.cache_creation_input_tokens || 0;
-        }
-
-        if (entry.model) {
-          model = entry.model;
+        const entryModel = entry.message?.model || entry.model;
+        if (entryModel) {
+          model = entryModel;
         }
       } catch {
         // Skip unparseable lines silently to avoid memory accumulation
@@ -582,10 +550,6 @@ async function parseFullSession(
           cost: 0,
           model,
           messages,
-          inputTokens,
-          outputTokens,
-          cacheReadTokens,
-          cacheCreationTokens,
         });
       } catch (err) {
         reject(err);
@@ -668,10 +632,6 @@ export async function listAllSessions(options?: {
         turnCount: metadata.turnCount || 0,
         cost: metadata.cost || 0,
         model: metadata.model,
-        inputTokens: metadata.inputTokens || 0,
-        outputTokens: metadata.outputTokens || 0,
-        cacheReadTokens: metadata.cacheReadTokens || 0,
-        cacheCreationTokens: metadata.cacheCreationTokens || 0,
       });
     } catch {
       // Skip files we can't read
@@ -712,10 +672,6 @@ export async function listProjectSessions(
           turnCount: metadata.turnCount || 0,
           cost: metadata.cost || 0,
           model: metadata.model,
-          inputTokens: metadata.inputTokens || 0,
-          outputTokens: metadata.outputTokens || 0,
-          cacheReadTokens: metadata.cacheReadTokens || 0,
-          cacheCreationTokens: metadata.cacheCreationTokens || 0,
         });
       } catch {
         // Skip files we can't read
@@ -802,10 +758,6 @@ export async function searchSessionContent(
         cost: match.cost,
         model: match.model,
         matchSnippet: match.matchSnippet,
-        inputTokens: match.inputTokens,
-        outputTokens: match.outputTokens,
-        cacheReadTokens: match.cacheReadTokens,
-        cacheCreationTokens: match.cacheCreationTokens,
       });
     }
   }
@@ -829,10 +781,6 @@ async function searchSingleSession(
   cost: number;
   model?: string;
   matchSnippet?: string;
-  inputTokens: number;
-  outputTokens: number;
-  cacheReadTokens: number;
-  cacheCreationTokens: number;
 } | null> {
   type MatchResult = {
     id: string;
@@ -842,10 +790,6 @@ async function searchSingleSession(
     cost: number;
     model?: string;
     matchSnippet?: string;
-    inputTokens: number;
-    outputTokens: number;
-    cacheReadTokens: number;
-    cacheCreationTokens: number;
   };
 
   return new Promise<MatchResult | null>((resolve) => {
@@ -857,10 +801,6 @@ async function searchSingleSession(
     let turnCount = 0;
     let model: string | undefined;
     let resolved = false;
-    let inputTokens = 0;
-    let outputTokens = 0;
-    let cacheReadTokens = 0;
-    let cacheCreationTokens = 0;
 
     const safeResolve = (value: MatchResult | null) => {
       if (resolved) return;
@@ -933,13 +873,6 @@ async function searchSingleSession(
           turnCount++;
         }
 
-        if (entry.message?.usage) {
-          inputTokens += entry.message.usage.input_tokens || 0;
-          outputTokens += entry.message.usage.output_tokens || 0;
-          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
-          cacheCreationTokens +=
-            entry.message.usage.cache_creation_input_tokens || 0;
-        }
         const entryModel = entry.message?.model || entry.model;
         if (entryModel) model = entryModel;
 
@@ -973,10 +906,6 @@ async function searchSingleSession(
               cost: 0,
               model,
               matchSnippet,
-              inputTokens,
-              outputTokens,
-              cacheReadTokens,
-              cacheCreationTokens,
             }
           : null,
       );
@@ -994,6 +923,75 @@ async function searchSingleSession(
       signal?.removeEventListener("abort", onAbort);
       safeResolve(null);
     });
+  });
+}
+
+export interface SessionUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
+  model?: string;
+}
+
+/**
+ * Streaming usage scanner that reads the entire JSONL file for accurate
+ * token totals. Keeps only counters in memory (no messages array).
+ * Optionally filters tokens to entries with timestamps >= afterDate.
+ */
+export async function streamSessionUsage(
+  filePath: string,
+  afterDate?: Date,
+): Promise<SessionUsage> {
+  return new Promise((resolve) => {
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let cacheCreationTokens = 0;
+    let model: string | undefined;
+
+    const stream = fs.createReadStream(filePath, {
+      encoding: "utf8",
+      highWaterMark: 16 * 1024,
+    });
+    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+
+    const safeResolve = () =>
+      resolve({
+        inputTokens,
+        outputTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
+        model,
+      });
+
+    rl.on("line", (line) => {
+      try {
+        const entry: JSONLEntry = JSON.parse(line);
+        if (entry.message?.usage) {
+          if (
+            afterDate &&
+            entry.timestamp &&
+            new Date(entry.timestamp) < afterDate
+          ) {
+            return;
+          }
+          inputTokens += entry.message.usage.input_tokens || 0;
+          outputTokens += entry.message.usage.output_tokens || 0;
+          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
+          cacheCreationTokens +=
+            entry.message.usage.cache_creation_input_tokens || 0;
+        }
+        const m = entry.message?.model || entry.model;
+        if (m) model = m;
+      } catch {
+        // skip
+      }
+    });
+
+    rl.on("close", safeResolve);
+    rl.on("error", safeResolve);
+    stream.on("error", safeResolve);
   });
 }
 
