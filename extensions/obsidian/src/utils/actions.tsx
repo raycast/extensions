@@ -6,6 +6,7 @@ import {
   getDefaultApplication,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
@@ -146,7 +147,7 @@ export function CopyWikilinkAction(props: { note: Note }) {
       title="Copy Wikilink"
       icon={Icon.Link}
       content={`[[${note.title}]]`}
-      shortcut={{ modifiers: ["opt"], key: "w" }}
+      shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
     />
   );
 }
@@ -158,7 +159,7 @@ export function PasteWikilinkAction(props: { note: Note }) {
       title="Paste Wikilink"
       icon={Icon.Link}
       content={`[[${note.title}]]`}
-      shortcut={{ modifiers: ["opt", "shift"], key: "w" }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
     />
   );
 }
