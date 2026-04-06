@@ -11,8 +11,12 @@ const toQueryString = (query: string) => {
   return query.replaceAll(" ", "+");
 };
 
+const formatPOS = (detailStr: string) => {
+  return detailStr.replace(/(\w+)\t/, "`$1` ");
+};
+
 const toDetailMarkdown = (word: Word) => {
-  return "# " + word.word + "\n---\n" + (word.defs?.join("\n\n") || "");
+  return "# " + word.word + "\n---\n" + (word.defs?.map(formatPOS).join("\n\n") || "");
 };
 
 export default function Command() {
