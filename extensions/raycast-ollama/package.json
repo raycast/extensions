@@ -4909,9 +4909,9 @@
     },
     {
       "name": "ollama-mcp-server",
-      "title": "Manage Mcp Server",
+      "title": "Manage MCP Server",
       "subtitle": "Ollama",
-      "description": "Manage configured Mcp Server",
+      "description": "Manage configured MCP Server",
       "mode": "view"
     }
   ],
