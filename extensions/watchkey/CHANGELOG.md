@@ -1,6 +1,6 @@
 # Watchkey Changelog
 
-## [Selection Lists & Update Key] - {PR_MERGE_DATE}
+## [Selection Lists & Update Key] - 2026-04-06
 
 - Get Key and Delete Key now display a searchable list of saved keys instead of requiring manual text input
 - Added new Update Key command for updating existing secrets
