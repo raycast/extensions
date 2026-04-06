@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apple-devices-battery",
+  "title": "Apple Devices Battery",
+  "description": "Battery widget for Raycast - view charge level, health, cycle count, power usage, temperature, and time remaining at a glance.",
+  "icon": "command-icon.png",
+  "author": "nirrosh",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "show-battery",
+      "title": "My Battery",
+      "description": "Detailed battery dashboard with charge, health, cycles, temperature, and power info",
+      "mode": "view",
+      "keywords": [
+        "battery",
+        "charge",
+        "health",
+        "power"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "temperatureUnit",
+      "title": "Temperature Unit",
+      "description": "Choose between Celsius and Fahrenheit",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        { "title": "Celsius", "value": "celsius" },
+        { "title": "Fahrenheit", "value": "fahrenheit" }
+      ],
+      "default": "celsius"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/plist": "^3.0.2",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
