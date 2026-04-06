@@ -10,7 +10,10 @@
     "Web"
   ],
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "version": "1.0.0",
   "commands": [
     {
@@ -35,12 +38,15 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@vicinae/api": "^0.20.11",
     "eslint": "^8.57.1",
     "typescript": "^5.7.3"
   },
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
+    "dev:linux": "vici develop",
+    "build:linux": "vici build",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   }
