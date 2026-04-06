@@ -8,11 +8,12 @@ import { ResponseView } from "./ResponseView";
 interface Props {
   initial?: Partial<WebhookRequest>;
   onSent?: () => void;
+  initialSavedId?: string;
 }
 
 const HTTP_METHODS: HttpMethod[] = ["POST", "GET", "PUT", "PATCH", "DELETE"];
 
-export function WebhookForm({ initial, onSent }: Props) {
+export function WebhookForm({ initial, onSent, initialSavedId }: Props) {
   const { push } = useNavigation();
 
   const [url, setUrl] = useState(initial?.url ?? "");
@@ -140,7 +141,7 @@ export function WebhookForm({ initial, onSent }: Props) {
     } finally {
       setIsSending(false);
     }
-  }, [url, method, bodyMode, fields, rawJson]);
+  }, [url, method, bodyMode, fields, rawJson, onSent, push]);
 
   const handleSave = useCallback(async () => {
     if (!saveName.trim()) {
@@ -170,7 +171,7 @@ export function WebhookForm({ initial, onSent }: Props) {
     }
 
     const webhook: SavedWebhook = {
-      id: generateId(),
+      id: initialSavedId ?? generateId(),
       name: saveName.trim(),
       createdAt: Date.now(),
       request: buildRequest(),
@@ -183,7 +184,7 @@ export function WebhookForm({ initial, onSent }: Props) {
     });
     setSaveName("");
     onSent?.();
-  }, [saveName, url, method, bodyMode, fields, rawJson]);
+  }, [saveName, url, method, bodyMode, fields, rawJson, onSent, initialSavedId]);
 
   const jsonPreview = (() => {
     if (!hasBody) return "";

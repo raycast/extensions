@@ -59,7 +59,7 @@ export default function Command() {
   };
 
   const openFromSaved = (webhook: SavedWebhook) => {
-    push(<WebhookForm initial={webhook.request} onSent={refresh} />);
+    push(<WebhookForm initial={webhook.request} initialSavedId={webhook.id} onSent={refresh} />);
   };
 
   const handleDeleteHistory = async (id: string) => {
