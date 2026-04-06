@@ -1,6 +1,6 @@
 # Obsidian WikiLinker Changelog
 
-## [Initial Release] - 2026-04-01
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search your Obsidian vault by note name with fuzzy filtering
 - Paste `[[wikilink]]` into any focused app
