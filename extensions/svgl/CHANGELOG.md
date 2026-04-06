@@ -1,6 +1,6 @@
 # svgl Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-04-06
 
 - Added Copy as Astro Component action
 
