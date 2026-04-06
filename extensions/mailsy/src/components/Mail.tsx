@@ -1,8 +1,8 @@
 import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
-import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, open, popToRoot, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, open, popToRoot } from "@raycast/api";
 import { useAccount } from "../hooks/useAccount";
-import { deleteAccount, deleteMail, getAccount, getMails, getMessageFilePath, writeBridgePage } from "../libs/api";
+import { deleteAccount, deleteBridgePage, deleteMail, getAccount, getMails, getMessageFilePath, writeBridgePage } from "../libs/api";
 import { handleAction, removeAccount, timeAgo } from "../libs/utils";
 import { Message } from "./Message";
 
@@ -112,7 +112,10 @@ export function Mail(): ReactElement {
                   shortcut={logoutShortcut}
                   onAction={() =>
                     handleAction(
-                      () => removeAccount(),
+                      async () => {
+                        await removeAccount();
+                        await deleteBridgePage();
+                      },
                       () => popToRoot(),
                       `Logging out...`,
                       `Logout successful`,
@@ -124,11 +127,19 @@ export function Mail(): ReactElement {
               <Action
                 title="Open in Browser"
                 icon={{ source: Icon.Globe, tintColor: Color.Blue }}
-                onAction={async () => {
-                  if (!account) return;
-                  const filePath = await writeBridgePage(account);
-                  await open(`file://${filePath}`);
-                }}
+                onAction={() =>
+                  handleAction(
+                    async () => {
+                      if (!account) return;
+                      const filePath = await writeBridgePage(account);
+                      await open(`file://${filePath}`);
+                    },
+                    () => {},
+                    `Opening inbox...`,
+                    `Inbox opened in browser`,
+                    `Could not open inbox in browser`,
+                  )
+                }
               />
             </ActionPanel>
           }

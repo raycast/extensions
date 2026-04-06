@@ -1,5 +1,9 @@
 # Mailsy Changelog
 
+## [Changes] - {PR_MERGE_DATE}
+
+- Added browser inbox bridge page for the account action.
+
 ## [Changes] - 2026-03-19
 
 - Upgraded the extension to the latest Raycast API and tooling versions.

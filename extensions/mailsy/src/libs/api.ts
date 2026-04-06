@@ -106,6 +106,16 @@ export const getBridgePagePath = (): string => {
   return `${environment.assetsPath}/inbox.html`;
 };
 
+export const deleteBridgePage = async (): Promise<void> => {
+  try {
+    await fs.unlink(getBridgePagePath());
+  } catch (error) {
+    if (!(error instanceof Error) || !("code" in error) || error.code !== "ENOENT") {
+      throw error;
+    }
+  }
+};
+
 export const writeBridgePage = async (account: Account): Promise<string> => {
   const filePath = getBridgePagePath();
   const html = `<!DOCTYPE html>
@@ -174,7 +184,7 @@ el.innerHTML='<div class="msg-view">'
 +'<a class="back" onclick="loadInbox()">\\u2190 Back to Inbox</a>'
 +'<h2>'+esc(m.subject||'No Subject')+'</h2>'
 +'<div class="meta">From: '+esc((m.from&&m.from.name)||'')+' &lt;'+esc((m.from&&m.from.address)||'')+'&gt; \\u00b7 '+new Date(m.createdAt).toLocaleString()+'</div>'
-+(h?'<iframe sandbox="allow-same-origin" srcdoc="'+h.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></iframe>':'<p>'+esc(m.text||'No content')+'</p>')
++(h?'<iframe sandbox srcdoc="'+h.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></iframe>':'<p>'+esc(m.text||'No content')+'</p>')
 +'</div>';
 }).catch(function(e){el.innerHTML='<div class="err">'+esc(e.message)+'<br><a class="back" onclick="loadInbox()">\\u2190 Back</a></div>'})
 }
@@ -260,6 +270,7 @@ export const deleteAccount = async (): Promise<void> => {
 
   await deleteRemoteAccount(account.id, account.token);
   await LocalStorage.removeItem(ACCOUNT_STORAGE_KEY);
+  await deleteBridgePage();
 };
 
 export const getMails = async (): Promise<Message[]> => {
