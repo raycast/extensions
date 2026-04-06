@@ -5,7 +5,7 @@
   "description": "Pick any color from your screen and get a human-readable description. Includes colorblind simulation and confusion warnings.",
   "icon": "icon.png",
   "author": "pjtat5",
-  "categories": ["Design Tools", "Other"],
+  "categories": ["Design Tools"],
   "license": "MIT",
   "platforms": ["macOS"],
   "commands": [

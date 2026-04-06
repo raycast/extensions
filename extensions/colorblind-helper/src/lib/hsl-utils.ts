@@ -49,14 +49,6 @@ export function getLightnessDescriptor(l: number): string {
   return "near-white";
 }
 
-export function getSaturationDescriptor(s: number): string {
-  if (s <= 10) return "gray";
-  if (s <= 30) return "muted";
-  if (s <= 60) return "moderate";
-  if (s <= 85) return "vivid";
-  return "bold";
-}
-
 /**
  * Pick the single most distinguishing qualifier for a color based on HSL.
  * Prioritizes extreme lightness, then saturation character.

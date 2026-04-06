@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "outDir": "dist"
   },
-  "include": ["src/**/*", "env.d.ts"]
+  "include": ["src/**/*"]
 }

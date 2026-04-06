@@ -72,7 +72,6 @@ const COLOR_WORDS = [
   "lawn",
   "lime",
   "olive",
-  "dark",
   "indian",
   "fire",
   "brick",

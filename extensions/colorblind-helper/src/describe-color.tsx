@@ -97,10 +97,14 @@ function ColorDetailView({ desc }: { desc: ColorDescription }) {
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { push } = useNavigation();
 
   useEffect(() => {
-    getHistory().then(setHistory);
+    getHistory().then((h) => {
+      setHistory(h);
+      setIsLoading(false);
+    });
   }, []);
 
   async function refreshHistory() {
@@ -147,6 +151,7 @@ export default function Command() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       filtering={false}
+      isLoading={isLoading}
     >
       <List.Section title="Actions">
         <List.Item
