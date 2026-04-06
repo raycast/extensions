@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "omni",
+  "title": "Omni",
+  "description": "Real-time transcription powered by Omni. Start/stop transcription, manage input devices, and check status.",
+  "icon": "icon.png",
+  "author": "aremuio",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-transcription",
+      "title": "Toggle Transcription",
+      "description": "Start or stop real-time transcription using your default stop mode.",
+      "mode": "no-view",
+      "keywords": ["transcription", "realtime", "record", "speech", "stt", "dictate", "voice", "asr"]
+    },
+    {
+      "name": "transcribe-copy",
+      "title": "Transcribe & Copy",
+      "description": "Start or stop real-time transcription. Copies transcript when stopped.",
+      "mode": "no-view",
+      "keywords": ["transcription", "realtime", "copy", "clipboard", "dictate", "voice", "asr"]
+    },
+    {
+      "name": "input-devices",
+      "title": "Select Input Device",
+      "description": "List and select audio input devices for transcription.",
+      "mode": "view",
+      "keywords": ["microphone", "audio", "mic", "device"]
+    },
+    {
+      "name": "status",
+      "title": "Omni Status",
+      "description": "View daemon status, transcription state, and configuration.",
+      "mode": "view",
+      "keywords": ["status", "info", "running"]
+    },
+    {
+      "name": "doctor",
+      "title": "Omni Doctor",
+      "description": "Run health checks on your Omni setup.",
+      "mode": "view",
+      "keywords": ["health", "check", "diagnose", "debug"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "omniBinary",
+      "title": "Omni Binary Path",
+      "description": "Path to the omni binary. Leave empty to auto-detect from PATH / npm global.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/usr/local/bin/omni"
+    },
+    {
+      "name": "stopMode",
+      "title": "Default Stop Mode",
+      "description": "What to do with transcribed text when stopping via Toggle Transcription.",
+      "type": "dropdown",
+      "required": false,
+      "default": "insert",
+      "data": [
+        { "title": "Insert at Cursor", "value": "insert" },
+        { "title": "Copy to Clipboard", "value": "copy" },
+        { "title": "Stop Only", "value": "" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
