@@ -20,62 +20,7 @@
             "title": "Upload Images",
             "description": "Upload your images through PicGo-Core.",
             "mode": "view",
-            "icon": "extension-icon.png",
-            "preferences": [
-                {
-                    "name": "uploadTimeout",
-                    "type": "textfield",
-                    "required": false,
-                    "title": "Upload Timeout (ms)",
-                    "description": "Custom timeout for PicGo upload process",
-                    "placeholder": "Custom timeout for PicGo upload process",
-                    "default": "30000"
-                },
-                {
-                    "name": "uploadResultView",
-                    "type": "dropdown",
-                    "title": "Upload Result View",
-                    "data": [
-                        {
-                            "title": "Format List",
-                            "value": "format_list"
-                        },
-                        {
-                            "title": "Image Grid",
-                            "value": "image_grid"
-                        }
-                    ],
-                    "required": false,
-                    "default": "format_list",
-                    "description": "Select the default view of uploaded images."
-                },
-                {
-                    "name": "autoCopyAfterUpload",
-                    "type": "checkbox",
-                    "required": false,
-                    "label": "Automatically Copy URLs After Upload",
-                    "description": "Automatically copy your image URLs right after finishing uploading",
-                    "default": true
-                },
-                {
-                    "name": "customFormat",
-                    "type": "textfield",
-                    "required": false,
-                    "title": "Custom URL Format",
-                    "description": "Use $url to represent the position of image URL\nUse $fileName to represent the position of file names\nUse $extName to represent the position of image extension name\n\nEx. [$fileName]($url) => [img.png](https://somepath/img.png)",
-                    "placeholder": "Ex. [$fileName]($url)",
-                    "default": "$url"
-                },
-                {
-                    "name": "proxy",
-                    "type": "textfield",
-                    "required": false,
-                    "title": "Upload Proxy",
-                    "description": "Custom proxy address to upload images",
-                    "placeholder": "Ex. https://127.0.0.1:7890",
-                    "default": ""
-                }
-            ]
+            "icon": "extension-icon.png"
         },
         {
             "name": "plugin-search",
@@ -89,36 +34,7 @@
             "title": "Manage Plugins",
             "description": "Manage your local PicGo plugins.",
             "mode": "view",
-            "icon": "extension-icon.png",
-            "preferences": [
-                {
-                    "name": "npmPath",
-                    "type": "textfield",
-                    "required": false,
-                    "title": "NPM Path",
-                    "description": "Custom path to NPM executable (exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm')",
-                    "placeholder": "Exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm'",
-                    "default": ""
-                },
-                {
-                    "name": "npmProxy",
-                    "type": "textfield",
-                    "required": false,
-                    "title": "NPM Proxy",
-                    "description": "Custom proxy address to download plugins via NPM",
-                    "placeholder": "Ex. https://127.0.0.1:7890",
-                    "default": ""
-                },
-                {
-                    "name": "npmMirror",
-                    "type": "textfield",
-                    "required": false,
-                    "title": "NPM Mirror",
-                    "description": "Custom mirror address to download plugins via NPM",
-                    "placeholder": "Ex. https://registry.npmmirror.com",
-                    "default": ""
-                }
-            ]
+            "icon": "extension-icon.png"
         },
         {
             "name": "uploader-management",
@@ -126,6 +42,88 @@
             "description": "Manage your PicGo uploader configurations.",
             "mode": "view",
             "icon": "extension-icon.png"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "uploadTimeout",
+            "type": "textfield",
+            "required": false,
+            "title": "Upload Timeout (ms)",
+            "description": "Custom timeout for PicGo upload process",
+            "placeholder": "Custom timeout for PicGo upload process",
+            "default": "30000"
+        },
+        {
+            "name": "uploadResultView",
+            "type": "dropdown",
+            "title": "Upload Result View",
+            "data": [
+                {
+                    "title": "Format List",
+                    "value": "format_list"
+                },
+                {
+                    "title": "Image Grid",
+                    "value": "image_grid"
+                }
+            ],
+            "required": false,
+            "default": "format_list",
+            "description": "Select the default view of uploaded images."
+        },
+        {
+            "name": "autoCopyAfterUpload",
+            "type": "checkbox",
+            "required": false,
+            "label": "Automatically Copy URLs After Upload",
+            "description": "Automatically copy your image URLs right after finishing uploading",
+            "default": true
+        },
+        {
+            "name": "customFormat",
+            "type": "textfield",
+            "required": false,
+            "title": "Custom URL Format",
+            "description": "Use $url to represent the position of image URL\nUse $fileName to represent the position of file names\nUse $extName to represent the position of image extension name\n\nEx. [$fileName]($url) => [img.png](https://somepath/img.png)",
+            "placeholder": "Ex. [$fileName]($url)",
+            "default": "$url"
+        },
+        {
+            "name": "proxy",
+            "type": "textfield",
+            "required": false,
+            "title": "Upload Proxy",
+            "description": "Custom proxy address to upload images",
+            "placeholder": "Ex. https://127.0.0.1:7890",
+            "default": ""
+        },
+        {
+            "name": "npmPath",
+            "type": "textfield",
+            "required": false,
+            "title": "NPM Path",
+            "description": "Custom path to NPM executable (exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm')",
+            "placeholder": "Exclude npm itself, e.g. '/usr/local/bin' instead of '/usr/local/bin/npm'",
+            "default": ""
+        },
+        {
+            "name": "npmProxy",
+            "type": "textfield",
+            "required": false,
+            "title": "NPM Proxy",
+            "description": "Custom proxy address to download plugins via NPM",
+            "placeholder": "Ex. https://127.0.0.1:7890",
+            "default": ""
+        },
+        {
+            "name": "npmMirror",
+            "type": "textfield",
+            "required": false,
+            "title": "NPM Mirror",
+            "description": "Custom mirror address to download plugins via NPM",
+            "placeholder": "Ex. https://registry.npmmirror.com",
+            "default": ""
         }
     ],
     "dependencies": {
