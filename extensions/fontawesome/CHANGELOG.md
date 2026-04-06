@@ -1,6 +1,6 @@
 # Font Awesome Changelog
 
-## [Improve API token error handling] - {PR_MERGE_DATE}
+## [Improve API token error handling] - 2026-04-06
 
 - Added a clearer error state for misconfigured custom API tokens while keeping the default no-token free-icon flow working normally.
 
