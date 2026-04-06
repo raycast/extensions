@@ -5,6 +5,10 @@
   "description": "Search notes and manage your day from Raycast with nocal.",
   "version": "1.0.0",
   "author": "brianmuse",
+  "contributors": [
+    "0xdhrv"
+  ],
+  "owner": "nocal",
   "access": "public",
   "license": "MIT",
   "private": false,

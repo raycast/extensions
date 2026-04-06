@@ -1,4 +1,9 @@
+
 # nocal Changelog
+
+## [Chore] - {PR_MERGE_DATE}
+
+- Move to nocal repository
 
 ## [Initial Release] - 2026-04-02
 
