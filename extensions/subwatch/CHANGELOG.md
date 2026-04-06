@@ -1,6 +1,10 @@
 # Subwatch Changelog
 
-## ✨ [v1.1] - 2025-05-27
+## ✨ [v2.0] - {PR_MERGE_DATE}
+
+- Upgrade API and add trial option to match with Subwatch version 2.
+
+## ✨ [v1.1] - {PR_MERGE_DATE}
 
 - Fixes a bug where getting subscriptions fails when server overload, now I'm catch them.
 

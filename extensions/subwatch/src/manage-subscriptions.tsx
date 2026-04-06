@@ -5,34 +5,37 @@ import CreateSubscriptionAction from "./add-subscription";
 import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
-  const { subwatchApiKey, supabaseApiKey } = getPreferenceValues<Preferences>();
+  const { subwatchApiKey } = getPreferenceValues<Preferences>();
   const { isLoading, data, error, mutate } = fetchSubscriptions();
 
   if (error) {
     showFailureToast(error, { title: "An error occurred!" });
   }
 
+  function getOrdinalNum(n: number) {
+    return n + (n > 0 ? ["th", "st", "nd", "rd"][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : "");
+  }
+
   async function handleDelete(index: number) {
-    const subscriptionToDelete = data?.[0].data[index];
+    const subscriptionToDelete = data?.[index];
+    if (!subscriptionToDelete) {
+      showFailureToast({
+        title: `Could not delete subscription in index ${index}`,
+      });
+    }
     await showToast({
       style: Toast.Style.Animated,
       title: `Deleting ${subscriptionToDelete?.name}`,
     });
 
-    const newData = data?.[0]?.data.filter((e) => e.domain != subscriptionToDelete?.domain);
-
     try {
       await mutate(
-        fetch("https://nzyzephaenhlxoohrphc.supabase.co/rest/v1/rpc/raycast_update_data", {
-          method: "POST",
+        fetch(`https://subwatch.co/api/subscription/${subscriptionToDelete!.id}`, {
+          method: "DELETE",
           headers: {
             "Content-Type": "application/json",
-            apikey: supabaseApiKey,
+            "x-api-key": subwatchApiKey,
           },
-          body: JSON.stringify({
-            raycast_uuid: subwatchApiKey,
-            newdata: newData,
-          }),
         }),
       );
       showToast({
@@ -55,7 +58,7 @@ export default function Command() {
       searchBarPlaceholder="Search your subscriptions"
       isShowingDetail
     >
-      {data?.[0]?.data?.map((item, index) => (
+      {data?.map((item, index) => (
         <List.Item
           key={index}
           title={item.name.charAt(0).toUpperCase() + item.name.slice(1)}
@@ -78,15 +81,20 @@ export default function Command() {
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Link title="Domain" target={`https://${item.domain}`} text={item.domain} />
-                  <List.Item.Detail.Metadata.Label title="Interval" text={item.billing[0]?.interval} />
-                  <List.Item.Detail.Metadata.Label title="Pricing" text={`$${String(item.billing[0]?.price)}`} />
+                  <List.Item.Detail.Metadata.Label title="Interval" text={item.interval} />
+                  <List.Item.Detail.Metadata.Label title="Pricing" text={`$${String(item.price)}`} />
+                  <List.Item.Detail.Metadata.Label
+                    title="Renew at"
+                    text={getOrdinalNum(new Date(item.start_date).getDate())}
+                  />
+                  <List.Item.Detail.Metadata.TagList title="Category">
+                    <List.Item.Detail.Metadata.TagList.Item text={item.category} />
+                  </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="Start date" text={item.billing[0]?.start_date} />
+                  <List.Item.Detail.Metadata.Label title="Start date" text={new Date(item.start_date).toDateString()} />
                   <List.Item.Detail.Metadata.Label
                     title="End date"
-                    text={
-                      item.billing[0].end_date && item.billing[0].end_date !== "null" ? item.billing[0].end_date : ""
-                    }
+                    text={item.end_date && item.end_date !== "null" ? new Date(item.end_date).toDateString() : ""}
                   />
                 </List.Item.Detail.Metadata>
               }
