@@ -1,6 +1,6 @@
 # Pro Management Changelog
 
-## [Initial Version] - 2026-04-05
+## [Initial Version] - {PR_MERGE_DATE}
 
 - **Search Projects**: Scan local workspace directories (`~/project` etc.), fuzzy search, and jump into your codebase using `IntelliJ IDEA`, `PyCharm`, `iTerm2`, `Fork`, or `Antigravity`.
 - **Workspace Navigation**: Pin active sprints, favorite long-term repositories, and automatically track and sort by CLI usage frequency.
