@@ -33,10 +33,6 @@ import {
   setIconOverride,
 } from "./device-icons";
 
-interface Preferences {
-  temperatureUnit: string;
-}
-
 function getMacIcon(mac: MacBattery): { source: Icon; tintColor?: Color } {
   if (mac.isCharging) {
     return { source: Icon.BatteryCharging, tintColor: Color.Blue };

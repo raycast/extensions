@@ -72,7 +72,7 @@ async function getMacModel(): Promise<string> {
     if (model.startsWith("iMac")) return "iMac";
     if (model.startsWith("Macmini")) return "Mac mini";
     if (model.startsWith("MacPro")) return "Mac Pro";
-    if (model.startsWith("Mac")) return "Mac Studio";
+    if (model.startsWith("MacStudio")) return "Mac Studio";
     return "Mac";
   } catch {
     return "Mac";
