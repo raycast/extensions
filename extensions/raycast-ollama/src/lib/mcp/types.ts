@@ -12,7 +12,7 @@ export interface McpServerParams {
 
 export interface McpServerToolInputSchema {
   type: string;
-  properties: {
+  properties?: {
     [key: string]: {
       type: string;
       description?: string;
