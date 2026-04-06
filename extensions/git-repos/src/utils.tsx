@@ -3,7 +3,7 @@ import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/ap
 import { homedir, platform } from "os";
 import path from "path";
 import fs from "fs";
-import { globSync, Path } from "glob";
+import { glob, Path } from "glob";
 import parseGitConfig from "parse-git-config";
 import parseGithubURL from "parse-github-url";
 import getDefaultBrowser from "default-browser";
@@ -235,13 +235,13 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (scanPath) => {
-      const gitEntries = globSync("**/.git", {
+      const gitEntries = (await glob("**/.git", {
         cwd: scanPath,
         maxDepth,
         follow: true,
         withFileTypes: true,
         dot: true,
-      }) as Path[];
+      })) as Path[];
       const gitDirs = gitEntries.filter((p) => p.isDirectory()).map((p) => p.fullpath());
       const gitFiles = gitEntries.filter((p) => p.isFile()).map((p) => p.fullpath());
 
