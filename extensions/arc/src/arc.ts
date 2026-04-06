@@ -118,11 +118,10 @@ async function runAppleScriptActionOnTab(tabId: string, action: string, activate
   await ensureArcIsRunning();
   return runAppleScript(`
     tell application "Arc"
-      if (count of windows) is 0 then
-        make new window
-      end if
       tell first window
-        tell (first tab whose id is "${tabId}") to ${action}
+        try
+          tell (first tab whose id is "${tabId}") to ${action}
+        end try
       end tell
       ${activate ? "activate" : ""}
     end tell
