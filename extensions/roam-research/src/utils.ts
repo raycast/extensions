@@ -1,8 +1,18 @@
 import { useRef } from "react";
 import dayjs from "dayjs";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Keyboard } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { dateToPageTitle } from "./roam-api-sdk-copy";
+
+export function crossPlatformShortcut(
+  modifiers: Keyboard.KeyModifier[],
+  key: Keyboard.KeyEquivalent
+): Keyboard.Shortcut {
+  return {
+    macOS: { modifiers, key },
+    Windows: { modifiers: modifiers.map((m) => (m === "cmd" ? "ctrl" : m)) as Keyboard.KeyModifier[], key },
+  };
+}
 
 // Pure function for resolving the instant capture template and its graph.
 // Non-hook so the no-view command (async function, not React) can use it.
@@ -231,9 +241,9 @@ export const useGraphsConfig: () => {
 
   const saveGraphConfig = (obj: GraphConfig) => {
     const cur = graphsRef.current;
+    const isNewGraph = !(obj.nameField in cur);
     updateGraphs({ ...cur, [obj.nameField]: obj });
-    // Append to order if new graph
-    if (!orderRef.current.includes(obj.nameField)) {
+    if (isNewGraph) {
       updateOrder([...orderRef.current, obj.nameField]);
     }
   };

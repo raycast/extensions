@@ -14,6 +14,7 @@ import {
   List,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { keys } from "./utils";
@@ -102,7 +103,7 @@ export default function Command() {
                     title="Delete Graph Config"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
                     onAction={async () => {
                       await confirmAlert({
                         title: `Delete config for "${name as string}"?`,

@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useGraphsConfig } from "./utils";
+import { useGraphsConfig, crossPlatformShortcut } from "./utils";
 import { GraphDetail } from "./detail";
 import { recheckGraphCapabilities, clearGraphPagesCache } from "./roamApi";
 
@@ -61,7 +61,7 @@ export const graphList = (graphsConfig: GraphsConfigMap, options: GraphListOptio
                 <Action
                   icon={Icon.ArrowUp}
                   title="Move Up"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                  shortcut={crossPlatformShortcut(["cmd", "shift"], "arrowUp")}
                   onAction={() => moveGraph(graphName, "up")}
                 />
               )}
@@ -69,7 +69,7 @@ export const graphList = (graphsConfig: GraphsConfigMap, options: GraphListOptio
                 <Action
                   icon={Icon.ArrowDown}
                   title="Move Down"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                  shortcut={crossPlatformShortcut(["cmd", "shift"], "arrowDown")}
                   onAction={() => moveGraph(graphName, "down")}
                 />
               )}

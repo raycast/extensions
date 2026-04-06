@@ -1,8 +1,8 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
 import { clearSyncedItems, deleteOutboxItem, retryOutboxItem, processOutboxQueue, getOutboxItems } from "./outbox";
-import { useGraphsConfig } from "./utils";
+import { useGraphsConfig, crossPlatformShortcut } from "./utils";
 import { dateToPageTitle } from "./roam-api-sdk-copy";
 
 const STATUS_CONFIG: Record<OutboxItemStatus, { icon: Icon; tint: Color; label: string }> = {
@@ -126,26 +126,26 @@ export default function Command() {
             <Action.CopyToClipboard
               title="Copy Content"
               content={item.content}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action
               title="Delete"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={() => handleDelete(item.id)}
             />
             <Action
               title="Retry All Pending"
               icon={Icon.RotateAntiClockwise}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+              shortcut={crossPlatformShortcut(["cmd", "shift"], "r")}
               onAction={handleRetryAll}
             />
             <Action
               title="Clear Synced History"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={crossPlatformShortcut(["cmd", "shift"], "d")}
               onAction={handleClearSynced}
             />
           </ActionPanel>

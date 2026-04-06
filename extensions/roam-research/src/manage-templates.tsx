@@ -10,10 +10,18 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { randomUUID } from "crypto";
 import { useState } from "react";
-import { useGraphsConfig, useTemplatesConfig, getFirstTemplate, keys, BUILTIN_DEFAULT_TEMPLATE } from "./utils";
+import {
+  useGraphsConfig,
+  useTemplatesConfig,
+  getFirstTemplate,
+  keys,
+  BUILTIN_DEFAULT_TEMPLATE,
+  crossPlatformShortcut,
+} from "./utils";
 import {
   PageDropdown,
   CONTENT_TEMPLATE_HELP,
@@ -107,7 +115,7 @@ export const TemplateListView = () => {
               <Action
                 title="Move Up"
                 icon={Icon.ArrowUp}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                shortcut={crossPlatformShortcut(["cmd", "shift"], "arrowUp")}
                 onAction={() => moveTemplate(tmpl.id, "up")}
               />
             )}
@@ -115,7 +123,7 @@ export const TemplateListView = () => {
               <Action
                 title="Move Down"
                 icon={Icon.ArrowDown}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
+                shortcut={crossPlatformShortcut(["cmd", "shift"], "arrowDown")}
                 onAction={() => moveTemplate(tmpl.id, "down")}
               />
             )}
@@ -131,13 +139,13 @@ export const TemplateListView = () => {
                   clearInstantCaptureTemplate={clearInstantCaptureTemplate}
                 />
               }
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Keyboard.Shortcut.Common.New}
             />
             <Action
               title="Delete Template"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
                 await confirmAlert({
                   title: `Delete "${tmpl.name}"?`,

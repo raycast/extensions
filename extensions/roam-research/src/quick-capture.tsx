@@ -18,6 +18,7 @@ import {
   resolveInstantCapture,
   resolveCaptureTags,
   keys,
+  crossPlatformShortcut,
 } from "./utils";
 import { captureWithOutbox } from "./outbox";
 import { CaptureError, addUsedPage } from "./roamApi";
@@ -78,6 +79,9 @@ function resolveGraphForTemplate(
   return undefined;
 }
 
+// --- Platform-aware shortcut label ---
+const captureShortcutLabel = process.platform === "win32" ? "Ctrl+Shift+Enter" : "⌘⇧↵";
+
 // --- Screen 3: Graph Selection ---
 
 const GraphSelectionList = ({
@@ -95,7 +99,7 @@ const GraphSelectionList = ({
 
   return (
     <List navigationTitle="Select Graph">
-      <List.Section title="Graphs" subtitle="⌘⇧↵ Capture with selected graph">
+      <List.Section title="Graphs" subtitle={`${captureShortcutLabel} Capture with selected graph`}>
         {appendableGraphNames.map((graphName) => {
           const graphConfig = graphsConfig[graphName];
           return (
@@ -115,7 +119,7 @@ const GraphSelectionList = ({
                   <Action
                     title="Capture"
                     icon={Icon.Upload}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                    shortcut={crossPlatformShortcut(["cmd", "shift"], "return")}
                     onAction={() => performQuickCapture({ content, graphConfig, template })}
                   />
                 </ActionPanel>
@@ -147,7 +151,7 @@ const TemplateSelectionList = ({
 
   return (
     <List navigationTitle="Select Template">
-      <List.Section title="Templates" subtitle="⌘⇧↵ Capture with selected template">
+      <List.Section title="Templates" subtitle={`${captureShortcutLabel} Capture with selected template`}>
         {allTemplates.map((tmpl) => (
           <List.Item
             key={tmpl.id}
@@ -192,7 +196,7 @@ const TemplateSelectionList = ({
                 <Action
                   title="Capture"
                   icon={Icon.Upload}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                  shortcut={crossPlatformShortcut(["cmd", "shift"], "return")}
                   onAction={() => {
                     const graphConfig = resolveGraphForTemplate(tmpl, graphsConfig, appendableGraphNames);
                     if (!graphConfig) {
@@ -307,7 +311,7 @@ export default function Command() {
     }
   };
 
-  // Resolve instant capture template for ⌘⇧↵ shortcut
+  // Resolve instant capture template for Cmd+Shift+Enter / Ctrl+Shift+Enter shortcut
   const instantCapture = !isLoading ? resolveInstantCapture(templatesConfig, graphsConfig) : undefined;
 
   const handleCaptureWithDefaults = async () => {
@@ -353,7 +357,7 @@ export default function Command() {
               <Action
                 title="Capture with Defaults"
                 icon={Icon.Upload}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+                shortcut={crossPlatformShortcut(["cmd", "shift"], "return")}
                 onAction={handleCaptureWithDefaults}
               />
             )}
@@ -364,7 +368,7 @@ export default function Command() {
         <List.Item
           title={`Capture to ${instantCapture.graphConfig.nameField} with template "${instantCapture.template.name}"`}
           icon={Icon.Upload}
-          accessories={[{ text: "⌘⇧↵" }]}
+          accessories={[{ text: captureShortcutLabel }]}
           actions={
             <ActionPanel>
               <Action title="Capture with Defaults" icon={Icon.Upload} onAction={handleCaptureWithDefaults} />
