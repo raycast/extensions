@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
+import "../lib/polyfill/node-fetch";
 
 const pref = getPreferenceValues<Preferences>();
 const key = pref.ollamaApiKey;
@@ -20,7 +20,7 @@ type Input = {
  */
 export default async function tool(input: Input): Promise<string> {
   /* Throw Error if API Key isn't configured */
-  if (!key) throw new Error("Ollama Api Key need to be configured on Raycast Command Extension");
+  if (!key) throw new Error("Ollama API key is not configured in Raycast preferences");
 
   /* Parse max_result */
   if (input.max_result && input.max_result > 10) input.max_result = 10;
@@ -48,7 +48,7 @@ export default async function tool(input: Input): Promise<string> {
     const data = await response.json();
     return JSON.stringify(data);
   } catch (error) {
-    console.error("Error on Ollama Web Search Tool", error);
+    console.error("Ollama Web Search tool error:", error);
     throw error;
   }
 }
