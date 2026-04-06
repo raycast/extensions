@@ -92,7 +92,7 @@ export async function executeCommand(
   command: CommandDef,
   projectPath: string,
 ): Promise<void> {
-  const cmd = command.template.replace("{path}", projectPath);
+  const cmd = command.template.replace("{path}", `"${projectPath}"`);
 
   // 获取用户的 shell 环境变量（确保 PATH 包含 IDE 命令）
   const shellCmd = `source ~/.zshrc 2>/dev/null; ${cmd}`;

@@ -202,7 +202,7 @@ export function loadSkills(
     let name = item.name;
     let desc = "";
     if (item.isDirectory()) {
-      const mdPath = path.join(fullPath, "SKILL.md");
+      const mdPath = path.join(fullPath, "skill.md");
       if (fs.existsSync(mdPath)) desc = parseDescription(mdPath);
     } else {
       name = getBaseName(item.name);
@@ -232,9 +232,9 @@ export function loadSkills(
       let desc = "";
       if (
         item.isDirectory() &&
-        fs.existsSync(path.join(fullPath, "SKILL.md"))
+        fs.existsSync(path.join(fullPath, "skill.md"))
       ) {
-        desc = parseDescription(path.join(fullPath, "SKILL.md"));
+        desc = parseDescription(path.join(fullPath, "skill.md"));
       } else if (item.isFile?.()) {
         desc = parseDescription(fullPath);
       }
