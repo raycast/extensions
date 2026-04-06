@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [Security Fix] - {PR_MERGE_DATE}
+## [Security Fix] - 2026-04-06
 
 - Replace AppleScript-based renaming with native Node.js `fs.rename()` to fix shell injection vulnerability
 - Add per-file error handling with individual success/failure tracking
