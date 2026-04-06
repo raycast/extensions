@@ -2,7 +2,15 @@ import type { ReactElement } from "react";
 import { useCallback, useState } from "react";
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard, List, open, popToRoot } from "@raycast/api";
 import { useAccount } from "../hooks/useAccount";
-import { deleteAccount, deleteBridgePage, deleteMail, getAccount, getMails, getMessageFilePath, writeBridgePage } from "../libs/api";
+import {
+  deleteAccount,
+  deleteBridgePage,
+  deleteMail,
+  getAccount,
+  getMails,
+  getMessageFilePath,
+  writeBridgePage,
+} from "../libs/api";
 import { handleAction, removeAccount, timeAgo } from "../libs/utils";
 import { Message } from "./Message";
 
