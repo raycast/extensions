@@ -14,6 +14,13 @@ export default function ImagesPreviewPage({ imgs }: Props) {
     const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const validImgs = imgs.filter((i) => i.imgUrl);
 
+    useEffect(() => {
+        if (autoCopyAfterUpload) {
+            Clipboard.copy(exportFormats.url.generate(validImgs));
+            showToast({ style: Toast.Style.Success, title: "URL Copied!" });
+        }
+    }, []);
+
     if (validImgs.length === 0) {
         return (
             <Grid>
@@ -21,13 +28,6 @@ export default function ImagesPreviewPage({ imgs }: Props) {
             </Grid>
         );
     }
-
-    useEffect(() => {
-        if (autoCopyAfterUpload) {
-            Clipboard.copy(exportFormats.url.generate(validImgs));
-            showToast({ style: Toast.Style.Success, title: "URL Copied!" });
-        }
-    }, []);
 
     return (
         <Grid

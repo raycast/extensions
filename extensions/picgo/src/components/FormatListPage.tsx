@@ -4,6 +4,7 @@ import { Action, ActionPanel, Icon, List, getPreferenceValues, Clipboard, showTo
 import { exportFormats } from "../util/format";
 import ImagesMetadataPanel from "./ImagesMetadataPanel";
 import ImagesPreviewPage from "./ImagesPreviewPage";
+import { useEffect } from "react";
 
 interface Props {
     result: IImgInfo[];
@@ -12,16 +13,21 @@ interface Props {
 export default function FormatListPage({ result }: Props) {
     const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const imgs = result.filter((r) => r.imgUrl);
+
+    useEffect(() => {
+        if (autoCopyAfterUpload) {
+            Clipboard.copy(exportFormats.url.generate(imgs));
+            showToast({ style: Toast.Style.Success, title: "URL Copied!" });
+        }
+    }, []);
+
     if (imgs.length === 0)
         return (
             <List>
                 <List.EmptyView icon={Icon.Warning} title="No Image URL Results." />
             </List>
         );
-    if (autoCopyAfterUpload) {
-        Clipboard.copy(exportFormats.url.generate(imgs));
-        showToast({ style: Toast.Style.Success, title: "URL Copied!" });
-    }
+
     return (
         <List isShowingDetail navigationTitle={`${imgs.length} images uploaded`}>
             {Object.keys(exportFormats).map((k) => {
