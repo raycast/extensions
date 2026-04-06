@@ -19,9 +19,12 @@ export default function Command() {
   const [query, setQuery] = useState("");
   const [showDetails, setShowDetails] = useState(false);
 
-  const { isLoading, data } = useFetch<Word[]>("https://www.onelook.com/api/words?md=d&ml=" + toQueryString(query), {
-    execute: !!query,
-  });
+  const { isLoading, data } = useFetch<Word[]>(
+    "https://api.datamuse.com/words?qe=ml&md=d&ml=" + toQueryString(query),
+    {
+      execute: !!query
+    }
+  );
 
   return (
     <List
