@@ -20,6 +20,7 @@ import {
   CommandDef,
   SkillInstallation,
   AgentConfig,
+  Project,
 } from "./types";
 import {
   loadSkills,
@@ -55,7 +56,6 @@ import {
 } from "./storage";
 import { getAllCommands, executeCommand } from "./commands";
 import { shortenPath, loadProjects } from "./projects";
-import { Project } from "./types";
 
 export default function ManageSkills() {
   const [skills, setSkills] = useState<Skill[]>([]);
