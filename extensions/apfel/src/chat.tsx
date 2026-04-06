@@ -98,7 +98,7 @@ function Chat(props: { conversation?: Conversation }) {
       searchText={question.data}
       isShowingDetail={chats.data.length > 0 ? true : false}
       filtering={false}
-      isLoading={question.isLoading ? question.isLoading : chats.isLoading}
+      isLoading={chats.isLoading}
       onSearchTextChange={question.update}
       throttle={false}
       navigationTitle={"Ask"}
