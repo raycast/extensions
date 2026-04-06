@@ -1,6 +1,6 @@
 # Anytype Changelog
 
-## [Dependency Updates] - {PR_MERGE_DATE}
+## [Dependency Updates] - 2026-04-06
 
 - Update dependencies to latest versions
 - Update metadata images
