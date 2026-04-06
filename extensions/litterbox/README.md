@@ -1,3 +1,0 @@
-# Litterbox
-
-Upload to litterbox

@@ -1,3 +1,0 @@
-# Whois 🌐
-
-Retrieve whois data.
