@@ -7,10 +7,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {
-  /** API Key - Your Keeply API key. Generate one at app.keeply.tools/settings → Developer */
-  "apiKey": string
-}
+type ExtensionPreferences = {}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
@@ -28,4 +25,3 @@ declare namespace Arguments {
   /** Arguments passed to the `add-bookmark` command */
   export type AddBookmark = {}
 }
-

@@ -12,7 +12,7 @@ export const oauthClient = new OAuth.PKCEClient({
 
 export async function authorize(): Promise<string> {
   const existingTokens = await oauthClient.getTokens();
-  if (existingTokens?.accessToken) {
+  if (existingTokens?.accessToken && !existingTokens.isExpired()) {
     return existingTokens.accessToken;
   }
 
