@@ -39,7 +39,7 @@ export function BlockActions({ block, channel, extraActions }: BlockActionsProps
                 channel={{
                   slug: block.slug || "",
                   title: block.title || "",
-                  user: block.user || "",
+                  user: block.user.full_name,
                   open: channel?.open,
                 }}
               />

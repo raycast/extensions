@@ -14,30 +14,30 @@ export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
   const { push } = useNavigation();
   const arena = useArena();
   const { handleSubmit, itemProps } = useForm<Values>({
-    onSubmit(values) {
-      arena
-        .block()
-        .create(channel.slug, {
+    async onSubmit(values) {
+      try {
+        await arena.block().create(channel.slug, {
           content: values.content,
           title: values.title,
           description: values.description,
-        })
-        .then(() => {
-          showToast({ title: "Submitted form", message: `Block successfully created and added to ${channel.title}` });
-          push(
-            <ChannelView
-              channel={{
-                slug: channel.slug,
-                title: channel.title,
-                user: channel.user,
-                open: channel.open,
-              }}
-            />,
-          );
-        })
-        .catch((error) => {
-          showFailureToast(error, { title: "Error creating Block" });
         });
+        await showToast({
+          title: "Submitted form",
+          message: `Block successfully created and added to ${channel.title}`,
+        });
+        push(
+          <ChannelView
+            channel={{
+              slug: channel.slug,
+              title: channel.title,
+              user: channel.user,
+              open: channel.open,
+            }}
+          />,
+        );
+      } catch (error) {
+        showFailureToast(error, { title: "Error creating Block" });
+      }
     },
     validation: {
       content: FormValidation.Required,

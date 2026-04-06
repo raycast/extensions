@@ -396,7 +396,7 @@ export class Arena {
     return {
       get: async () => this.request<unknown>("GET", `users/${identifier}`).then(mapUser),
       channels: async (params?: SearchFilters) => {
-        const response = await this.getList<unknown>(`users/${identifier}/contents`, { ...params, type: "Channel" });
+        const response = await this.getList<unknown>(`users/${identifier}/channels`, params);
         return response.items.map(mapChannel);
       },
       followers: async (params?: SearchFilters) => {

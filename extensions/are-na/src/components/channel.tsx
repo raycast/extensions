@@ -16,7 +16,6 @@ interface ChannelRes {
   slug: string;
   user: string;
   contents: Block[] | null;
-  connections: number;
   collaborators: number;
   canDelete: boolean;
   open?: boolean;
@@ -42,7 +41,6 @@ export function ChannelView({ channel }: { channel: MinimalChannel }) {
           page,
           per: pageSize,
         });
-        const connections = await chan.connections({ page: 1, per: pageSize });
         if (cancelled) return;
         setData((previous) => ({
           id: fullChannel.id,
@@ -50,7 +48,6 @@ export function ChannelView({ channel }: { channel: MinimalChannel }) {
           slug: fullChannel.slug,
           user: fullChannel.user.full_name,
           contents: page === 1 ? contents : [...(previous?.contents ?? []), ...contents],
-          connections: connections.length,
           collaborators: fullChannel.collaborators.length,
           canDelete: Boolean(fullChannel.can?.destroy),
           open: fullChannel.open,
