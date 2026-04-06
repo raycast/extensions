@@ -147,7 +147,7 @@ export function CopyWikilinkAction(props: { note: Note }) {
       title="Copy Wikilink"
       icon={Icon.Link}
       content={`[[${note.title}]]`}
-      shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+      shortcut={{ modifiers: ["opt"], key: "w" }}
     />
   );
 }
@@ -159,7 +159,7 @@ export function PasteWikilinkAction(props: { note: Note }) {
       title="Paste Wikilink"
       icon={Icon.Link}
       content={`[[${note.title}]]`}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+      shortcut={{ modifiers: ["opt", "shift"], key: "w" }}
     />
   );
 }
