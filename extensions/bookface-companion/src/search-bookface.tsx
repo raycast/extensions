@@ -47,7 +47,7 @@ const TYPE_META: Record<string, { icon: Icon; color: Color; label: string }> = {
     label: "Startup Library",
   },
   employer: {
-    icon: Icon.Briefcase,
+    icon: Icon.Hammer,
     color: Color.SecondaryText,
     label: "Employer",
   },

@@ -3,6 +3,7 @@ import {
   Action,
   List,
   Icon,
+  Image,
   showToast,
   Toast,
   openExtensionPreferences,
@@ -46,7 +47,7 @@ export default function Command() {
 function Feed() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, mutate } = useCachedPromise(
     async () => {
       try {
         const allPosts: FeedPost[] = [];
@@ -98,6 +99,7 @@ function Feed() {
           key={post.id}
           post={post}
           comments={selectedPostId === post.id ? (comments ?? []) : []}
+          mutateFeed={mutate}
         />
       ))}
     </List>
@@ -142,9 +144,11 @@ function renderComment(comment: Comment, depth = 0): string {
 function PostListItem({
   post,
   comments,
+  mutateFeed,
 }: {
   post: FeedPost;
   comments: Comment[];
+  mutateFeed: () => Promise<FeedPost[] | undefined>;
 }) {
   const author = post.user;
   const votes = post.vote_info?.count;
@@ -179,7 +183,7 @@ function PostListItem({
       id={String(post.id)}
       icon={
         author.avatar_thumb
-          ? { source: author.avatar_thumb, mask: "circle" as const }
+          ? { source: author.avatar_thumb, mask: Image.Mask.Circle }
           : Icon.Person
       }
       title={post.title || "(untitled)"}
@@ -206,7 +210,7 @@ function PostListItem({
                     post.id,
                     post.vote_info!.current_user_vote!.id,
                   );
-                  post.vote_info!.current_user_vote = null;
+                  await mutateFeed();
                   showToast({
                     style: Toast.Style.Success,
                     title: "Upvote removed",
@@ -227,8 +231,8 @@ function PostListItem({
               shortcut={{ modifiers: ["cmd"], key: "u" }}
               onAction={async () => {
                 try {
-                  const vote = await upvotePost(post.id);
-                  post.vote_info.current_user_vote = vote;
+                  await upvotePost(post.id);
+                  await mutateFeed();
                   showToast({ style: Toast.Style.Success, title: "Upvoted" });
                 } catch (e) {
                   showToast({

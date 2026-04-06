@@ -46,10 +46,3 @@ export interface AuthSession {
   algoliaKey?: string;
   expiresAt: number;
 }
-
-// --- Preferences ---
-
-export interface Preferences {
-  ycid?: string;
-  password?: string;
-}

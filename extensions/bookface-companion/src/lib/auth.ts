@@ -1,5 +1,10 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import type { AuthSession, Preferences } from "../types";
+import type { AuthSession } from "../types";
+
+interface Preferences {
+  ycid?: string;
+  password?: string;
+}
 
 const SSO_KEY_STORAGE = "bookface_sso_key";
 const ALGOLIA_KEY_STORAGE = "bookface_algolia_key";
