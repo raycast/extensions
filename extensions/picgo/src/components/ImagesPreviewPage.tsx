@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
+import { ActionPanel, Action, Grid, Icon, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
 import { IImgInfo } from "picgo";
 import { exportFormats } from "../util/format";
 import { useMemo, useState } from "react";
@@ -11,9 +11,20 @@ interface Props {
 export default function ImagesPreviewPage({ imgs }: Props) {
     const [formatKey, setFormatKey] = useState<keyof typeof exportFormats>("url");
     const format = useMemo(() => exportFormats[formatKey]!, [formatKey]);
+    const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
+    const validImgs = imgs.filter((i) => i.imgUrl);
 
-    if (imgs.length === 0) {
-        return <Grid.EmptyView title="No Content"></Grid.EmptyView>;
+    if (validImgs.length === 0) {
+        return (
+            <Grid>
+                <Grid.EmptyView title="No Content"></Grid.EmptyView>
+            </Grid>
+        );
+    }
+
+    if (autoCopyAfterUpload) {
+        Clipboard.copy(exportFormats.url.generate(validImgs));
+        showToast({ style: Toast.Style.Success, title: "URL Copied!" });
     }
 
     return (
@@ -30,34 +41,32 @@ export default function ImagesPreviewPage({ imgs }: Props) {
                 </Grid.Dropdown>
             }
         >
-            {imgs
-                .filter((i) => i.imgUrl)
-                .map((img) => (
-                    <Grid.Item
-                        key={img.imgUrl}
-                        content={img.imgUrl!}
-                        title={img.fileName}
-                        subtitle={img.imgUrl}
-                        accessory={{ icon: Icon.Link, tooltip: img.imgUrl }}
-                        actions={
-                            <ActionPanel>
-                                <Action.CopyToClipboard
-                                    title={`Copy as ${format.label} Format`}
-                                    content={format.generate([img])}
-                                />
-                                <Action.CopyToClipboard
-                                    title={`Copy All as ${format.label} Format`}
-                                    content={format.generate(imgs)}
-                                />
-                                <Action.Push
-                                    title="Switch to Format List View"
-                                    icon={Icon.Switch}
-                                    target={<FormatListPage result={imgs} />}
-                                />
-                            </ActionPanel>
-                        }
-                    ></Grid.Item>
-                ))}
+            {validImgs.map((img) => (
+                <Grid.Item
+                    key={img.imgUrl}
+                    content={img.imgUrl!}
+                    title={img.fileName}
+                    subtitle={img.imgUrl}
+                    accessory={{ icon: Icon.Link, tooltip: img.imgUrl }}
+                    actions={
+                        <ActionPanel>
+                            <Action.CopyToClipboard
+                                title={`Copy as ${format.label} Format`}
+                                content={format.generate([img])}
+                            />
+                            <Action.CopyToClipboard
+                                title={`Copy All as ${format.label} Format`}
+                                content={format.generate(validImgs)}
+                            />
+                            <Action.Push
+                                title="Switch to Format List View"
+                                icon={Icon.Switch}
+                                target={<FormatListPage result={validImgs} />}
+                            />
+                        </ActionPanel>
+                    }
+                ></Grid.Item>
+            ))}
         </Grid>
     );
 }
