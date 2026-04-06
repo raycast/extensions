@@ -12,13 +12,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { HistoryEntry, SavedWebhook } from "./types";
-import {
-  clearHistory,
-  deleteHistory,
-  deleteSaved,
-  getHistory,
-  getSaved,
-} from "./storage";
+import { clearHistory, deleteHistory, deleteSaved, getHistory, getSaved } from "./storage";
 import { WebhookForm } from "./WebhookForm";
 import { ResponseView } from "./ResponseView";
 import { relativeTime, statusColor, truncateUrl } from "./utils";
@@ -59,9 +53,7 @@ export default function Command() {
         body={entry.responseBody ?? ""}
         responseTime={entry.responseTime ?? 0}
         request={entry.request}
-        onEditInForm={() =>
-          push(<WebhookForm initial={entry.request} onSent={refresh} />)
-        }
+        onEditInForm={() => push(<WebhookForm initial={entry.request} onSent={refresh} />)}
       />,
     );
   };
@@ -117,11 +109,7 @@ export default function Command() {
           icon={{ source: Icon.ArrowRight, tintColor: Color.Blue }}
           actions={
             <ActionPanel>
-              <Action
-                title="Send New Webhook"
-                icon={Icon.ArrowRight}
-                onAction={openNewForm}
-              />
+              <Action title="Send New Webhook" icon={Icon.ArrowRight} onAction={openNewForm} />
             </ActionPanel>
           }
         />
@@ -144,11 +132,7 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Open in Form"
-                    icon={Icon.Pencil}
-                    onAction={() => openFromSaved(webhook)}
-                  />
+                  <Action title="Open in Form" icon={Icon.Pencil} onAction={() => openFromSaved(webhook)} />
                   <Action
                     title="Delete Saved Webhook"
                     icon={Icon.Trash}
@@ -165,22 +149,11 @@ export default function Command() {
 
       {/* ── History ── */}
       {history.length > 0 && (
-        <List.Section
-          title="Recent History"
-          subtitle={`${history.length} entries`}
-        >
+        <List.Section title="Recent History" subtitle={`${history.length} entries`}>
           {history.map((entry) => {
-            const statusEmoji = entry.error
-              ? "🔴"
-              : entry.responseStatus
-                ? statusColor(entry.responseStatus)
-                : "⚪";
+            const statusEmoji = entry.error ? "🔴" : entry.responseStatus ? statusColor(entry.responseStatus) : "⚪";
 
-            const statusText = entry.error
-              ? "Failed"
-              : entry.responseStatus
-                ? `${entry.responseStatus}`
-                : "";
+            const statusText = entry.error ? "Failed" : entry.responseStatus ? `${entry.responseStatus}` : "";
 
             return (
               <List.Item
@@ -195,15 +168,13 @@ export default function Command() {
                   },
                   {
                     text: relativeTime(entry.timestamp),
-                    tooltip: new Date(entry.timestamp).toLocaleString(),
+                    tooltip: new Date(entry.timestamp).toLocaleString("en-US"),
                   },
                 ]}
                 actions={
                   <ActionPanel>
                     <Action
-                      title={
-                        entry.error ? "Open in Form (Failed)" : "View Response"
-                      }
+                      title={entry.error ? "Open in Form (Failed)" : "View Response"}
                       icon={entry.error ? Icon.Pencil : Icon.Eye}
                       onAction={() => openHistoryResult(entry)}
                     />

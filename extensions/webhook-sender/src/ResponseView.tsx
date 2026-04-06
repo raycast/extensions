@@ -16,12 +16,9 @@ function statusLabel(status: number): {
   emoji: string;
   text: string;
 } {
-  if (status >= 200 && status < 300)
-    return { color: Color.Green, emoji: "✅", text: "Success" };
-  if (status >= 300 && status < 400)
-    return { color: Color.Yellow, emoji: "↩️", text: "Redirect" };
-  if (status >= 400 && status < 500)
-    return { color: Color.Orange, emoji: "⚠️", text: "Client Error" };
+  if (status >= 200 && status < 300) return { color: Color.Green, emoji: "✅", text: "Success" };
+  if (status >= 300 && status < 400) return { color: Color.Yellow, emoji: "↩️", text: "Redirect" };
+  if (status >= 400 && status < 500) return { color: Color.Orange, emoji: "⚠️", text: "Client Error" };
   return { color: Color.Red, emoji: "❌", text: "Server Error" };
 }
 
@@ -60,14 +57,7 @@ function formatSentBody(sentBody: string | undefined): string {
   }
 }
 
-export function ResponseView({
-  status,
-  body,
-  responseTime,
-  request,
-  error,
-  onEditInForm,
-}: Props) {
+export function ResponseView({ status, body, responseTime, request, error, onEditInForm }: Props) {
   const label = statusLabel(status);
 
   const sentBody = buildBody(request);
@@ -91,35 +81,20 @@ ${formatSentBody(sentBody)}
 
   return (
     <Detail
-      navigationTitle={
-        error ? "Request Failed" : `${status} · ${responseTime}ms`
-      }
+      navigationTitle={error ? "Request Failed" : `${status} · ${responseTime}ms`}
       markdown={markdown}
       metadata={
         !error ? (
           <Detail.Metadata>
-            <Detail.Metadata.Label
-              title="Status"
-              text={{ value: `${status} ${label.text}`, color: label.color }}
-            />
-            <Detail.Metadata.Label
-              title="Response Time"
-              text={`${responseTime}ms`}
-            />
+            <Detail.Metadata.Label title="Status" text={{ value: `${status} ${label.text}`, color: label.color }} />
+            <Detail.Metadata.Label title="Response Time" text={`${responseTime}ms`} />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Method" text={request.method} />
             <Detail.Metadata.Label
               title="URL"
-              text={
-                request.url.length > 60
-                  ? request.url.slice(0, 60) + "…"
-                  : request.url
-              }
+              text={request.url.length > 60 ? request.url.slice(0, 60) + "…" : request.url}
             />
-            <Detail.Metadata.Label
-              title="Body Type"
-              text={request.bodyMode === "raw" ? "Raw JSON" : "Key-Value"}
-            />
+            <Detail.Metadata.Label title="Body Type" text={request.bodyMode === "raw" ? "Raw JSON" : "Key-Value"} />
           </Detail.Metadata>
         ) : undefined
       }
@@ -133,11 +108,7 @@ ${formatSentBody(sentBody)}
               onAction={onEditInForm}
             />
           )}
-          <Action.CopyToClipboard
-            title="Copy Response"
-            content={body}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy Response" content={body} shortcut={{ modifiers: ["cmd"], key: "c" }} />
           {sentBody && (
             <Action.CopyToClipboard
               title="Copy Request Body"

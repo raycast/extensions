@@ -1,20 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
-import {
-  HttpMethod,
-  KeyValueField,
-  SavedWebhook,
-  ValueType,
-  WebhookRequest,
-} from "./types";
+import { HttpMethod, KeyValueField, SavedWebhook, ValueType, WebhookRequest } from "./types";
 import { addHistory, saveWebhook } from "./storage";
 import { emptyField, fieldsToJson, generateId, sendWebhook } from "./utils";
 import { ResponseView } from "./ResponseView";
@@ -31,13 +17,9 @@ export function WebhookForm({ initial, onSent }: Props) {
 
   const [url, setUrl] = useState(initial?.url ?? "");
   const [method, setMethod] = useState<HttpMethod>(initial?.method ?? "POST");
-  const [bodyMode, setBodyMode] = useState<"key-value" | "raw">(
-    initial?.bodyMode ?? "key-value",
-  );
+  const [bodyMode, setBodyMode] = useState<"key-value" | "raw">(initial?.bodyMode ?? "key-value");
   const [fields, setFields] = useState<KeyValueField[]>(
-    initial?.fields && initial.fields.length > 0
-      ? initial.fields
-      : [emptyField()],
+    initial?.fields && initial.fields.length > 0 ? initial.fields : [emptyField()],
   );
   const [rawJson, setRawJson] = useState(initial?.rawJson ?? "");
   const [saveName, setSaveName] = useState("");
@@ -46,14 +28,9 @@ export function WebhookForm({ initial, onSent }: Props) {
 
   const hasBody = method !== "GET" && method !== "DELETE";
 
-  const updateField = useCallback(
-    (id: string, patch: Partial<KeyValueField>) => {
-      setFields((prev) =>
-        prev.map((f) => (f.id === id ? { ...f, ...patch } : f)),
-      );
-    },
-    [],
-  );
+  const updateField = useCallback((id: string, patch: Partial<KeyValueField>) => {
+    setFields((prev) => prev.map((f) => (f.id === id ? { ...f, ...patch } : f)));
+  }, []);
 
   const addField = useCallback(() => {
     setFields((prev) => [...prev, emptyField()]);
@@ -87,6 +64,20 @@ export function WebhookForm({ initial, onSent }: Props) {
   const handleSend = useCallback(async () => {
     if (!url.trim()) {
       await showToast({ style: Toast.Style.Failure, title: "URL is required" });
+      return;
+    }
+
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "URL must start with http:// or https://",
+        });
+        return;
+      }
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Invalid URL" });
       return;
     }
 
@@ -127,12 +118,7 @@ export function WebhookForm({ initial, onSent }: Props) {
       onSent?.();
 
       push(
-        <ResponseView
-          status={result.status}
-          body={result.body}
-          responseTime={result.responseTime}
-          request={request}
-        />,
+        <ResponseView status={result.status} body={result.body} responseTime={result.responseTime} request={request} />,
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -169,6 +155,20 @@ export function WebhookForm({ initial, onSent }: Props) {
       return;
     }
 
+    try {
+      const parsed = new URL(url);
+      if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "URL must start with http:// or https://",
+        });
+        return;
+      }
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Invalid URL" });
+      return;
+    }
+
     const webhook: SavedWebhook = {
       id: generateId(),
       name: saveName.trim(),
@@ -199,11 +199,7 @@ export function WebhookForm({ initial, onSent }: Props) {
       isLoading={isSending}
       actions={
         <ActionPanel>
-          <Action
-            title="Send Webhook"
-            icon={Icon.ArrowRight}
-            onAction={handleSend}
-          />
+          <Action title="Send Webhook" icon={Icon.ArrowRight} onAction={handleSend} />
           <Action
             title="Save Webhook"
             icon={Icon.Bookmark}
@@ -220,9 +216,7 @@ export function WebhookForm({ initial, onSent }: Props) {
           )}
           {bodyMode === "key-value" && hasBody && fields.length > 1 && (
             <Action
-              title={
-                fieldToRemove ? "Remove Selected Field" : "Remove Last Field"
-              }
+              title={fieldToRemove ? "Remove Selected Field" : "Remove Last Field"}
               icon={Icon.Minus}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
               style={Action.Style.Destructive}
@@ -242,12 +236,7 @@ export function WebhookForm({ initial, onSent }: Props) {
         autoFocus
       />
 
-      <Form.Dropdown
-        id="method"
-        title="Method"
-        value={method}
-        onChange={(v) => setMethod(v as HttpMethod)}
-      >
+      <Form.Dropdown id="method" title="Method" value={method} onChange={(v) => setMethod(v as HttpMethod)}>
         {HTTP_METHODS.map((m) => (
           <Form.Dropdown.Item key={m} value={m} title={m} />
         ))}
@@ -271,11 +260,7 @@ export function WebhookForm({ initial, onSent }: Props) {
           {bodyMode === "key-value" ? (
             <>
               {fields.map((field) => (
-                <KeyValueRow
-                  key={field.id}
-                  field={field}
-                  onChange={(patch) => updateField(field.id, patch)}
-                />
+                <KeyValueRow key={field.id} field={field} onChange={(patch) => updateField(field.id, patch)} />
               ))}
               {fields.length > 1 && (
                 <Form.Dropdown
@@ -285,19 +270,12 @@ export function WebhookForm({ initial, onSent }: Props) {
                   onChange={setFieldToRemove}
                   info="Select a field then press ⌘⇧D to remove it"
                 >
-                  <Form.Dropdown.Item
-                    value=""
-                    title="— select field to remove —"
-                  />
+                  <Form.Dropdown.Item value="" title="— select field to remove —" />
                   {fields.map((f, idx) => (
                     <Form.Dropdown.Item
                       key={f.id}
                       value={f.id}
-                      title={
-                        f.key
-                          ? `Field ${idx + 1}: "${f.key}"`
-                          : `Field ${idx + 1} (empty)`
-                      }
+                      title={f.key ? `Field ${idx + 1}: "${f.key}"` : `Field ${idx + 1} (empty)`}
                     />
                   ))}
                 </Form.Dropdown>
@@ -306,9 +284,7 @@ export function WebhookForm({ initial, onSent }: Props) {
                 title=""
                 text={`⌘N  add field${fields.length > 1 ? "  ·  ⌘⇧D  remove selected field" : ""}`}
               />
-              {jsonPreview && (
-                <Form.Description title="JSON Preview" text={jsonPreview} />
-              )}
+              {jsonPreview && <Form.Description title="JSON Preview" text={jsonPreview} />}
             </>
           ) : (
             <Form.TextArea
@@ -333,10 +309,7 @@ export function WebhookForm({ initial, onSent }: Props) {
         value={saveName}
         onChange={setSaveName}
       />
-      <Form.Description
-        title=""
-        text="Give this webhook a name and press ⌘S to save it for later"
-      />
+      <Form.Description title="" text="Give this webhook a name and press ⌘S to save it for later" />
     </Form>
   );
 }
@@ -348,13 +321,7 @@ interface RowProps {
 
 function KeyValueRow({ field, onChange }: RowProps) {
   const typeSuffix =
-    field.type === "boolean"
-      ? " (bool)"
-      : field.type === "number"
-        ? " (num)"
-        : field.type === "null"
-          ? " (null)"
-          : "";
+    field.type === "boolean" ? " (bool)" : field.type === "number" ? " (num)" : field.type === "null" ? " (null)" : "";
 
   return (
     <>

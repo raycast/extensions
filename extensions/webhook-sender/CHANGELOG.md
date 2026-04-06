@@ -1,8 +1,9 @@
 # Webhook Sender Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
+
 - Initial release
 - Send webhooks with GET, POST, PUT, PATCH, DELETE support
 - Key-Value body mode with per-field type selector (string, boolean, number, null)
