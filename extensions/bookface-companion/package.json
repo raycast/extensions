@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bookface-companion",
+  "title": "Bookface Companion",
+  "description": "Search YC companies, find founders, browse the Bookface feed, chat with the YC Agent, and track demo day countdowns",
+  "icon": "icon.png",
+  "author": "jleguina",
+  "categories": [
+    "Productivity",
+    "Other"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "yc",
+    "y combinator",
+    "bookface",
+    "startup",
+    "founders"
+  ],
+  "preferences": [
+    {
+      "name": "ycid",
+      "title": "YC Username",
+      "description": "Your Y Combinator username. Required for Bookface features.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "pg"
+    },
+    {
+      "name": "password",
+      "title": "YC Password",
+      "description": "Your Y Combinator password (encrypted at rest). Required for Bookface features.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "demo-day-countdown",
+      "title": "Demo Day Countdown",
+      "subtitle": "YC",
+      "description": "Show days until the next YC demo day in your menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "search-bookface",
+      "title": "Search Bookface",
+      "subtitle": "Bookface",
+      "description": "Search all of Bookface: founders, companies, investors, deals, and more",
+      "mode": "view"
+    },
+    {
+      "name": "bookface-feed",
+      "title": "Bookface Feed",
+      "subtitle": "Bookface",
+      "description": "Browse the Bookface feed",
+      "mode": "view"
+    },
+    {
+      "name": "yc-agent",
+      "title": "Ask YC Agent",
+      "subtitle": "Bookface",
+      "description": "Chat with the YC Agent. Ask questions, get advice, and search the YC network.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.14",
+    "@types/react": "^19.0.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: all extensions must be published through the Raycast Store process\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
