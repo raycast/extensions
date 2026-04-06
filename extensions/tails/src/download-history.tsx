@@ -1,24 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Color,
-  confirmAlert,
-  Icon,
-  Keyboard,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { existsSync } from "node:fs";
 
-import {
-  clearHistory,
-  type HistoryEntry,
-  loadHistory,
-  removeHistoryEntry,
-} from "./lib/history";
+import { clearHistory, type HistoryEntry, loadHistory, removeHistoryEntry } from "./lib/history";
 
 export default function DownloadHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
@@ -39,8 +23,7 @@ export default function DownloadHistory() {
   async function handleClear() {
     const confirmed = await confirmAlert({
       title: "Clear Download History",
-      message:
-        "This clears the list only. Your downloaded files stay where they are.",
+      message: "This clears the list only. Your downloaded files stay where they are.",
       primaryAction: {
         title: "Clear",
         style: Alert.ActionStyle.Destructive,
@@ -83,8 +66,7 @@ export default function DownloadHistory() {
       {Object.entries(grouped).map(([date, entries]) => (
         <List.Section key={date} title={date}>
           {entries.map((entry) => {
-            const fileExists =
-              entry.status === "completed" && existsSync(entry.downloadPath);
+            const fileExists = entry.status === "completed" && existsSync(entry.downloadPath);
 
             return (
               <List.Item
@@ -107,22 +89,13 @@ export default function DownloadHistory() {
                         shortcut={Keyboard.Shortcut.Common.Open}
                       />
                     )}
-                    {fileExists && (
-                      <Action.Open
-                        title="Open File"
-                        target={entry.downloadPath}
-                        icon={Icon.Play}
-                      />
-                    )}
+                    {fileExists && <Action.Open title="Open File" target={entry.downloadPath} icon={Icon.Play} />}
                     <Action.CopyToClipboard
                       title="Copy URL"
                       content={entry.url}
                       shortcut={Keyboard.Shortcut.Common.Copy}
                     />
-                    <Action.OpenInBrowser
-                      title="Open Original"
-                      url={entry.url}
-                    />
+                    <Action.OpenInBrowser title="Open Original" url={entry.url} />
                     <Action
                       title="Remove from History"
                       icon={Icon.Trash}

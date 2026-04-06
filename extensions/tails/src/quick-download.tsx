@@ -1,10 +1,4 @@
-import {
-  Clipboard,
-  LaunchProps,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Clipboard, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
 
 import { fetchMetadata, fetchStreams, handleApiError } from "./lib/api";
 import { downloadAll } from "./lib/download";
@@ -12,9 +6,7 @@ import { isUrl, pickBestStreamVariant } from "./lib/format";
 import { addToHistory } from "./lib/history";
 import type { StreamFile } from "./lib/types";
 
-export default async function QuickDownload(
-  props: LaunchProps<{ arguments: { url: string } }>,
-) {
+export default async function QuickDownload(props: LaunchProps<{ arguments: { url: string } }>) {
   try {
     let url = props.arguments.url?.trim();
 

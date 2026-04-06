@@ -24,9 +24,7 @@ export async function loadHistory(): Promise<HistoryEntry[]> {
   return parsed.sort((a, b) => b.timestamp - a.timestamp);
 }
 
-export function addToHistory(
-  entry: Omit<HistoryEntry, "id" | "timestamp">,
-): void {
+export function addToHistory(entry: Omit<HistoryEntry, "id" | "timestamp">): void {
   void (async () => {
     try {
       const history = await loadHistory();

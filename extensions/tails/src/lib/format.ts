@@ -1,9 +1,4 @@
-import type {
-  MediaItem,
-  StreamVariant,
-  VideoVariant,
-  AudioVariant,
-} from "./types";
+import type { MediaItem, StreamVariant, VideoVariant, AudioVariant } from "./types";
 
 export function formatBytes(bytes: number | null): string {
   if (bytes === null || bytes === 0) return "";
@@ -23,10 +18,7 @@ export function formatCost(cost: number): string {
   return cost === 1 ? "1 credit" : `${cost} credits`;
 }
 
-export function variantTitle(
-  _item: MediaItem,
-  variant: VideoVariant | AudioVariant,
-): string {
+export function variantTitle(_item: MediaItem, variant: VideoVariant | AudioVariant): string {
   return variant.quality;
 }
 
@@ -37,11 +29,7 @@ export function variantSubtitle(variant: VideoVariant | AudioVariant): string {
   return parts.join(" · ");
 }
 
-export function mediaItemLabel(
-  item: MediaItem,
-  index: number,
-  total: number,
-): string {
+export function mediaItemLabel(item: MediaItem, index: number, total: number): string {
   const prefix = total > 1 ? `${index + 1}. ` : "";
   switch (item.type) {
     case "video":
@@ -53,14 +41,9 @@ export function mediaItemLabel(
   }
 }
 
-export function pickBestStreamVariant(
-  variants: StreamVariant[],
-): StreamVariant | undefined {
+export function pickBestStreamVariant(variants: StreamVariant[]): StreamVariant | undefined {
   if (variants.length === 0) return undefined;
-  return variants.reduce(
-    (best, v) => (v.cost >= best.cost ? v : best),
-    variants[0],
-  );
+  return variants.reduce((best, v) => (v.cost >= best.cost ? v : best), variants[0]);
 }
 
 export function isUrl(text: string): boolean {

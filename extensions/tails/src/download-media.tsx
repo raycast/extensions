@@ -14,12 +14,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { pathToFileURL } from "node:url";
 
-import {
-  fetchMetadata,
-  fetchStreams,
-  getCachedImageUrl,
-  handleApiError,
-} from "./lib/api";
+import { fetchMetadata, fetchStreams, getCachedImageUrl, handleApiError } from "./lib/api";
 import { downloadAll } from "./lib/download";
 import {
   formatBytes,
@@ -42,9 +37,7 @@ import type {
   VideoVariant,
 } from "./lib/types";
 
-export default function DownloadMedia(
-  props: LaunchProps<{ arguments: { url: string } }>,
-) {
+export default function DownloadMedia(props: LaunchProps<{ arguments: { url: string } }>) {
   const [url, setUrl] = useState(props.arguments.url?.trim() || "");
 
   useEffect(() => {
@@ -74,11 +67,7 @@ export default function DownloadMedia(
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail={!!data}
-      searchBarPlaceholder="Filter downloads…"
-    >
+    <List isLoading={isLoading} isShowingDetail={!!data} searchBarPlaceholder="Filter downloads…">
       {data && <MediaList metadata={data} url={url} />}
 
       {!isLoading && !data && (
@@ -96,13 +85,7 @@ export default function DownloadMedia(
   );
 }
 
-function MediaList({
-  metadata,
-  url,
-}: {
-  metadata: MetadataResponse;
-  url: string;
-}) {
+function MediaList({ metadata, url }: { metadata: MetadataResponse; url: string }) {
   const { media } = metadata;
   const isMulti = media.length > 1;
 
@@ -123,10 +106,7 @@ function MediaList({
   );
 }
 
-function buildDetailMarkdown(
-  metadata: MetadataResponse,
-  item: MediaItem,
-): string {
+function buildDetailMarkdown(metadata: MetadataResponse, item: MediaItem): string {
   const lines: string[] = [];
 
   const rawThumb =
@@ -148,11 +128,7 @@ function buildDetailMarkdown(
   return lines.join("\n");
 }
 
-function buildDetailMetadata(
-  metadata: MetadataResponse,
-  item: MediaItem,
-  variant?: VideoVariant | AudioVariant,
-) {
+function buildDetailMetadata(metadata: MetadataResponse, item: MediaItem, variant?: VideoVariant | AudioVariant) {
   const tags: { label: string; value: string }[] = [];
 
   if (metadata.title) tags.push({ label: "Title", value: metadata.title });
@@ -164,16 +140,13 @@ function buildDetailMetadata(
   tags.push({ label: "Platform", value: metadata.platform });
 
   if (item.type === "video") {
-    if (item.duration)
-      tags.push({ label: "Duration", value: formatDuration(item.duration) });
-    if (variant && "fps" in variant && variant.fps)
-      tags.push({ label: "Frame Rate", value: `${variant.fps} fps` });
+    if (item.duration) tags.push({ label: "Duration", value: formatDuration(item.duration) });
+    if (variant && "fps" in variant && variant.fps) tags.push({ label: "Frame Rate", value: `${variant.fps} fps` });
     if (!item.hasAudio) tags.push({ label: "Audio", value: "None" });
   } else if (item.type === "audio" && item.duration) {
     tags.push({ label: "Duration", value: formatDuration(item.duration) });
   } else if (item.type === "image") {
-    if (item.width && item.height)
-      tags.push({ label: "Size", value: `${item.width}×${item.height}` });
+    if (item.width && item.height) tags.push({ label: "Size", value: `${item.width}×${item.height}` });
   }
 
   if (variant) {
@@ -188,18 +161,10 @@ function buildDetailMetadata(
   return (
     <List.Item.Detail.Metadata>
       {tags.map((t) => (
-        <List.Item.Detail.Metadata.Label
-          key={t.label}
-          title={t.label}
-          text={t.value}
-        />
+        <List.Item.Detail.Metadata.Label key={t.label} title={t.label} text={t.value} />
       ))}
       <List.Item.Detail.Metadata.Separator />
-      <List.Item.Detail.Metadata.Link
-        title="Original"
-        text={metadata.originUrl}
-        target={metadata.originUrl}
-      />
+      <List.Item.Detail.Metadata.Link title="Original" text={metadata.originUrl} target={metadata.originUrl} />
     </List.Item.Detail.Metadata>
   );
 }
@@ -229,18 +194,12 @@ function MediaSection({
     );
   }
 
-  const variants = item.variants.filter(
-    (v) => !("restricted" in v && v.restricted),
-  );
+  const variants = item.variants.filter((v) => !("restricted" in v && v.restricted));
 
   if (variants.length === 0) return null;
 
   return (
-    <List.Section
-      title={sectionTitle}
-      subtitle={formatDuration(item.duration)}
-      key={item.stableMediaId}
-    >
+    <List.Section title={sectionTitle} subtitle={formatDuration(item.duration)} key={item.stableMediaId}>
       {variants.map((variant, vi) => (
         <VariantRow
           key={`${item.stableMediaId}-${vi}`}
@@ -297,16 +256,8 @@ function VariantRow({
 
           {isMulti && (
             <ActionPanel.Section title="Batch">
-              <Action
-                title="Download All"
-                icon={Icon.Download}
-                onAction={() => downloadAllMedia(url, metadata)}
-              />
-              <Action
-                title="Copy All Links"
-                icon={Icon.Clipboard}
-                onAction={() => copyAllStreamUrls(url)}
-              />
+              <Action title="Download All" icon={Icon.Download} onAction={() => downloadAllMedia(url, metadata)} />
+              <Action title="Copy All Links" icon={Icon.Clipboard} onAction={() => copyAllStreamUrls(url)} />
             </ActionPanel.Section>
           )}
 
@@ -356,11 +307,7 @@ function ImageRow({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action
-              title="Download"
-              icon={Icon.Download}
-              onAction={() => downloadImageDirect(item, metadata)}
-            />
+            <Action title="Download" icon={Icon.Download} onAction={() => downloadImageDirect(item, metadata)} />
             <Action.CopyToClipboard
               title="Copy Image URL"
               content={item.displayUrl}
@@ -370,11 +317,7 @@ function ImageRow({
 
           {isMulti && (
             <ActionPanel.Section title="Batch">
-              <Action
-                title="Download All"
-                icon={Icon.Download}
-                onAction={() => downloadAllMedia(url, metadata)}
-              />
+              <Action title="Download All" icon={Icon.Download} onAction={() => downloadAllMedia(url, metadata)} />
             </ActionPanel.Section>
           )}
 
@@ -391,12 +334,7 @@ function ImageRow({
   );
 }
 
-function recordDownloads(
-  paths: string[],
-  sourceUrl: string,
-  platform: string,
-  thumbnailUrl: string | null,
-) {
+function recordDownloads(paths: string[], sourceUrl: string, platform: string, thumbnailUrl: string | null) {
   for (const path of paths) {
     addToHistory({
       url: sourceUrl,
@@ -416,11 +354,7 @@ async function showNoDownloadsToast() {
   });
 }
 
-async function downloadVariant(
-  url: string,
-  quality: string,
-  metadata: MetadataResponse,
-) {
+async function downloadVariant(url: string, quality: string, metadata: MetadataResponse) {
   try {
     await showToast({
       style: Toast.Style.Animated,
@@ -442,12 +376,7 @@ async function downloadVariant(
     }
 
     const result = await downloadAll(files);
-    recordDownloads(
-      result.paths,
-      url,
-      metadata.platform,
-      metadata.thumbnailUrl,
-    );
+    recordDownloads(result.paths, url, metadata.platform, metadata.thumbnailUrl);
   } catch (error) {
     await handleApiError(error);
   }
@@ -468,23 +397,27 @@ async function downloadAllMedia(url: string, metadata: MetadataResponse) {
       if (best) files.push(...best.streams);
     }
 
+    const nameCounts = new Map<string, number>();
+    for (const file of files) {
+      const count = nameCounts.get(file.fileName) ?? 0;
+      nameCounts.set(file.fileName, count + 1);
+      if (count > 0) {
+        const dot = file.fileName.lastIndexOf(".");
+        const base = dot > 0 ? file.fileName.slice(0, dot) : file.fileName;
+        const ext = dot > 0 ? file.fileName.slice(dot) : "";
+        file.fileName = `${base}_${count}${ext}`;
+      }
+    }
+
     if (files.length === 0) {
       await showNoDownloadsToast();
       return;
     }
 
     const subfolder = metadata.title || metadata.postId;
-    const result = await downloadAll(
-      files,
-      files.length > 1 ? subfolder : undefined,
-    );
+    const result = await downloadAll(files, files.length > 1 ? subfolder : undefined);
 
-    recordDownloads(
-      result.paths,
-      url,
-      metadata.platform,
-      metadata.thumbnailUrl,
-    );
+    recordDownloads(result.paths, url, metadata.platform, metadata.thumbnailUrl);
   } catch (error) {
     await handleApiError(error);
   }
@@ -510,12 +443,7 @@ async function downloadImageDirect(
     };
 
     const result = await downloadAll([file]);
-    recordDownloads(
-      result.paths,
-      metadata.originUrl,
-      metadata.platform,
-      item.displayUrl,
-    );
+    recordDownloads(result.paths, metadata.originUrl, metadata.platform, item.displayUrl);
   } catch (error) {
     await handleApiError(error);
   }

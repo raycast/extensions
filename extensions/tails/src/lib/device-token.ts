@@ -42,9 +42,7 @@ async function getOrCreateDeviceId(): Promise<string> {
 
 export async function getStoredDeviceToken(): Promise<DeviceTokenState | null> {
   const token = await LocalStorage.getItem<string>(DEVICE_TOKEN_KEY);
-  const expiresAt = await LocalStorage.getItem<number>(
-    DEVICE_TOKEN_EXPIRES_KEY,
-  );
+  const expiresAt = await LocalStorage.getItem<number>(DEVICE_TOKEN_EXPIRES_KEY);
 
   if (!token || !expiresAt) return null;
   if (Date.now() / 1000 > expiresAt) return null;

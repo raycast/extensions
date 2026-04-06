@@ -27,9 +27,7 @@ export async function downloadFile(
   onProgress?: (downloaded: number, total: number | null) => void,
 ): Promise<string> {
   const baseDir = resolveDownloadDir();
-  const targetDir = subfolder
-    ? join(baseDir, sanitizeFilename(subfolder))
-    : baseDir;
+  const targetDir = subfolder ? join(baseDir, sanitizeFilename(subfolder)) : baseDir;
 
   await mkdir(targetDir, { recursive: true });
 
@@ -52,9 +50,7 @@ export async function downloadFile(
     },
   });
 
-  const readable = Readable.fromWeb(
-    res.body as import("node:stream/web").ReadableStream,
-  );
+  const readable = Readable.fromWeb(res.body as import("node:stream/web").ReadableStream);
   await pipeline(readable, progress, createWriteStream(filePath));
 
   return filePath;
@@ -65,10 +61,7 @@ export interface BatchDownloadResult {
   failed: number;
 }
 
-export async function downloadAll(
-  files: StreamFile[],
-  subfolder?: string,
-): Promise<BatchDownloadResult> {
+export async function downloadAll(files: StreamFile[], subfolder?: string): Promise<BatchDownloadResult> {
   const paths: string[] = [];
   let failed = 0;
 
@@ -102,10 +95,7 @@ export async function downloadAll(
 
     await showToast({
       style: Toast.Style.Success,
-      title:
-        paths.length === 1
-          ? `Downloaded ${fileName}`
-          : `Downloaded ${paths.length} file(s)`,
+      title: paths.length === 1 ? `Downloaded ${fileName}` : `Downloaded ${paths.length} file(s)`,
       primaryAction: {
         title: "Show File",
         onAction: async () => {

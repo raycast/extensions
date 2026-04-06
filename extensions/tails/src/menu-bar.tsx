@@ -1,13 +1,4 @@
-import {
-  Clipboard,
-  Color,
-  Icon,
-  launchCommand,
-  LaunchType,
-  MenuBarExtra,
-  open,
-  showHUD,
-} from "@raycast/api";
+import { Clipboard, Color, Icon, launchCommand, LaunchType, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { fetchUsage, handleApiError } from "./lib/api";
@@ -29,36 +20,21 @@ export default function TailsMenuBar() {
     : "extension-icon.png";
 
   const title = usage ? `${usage.used}/${usage.quota}` : "…";
-  const tooltip = usage
-    ? `Tails — ${usage.used} of ${usage.quota} credits used (${pct}%)`
-    : "Tails — Loading…";
+  const tooltip = usage ? `Tails — ${usage.used} of ${usage.quota} credits used (${pct}%)` : "Tails — Loading…";
 
   return (
-    <MenuBarExtra
-      icon={icon}
-      title={title}
-      tooltip={tooltip}
-      isLoading={isLoading}
-    >
+    <MenuBarExtra icon={icon} title={title} tooltip={tooltip} isLoading={isLoading}>
       <MenuBarExtra.Section title="Usage">
         {usage && (
           <>
-            <MenuBarExtra.Item
-              title={`${usageBar(pct)}  ${usage.used} / ${usage.quota}`}
-            />
-            <MenuBarExtra.Item
-              title={`Resets ${formatResetShort(usage.resetsAt)}`}
-            />
+            <MenuBarExtra.Item title={`${usageBar(pct)}  ${usage.used} / ${usage.quota}`} />
+            <MenuBarExtra.Item title={`Resets ${formatResetShort(usage.resetsAt)}`} />
           </>
         )}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Quick Actions">
-        <MenuBarExtra.Item
-          title="Download from Clipboard"
-          icon={Icon.Clipboard}
-          onAction={downloadFromClipboard}
-        />
+        <MenuBarExtra.Item title="Download from Clipboard" icon={Icon.Clipboard} onAction={downloadFromClipboard} />
         <MenuBarExtra.Item
           title="Download History"
           icon={Icon.List}
@@ -122,9 +98,7 @@ function formatResetShort(iso: string): string {
 
   const date = new Date(iso);
   const now = new Date();
-  const diffDays = Math.ceil(
-    (date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
-  );
+  const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays <= 0) return "today";
   if (diffDays === 1) return "tomorrow";

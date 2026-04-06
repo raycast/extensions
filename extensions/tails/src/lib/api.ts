@@ -1,20 +1,8 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  statSync,
-  unlinkSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 
-import {
-  environment,
-  openExtensionPreferences,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { environment, openExtensionPreferences, showToast, Toast } from "@raycast/api";
 
 import { provisionDeviceToken } from "./device-token";
 import { getPreferences } from "./preferences";
@@ -85,8 +73,7 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
         message = "Too many requests. Try again in a moment.";
         break;
       default:
-        message =
-          mapErrorCode(code) ?? (body || `Request failed (${res.status})`);
+        message = mapErrorCode(code) ?? (body || `Request failed (${res.status})`);
     }
 
     throw new ApiError(res.status, message, code);
@@ -109,8 +96,7 @@ function mapErrorCode(code: string | undefined): string | null {
     "content.no_media": "No downloadable media in this post.",
     "content.live": "Live content can't be downloaded.",
     "content.blocked": "This content has been blocked.",
-    "platform.rate_limited":
-      "That site is rate-limiting requests. Try again shortly.",
+    "platform.rate_limited": "That site is rate-limiting requests. Try again shortly.",
     "usage.exceeded": getPreferences().apiToken
       ? "You're out of credits. Check your usage."
       : "Trial credits used up. Add an API token for more.",
@@ -158,8 +144,7 @@ export async function handleApiError(error: unknown): Promise<void> {
     return;
   }
 
-  const message =
-    error instanceof Error ? error.message : "Something went wrong";
+  const message = error instanceof Error ? error.message : "Something went wrong";
 
   await showToast({
     style: Toast.Style.Failure,
@@ -179,18 +164,13 @@ function errorTitle(status: number, code?: string): string {
 }
 
 export async function fetchMetadata(url: string): Promise<MetadataResponse> {
-  const meta = await fetchApi<MetadataResponse>(
-    `/api/media/metadata?url=${encodeURIComponent(url)}`,
-  );
+  const meta = await fetchApi<MetadataResponse>(`/api/media/metadata?url=${encodeURIComponent(url)}`);
 
   await resolveImageUrls(meta);
   return meta;
 }
 
-export async function fetchStreams(
-  url: string,
-  quality?: string,
-): Promise<StreamsResponse> {
+export async function fetchStreams(url: string, quality?: string): Promise<StreamsResponse> {
   return fetchApi<StreamsResponse>("/api/media/streams", {
     method: "POST",
     body: JSON.stringify({ url, quality }),
