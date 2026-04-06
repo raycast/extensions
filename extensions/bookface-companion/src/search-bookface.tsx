@@ -194,7 +194,11 @@ function SearchHitItem({
           {hit.search_path && (
             <Action.OpenInBrowser
               title="Open on Bookface"
-              url={hit.search_path}
+              url={
+                hit.search_path.startsWith("http")
+                  ? hit.search_path
+                  : `https://bookface.ycombinator.com${hit.search_path}`
+              }
             />
           )}
           <Action.CopyToClipboard
@@ -205,7 +209,11 @@ function SearchHitItem({
           {hit.search_path && (
             <Action.CopyToClipboard
               title="Copy URL"
-              content={hit.search_path}
+              content={
+                hit.search_path.startsWith("http")
+                  ? hit.search_path
+                  : `https://bookface.ycombinator.com${hit.search_path}`
+              }
               shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
             />
           )}

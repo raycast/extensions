@@ -202,7 +202,7 @@ function AgentChat() {
         });
       }
     },
-    [chatId],
+    [chatId, selectedChat],
   );
 
   const hasMessages = pairs.length > 0;
