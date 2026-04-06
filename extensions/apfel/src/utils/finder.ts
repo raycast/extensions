@@ -1,16 +1,14 @@
-import { getSelectedFinderItems, showHUD } from "@raycast/api";
+import { getSelectedFinderItems } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { statSync } from "fs";
 
-type FinderResult = { type: "path"; path: string } | { type: "empty" } | { type: "permission_error" };
-
-export async function getFinderSelection(): Promise<FinderResult> {
+export async function getFinderSelection() {
   try {
     const items = await getSelectedFinderItems();
-    if (items.length) return { type: "path", path: items[0].path };
-    return { type: "empty" };
+    if (items.length) return items[0].path;
+    return null;
   } catch {
-    // ignore errors
+    // ignore
   }
 
   try {
@@ -22,14 +20,10 @@ export async function getFinderSelection(): Promise<FinderResult> {
       end tell
     `);
 
-    if (!path.trim()) return { type: "empty" };
-    return { type: "path", path: path.trim() };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (message.includes("-1743") || message.includes("not allowed")) {
-      await showHUD("⚠️ Go to System Settings → Privacy & Security → Automation → enable Finder for Raycast");
-    }
-    return { type: "permission_error" };
+    if (!path.trim()) return null;
+    return path.trim();
+  } catch {
+    return false;
   }
 }
 

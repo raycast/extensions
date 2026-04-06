@@ -1,68 +1,65 @@
-import { Action, ActionPanel, Detail, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { execSync } from "child_process";
 import { readdirSync, statSync } from "fs";
 import { basename } from "path";
 import { v4 as uuidv4 } from "uuid";
-import { isApfelInstalled } from "./api/apfel";
 import { apfelExplainDirectory } from "./api/apfel/explain-directory";
+import { ApfelGuard } from "./components/ApfelGuard";
 import { useHistory } from "./hooks/useHistory";
 import { getFinderSelection, isDirectory } from "./utils/finder";
-import IntelligenceNotReadyView from "./views/intelligence-not-ready";
-import NotFoundView from "./views/not-found";
 
 export default function Command() {
-  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
-
-  if (isCheckingAvailability) return <Detail isLoading />;
-  if (!availabilityData?.apfel) return <NotFoundView />;
-  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
-
-  return <ExplainDirectory />;
+  return (
+    <ApfelGuard checkForFileSystemPermission>
+      <ExplainDirectory />
+    </ApfelGuard>
+  );
 }
 
 function ExplainDirectory() {
   const history = useHistory();
 
   const { isLoading, data } = usePromise(async () => {
-    const result = await getFinderSelection();
+    const path = await getFinderSelection();
 
-    if (result.type === "permission_error") return;
-    if (result.type === "empty") {
-      await showHUD("No item selected", { popToRootType: PopToRootType.Suspended });
+    if (!path) {
+      await showHUD("No item selected");
+      await popToRoot();
       return;
     }
 
-    if (!isDirectory(result.path)) {
-      await showHUD("Selected item is not a directory", { popToRootType: PopToRootType.Suspended });
+    if (!isDirectory(path)) {
+      await showHUD("Selected item is not a directory");
+      await popToRoot();
       return;
     }
 
     await showToast({ style: Toast.Style.Animated, title: "Getting your explanation..." });
-    const explanation = await apfelExplainDirectory(result.path);
+    const explanation = await apfelExplainDirectory(path);
 
-    const stat = statSync(result.path);
-    const items = readdirSync(result.path);
-    const fileCount = items.filter((i) => !statSync(`${result.path}/${i}`).isDirectory()).length;
-    const folderCount = items.filter((i) => statSync(`${result.path}/${i}`).isDirectory()).length;
+    const stat = statSync(path);
+    const items = readdirSync(path);
+    const fileCount = items.filter((i) => !statSync(`${path}/${i}`).isDirectory()).length;
+    const folderCount = items.filter((i) => statSync(`${path}/${i}`).isDirectory()).length;
 
     let gitBranch: string | null = null;
     let gitCommit: string | null = null;
     try {
-      gitBranch = execSync(`git -C "${result.path}" branch --show-current 2>/dev/null`, { encoding: "utf8" }).trim();
-      gitCommit = execSync(`git -C "${result.path}" log --oneline -1 2>/dev/null`, { encoding: "utf8" }).trim();
+      gitBranch = execSync(`git -C "${path}" branch --show-current 2>/dev/null`, { encoding: "utf8" }).trim();
+      gitCommit = execSync(`git -C "${path}" log --oneline -1 2>/dev/null`, { encoding: "utf8" }).trim();
     } catch {
       // ignore errors
     }
 
     await history.add({
       id: uuidv4(),
-      question: `Explain Directory: ${basename(result.path)}`,
+      question: `Explain Directory: ${basename(path)}`,
       answer: explanation,
       created_at: new Date().toISOString(),
       metadata: [
-        { title: "Name", text: basename(result.path) },
-        { title: "Path", text: result.path },
+        { title: "Name", text: basename(path) },
+        { title: "Path", text: path },
         { title: "File Count", text: `${fileCount}` },
         { title: "Folder Count", text: `${folderCount}` },
         { title: "Created", text: stat.birthtime.toLocaleString() },
@@ -76,8 +73,8 @@ function ExplainDirectory() {
 
     return {
       explanation,
-      path: result.path,
-      name: basename(result.path),
+      path: path,
+      name: basename(path),
       fileCount: `${fileCount}`,
       folderCount: `${folderCount}`,
       created: stat.birthtime,

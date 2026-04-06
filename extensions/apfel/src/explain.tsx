@@ -1,20 +1,16 @@
 import { Detail, getSelectedText, showHUD, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { v4 as uuidv4 } from "uuid";
-import { isApfelInstalled } from "./api/apfel";
 import { apfelExplain } from "./api/apfel/explain";
+import { ApfelGuard } from "./components/ApfelGuard";
 import { useHistory } from "./hooks/useHistory";
-import IntelligenceNotReadyView from "./views/intelligence-not-ready";
-import NotFoundView from "./views/not-found";
 
 export default function Command() {
-  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
-
-  if (isCheckingAvailability) return <Detail isLoading />;
-  if (!availabilityData?.apfel) return <NotFoundView />;
-  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
-
-  return <Explain />;
+  return (
+    <ApfelGuard>
+      <Explain />
+    </ApfelGuard>
+  );
 }
 
 function Explain() {

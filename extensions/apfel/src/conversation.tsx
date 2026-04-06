@@ -1,24 +1,19 @@
-import { ActionPanel, Detail, Icon, List, useNavigation } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { ActionPanel, Icon, List, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { DestructiveAction, PinAction, PrimaryAction } from "./actions";
 import { PreferencesActionSection } from "./actions/preferences";
-import { isApfelInstalled } from "./api/apfel";
 import Chat from "./chat";
+import { ApfelGuard } from "./components/ApfelGuard";
 import { useConversations } from "./hooks/useConversations";
 import type { Conversation } from "./type";
 import { ConversationListView } from "./views/conversation-list";
-import IntelligenceNotReadyView from "./views/intelligence-not-ready";
-import NotFoundView from "./views/not-found";
 
 export default function Command() {
-  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
-
-  if (isCheckingAvailability) return <Detail isLoading />;
-  if (!availabilityData?.apfel) return <NotFoundView />;
-  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
-
-  return <Conversation />;
+  return (
+    <ApfelGuard>
+      <Conversation />
+    </ApfelGuard>
+  );
 }
 
 function Conversation() {

@@ -1,24 +1,19 @@
-import { ActionPanel, Detail, Icon, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { ActionPanel, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { DestructiveAction } from "./actions";
 import { CopyActionSection } from "./actions/copy";
 import { PreferencesActionSection } from "./actions/preferences";
-import { isApfelInstalled } from "./api/apfel";
+import { ApfelGuard } from "./components/ApfelGuard";
 import { useSavedChat } from "./hooks/useSavedChat";
 import type { Chat } from "./type";
 import { AnswerDetailView } from "./views/answer-detail";
-import IntelligenceNotReadyView from "./views/intelligence-not-ready";
-import NotFoundView from "./views/not-found";
 
 export default function Command() {
-  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
-
-  if (isCheckingAvailability) return <Detail isLoading />;
-  if (!availabilityData?.apfel) return <NotFoundView />;
-  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
-
-  return <Saved />;
+  return (
+    <ApfelGuard>
+      <Saved />
+    </ApfelGuard>
+  );
 }
 
 function Saved() {

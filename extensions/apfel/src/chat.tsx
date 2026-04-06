@@ -1,29 +1,24 @@
-import { ActionPanel, Detail, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { ActionPanel, List } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { PrimaryAction } from "./actions";
 import { FormInputActionSection } from "./actions/form-input";
 import { PreferencesActionSection } from "./actions/preferences";
-import { isApfelInstalled } from "./api/apfel";
+import { ApfelGuard } from "./components/ApfelGuard";
 import { useChat } from "./hooks/useChat";
 import { useConversations } from "./hooks/useConversations";
 import { DEFAULT_MODEL, useModel } from "./hooks/useModel";
 import { useQuestion } from "./hooks/useQuestion";
 import type { Chat, Conversation, Model } from "./type";
 import { ChatView } from "./views/chat";
-import IntelligenceNotReadyView from "./views/intelligence-not-ready";
 import { ModelDropdown } from "./views/model/dropdown";
-import NotFoundView from "./views/not-found";
 
 export default function Command(props: { conversation?: Conversation }) {
-  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
-
-  if (isCheckingAvailability) return <Detail isLoading />;
-  if (!availabilityData?.apfel) return <NotFoundView />;
-  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
-
-  return <Chat {...props} />;
+  return (
+    <ApfelGuard>
+      <Chat {...props} />
+    </ApfelGuard>
+  );
 }
 
 function Chat(props: { conversation?: Conversation }) {

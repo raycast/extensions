@@ -1,55 +1,52 @@
-import { Action, ActionPanel, Detail, PopToRootType, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { statSync } from "fs";
 import { basename } from "path";
 import { v4 as uuidv4 } from "uuid";
-import { isApfelInstalled } from "./api/apfel";
 import { apfelExplainFile } from "./api/apfel/explain-file";
+import { ApfelGuard } from "./components/ApfelGuard";
 import { useHistory } from "./hooks/useHistory";
 import { getFinderSelection, isDirectory } from "./utils/finder";
-import IntelligenceNotReadyView from "./views/intelligence-not-ready";
-import NotFoundView from "./views/not-found";
 
 export default function Command() {
-  const { data: availabilityData, isLoading: isCheckingAvailability } = usePromise(isApfelInstalled);
-
-  if (isCheckingAvailability) return <Detail isLoading />;
-  if (!availabilityData?.apfel) return <NotFoundView />;
-  if (!availabilityData?.appleIntelligence) return <IntelligenceNotReadyView />;
-
-  return <ExplainFile />;
+  return (
+    <ApfelGuard checkForFileSystemPermission>
+      <ExplainFile />
+    </ApfelGuard>
+  );
 }
 
 function ExplainFile() {
   const history = useHistory();
 
   const { isLoading, data } = usePromise(async () => {
-    const result = await getFinderSelection();
+    const path = await getFinderSelection();
 
-    if (result.type === "permission_error") return;
-    if (result.type === "empty") {
-      await showHUD("No item selected", { popToRootType: PopToRootType.Suspended });
+    if (!path) {
+      await showHUD("No item selected");
+      await popToRoot();
       return;
     }
 
-    if (isDirectory(result.path)) {
-      await showHUD("Selected item is not a file", { popToRootType: PopToRootType.Suspended });
+    if (isDirectory(path)) {
+      await showHUD("Selected item is not a file");
+      await popToRoot();
       return;
     }
 
     await showToast({ style: Toast.Style.Animated, title: "Getting your explanation…" });
 
-    const explanation = await apfelExplainFile(result.path);
-    const stat = statSync(result.path);
+    const explanation = await apfelExplainFile(path);
+    const stat = statSync(path);
 
     await history.add({
       id: uuidv4(),
-      question: `Explain File: ${result.path}`,
+      question: `Explain File: ${path}`,
       answer: explanation,
       created_at: new Date().toISOString(),
       metadata: [
-        { title: "Name", text: basename(result.path) },
-        { title: "Path", text: result.path },
+        { title: "Name", text: basename(path) },
+        { title: "Path", text: path },
         { title: "Size", text: `${(stat.size / 1024).toFixed(1)} KB` },
         { title: "Created", text: stat.birthtime.toLocaleString() },
         { title: "Modified", text: stat.mtime.toLocaleString() },
@@ -60,8 +57,8 @@ function ExplainFile() {
 
     return {
       explanation,
-      path: result.path,
-      name: basename(result.path),
+      path: path,
+      name: basename(path),
       size: `${(stat.size / 1024).toFixed(1)} KB`,
       created: stat.birthtime,
       modified: stat.mtime,
