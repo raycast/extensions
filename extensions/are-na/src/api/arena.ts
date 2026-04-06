@@ -27,6 +27,24 @@ interface ApiEnvelope<T> {
   meta?: ApiMeta;
 }
 
+function unwrapEnvelopeData<T>(value: unknown): T {
+  const record = toRecord(value);
+  if ("data" in record && record.data !== undefined && record.data !== null) {
+    return record.data as T;
+  }
+  return value as T;
+}
+
+/** v3 exposes user channels via `GET /users/{id}/contents?type=Channel` (not `/users/{id}/channels`). */
+const USER_CONTENT_SORT = new Set(["created_at_asc", "created_at_desc", "updated_at_asc", "updated_at_desc"]);
+
+function contentSortForUserChannels(sort: string | undefined): string {
+  if (sort && USER_CONTENT_SORT.has(sort)) {
+    return sort;
+  }
+  return "updated_at_desc";
+}
+
 function ensureArray<T>(value: unknown): T[] {
   if (Array.isArray(value)) {
     return value as T[];
@@ -389,14 +407,21 @@ export class Arena {
   }
 
   me() {
-    return this.request<User>("GET", "me").then(mapUser);
+    return this.request<unknown>("GET", "me").then((response) => mapUser(unwrapEnvelopeData(response)));
   }
 
   user(identifier: string | number) {
     return {
-      get: async () => this.request<unknown>("GET", `users/${identifier}`).then(mapUser),
+      get: async () =>
+        this.request<unknown>("GET", `users/${identifier}`).then((response) => mapUser(unwrapEnvelopeData(response))),
       channels: async (params?: SearchFilters) => {
-        const response = await this.getList<unknown>(`users/${identifier}/channels`, params);
+        const { page, per, sort } = params ?? {};
+        const response = await this.getList<unknown>(`users/${identifier}/contents`, {
+          page,
+          per,
+          sort: contentSortForUserChannels(sort),
+          type: "Channel",
+        });
         return response.items.map(mapChannel);
       },
       followers: async (params?: SearchFilters) => {
@@ -419,7 +444,10 @@ export class Arena {
   channel(identifier?: string | number) {
     const channelIdentifier = identifier ?? "";
     return {
-      get: async () => this.request<unknown>("GET", `channels/${channelIdentifier}`).then(mapChannel),
+      get: async () =>
+        this.request<unknown>("GET", `channels/${channelIdentifier}`).then((response) =>
+          mapChannel(unwrapEnvelopeData(response)),
+        ),
       connections: async (params?: SearchFilters) => {
         const response = await this.getList<unknown>(`channels/${channelIdentifier}/connections`, params);
         return response.items.map(mapChannel);
@@ -454,11 +482,13 @@ export class Arena {
         });
       },
       collaborators: async () => {
-        const channel = await this.request<unknown>("GET", `channels/${channelIdentifier}`);
+        const channel = unwrapEnvelopeData(await this.request<unknown>("GET", `channels/${channelIdentifier}`));
         return ensureArray<unknown>(toRecord(channel).collaborators).map(mapUser);
       },
       create: async (title: string, status: ChannelStatus) =>
-        this.request<unknown>("POST", "channels", { body: { title, visibility: status } }).then(mapChannel),
+        this.request<unknown>("POST", "channels", { body: { title, visibility: status } }).then((response) =>
+          mapChannel(unwrapEnvelopeData(response)),
+        ),
       update: async (opts: { title?: string; status?: ChannelStatus; description?: string }) =>
         this.request<unknown>("PUT", `channels/${channelIdentifier}`, {
           body: {
@@ -466,7 +496,7 @@ export class Arena {
             visibility: opts.status,
             description: opts.description,
           },
-        }).then(mapChannel),
+        }).then((response) => mapChannel(unwrapEnvelopeData(response))),
       delete: async (deleteSlug?: string) => {
         const id = channelIdentifier || deleteSlug || "";
         await this.request<void>("DELETE", `channels/${id}`);
@@ -483,11 +513,12 @@ export class Arena {
         this.request<unknown>("POST", "blocks", {
           body: {
             value: opts.content,
+            source: opts.source,
             title: opts.title,
             description: opts.description,
             channel_ids: [channelIdentifier],
           },
-        }).then(mapBlock),
+        }).then((response) => mapBlock(unwrapEnvelopeData(response))),
       deleteBlock: async (blockID: string) => {
         await this.request<void>("DELETE", `blocks/${blockID}`);
       },
@@ -497,7 +528,8 @@ export class Arena {
   block(id?: string | number) {
     const blockId = id ?? "";
     return {
-      get: async () => this.request<unknown>("GET", `blocks/${blockId}`).then(mapBlock),
+      get: async () =>
+        this.request<unknown>("GET", `blocks/${blockId}`).then((response) => mapBlock(unwrapEnvelopeData(response))),
       channels: async (params?: SearchFilters) => {
         const response = await this.getList<unknown>(`blocks/${blockId}/connections`, params);
         return response.items.map(mapChannel);
@@ -511,7 +543,7 @@ export class Arena {
             title: opts.title,
             description: opts.description,
           },
-        }).then(mapBlock),
+        }).then((response) => mapBlock(unwrapEnvelopeData(response))),
       delete: async () => {
         await this.request<void>("DELETE", `blocks/${blockId}`);
       },

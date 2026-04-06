@@ -39,7 +39,7 @@ function MyChannelsCommand() {
 
   const { data, isLoading, revalidate } = usePromise(async (): Promise<Channel[]> => {
     const me = await arena.me();
-    return arena.user(me.slug).channels({ page: 1, per: 100, sort: "updated_at_desc" });
+    return arena.user(me.slug || me.id).channels({ page: 1, per: 100, sort: "updated_at_desc" });
   });
 
   const channels = data ?? [];

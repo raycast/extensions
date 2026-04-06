@@ -30,7 +30,7 @@ export default async function tool(input: Input = {}) {
 
     const arena = await getAuthenticatedArena();
     const me = await arena.me();
-    const channels = await arena.user(me.slug).channels({ page, per, sort });
+    const channels = await arena.user(me.slug || me.id).channels({ page, per, sort });
 
     return {
       channels: channels.map(channelSummary),
