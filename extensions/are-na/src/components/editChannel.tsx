@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
-import type { ChannelStatus, MinimalChannel } from "../api/types";
+import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/utils";
+import type { Channel, ChannelStatus, MinimalChannel } from "../api/types";
 import { useArena } from "../hooks/useArena";
 import { ChannelView } from "./channel";
 import { useState } from "react";
@@ -13,15 +13,15 @@ type Values = {
 
 type EditChannelProps = MinimalChannel & { status?: ChannelStatus };
 
-export function EditChannelView({ channel }: { channel: EditChannelProps }) {
+function EditChannelForm({ channel, loaded }: { channel: EditChannelProps; loaded: Channel }) {
   const arena = useArena();
   const { push } = useNavigation();
-  const [status, setStatus] = useState<ChannelStatus>(channel.status ?? (channel.open ? "public" : "closed"));
+  const [status, setStatus] = useState<ChannelStatus>(loaded.status);
   const { handleSubmit, itemProps } = useForm<Values>({
     initialValues: {
-      title: channel.title,
+      title: loaded.title,
       status,
-      description: "",
+      description: loaded.description ?? "",
     },
     validation: {
       title: FormValidation.Required,
@@ -74,4 +74,21 @@ export function EditChannelView({ channel }: { channel: EditChannelProps }) {
       <Form.TextArea title="Description" placeholder="Markdown description" {...itemProps.description} />
     </Form>
   );
+}
+
+export function EditChannelView({ channel }: { channel: EditChannelProps }) {
+  const arena = useArena();
+  const { data, isLoading, error } = usePromise(async (slug: string) => arena.channel(slug).get(), [channel.slug]);
+
+  if (isLoading) {
+    return <Form navigationTitle="Edit Channel" isLoading />;
+  }
+  if (error || !data) {
+    return (
+      <Form navigationTitle="Edit Channel">
+        <Form.Description title="Couldn't load channel" text={error?.message ?? "Try again."} />
+      </Form>
+    );
+  }
+  return <EditChannelForm channel={channel} loaded={data} />;
 }

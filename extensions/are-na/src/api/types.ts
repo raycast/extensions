@@ -91,6 +91,8 @@ export interface Channel {
   id: number;
   title: string;
   slug: string;
+  /** Markdown/plain description from the API; null if none */
+  description: string | null;
   owner_slug: string;
   status: ChannelStatus;
   open: boolean;

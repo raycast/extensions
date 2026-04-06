@@ -139,10 +139,14 @@ function mapChannel(raw: unknown): Channel {
   const can = toRecord(record.can);
   const connection = toRecord(record.connection);
 
+  const descriptionText =
+    markdownToText(record.description) ?? (typeof record.description === "string" ? record.description : null);
+
   return {
     id: Number(record.id ?? 0),
     title: (record.title as string) ?? "Untitled Channel",
     slug: (record.slug as string) ?? "",
+    description: descriptionText,
     owner_slug: (owner.slug as string) ?? (record.owner_slug as string) ?? "",
     status: visibility,
     open: visibility === "public",
