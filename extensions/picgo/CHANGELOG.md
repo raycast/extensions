@@ -1,6 +1,6 @@
 # Picgo Changelog
 
-## [Image Preview Grid View] - {PR_MERGE_DATE}
+## [Image Preview Grid View] - 2026-04-06
 
 - Add a new `Image Grid` view for uploaded image results.
 - Add new preference `Upload Result View`, you can pick the former `Format List` or newly added `Image Grid` view as the default view to display uploaded image results.
