@@ -9,13 +9,13 @@ interface Props {
   initial?: Partial<WebhookRequest>;
   onSent?: () => void;
   initialSavedId?: string;
+  initialSavedName?: string;
 }
 
 const HTTP_METHODS: HttpMethod[] = ["POST", "GET", "PUT", "PATCH", "DELETE"];
 
-export function WebhookForm({ initial, onSent, initialSavedId }: Props) {
+export function WebhookForm({ initial, onSent, initialSavedId, initialSavedName }: Props) {
   const { push } = useNavigation();
-
   const [url, setUrl] = useState(initial?.url ?? "");
   const [method, setMethod] = useState<HttpMethod>(initial?.method ?? "POST");
   const [bodyMode, setBodyMode] = useState<"key-value" | "raw">(initial?.bodyMode ?? "key-value");
@@ -23,7 +23,7 @@ export function WebhookForm({ initial, onSent, initialSavedId }: Props) {
     initial?.fields && initial.fields.length > 0 ? initial.fields : [emptyField()],
   );
   const [rawJson, setRawJson] = useState(initial?.rawJson ?? "");
-  const [saveName, setSaveName] = useState("");
+  const [saveName, setSaveName] = useState(initialSavedName ?? "");
   const [isSending, setIsSending] = useState(false);
   const [fieldToRemove, setFieldToRemove] = useState<string>("");
 
@@ -184,7 +184,7 @@ export function WebhookForm({ initial, onSent, initialSavedId }: Props) {
     });
     setSaveName("");
     onSent?.();
-  }, [saveName, url, method, bodyMode, fields, rawJson, onSent, initialSavedId]);
+  }, [saveName, url, method, bodyMode, fields, rawJson, onSent, initialSavedId, initialSavedName]);
 
   const jsonPreview = (() => {
     if (!hasBody) return "";

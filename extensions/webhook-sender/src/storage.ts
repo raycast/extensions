@@ -43,13 +43,9 @@ export async function getSaved(): Promise<SavedWebhook[]> {
 
 export async function saveWebhook(webhook: SavedWebhook): Promise<void> {
   const saved = await getSaved();
-  const existing = saved.findIndex((s) => s.id === webhook.id);
-  let updated: SavedWebhook[];
-  if (existing >= 0) {
-    updated = saved.map((s) => (s.id === webhook.id ? webhook : s));
-  } else {
-    updated = [webhook, ...saved];
-  }
+  const existing = saved.find((s) => s.id === webhook.id) ?? null;
+  const entry: SavedWebhook = existing ? { ...webhook, createdAt: existing.createdAt } : webhook;
+  const updated = existing ? saved.map((s) => (s.id === entry.id ? entry : s)) : [entry, ...saved];
   await LocalStorage.setItem(SAVED_KEY, JSON.stringify(updated));
 }
 
