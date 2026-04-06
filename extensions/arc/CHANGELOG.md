@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Performance Improvement] - 2026-04-06
+
+- Replace manual tab iteration loop with AppleScript `whose` filter for direct tab lookup, improving responsiveness with many open tabs
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
