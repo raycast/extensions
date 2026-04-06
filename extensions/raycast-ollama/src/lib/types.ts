@@ -1,10 +1,5 @@
-export interface Preferences {
-  ollamaResultViewInput: string;
-  ollamaResultViewInputFallback: boolean;
-  ollamaChatHistoryMessagesNumber: string;
-  ollamaCertificateValidation: string;
-  ollamaApiKey: string;
-}
+// Use the Raycast auto-generated global `Preferences` to avoid drift
+export type Preferences = globalThis.Preferences;
 
 export interface RaycastArgumentsOllamaCommandCustom {
   fallbackText?: string;
