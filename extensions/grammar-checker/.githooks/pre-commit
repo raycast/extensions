@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# Only lint staged files that are relevant
+staged=$(git diff --cached --name-only --diff-filter=d | grep -E '\.(ts|tsx|js)$' | grep -v 'raycast-env\.d\.ts' | grep -v 'eslint\.config\.js')
+
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+echo "Running ESLint on staged files..."
+bunx eslint $staged || exit 1
+
+echo "Running Prettier on staged files..."
+bunx prettier --check $staged || exit 1
