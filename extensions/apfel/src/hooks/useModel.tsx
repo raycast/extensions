@@ -9,6 +9,8 @@ export const DEFAULT_MODEL: Model = {
   name: "Default Model",
   prompt: "You are a useful assistant",
   pinned: false,
+  temperature: "1.0",
+  max_tokens: "4096",
 };
 
 async function getStoredModels(): Promise<Model[]> {

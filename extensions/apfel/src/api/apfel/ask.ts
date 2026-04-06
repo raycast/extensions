@@ -4,7 +4,12 @@ import { escapeForShell } from "../../utils";
 import { runAppleScript } from "@raycast/utils";
 
 export async function askApfel(prompt: string, model?: Model): Promise<string> {
-  const args = [model ? `-s '${escapeForShell(model.prompt)}'` : "", `'${escapeForShell(prompt)}'`].filter(Boolean);
+  const args = [
+    model?.prompt ? `-s '${escapeForShell(model.prompt)}'` : "",
+    model?.temperature ? `--temperature ${model.temperature}` : "",
+    model?.max_tokens ? `--max-tokens ${model.max_tokens}` : "",
+    `'${escapeForShell(prompt)}'`,
+  ].filter(Boolean);
 
   const result = await runAppleScript(`do shell script "${getApfelPath()} ${args.join(" ")}"`, {
     timeout: 60000,

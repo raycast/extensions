@@ -76,7 +76,8 @@ function Model() {
       }
       return (
         model.prompt.toLowerCase().includes(searchText.toLowerCase()) ||
-        model.name.toLowerCase().includes(searchText.toLowerCase())
+        model.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        model.temperature.toLocaleString().toLowerCase().includes(searchText.toLowerCase())
       );
     });
 

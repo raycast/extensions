@@ -39,6 +39,8 @@ export interface Model {
   name: string;
   prompt: string;
   pinned: boolean;
+  temperature: string;
+  max_tokens: string;
 }
 
 type PromiseFunctionNoArg = () => Promise<void>;
