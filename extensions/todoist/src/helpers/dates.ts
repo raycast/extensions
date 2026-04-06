@@ -1,4 +1,4 @@
-import { addDays, format, formatISO, isThisYear, isBefore, isSameDay, parseISO } from "date-fns";
+import { addDays, format, formatDistanceStrict, formatISO, isThisYear, isBefore, isSameDay, parseISO } from "date-fns";
 
 import { Task } from "../api";
 
@@ -61,6 +61,25 @@ export function displayDate(dateString: string) {
   }
 
   return format(date, "dd MMMM yyy");
+}
+
+export function displayIncomingDate(dateString: string) {
+  const date = parseDay(dateString);
+  const today = getToday();
+
+  if (isOverdue(dateString)) {
+    return displayDate(dateString);
+  }
+
+  if (isSameDay(date, today)) {
+    return "Today";
+  }
+
+  if (isSameDay(date, addDays(today, 1))) {
+    return "Tomorrow";
+  }
+
+  return formatDistanceStrict(date, today, { addSuffix: true, unit: "day" });
 }
 
 export function displayDateTime(dateString: string, use12HourFormat: boolean) {

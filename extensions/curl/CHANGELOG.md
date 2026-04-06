@@ -1,10 +1,10 @@
 # cURL Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-03-16
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
 
-## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - {PR_MERGE_DATE}
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - 2026-02-13
 
 - Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
 

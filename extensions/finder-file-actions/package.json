@@ -57,24 +57,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.3.3",
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
     "binary-split": "^1.0.5",
-    "fs-extra": "^11.3.0",
-    "run-applescript": "^6.0.0",
-    "through2-map": "^3.0.0",
-    "yup": "^0.32.11"
+    "fs-extra": "^11.3.4",
+    "run-applescript": "^7.1.0",
+    "through2-map": "^4.0.0",
+    "yup": "^1.7.1"
   },
   "devDependencies": {
-    "@jest/globals": "^29.7.0",
-    "@raycast/eslint-config": "^1.0.11",
+    "@jest/globals": "^30.3.0",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/fs-extra": "^11.0.4",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.3.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "react": "^18.2.0",
-    "typescript": "^4.4.3"
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",

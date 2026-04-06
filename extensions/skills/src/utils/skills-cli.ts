@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { basename } from "node:path";
+import { basename, join } from "node:path";
 import { getCustomNpxPath } from "../preferences";
-import type { InstalledSkill, Skill } from "../shared";
+import type { InstalledSkill, Skill, SkillLockEntry } from "../shared";
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
 
@@ -45,19 +46,19 @@ const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
  * Strip ANSI escape codes from CLI output.
  * Used by checkForUpdates() which does not have a --json option.
  */
-function stripAnsi(str: string): string {
+export function stripAnsi(str: string): string {
   return str.replace(ANSI_REGEX, "");
 }
 
 /** Escape a value for safe use as a shell argument. */
-function shellEscape(arg: string): string {
+export function shellEscape(arg: string): string {
   if (isWindows) {
     return `"${arg.replace(/"/g, '\\"')}"`;
   }
   return `'${arg.replace(/'/g, "'\\''")}'`;
 }
 
-function normalizeCliError(error: unknown, npxCommand: string): Error {
+export function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
       "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in Extension Preferences under 'Custom npx Path'.",
@@ -107,7 +108,7 @@ interface SkillsListJsonEntry {
   agents: string[];
 }
 
-function parseSkillsListJson(stdout: string): InstalledSkill[] {
+export function parseSkillsListJson(stdout: string): InstalledSkill[] {
   const entries: unknown = JSON.parse(stdout);
   if (!Array.isArray(entries)) {
     throw new Error("Expected JSON array");
@@ -129,12 +130,107 @@ export async function listInstalledSkills(): Promise<InstalledSkill[]> {
   }
 }
 
-export async function installSkill(skill: Skill): Promise<void> {
-  await runSkillsCli(["add", `${skill.source}@${skill.skillId}`, "-g", "-y"]);
+export async function installSkill(skill: Skill, agentDisplayNames?: string[]): Promise<void> {
+  const args = ["add", `${skill.source}@${skill.skillId}`, "-g"];
+  if (agentDisplayNames && agentDisplayNames.length > 0) {
+    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+  }
+  args.push("-y");
+  await runSkillsCli(args);
 }
 
-export async function removeSkill(skillName: string): Promise<void> {
-  await runSkillsCli(["remove", skillName, "-g", "-y"]);
+/**
+ * Display name → CLI agent ID for all agents supported by the Skills CLI.
+ * Sourced from https://github.com/vercel-labs/skills/blob/main/src/agents.ts
+ * Dynamically discovered agents fall back to the default transform (lowercase + space→hyphen).
+ */
+const AGENT_DISPLAY_TO_ID = new Map<string, string>([
+  ["AdaL", "adal"],
+  ["Amp", "amp"],
+  ["Antigravity", "antigravity"],
+  ["Augment", "augment"],
+  ["Claude Code", "claude-code"],
+  ["Cline", "cline"],
+  ["CodeBuddy", "codebuddy"],
+  ["Codex", "codex"],
+  ["Command Code", "command-code"],
+  ["Continue", "continue"],
+  ["Cortex Code", "cortex"],
+  ["Crush", "crush"],
+  ["Cursor", "cursor"],
+  ["Deep Agents", "deepagents"],
+  ["Droid", "droid"],
+  ["Firebender", "firebender"],
+  ["Gemini CLI", "gemini-cli"],
+  ["GitHub Copilot", "github-copilot"],
+  ["Goose", "goose"],
+  ["iFlow CLI", "iflow-cli"],
+  ["Junie", "junie"],
+  ["Kilo Code", "kilo"],
+  ["Kimi Code CLI", "kimi-cli"],
+  ["Kiro CLI", "kiro-cli"],
+  ["Kode", "kode"],
+  ["MCPJam", "mcpjam"],
+  ["Mistral Vibe", "mistral-vibe"],
+  ["Mux", "mux"],
+  ["Neovate", "neovate"],
+  ["OpenClaw", "openclaw"],
+  ["OpenCode", "opencode"],
+  ["OpenHands", "openhands"],
+  ["Pi", "pi"],
+  ["Pochi", "pochi"],
+  ["Qoder", "qoder"],
+  ["Qwen Code", "qwen-code"],
+  ["Replit", "replit"],
+  ["Roo Code", "roo"],
+  ["Trae", "trae"],
+  ["Trae CN", "trae-cn"],
+  ["Warp", "warp"],
+  ["Windsurf", "windsurf"],
+  ["Zencoder", "zencoder"],
+]);
+
+export function agentDisplayNameToId(displayName: string): string {
+  return AGENT_DISPLAY_TO_ID.get(displayName) ?? displayName.toLowerCase().replace(/\s+/g, "-");
+}
+
+/** Sorted known agent display names, used as synchronous initial data before the CLI responds. */
+export const KNOWN_AGENT_NAMES: string[] = [...AGENT_DISPLAY_TO_ID.keys()].sort();
+
+export interface AgentDiscoveryResult {
+  agents: string[];
+  /**
+   * Maps installed skill name → agents it is installed on.
+   * Keyed by the CLI's `name` field from `skills list --json`, which matches
+   * the `skillId` used in `skills add source@skillId`.
+   */
+  skillAgentMap: Record<string, string[]>;
+}
+
+export async function discoverAgents(): Promise<AgentDiscoveryResult> {
+  const agentSet = new Set<string>(AGENT_DISPLAY_TO_ID.keys());
+  const skillAgentMap: Record<string, string[]> = {};
+  try {
+    const skills = await listInstalledSkills();
+    for (const skill of skills) {
+      skillAgentMap[skill.name] = skill.agents;
+      for (const agent of skill.agents) {
+        agentSet.add(agent);
+      }
+    }
+  } catch {
+    // Fall back to the hardcoded list.
+  }
+  return { agents: [...agentSet].sort(), skillAgentMap };
+}
+
+export async function removeSkill(skillName: string, agentDisplayNames?: string[]): Promise<void> {
+  const args = ["remove", skillName, "-g"];
+  if (agentDisplayNames && agentDisplayNames.length > 0) {
+    args.push("-a", ...agentDisplayNames.map(agentDisplayNameToId));
+  }
+  args.push("-y");
+  await runSkillsCli(args);
 }
 
 /**
@@ -155,4 +251,26 @@ export async function checkForUpdates(): Promise<string[]> {
  */
 export async function updateAllSkills(): Promise<void> {
   await runSkillsCli(["update", "-y"]);
+}
+
+const LOCK_FILE = ".skill-lock.json";
+const AGENTS_DIR = ".agents";
+
+function getSkillLockPath(): string {
+  const xdgStateHome = process.env.XDG_STATE_HOME;
+  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
+  return join(home, AGENTS_DIR, LOCK_FILE);
+}
+
+export async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
+  try {
+    const raw = await readFile(getSkillLockPath(), "utf-8");
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
+      return parsed.skills as Record<string, SkillLockEntry>;
+    }
+    return {};
+  } catch {
+    return {};
+  }
 }

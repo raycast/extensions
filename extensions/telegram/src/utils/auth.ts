@@ -1,5 +1,6 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { isAuthenticated, authenticate, TelegramConfig } from "../services/telegram-client";
+import { getTelegramErrorMessage } from "./errors";
 
 export interface Preferences {
   apiId: string;
@@ -37,36 +38,36 @@ export async function ensureAuthenticated(): Promise<boolean> {
   return true;
 }
 
-export async function handleAuthFlow(code?: string): Promise<{ success: boolean; needsCode: boolean }> {
+export async function handleAuthFlow(options?: {
+  code?: string;
+  password?: string;
+  forceResendCode?: boolean;
+}): Promise<{ success: boolean; needsCode: boolean; needsPassword: boolean }> {
+  const config = getConfig();
+
   try {
-    const config = getConfig();
-    const result = await authenticate(config, code);
+    const result = await authenticate(config, options);
 
-    if (result.needsCode && !code) {
+    if (result.needsCode && !options?.code && !options?.password) {
       await showToast({
         style: Toast.Style.Success,
-        title: "Code Sent",
-        message: "Please enter the code sent to your Telegram app.",
+        title: options?.forceResendCode ? "Code Resent" : "Code Sent",
+        message: "Check your Telegram app (official Telegram chat) for the latest login code.",
       });
-      return { success: false, needsCode: true };
+      return { success: false, needsCode: true, needsPassword: false };
     }
 
-    if (!result.needsCode) {
+    if (result.needsPassword) {
       await showToast({
         style: Toast.Style.Success,
-        title: "Authenticated",
-        message: "Successfully authenticated with Telegram!",
+        title: "Password Required",
+        message: "Enter your Telegram 2-Step Verification password.",
       });
-      return { success: true, needsCode: false };
+      return { success: false, needsCode: false, needsPassword: true };
     }
 
-    return { success: false, needsCode: result.needsCode };
+    return { success: true, needsCode: false, needsPassword: false };
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Authentication Failed",
-      message: error instanceof Error ? error.message : "Unknown error occurred",
-    });
-    return { success: false, needsCode: false };
+    throw new Error(getTelegramErrorMessage(error));
   }
 }

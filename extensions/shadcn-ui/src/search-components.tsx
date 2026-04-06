@@ -1,6 +1,7 @@
-import { ActionPanel, Action, List, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { CREATE_ERROR_TOAST_OPTIONS, SHADCN_URL } from "./constants";
+import { ActionPanel, Action, List } from "@raycast/api";
+import { useCachedPromise, useFetch } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { SHADCN_URL } from "./constants";
 import yaml from "js-yaml";
 
 /**
@@ -30,7 +31,7 @@ export const parseComponentName = (componentName: string) => {
  */
 async function getComponentsFromGitHub(): Promise<SearchResult[]> {
   // GitHub API for directory listing
-  const res = await fetch("https://api.github.com/repos/shadcn-ui/ui/contents/apps/v4/content/docs/components");
+  const res = await fetch("https://api.github.com/repos/shadcn-ui/ui/contents/apps/v4/content/docs/components/radix");
   if (!res.ok) {
     throw new Error(res.statusText);
   }
@@ -48,17 +49,45 @@ async function getComponentsFromGitHub(): Promise<SearchResult[]> {
 }
 
 export default function SearchComponents() {
+  const [selectedItemId, setSelectedItemId] = useState<string>();
   const { isLoading, data } = useCachedPromise(getComponentsFromGitHub, [], {
     keepPreviousData: true,
-    onError: async (e) => {
-      await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
-    },
+    failureToastOptions: { title: "Failed to load components" },
   });
 
+  const selectedComponent = selectedItemId ?? data?.[0]?.component;
+
+  const { isLoading: isDetailLoading, data: detailData } = useFetch(
+    selectedComponent ? `${SHADCN_URL.RAW_GITHUB_COMPONENTS}/${selectedComponent}.mdx` : "",
+    {
+      parseResponse: parseFetchDetailResponse,
+      keepPreviousData: true,
+      execute: !!selectedComponent,
+      failureToastOptions: { title: "Failed to load component details" },
+    },
+  );
+
+  useEffect(() => {
+    if (!selectedItemId && data?.[0]?.component) {
+      setSelectedItemId(data[0].component);
+    }
+  }, [data, selectedItemId]);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search components..." isShowingDetail>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search components..."
+      isShowingDetail
+      selectedItemId={selectedItemId}
+      onSelectionChange={(itemId) => setSelectedItemId(itemId ?? undefined)}
+    >
       {data?.map((searchResult) => (
-        <SearchListItem key={searchResult.name} searchResult={searchResult} />
+        <SearchListItem
+          key={searchResult.component}
+          searchResult={searchResult}
+          detailData={selectedComponent === searchResult.component ? detailData : undefined}
+          isDetailLoading={selectedComponent === searchResult.component ? isDetailLoading : false}
+        />
       ))}
     </List>
   );
@@ -81,27 +110,22 @@ interface SearchResult {
   url: string;
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  const { isLoading, data: detailData } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url);
-      return await parseFetchDetailResponse(response);
-    },
-    [`${SHADCN_URL.RAW_GITHUB_COMPONENTS}/${searchResult.component}.mdx`],
-    {
-      keepPreviousData: true,
-      onError: async (e) => {
-        await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
-      },
-    },
-  );
-
+function SearchListItem({
+  searchResult,
+  detailData,
+  isDetailLoading,
+}: {
+  searchResult: SearchResult;
+  detailData?: FrontMatter;
+  isDetailLoading: boolean;
+}) {
   return (
     <List.Item
+      id={searchResult.component}
       title={searchResult.name}
       detail={
         <List.Item.Detail
-          isLoading={isLoading}
+          isLoading={isDetailLoading}
           markdown={!detailData ? "# NA" : `# ${detailData.title}\n## ${detailData.description}`}
           metadata={
             !!detailData?.links && (
@@ -130,7 +154,7 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               icon="npm-icon.png"
-              title="Copy Add Component [Npm]"
+              title="Copy Add Component [npm]"
               content={`npx shadcn@latest add ${searchResult.component}`}
               shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
             />

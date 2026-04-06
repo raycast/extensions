@@ -8,6 +8,7 @@ import {
   getNote,
   withErrorHandling,
   getProjectIcon,
+  getProjectIndent,
   getAPIDateString,
 } from "../api";
 import { parseNoteContent } from "../utils/delta-to-markdown";
@@ -121,7 +122,7 @@ export default function TaskUpdater({ task, projects: initialProjects, onTaskUpd
             <Form.Dropdown.Item
               key={project.id}
               value={project.id}
-              title={`${getProjectIcon(project, true).source}  ${project.title}`}
+              title={`${getProjectIndent(project)}${getProjectIcon(project, true).source}  ${project.title}`}
             />
           ))}
         </Form.Dropdown>

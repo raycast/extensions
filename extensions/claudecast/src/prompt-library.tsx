@@ -30,7 +30,11 @@ import {
   ensureClaudeInstalled,
 } from "./lib/claude-cli";
 import { captureContext, getCodeContext } from "./lib/context-capture";
-import { launchClaudeCode, launchRalphFreshLoop } from "./lib/terminal";
+import {
+  launchClaudeCode,
+  launchRalphFreshLoop,
+  expandTilde,
+} from "./lib/terminal";
 
 const CATEGORIES: PromptCategory[] = [
   "planning",
@@ -208,7 +212,8 @@ function PromptItem({
   async function runInTerminal(variables: Record<string, string> = {}) {
     if (!(await ensureClaudeInstalled())) return;
     const context = await captureContext();
-    const targetPath = variables.projectPath || context.projectPath;
+    const targetPath =
+      expandTilde(variables.projectPath || "") || context.projectPath;
     if (targetPath && !existsSync(targetPath)) {
       await showToast({
         style: Toast.Style.Failure,
@@ -439,7 +444,7 @@ function PromptVariablesForm({
 
     // Special handling for ralph-loop - create project directory if needed
     if (isRalphLoop) {
-      const projectPath = processedValues.projectPath;
+      const projectPath = expandTilde(processedValues.projectPath || "");
       if (projectPath && !existsSync(projectPath)) {
         try {
           mkdirSync(projectPath, { recursive: true });
@@ -463,7 +468,8 @@ function PromptVariablesForm({
       const context = await captureContext();
       await incrementUsageCount(prompt.id);
       // Use user-specified projectPath if provided, otherwise fall back to context
-      const targetPath = processedValues.projectPath || context.projectPath;
+      const targetPath =
+        expandTilde(processedValues.projectPath || "") || context.projectPath;
 
       // Special handling for Ralph Loop - use fresh context launcher
       if (isRalphLoop) {

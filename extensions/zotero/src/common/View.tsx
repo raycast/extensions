@@ -8,10 +8,19 @@ import {
   Clipboard,
   closeMainWindow,
   showHUD,
+  open,
 } from "@raycast/api";
-import { RefData, Preferences } from "./zoteroApi";
+import { dirname, join } from "path";
+import { RefData, Preferences, resolveHome } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
-import { exportRef, exportRefPaste, exportBibtexRef, exportBibtexRefPaste } from "./clipboard";
+import {
+  exportRef,
+  exportRefPaste,
+  exportBibtexRef,
+  exportBibtexRefPaste,
+  exportPandocKey,
+  exportPandocKeyPaste,
+} from "./clipboard";
 import { useState } from "react";
 import CollectionDropdown from "./CollectionDropdown";
 
@@ -45,6 +54,8 @@ const copyRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "
 const copyBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "4" };
 const pasteRefShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "5" };
 const pasteBibShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "6" };
+const copyPandocShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "7" };
+const pastePandocShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "8" };
 
 const copyURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
 const copyPDFURLShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "p" };
@@ -52,6 +63,17 @@ const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key:
 const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
+
+function resolveAttachmentPath(item: RefData, zoteroPath: string): string | null {
+  if (!item.attachment?.path || !item.attachment?.key) return null;
+  const attachmentPath = item.attachment.path;
+  if (!attachmentPath.startsWith("storage:")) {
+    return attachmentPath;
+  }
+  const filename = attachmentPath.slice("storage:".length);
+  const expandedZoteroPath = resolveHome(zoteroPath);
+  return join(dirname(expandedZoteroPath), "storage", item.attachment.key, filename);
+}
 
 function getURL(item: RefData): string {
   return `${
@@ -206,27 +228,24 @@ export const View = ({
   const [urls, onOpen] = useVisitedUrls();
   const [collection, setCollection] = useState<string>("All");
   const preferences: Preferences = getPreferenceValues();
-  const [searchText, setSearchText] = useState<string>("");
   return (
     <List
       isShowingDetail={queryResults[0].length > 0}
       isLoading={isLoading}
       onSearchTextChange={(text) => {
-        setSearchText(text);
         onSearchTextChange?.(text);
       }}
       throttle={throttle}
       searchBarPlaceholder="Search Zotero..."
       searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
     >
-      {searchText.length === 0 ? (
-        <List.EmptyView icon={{ source: "no-view.png" }} title="Type something to search Zotero Database!" />
-      ) : (
-        sectionNames.map((sectionName, sectionIndex) => (
-          <List.Section key={sectionIndex} title={sectionName} subtitle={`${queryResults[sectionIndex].length}`}>
-            {queryResults[sectionIndex]
-              .filter((item) => item.collection?.includes(collection) || collection == "All")
-              .map((item) => (
+      {sectionNames.map((sectionName, sectionIndex) => (
+        <List.Section key={sectionIndex} title={sectionName} subtitle={`${queryResults[sectionIndex].length}`}>
+          {queryResults[sectionIndex]
+            .filter((item) => item.collection?.includes(collection) || collection == "All")
+            .map((item) => {
+              const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
+              return (
                 <List.Item
                   key={item.key}
                   id={`${item.id}`}
@@ -235,12 +254,26 @@ export const View = ({
                   detail={<List.Item.Detail markdown={getItemDetail(item)} />}
                   actions={
                     <ActionPanel>
-                      {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                      {item.attachment?.key && item.attachment.key !== `` && (
                         <Action.OpenInBrowser
                           icon={Icon.ArrowRightCircleFilled}
                           title="Open PDF"
                           url={`zotero://open-pdf/library/items/${item.attachment.key}`}
                           onOpen={onOpen}
+                        />
+                      )}
+                      {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
+                        <Action
+                          icon={Icon.ArrowRightCircleFilled}
+                          title="Open PDF in System Viewer"
+                          onAction={async () => {
+                            try {
+                              await open(attachmentFilePath);
+                              closeMainWindow();
+                            } catch {
+                              await showHUD("Failed to open attachment");
+                            }
+                          }}
                         />
                       )}
                       <Action.OpenInBrowser
@@ -258,17 +291,19 @@ export const View = ({
                         />
                       )}
 
-                      {preferences.use_bibtex && (
+                      {preferences.use_bibtex && item.citekey && (
                         <Action.CopyToClipboard
                           title="Copy Bibtex Citation Key"
                           content={item.citekey}
                           shortcut={copyRefCommandShortcut}
                         />
                       )}
-                      {preferences.use_bibtex && <RefCopyToClipboardAction selected={item.citekey} />}
-                      {preferences.use_bibtex && <BibCopyToClipboardAction selected={item.citekey} />}
-                      {preferences.use_bibtex && <RefPasteAction selected={item.citekey} />}
-                      {preferences.use_bibtex && <BibPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <RefCopyToClipboardAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <BibCopyToClipboardAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <PandocCopyAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <RefPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <BibPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <PandocPasteAction selected={item.citekey} />}
 
                       <ActionPanel.Section>
                         {item.attachment && item.attachment.key && item.attachment.key !== `` && (
@@ -285,10 +320,10 @@ export const View = ({
                     </ActionPanel>
                   }
                 />
-              ))}
-          </List.Section>
-        ))
-      )}
+              );
+            })}
+        </List.Section>
+      ))}
     </List>
   );
 };
@@ -404,6 +439,28 @@ function BibCopyToClipboardAction({ selected }: { selected: string }) {
       icon={Icon.Clipboard}
       shortcut={copyBibShortcut}
       onAction={() => exportBibtexRef(selected)}
+    />
+  );
+}
+
+function PandocCopyAction({ selected }: { selected: string }) {
+  return (
+    <Action
+      title="Copy Pandoc Citation Key"
+      icon={Icon.Clipboard}
+      shortcut={copyPandocShortcut}
+      onAction={() => exportPandocKey(selected)}
+    />
+  );
+}
+
+function PandocPasteAction({ selected }: { selected: string }) {
+  return (
+    <Action
+      title="Paste Pandoc Citation Key to App"
+      icon={Icon.Document}
+      shortcut={pastePandocShortcut}
+      onAction={() => exportPandocKeyPaste(selected)}
     />
   );
 }

@@ -48,7 +48,7 @@ export default function Command(props: LaunchProps) {
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
   const [selectionError, setSelectionError] = useState<string | null>(null);
 
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const preferences = getPreferenceValues<SpotlightSearchPreferences>();
   const maxRecentFolders = parseInt(preferences.maxRecentFolders || "10");
   const cacheManager = CacheManager.getInstance();
@@ -278,7 +278,7 @@ export default function Command(props: LaunchProps) {
       },
       execute: hasCheckedPreferences && canExecute && !!searchText,
       abortable,
-    }
+    },
   );
 
   // Reset search when text changes
@@ -380,7 +380,7 @@ export default function Command(props: LaunchProps) {
               style: Toast.Style.Animated,
             });
           },
-        }
+        },
       );
 
       // Count successes and failures
@@ -528,7 +528,7 @@ export default function Command(props: LaunchProps) {
               style: Toast.Style.Animated,
             });
           },
-        }
+        },
       );
 
       // Count successes and failures
@@ -801,7 +801,7 @@ export default function Command(props: LaunchProps) {
                 icon={Icon.ArrowUp}
                 actions={
                   <ActionPanel>
-                    <Action title="Go Up" onAction={navigateUp} />
+                    <Action title="Go up" onAction={navigateUp} />
                   </ActionPanel>
                 }
               />

@@ -3,7 +3,7 @@ import { format } from "date-fns";
 
 import { Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
-import { displayDate, isExactTimeTask } from "../helpers/dates";
+import { displayIncomingDate, isExactTimeTask } from "../helpers/dates";
 import { getTaskLabels } from "../helpers/labels";
 import { priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
@@ -36,13 +36,13 @@ export default function TaskDetail({ taskId }: TaskDetailProps) {
   let displayedDeadline = "No deadline";
 
   if (task?.due) {
-    const date = displayDate(task.due.date);
+    const date = displayIncomingDate(task.due.date);
 
     displayedDate = isExactTimeTask(task) ? `${date} ${format(new Date(task.due.date), "HH:mm")}` : date;
   }
 
   if (task?.deadline) {
-    const deadlineDate = displayDate(task.deadline.date);
+    const deadlineDate = displayIncomingDate(task.deadline.date);
 
     displayedDeadline = deadlineDate;
   }

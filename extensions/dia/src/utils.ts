@@ -12,11 +12,11 @@ export function escapeAppleScriptString(str: string): string {
 
 /**
  * Escapes special characters in SQL LIKE patterns to prevent SQL injection.
- * Escapes: %, _, \, and quotes
+ * Escapes: %, _, \, and single quotes
  * Note: Backslashes are doubled for SQL string literals, then special chars are escaped
  */
 export function escapeSQLLikePattern(pattern: string): string {
-  return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/"/g, '""');
+  return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/'/g, "''");
 }
 
 export function getSafeFavicon(url: string): List.Item.Props["icon"] {

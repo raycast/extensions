@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claudecast",
   "title": "ClaudeCast",
-  "description": "Claude Code workflows at your fingertips - Quick prompts, session management, and agentic workflows",
+  "description": "Claude Code workflows at your fingertips: Quick prompts, session management, and agentic workflows",
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [
@@ -134,6 +134,16 @@
         "status",
         "monitor",
         "usage"
+      ],
+      "preferences": [
+        {
+          "name": "showCostInMenuBar",
+          "type": "checkbox",
+          "default": false,
+          "label": "Show Cost in Menu Bar",
+          "description": "Display today's cost next to the menu bar icon",
+          "required": false
+        }
       ]
     },
     {
