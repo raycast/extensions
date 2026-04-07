@@ -1,5 +1,9 @@
 # letterboxd Changelog
 
+## [Fix] - 2026-04-06
+
+- Fixed genre tag color for better visibility in light mode
+
 ## [Maintenance] - 2026-02-07
 
 - Add support for Windows platform

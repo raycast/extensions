@@ -101,6 +101,13 @@
       "subtitle": "Wispr Flow",
       "description": "Open the Wispr Flow app",
       "mode": "no-view"
+    },
+    {
+      "name": "paste-last-transcript",
+      "title": "Paste Last Transcript",
+      "subtitle": "Wispr Flow",
+      "description": "Paste the most recent Wispr Flow transcript into the active app",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

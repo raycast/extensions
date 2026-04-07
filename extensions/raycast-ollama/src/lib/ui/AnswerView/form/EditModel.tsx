@@ -102,8 +102,8 @@ export function EditModel(props: props): React.JSX.Element {
       {!IsLoadingModel && Model && itemProps.server.value && (
         <Form.Dropdown title="Model" {...itemProps.model}>
           {itemProps.server.value &&
-            Model.get(itemProps.server.value)!
-              .filter((model) => {
+            Model.get(itemProps.server.value)
+              ?.filter((model) => {
                 if (!model.capabilities || !props.capabilities || model.capabilities.length < props.capabilities.length)
                   return false;
                 if (
@@ -115,8 +115,8 @@ export function EditModel(props: props): React.JSX.Element {
                   return false;
                 return true;
               })
-              .sort()
-              .map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+              ?.sort()
+              ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
         </Form.Dropdown>
       )}
       <Form.Checkbox

@@ -1,3 +1,4 @@
+import { join } from "node:path";
 import { Action, ActionPanel, Icon, List, Toast, environment, popToRoot, showToast } from "@raycast/api";
 import { RenameForm, deleteDirectory } from "../utils";
 import { Directory } from "./directory";
@@ -14,7 +15,7 @@ export function DirectoryItem(props: {
 }) {
   const isSymlink = props.isSymlink ?? false;
   const originalPath = props.originalPath ?? "";
-  const filePath = `${props.fileData.path}/${props.fileData.name}`;
+  const filePath = join(props.fileData.path, props.fileData.name);
   const typeName = `${isSymlink ? "Symlink " : ""}Directory`;
 
   const context = encodeURIComponent(JSON.stringify({ path: filePath }));
@@ -61,7 +62,7 @@ export function DirectoryItem(props: {
           <ActionPanel.Section>
             <Action.Push
               target={<RenameForm filePath={filePath} refresh={props.refresh} typeName={typeName} />}
-              title={`RenameForm ${typeName}`}
+              title={`Rename ${typeName}`}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               icon={Icon.Pencil}
             />

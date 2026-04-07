@@ -1,125 +1,92 @@
-import { LaunchType, LocalStorage, environment, showHUD, showToast, Toast, updateCommandMetadata } from "@raycast/api";
+import { updateCommandMetadata } from "@raycast/api";
 import {
+  type IOType,
   getDefaultInputDevice,
   getDefaultOutputDevice,
   getInputDevices,
   getOutputDevices,
   setDefaultInputDevice,
+  getAllVolumeInfo,
+  setOutputDeviceVolume,
+  setInputDeviceVolume,
 } from "./audio-device";
 import { setOutputAndSystemDevice } from "./device-actions";
-import { AUTO_SWITCH_KEYS } from "./auto-switch-keys";
-import { applyDeviceOrder, getDeviceOrder, getHiddenDevices } from "./device-preferences";
+import {
+  getDefaultDeviceUid,
+  getDefaultDeviceName,
+  getAllPinnedVolumes,
+  getGraceUntil,
+  migrateFromPriorityOrder,
+} from "./device-preferences";
 
-type IOType = "input" | "output";
+async function maybeSwitchToDefault(type: IOType): Promise<boolean> {
+  const graceUntil = await getGraceUntil(type);
+  if (Date.now() < graceUntil) return false;
 
-const AUTO_SWITCH_INTERVAL_SECONDS = 20;
-const MS_PER_SECOND = 1000;
+  const defaultUid = await getDefaultDeviceUid(type);
+  if (!defaultUid) return false;
 
-const AUTO_SWITCH_LAST_RUN_KEYS = {
-  input: "autoSwitchLastRunInput",
-  output: "autoSwitchLastRunOutput",
-} as const;
-
-async function shouldSkipForInterval(type: IOType) {
-  const lastRunRaw = await LocalStorage.getItem<string>(AUTO_SWITCH_LAST_RUN_KEYS[type]);
-  const lastRun = lastRunRaw ? Number(lastRunRaw) : undefined;
-  if (!lastRun || !Number.isFinite(lastRun)) return false;
-  const intervalMs = AUTO_SWITCH_INTERVAL_SECONDS * MS_PER_SECOND;
-  return Date.now() - lastRun < intervalMs;
-}
-
-async function markLastRun(type: IOType) {
-  await LocalStorage.setItem(AUTO_SWITCH_LAST_RUN_KEYS[type], String(Date.now()));
-}
-
-async function isAutoSwitchEnabled(type: IOType) {
-  return (await LocalStorage.getItem(AUTO_SWITCH_KEYS[type])) === "true";
-}
-
-async function setAutoSwitchEnabled(type: IOType, enabled: boolean) {
-  await LocalStorage.setItem(AUTO_SWITCH_KEYS[type], enabled ? "true" : "false");
-}
-
-async function maybeSwitchInput(hiddenDevices: string[]) {
-  const devices = await getInputDevices();
-  const order = await getDeviceOrder("input");
-  const hiddenSet = new Set(hiddenDevices);
-  const ordered = applyDeviceOrder(order, devices).filter((device) => !hiddenSet.has(device.uid));
-  const target = ordered[0];
+  const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
+  const target = devices.find((d) => d.uid === defaultUid);
   if (!target) return false;
 
-  const current = await getDefaultInputDevice();
+  const current = type === "input" ? await getDefaultInputDevice() : await getDefaultOutputDevice();
   if (current.uid === target.uid) return false;
 
-  await setDefaultInputDevice(target.id);
-  return true;
-}
-
-async function maybeSwitchOutput(hiddenDevices: string[]) {
-  const devices = await getOutputDevices();
-  const order = await getDeviceOrder("output");
-  const hiddenSet = new Set(hiddenDevices);
-  const ordered = applyDeviceOrder(order, devices).filter((device) => !hiddenSet.has(device.uid));
-  const target = ordered[0];
-  if (!target) return false;
-
-  const current = await getDefaultOutputDevice();
-  if (current.uid === target.uid) return false;
-
-  await setOutputAndSystemDevice(target.id);
-  return true;
-}
-
-async function runSwitch(type: IOType) {
-  const hiddenDevices = await getHiddenDevices(type);
-  const changed = type === "input" ? await maybeSwitchInput(hiddenDevices) : await maybeSwitchOutput(hiddenDevices);
-
-  return changed;
-}
-
-export async function applyAutoSwitchIfEnabled(type: IOType) {
-  const enabled = await isAutoSwitchEnabled(type);
-  if (!enabled) return false;
-
-  try {
-    return await runSwitch(type);
-  } catch {
-    return false;
+  if (type === "input") {
+    await setDefaultInputDevice(target.id);
+  } else {
+    await setOutputAndSystemDevice(target.id);
   }
+  return true;
+}
+
+async function enforcePinnedVolumes(type: IOType) {
+  const pinnedMap = await getAllPinnedVolumes(type);
+  if (pinnedMap.size === 0) return;
+
+  const devices = type === "input" ? await getInputDevices() : await getOutputDevices();
+  const allVolumes = await getAllVolumeInfo(type);
+  const setVol = type === "input" ? setInputDeviceVolume : setOutputDeviceVolume;
+
+  for (const device of devices) {
+    const targetPct = pinnedMap.get(device.uid);
+    if (targetPct == null) continue;
+
+    try {
+      const info = allVolumes[device.id] ?? allVolumes[device.uid];
+      if (info?.volume == null) continue;
+      const currentPct = Math.round(info.volume * 100);
+      if (Math.abs(currentPct - targetPct) >= 2) {
+        await setVol(device.id, targetPct / 100);
+      }
+    } catch (err) {
+      console.error(`Failed to enforce volume for ${device.name} (${device.uid}):`, err);
+    }
+  }
+}
+
+async function runEnforcement(type: IOType) {
+  await maybeSwitchToDefault(type);
+  await enforcePinnedVolumes(type);
+}
+
+async function buildSubtitle(type: IOType): Promise<string> {
+  const defaultName = await getDefaultDeviceName(type);
+  const pinnedCount = (await getAllPinnedVolumes(type)).size;
+  const details: string[] = [];
+  if (defaultName) details.push(`Default: ${defaultName}`);
+  if (pinnedCount > 0) details.push(`${pinnedCount} pinned`);
+  return details.length > 0 ? details.join(" | ") : "No default device or pinned volumes";
 }
 
 export async function runAutoSwitch(type: IOType) {
-  const isBackground = environment.launchType === LaunchType.Background;
-  const enabled = await isAutoSwitchEnabled(type);
-
-  if (!isBackground) {
-    const nextEnabled = !enabled;
-    await setAutoSwitchEnabled(type, nextEnabled);
-    await updateCommandMetadata({ subtitle: nextEnabled ? "Enabled" : "Disabled" });
-    await showHUD(nextEnabled ? "Auto switch enabled" : "Auto switch disabled");
-    if (!nextEnabled) return;
-  } else if (!enabled) {
-    await updateCommandMetadata({ subtitle: "Disabled" });
-    return;
-  } else {
-    await updateCommandMetadata({ subtitle: "Enabled" });
-  }
+  await migrateFromPriorityOrder(getInputDevices, getOutputDevices);
+  await updateCommandMetadata({ subtitle: await buildSubtitle(type) });
 
   try {
-    if (isBackground && (await shouldSkipForInterval(type))) {
-      return;
-    }
-    await runSwitch(type);
-    if (isBackground) {
-      await markLastRun(type);
-    }
-  } catch (error) {
-    if (!isBackground) {
-      await showToast(
-        Toast.Style.Failure,
-        `Auto switch ${type === "input" ? "input" : "output"} failed`,
-        String(error),
-      );
-    }
+    await runEnforcement(type);
+  } catch {
+    // Silently ignore errors in background
   }
 }

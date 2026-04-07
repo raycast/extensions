@@ -23,6 +23,7 @@ const bundleIdMap: Record<string, { macos: string; windows: { name: string; exe:
     windows: { name: "VSCodium - Insiders", exe: "VSCodium - Insiders.exe" },
   },
   Windsurf: { macos: "com.exafunction.windsurf", windows: { name: "Windsurf", exe: "Windsurf.exe" } },
+  Lingma: { macos: "com.aliyun.lingma.ide", windows: { name: "Lingma", exe: "Lingma.exe" } },
 };
 
 /**

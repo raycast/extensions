@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "printer-status",
+  "title": "Printer Status",
+  "description": "Check printer status (page counts, ink levels, device info) via SNMP",
+  "icon": "printer-icon.png",
+  "author": "davidyannick",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "xerox",
+      "title": "Printer Status",
+      "icon": "printer-icon.png",
+      "description": "Show current page counts and status for the configured printer",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-xerox",
+      "title": "Ask Printer",
+      "description": "Retrieve current status, ink levels, page counts, and device information from the configured printer"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@printer-status what is the printer status",
+        "mocks": {
+          "ask-xerox": [
+            {
+              "pageCount": "12500",
+              "blackPageCount": "8000",
+              "colorPageCount": "4500",
+              "blackInkLevel": "85",
+              "cyanInkLevel": "70",
+              "magentaInkLevel": "72",
+              "yellowInkLevel": "68",
+              "modelName": "Xerox WorkCentre",
+              "serialNumber": "EXAMPLE123",
+              "printerName": "Office Printer",
+              "printerStatus": "idle"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "ask-xerox"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "printerIp",
+      "type": "textfield",
+      "required": true,
+      "title": "Printer IP Address",
+      "description": "The IP address of your printer",
+      "default": "192.168.1.10"
+    },
+    {
+      "name": "snmpCommunity",
+      "type": "password",
+      "required": false,
+      "title": "SNMP Community String",
+      "description": "The SNMP community string for your printer (default: public)",
+      "default": "public"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2",
+    "net-snmp": "^3.26.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/net-snmp": "^3.23.0",
+    "@types/node": "25.3.3",
+    "@types/react": "19.2.14",
+    "eslint": "^9.16.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

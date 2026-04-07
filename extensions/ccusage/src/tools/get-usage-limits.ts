@@ -1,4 +1,3 @@
-import { UsageLimitDataSchema } from "../types/usage-types";
 import { getClaudeAccessToken } from "../utils/keychain-access";
 import { fetchClaudeUsageLimits } from "../utils/claude-api-client";
 
@@ -32,23 +31,22 @@ export default async function getUsageLimits(input?: Input): Promise<{
     throw new Error("Usage limits require Claude OAuth authentication in Claude Code.");
   }
 
-  const limitData = await fetchClaudeUsageLimits(token);
+  const result = await fetchClaudeUsageLimits(token);
 
-  if (!limitData) {
-    throw new Error(
-      "Failed to fetch usage limits from Claude API. Please check your network connection and authentication status.",
-    );
+  if (result.status === "rate_limited") {
+    throw new Error("Rate limited by Anthropic API. Please try again later.");
+  }
+  if (result.status === "error") {
+    throw new Error(result.message);
   }
 
-  const parseResult = UsageLimitDataSchema.safeParse(limitData);
+  const usageLimitsData = result.data;
 
-  if (!parseResult.success) {
-    throw new Error(`Invalid usage limit data: ${parseResult.error.message}`);
-  }
+  const formatResetTime = (isoString: string | null): string => {
+    if (!isoString) {
+      return "N/A";
+    }
 
-  const data = parseResult.data;
-
-  const formatResetTime = (isoString: string): string => {
     const resetTime = new Date(isoString);
     const now = new Date();
     const diffMs = resetTime.getTime() - now.getTime();
@@ -73,14 +71,14 @@ export default async function getUsageLimits(input?: Input): Promise<{
 
   return {
     fiveHour: {
-      utilization: Math.round(data.five_hour.utilization * 10) / 10,
-      resetsAt: formatResetTime(data.five_hour.resets_at),
-      ...(input?.includeRawTimestamps && { rawTimestamp: data.five_hour.resets_at }),
+      utilization: Math.round(usageLimitsData.five_hour.utilization * 10) / 10,
+      resetsAt: formatResetTime(usageLimitsData.five_hour.resets_at),
+      ...(input?.includeRawTimestamps && { rawTimestamp: usageLimitsData.five_hour.resets_at ?? undefined }),
     },
     sevenDay: {
-      utilization: Math.round(data.seven_day.utilization * 10) / 10,
-      resetsAt: formatResetTime(data.seven_day.resets_at),
-      ...(input?.includeRawTimestamps && { rawTimestamp: data.seven_day.resets_at }),
+      utilization: Math.round(usageLimitsData.seven_day.utilization * 10) / 10,
+      resetsAt: formatResetTime(usageLimitsData.seven_day.resets_at),
+      ...(input?.includeRawTimestamps && { rawTimestamp: usageLimitsData.seven_day.resets_at ?? undefined }),
     },
   };
 }

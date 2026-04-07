@@ -387,7 +387,7 @@ async function getData(): Promise<RefData[]> {
     }
 
     if (preferences.use_bibtex) {
-      row.citekey = await getBibtexKey(row.key, row.library);
+      row.citekey = row.citationKey || (await getBibtexKey(row.key, row.library));
     }
 
     rows.push(row);

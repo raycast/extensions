@@ -91,7 +91,7 @@ export default function MyVault() {
       for (const record of fetchedRecords as ListRecord[]) {
         const temp: ProcessedRecord = {
           recordUid: record.record_uid,
-          title: record.title,
+          title: String(record.title ?? "").trim() || record.record_uid || "Untitled",
           type: record.type,
           description: record.description ?? "",
         };

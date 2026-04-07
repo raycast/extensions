@@ -5,6 +5,10 @@
 - Fix infinite retry loop on HTTP 429: add exponential backoff (1s, 5s, 15s) with a 3-retry cap and surface a Raycast error toast after retries are exhausted
 - Add non-retryable error path for HTTP 402 quota-exhausted responses
 
+## [New Feature] - 2026-03-10
+
+- Add optional Script Triggers preferences to run local shell scripts when a timer starts, stops, or is fetched, enabling integration with tools like Sketchybar or Hammerspoon without independent API polling
+
 ## [Bug Fixes] - 2026-02-23
 
 - Reduced Menu Bar background refresh interval from 10 seconds to 3 minutes to prevent API rate limit exhaustion (240 calls/hour limit)

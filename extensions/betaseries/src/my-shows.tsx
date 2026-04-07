@@ -1,10 +1,4 @@
-import {
-  LaunchType,
-  List,
-  launchCommand,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { useFetch, useLocalStorage } from "@raycast/utils";
 import {
@@ -20,6 +14,7 @@ import {
   DISABLED_SHOW_NOTIFICATIONS_KEY,
   normalizeNumberIds,
 } from "./notifications";
+import { refreshNewEpisodesMenubar } from "./menubar";
 
 type ShowFilter = "to-watch" | "active" | "archived";
 const SHOW_FILTERS: ShowFilter[] = ["to-watch", "active", "archived"];
@@ -148,10 +143,7 @@ export default function Command() {
                   : "Notifications disabled for this show",
               });
 
-              await launchCommand({
-                name: "new-episodes-menubar",
-                type: LaunchType.Background,
-              });
+              await refreshNewEpisodesMenubar();
             })();
           }}
           onLogout={() => void handleLogout()}
@@ -175,10 +167,7 @@ export default function Command() {
                   return [updated];
                 }),
             });
-            void launchCommand({
-              name: "new-episodes-menubar",
-              type: LaunchType.Background,
-            });
+            void refreshNewEpisodesMenubar();
           }}
         />
       ))}

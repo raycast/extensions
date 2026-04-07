@@ -4,7 +4,6 @@ import {
   closeMainWindow,
   LaunchProps,
   List,
-  open,
   popToRoot,
   showToast,
   Toast,
@@ -14,6 +13,7 @@ import {
   Alert,
   Clipboard,
 } from "@raycast/api";
+import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import { CustomAction } from "./api/custom-actions/custom-actions.types";
 import {
@@ -92,7 +92,7 @@ function ActionInput({ action }: ComponentProps) {
       silent: action.silent,
     });
 
-    await open(target);
+    await openUrl(target, { background: action.silent });
     await closeMainWindow();
     await popToRoot();
   }

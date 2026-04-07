@@ -17,6 +17,7 @@ import {
   searchSessionContent,
   getSessionDetail,
   deleteSession,
+  safeTruncate,
   SessionMetadata,
   SessionDetail,
 } from "./lib/session-parser";
@@ -113,6 +114,7 @@ export default function DeepSearchSessions() {
   return (
     <List
       isLoading={isSearching}
+      isShowingDetail
       searchBarPlaceholder="Search all session content..."
       filtering={false}
       onSearchTextChange={onSearchTextChange}
@@ -147,7 +149,7 @@ function SearchResultItem({
   onDelete: () => void;
 }) {
   const title = session.firstMessage || session.summary || session.id;
-  const truncatedTitle = title.length > 60 ? title.slice(0, 60) + "..." : title;
+  const truncatedTitle = safeTruncate(title, 60, "...");
 
   const accessories: List.Item.Accessory[] = [];
 
@@ -243,12 +245,14 @@ function SearchResultItem({
     }
   }
 
+  const detailMarkdown = buildDetailMarkdown(session);
+
   return (
     <List.Item
       title={truncatedTitle}
-      subtitle={session.summary || undefined}
       icon={Icon.Message}
       accessories={accessories}
+      detail={<List.Item.Detail markdown={detailMarkdown} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Session">
@@ -420,6 +424,30 @@ function SessionDetailView({
   );
 }
 
+function buildDetailMarkdown(session: SessionMetadata): string {
+  const fullTitle = session.firstMessage || session.summary || session.id;
+  let md = `**Session Prompt**\n\n${fullTitle}\n\n`;
+
+  if (session.matchSnippet) {
+    md += `---\n\n**Match**\n\n${session.matchSnippet}\n\n`;
+  }
+
+  if (session.summary && session.summary !== fullTitle) {
+    md += `**Summary:** ${session.summary}\n\n`;
+  }
+
+  md += `---\n\n`;
+  md += `**Project:** ${session.projectPath}\n\n`;
+  md += `**Turns:** ${session.turnCount}`;
+  if (session.cost > 0) {
+    md += ` · **Cost:** $${session.cost.toFixed(4)}`;
+  }
+  md += `\n\n`;
+  md += `**Modified:** ${session.lastModified.toLocaleString()}`;
+
+  return md;
+}
+
 function formatSessionMarkdown(session: SessionDetail): string {
   let md = `# ${session.firstMessage || session.summary || "Session"}\n\n`;
 
@@ -432,10 +460,7 @@ function formatSessionMarkdown(session: SessionDetail): string {
 
   for (const message of session.messages.slice(0, 20)) {
     const role = message.type === "user" ? "**You**" : "**Claude**";
-    const content =
-      message.content.length > 500
-        ? message.content.slice(0, 500) + "..."
-        : message.content;
+    const content = safeTruncate(message.content, 500, "...");
 
     md += `${role}:\n${content}\n\n`;
   }

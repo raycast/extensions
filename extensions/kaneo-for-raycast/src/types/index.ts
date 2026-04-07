@@ -45,6 +45,18 @@ interface Task {
   assigneeName: string | null;
   assigneeImage: string | null;
   projectId: string;
+  parentTasks?: Task[];
+  subTasks?: Task[];
+}
+
+interface TaskRelation {
+  id: string;
+  sourceTaskId: string;
+  targetTaskId: string;
+  relationType: string;
+  createdAt: string;
+  sourceTask: Task;
+  targetTask: Task;
 }
 
 interface Column {
@@ -55,7 +67,10 @@ interface Column {
 }
 
 interface ProjectDetail extends Project {
-  columns: Column[];
+  columns?: Column[];
+  data?: {
+    columns: Column[];
+  };
 }
 
 interface UserDetail {
@@ -109,6 +124,7 @@ export type {
   Session,
   Project,
   Task,
+  TaskRelation,
   ProjectDetail,
   Users,
   Member,

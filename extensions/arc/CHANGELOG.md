@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Fixed Arc duplicate windows] - 2026-03-04
 
 - Fixed duplicate window creation when launching Arc Browser from a stopped state

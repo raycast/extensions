@@ -63,6 +63,10 @@
           "value": "kitty"
         },
         {
+          "title": "Ghostty",
+          "value": "ghostty"
+        },
+        {
           "title": "Other (specify below)",
           "value": "other"
         }
@@ -92,7 +96,7 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.10.0",
+    "@types/node": "^20.19.37",
     "@types/react": "^19.0.10",
     "eslint": "^8.55.0",
     "typescript": "^5.3.2"

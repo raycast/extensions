@@ -4,7 +4,7 @@ import removeMarkdown from "remove-markdown";
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { displayTime, displayDate, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
+import { displayIncomingDate, displayTime, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -73,7 +73,7 @@ export default function TaskListItem({ task, mode, viewProps, data, setData, qui
   }
 
   if (task.deadline?.date) {
-    const text = displayDate(task.deadline.date);
+    const text = displayIncomingDate(task.deadline.date);
     const overdue = isOverdue(task.deadline.date);
 
     accessories.unshift({
@@ -92,7 +92,7 @@ export default function TaskListItem({ task, mode, viewProps, data, setData, qui
     const overdue = isOverdue(task.due.date);
     const use12HourFormat = data?.user?.time_format === 1;
 
-    const text = displayDate(task.due.date);
+    const text = displayIncomingDate(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
       accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });

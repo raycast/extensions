@@ -10,9 +10,7 @@ const config: JestConfigWithTsJest = {
   moduleFileExtensions: ["ts", "tsx", "js"],
   setupFilesAfterEnv: ["<rootDir>/src/utils/testing/setupEnvironment.tsx"],
   // Transform ESM-only packages (otplib, @otplib, @scure, @noble) so Jest can load them
-  transformIgnorePatterns: [
-    "node_modules/(?!(otplib|@otplib|@scure|@noble)/)",
-  ],
+  transformIgnorePatterns: ["node_modules/(?!(otplib|@otplib|@scure|@noble)/)"],
   transform: {
     "^.+\\.tsx?$": "ts-jest",
     "node_modules/(otplib|@otplib|@scure|@noble)/.+\\.(js|mjs)$": "babel-jest",

@@ -22,6 +22,10 @@ interface BookmarkListProps {
   emptyViewDescription?: string;
   onSearch?: (text: string) => void;
   onBookmarkVisit?: (bookmark: Bookmark) => void;
+  /** Override the item label used in the section title and navigation title (e.g. "Notes" instead of "Bookmarks") */
+  itemLabel?: string;
+  /** Optional accessory element rendered in the search bar (e.g. a List.Dropdown for filtering) */
+  searchBarAccessory?: Parameters<typeof List>[0]["searchBarAccessory"];
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
@@ -49,6 +53,8 @@ export function BookmarkList({
   emptyViewDescription,
   onSearch,
   onBookmarkVisit,
+  itemLabel,
+  searchBarAccessory,
 }: BookmarkListProps) {
   const { t } = useTranslation();
   const { push } = useNavigation();
@@ -83,9 +89,12 @@ export function BookmarkList({
 
   const displayInfo = useMemo(() => {
     const displayBookmarks = searchFilteredBookmarks || [];
+    const label = itemLabel ?? t("bookmarkList.title", { count: displayBookmarks.length }).replace(/ \(\d+\)$/, "");
     const listTitle = searchText
-      ? t("bookmarkList.filterResults", { searchText, count: displayBookmarks.length })
-      : t("bookmarkList.title", { count: displayBookmarks.length });
+      ? t("bookmarkList.filterResultsLabel", { label, searchText, count: displayBookmarks.length })
+      : itemLabel
+        ? `${itemLabel} (${displayBookmarks.length})`
+        : t("bookmarkList.title", { count: displayBookmarks.length });
     const hasMoreNotice = pagination?.hasMore ? "..." : "";
 
     return {
@@ -93,7 +102,7 @@ export function BookmarkList({
       listTitle,
       hasMoreNotice,
     };
-  }, [searchFilteredBookmarks, searchText, pagination?.hasMore, t]);
+  }, [searchFilteredBookmarks, searchText, pagination?.hasMore, t, itemLabel]);
 
   // Best-practice fix: avoid a pagination deadlock when reopening a command.
   // If we render only the cached first page and the list isn't scrollable, Raycast won't trigger `onLoadMore`.
@@ -138,11 +147,12 @@ export function BookmarkList({
       isLoading={isLoading}
       isShowingDetail={displayInfo.displayBookmarks.length > 0}
       searchBarPlaceholder={searchBarPlaceholder || defaultValues.searchBarPlaceholder}
+      searchBarAccessory={searchBarAccessory}
       searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
       onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
       pagination={pagination}
-      navigationTitle={t("bookmarkList.title", { count: displayInfo.displayBookmarks.length })}
+      navigationTitle={displayInfo.listTitle}
     >
       {searchText && (
         <List.Item
