@@ -58,13 +58,14 @@ export function AuthenticateView(props: AuthenticateViewProps) {
       return;
     }
 
+    const currentSession = session;
     let isCancelled = false;
 
     async function waitForAuthorization() {
       try {
         setStatus("Waiting for browser authorization...");
 
-        await pollDeviceAuthorization(session, {
+        await pollDeviceAuthorization(currentSession, {
           onPending() {
             if (!isCancelled) {
               setStatus("The browser authorization page is ready. This view will continue after approval.");
