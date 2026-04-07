@@ -1,6 +1,6 @@
 # CoinMarketCap Crypto Crawler Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-03-16
 
 - Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
 - Update TypeScript to ^5.8.3 and @types/react to ^19.1.8 to fix build errors

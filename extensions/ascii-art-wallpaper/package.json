@@ -5,6 +5,9 @@
   "description": "Browse artworks from the Metropolitan Museum of Art and generate ASCII art wallpapers",
   "icon": "extension-icon.png",
   "author": "theo_daguier",
+  "contributors": [
+    "alexi.build"
+  ],
   "categories": [
     "Fun",
     "Design Tools"

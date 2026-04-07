@@ -85,6 +85,27 @@ export function getKillCommand(pid: number, force = false): string {
 }
 
 /**
+ * Get command to kill all processes matching a name.
+ *
+ * It shell-escapes the process name quotes to avoid breakage with names
+ * containing quotes or special characters (e.g. "Foo's Bar").
+ */
+export function getKillAllCommand(processName: string, force = false): string {
+  if (isWindows) {
+    // Use PowerShell Stop-Process by name which accepts the process name without needing the
+    // .exe suffix and handles common name matching (e.g. names from Get-Process).
+    // Escape single quotes for a safe single-quoted PowerShell string.
+    const psName = processName.replace(/'/g, "''");
+    const psScript = `Get-Process -Name '${psName}' -ErrorAction SilentlyContinue | Stop-Process ${
+      force ? "-Force" : ""
+    }`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(psScript)}`;
+  }
+  const escaped = processName.replace(/'/g, "'\\''");
+  return force ? `PROC_NAME='${escaped}' zsh -c 'sudo killall "$PROC_NAME"'` : `killall '${escaped}'`;
+}
+
+/**
  * Parse macOS ps command output line
  * Format: pid ppid cpu mem path
  */
