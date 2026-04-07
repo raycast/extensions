@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-07
 
 - Added support for Qoder.
 
