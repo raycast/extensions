@@ -44,19 +44,19 @@ Reply with ONLY a JSON array of parameter names that should be KEPT (essential o
 }
 
 async function analyzeURL(url: string): Promise<URLAnalysis> {
-  const qIndex = url.indexOf("?");
-  const base = qIndex === -1 ? url : url.substring(0, qIndex);
-  const queryString = qIndex === -1 ? "" : url.substring(qIndex + 1);
-
-  if (!queryString) {
-    return { original: url, base, params: [], usedAI: false };
+  let urlObj: URL;
+  try {
+    urlObj = new URL(url);
+  } catch {
+    return { original: url, base: url, params: [], usedAI: false };
   }
 
-  const allParams = queryString.split("&").map((p) => {
-    const eqIndex = p.indexOf("=");
-    if (eqIndex === -1) return { name: p, value: "" };
-    return { name: p.substring(0, eqIndex), value: p.substring(eqIndex + 1) };
-  });
+  const base = `${urlObj.origin}${urlObj.pathname}${urlObj.hash}`;
+  const allParams = Array.from(urlObj.searchParams.entries()).map(([name, value]) => ({ name, value }));
+
+  if (allParams.length === 0) {
+    return { original: url, base, params: [], usedAI: false };
+  }
 
   const matchedRule = rules.find((rule) => url.includes(rule.url));
   let keepSet: Set<string>;

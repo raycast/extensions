@@ -15,10 +15,7 @@ import { useEffect, useState } from "react";
 import { analyzeText, buildCleanedText, URLAnalysis } from "../utils/analyze";
 
 export default function CleanFlow({ rawText }: { rawText: string }) {
-  const { manualReview, exitAfterCleaning } = getPreferenceValues<{
-    manualReview: boolean;
-    exitAfterCleaning: boolean;
-  }>();
+  const { manualReview, exitAfterCleaning } = getPreferenceValues<Preferences>();
   const [analyses, setAnalyses] = useState<URLAnalysis[]>();
 
   useEffect(() => {

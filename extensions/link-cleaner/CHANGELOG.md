@@ -1,6 +1,6 @@
 # Link Cleaner Changelog
 
-## [Expand Rules, Add AI Fallback, and Manual Review Mode] - 2026-03-20
+## [Expand Rules, Add AI Fallback, and Manual Review Mode] - {PR_MERGE_DATE}
 
 - Expand site-specific rules from 6 to 30+ sites (search engines, video, music, social media, e-commerce, developer platforms)
 - Add Raycast AI fallback for URLs not matching any predefined rule (requires Pro; degrades gracefully to a built-in blacklist

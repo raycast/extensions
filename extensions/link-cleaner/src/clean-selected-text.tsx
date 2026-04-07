@@ -1,7 +1,6 @@
-import { getSelectedText, popToRoot, showToast, Toast } from "@raycast/api";
+import { Form, getSelectedText, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import CleanFlow from "./components/CleanFlow";
-import { Form } from "@raycast/api";
 
 export default function Command() {
   const [rawText, setRawText] = useState<string>();
