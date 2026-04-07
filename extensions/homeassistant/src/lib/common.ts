@@ -16,7 +16,7 @@ function parseCustomHeaders(raw: string | undefined): Record<string, string> | u
     return undefined;
   }
   const result: Record<string, string> = {};
-  for (const entry of raw.split(",")) {
+  for (const entry of raw.split(";")) {
     const trimmed = entry.trim();
     if (!trimmed) continue;
     const colonIndex = trimmed.indexOf(":");
