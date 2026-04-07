@@ -96,6 +96,7 @@ function cliPaths(): Record<string, string> {
       Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
       Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
       Positron: "/Applications/Positron.app/Contents/Resources/app/bin/code",
+      Qoder: "/Applications/Qoder.app/Contents/Resources/app/bin/code",
       Trae: "/Applications/Trae.app/Contents/Resources/app/bin/marscode",
       "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/bin/marscode",
       VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/bin/codium",
@@ -229,6 +230,7 @@ const buildSchemes: Record<string, string> = {
   Kiro: "kiro",
   VSCodium: "vscode-oss",
   Positron: "positron",
+  Qoder: "qoder",
   Windsurf: "windsurf",
   Trae: "trae",
   "Trae CN": "trae-cn",
