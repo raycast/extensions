@@ -62,7 +62,10 @@ export async function getHAWSConnection(): Promise<Connection> {
     const instance = await ha.nearestURL();
     console.log(`Nearest Instance URL ${instance}`);
     const auth = createLongLivedTokenAuth(instance, ha.token);
-    con = await createConnection({ auth, createSocket: async () => createSocket(auth, ha.ignoreCerts, ha.customHeaders) });
+    con = await createConnection({
+      auth,
+      createSocket: async () => createSocket(auth, ha.ignoreCerts, ha.customHeaders),
+    });
     return con;
   }
 }
