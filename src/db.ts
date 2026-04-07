@@ -67,11 +67,16 @@ export function validateUUID(id: string): string {
  * Executes a write SQL statement (INSERT/UPDATE/DELETE).
  */
 export async function writeSQL(sql: string): Promise<void> {
-  const { DatabaseSync } = await import("node:sqlite");
-  const db = new DatabaseSync(getDbPath());
   try {
-    db.exec(sql);
-  } finally {
-    db.close();
+    const { DatabaseSync } = await import("node:sqlite");
+    const db = new DatabaseSync(getDbPath());
+    try {
+      db.exec(sql);
+    } finally {
+      db.close();
+    }
+  } catch {
+    const { execFileSync } = await import("node:child_process");
+    execFileSync("sqlite3", [getDbPath()], { input: sql });
   }
 }
