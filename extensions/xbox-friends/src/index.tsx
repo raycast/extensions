@@ -40,6 +40,10 @@ export default function Command() {
       Accept: "application/json",
     },
     keepPreviousData: true,
+    parseResponse: async (response) => {
+      const json = await response.json();
+      return json.content ?? json;
+    },
     onError: (error) => {
       showToast({
         style: Toast.Style.Failure,
