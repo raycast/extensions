@@ -40,7 +40,26 @@ export default function SearchNotesCommand() {
   const trimmedSearchText = searchText.trim();
   const hasPendingSearch = trimmedSearchText !== query;
 
+  function handleSearchTextChange(nextSearchText: string) {
+    setSearchText(nextSearchText);
+
+    if (!nextSearchText.trim()) {
+      setQuery("");
+      setResults([]);
+      setError(null);
+      setIsLoading(false);
+    }
+  }
+
   function submitSearch() {
+    if (!trimmedSearchText) {
+      setQuery("");
+      setResults([]);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+
     setResults([]);
     setIsLoading(true);
     setQuery(trimmedSearchText);
@@ -51,6 +70,7 @@ export default function SearchNotesCommand() {
     if (!credentials || !query) {
       setResults([]);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
@@ -96,7 +116,7 @@ export default function SearchNotesCommand() {
     <List
       isLoading={isLoading}
       isShowingDetail
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={handleSearchTextChange}
       searchText={searchText}
       searchBarPlaceholder="Enter a keyword or semantic query"
     >

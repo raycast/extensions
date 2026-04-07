@@ -34,7 +34,7 @@ async function parseEnvelope<T>(response: Response): Promise<GetNoteEnvelope<T>>
   const raw = await response.text();
 
   if (!response.ok) {
-    throw createRequestError(new URL(response.url).pathname, response.status, raw.slice(0, 200));
+    throw createRequestError(new URL(response.url).pathname, response.status);
   }
 
   return JSON.parse(rewriteBigIntJson(raw)) as GetNoteEnvelope<T>;

@@ -14,6 +14,21 @@ function truncatePreview(content?: string, maxLength = 280): string {
   return `${normalized.slice(0, maxLength).trimEnd()}...`;
 }
 
+export function escapeMarkdown(content?: string): string {
+  if (!content) {
+    return "";
+  }
+
+  return content
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/\\/g, "\\\\")
+    .replace(/(`|\*|_|{|}|\[|\]|\(|\)|#|\+|!|\|)/g, "\\$1")
+    .replace(/^(\s*)([-+*])/gm, "$1\\$2")
+    .replace(/^(\s*)(\d+)\./gm, "$1$2\\.");
+}
+
 export function normalizeTagInput(raw: string): string[] {
   return raw
     .split(/[,\n]/)
@@ -24,13 +39,13 @@ export function normalizeTagInput(raw: string): string[] {
 export function notePreviewMarkdown(
   note: Pick<NoteSummary, "title" | "content" | "note_type" | "created_at" | "tags">,
 ): string {
-  const tags = note.tags?.length ? note.tags.map((tag) => `\`${tag.name}\``).join(" ") : "_No tags_";
-  const preview = truncatePreview(note.content);
+  const tags = note.tags?.length ? note.tags.map((tag) => escapeMarkdown(tag.name)).join(", ") : "_No tags_";
+  const preview = escapeMarkdown(truncatePreview(note.content));
 
-  return `# ${note.title || "Untitled Note"}
+  return `# ${escapeMarkdown(note.title || "Untitled Note")}
 
-- Type: ${note.note_type}
-- Created At: ${note.created_at || "Unknown"}
+- Type: ${escapeMarkdown(note.note_type || "Unknown")}
+- Created At: ${escapeMarkdown(note.created_at || "Unknown")}
 - Tags: ${tags}
 
 ## Preview
@@ -40,21 +55,21 @@ ${preview}
 }
 
 export function recallPreviewMarkdown(result: RecallResult): string {
-  return `# ${result.title || "Untitled Result"}
+  return `# ${escapeMarkdown(result.title || "Untitled Result")}
 
-- Type: ${result.note_type}
-${result.created_at ? `- Created At: ${result.created_at}` : ""}
+- Type: ${escapeMarkdown(result.note_type || "Unknown")}
+${result.created_at ? `- Created At: ${escapeMarkdown(result.created_at)}` : ""}
 
-${result.content || "_No snippet returned_"}
+${result.content ? escapeMarkdown(result.content) : "_No snippet returned_"}
 `;
 }
 
 export function knowledgeBasePreviewMarkdown(topic: KnowledgeBase): string {
-  return `# ${topic.name}
+  return `# ${escapeMarkdown(topic.name || "Untitled Knowledge Base")}
 
-${topic.description || "_No description_"}
+${topic.description ? escapeMarkdown(topic.description) : "_No description_"}
 
-- Topic ID: \`${topic.topic_id}\`
+- Topic ID: \`${escapeMarkdown(topic.topic_id)}\`
 - Note Count: ${topic.stats?.note_count ?? 0}
 - File Count: ${topic.stats?.file_count ?? 0}
 - Blogger Count: ${topic.stats?.blogger_count ?? 0}

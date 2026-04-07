@@ -60,8 +60,6 @@ export function buildApiError(payload: GetNoteApiErrorPayload | null | undefined
   });
 }
 
-export function createRequestError(endpoint: string, status: number, body?: string): GetNoteError {
-  return new GetNoteError(
-    `Request to ${GETNOTE_BASE_URL}${endpoint} failed (HTTP ${status})${body ? `: ${body}` : ""}`,
-  );
+export function createRequestError(endpoint: string, status: number): GetNoteError {
+  return new GetNoteError(`Request to ${GETNOTE_BASE_URL}${endpoint} failed (HTTP ${status}).`);
 }

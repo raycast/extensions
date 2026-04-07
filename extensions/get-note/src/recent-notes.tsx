@@ -69,7 +69,7 @@ export default function RecentNotesCommand() {
               <Action.Push
                 title="View Details"
                 icon={Icon.Sidebar}
-                target={<NoteDetailScreen noteId={note.note_id} initialNote={note} />}
+                target={<NoteDetailScreen noteId={note.note_id} initialNote={note} initialNoteIsPartial />}
               />
               <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={buildNoteBrowserUrl(note.note_id)} />
               {note.note_type?.toLowerCase() === "link" ? (

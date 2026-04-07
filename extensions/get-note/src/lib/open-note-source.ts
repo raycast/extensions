@@ -2,6 +2,7 @@ import { Toast, open, showToast } from "@raycast/api";
 
 import { getNoteDetail } from "./api";
 import { normalizeGetNoteError } from "./errors";
+import { toOpenableExternalUrl } from "./note-url";
 
 export async function openNoteSourceInBrowser(noteId: string): Promise<void> {
   const toast = await showToast({
@@ -11,12 +12,12 @@ export async function openNoteSourceInBrowser(noteId: string): Promise<void> {
 
   try {
     const note = await getNoteDetail(noteId);
-    const sourceUrl = note.web_page?.url;
+    const sourceUrl = toOpenableExternalUrl(note.web_page?.url);
 
     if (!sourceUrl) {
       toast.style = Toast.Style.Failure;
       toast.title = "No Source URL";
-      toast.message = "This note does not have a source URL.";
+      toast.message = "This note does not have a valid http(s) source URL.";
       return;
     }
 
