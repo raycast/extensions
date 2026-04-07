@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-04-07
 
 - Fix infinite retry loop on HTTP 429: add exponential backoff (1s, 5s, 15s) with a 3-retry cap and surface a Raycast error toast after retries are exhausted
 - Add non-retryable error path for HTTP 402 quota-exhausted responses
