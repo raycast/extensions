@@ -1,5 +1,4 @@
 import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
-import { executeSQL } from "@raycast/utils";
 import { existsSync } from "fs";
 import { platform } from "./platform";
 
@@ -68,5 +67,11 @@ export function validateUUID(id: string): string {
  * Executes a write SQL statement (INSERT/UPDATE/DELETE).
  */
 export async function writeSQL(sql: string): Promise<void> {
-  await executeSQL(getDbPath(), sql);
+  const { DatabaseSync } = await import("node:sqlite");
+  const db = new DatabaseSync(getDbPath());
+  try {
+    db.exec(sql);
+  } finally {
+    db.close();
+  }
 }
