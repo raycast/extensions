@@ -78,9 +78,9 @@ export function buildIssueSearchJql(query: string, options: BuildIssueSearchJqlO
   return [jqlConditions.join(" AND "), "order by lastViewed desc"].filter(Boolean).join(" ");
 }
 
-function parsePreferenceList(value: string): string[] {
+function parsePreferenceList(value?: string): string[] {
   return uniqueValues(
-    value
+    (value ?? "")
       .split(",")
       .map((item) => item.trim())
       .filter((item) => item.length > 0),

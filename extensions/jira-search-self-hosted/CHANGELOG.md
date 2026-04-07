@@ -1,6 +1,6 @@
 # Jira Search Self Hosted Changelog
 
-## [Update] - 2026-04-07
+## [Update] - {PR_MERGE_DATE}
 
 Added configuration option to set default filters for projects, issue types, statuses, and assignees for inclusion and exclusion.
 
