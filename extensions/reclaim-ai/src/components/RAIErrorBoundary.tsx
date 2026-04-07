@@ -1,4 +1,5 @@
 import { captureException } from "@sentry/node";
+import { List } from "@raycast/api";
 import { ComponentType, FC } from "react";
 import { ErrorBoundary, ErrorBoundaryProps } from "react-error-boundary";
 import { useCallbackSafeRef } from "../hooks/useCallbackSafeRef";
@@ -28,7 +29,11 @@ export const withRAIErrorBoundary = <P extends Record<string, unknown>>(
 
   const Wrapped: React.FC<P> = (props: P) => (
     <RAIErrorBoundary
-      fallbackRender={() => <>Something went wrong! Please contact support.</>}
+      fallbackRender={() => (
+        <List>
+          <List.EmptyView title="Something went wrong!" description="Please contact support." />
+        </List>
+      )}
       {...errorBoundaryOptions}
     >
       <WrappedComponent {...props} />
