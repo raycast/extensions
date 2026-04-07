@@ -13,7 +13,6 @@ interface SettingsFormProps {
 interface FormValues {
   usagePct: string;
   requestCost: string;
-  language: string;
   country: string;
 }
 

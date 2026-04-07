@@ -58,7 +58,6 @@ export interface ContentText {
   messageNeutral: (p: NeutralParams) => string;
   // Metadata labels
   metaRequestsToday: string;
-  mdRequestsToday: (n: number, budgetPerDay: string) => string;
   metaMonthDone: string;
   metaWorkingDay: string;
   metaYouUsed: string;
@@ -69,7 +68,6 @@ export interface ContentText {
   metaCountry: string;
   metaHolidaysTitle: string;
   metaPublicHolidays: (count: number, monthName: string, year: number) => string;
-  toastUsageSaved: string;
   metaHolidaysUnavailable: string;
   metaHolidaysLoading: string;
   metaDataSource: string;
@@ -121,7 +119,6 @@ export const contentText: ContentText = {
     `Keep to **~${budgetPerDay}%** per working day (${daysLeft} days left) to stay safe.`,
 
   metaRequestsToday: "Requests left today",
-  mdRequestsToday: (n, budgetPerDay) => `⚡ **~${n} requests / day** to stay on track *(${budgetPerDay}% / day)*`,
   metaMonthDone: "Month done",
   metaWorkingDay: "Working day",
   metaYouUsed: "You used",
@@ -133,7 +130,6 @@ export const contentText: ContentText = {
   metaHolidaysTitle: "Holidays",
   metaPublicHolidays: (count, monthName, year) =>
     count === 1 ? `1 public holiday · ${monthName} ${year}` : `${count} public holidays · ${monthName} ${year}`,
-  toastUsageSaved: "Usage updated",
   metaHolidaysUnavailable: "Unavailable — weekdays only",
   metaHolidaysLoading: "Loading…",
   metaDataSource: "Holidays data source",
