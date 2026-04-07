@@ -70,11 +70,7 @@ export default function CleanFlow({ rawText }: { rawText: string }) {
             defaultValue={analysis.params.filter((p) => p.keep).map((p) => p.name)}
           >
             {analysis.params.map((p) => (
-              <Form.TagPicker.Item
-                key={p.name}
-                value={p.name}
-                title={p.value ? `${p.name}=${decodeURIComponent(p.value)}` : p.name}
-              />
+              <Form.TagPicker.Item key={p.name} value={p.name} title={p.value ? `${p.name}=${p.value}` : p.name} />
             ))}
           </Form.TagPicker>
         );
