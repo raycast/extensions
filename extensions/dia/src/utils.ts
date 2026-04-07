@@ -60,6 +60,23 @@ export function isLikelyURL(str: string): boolean {
   return /^[\w-]+(\.[\w-]+)+/.test(trimmed);
 }
 
+/**
+ * Detects if text contains a URL broken across multiple lines
+ * (e.g., copied from a terminal, email, or narrow viewport).
+ * Returns the fixed URL if broken, or null if not.
+ */
+export function fixBrokenURL(text: string): string | null {
+  if (!text.includes("\n") && !text.includes("\r")) return null;
+  const joined = text
+    .split(/[\r\n]+/)
+    .map((line) => line.trim())
+    .join("");
+  if (/^https?:\/\/\S+$/.test(joined) || /^[\w-]+:\/\/\S+$/.test(joined)) {
+    return joined;
+  }
+  return null;
+}
+
 export function filterTabs(tabs: Tab[] | undefined, query: string) {
   if (!query || !tabs) return tabs;
 

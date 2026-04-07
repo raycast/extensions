@@ -107,6 +107,13 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "fix-url",
+      "title": "Fix Broken URL",
+      "subtitle": "Dia",
+      "description": "Detect and fix a broken URL in your clipboard (split across lines) and copy the clean version.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {

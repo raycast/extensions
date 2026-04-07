@@ -6,10 +6,11 @@ import { HistoryListItem } from "./components/HistoryListItem";
 import { SuggestionListItem } from "./components/SuggestionListItem";
 import { TabListItem } from "./components/TabListItem";
 import { URLListItem } from "./components/URLListItem";
+import { FixedURLListItem } from "./components/FixedURLListItem";
 import withVersionCheck from "./components/VersionCheck";
 import { useSearchHistory, useTabs, useBookmarks } from "./dia";
 import { useGoogleSuggestions } from "./google";
-import { filterHistory, filterTabs, isLikelyURL } from "./utils";
+import { filterHistory, filterTabs, fixBrokenURL, isLikelyURL } from "./utils";
 
 type ViewMode = "all" | "pinned-tabs" | "open-tabs" | "bookmarks" | "history" | "suggestions";
 
@@ -48,6 +49,7 @@ function Command() {
 
   const shouldShow = (section: ViewMode) => viewMode === "all" || viewMode === section;
   const detectedURL = searchText && isLikelyURL(searchText) ? searchText.trim() : null;
+  const brokenURLFixed = !detectedURL && searchText ? fixBrokenURL(searchText) : null;
 
   return (
     <List
@@ -74,6 +76,12 @@ function Command() {
         </List.Dropdown>
       }
     >
+      {brokenURLFixed && (
+        <List.Section title="Fixed URL">
+          <FixedURLListItem fixedUrl={brokenURLFixed} />
+        </List.Section>
+      )}
+
       {detectedURL && (
         <List.Section title="Open URL">
           <URLListItem url={detectedURL} searchText={searchText} />
