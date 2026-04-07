@@ -13,6 +13,8 @@ export interface HookSession {
   last_event: string;
   source: string;
   term_program?: string;
+  terminal_emulator?: string;
+  bundle_id?: string;
   label?: string;
   first_prompt?: string;
   is_worktree?: boolean;

@@ -8,33 +8,67 @@ Track active sessions, monitor usage costs, and quickly switch between Claude Co
 
 ### Session Monitoring
 
-- Real-time session status tracking (Active, Waiting for Input, Idle, Ended)
-- View session details including project, git branch, model, tokens, and cost
-- AI-generated session labels for quick identification
-- One-click focus to jump back into any session
+- Real-time session status tracking: Active, Waiting for Input, Idle, Ended
+- View session details: project, git branch, model, turns, tokens (input, output, cache read), cost, and duration
+- AI-generated session labels for quick identification (powered by Claude Haiku)
+- One-click focus to jump back into any session's editor or terminal
 - Resume ended sessions directly from Raycast
-- Git branch display and worktree detection
-- Support for multiple terminals: VS Code, Cursor, Zed, iTerm2, Warp, Ghostty, and more
+- Git branch display and worktree detection (worktree badge on sessions)
+- Show in Finder and copy project path
+- Automatic cleanup of stale sessions
+
+**Supported Editors & Terminals:**
+
+| Editors | JetBrains IDEs | Terminals |
+|---------|---------------|-----------|
+| VS Code | IntelliJ IDEA | Terminal.app |
+| Cursor | WebStorm | iTerm2 |
+| Zed | PyCharm | Warp |
+| Windsurf | GoLand | Ghostty |
+| | CLion, PhpStorm, etc. | kitty |
+| | | tmux |
+
+Focus action opens the project directly in the editor's CLI. JetBrains IDEs are detected via `TERMINAL_EMULATOR` and focused using the app bundle launcher. Resume copies `claude --resume` to clipboard and opens your chosen terminal at the project directory.
 
 ### Menu Bar Status
 
 - Always-visible menu bar icon showing active session count
 - Color-coded status: green (active), orange (waiting for input), yellow (idle)
-- Quick access to any session with cost and duration info
+- Session sections: Waiting for Input, Active, Idle, Recently Ended (last 5)
+- Each session shows: project name, terminal app, duration, last update, and cost
+- Click any session to focus its editor/terminal window
+- Quick actions: Open Session List (Cmd+L), Usage Dashboard (Cmd+U)
 
 ### Usage Dashboard
 
-- Cost tracking with daily, weekly, and monthly breakdowns
-- Token usage statistics (input, output, cache read, cache creation)
-- Per-project and per-model usage breakdown
-- Daily cost trend chart
+- Overview table: today, this week, and this month stats (sessions, cost, tokens)
+- Daily cost trend chart (last 7 days)
+- Per-model usage breakdown (weekly)
+- Per-project cost and token breakdown (weekly)
+- Token types tracked: input, output, cache read
 
 ### Extensions Manager
 
-- Browse and manage Claude Code plugins with enable/disable/update/uninstall actions
-- View skills from user, command, and plugin sources
-- Monitor MCP server status with real-time health checks
-- View detailed plugin contents: commands, skills, agents, and MCP servers
+**Plugins:**
+- Browse enabled and disabled plugins with status indicators
+- Actions: enable, disable, update, uninstall
+- View plugin details: version, author, scope, source repo, install dates, git SHA
+- View plugin contents: commands, skills, agents, MCP servers
+- Blocklist status display with reason and detail
+- Marketplace update with automatic remote sync
+
+**Skills:**
+- Browse user skills, command skills, and plugin skills
+- View skill details with invokable slash command info
+- Symlink detection for plugin-installed skills
+- Actions: view in Finder, copy path, uninstall
+
+**MCP Servers:**
+- Monitor server status: Connected, Needs Auth, Unreachable
+- Categories: user, cloud (claude.ai), built-in
+- View server details: command, args, URL, environment variables
+- Actions: open auth URL (for servers needing auth), refresh status, remove
+- Health check explanation for unreachable servers
 
 ## Getting Started
 
@@ -53,6 +87,20 @@ The setup installs a lightweight hook script that notifies the extension when se
 | **Claude Code Usage** | Usage statistics dashboard with cost and token breakdowns |
 | **Claude Code Extensions** | Manage plugins, skills, and MCP servers |
 | **Setup Claude Code Hooks** | One-click hook installation for session monitoring |
+
+## Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| Cmd+D | View Details |
+| Cmd+F | Show in Finder |
+| Cmd+C | Copy ID / Name |
+| Cmd+Shift+C | Copy Path |
+| Cmd+E | Enable / Disable |
+| Cmd+U | Update |
+| Cmd+O | Open Homepage |
+| Cmd+R | Refresh |
+| Ctrl+X | Delete / Remove |
 
 ## Preferences
 

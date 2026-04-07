@@ -62,7 +62,10 @@
         { "title": "VS Code", "value": "vscode" },
         { "title": "Cursor", "value": "cursor" },
         { "title": "Zed", "value": "zed" },
-        { "title": "Windsurf", "value": "windsurf" }
+        { "title": "Windsurf", "value": "windsurf" },
+        { "title": "IntelliJ IDEA", "value": "jetbrains-idea" },
+        { "title": "WebStorm", "value": "jetbrains-webstorm" },
+        { "title": "PyCharm", "value": "jetbrains-pycharm" }
       ]
     }
   ],

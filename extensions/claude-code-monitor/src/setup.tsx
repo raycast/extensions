@@ -241,9 +241,13 @@ if 'session_id' not in session:
     session['ended_at'] = None
     session['source'] = source
 
-# Always backfill term_program if missing
+# Always backfill term_program/terminal_emulator/bundle_id if missing
 if not session.get('term_program'):
     session['term_program'] = os.environ.get('TERM_PROGRAM', '')
+if not session.get('terminal_emulator'):
+    session['terminal_emulator'] = os.environ.get('TERMINAL_EMULATOR', '')
+if not session.get('bundle_id'):
+    session['bundle_id'] = os.environ.get('__CFBundleIdentifier', '')
 
 if event == 'SessionStart':
     session['cwd'] = cwd
@@ -253,6 +257,8 @@ if event == 'SessionStart':
     session['ended_at'] = None
     session['source'] = source
     session['term_program'] = os.environ.get('TERM_PROGRAM', '')
+    session['terminal_emulator'] = os.environ.get('TERMINAL_EMULATOR', '')
+    session['bundle_id'] = os.environ.get('__CFBundleIdentifier', '')
 
 if event == 'SessionEnd':
     session['ended_at'] = now

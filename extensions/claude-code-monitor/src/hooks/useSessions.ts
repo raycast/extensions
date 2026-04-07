@@ -32,6 +32,8 @@ function mergeSessions(
       last_event: hook.last_event,
       transcript_path: hook.transcript_path,
       term_program: hook.term_program,
+      terminal_emulator: hook.terminal_emulator,
+      bundle_id: hook.bundle_id,
       label: hook.label,
       first_prompt: hook.first_prompt,
       is_worktree: hook.is_worktree,

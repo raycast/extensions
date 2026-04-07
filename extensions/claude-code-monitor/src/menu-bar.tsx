@@ -115,9 +115,11 @@ function SessionMenuItem({ session }: { session: Session }) {
     session.cost != null && session.cost > 0
       ? ` | ${formatCost(session.cost)}`
       : "";
-  const appLabel = session.term_program
-    ? getAppLabel(session.term_program)
-    : "";
+  const appLabel = getAppLabel(
+    session.term_program,
+    session.terminal_emulator,
+    session.bundle_id,
+  );
   const appStr = appLabel ? `${appLabel} | ` : "";
 
   const title = getSessionTitle(session);

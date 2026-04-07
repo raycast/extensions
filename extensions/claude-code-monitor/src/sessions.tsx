@@ -110,9 +110,14 @@ function SessionItem({
     });
   }
 
-  if (session.term_program) {
+  const appLabel = getAppLabel(
+    session.term_program,
+    session.terminal_emulator,
+    session.bundle_id,
+  );
+  if (appLabel) {
     accessories.push({
-      tag: { value: getAppLabel(session.term_program), color: Color.Blue },
+      tag: { value: appLabel, color: Color.Blue },
     });
   }
 
@@ -152,6 +157,45 @@ function SessionItem({
                 }
               }}
             />
+            {session.state === "ended" && session.session_id && session.cwd && (
+              <ActionPanel.Submenu
+                title="Resume In…"
+                icon={Icon.ArrowRight}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              >
+                {[
+                  { title: "Terminal.app", value: "Apple_Terminal" },
+                  { title: "iTerm2", value: "iTerm.app" },
+                  { title: "Warp", value: "WarpTerminal" },
+                  { title: "Ghostty", value: "ghostty" },
+                  { title: "kitty", value: "kitty" },
+                ].map((term) => (
+                  <Action
+                    key={term.value}
+                    title={term.title}
+                    onAction={async () => {
+                      try {
+                        await resumeSession(
+                          session.session_id,
+                          session.cwd,
+                          term.value,
+                        );
+                        await showToast({
+                          style: Toast.Style.Success,
+                          title: "Resume command copied",
+                          message: "Paste in terminal to resume",
+                        });
+                      } catch {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to resume session",
+                        });
+                      }
+                    }}
+                  />
+                ))}
+              </ActionPanel.Submenu>
+            )}
             {session.session_id && (
               <Action.Push
                 title="View Details"
@@ -298,10 +342,15 @@ function SessionDetailView({
                 color={stateConfig.color}
               />
             </Detail.Metadata.TagList>
-            {parentSession.term_program && (
+            {(parentSession.term_program ||
+              parentSession.terminal_emulator) && (
               <Detail.Metadata.Label
                 title="Terminal"
-                text={getAppLabel(parentSession.term_program)}
+                text={getAppLabel(
+                  parentSession.term_program,
+                  parentSession.terminal_emulator,
+                  parentSession.bundle_id,
+                )}
               />
             )}
             {gitBranch && gitBranch !== "HEAD" && (
@@ -363,6 +412,11 @@ function SessionDetailView({
               try {
                 const cwd = parentSession.cwd || detail?.projectPath || "";
                 await resumeSession(sessionId, cwd, parentSession.term_program);
+                await showToast({
+                  style: Toast.Style.Success,
+                  title: "Resume command copied",
+                  message: "Paste in terminal to resume",
+                });
               } catch {
                 await showToast({
                   style: Toast.Style.Failure,

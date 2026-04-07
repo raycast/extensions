@@ -80,6 +80,8 @@ export function readHookSessions(): HookSession[] {
             last_event: session.last_event || "unknown",
             source: session.source || "",
             term_program: session.term_program,
+            terminal_emulator: session.terminal_emulator,
+            bundle_id: session.bundle_id,
             label: session.label,
             first_prompt: session.first_prompt,
             is_worktree: isWorktree || undefined,
