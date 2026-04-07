@@ -1,6 +1,6 @@
 # SSH Manager Changelog
 
-## [Edit existing connections] - {PR_MERGE_DATE}
+## [Edit existing connections] - 2026-04-07
 
 - Allow existing saved SSH connections to be edited
 - Add `.idea` and `.ai` folders to `.gitignore`
