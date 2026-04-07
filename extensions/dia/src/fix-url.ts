@@ -1,31 +1,11 @@
 import { Clipboard, closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
-
-/**
- * Detects if text contains a URL that was broken across multiple lines
- * (e.g., copied from a terminal, email, or narrow viewport).
- */
-function containsBrokenURL(text: string): boolean {
-  if (!text.includes("\n") && !text.includes("\r")) return false;
-  const joined = text.replace(/[\r\n]+\s*/g, "");
-  return /^https?:\/\/\S+/.test(joined) || /^[\w-]+:\/\/\S+/.test(joined);
-}
-
-/**
- * Joins a broken URL: strips line breaks, trailing/leading whitespace per line,
- * and any spaces introduced by word-wrap.
- */
-function joinBrokenURL(text: string): string {
-  return text
-    .split(/[\r\n]+/)
-    .map((line) => line.trim())
-    .join("");
-}
+import { fixBrokenURL } from "./utils";
 
 export default async function Command() {
   try {
     const clipboard = await Clipboard.readText();
 
-    if (!clipboard || !clipboard.trim()) {
+    if (!clipboard?.trim()) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Clipboard is empty",
@@ -34,18 +14,9 @@ export default async function Command() {
       return;
     }
 
-    const raw = clipboard.trim();
+    const fixed = fixBrokenURL(clipboard.trim());
 
-    if (!containsBrokenURL(raw)) {
-      // Maybe it's a single-line URL with stray spaces
-      const cleaned = raw.replace(/\s+/g, "");
-      if (/^https?:\/\/\S+/.test(cleaned) && cleaned !== raw) {
-        await Clipboard.copy(cleaned);
-        await closeMainWindow();
-        await showHUD("URL cleaned and copied");
-        return;
-      }
-
+    if (!fixed) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No broken URL detected",
@@ -54,7 +25,6 @@ export default async function Command() {
       return;
     }
 
-    const fixed = joinBrokenURL(raw);
     await Clipboard.copy(fixed);
     await closeMainWindow();
     await showHUD("URL fixed and copied");
