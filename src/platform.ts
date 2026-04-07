@@ -1,7 +1,11 @@
+import { execFile } from "child_process";
 import { existsSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { promisify } from "util";
 import { getApplications, open, showToast, Toast } from "@raycast/api";
+
+const execFileAsync = promisify(execFile);
 
 export const WISPR_FLOW_BUNDLE_ID = "com.electron.wispr-flow";
 
@@ -60,6 +64,29 @@ class WindowsPlatform implements PlatformAdapter {
       });
     }
   }
+}
+
+export async function getWindowsAppPathMap(): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  try {
+    const ps = [
+      "HKLM:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*",
+      "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\*",
+    ].join("','");
+    const script = `Get-ItemProperty '${ps}' -ErrorAction SilentlyContinue | Where-Object { $_.DisplayIcon } | ForEach-Object { $icon = $_.DisplayIcon -replace '(,[^,]+)?$' -replace '"',''; if ($icon -match '\\.exe$' -and (Test-Path $icon)) { "$([io.path]::GetFileNameWithoutExtension($icon).ToLower())|$icon" } } | Sort-Object -Unique`;
+    const { stdout } = await execFileAsync("powershell", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-Command",
+      script,
+    ]);
+    for (const line of stdout.trim().split(/\r?\n/)) {
+      const [name, path] = line.split("|");
+      if (name && path) map.set(name, path);
+    }
+  } catch {
+  }
+  return map;
 }
 
 export function createPlatformAdapter(): PlatformAdapter {

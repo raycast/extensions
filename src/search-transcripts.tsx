@@ -24,6 +24,7 @@ import {
   groupTranscriptsByDate,
 } from "./utils";
 import { getDbPath, dbExists, writeSQL } from "./db";
+import { getWindowsAppPathMap } from "./platform";
 
 const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
   timestamp, app, url, duration, numWords, status, language, conversationId, isArchived`;
@@ -159,12 +160,22 @@ export default function Command() {
   }, [uniqueAppsData]);
 
   const { data: installedApps } = usePromise(getApplications);
+  const { data: winRegistryMap } = usePromise(
+    () => process.platform === "win32" ? getWindowsAppPathMap() : Promise.resolve(new Map<string, string>())
+  );
   const appPathMap = useMemo(() => {
     const map = new Map<string, string>();
+    const isWindows = process.platform === "win32";
     for (const app of installedApps ?? []) {
-      if (app.bundleId) {
+      if (isWindows) {
+        const exeName = app.path.split(/[\\/]/).pop()?.replace(/\.exe$/i, "").toLowerCase();
+        if (exeName) map.set(exeName, app.path);
+      } else if (app.bundleId) {
         map.set(app.bundleId, app.path);
       }
+    }
+    for (const [name, path] of winRegistryMap ?? []) {
+      if (!map.has(name)) map.set(name, path);
     }
     // Map legacy bundle IDs to current app paths
     const BUNDLE_ALIASES: Record<string, string> = {
@@ -176,7 +187,7 @@ export default function Command() {
       }
     }
     return map;
-  }, [installedApps]);
+  }, [installedApps, winRegistryMap]);
 
   const allTranscripts = data ?? [];
   const groups = groupTranscriptsByDate(allTranscripts);
@@ -265,7 +276,8 @@ function TranscriptListItem({
     displayText.length > 80
       ? displayText.substring(0, 80) + "..."
       : displayText;
-  const appPath = transcript.app ? appPathMap.get(transcript.app) : undefined;
+  const appKey = process.platform === "win32" ? transcript.app?.toLowerCase() : transcript.app;
+  const appPath = appKey ? appPathMap.get(appKey) : undefined;
   const appIcon = appPath ? { fileIcon: appPath } : Icon.Microphone;
 
   const handleArchive = useCallback(async () => {
