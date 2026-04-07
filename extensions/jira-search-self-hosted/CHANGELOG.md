@@ -1,5 +1,9 @@
 # Jira Search Self Hosted Changelog
 
+## [Update] - 2026-04-07
+
+Added configuration option to set default filters for projects, issue types, statuses, and assignees for inclusion and exclusion.
+
 ## [Moved contributor] - 2025-12-07
 
 ## [Moved contributor] - 2025-12-03
