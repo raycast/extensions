@@ -51,6 +51,29 @@ After the PR is opened, the Raycast team reviews it and may request changes. Onc
 - Match list and detail behavior between History and the Translate screen Recent section (for example Show/Hide Detail as the primary action and the same markdown detail patterns).
 - Prefer breaking storage or schema changes over optional legacy compatibility when the project is still greenfield and the simpler model is worth a reset.
 
+## Raycast Reserved Keyboard Shortcuts
+
+When assigning `shortcut` props to `<Action>` components, avoid these reserved shortcuts — Raycast intercepts them before they reach extensions (silently ignored in production, warning in dev):
+
+**Hard-reserved by Raycast:**
+- `Cmd+K` — Opens Action Panel
+- `Cmd+W` — Closes Raycast window
+- `Cmd+Esc` — Returns to root search
+- `Ctrl+P` / `Ctrl+N` — Move up/down in lists
+- `Cmd+,` — Open Raycast preferences
+- `Cmd+P` — Reserved (pin/navigation, not available to extensions)
+- `Enter` / `Cmd+Enter` — Primary/secondary action (auto-assigned to first two ActionPanel items)
+- `Esc` — Navigate back
+
+**`Keyboard.Shortcut.Common` conventions** (not reserved, but use for their intended purpose for ecosystem consistency):
+- `Cmd+O` → Open, `Cmd+Shift+O` → Open With
+- `Cmd+Shift+C` → Copy, `Cmd+D` → Duplicate, `Cmd+E` → Edit
+- `Cmd+S` → Save, `Cmd+N` → New, `Cmd+R` → Refresh
+- `Cmd+Shift+P` → Pin, `Cmd+Y` → Quick Look
+- `Ctrl+X` → Remove, `Ctrl+Shift+X` → Remove All
+
+**Safe for custom actions:** `opt+key`, `ctrl+key`, `cmd+shift+key` combinations not listed above.
+
 ## Learned Workspace Facts
 
 - Word translation uses multiple Gemini-returned senses with user selection before persistence; phrase or text translation stays a single saved result without a sense picker.

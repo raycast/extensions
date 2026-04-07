@@ -23,3 +23,7 @@ export const getPreferenceValues = vi.fn(() => ({
 }));
 
 export const closeMainWindow = vi.fn(async () => {});
+
+export const environment = {
+  supportPath: "/tmp/vocabuilder-test-support",
+};

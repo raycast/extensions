@@ -13,6 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
+import PronounceAction from "./components/PronounceAction";
 import LanguageConfigError from "./components/LanguageConfigError";
 import { useLanguagePair } from "./hooks/useLanguagePair";
 import History from "./history";
@@ -35,6 +36,13 @@ function pickSenseShortcut(index: number): { modifiers: "cmd"[]; key: "1" | "2" 
   const keys: ("1" | "2" | "3" | "4" | "5")[] = ["1", "2", "3", "4", "5"];
   return { modifiers: ["cmd"], key: keys[index] };
 }
+
+const RETRYABLE_ERRORS = [
+  "NETWORK_OFFLINE",
+  "GEMINI_REQUEST_FAILED",
+  "GEMINI_EMPTY_RESPONSE",
+  "GEMINI_INVALID_RESPONSE",
+];
 
 const SECRET_PREFIX_RE = /^(sk-|ghp_|github_pat_|xox[baprs]-|AKIA|ASIA|AIza)/i;
 
@@ -432,11 +440,11 @@ export default function Translate() {
           icon={errorCode === "NETWORK_OFFLINE" ? Icon.WifiDisabled : Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              {errorCode === "NETWORK_OFFLINE" && searchText.trim() && (
-                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => submitTranslation(searchText)} />
-              )}
-              {error.includes("API key") && (
+              {errorCode === "INVALID_API_KEY" && (
                 <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
+              )}
+              {RETRYABLE_ERRORS.includes(errorCode ?? "") && searchText.trim() && (
+                <Action title="Retry" icon={Icon.ArrowClockwise} onAction={() => submitTranslation(searchText)} />
               )}
               <ToggleLanguagesAction />
             </ActionPanel>
@@ -469,6 +477,15 @@ export default function Translate() {
                 detail={
                   <List.Item.Detail
                     markdown={buildTranslationDetailMarkdown(detailTranslation, pendingWord.originalInput)}
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label
+                          title=""
+                          text="⌘O to pronounce · ⌘⇧O for translation"
+                          icon={Icon.SpeakerHigh}
+                        />
+                      </List.Item.Detail.Metadata>
+                    }
                   />
                 }
                 actions={
@@ -483,6 +500,18 @@ export default function Translate() {
                       title="Copy Only"
                       content={sense.translation}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    />
+                    <PronounceAction
+                      word={pendingWord.effectiveWord}
+                      languageCode={languagePair.source.code}
+                      title="Pronounce Word"
+                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                    />
+                    <PronounceAction
+                      word={sense.translation}
+                      languageCode={languagePair.target.code}
+                      title="Pronounce Translation"
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                     />
                     <Action
                       title="Open History"
@@ -510,6 +539,18 @@ export default function Translate() {
                   title="Copy Translation"
                   content={result.translation}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
+                />
+                <PronounceAction
+                  word={result.word}
+                  languageCode={languagePair.source.code}
+                  title="Pronounce Original"
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+                <PronounceAction
+                  word={result.translation}
+                  languageCode={languagePair.target.code}
+                  title="Pronounce Translation"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 />
                 <Action
                   title="Open History"
@@ -606,6 +647,13 @@ export default function Translate() {
                         content={item.translation}
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
+                      <PronounceAction
+                        word={item.word}
+                        languageCode={languagePair.source.code}
+                        title="Pronounce Word"
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      />
+                      {/* Recent items only show source pronunciation — full history has both */}
                       <Action
                         title="Open History"
                         icon={Icon.Clock}

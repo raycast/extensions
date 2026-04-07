@@ -52,7 +52,7 @@ ${escapeMarkdownMultiline(input)}`;
 export function buildFlashcardDetailMarkdown(
   card: Pick<Translation, "word" | "translation" | "partOfSpeech" | "example" | "exampleTranslation">,
 ): string {
-  return `# ${escapeMarkdown(card.word)}
+  return `## ${escapeMarkdown(card.word)}
 
 **${escapeMarkdown(card.partOfSpeech)}** · ${escapeMarkdown(card.translation)}
 

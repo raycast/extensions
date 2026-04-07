@@ -1,4 +1,5 @@
 import { Action, ActionPanel, closeMainWindow, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import PronounceAction from "./components/PronounceAction";
 import { useEffect, useReducer, useState } from "react";
 import LanguageConfigError from "./components/LanguageConfigError";
 import { useLanguagePair } from "./hooks/useLanguagePair";
@@ -245,16 +246,49 @@ export default function Flashcards(props: { languagePair?: LanguagePair }) {
         title={card.word}
         subtitle={state.revealed ? undefined : "···"}
         accessories={[isNew ? { tag: { value: "New", color: Color.Green } } : {}, { text: position }]}
-        detail={<List.Item.Detail markdown={detailMarkdown} />}
+        detail={
+          <List.Item.Detail
+            markdown={detailMarkdown}
+            metadata={
+              <List.Item.Detail.Metadata>
+                <List.Item.Detail.Metadata.Label
+                  title=""
+                  text={state.revealed ? "⌘O to pronounce · ⌘⇧O for translation" : "⌘O to pronounce"}
+                  icon={Icon.SpeakerHigh}
+                />
+              </List.Item.Detail.Metadata>
+            }
+          />
+        }
         actions={
           <ActionPanel>
             {!state.revealed ? (
-              <Action title="Reveal Answer" onAction={() => dispatch({ type: "reveal" })} />
+              <>
+                <Action title="Reveal Answer" onAction={() => dispatch({ type: "reveal" })} />
+                <PronounceAction
+                  word={card.word}
+                  languageCode={languagePair.source.code}
+                  title="Pronounce Word"
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+              </>
             ) : (
               <>
                 <Action title="Good" onAction={() => handleRate("good")} />
                 <Action title="Again" shortcut={{ modifiers: [], key: "1" }} onAction={() => handleRate("again")} />
                 <Action title="Easy" shortcut={{ modifiers: [], key: "2" }} onAction={() => handleRate("easy")} />
+                <PronounceAction
+                  word={card.word}
+                  languageCode={languagePair.source.code}
+                  title="Pronounce Word"
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+                <PronounceAction
+                  word={card.translation}
+                  languageCode={languagePair.target.code}
+                  title="Pronounce Translation"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                />
               </>
             )}
             <ToggleLanguagesAction />
