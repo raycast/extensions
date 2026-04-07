@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Wikilink Actions] - {PR_MERGE_DATE}
+## [Wikilink Actions] - 2026-04-07
 
 - New: Copy Wikilink — copies `[[Note Title]]` to clipboard (⌥W)
 - New: Paste Wikilink — pastes `[[Note Title]]` into the focused app (⌥⇧W)
