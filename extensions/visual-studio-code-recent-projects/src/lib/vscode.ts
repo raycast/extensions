@@ -79,6 +79,7 @@ function cliPaths(): Record<string, string> {
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
       Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
       Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
+      Qoder: path.join(programsFolder, "Qoder", "bin", "code.cmd"),
       Trae: path.join(programsFolder, "Trae", "bin", "trae.cmd"),
       "Trae CN": path.join(programsFolder, "Trae CN", "bin", "trae-cn.cmd"),
       VSCodium: path.join(programsFolder, "VSCodium", "bin", "codium.cmd"),
