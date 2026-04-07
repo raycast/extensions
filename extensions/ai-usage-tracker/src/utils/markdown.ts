@@ -1,4 +1,4 @@
-import type { Translations } from "../i18n/translations";
+import { contentText } from "./content-text";
 import type { StatusInfo, StatusKind } from "./status";
 
 const BAR_WIDTH = 60;
@@ -29,24 +29,23 @@ export function buildMarkdown(
   total: number,
   status: StatusInfo,
   holidaysLoading: boolean,
-  t: Translations,
 ): string {
   const emoji = STATUS_EMOJI[status.kind];
   const mood = MOOD_EMOJI[status.kind];
 
   const titleMap: Record<StatusKind, string> = {
-    ahead: t.statusAhead,
-    behind: t.statusBehind,
-    neutral: t.statusNeutral,
-    idle: t.statusIdle,
+    ahead: contentText.statusAhead,
+    behind: contentText.statusBehind,
+    neutral: contentText.statusNeutral,
+    idle: contentText.statusIdle,
   };
 
   const deltaStr =
     status.kind === "idle" || status.delta === 0
-      ? t.metaDeltaOnTrack
+      ? contentText.metaDeltaOnTrack
       : status.delta > 0
-        ? t.metaDeltaBehind(status.delta)
-        : t.metaDeltaAhead(Math.abs(status.delta));
+        ? contentText.metaDeltaBehind(status.delta)
+        : contentText.metaDeltaAhead(Math.abs(status.delta));
 
   const usageFill = status.kind === "ahead" ? "▓" : "█";
 
@@ -54,12 +53,12 @@ export function buildMarkdown(
 
   // Requests remaining for today — headline metric
   if (status.kind !== "idle" && status.daysLeft > 0) {
-    lines.push(`⚡ **~${status.requestsToday}** ${t.metaRequestsToday}`, "", "---", "");
+    lines.push(`⚡ **~${status.requestsToday}** ${contentText.metaRequestsToday}`, "", "---", "");
   }
 
   // Month bar: label line, then bar line
   lines.push(
-    `📅 **${t.metaMonthDone} ${monthPct}%** · *${elapsed} / ${total}*\n`,
+    `📅 **${contentText.metaMonthDone} ${monthPct}%** · *${elapsed} / ${total}*\n`,
     `\`${makeBar(monthPct)}\` **${monthPct}%**`,
   );
 
@@ -67,7 +66,7 @@ export function buildMarkdown(
   if (usage > 0) {
     lines.push(
       "",
-      `${emoji} **${t.metaYouUsed} ${usage}%** · *${deltaStr}* ${mood}\n`,
+      `${emoji} **${contentText.metaYouUsed} ${usage}%** · *${deltaStr}* ${mood}\n`,
       `\`${makeBar(usage, usageFill)}\` **${usage}%**`,
     );
   }
@@ -75,7 +74,7 @@ export function buildMarkdown(
   lines.push("", "---", "", `${status.message}`);
 
   if (holidaysLoading) {
-    lines.push("", "---", "", t.mdFetchingHolidays);
+    lines.push("", "---", "", contentText.mdFetchingHolidays);
   }
 
   return lines.join("\n");

@@ -1,13 +1,12 @@
-import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 
 import type { Settings } from "../hooks/useSettings";
-import type { Lang, Translations } from "../i18n/translations";
+import { contentText } from "../utils/content-text";
 import { SUPPORTED_COUNTRIES } from "../utils/countries";
 
 interface SettingsFormProps {
   settings: Settings;
   isFirstRun?: boolean;
-  t: Translations;
   onSave: (settings: Settings) => Promise<void>;
 }
 
@@ -18,12 +17,7 @@ interface FormValues {
   country: string;
 }
 
-const LANGUAGES: { code: Lang; label: string }[] = [
-  { code: "en", label: "English" },
-  { code: "fr", label: "Français" },
-];
-
-export function SettingsForm({ settings, isFirstRun = false, t, onSave }: SettingsFormProps) {
+export function SettingsForm({ settings, isFirstRun = false, onSave }: SettingsFormProps) {
   const { pop } = useNavigation();
 
   async function handleSubmit(values: FormValues) {
@@ -31,8 +25,8 @@ export function SettingsForm({ settings, isFirstRun = false, t, onSave }: Settin
     if (isNaN(usagePct) || usagePct < 0 || usagePct > 100) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t.validationInvalidUsage,
-        message: t.validationInvalidUsageMsg,
+        title: contentText.validationInvalidUsage,
+        message: contentText.validationInvalidUsageMsg,
       });
       return;
     }
@@ -41,8 +35,8 @@ export function SettingsForm({ settings, isFirstRun = false, t, onSave }: Settin
     if (isNaN(requestCost) || requestCost <= 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t.validationInvalidCost,
-        message: t.validationInvalidCostMsg,
+        title: contentText.validationInvalidCost,
+        message: contentText.validationInvalidCostMsg,
       });
       return;
     }
@@ -50,7 +44,6 @@ export function SettingsForm({ settings, isFirstRun = false, t, onSave }: Settin
     await onSave({
       usagePct,
       requestCost,
-      language: values.language as Lang,
       country: values.country,
     });
 
@@ -59,38 +52,33 @@ export function SettingsForm({ settings, isFirstRun = false, t, onSave }: Settin
 
   return (
     <Form
-      navigationTitle={isFirstRun ? t.formTitleFirstRun : t.formTitleSettings}
+      navigationTitle={isFirstRun ? contentText.formTitleFirstRun : contentText.formTitleSettings}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title={t.formSubmitButton} icon={Icon.CheckCircle} onSubmit={handleSubmit} />
+          <Action.SubmitForm title={contentText.formSubmitButton} icon={Icon.CheckCircle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Description text={t.formDesc(settings.requestCost)} />
+      <Form.Description text={contentText.formDesc(settings.requestCost)} />
       <Form.TextField
         id="usagePct"
-        title={t.formUsageLabel}
-        placeholder={t.formUsagePlaceholder}
+        title={contentText.formUsageLabel}
+        placeholder={contentText.formUsagePlaceholder}
         defaultValue={String(settings.usagePct)}
-        info={t.formUsageInfo}
+        info={contentText.formUsageInfo}
       />
       <Form.Separator />
       <Form.TextField
         id="requestCost"
-        title={t.formCostLabel}
-        placeholder={t.formCostPlaceholder}
+        title={contentText.formCostLabel}
+        placeholder={contentText.formCostPlaceholder}
         defaultValue={String(settings.requestCost)}
-        info={t.formCostInfo}
+        info={contentText.formCostInfo}
       />
       <Form.Separator />
-      <Form.Dropdown id="language" title={t.formLanguageLabel} defaultValue={settings.language}>
-        {LANGUAGES.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.label} />
-        ))}
-      </Form.Dropdown>
-      <Form.Dropdown id="country" title={t.formCountryLabel} defaultValue={settings.country}>
+      <Form.Dropdown id="country" title={contentText.formCountryLabel} defaultValue={settings.country}>
         {SUPPORTED_COUNTRIES.map((c) => (
-          <Form.Dropdown.Item key={c.code} value={c.code} title={`${c.names[settings.language]} (${c.code})`} />
+          <Form.Dropdown.Item key={c.code} value={c.code} title={`${c.name} (${c.code})`} />
         ))}
       </Form.Dropdown>
     </Form>

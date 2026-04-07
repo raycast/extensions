@@ -1,4 +1,4 @@
-import type { Translations } from "../i18n/translations";
+import { contentText } from "./content-text";
 
 export type StatusKind = "ahead" | "behind" | "neutral" | "idle";
 
@@ -12,13 +12,7 @@ export interface StatusInfo {
   message: string;
 }
 
-export function computeStatus(
-  usage: number,
-  elapsed: number,
-  total: number,
-  requestCost: number,
-  t: Translations,
-): StatusInfo {
+export function computeStatus(usage: number, elapsed: number, total: number, requestCost: number): StatusInfo {
   const monthPct = total > 0 ? Math.round((elapsed / total) * 100) : 0;
   const delta = usage - monthPct;
   const daysLeft = total - elapsed;
@@ -38,7 +32,7 @@ export function computeStatus(
       budgetPerDay,
       daysLeft,
       requestsToday: 0,
-      message: t.messageIdle,
+      message: contentText.messageIdle,
     };
   }
 
@@ -51,7 +45,7 @@ export function computeStatus(
       budgetPerDay,
       daysLeft,
       requestsToday,
-      message: t.messageAhead({ delta, monthPct, usage, extraRequests, budgetPerDay, daysLeft }),
+      message: contentText.messageAhead({ delta, monthPct, usage, extraRequests, budgetPerDay, daysLeft }),
     };
   }
 
@@ -63,7 +57,7 @@ export function computeStatus(
       budgetPerDay,
       daysLeft,
       requestsToday,
-      message: t.messageBehind({ delta, monthPct, usage, budgetPerDay, daysLeft }),
+      message: contentText.messageBehind({ delta, monthPct, usage, budgetPerDay, daysLeft }),
     };
   }
 
@@ -74,6 +68,6 @@ export function computeStatus(
     budgetPerDay,
     daysLeft,
     requestsToday,
-    message: t.messageNeutral({ monthPct, usage, budgetPerDay, daysLeft }),
+    message: contentText.messageNeutral({ monthPct, usage, budgetPerDay, daysLeft }),
   };
 }

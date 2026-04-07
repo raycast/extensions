@@ -1,12 +1,10 @@
 import { LocalStorage } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import type { Lang } from "../i18n/translations";
-
 export interface Settings {
   usagePct: number;
   requestCost: number;
-  language: Lang;
+
   country: string;
 }
 
@@ -15,7 +13,6 @@ const LS_KEY = "settings-v1";
 export const DEFAULT_SETTINGS: Settings = {
   usagePct: 0,
   requestCost: 0.3,
-  language: "en",
   country: "FR",
 };
 

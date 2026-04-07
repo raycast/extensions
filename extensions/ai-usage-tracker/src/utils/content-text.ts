@@ -1,5 +1,3 @@
-export type Lang = "en" | "fr";
-
 export interface AheadParams {
   delta: number;
   monthPct: number;
@@ -24,7 +22,7 @@ export interface NeutralParams {
   daysLeft: number;
 }
 
-export interface Translations {
+export interface ContentText {
   // Navigation
   navTitle: string;
   // Actions
@@ -41,7 +39,6 @@ export interface Translations {
   formCostLabel: string;
   formCostPlaceholder: string;
   formCostInfo: string;
-  formLanguageLabel: string;
   formCountryLabel: string;
   formSubmitButton: string;
   // Validation
@@ -82,7 +79,7 @@ export interface Translations {
   mdFetchingHolidays: string;
 }
 
-const en: Translations = {
+export const contentText: ContentText = {
   navTitle: "AI Requests Usage Tracker",
   actionOpenSettings: "Settings",
   actionUpdateUsage: "Update Usage",
@@ -98,7 +95,6 @@ const en: Translations = {
   formCostLabel: "Cost per request (%)",
   formCostPlaceholder: "e.g. 0.3",
   formCostInfo: "How much % each premium request consumes (default: 0.3%)",
-  formLanguageLabel: "Language",
   formCountryLabel: "Country",
   formSubmitButton: "Save",
 
@@ -146,75 +142,3 @@ const en: Translations = {
   mdYourUsage: "**Your usage**",
   mdFetchingHolidays: "*⏳ Fetching public holidays…*",
 };
-
-const fr: Translations = {
-  navTitle: "Suivi des requêtes premium",
-  actionOpenSettings: "Paramètres",
-  actionUpdateUsage: "Mettre à jour l'utilisation",
-
-  formTitleFirstRun: "Bienvenue — Configurez votre suivi",
-  formTitleSettings: "Paramètres",
-  formTitleUpdateUsage: "Mettre à jour l'utilisation",
-  formDesc: (cost) =>
-    `Chaque requête premium consomme ${cost} % de votre quota mensuel. Entrez votre utilisation actuelle et configurez vos préférences.`,
-  formUsageLabel: "Utilisation actuelle (%)",
-  formUsagePlaceholder: "0 - 100",
-  formUsageInfo: "Votre pourcentage d'utilisation actuel des requêtes premium IA (0-100)",
-  formCostLabel: "Coût par requête (%)",
-  formCostPlaceholder: "ex. 0.3",
-  formCostInfo: "Combien de % chaque requête premium consomme (défaut : 0,3 %)",
-  formLanguageLabel: "Langue",
-  formCountryLabel: "Pays",
-  formSubmitButton: "Enregistrer",
-
-  validationInvalidUsage: "Valeur invalide",
-  validationInvalidUsageMsg: "Veuillez entrer un nombre entier entre 0 et 100.",
-  validationInvalidCost: "Coût invalide",
-  validationInvalidCostMsg: "Veuillez entrer un nombre positif (ex. 0.3).",
-
-  statusAhead: "En avance",
-  statusBehind: "En retard",
-  statusNeutral: "Dans les temps",
-  statusIdle: "Suivre votre utilisation",
-
-  messageIdle: "Renseignez votre pourcentage d'utilisation ci-dessous pour voir où vous en êtes.",
-  messageAhead: ({ delta, monthPct, usage, extraRequests, budgetPerDay, daysLeft }) =>
-    `Vous êtes **en avance** de ${Math.abs(delta)} points — le mois est avancé à ${monthPct} % mais vous n'avez utilisé que ${usage} %.\n\n` +
-    `Vous pourriez consommer **~${extraRequests}** requêtes premium supplémentaires avant de rattraper la courbe.\n\n` +
-    `Budget restant : **~${budgetPerDay} %** par jour ouvré (${daysLeft} jours restants).`,
-  messageBehind: ({ delta, monthPct, usage, budgetPerDay, daysLeft }) =>
-    `Vous êtes **en retard** de ${delta} points — le mois est avancé à ${monthPct} % mais vous avez utilisé ${usage} %.\n\n` +
-    `Pour rester dans le budget, visez **≤${budgetPerDay} %** par jour ouvré sur les ${daysLeft} prochains jours.`,
-  messageNeutral: ({ monthPct, usage, budgetPerDay, daysLeft }) =>
-    `**Dans les temps.** Le mois est avancé à ${monthPct} %, vous avez utilisé ${usage} %.\n\n` +
-    `Maintenez **~${budgetPerDay} %** par jour ouvré (${daysLeft} jours restants) pour rester en sécurité.`,
-
-  metaRequestsToday: "Restantes aujourd'hui",
-  mdRequestsToday: (n, budgetPerDay) =>
-    `⚡ **~${n} requêtes / jour** pour rester dans les temps *(${budgetPerDay} % / jour)*`,
-  metaMonthDone: "Mois écoulé",
-  metaWorkingDay: "Jour ouvré",
-  metaYouUsed: "Vous avez utilisé",
-  metaDelta: "Écart",
-  metaDeltaAhead: (n) => `${n} % d'avance`,
-  metaDeltaBehind: (n) => `+${n} % de retard`,
-  metaDeltaOnTrack: "±0 %",
-  metaCountry: "Pays",
-  metaHolidaysTitle: "Jours fériés",
-  metaPublicHolidays: (count, monthName, year) =>
-    count === 1 ? `1 jour férié · ${monthName} ${year}` : `${count} jours fériés · ${monthName} ${year}`,
-  toastUsageSaved: "Utilisation mise à jour",
-  metaHolidaysUnavailable: "Indisponible — jours de semaine seulement",
-  metaHolidaysLoading: "Chargement…",
-  metaDataSource: "Source jours fériés",
-
-  mdMonthProgress: "**Avancement du mois** (jours ouvrés)",
-  mdYourUsage: "**Votre utilisation**",
-  mdFetchingHolidays: "*⏳ Chargement des jours fériés…*",
-};
-
-export const TRANSLATIONS: Record<Lang, Translations> = { en, fr };
-
-export function getTranslations(lang: Lang): Translations {
-  return TRANSLATIONS[lang];
-}
