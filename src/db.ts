@@ -38,7 +38,7 @@ export async function ensureWisprFlowInstalled(): Promise<boolean> {
   return installed;
 }
 
-export async function openWisprFlow(url: string): Promise<void> {
+export async function openWisprFlow(url: string): Promise<boolean> {
   return platform.openWisprFlow(url);
 }
 
@@ -67,16 +67,43 @@ export function validateUUID(id: string): string {
  * Executes a write SQL statement (INSERT/UPDATE/DELETE).
  */
 export async function writeSQL(sql: string): Promise<void> {
+  const dbPath = getDbPath();
+
   try {
     const { DatabaseSync } = await import("node:sqlite");
-    const db = new DatabaseSync(getDbPath());
+    const db = new DatabaseSync(dbPath);
     try {
       db.exec(sql);
     } finally {
       db.close();
     }
-  } catch {
-    const { execFileSync } = await import("node:child_process");
-    execFileSync("sqlite3", [getDbPath()], { input: sql });
+    return;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    const isMissingNodeSqlite =
+      code === "ERR_UNKNOWN_BUILTIN_MODULE" ||
+      code === "ERR_MODULE_NOT_FOUND" ||
+      (error instanceof Error && error.message.includes("node:sqlite"));
+
+    if (!isMissingNodeSqlite) {
+      throw error;
+    }
+  }
+
+  const { execFileSync } = await import("node:child_process");
+  try {
+    execFileSync("sqlite3", [dbPath], {
+      input: sql,
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      throw new Error(
+        "sqlite3 not found and node:sqlite is unavailable. Please ensure sqlite3 is installed and in your PATH.",
+      );
+    }
+
+    throw error;
   }
 }

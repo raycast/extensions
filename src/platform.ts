@@ -12,7 +12,7 @@ export const WISPR_FLOW_BUNDLE_ID = "com.electron.wispr-flow";
 export interface PlatformAdapter {
   getDefaultDbPath(): string;
   isWisprFlowInstalled(): Promise<boolean>;
-  openWisprFlow(url: string): Promise<void>;
+  openWisprFlow(url: string): Promise<boolean>;
 }
 
 class MacOSPlatform implements PlatformAdapter {
@@ -31,8 +31,14 @@ class MacOSPlatform implements PlatformAdapter {
     return apps.some(({ bundleId }) => bundleId === WISPR_FLOW_BUNDLE_ID);
   }
 
-  async openWisprFlow(url: string): Promise<void> {
-    await open(url, WISPR_FLOW_BUNDLE_ID);
+  async openWisprFlow(url: string): Promise<boolean> {
+    try {
+      await open(url, WISPR_FLOW_BUNDLE_ID);
+      return true;
+    } catch {
+      await showOpenFailureToast();
+      return false;
+    }
   }
 }
 
@@ -48,22 +54,36 @@ class WindowsPlatform implements PlatformAdapter {
   }
 
   async isWisprFlowInstalled(): Promise<boolean> {
+    const appPathMap = await getWindowsAppPathMap();
+    if (appPathMap.has("wispr flow") || appPathMap.has("wisprflow")) {
+      return true;
+    }
+
     const localAppData = process.env.LOCALAPPDATA;
-    if (!localAppData) return false;
+    if (!localAppData) {
+      return false;
+    }
+
     return existsSync(join(localAppData, "WisprFlow", "Wispr Flow.exe"));
   }
 
-  async openWisprFlow(url: string): Promise<void> {
+  async openWisprFlow(url: string): Promise<boolean> {
     try {
       await open(url);
+      return true;
     } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not open Wispr Flow",
-        message: "Please open Wispr Flow manually.",
-      });
+      await showOpenFailureToast();
+      return false;
     }
   }
+}
+
+async function showOpenFailureToast(): Promise<void> {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Could not open Wispr Flow",
+    message: "Please open Wispr Flow manually.",
+  });
 }
 
 export async function getWindowsAppPathMap(): Promise<Map<string, string>> {
@@ -85,7 +105,9 @@ export async function getWindowsAppPathMap(): Promise<Map<string, string>> {
       if (name && path) map.set(name, path);
     }
   } catch {
+    return map;
   }
+
   return map;
 }
 

@@ -160,15 +160,21 @@ export default function Command() {
   }, [uniqueAppsData]);
 
   const { data: installedApps } = usePromise(getApplications);
-  const { data: winRegistryMap } = usePromise(
-    () => process.platform === "win32" ? getWindowsAppPathMap() : Promise.resolve(new Map<string, string>())
+  const { data: winRegistryMap } = usePromise(() =>
+    process.platform === "win32"
+      ? getWindowsAppPathMap()
+      : Promise.resolve(new Map<string, string>()),
   );
   const appPathMap = useMemo(() => {
     const map = new Map<string, string>();
     const isWindows = process.platform === "win32";
     for (const app of installedApps ?? []) {
       if (isWindows) {
-        const exeName = app.path.split(/[\\/]/).pop()?.replace(/\.exe$/i, "").toLowerCase();
+        const exeName = app.path
+          .split(/[\\/]/)
+          .pop()
+          ?.replace(/\.exe$/i, "")
+          .toLowerCase();
         if (exeName) map.set(exeName, app.path);
       } else if (app.bundleId) {
         map.set(app.bundleId, app.path);
@@ -276,7 +282,10 @@ function TranscriptListItem({
     displayText.length > 80
       ? displayText.substring(0, 80) + "..."
       : displayText;
-  const appKey = process.platform === "win32" ? transcript.app?.toLowerCase() : transcript.app;
+  const appKey =
+    process.platform === "win32"
+      ? transcript.app?.toLowerCase()
+      : transcript.app;
   const appPath = appKey ? appPathMap.get(appKey) : undefined;
   const appIcon = appPath ? { fileIcon: appPath } : Icon.Microphone;
 

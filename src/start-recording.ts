@@ -3,6 +3,7 @@ import { ensureWisprFlowInstalled, openWisprFlow } from "./db";
 
 export default async function main() {
   if (!(await ensureWisprFlowInstalled())) return;
-  await openWisprFlow("wispr-flow://start-hands-free");
+  const opened = await openWisprFlow("wispr-flow://start-hands-free");
+  if (!opened) return;
   await showToast({ style: Toast.Style.Success, title: "Recording started" });
 }
