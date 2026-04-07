@@ -80,7 +80,7 @@ export default function Command() {
         : "NULL";
       const nullUUID = "00000000-0000-0000-0000-000000000000";
 
-      writeSQL(
+      await writeSQL(
         `INSERT INTO Dictionary (id, phrase, replacement, teamDictionaryId, lastUsed, frequencyUsed, remoteFrequencyUsed, manualEntry, createdAt, modifiedAt, isDeleted, source, isSnippet, observedSource)
          VALUES ('${id}', '${escapedPhrase}', ${replacementValue}, '${nullUUID}', NULL, 0, 0, 1, '${now}', '${now}', 0, 'manual', 0, NULL)`,
       );

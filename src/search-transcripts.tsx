@@ -223,7 +223,6 @@ export default function Command() {
               appPathMap={appPathMap}
               primaryAction={primaryAction}
               confirmBeforeArchive={confirmBeforeArchive}
-              dbPath={dbPath}
               onArchive={revalidate}
             />
           ))}
@@ -249,14 +248,12 @@ function TranscriptListItem({
   appPathMap,
   primaryAction,
   confirmBeforeArchive,
-  dbPath,
   onArchive,
 }: {
   transcript: Transcript;
   appPathMap: Map<string, string>;
   primaryAction: string;
   confirmBeforeArchive: boolean;
-  dbPath: string;
   onArchive: () => void;
 }) {
   const displayText = getDisplayText(transcript);
@@ -284,7 +281,7 @@ function TranscriptListItem({
       if (!confirmed) return;
     }
     const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
-    writeSQL(
+    await writeSQL(
       `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
     );
     onArchive();
@@ -294,7 +291,7 @@ function TranscriptListItem({
       primaryAction: {
         title: "Undo",
         onAction: async (toast) => {
-          writeSQL(
+          await writeSQL(
             `UPDATE History SET isArchived = 0 WHERE transcriptEntityId = '${escaped}'`,
           );
           onArchive();
@@ -302,7 +299,7 @@ function TranscriptListItem({
         },
       },
     });
-  }, [transcript.transcriptEntityId, confirmBeforeArchive, dbPath, onArchive]);
+  }, [transcript.transcriptEntityId, confirmBeforeArchive, onArchive]);
 
   const wisprFlowPath = appPathMap.get("com.electron.wispr-flow");
   const hasOriginalText =
@@ -441,7 +438,6 @@ function TranscriptListItem({
             <Action
               title="Open Extension Preferences"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
               onAction={openExtensionPreferences}
             />
           </ActionPanel.Section>
