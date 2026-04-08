@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Patch] - PR_MERGE_DATE
+## [Patch] - {PR_MERGE_DATE}
 
 ### Bug Fixes
 
