@@ -1,5 +1,12 @@
 # Kill Process Changelog
 
+## [Kill Port Process] - {PR_MERGE_DATE}
+
+- Added `Kill Port Process` command to list and manage processes by their listening ports
+- Added `list-port-processes` AI tool to support querying port usage via AI
+- Improved process path extraction for `node` applications
+- Robust multi-platform support for port detection (macOS & Windows)
+
 ## [Added Kill All action] - 2026-04-01
 
 - Added action to kill all processes with the same name

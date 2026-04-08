@@ -14,7 +14,8 @@
     "validate",
     "dead_hikikomori",
     "mateus_badalotti",
-    "jomifepe"
+    "jomifepe",
+    "DavidWilde"
   ],
   "platforms": [
     "macOS",
@@ -26,6 +27,12 @@
       "name": "index",
       "title": "Kill Process",
       "description": "Lists all running processes, ordered by CPU or memory usage and allows (force) killing one",
+      "mode": "view"
+    },
+    {
+      "name": "kill-port-process",
+      "title": "Kill Port Process",
+      "description": "Lists all processes listening on a port and allows killing them",
       "mode": "view"
     }
   ],
@@ -44,6 +51,11 @@
       "name": "killall-process",
       "title": "(Force) Kill All Processes by Name",
       "description": "Terminates all processes matching a given name using killall (macOS) or taskkill /IM (Windows). Force kill requires enabling sudo authentication with touchID on macOS, admin rights on Windows."
+    },
+    {
+      "name": "list-port-processes",
+      "title": "List Port Processes",
+      "description": "Lists all processes listening on a port with their port number, protocol, and command line"
     }
   ],
   "ai": {
@@ -726,6 +738,24 @@
       "description": "List app processes before other results.",
       "label": "Prioritize Apps",
       "name": "shouldPrioritizeAppsWhenFiltering",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether processes are sorted by CPU or memory usage.",
+      "label": "Sort by Memory Usage",
+      "name": "sortByMem",
+      "required": false,
+      "default": false,
+      "title": "",
+      "type": "checkbox"
+    },
+    {
+      "description": "Determine whether aggregate processes belong to the same app.",
+      "label": "Aggregate Apps",
+      "name": "aggregateApps",
       "required": false,
       "default": false,
       "title": "",

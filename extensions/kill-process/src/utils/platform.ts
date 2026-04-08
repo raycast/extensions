@@ -1,5 +1,5 @@
 import { Image } from "@raycast/api";
-import { Process } from "../types";
+import { Process, PortProcess } from "../types";
 
 /**
  * Platform detection
@@ -52,6 +52,26 @@ $result | ConvertTo-Json -Compress
 `;
 
 /**
+ * Windows PowerShell script to list all processes listening on a port
+ * Returns: pid, port, protocol, commandLine, path, name
+ */
+const WINDOWS_PORT_LIST_SCRIPT = `
+$connections = Get-NetTCPConnection -State Listen
+$result = $connections | ForEach-Object {
+    $proc = Get-CimInstance Win32_Process -Filter "ProcessId = $($_.OwningProcess)"
+    [PSCustomObject]@{
+        pid = $_.OwningProcess
+        port = $_.LocalPort
+        protocol = "TCP"
+        commandLine = $proc.CommandLine
+        path = $proc.ExecutablePath
+        name = $proc.Name
+    }
+}
+$result | ConvertTo-Json -Compress
+`;
+
+/**
  * Get command to list all processes
  * - Windows: Uses Get-Process (fast, but CPU is placeholder)
  * - macOS: Uses ps command
@@ -75,13 +95,32 @@ export function getProcessPerformanceCommand(): string {
 }
 
 /**
+ * Get command to list all processes listening on a port
+ * - Windows: Uses PowerShell to join connections and processes
+ * - macOS: Uses lsof -iTCP -sTCP:LISTEN -P -n -F pcn (machine readable)
+ */
+export function getPortListCommand(): string {
+  if (isWindows) {
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(WINDOWS_PORT_LIST_SCRIPT)}`;
+  }
+  return "/usr/sbin/lsof -iTCP -sTCP:LISTEN -P -n -F pcn";
+}
+
+/**
+ * Get command to fetch the full command line for a PID (macOS only)
+ */
+export function getCommandLineCommand(pid: number): string {
+  return `/bin/ps -ww -p ${pid} -o command=`;
+}
+
+/**
  * Get command to kill a process
  */
 export function getKillCommand(pid: number, force = false): string {
   if (isWindows) {
     return force ? `taskkill /F /PID ${pid}` : `taskkill /PID ${pid}`;
   }
-  return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
+  return force ? `zsh -c 'sudo /bin/kill -9 ${pid}'` : `/bin/kill -9 ${pid}`;
 }
 
 /**
@@ -145,6 +184,33 @@ export function parseWindowsProcesses(output: string): Partial<Process>[] {
     }));
   } catch {
     console.error("Failed to parse Windows process output");
+    return [];
+  }
+}
+
+/**
+ * Parse Windows port process list JSON output
+ */
+export function parseWindowsPortProcesses(output: string): Partial<PortProcess>[] {
+  try {
+    const data = JSON.parse(output);
+    const processes = Array.isArray(data) ? data : [data];
+
+    return processes.map(
+      (proc: { pid: number; port: number; protocol: string; commandLine: string; path: string; name: string }) => ({
+        id: proc.pid,
+        pid: 0,
+        port: proc.port,
+        protocol: proc.protocol,
+        commandLine: proc.commandLine,
+        path: proc.path || "",
+        processName: proc.name || "",
+        cpu: 0,
+        mem: 0,
+      }),
+    );
+  } catch {
+    console.error("Failed to parse Windows port process output");
     return [];
   }
 }

@@ -8,3 +8,9 @@ export type Process = {
   processName: string;
   appName: string | undefined;
 };
+
+export type PortProcess = Process & {
+  port: number;
+  protocol: string;
+  commandLine?: string;
+};
