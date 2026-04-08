@@ -1537,5 +1537,8 @@
     "test:integration": "node ../../node_modules/jest/bin/jest.js --config ./jest.config.js --runInBand",
     "test:smoke": "npm run lint && npm run build",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
