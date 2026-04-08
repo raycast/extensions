@@ -1,6 +1,6 @@
 # Kill MCP Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-08
 
 - List all running MCP servers from Claude Desktop, VS Code, Cursor, and Claude Code
 - View detailed information about each MCP server (RAM, CPU, start time)
