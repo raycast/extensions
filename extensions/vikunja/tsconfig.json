@@ -1,17 +1,25 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Raycast Extension",
   "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
-    "lib": ["es2021"],
+    "lib": ["ES2023"],
     "module": "commonjs",
-    "target": "es2021",
+    "moduleResolution": "node",
+    "target": "ES2023",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@raycast/api": ["../build/node_modules/@raycast/api"],
+      "@raycast/utils": ["../build/node_modules/@raycast/utils"],
+      "react": ["../build/node_modules/react"],
+      "react/jsx-runtime": ["../build/node_modules/react/jsx-runtime"]
+    },
+    "typeRoots": ["../build/node_modules/@types"]
   }
 }
