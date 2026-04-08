@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "croc-transfer",
+  "title": "Croc Transfer",
+  "description": "Send and receive files securely using croc",
+  "icon": "extension-icon.png",
+  "author": "wilton",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-file",
+      "title": "Send File",
+      "subtitle": "croc",
+      "description": "Send files or folders to another computer via croc",
+      "mode": "view",
+      "keywords": [
+        "send",
+        "transfer",
+        "share",
+        "croc",
+        "file"
+      ]
+    },
+    {
+      "name": "receive-file",
+      "title": "Receive File",
+      "subtitle": "croc",
+      "description": "Receive files by entering a croc code phrase",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "code",
+          "type": "text",
+          "placeholder": "Code phrase (optional)",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "receive",
+        "download",
+        "get",
+        "croc",
+        "file"
+      ]
+    },
+{
+      "name": "transfer-history",
+      "title": "Transfer History",
+      "subtitle": "croc",
+      "description": "View past croc transfers and re-send files",
+      "mode": "view",
+      "keywords": [
+        "history",
+        "log",
+        "recent",
+        "croc",
+        "transfer"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "crocPath",
+      "title": "croc Binary Path",
+      "description": "Path to the croc binary. Leave empty to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Directory where received files are saved.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads"
+    },
+    {
+      "name": "autoAccept",
+      "title": "Auto Accept",
+      "description": "Automatically accept incoming files without confirmation.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Auto-accept incoming transfers"
+    },
+    {
+      "name": "customRelay",
+      "title": "Custom Relay Server",
+      "description": "Custom relay server address. Leave empty to use the default.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
