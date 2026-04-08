@@ -19,19 +19,24 @@ export default function TailsMenuBar() {
         : "extension-icon.png"
     : "extension-icon.png";
 
-  const title = usage ? `${usage.used}/${usage.quota}` : "…";
   const tooltip = usage ? `Tails — ${usage.used} of ${usage.quota} credits used (${pct}%)` : "Tails — Loading…";
 
   return (
-    <MenuBarExtra icon={icon} title={title} tooltip={tooltip} isLoading={isLoading}>
-      <MenuBarExtra.Section title="Usage">
-        {usage && (
-          <>
-            <MenuBarExtra.Item title={`${usageBar(pct)}  ${usage.used} / ${usage.quota}`} />
-            <MenuBarExtra.Item title={`Resets ${formatResetShort(usage.resetsAt)}`} />
-          </>
-        )}
-      </MenuBarExtra.Section>
+    <MenuBarExtra icon={icon} tooltip={tooltip} isLoading={isLoading}>
+      {usage && (
+        <MenuBarExtra.Section title="Usage">
+          <MenuBarExtra.Item
+            title={`${usage.used} / ${usage.quota} credits (${pct}%)`}
+            icon={Icon.Gauge}
+            onAction={() => open(getPreferences().instanceUrl)}
+          />
+          <MenuBarExtra.Item
+            title={`Resets ${formatResetShort(usage.resetsAt)}`}
+            icon={Icon.Clock}
+            onAction={() => open(getPreferences().instanceUrl)}
+          />
+        </MenuBarExtra.Section>
+      )}
 
       <MenuBarExtra.Section title="Quick Actions">
         <MenuBarExtra.Item title="Download from Clipboard" icon={Icon.Clipboard} onAction={downloadFromClipboard} />
@@ -51,19 +56,6 @@ export default function TailsMenuBar() {
           onAction={() => open(getPreferences().instanceUrl)}
         />
       </MenuBarExtra.Section>
-
-      <MenuBarExtra.Separator />
-
-      <MenuBarExtra.Item
-        title="Download Media…"
-        icon={Icon.Download}
-        onAction={() =>
-          launchCommand({
-            name: "download-media",
-            type: LaunchType.UserInitiated,
-          })
-        }
-      />
     </MenuBarExtra>
   );
 }
@@ -103,9 +95,4 @@ function formatResetShort(iso: string): string {
   if (diffDays <= 0) return "today";
   if (diffDays === 1) return "tomorrow";
   return `in ${diffDays} days`;
-}
-
-function usageBar(pct: number): string {
-  const filled = Math.round(pct / 10);
-  return "█".repeat(filled) + "░".repeat(10 - filled);
 }
