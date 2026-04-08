@@ -1,6 +1,6 @@
 # Craftdocs Changelog
 
-## [Reliability and UX improvements] - {PR_MERGE_DATE}
+## [Reliability and UX improvements] - 2026-04-08
 
 - Prevented issues when Craft is missing, not set up yet, or still syncing its local data.
 - Improved reliability when Craft search data is unavailable or only some Spaces are available locally.
