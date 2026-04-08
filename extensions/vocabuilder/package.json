@@ -230,5 +230,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "husky"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,6 +1,6 @@
 VocaBuilder Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-04-08
 
 - Added `Translate` command to translate words and short texts between languages using Gemini.
 - Added `Translation History` command to browse saved translations.
