@@ -495,12 +495,13 @@ export function ChatListView({
     if (initialRefreshDone.current) return;
     if (accountServices.size === 0) return;
     initialRefreshDone.current = true;
-    const isStale = Date.now() - indexState.updatedAt > INDEX_REFRESH_MAX_AGE_MS;
-    if (indexState.items.length === 0 || isStale) {
-      void refreshIndex("full");
-      return;
-    }
-    void refreshIndex("incremental");
+    const mode =
+      indexState.items.length === 0 || Date.now() - indexState.updatedAt > INDEX_REFRESH_MAX_AGE_MS
+        ? ("full" as const)
+        : ("incremental" as const);
+    // Defer to avoid React state update before mount completes
+    const id = setTimeout(() => void refreshIndex(mode), 0);
+    return () => clearTimeout(id);
   }, [accountServices, indexState.items.length]);
 
   const tokens = useMemo(() => parseSearchTerms(trimmedQuery), [trimmedQuery]);
