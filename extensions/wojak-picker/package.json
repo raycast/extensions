@@ -14,16 +14,14 @@
       "required": false,
       "title": "Supabase URL",
       "description": "Project URL, for example https://your-project.supabase.co",
-      "placeholder": "https://your-project.supabase.co",
-      "default": "https://ernvizpfdljlbkjshggj.supabase.co"
+      "placeholder": "https://your-project.supabase.co"
     },
     {
       "name": "supabaseAnonKey",
       "type": "password",
       "required": false,
       "title": "Supabase Anon Key",
-      "description": "Public anon key used by the Raycast extension",
-      "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVybnZpenBmZGxqbGJranNoZ2dqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NjA2NzAsImV4cCI6MjA5MTIzNjY3MH0.zklBHj_lsHVgxPzcKfyYzYrw9aLEPrf8kqnHJWvcuMk"
+      "description": "Public anon key used by the Raycast extension"
     },
     {
       "name": "supabaseBucket",
@@ -44,12 +42,11 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.68.0",
-    "@raycast/utils": "^1.15.0",
     "fuse.js": "^7.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.11.5",
-    "@types/react": "^18.2.55",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
     "typescript": "^5.3.3"
   },
   "scripts": {

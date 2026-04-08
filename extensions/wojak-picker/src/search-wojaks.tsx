@@ -1,4 +1,3 @@
-// @ts-nocheck
 import {
   Action,
   ActionPanel,
@@ -14,11 +13,10 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 type Wojak = {
   id: string;
@@ -27,11 +25,8 @@ type Wojak = {
   thumbUrl: string;
   fullUrl: string;
   name: string;
+  sourcePageUrl?: string;
 };
-
-const defaultSupabaseUrl = "https://ernvizpfdljlbkjshggj.supabase.co";
-const defaultSupabaseAnonKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVybnZpenBmZGxqbGJranNoZ2dqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NjA2NzAsImV4cCI6MjA5MTIzNjY3MH0.zklBHj_lsHVgxPzcKfyYzYrw9aLEPrf8kqnHJWvcuMk";
 
 const allCategoriesLabel = "All Categories";
 const pageSize = 100;
@@ -101,8 +96,8 @@ function getConfiguredPreferences() {
   const preferences = getPreferenceValues<Preferences.SearchWojaks>();
 
   return {
-    supabaseUrl: preferences.supabaseUrl?.trim().replace(/\/$/, "") || defaultSupabaseUrl,
-    supabaseAnonKey: preferences.supabaseAnonKey?.trim() || defaultSupabaseAnonKey,
+    supabaseUrl: preferences.supabaseUrl?.trim().replace(/\/$/, "") || "",
+    supabaseAnonKey: preferences.supabaseAnonKey?.trim() || "",
     supabaseBucket: preferences.supabaseBucket?.trim() || "wojaks",
   };
 }
@@ -119,16 +114,30 @@ function getCachePayload(rawValue?: string | null) {
   }
 }
 
-function mapRemoteWojak(item: any): Wojak {
+type RemoteWojak = {
+  id?: string;
+  name?: string;
+  category?: string;
+  filename?: string;
+  thumb_url?: string;
+  thumbUrl?: string;
+  full_url?: string;
+  fullUrl?: string;
+  source_page_url?: string;
+  sourcePageUrl?: string;
+};
+
+function mapRemoteWojak(item: RemoteWojak): Wojak {
   const fullUrl = item.full_url || item.fullUrl || "";
   const thumbUrl = item.thumb_url || item.thumbUrl || buildThumbnailUrl(fullUrl);
   return {
-    id: item.id,
-    name: item.name,
-    category: item.category,
-    filename: item.filename,
+    id: item.id || "",
+    name: item.name || "",
+    category: item.category || "",
+    filename: item.filename || "",
     thumbUrl,
     fullUrl,
+    sourcePageUrl: item.source_page_url || item.sourcePageUrl || "",
   };
 }
 
@@ -152,19 +161,56 @@ function buildThumbnailUrl(fullUrl?: string) {
 async function fetchWojaksFromSupabase() {
   const { supabaseUrl, supabaseAnonKey } = getConfiguredPreferences();
 
-  const response = await fetch(`${supabaseUrl}/rest/v1/wojaks?select=id,name,category,filename,thumb_url,full_url&order=name.asc`, {
+  const response = await fetch(
+    `${supabaseUrl}/rest/v1/wojaks?select=id,name,category,filename,thumb_url,full_url,source_page_url&order=name.asc`,
+    {
     headers: {
       apikey: supabaseAnonKey,
       Authorization: `Bearer ${supabaseAnonKey}`,
     },
-  });
+    },
+  );
 
   if (!response.ok) {
     throw new Error(`Supabase metadata fetch failed with HTTP ${response.status}`);
   }
 
-  const data = await response.json();
-  return data.map(mapRemoteWojak).filter((item: Wojak) => item.id && item.name && item.filename && item.fullUrl);
+  const data = (await response.json()) as RemoteWojak[];
+  return data
+    .map((item: RemoteWojak) => mapRemoteWojak(item))
+    .filter((item: Wojak) => item.id && item.name && item.filename && item.fullUrl);
+}
+
+function useStoredCategory() {
+  const [value, setValue] = useState(allCategoriesLabel);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      const storedValue = await LocalStorage.getItem<string>("wojak-picker.selected-category");
+      if (!cancelled && storedValue) {
+        setValue(storedValue);
+      }
+      if (!cancelled) {
+        setIsLoading(false);
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  async function setStoredValue(nextValue: string) {
+    setValue(nextValue);
+    await LocalStorage.setItem("wojak-picker.selected-category", nextValue);
+  }
+
+  return { value, setValue: setStoredValue, isLoading };
 }
 
 async function loadWojaks() {
@@ -227,7 +273,7 @@ export default function Command() {
     value: storedCategory,
     setValue: setStoredCategory,
     isLoading: isCategoryLoading,
-  } = useLocalStorage("wojak-picker.selected-category", allCategoriesLabel);
+  } = useStoredCategory();
 
   const isConfigured = Boolean(preferences.supabaseUrl && preferences.supabaseAnonKey);
   const { categories, categoryPools, getFuse, wojaksById } = useMemo(() => createSearchHelpers(wojaks), [wojaks]);
@@ -300,26 +346,26 @@ export default function Command() {
 
     const categoryResults = getFuse(selectedCategory)
       .search(normalizedQuery)
-      .map((result) => result.item);
+      .map((result: { item: Wojak }) => result.item);
 
     if (categoryResults.length > 0 || selectedCategory === allCategoriesLabel) {
-      resultCache.set(cacheKey, JSON.stringify(categoryResults.map((wojak) => wojak.id)));
+      resultCache.set(cacheKey, JSON.stringify(categoryResults.map((wojak: Wojak) => wojak.id)));
       return categoryResults;
     }
 
     const fallbackCacheKey = `${allCategoriesLabel}::${normalizedQuery}`;
     const fallbackCachedResults = getCachedSearchResults(fallbackCacheKey, wojaksById);
     if (fallbackCachedResults !== undefined && fallbackCachedResults.length > 0) {
-      resultCache.set(cacheKey, JSON.stringify(fallbackCachedResults.map((wojak) => wojak.id)));
+      resultCache.set(cacheKey, JSON.stringify(fallbackCachedResults.map((wojak: Wojak) => wojak.id)));
       return fallbackCachedResults;
     }
 
     const fallbackResults = getFuse(allCategoriesLabel)
       .search(normalizedQuery)
-      .map((result) => result.item);
+      .map((result: { item: Wojak }) => result.item);
 
-    resultCache.set(fallbackCacheKey, JSON.stringify(fallbackResults.map((wojak) => wojak.id)));
-    resultCache.set(cacheKey, JSON.stringify(fallbackResults.map((wojak) => wojak.id)));
+    resultCache.set(fallbackCacheKey, JSON.stringify(fallbackResults.map((wojak: Wojak) => wojak.id)));
+    resultCache.set(cacheKey, JSON.stringify(fallbackResults.map((wojak: Wojak) => wojak.id)));
     return fallbackResults;
   }, [debouncedSearchText, selectedCategory]);
 
@@ -390,7 +436,7 @@ export default function Command() {
           description={remoteError || "Try a different search term or category."}
         />
       ) : (
-        visibleWojaks.map((wojak) => (
+        visibleWojaks.map((wojak: Wojak) => (
           <Grid.Item
             key={wojak.id}
             id={wojak.id}
@@ -415,11 +461,13 @@ export default function Command() {
                   url={wojak.fullUrl}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
-                <Action.OpenInBrowser
-                  title="Open Category Page"
-                  url={wojak.sourcePageUrl}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                />
+                {wojak.sourcePageUrl ? (
+                  <Action.OpenInBrowser
+                    title="Open Category Page"
+                    url={wojak.sourcePageUrl}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                  />
+                ) : null}
               </ActionPanel>
             }
           />

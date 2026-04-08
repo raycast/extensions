@@ -3,7 +3,7 @@
     "strict": true,
     "module": "CommonJS",
     "target": "ES2020",
-    "jsx": "react-jsx",
+    "jsx": "react",
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
@@ -11,5 +11,5 @@
     "skipLibCheck": true,
     "lib": ["ES2020"]
   },
-  "include": ["src"]
+  "include": ["src", "raycast-env.d.ts"]
 }
