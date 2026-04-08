@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "raycast-env.d.ts", "../../src/ts/global.d.ts"],
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "compilerOptions": {
     "allowJs": true,
