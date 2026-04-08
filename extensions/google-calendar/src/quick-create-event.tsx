@@ -50,11 +50,8 @@ const TIMEZONE_OFFSETS: Record<string, number> = {
   AKST: -540,
   AKDT: -480,
   HST: -600,
-  // US timezones (short) - map to standard time
-  ET: -300,
-  CT: -360,
-  MT: -420,
-  PT: -480,
+  // US timezones (short) - resolved dynamically below via DST_AWARE_ZONES
+  // ET, CT, MT, PT are handled in extractTimezone()
   // European
   GMT: 0,
   UTC: 0,
@@ -72,6 +69,21 @@ const TIMEZONE_OFFSETS: Record<string, number> = {
   NZST: 720,
   NZDT: 780,
 };
+
+const DST_AWARE_ZONES: Record<string, string> = {
+  ET: "America/New_York",
+  CT: "America/Chicago",
+  MT: "America/Denver",
+  PT: "America/Los_Angeles",
+};
+
+function getDSTAwareOffset(tz: string, date: Date = new Date()): number | undefined {
+  const iana = DST_AWARE_ZONES[tz.toUpperCase()];
+  if (!iana) return undefined;
+  const utcStr = date.toLocaleString("en-US", { timeZone: "UTC" });
+  const tzStr = date.toLocaleString("en-US", { timeZone: iana });
+  return (new Date(tzStr).getTime() - new Date(utcStr).getTime()) / (60 * 1000);
+}
 
 function extractTimezone(query: string): { query: string; timezone: string | null; offsetMinutes: number | null } {
   const tzList =
@@ -94,7 +106,7 @@ function extractTimezone(query: string): { query: string; timezone: string | nul
     const tzMatch = fullMatch.match(new RegExp(`(${tzList})$`, "i"));
     if (tzMatch) {
       const tz = tzMatch[1].toUpperCase();
-      const offset = TIMEZONE_OFFSETS[tz];
+      const offset = getDSTAwareOffset(tz) ?? TIMEZONE_OFFSETS[tz];
       if (offset !== undefined) {
         const cleanedQuery = query.replace(new RegExp(`\\s+${tz}\\b`, "gi"), "");
         return { query: cleanedQuery, timezone: tz, offsetMinutes: offset };
