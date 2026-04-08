@@ -244,13 +244,13 @@ function VariantRow({
             <Action
               title="Download"
               icon={Icon.Download}
-              onAction={() => downloadVariant(url, variant.quality, metadata)}
+              onAction={() => downloadVariant(url, variant.quality, item.stableMediaId, metadata)}
             />
             <Action
               title="Copy Download URL"
               icon={Icon.Clipboard}
               shortcut={Keyboard.Shortcut.Common.Copy}
-              onAction={() => copyStreamUrl(url, variant.quality)}
+              onAction={() => copyStreamUrl(url, variant.quality, item.stableMediaId)}
             />
           </ActionPanel.Section>
 
@@ -354,7 +354,7 @@ async function showNoDownloadsToast() {
   });
 }
 
-async function downloadVariant(url: string, quality: string, metadata: MetadataResponse) {
+async function downloadVariant(url: string, quality: string, stableMediaId: string, metadata: MetadataResponse) {
   try {
     await showToast({
       style: Toast.Style.Animated,
@@ -365,6 +365,7 @@ async function downloadVariant(url: string, quality: string, metadata: MetadataR
     const files: StreamFile[] = [];
 
     for (const media of streams.medias) {
+      if (media.stableMediaId !== stableMediaId) continue;
       for (const variant of media.variants) {
         files.push(...variant.streams);
       }
@@ -449,7 +450,7 @@ async function downloadImageDirect(
   }
 }
 
-async function copyStreamUrl(url: string, quality: string) {
+async function copyStreamUrl(url: string, quality: string, stableMediaId: string) {
   try {
     await showToast({
       style: Toast.Style.Animated,
@@ -460,6 +461,7 @@ async function copyStreamUrl(url: string, quality: string) {
     const urls: string[] = [];
 
     for (const media of streams.medias) {
+      if (media.stableMediaId !== stableMediaId) continue;
       for (const variant of media.variants) {
         for (const s of variant.streams) {
           urls.push(s.url);

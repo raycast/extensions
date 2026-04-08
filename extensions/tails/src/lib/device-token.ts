@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { hostname, homedir, networkInterfaces } from "node:os";
 
 import { LocalStorage } from "@raycast/api";
@@ -35,7 +35,7 @@ async function getOrCreateDeviceId(): Promise<string> {
   const existing = await LocalStorage.getItem<string>(DEVICE_ID_KEY);
   if (existing) return existing;
 
-  const id = crypto.randomUUID();
+  const id = randomUUID();
   await LocalStorage.setItem(DEVICE_ID_KEY, id);
   return id;
 }

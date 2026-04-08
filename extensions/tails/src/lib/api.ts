@@ -120,7 +120,7 @@ export async function handleApiError(error: unknown): Promise<void> {
           onAction: openExtensionPreferences,
         };
       } else {
-        const { clearDeviceToken } = await import("./device-token.js");
+        const { clearDeviceToken } = await import("./device-token");
         await clearDeviceToken();
       }
     } else if (error.status === 402 || error.code === "usage.exceeded") {
