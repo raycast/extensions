@@ -86,10 +86,16 @@ export async function writeSQL(sql: string): Promise<void> {
       throw error;
     }
 
-    const { execFileSync } = await import("node:child_process");
+    const { execFile } = await import("node:child_process");
 
     try {
-      execFileSync("sqlite3", [getDbPath()], { input: sql });
+      await new Promise<void>((resolve, reject) => {
+        const child = execFile("sqlite3", [getDbPath()], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+        child.stdin?.end(sql);
+      });
     } catch (cliError) {
       if (
         typeof cliError === "object" &&

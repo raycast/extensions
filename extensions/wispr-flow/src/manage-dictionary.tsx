@@ -6,7 +6,6 @@ import {
   confirmAlert,
   Detail,
   Form,
-  getApplications,
   Icon,
   List,
   openExtensionPreferences,
@@ -14,15 +13,15 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
-import { useState, useCallback, useMemo } from "react";
+import { useCachedPromise, executeSQL } from "@raycast/utils";
+import { useState, useCallback } from "react";
 import {
   getDbPath,
   dbExists,
   escapeSQL,
+  openWisprFlow,
   validateUUID,
   writeSQL,
-  WISPR_FLOW_BUNDLE_ID,
 } from "./db";
 import { DictionaryEntry } from "./types";
 
@@ -205,13 +204,6 @@ export default function Command() {
     );
   }
 
-  const { data: installedApps } = usePromise(getApplications);
-  const wisprFlowPath = useMemo(() => {
-    return (installedApps ?? []).find(
-      (app) => app.bundleId === WISPR_FLOW_BUNDLE_ID,
-    )?.path;
-  }, [installedApps]);
-
   function sourceLabel(source: string): string {
     switch (source) {
       case "manual":
@@ -300,14 +292,12 @@ export default function Command() {
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
-              {wisprFlowPath ? (
-                <Action.Open
-                  title="Open Wispr Flow"
-                  icon={Icon.Microphone}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                  target={wisprFlowPath}
-                />
-              ) : null}
+              <Action
+                title="Open Wispr Flow"
+                icon={Icon.Microphone}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                onAction={() => openWisprFlow("wispr-flow://open")}
+              />
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}

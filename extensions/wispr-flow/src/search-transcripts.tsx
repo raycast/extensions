@@ -23,7 +23,7 @@ import {
   formatDuration,
   groupTranscriptsByDate,
 } from "./utils";
-import { getDbPath, dbExists, writeSQL } from "./db";
+import { getDbPath, dbExists, openWisprFlow, writeSQL } from "./db";
 import { getWindowsAppPathMap } from "./platform";
 
 const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
@@ -322,7 +322,6 @@ function TranscriptListItem({
     });
   }, [transcript.transcriptEntityId, confirmBeforeArchive, onArchive]);
 
-  const wisprFlowPath = appPathMap.get("com.electron.wispr-flow");
   const hasOriginalText =
     transcript.asrText && transcript.asrText !== displayText;
 
@@ -432,14 +431,12 @@ function TranscriptListItem({
                 target={appPath}
               />
             ) : null}
-            {wisprFlowPath ? (
-              <Action.Open
-                title="Open Wispr Flow"
-                icon={Icon.Microphone}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                target={wisprFlowPath}
-              />
-            ) : null}
+            <Action
+              title="Open Wispr Flow"
+              icon={Icon.Microphone}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+              onAction={() => openWisprFlow("wispr-flow://open")}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
