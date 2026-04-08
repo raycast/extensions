@@ -362,10 +362,14 @@ export function ChatListView({
   const [isIndexRefreshing, setIsIndexRefreshing] = useState(false);
   const [error, setError] = useState<unknown>(undefined);
   const {
-    data: accountServices,
+    data: accountServiceInfoList,
     isLoading: isLoadingAccountServices,
     error: accountServicesError,
   } = useAccountServiceCache();
+  const accountServices = useMemo(
+    () => new Map((accountServiceInfoList ?? []).map((account) => [account.accountID, account])),
+    [accountServiceInfoList],
+  );
 
   useEffect(() => {
     indexRef.current = indexState;
@@ -382,7 +386,7 @@ export function ChatListView({
       done: boolean;
     }) => void | Promise<void>,
   ) => {
-    if (!accountServices) {
+    if (accountServices.size === 0) {
       throw new Error("Account metadata not loaded");
     }
 
@@ -497,7 +501,7 @@ export function ChatListView({
 
   useEffect(() => {
     if (initialRefreshDone.current) return;
-    if (!accountServices) return;
+    if (accountServices.size === 0) return;
     initialRefreshDone.current = true;
     const isStale = Date.now() - indexState.updatedAt > INDEX_REFRESH_MAX_AGE_MS;
     if (indexState.items.length === 0 || isStale) {
@@ -1347,7 +1351,11 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
   const { data, isLoading } = useBeeperDesktop(async () => {
     return retrieveChat(chat.id, { maxParticipantCount: 50 });
   });
-  const { data: accountServices } = useAccountServiceCache();
+  const { data: accountServiceInfoList } = useAccountServiceCache();
+  const accountServices = useMemo(
+    () => new Map((accountServiceInfoList ?? []).map((account) => [account.accountID, account])),
+    [accountServiceInfoList],
+  );
   const serviceLabel = getChatServiceLabel(chat, accountServices) ?? "";
 
   const participantLines = useMemo(() => {

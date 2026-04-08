@@ -44,19 +44,28 @@ export function ContactsView() {
   const [accountFilter, setAccountFilter] = useState<string>("all");
   const { push } = useNavigation();
   const beeperAppPath = getBeeperAppPath();
+  const accountInfoList = useMemo(() => getAccountServiceInfoList(accounts), [accounts]);
+  const uniqueAccounts = useMemo(
+    () =>
+      accountInfoList.map((accountInfo) => ({
+        accountID: accountInfo.accountID,
+        user: accounts.find((account) => account.accountID === accountInfo.accountID)?.user,
+      })),
+    [accountInfoList, accounts],
+  );
 
   useEffect(() => {
-    if (accountFilter === "all" && accounts.length === 1) {
-      setAccountFilter(accounts[0].accountID);
+    if (accountFilter === "all" && uniqueAccounts.length === 1) {
+      setAccountFilter(uniqueAccounts[0].accountID);
     }
-  }, [accountFilter, accounts]);
+  }, [accountFilter, uniqueAccounts]);
 
-  const shouldSearch = query.trim().length > 0 && accounts.length > 0;
+  const shouldSearch = query.trim().length > 0 && uniqueAccounts.length > 0;
   const accountInfoMap = useMemo(
-    () => new Map(getAccountServiceInfoList(accounts).map((account) => [account.accountID, account])),
-    [accounts],
+    () => new Map(accountInfoList.map((account) => [account.accountID, account])),
+    [accountInfoList],
   );
-  const accountsKey = useMemo(() => accounts.map((account) => account.accountID).join("|"), [accounts]);
+  const accountsKey = useMemo(() => uniqueAccounts.map((account) => account.accountID).join("|"), [uniqueAccounts]);
   const lastPartialErrorKey = useRef<string | null>(null);
 
   const {
@@ -72,7 +81,7 @@ export function ContactsView() {
 
       if (filter === "all") {
         const results = await Promise.allSettled(
-          accounts.map(async (account) => {
+          uniqueAccounts.map(async (account) => {
             const items = await searchContacts(account.accountID, term);
             return items.map((contact) => ({ ...contact, accountID: account.accountID }));
           }),
@@ -116,7 +125,7 @@ export function ContactsView() {
       isLoading={isLoadingAccounts}
     >
       <List.Dropdown.Item key="all" value="all" title="All Accounts" />
-      {accounts.map((account) => (
+      {uniqueAccounts.map((account) => (
         <List.Dropdown.Item
           key={account.accountID}
           value={account.accountID}
