@@ -8,7 +8,7 @@ export interface Session {
   tabId: string;
 }
 
-const run = (args: string): string => execSync(`"${IT2API_PATH}" ${args}`, { encoding: "utf-8" }).trim();
+const run = (args: string): string => execSync(`bash -l -c '"${IT2API_PATH}" ${args}'`, { encoding: "utf-8" }).trim();
 
 export const listSessions = (): Session[] => {
   const hierarchy = run("show-hierarchy");

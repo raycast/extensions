@@ -12,7 +12,7 @@ export const checkIt2apiReady = (): It2apiReadyResult => {
   if (!existsSync(IT2API_PATH))
     return { ready: false, reason: "it2api not found — ensure iTerm2 is installed at /Applications/iTerm.app" };
   try {
-    execSync("python3 -c 'import iterm2'", { stdio: "pipe" });
+    execSync(`bash -l -c 'python3 -c "import iterm2"'`, { stdio: "pipe" });
   } catch {
     return { ready: false, reason: "iterm2 Python package missing — run: python3 -m pip install iterm2" };
   }
