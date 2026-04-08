@@ -338,7 +338,7 @@ export function FireSetup({
 
   const portfolioDisplay =
     currentPortfolioValue > 0
-      ? `${currencySymbol}${currentPortfolioValue.toLocaleString("en", { maximumFractionDigits: 0 })}`
+      ? `${currencySymbol}${currentPortfolioValue.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
       : "No positions yet";
 
   // ── Render ──

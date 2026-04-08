@@ -1,4 +1,4 @@
-# Portfolio Tracker Changelog
+# Portfolio Tracker
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

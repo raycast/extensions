@@ -385,13 +385,13 @@ export function FireContributions({
       {hasContributions && (
         <List.Section
           title="Monthly Contributions"
-          subtitle={`${currencySymbol}${totalMonthly.toLocaleString("en", { maximumFractionDigits: 0 })}/mo · ${currencySymbol}${(totalMonthly * 12).toLocaleString("en", { maximumFractionDigits: 0 })}/yr`}
+          subtitle={`${currencySymbol}${totalMonthly.toLocaleString("en-US", { maximumFractionDigits: 0 })}/mo · ${currencySymbol}${(totalMonthly * 12).toLocaleString("en-US", { maximumFractionDigits: 0 })}/yr`}
         >
           {localContributions.map((contribution) => {
             const info = positionLookup[contribution.positionId];
             const title = info
-              ? `${currencySymbol}${contribution.monthlyAmount.toLocaleString("en", { maximumFractionDigits: 0 })}/mo`
-              : `${currencySymbol}${contribution.monthlyAmount.toLocaleString("en", { maximumFractionDigits: 0 })}/mo (orphaned)`;
+              ? `${currencySymbol}${contribution.monthlyAmount.toLocaleString("en-US", { maximumFractionDigits: 0 })}/mo`
+              : `${currencySymbol}${contribution.monthlyAmount.toLocaleString("en-US", { maximumFractionDigits: 0 })}/mo (orphaned)`;
 
             const subtitle = info ? `→ ${info.symbol} · ${info.displayName}` : "Position no longer exists";
 
@@ -412,7 +412,7 @@ export function FireContributions({
                     tooltip: info ? `Account: ${accountTag}` : "Position was deleted from portfolio",
                   },
                   {
-                    text: `${currencySymbol}${(contribution.monthlyAmount * 12).toLocaleString("en", { maximumFractionDigits: 0 })}/yr`,
+                    text: `${currencySymbol}${(contribution.monthlyAmount * 12).toLocaleString("en-US", { maximumFractionDigits: 0 })}/yr`,
                     tooltip: "Annual contribution",
                   },
                 ]}

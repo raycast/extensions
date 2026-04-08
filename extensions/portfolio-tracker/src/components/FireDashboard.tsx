@@ -401,13 +401,13 @@ export function FireDashboard({
           {projection.targetHitInWindow && (
             <Detail.Metadata.Label
               title="Days to FIRE"
-              text={projection.daysToFire !== null ? projection.daysToFire.toLocaleString("en") : "—"}
+              text={projection.daysToFire !== null ? projection.daysToFire.toLocaleString("en-US") : "—"}
             />
           )}
           {projection.targetHitInWindow && (
             <Detail.Metadata.Label
               title="Working Days"
-              text={projection.workingDaysToFire !== null ? projection.workingDaysToFire.toLocaleString("en") : "—"}
+              text={projection.workingDaysToFire !== null ? projection.workingDaysToFire.toLocaleString("en-US") : "—"}
             />
           )}
           {!projection.targetHitInWindow && (
@@ -423,7 +423,7 @@ export function FireDashboard({
             title="Monthly Contributions"
             text={
               monthlyContrib > 0
-                ? `${currencySymbol}${monthlyContrib.toLocaleString("en", { maximumFractionDigits: 0 })}`
+                ? `${currencySymbol}${monthlyContrib.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
                 : "None"
             }
           />
@@ -431,7 +431,7 @@ export function FireDashboard({
             title="Annual Contributions"
             text={
               annualContrib > 0
-                ? `${currencySymbol}${annualContrib.toLocaleString("en", { maximumFractionDigits: 0 })}`
+                ? `${currencySymbol}${annualContrib.toLocaleString("en-US", { maximumFractionDigits: 0 })}`
                 : "None"
             }
           />
