@@ -203,7 +203,7 @@ export async function downloadGitHubContent(
               const relativePath = entry.fileName.substring(prefix.length);
               const entryDest = path.join(finalDest, relativePath);
 
-              if (!entryDest.startsWith(finalDest)) {
+              if (!entryDest.startsWith(finalDest + path.sep)) {
                 zipfile.readEntry();
                 return;
               }
