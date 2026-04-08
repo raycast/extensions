@@ -1,6 +1,6 @@
 # Kill Process Changelog
 
-## [Added Restart Action] - {PR_MERGE_DATE}
+## [Added Restart Action] - 2026-04-08
 
 - Added `Restart` and `Force Restart` actions for restartable processes
 
