@@ -423,7 +423,9 @@ export class Bitwarden {
       });
 
       const sessionToken = result.stdout;
-      if (!sessionToken.trim()) throw new InvalidSessionTokenError();
+      if (!sessionToken.trim()) {
+        throw new InvalidSessionTokenError(result.stderr?.trim() || "Invalid session token");
+      }
 
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");

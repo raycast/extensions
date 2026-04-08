@@ -1,5 +1,10 @@
 # Bitwarden Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix infinite retry loop when unlocking vault with invalid session token
+- Surface CLI stderr in error message for invalid session token errors
+
 ## [Fix] - 2026-04-03
 
 - Update bundled Bitwarden CLI from v2025.11.0 to v2026.2.0 to fix "Invalid session token" error caused by server-side KDF upgrades
