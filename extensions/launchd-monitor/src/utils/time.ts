@@ -20,6 +20,7 @@ export function timeUntil(date: Date): string {
   const diffDays = Math.floor(diffMs / 86400000);
 
   if (diffMs < 0) return "overdue";
+  if (diffMin < 1) return "in <1m";
   if (diffMin < 60) return `in ${diffMin}m`;
   if (diffHours < 24) return `in ${diffHours}h`;
   if (diffDays === 1) return "tomorrow";

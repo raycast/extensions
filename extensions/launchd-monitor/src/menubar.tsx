@@ -61,7 +61,7 @@ export default function Command() {
     error,
     isLoading,
     revalidate,
-  } = useCachedPromise(() => getAllJobStatuses(labels), [], {
+  } = useCachedPromise(() => getAllJobStatuses(labels), [labels.join(",")], {
     initialData: undefined,
   });
 

@@ -115,9 +115,16 @@ export async function getJobStatus(label: string): Promise<JobStatus> {
     plistPath ? getPlistSchedules(plistPath) : Promise.resolve([]),
   ]);
 
-  // Determine primary log path for mtime check
-  const logPath = info.stdoutPath || info.stderrPath;
-  const lastRunTime = logPath ? await getLogLastModified(logPath) : null;
+  // Use the most recent mtime from stdout/stderr
+  const mtimes = await Promise.all(
+    [info.stdoutPath, info.stderrPath]
+      .filter((p): p is string => p !== null)
+      .map((p) => getLogLastModified(p)),
+  );
+  const lastRunTime =
+    mtimes
+      .filter((d): d is Date => d !== null)
+      .sort((a, b) => b.getTime() - a.getTime())[0] ?? null;
 
   // LastExitStatus is a waitpid-style status:
   // - If low 7 bits are 0: normal exit, code = (status >> 8) & 0xFF
@@ -154,6 +161,6 @@ export async function getAllJobStatuses(
 }
 
 export async function kickstartJob(label: string): Promise<void> {
-  const uid = process.getuid?.() ?? 501;
+  const uid = process.getuid?.() ?? os.userInfo().uid;
   await exec("/bin/launchctl", ["kickstart", `gui/${uid}/${label}`]);
 }
