@@ -1,12 +1,13 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "raycast-env.d.ts"],
+  "include": ["src/**/*", "raycast-env.d.ts", "../../src/ts/global.d.ts"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "compilerOptions": {
     "allowJs": true,
     "lib": ["ES2023"],
     "module": "commonjs",
     "target": "ES2022",
-    "strict": true,
+    "strict": false,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

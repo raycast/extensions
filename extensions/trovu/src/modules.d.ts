@@ -32,3 +32,6 @@ declare module "./core/SuggestionsGetter.js" {
 
   export default SuggestionsGetter;
 }
+
+declare module "js-yaml";
+declare module "split-limit";

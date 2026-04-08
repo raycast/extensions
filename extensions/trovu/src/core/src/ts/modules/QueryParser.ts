@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 
 /** @module QueryParser */
 import countriesList from "countries-list";
@@ -15,8 +13,8 @@ export default class QueryParser {
    *
    * @return {object}               - Contains various values parsed from the query.
    */
-  static parse(query) {
-    const env = {};
+  static parse(query: string) {
+    const env: AnyObject = {};
     env.query = query || "";
     env.query = env.query.trim();
     Object.assign(env, QueryParser.setFlagsFromQuery(env));
@@ -43,8 +41,8 @@ export default class QueryParser {
    * - {string} keyword           - The keyword from the query.
    * - {string} argumentString    - The whole argument string.
    */
-  static getKeywordAndArgumentString(query) {
-    let keyword, argumentString;
+  static getKeywordAndArgumentString(query: string) {
+    let keyword: string, argumentString: string;
 
     [keyword, argumentString] = splitLimit(query, " ", 2);
 
@@ -65,8 +63,8 @@ export default class QueryParser {
    *
    * @return {array} args              - The arguments from the argument string.
    */
-  static getArguments(argumentString) {
-    let args;
+  static getArguments(argumentString: string) {
+    let args: string[];
     if (argumentString) {
       args = argumentString.split(",");
     } else {
@@ -85,11 +83,11 @@ export default class QueryParser {
    * - {string} extraNamespaceName - If found, the name of the extra namespace.
    * - {string} keyword            - The new keyword.
    */
-  static getExtraNamespace(keyword) {
+  static getExtraNamespace(keyword: string) {
     // Check for extraNamespace in keyword:
     //   split at dot
     //   but don't split up country namespace names.
-    let extraNamespaceName;
+    let extraNamespaceName: string | undefined;
     if (keyword.match(/.\./)) {
       [extraNamespaceName, keyword] = splitLimit(keyword, ".", 2);
       // If extraNamespace started with a dot, it will be empty
@@ -110,8 +108,8 @@ export default class QueryParser {
    *
    * @return {object}               - Contains either {language: } or {country: }.
    */
-  static getLanguageAndCountryFromExtraNamespaceName(extraNamespaceName) {
-    const env = {};
+  static getLanguageAndCountryFromExtraNamespaceName(extraNamespaceName: string) {
+    const env: AnyObject = {};
 
     if (extraNamespaceName in countriesList.languages) {
       env.language = extraNamespaceName;
@@ -122,7 +120,7 @@ export default class QueryParser {
     return env;
   }
 
-  static setFlagsFromQuery(env) {
+  static setFlagsFromQuery(env: AnyObject) {
     if (env.query) {
       // Check for debug.
       if (env.query.match(/^debug:/)) {
