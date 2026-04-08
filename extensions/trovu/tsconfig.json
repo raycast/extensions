@@ -4,7 +4,8 @@
   "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
   "compilerOptions": {
     "allowJs": true,
-    "lib": ["ES2023"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": ["node"],
     "module": "commonjs",
     "target": "ES2022",
     "strict": false,
