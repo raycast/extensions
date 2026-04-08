@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   getAllStats,
@@ -7,16 +7,29 @@ import {
   generateProjectTable,
   generateModelTable,
 } from "./lib/usage-stats";
+import {
+  formatUtilization,
+  formatResetTime,
+  generateQuotaBar,
+} from "./lib/plan-usage";
+import { usePlanUsage } from "./hooks/usePlanUsage";
 import { formatTokens } from "./lib/pricing";
-import { UsageStats, DailyStats } from "./types";
+import { UsageStats, DailyStats, PlanUsageData } from "./types";
+
+function utilizationColor(util: number): Color {
+  if (util >= 80) return Color.Red;
+  if (util >= 50) return Color.Orange;
+  return Color.Green;
+}
 
 export default function UsageDashboardCommand() {
   const { data, isLoading, revalidate, error } = useCachedPromise(() =>
     getAllStats(7),
   );
+  const { planUsage, revalidate: revalidatePlan } = usePlanUsage();
 
   const markdown = data
-    ? buildDashboardMarkdown(data)
+    ? buildDashboardMarkdown(data, planUsage)
     : error
       ? "# Failed to Load\n\nCould not load usage data. Press Cmd+R to retry."
       : "Loading usage data...";
@@ -28,6 +41,23 @@ export default function UsageDashboardCommand() {
       metadata={
         data ? (
           <Detail.Metadata>
+            {planUsage?.fiveHour != null && (
+              <Detail.Metadata.TagList title="5h Window">
+                <Detail.Metadata.TagList.Item
+                  text={formatUtilization(planUsage.fiveHour.utilization)}
+                  color={utilizationColor(planUsage.fiveHour.utilization)}
+                />
+              </Detail.Metadata.TagList>
+            )}
+            {planUsage?.sevenDay != null && (
+              <Detail.Metadata.TagList title="7d Window">
+                <Detail.Metadata.TagList.Item
+                  text={formatUtilization(planUsage.sevenDay.utilization)}
+                  color={utilizationColor(planUsage.sevenDay.utilization)}
+                />
+              </Detail.Metadata.TagList>
+            )}
+            {planUsage && <Detail.Metadata.Separator />}
             <Detail.Metadata.Label
               title="Today Sessions"
               text={`${data.today.totalSessions}`}
@@ -75,7 +105,10 @@ export default function UsageDashboardCommand() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => revalidate()}
+            onAction={() => {
+              revalidate();
+              revalidatePlan();
+            }}
           />
         </ActionPanel>
       }
@@ -83,13 +116,33 @@ export default function UsageDashboardCommand() {
   );
 }
 
-function buildDashboardMarkdown(data: {
-  today: UsageStats;
-  week: UsageStats;
-  month: UsageStats;
-  daily: DailyStats[];
-}): string {
+function buildDashboardMarkdown(
+  data: {
+    today: UsageStats;
+    week: UsageStats;
+    month: UsageStats;
+    daily: DailyStats[];
+  },
+  planUsage: PlanUsageData | null,
+): string {
   let md = "# Claude Code Usage Dashboard\n\n";
+
+  // Plan Quota
+  if (planUsage && (planUsage.fiveHour || planUsage.sevenDay)) {
+    md += "## Plan Quota\n\n";
+    md += "```\n";
+    if (planUsage.fiveHour) {
+      const reset5h = formatResetTime(planUsage.fiveHour.resets_at);
+      const resetStr = reset5h ? ` (resets in ${reset5h})` : "";
+      md += `5h  \u2502${generateQuotaBar(planUsage.fiveHour.utilization)}\u2502 ${formatUtilization(planUsage.fiveHour.utilization)}${resetStr}\n`;
+    }
+    if (planUsage.sevenDay) {
+      const reset7d = formatResetTime(planUsage.sevenDay.resets_at);
+      const resetStr = reset7d ? ` (resets in ${reset7d})` : "";
+      md += `7d  \u2502${generateQuotaBar(planUsage.sevenDay.utilization)}\u2502 ${formatUtilization(planUsage.sevenDay.utilization)}${resetStr}\n`;
+    }
+    md += "```\n\n";
+  }
 
   // Overview
   md += "## Overview\n\n";

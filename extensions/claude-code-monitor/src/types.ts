@@ -112,6 +112,36 @@ export interface DailyStats {
   outputTokens: number;
 }
 
+// ===== Plan Usage Quota Types =====
+
+export interface PlanUsageWindow {
+  utilization: number;
+  resets_at: string | null;
+}
+
+export interface PlanUsageResponse {
+  five_hour: PlanUsageWindow | null;
+  seven_day: PlanUsageWindow | null;
+  seven_day_opus: PlanUsageWindow | null;
+  seven_day_sonnet: PlanUsageWindow | null;
+  seven_day_oauth_apps: PlanUsageWindow | null;
+  seven_day_cowork: PlanUsageWindow | null;
+  iguana_necktie: PlanUsageWindow | null;
+  extra_usage: {
+    is_enabled: boolean;
+    monthly_limit: number | null;
+    used_credits: number | null;
+    utilization: number | null;
+  } | null;
+}
+
+export interface PlanUsageData {
+  fiveHour: PlanUsageWindow | null;
+  sevenDay: PlanUsageWindow | null;
+  extraUsage: PlanUsageResponse["extra_usage"];
+  fetchedAt: number;
+}
+
 // ===== Plugin System Types =====
 
 /** Raw structure of installed_plugins.json */

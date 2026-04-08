@@ -184,6 +184,8 @@ interface SessionParserCacheEntry {
   cacheReadTokens: number;
   cacheCreationTokens: number;
   id?: string;
+  projectPath?: string;
+  projectName?: string;
 }
 
 const USAGE_CACHE_FILE = path.join(
@@ -227,6 +229,8 @@ async function flushUsageCache(): Promise<void> {
 async function parseSessionMetadataFast(
   filePath: string,
   mtime?: Date,
+  projectPath?: string,
+  projectName?: string,
 ): Promise<Partial<SessionMetadata>> {
   // Check disk cache
   const cache = await loadUsageCache();
@@ -371,6 +375,8 @@ async function parseSessionMetadataFast(
     cacheReadTokens,
     cacheCreationTokens,
     id: result.id,
+    projectPath,
+    projectName,
   };
   usageCacheDirty = true;
 
@@ -414,8 +420,14 @@ export async function listAllSessions(options?: {
 
   for (const { filePath, projectDir, mtime } of filesToParse) {
     try {
-      const metadata = await parseSessionMetadataFast(filePath, mtime);
       const projectPath = await resolveProjectPath(projectDir);
+      const projectName = getProjectName(projectPath);
+      const metadata = await parseSessionMetadataFast(
+        filePath,
+        mtime,
+        projectPath,
+        projectName,
+      );
 
       sessions.push({
         id: metadata.id || path.basename(filePath, ".jsonl"),

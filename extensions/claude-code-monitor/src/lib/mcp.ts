@@ -4,7 +4,7 @@ import os from "node:os";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import type { McpServerInfo, InstalledPluginsFile } from "../types";
-import { readJsonFile, buildClaudeEnv } from "./fs-utils";
+import { readJsonFile, buildClaudeEnv, getShellProxy } from "./fs-utils";
 
 const execFileAsync = promisify(execFile);
 
@@ -17,28 +17,6 @@ const INSTALLED_PLUGINS_PATH = path.join(
   "plugins",
   "installed_plugins.json",
 );
-
-function getShellProxy(): Record<string, string> {
-  // Raycast (GUI app) doesn't source ~/.zshrc, so proxy env vars are missing.
-  // Read them directly from shell config files.
-  if (process.env.http_proxy || process.env.HTTP_PROXY) return {};
-  try {
-    const rcFiles = [".zshrc", ".bashrc", ".zprofile", ".bash_profile"];
-    for (const file of rcFiles) {
-      const content = fs.readFileSync(path.join(HOME, file), "utf-8");
-      const vars: Record<string, string> = {};
-      for (const m of content.matchAll(
-        /(?:export\s+)?((https?_proxy|all_proxy|no_proxy))=(\S+)/gi,
-      )) {
-        vars[m[1]] = m[3].replace(/^["']|["']$/g, "");
-      }
-      if (Object.keys(vars).length > 0) return vars;
-    }
-  } catch {
-    /* ignore */
-  }
-  return {};
-}
 
 function buildEnv() {
   return buildClaudeEnv(getShellProxy());
