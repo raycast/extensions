@@ -1,6 +1,6 @@
 # Trovu Changelog
 
-## [1.3.1] - {PR_MERGE_DATE}
+## [1.3.1] - 2026-04-08
 
 - Minor code fixes.
 
