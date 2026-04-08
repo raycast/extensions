@@ -88,15 +88,31 @@ function labelToDisplayName(label: string): string {
     .join(" ");
 }
 
-function plistPathForLabel(label: string): string {
-  return path.join(os.homedir(), "Library", "LaunchAgents", `${label}.plist`);
+import fs from "fs/promises";
+
+async function plistPathForLabel(label: string): Promise<string | null> {
+  const searchPaths = [
+    path.join(os.homedir(), "Library", "LaunchAgents"),
+    "/Library/LaunchAgents",
+    "/Library/LaunchDaemons",
+  ];
+  for (const dir of searchPaths) {
+    const candidate = path.join(dir, `${label}.plist`);
+    try {
+      await fs.access(candidate);
+      return candidate;
+    } catch {
+      continue;
+    }
+  }
+  return null;
 }
 
 export async function getJobStatus(label: string): Promise<JobStatus> {
-  const plistPath = plistPathForLabel(label);
+  const plistPath = await plistPathForLabel(label);
   const [info, schedules] = await Promise.all([
     getLaunchctlInfo(label),
-    getPlistSchedules(plistPath),
+    plistPath ? getPlistSchedules(plistPath) : Promise.resolve([]),
   ]);
 
   // Determine primary log path for mtime check

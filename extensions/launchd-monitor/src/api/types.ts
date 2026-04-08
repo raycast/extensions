@@ -28,7 +28,7 @@ export interface JobStatus {
   stdoutPath: string | null;
   stderrPath: string | null;
   program: string | null;
-  plistPath: string;
+  plistPath: string | null;
 }
 
 export type OverallStatus = "all-ok" | "has-failures" | "not-loaded";

@@ -50,7 +50,7 @@ function getStatusText(job: JobStatus): string {
 }
 
 export default function Command() {
-  const { launchdLabels } = getPreferenceValues<{ launchdLabels: string }>();
+  const { launchdLabels } = getPreferenceValues<Preferences.Menubar>();
   const labels = launchdLabels
     .split(",")
     .map((l) => l.trim())
@@ -159,7 +159,7 @@ export default function Command() {
             title="Copy Last 50 Lines"
             icon={Icon.Clipboard}
             onAction={async () => {
-              const logPath = job.stderrPath || job.stdoutPath;
+              const logPath = job.stdoutPath || job.stderrPath;
               if (!logPath) {
                 await showHUD("No log file found");
                 return;
@@ -188,11 +188,13 @@ export default function Command() {
               }
             }}
           />
-          <MenuBarExtra.Item
-            title="Open Plist"
-            icon={Icon.Gear}
-            onAction={() => open(job.plistPath)}
-          />
+          {job.plistPath && (
+            <MenuBarExtra.Item
+              title="Open Plist"
+              icon={Icon.Gear}
+              onAction={() => open(job.plistPath!)}
+            />
+          )}
         </MenuBarExtra.Section>
       ))}
       <MenuBarExtra.Section>
