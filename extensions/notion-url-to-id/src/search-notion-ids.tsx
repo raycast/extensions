@@ -88,6 +88,14 @@ function FolderForm(props: {
           <Action.SubmitForm
             title="Save Folder"
             onSubmit={async (values: { folderChoice: string; folderName: string }) => {
+              if (values.folderChoice === CREATE_FOLDER_OPTION && !values.folderName.trim()) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Folder name cannot be empty",
+                });
+                return;
+              }
+
               const folder =
                 values.folderChoice === REMOVE_FOLDER_OPTION
                   ? undefined
