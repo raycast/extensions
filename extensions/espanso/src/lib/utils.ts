@@ -279,8 +279,14 @@ const evaluateVar = async (v: EspansoVar): Promise<string> => {
     case "shell": {
       if (!v.params?.cmd) return `{{${v.name}}}`;
       try {
-        const { stdout } = await execPromise(v.params.cmd);
-        return stdout.trim();
+        const rawShell = typeof v.params.shell === "string" && v.params.shell.trim() ? v.params.shell.trim() : "zsh";
+        const shellPath = rawShell.includes("/") ? rawShell : `/bin/${rawShell}`;
+        const shellBase = rawShell.includes("/") ? rawShell.split("/").pop()! : rawShell;
+        const interactive = shellBase === "zsh" || shellBase === "bash";
+        const shellArgs = interactive ? ["-i", "-c", v.params.cmd] : ["-c", v.params.cmd];
+        const { stdout } = await execFilePromise(shellPath, shellArgs);
+        // eslint-disable-next-line no-control-regex
+        return stdout.replace(/\x1b\[[0-9;]*[ -/]*[@-~]/g, "").trim();
       } catch {
         return `{{${v.name}}}`;
       }
