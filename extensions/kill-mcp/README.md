@@ -49,9 +49,11 @@ The extension detects MCP servers from:
 ## Troubleshooting
 
 ### No MCP servers detected
+
 Ensure you have configured MCP servers in at least one of the supported applications. The extension monitors system processes and looks for patterns matching your MCP configurations.
 
 ### Process still running after "kill"
+
 Try using "Force Kill" (⇧⌘K) to send SIGKILL instead of SIGTERM.
 
 ## Requirements

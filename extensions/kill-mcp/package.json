@@ -1,5 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
   "name": "kill-mcp",
   "title": "Kill MCP Servers",
   "description": "View and manage MCP (Model Context Protocol) servers running on your Mac. See RAM usage and kill processes.",
@@ -8,6 +9,9 @@
   "categories": [
     "Developer Tools",
     "System"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
@@ -19,15 +23,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1"
+    "@raycast/api": "^1.104.11"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^20.13.0",
-    "@types/react": "^19.0.10",
-    "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@types/node": "^25.5.2",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build --skip-types -e dist -o dist",

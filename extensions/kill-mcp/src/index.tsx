@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import MCPServerDetail from "./components/MCPServerDetail";
 import {
@@ -33,8 +24,10 @@ export default function Command() {
   const [configs, setConfigs] = useState<MCPConfig[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadData = useCallback(async (showErrorToast = true) => {
-    setIsLoading(true);
+  const loadData = useCallback(async (showErrorToast = true, isInitialLoad = false) => {
+    if (isInitialLoad) {
+      setIsLoading(true);
+    }
     try {
       const mcpProcesses = getMCPProcesses();
       const mcpConfigs = getMCPConfigs();
@@ -50,17 +43,19 @@ export default function Command() {
         });
       }
     } finally {
-      setIsLoading(false);
+      if (isInitialLoad) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     // Initial load
-    loadData();
+    loadData(true, true);
 
     // Set up auto-refresh interval
     const intervalId = setInterval(() => {
-      loadData(false); // Don't show error toast on auto-refresh
+      loadData(false, false); // Don't show error toast or loading state on auto-refresh
     }, AUTO_REFRESH_INTERVAL);
 
     // Cleanup interval on unmount
@@ -157,19 +152,11 @@ export default function Command() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search MCP servers..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Source"
-          value={selectedSource}
-          onChange={setSelectedSource}
-        >
+        <List.Dropdown tooltip="Filter by Source" value={selectedSource} onChange={setSelectedSource}>
           <List.Dropdown.Item title="All Sources" value="all" />
           <List.Dropdown.Section title="Sources">
             {sources.map((source) => (
-              <List.Dropdown.Item
-                key={source}
-                title={getSourceDisplayName(source)}
-                value={source}
-              />
+              <List.Dropdown.Item key={source} title={getSourceDisplayName(source)} value={source} />
             ))}
           </List.Dropdown.Section>
         </List.Dropdown>
@@ -277,7 +264,7 @@ export default function Command() {
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                     <Action.CopyToClipboard
-                      title="Copy Process Id"
+                      title="Copy Process ID"
                       content={process.pid.toString()}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />

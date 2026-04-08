@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Detail,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Detail, Icon, showToast, Toast } from "@raycast/api";
 import {
   CPU_THRESHOLDS,
   formatRAMUsage,
@@ -127,11 +118,7 @@ ${process.configPath ? `## Configuration\n\nLoaded from: \`${process.configPath}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Started" text={process.startTime || "Unknown"} />
           {process.configPath && (
-            <Detail.Metadata.Link
-              title="Config File"
-              target={`file://${process.configPath}`}
-              text="Open in Finder"
-            />
+            <Detail.Metadata.Link title="Config File" target={`file://${process.configPath}`} text="Open in Finder" />
           )}
         </Detail.Metadata>
       }
@@ -155,7 +142,7 @@ ${process.configPath ? `## Configuration\n\nLoaded from: \`${process.configPath}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy Process Id"
+              title="Copy Process ID"
               content={process.pid.toString()}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />

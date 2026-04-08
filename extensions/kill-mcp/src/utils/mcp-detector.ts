@@ -82,7 +82,7 @@ export function getMCPConfigs(): MCPConfig[] {
       try {
         const content = JSON.parse(readFileSync(configPath, "utf-8"));
         const servers = content.mcpServers || content.servers || content;
-        if (typeof servers === "object") {
+        if (servers && typeof servers === "object" && !Array.isArray(servers)) {
           configs.push({
             source: "vscode",
             path: configPath,
@@ -106,7 +106,7 @@ export function getMCPConfigs(): MCPConfig[] {
       try {
         const content = JSON.parse(readFileSync(configPath, "utf-8"));
         const servers = content.mcpServers || content.servers || content;
-        if (typeof servers === "object") {
+        if (servers && typeof servers === "object" && !Array.isArray(servers)) {
           configs.push({
             source: "cursor",
             path: configPath,
@@ -151,14 +151,11 @@ export function getMCPProcesses(): MCPProcess[] {
   const configs = getMCPConfigs();
 
   // Build a map of known MCP commands for matching
-  const knownMCPCommands = new Map<
-    string,
-    { name: string; source: MCPConfig["source"]; configPath: string }
-  >();
+  const knownMCPCommands = new Map<string, { name: string; source: MCPConfig["source"]; configPath: string }>();
 
   for (const config of configs) {
     for (const [serverName, serverConfig] of Object.entries(config.servers)) {
-      const cmdKey = serverConfig.command + (serverConfig.args?.join(" ") || "");
+      const cmdKey = serverConfig.command + (serverConfig.args?.length ? " " + serverConfig.args.join(" ") : "");
       knownMCPCommands.set(cmdKey, {
         name: serverName,
         source: config.source,
@@ -248,10 +245,7 @@ export function getMCPProcesses(): MCPProcess[] {
         if (!isGeneric) {
           const tokens = cmdPattern.split(" ");
           const uniqueTokens = tokens.filter((t) => t.length > 3);
-          if (
-            uniqueTokens.length > 0 &&
-            uniqueTokens.every((token) => fullCommand.includes(token))
-          ) {
+          if (uniqueTokens.length > 0 && uniqueTokens.every((token) => fullCommand.includes(token))) {
             serverName = info.name;
             source = info.source;
             configPath = info.configPath;
@@ -308,10 +302,7 @@ function isMCPServerProcess(command: string, configs: MCPConfig[]): boolean {
           return true;
         }
         // If args are configured, ALL must match (not just one) to avoid false positives
-        if (
-          serverConfig.args.length > 0 &&
-          serverConfig.args.every((arg) => command.includes(arg))
-        ) {
+        if (serverConfig.args.length > 0 && serverConfig.args.every((arg) => command.includes(arg))) {
           return true;
         }
       }
@@ -361,21 +352,19 @@ function extractServerName(command: string): string {
 function determineSourceFromParent(ppid: number): MCPProcess["source"] {
   if (!isValidPID(ppid)) return "unknown";
   try {
-    const parentCmd = execSync(`ps -p ${ppid} -o command=`, { encoding: "utf-8" })
-      .trim()
-      .toLowerCase();
+    const parentCmd = execSync(`ps -p ${ppid} -o command=`, { encoding: "utf-8" }).trim().toLowerCase();
 
+    if (parentCmd.includes("claude-code") || parentCmd.includes("claude_code")) {
+      return "claude-code";
+    }
     if (parentCmd.includes("claude") && parentCmd.includes("desktop")) {
       return "claude-desktop";
-    }
-    if (parentCmd.includes("code") || parentCmd.includes("vscode")) {
-      return "vscode";
     }
     if (parentCmd.includes("cursor")) {
       return "cursor";
     }
-    if (parentCmd.includes("claude-code") || parentCmd.includes("claude_code")) {
-      return "claude-code";
+    if (parentCmd.includes("code") || parentCmd.includes("vscode")) {
+      return "vscode";
     }
   } catch {
     // Parent process lookup failed
