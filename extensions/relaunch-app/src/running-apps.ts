@@ -1,7 +1,8 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import { promisify } from "util";
 
 const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export interface RunningApp {
   name: string;
@@ -62,8 +63,8 @@ export async function restartApp(app: RunningApp): Promise<void> {
 
   // Relaunch: prefer bundle ID, fall back to app name
   if (app.bundleId) {
-    await execAsync(`open -b "${app.bundleId}"`);
+    await execFileAsync("open", ["-b", app.bundleId]);
   } else {
-    await execAsync(`open -a "${app.name}"`);
+    await execFileAsync("open", ["-a", app.name]);
   }
 }
