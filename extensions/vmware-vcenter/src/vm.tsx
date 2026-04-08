@@ -812,8 +812,16 @@ export default function Command(): JSX.Element {
                     SetShowServerView(true);
                   }}
                 />
-                <Action title="Edit Server" icon={Icon.Pencil} onAction={() => SetShowServerViewEdit(true)} />
-                <Action title="Delete Server" icon={Icon.DeleteDocument} onAction={DeleteSelectedServer} />
+                <Action
+                  title="Edit Server"
+                  icon={Icon.Pencil}
+                  onAction={() => SelectedServerName.current !== "All" && SetShowServerViewEdit(true)}
+                />
+                <Action
+                  title="Delete Server"
+                  icon={Icon.DeleteDocument}
+                  onAction={() => SelectedServerName.current !== "All" && DeleteSelectedServer}
+                />
               </React.Fragment>
             )}
           </ActionPanel.Section>
@@ -840,8 +848,16 @@ export default function Command(): JSX.Element {
                   SetShowServerView(true);
                 }}
               />
-              <Action title="Edit Server" icon={Icon.Pencil} onAction={() => SetShowServerViewEdit(true)} />
-              <Action title="Delete Server" icon={Icon.DeleteDocument} onAction={DeleteSelectedServer} />
+              <Action
+                title="Edit Server"
+                icon={Icon.Pencil}
+                onAction={() => SelectedServerName.current !== "All" && SetShowServerViewEdit(true)}
+              />
+              <Action
+                title="Delete Server"
+                icon={Icon.DeleteDocument}
+                onAction={() => SelectedServerName.current !== "All" && DeleteSelectedServer}
+              />
             </React.Fragment>
           )}
         </ActionPanel.Section>
