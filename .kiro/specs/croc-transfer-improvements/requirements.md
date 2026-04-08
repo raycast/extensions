@@ -12,7 +12,7 @@ This document covers a set of improvements to the Croc Transfer Raycast extensio
 - **ReceiveCommand**: The "Receive File" Raycast command (`receive-file.tsx`).
 - **QuickSendCommand**: A new `no-view` Raycast command that sends Finder-selected files without opening a UI window.
 - **HistoryCommand**: The "Transfer History" Raycast command (`transfer-history.tsx`).
-- **TransferRecord**: A persisted history entry stored in Raycast LocalStorage representing one completed, failed, or cancelled transfer.
+- **TransferRecord**: A persisted history entry stored in Raycast LocalStorage representing one transfer attempt. `status` is one of `"success"`, `"failed"`, `"cancelled"`, or `"in_progress"` (the last is a transient state used only by QuickSendCommand's write-ahead pattern).
 - **CodePhrase**: The hyphen-separated secret string croc uses to identify a transfer session.
 - **DownloadDirectory**: The directory preference where received files are saved.
 - **useTransfer**: The existing React hook in `src/hooks/useTransfer.ts` that manages transfer lifecycle state.
@@ -210,6 +210,7 @@ This document covers a set of improvements to the Croc Transfer Raycast extensio
 10. THE QuickSendCommand SHALL manage its own process lifecycle directly using `spawnCrocSend` from `src/utils/process.ts`, without using the `useTransfer` hook, because `useTransfer` is a React hook and cannot be used in no-view mode.
 11. THE QuickSendCommand SHALL NOT provide a cancel mechanism; once started, the transfer runs to completion or failure. This is a known limitation of no-view mode commands.
 12. WHEN Raycast terminates the no-view command process before the transfer completes, THE Extension SHALL attempt to write a TransferRecord with `status: "failed"` to history (if a CodePhrase had already been generated) using a `process.on('exit')` or `process.on('SIGTERM')` handler. This is best-effort: if Raycast sends SIGKILL, the record may not be written. If no CodePhrase had been generated yet, no record SHALL be written.
+13. THE QuickSendCommand SHALL use a write-ahead history pattern: upon CodePhrase generation it SHALL write a TransferRecord with `status: "in_progress"` and a `sessionId` identifying the current process. On any subsequent command open, THE Extension SHALL scan history for `"in_progress"` records whose `sessionId` does not match the current session and mark them `"failed"`, handling the case where the process was killed before cleanup could run.
 
 ---
 

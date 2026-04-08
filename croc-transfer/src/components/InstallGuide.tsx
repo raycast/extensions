@@ -1,6 +1,9 @@
-import { Action, ActionPanel, Clipboard, Detail, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { execFile } from "child_process";
 
-const INSTALL_COMMAND = "brew install croc";
+interface InstallGuideProps {
+  onCrocFound?: () => void;
+}
 
 const MARKDOWN = `
 # croc is not installed
@@ -32,19 +35,37 @@ croc --version
 If you installed croc to a non-standard path, set the **croc Binary Path** in the extension preferences.
 `;
 
-export function InstallGuide() {
+export function InstallGuide({ onCrocFound }: InstallGuideProps) {
+  async function handleInstallWithHomebrew() {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Installing croc…", message: "brew install croc" });
+    execFile("/opt/homebrew/bin/brew", ["install", "croc"], (err, _stdout, stderr) => {
+      if (err) {
+        execFile("/usr/local/bin/brew", ["install", "croc"], (err2, _stdout2, stderr2) => {
+          if (err2) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Install failed";
+            toast.message = (stderr2 || stderr).trim().slice(0, 200);
+          } else {
+            toast.style = Toast.Style.Success;
+            toast.title = "croc installed!";
+            onCrocFound?.();
+          }
+        });
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = "croc installed!";
+        onCrocFound?.();
+      }
+    });
+  }
+
   return (
     <Detail
       markdown={MARKDOWN}
       actions={
         <ActionPanel>
-          <Action
-            title="Copy Install Command"
-            onAction={async () => {
-              await Clipboard.copy(INSTALL_COMMAND);
-              await showHUD("Copied: brew install croc");
-            }}
-          />
+          <Action title="Install with Homebrew" onAction={handleInstallWithHomebrew} />
+          <Action title="Refresh" onAction={() => onCrocFound?.()} />
           <Action.OpenInBrowser title="View croc on GitHub" url="https://github.com/schollz/croc" />
         </ActionPanel>
       }

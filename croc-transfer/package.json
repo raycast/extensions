@@ -60,6 +60,20 @@
         "croc",
         "transfer"
       ]
+    },
+    {
+      "name": "quick-send",
+      "title": "Quick Send",
+      "subtitle": "croc",
+      "description": "Send selected Finder files via croc without opening a window",
+      "mode": "no-view",
+      "keywords": [
+        "send",
+        "quick",
+        "croc",
+        "file",
+        "finder"
+      ]
     }
   ],
   "preferences": [
@@ -74,7 +88,7 @@
     {
       "name": "downloadDirectory",
       "title": "Download Directory",
-      "description": "Directory where received files are saved.",
+      "description": "Directory where received files are saved. Files are placed directly in this folder.",
       "type": "directory",
       "required": false,
       "default": "~/Downloads"

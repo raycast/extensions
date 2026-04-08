@@ -4,39 +4,32 @@ import {
   Clipboard,
   Color,
   Detail,
+  Form,
   Icon,
   LaunchProps,
-  List,
-  open,
   showHUD,
+  showInFinder,
   showToast,
   Toast,
 } from "@raycast/api";
-import { basename, join } from "path";
+import { basename } from "path";
 import { useEffect, useRef, useState } from "react";
 import { InstallGuide } from "./components/InstallGuide";
 import { useCrocCheck } from "./hooks/useCrocCheck";
-import { useTransferHistory } from "./hooks/useTransferHistory";
 import { addRecord } from "./utils/history";
 import { buildCrocArgs, getCrocPath, getPrefs } from "./utils/croc";
 import { buildProgressBar, CrocProcess, spawnCrocReceive, TransferProgress } from "./utils/process";
 
 type ReceiveState = "input" | "receiving" | "done" | "error";
 
-/** Extract a croc code phrase from arbitrary clipboard text.
- *  Handles: "Code is: 1368-paris-profit-lorenzo", "1368-paris-profit-lorenzo", URLs with codes, etc.
- *  croc codes are hyphen-separated tokens starting with a number segment.
- */
 function extractCrocCode(text: string): string | null {
   const cleaned = text.trim();
-  // Remove "Code is:" or "CROC_SECRET=" prefix
   const stripped = cleaned
     .replace(/^Code\s+is:\s*/i, "")
     .replace(/^CROC_SECRET\s*=\s*["']?/i, "")
     .replace(/["']?\s*$/, "")
     .trim();
 
-  // Match a croc code: starts with digits, followed by 1+ hyphen-word groups
   const match = stripped.match(/^(\d+-(?:[a-z]+-)*[a-z]+)$/i)
     ?? stripped.match(/(\d+-(?:[a-z]+-)*[a-z]+)/i);
 
@@ -44,27 +37,22 @@ function extractCrocCode(text: string): string | null {
 }
 
 export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: string } }>) {
-  const { isChecking, isInstalled } = useCrocCheck();
-  const { history } = useTransferHistory();
-  const [searchText, setSearchText] = useState("");
-  const [clipboardCode, setClipboardCode] = useState<string | null>(null);
+  const { isChecking, isInstalled, recheck } = useCrocCheck();
+  const [codeInput, setCodeInput] = useState("");
   const [state, setState] = useState<ReceiveState>("input");
   const [activePhrase, setActivePhrase] = useState("");
   const [progress, setProgress] = useState<TransferProgress | null>(null);
   const [receivedFiles, setReceivedFiles] = useState<string[]>([]);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const procRef = useRef<CrocProcess | null>(null);
+  const deepLinkHandled = useRef(false);
 
   const prefs = getPrefs();
-  const downloadDir = join(
-    (prefs.downloadDirectory || "~/Downloads").replace(/^~/, process.env.HOME ?? "~"),
-    "Share"
-  );
+  const downloadDir = (prefs.downloadDirectory || "~/Downloads").replace(/^~/, process.env.HOME ?? "~");
 
   useEffect(() => () => { procRef.current?.kill(); }, []);
 
-  // Deep Link: auto-start receive if code argument is provided
-  const deepLinkHandled = useRef(false);
+  // Deep link: auto-start
   useEffect(() => {
     if (deepLinkHandled.current) return;
     const argCode = props.arguments?.code?.trim();
@@ -73,18 +61,17 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
       if (extracted) {
         deepLinkHandled.current = true;
         startReceive(extracted);
-        return;
       }
     }
   }, []);
 
-  // Read clipboard on mount, extract code if present
+  // Pre-fill from clipboard
   useEffect(() => {
     if (deepLinkHandled.current) return;
     Clipboard.readText().then((text) => {
       if (text) {
         const code = extractCrocCode(text);
-        if (code) setClipboardCode(code);
+        if (code) setCodeInput(code);
       }
     }).catch(() => { /* clipboard unavailable */ });
   }, []);
@@ -98,7 +85,7 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
     setState("receiving");
     setProgress(null);
 
-    const args = buildCrocArgs("receive", []);
+    const args = buildCrocArgs("receive");
     const toast = await showToast({ style: Toast.Style.Animated, title: "Connecting…", message: trimmed });
 
     procRef.current = spawnCrocReceive(
@@ -127,8 +114,17 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
     );
   }
 
+  function handleCancel() {
+    procRef.current?.kill();
+    if (activePhrase) {
+      addRecord({ type: "receive", files: [], phrase: activePhrase, status: "cancelled" });
+    }
+    setState("input");
+    setProgress(null);
+  }
+
   if (isChecking) return <Detail markdown="Checking croc installation..." />;
-  if (!isInstalled) return <InstallGuide />;
+  if (!isInstalled) return <InstallGuide onCrocFound={recheck} />;
 
   if (state === "receiving") {
     const pct = progress?.percent ?? 0;
@@ -178,7 +174,7 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={() => { procRef.current?.kill(); setState("input"); }}
+              onAction={handleCancel}
             />
           </ActionPanel>
         }
@@ -190,6 +186,7 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
     const fileList = receivedFiles.length > 0
       ? receivedFiles.map((f) => `- \`${basename(f)}\``).join("\n")
       : "Files saved to download folder.";
+    const firstFile = receivedFiles[0];
     return (
       <Detail
         markdown={`# Files Received\n\n${fileList}`}
@@ -206,11 +203,13 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
         }
         actions={
           <ActionPanel>
-            <Action
-              title="Open Download Folder"
-              icon="📥"
-              onAction={() => open(downloadDir)}
-            />
+            {firstFile && (
+              <Action
+                title="Reveal in Finder"
+                icon={Icon.Finder}
+                onAction={() => showInFinder(firstFile)}
+              />
+            )}
             <Action
               title="Receive Another"
               icon={Icon.Download}
@@ -245,94 +244,46 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
     );
   }
 
-  // Input state
-  const trimmed = searchText.trim();
-  const isTyping = trimmed.length > 0;
-  const isValidPhrase = trimmed.length > 2;
-
-  // Recent phrases from history (unique, last 5 receives)
-  const recentPhrases = [...new Map(
-    history
-      .filter((r) => r.type === "receive" && r.status === "success")
-      .map((r) => [r.phrase, r])
-  ).values()].slice(0, 5);
-
-  const showClipboard = !isTyping && clipboardCode !== null;
-  const showRecent = !isTyping && recentPhrases.length > 0;
-  const showEmpty = !isTyping && !showClipboard && !showRecent;
-
+  // Input state — Form with pre-filled code
   return (
-    <List
-      searchBarPlaceholder="Enter code phrase (e.g. 3-panda-brave-story)"
-      onSearchTextChange={setSearchText}
-    >
-      {showEmpty && (
-        <List.EmptyView
-          icon={Icon.Download}
-          title="Enter Code Phrase"
-          description="Type the phrase from the sender, then press Enter."
-        />
-      )}
-
-      {/* Typed phrase takes priority */}
-      {isValidPhrase && (
-        <List.Section title="Receive">
-          <List.Item
-            icon={{ source: Icon.Download, tintColor: Color.Blue }}
-            title={trimmed}
-            subtitle="Press ↵ to start receiving"
-            actions={
-              <ActionPanel>
-                <Action title="Receive Files" icon={Icon.Download} onAction={() => startReceive(trimmed)} />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      )}
-
-      {/* Clipboard code — shown when nothing is typed */}
-      {showClipboard && (
-        <List.Section title="From Clipboard">
-          <List.Item
-            icon={{ source: Icon.Clipboard, tintColor: Color.Blue }}
-            title={clipboardCode!}
-            subtitle="Detected from clipboard · Press ↵ to receive"
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Receive Files"
-                  icon={Icon.Download}
-                  onAction={() => startReceive(clipboardCode!)}
-                />
-              </ActionPanel>
-            }
-          />
-        </List.Section>
-      )}
-
-      {/* Recent history */}
-      {showRecent && (
-        <List.Section title="Recent" subtitle={`${recentPhrases.length}`}>
-          {recentPhrases.map((r) => (
-            <List.Item
-              key={r.id}
-              icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
-              title={r.phrase}
-              subtitle={r.files.length > 0 ? basename(r.files[0]) : undefined}
-              actions={
-                <ActionPanel>
-                  <Action title="Receive Again" icon={Icon.Download} onAction={() => startReceive(r.phrase)} />
-                  <Action
-                    title="Copy Phrase"
-                    icon={Icon.Clipboard}
-                    onAction={async () => { await Clipboard.copy(r.phrase); await showHUD(`Copied: ${r.phrase}`); }}
-                  />
-                </ActionPanel>
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Receive"
+            icon={Icon.Download}
+            onSubmit={() => {
+              const trimmed = codeInput.trim();
+              if (!trimmed) {
+                showToast({ style: Toast.Style.Failure, title: "Enter a code phrase" });
+                return;
               }
-            />
-          ))}
-        </List.Section>
-      )}
-    </List>
+              startReceive(trimmed);
+            }}
+          />
+          <Action
+            title="Copy Phrase"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            onAction={async () => {
+              if (codeInput.trim()) {
+                await Clipboard.copy(codeInput.trim());
+                await showHUD(`Copied: ${codeInput.trim()}`);
+              }
+            }}
+          />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        id="code"
+        title="Code Phrase"
+        placeholder="e.g. 3-panda-brave-story"
+        autoFocus
+        value={codeInput}
+        onChange={setCodeInput}
+      />
+      <Form.Description text="Enter the code phrase from the sender, then press ↵ to start receiving." />
+    </Form>
   );
 }

@@ -18,18 +18,32 @@ import { tmpdir } from "os";
 import { execFile, execFileSync } from "child_process";
 import { useState, useEffect } from "react";
 import { useTransferHistory } from "./hooks/useTransferHistory";
-import { TransferRecord } from "./utils/history";
+import { TransferRecord, formatFileSize } from "./utils/history";
 import { getCrocPath, buildCrocArgs } from "./utils/croc";
 import { spawnCrocSend } from "./utils/process";
 import { addRecord } from "./utils/history";
+import { cleanStaleInProgressRecords } from "./utils/history";
+
+// Session ID for stale in_progress record cleanup
+const SESSION_ID = Math.random().toString(36).slice(2);
 
 function buildDeepLink(phrase: string): string {
   return `raycast://extensions/wilton/croc-transfer/receive-file?arguments=${encodeURIComponent(JSON.stringify({ code: phrase }))}`;
 }
 
+type DateGroup = "Today" | "Yesterday" | "Earlier";
+
+function getDateGroup(timestamp: number): DateGroup {
+  const now = new Date();
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const yesterdayStart = todayStart - 86_400_000;
+  if (timestamp >= todayStart) return "Today";
+  if (timestamp >= yesterdayStart) return "Yesterday";
+  return "Earlier";
+}
+
 const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".heic", ".heif", ".bmp", ".tiff", ".tif"]);
 const TEXT_EXTS = new Set([".md", ".txt", ".json", ".yaml", ".yml", ".csv", ".log", ".sh", ".py", ".js", ".ts", ".swift", ".go", ".rs", ".c", ".cpp", ".h", ".html", ".css", ".xml"]);
-// Formats that can't be rendered inline but qlmanage can generate a thumbnail for
 const QUICKLOOK_THUMB_EXTS = new Set([".pvt", ".mov", ".mp4", ".m4v", ".avi", ".mkv", ".webm", ".pdf"]);
 
 const QL_THUMB_DIR = join(tmpdir(), "raycast-croc-ql-thumbs");
@@ -38,11 +52,9 @@ function encodeFilePath(filePath: string): string {
   return filePath.split("/").map((seg) => encodeURIComponent(seg)).join("/");
 }
 
-// Raycast List detail panel: markdown visible area is ~170-200px tall
 const PREVIEW_MAX_W = 500;
 const PREVIEW_MAX_H = 190;
 
-/** Use sips to get pixel dimensions of an image file. Returns null if unavailable. */
 function getImageDimensions(filePath: string): { w: number; h: number } | null {
   try {
     const out = execFileSync("/usr/bin/sips", ["-g", "pixelWidth", "-g", "pixelHeight", filePath], {
@@ -58,16 +70,13 @@ function getImageDimensions(filePath: string): { w: number; h: number } | null {
   }
 }
 
-/** Scale to fit within PREVIEW_MAX_W × PREVIEW_MAX_H, preserving aspect ratio. */
 function scaleToBounds(w: number, h: number): { w: number; h: number } {
   const scale = Math.min(1, PREVIEW_MAX_W / w, PREVIEW_MAX_H / h);
   return { w: Math.round(w * scale), h: Math.round(h * scale) };
 }
 
 function imgTag(src: string, dims: { w: number; h: number } | null): string {
-  if (dims) {
-    return `<img src="${src}" width="${dims.w}" height="${dims.h}" />`;
-  }
+  if (dims) return `<img src="${src}" width="${dims.w}" height="${dims.h}" />`;
   return `<img src="${src}" height="${PREVIEW_MAX_H}" />`;
 }
 
@@ -109,7 +118,6 @@ async function generateQLThumbnail(filePath: string): Promise<string | null> {
     mkdirSync(QL_THUMB_DIR, { recursive: true });
     await new Promise<void>((resolve, reject) => {
       execFile("/usr/bin/qlmanage", ["-t", "-s", "800", "-o", QL_THUMB_DIR, filePath], (err) => {
-        // qlmanage exits non-zero even on success sometimes; check thumb existence instead
         if (err && !existsSync(join(QL_THUMB_DIR, basename(filePath) + ".png"))) {
           reject(err);
         } else {
@@ -167,7 +175,6 @@ function RecordDetail({ record }: { record: TransferRecord }) {
     const ext = extname(file).toLowerCase();
 
     if (QUICKLOOK_THUMB_EXTS.has(ext)) {
-      // Show metadata immediately, then replace with thumbnail when ready
       setMarkdown(fileMetadataMarkdown(file));
       generateQLThumbnail(file).then((thumb) => {
         if (thumb) setMarkdown(thumb);
@@ -191,7 +198,7 @@ function RecordDetail({ record }: { record: TransferRecord }) {
           />
           <List.Item.Detail.Metadata.Label
             title="Status"
-            text={record.status === "success" ? "Success" : record.status === "failed" ? "Failed" : "Cancelled"}
+            text={record.status === "success" ? "Success" : record.status === "failed" ? "Failed" : record.status === "cancelled" ? "Cancelled" : "In Progress"}
             icon={{
               source: record.status === "success" ? Icon.CheckCircle : record.status === "failed" ? Icon.XMarkCircle : Icon.MinusCircle,
               tintColor: record.status === "success" ? Color.Green : record.status === "failed" ? Color.Red : Color.SecondaryText,
@@ -201,6 +208,9 @@ function RecordDetail({ record }: { record: TransferRecord }) {
           <List.Item.Detail.Metadata.Label title="Code Phrase" text={record.phrase} icon={Icon.Key} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Date" text={new Date(record.timestamp).toLocaleString()} icon={Icon.Clock} />
+          {record.size !== undefined && (
+            <List.Item.Detail.Metadata.Label title="Size" text={formatFileSize(record.size)} icon={Icon.HardDrive} />
+          )}
           {dirPath && (
             <List.Item.Detail.Metadata.Label title="Folder" text={dirPath} icon="📥" />
           )}
@@ -232,12 +242,20 @@ function RecordItem({ record, onRemove }: { record: TransferRecord; onRemove: (i
     : record.status === "failed" ? Color.Red
     : Color.SecondaryText;
 
+  const accessories: List.Item.Accessory[] = [
+    { date: new Date(record.timestamp) },
+  ];
+  if (record.files.length > 1) {
+    accessories.unshift({ tag: { value: `${record.files.length} files` } });
+  }
+
   return (
     <List.Item
       icon={{ source: record.type === "send" ? Icon.Upload : Icon.Download, tintColor: statusColor }}
       title={record.phrase}
+      keywords={record.files.map((f) => basename(f))}
       quickLook={firstExistingFile ? { path: firstExistingFile, name: basename(firstExistingFile) } : undefined}
-      accessories={[]}
+      accessories={accessories}
       detail={<RecordDetail record={record} />}
       actions={
         <ActionPanel>
@@ -250,9 +268,7 @@ function RecordItem({ record, onRemove }: { record: TransferRecord; onRemove: (i
                 title="Open File"
                 icon={Icon.Document}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onAction={() => {
-                  if (firstExistingFile) open(firstExistingFile);
-                }}
+                onAction={() => { if (firstExistingFile) open(firstExistingFile); }}
               />
             )}
             <Action
@@ -302,6 +318,11 @@ function RecordItem({ record, onRemove }: { record: TransferRecord; onRemove: (i
 export default function TransferHistory() {
   const { history, isLoading, remove, clear } = useTransferHistory();
 
+  // Clean up stale in_progress records from previous sessions
+  useEffect(() => {
+    cleanStaleInProgressRecords(SESSION_ID);
+  }, []);
+
   async function handleClearAll() {
     const confirmed = await confirmAlert({
       title: "Clear All History",
@@ -310,6 +331,13 @@ export default function TransferHistory() {
     });
     if (confirmed) { await clear(); await showHUD("History cleared"); }
   }
+
+  // Group records by date
+  const groups: Record<DateGroup, TransferRecord[]> = { Today: [], Yesterday: [], Earlier: [] };
+  for (const r of history) {
+    groups[getDateGroup(r.timestamp)].push(r);
+  }
+  const groupOrder: DateGroup[] = ["Today", "Yesterday", "Earlier"];
 
   return (
     <List
@@ -331,9 +359,15 @@ export default function TransferHistory() {
           description="Send or receive files with croc to see your history here."
         />
       )}
-      {history.map((r) => (
-        <RecordItem key={r.id} record={r} onRemove={remove} />
-      ))}
+      {groupOrder.map((group) =>
+        groups[group].length > 0 ? (
+          <List.Section key={group} title={group} subtitle={`${groups[group].length}`}>
+            {groups[group].map((r) => (
+              <RecordItem key={r.id} record={r} onRemove={remove} />
+            ))}
+          </List.Section>
+        ) : null
+      )}
     </List>
   );
 }

@@ -7,7 +7,6 @@ import {
   Form,
   getSelectedFinderItems,
   Icon,
-  Keyboard,
   showHUD,
   showToast,
   Toast,
@@ -19,20 +18,15 @@ import { tmpdir } from "os";
 import { useEffect, useRef, useState } from "react";
 import { InstallGuide } from "./components/InstallGuide";
 import { useCrocCheck } from "./hooks/useCrocCheck";
+import { useTransfer } from "./hooks/useTransfer";
 import { addRecord } from "./utils/history";
 import { buildCrocArgs, getCrocPath } from "./utils/croc";
-import { buildProgressBar, CrocProcess, spawnCrocSend, TransferProgress } from "./utils/process";
-
-type SendState = "form" | "zipping" | "starting" | "waiting" | "transferring" | "done" | "error";
+import { buildProgressBar, computeFileSize, spawnCrocSend } from "./utils/process";
 
 function buildDeepLink(phrase: string): string {
   return `raycast://extensions/wilton/croc-transfer/receive-file?arguments=${encodeURIComponent(JSON.stringify({ code: phrase }))}`;
 }
 
-/**
- * For each path: if it's a directory, zip it to a temp file.
- * Returns { sendPaths, tempZips } where tempZips are cleaned up after send.
- */
 function prepareFilesForSend(paths: string[]): { sendPaths: string[]; tempZips: string[] } {
   const sendPaths: string[] = [];
   const tempZips: string[] = [];
@@ -44,7 +38,6 @@ function prepareFilesForSend(paths: string[]): { sendPaths: string[]; tempZips: 
     if (isDir) {
       const folderName = basename(p);
       const zipPath = join(tmpdir(), `${folderName}-${Date.now()}.zip`);
-      // -r recursive, -q quiet, path relative so zip doesn't include full absolute path
       execFileSync("/usr/bin/zip", ["-rq", zipPath, "."], { cwd: p });
       sendPaths.push(zipPath);
       tempZips.push(zipPath);
@@ -63,20 +56,13 @@ function cleanupZips(zips: string[]) {
 }
 
 function SendView({ defaultFiles }: { defaultFiles: string[] }) {
-  const [state, setState] = useState<SendState>("form");
+  const transfer = useTransfer();
   const [filePaths, setFilePaths] = useState<string[]>(defaultFiles);
   const [customPhrase, setCustomPhrase] = useState("");
-  const [phrase, setPhrase] = useState<string | null>(null);
-  const [progress, setProgress] = useState<TransferProgress | null>(null);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [fileLabel, setFileLabel] = useState<string>("");
-  const procRef = useRef<CrocProcess | null>(null);
   const tempZipsRef = useRef<string[]>([]);
 
-  useEffect(() => () => {
-    procRef.current?.kill();
-    cleanupZips(tempZipsRef.current);
-  }, []);
+  useEffect(() => () => { cleanupZips(tempZipsRef.current); }, []);
 
   async function handleSubmit() {
     if (filePaths.length === 0) {
@@ -86,38 +72,31 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     const crocPath = getCrocPath();
     if (!crocPath) return;
 
-    // Check if any directories need zipping
     const hasDirs = filePaths.some((p) => { try { return statSync(p).isDirectory(); } catch { return false; } });
 
     let sendPaths = filePaths;
     let tempZips: string[] = [];
 
     if (hasDirs) {
-      setState("zipping");
+      transfer.setZipping();
       const toast = await showToast({ style: Toast.Style.Animated, title: "Compressing folders…" });
       try {
         const result = prepareFilesForSend(filePaths);
         sendPaths = result.sendPaths;
         tempZips = result.tempZips;
         tempZipsRef.current = tempZips;
-        toast.style = Toast.Style.Animated;
-        toast.title = "Starting croc…";
+        toast.hide();
       } catch (err) {
-        setState("error");
-        setErrorMsg(`Failed to zip folder: ${err}`);
-        toast.style = Toast.Style.Failure;
-        toast.title = "Zip failed";
+        transfer.setError(`Failed to zip folder: ${err}`);
         return;
       }
     }
 
-    // Build display label using original paths
     const label = filePaths.length === 1
       ? (basename(filePaths[0]) + (hasDirs ? ".zip" : ""))
       : `${filePaths.length} items`;
     setFileLabel(label);
 
-    setState("starting");
     const extraArgs: string[] = [];
     if (customPhrase.trim()) extraArgs.push("--code", customPhrase.trim());
     extraArgs.push(...sendPaths);
@@ -125,42 +104,47 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     const args = buildCrocArgs("send", extraArgs);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Starting croc…" });
 
-    procRef.current = spawnCrocSend(
+    const proc = spawnCrocSend(
       crocPath, args,
       async (p) => {
-        setPhrase(p);
-        setState("waiting");
+        transfer.setPhrase(p);
         await Clipboard.copy(p);
         toast.style = Toast.Style.Animated;
         toast.title = "Waiting for receiver";
         toast.message = p;
-        await addRecord({ type: "send", files: filePaths, phrase: p, status: "success" });
+        const size = computeFileSize(filePaths);
+        await addRecord({ type: "send", files: filePaths, phrase: p, status: "success", size });
       },
       (prog) => {
-        setProgress(prog);
-        setState("transferring");
+        transfer.setProgress(prog);
         toast.message = `${prog.percent}% · ${prog.speed}`;
       },
       async () => {
         cleanupZips(tempZipsRef.current);
         tempZipsRef.current = [];
-        setState("done");
-        toast.style = Toast.Style.Success;
-        toast.title = "Transfer complete";
-        toast.message = undefined;
+        transfer.setDone();
+        toast.hide();
+        const name = filePaths.length === 1 ? basename(filePaths[0]) : `${filePaths.length} files`;
+        await showHUD(`✓ Sent: ${name}`);
       },
       async (err) => {
         cleanupZips(tempZipsRef.current);
         tempZipsRef.current = [];
-        setErrorMsg(err.message);
-        setState("error");
+        transfer.setError(err.message);
         toast.style = Toast.Style.Failure;
         toast.title = "Transfer failed";
         toast.message = err.message;
-        if (phrase) await addRecord({ type: "send", files: filePaths, phrase, status: "failed" });
       }
     );
+
+    transfer.setStarting(proc);
   }
+
+  const { state, phrase, progress, error } = transfer;
+
+  const displayLabel = fileLabel || (filePaths.length === 1
+    ? (filePaths[0].split("/").pop() ?? filePaths[0])
+    : `${filePaths.length} items`);
 
   if (state === "form") {
     return (
@@ -191,7 +175,6 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     );
   }
 
-  // Zipping state
   if (state === "zipping") {
     const dirs = filePaths.filter((p) => { try { return statSync(p).isDirectory(); } catch { return false; } });
     return (
@@ -207,11 +190,6 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     );
   }
 
-  const displayLabel = fileLabel || (filePaths.length === 1
-    ? (filePaths[0].split("/").pop() ?? filePaths[0])
-    : `${filePaths.length} items`);
-
-  // Starting: no phrase yet
   if (state === "starting") {
     return (
       <Detail
@@ -226,7 +204,6 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     );
   }
 
-  // Waiting for receiver
   if (state === "waiting" && phrase) {
     const deepLink = buildDeepLink(phrase);
     return (
@@ -267,7 +244,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
                 icon={Icon.XMarkCircle}
                 style={Action.Style.Destructive}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
-                onAction={() => { procRef.current?.kill(); setState("form"); setPhrase(null); }}
+                onAction={() => transfer.cancel(filePaths)}
               />
             </ActionPanel.Section>
           </ActionPanel>
@@ -276,7 +253,6 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     );
   }
 
-  // Transferring
   if (state === "transferring" && phrase) {
     const pct = progress?.percent ?? 0;
     const bar = buildProgressBar(pct);
@@ -313,7 +289,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
               icon={Icon.XMarkCircle}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["cmd"], key: "." }}
-              onAction={() => { procRef.current?.kill(); setState("form"); setPhrase(null); setProgress(null); }}
+              onAction={() => transfer.cancel(filePaths)}
             />
           </ActionPanel>
         }
@@ -321,7 +297,6 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     );
   }
 
-  // Done
   if (state === "done") {
     const deepLink = phrase ? buildDeepLink(phrase) : null;
     return (
@@ -361,7 +336,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
               <Action
                 title="Send Another File"
                 icon={Icon.Upload}
-                onAction={() => { setState("form"); setPhrase(null); setProgress(null); }}
+                onAction={() => transfer.setForm()}
               />
             </ActionPanel.Section>
           </ActionPanel>
@@ -373,7 +348,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
   // Error
   return (
     <Detail
-      markdown={`# Transfer Failed\n\n\`\`\`\n${errorMsg}\n\`\`\``}
+      markdown={`# Transfer Failed\n\n\`\`\`\n${error}\n\`\`\``}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Status" text="Failed" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} />
@@ -385,7 +360,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
           <Action
             title="Try Again"
             icon={Icon.ArrowClockwise}
-            onAction={() => { setState("form"); setErrorMsg(null); }}
+            onAction={() => transfer.setForm()}
           />
         </ActionPanel>
       }
@@ -394,7 +369,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
 }
 
 export default function SendFile() {
-  const { isChecking, isInstalled } = useCrocCheck();
+  const { isChecking, isInstalled, recheck } = useCrocCheck();
   const [finderFiles, setFinderFiles] = useState<string[] | null>(null);
   const [finderChecked, setFinderChecked] = useState(false);
 
@@ -411,6 +386,6 @@ export default function SendFile() {
   }, []);
 
   if (isChecking || !finderChecked) return <Detail markdown="Checking croc installation..." />;
-  if (!isInstalled) return <InstallGuide />;
+  if (!isInstalled) return <InstallGuide onCrocFound={recheck} />;
   return <SendView defaultFiles={finderFiles ?? []} />;
 }

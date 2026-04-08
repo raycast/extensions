@@ -208,10 +208,10 @@ Uses `getSelectedFinderItems()`, `spawnCrocSend`, `showHUD`, `addRecord`.
 
 ## Data Models
 
-No schema changes to `TransferRecord`. The `size` field already exists as `size?: number`. All changes are additive or behavioral.
+Minimal schema change: `TransferStatus` gains `"in_progress"` for the QuickSendCommand write-ahead pattern. The `size` field already exists as `size?: number`. No structural changes otherwise.
 
 ```typescript
-// Existing — minimal change: TransferStatus gains "in_progress" for QuickSendCommand write-ahead
+// TransferStatus gains "in_progress" — all other fields unchanged
 export interface TransferRecord {
   id: string;
   type: TransferType;        // "send" | "receive"
@@ -220,10 +220,24 @@ export interface TransferRecord {
   timestamp: number;
   status: TransferStatus;    // "success" | "failed" | "cancelled" | "in_progress"
   size?: number;             // bytes — now populated for all completed transfers
+  sessionId?: string;        // set only by QuickSendCommand; used for stale cleanup
 }
 ```
 
-> `"in_progress"` is a transient status used exclusively by `QuickSendCommand`. View-mode commands never write it. On any command open, the extension scans for `"in_progress"` records older than 5 minutes and marks them `"failed"` (stale cleanup).
+> `"in_progress"` is a transient status used exclusively by `QuickSendCommand`. View-mode commands never write it.
+
+### Session-Based Stale Record Cleanup
+
+A time-based threshold (e.g. 5 minutes) is unsafe — a large-file transfer can legitimately run for hours, and opening the History command mid-transfer would incorrectly mark the record as `"failed"`.
+
+Instead, QuickSendCommand uses a **sessionId** approach:
+
+1. When the extension process loads, a module-level `SESSION_ID` is generated once: `const SESSION_ID = Math.random().toString(36).slice(2)`.
+2. When QuickSendCommand writes the initial `"in_progress"` record, it stores `sessionId: SESSION_ID`.
+3. On any command open, the extension scans history for records where `status === "in_progress"` **and** `sessionId !== SESSION_ID`. These belong to a previous process that is no longer running, so they are marked `"failed"`.
+4. Records with `status === "in_progress"` and `sessionId === SESSION_ID` are left untouched — the transfer is still running in the current process.
+
+This correctly handles all termination scenarios regardless of transfer duration.
 
 ### Date Grouping Logic
 

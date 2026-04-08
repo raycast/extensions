@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync, execFile } from "child_process";
 import { existsSync } from "fs";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -17,12 +17,15 @@ const CANDIDATE_PATHS = [
 
 let _resolvedPath: string | null = null;
 
+export function clearCrocPathCache(): void {
+  _resolvedPath = null;
+}
+
 export function getCrocPath(): string | null {
   if (_resolvedPath) return _resolvedPath;
 
   const prefs = getPreferenceValues<Preferences>();
 
-  // 1. User-configured path
   if (prefs.crocPath?.trim()) {
     const p = prefs.crocPath.trim();
     if (existsSync(p)) {
@@ -31,7 +34,6 @@ export function getCrocPath(): string | null {
     }
   }
 
-  // 2. which croc (PATH lookup)
   try {
     const result = execSync("which croc", { encoding: "utf8", timeout: 3000 }).trim();
     if (result && existsSync(result)) {
@@ -42,7 +44,6 @@ export function getCrocPath(): string | null {
     // not in PATH
   }
 
-  // 3. Known Homebrew paths
   for (const p of CANDIDATE_PATHS) {
     if (existsSync(p)) {
       _resolvedPath = p;
@@ -51,6 +52,21 @@ export function getCrocPath(): string | null {
   }
 
   return null;
+}
+
+export function resolveCrocPathAsync(): Promise<string | null> {
+  return new Promise((resolve) => {
+    const prefs = getPreferenceValues<Preferences>();
+    if (prefs.crocPath?.trim() && existsSync(prefs.crocPath.trim())) {
+      return resolve(prefs.crocPath.trim());
+    }
+    execFile("which", ["croc"], (err, stdout) => {
+      const found = !err && stdout.trim();
+      if (found) return resolve(stdout.trim());
+      const candidate = CANDIDATE_PATHS.find((p) => existsSync(p)) ?? null;
+      resolve(candidate);
+    });
+  });
 }
 
 export function getCrocVersion(crocPath: string): string | null {
@@ -63,11 +79,23 @@ export function getCrocVersion(crocPath: string): string | null {
   }
 }
 
+export async function getCrocVersionAsync(crocPath: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    execFile(crocPath, ["--version"], { timeout: 3000 }, (err, stdout) => {
+      if (err) return resolve(null);
+      const match = stdout.match(/croc\s+v?([\d.]+)/i);
+      resolve(match ? match[1] : stdout.trim().split("\n")[0]);
+    });
+  });
+}
+
 export function getPrefs(): Preferences {
   return getPreferenceValues<Preferences>();
 }
 
-export function buildCrocArgs(subcommand: "send" | "receive", extra: string[]): string[] {
+export function buildCrocArgs(subcommand: "send", extra: string[]): string[];
+export function buildCrocArgs(subcommand: "receive"): string[];
+export function buildCrocArgs(subcommand: "send" | "receive", extra?: string[]): string[] {
   const prefs = getPrefs();
   const args: string[] = [];
 
@@ -77,13 +105,9 @@ export function buildCrocArgs(subcommand: "send" | "receive", extra: string[]): 
 
   if (subcommand === "send") {
     args.push("send");
-    args.push(...extra);
+    if (extra) args.push(...extra);
   } else {
-    // croc v10: receive via CROC_SECRET env var (see buildCrocEnv)
-    // Command is just: croc [--yes]
-    // The code phrase is passed via CROC_SECRET environment variable
     if (prefs.autoAccept) args.push("--yes");
-    // extra[0] is the code phrase — handled in buildCrocEnv, not in args
   }
 
   return args;

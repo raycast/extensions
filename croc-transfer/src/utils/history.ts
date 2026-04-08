@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 
-export type TransferStatus = "success" | "failed" | "cancelled";
+export type TransferStatus = "success" | "failed" | "cancelled" | "in_progress";
 export type TransferType = "send" | "receive";
 
 export interface TransferRecord {
@@ -11,6 +11,7 @@ export interface TransferRecord {
   timestamp: number;
   status: TransferStatus;
   size?: number;
+  sessionId?: string;
 }
 
 const STORAGE_KEY = "croc-transfer-history";
@@ -55,6 +56,17 @@ export async function clearHistory(): Promise<void> {
   await LocalStorage.removeItem(STORAGE_KEY);
 }
 
+/** Clean up stale in_progress records from previous sessions */
+export async function cleanStaleInProgressRecords(currentSessionId: string): Promise<void> {
+  const history = await loadHistory();
+  const hasStale = history.some((r) => r.status === "in_progress" && r.sessionId !== currentSessionId);
+  if (!hasStale) return;
+  const updated = history.map((r) =>
+    r.status === "in_progress" && r.sessionId !== currentSessionId ? { ...r, status: "failed" as TransferStatus } : r
+  );
+  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+}
+
 export function formatFileNames(files: string[]): string {
   if (files.length === 0) return "Unknown";
   if (files.length === 1) return files[0].split("/").pop() ?? files[0];
@@ -76,4 +88,12 @@ export function formatTimestamp(timestamp: number): string {
   } else {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
   }
+}
+
+export function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+  return `${(bytes / (1024 * 1024 * 1024 * 1024)).toFixed(1)} TB`;
 }

@@ -10,7 +10,7 @@
 type ExtensionPreferences = {
   /** croc Binary Path - Path to the croc binary. Leave empty to auto-detect. */
   "crocPath": string,
-  /** Download Directory - Directory where received files are saved. */
+  /** Download Directory - Directory where received files are saved. Files are placed directly in this folder. */
   "downloadDirectory": string,
   /** Auto Accept - Automatically accept incoming files without confirmation. */
   "autoAccept": boolean,
@@ -28,6 +28,8 @@ declare namespace Preferences {
   export type ReceiveFile = ExtensionPreferences & {}
   /** Preferences accessible in the `transfer-history` command */
   export type TransferHistory = ExtensionPreferences & {}
+  /** Preferences accessible in the `quick-send` command */
+  export type QuickSend = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -40,5 +42,7 @@ declare namespace Arguments {
 }
   /** Arguments passed to the `transfer-history` command */
   export type TransferHistory = {}
+  /** Arguments passed to the `quick-send` command */
+  export type QuickSend = {}
 }
 
