@@ -340,12 +340,12 @@ export default class Env {
    * @return {object} [language, country] - The default language and country.
    */
   getLanguageAndCountryFromBrowser() {
-    // In the Raycast environment we rely on preferences for language/country.
-    // Avoid reading `navigator.language` here so the extension's preferences
-    // remain the single source of truth. Fall back to values provided in
-    // `data.config` if preferences are not supplied.
-    const language = this.data?.config?.language || "";
-    const country = this.data?.config?.country || "";
+    const languageStr = this.getNavigatorLanguage();
+    let language, country;
+    if (languageStr) {
+      [language, country] = languageStr.split("-");
+    }
+
     return { language, country };
   }
 
@@ -355,8 +355,11 @@ export default class Env {
    * @return {string} navigatorLanguage - The browser's value of navigator.language.
    */
   getNavigatorLanguage() {
-    // Deprecated in this context — avoid reading global navigator.
-    return "";
+    if (typeof navigator === "undefined") {
+      return "";
+    }
+    const languageStr = navigator.language;
+    return languageStr;
   }
 
   /**
