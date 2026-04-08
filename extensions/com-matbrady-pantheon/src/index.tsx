@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState } from "react";
 import { terminusCmd } from "./utils";
@@ -41,7 +41,15 @@ export default function Command() {
 
   let sites: Sites = {};
   if (data) {
-    sites = JSON.parse(data);
+    try {
+      sites = JSON.parse(data);
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to parse site list",
+        message: "Unexpected Terminus output",
+      });
+    }
   }
 
   const allOrgs = Array.from(new Set(Object.values(sites).flatMap((site) => getMemberships(site)))).sort((a, b) => {

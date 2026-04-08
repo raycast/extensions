@@ -1,26 +1,3 @@
-import { shellEnv } from "shell-env";
-
-interface Env {
-  env: Record<string, string>;
-}
-
-let env: null | Env = null;
-
-// export function useGetPantheonSiteList() {
-//   const cachedSites = cache.get("pantheonSites");
-// }
-
-export async function useGetEnv() {
-  // Get the cached environment details, if they are present
-  if (env) {
-    return env;
-  }
-
-  // Query for environment details and update the cache variable
-  env = { env: await shellEnv() };
-  return env;
-}
-
 // Shell fragment that adds common terminus install locations to PATH.
 // Each line is a no-op if the path doesn't exist, so all install methods are supported:
 //   - Homebrew (Intel: /usr/local, Apple Silicon: /opt/homebrew)

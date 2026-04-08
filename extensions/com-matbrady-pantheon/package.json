@@ -30,7 +30,7 @@
       "description": "Overide the default admin url '/login.php'",
       "type": "textfield",
       "required": false,
-      "default": "login.php"
+      "default": "/login.php"
     },
     {
       "title": "Show Site Screenshots",
@@ -52,10 +52,10 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.10",
-    "@raycast/utils": "^2.2.3",
-    "shell-env": "^4.0.3"
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "25.5.0",
     "@types/react": "19.2.14",
     "@typescript-eslint/eslint-plugin": "^8.57.0",

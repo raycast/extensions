@@ -114,7 +114,17 @@ export function SiteDetail({ site, preferences }: { site: Site; preferences: Pre
   let environments: { id: string; title: string; info: EnvInfo }[] = [];
 
   if (data) {
-    const envData: Environments = JSON.parse(data);
+    let envData: Environments;
+    try {
+      envData = JSON.parse(data);
+    } catch {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to parse environment data",
+        message: "Unexpected Terminus output",
+      });
+      return null;
+    }
     const order = ["dev", "test", "live"];
     const keys = Object.keys(envData).sort((a, b) => {
       const ai = order.indexOf(a);
