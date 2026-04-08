@@ -1,0 +1,61 @@
+{
+  "name": "chrome-tabs-sidebar",
+  "title": "Chrome Tabs Sidebar",
+  "description": "Toggle Chrome's vertical tabs sidebar with a single keystroke",
+  "keywords": [
+    "chrome",
+    "vertical tabs",
+    "sidebar",
+    "toggle"
+  ],
+  "icon": "command-icon.png",
+  "author": "saqibameen",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saqibameen/chrome-sidebar-toggle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/saqibameen/chrome-sidebar-toggle/issues"
+  },
+  "homepage": "https://github.com/saqibameen/chrome-sidebar-toggle#readme",
+  "commands": [
+    {
+      "name": "toggle-sidebar",
+      "title": "Toggle Chrome Sidebar",
+
+      "description": "Toggle Chrome's vertical tabs sidebar (Expand/Collapse)",
+      "mode": "no-view",
+      "hotkey": {
+        "modifiers": [
+          "cmd",
+          "shift"
+        ],
+        "key": ","
+      }
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
