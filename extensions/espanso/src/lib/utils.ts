@@ -280,13 +280,21 @@ const evaluateVar = async (v: EspansoVar): Promise<string> => {
       if (!v.params?.cmd) return `{{${v.name}}}`;
       try {
         const rawShell = typeof v.params.shell === "string" && v.params.shell.trim() ? v.params.shell.trim() : "zsh";
-        const shellPath = rawShell.includes("/") ? rawShell : `/bin/${rawShell}`;
         const shellBase = rawShell.includes("/") ? rawShell.split("/").pop()! : rawShell;
         const interactive = shellBase === "zsh" || shellBase === "bash";
-        const shellArgs = interactive ? ["-i", "-c", v.params.cmd] : ["-c", v.params.cmd];
-        const { stdout } = await execFilePromise(shellPath, shellArgs);
+        const shellArgs = interactive ? [rawShell, "-i", "-c", v.params.cmd] : [rawShell, "-c", v.params.cmd];
+        const { stdout } = await execFilePromise("/usr/bin/env", shellArgs);
         // eslint-disable-next-line no-control-regex
-        return stdout.replace(/\x1b\[[0-9;]*[ -/]*[@-~]/g, "").trim();
+        return (
+          stdout
+            // eslint-disable-next-line no-control-regex
+            .replace(/\x1b\[[0-9;]*[ -/]*[@-~]/g, "")
+            // eslint-disable-next-line no-control-regex
+            .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, "")
+            // eslint-disable-next-line no-control-regex
+            .replace(/\x1b[@-_]/g, "")
+            .trim()
+        );
       } catch {
         return `{{${v.name}}}`;
       }
