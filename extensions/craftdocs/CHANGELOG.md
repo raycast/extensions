@@ -2,13 +2,13 @@
 
 ## [Reliability and UX improvements] - {PR_MERGE_DATE}
 
-- Prevented issues when Craft App is missing, not set up yet, or still starting.
--  Improved reliability when Craft search data is unavailable or only some Spaces are available locally.
--  Added clearer fallback states across `Search Blocks`, `Daily Notes`, `Manage Spaces`, and `Add to Daily Note`, including a copy-and-open fallback when today's Daily Note can't be found automatically.
--  Fixed Space selection so `Search Blocks` and `Daily Notes` immediately switch to a valid enabled Space instead of briefly using disabled or unavailable Spaces.
--  Fixed `Search Blocks` so creating a new Document uses the currently selected Space.
--  Kept existing Space settings more reliably and improved setup guidance for renaming Spaces.
--  Refined wording throughout the extension for clearer, more user-friendly guidance.
+- Prevented issues when Craft is missing, not set up yet, or still syncing its local data.
+- Improved reliability when Craft search data is unavailable or only some Spaces are available locally.
+- Added clearer states across `Search Blocks`, `Daily Notes`, `Manage Spaces`, and `Add to Daily Note`, including a fallback that copies your content and opens today's Daily Note when it can't be found automatically.
+- Fixed Space selection so `Search Blocks` and `Daily Notes` switch to a valid enabled Space when a previously selected Space is disabled or unavailable.
+- Fixed `Search Blocks` so creating a new Document uses the currently selected Space.
+- Preserved existing Space names and enabled settings more reliably, and improved setup guidance for renaming Spaces.
+- Refined wording throughout the extension for clearer, more consistent guidance.
 
 ## [Feature] - 2025-08-11
 
