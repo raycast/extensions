@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wojak-picker",
+  "title": "Wojak Picker",
+  "description": "Browse, search, and copy Wojaks straight into any chat from Raycast.",
+  "icon": "icon.png",
+  "author": "itsmeonli",
+  "categories": ["Fun"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "supabaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Supabase URL",
+      "description": "Project URL, for example https://your-project.supabase.co",
+      "placeholder": "https://your-project.supabase.co",
+      "default": "https://ernvizpfdljlbkjshggj.supabase.co"
+    },
+    {
+      "name": "supabaseAnonKey",
+      "type": "password",
+      "required": false,
+      "title": "Supabase Anon Key",
+      "description": "Public anon key used by the Raycast extension",
+      "default": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVybnZpenBmZGxqbGJranNoZ2dqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2NjA2NzAsImV4cCI6MjA5MTIzNjY3MH0.zklBHj_lsHVgxPzcKfyYzYrw9aLEPrf8kqnHJWvcuMk"
+    },
+    {
+      "name": "supabaseBucket",
+      "type": "textfield",
+      "required": false,
+      "title": "Supabase Bucket",
+      "description": "Storage bucket name for Wojak images",
+      "default": "wojaks"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-wojaks",
+      "title": "Search Wojaks",
+      "description": "Search and copy wojak images",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0",
+    "@raycast/utils": "^1.15.0",
+    "fuse.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "@types/react": "^18.2.55",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "migrate:supabase": "node scripts/migrate-to-supabase.js",
+    "publish": "ray publish",
+    "scrape": "node scrape/scrape.js"
+  }
+}
