@@ -1,5 +1,11 @@
 # Espanso Changelog
 
+## [Patch] - PR_MERGE_DATE
+
+### Bug Fixes
+
+- Fixed shell-type var preview not resolving user PATH: shell vars now run via an interactive shell (`zsh`/`bash`) so `.zshrc` is sourced. Respects the `shell:` param in Espanso YAML if specified. ANSI escape sequences from shell startup are stripped from output.
+
 ## [Improvements] - 2026-04-07
 
 ### New Features
