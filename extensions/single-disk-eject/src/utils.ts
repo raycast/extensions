@@ -104,7 +104,7 @@ function getVolumesFromPowerShellWindows(raw: string): Volume[] {
       .map((line) => {
         const cleanLine = line.replace(/"/g, "");
         const parts = cleanLine.split(",");
-        if (parts.length < 1) return null;
+        if (parts.length < 2) return null;
 
         const driveLetter = parts[0]?.trim(); // DeviceID (e.g., "E:")
         const rawLabel = parts[1]?.trim() || ""; // VolumeName
@@ -165,10 +165,8 @@ async function ejectVolumeMac(volume: Volume): Promise<void> {
 }
 
 async function ejectVolumeWindows(volume: Volume): Promise<void> {
-  // Extract drive letter from volume name (e.g., "Backup Stick (E:)" -> "E")
-  // The format is now "Label (Drive:)" so we need to extract from the parentheses
-  const match = volume.name.match(/\(([A-Z]):?\)/i);
-  const driveLetter = match ? match[1] : volume.name.split(":")[0];
+  // Extract drive letter from the "E: (Label)" format
+  const driveLetter = volume.name.split(":")[0];
 
   // Path to PowerShell script in the assets folder using Raycast environment
   const scriptPath = path.join(environment.assetsPath, "eject.ps1");
