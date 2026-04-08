@@ -34,7 +34,7 @@
     "typescript": "^6.0.2"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
