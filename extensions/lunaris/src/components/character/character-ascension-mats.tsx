@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getMaterials } from "@/lib/utils/lunaris";
+import { sanitizeDescription } from "@/lib/utils/format";
 
 type Props = { character: GenshinCharacterSingle };
 
@@ -64,25 +65,19 @@ export default function CharacterAscensionMaterials({ character }: Props) {
 
 function MaterialItem({ id, amount, item }: { id: string; amount: number; item?: MaterialItemData }) {
   const iconUrl = item?.icon ? `https://api.lunaris.moe/data/assets/items/${item.icon}.webp` : "";
-
-  const cleanDescription = (item?.enDescription || "")
-    .replace(/<color=[^>]+>(.*?)<\/color>/gi, "**$1**")
-    .replace(/\{LINK#[^}]+\}(.*?)\{\/LINK\}/gi, "_$1_")
-    .replace(/\\n/g, "\n\n")
-    .replace(/<[^>]*>/g, "")
-    .trim();
+  const cleanDescription = sanitizeDescription(item?.enDescription || "");
 
   return (
     <List.Item
       title={item?.enName || `ID: ${id}`}
-      subtitle={`x${amount.toLocaleString()}`}
+      subtitle={`x${amount.toLocaleString("en-US")}`}
       keywords={[id]}
       icon={{ source: iconUrl }}
       detail={
         <List.Item.Detail
           markdown={`
 ${iconUrl && `![](${iconUrl})`}
-# ${item?.enName || "Unknown Item"} (x${amount.toLocaleString()})
+# ${item?.enName || "Unknown Item"} (x${amount.toLocaleString("en-US")})
 ${cleanDescription}
           `}
         />

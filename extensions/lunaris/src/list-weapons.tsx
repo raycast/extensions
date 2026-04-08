@@ -19,6 +19,14 @@ export default function Command() {
     setRefinementLevel((prev) => (add ? Math.min(5, prev + 1) : Math.max(1, prev - 1)));
   };
 
+  if (!isLoading && (!weapons || Object.keys(weapons).length === 0)) {
+    return (
+      <List isLoading={false} isShowingDetail>
+        <List.EmptyView title="No weapons" description="Could not load weapons." />
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -40,25 +48,28 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Pinned Weapons">
-        {weapons &&
-          Object.entries(weapons)
-            .reverse()
-            .filter(([id]) => {
-              return pinned.includes(id);
-            })
-            .map(([id, weap]) => (
-              <WeaponListItem
-                key={id}
-                id={id}
-                weapon={weap}
-                pinned={pinned}
-                setPinned={setPinned}
-                refinementLevel={refinementLevel}
-                changeRefinementLevel={changeRefinementLevel}
-              />
-            ))}
-      </List.Section>
+      {pinned && pinned.length > 0 && (
+        <List.Section title="Pinned Weapons">
+          {weapons &&
+            Object.entries(weapons)
+              .reverse()
+              .filter(([id]) => {
+                return pinned.includes(id);
+              })
+              .map(([id, weap]) => (
+                <WeaponListItem
+                  key={id}
+                  id={id}
+                  weapon={weap}
+                  pinned={pinned}
+                  setPinned={setPinned}
+                  refinementLevel={refinementLevel}
+                  changeRefinementLevel={changeRefinementLevel}
+                />
+              ))}
+        </List.Section>
+      )}
+
       <List.Section title={pinned && pinned.length > 0 ? "All Weapons" : undefined}>
         {weapons &&
           Object.entries(weapons)

@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getGameVersion, getMaterials } from "@/lib/utils/lunaris";
+import { sanitizeDescription } from "@/lib/utils/format";
 
 type Props = { id: string };
 
@@ -17,7 +18,7 @@ export default function WeaponAscensionMaterials({ id }: Props) {
 
   const { isLoading, data: materials } = usePromise(getMaterials);
 
-  if (!weapon) return;
+  if (!weapon) return null;
 
   const materialList = weapon.ascension.map(({ count, icon }) => {
     const materialID = icon.split("_").at(-1);
@@ -47,20 +48,15 @@ export default function WeaponAscensionMaterials({ id }: Props) {
             <List.Item
               key={item.id === "-1" ? index : item.id}
               title={item.name || `ID: ${item.id}`}
-              subtitle={`x${item.amount.toLocaleString()}`}
+              subtitle={`x${item.amount.toLocaleString("en-US")}`}
               keywords={[item.id, item.name]}
               icon={{ source: item.icon }}
               detail={
                 <List.Item.Detail
                   markdown={`
 ![](${item.icon})
-# ${item.name || "Unknown Item"} (x${item.amount.toLocaleString()})
-${item.description
-  .replace(/<color=[^>]+>(.*?)<\/color>/gi, "**$1**")
-  .replace(/\{LINK#[^}]+\}(.*?)\{\/LINK\}/gi, "_$1_")
-  .replace(/\\n/g, "\n\n")
-  .replace(/<[^>]*>/g, "")
-  .trim()}
+# ${item.name || "Unknown Item"} (x${item.amount.toLocaleString("en-US")})
+${sanitizeDescription(item.description || "")}
 		  `}
                 />
               }

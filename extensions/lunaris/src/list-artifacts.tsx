@@ -11,6 +11,14 @@ export default function Command() {
   const [pinned, setPinned] = useCachedState<string[]>("pinned_artifacts", []);
   const [filter, setFilter] = useState<string>("All");
 
+  if (!isLoading && (!artifacts || Object.keys(artifacts).length === 0)) {
+    return (
+      <List isLoading={false} isShowingDetail>
+        <List.EmptyView title="No artifacts" description="Could not load artifacts." />
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
@@ -26,17 +34,20 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Pinned Artifacts">
-        {artifacts &&
-          Object.entries(artifacts)
-            .reverse()
-            .filter(([id]) => {
-              return pinned.includes(id);
-            })
-            .map(([id, artifact]) => (
-              <ArtifactListItem key={id} id={id} artifact={artifact} pinned={pinned} setPinned={setPinned} />
-            ))}
-      </List.Section>
+      {pinned && pinned.length > 0 && (
+        <List.Section title="Pinned Artifacts">
+          {artifacts &&
+            Object.entries(artifacts)
+              .reverse()
+              .filter(([id]) => {
+                return pinned.includes(id);
+              })
+              .map(([id, artifact]) => (
+                <ArtifactListItem key={id} id={id} artifact={artifact} pinned={pinned} setPinned={setPinned} />
+              ))}
+        </List.Section>
+      )}
+
       <List.Section title={pinned && pinned.length > 0 ? "All Artifacts" : undefined}>
         {artifacts &&
           Object.entries(artifacts)

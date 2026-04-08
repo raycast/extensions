@@ -1,6 +1,7 @@
 import { Action, ActionPanel, getPreferenceValues, Grid, Icon } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { getAllCharacters, getBanners, getGameVersion } from "./lib/utils/lunaris";
+import { compareSemverStrings } from "./lib/utils/format";
 import { useEffect, useMemo, useState } from "react";
 import SingleCharacter from "./components/character/single-character";
 import { API_ENDPOINT } from "./lib/constants";
@@ -15,11 +16,12 @@ export default function Command() {
 
     const bannerInformation: BannerInformation[] = Object.entries(allBanners.version)
       .filter(([version]) => {
-        const vNum = parseFloat(version);
-        const gvNum = gameVersion ? parseFloat(gameVersion) : 0;
-
-        if (!preferences.allowUnreleased && gvNum > 0 && vNum > gvNum) {
-          return false;
+        if (!preferences.allowUnreleased && gameVersion) {
+          // compare semantic version strings rather than using parseFloat
+          const cmp = compareSemverStrings(version, gameVersion);
+          if (cmp === 1) {
+            return false;
+          }
         }
         return true;
       })
@@ -32,6 +34,14 @@ export default function Command() {
   });
 
   const [selectedVersion, setSelectedVersion] = useState(banners && banners[0] ? banners[0].version : null);
+
+  if (!isLoading && (!banners || banners.length === 0)) {
+    return (
+      <Grid isLoading={false} columns={4} fit={Grid.Fit.Fill} aspectRatio="9/16">
+        <Grid.EmptyView title="No banners" description="Could not load banners." />
+      </Grid>
+    );
+  }
 
   useEffect(() => {
     if (banners && banners.length > 0 && !selectedVersion) {

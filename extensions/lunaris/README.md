@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/extension-banner.png" alt="Lunaris for Raycast" width="100%">
+  <img src="media/extension-banner.png" alt="Lunaris for Raycast" width="100%">
 </p>
 
-# 🌙 Lunaris for Raycast
+# Lunaris
 
 Raycast extension for **Genshin Impact** players. Quickly look up character information, weapon stats, artifact set bonuses and banner information using data from [Lunaris](https://lunaris.moe/).
 

@@ -13,6 +13,14 @@ export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const [filter, setFilter] = useState<string>("All");
 
+  if (!isLoading && (!characters || Object.keys(characters).length === 0)) {
+    return (
+      <Grid columns={7} isLoading={false} inset={Grid.Inset.Zero}>
+        <Grid.EmptyView title="No characters" description="Could not load characters." />
+      </Grid>
+    );
+  }
+
   return (
     <Grid
       columns={7}
@@ -35,17 +43,20 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      <Grid.Section title="Pinned Characters">
-        {characters &&
-          Object.entries(characters)
-            .reverse()
-            .filter(([id]) => {
-              return pinned.includes(id);
-            })
-            .map(([id, char]) => (
-              <CharacterGridItem key={id} id={id} character={char} pinned={pinned} setPinned={setPinned} />
-            ))}
-      </Grid.Section>
+      {pinned && pinned.length > 0 && (
+        <Grid.Section title="Pinned Characters">
+          {characters &&
+            Object.entries(characters)
+              .reverse()
+              .filter(([id]) => {
+                return pinned.includes(id);
+              })
+              .map(([id, char]) => (
+                <CharacterGridItem key={id} id={id} character={char} pinned={pinned} setPinned={setPinned} />
+              ))}
+        </Grid.Section>
+      )}
+
       <Grid.Section title={pinned && pinned.length > 0 ? "All Characters" : undefined}>
         {characters &&
           Object.entries(characters)

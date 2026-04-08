@@ -8,6 +8,7 @@ type LunarisVersion = {
 export async function getGameVersion(): Promise<string | null> {
   try {
     const res = await fetch(`${API_ENDPOINT}/version.json`);
+    if (!res.ok) return null;
     const data = (await res.json()) as Partial<LunarisVersion>;
     return data.version ?? null;
   } catch {
