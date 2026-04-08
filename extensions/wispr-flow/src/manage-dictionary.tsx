@@ -104,10 +104,10 @@ export default function Command() {
       try {
         const validId = validateUUID(entry.id);
         const now = formatDateForWispr(new Date());
-        writeSQL(
+        await writeSQL(
           `UPDATE Dictionary SET isDeleted = 1, modifiedAt = '${now}' WHERE id = '${validId}'`,
         );
-        revalidate();
+        await revalidate();
         await showToast({
           style: Toast.Style.Success,
           title: "Word Deleted",
@@ -115,10 +115,10 @@ export default function Command() {
           primaryAction: {
             title: "Undo",
             onAction: async (toast) => {
-              writeSQL(
+              await writeSQL(
                 `UPDATE Dictionary SET isDeleted = 0, modifiedAt = '${formatDateForWispr(new Date())}' WHERE id = '${validId}'`,
               );
-              revalidate();
+              await revalidate();
               await toast.hide();
             },
           },
@@ -163,7 +163,7 @@ export default function Command() {
         const replacementValue = values.replacement?.trim()
           ? `'${escapeSQL(values.replacement.trim(), 255)}'`
           : "NULL";
-        writeSQL(
+        await writeSQL(
           `UPDATE Dictionary SET phrase = '${escapedPhrase}', replacement = ${replacementValue}, modifiedAt = '${now}' WHERE id = '${validId}'`,
         );
         await showToast({
@@ -311,7 +311,6 @@ export default function Command() {
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
                 onAction={openExtensionPreferences}
               />
               <Action
