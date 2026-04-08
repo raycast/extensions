@@ -1,6 +1,5 @@
 import { Clipboard, closeMainWindow, open, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { buildDebankUrl } from "./lib/build-debank-url";
 import { detectInputType } from "./lib/detect-input";
 
 export default async function Command() {
@@ -25,7 +24,7 @@ export default async function Command() {
     return;
   }
 
-  const url = buildDebankUrl(input);
+  const url = `https://debank.com/profile/${input}`;
   await open(url);
   await closeMainWindow();
   await showHUD("Opened in browser");
