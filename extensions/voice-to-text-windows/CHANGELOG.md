@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-04-08
 
 - Record speech with real-time braille audio visualization
 - Transcribe with OpenAI Whisper (GPT-4o Transcribe, Mini, or Whisper v2)
