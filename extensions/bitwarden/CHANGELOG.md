@@ -1,9 +1,9 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Improvements] - {PR_MERGE_DATE}
 
-- Fix infinite retry loop when unlocking vault with invalid session token
-- Surface CLI stderr in error message for invalid session token errors
+- Show unlock animation while vault is being unlocked
+- Standardize "Logged out" toast casing
 
 ## [Fix] - 2026-04-03
 
