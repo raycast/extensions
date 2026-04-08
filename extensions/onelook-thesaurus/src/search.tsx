@@ -38,7 +38,7 @@ export default function Command() {
         <List.Item
           key={index}
           title={word.word}
-          subtitle={word.defs?.[0]}
+          subtitle={word.defs?.[0] ? formatPOS(word.defs[0]) : undefined}
           detail={<List.Item.Detail markdown={toDetailMarkdown(word)} />}
           actions={
             <ActionPanel>
