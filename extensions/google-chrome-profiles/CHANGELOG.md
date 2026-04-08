@@ -1,6 +1,6 @@
 # Google Chrome Profiles Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-04-08
 
 - Add "New Window" action to open a new Chrome window for a profile
 - Available from the profile list via `⌘ ⇧ ↵` or from within a profile's bookmarks view
