@@ -10,31 +10,42 @@ interface Tab {
   sessions: Session[];
 }
 
+interface Window {
+  windowId: string;
+  tabs: Tab[];
+}
+
 const IT2API_HINT = "Enable Python API in iTerm2 → Preferences → General → Magic";
 
-const groupByTab = (sessions: Session[]): Tab[] => {
-  const map = new Map<string, Tab>();
-  for (const session of sessions) {
-    const key = `${session.windowId}::${session.tabId}`;
-    if (!map.has(key)) map.set(key, { windowId: session.windowId, tabId: session.tabId, sessions: [] });
-    map.get(key)!.sessions.push(session);
-  }
-  return Array.from(map.values());
-};
+const groupByWindow = (sessions: Session[]): Window[] => {
+  const tabMap = new Map<string, Tab>();
+  const windowMap = new Map<string, Window>();
 
-const tabLabel = (tab: Tab) => `Window ${tab.windowId.slice(-4)} · Tab ${tab.tabId}`;
+  for (const session of sessions) {
+    const tabKey = `${session.windowId}::${session.tabId}`;
+    if (!tabMap.has(tabKey)) tabMap.set(tabKey, { windowId: session.windowId, tabId: session.tabId, sessions: [] });
+    tabMap.get(tabKey)!.sessions.push(session);
+  }
+
+  for (const tab of tabMap.values()) {
+    if (!windowMap.has(tab.windowId)) windowMap.set(tab.windowId, { windowId: tab.windowId, tabs: [] });
+    windowMap.get(tab.windowId)!.tabs.push(tab);
+  }
+
+  return Array.from(windowMap.values());
+};
 
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
 
   const it2apiAvailable = isIt2apiAvailable();
 
-  const { tabs, it2apiError } = useMemo(() => {
-    if (!it2apiAvailable) return { tabs: [] as Tab[], it2apiError: "it2api not found" };
+  const { windows, it2apiError } = useMemo(() => {
+    if (!it2apiAvailable) return { windows: [] as Window[], it2apiError: "it2api not found" };
     try {
-      return { tabs: groupByTab(listSessions()), it2apiError: undefined };
+      return { windows: groupByWindow(listSessions()), it2apiError: undefined };
     } catch (e) {
-      return { tabs: [] as Tab[], it2apiError: (e as Error).message };
+      return { windows: [] as Window[], it2apiError: (e as Error).message };
     }
   }, [it2apiAvailable]);
 
@@ -64,22 +75,26 @@ export default function Command() {
           description={`${it2apiError}\n\n${IT2API_HINT}`}
         />
       )}
-      {!it2apiError && tabs.length === 0 && (
+      {!it2apiError && windows.length === 0 && (
         <List.EmptyView icon={Icon.Terminal} title="No tabs found" description="No open iTerm tabs detected" />
       )}
-      {tabs.map((tab) => (
-        <List.Item
-          key={`${tab.windowId}::${tab.tabId}`}
-          icon={Icon.AppWindowList}
-          title={tab.sessions[0].name}
-          subtitle={tabLabel(tab)}
-          accessories={tab.sessions.length > 1 ? [{ text: `${tab.sessions.length} panes` }] : []}
-          actions={
-            <ActionPanel>
-              <Action title="Switch to Tab" icon={Icon.AppWindowList} onAction={() => switchTo(tab)} />
-            </ActionPanel>
-          }
-        />
+      {windows.map((window, i) => (
+        <List.Section key={window.windowId} title={`Window ${i + 1}`}>
+          {window.tabs.map((tab) => (
+            <List.Item
+              key={`${tab.windowId}::${tab.tabId}`}
+              icon={Icon.AppWindowList}
+              title={tab.sessions[0].name}
+              subtitle={`Tab ${tab.tabId}`}
+              accessories={tab.sessions.length > 1 ? [{ text: `${tab.sessions.length} panes` }] : []}
+              actions={
+                <ActionPanel>
+                  <Action title="Switch to Tab" icon={Icon.AppWindowList} onAction={() => switchTo(tab)} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       ))}
     </List>
   );
