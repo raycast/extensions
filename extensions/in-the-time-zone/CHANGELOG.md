@@ -1,4 +1,4 @@
-# In The (Time) Zone Changelog
+# In The Timezone Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

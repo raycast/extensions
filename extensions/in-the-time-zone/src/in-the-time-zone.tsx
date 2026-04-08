@@ -179,7 +179,7 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle="In The (Time) Zone"
+      navigationTitle="In The Timezone"
       searchBarPlaceholder="Search cities to add..."
       isLoading={isLoading}
       searchText={searchText}

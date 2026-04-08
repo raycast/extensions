@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "in-the-time-zone",
-      "title": "In the (Time) Zone",
+      "title": "In the Timezone",
       "description": "Scrub time across time zones",
       "mode": "view",
       "src": "src/in-the-time-zone.tsx"

@@ -1,4 +1,4 @@
-# In The (Time) Zone
+# In The Timezone
 
 Visualize and scrub time across multiple time zones. Perfect for coordinating meetings with distributed teams.
 
@@ -12,7 +12,7 @@ Visualize and scrub time across multiple time zones. Perfect for coordinating me
 
 ## Usage
 
-1. Open "In The (Time) Zone" from Raycast
+1. Open "In The Timezone" from Raycast
 2. Use `Cmd+E` to add/remove cities
 3. Use `←` / `→` to shift time by your configured Arrow Key Scrub Minutes
 4. Use `Option+←` / `Option+→` to shift by your configured Option+Arrow Key Scrub Minutes
