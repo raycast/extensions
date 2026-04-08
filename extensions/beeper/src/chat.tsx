@@ -495,14 +495,10 @@ export function ChatListView({
     if (initialRefreshDone.current) return;
     if (accountServices.size === 0) return;
     initialRefreshDone.current = true;
-    const mode =
-      indexState.items.length === 0 || Date.now() - indexState.updatedAt > INDEX_REFRESH_MAX_AGE_MS
-        ? ("full" as const)
-        : ("incremental" as const);
-    // Defer to avoid React state update before mount completes
-    const id = setTimeout(() => void refreshIndex(mode), 0);
-    return () => clearTimeout(id);
-  }, [accountServices, indexState.items.length]);
+    const current = indexRef.current;
+    const isStale = current.items.length === 0 || Date.now() - current.updatedAt > INDEX_REFRESH_MAX_AGE_MS;
+    void refreshIndex(isStale ? "full" : "incremental");
+  }, [accountServices]);
 
   const tokens = useMemo(() => parseSearchTerms(trimmedQuery), [trimmedQuery]);
   const normalizedQuery = useMemo(() => normalizeSearchValue(trimmedQuery), [trimmedQuery]);
