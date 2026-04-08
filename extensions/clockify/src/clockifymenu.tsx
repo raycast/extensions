@@ -35,24 +35,20 @@ export default function ClockifyMenuCommand() {
 
   const handleRestartTimer = async (entry: TimeEntry) => {
     try {
-      await addNewTimeEntry(
-        entry.description,
-        entry.projectId,
-        entry.taskId,
-        async () => {
-          // Refresh time entries to get hydrated data with full project info
-          const freshEntries = await getTimeEntries({});
-          const activeEntry = freshEntries.find((e) => isInProgress(e));
-          if (activeEntry) {
-            setCurrentData({
-              currentEntry: activeEntry,
-              currentlyElapsedTime: getElapsedTime(activeEntry),
-            });
-          }
-          setRecentEntries([]);
-        },
-        new Date(),
-      );
+      const newEntry = await addNewTimeEntry(entry.description, entry.projectId, entry.taskId, [], new Date());
+
+      if (newEntry) {
+        // Refresh time entries to get hydrated data with full project info
+        const freshEntries = await getTimeEntries({});
+        const activeEntry = freshEntries.find((e) => isInProgress(e));
+        if (activeEntry) {
+          setCurrentData({
+            currentEntry: activeEntry,
+            currentlyElapsedTime: getElapsedTime(activeEntry),
+          });
+        }
+        setRecentEntries([]);
+      }
     } catch (error) {
       showFailureToast(error, { title: "Could not restart timer" });
     }
@@ -93,15 +89,20 @@ export default function ClockifyMenuCommand() {
   const currentEntry = currentData?.currentEntry;
   const currentlyElapsedTime = currentData?.currentlyElapsedTime;
 
-  // Fetch data asynchronously without blocking render
+  // Fetch recent entries when there's no active timer, or today's total when there is
+  // Note: This effect runs on mount and whenever the active entry's project changes
+  // Uses setTimeout to defer data fetching and allow the menu to render first
   useEffect(() => {
-    // Use setTimeout to ensure this runs after initial render
     const timeoutId = setTimeout(() => {
       if (currentEntry?.projectId) {
+        // Active timer: show today's total for this project
         getTodayTotalTimeForProject(currentEntry.projectId).then((total) => {
           setTodayTotal(total);
+          // Clear recent entries since we have an active timer
+          setRecentEntries([]);
         });
       } else if (!currentEntry) {
+        // No active timer: show recent entries
         getTimeEntries({}).then((allEntries) => {
           const uniqueEntries: TimeEntry[] = [];
           const seen = new Set<string>();
@@ -117,6 +118,7 @@ export default function ClockifyMenuCommand() {
           }
 
           setRecentEntries(uniqueEntries);
+          setTodayTotal(0);
         });
       }
     }, 0);

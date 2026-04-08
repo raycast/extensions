@@ -245,6 +245,9 @@ export async function getTodayTotalTimeForProject(projectId: string): Promise<nu
     tomorrow.setDate(tomorrow.getDate() + 1);
 
     // Fetch today's entries from API
+    // Note: page-size=500 limits to 500 entries per day. For users with heavy tracking,
+    // this could be insufficient. Consider implementing pagination if needed.
+    // The API projectId filter doesn't work correctly, so we filter client-side.
     const { data, error } = await fetcher(
       `/workspaces/${workspaceId}/user/${userId}/time-entries?` +
         `start=${today.toISOString()}&` +
@@ -331,14 +334,10 @@ export async function addNewTimeEntry(
   description: string | undefined | null,
   projectId: string,
   taskId: string | undefined | null,
-  callbackOrTagIds?: (() => void) | string[],
+  tagIds: string[] = [],
   startTime?: Date,
-): Promise<void> {
+): Promise<TimeEntry | null> {
   showToast(Toast.Style.Animated, "Starting…");
-
-  // Handle both callback-style (for restarting entries) and tagIds-style (for new entries form)
-  const tagIds = Array.isArray(callbackOrTagIds) ? callbackOrTagIds : [];
-  const callback = typeof callbackOrTagIds === "function" ? callbackOrTagIds : undefined;
 
   const workspaceId = await LocalStorage.getItem("workspaceId");
   const { data, error } = await fetcher(`/workspaces/${workspaceId}/time-entries`, {
@@ -356,7 +355,7 @@ export async function addNewTimeEntry(
   if (!error && data?.id) {
     showToast(Toast.Style.Success, "Timer is running");
 
-    // Update the cache directly or call the callback to refetch
+    // Update the cache directly
     try {
       const entriesString = cache.get(TIME_ENTRIES_CACHE_KEY);
       if (entriesString) {
@@ -369,11 +368,9 @@ export async function addNewTimeEntry(
       console.error("Error updating cache:", e);
     }
 
-    // Call the callback if provided to refetch the time entries
-    if (callback) {
-      callback();
-    }
+    return data as TimeEntry;
   } else {
     showToast(Toast.Style.Failure, "Timer could not be started");
+    return null;
   }
 }
