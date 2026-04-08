@@ -123,14 +123,12 @@ export class AudioEngine {
     const entry = registry.entries.find((e) => e.soundId === soundId);
 
     if (entry && this.isProcessAlive(entry.pid)) {
-      const newPid = this.startSound(soundId, filePath, newVolume);
-      if (newPid) {
-        try {
-          process.kill(entry.pid, "SIGTERM");
-        } catch {
-          // Already dead
-        }
+      try {
+        process.kill(entry.pid, "SIGTERM");
+      } catch {
+        // Already dead
       }
+      this.startSound(soundId, filePath, newVolume);
     } else {
       this.startSound(soundId, filePath, newVolume);
     }
