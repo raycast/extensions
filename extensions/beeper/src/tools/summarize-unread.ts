@@ -1,7 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { assertBeeperConnection, getBeeperDesktop } from "../api";
-import { getServiceDisplayName } from "../utils/service-icons";
-import { BeeperService } from "../utils/types";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
 import { loadAccountServiceCache } from "../utils/account-service-cache";
 import { findBestChatMatch } from "../services/chat-search";
@@ -58,7 +56,7 @@ export default async function (input: Input): Promise<SummarizeResult> {
 
   const chatId = searchResult.match.id;
   const chatName = searchResult.match.title || input.chatName;
-  const service = getServiceDisplayName(searchResult.match.service);
+  const service = searchResult.match.service;
   const unreadCount = searchResult.match.unreadCount || 0;
 
   if (unreadCount === 0) {
@@ -123,7 +121,7 @@ async function getAllUnreadChatsSummary(
   const allChats: Array<{
     id: string;
     title: string;
-    service: BeeperService;
+    service: string;
     type?: string;
     lastActivity?: string;
     unreadCount?: number;
@@ -138,7 +136,7 @@ async function getAllUnreadChatsSummary(
     allChats.push({
       id: chat.id,
       title: chat.title || "",
-      service: accountInfo.service,
+      service: accountInfo.serviceLabel,
       type: chat.type,
       lastActivity: chat.lastActivity,
       unreadCount: chat.unreadCount,
@@ -150,15 +148,7 @@ async function getAllUnreadChatsSummary(
 
   if (serviceFilter) {
     const normalizedFilter = serviceFilter.toLowerCase();
-    unreadChats = unreadChats.filter((chat) => {
-      const chatServiceId = chat.service;
-      const chatServiceName = getServiceDisplayName(chatServiceId).toLowerCase();
-      return (
-        chatServiceId.includes(normalizedFilter) ||
-        normalizedFilter.includes(chatServiceId) ||
-        chatServiceName.includes(normalizedFilter)
-      );
-    });
+    unreadChats = unreadChats.filter((chat) => chat.service.toLowerCase().includes(normalizedFilter));
   }
 
   unreadChats.sort((a, b) => (b.unreadCount || 0) - (a.unreadCount || 0));
@@ -167,7 +157,7 @@ async function getAllUnreadChatsSummary(
 
   const unreadChatsSummary: UnreadChatSummary[] = unreadChats.map((chat) => ({
     chatName: chat.title || "Unknown Chat",
-    service: getServiceDisplayName(chat.service),
+    service: chat.service,
     unreadCount: chat.unreadCount || 0,
     chatType: chat.type || "single",
     lastActivity: chat.lastActivity,
@@ -188,7 +178,7 @@ function summarizeMockUnread(input: Input): SummarizeResult {
       totalUnreadCount: unreadChats.reduce((sum, chat) => sum + (chat.unreadCount || 0), 0),
       unreadChats: unreadChats.map((chat) => ({
         chatName: chat.name,
-        service: getServiceDisplayName(chat.service),
+        service: chat.service,
         unreadCount: chat.unreadCount || 0,
         chatType: chat.type,
         lastActivity: chat.lastMessageAt,
@@ -209,7 +199,7 @@ function summarizeMockUnread(input: Input): SummarizeResult {
 
   return {
     chatName: match.name,
-    service: getServiceDisplayName(match.service),
+    service: match.service,
     unreadCount: match.unreadCount || 0,
     messages,
   };

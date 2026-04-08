@@ -1,12 +1,11 @@
 import { getBeeperDesktop } from "../api";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
-import { BeeperService } from "../utils/types";
 import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 export interface ChatMatchCandidate {
   id: string;
   title: string;
-  service: BeeperService;
+  service: string;
   accountID?: string;
   type?: string;
   lastActivity?: string;
@@ -39,7 +38,7 @@ export async function findBestChatMatch(chatName: string, service?: string): Pro
     allMatches.push({
       id: chat.id,
       title: chat.title || "",
-      service: accountInfo.service,
+      service: accountInfo.serviceLabel,
       accountID: chat.accountID,
       type: chat.type,
       lastActivity: chat.lastActivity,

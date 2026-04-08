@@ -1,9 +1,7 @@
-import { BeeperService } from "./types";
-
 interface ChatMatch {
   id: string;
   title: string;
-  service: BeeperService;
+  service: string;
   accountID?: string;
   type?: string;
   lastActivity?: string;

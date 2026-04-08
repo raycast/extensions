@@ -1,9 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { assertBeeperConnection, getBeeperDesktop } from "../api";
-import { getServiceDisplayName } from "../utils/service-icons";
-import { parseService } from "../utils/types";
 import { MOCK_MESSAGES } from "../utils/mock-data";
 import { getSenderDisplayName } from "../utils/helpers";
+import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 type Input = {
   query: string;
@@ -33,7 +32,7 @@ export default async function (input: Input): Promise<{ messages: MessageResult[
       .map((message) => ({
         text: message.text,
         sender: message.senderName,
-        service: getServiceDisplayName(message.service),
+        service: message.service,
         timestamp: message.timestamp,
         chatId: message.chatId,
       }));
@@ -48,6 +47,7 @@ export default async function (input: Input): Promise<{ messages: MessageResult[
   await assertBeeperConnection();
 
   const client = getBeeperDesktop();
+  const accountServices = await loadAccountServiceCache();
 
   const searchParams: {
     query: string;
@@ -66,10 +66,11 @@ export default async function (input: Input): Promise<{ messages: MessageResult[
   const messages: MessageResult[] = [];
 
   for await (const msg of searchCursor) {
+    const accountInfo = accountServices.get(msg.accountID);
     messages.push({
       text: msg.text || "[No text content]",
       sender: getSenderDisplayName(msg),
-      service: getServiceDisplayName(parseService(msg.accountID)),
+      service: accountInfo?.serviceLabel || msg.accountID,
       timestamp: msg.timestamp,
       chatId: msg.chatID,
     });

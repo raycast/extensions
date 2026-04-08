@@ -1,8 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
 import { createBeeperOAuth, listAccounts } from "./api";
 import { MOCK_ACCOUNTS } from "./utils/mock-data";
-import { getServiceDisplayName, getServiceIcon } from "./utils/service-icons";
 import { BeeperAccount } from "./utils/types";
 import { getAccountServiceInfoList } from "./utils/account-service-cache";
 
@@ -24,15 +23,13 @@ function ListAccountsCommand() {
 
       const transformedAccounts: BeeperAccount[] = accountInfo.map((account) => ({
         id: account.accountID,
-        service: account.service,
+        service: account.serviceLabel,
         displayName: account.accountDisplayName,
         isConnected: true,
         username: account.username,
       }));
 
-      return transformedAccounts.sort((a, b) =>
-        getServiceDisplayName(a.service).localeCompare(getServiceDisplayName(b.service)),
-      );
+      return transformedAccounts.sort((a, b) => a.service.localeCompare(b.service));
     },
     [],
     {
@@ -69,41 +66,28 @@ function ListAccountsCommand() {
       ) : (
         <List.Section title="Connected" subtitle={`${accounts.length} service${accounts.length !== 1 ? "s" : ""}`}>
           {accounts.map((account) => (
-            <AccountListItem key={account.id} account={account} onRefresh={revalidate} />
+            <List.Item
+              key={account.id}
+              title={account.displayName}
+              subtitle={account.username || account.service}
+              icon={Icon.Person}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard content={account.displayName} title="Copy Account Name" />
+                  <Action.CopyToClipboard content={account.id} title="Copy Account ID" />
+                  <Action
+                    title="Refresh Accounts"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    onAction={revalidate}
+                  />
+                </ActionPanel>
+              }
+            />
           ))}
         </List.Section>
       )}
     </List>
-  );
-}
-
-function AccountListItem({ account, onRefresh }: { account: BeeperAccount; onRefresh?: () => void }) {
-  const serviceInfo = getServiceIcon(account.service);
-
-  return (
-    <List.Item
-      id={account.id}
-      title={account.displayName}
-      subtitle={account.username || getServiceDisplayName(account.service)}
-      icon={{ source: serviceInfo.icon as Icon, tintColor: serviceInfo.tintColor }}
-      accessories={[{ tag: { value: "Connected", color: Color.Green } }]}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action.CopyToClipboard content={account.displayName} title="Copy Account Name" />
-            <Action.CopyToClipboard content={account.id} title="Copy Account ID" />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <Action
-              title="Refresh Accounts"
-              icon={Icon.ArrowClockwise}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={onRefresh}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
   );
 }
 

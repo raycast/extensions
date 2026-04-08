@@ -1,6 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 import { assertBeeperConnection, getBeeperDesktop } from "../api";
-import { getServiceDisplayName } from "../utils/service-icons";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
 import { findBestChatMatch } from "../services/chat-search";
 import { getSenderDisplayName } from "../utils/helpers";
@@ -48,7 +47,7 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
 
   const chatId = searchResult.match.id;
   const chatName = searchResult.match.title || input.chatName;
-  const service = getServiceDisplayName(searchResult.match.service);
+  const service = searchResult.match.service;
 
   const now = new Date();
   const effectiveTimeRange = input.timeRange || "today";
@@ -170,7 +169,7 @@ function summarizeMockMessages(input: Input): SummarizeMessagesResult {
 
   return {
     chatName: match.name,
-    service: getServiceDisplayName(match.service),
+    service: match.service,
     messageCount: messages.length,
     messages,
     question: input.question,

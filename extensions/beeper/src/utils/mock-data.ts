@@ -1,11 +1,11 @@
 import BeeperDesktop from "@beeper/desktop-api";
-import { BeeperAccount, BeeperService } from "./types";
+import { BeeperAccount } from "./types";
 
 export interface MockChatItem {
   id: string;
   name: string;
   type: "single" | "group" | "space";
-  service: BeeperService;
+  service: string;
   networkRaw: string;
   accountId: string;
   lastMessageAt?: string;
@@ -92,7 +92,7 @@ export interface MockMessageResult {
   chatId: string;
   accountId: string;
   timestamp: string;
-  service: BeeperService;
+  service: string;
   isSender: boolean;
   isUnread?: boolean;
 }

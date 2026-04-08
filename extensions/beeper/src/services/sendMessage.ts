@@ -1,5 +1,4 @@
 import { getBeeperDesktop } from "../api";
-import { BeeperService } from "../utils/types";
 import { findBestChatMatch } from "./chat-search";
 
 interface SendMessageOptions {
@@ -12,7 +11,7 @@ interface SendMessageOptions {
 interface SendMessageResult {
   success: boolean;
   sentTo?: string;
-  service?: BeeperService;
+  service?: string;
   error?: string;
   suggestions?: string[];
 }
@@ -23,7 +22,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
   try {
     let chatId = options.chatId;
     let chatName: string | undefined;
-    let chatService: BeeperService = "unknown";
+    let chatService = "unknown";
 
     if (!chatId && options.chatName) {
       const result = await findBestChatMatch(options.chatName, options.service);

@@ -1,6 +1,5 @@
 import { Tool } from "@raycast/api";
 import { sendMessage } from "../services/sendMessage";
-import { getServiceDisplayName } from "../utils/service-icons";
 
 type Input = {
   name: string;
@@ -20,11 +19,9 @@ export default async function (input: Input) {
     throw new Error((result.error || "Failed to send message") + suggestionText);
   }
 
-  const serviceName = result.service ? getServiceDisplayName(result.service) : input.service || "Beeper";
-
   return {
     sentTo: result.sentTo || input.name,
-    service: serviceName,
+    service: result.service || input.service || "Beeper",
     messageSent: true,
   };
 }

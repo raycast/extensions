@@ -1,5 +1,4 @@
 import { openChat } from "../services/openChat";
-import { getServiceDisplayName } from "../utils/service-icons";
 
 type Input = {
   name: string;
@@ -17,10 +16,8 @@ export default async function (input: Input) {
     throw new Error((result.error || "Failed to open chat") + suggestionText);
   }
 
-  const serviceName = result.chat?.service ? getServiceDisplayName(result.chat.service) : input.service || "Beeper";
-
   return {
     openedChat: result.chat?.name || input.name,
-    service: serviceName,
+    service: result.chat?.service || input.service || "Beeper",
   };
 }
