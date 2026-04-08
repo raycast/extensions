@@ -1,6 +1,6 @@
 # Portfolio Tracker
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-08
 
 ### Features
 
