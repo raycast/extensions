@@ -2,7 +2,8 @@
 
 ## [Enhancements] - {PR_MERGE_DATE}
 
-- Access the Datamuse Thesaurus API through `api.datamuse.com` instead of `www.onelook.com`
-- Format parts of speech as `inline code` in the definitions view
+- Switch from the deprecated OneLook API proxy (`www.onelook.com/api`) to the official Datamuse Thesaurus API (`api.datamuse.com/words`) — the backend that powers OneLook Thesaurus
+- Add `qe=ml` (query echo) so the original word appears first with its definitions, matching the previous OneLook behavior
+- Format parts of speech as inline code (e.g. `` `adj` ``) in the definitions view
 
 ## [Initial Version] - 2024-07-17
