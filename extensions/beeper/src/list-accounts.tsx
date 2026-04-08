@@ -4,7 +4,8 @@ import { createBeeperOAuth } from "./api";
 import { getBeeperClient, checkBeeperConnection } from "./services/beeper-client";
 import { MOCK_ACCOUNTS } from "./utils/mock-data";
 import { getServiceDisplayName, getServiceIcon } from "./utils/service-icons";
-import { BeeperAccount, parseService } from "./utils/types";
+import { BeeperAccount } from "./utils/types";
+import { buildAccountServiceCache } from "./utils/account-service-cache";
 
 function ListAccountsCommand() {
   const {
@@ -26,13 +27,14 @@ function ListAccountsCommand() {
 
       const client = await getBeeperClient();
       const response = await client.accounts.list();
+      const accountInfo = Array.from(buildAccountServiceCache(response || []).values());
 
-      const transformedAccounts: BeeperAccount[] = (response || []).map((account) => ({
+      const transformedAccounts: BeeperAccount[] = accountInfo.map((account) => ({
         id: account.accountID,
-        service: parseService(account.network),
-        displayName: account.user?.fullName || account.network || "Unknown",
+        service: account.service,
+        displayName: account.accountDisplayName,
         isConnected: true,
-        username: account.user?.username,
+        username: account.username,
       }));
 
       return transformedAccounts.sort((a, b) =>
@@ -114,8 +116,8 @@ function AccountListItem({ account, onRefresh }: AccountListItemProps) {
   return (
     <List.Item
       id={account.id}
-      title={getServiceDisplayName(account.service)}
-      subtitle={account.username || account.displayName}
+      title={account.displayName}
+      subtitle={account.username || getServiceDisplayName(account.service)}
       icon={{ source: serviceInfo.icon as Icon, tintColor: serviceInfo.tintColor }}
       accessories={[
         {

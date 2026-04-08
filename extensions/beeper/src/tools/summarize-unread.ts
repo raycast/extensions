@@ -4,6 +4,7 @@ import { getServiceDisplayName } from "../utils/service-icons";
 import { parseService } from "../utils/types";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
+import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 type Input = {
   chatName?: string;
@@ -46,9 +47,10 @@ export default async function (input: Input): Promise<SummarizeResult> {
   }
 
   const client = await getBeeperClient();
+  const accountServices = await loadAccountServiceCache();
 
   if (!input.chatName) {
-    return await getAllUnreadChatsSummary(client, input.service);
+    return await getAllUnreadChatsSummary(client, input.service, accountServices);
   }
 
   const searchCursor = await client.chats.search({
@@ -69,10 +71,15 @@ export default async function (input: Input): Promise<SummarizeResult> {
   }> = [];
 
   for await (const chat of searchCursor) {
+    const accountInfo = accountServices.get(chat.accountID);
+    if (!accountInfo) {
+      throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+    }
+
     allMatches.push({
       id: chat.id,
       title: chat.title || "",
-      network: chat.network || "",
+      network: accountInfo.service,
       accountID: chat.accountID,
       type: chat.type,
       lastActivity: chat.lastActivity,
@@ -157,6 +164,7 @@ export default async function (input: Input): Promise<SummarizeResult> {
 async function getAllUnreadChatsSummary(
   client: Awaited<ReturnType<typeof getBeeperClient>>,
   serviceFilter?: string,
+  accountServices?: Awaited<ReturnType<typeof loadAccountServiceCache>>,
 ): Promise<SummarizeResult> {
   const searchCursor = await client.chats.search({
     limit: 100,
@@ -173,10 +181,15 @@ async function getAllUnreadChatsSummary(
   }> = [];
 
   for await (const chat of searchCursor) {
+    const accountInfo = accountServices?.get(chat.accountID);
+    if (!accountInfo) {
+      throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+    }
+
     allChats.push({
       id: chat.id,
       title: chat.title || "",
-      network: chat.network || "",
+      network: accountInfo.service,
       type: chat.type,
       lastActivity: chat.lastActivity,
       unreadCount: chat.unreadCount,
@@ -189,8 +202,13 @@ async function getAllUnreadChatsSummary(
   if (serviceFilter) {
     const normalizedFilter = serviceFilter.toLowerCase();
     unreadChats = unreadChats.filter((chat) => {
-      const chatService = chat.network?.toLowerCase() || "";
-      return chatService.includes(normalizedFilter) || normalizedFilter.includes(chatService);
+      const chatServiceId = parseService(chat.network);
+      const chatServiceName = getServiceDisplayName(chatServiceId).toLowerCase();
+      return (
+        chatServiceId.includes(normalizedFilter) ||
+        normalizedFilter.includes(chatServiceId) ||
+        chatServiceName.includes(normalizedFilter)
+      );
     });
   }
 

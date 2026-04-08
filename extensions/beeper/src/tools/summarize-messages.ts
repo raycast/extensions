@@ -4,6 +4,7 @@ import { getServiceDisplayName } from "../utils/service-icons";
 import { parseService } from "../utils/types";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
+import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 type Input = {
   chatName: string;
@@ -43,6 +44,7 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
   }
 
   const client = await getBeeperClient();
+  const accountServices = await loadAccountServiceCache();
 
   const searchCursor = await client.chats.search({
     query: input.chatName,
@@ -62,10 +64,15 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
   }> = [];
 
   for await (const chat of searchCursor) {
+    const accountInfo = accountServices.get(chat.accountID);
+    if (!accountInfo) {
+      throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+    }
+
     allMatches.push({
       id: chat.id,
       title: chat.title || "",
-      network: chat.network || "",
+      network: accountInfo.service,
       accountID: chat.accountID,
       type: chat.type,
       lastActivity: chat.lastActivity,

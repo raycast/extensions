@@ -157,7 +157,6 @@ export function mockChatToBeeperChat(item: MockChatItem): BeeperDesktop.Chat {
   return {
     id: item.id,
     accountID: item.accountId,
-    network: item.networkRaw,
     participants: { hasMore: false, items: [], total: 0 },
     type: item.type === "space" ? "group" : item.type,
     unreadCount: item.unreadCount ?? 0,

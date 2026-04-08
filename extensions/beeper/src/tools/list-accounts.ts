@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getBeeperClient, checkBeeperConnection } from "../services/beeper-client";
-import { parseService } from "../utils/types";
 import { getServiceDisplayName } from "../utils/service-icons";
 import { MOCK_ACCOUNTS } from "../utils/mock-data";
+import { buildAccountServiceCache } from "../utils/account-service-cache";
 
 export default async function () {
   const { useMockData } = getPreferenceValues<Preferences>();
@@ -23,14 +23,14 @@ export default async function () {
 
   const client = await getBeeperClient();
   const accounts = await client.accounts.list();
+  const accountInfo = Array.from(buildAccountServiceCache(accounts || []).values());
 
-  return (accounts || []).map((account) => {
-    const service = parseService(account.network);
+  return accountInfo.map((account) => {
     return {
-      service: getServiceDisplayName(service),
-      serviceId: service,
-      displayName: account.user?.fullName || account.network || "Unknown",
-      username: account.user?.username,
+      service: getServiceDisplayName(account.service),
+      serviceId: account.service,
+      displayName: account.accountDisplayName,
+      username: account.username,
       isConnected: true,
     };
   });

@@ -294,9 +294,13 @@ export const listAccounts = async (): Promise<BeeperDesktop.Account[]> => {
   if (useMockData()) {
     return MOCK_ACCOUNTS.map((a) => ({
       accountID: a.id,
-      network: a.service,
-      user: { fullName: a.displayName, username: a.username },
-    })) as BeeperDesktop.Account[];
+      user: {
+        id: a.id,
+        fullName: a.displayName,
+        username: a.username,
+        isSelf: true,
+      },
+    }));
   }
   const response = await getBeeperDesktop().get("/v1/accounts");
   return getItemsFromResponse<BeeperDesktop.Account>(response);

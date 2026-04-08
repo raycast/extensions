@@ -1,6 +1,7 @@
 import { getBeeperClient } from "./beeper-client";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { parseService, BeeperService } from "../utils/types";
+import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 interface SendMessageOptions {
   chatId?: string;
@@ -24,6 +25,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
     let chatId = options.chatId;
     let chatName: string | undefined;
     let chatService: BeeperService = "unknown";
+    const accountServices = await loadAccountServiceCache();
 
     if (!chatId && options.chatName) {
       const searchCursor = await client.chats.search({
@@ -33,10 +35,15 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
 
       const allMatches: Array<{ id: string; title: string; network: string }> = [];
       for await (const chat of searchCursor) {
+        const accountInfo = accountServices.get(chat.accountID);
+        if (!accountInfo) {
+          throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+        }
+
         allMatches.push({
           id: chat.id,
           title: chat.title || "",
-          network: chat.network || "",
+          network: accountInfo.service,
         });
         if (allMatches.length >= 20) break;
       }

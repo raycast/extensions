@@ -74,6 +74,7 @@ export function parseService(serviceString: string | undefined): BeeperService {
   if (!serviceString) return "unknown";
 
   const normalized = serviceString.toLowerCase();
+  const compactNormalized = normalized.replace(/[^a-z0-9]/g, "");
 
   const serviceMap: Record<string, BeeperService> = {
     whatsapp: "whatsapp",
@@ -84,6 +85,7 @@ export function parseService(serviceString: string | undefined): BeeperService {
     facebook: "messenger",
     discord: "discord",
     slack: "slack",
+    slackgo: "slack",
     linkedin: "linkedin",
     twitter: "twitter",
     x: "twitter",
@@ -103,18 +105,40 @@ export function parseService(serviceString: string | undefined): BeeperService {
     "google-voice": "googlevoice",
     sms: "sms",
     imessage: "imessage",
+    imessagego: "imessage",
     matrix: "matrix",
     "beeper (matrix)": "matrix",
     beeper: "matrix",
   };
 
-  if (serviceMap[normalized]) {
-    return serviceMap[normalized];
+  const candidates = new Set<string>([normalized, compactNormalized]);
+  const strippedPrefixes = [
+    normalized.replace(/^(local|cloud|remote|hungryserv)[-_.]/, ""),
+    normalized.replace(/^(local|cloud|remote|hungryserv)/, ""),
+  ];
+
+  for (const candidate of strippedPrefixes) {
+    if (!candidate) continue;
+    candidates.add(candidate);
+    candidates.add(candidate.replace(/[^a-z0-9]/g, ""));
   }
 
-  for (const [key, value] of Object.entries(serviceMap)) {
-    if (key.length >= 3 && normalized.startsWith(key)) {
-      return value;
+  for (const part of normalized.split(/[^a-z0-9]+/).filter(Boolean)) {
+    candidates.add(part);
+  }
+
+  for (const candidate of candidates) {
+    if (serviceMap[candidate]) {
+      return serviceMap[candidate];
+    }
+  }
+
+  for (const candidate of candidates) {
+    for (const [key, value] of Object.entries(serviceMap)) {
+      const compactKey = key.replace(/[^a-z0-9]/g, "");
+      if (compactKey.length >= 3 && candidate.startsWith(compactKey)) {
+        return value;
+      }
     }
   }
 

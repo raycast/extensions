@@ -2,6 +2,7 @@ import { closeMainWindow } from "@raycast/api";
 import { getBeeperClient } from "./beeper-client";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { BeeperChat, parseService } from "../utils/types";
+import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 interface OpenChatOptions {
   chatId?: string;
@@ -22,6 +23,7 @@ export async function openChat(options: OpenChatOptions): Promise<OpenChatResult
   try {
     let chatId = options.chatId;
     let foundChat: BeeperChat | undefined;
+    const accountServices = await loadAccountServiceCache();
 
     if (!chatId && options.chatName) {
       const searchCursor = await client.chats.search({
@@ -42,10 +44,15 @@ export async function openChat(options: OpenChatOptions): Promise<OpenChatResult
       }> = [];
 
       for await (const chat of searchCursor) {
+        const accountInfo = accountServices.get(chat.accountID);
+        if (!accountInfo) {
+          throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+        }
+
         allMatches.push({
           id: chat.id,
           title: chat.title || "",
-          network: chat.network || "",
+          network: accountInfo.service,
           accountID: chat.accountID,
           type: chat.type,
           lastActivity: chat.lastActivity,

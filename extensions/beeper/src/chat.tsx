@@ -14,7 +14,14 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useCachedState, useFrecencySorting, useForm, useLocalStorage, withAccessToken } from "@raycast/utils";
+import {
+  useCachedPromise,
+  useCachedState,
+  useFrecencySorting,
+  useForm,
+  useLocalStorage,
+  withAccessToken,
+} from "@raycast/utils";
 import BeeperDesktop from "@beeper/desktop-api";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -33,6 +40,7 @@ import {
   getRaycastFocusLink,
   useBeeperDesktop,
 } from "./api";
+import { AccountServiceInfo, loadAccountServiceCache } from "./utils/account-service-cache";
 
 type InboxFilter = "all" | "inbox" | "primary" | "low-priority" | "archive";
 type ChatTypeFilter = "any" | "single" | "group";
@@ -97,6 +105,11 @@ const getChatTimestamp = (chat: BeeperDesktop.Chat) => {
   return Number.isNaN(ts) ? 0 : ts;
 };
 
+const getChatServiceLabel = (
+  chat: Pick<BeeperDesktop.Chat, "accountID">,
+  accountServices?: Map<string, AccountServiceInfo>,
+) => accountServices?.get(chat.accountID)?.serviceLabel;
+
 const sortIndexedChatsByActivity = (items: IndexedChat[]) =>
   [...items].sort((a, b) => getChatTimestamp(b.chat) - getChatTimestamp(a.chat));
 
@@ -117,7 +130,6 @@ const mergeIndexedChats = (base: IndexedChat[], updates: IndexedChat[]) => {
 const summarizeChatForIndex = (chat: BeeperDesktop.Chat): BeeperDesktop.Chat => ({
   id: chat.id,
   accountID: chat.accountID,
-  network: chat.network ?? "",
   participants: {
     hasMore: false,
     items: MAX_PARTICIPANTS_STORED > 0 ? (chat.participants?.items ?? []).slice(0, MAX_PARTICIPANTS_STORED) : [],
@@ -125,14 +137,13 @@ const summarizeChatForIndex = (chat: BeeperDesktop.Chat): BeeperDesktop.Chat => 
   },
   type: chat.type,
   unreadCount: chat.unreadCount ?? 0,
-  description: chat.description ?? undefined,
   isArchived: chat.isArchived ?? false,
   isMuted: chat.isMuted ?? false,
   isPinned: chat.isPinned ?? false,
   lastActivity: chat.lastActivity ?? undefined,
   lastReadMessageSortKey: chat.lastReadMessageSortKey ?? undefined,
   localChatID: chat.localChatID ?? null,
-  title: chat.title ?? null,
+  title: chat.title ?? "",
 });
 
 const normalizeIndexState = (state: ChatIndexState): ChatIndexState => {
@@ -140,7 +151,7 @@ const normalizeIndexState = (state: ChatIndexState): ChatIndexState => {
   let items = state.items.map((item) => {
     let next = item;
     if (!next.searchFields) {
-      next = { ...next, searchFields: buildSearchFields(next.chat) };
+      next = { ...next, searchFields: { title: "", network: "", participants: [] } };
       changed = true;
     }
     const summarizedChat = summarizeChatForIndex(next.chat);
@@ -290,9 +301,16 @@ class ThreadSearchIndex {
   }
 }
 
-const buildSearchFields = (chat: BeeperDesktop.Chat): ChatSearchFields => {
+const buildSearchFields = (
+  chat: BeeperDesktop.Chat,
+  accountServices: Map<string, AccountServiceInfo>,
+): ChatSearchFields => {
   const title = normalizeSearchValue(chat.title || "");
-  const network = normalizeSearchValue(chat.network || "");
+  const serviceLabel = getChatServiceLabel(chat, accountServices);
+  if (!serviceLabel) {
+    throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+  }
+  const network = normalizeSearchValue(serviceLabel);
   const participants =
     chat.participants?.items
       ?.slice(0, MAX_PARTICIPANTS_INDEXED)
@@ -350,6 +368,11 @@ export function ChatListView({
   const initialRefreshDone = useRef(false);
   const [isIndexRefreshing, setIsIndexRefreshing] = useState(false);
   const [error, setError] = useState<unknown>(undefined);
+  const {
+    data: accountServices,
+    isLoading: isLoadingAccountServices,
+    error: accountServicesError,
+  } = useCachedPromise(() => loadAccountServiceCache(), [], { keepPreviousData: true });
 
   useEffect(() => {
     indexRef.current = indexState;
@@ -366,6 +389,10 @@ export function ChatListView({
       done: boolean;
     }) => void | Promise<void>,
   ) => {
+    if (!accountServices) {
+      throw new Error("Account metadata not loaded");
+    }
+
     const maxPages = mode === "incremental" ? INDEX_MAX_PAGES_INCREMENTAL : INDEX_MAX_PAGES;
     const items: IndexedChat[] = [];
     let itemsCount = 0;
@@ -393,7 +420,7 @@ export function ChatListView({
       const mapped = pageItems.map((chat) => ({
         chat: summarizeChatForIndex(chat),
         inbox,
-        searchFields: buildSearchFields(chat),
+        searchFields: buildSearchFields(chat, accountServices),
       }));
       itemsCount += mapped.length;
       if (!onPage) {
@@ -477,6 +504,7 @@ export function ChatListView({
 
   useEffect(() => {
     if (initialRefreshDone.current) return;
+    if (!accountServices) return;
     initialRefreshDone.current = true;
     const isStale = Date.now() - indexState.updatedAt > INDEX_REFRESH_MAX_AGE_MS;
     if (indexState.items.length === 0 || isStale) {
@@ -484,7 +512,7 @@ export function ChatListView({
       return;
     }
     void refreshIndex("incremental");
-  }, [indexState.items.length]);
+  }, [accountServices, indexState.items.length]);
 
   const tokens = useMemo(() => parseSearchTerms(trimmedQuery), [trimmedQuery]);
   const normalizedQuery = useMemo(() => normalizeSearchValue(trimmedQuery), [trimmedQuery]);
@@ -596,7 +624,8 @@ export function ChatListView({
 
   const setChatType = (type: ChatTypeFilter) => setFilters((prev) => ({ ...prev, type }));
 
-  const isLoading = isIndexRefreshing && indexState.items.length === 0;
+  const combinedError = accountServicesError ?? error;
+  const isLoading = isLoadingAccountServices || (isIndexRefreshing && indexState.items.length === 0);
 
   const markChatVisited = (chat: BeeperDesktop.Chat) => {
     if (!showSmartSections) return;
@@ -705,6 +734,8 @@ export function ChatListView({
   const renderChatItem = (chat: BeeperDesktop.Chat) => {
     const lastActivity = parseDate(chat.lastActivity);
     const openLink = getRaycastFocusLink({ chatID: chat.id });
+    const serviceLabel = getChatServiceLabel(chat, accountServices);
+    if (!serviceLabel) return null;
     const accessories = [
       ...(chat.unreadCount > 0 ? [{ text: `${chat.unreadCount} unread` }] : []),
       ...(chat.isPinned ? [{ icon: Icon.Pin }] : []),
@@ -718,17 +749,17 @@ export function ChatListView({
         key={chat.id}
         icon={chat.type === "group" ? Icon.TwoPeople : Icon.Person}
         title={chat.title || "Unnamed Chat"}
-        subtitle={chat.network}
+        subtitle={serviceLabel}
         accessories={accessories}
         detail={
           isShowingDetail ? (
             <List.Item.Detail
-              markdown={`# ${chat.title || "Chat"}\n\n${chat.network}\n\n**Unread:** ${chat.unreadCount}`}
+              markdown={`# ${chat.title || "Chat"}\n\n${serviceLabel}\n\n**Unread:** ${chat.unreadCount}`}
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Chat ID" text={chat.id} />
                   <List.Item.Detail.Metadata.Label title="Account ID" text={chat.accountID} />
-                  <List.Item.Detail.Metadata.Label title="Network" text={chat.network} />
+                  <List.Item.Detail.Metadata.Label title="Network" text={serviceLabel} />
                   <List.Item.Detail.Metadata.Label title="Type" text={chat.type} />
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.TagList title="Status">
@@ -888,10 +919,10 @@ export function ChatListView({
       {otherChats.length > 0 && <List.Section title="Chats">{otherChats.map(renderChatItem)}</List.Section>}
       {!isLoading && chats.length === 0 && (
         <List.EmptyView
-          icon={error ? Icon.Warning : Icon.Message}
-          title={error ? "Failed to Load Chats" : "No Chats Found"}
+          icon={combinedError ? Icon.Warning : Icon.Message}
+          title={combinedError ? "Failed to Load Chats" : "No Chats Found"}
           description={
-            error
+            combinedError
               ? "Make sure Beeper Desktop is running and the API is enabled, then try Refresh."
               : "Try adjusting your filters or search query."
           }
@@ -1323,6 +1354,8 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
   const { data, isLoading } = useBeeperDesktop(async () => {
     return retrieveChat(chat.id, { maxParticipantCount: 50 });
   });
+  const { data: accountServices } = useCachedPromise(() => loadAccountServiceCache(), [], { keepPreviousData: true });
+  const serviceLabel = getChatServiceLabel(chat, accountServices) ?? "";
 
   const participantLines = useMemo(() => {
     const participants = data?.participants?.items ?? [];
@@ -1340,7 +1373,7 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
       isLoading={isLoading}
       markdown={`# ${data?.title || chat.title || "Chat"}\n\n**Chat ID:** ${chat.id}\n**Account ID:** ${
         chat.accountID
-      }\n**Network:** ${chat.network}\n**Type:** ${chat.type}\n**Unread:** ${
+      }\n**Network:** ${serviceLabel}\n**Type:** ${chat.type}\n**Unread:** ${
         chat.unreadCount
       }\n**Pinned:** ${chat.isPinned ? "Yes" : "No"}\n**Muted:** ${
         chat.isMuted ? "Yes" : "No"
