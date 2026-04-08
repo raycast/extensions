@@ -26,13 +26,8 @@ export default function TailsMenuBar() {
       {usage && (
         <MenuBarExtra.Section title="Usage">
           <MenuBarExtra.Item
-            title={`${usage.used} / ${usage.quota} credits (${pct}%)`}
+            title={`Used ${usage.used} of ${usage.quota} credits`}
             icon={Icon.Gauge}
-            onAction={() => open(getPreferences().instanceUrl)}
-          />
-          <MenuBarExtra.Item
-            title={`Resets ${formatResetShort(usage.resetsAt)}`}
-            icon={Icon.Clock}
             onAction={() => open(getPreferences().instanceUrl)}
           />
         </MenuBarExtra.Section>
@@ -83,16 +78,4 @@ async function downloadFromClipboard() {
   } catch (error) {
     await handleApiError(error);
   }
-}
-
-function formatResetShort(iso: string): string {
-  if (iso === "never") return "never (trial)";
-
-  const date = new Date(iso);
-  const now = new Date();
-  const diffDays = Math.ceil((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diffDays <= 0) return "today";
-  if (diffDays === 1) return "tomorrow";
-  return `in ${diffDays} days`;
 }
