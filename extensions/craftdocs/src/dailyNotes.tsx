@@ -39,7 +39,7 @@ export default function dailyNotes() {
   }
 
   if (!command.environment.environment || command.environment.environment.status !== "ready") {
-    return <CraftEnvironmentList environment={command.environment.environment || errorEnvironmentState} />;
+    return <CraftEnvironmentList environment={command.environment.environment} />;
   }
 
   return (
@@ -57,8 +57,3 @@ export default function dailyNotes() {
     </List>
   );
 }
-
-const errorEnvironmentState = {
-  status: "error" as const,
-  message: "Could not inspect installed Craft applications.",
-};

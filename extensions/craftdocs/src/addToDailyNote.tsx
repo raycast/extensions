@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, popToRoot, closeMainWindow } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CraftEnvironmentForm } from "./components/CraftCommandState";
 import { APPEND_POSITIONS } from "./constants";
 import useCraftCommandContext from "./hooks/useCraftCommandContext";
@@ -46,9 +46,15 @@ export default function AddToDailyNote() {
     }
   }, [config?.primarySpace, formValues.spaceId]);
 
-  const dailyNoteBlockId = formValues.spaceId
-    ? findDailyNoteBlockId(command.db.databases, formValues.spaceId, new Date())
-    : null;
+  const todayKey = new Date().toDateString();
+
+  const dailyNoteBlockId = useMemo(() => {
+    if (!formValues.spaceId) {
+      return null;
+    }
+
+    return findDailyNoteBlockId(command.db.databases, formValues.spaceId, new Date());
+  }, [command.db.databases, formValues.spaceId, todayKey]);
 
   const actionType = resolveAddToDailyNoteAction({
     content: formValues.content,
@@ -114,7 +120,7 @@ export default function AddToDailyNote() {
   }
 
   if (!command.environment.environment || command.environment.environment.status !== "ready") {
-    return <CraftEnvironmentForm environment={command.environment.environment || errorEnvironmentState} />;
+    return <CraftEnvironmentForm environment={command.environment.environment} />;
   }
 
   if (!config || config.enabledSpaces.length === 0) {
@@ -198,8 +204,3 @@ export default function AddToDailyNote() {
     </Form>
   );
 }
-
-const errorEnvironmentState = {
-  status: "error" as const,
-  message: "Could not inspect installed Craft applications.",
-};

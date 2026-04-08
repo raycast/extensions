@@ -8,8 +8,13 @@ type CommandStateCopy = {
   showPreferencesAction?: boolean;
 };
 
-export const CraftEnvironmentList = ({ environment }: { environment: CraftCommandEnvironment }) => {
-  const copy = getEnvironmentCopy(environment);
+const errorEnvironmentState: CraftCommandEnvironment = {
+  status: "error",
+  message: "Could not inspect installed Craft applications.",
+};
+
+export const CraftEnvironmentList = ({ environment }: { environment: CraftCommandEnvironment | null }) => {
+  const copy = getEnvironmentCopy(environment || errorEnvironmentState);
 
   return (
     <List>
@@ -23,8 +28,8 @@ export const CraftEnvironmentList = ({ environment }: { environment: CraftComman
   );
 };
 
-export const CraftEnvironmentForm = ({ environment }: { environment: CraftCommandEnvironment }) => {
-  const copy = getEnvironmentCopy(environment);
+export const CraftEnvironmentForm = ({ environment }: { environment: CraftCommandEnvironment | null }) => {
+  const copy = getEnvironmentCopy(environment || errorEnvironmentState);
 
   return (
     <Form actions={copy.showPreferencesAction ? <PreferencesActionPanel /> : undefined}>
