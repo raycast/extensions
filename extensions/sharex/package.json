@@ -36,6 +36,20 @@
       "title": "Capture GIF",
       "description": "Capture screen as GIF via ShareX",
       "mode": "no-view"
+    },
+    {
+      "name": "capture-screenshot-delayed",
+      "title": "Capture Screenshot (Delayed)",
+      "description": "Capture a screenshot after a configurable delay via ShareX",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "delay",
+          "placeholder": "Delay in seconds (default: 3)",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
