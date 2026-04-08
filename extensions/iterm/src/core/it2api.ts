@@ -8,11 +8,22 @@ export const isIt2apiAvailable = () => existsSync(IT2API_PATH);
 
 export type It2apiReadyResult = { ready: true } | { ready: false; reason: string };
 
+const extendedPath = [
+  `${process.env.HOME}/.local/share/mise/shims`,
+  "/opt/homebrew/bin",
+  "/usr/local/bin",
+  "/usr/bin",
+  "/bin",
+  process.env.PATH ?? "",
+]
+  .filter(Boolean)
+  .join(":");
+
 export const checkIt2apiReady = (): It2apiReadyResult => {
   if (!existsSync(IT2API_PATH))
     return { ready: false, reason: "it2api not found — ensure iTerm2 is installed at /Applications/iTerm.app" };
   try {
-    execSync(`bash -l -c 'python3 -c "import iterm2"'`, { stdio: "pipe" });
+    execSync(`python3 -c "import iterm2"`, { stdio: "pipe", env: { ...process.env, PATH: extendedPath } });
   } catch {
     return { ready: false, reason: "iterm2 Python package missing — run: python3 -m pip install iterm2" };
   }

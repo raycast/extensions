@@ -8,7 +8,22 @@ export interface Session {
   tabId: string;
 }
 
-const run = (args: string): string => execSync(`bash -l -c '"${IT2API_PATH}" ${args}'`, { encoding: "utf-8" }).trim();
+const extendedPath = [
+  `${process.env.HOME}/.local/share/mise/shims`,
+  "/opt/homebrew/bin",
+  "/usr/local/bin",
+  "/usr/bin",
+  "/bin",
+  process.env.PATH ?? "",
+]
+  .filter(Boolean)
+  .join(":");
+
+const run = (args: string): string =>
+  execSync(`"${IT2API_PATH}" ${args}`, {
+    encoding: "utf-8",
+    env: { ...process.env, PATH: extendedPath },
+  }).trim();
 
 export const listSessions = (): Session[] => {
   const hierarchy = run("show-hierarchy");
