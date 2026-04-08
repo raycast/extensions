@@ -1,5 +1,6 @@
 {
   "name": "ghost-share",
+  "version": "1.0.0",
   "title": "Ghost Share",
   "description": "Instantly share the selected Finder file via file.io",
   "icon": "command-icon.png",
