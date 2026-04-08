@@ -1,5 +1,9 @@
 # VMware vCenter Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Performance Improvement.
+
 ## [Improvement] - 2026-04-04
 
 - [Improvement] Added 'Parallels Client' as RDP Client for macOS.
