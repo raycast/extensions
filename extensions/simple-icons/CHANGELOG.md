@@ -1,5 +1,10 @@
 # Brand Icons Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Fix `raycast-tint-color` value
+- Bump all dependencies to the latest
+
 ## [Routine Maintenance] - 2026-03-07
 
 - We reached 3400+ icons!
