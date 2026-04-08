@@ -84,6 +84,12 @@
       "mode": "view"
     },
     {
+      "name": "switch-tab",
+      "title": "Switch iTerm Tab",
+      "description": "List and switch to any open iTerm tab",
+      "mode": "view"
+    },
+    {
       "name": "switch-session",
       "title": "Switch iTerm Session",
       "description": "List and switch to any open iTerm session",
