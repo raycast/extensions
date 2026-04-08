@@ -5,7 +5,7 @@ import { getBeeperClient, checkBeeperConnection } from "./services/beeper-client
 import { MOCK_ACCOUNTS } from "./utils/mock-data";
 import { getServiceDisplayName, getServiceIcon } from "./utils/service-icons";
 import { BeeperAccount } from "./utils/types";
-import { buildAccountServiceCache } from "./utils/account-service-cache";
+import { getAccountServiceInfoList } from "./utils/account-service-cache";
 
 function ListAccountsCommand() {
   const {
@@ -27,7 +27,7 @@ function ListAccountsCommand() {
 
       const client = await getBeeperClient();
       const response = await client.accounts.list();
-      const accountInfo = Array.from(buildAccountServiceCache(response || []).values());
+      const accountInfo = getAccountServiceInfoList(response || []);
 
       const transformedAccounts: BeeperAccount[] = accountInfo.map((account) => ({
         id: account.accountID,

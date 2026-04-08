@@ -33,7 +33,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
         limit: 20,
       });
 
-      const allMatches: Array<{ id: string; title: string; network: string }> = [];
+      const allMatches: Array<{ id: string; title: string; service: BeeperService }> = [];
       for await (const chat of searchCursor) {
         const accountInfo = accountServices.get(chat.accountID);
         if (!accountInfo) {
@@ -43,7 +43,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
         allMatches.push({
           id: chat.id,
           title: chat.title || "",
-          network: accountInfo.service,
+          service: accountInfo.service,
         });
         if (allMatches.length >= 20) break;
       }
@@ -70,7 +70,7 @@ export async function sendMessage(options: SendMessageOptions): Promise<SendMess
       const bestMatch = rankedMatches[0].chat;
       chatId = bestMatch.id;
       chatName = bestMatch.title;
-      chatService = parseService(bestMatch.network);
+      chatService = bestMatch.service;
     }
 
     if (!chatId) {

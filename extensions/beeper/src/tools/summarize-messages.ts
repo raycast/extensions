@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { getBeeperClient, checkBeeperConnection } from "../services/beeper-client";
 import { getServiceDisplayName } from "../utils/service-icons";
-import { parseService } from "../utils/types";
+import { BeeperService } from "../utils/types";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
 import { loadAccountServiceCache } from "../utils/account-service-cache";
@@ -54,7 +54,7 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
   const allMatches: Array<{
     id: string;
     title: string;
-    network: string;
+    service: BeeperService;
     accountID?: string;
     type?: string;
     lastActivity?: string;
@@ -72,7 +72,7 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
     allMatches.push({
       id: chat.id,
       title: chat.title || "",
-      network: accountInfo.service,
+      service: accountInfo.service,
       accountID: chat.accountID,
       type: chat.type,
       lastActivity: chat.lastActivity,
@@ -100,7 +100,7 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
   const bestMatch = rankedMatches[0].chat;
   const chatId = bestMatch.id;
   const chatName = bestMatch.title || input.chatName;
-  const service = getServiceDisplayName(parseService(bestMatch.network));
+  const service = getServiceDisplayName(bestMatch.service);
 
   const now = new Date();
   const effectiveTimeRange = input.timeRange || "today";

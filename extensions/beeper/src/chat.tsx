@@ -14,14 +14,7 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import {
-  useCachedPromise,
-  useCachedState,
-  useFrecencySorting,
-  useForm,
-  useLocalStorage,
-  withAccessToken,
-} from "@raycast/utils";
+import { useCachedState, useFrecencySorting, useForm, useLocalStorage, withAccessToken } from "@raycast/utils";
 import BeeperDesktop from "@beeper/desktop-api";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -40,7 +33,7 @@ import {
   getRaycastFocusLink,
   useBeeperDesktop,
 } from "./api";
-import { AccountServiceInfo, loadAccountServiceCache } from "./utils/account-service-cache";
+import { AccountServiceInfo, useAccountServiceCache } from "./utils/account-service-cache";
 
 type InboxFilter = "all" | "inbox" | "primary" | "low-priority" | "archive";
 type ChatTypeFilter = "any" | "single" | "group";
@@ -372,7 +365,7 @@ export function ChatListView({
     data: accountServices,
     isLoading: isLoadingAccountServices,
     error: accountServicesError,
-  } = useCachedPromise(() => loadAccountServiceCache(), [], { keepPreviousData: true });
+  } = useAccountServiceCache();
 
   useEffect(() => {
     indexRef.current = indexState;
@@ -1354,7 +1347,7 @@ export function ChatDetails({ chat }: { chat: BeeperDesktop.Chat }) {
   const { data, isLoading } = useBeeperDesktop(async () => {
     return retrieveChat(chat.id, { maxParticipantCount: 50 });
   });
-  const { data: accountServices } = useCachedPromise(() => loadAccountServiceCache(), [], { keepPreviousData: true });
+  const { data: accountServices } = useAccountServiceCache();
   const serviceLabel = getChatServiceLabel(chat, accountServices) ?? "";
 
   const participantLines = useMemo(() => {

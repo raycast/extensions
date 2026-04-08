@@ -1,4 +1,5 @@
 import BeeperDesktop from "@beeper/desktop-api";
+import { useCachedPromise } from "@raycast/utils";
 import { listAccounts } from "../api";
 import { getServiceDisplayName } from "./service-icons";
 import { BeeperService, parseService } from "./types";
@@ -55,21 +56,8 @@ export const buildAccountServiceCache = (accounts: BeeperDesktop.Account[]) => {
   return new Map(entries);
 };
 
-export const getCachedAccountServiceInfo = (accountID?: string) => {
-  if (!accountID) return undefined;
-  return cache.get(accountID);
-};
-
-export const requireCachedAccountServiceInfo = (accountID: string) => {
-  const info = cache.get(accountID);
-  if (!info) {
-    throw new Error(`Account metadata not loaded for ${accountID}`);
-  }
-  return info;
-};
-
-export const getCachedAccountServiceLabel = (accountID?: string) =>
-  getCachedAccountServiceInfo(accountID)?.serviceLabel;
+export const getAccountServiceInfoList = (accounts: BeeperDesktop.Account[]) =>
+  Array.from(buildAccountServiceCache(accounts).values());
 
 export const loadAccountServiceCache = async (options?: { forceRefresh?: boolean }) => {
   const forceRefresh = options?.forceRefresh === true;
@@ -92,3 +80,6 @@ export const loadAccountServiceCache = async (options?: { forceRefresh?: boolean
 
   return inFlight;
 };
+
+export const useAccountServiceCache = () =>
+  useCachedPromise(() => loadAccountServiceCache(), [], { keepPreviousData: true });

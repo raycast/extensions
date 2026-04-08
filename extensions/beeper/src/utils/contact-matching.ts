@@ -1,9 +1,9 @@
-import { parseService } from "./types";
+import { BeeperService } from "./types";
 
 interface ChatMatch {
   id: string;
   title: string;
-  network: string;
+  service: BeeperService;
   accountID?: string;
   type?: string;
   lastActivity?: string;
@@ -100,10 +100,7 @@ export function rankChatMatches(
 
   if (service) {
     const targetService = service.toLowerCase();
-    matches = matches.filter((chat) => {
-      const chatService = parseService(chat.network);
-      return chatService.toLowerCase() === targetService;
-    });
+    matches = matches.filter((chat) => chat.service.toLowerCase() === targetService);
   }
 
   const scoredMatches: MatchResult[] = matches.map((chat) => {

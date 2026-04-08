@@ -1,7 +1,7 @@
 import { closeMainWindow } from "@raycast/api";
 import { getBeeperClient } from "./beeper-client";
 import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
-import { BeeperChat, parseService } from "../utils/types";
+import { BeeperChat } from "../utils/types";
 import { loadAccountServiceCache } from "../utils/account-service-cache";
 
 interface OpenChatOptions {
@@ -34,7 +34,7 @@ export async function openChat(options: OpenChatOptions): Promise<OpenChatResult
       const allMatches: Array<{
         id: string;
         title: string;
-        network: string;
+        service: BeeperChat["service"];
         accountID?: string;
         type?: string;
         lastActivity?: string;
@@ -52,7 +52,7 @@ export async function openChat(options: OpenChatOptions): Promise<OpenChatResult
         allMatches.push({
           id: chat.id,
           title: chat.title || "",
-          network: accountInfo.service,
+          service: accountInfo.service,
           accountID: chat.accountID,
           type: chat.type,
           lastActivity: chat.lastActivity,
@@ -87,7 +87,7 @@ export async function openChat(options: OpenChatOptions): Promise<OpenChatResult
       foundChat = {
         id: chatId,
         name: bestMatch.title || "Unknown",
-        service: parseService(bestMatch.network),
+        service: bestMatch.service,
         accountId: bestMatch.accountID || "",
         type: (bestMatch.type as "single" | "group" | "space") || "single",
         lastMessageAt: bestMatch.lastActivity,

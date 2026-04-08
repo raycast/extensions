@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createBeeperOAuth, createChat, focusApp, listAccounts, retrieveChat, searchContacts } from "./api";
 import { ChatThread } from "./chat";
-import { buildAccountServiceCache } from "./utils/account-service-cache";
+import { getAccountServiceInfoList } from "./utils/account-service-cache";
 
 const getBeeperAppPath = () => {
   const candidates = ["/Applications/Beeper Desktop.app", join(homedir(), "Applications", "Beeper Desktop.app")];
@@ -52,8 +52,10 @@ export function ContactsView() {
   }, [accountFilter, accounts]);
 
   const shouldSearch = query.trim().length > 0 && accounts.length > 0;
-  const accountMap = useMemo(() => new Map(accounts.map((account) => [account.accountID, account])), [accounts]);
-  const accountInfoMap = useMemo(() => buildAccountServiceCache(accounts), [accounts]);
+  const accountInfoMap = useMemo(
+    () => new Map(getAccountServiceInfoList(accounts).map((account) => [account.accountID, account])),
+    [accounts],
+  );
   const accountsKey = useMemo(() => accounts.map((account) => account.accountID).join("|"), [accounts]);
   const lastPartialErrorKey = useRef<string | null>(null);
 
@@ -162,8 +164,7 @@ export function ContactsView() {
       throttle
     >
       {contacts.map((contact) => {
-        const account = accountMap.get((contact as { accountID?: string }).accountID || "");
-        const accountInfo = account ? accountInfoMap.get(account.accountID) : undefined;
+        const accountInfo = accountInfoMap.get((contact as { accountID?: string }).accountID || "");
         const title = contact.fullName || contact.username || contact.id;
         const subtitle = contact.username && contact.fullName ? contact.username : contact.email || contact.phoneNumber;
         const accountLabel = accountInfo?.accountDisplayName;
