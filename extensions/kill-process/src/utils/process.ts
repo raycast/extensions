@@ -69,6 +69,10 @@ export async function fetchPortProcesses(): Promise<PortProcess[]> {
         return;
       }
 
+      if (err) {
+        console.warn("lsof exited with error (partial results may follow):", err.message);
+      }
+
       if (isWindows) {
         const parsed = parseWindowsPortProcesses(stdout) as PortProcess[];
         resolve(parsed.map((p) => ({ ...p, type: getProcessType(p.path) })));

@@ -9,6 +9,7 @@ import {
   Icon,
   Keyboard,
   List,
+  LocalStorage,
   open,
   popToRoot,
   showToast,
@@ -21,6 +22,9 @@ import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
 import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
 import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
+
+const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
+const SORT_BY_STORAGE_KEY = "kill-process.sort-by";
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
@@ -42,6 +46,23 @@ export default function ProcessList() {
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
+
+  useEffect(() => {
+    const loadSettings = async () => {
+      const [storedGrouping, storedSortBy] = await Promise.all([
+        LocalStorage.getItem<boolean>(APP_GROUPING_STORAGE_KEY),
+        LocalStorage.getItem<string>(SORT_BY_STORAGE_KEY),
+      ]);
+
+      if (typeof storedGrouping === "boolean") {
+        setAggregateApps(storedGrouping);
+      }
+      if (storedSortBy === "cpu" || storedSortBy === "memory") {
+        setSortBy(storedSortBy as "cpu" | "memory");
+      }
+    };
+    loadSettings();
+  }, []);
 
   const fetchProcesses = () => {
     fetchRunningProcesses()
@@ -263,7 +284,15 @@ export default function ProcessList() {
       searchBarPlaceholder="Filter by name"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" storeValue onChange={(newValue) => setSortBy(newValue as "cpu" | "memory")}>
+        <List.Dropdown
+          tooltip="Filter"
+          storeValue
+          onChange={(newValue) => {
+            const val = newValue as "cpu" | "memory";
+            setSortBy(val);
+            LocalStorage.setItem(SORT_BY_STORAGE_KEY, val);
+          }}
+        >
           <List.Dropdown.Section title="Sort By">
             <List.Dropdown.Item title="CPU Usage" value="cpu" />
             <List.Dropdown.Item title="Memory Usage" value="memory" />
@@ -345,10 +374,12 @@ export default function ProcessList() {
                       title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
                       icon={Icon.AppWindow}
                       shortcut={{ modifiers: ["shift"], key: "tab" }}
-                      onAction={() => {
-                        setAggregateApps(!aggregateApps);
+                      onAction={async () => {
+                        const newAggregateApps = !aggregateApps;
+                        setAggregateApps(newAggregateApps);
+                        await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, newAggregateApps);
                         showToast({
-                          title: `${aggregateApps ? "Disabled" : "Enabled"} aggregating apps`,
+                          title: `${newAggregateApps ? "Enabled" : "Disabled"} aggregating apps`,
                         });
                       }}
                     />
