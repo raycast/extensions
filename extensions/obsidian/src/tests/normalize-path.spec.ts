@@ -7,7 +7,9 @@ describe("normalizeRelativePath", () => {
   });
 
   it("handles Windows backslash paths", () => {
-    expect(normalizeRelativePath("C:\\Users\\me\\vault\\notes\\hello.md", "C:\\Users\\me\\vault")).toBe("notes/hello.md");
+    expect(normalizeRelativePath("C:\\Users\\me\\vault\\notes\\hello.md", "C:\\Users\\me\\vault")).toBe(
+      "notes/hello.md"
+    );
   });
 
   it("removes leading separators after prefix removal", () => {
