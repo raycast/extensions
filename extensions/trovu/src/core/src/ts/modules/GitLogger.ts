@@ -1,4 +1,3 @@
-
 export default class GitLogger {
   [key: string]: any;
 

@@ -1,4 +1,3 @@
-
 /** @module QueryParser */
 import countriesList from "countries-list";
 import splitLimit from "split-limit";

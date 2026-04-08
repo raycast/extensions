@@ -1,4 +1,3 @@
-
 /** @module NamespaceFetcher */
 import ShortcutVerifier from "./ShortcutVerifier";
 import UrlProcessor from "./UrlProcessor";
