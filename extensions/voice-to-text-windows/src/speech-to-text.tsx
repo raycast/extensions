@@ -515,6 +515,10 @@ async function waitForFile(filePath: string, timeoutMs: number): Promise<void> {
   throw new Error("Timed out waiting for recording to save.");
 }
 
+// Use PowerShell's Set-Clipboard on Windows rather than Raycast's `Clipboard.copy()` API.
+// Rationale: invoking Raycast's clipboard API here (while the extension is finishing
+// its UI flow) can cause the Raycast window to lose focus or close on Windows.
+// Using an external Set-Clipboard call avoids that behavior and keeps the UI open.
 function copyToClipboard(text: string): Promise<void> {
   return new Promise((resolve) => {
     const clipProc = spawn("powershell.exe", ["-NoProfile", "-Command", "$input | Set-Clipboard"]);
