@@ -111,6 +111,8 @@ export default function ServerView(props: props): JSX.Element {
       }
     } else {
       await showToast({ title: "Compile all Filed First", style: Toast.Style.Failure });
+      SetIsLoadingForm(false);
+      return false;
     }
     props.SetShowView(false);
     if (props.RevalidateServerNames) props.RevalidateServerNames();

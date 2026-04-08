@@ -7,6 +7,9 @@ import {
   StoragePoliciesSummary,
   VmStoragePolicyComplianceStatus,
   VmGuestNetworkingInterfacesInfo,
+  VMInfo,
+  VMStoragePolicyComplianceInfo,
+  VmStoragePolicyInfo,
 } from "./api/types";
 import {
   PowerModeIcons,
@@ -254,7 +257,7 @@ export default function Command(): JSX.Element {
       /* Cache Fallback */
       if (dataCache.has(server)) {
         const value = dataCache.get(server);
-        if (value) dataCache.set(server, value);
+        if (value) dataMerged.set(server, value);
       }
     }
 
@@ -371,13 +374,13 @@ export default function Command(): JSX.Element {
     for (const [index, response] of promises.entries()) {
       if (response.status === "fulfilled") {
         if (index === 0) {
-          vm.vm_info === response.value;
+          vm.vm_info = response.value as VMInfo;
         } else if (index === 1) {
-          vm.storage_policy_info === response.value;
+          vm.storage_policy_info = response.value as VmStoragePolicyInfo;
         } else if (index === 2) {
-          vm.storage_policy_compliance_info === response.value;
+          vm.storage_policy_compliance_info = response.value as VMStoragePolicyComplianceInfo;
         } else if (index === 3) {
-          vm.interfaces_info === response.value;
+          vm.interfaces_info = response.value as VmGuestNetworkingInterfacesInfo[];
         }
       } else {
         await showToast({ style: Toast.Style.Success, title: vm.summary.name, message: response.reason });
