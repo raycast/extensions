@@ -1,6 +1,6 @@
 # In The Timezone Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-08
 
 - Initial release
 - Timeline view with color-coded working hours
