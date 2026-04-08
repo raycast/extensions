@@ -5,26 +5,36 @@
   "description": "Ambient sound mixer for focus and relaxation. Layer multiple sounds, save presets, and control from your menu bar.",
   "icon": "icon.png",
   "author": "chandlervdw",
-  "contributors": ["pernielsentikaer"],
-  "categories": ["Productivity", "Media"],
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "mix-sounds",
       "title": "Mix Sounds",
+      "subtitle": "Moodist",
       "description": "Browse and mix ambient sounds with individual volume control",
       "mode": "view"
     },
     {
       "name": "toggle-playback",
       "title": "Toggle Playback",
+      "subtitle": "Moodist",
       "description": "Play or pause the current sound mix",
       "mode": "no-view"
     },
     {
       "name": "menu-bar",
       "title": "Moodist Menu Bar",
+      "subtitle": "Moodist",
       "description": "Persistent menu bar controls for Moodist",
       "mode": "menu-bar",
       "interval": "30s"
@@ -32,24 +42,28 @@
     {
       "name": "manage-presets",
       "title": "Manage Presets",
+      "subtitle": "Moodist",
       "description": "Save, load, and delete sound mix presets",
       "mode": "view"
     },
     {
       "name": "set-timer",
       "title": "Set Sleep Timer",
+      "subtitle": "Moodist",
       "description": "Set an auto-stop timer for the current mix",
       "mode": "view"
     },
     {
       "name": "stop-all",
       "title": "Stop All Sounds",
+      "subtitle": "Moodist",
       "description": "Stop all playing sounds and kill any orphaned processes",
       "mode": "no-view"
     },
     {
       "name": "keep-alive",
       "title": "Keep Alive",
+      "subtitle": "Moodist",
       "description": "Background task that restarts sounds if they stop unexpectedly",
       "mode": "no-view",
       "interval": "20s",
@@ -77,15 +91,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.14.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.0",
-    "typescript": "^5.8.0"
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "prebuild": "cd native/looper && swift build && cp .build/debug/looper ../../assets/looper",
