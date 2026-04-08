@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [New Features & Improvements] - {PR_MERGED_DATE}
+## [New Features & Improvements] - {PR_MERGE_DATE}
 
 - Added `Search Projects` command to browse a configurable projects directory (`~/Projects` by default) and open folders in new tab, new window, horizontal split, or vertical split — with git branch and version tag badges
 - Added `Switch iTerm Session` command to list and jump to any open iTerm session (requires iTerm2 Python API)
