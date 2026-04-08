@@ -16,6 +16,7 @@ import {
 } from "./utils/actions";
 import { SORT_LABELS, SortOption } from "./constants";
 import { useVessloData } from "./utils/useVessloData";
+import { isUpdatableApp } from "./utils/update-filter";
 
 export default function Updates() {
   const { data, isLoading } = useVessloData();
@@ -23,13 +24,7 @@ export default function Updates() {
 
   const appsWithUpdates = useMemo(() => {
     if (!data) return [];
-    return data.apps.filter(
-      (app) =>
-        app.targetVersion !== null &&
-        app.targetVersion !== undefined &&
-        app.targetVersion !== "undefined" &&
-        app.targetVersion.trim() !== "",
-    );
+    return data.apps.filter((app) => isUpdatableApp(app));
   }, [data]);
 
   // Sort apps based on sortBy option
@@ -55,8 +50,11 @@ export default function Updates() {
   const sparkleApps = sortedApps.filter(
     (app) => app.sources.includes("Sparkle") && !app.sources.includes("Brew"),
   );
-  const appStoreApps = sortedApps.filter((app) =>
-    app.sources.includes("App Store"),
+  const appStoreApps = sortedApps.filter(
+    (app) =>
+      app.sources.includes("App Store") &&
+      !app.sources.includes("Brew") &&
+      !app.sources.includes("Sparkle"),
   );
   const otherApps = sortedApps.filter(
     (app) =>
@@ -155,10 +153,10 @@ function UpdateListItem({ app }: { app: VessloApp }) {
   let sourceBadge = { value: "manual", color: Color.SecondaryText };
   if (isHomebrew) {
     sourceBadge = { value: "brew", color: Color.Orange };
-  } else if (isAppStore) {
-    sourceBadge = { value: "appStore", color: Color.Blue };
   } else if (isSparkle) {
     sourceBadge = { value: "sparkle", color: Color.Green };
+  } else if (isAppStore) {
+    sourceBadge = { value: "appStore", color: Color.Blue };
   }
 
   return (
@@ -205,7 +203,7 @@ function UpdateListItem({ app }: { app: VessloApp }) {
               <Action.OpenInBrowser
                 title="Open in App Store"
                 icon={Icon.AppWindowList}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                 url={`macappstore://apps.apple.com/app/id${app.appStoreId}`}
               />
             )}
@@ -213,7 +211,7 @@ function UpdateListItem({ app }: { app: VessloApp }) {
               <Action
                 title="Update Via Terminal (Mas)"
                 icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                 onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
               />
             )}

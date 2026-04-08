@@ -1,5 +1,5 @@
 /**
- * Normalize a given URL by trimming whitespace, prepending with "https://" if necessary, converting to lowercase, and removing a trailing slash if present.
+ * Normalize a given URL by trimming whitespace, prepending with "https://" if necessary, lowercasing the scheme and hostname, and removing a trailing slash if present.
  * @param {string} url The URL to normalize.
  * @returns {string} The normalized URL.
  */
@@ -10,7 +10,14 @@ export function normalizeUrl(url: string): string {
     normalized = `https://${normalized}`;
   }
 
-  normalized = normalized.toLowerCase();
+  try {
+    const urlObj = new URL(normalized);
+    urlObj.protocol = urlObj.protocol.toLowerCase();
+    urlObj.hostname = urlObj.hostname.toLowerCase();
+    normalized = urlObj.href;
+  } catch {
+    normalized = normalized.toLowerCase();
+  }
 
   if (normalized.endsWith("/")) {
     normalized = normalized.slice(0, -1);
@@ -25,12 +32,30 @@ export function normalizeUrl(url: string): string {
  * @returns {boolean} true if the URL is valid, false otherwise.
  */
 export function validateUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (trimmed.includes(" ")) {
+    return false;
+  }
   try {
-    const urlObj = new URL(url.match(/^https?:\/\//i) ? url : `https://${url}`);
+    const urlObj = new URL(trimmed.match(/^https?:\/\//i) ? trimmed : `https://${trimmed}`);
     return urlObj.protocol === "http:" || urlObj.protocol === "https:";
   } catch {
     return false;
   }
+}
+
+/**
+ * Extracts the first URL (starting with http:// or https://) found in a string.
+ * Useful for handling mixed input like "filename.png https://example.com".
+ * @param {string} input The input string to search.
+ * @returns {string | null} The first URL found, or null if none.
+ */
+export function extractUrl(input: string): string | null {
+  const match = input.match(/https?:\/\/[^\s<>"')\]]+/);
+  if (!match) return null;
+  // Strip common trailing punctuation that isn't part of the URL
+  const cleaned = match[0].replace(/[.,;:!?]+$/, "");
+  return validateUrl(cleaned) ? cleaned : null;
 }
 
 /**

@@ -1,54 +1,62 @@
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  Icon,
-  Keyboard,
-  launchCommand,
-  LaunchType,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api";
 import { getFavicon, useFetch } from "@raycast/utils";
 import axios from "axios";
-import { useState } from "react";
-import { useCollections } from "./hooks";
+import { useEffect, useState } from "react";
+import { baseUrl, headers, useCollections } from "./hooks";
 import { ApiResponse, Link } from "./interfaces";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const [collectionId, setCollectionId] = useState("");
 
   const { isLoading: isLoadingCollections, data: collections } = useCollections();
 
+  // NOTE: GET /api/v1/links is deprecated per Linkwarden API docs.
+  // Migrate to GET /api/v1/search when feasible.
+  // See: https://docs.linkwarden.app/api/retrieve-a-list-of-links
+  const searchParams = new URLSearchParams({
+    sort: "0",
+    searchQueryString: searchText,
+    searchByName: "true",
+    searchByUrl: "true",
+    searchByDescription: "true",
+    searchByTags: "true",
+    searchByTextContent: "true",
+  });
+  if (collectionId) {
+    searchParams.set("collectionId", collectionId);
+  }
+
   const {
     isLoading: isLoadingLinks,
     data,
+    error: linksError,
     revalidate,
-  } = useFetch(
-    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true&collectionId=${collectionId}`,
-    {
-      headers: {
-        Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-      },
-      mapResult(result: ApiResponse<Link[]>) {
-        return {
-          data: result.response,
-        };
-      },
-      initialData: [],
-      keepPreviousData: true,
+  } = useFetch(`${baseUrl}links?${searchParams.toString()}`, {
+    headers,
+    mapResult(result: ApiResponse<Link[]>) {
+      return {
+        data: result.response,
+      };
     },
-  );
+    initialData: [],
+    keepPreviousData: true,
+  });
+
+  useEffect(() => {
+    if (linksError) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch links",
+        message: linksError.message,
+      });
+    }
+  }, [linksError]);
 
   const deleteLink = async (id: number) => {
     try {
-      await axios.delete(`${preferences.LinkwardenUrl}/api/v1/links/${id}`, {
-        headers: {
-          Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-        },
+      await axios.delete(`${baseUrl}links/${id}`, {
+        headers,
       });
 
       showToast({

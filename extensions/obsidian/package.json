@@ -21,7 +21,8 @@
     "theherk",
     "chris_van_es",
     "vicampuzano",
-    "ErBlack"
+    "ErBlack",
+    "byheaven"
   ],
   "license": "MIT",
   "preferences": [
@@ -714,5 +715,5 @@
     "macOS",
     "Windows"
   ],
-  "version": "1.0.0"
+  "version": "1.0.1"
 }

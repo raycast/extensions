@@ -1,14 +1,26 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateBookmark } from "./apis";
 import { getBrowserLink } from "./hooks/useBrowserLink";
-import { Bookmark } from "./types";
+import { Language, translations } from "./i18n";
+import { translate } from "./i18n/translate";
+import { Bookmark, Preferences } from "./types";
+
+const log = logger.child("[QuickBookmark]");
 
 export default async function QuickBookmark() {
+  const preferences = getPreferenceValues<Preferences>();
+  const language = (preferences.language as Language) || "en";
+  const t = (key: string, params?: Record<string, string | number | undefined>) =>
+    translate(translations[language], key, params);
+
   try {
+    log.log("Starting quick bookmark");
+
     // Show initial toast
     const toast = await showToast({
-      title: "Getting browser URL...",
+      title: t("quickBookmark.gettingBrowserUrl"),
       style: Toast.Style.Animated,
     });
 
@@ -16,13 +28,15 @@ export default async function QuickBookmark() {
     const url = await getBrowserLink();
 
     if (!url) {
+      log.warn("Could not get browser URL");
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to get browser URL";
-      toast.message = "Make sure a browser is open with an active tab";
+      toast.title = t("quickBookmark.failedToGetBrowserUrl.title");
+      toast.message = t("quickBookmark.failedToGetBrowserUrl.message");
       return;
     }
 
-    toast.title = "Creating bookmark...";
+    log.log("Got browser URL", { url });
+    toast.title = t("quickBookmark.creatingBookmark");
 
     // Create the bookmark
     const payload = {
@@ -34,15 +48,18 @@ export default async function QuickBookmark() {
     const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
 
     if (!bookmark) {
+      log.error("Bookmark creation returned empty result", { url });
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to create bookmark";
+      toast.title = t("quickBookmark.failedToCreateBookmark");
       return;
     }
 
-    await showHUD("✓ Bookmark created");
+    log.info("Quick bookmark created", { bookmarkId: bookmark.id, url });
+    await showHUD(t("quickBookmark.successHud"));
   } catch (error) {
+    log.error("Quick bookmark failed", { error });
     await showFailureToast({
-      title: "Failed to create quick bookmark",
+      title: t("quickBookmark.failureToastTitle"),
       message: String(error),
     });
   }

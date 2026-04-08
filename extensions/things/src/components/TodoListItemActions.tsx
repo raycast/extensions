@@ -192,7 +192,7 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        <Action.OpenInBrowser title="Open in Things" icon="things-flat.png" url={`things:///show?id=${todo.id}`} />
+        <Action.Open title="Open in Things" icon="things-flat.png" target={`things:///show?id=${todo.id}`} />
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
@@ -342,22 +342,22 @@ New title:
 
       {todo.project && (
         <ActionPanel.Section title={todo.project.name}>
-          <Action.OpenInBrowser
+          <Action.Open
             title="Open Project in Things"
             icon="things-flat.png"
             shortcut={{ modifiers: ['cmd'], key: 'o' }}
-            url={`things:///show?id=${todo.project.id}`}
+            target={`things:///show?id=${todo.project.id}`}
           />
           <Action.CopyToClipboard title="Copy Project URL" content={`things:///show?id=${todo.project.id}`} />
         </ActionPanel.Section>
       )}
       {area && (
         <ActionPanel.Section title={area.name}>
-          <Action.OpenInBrowser
+          <Action.Open
             title="Open Area in Things"
             icon="things-flat.png"
             shortcut={{ modifiers: ['opt'], key: 'o' }}
-            url={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
+            target={`things:///show?id=${area.id.replace('THMAreaParentSource/', '')}`}
           />
           <Action.CopyToClipboard
             title="Copy Area URL"
@@ -366,11 +366,11 @@ New title:
         </ActionPanel.Section>
       )}
       <ActionPanel.Section title={`${capitalize(commandListName)} List`}>
-        <Action.OpenInBrowser
+        <Action.Open
           title={`Open ${capitalize(commandListName)} List in Things`}
           icon="things-flat.png"
           shortcut={{ modifiers: ['ctrl'], key: 'o' }}
-          url={`things:///show?id=${commandListName.toLowerCase()}`}
+          target={`things:///show?id=${commandListName.toLowerCase()}`}
         />
         <Action.Push
           title="Add New To-Do"

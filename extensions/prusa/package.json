@@ -45,6 +45,13 @@
       "description": "Shows print progress and time remaining in menu bar",
       "mode": "menu-bar",
       "interval": "30s"
+    },
+    {
+      "name": "open-prusa-connect",
+      "title": "Open Prusa Connect Dashboard",
+      "description": "Open your printer's Prusa Connect dashboard in the browser",
+      "mode": "no-view",
+      "icon": "command-icon.png"
     }
   ],
   "preferences": [
@@ -71,6 +78,14 @@
       "title": "Request Timeout (seconds)",
       "description": "Timeout for API requests in seconds",
       "placeholder": "10"
+    },
+    {
+      "name": "prusaConnectUUID",
+      "type": "textfield",
+      "required": false,
+      "title": "Prusa Connect Printer UUID",
+      "description": "Your printer's UUID from the Prusa Connect dashboard URL (connect.prusa3d.com/printer/{UUID}/dashboard)",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
     }
   ],
   "dependencies": {

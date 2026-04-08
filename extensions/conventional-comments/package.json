@@ -38,5 +38,8 @@
     "dev": "ray develop",
     "tsc": "tsc --project . --noEmit",
     "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

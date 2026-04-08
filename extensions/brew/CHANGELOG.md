@@ -1,5 +1,22 @@
 # Brew Changelog
 
+## [Cask Id] - 2026-03-24
+
+- Add cask id to the cask metadata
+
+## [Improvements] - 2026-02-24
+
+- Remove updating homebrew index toast from outdated command
+
+## [Bug Fix] - 2026-02-24
+
+- Improve install/uninstall/upgrade failure toasts by surfacing concise Homebrew errors instead of full auto-update logs.
+- Keep full `stderr`/`stdout` output available through the toast's `Copy Logs` action for debugging.
+
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
 ## [Improved Memory Usage] - 2026-02-16
 
 - Use chunking to significantly reduce working memory

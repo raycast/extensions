@@ -50,6 +50,7 @@ export async function getClaudePath(): Promise<string | null> {
     "/opt/homebrew/bin/claude",
     "/usr/local/bin/claude",
     path.join(os.homedir(), ".npm-global/bin/claude"),
+    path.join(os.homedir(), ".local/bin/claude"),
   ];
 
   // Try common paths first

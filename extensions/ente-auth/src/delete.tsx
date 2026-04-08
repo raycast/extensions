@@ -1,4 +1,5 @@
 import { confirmAlert } from "@raycast/api";
+import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "./constants/ente";
 import { deleteEnteExport } from "./helpers/ente";
 
 export default async function Command() {
@@ -11,6 +12,6 @@ export default async function Command() {
 	}
 
 	if (deleteFile) {
-		deleteEnteExport();
+		await deleteEnteExport(getExportFilePath(DEFAULT_EXPORT_DIR_PATH()));
 	}
 }

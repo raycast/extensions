@@ -1,6 +1,6 @@
 import { ActionPanel, Action, Icon, Keyboard, useNavigation } from "@raycast/api";
 import { StoreItem } from "../types";
-import { extractLatestChanges } from "../utils";
+import { createStoreDeeplink, extractLatestChanges } from "../utils";
 import { ChangelogDetail } from "./ChangelogDetail";
 
 interface ChangelogActionsProps {
@@ -66,6 +66,19 @@ export function ChangelogActions({ items, currentIndex, changelog }: ChangelogAc
           url={currentItem.url}
           icon={Icon.Globe}
           shortcut={Keyboard.Shortcut.Common.Open}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action.OpenInBrowser
+          title="Open in Raycast Store"
+          url={createStoreDeeplink(currentItem.url)}
+          icon={Icon.RaycastLogoNeg}
+        />
+        <Action.CopyToClipboard
+          title="Copy Extension URL"
+          content={currentItem.url}
+          icon={Icon.Clipboard}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
     </ActionPanel>

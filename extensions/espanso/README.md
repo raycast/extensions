@@ -9,6 +9,9 @@ The Raycast version of Espanso Search Bar
 - 👤 **Profile Support** - Filter matches by context (work, home, etc.) using the profiles folder
 - 🏷️ **Rich Metadata** - View triggers, labels, categories, and custom metadata
 - 📋 **Quick Actions** - Paste directly to frontmost app or copy to clipboard
+- ⚡ **Live Preview** - Dynamic matches (date, shell, script, random, clipboard) are evaluated and shown as real content in the preview panel
+- 🖼️ **Image Matches** - Image matches render inline in the preview with a one-click copy action
+- 🔄 **Re-evaluate** - Refresh dynamic match values on demand directly from the action panel
 - 🎨 **Customizable UI** - Choose your preferred breadcrumb separator character
 - 🔤 **Proper Formatting** - Intelligent acronym handling (AI, API, UI, etc.) for professional display
 
@@ -46,6 +49,7 @@ match/
 ```
 
 Matches in `profiles/work/dev/snippets.yml` will:
+
 - Show **"Work"** as the profile in the UI
 - Belong to the **"Dev"** category
 - Be filterable by both profile and category

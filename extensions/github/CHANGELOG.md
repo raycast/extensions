@@ -6,6 +6,18 @@
 - Integrated with existing GitHub authentication for private repository access
 - Implemented memory-efficient streaming zip extraction for large repositories
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improve Auto-Merge Support] - 2026-03-05
+
+- Pull Requests: Fix auto-merge actions not appearing due to inverted condition
+- Pull Requests: Add merge method selection when enabling auto-merge
+- Pull Requests: Show "Auto-merge" tag in list and detail views
+- Create Pull Request: Add auto-merge option with merge method picker
+- Added AI tools to enable and disable auto-merge on pull requests
+
 ## [Add Pagination Support to My Starred Repositories] - 2026-01-24
 
 - My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support

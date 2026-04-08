@@ -1,5 +1,16 @@
 # Workouts Changelog
 
+## [Improved Search Command Display] - 2026-03-29
+
+- Show activity name as the list item title instead of the sport type (which is already conveyed by the icon)
+- Group activities by month with section headers
+- Use locale-aware relative dates (today, yesterday, weekday name, then short date)
+- Add detail panel fields: description, max speed, weighted average power, average cadence, max heart rate, max/min elevation, start time, kudos, achievements, and PRs
+- Show workout type, commute, and trainer tags in the detail panel
+- Add units to average power (W) and spacing to elevation (ft/m)
+- Fix timezone handling for local activity dates
+- Include sport type name in search keywords
+
 ## [Windows release] - 2025-06-24
 
 - Make available on Windows

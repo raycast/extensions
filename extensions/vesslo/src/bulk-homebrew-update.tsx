@@ -12,17 +12,18 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { useState, useMemo } from "react";
-import { loadVessloData } from "./utils/data";
+
 import { exec } from "child_process";
 import { promisify } from "util";
 import { getBrewPath } from "./utils/brew";
 import { useVessloData } from "./utils/useVessloData";
 import { runBrewUpgrade, runBrewUpgradeInTerminal } from "./utils/actions";
+import { hasValidTargetVersion } from "./utils/update-filter";
 
 const execAsync = promisify(exec);
 
 export default function BulkHomebrewUpdate() {
-  const { data, isLoading, setData } = useVessloData();
+  const { data, isLoading } = useVessloData();
   const [isUpdating, setIsUpdating] = useState(false);
 
   const homebrewAppsWithUpdates = useMemo(() => {
@@ -30,7 +31,7 @@ export default function BulkHomebrewUpdate() {
     return data.apps.filter(
       (app) =>
         app.sources.includes("Brew") &&
-        app.targetVersion !== null &&
+        hasValidTargetVersion(app.targetVersion) &&
         app.homebrewCask,
     );
   }, [data]);
@@ -71,7 +72,9 @@ export default function BulkHomebrewUpdate() {
       });
 
       const brewPath = getBrewPath();
-      const { stdout } = await execAsync(`${brewPath} upgrade --cask`);
+      const { stdout } = await execAsync(`${brewPath} upgrade --cask`, {
+        maxBuffer: 1024 * 1024 * 50,
+      });
 
       await showToast({
         style: Toast.Style.Success,
@@ -88,8 +91,6 @@ export default function BulkHomebrewUpdate() {
       });
     } finally {
       setIsUpdating(false);
-      const refreshed = loadVessloData();
-      if (refreshed) setData(refreshed);
     }
   }
 
@@ -106,7 +107,13 @@ export default function BulkHomebrewUpdate() {
 
   return (
     <List isLoading={isLoading || isUpdating}>
-      {homebrewAppsWithUpdates.length === 0 ? (
+      {!data ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Vesslo data not found"
+          description="Please run Vesslo app to export data"
+        />
+      ) : homebrewAppsWithUpdates.length === 0 ? (
         <List.EmptyView
           icon={Icon.CheckCircle}
           title="All Homebrew apps are up to date!"

@@ -7,6 +7,7 @@ import {
   runBrewUpgradeInTerminal,
   runMasUpgradeInTerminal,
 } from "../utils/actions";
+import { hasValidTargetVersion } from "../utils/update-filter";
 
 interface SharedAppListItemProps {
   app: VessloApp;
@@ -63,7 +64,7 @@ export function SharedAppListItem({
   });
 
   // Update badge
-  if (app.targetVersion) {
+  if (hasValidTargetVersion(app.targetVersion)) {
     accessories.push({ tag: { value: "UPDATE", color: Color.Green } });
   }
 
@@ -99,11 +100,13 @@ export function SharedAppListItem({
           </ActionPanel.Section>
 
           <ActionPanel.Section>
-            <Action
-              title="Open in Vesslo"
-              icon={Icon.Link}
-              onAction={() => app.bundleId && openInVesslo(app.bundleId)}
-            />
+            {app.bundleId && (
+              <Action
+                title="Open in Vesslo"
+                icon={Icon.Link}
+                onAction={() => openInVesslo(app.bundleId!)}
+              />
+            )}
             {app.bundleId && (
               <Action.CopyToClipboard
                 title="Copy Bundle ID"
@@ -112,7 +115,7 @@ export function SharedAppListItem({
             )}
           </ActionPanel.Section>
 
-          {app.targetVersion && (
+          {hasValidTargetVersion(app.targetVersion) && (
             <ActionPanel.Section title="Update">
               {app.sources.includes("Brew") && app.homebrewCask && (
                 <Action
@@ -139,7 +142,7 @@ export function SharedAppListItem({
                 <Action
                   title="Update Via Terminal (Mas)"
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                   onAction={() => runMasUpgradeInTerminal(app.appStoreId!)}
                 />
               )}
