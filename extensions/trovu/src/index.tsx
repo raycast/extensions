@@ -8,12 +8,6 @@ import SuggestionsGetter from "./core/src/ts/modules/SuggestionsGetter";
 import { markdowns } from "./markdowns";
 import { isEqual } from "lodash";
 
-interface Preferences {
-  language: string;
-  country: string;
-  github?: string;
-}
-
 interface Suggestion {
   argumentCount: string;
   argumentString: string;
