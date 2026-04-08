@@ -84,19 +84,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.10",
+    "@raycast/api": "1.104.11",
     "city-timezones": "^1.3.3",
-    "luxon": "^3.0.0",
+    "luxon": "^3.7.2",
     "suncalc": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/luxon": "^3.7.1",
-    "@types/node": "18.18.4",
-    "@types/suncalc": "^1.8.3",
-    "eslint": "^9.39.4",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@types/node": "25.5.2",
+    "@types/suncalc": "^1.9.2",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
