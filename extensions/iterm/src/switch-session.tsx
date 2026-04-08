@@ -1,26 +1,24 @@
 import { Action, ActionPanel, Icon, List, closeMainWindow, popToRoot, showToast, Toast } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { isIt2apiAvailable } from "./core/it2api";
+import { checkIt2apiReady } from "./core/it2api";
 import { Session, activateSession, listSessions } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
 
 const tabLabel = (s: Session) => `Window ${s.windowId.slice(-4)} · Tab ${s.tabId}`;
 
-const IT2API_HINT = "Enable Python API in iTerm2 → Preferences → General → Magic";
-
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
 
-  const it2apiAvailable = isIt2apiAvailable();
+  const prerequisite = useMemo(() => checkIt2apiReady(), []);
 
   const { sessions, it2apiError } = useMemo(() => {
-    if (!it2apiAvailable) return { sessions: [] as Session[], it2apiError: "it2api not found" };
+    if (!prerequisite.ready) return { sessions: [] as Session[], it2apiError: prerequisite.reason };
     try {
       return { sessions: listSessions(), it2apiError: undefined };
     } catch (e) {
       return { sessions: [] as Session[], it2apiError: (e as Error).message };
     }
-  }, [it2apiAvailable]);
+  }, [prerequisite]);
 
   const switchTo = async (session: Session) => {
     try {
@@ -42,11 +40,7 @@ export default function Command() {
   return (
     <List searchBarPlaceholder="Search sessions...">
       {it2apiError && (
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Cannot connect to iTerm2"
-          description={`${it2apiError}\n\n${IT2API_HINT}`}
-        />
+        <List.EmptyView icon={Icon.ExclamationMark} title="Cannot connect to iTerm2" description={it2apiError} />
       )}
       {!it2apiError && sessions.length === 0 && (
         <List.EmptyView icon={Icon.Terminal} title="No sessions found" description="No open iTerm sessions detected" />
