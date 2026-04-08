@@ -1,7 +1,6 @@
-import { getBeeperClient } from "./beeper-client";
-import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
-import { parseService, BeeperService } from "../utils/types";
-import { loadAccountServiceCache } from "../utils/account-service-cache";
+import { getBeeperDesktop } from "../api";
+import { BeeperService } from "../utils/types";
+import { findBestChatMatch } from "./chat-search";
 
 interface SendMessageOptions {
   chatId?: string;
@@ -19,58 +18,23 @@ interface SendMessageResult {
 }
 
 export async function sendMessage(options: SendMessageOptions): Promise<SendMessageResult> {
-  const client = await getBeeperClient();
+  const client = getBeeperDesktop();
 
   try {
     let chatId = options.chatId;
     let chatName: string | undefined;
     let chatService: BeeperService = "unknown";
-    const accountServices = await loadAccountServiceCache();
 
     if (!chatId && options.chatName) {
-      const searchCursor = await client.chats.search({
-        query: options.chatName,
-        limit: 20,
-      });
+      const result = await findBestChatMatch(options.chatName, options.service);
 
-      const allMatches: Array<{ id: string; title: string; service: BeeperService }> = [];
-      for await (const chat of searchCursor) {
-        const accountInfo = accountServices.get(chat.accountID);
-        if (!accountInfo) {
-          throw new Error(`Account metadata not loaded for ${chat.accountID}`);
-        }
-
-        allMatches.push({
-          id: chat.id,
-          title: chat.title || "",
-          service: accountInfo.service,
-        });
-        if (allMatches.length >= 20) break;
+      if (!result.found) {
+        return { success: false, error: result.error, suggestions: result.suggestions };
       }
 
-      const rankedMatches = rankChatMatches(allMatches, options.chatName, {
-        service: options.service,
-        minScore: 0.4,
-        maxResults: 5,
-      });
-
-      if (rankedMatches.length === 0) {
-        const allRanked = rankChatMatches(allMatches, options.chatName, {
-          minScore: 0.3,
-          maxResults: 3,
-        });
-
-        return {
-          success: false,
-          error: getSuggestionMessage(options.chatName, allRanked, options.service),
-          suggestions: allRanked.map((m) => m.chat.title),
-        };
-      }
-
-      const bestMatch = rankedMatches[0].chat;
-      chatId = bestMatch.id;
-      chatName = bestMatch.title;
-      chatService = bestMatch.service;
+      chatId = result.match.id;
+      chatName = result.match.title;
+      chatService = result.match.service;
     }
 
     if (!chatId) {

@@ -34,6 +34,7 @@ import {
   useBeeperDesktop,
 } from "./api";
 import { AccountServiceInfo, useAccountServiceCache } from "./utils/account-service-cache";
+import { parseDate, getErrorMessage, getMessageID } from "./utils/helpers";
 
 type InboxFilter = "all" | "inbox" | "primary" | "low-priority" | "archive";
 type ChatTypeFilter = "any" | "single" | "group";
@@ -52,16 +53,6 @@ const recentDefaultFilters: ChatFilters = {
   includeMuted: true,
 };
 
-const parseDate = (value?: string) => {
-  if (!value) return undefined;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? undefined : date;
-};
-
-const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
-
-const getMessageID = (message: BeeperDesktop.Message & { messageID?: string }) => message.messageID ?? message.id;
-
 type ChatInbox = "primary" | "low-priority" | "archive";
 type IndexedChat = { chat: BeeperDesktop.Chat; inbox: ChatInbox; searchFields: ChatSearchFields };
 type ChatIndexState = {
@@ -71,14 +62,14 @@ type ChatIndexState = {
 };
 
 const INDEXED_INBOXES: ChatInbox[] = ["primary", "low-priority", "archive"];
-const MAX_INDEXD_CHATS_TARGET = 3000;
+const MAX_INDEXED_CHATS_TARGET = 3000;
 const INDEX_PAGE_LIMIT = 50;
 const INDEX_MAX_PAGES = 10;
 const INDEX_MAX_PAGES_INCREMENTAL = 2;
 const INDEX_REFRESH_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 const MAX_PARTICIPANTS_INDEXED = 10;
 const MAX_PARTICIPANTS_STORED = 0;
-const MAX_INDEXED_CHATS_PER_INBOX = Math.ceil(MAX_INDEXD_CHATS_TARGET / INDEXED_INBOXES.length);
+const MAX_INDEXED_CHATS_PER_INBOX = Math.ceil(MAX_INDEXED_CHATS_TARGET / INDEXED_INBOXES.length);
 
 const emptyCursors: ChatIndexState["cursors"] = {
   primary: { newestCursor: null, oldestCursor: null },
@@ -141,21 +132,19 @@ const summarizeChatForIndex = (chat: BeeperDesktop.Chat): BeeperDesktop.Chat => 
 
 const normalizeIndexState = (state: ChatIndexState): ChatIndexState => {
   let changed = false;
-  let items = state.items.map((item) => {
-    let next = item;
-    if (!next.searchFields) {
-      next = { ...next, searchFields: { title: "", network: "", participants: [] } };
-      changed = true;
-    }
-    const summarizedChat = summarizeChatForIndex(next.chat);
-    if (summarizedChat !== next.chat) {
-      next = { ...next, chat: summarizedChat };
-      changed = true;
-    }
-    return next;
-  });
-  if (items.length > MAX_INDEXD_CHATS_TARGET) {
-    items = sortIndexedChatsByActivity(items).slice(0, MAX_INDEXD_CHATS_TARGET);
+  let items = state.items;
+
+  // Backfill searchFields for items persisted before this field existed
+  const needsBackfill = items.some((item) => !item.searchFields);
+  if (needsBackfill) {
+    items = items.map((item) =>
+      item.searchFields ? item : { ...item, searchFields: { title: "", network: "", participants: [] } },
+    );
+    changed = true;
+  }
+
+  if (items.length > MAX_INDEXED_CHATS_TARGET) {
+    items = sortIndexedChatsByActivity(items).slice(0, MAX_INDEXED_CHATS_TARGET);
     changed = true;
   }
   return changed ? { ...state, items } : state;
@@ -297,11 +286,12 @@ class ThreadSearchIndex {
 const buildSearchFields = (
   chat: BeeperDesktop.Chat,
   accountServices: Map<string, AccountServiceInfo>,
-): ChatSearchFields => {
+): ChatSearchFields | null => {
   const title = normalizeSearchValue(chat.title || "");
   const serviceLabel = getChatServiceLabel(chat, accountServices);
   if (!serviceLabel) {
-    throw new Error(`Account metadata not loaded for ${chat.accountID}`);
+    console.warn(`Account metadata not loaded for ${chat.accountID}, skipping`);
+    return null;
   }
   const network = normalizeSearchValue(serviceLabel);
   const participants =
@@ -414,11 +404,13 @@ export function ChatListView({
         oldestCursor = response.oldestCursor;
       }
       if (pageItems.length === 0) break;
-      const mapped = pageItems.map((chat) => ({
-        chat: summarizeChatForIndex(chat),
-        inbox,
-        searchFields: buildSearchFields(chat, accountServices),
-      }));
+      const mapped = pageItems
+        .map((chat) => {
+          const searchFields = buildSearchFields(chat, accountServices);
+          if (!searchFields) return null;
+          return { chat: summarizeChatForIndex(chat), inbox, searchFields };
+        })
+        .filter((item): item is IndexedChat => item !== null);
       itemsCount += mapped.length;
       if (!onPage) {
         items.push(...mapped);
@@ -477,8 +469,8 @@ export function ChatListView({
             newestCursor: page.newestCursor ?? nextState.cursors[inbox].newestCursor ?? null,
             oldestCursor: page.oldestCursor ?? nextState.cursors[inbox].oldestCursor ?? null,
           };
-          if (nextState.items.length > MAX_INDEXD_CHATS_TARGET * 2) {
-            nextState.items = sortIndexedChatsByActivity(nextState.items).slice(0, MAX_INDEXD_CHATS_TARGET);
+          if (nextState.items.length > MAX_INDEXED_CHATS_TARGET * 2) {
+            nextState.items = sortIndexedChatsByActivity(nextState.items).slice(0, MAX_INDEXED_CHATS_TARGET);
           }
           await persistIfNeeded(page.done);
         });
@@ -488,7 +480,7 @@ export function ChatListView({
         };
       }
 
-      nextState.items = sortIndexedChatsByActivity(nextState.items).slice(0, MAX_INDEXD_CHATS_TARGET);
+      nextState.items = sortIndexedChatsByActivity(nextState.items).slice(0, MAX_INDEXED_CHATS_TARGET);
       nextState.updatedAt = Date.now();
       await setIndexState(nextState);
     } catch (err) {
@@ -692,41 +684,52 @@ export function ChatListView({
     }
   };
 
-  const pinnedChats = chats.filter((chat) => chat.isPinned);
-  const unreadChats = chats.filter((chat) => chat.unreadCount > 0 && !chat.isPinned);
+  const sections = useMemo(() => {
+    const pinnedIDs = new Set<string>();
+    const unreadIDs = new Set<string>();
+    const pinnedChats: BeeperDesktop.Chat[] = [];
+    const unreadChats: BeeperDesktop.Chat[] = [];
 
-  const pinnedIDs = new Set(pinnedChats.map((chat) => chat.id));
-  const unreadIDs = showUnreadSection ? new Set(unreadChats.map((chat) => chat.id)) : new Set<string>();
-  const recentIDs = new Set(recentChatIDs ?? []);
+    for (const chat of chats) {
+      if (chat.isPinned) {
+        pinnedChats.push(chat);
+        pinnedIDs.add(chat.id);
+      } else if (showUnreadSection && chat.unreadCount > 0) {
+        unreadChats.push(chat);
+        unreadIDs.add(chat.id);
+      }
+    }
 
-  const chatById = useMemo(() => new Map(chats.map((chat) => [chat.id, chat])), [chats]);
-  const recentChats = useMemo(
-    () =>
-      (recentChatIDs ?? [])
-        .map((id) => chatById.get(id))
-        .filter((chat): chat is BeeperDesktop.Chat => Boolean(chat))
-        .filter((chat) => !pinnedIDs.has(chat.id) && !unreadIDs.has(chat.id)),
-    [chatById, recentChatIDs, pinnedIDs, unreadIDs],
-  );
+    const recentIDList = recentChatIDs ?? [];
+    const recentIDSet = new Set(recentIDList);
+    const chatById = new Map(chats.map((chat) => [chat.id, chat]));
 
-  const frequentChats = useMemo(
-    () =>
-      frecencyChats
-        .filter((chat) => !pinnedIDs.has(chat.id) && !unreadIDs.has(chat.id) && !recentIDs.has(chat.id))
-        .slice(0, 8),
-    [frecencyChats, pinnedIDs, unreadIDs, recentIDs],
-  );
+    const recentChats = recentIDList
+      .map((id) => chatById.get(id))
+      .filter(
+        (chat): chat is BeeperDesktop.Chat => Boolean(chat) && !pinnedIDs.has(chat!.id) && !unreadIDs.has(chat!.id),
+      );
 
-  const otherChats = chats.filter(
-    (chat) =>
-      !pinnedIDs.has(chat.id) &&
-      !unreadIDs.has(chat.id) &&
-      !recentIDs.has(chat.id) &&
-      !frequentChats.some((item) => item.id === chat.id),
-  );
+    const frequentIDs = new Set<string>();
+    const frequentChats: BeeperDesktop.Chat[] = [];
+    for (const chat of frecencyChats) {
+      if (frequentChats.length >= 8) break;
+      if (!pinnedIDs.has(chat.id) && !unreadIDs.has(chat.id) && !recentIDSet.has(chat.id)) {
+        frequentChats.push(chat);
+        frequentIDs.add(chat.id);
+      }
+    }
+
+    const otherChats = chats.filter(
+      (chat) =>
+        !pinnedIDs.has(chat.id) && !unreadIDs.has(chat.id) && !recentIDSet.has(chat.id) && !frequentIDs.has(chat.id),
+    );
+
+    return { pinnedChats, unreadChats, recentChats, frequentChats, otherChats };
+  }, [chats, frecencyChats, recentChatIDs, showUnreadSection]);
 
   const showSections = showSmartSections && trimmedQuery.length === 0;
-  const showUnread = showUnreadSection && unreadChats.length > 0;
+  const showUnread = showUnreadSection && sections.unreadChats.length > 0;
 
   const renderChatItem = (chat: BeeperDesktop.Chat) => {
     const lastActivity = parseDate(chat.lastActivity);
@@ -903,17 +906,19 @@ export function ChatListView({
       isShowingDetail={isShowingDetail}
       throttle
     >
-      {showPinnedSection && pinnedChats.length > 0 && (
-        <List.Section title="Pinned">{pinnedChats.map(renderChatItem)}</List.Section>
+      {showPinnedSection && sections.pinnedChats.length > 0 && (
+        <List.Section title="Pinned">{sections.pinnedChats.map(renderChatItem)}</List.Section>
       )}
-      {showUnread && <List.Section title="Unread">{unreadChats.map(renderChatItem)}</List.Section>}
-      {showSections && recentChats.length > 0 && (
-        <List.Section title="Recent">{recentChats.map(renderChatItem)}</List.Section>
+      {showUnread && <List.Section title="Unread">{sections.unreadChats.map(renderChatItem)}</List.Section>}
+      {showSections && sections.recentChats.length > 0 && (
+        <List.Section title="Recent">{sections.recentChats.map(renderChatItem)}</List.Section>
       )}
-      {showSections && frequentChats.length > 0 && (
-        <List.Section title="Frequently Used">{frequentChats.map(renderChatItem)}</List.Section>
+      {showSections && sections.frequentChats.length > 0 && (
+        <List.Section title="Frequently Used">{sections.frequentChats.map(renderChatItem)}</List.Section>
       )}
-      {otherChats.length > 0 && <List.Section title="Chats">{otherChats.map(renderChatItem)}</List.Section>}
+      {sections.otherChats.length > 0 && (
+        <List.Section title="Chats">{sections.otherChats.map(renderChatItem)}</List.Section>
+      )}
       {!isLoading && chats.length === 0 && (
         <List.EmptyView
           icon={combinedError ? Icon.Warning : Icon.Message}
@@ -1161,13 +1166,13 @@ function MessageActions({
   );
 }
 
-function MessageDetail({ chat, message }: { chat: BeeperDesktop.Chat; message: BeeperDesktop.Message }) {
+export function MessageDetail({ chat, message }: { chat?: BeeperDesktop.Chat; message: BeeperDesktop.Message }) {
   const messageID = getMessageID(message);
+  const sender = message.senderName || (message.isSender ? "You" : "Unknown");
+  const chatLine = chat ? `**Chat:** ${chat.title || "Chat"}\n` : "";
   return (
     <Detail
-      markdown={`# Message from ${message.senderName || (message.isSender ? "You" : "Unknown")}\n\n**Chat:** ${
-        chat.title || "Chat"
-      }\n**Message ID:** ${messageID}\n**Timestamp:** ${
+      markdown={`# Message from ${sender}\n\n${chatLine}**Message ID:** ${messageID}\n**Timestamp:** ${
         message.timestamp || "N/A"
       }\n**Text:**\n${message.text || "—"}\n`}
     />

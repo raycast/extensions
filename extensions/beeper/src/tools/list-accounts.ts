@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { getBeeperClient, checkBeeperConnection } from "../services/beeper-client";
+import { assertBeeperConnection, listAccounts } from "../api";
 import { getServiceDisplayName } from "../utils/service-icons";
 import { MOCK_ACCOUNTS } from "../utils/mock-data";
 import { getAccountServiceInfoList } from "../utils/account-service-cache";
@@ -16,14 +16,11 @@ export default async function () {
     }));
   }
 
-  const connectionStatus = await checkBeeperConnection();
-  if (!connectionStatus.connected) {
-    throw new Error(connectionStatus.error || "Cannot connect to Beeper Desktop");
-  }
+  await assertBeeperConnection();
 
   const client = await getBeeperClient();
-  const accounts = await client.accounts.list();
-  const accountInfo = getAccountServiceInfoList(accounts || []);
+  const accounts = await listAccounts();
+  const accountInfo = getAccountServiceInfoList(accounts);
 
   return accountInfo.map((account) => {
     return {

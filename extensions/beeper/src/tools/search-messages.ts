@@ -1,8 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
-import { getBeeperClient, checkBeeperConnection } from "../services/beeper-client";
+import { assertBeeperConnection, getBeeperDesktop } from "../api";
 import { getServiceDisplayName } from "../utils/service-icons";
 import { parseService } from "../utils/types";
 import { MOCK_MESSAGES } from "../utils/mock-data";
+import { getSenderDisplayName } from "../utils/helpers";
 
 type Input = {
   query: string;
@@ -44,12 +45,9 @@ export default async function (input: Input): Promise<{ messages: MessageResult[
     return { messages, count: messages.length };
   }
 
-  const connectionStatus = await checkBeeperConnection();
-  if (!connectionStatus.connected) {
-    throw new Error(connectionStatus.error || "Cannot connect to Beeper Desktop");
-  }
+  await assertBeeperConnection();
 
-  const client = await getBeeperClient();
+  const client = getBeeperDesktop();
 
   const searchParams: {
     query: string;
@@ -68,13 +66,9 @@ export default async function (input: Input): Promise<{ messages: MessageResult[
   const messages: MessageResult[] = [];
 
   for await (const msg of searchCursor) {
-    const senderName = msg.isSender
-      ? "You"
-      : msg.senderName || msg.senderID?.split(":")[0]?.replace("@", "") || "Unknown";
-
     messages.push({
       text: msg.text || "[No text content]",
-      sender: senderName,
+      sender: getSenderDisplayName(msg),
       service: getServiceDisplayName(parseService(msg.accountID)),
       timestamp: msg.timestamp,
       chatId: msg.chatID,

@@ -82,4 +82,4 @@ export const loadAccountServiceCache = async (options?: { forceRefresh?: boolean
 };
 
 export const useAccountServiceCache = () =>
-  useCachedPromise(async () => getAccountServiceInfoList(await listAccounts()), [], { keepPreviousData: true });
+  useCachedPromise(async () => Array.from((await loadAccountServiceCache()).values()), [], { keepPreviousData: true });

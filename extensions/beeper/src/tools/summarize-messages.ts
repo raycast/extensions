@@ -1,10 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
-import { getBeeperClient, checkBeeperConnection } from "../services/beeper-client";
+import { assertBeeperConnection, getBeeperDesktop } from "../api";
 import { getServiceDisplayName } from "../utils/service-icons";
-import { BeeperService } from "../utils/types";
-import { rankChatMatches, getSuggestionMessage } from "../utils/contact-matching";
 import { MOCK_CHATS, MOCK_MESSAGES } from "../utils/mock-data";
-import { loadAccountServiceCache } from "../utils/account-service-cache";
+import { findBestChatMatch } from "../services/chat-search";
+import { getSenderDisplayName } from "../utils/helpers";
 
 type Input = {
   chatName: string;
@@ -38,69 +37,18 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
     return summarizeMockMessages(input);
   }
 
-  const connectionStatus = await checkBeeperConnection();
-  if (!connectionStatus.connected) {
-    throw new Error(connectionStatus.error || "Cannot connect to Beeper Desktop");
+  await assertBeeperConnection();
+
+  const client = getBeeperDesktop();
+
+  const searchResult = await findBestChatMatch(input.chatName, input.service);
+  if (!searchResult.found) {
+    throw new Error(searchResult.error);
   }
 
-  const client = await getBeeperClient();
-  const accountServices = await loadAccountServiceCache();
-
-  const searchCursor = await client.chats.search({
-    query: input.chatName,
-    limit: 20,
-  });
-
-  const allMatches: Array<{
-    id: string;
-    title: string;
-    service: BeeperService;
-    accountID?: string;
-    type?: string;
-    lastActivity?: string;
-    unreadCount?: number;
-    isMuted?: boolean;
-    isArchived?: boolean;
-  }> = [];
-
-  for await (const chat of searchCursor) {
-    const accountInfo = accountServices.get(chat.accountID);
-    if (!accountInfo) {
-      throw new Error(`Account metadata not loaded for ${chat.accountID}`);
-    }
-
-    allMatches.push({
-      id: chat.id,
-      title: chat.title || "",
-      service: accountInfo.service,
-      accountID: chat.accountID,
-      type: chat.type,
-      lastActivity: chat.lastActivity,
-      unreadCount: chat.unreadCount,
-      isMuted: chat.isMuted,
-      isArchived: chat.isArchived,
-    });
-    if (allMatches.length >= 20) break;
-  }
-
-  const rankedMatches = rankChatMatches(allMatches, input.chatName, {
-    service: input.service,
-    minScore: 0.4,
-    maxResults: 5,
-  });
-
-  if (rankedMatches.length === 0) {
-    const allRanked = rankChatMatches(allMatches, input.chatName, {
-      minScore: 0.3,
-      maxResults: 3,
-    });
-    throw new Error(getSuggestionMessage(input.chatName, allRanked, input.service));
-  }
-
-  const bestMatch = rankedMatches[0].chat;
-  const chatId = bestMatch.id;
-  const chatName = bestMatch.title || input.chatName;
-  const service = getServiceDisplayName(bestMatch.service);
+  const chatId = searchResult.match.id;
+  const chatName = searchResult.match.title || input.chatName;
+  const service = getServiceDisplayName(searchResult.match.service);
 
   const now = new Date();
   const effectiveTimeRange = input.timeRange || "today";
@@ -127,12 +75,8 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
   const maxMessages = 50;
 
   for await (const msg of messageCursor) {
-    const senderName = msg.isSender
-      ? "You"
-      : msg.senderName || msg.senderID?.split(":")[0]?.replace("@", "") || "Unknown";
-
     messages.push({
-      sender: senderName,
+      sender: getSenderDisplayName(msg),
       text: msg.text || "[Attachment or media message]",
       timestamp: msg.timestamp,
       isFromMe: msg.isSender || false,
@@ -151,12 +95,8 @@ export default async function (input: Input): Promise<SummarizeMessagesResult> {
 
     const recentMessages: Message[] = [];
     for await (const msg of recentMessagesCursor) {
-      const senderName = msg.isSender
-        ? "You"
-        : msg.senderName || msg.senderID?.split(":")[0]?.replace("@", "") || "Unknown";
-
       recentMessages.push({
-        sender: senderName,
+        sender: getSenderDisplayName(msg),
         text: msg.text || "[Attachment or media message]",
         timestamp: msg.timestamp,
         isFromMe: msg.isSender || false,

@@ -52,7 +52,3 @@ const serviceDisplayNames: Record<BeeperService, string> = {
 export function getServiceDisplayName(service: BeeperService): string {
   return serviceDisplayNames[service] || service;
 }
-
-export function getAllServices(): BeeperService[] {
-  return Object.keys(serviceDisplayNames).filter((s) => s !== "unknown") as BeeperService[];
-}

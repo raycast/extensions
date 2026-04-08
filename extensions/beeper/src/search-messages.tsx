@@ -11,9 +11,6 @@ import {
 } from "@raycast/api";
 import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils";
 import BeeperDesktop from "@beeper/desktop-api";
-import { existsSync } from "node:fs";
-import { homedir } from "node:os";
-import { join } from "node:path";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createBeeperOAuth,
@@ -23,7 +20,8 @@ import {
   searchMessages,
   useBeeperDesktop,
 } from "./api";
-import { ChatThread, ComposeMessageForm } from "./chat";
+import { ChatThread, ComposeMessageForm, MessageDetail } from "./chat";
+import { parseDate, getMessageID, getBeeperAppPath } from "./utils/helpers";
 
 type SenderFilter = "any" | "me" | "others";
 
@@ -41,18 +39,6 @@ type SearchMessagesLaunchContext = {
 const defaultFilters: MessageFilters = {
   sender: "any",
   includeMuted: true,
-};
-
-const parseDate = (value?: string) => {
-  if (!value) return undefined;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? undefined : date;
-};
-
-const getMessageID = (message: BeeperDesktop.Message & { messageID?: string }) => message.messageID ?? message.id;
-const getBeeperAppPath = () => {
-  const candidates = ["/Applications/Beeper Desktop.app", join(homedir(), "Applications", "Beeper Desktop.app")];
-  return candidates.find((path) => existsSync(path));
 };
 
 function SearchMessagesCommand(props: LaunchProps<{ launchContext?: SearchMessagesLaunchContext }>) {
@@ -396,17 +382,6 @@ function ComposeMessageById({ chatID, replyToMessageID }: { chatID: string; repl
   }
 
   return <ComposeMessageForm chat={chat} replyToMessageID={replyToMessageID} />;
-}
-
-function MessageDetail({ message }: { message: BeeperDesktop.Message }) {
-  const messageID = getMessageID(message);
-  return (
-    <Detail
-      markdown={`# Message from ${message.senderName || (message.isSender ? "You" : "Unknown")}\n\n**Message ID:** ${
-        messageID
-      }\n**Timestamp:** ${message.timestamp || "N/A"}\n**Text:**\n${message.text || "—"}\n`}
-    />
-  );
 }
 
 export default withAccessToken(createBeeperOAuth())(SearchMessagesCommand);

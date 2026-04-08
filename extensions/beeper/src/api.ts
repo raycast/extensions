@@ -81,6 +81,8 @@ export function getBeeperDesktop(): BeeperDesktop {
       accessToken,
       baseURL: baseURL,
       logLevel: "info",
+      timeout: 10000,
+      maxRetries: 2,
     });
     lastBaseURL = baseURL;
     lastAccessToken = accessToken;
@@ -91,6 +93,40 @@ export function getBeeperDesktop(): BeeperDesktop {
 
 export function useBeeperDesktop<T>(fn: (client: BeeperDesktop) => Promise<T>) {
   return usePromise(async () => fn(getBeeperDesktop()));
+}
+
+export async function checkBeeperConnection(): Promise<{ connected: boolean; error?: string }> {
+  try {
+    const client = getBeeperDesktop();
+    await client.accounts.list();
+    return { connected: true };
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+
+    if (errorMessage.includes("ECONNREFUSED") || errorMessage.includes("fetch failed")) {
+      return {
+        connected: false,
+        error:
+          "Cannot connect to Beeper Desktop. Make sure Beeper is running and the Desktop API is enabled in Settings -> Developers.",
+      };
+    }
+
+    if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
+      return {
+        connected: false,
+        error: "Authentication failed. Please run a command in Raycast to re-authorize.",
+      };
+    }
+
+    return { connected: false, error: errorMessage };
+  }
+}
+
+export async function assertBeeperConnection(): Promise<void> {
+  const status = await checkBeeperConnection();
+  if (!status.connected) {
+    throw new Error(status.error || "Cannot connect to Beeper Desktop");
+  }
 }
 
 export const focusApp = async (

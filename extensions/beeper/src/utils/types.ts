@@ -60,14 +60,6 @@ export interface BeeperMessage {
 }
 
 /**
- * Search result from Beeper API
- */
-export interface BeeperSearchResult {
-  chats: BeeperChat[];
-  messages: BeeperMessage[];
-}
-
-/**
  * Extract service type from account ID or service string
  */
 export function parseService(serviceString: string | undefined): BeeperService {

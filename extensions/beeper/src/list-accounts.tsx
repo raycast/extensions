@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedPromise, withAccessToken } from "@raycast/utils";
-import { createBeeperOAuth } from "./api";
-import { getBeeperClient, checkBeeperConnection } from "./services/beeper-client";
+import { createBeeperOAuth, listAccounts } from "./api";
 import { MOCK_ACCOUNTS } from "./utils/mock-data";
 import { getServiceDisplayName, getServiceIcon } from "./utils/service-icons";
 import { BeeperAccount } from "./utils/types";
@@ -20,14 +19,8 @@ function ListAccountsCommand() {
         return MOCK_ACCOUNTS;
       }
 
-      const connectionStatus = await checkBeeperConnection();
-      if (!connectionStatus.connected) {
-        throw new Error(connectionStatus.error || "Cannot connect to Beeper Desktop");
-      }
-
-      const client = await getBeeperClient();
-      const response = await client.accounts.list();
-      const accountInfo = getAccountServiceInfoList(response || []);
+      const rawAccounts = await listAccounts();
+      const accountInfo = getAccountServiceInfoList(rawAccounts);
 
       const transformedAccounts: BeeperAccount[] = accountInfo.map((account) => ({
         id: account.accountID,
@@ -54,9 +47,6 @@ function ListAccountsCommand() {
     },
   );
 
-  const connectedCount = accounts?.filter((a) => a.isConnected).length || 0;
-  const disconnectedCount = accounts?.filter((a) => !a.isConnected).length || 0;
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter connected accounts...">
       {error ? (
@@ -77,40 +67,17 @@ function ListAccountsCommand() {
           description="Connect messaging services in Beeper Desktop to see them here"
         />
       ) : (
-        <>
-          {connectedCount > 0 && (
-            <List.Section title="Connected" subtitle={`${connectedCount} service${connectedCount !== 1 ? "s" : ""}`}>
-              {accounts
-                .filter((a) => a.isConnected)
-                .map((account) => (
-                  <AccountListItem key={account.id} account={account} onRefresh={revalidate} />
-                ))}
-            </List.Section>
-          )}
-          {disconnectedCount > 0 && (
-            <List.Section
-              title="Disconnected"
-              subtitle={`${disconnectedCount} service${disconnectedCount !== 1 ? "s" : ""}`}
-            >
-              {accounts
-                .filter((a) => !a.isConnected)
-                .map((account) => (
-                  <AccountListItem key={account.id} account={account} onRefresh={revalidate} />
-                ))}
-            </List.Section>
-          )}
-        </>
+        <List.Section title="Connected" subtitle={`${accounts.length} service${accounts.length !== 1 ? "s" : ""}`}>
+          {accounts.map((account) => (
+            <AccountListItem key={account.id} account={account} onRefresh={revalidate} />
+          ))}
+        </List.Section>
       )}
     </List>
   );
 }
 
-interface AccountListItemProps {
-  account: BeeperAccount;
-  onRefresh?: () => void;
-}
-
-function AccountListItem({ account, onRefresh }: AccountListItemProps) {
+function AccountListItem({ account, onRefresh }: { account: BeeperAccount; onRefresh?: () => void }) {
   const serviceInfo = getServiceIcon(account.service);
 
   return (
@@ -119,14 +86,7 @@ function AccountListItem({ account, onRefresh }: AccountListItemProps) {
       title={account.displayName}
       subtitle={account.username || getServiceDisplayName(account.service)}
       icon={{ source: serviceInfo.icon as Icon, tintColor: serviceInfo.tintColor }}
-      accessories={[
-        {
-          tag: {
-            value: account.isConnected ? "Connected" : "Disconnected",
-            color: account.isConnected ? Color.Green : Color.Red,
-          },
-        },
-      ]}
+      accessories={[{ tag: { value: "Connected", color: Color.Green } }]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
