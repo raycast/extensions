@@ -1,6 +1,5 @@
 import { showToast, Toast, Clipboard, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import fs from "fs";
 import { openAsBlob } from "fs";
 import path from "path";
 

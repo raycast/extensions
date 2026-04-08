@@ -2,7 +2,7 @@
   "name": "ghost-share",
   "version": "1.0.0",
   "title": "Ghost Share",
-  "description": "Instantly share the selected Finder file via file.io",
+  "description": "Instantly share the selected Finder file via Catbox.moe",
   "icon": "command-icon.png",
   "author": "ritvik_ranjan",
   "categories": [
