@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.4.2] - {PR_MERGE_DATE}
+## [1.4.2] - 2026-04-09
 
 - Fix timezone offset calculation for half-hour timezones (e.g. IST +05:30) that caused events to be scheduled one hour off
 
