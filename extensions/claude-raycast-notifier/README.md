@@ -6,6 +6,7 @@ Supported providers:
 
 - Claude Code
 - Gemini CLI
+- GitHub Copilot (`Done` only)
 
 Current semantic notifications:
 
@@ -16,7 +17,7 @@ Current semantic notifications:
 
 - Plays a sound when the AI needs your attention
 - Plays a sound when the AI finishes
-- Opens a compact Raycast notification
+- Shows a compact macOS notification
 - Keeps notification text minimal: provider + status
 
 ## Commands
@@ -69,7 +70,7 @@ Configure Claude hooks so:
 - `Stop` maps to `Done`
 
 Example config:
-- [config/claude-hooks.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/claude-hooks.example.json)
+- `../config/claude-hooks.example.json`
 
 ### Gemini CLI
 
@@ -79,9 +80,19 @@ Configure Gemini hooks so:
 - `AfterAgent` maps to `Done`
 
 Example config:
-- [config/gemini-settings.example.json](/Users/fulln/opensource/claude-raycast-notifier/config/gemini-settings.example.json)
+- `../config/gemini-settings.example.json`
+
+### GitHub Copilot
+
+Configure Copilot hooks so:
+
+- `sessionEnd` with `reason: complete` maps to `Done`
+
+Example config:
+- `../config/copilot-hooks.example.json`
 
 ## Notes
 
 - Codex is intentionally not wired yet because it does not currently expose stable native hooks for this flow.
+- Antigravity is intentionally not wired yet because it does not currently expose a stable external shell hook surface for this flow.
 - The extension stores managed sound data under `~/.claude-raycast-notifier` by default.

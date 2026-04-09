@@ -57,8 +57,14 @@ const SEMANTIC_HOOKS: SemanticHook[] = [
     id: "done",
     title: "Done",
     description: "Play this sound when an AI finishes the current task.",
-    providers: "Claude, Gemini",
-    hookKeys: ["claude:stop", "gemini:afteragent", "gemini:done"],
+    providers: "Claude, Gemini, GitHub Copilot",
+    hookKeys: [
+      "claude:stop",
+      "gemini:afteragent",
+      "gemini:done",
+      "copilot:sessionend",
+      "copilot:done",
+    ],
   },
 ];
 
@@ -83,7 +89,7 @@ export default function Command() {
             <ActionPanel>
               <Action
                 title="Repair Managed Sound Data"
-                icon={Icon.Wrench}
+                icon={Icon.Hammer}
                 onAction={async () => {
                   await showToast({
                     style: Toast.Style.Animated,
@@ -221,7 +227,7 @@ function HookSoundForm(props: {
       mappings,
       current: resolveSemanticMapping(mappings, props.hook),
     };
-  }, [props.hook.id]);
+  }, []);
 
   const currentSound = data?.library.sounds.find(
     (sound) => sound.id === data.current?.soundId,

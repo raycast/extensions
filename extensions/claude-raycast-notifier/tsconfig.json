@@ -4,9 +4,10 @@
     "module": "commonjs",
     "jsx": "react-jsx",
     "strict": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "types": ["node"]
+    "types": ["node", "react"]
   },
   "include": ["src/**/*"]
 }

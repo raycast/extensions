@@ -170,6 +170,7 @@ export async function repairUserData(): Promise<{
   await writeJsonFile(paths.libraryFile, library);
 
   const existingMappings = await loadSoundMappings();
+  const manifestDefaults = manifest.defaults ?? {};
   const validSoundIds = new Set(library.sounds.map((sound) => sound.id));
   const mappings = normalizeMappings({
     version: MAPPINGS_VERSION,
@@ -179,7 +180,7 @@ export async function repairUserData(): Promise<{
         if (current?.soundId && validSoundIds.has(current.soundId)) {
           return [slot, current];
         }
-        return [slot, manifest.defaults[slot] ?? defaultMapping()];
+        return [slot, manifestDefaults[slot] ?? defaultMapping()];
       }),
     ) as Record<SoundSlot, SoundMapping>,
     hooks: existingMappings.hooks,
@@ -344,7 +345,9 @@ function normalizeLibrary(
 function normalizeMappings(
   value: Partial<SoundMappings> | undefined,
 ): SoundMappings {
-  const slots = value?.slots ?? {};
+  const slots = (value?.slots ?? {}) as Partial<
+    Record<SoundSlot, SoundMapping>
+  >;
   const hooks = value?.hooks ?? {};
 
   return {
