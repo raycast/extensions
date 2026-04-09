@@ -90,12 +90,6 @@
       "mode": "view"
     },
     {
-      "name": "switch-session",
-      "title": "Switch iTerm Session",
-      "description": "List and switch to any open iTerm session",
-      "mode": "view"
-    },
-    {
       "name": "switch-color-preset",
       "title": "Switch iTerm Color Preset",
       "description": "Apply a color preset to the current iTerm profile",

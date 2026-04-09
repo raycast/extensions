@@ -1,8 +1,22 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  Icon,
+  List,
+  LocalStorage,
+  Toast,
+  closeMainWindow,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
 import { checkIt2apiReady } from "./core/it2api";
 import { Session, activateSession, listSessions } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
+
+const TAGS_STORAGE_KEY = "iterm.session-tags";
 
 interface Tab {
   windowIndex: number;
@@ -25,8 +39,53 @@ const groupByTab = (sessions: Session[]): Tab[] => {
   return Array.from(tabMap.values());
 };
 
+interface TagFormProps {
+  session: Session;
+  currentTag: string;
+  onSave: (sessionName: string, tag: string) => void;
+}
+
+const TagForm = ({ session, currentTag, onSave }: TagFormProps) => {
+  const { pop } = useNavigation();
+  const [tag, setTag] = useState(currentTag);
+
+  const handleSave = ({ tag: submitted }: { tag: string }) => {
+    onSave(session.name, submitted.trim());
+    pop();
+  };
+
+  const handleRemove = () => {
+    onSave(session.name, "");
+    pop();
+  };
+
+  return (
+    <Form
+      navigationTitle={`Tag: ${session.name}`}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save Tag" icon={Icon.Tag} onSubmit={handleSave} />
+          {currentTag.length > 0 && (
+            <Action title="Remove Tag" icon={Icon.Trash} style={Action.Style.Destructive} onAction={handleRemove} />
+          )}
+        </ActionPanel>
+      }
+    >
+      <Form.TextField id="tag" title="Tag" value={tag} onChange={setTag} placeholder="e.g. api, frontend, db…" />
+    </Form>
+  );
+};
+
 export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState(false);
+  const [tags, setTags] = useState<Record<string, string>>({});
+  const { push } = useNavigation();
+
+  useEffect(() => {
+    LocalStorage.getItem<string>(TAGS_STORAGE_KEY).then((stored) => {
+      if (stored) setTags(JSON.parse(stored));
+    });
+  }, []);
 
   const prerequisite = useMemo(() => checkIt2apiReady(), []);
 
@@ -53,10 +112,20 @@ export default function Command() {
     }
   };
 
+  const saveTag = async (sessionName: string, tag: string) => {
+    const updated = { ...tags, [sessionName]: tag };
+    if (!tag) delete updated[sessionName];
+    setTags(updated);
+    await LocalStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(updated));
+  };
+
+  const openTagForm = (session: Session) =>
+    push(<TagForm session={session} currentTag={tags[session.name] ?? ""} onSave={saveTag} />);
+
   if (hasPermissionError) return <PermissionErrorScreen />;
 
   return (
-    <List searchBarPlaceholder="Search sessions...">
+    <List searchBarPlaceholder="Search sessions…">
       {it2apiError && (
         <List.EmptyView icon={Icon.ExclamationMark} title="Cannot connect to iTerm2" description={it2apiError} />
       )}
@@ -65,18 +134,28 @@ export default function Command() {
       )}
       {tabs.map((tab) => (
         <List.Section key={`w${tab.windowIndex}-t${tab.tabId}`} title={`Window ${tab.windowIndex} · Tab ${tab.tabId}`}>
-          {tab.sessions.map((session) => (
-            <List.Item
-              key={session.id}
-              icon={Icon.Terminal}
-              title={session.name}
-              actions={
-                <ActionPanel>
-                  <Action title="Switch to Session" icon={Icon.Terminal} onAction={() => switchTo(session)} />
-                </ActionPanel>
-              }
-            />
-          ))}
+          {tab.sessions.map((session) => {
+            const tag = tags[session.name];
+            return (
+              <List.Item
+                key={session.id}
+                icon={Icon.Terminal}
+                title={session.name}
+                accessories={tag ? [{ tag: { value: tag, color: Color.Blue } }] : []}
+                actions={
+                  <ActionPanel>
+                    <Action title="Switch to Session" icon={Icon.Terminal} onAction={() => switchTo(session)} />
+                    <Action
+                      title="Tag Session"
+                      icon={Icon.Tag}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={() => openTagForm(session)}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       ))}
     </List>
