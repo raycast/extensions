@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Patch] - {PR_MERGE_DATE}
+## [Patch] - 2026-04-09
 
 ### Bug Fixes
 
