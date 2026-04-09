@@ -35,7 +35,24 @@ export type ClaudeEvent = {
   action: ClaudeAction | null;
 };
 
+export class InvalidClaudeEventPayloadError extends Error {
+  override cause?: unknown;
+
+  constructor(message = "Invalid Claude event payload", cause?: unknown) {
+    super(message);
+    this.name = "InvalidClaudeEventPayloadError";
+    this.cause = cause;
+  }
+}
+
 export function decodePayload(payload: string): ClaudeEvent {
-  const json = Buffer.from(payload, "base64").toString("utf8");
-  return JSON.parse(json) as ClaudeEvent;
+  try {
+    const json = Buffer.from(payload, "base64").toString("utf8");
+    return JSON.parse(json) as ClaudeEvent;
+  } catch (error) {
+    throw new InvalidClaudeEventPayloadError(
+      "Invalid Claude event payload",
+      error,
+    );
+  }
 }

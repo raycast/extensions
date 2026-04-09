@@ -21,7 +21,7 @@
       "name": "notify-event",
       "title": "Notify AI Event",
       "description": "Render an actionable AI event and return you to the source app",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "payload",
@@ -67,6 +67,7 @@
     "dev": "ray develop",
     "build": "ray build --skip-types -e dist -o dist",
     "lint": "ray lint",
+    "test": "node --test tests/*.test.mjs",
     "publish": "npx @raycast/api@latest publish"
   }
 }

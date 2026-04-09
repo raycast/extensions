@@ -16,7 +16,15 @@ import { decodePayload } from "./lib/event";
 type Arguments = { payload: string };
 
 export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const event = decodePayload(props.arguments.payload);
+  let event: ReturnType<typeof decodePayload> | null = null;
+  try {
+    event = decodePayload(props.arguments.payload);
+  } catch {
+    void showHUD("Invalid event payload");
+    void closeMainWindow();
+    return null;
+  }
+
   const returnUrl = event.returnUrl ?? "claude://";
   const openTitle = event.source ? `Open ${event.source}` : "Open AI App";
   const summary = eventSummary(event.source, event.type);
@@ -106,7 +114,7 @@ function InputActionView(props: {
 
 async function copyAndReturn(value: string, target: string) {
   await Clipboard.copy(value);
-  await showHUD(`Copied: ${value}`);
+  await showHUD("Copied to Clipboard");
   await open(target);
 }
 

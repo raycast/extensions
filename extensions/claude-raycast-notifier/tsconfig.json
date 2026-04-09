@@ -9,5 +9,5 @@
     "moduleResolution": "node",
     "types": ["node", "react"]
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }

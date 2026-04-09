@@ -148,11 +148,7 @@ export default function Command() {
                     <Action
                       title="Preview Current Sound"
                       icon={Icon.Play}
-                      onAction={() =>
-                        previewSoundFile(
-                          resolveManagedSoundPath(sound.filename),
-                        )
-                      }
+                      onAction={() => previewManagedSound(sound.filename)}
                     />
                   ) : null}
                   <Action
@@ -295,9 +291,7 @@ function HookSoundForm(props: {
             <Action
               title="Preview Current Sound"
               icon={Icon.Play}
-              onAction={() =>
-                previewSoundFile(resolveManagedSoundPath(currentSound.filename))
-              }
+              onAction={() => previewManagedSound(currentSound.filename)}
             />
           ) : null}
         </ActionPanel>
@@ -452,4 +446,16 @@ function iconForSemanticHook(slot: SoundSlot, enabled: boolean) {
   }
 
   return { source: Icon.CheckCircle, tintColor: Color.Green };
+}
+
+async function previewManagedSound(filename: string) {
+  try {
+    await previewSoundFile(resolveManagedSoundPath(filename));
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Preview failed",
+      message: error instanceof Error ? error.message : "Could not play audio",
+    });
+  }
 }

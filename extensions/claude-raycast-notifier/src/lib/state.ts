@@ -14,8 +14,6 @@ export type NotifierState = {
   };
 };
 
-type Preferences = { stateFilePath: string };
-
 const DEFAULT_STATE: NotifierState = {
   current: null,
   recent: [],

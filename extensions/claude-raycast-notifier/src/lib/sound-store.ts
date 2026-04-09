@@ -18,10 +18,6 @@ const SOUND_SLOTS: SoundSlot[] = [
 const LIBRARY_VERSION = 1;
 const MAPPINGS_VERSION = 2;
 
-type Preferences = {
-  notifierRootPath: string;
-};
-
 type SoundKind = "bundled" | "imported";
 
 export type SoundLibraryEntry = {
@@ -122,7 +118,15 @@ export async function importSoundFile(
 }
 
 export async function previewSoundFile(filePath: string): Promise<void> {
-  await execFileAsync("afplay", [filePath]);
+  try {
+    await execFileAsync("afplay", [filePath]);
+  } catch (error) {
+    const detail =
+      error instanceof Error && error.message.length > 0
+        ? error.message
+        : "Unable to play this audio file";
+    throw new Error(detail);
+  }
 }
 
 export async function repairUserData(): Promise<{
