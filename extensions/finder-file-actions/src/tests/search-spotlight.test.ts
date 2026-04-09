@@ -33,7 +33,7 @@ mock.module("@raycast/api", () => ({
 type SearchFn = (
   search: string,
   searchScope: string,
-  abortable: { current: AbortController | null | undefined } | undefined
+  abortable: { current: AbortController | null | undefined } | undefined,
 ) => Promise<{ path: string }[]>;
 
 let searchSpotlight: SearchFn;

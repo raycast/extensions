@@ -27,7 +27,7 @@ function normalizePath(inputPath: string): string {
 export const searchSpotlight = (
   search: string,
   searchScope: string,
-  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined
+  abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
 ): Promise<SpotlightSearchResult[]> => {
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
   const isExactSearch = search.startsWith("[") && search.endsWith("]");
@@ -58,7 +58,7 @@ export const searchSpotlight = (
       safeSearchScope(searchScope),
       searchFilter,
       folderSpotlightSearchAttributes as [],
-      abortable
+      abortable,
     );
 
     stream

@@ -40,7 +40,9 @@ describe("usePromise deps stability (bug 1 guard)", () => {
     // count top-level commas (params are simple - no nested generics between commas at top level in our case)
     // our signature: search: string, searchScope: string, abortable: ...
     // the only top-level commas separate the 3 params
-    const commas = (params.match(/,/g) || []).length;
+    // strip trailing comma (prettier may add one) then count separators
+    const trimmed = params.replace(/,\s*$/, "");
+    const commas = (trimmed.match(/,/g) || []).length;
     expect(commas).toBe(2); // 3 params = 2 commas
   });
 });

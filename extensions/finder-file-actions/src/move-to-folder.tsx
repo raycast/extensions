@@ -47,7 +47,7 @@ export default function Command(props: LaunchProps) {
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
   const [selectionError, setSelectionError] = useState<string | null>(null);
 
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController>(null);
   const preferences = getPreferenceValues<SpotlightSearchPreferences>();
   const maxRecentFolders = parseInt(preferences.maxRecentFolders || "10");
   const cacheManager = CacheManager.getInstance();
@@ -339,7 +339,7 @@ export default function Command(props: LaunchProps) {
               style: Toast.Style.Animated,
             });
           },
-        }
+        },
       );
 
       // Count successes and failures
@@ -487,7 +487,7 @@ export default function Command(props: LaunchProps) {
               style: Toast.Style.Animated,
             });
           },
-        }
+        },
       );
 
       // Count successes and failures
