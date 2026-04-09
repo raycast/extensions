@@ -5,32 +5,24 @@ import { Session, activateSession, listSessions } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
 
 interface Tab {
-  windowId: string;
+  windowIndex: number;
   tabId: string;
   sessions: Session[];
 }
 
-interface Window {
-  windowId: string;
-  tabs: Tab[];
-}
-
-const groupByWindow = (sessions: Session[]): Window[] => {
+const groupByTab = (sessions: Session[]): Tab[] => {
   const tabMap = new Map<string, Tab>();
-  const windowMap = new Map<string, Window>();
+  const windowOrder: string[] = [];
 
   for (const session of sessions) {
-    const tabKey = `${session.windowId}::${session.tabId}`;
-    if (!tabMap.has(tabKey)) tabMap.set(tabKey, { windowId: session.windowId, tabId: session.tabId, sessions: [] });
-    tabMap.get(tabKey)!.sessions.push(session);
+    if (!windowOrder.includes(session.windowId)) windowOrder.push(session.windowId);
+    const key = `${session.windowId}::${session.tabId}`;
+    if (!tabMap.has(key))
+      tabMap.set(key, { windowIndex: windowOrder.indexOf(session.windowId) + 1, tabId: session.tabId, sessions: [] });
+    tabMap.get(key)!.sessions.push(session);
   }
 
-  for (const tab of tabMap.values()) {
-    if (!windowMap.has(tab.windowId)) windowMap.set(tab.windowId, { windowId: tab.windowId, tabs: [] });
-    windowMap.get(tab.windowId)!.tabs.push(tab);
-  }
-
-  return Array.from(windowMap.values());
+  return Array.from(tabMap.values());
 };
 
 export default function Command() {
@@ -38,18 +30,18 @@ export default function Command() {
 
   const prerequisite = useMemo(() => checkIt2apiReady(), []);
 
-  const { windows, it2apiError } = useMemo(() => {
-    if (!prerequisite.ready) return { windows: [] as Window[], it2apiError: prerequisite.reason };
+  const { tabs, it2apiError } = useMemo(() => {
+    if (!prerequisite.ready) return { tabs: [] as Tab[], it2apiError: prerequisite.reason };
     try {
-      return { windows: groupByWindow(listSessions()), it2apiError: undefined };
+      return { tabs: groupByTab(listSessions()), it2apiError: undefined };
     } catch (e) {
-      return { windows: [] as Window[], it2apiError: (e as Error).message };
+      return { tabs: [] as Tab[], it2apiError: (e as Error).message };
     }
   }, [prerequisite]);
 
-  const switchTo = async (tab: Tab) => {
+  const switchTo = async (session: Session) => {
     try {
-      activateSession(tab.sessions[0].id);
+      activateSession(session.id);
       await closeMainWindow();
     } catch (e) {
       const error = e as Error;
@@ -57,32 +49,30 @@ export default function Command() {
         setHasPermissionError(true);
         return;
       }
-      await showToast({ style: Toast.Style.Failure, title: "Cannot switch tab", message: error.message });
+      await showToast({ style: Toast.Style.Failure, title: "Cannot switch session", message: error.message });
     }
   };
 
   if (hasPermissionError) return <PermissionErrorScreen />;
 
   return (
-    <List searchBarPlaceholder="Search tabs...">
+    <List searchBarPlaceholder="Search sessions...">
       {it2apiError && (
         <List.EmptyView icon={Icon.ExclamationMark} title="Cannot connect to iTerm2" description={it2apiError} />
       )}
-      {!it2apiError && windows.length === 0 && (
-        <List.EmptyView icon={Icon.Terminal} title="No tabs found" description="No open iTerm tabs detected" />
+      {!it2apiError && tabs.length === 0 && (
+        <List.EmptyView icon={Icon.Terminal} title="No sessions found" description="No open iTerm sessions detected" />
       )}
-      {windows.map((window, i) => (
-        <List.Section key={window.windowId} title={`Window ${i + 1}`}>
-          {window.tabs.map((tab) => (
+      {tabs.map((tab) => (
+        <List.Section key={`w${tab.windowIndex}-t${tab.tabId}`} title={`Window ${tab.windowIndex} · Tab ${tab.tabId}`}>
+          {tab.sessions.map((session) => (
             <List.Item
-              key={`${tab.windowId}::${tab.tabId}`}
-              icon={Icon.AppWindowList}
-              title={tab.sessions[0].name}
-              subtitle={`Tab ${tab.tabId}`}
-              accessories={tab.sessions.length > 1 ? [{ text: `${tab.sessions.length} panes` }] : []}
+              key={session.id}
+              icon={Icon.Terminal}
+              title={session.name}
               actions={
                 <ActionPanel>
-                  <Action title="Switch to Tab" icon={Icon.AppWindowList} onAction={() => switchTo(tab)} />
+                  <Action title="Switch to Session" icon={Icon.Terminal} onAction={() => switchTo(session)} />
                 </ActionPanel>
               }
             />
