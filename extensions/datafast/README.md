@@ -16,7 +16,7 @@ View your Datafast web analytics in Raycast.
 
 **Countries** – View traffic and revenue by country with drill-down into regions and cities.
 
-**Enable Menu Bar** – Show the number of active visitors in your Mac menu bar, updated every minute. Also detects new sales and celebrates with confetti. To toggle this on or off, open the **Enable Menu Bar** command preferences and check or uncheck **Enable sale notifications** under **Sale Notifications**.
+**Enable Menu Bar** – Show the number of active visitors in your Mac menu bar, updated every minute. Also detects new sales and celebrates with confetti. To toggle this, open the **Enable Menu Bar** command preferences and check or uncheck **Enable sale notifications** under **Sale Notifications**.
 
 ## Getting Started
 
