@@ -38,6 +38,10 @@ export type ClaudeQuestionResponse = {
   answers?: Record<string, string | string[]>;
 };
 
+type StoredQuestionRequest = ClaudeQuestionRequest & {
+  requestFileName: string;
+};
+
 export function decodeQuestionPayload(payload: string): ClaudeQuestionRequest {
   const json = Buffer.from(payload, "base64").toString("utf8");
   return JSON.parse(json) as ClaudeQuestionRequest;
@@ -56,7 +60,7 @@ export async function loadQuestionRequests(): Promise<ClaudeQuestionRequest[]> {
 
   try {
     const entries = await fs.readdir(dir);
-    const requests = await Promise.all(
+    const requests: Array<StoredQuestionRequest | null> = await Promise.all(
       entries
         .filter((entry) => entry.endsWith(".json"))
         .map(async (entry) => {
@@ -65,7 +69,7 @@ export async function loadQuestionRequests(): Promise<ClaudeQuestionRequest[]> {
             return {
               ...(JSON.parse(raw) as ClaudeQuestionRequest),
               requestFileName: entry,
-            } satisfies ClaudeQuestionRequest;
+            };
           } catch {
             return null;
           }
@@ -73,7 +77,7 @@ export async function loadQuestionRequests(): Promise<ClaudeQuestionRequest[]> {
     );
 
     return requests
-      .filter((request): request is ClaudeQuestionRequest => Boolean(request))
+      .filter(isStoredQuestionRequest)
       .sort((left, right) =>
         (right.createdAt ?? "").localeCompare(left.createdAt ?? ""),
       );
@@ -109,4 +113,10 @@ function requestsDirPath(): string {
   const preferences = getPreferenceValues<Preferences>();
   const rootDir = preferences.notifierRootPath.replace(/^~(?=\/)/, homedir());
   return join(rootDir, "requests");
+}
+
+function isStoredQuestionRequest(
+  request: StoredQuestionRequest | null,
+): request is StoredQuestionRequest {
+  return request !== null;
 }
