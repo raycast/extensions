@@ -78,10 +78,9 @@ describe("useInstalledSkillNames", () => {
     expect(listInstalledSkills).toHaveBeenCalled();
   });
 
-  it("matches by skillId only — id and name alone must not match", () => {
-    // CLI returns skill names that correspond to the search API's skillId field.
-    // The search API Skill type has three distinct fields: id, skillId, and name.
-    // Only skillId should match; id and name must not produce false positives.
+  it("exposes names exactly as returned by the CLI", () => {
+    // The hook builds a Set from CLI output without any transformation.
+    // Matching logic (e.g. using skillId) lives in the consumer, not the hook.
     vi.mocked(useCachedPromise).mockReturnValue({
       data: ["vercel-example-skill"],
       isLoading: false,
@@ -89,11 +88,7 @@ describe("useInstalledSkillNames", () => {
 
     const { installedNames } = useInstalledSkillNames();
 
-    // skillId — should match
     expect(installedNames.has("vercel-example-skill")).toBe(true);
-    // id (e.g. "owner/repo") — must not match
-    expect(installedNames.has("vercel-labs/example")).toBe(false);
-    // display name (e.g. "example-skill") — must not match
-    expect(installedNames.has("example-skill")).toBe(false);
+    expect(installedNames.has("other-skill")).toBe(false);
   });
 });

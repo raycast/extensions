@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   type AuditStatus,
   type SkillFrontmatter,
@@ -187,12 +187,9 @@ export function SkillListItem({
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
       : { source: Icon.Hammer };
 
-  const accessories = useMemo(() => {
-    const items: List.Item.Accessory[] = [];
-    if (isInstalled) items.push({ tag: { value: "Installed", color: Color.Green } });
-    if (!isShowingDetail) items.push({ text: formatInstalls(skill.installs), icon: Icon.Download });
-    return items;
-  }, [isInstalled, isShowingDetail, skill.installs]);
+  const accessories: List.Item.Accessory[] = [];
+  if (isInstalled) accessories.push({ tag: { value: "Installed", color: Color.Green } });
+  if (!isShowingDetail) accessories.push({ text: formatInstalls(skill.installs), icon: Icon.Download });
 
   const shownErrorTimestampRef = useRef<string | undefined>(undefined);
 
