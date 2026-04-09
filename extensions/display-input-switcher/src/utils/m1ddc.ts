@@ -15,10 +15,6 @@ function exec(cmd: string, args: string[]): Promise<{ stdout: string; stderr: st
   });
 }
 
-interface Preferences {
-  m1ddcPath?: string;
-}
-
 const KNOWN_PATHS = ["/opt/homebrew/bin/m1ddc", "/usr/local/bin/m1ddc"];
 
 function isBinReady(filePath: string): boolean {

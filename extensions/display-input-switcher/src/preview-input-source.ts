@@ -29,17 +29,20 @@ export default async function previewInputSource(
   try {
     // Read current input to know what to revert to
     const currentOutput = await readInputSource(display.id);
-    let originalValue = target.value === 17 ? 18 : 17; // fallback
-    if (currentOutput !== null) {
-      const val = parseInt(currentOutput.trim(), 10);
-      if (!isNaN(val) && val > 0) {
-        if (val === target.value) {
-          await showToast({ style: Toast.Style.Success, title: `Already on "${target.name}"` });
-          return;
-        }
-        originalValue = val;
-      }
+    if (currentOutput === null) {
+      await showToast({ style: Toast.Style.Failure, title: "Could not read current input source" });
+      return;
     }
+    const val = parseInt(currentOutput.trim(), 10);
+    if (isNaN(val) || val <= 0) {
+      await showToast({ style: Toast.Style.Failure, title: "Could not read current input source" });
+      return;
+    }
+    if (val === target.value) {
+      await showToast({ style: Toast.Style.Success, title: `Already on "${target.name}"` });
+      return;
+    }
+    const originalValue = val;
 
     const result = await setInputSource(display.id, target.value);
     if (result === null) return;
