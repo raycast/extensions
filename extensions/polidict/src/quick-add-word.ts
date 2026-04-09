@@ -13,14 +13,10 @@ import {
   invalidateUserProfileCache,
 } from "./features/shared/query-keys";
 
-type QuickAddWordArguments = {
-  text?: string;
-};
-
 export default async function QuickAddWord({
   arguments: args,
   fallbackText,
-}: LaunchProps<{ arguments: QuickAddWordArguments }>) {
+}: LaunchProps<{ arguments: Arguments.QuickAddWord }>) {
   const directText = normalizeText(args.text);
   const selectedText = await readSelectedText();
   const text = directText ?? selectedText ?? normalizeText(fallbackText);

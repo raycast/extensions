@@ -25,8 +25,7 @@ interface TokenResponsePayload {
 }
 
 function getAuthLocale(): AuthLocale {
-  const locale = Intl.DateTimeFormat().resolvedOptions().locale.toLowerCase();
-  return locale.startsWith("uk") ? "uk" : "en";
+  return "en";
 }
 
 async function storeTokens(tokens: TokenResponsePayload): Promise<void> {
