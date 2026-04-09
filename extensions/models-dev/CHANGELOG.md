@@ -1,5 +1,10 @@
 # models.dev Changelog
 
+## [New AI Models Command] - {PR_MERGE_DATE}
+
+- Add “New AI Models” command to browse recently released models
+- Add `lookbackPeriod` preference (days) to control the recency window
+
 ## [Bug Fix] - 2026-03-31
 
 ### Fixed
