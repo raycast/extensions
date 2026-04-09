@@ -2,13 +2,6 @@ import { execSync, execFile } from "child_process";
 import { existsSync } from "fs";
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  crocPath: string;
-  downloadDirectory: string;
-  autoAccept: boolean;
-  customRelay: string;
-}
-
 const CANDIDATE_PATHS = [
   "/opt/homebrew/bin/croc", // Apple Silicon
   "/usr/local/bin/croc", // Intel Mac
@@ -122,16 +115,4 @@ export function buildCrocArgs(
   }
 
   return args;
-}
-
-/** Build environment for croc receive (sets CROC_SECRET) */
-export function buildCrocEnv(
-  subcommand: "send" | "receive",
-  codePhrase?: string,
-): NodeJS.ProcessEnv {
-  const env = { ...process.env };
-  if (subcommand === "receive" && codePhrase) {
-    env["CROC_SECRET"] = codePhrase;
-  }
-  return env;
 }

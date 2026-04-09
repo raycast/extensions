@@ -47,7 +47,7 @@
         "file"
       ]
     },
-{
+    {
       "name": "transfer-history",
       "title": "Transfer History",
       "subtitle": "croc",
@@ -119,7 +119,7 @@
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "^20.8.10",
     "@types/react": "^19.2.14",
-    "eslint": "^8.51.0",
+    "eslint": "^8.57.1",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
