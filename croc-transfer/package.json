@@ -91,7 +91,7 @@
       "description": "Directory where received files are saved. Files are placed directly in this folder.",
       "type": "directory",
       "required": false,
-      "default": "~/Downloads"
+      "default": "~/Downloads/Share"
     },
     {
       "name": "autoAccept",

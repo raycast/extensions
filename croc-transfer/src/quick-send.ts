@@ -1,4 +1,4 @@
-import { getSelectedFinderItems, showHUD, showToast, Toast } from "@raycast/api";
+import { getSelectedFinderItems, showHUD, showToast, Toast, Clipboard } from "@raycast/api";
 import { basename } from "path";
 import { getCrocPath, buildCrocArgs } from "./utils/croc";
 import { spawnCrocSend, computeFileSize } from "./utils/process";
@@ -43,32 +43,37 @@ export default async function QuickSend(): Promise<void> {
     }
   });
 
-  spawnCrocSend(
-    crocPath,
-    args,
-    async (phrase) => {
-      const size = computeFileSize(files);
-      const record = await addRecord({
-        type: "send",
-        files,
-        phrase,
-        status: "in_progress",
-        size,
-        sessionId: SESSION_ID,
-      });
-      recordId = record.id;
-      await showHUD(`Code: ${phrase} — waiting for receiver`);
-    },
-    async (prog) => {
-      await showHUD(`Sending ${label}: ${prog.percent}%`);
-    },
-    async () => {
-      if (recordId) await updateRecord(recordId, { status: "success" });
-      await showHUD(`✓ Sent: ${label}`);
-    },
-    async (err) => {
-      if (recordId) await updateRecord(recordId, { status: "failed" });
-      await showToast({ style: Toast.Style.Failure, title: "Send failed", message: err.message });
-    }
-  );
+  await new Promise<void>((resolve) => {
+    spawnCrocSend(
+      crocPath,
+      args,
+      async (phrase) => {
+        const size = computeFileSize(files);
+        const record = await addRecord({
+          type: "send",
+          files,
+          phrase,
+          status: "in_progress",
+          size,
+          sessionId: SESSION_ID,
+        });
+        recordId = record.id;
+        await Clipboard.copy(phrase);
+        await showHUD(`Code copied: ${phrase}`);
+      },
+      async (prog) => {
+        await showHUD(`Sending ${label}: ${prog.percent}%`);
+      },
+      async () => {
+        if (recordId) await updateRecord(recordId, { status: "success" });
+        await showHUD(`✓ Sent: ${label}`);
+        resolve();
+      },
+      async (err) => {
+        if (recordId) await updateRecord(recordId, { status: "failed" });
+        await showToast({ style: Toast.Style.Failure, title: "Send failed", message: err.message });
+        resolve();
+      }
+    );
+  });
 }

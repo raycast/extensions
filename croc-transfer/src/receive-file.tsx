@@ -48,7 +48,7 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
   const deepLinkHandled = useRef(false);
 
   const prefs = getPrefs();
-  const downloadDir = (prefs.downloadDirectory || "~/Downloads").replace(/^~/, process.env.HOME ?? "~");
+  const downloadDir = (prefs.downloadDirectory || "~/Downloads/Share").replace(/^~/, process.env.HOME ?? "~");
 
   useEffect(() => () => { procRef.current?.kill(); }, []);
 
