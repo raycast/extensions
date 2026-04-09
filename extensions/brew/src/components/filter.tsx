@@ -13,7 +13,7 @@ export function InstallableFilterDropdown(props: {
   return (
     <List.Dropdown
       tooltip="Filter by formula or cask"
-      value={props.value}
+      {...(props.value !== undefined ? { value: props.value } : { storeValue: true })}
       onChange={(value) => {
         props.onSelect(value as InstallableFilterType);
       }}

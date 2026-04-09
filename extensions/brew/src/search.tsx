@@ -20,8 +20,9 @@ function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
-export default function SearchView(props: LaunchProps<{ arguments: { search: string; filter: string } }>) {
+export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const [searchText, setSearchText] = useState(props.arguments.search ?? "");
+  const hasFilterArg = !!props.arguments.filter;
   const initialFilter = (props.arguments.filter as InstallableFilterType) || InstallableFilterType.all;
   const [filter, setFilter] = useState(initialFilter);
   const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
@@ -129,7 +130,7 @@ export default function SearchView(props: LaunchProps<{ arguments: { search: str
       casks={casks}
       searchText={searchText}
       searchBarPlaceholder={placeholder(filter)}
-      searchBarAccessory={<InstallableFilterDropdown value={filter} onSelect={setFilter} />}
+      searchBarAccessory={<InstallableFilterDropdown value={hasFilterArg ? filter : undefined} onSelect={setFilter} />}
       isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
       filtering={false}
