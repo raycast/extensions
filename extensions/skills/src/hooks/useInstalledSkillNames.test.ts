@@ -77,5 +77,4 @@ describe("useInstalledSkillNames", () => {
     await expect(loader()).resolves.toEqual(["skill-a", "skill-b"]);
     expect(listInstalledSkills).toHaveBeenCalled();
   });
-
 });
