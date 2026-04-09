@@ -15,7 +15,7 @@
   "commands": [
     {
       "name": "set-input-source",
-      "title": "Set Input Source",
+      "title": "Switch Input Source",
       "description": "Set the input source on a display",
       "mode": "no-view",
       "arguments": [

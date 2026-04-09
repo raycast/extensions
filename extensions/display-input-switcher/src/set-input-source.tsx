@@ -14,14 +14,15 @@ export default async function setInputSourceCommand(props: LaunchProps<{ argumen
 
   try {
     const currentOutput = await readInputSource(display.id);
+    let currentValue: number | null = null;
     if (currentOutput !== null) {
-      const currentValue = parseInt(currentOutput.trim(), 10);
-      if (!isNaN(currentValue) && currentValue > 0) {
-        if (currentValue === inputValue) {
+      const parsed = parseInt(currentOutput.trim(), 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        if (parsed === inputValue) {
           await showToast({ style: Toast.Style.Success, title: `Already on "${target.name}"` });
           return;
         }
-        await setPreviousSource(currentValue);
+        currentValue = parsed;
       }
     }
 
@@ -33,6 +34,10 @@ export default async function setInputSourceCommand(props: LaunchProps<{ argumen
       rememberUserChoice: true,
     });
     if (!confirmed) return;
+
+    if (currentValue !== null) {
+      await setPreviousSource(currentValue);
+    }
 
     const result = await setInputSource(display.id, inputValue);
     if (result === null) return;
