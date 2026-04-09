@@ -18,7 +18,7 @@ Filter models by multiple capabilities at once (e.g., reasoning + vision + tool 
 
 ### Compare AI Models
 
-Select up to two models for side-by-side comparison. View pricing, context windows, and capabilities in a table. Export comparisons as markdown.
+Select two models for side-by-side comparison. View pricing, context windows, and capabilities in a table. Export comparisons as markdown.
 
 ### New AI Models
 
