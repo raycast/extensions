@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useInstallGuard } from "./install-guard";
+import { useUpdateCheck } from "./use-update-check";
 import { watchkeyImport } from "./watchkey";
 
 interface FormValues {
@@ -9,6 +10,7 @@ interface FormValues {
 
 export default function ImportKey() {
   const { installed, installView } = useInstallGuard();
+  useUpdateCheck();
 
   const { handleSubmit, itemProps } = useForm<FormValues>({
     onSubmit: async (values) => {

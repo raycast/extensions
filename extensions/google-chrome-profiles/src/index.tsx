@@ -6,7 +6,6 @@ import {
   getPreferenceValues,
   Icon,
   Image,
-  LaunchProps,
   List,
   showHUD,
   showToast,
@@ -64,6 +63,21 @@ const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserC
                 ChromeAction.Focus,
                 async () => {
                   await showHUD("Bringing to front...");
+                },
+                browser,
+              );
+            }}
+          />
+          <Action
+            title="New Window"
+            icon={Icon.AppWindow}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={async () => {
+              await openGoogleChrome(
+                profile,
+                ChromeAction.NewWindow,
+                async () => {
+                  await showHUD("Opening new window...");
                 },
                 browser,
               );
@@ -281,6 +295,13 @@ function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
               actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
+          <List.Item
+            title="New Window"
+            icon={Icon.Duplicate}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} browser={props.browser} />
+            }
+          />
           {clipboardItem && (
             <List.Item
               title={clipboardItem.title}
@@ -339,23 +360,30 @@ function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; b
   );
   const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile?context=${context}`;
 
-  const action = props.target.action;
-  const hudMessage =
-    action === "focus" ? "Bringing to front..." : action === "newTab" ? "Opening new tab..." : "Opening...";
+  const targetUrl = props.target.action === "openUrl" ? props.target.url : "";
 
-  const quicklinkTitle =
-    action === "focus"
-      ? "Create Quicklink (Bring to Front)"
-      : action === "newTab"
-      ? "Create Quicklink (New Tab)"
-      : "Create Quicklink (Open the URL)";
-
-  const quicklinkName =
-    action === "focus"
-      ? `${props.profile.name} > Bring to Front`
-      : action === "newTab"
-      ? `${props.profile.name} > New Tab`
-      : `${props.profile.name} > Open ${props.target.url}`;
+  const { hudMessage, quicklinkTitle, quicklinkName } = {
+    focus: {
+      hudMessage: "Bringing to front...",
+      quicklinkTitle: "Create Quicklink (Bring to Front)",
+      quicklinkName: `${props.profile.name} > Bring to Front`,
+    },
+    newTab: {
+      hudMessage: "Opening new tab...",
+      quicklinkTitle: "Create Quicklink (New Tab)",
+      quicklinkName: `${props.profile.name} > New Tab`,
+    },
+    newWindow: {
+      hudMessage: "Opening new window...",
+      quicklinkTitle: "Create Quicklink (New Window)",
+      quicklinkName: `${props.profile.name} > New Window`,
+    },
+    openUrl: {
+      hudMessage: "Opening...",
+      quicklinkTitle: "Create Quicklink (Open the URL)",
+      quicklinkName: `${props.profile.name} > Open ${targetUrl}`,
+    },
+  }[props.target.action];
 
   return (
     <ActionPanel>

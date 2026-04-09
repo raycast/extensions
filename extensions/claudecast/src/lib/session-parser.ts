@@ -15,6 +15,7 @@ export interface SessionMetadata {
   turnCount: number;
   cost: number;
   model?: string;
+  matchSnippet?: string;
 }
 
 export interface SessionMessage {
@@ -35,11 +36,84 @@ interface JSONLEntry {
   uuid?: string;
   message?: {
     role: string;
+    model?: string;
     content: string | Array<{ type: string; text?: string }>;
+    usage?: {
+      input_tokens?: number;
+      output_tokens?: number;
+      cache_read_input_tokens?: number;
+      cache_creation_input_tokens?: number;
+    };
   };
-  costUSD?: number;
   model?: string;
   timestamp?: string;
+}
+
+/**
+ * Replace lone UTF-16 surrogates with U+FFFD (REPLACEMENT CHARACTER).
+ * Session JSONL may contain lone surrogates that crash Raycast's
+ * render tree serializer with "Cannot parse render tree JSON".
+ */
+function sanitizeString(str: string): string {
+  return str.replace(
+    /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g,
+    "\uFFFD",
+  );
+}
+
+/**
+ * Truncate a string without splitting UTF-16 surrogate pairs.
+ * If the cut point lands on a high surrogate, backs off by one character.
+ */
+export function safeTruncate(str: string, maxLen: number, suffix = ""): string {
+  if (str.length <= maxLen) return str;
+  let end = maxLen;
+  const code = str.charCodeAt(end - 1);
+  if (code >= 0xd800 && code <= 0xdbff) {
+    end--;
+  }
+  return str.slice(0, end) + suffix;
+}
+
+/**
+ * Extract a short contextual snippet around the first occurrence of a query.
+ * Normalizes whitespace so multiline session content produces clean subtitles.
+ */
+function extractSnippet(
+  text: string,
+  query: string,
+  contextWords = 15,
+): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  const lower = normalized.toLowerCase();
+  const idx = lower.indexOf(query.toLowerCase());
+  if (idx === -1) return "";
+
+  let start = idx;
+  let wordsFound = 0;
+  while (start > 0 && wordsFound < contextWords) {
+    start--;
+    if (normalized[start] === " ") wordsFound++;
+  }
+  if (start > 0) start++;
+
+  let end = idx + query.length;
+  wordsFound = 0;
+  while (end < normalized.length && wordsFound < contextWords) {
+    if (normalized[end] === " ") wordsFound++;
+    end++;
+  }
+
+  const prefix = start > 0 ? "..." : "";
+  const suffix = end < normalized.length ? "..." : "";
+
+  // Build snippet with the matched portion wrapped in **bold** for highlighting
+  const before = normalized.slice(start, idx);
+  const match = normalized.slice(idx, idx + query.length);
+  const after = normalized.slice(idx + query.length, end);
+  const snippet =
+    prefix + before + "**" + match + "**" + after.trimEnd() + suffix;
+  return safeTruncate(snippet, 300);
 }
 
 const CLAUDE_DIR = path.join(os.homedir(), ".claude");
@@ -261,15 +335,12 @@ async function parseSessionMetadataFast(
     const result: Partial<SessionMetadata> = {};
     let lineCount = 0;
     let turnCount = 0;
-    let totalCost = 0;
     let resolved = false;
 
-    // Helper to safely resolve only once and clean up
     const safeResolve = () => {
       if (resolved) return;
       resolved = true;
       result.turnCount = turnCount;
-      result.cost = totalCost;
       resolve(result);
     };
 
@@ -298,7 +369,7 @@ async function parseSessionMetadataFast(
         const entry: JSONLEntry = JSON.parse(line);
 
         if (entry.type === "summary") {
-          result.summary = entry.summary || "";
+          result.summary = sanitizeString(entry.summary || "");
           result.id = entry.leafUuid || path.basename(filePath, ".jsonl");
         }
 
@@ -307,10 +378,12 @@ async function parseSessionMetadataFast(
           if (!result.firstMessage && entry.message?.content) {
             const content = entry.message.content;
             if (typeof content === "string") {
-              result.firstMessage = content.slice(0, 200);
+              result.firstMessage = sanitizeString(safeTruncate(content, 200));
             } else if (Array.isArray(content)) {
               const textBlock = content.find((b) => b.type === "text");
-              result.firstMessage = textBlock?.text?.slice(0, 200) || "";
+              result.firstMessage = sanitizeString(
+                safeTruncate(textBlock?.text || "", 200),
+              );
             }
           }
         }
@@ -319,12 +392,9 @@ async function parseSessionMetadataFast(
           turnCount++;
         }
 
-        if (entry.costUSD) {
-          totalCost += entry.costUSD;
-        }
-
-        if (entry.model) {
-          result.model = entry.model;
+        const entryModel = entry.message?.model || entry.model;
+        if (entryModel) {
+          result.model = entryModel;
         }
       } catch {
         // Skip unparseable lines silently to avoid memory accumulation from console.warn
@@ -388,7 +458,6 @@ async function parseFullSession(
     const messages: SessionMessage[] = [];
     let summary = "";
     let id = path.basename(filePath, ".jsonl");
-    let totalCost = 0;
     let model: string | undefined;
     let firstMessage = "";
 
@@ -402,23 +471,25 @@ async function parseFullSession(
         const entry: JSONLEntry = JSON.parse(line);
 
         if (entry.type === "summary") {
-          summary = entry.summary || "";
+          summary = sanitizeString(entry.summary || "");
           id = entry.leafUuid || id;
         }
 
         if (entry.type === "user" || entry.type === "human") {
           let content = "";
           if (typeof entry.message?.content === "string") {
-            content = entry.message.content;
+            content = sanitizeString(entry.message.content);
           } else if (Array.isArray(entry.message?.content)) {
-            content = entry.message.content
-              .filter((b) => b.type === "text")
-              .map((b) => b.text)
-              .join("\n");
+            content = sanitizeString(
+              entry.message.content
+                .filter((b) => b.type === "text")
+                .map((b) => b.text)
+                .join("\n"),
+            );
           }
 
           if (!firstMessage) {
-            firstMessage = content.slice(0, 200);
+            firstMessage = safeTruncate(content, 200);
           }
 
           messages.push({
@@ -433,7 +504,7 @@ async function parseFullSession(
           let hasToolUse = false;
 
           if (typeof entry.message?.content === "string") {
-            content = entry.message.content;
+            content = sanitizeString(entry.message.content);
           } else if (Array.isArray(entry.message?.content)) {
             for (const block of entry.message.content) {
               if (block.type === "text") {
@@ -442,6 +513,7 @@ async function parseFullSession(
                 hasToolUse = true;
               }
             }
+            content = sanitizeString(content);
           }
 
           messages.push({
@@ -452,12 +524,9 @@ async function parseFullSession(
           });
         }
 
-        if (entry.costUSD) {
-          totalCost += entry.costUSD;
-        }
-
-        if (entry.model) {
-          model = entry.model;
+        const entryModel = entry.message?.model || entry.model;
+        if (entryModel) {
+          model = entryModel;
         }
       } catch {
         // Skip unparseable lines silently to avoid memory accumulation
@@ -478,7 +547,7 @@ async function parseFullSession(
           firstMessage,
           lastModified: stat.mtime,
           turnCount: messages.length,
-          cost: totalCost,
+          cost: 0,
           model,
           messages,
         });
@@ -688,6 +757,7 @@ export async function searchSessionContent(
         turnCount: match.turnCount,
         cost: match.cost,
         model: match.model,
+        matchSnippet: match.matchSnippet,
       });
     }
   }
@@ -710,6 +780,7 @@ async function searchSingleSession(
   turnCount: number;
   cost: number;
   model?: string;
+  matchSnippet?: string;
 } | null> {
   type MatchResult = {
     id: string;
@@ -718,15 +789,16 @@ async function searchSingleSession(
     turnCount: number;
     cost: number;
     model?: string;
+    matchSnippet?: string;
   };
 
   return new Promise<MatchResult | null>((resolve) => {
     let found = false;
+    let matchSnippet = "";
     let summary = "";
     let id = path.basename(filePath, ".jsonl");
     let firstMessage = "";
     let turnCount = 0;
-    let totalCost = 0;
     let model: string | undefined;
     let resolved = false;
 
@@ -771,7 +843,7 @@ async function searchSingleSession(
         const entry: JSONLEntry = JSON.parse(line);
 
         if (entry.type === "summary") {
-          summary = entry.summary || "";
+          summary = sanitizeString(entry.summary || "");
           id = entry.leafUuid || id;
         }
 
@@ -779,19 +851,21 @@ async function searchSingleSession(
         let content = "";
         if (entry.message?.content) {
           if (typeof entry.message.content === "string") {
-            content = entry.message.content;
+            content = sanitizeString(entry.message.content);
           } else if (Array.isArray(entry.message.content)) {
-            content = entry.message.content
-              .filter((b) => b.type === "text")
-              .map((b) => b.text || "")
-              .join(" ");
+            content = sanitizeString(
+              entry.message.content
+                .filter((b) => b.type === "text")
+                .map((b) => b.text || "")
+                .join(" "),
+            );
           }
         }
 
         if (entry.type === "user" || entry.type === "human") {
           turnCount++;
           if (!firstMessage && content) {
-            firstMessage = content.slice(0, 200);
+            firstMessage = safeTruncate(content, 200);
           }
         }
 
@@ -799,16 +873,20 @@ async function searchSingleSession(
           turnCount++;
         }
 
-        if (entry.costUSD) totalCost += entry.costUSD;
-        if (entry.model) model = entry.model;
+        const entryModel = entry.message?.model || entry.model;
+        if (entryModel) model = entryModel;
 
-        // Check for match in content and summary
+        // Check for match in content and summary, capture snippet on first hit
         if (!found) {
-          if (
-            (content && content.toLowerCase().includes(lowerQuery)) ||
-            (summary && summary.toLowerCase().includes(lowerQuery))
-          ) {
+          const matchSource =
+            content && content.toLowerCase().includes(lowerQuery)
+              ? content
+              : summary && summary.toLowerCase().includes(lowerQuery)
+                ? summary
+                : null;
+          if (matchSource) {
             found = true;
+            matchSnippet = extractSnippet(matchSource, lowerQuery);
           }
         }
       } catch {
@@ -820,7 +898,15 @@ async function searchSingleSession(
       signal?.removeEventListener("abort", onAbort);
       safeResolve(
         found
-          ? { id, summary, firstMessage, turnCount, cost: totalCost, model }
+          ? {
+              id,
+              summary,
+              firstMessage,
+              turnCount,
+              cost: 0,
+              model,
+              matchSnippet,
+            }
           : null,
       );
     });
@@ -837,6 +923,75 @@ async function searchSingleSession(
       signal?.removeEventListener("abort", onAbort);
       safeResolve(null);
     });
+  });
+}
+
+export interface SessionUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheCreationTokens: number;
+  model?: string;
+}
+
+/**
+ * Streaming usage scanner that reads the entire JSONL file for accurate
+ * token totals. Keeps only counters in memory (no messages array).
+ * Optionally filters tokens to entries with timestamps >= afterDate.
+ */
+export async function streamSessionUsage(
+  filePath: string,
+  afterDate?: Date,
+): Promise<SessionUsage> {
+  return new Promise((resolve) => {
+    let inputTokens = 0;
+    let outputTokens = 0;
+    let cacheReadTokens = 0;
+    let cacheCreationTokens = 0;
+    let model: string | undefined;
+
+    const stream = fs.createReadStream(filePath, {
+      encoding: "utf8",
+      highWaterMark: 16 * 1024,
+    });
+    const rl = readline.createInterface({ input: stream, crlfDelay: Infinity });
+
+    const safeResolve = () =>
+      resolve({
+        inputTokens,
+        outputTokens,
+        cacheReadTokens,
+        cacheCreationTokens,
+        model,
+      });
+
+    rl.on("line", (line) => {
+      try {
+        const entry: JSONLEntry = JSON.parse(line);
+        if (entry.message?.usage) {
+          if (
+            afterDate &&
+            entry.timestamp &&
+            new Date(entry.timestamp) < afterDate
+          ) {
+            return;
+          }
+          inputTokens += entry.message.usage.input_tokens || 0;
+          outputTokens += entry.message.usage.output_tokens || 0;
+          cacheReadTokens += entry.message.usage.cache_read_input_tokens || 0;
+          cacheCreationTokens +=
+            entry.message.usage.cache_creation_input_tokens || 0;
+        }
+        const m = entry.message?.model || entry.model;
+        if (m) model = m;
+      } catch {
+        // skip
+      }
+    });
+
+    rl.on("close", safeResolve);
+    rl.on("error", safeResolve);
+    stream.on("error", safeResolve);
   });
 }
 

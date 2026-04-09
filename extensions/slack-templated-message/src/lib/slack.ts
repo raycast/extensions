@@ -61,8 +61,12 @@ export async function replaceTemplateVariables(message: string, client: WebClien
     console.error("Failed to get user info:", error);
   }
 
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
   const variables: { [key: string]: string } = {
-    date: now.toISOString().split("T")[0],
+    date: `${year}-${month}-${day}`,
     time: now.toTimeString().slice(0, 5),
     user: userName,
   };
