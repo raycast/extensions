@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "smart-translator",
+  "title": "Smart Translator",
+  "description": "Multilingual translator with 4 tone variations (Polite, Casual, Business, Slang)",
+  "version": "1.0.0",
+  "icon": "extension-icon.png",
+  "author": "pepix",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "keywords": ["translate", "translation", "language", "ai"],
+  "preferences": [
+    {
+      "name": "baseLang",
+      "title": "Base Language",
+      "description": "Your primary language. Non-base-language text will be translated into this.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        { "title": "Arabic", "value": "Arabic" },
+        { "title": "Chinese", "value": "Chinese" },
+        { "title": "Dutch", "value": "Dutch" },
+        { "title": "English", "value": "English" },
+        { "title": "French", "value": "French" },
+        { "title": "German", "value": "German" },
+        { "title": "Hindi", "value": "Hindi" },
+        { "title": "Indonesian", "value": "Indonesian" },
+        { "title": "Italian", "value": "Italian" },
+        { "title": "Japanese", "value": "Japanese" },
+        { "title": "Korean", "value": "Korean" },
+        { "title": "Polish", "value": "Polish" },
+        { "title": "Portuguese", "value": "Portuguese" },
+        { "title": "Russian", "value": "Russian" },
+        { "title": "Spanish", "value": "Spanish" },
+        { "title": "Swedish", "value": "Swedish" },
+        { "title": "Thai", "value": "Thai" },
+        { "title": "Turkish", "value": "Turkish" },
+        { "title": "Ukrainian", "value": "Ukrainian" },
+        { "title": "Vietnamese", "value": "Vietnamese" }
+      ]
+    },
+    {
+      "name": "targetLang",
+      "title": "Target Language",
+      "description": "Your secondary language. Base-language text will be translated into this.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        { "title": "Arabic", "value": "Arabic" },
+        { "title": "Chinese", "value": "Chinese" },
+        { "title": "Dutch", "value": "Dutch" },
+        { "title": "English", "value": "English" },
+        { "title": "French", "value": "French" },
+        { "title": "German", "value": "German" },
+        { "title": "Hindi", "value": "Hindi" },
+        { "title": "Indonesian", "value": "Indonesian" },
+        { "title": "Italian", "value": "Italian" },
+        { "title": "Japanese", "value": "Japanese" },
+        { "title": "Korean", "value": "Korean" },
+        { "title": "Polish", "value": "Polish" },
+        { "title": "Portuguese", "value": "Portuguese" },
+        { "title": "Russian", "value": "Russian" },
+        { "title": "Spanish", "value": "Spanish" },
+        { "title": "Swedish", "value": "Swedish" },
+        { "title": "Thai", "value": "Thai" },
+        { "title": "Turkish", "value": "Turkish" },
+        { "title": "Ukrainian", "value": "Ukrainian" },
+        { "title": "Vietnamese", "value": "Vietnamese" }
+      ]
+    },
+    {
+      "name": "detectMode",
+      "title": "Detection Mode",
+      "description": "Fast: quick language detection. Accurate: slower but more reliable for similar scripts.",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        { "title": "Fast", "value": "fast" },
+        { "title": "Accurate", "value": "accurate" }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate with Tones",
+      "description": "Translate text and show tone variations",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Translation History",
+      "description": "View past translations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.4",
+    "@types/react": "19.0.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
