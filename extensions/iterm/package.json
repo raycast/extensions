@@ -103,7 +103,7 @@
     },
     {
       "name": "search-projects",
-      "title": "Search iTerm Projects",
+      "title": "Search Projects in iTerm",
       "description": "Browse and open project folders in iTerm",
       "mode": "view",
       "preferences": [
