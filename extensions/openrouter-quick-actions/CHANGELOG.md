@@ -1,6 +1,6 @@
 # OpenRouter Quick Actions Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-09
 
 - Improve error handling and always use stream to improve support for more providers
 - Update the HUD when no-ui is used
