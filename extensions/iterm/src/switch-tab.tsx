@@ -122,17 +122,34 @@ export default function Command() {
   const openTagForm = (session: Session) =>
     push(<TagForm session={session} currentTag={tags[session.name] ?? ""} onSave={saveTag} />);
 
+  const [selectedWindow, setSelectedWindow] = useState("all");
+
+  const windowCount = useMemo(() => new Set(tabs.map((t) => t.windowIndex)).size, [tabs]);
+  const visibleTabs = selectedWindow === "all" ? tabs : tabs.filter((t) => String(t.windowIndex) === selectedWindow);
+
   if (hasPermissionError) return <PermissionErrorScreen />;
 
   return (
-    <List searchBarPlaceholder="Search sessions…">
+    <List
+      searchBarPlaceholder="Search sessions…"
+      searchBarAccessory={
+        windowCount > 1 ? (
+          <List.Dropdown tooltip="Filter by window" value={selectedWindow} onChange={setSelectedWindow}>
+            <List.Dropdown.Item title="All Windows" value="all" />
+            {Array.from({ length: windowCount }, (_, i) => (
+              <List.Dropdown.Item key={i + 1} title={`Window ${i + 1}`} value={String(i + 1)} />
+            ))}
+          </List.Dropdown>
+        ) : undefined
+      }
+    >
       {it2apiError && (
         <List.EmptyView icon={Icon.ExclamationMark} title="Cannot connect to iTerm2" description={it2apiError} />
       )}
-      {!it2apiError && tabs.length === 0 && (
+      {!it2apiError && visibleTabs.length === 0 && (
         <List.EmptyView icon={Icon.Terminal} title="No sessions found" description="No open iTerm sessions detected" />
       )}
-      {tabs.map((tab) => (
+      {visibleTabs.map((tab) => (
         <List.Section key={`w${tab.windowIndex}-t${tab.tabId}`} title={`Window ${tab.windowIndex} · Tab ${tab.tabId}`}>
           {tab.sessions.map((session) => {
             const tag = tags[session.name];
