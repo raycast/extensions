@@ -85,8 +85,8 @@
     },
     {
       "name": "switch-tab",
-      "title": "Switch iTerm Tab",
-      "description": "List and switch to any open iTerm tab",
+      "title": "Switch iTerm Session",
+      "description": "List and switch to any open iTerm session, grouped by window and tab",
       "mode": "view"
     },
     {
