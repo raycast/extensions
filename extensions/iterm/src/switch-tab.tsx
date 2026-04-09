@@ -152,7 +152,7 @@ export default function Command() {
       {visibleTabs.map((tab) => (
         <List.Section
           key={`w${tab.windowIndex}-t${tab.tabId}`}
-          title={windowCount > 1 ? `Window ${tab.windowIndex} · Tab ${tab.tabId}` : `Tab ${tab.tabId}`}
+          title={windowCount > 1 ? `Window ${tab.windowIndex} · ${tab.sessions[0].name}` : tab.sessions[0].name}
         >
           {tab.sessions.map((session) => {
             const tag = tags[session.name];
