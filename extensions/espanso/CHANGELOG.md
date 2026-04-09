@@ -1,5 +1,24 @@
 # Espanso Changelog
 
+## [Patch] - 2026-04-09
+
+### Bug Fixes
+
+- Fixed shell-type var preview not resolving user PATH: shell vars now run via an interactive shell (`zsh`/`bash`) so `.zshrc` is sourced. Respects the `shell:` param in Espanso YAML if specified. ANSI escape sequences from shell startup are stripped from output.
+
+## [Improvements] - 2026-04-07
+
+### New Features
+
+- **Live preview for dynamic matches**: Variables (`date`, `shell`, `script`, `echo`, `random`, `clipboard`) are evaluated and shown as real content in the detail panel — no more raw `{{varName}}` templates
+- **Image match support**: Matches using `image_path` now render the image inline in the preview; `$CONFIG` and `~` path variables are resolved automatically
+- **Re-evaluate action**: Dynamic matches expose a "Re-evaluate" action to refresh values on demand (useful for `random` or time-sensitive `shell` snippets)
+- **Lazy evaluation**: Variable expansion only runs when an item is selected, avoiding unnecessary shell executions on list load
+
+### Bug Fixes
+
+- Dynamic snippets (e.g. date matches) now paste and copy the evaluated value instead of the raw template string (fixes [#26651](https://github.com/raycast/extensions/issues/26651))
+
 ## [Major Improvements] - 2026-02-02
 
 ### New Features

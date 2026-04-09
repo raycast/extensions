@@ -2,6 +2,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import { decodeJwtPayload } from "../agents/jwt";
 
 const AUTH_V2_FILE = path.join(os.homedir(), ".factory", "auth.v2.file");
 const AUTH_V2_KEY = path.join(os.homedir(), ".factory", "auth.v2.key");
@@ -11,8 +12,18 @@ const AUTH_LEGACY_PATHS = [
   path.join(os.homedir(), ".factory", "auth.encrypted"),
 ];
 
+/**
+ * WorkOS OAuth client ID for Droid authentication.
+ * This is a public client identifier used for token refresh requests.
+ */
 const WORKOS_CLIENT_ID = "client_01HNM792M5G5G1A2THWPXKFMXB";
+
 const WORKOS_AUTH_URL = "https://api.workos.com/user_management/authenticate";
+
+/**
+ * Buffer time (in milliseconds) before token expiry to trigger a refresh.
+ * Set to 1 hour to ensure tokens are refreshed before they expire.
+ */
 const TOKEN_REFRESH_BUFFER_MS = 60 * 60 * 1000; // refresh 1h before expiry
 
 interface AuthTokens {
@@ -37,17 +48,6 @@ function tryParseAuthFile(filePath: string): AuthTokens | null {
 
     if (!accessToken) return null;
     return { access_token: accessToken, refresh_token: refreshToken ?? null };
-  } catch {
-    return null;
-  }
-}
-
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], "base64url").toString("utf-8");
-    return JSON.parse(payload) as Record<string, unknown>;
   } catch {
     return null;
   }

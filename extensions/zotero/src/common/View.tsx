@@ -8,8 +8,10 @@ import {
   Clipboard,
   closeMainWindow,
   showHUD,
+  open,
 } from "@raycast/api";
-import { RefData, Preferences } from "./zoteroApi";
+import { dirname, join } from "path";
+import { RefData, Preferences, resolveHome } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
   exportRef,
@@ -61,6 +63,17 @@ const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key:
 const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
+
+function resolveAttachmentPath(item: RefData, zoteroPath: string): string | null {
+  if (!item.attachment?.path || !item.attachment?.key) return null;
+  const attachmentPath = item.attachment.path;
+  if (!attachmentPath.startsWith("storage:")) {
+    return attachmentPath;
+  }
+  const filename = attachmentPath.slice("storage:".length);
+  const expandedZoteroPath = resolveHome(zoteroPath);
+  return join(dirname(expandedZoteroPath), "storage", item.attachment.key, filename);
+}
 
 function getURL(item: RefData): string {
   return `${
@@ -230,68 +243,85 @@ export const View = ({
         <List.Section key={sectionIndex} title={sectionName} subtitle={`${queryResults[sectionIndex].length}`}>
           {queryResults[sectionIndex]
             .filter((item) => item.collection?.includes(collection) || collection == "All")
-            .map((item) => (
-              <List.Item
-                key={item.key}
-                id={`${item.id}`}
-                title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
-                icon={getItemIcon(item)}
-                detail={<List.Item.Detail markdown={getItemDetail(item)} />}
-                actions={
-                  <ActionPanel>
-                    {item.attachment && item.attachment.key && item.attachment.key !== `` && (
-                      <Action.OpenInBrowser
-                        icon={Icon.ArrowRightCircleFilled}
-                        title="Open PDF"
-                        url={`zotero://open-pdf/library/items/${item.attachment.key}`}
-                        onOpen={onOpen}
-                      />
-                    )}
-                    <Action.OpenInBrowser
-                      icon={Icon.Link}
-                      title="Open in Zotero"
-                      url={`zotero://select/items/${item.library ? item.library : 0}_${item.key}`}
-                      onOpen={onOpen}
-                    />
-                    {getURL(item) !== "" && (
-                      <Action.OpenInBrowser
-                        title="Open Original Link"
-                        url={getURL(item)}
-                        shortcut={openExtLinkCommandShortcut}
-                        onOpen={onOpen}
-                      />
-                    )}
-
-                    {preferences.use_bibtex && item.citekey && (
-                      <Action.CopyToClipboard
-                        title="Copy Bibtex Citation Key"
-                        content={item.citekey}
-                        shortcut={copyRefCommandShortcut}
-                      />
-                    )}
-                    {preferences.use_bibtex && item.citekey && <RefCopyToClipboardAction selected={item.citekey} />}
-                    {preferences.use_bibtex && item.citekey && <BibCopyToClipboardAction selected={item.citekey} />}
-                    {preferences.use_bibtex && item.citekey && <PandocCopyAction selected={item.citekey} />}
-                    {preferences.use_bibtex && item.citekey && <RefPasteAction selected={item.citekey} />}
-                    {preferences.use_bibtex && item.citekey && <BibPasteAction selected={item.citekey} />}
-                    {preferences.use_bibtex && item.citekey && <PandocPasteAction selected={item.citekey} />}
-
-                    <ActionPanel.Section>
-                      {item.attachment && item.attachment.key && item.attachment.key !== `` && (
-                        <PDFURLCopyToClipboardAction
-                          itemURL={`zotero://open-pdf/library/items/${item.attachment.key}`}
+            .map((item) => {
+              const attachmentFilePath = resolveAttachmentPath(item, preferences.zotero_path);
+              return (
+                <List.Item
+                  key={item.key}
+                  id={`${item.id}`}
+                  title={item.title + (urls.includes(item.url) ? " (visited)" : "")}
+                  icon={getItemIcon(item)}
+                  detail={<List.Item.Detail markdown={getItemDetail(item)} />}
+                  actions={
+                    <ActionPanel>
+                      {item.attachment?.key && item.attachment.key !== `` && (
+                        <Action.OpenInBrowser
+                          icon={Icon.ArrowRightCircleFilled}
+                          title="Open PDF"
+                          url={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                          onOpen={onOpen}
                         />
                       )}
-                      {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
-                      {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
-                      {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
-                      {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
-                      {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
-                    </ActionPanel.Section>
-                  </ActionPanel>
-                }
-              />
-            ))}
+                      {item.attachment?.key && item.attachment.key !== `` && attachmentFilePath && (
+                        <Action
+                          icon={Icon.ArrowRightCircleFilled}
+                          title="Open PDF in System Viewer"
+                          onAction={async () => {
+                            try {
+                              await open(attachmentFilePath);
+                              closeMainWindow();
+                            } catch {
+                              await showHUD("Failed to open attachment");
+                            }
+                          }}
+                        />
+                      )}
+                      <Action.OpenInBrowser
+                        icon={Icon.Link}
+                        title="Open in Zotero"
+                        url={`zotero://select/items/${item.library ? item.library : 0}_${item.key}`}
+                        onOpen={onOpen}
+                      />
+                      {getURL(item) !== "" && (
+                        <Action.OpenInBrowser
+                          title="Open Original Link"
+                          url={getURL(item)}
+                          shortcut={openExtLinkCommandShortcut}
+                          onOpen={onOpen}
+                        />
+                      )}
+
+                      {preferences.use_bibtex && item.citekey && (
+                        <Action.CopyToClipboard
+                          title="Copy Bibtex Citation Key"
+                          content={item.citekey}
+                          shortcut={copyRefCommandShortcut}
+                        />
+                      )}
+                      {preferences.use_bibtex && item.citekey && <RefCopyToClipboardAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <BibCopyToClipboardAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <PandocCopyAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <RefPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <BibPasteAction selected={item.citekey} />}
+                      {preferences.use_bibtex && item.citekey && <PandocPasteAction selected={item.citekey} />}
+
+                      <ActionPanel.Section>
+                        {item.attachment && item.attachment.key && item.attachment.key !== `` && (
+                          <PDFURLCopyToClipboardAction
+                            itemURL={`zotero://open-pdf/library/items/${item.attachment.key}`}
+                          />
+                        )}
+                        {getURL(item) !== "" && <URLCopyToClipboardAction itemURL={getURL(item)} />}
+                        {getItemTitle(item) !== "" && <TitleCopyToClipboardAction itemTitle={getItemTitle(item)} />}
+                        {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
+                        {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
+                        {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              );
+            })}
         </List.Section>
       ))}
     </List>

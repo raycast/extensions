@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { getEnvironments, addEnvironment, updateEnvironment, deleteEnvironment, generateId } from "./storage";
 import { ENV_COLOR_OPTIONS, EnvColorValue, StoredEnvironment } from "./types";
 import { resolveEnvColor, COLOR_ICON_MAP } from "./colors";
@@ -125,7 +125,7 @@ function EnvironmentForm({ environment, onSave }: { environment?: StoredEnvironm
 }
 
 export default function ManageEnvironments() {
-  const { data: environments = [], isLoading, revalidate } = useCachedPromise(getEnvironments);
+  const { data: environments = [], isLoading, revalidate } = usePromise(getEnvironments);
 
   async function handleDelete(env: StoredEnvironment) {
     const confirmed = await confirmAlert({
@@ -183,6 +183,7 @@ export default function ManageEnvironments() {
                     icon={Icon.Pencil}
                     title="Edit Environment"
                     target={<EnvironmentForm environment={env} onSave={revalidate} />}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
                   />
                   <Action.Push
                     icon={Icon.Plus}

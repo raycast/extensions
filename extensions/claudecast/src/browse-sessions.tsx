@@ -17,6 +17,7 @@ import {
   listAllSessions,
   getSessionDetail,
   deleteSession,
+  safeTruncate,
   SessionMetadata,
   SessionDetail,
 } from "./lib/session-parser";
@@ -119,7 +120,7 @@ function SessionItem({
   onDelete: () => void;
 }) {
   const title = session.firstMessage || session.summary || session.id;
-  const truncatedTitle = title.length > 60 ? title.slice(0, 60) + "..." : title;
+  const truncatedTitle = safeTruncate(title, 60, "...");
 
   const accessories: List.Item.Accessory[] = [];
 
@@ -388,10 +389,7 @@ function formatSessionMarkdown(session: SessionDetail): string {
 
   for (const message of session.messages.slice(0, 20)) {
     const role = message.type === "user" ? "**You**" : "**Claude**";
-    const content =
-      message.content.length > 500
-        ? message.content.slice(0, 500) + "..."
-        : message.content;
+    const content = safeTruncate(message.content, 500, "...");
 
     md += `${role}:\n${content}\n\n`;
   }

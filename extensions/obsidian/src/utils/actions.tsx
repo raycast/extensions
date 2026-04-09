@@ -139,6 +139,36 @@ export function CopyNotePathAction(props: { note: Note }) {
   );
 }
 
+export function CopyWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{
+        macOS: { modifiers: ["opt"], key: "w" },
+        Windows: { modifiers: ["alt"], key: "w" },
+      }}
+    />
+  );
+}
+
+export function PasteWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.Paste
+      title="Paste Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{
+        macOS: { modifiers: ["opt", "shift"], key: "w" },
+        Windows: { modifiers: ["alt", "shift"], key: "w" },
+      }}
+    />
+  );
+}
+
 export function PasteNoteAction(props: { note: NoteWithContent }) {
   const { note } = props;
   return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
@@ -410,6 +440,8 @@ export function NoteActions(props: {
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} onDelete={onDelete} />
       <AppendTaskAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      <CopyWikilinkAction note={note} />
+      <PasteWikilinkAction note={note} />
     </>
   );
 }

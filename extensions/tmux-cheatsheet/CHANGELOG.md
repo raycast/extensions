@@ -1,5 +1,9 @@
 # Tmux Cheatsheet Changelog
 
+## [Fixed author mismatch] - 2026-04-04
+
+- Fixed author mismatch in extension package configuration
+
 ## [Added Keybinding Detection, Category Filter, and Key Symbols] - 2026-04-01
 
 - Auto-detect custom keybindings from `~/.tmux.conf` and show them instead of defaults
