@@ -6,13 +6,9 @@ import { filterByReleasedWithinDays, filterOutDeprecated, sortByProviderThenName
 import { getReleaseDateAccessories } from "./lib/accessories";
 import { Model } from "./lib/types";
 
-interface Preferences {
-  lookbackPeriod: string;
-}
-
 export default function NewAIModels() {
   const { data, isLoading } = useModelsData();
-  const { lookbackPeriod } = getPreferenceValues<Preferences>();
+  const { lookbackPeriod } = getPreferenceValues<Preferences.NewModels>();
   const days = parseInt(lookbackPeriod, 10) || 30;
 
   const filteredModels = useMemo(() => {
