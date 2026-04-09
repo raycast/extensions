@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, closeMainWindow, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, closeMainWindow, showToast, Toast } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { checkIt2apiReady } from "./core/it2api";
 import { Session, activateSession, listSessions } from "./core/it2api-runner";
@@ -51,7 +51,6 @@ export default function Command() {
     try {
       activateSession(tab.sessions[0].id);
       await closeMainWindow();
-      await popToRoot();
     } catch (e) {
       const error = e as Error;
       if (isPermissionError(error.message)) {
