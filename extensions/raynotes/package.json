@@ -1,0 +1,80 @@
+{
+	"$schema": "https://www.raycast.com/schemas/extension.json",
+	"name": "raynotes",
+	"title": "Raynotes",
+	"description": "AI-powered raw notes polisher for Obsidian vault.",
+	"icon": "extension-icon.png",
+	"author": "abchikuei",
+	"platforms": [
+		"macOS",
+		"Windows"
+	],
+	"categories": [
+		"Productivity",
+		"Documentation"
+	],
+	"license": "MIT",
+	"commands": [
+		{
+			"name": "index",
+			"title": "Conspect",
+			"subtitle": "Obsidian Sync",
+			"description": "Takes raw notes, polishes them via AI and appends to Obsidian Source file.",
+			"mode": "no-view"
+		}
+	],
+	"dependencies": {
+		"@raycast/api": "^1.104.11",
+		"@raycast/utils": "^1.17.0",
+		"axios": "^1.15.0"
+	},
+	"devDependencies": {
+		"@raycast/eslint-config": "^2.0.4",
+		"@trivago/prettier-plugin-sort-imports": "^6.0.2",
+		"@types/node": "22.13.10",
+		"@types/react": "19.0.10",
+		"eslint": "^9.22.0",
+		"prettier": "^3.8.1",
+		"typescript": "^5.8.2"
+	},
+	"scripts": {
+		"build": "ray build",
+		"dev": "ray develop",
+		"fix-lint": "ray lint --fix",
+		"lint": "ray lint",
+		"prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+		"publish": "npx @raycast/api@latest publish"
+	},
+	"preferences": [
+		{
+			"name": "rawNotesPath",
+			"type": "textfield",
+			"title": "Raw Notes File Path",
+			"description": "Path to your draft file",
+			"required": true
+		},
+		{
+			"name": "obsidianPath",
+			"type": "textfield",
+			"title": "Obsidian File Path",
+			"description": "Path to your Obsidian file",
+			"required": true
+		},
+		{
+			"name": "openaiApiKey",
+			"type": "password",
+			"title": "OpenAI API Key",
+			"description": "Enter your OpenAI API Key (sk-...)",
+			"placeholder": "sk-proj-...",
+			"required": true
+		},
+		{
+			"name": "customPrompt",
+			"type": "textfield",
+			"title": "AI Instructions",
+			"description": "System prompt for AI to polish, translate, and categorize notes with Mermaid support.",
+			"required": true,
+			"default": "You are a Knowledge Management Assistant. Your goal is to transform raw, messy engineering notes into structured, clear, and professional English entries for an Obsidian vault.\n\nStrictly follow these rules:\n\n1. Language & Clarity: Translate everything (Russian/English) into clear, professional English. Use simple, accessible vocabulary for high readability while maintaining technical accuracy.\n2. Completeness: You MUST preserve ALL thoughts and details from the raw notes. Do not omit information.\n3. Primary Language: Use TypeScript for code examples and algorithmic demonstrations unless specified otherwise.\n4. Header Structure: Do not include a date header. If you generate a title, place the primary hashtag (#SE, #CS, #CP, #MF, #WS, or #GF) at the very end of that title line.\n5. Format & Mermaid: Use clean Markdown. Visualize processes or logic using Mermaid diagrams (e.g., graph TD or sequenceDiagram) where it adds value. \n6. Layout & Tone: Optimize for a single-file 'stream of consciousness'. Use bold text for key terms. Tone should be technical, simple, and professional. No conversational filler."
+		}
+	]
+}
