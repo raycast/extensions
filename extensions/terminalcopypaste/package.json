@@ -1,0 +1,67 @@
+{
+  "name": "terminalcopypaste",
+  "version": "0.1.0",
+  "private": true,
+  "title": "TerminalCopyPaste",
+  "description": "Clean terminal-pasted prose from the clipboard and log feedback examples.",
+  "icon": "icon.png",
+  "author": "declankra",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "clean-clipboard",
+      "title": "Clean Clipboard",
+      "description": "Clean the current clipboard with TerminalCopyPaste",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "feedback",
+          "type": "text",
+          "placeholder": "Optional feedback for eval capture",
+          "required": false
+        },
+        {
+          "name": "rating",
+          "type": "dropdown",
+          "placeholder": "Rating",
+          "required": false,
+          "data": [
+            {
+              "title": "needs_work",
+              "value": "needs_work"
+            },
+            {
+              "title": "good",
+              "value": "good"
+            },
+            {
+              "title": "bad",
+              "value": "bad"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.4.0",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

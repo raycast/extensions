@@ -1,0 +1,5 @@
+__pycache__/
+dist/
+node_modules/
+evals.jsonl
+raycast-env.d.ts
