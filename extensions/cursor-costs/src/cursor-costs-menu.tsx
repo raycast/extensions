@@ -202,6 +202,16 @@ export default function Command() {
                       }}
                     />
                   )}
+                  {planUsage.totalPercentUsed != null && (
+                    <MenuBarExtra.Item
+                      icon={getProgressIcon(planUsage.totalPercentUsed)}
+                      title="Total"
+                      subtitle={formatPlanPercentValue(planUsage.totalPercentUsed)}
+                      onAction={() => {
+                        void open("https://cursor.com/dashboard?tab=usage");
+                      }}
+                    />
+                  )}
                   {planUsage.breakdown.bonus > 0 && (
                     <MenuBarExtra.Item
                       icon={Icon.Gift}
@@ -388,6 +398,16 @@ export default function Command() {
                   }}
                 />
               )}
+              {planUsage?.enabled && planUsage.totalPercentUsed != null && (
+                <MenuBarExtra.Item
+                  icon={getProgressIcon(planUsage.totalPercentUsed)}
+                  title="Total"
+                  subtitle={formatPlanPercentValue(planUsage.totalPercentUsed)}
+                  onAction={() => {
+                    void open("https://cursor.com/dashboard?tab=usage");
+                  }}
+                />
+              )}
               {planUsage?.enabled && planUsage.breakdown.bonus > 0 && (
                 <MenuBarExtra.Item
                   icon={Icon.Gift}
@@ -438,6 +458,9 @@ export default function Command() {
       }
       if (planUsage.apiPercentUsed != null) {
         autoApiParts.push(`API ${formatPlanPercentValue(planUsage.apiPercentUsed)}`);
+      }
+      if (planUsage.totalPercentUsed != null) {
+        autoApiParts.push(`Total ${formatPlanPercentValue(planUsage.totalPercentUsed)}`);
       }
       const autoApi = autoApiParts.length > 0 ? ` • ${autoApiParts.join(" • ")}` : "";
       return `Cursor Costs • ${cost} • ${percent} used${autoApi}`;

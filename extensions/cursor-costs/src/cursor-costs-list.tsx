@@ -157,6 +157,12 @@ export default function CursorCostsList() {
                             text={formatPlanPercentValue(planUsage.apiPercentUsed)}
                           />
                         )}
+                        {planUsage.totalPercentUsed != null && (
+                          <List.Item.Detail.Metadata.Label
+                            title="Total"
+                            text={formatPlanPercentValue(planUsage.totalPercentUsed)}
+                          />
+                        )}
                       </>
                     )}
                   </List.Item.Detail.Metadata>
@@ -199,6 +205,12 @@ export default function CursorCostsList() {
                         <List.Item.Detail.Metadata.Label
                           title="API"
                           text={formatPlanPercentValue(planUsage.apiPercentUsed)}
+                        />
+                      )}
+                      {planUsage.totalPercentUsed != null && (
+                        <List.Item.Detail.Metadata.Label
+                          title="Total"
+                          text={formatPlanPercentValue(planUsage.totalPercentUsed)}
                         />
                       )}
                       <List.Item.Detail.Metadata.Separator />
