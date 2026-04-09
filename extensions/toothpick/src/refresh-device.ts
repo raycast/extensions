@@ -4,7 +4,7 @@ import { refreshDevice } from "./core/devices/handlers/refresh-device";
 import { getDevicesService } from "./core/devices/devices.service";
 import { showErrorMessage } from "./utils";
 
-export default async (props: { arguments: { nameOrMacAddress: string | undefined } }) => {
+export default async function Command(props: { arguments: { nameOrMacAddress: string | undefined } }) {
   const { fuzzyRatio, bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
 
   if (props.arguments.nameOrMacAddress === undefined) {
@@ -31,4 +31,4 @@ export default async (props: { arguments: { nameOrMacAddress: string | undefined
   } catch (error) {
     await showErrorMessage(`${error}`);
   }
-};
+}

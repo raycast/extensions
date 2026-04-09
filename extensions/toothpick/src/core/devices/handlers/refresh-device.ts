@@ -1,31 +1,19 @@
-import { getPreferenceValues, closeMainWindow } from "@raycast/api";
 import { Device } from "../devices.model";
-import { getDevicesService } from "../devices.service";
-import { showAnimatedMessage, showErrorMessage, showSuccessMessage, showWarningMessage } from "src/utils";
+import { disconnectDevice } from "./disconnect-device";
+import { connectDevice } from "./connect-device";
+import { showAnimatedMessage, showWarningMessage } from "src/utils";
 
-export async function refreshDevice(device: Device) {
-  const { closeOnSuccessfulConnection, bluetoothBackend } = getPreferenceValues<ExtensionPreferences>();
-  const devicesService = getDevicesService(bluetoothBackend);
+const RECONNECT_DELAY_MS = 2000;
 
-  await showAnimatedMessage("Disconnecting...");
-  const disconnectResult = devicesService?.disconnectDevice(device.macAddress);
-  if (disconnectResult) {
-    await showSuccessMessage("Device disconnected successfully");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+export async function refreshDevice(device: Device): Promise<boolean> {
+  const disconnected = await disconnectDevice(device);
+
+  if (disconnected) {
     await showAnimatedMessage("Reconnecting...");
+    await new Promise((resolve) => setTimeout(resolve, RECONNECT_DELAY_MS));
   } else {
     await showWarningMessage("Failed to disconnect. Reconnecting anyway…");
   }
 
-  const connectResult = devicesService?.connectDevice(device.macAddress);
-  if (connectResult) {
-    await showSuccessMessage("Device connected successfully.");
-  } else {
-    await showErrorMessage("Failed to connect.");
-  }
-  if (closeOnSuccessfulConnection) {
-    closeMainWindow();
-  }
-
-  return !!disconnectResult && !!connectResult;
+  return connectDevice(device);
 }

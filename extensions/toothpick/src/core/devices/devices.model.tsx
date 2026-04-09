@@ -67,13 +67,13 @@ export class Device {
           icon={{ source: "icons/connect.svg", tintColor: Color.PrimaryText }}
         />
       ),
-      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
       <Action
         title={`Copy Mac Address: ${this.macAddress}`}
         key="copy-mac-address"
         onAction={() => Clipboard.copy(this.macAddress)}
         icon={Icon.Hammer}
       />,
+      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
       <Action
         title={`Copy Device Data`}
         key="copy-device-data"

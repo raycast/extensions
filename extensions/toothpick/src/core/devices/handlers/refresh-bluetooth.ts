@@ -1,4 +1,5 @@
-import { getDevicesService, DevicesService } from "src/core/devices/devices.service";
+import { getDevicesService } from "src/core/devices/devices.service";
+import { DevicesService } from "src/core/devices/devices.service";
 import { showAnimatedMessage, showErrorMessage, showSuccessMessage } from "src/utils";
 
 export default async function refreshBluetooth() {
@@ -12,12 +13,11 @@ export default async function refreshBluetooth() {
     return;
   }
 
-  await showAnimatedMessage("Refreshing Bluetooth...");
-  const result = devicesService?.refreshBluetooth();
-
-  if (result) {
+  try {
+    await showAnimatedMessage("Refreshing Bluetooth...");
+    devicesService.refreshBluetooth();
     await showSuccessMessage("Bluetooth refreshed successfully");
-  } else {
-    await showErrorMessage("Failed to refresh Bluetooth");
+  } catch (error) {
+    await showErrorMessage(`Failed to refresh Bluetooth: ${error instanceof Error ? error.message : error}`);
   }
 }
