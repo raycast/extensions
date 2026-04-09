@@ -18,6 +18,12 @@
       "mode": "view"
     },
     {
+      "name": "setup-hooks",
+      "title": "Setup Hooks",
+      "description": "Check Claude and Gemini hook health and install hook config from Raycast",
+      "mode": "view"
+    },
+    {
       "name": "notify-event",
       "title": "Notify AI Event",
       "description": "Render an actionable AI event and return you to the source app",
@@ -31,6 +37,27 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "answer-claude-question",
+      "title": "Answer Claude Question",
+      "description": "Answer a Claude Code AskUserQuestion prompt and send the result back through hooks",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "payload",
+          "description": "Base64 encoded Claude question payload",
+          "type": "text",
+          "placeholder": "Base64 question payload",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "pending-claude-questions",
+      "title": "Pending Claude Questions",
+      "description": "Review and answer pending Claude Code questions from multiple sessions",
+      "mode": "view"
     }
   ],
   "preferences": [

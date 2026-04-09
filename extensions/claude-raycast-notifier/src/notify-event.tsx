@@ -25,7 +25,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
     return null;
   }
 
-  const returnUrl = event.returnUrl ?? "claude://";
+  const returnUrl = event.returnUrl ?? null;
   const openTitle = event.source ? `Open ${event.source}` : "Open AI App";
   const summary = eventSummary(event.source, event.type);
 
@@ -81,7 +81,6 @@ function InputActionView(props: {
   source?: string | null;
 }) {
   const [value, setValue] = useState("");
-  const returnUrl = props.returnUrl ?? "claude://";
   const openTitle = props.source ? `Open ${props.source}` : "Open AI App";
 
   return (
@@ -91,7 +90,7 @@ function InputActionView(props: {
         <ActionPanel>
           <Action
             title={`Copy Input and Open ${props.source ?? "App"}`}
-            onAction={() => copyAndReturn(value, returnUrl)}
+            onAction={() => copyAndReturn(value, props.returnUrl ?? null)}
           />
           <Action.CopyToClipboard title="Copy Input" content={value} />
           {props.returnUrl ? (
@@ -112,10 +111,12 @@ function InputActionView(props: {
   );
 }
 
-async function copyAndReturn(value: string, target: string) {
+async function copyAndReturn(value: string, target: string | null | undefined) {
   await Clipboard.copy(value);
   await showHUD("Copied to Clipboard");
-  await open(target);
+  if (target) {
+    await open(target);
+  }
 }
 
 function eventSummary(source: string | null | undefined, type: string) {
