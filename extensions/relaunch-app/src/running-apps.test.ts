@@ -1,4 +1,5 @@
-import { describe, expect, it } from "bun:test";
+import * as assert from "node:assert/strict";
+import { describe, it } from "node:test";
 import { parseLsappinfoOutput } from "./running-apps";
 
 describe("parseLsappinfoOutput", () => {
@@ -26,7 +27,7 @@ describe("parseLsappinfoOutput", () => {
     type="Foreground"
 `;
 
-    expect(parseLsappinfoOutput(sample)).toEqual([
+    assert.deepEqual(parseLsappinfoOutput(sample), [
       {
         name: "Arc",
         pid: "700",
@@ -49,8 +50,13 @@ describe("parseLsappinfoOutput", () => {
     type="Foreground"
 `;
 
-    expect(parseLsappinfoOutput(sample)).toEqual([
-      { name: "Some App", pid: "1234" },
+    assert.deepEqual(parseLsappinfoOutput(sample), [
+      {
+        name: "Some App",
+        pid: "1234",
+        bundleId: undefined,
+        bundlePath: undefined,
+      },
     ]);
   });
 });
