@@ -19,7 +19,7 @@ import { useEffect, useRef, useState } from "react";
 import { InstallGuide } from "./components/InstallGuide";
 import { useCrocCheck } from "./hooks/useCrocCheck";
 import { useTransfer } from "./hooks/useTransfer";
-import { addRecord } from "./utils/history";
+import { addRecord, updateRecord } from "./utils/history";
 import { buildCrocArgs, getCrocPath } from "./utils/croc";
 import {
   buildProgressBar,
@@ -76,6 +76,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
   const [customPhrase, setCustomPhrase] = useState("");
   const [fileLabel, setFileLabel] = useState<string>("");
   const tempZipsRef = useRef<string[]>([]);
+  const recordIdRef = useRef<string | null>(null);
 
   useEffect(
     () => () => {
@@ -150,19 +151,22 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         toast.title = "Waiting for receiver";
         toast.message = p;
         const size = computeFileSize(filePaths);
-        await addRecord({
+        const record = await addRecord({
           type: "send",
           files: filePaths,
           phrase: p,
-          status: "success",
+          status: "in_progress",
           size,
         });
+        recordIdRef.current = record.id;
       },
       (prog) => {
         transfer.setProgress(prog);
         toast.message = `${prog.percent}% · ${prog.speed}`;
       },
       async () => {
+        if (recordIdRef.current)
+          await updateRecord(recordIdRef.current, { status: "success" });
         cleanupZips(tempZipsRef.current);
         tempZipsRef.current = [];
         transfer.setDone();
@@ -174,6 +178,8 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         await showHUD(`✓ Sent: ${name}`);
       },
       async (err) => {
+        if (recordIdRef.current)
+          await updateRecord(recordIdRef.current, { status: "failed" });
         cleanupZips(tempZipsRef.current);
         tempZipsRef.current = [];
         transfer.setError(err.message);

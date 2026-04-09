@@ -7,6 +7,7 @@ import {
   readdirSync,
   mkdirSync,
   statSync,
+  rmSync,
 } from "fs";
 
 export interface TransferProgress {
@@ -171,6 +172,11 @@ function spawnWithPty(
     proc.on("close", (code) => {
       setTimeout(() => {
         cleanup();
+        try {
+          rmSync(scriptDir, { recursive: true, force: true });
+        } catch {
+          /* ignore */
+        }
         onExit(code, cleanOutput(outputLog));
       }, 200);
     });
