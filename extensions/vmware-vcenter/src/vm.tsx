@@ -10,6 +10,7 @@ import {
   VMInfo,
   VMStoragePolicyComplianceInfo,
   VmStoragePolicyInfo,
+  VMSummary,
 } from "./api/types";
 import {
   PowerModeIcons,
@@ -366,6 +367,7 @@ export default function Command(): JSX.Element {
     /* Load Data */
     const id = vm.summary.vm;
     const promises = await Promise.allSettled([
+      client.ListVM(`vms=${vm.summary.vm}`),
       client.GetVM(id),
       client.GetVMStoragePolicy(id),
       client.GetVMStoragePolicyCompliance(id),
@@ -373,19 +375,33 @@ export default function Command(): JSX.Element {
     ]);
     for (const [index, response] of promises.entries()) {
       if (response.status === "fulfilled") {
+        if (!response.value) continue;
         if (index === 0) {
-          vm.vm_info = response.value as VMInfo;
+          const summary = (response.value as VMSummary[]).find((value) => value.vm === vm.summary.vm);
+          if (summary) vm.summary = summary;
         } else if (index === 1) {
-          vm.storage_policy_info = response.value as VmStoragePolicyInfo;
+          vm.vm_info = response.value as VMInfo;
         } else if (index === 2) {
-          vm.storage_policy_compliance_info = response.value as VMStoragePolicyComplianceInfo;
+          vm.storage_policy_info = response.value as VmStoragePolicyInfo;
         } else if (index === 3) {
+          vm.storage_policy_compliance_info = response.value as VMStoragePolicyComplianceInfo;
+        } else if (index === 4) {
           vm.interfaces_info = response.value as VmGuestNetworkingInterfacesInfo[];
         }
       } else {
         await showToast({ style: Toast.Style.Success, title: vm.summary.name, message: response.reason });
       }
     }
+
+    /* SetVMs and Save to Cache */
+    SetVMs((prevValue) => {
+      const index = prevValue.findIndex((value) => value.server === vm.server && value.summary.vm === vm.summary.vm);
+      if (index !== -1) {
+        prevValue[index] = vm;
+        cache.set(`vm_${vm.server}_vms`, JSON.stringify(prevValue.filter((value) => value.server === vm.server)));
+      }
+      return prevValue;
+    });
     SetIsLoadingVMs(false);
   }
 
