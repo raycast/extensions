@@ -366,9 +366,11 @@ function RecordDetail({ record }: { record: TransferRecord }) {
 function RecordItem({
   record,
   onRemove,
+  onClearAll,
 }: {
   record: TransferRecord;
   onRemove: (id: string) => void;
+  onClearAll: () => void;
 }) {
   const dirPath = record.files[0] ? dirname(record.files[0]) : null;
   const filesExist = record.files.some((f) => existsSync(f));
@@ -466,6 +468,13 @@ function RecordItem({
                 await showHUD("Record deleted");
               }}
             />
+            <Action
+              title="Clear All History"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
+              onAction={onClearAll}
+            />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -540,7 +549,12 @@ export default function TransferHistory() {
             subtitle={`${groups[group].length}`}
           >
             {groups[group].map((r) => (
-              <RecordItem key={r.id} record={r} onRemove={remove} />
+              <RecordItem
+                key={r.id}
+                record={r}
+                onRemove={remove}
+                onClearAll={handleClearAll}
+              />
             ))}
           </List.Section>
         ) : null,
