@@ -37,6 +37,30 @@ You can change them at any time from `Manage Hook Sounds`.
 
 ## Setup
 
+### Quick Install
+
+Requirements:
+
+- Raycast app already installed
+- Node.js and `npm`
+
+Install with:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
+```
+
+This downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
+It also backs up your current Claude and Gemini settings, then merges in the required hook entries.
+
+The installer starts the extension for you.
+If you ever need to start it manually:
+
+```bash
+cd ~/.ai-hook-notifier/raycast-extension
+npm run dev -- --non-interactive --exit-on-error
+```
+
 ### Claude Code
 
 Configure Claude hooks so:
