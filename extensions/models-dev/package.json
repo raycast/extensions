@@ -123,7 +123,7 @@
       "preferences": [
         {
           "name": "lookbackPeriod",
-          "title": "Lookback Period (Days)",
+          "title": "Lookback Period (Days)"
         }
       ]
     },
