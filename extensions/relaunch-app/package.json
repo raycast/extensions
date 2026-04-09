@@ -1,0 +1,41 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "relaunch-app",
+  "title": "Relaunch App",
+  "description": "Kill and relaunch any running macOS application instantly.",
+  "icon": "extension-icon.png",
+  "author": "pratyush",
+  "categories": ["System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "relaunch-app",
+      "title": "Relaunch App",
+      "subtitle": "Kill and Relaunch",
+      "description": "Choose a running app to kill and relaunch.",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.14.11",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "bunx ray build --skip-types -e dist",
+    "dev": "bunx ray develop",
+    "fix-lint": "bunx ray lint --fix",
+    "lint": "bunx ray lint",
+    "test": "bun test",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`bun run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "bunx @raycast/api@latest publish"
+  }
+}
