@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-raycast-notifier",
+  "title": "AI Hook Notifier",
+  "description": "Claude and Gemini events in Raycast with sounds and focused notifications.",
+  "icon": "icon.png",
+  "author": "lee_fulln",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "manage-sounds",
+      "title": "Manage Hook Sounds",
+      "description": "Manage sounds, install health, and AI hook notifier setup",
+      "mode": "view"
+    },
+    {
+      "name": "notify-event",
+      "title": "Notify AI Event",
+      "description": "Render an actionable AI event and return you to the source app",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "payload",
+          "description": "Base64 encoded event payload",
+          "type": "text",
+          "placeholder": "Base64 event payload",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "stateFilePath",
+      "title": "State File Path",
+      "description": "Path to the shared Claude notifier state file",
+      "type": "textfield",
+      "default": "~/.claude-raycast-notifier/state.json",
+      "required": true
+    },
+    {
+      "name": "notifierRootPath",
+      "title": "Notifier Root Path",
+      "description": "Directory containing sound-library.json, sound-mappings.json, and managed sound assets",
+      "type": "textfield",
+      "default": "~/.claude-raycast-notifier",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build --skip-types -e dist -o dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
