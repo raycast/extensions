@@ -16,7 +16,7 @@
     {
       "name": "switch-input-source",
       "title": "Switch Input Source",
-      "description": "Set the input source on a display",
+      "description": "Switch the input source on a display",
       "mode": "no-view",
       "arguments": [
         {
