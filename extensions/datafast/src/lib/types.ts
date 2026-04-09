@@ -156,6 +156,7 @@ export interface CityData {
 }
 
 export interface DateRangeParams {
+  [key: string]: string | number | undefined;
   startAt: string;
   endAt: string;
 }

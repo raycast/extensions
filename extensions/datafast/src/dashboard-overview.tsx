@@ -28,7 +28,7 @@ export default function DashboardOverview() {
     [range],
     {
       keepPreviousData: true,
-      failureToastOptions: { title: "Failed to load overview" },
+      failureToastOptions: { title: "Failed to get Datafast data" },
     },
   );
   const { data: previous, isLoading: loadingPrevious } = useCachedPromise(
@@ -36,13 +36,13 @@ export default function DashboardOverview() {
     [previousRange],
     {
       keepPreviousData: true,
-      failureToastOptions: { title: "Failed to load comparison data" },
+      failureToastOptions: { title: "Failed to get Datafast data" },
     },
   );
   const { data: realtime, isLoading: loadingRealtime } = useCachedPromise(
     fetchRealtime,
     [],
-    { failureToastOptions: { title: "Failed to load realtime data" } },
+    { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
   const { data: metadata } = useCachedPromise(fetchMetadata, []);
 

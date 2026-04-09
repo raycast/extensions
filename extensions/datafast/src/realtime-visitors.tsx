@@ -114,12 +114,12 @@ export default function RealtimeVisitors() {
   const { data: realtime, isLoading: loadingCount } = useCachedPromise(
     fetchRealtime,
     [],
-    { failureToastOptions: { title: "Failed to load realtime count" } },
+    { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
   const { data: mapData, isLoading: loadingMap } = useCachedPromise(
     fetchRealtimeMap,
     [],
-    { failureToastOptions: { title: "Failed to load visitor data" } },
+    { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
 
   const visitors = mapData?.visitors || [];

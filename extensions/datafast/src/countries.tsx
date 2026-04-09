@@ -38,12 +38,12 @@ function CountryDetail({
   const { data: regions, isLoading: loadingRegions } = useCachedPromise(
     fetchRegions,
     [regionParams],
-    { failureToastOptions: { title: "Failed to load regions" } },
+    { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
   const { data: cities, isLoading: loadingCities } = useCachedPromise(
     fetchCities,
     [cityParams],
-    { failureToastOptions: { title: "Failed to load cities" } },
+    { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
 
   return (
@@ -132,7 +132,7 @@ export default function Countries() {
   const params = useMemo(() => ({ ...range, limit: 100 }), [range]);
   const { data, isLoading } = useCachedPromise(fetchCountries, [params], {
     keepPreviousData: true,
-    failureToastOptions: { title: "Failed to load countries" },
+    failureToastOptions: { title: "Failed to get Datafast data" },
   });
   const { data: metadata } = useCachedPromise(fetchMetadata, []);
 

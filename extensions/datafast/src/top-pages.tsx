@@ -18,7 +18,7 @@ export default function TopPages() {
 
   const { data, isLoading } = useCachedPromise(fetchPages, [params], {
     keepPreviousData: true,
-    failureToastOptions: { title: "Failed to load pages" },
+    failureToastOptions: { title: "Failed to get Datafast data" },
   });
   const { data: metadata } = useCachedPromise(fetchMetadata, []);
 

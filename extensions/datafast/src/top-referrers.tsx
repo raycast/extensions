@@ -18,7 +18,7 @@ export default function TopReferrers() {
 
   const { data, isLoading } = useCachedPromise(fetchReferrers, [params], {
     keepPreviousData: true,
-    failureToastOptions: { title: "Failed to load referrers" },
+    failureToastOptions: { title: "Failed to get Datafast data" },
   });
   const { data: metadata } = useCachedPromise(fetchMetadata, []);
 

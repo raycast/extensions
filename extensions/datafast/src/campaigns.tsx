@@ -112,7 +112,7 @@ export default function Campaigns() {
   const params = useMemo(() => ({ ...range, limit: 100 }), [range]);
   const { data, isLoading } = useCachedPromise(fetchCampaigns, [params], {
     keepPreviousData: true,
-    failureToastOptions: { title: "Failed to load campaigns" },
+    failureToastOptions: { title: "Failed to get Datafast data" },
   });
   const { data: metadata } = useCachedPromise(fetchMetadata, []);
 
