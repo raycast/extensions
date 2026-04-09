@@ -9,7 +9,7 @@ import { Model } from "./lib/types";
 export default function NewAIModels() {
   const { data, isLoading } = useModelsData();
   const { lookbackPeriod } = getPreferenceValues<Preferences.NewModels>();
-  const days = parseInt(lookbackPeriod, 10) || 30;
+  const days = Math.max(1, parseInt(lookbackPeriod, 10) || 7);
 
   const filteredModels = useMemo(() => {
     if (!data?.models) return [];
