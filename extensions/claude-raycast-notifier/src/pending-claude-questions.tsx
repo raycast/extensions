@@ -30,7 +30,7 @@ export default function Command() {
       {requests.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No pending agent questions"
-          description="When Claude or Gemini asks for input, the pending question will appear here."
+          description="If you installed from Raycast and nothing appears here, run Setup Hooks first. Claude or Gemini questions will show up after hooks are configured."
           actions={
             <ActionPanel>
               <Action
@@ -39,7 +39,7 @@ export default function Command() {
                 onAction={() => revalidate()}
               />
               <Action
-                title="Setup Hooks"
+                title="Run Setup Hooks First"
                 icon={Icon.WrenchScrewdriver}
                 onAction={() =>
                   open(

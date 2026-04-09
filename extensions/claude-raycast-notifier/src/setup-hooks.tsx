@@ -26,7 +26,11 @@ export default function Command() {
   const { data, isLoading, revalidate } = usePromise(loadHookSetupStatus, []);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Setup Hooks">
+    <List
+      isLoading={isLoading}
+      navigationTitle="Setup Hooks After Install"
+      searchBarPlaceholder="Run this once after installing from Raycast"
+    >
       <List.Section title="Overview">
         <List.Item
           icon={{
@@ -36,13 +40,17 @@ export default function Command() {
           title={
             data?.runtimeInstalled
               ? "Hook runtime is installed"
-              : "Hook runtime is missing"
+              : "Run this after installing from Raycast"
           }
-          subtitle={data?.runtimeDir}
+          subtitle={
+            data?.runtimeInstalled
+              ? data?.runtimeDir
+              : "Claude and Gemini will not send events into Raycast until hooks are installed"
+          }
           actions={
             <ActionPanel>
               <Action
-                title="Install All Hooks"
+                title="Install All Hooks Now"
                 icon={Icon.Download}
                 onAction={async () => {
                   await installWithToast(
@@ -117,7 +125,11 @@ function ProviderItem({
         tintColor,
       }}
       title={`${label} Hooks`}
-      subtitle={status.configured ? "Configured" : "Needs setup"}
+      subtitle={
+        status.configured
+          ? "Configured"
+          : "Required after installing from Raycast"
+      }
       accessories={[{ text: basename(settingsPath) }, { tag: label }]}
       detail={
         <List.Item.Detail

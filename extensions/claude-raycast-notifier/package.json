@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claude-raycast-notifier",
   "title": "AI Hook Notifier",
-  "description": "Claude and Gemini events in Raycast with sounds and focused notifications.",
+  "description": "Claude and Gemini events in Raycast. After installing from Raycast, run Setup Hooks once.",
   "icon": "icon.png",
   "author": "lee_fulln",
   "license": "MIT",
@@ -19,8 +19,8 @@
     },
     {
       "name": "setup-hooks",
-      "title": "Setup Hooks",
-      "description": "Check Claude and Gemini hook health and install hook config from Raycast",
+      "title": "Setup Hooks After Install",
+      "description": "Required after Raycast install: check Claude and Gemini hook health and install hook config",
       "mode": "view"
     },
     {
@@ -56,7 +56,7 @@
     {
       "name": "pending-claude-questions",
       "title": "Pending Claude Questions",
-      "description": "Review and answer pending Claude Code questions from multiple sessions",
+      "description": "Review pending questions. If this stays empty after Raycast install, run Setup Hooks first",
       "mode": "view"
     }
   ],
