@@ -1,5 +1,5 @@
 import { execFile } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, readdirSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { promisify } from "util";
@@ -48,9 +48,29 @@ class WindowsPlatform implements PlatformAdapter {
   }
 
   async isWisprFlowInstalled(): Promise<boolean> {
-    const localAppData = process.env.LOCALAPPDATA;
-    if (!localAppData) return false;
-    return existsSync(join(localAppData, "WisprFlow", "Wispr Flow.exe"));
+    const searchDirs = [
+      process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"),
+      process.env.PROGRAMFILES ?? "C:\\Program Files",
+      process.env["PROGRAMFILES(X86)"] ?? "C:\\Program Files (x86)",
+    ];
+    for (const base of searchDirs) {
+      const wisprDir = join(base, "WisprFlow");
+      if (!existsSync(wisprDir)) continue;
+      if (existsSync(join(wisprDir, "Wispr Flow.exe"))) return true;
+      try {
+        if (
+          readdirSync(wisprDir).some(
+            (e) =>
+              e.startsWith("app-") &&
+              existsSync(join(wisprDir, e, "Wispr Flow.exe")),
+          )
+        )
+          return true;
+      } catch {
+        /* continue */
+      }
+    }
+    return false;
   }
 
   async openWisprFlow(url: string): Promise<void> {
