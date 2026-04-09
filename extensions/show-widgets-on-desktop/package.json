@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "show-widgets-on-desktop",
+  "title": "Desktop Widgets",
+  "description": "Toggle macOS “Show widgets on desktop” (standard desktop mode).",
+  "icon": "extension-icon.png",
+  "author": "zoranjambor",
+  "authorUrl": "https://zoranjambor.com",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-desktop-widgets",
+      "title": "Toggle Desktop Widgets",
+      "description": "Turn desktop widgets on or off (System Settings → Desktop & Dock).",
+      "mode": "no-view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray fix-lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
