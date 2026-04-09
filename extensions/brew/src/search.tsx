@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
@@ -20,9 +20,10 @@ function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
-export default function SearchView() {
-  const [searchText, setSearchText] = useState("");
-  const [filter, setFilter] = useState(InstallableFilterType.all);
+export default function SearchView(props: LaunchProps<{ arguments: { search: string; filter: string } }>) {
+  const [searchText, setSearchText] = useState(props.arguments.search ?? "");
+  const initialFilter = (props.arguments.filter as InstallableFilterType) || InstallableFilterType.all;
+  const [filter, setFilter] = useState(initialFilter);
   const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
@@ -126,8 +127,9 @@ export default function SearchView() {
     <FormulaList
       formulae={formulae}
       casks={casks}
+      searchText={searchText}
       searchBarPlaceholder={placeholder(filter)}
-      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
+      searchBarAccessory={<InstallableFilterDropdown value={filter} onSelect={setFilter} />}
       isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
       filtering={false}
