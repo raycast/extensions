@@ -8,6 +8,7 @@ import {
   showHUD,
   environment,
   updateCommandMetadata,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
@@ -60,7 +61,9 @@ export default function MenuBarRealtime() {
   const count = data?.count ?? data?.visitors?.length ?? 0;
 
   useEffect(() => {
-    if (data?.recentPayments) {
+    const { saleNotifications } =
+      getPreferenceValues<Preferences.MenuBarRealtime>();
+    if (saleNotifications !== false && data?.recentPayments) {
       checkForNewSales(data.recentPayments);
     }
     updateCommandMetadata({ subtitle: null });

@@ -83,7 +83,18 @@
       "description": "Show live visitor count in your menu bar",
       "mode": "menu-bar",
       "interval": "1m",
-      "keywords": ["visitors", "realtime", "menu bar", "live"]
+      "keywords": ["visitors", "realtime", "menu bar", "live"],
+      "preferences": [
+        {
+          "name": "saleNotifications",
+          "type": "checkbox",
+          "required": false,
+          "title": "Sale Notifications",
+          "description": "Show confetti and a notification when a new sale comes through",
+          "default": true,
+          "label": "Enable sale notifications"
+        }
+      ]
     }
   ],
   "dependencies": {
