@@ -1,5 +1,5 @@
 import { LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
-import { getFirstExternalDisplay, readInputSource, setInputSource } from "./utils/m1ddc";
+import { getFirstExternalDisplay, readInputSource, switchInputSource } from "./utils/m1ddc";
 import { getSource, getSourceName, setPreviousSource } from "./utils/sources";
 
 export default async function previewInputSource(
@@ -44,7 +44,7 @@ export default async function previewInputSource(
     }
     const originalValue = val;
 
-    const result = await setInputSource(display.id, target.value);
+    const result = await switchInputSource(display.id, target.value);
     if (result === null) return;
 
     let cancelled = false;
@@ -93,7 +93,7 @@ export default async function previewInputSource(
       await showHUD(`Switched to "${target.name}" on "${display.name}"`);
     } else {
       // Revert (either cancelled or timed out)
-      await setInputSource(display.id, originalValue);
+      await switchInputSource(display.id, originalValue);
       const revertName = getSourceName(originalValue);
       await showToast({ style: Toast.Style.Success, title: `Switched back to "${revertName}"` });
     }

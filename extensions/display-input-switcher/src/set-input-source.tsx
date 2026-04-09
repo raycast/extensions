@@ -1,8 +1,8 @@
 import { Alert, confirmAlert, LaunchProps, showHUD, showToast, Toast } from "@raycast/api";
-import { getFirstExternalDisplay, readInputSource, setInputSource } from "./utils/m1ddc";
+import { getFirstExternalDisplay, readInputSource, switchInputSource } from "./utils/m1ddc";
 import { getSource, setPreviousSource } from "./utils/sources";
 
-export default async function setInputSourceCommand(props: LaunchProps<{ arguments: { input: string } }>) {
+export default async function switchInputSourceCommand(props: LaunchProps<{ arguments: { input: string } }>) {
   const inputValue = parseInt(props.arguments.input, 10);
   const target = getSource(inputValue);
 
@@ -39,7 +39,7 @@ export default async function setInputSourceCommand(props: LaunchProps<{ argumen
       await setPreviousSource(currentValue);
     }
 
-    const result = await setInputSource(display.id, inputValue);
+    const result = await switchInputSource(display.id, inputValue);
     if (result === null) return;
 
     await showHUD(`Switched to "${target.name}" on "${display.name}"`);

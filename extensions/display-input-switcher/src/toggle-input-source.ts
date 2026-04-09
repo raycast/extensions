@@ -1,5 +1,5 @@
 import { Alert, confirmAlert, showHUD, showToast, Toast } from "@raycast/api";
-import { getFirstExternalDisplay, readInputSource, setInputSource } from "./utils/m1ddc";
+import { getFirstExternalDisplay, readInputSource, switchInputSource } from "./utils/m1ddc";
 import { getPreviousSource, getSourceName, setPreviousSource } from "./utils/sources";
 
 export default async function toggleInputSource() {
@@ -45,7 +45,7 @@ export default async function toggleInputSource() {
     });
     if (!confirmed) return;
 
-    const result = await setInputSource(display.id, previousValue);
+    const result = await switchInputSource(display.id, previousValue);
     if (result === null) return;
 
     // Current becomes the new previous

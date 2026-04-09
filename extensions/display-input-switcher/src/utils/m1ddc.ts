@@ -131,7 +131,7 @@ export async function getFirstExternalDisplay(): Promise<DisplayInfo | null> {
   return displays.find((d) => d.name !== "(null)") ?? displays[0] ?? null;
 }
 
-export async function setInputSource(displayId: number, inputSourceValue: number): Promise<string | null> {
+export async function switchInputSource(displayId: number, inputSourceValue: number): Promise<string | null> {
   const cliPath = await getCliPath();
   if (!cliPath) return null;
   const { stdout, stderr } = await exec(cliPath, [
