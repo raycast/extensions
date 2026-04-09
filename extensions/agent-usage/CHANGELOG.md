@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Synthetic Provider and OpenCode Integration] - {PR_MERGE_DATE}
+## [Synthetic Provider and OpenCode Integration] - 2026-04-09
 
 ### New Features
 
