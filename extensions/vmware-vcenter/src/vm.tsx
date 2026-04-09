@@ -435,6 +435,7 @@ export default function Command(): JSX.Element {
         title: vm.summary.name,
         message: MessageGuestActionFinished.get(action),
       });
+      await LoadVM(vm);
     } catch (error) {
       if (error instanceof Error)
         await showToast({
@@ -474,6 +475,7 @@ export default function Command(): JSX.Element {
         title: vm.summary.name,
         message: MessageActionFinished.get(action),
       });
+      await LoadVM(vm);
     } catch (error) {
       if (error instanceof Error)
         await showToast({
