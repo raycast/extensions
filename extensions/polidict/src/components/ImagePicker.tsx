@@ -141,7 +141,7 @@ export function ImagePicker({ initialSearchText, onSelect }: ImagePickerProps) {
                     <Action.OpenInBrowser
                       title="View Photographer on Unsplash"
                       url={image.attribution.photographerUrl}
-                      shortcut={{ modifiers: ["cmd"], key: "p" }}
+                      shortcut={{ modifiers: ["opt"], key: "p" }}
                     />
                     <Action.OpenInBrowser
                       title="View Photo on Unsplash"

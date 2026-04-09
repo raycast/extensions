@@ -1,8 +1,14 @@
 # Polidict
 
-Language learning vocabulary management and training extension for Raycast.
+Raycast client for [Polidict](https://polidict.com) — a language learning service for advanced learners. Look up words, manage vocabulary, and train with spaced repetition, all without leaving Raycast.
 
-## Features
+## Setup
+
+1. **Create a Polidict account** at [polidict.com](https://polidict.com)
+2. **Sign in** when prompted by the extension (Google OAuth or email magic link)
+3. **Select your languages** — choose your learning language and set your native language for translations
+
+## Commands
 
 ### Lookup Word
 
@@ -12,15 +18,14 @@ Search for words and get definitions from multiple sources:
 - **Blueprints** — curated definitions from Polidict's database
 - **AI Definitions** — generate definitions using Raycast AI (requires Raycast Pro)
 
-Add words to your vocabulary with definitions, examples, and translations.
-
-![Lookup](media/lookup.png)
+![Lookup](metadata/polidict-5.png)
 
 ### View Vocabulary
 
 Browse, filter, and manage your saved vocabulary. View definitions, filter by groups, edit or delete items.
 
-![Vocabulary](media/vocabulary.png)
+![Vocabulary](metadata/polidict-1.png)
+![Edit Word](metadata/polidict-4.png)
 
 ### Start Training
 
@@ -30,8 +35,8 @@ Practice your vocabulary with interactive exercises:
 - **Quiz Reverse** — pick the correct word for a definition
 - **Flashcard** — review cards with front and back
 
-![Trainings](media/trainings.png)
-![Quiz](media/quiz.png)
+![Trainings](metadata/polidict-2.png)
+![Quiz](metadata/polidict-3.png)
 
 ### Quick Add Word
 
@@ -45,19 +50,13 @@ Create, edit, and delete vocabulary groups to organize your words.
 
 View your learning statistics, streak, and training history.
 
-![Stats](media/learning-stats.png)
-
-## Setup
-
-1. **Create a Polidict account** at [polidict.com](https://polidict.com)
-2. **Sign in** when prompted by the extension (Google OAuth or email magic link)
-3. **Select your languages** — choose your learning language and set your native language for translations
+![Stats](metadata/polidict-6.png)
 
 ## Requirements
 
-- **Polidict account** — required for all features
+- **Polidict account** — required for all features ([sign up](https://polidict.com))
 - **Raycast Pro** (optional) — enables AI-generated definitions when no blueprint is available
 
 ## Support
 
-For issues and feature requests, visit [github.com/solomkinmv/polidict](https://github.com/solomkinmv/polidict).
+For issues and feature requests, contact [support@polidict.com](mailto:support@polidict.com).

@@ -81,13 +81,13 @@ function ViewVocabularyContent({
   });
 
   useEffect(() => {
-    if (!learningItemsData) return;
+    if (!learningItemsData || page <= lastProcessedPage.current) return;
+
     setHasMore(learningItemsData.hasNext);
 
     if (page === 1) {
       setAccumulatedItems(learningItemsData.learningItems);
-      lastProcessedPage.current = 1;
-    } else if (page > lastProcessedPage.current) {
+    } else {
       setAccumulatedItems((prev) => {
         const existingIds = new Set(prev.map((item) => item.id));
         const newItems = learningItemsData.learningItems.filter(
@@ -95,8 +95,8 @@ function ViewVocabularyContent({
         );
         return [...prev, ...newItems];
       });
-      lastProcessedPage.current = page;
     }
+    lastProcessedPage.current = page;
   }, [learningItemsData, page]);
 
   const isLoading = groupsLoading || itemsLoading;
@@ -112,7 +112,7 @@ function ViewVocabularyContent({
     setPage(1);
     setAccumulatedItems([]);
     lastProcessedPage.current = 0;
-    revalidateHook();
+    setTimeout(() => revalidateHook(), 0);
   }, [revalidateHook]);
 
   function loadMore() {
