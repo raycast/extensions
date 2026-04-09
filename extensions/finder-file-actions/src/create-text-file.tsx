@@ -4,11 +4,7 @@ import path from "path";
 import { isFinderFrontmost, getCurrentFinderDirectory, selectInFinder, generateUniqueName } from "./common/finder";
 import { fsAsync } from "./common/fs-async";
 
-interface CreateTextFileArguments {
-  extension?: string;
-}
-
-export default async function CreateTextFile(props: LaunchProps<{ arguments: CreateTextFileArguments }>) {
+export default async function CreateTextFile(props: LaunchProps<{ arguments: Arguments.CreateTextFile }>) {
   const rawExt = props.arguments.extension?.trim() || "txt";
   // strip leading dot if user typed ".md" instead of "md"
   const extension = rawExt.replace(/^\./, "");

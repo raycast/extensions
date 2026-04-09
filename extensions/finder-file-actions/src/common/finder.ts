@@ -49,7 +49,7 @@ export async function selectInFinder(itemPath: string): Promise<void> {
     await runAppleScript(`
       tell application "Finder"
         activate
-        set theItem to (POSIX file "${itemPath}") as alias
+        set theItem to (POSIX file "${itemPath.replace(/"/g, '\\"')}") as alias
         select theItem
       end tell
     `);

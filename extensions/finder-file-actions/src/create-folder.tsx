@@ -4,11 +4,7 @@ import path from "path";
 import { isFinderFrontmost, getCurrentFinderDirectory, selectInFinder, generateUniqueName } from "./common/finder";
 import { fsAsync } from "./common/fs-async";
 
-interface CreateFolderArguments {
-  folderName?: string;
-}
-
-export default async function CreateFolder(props: LaunchProps<{ arguments: CreateFolderArguments }>) {
+export default async function CreateFolder(props: LaunchProps<{ arguments: Arguments.CreateFolder }>) {
   const folderName = props.arguments.folderName?.trim() || "untitled folder";
 
   const frontmost = await isFinderFrontmost();

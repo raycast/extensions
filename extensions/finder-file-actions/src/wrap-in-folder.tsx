@@ -4,11 +4,7 @@ import path from "path";
 import { isFinderFrontmost, selectInFinder, generateUniqueName } from "./common/finder";
 import { fsAsync } from "./common/fs-async";
 
-interface WrapInFolderArguments {
-  folderName?: string;
-}
-
-export default async function WrapInFolder(props: LaunchProps<{ arguments: WrapInFolderArguments }>) {
+export default async function WrapInFolder(props: LaunchProps<{ arguments: Arguments.WrapInFolder }>) {
   const folderName = props.arguments.folderName?.trim() || "untitled folder";
 
   const frontmost = await isFinderFrontmost();

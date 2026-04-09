@@ -117,8 +117,7 @@
     "binary-split": "^1.0.5",
     "fs-extra": "^11.3.4",
     "run-applescript": "^7.1.0",
-    "through2-map": "^4.0.0",
-    "yup": "^1.7.1"
+    "through2-map": "^4.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.3.0",
