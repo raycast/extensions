@@ -1,5 +1,9 @@
 # Plexamp CHANGELOG
 
+## [Menubar Flicker Fix] - {PR_MERGE_DATE}
+
+- Fixed the menubar widget blinking "Nothing playing" and losing album art on every background refresh by caching playback state across remounts.
+
 ## [Recently Played] - 2026-03-26
 
 - Added the `Recently Played` command to browse the 50 most recently played tracks from the selected Plex music library.
