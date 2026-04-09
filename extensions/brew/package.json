@@ -47,7 +47,7 @@
           "name": "filter",
           "placeholder": "Filter",
           "type": "dropdown",
-          "default": "all",
+          "required": false,
           "data": [
             { "title": "All", "value": "all" },
             { "title": "Formulae", "value": "formulae" },
