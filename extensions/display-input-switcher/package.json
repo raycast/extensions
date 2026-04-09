@@ -14,7 +14,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "set-input-source",
+      "name": "switch-input-source",
       "title": "Switch Input Source",
       "description": "Set the input source on a display",
       "mode": "no-view",
