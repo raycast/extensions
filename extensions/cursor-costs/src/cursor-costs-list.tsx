@@ -12,6 +12,7 @@ import {
   formatUsagePercent,
   formatUsageFraction,
   formatRemainingCents,
+  formatPlanPercentValue,
   calculateTotalTokens,
 } from "./utils/formatting";
 
@@ -144,6 +145,18 @@ export default function CursorCostsList() {
                           title="Usage"
                           text={formatUsagePercent(planUsage.used, planUsage.limit, planUsage.breakdown?.bonus)}
                         />
+                        {planUsage.autoPercentUsed != null && (
+                          <List.Item.Detail.Metadata.Label
+                            title="Auto"
+                            text={formatPlanPercentValue(planUsage.autoPercentUsed)}
+                          />
+                        )}
+                        {planUsage.apiPercentUsed != null && (
+                          <List.Item.Detail.Metadata.Label
+                            title="API"
+                            text={formatPlanPercentValue(planUsage.apiPercentUsed)}
+                          />
+                        )}
                       </>
                     )}
                   </List.Item.Detail.Metadata>
@@ -176,6 +189,18 @@ export default function CursorCostsList() {
                         title="Percentage"
                         text={formatUsagePercent(planUsage.used, planUsage.limit, planUsage.breakdown.bonus)}
                       />
+                      {planUsage.autoPercentUsed != null && (
+                        <List.Item.Detail.Metadata.Label
+                          title="Auto"
+                          text={formatPlanPercentValue(planUsage.autoPercentUsed)}
+                        />
+                      )}
+                      {planUsage.apiPercentUsed != null && (
+                        <List.Item.Detail.Metadata.Label
+                          title="API"
+                          text={formatPlanPercentValue(planUsage.apiPercentUsed)}
+                        />
+                      )}
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Included"
