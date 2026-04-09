@@ -4,7 +4,7 @@ View your Datafast web analytics in Raycast.
 
 ## Commands
 
-**Dashboard Overview** – View key metrics including visitors, revenue, conversion rate, revenue per visitor, bounce rate, session time, and online users with period-over-period trend comparisons.
+**Dashboard Overview** – View key metrics including visitors, revenue, conversion rate, revenue per visitor, bounce rate, and online users with period-over-period trend comparisons.
 
 **Realtime Visitors** – See who's on your site right now with location, device, browser, referral source, and conversion likelihood for each active visitor.
 
