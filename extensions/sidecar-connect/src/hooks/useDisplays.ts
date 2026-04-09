@@ -59,7 +59,6 @@ export function useDisplays() {
           id: stored.id,
           name: stored.name,
           isConnected: false,
-          isWired: false,
           isFavorite: stored.isFavorite,
           lastConnected: stored.lastConnected,
           source: "history",

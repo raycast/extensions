@@ -4,7 +4,7 @@ import { getFavoriteDeviceName, markConnected } from "./lib/display-store";
 import { SidecarDevice } from "./lib/types";
 
 export default async function Toggle() {
-  const preferences = getPreferenceValues<{ defaultDevice?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Determine target: preference > favorite > first available/connected
   let targetName = preferences.defaultDevice?.trim();

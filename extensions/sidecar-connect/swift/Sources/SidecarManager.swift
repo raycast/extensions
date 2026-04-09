@@ -118,7 +118,7 @@ final class SidecarManager {
             let deviceID = name
             let isConnected = connectedNames.contains(name)
 
-            return SidecarDeviceInfo(id: deviceID, name: name, isConnected: isConnected, isWired: false)
+            return SidecarDeviceInfo(id: deviceID, name: name, isConnected: isConnected)
         }
     }
 

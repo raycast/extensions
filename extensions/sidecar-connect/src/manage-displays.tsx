@@ -81,7 +81,6 @@ function DeviceItem({
     <List.Item
       icon={device.isConnected ? { source: Icon.Monitor, tintColor: Color.Green } : Icon.Monitor}
       title={device.name}
-      subtitle={device.isWired ? "Wired" : undefined}
       accessories={accessories}
       actions={
         <ActionPanel>
@@ -154,7 +153,7 @@ function DeviceItem({
             <Action
               title="Open Display Settings"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
               onAction={() => open("x-apple.systempreferences:com.apple.Displays-Settings.extension")}
             />
           </ActionPanel.Section>
