@@ -150,7 +150,10 @@ export default function Command() {
         <List.EmptyView icon={Icon.Terminal} title="No sessions found" description="No open iTerm sessions detected" />
       )}
       {visibleTabs.map((tab) => (
-        <List.Section key={`w${tab.windowIndex}-t${tab.tabId}`} title={`Window ${tab.windowIndex} · Tab ${tab.tabId}`}>
+        <List.Section
+          key={`w${tab.windowIndex}-t${tab.tabId}`}
+          title={windowCount > 1 ? `Window ${tab.windowIndex} · Tab ${tab.tabId}` : `Tab ${tab.tabId}`}
+        >
           {tab.sessions.map((session) => {
             const tag = tags[session.name];
             return (
