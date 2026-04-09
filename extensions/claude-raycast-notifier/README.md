@@ -54,7 +54,9 @@ curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/
 This downloads a small bootstrap script, then downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
 It also backs up your current Claude and Gemini settings, then merges in the required hook entries.
 
-The installer starts the extension for you.
+If Raycast is installed, the installer also starts the extension for you.
+If Raycast is not installed, voice notifications still work and the installer prints the updated config paths.
+
 If you ever need to start it manually:
 
 ```bash
