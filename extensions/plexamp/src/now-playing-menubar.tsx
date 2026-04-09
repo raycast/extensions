@@ -1,60 +1,54 @@
 import { Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import { formatNowPlayingMenuBarTitle } from "./format";
 import { getImageUrl, getMetadataByKeyForTimeline, getMetadataByRatingKey, getTimeline } from "./plex";
 import type { MetadataItem, TimelineInfo } from "./types";
+import { useAsyncValue } from "./use-async-value";
 
 interface MenuBarState {
   timeline: TimelineInfo;
   current?: MetadataItem;
-  error?: string;
+  imageUrl?: string;
 }
 
-export default function Command() {
-  const [state, setState] = useState<MenuBarState>({
-    timeline: { state: "loading" },
-  });
-  const [isLoading, setIsLoading] = useState(true);
+async function loadNowPlaying(): Promise<MenuBarState> {
+  const timeline = await getTimeline();
+  let current: MetadataItem | undefined;
 
-  const reload = useCallback(async () => {
+  if (timeline.key) {
     try {
-      const timeline = await getTimeline();
-      let current: MetadataItem | undefined;
-
-      if (timeline.key) {
-        try {
-          current = await getMetadataByKeyForTimeline(timeline, timeline.key);
-        } catch {
-          current = undefined;
-        }
-      }
-
-      if (!current && timeline.ratingKey) {
-        try {
-          current = await getMetadataByRatingKey(timeline.ratingKey);
-        } catch {
-          current = undefined;
-        }
-      }
-
-      setState({ timeline, current });
-    } catch (error) {
-      setState({
-        timeline: { state: "error" },
-        error: error instanceof Error ? error.message : String(error),
-      });
-    } finally {
-      setIsLoading(false);
+      current = await getMetadataByKeyForTimeline(timeline, timeline.key);
+    } catch {
+      current = undefined;
     }
-  }, []);
+  }
 
-  useEffect(() => {
-    void reload();
-  }, [reload]);
+  if (!current && timeline.ratingKey) {
+    try {
+      current = await getMetadataByRatingKey(timeline.ratingKey);
+    } catch {
+      current = undefined;
+    }
+  }
+
+  const imageUrl = current?.thumb ? getImageUrl(current.thumb) : undefined;
+
+  return { timeline, current, imageUrl };
+}
+
+const initialState: MenuBarState = { timeline: { state: "loading" } };
+
+export default function Command() {
+  const { value: state, isLoading, error, reload } = useAsyncValue(
+    loadNowPlaying,
+    "menubar",
+    initialState,
+    "menubar-now-playing",
+  );
 
   const title = useMemo(() => formatNowPlayingMenuBarTitle(state.current), [state.current]);
-  const icon = state.current?.thumb ? { source: getImageUrl(state.current.thumb) ?? Icon.Music } : Icon.Music;
+  const icon = state.imageUrl ? { source: state.imageUrl } : Icon.Music;
   const subtitle =
     state.current?.type === "track"
       ? [state.current.parentTitle, state.current.grandparentTitle].filter(Boolean).join(" - ")
@@ -63,15 +57,15 @@ export default function Command() {
         : undefined;
 
   return (
-    <MenuBarExtra isLoading={isLoading} icon={icon} title={title} tooltip={state.error ?? title}>
+    <MenuBarExtra isLoading={isLoading} icon={icon} title={title} tooltip={error ?? title}>
       <MenuBarExtra.Section title="Playback">
         <MenuBarExtra.Item title={title} icon={icon} />
         {subtitle ? <MenuBarExtra.Item title={subtitle} icon={Icon.Music} /> : null}
         <MenuBarExtra.Item title={`State: ${state.timeline.state}`} icon={Icon.Play} />
       </MenuBarExtra.Section>
-      {state.error ? (
+      {error ? (
         <MenuBarExtra.Section title="Error">
-          <MenuBarExtra.Item title={state.error} icon={Icon.ExclamationMark} />
+          <MenuBarExtra.Item title={error} icon={Icon.ExclamationMark} />
         </MenuBarExtra.Section>
       ) : null}
       <MenuBarExtra.Section>
