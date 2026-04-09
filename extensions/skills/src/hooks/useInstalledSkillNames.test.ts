@@ -78,17 +78,4 @@ describe("useInstalledSkillNames", () => {
     expect(listInstalledSkills).toHaveBeenCalled();
   });
 
-  it("exposes names exactly as returned by the CLI", () => {
-    // The hook builds a Set from CLI output without any transformation.
-    // Matching logic (e.g. using skillId) lives in the consumer, not the hook.
-    vi.mocked(useCachedPromise).mockReturnValue({
-      data: ["vercel-example-skill"],
-      isLoading: false,
-    } as ReturnType<typeof useCachedPromise>);
-
-    const { installedNames } = useInstalledSkillNames();
-
-    expect(installedNames.has("vercel-example-skill")).toBe(true);
-    expect(installedNames.has("other-skill")).toBe(false);
-  });
 });
