@@ -25,7 +25,7 @@
           "description": "Use the screenshot folder and file naming conventions from the macOS Screenshot app",
           "type": "checkbox",
           "required": false,
-          "title": "macOS Screenshot app",
+          "title": "macOS Screenshot App",
           "default": true,
           "label": "Use settings from macOS Screenshot app"
         },
@@ -34,7 +34,7 @@
           "description": "Location where you save your screenshots",
           "type": "textfield",
           "required": true,
-          "title": "Screenshot folder",
+          "title": "Screenshot Folder",
           "default": "~/Desktop"
         },
         {
@@ -42,7 +42,7 @@
           "description": "Number of days to keep screenshots for",
           "type": "dropdown",
           "required": true,
-          "title": "Delete screenshots older than",
+          "title": "Delete Screenshots Older Than",
           "default": "30",
           "data": [
             {
@@ -62,7 +62,7 @@
               "value": "30"
             },
             {
-              "title": "3 Month",
+              "title": "3 Months",
               "value": "90"
             }
           ]

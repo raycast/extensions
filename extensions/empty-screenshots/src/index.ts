@@ -4,12 +4,6 @@ import { homedir } from "os";
 import { execSync } from "child_process";
 import { showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  daysToKeep: string;
-  screenshotFolder: string;
-  useMacOSDefaults: boolean;
-}
-
 const MACOS_SCREENSHOT_PATTERN = /^Screen(shot| Recording) \d{4}-\d{2}-\d{2}/;
 
 function getMacOSScreenshotFolder(): string {
@@ -25,7 +19,7 @@ function getMacOSScreenshotFolder(): string {
 }
 
 export default async function main() {
-  const { daysToKeep, screenshotFolder, useMacOSDefaults } = getPreferenceValues<Preferences>();
+  const { daysToKeep, screenshotFolder, useMacOSDefaults } = getPreferenceValues<Preferences.Index>();
   const numberOfDays = parseInt(daysToKeep, 10);
   const folder = useMacOSDefaults ? getMacOSScreenshotFolder() : resolve(screenshotFolder.replace("~", homedir()));
 
