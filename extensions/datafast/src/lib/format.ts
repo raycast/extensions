@@ -37,7 +37,7 @@ export function formatPercentage(n: number | undefined | null): string {
 export function formatDuration(value: number | undefined | null): string {
   let secs = value ?? 0;
   // API may return milliseconds — if value > 1 hour in seconds, assume ms
-  if (secs > 3600) secs = secs / 1000;
+  if (secs > 86400) secs = secs / 1000;
   const m = Math.floor(secs / 60);
   const s = Math.round(secs % 60);
   return `${m}m ${s}s`;

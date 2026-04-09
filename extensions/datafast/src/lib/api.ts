@@ -47,6 +47,13 @@ export async function datafastFetch<T>(
     },
   });
 
+  if (
+    !response.ok &&
+    !response.headers.get("content-type")?.includes("application/json")
+  ) {
+    throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+  }
+
   const json = (await response.json()) as ApiResponse<T>;
 
   if (json.status === "error") {

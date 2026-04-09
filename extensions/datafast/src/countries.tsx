@@ -27,22 +27,18 @@ function CountryDetail({
   range: DateRangeParams;
   currency: string;
 }) {
-  const regionParams = useMemo(
-    () => ({ ...range, country, limit: 50 }),
-    [range, country],
-  );
-  const cityParams = useMemo(
+  const locationParams = useMemo(
     () => ({ ...range, country, limit: 50 }),
     [range, country],
   );
   const { data: regions, isLoading: loadingRegions } = useCachedPromise(
     fetchRegions,
-    [regionParams],
+    [locationParams],
     { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
   const { data: cities, isLoading: loadingCities } = useCachedPromise(
     fetchCities,
-    [cityParams],
+    [locationParams],
     { failureToastOptions: { title: "Failed to get Datafast data" } },
   );
 
