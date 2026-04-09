@@ -1,4 +1,10 @@
-import { getSelectedFinderItems, showHUD, showToast, Toast, Clipboard } from "@raycast/api";
+import {
+  getSelectedFinderItems,
+  showHUD,
+  showToast,
+  Toast,
+  Clipboard,
+} from "@raycast/api";
 import { basename } from "path";
 import { getCrocPath, buildCrocArgs } from "./utils/croc";
 import { spawnCrocSend, computeFileSize } from "./utils/process";
@@ -26,7 +32,8 @@ export default async function QuickSend(): Promise<void> {
     return;
   }
 
-  const label = files.length === 1 ? basename(files[0]) : `${files.length} files`;
+  const label =
+    files.length === 1 ? basename(files[0]) : `${files.length} files`;
   await showHUD(`Preparing to send: ${label}`);
 
   const args = buildCrocArgs("send", files);
@@ -37,7 +44,9 @@ export default async function QuickSend(): Promise<void> {
   // Best-effort SIGTERM handler
   process.on("SIGTERM", () => {
     if (recordId) {
-      updateRecord(recordId, { status: "failed" }).finally(() => process.exit(1));
+      updateRecord(recordId, { status: "failed" }).finally(() =>
+        process.exit(1),
+      );
     } else {
       process.exit(1);
     }
@@ -71,9 +80,13 @@ export default async function QuickSend(): Promise<void> {
       },
       async (err) => {
         if (recordId) await updateRecord(recordId, { status: "failed" });
-        await showToast({ style: Toast.Style.Failure, title: "Send failed", message: err.message });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Send failed",
+          message: err.message,
+        });
         resolve();
-      }
+      },
     );
   });
 }

@@ -18,7 +18,12 @@ import { InstallGuide } from "./components/InstallGuide";
 import { useCrocCheck } from "./hooks/useCrocCheck";
 import { addRecord } from "./utils/history";
 import { buildCrocArgs, getCrocPath, getPrefs } from "./utils/croc";
-import { buildProgressBar, CrocProcess, spawnCrocReceive, TransferProgress } from "./utils/process";
+import {
+  buildProgressBar,
+  CrocProcess,
+  spawnCrocReceive,
+  TransferProgress,
+} from "./utils/process";
 
 type ReceiveState = "input" | "receiving" | "done" | "error";
 
@@ -30,13 +35,16 @@ function extractCrocCode(text: string): string | null {
     .replace(/["']?\s*$/, "")
     .trim();
 
-  const match = stripped.match(/^(\d+-(?:[a-z]+-)*[a-z]+)$/i)
-    ?? stripped.match(/(\d+-(?:[a-z]+-)*[a-z]+)/i);
+  const match =
+    stripped.match(/^(\d+-(?:[a-z]+-)*[a-z]+)$/i) ??
+    stripped.match(/(\d+-(?:[a-z]+-)*[a-z]+)/i);
 
   return match ? match[1].toLowerCase() : null;
 }
 
-export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: string } }>) {
+export default function ReceiveFile(
+  props: LaunchProps<{ arguments: { code?: string } }>,
+) {
   const { isChecking, isInstalled, recheck } = useCrocCheck();
   const [codeInput, setCodeInput] = useState("");
   const [state, setState] = useState<ReceiveState>("input");
@@ -48,9 +56,17 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
   const deepLinkHandled = useRef(false);
 
   const prefs = getPrefs();
-  const downloadDir = (prefs.downloadDirectory || "~/Downloads/Share").replace(/^~/, process.env.HOME ?? "~");
+  const downloadDir = (prefs.downloadDirectory || "~/Downloads/Share").replace(
+    /^~/,
+    process.env.HOME ?? "~",
+  );
 
-  useEffect(() => () => { procRef.current?.kill(); }, []);
+  useEffect(
+    () => () => {
+      procRef.current?.kill();
+    },
+    [],
+  );
 
   // Deep link: auto-start
   useEffect(() => {
@@ -68,12 +84,16 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
   // Pre-fill from clipboard
   useEffect(() => {
     if (deepLinkHandled.current) return;
-    Clipboard.readText().then((text) => {
-      if (text) {
-        const code = extractCrocCode(text);
-        if (code) setCodeInput(code);
-      }
-    }).catch(() => { /* clipboard unavailable */ });
+    Clipboard.readText()
+      .then((text) => {
+        if (text) {
+          const code = extractCrocCode(text);
+          if (code) setCodeInput(code);
+        }
+      })
+      .catch(() => {
+        /* clipboard unavailable */
+      });
   }, []);
 
   async function startReceive(phrase: string) {
@@ -86,10 +106,17 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
     setProgress(null);
 
     const args = buildCrocArgs("receive");
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Connecting…", message: trimmed });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Connecting…",
+      message: trimmed,
+    });
 
     procRef.current = spawnCrocReceive(
-      crocPath, args, trimmed, downloadDir,
+      crocPath,
+      args,
+      trimmed,
+      downloadDir,
       (p) => {
         setProgress(p);
         toast.message = `${p.percent}% · ${p.speed}`;
@@ -101,7 +128,12 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
         toast.style = Toast.Style.Success;
         toast.title = "Files received!";
         toast.message = files.length > 0 ? basename(files[0]) : downloadDir;
-        await addRecord({ type: "receive", files, phrase: trimmed, status: "success" });
+        await addRecord({
+          type: "receive",
+          files,
+          phrase: trimmed,
+          status: "success",
+        });
       },
       async (err) => {
         setErrorMsg(err.message);
@@ -109,15 +141,25 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
         toast.style = Toast.Style.Failure;
         toast.title = "Transfer failed";
         toast.message = err.message;
-        await addRecord({ type: "receive", files: [], phrase: trimmed, status: "failed" });
-      }
+        await addRecord({
+          type: "receive",
+          files: [],
+          phrase: trimmed,
+          status: "failed",
+        });
+      },
     );
   }
 
   function handleCancel() {
     procRef.current?.kill();
     if (activePhrase) {
-      addRecord({ type: "receive", files: [], phrase: activePhrase, status: "cancelled" });
+      addRecord({
+        type: "receive",
+        files: [],
+        phrase: activePhrase,
+        status: "cancelled",
+      });
     }
     setState("input");
     setProgress(null);
@@ -129,10 +171,15 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
   if (state === "receiving") {
     const pct = progress?.percent ?? 0;
     const bar = buildProgressBar(pct);
-    const sizeInfo = progress?.transferred && progress?.total ? `**${progress.transferred}** / ${progress.total}` : "";
+    const sizeInfo =
+      progress?.transferred && progress?.total
+        ? `**${progress.transferred}** / ${progress.total}`
+        : "";
     const speedInfo = progress?.speed || "";
     const etaInfo = progress?.eta ? `${progress.eta} remaining` : "";
-    const statsLine = [sizeInfo, speedInfo, etaInfo].filter(Boolean).join("  \u00B7  ");
+    const statsLine = [sizeInfo, speedInfo, etaInfo]
+      .filter(Boolean)
+      .join("  \u00B7  ");
 
     const md = progress
       ? `## Receiving Files\n\n\`${bar}\` ${pct}%\n\n${statsLine}`
@@ -143,28 +190,66 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
         markdown={md}
         metadata={
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Code Phrase" text={activePhrase} icon={Icon.Key} />
+            <Detail.Metadata.Label
+              title="Code Phrase"
+              text={activePhrase}
+              icon={Icon.Key}
+            />
             <Detail.Metadata.Separator />
             {progress ? (
               <>
                 <Detail.Metadata.TagList title="Status">
-                  <Detail.Metadata.TagList.Item text="Receiving" color={Color.Blue} />
-                  <Detail.Metadata.TagList.Item text={`${pct}%`} color={pct >= 80 ? Color.Green : Color.Blue} />
+                  <Detail.Metadata.TagList.Item
+                    text="Receiving"
+                    color={Color.Blue}
+                  />
+                  <Detail.Metadata.TagList.Item
+                    text={`${pct}%`}
+                    color={pct >= 80 ? Color.Green : Color.Blue}
+                  />
                 </Detail.Metadata.TagList>
-                {progress.speed && <Detail.Metadata.Label title="Speed" text={progress.speed} icon={Icon.Gauge} />}
-                {progress.eta && <Detail.Metadata.Label title="ETA" text={progress.eta} icon={Icon.Clock} />}
-                {progress.elapsed && <Detail.Metadata.Label title="Elapsed" text={progress.elapsed} icon={Icon.Stopwatch} />}
+                {progress.speed && (
+                  <Detail.Metadata.Label
+                    title="Speed"
+                    text={progress.speed}
+                    icon={Icon.Gauge}
+                  />
+                )}
+                {progress.eta && (
+                  <Detail.Metadata.Label
+                    title="ETA"
+                    text={progress.eta}
+                    icon={Icon.Clock}
+                  />
+                )}
+                {progress.elapsed && (
+                  <Detail.Metadata.Label
+                    title="Elapsed"
+                    text={progress.elapsed}
+                    icon={Icon.Stopwatch}
+                  />
+                )}
                 {progress.transferred && progress.total && (
-                  <Detail.Metadata.Label title="Transferred" text={`${progress.transferred} / ${progress.total}`} />
+                  <Detail.Metadata.Label
+                    title="Transferred"
+                    text={`${progress.transferred} / ${progress.total}`}
+                  />
                 )}
               </>
             ) : (
               <Detail.Metadata.TagList title="Status">
-                <Detail.Metadata.TagList.Item text="Connecting" color={Color.Orange} />
+                <Detail.Metadata.TagList.Item
+                  text="Connecting"
+                  color={Color.Orange}
+                />
               </Detail.Metadata.TagList>
             )}
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Save to" text={downloadDir} icon={Icon.Folder} />
+            <Detail.Metadata.Label
+              title="Save to"
+              text={downloadDir}
+              icon={Icon.Folder}
+            />
           </Detail.Metadata>
         }
         actions={
@@ -183,21 +268,33 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
   }
 
   if (state === "done") {
-    const fileList = receivedFiles.length > 0
-      ? receivedFiles.map((f) => `- \`${basename(f)}\``).join("\n")
-      : "Files saved to download folder.";
+    const fileList =
+      receivedFiles.length > 0
+        ? receivedFiles.map((f) => `- \`${basename(f)}\``).join("\n")
+        : "Files saved to download folder.";
     const firstFile = receivedFiles[0];
     return (
       <Detail
         markdown={`# Files Received\n\n${fileList}`}
         metadata={
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Status" text="Complete" icon={{ source: Icon.CheckCircle, tintColor: Color.Green }} />
+            <Detail.Metadata.Label
+              title="Status"
+              text="Complete"
+              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+            />
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Code Phrase" text={activePhrase} />
-            <Detail.Metadata.Label title="Saved to" text={downloadDir} icon="📥" />
+            <Detail.Metadata.Label
+              title="Saved to"
+              text={downloadDir}
+              icon="📥"
+            />
             {receivedFiles.length > 0 && (
-              <Detail.Metadata.Label title="Files" text={`${receivedFiles.length} file${receivedFiles.length > 1 ? "s" : ""}`} />
+              <Detail.Metadata.Label
+                title="Files"
+                text={`${receivedFiles.length} file${receivedFiles.length > 1 ? "s" : ""}`}
+              />
             )}
           </Detail.Metadata>
         }
@@ -213,7 +310,10 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
             <Action
               title="Receive Another"
               icon={Icon.Download}
-              onAction={() => { setState("input"); setReceivedFiles([]); }}
+              onAction={() => {
+                setState("input");
+                setReceivedFiles([]);
+              }}
             />
           </ActionPanel>
         }
@@ -227,7 +327,11 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
         markdown={`# Transfer Failed\n\n\`\`\`\n${errorMsg}\n\`\`\``}
         metadata={
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Status" text="Failed" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} />
+            <Detail.Metadata.Label
+              title="Status"
+              text="Failed"
+              icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+            />
             <Detail.Metadata.Label title="Code Phrase" text={activePhrase} />
           </Detail.Metadata>
         }
@@ -236,7 +340,10 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
             <Action
               title="Try Again"
               icon={Icon.ArrowClockwise}
-              onAction={() => { setState("input"); setErrorMsg(null); }}
+              onAction={() => {
+                setState("input");
+                setErrorMsg(null);
+              }}
             />
           </ActionPanel>
         }
@@ -255,7 +362,10 @@ export default function ReceiveFile(props: LaunchProps<{ arguments: { code?: str
             onSubmit={() => {
               const trimmed = codeInput.trim();
               if (!trimmed) {
-                showToast({ style: Toast.Style.Failure, title: "Enter a code phrase" });
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Enter a code phrase",
+                });
                 return;
               }
               startReceive(trimmed);

@@ -27,7 +27,9 @@ export async function loadHistory(): Promise<TransferRecord[]> {
   }
 }
 
-export async function addRecord(record: Omit<TransferRecord, "id" | "timestamp">): Promise<TransferRecord> {
+export async function addRecord(
+  record: Omit<TransferRecord, "id" | "timestamp">,
+): Promise<TransferRecord> {
   const history = await loadHistory();
   const newRecord: TransferRecord = {
     ...record,
@@ -40,7 +42,10 @@ export async function addRecord(record: Omit<TransferRecord, "id" | "timestamp">
   return newRecord;
 }
 
-export async function updateRecord(id: string, patch: Partial<TransferRecord>): Promise<void> {
+export async function updateRecord(
+  id: string,
+  patch: Partial<TransferRecord>,
+): Promise<void> {
   const history = await loadHistory();
   const updated = history.map((r) => (r.id === id ? { ...r, ...patch } : r));
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
@@ -57,12 +62,18 @@ export async function clearHistory(): Promise<void> {
 }
 
 /** Clean up stale in_progress records from previous sessions */
-export async function cleanStaleInProgressRecords(currentSessionId: string): Promise<void> {
+export async function cleanStaleInProgressRecords(
+  currentSessionId: string,
+): Promise<void> {
   const history = await loadHistory();
-  const hasStale = history.some((r) => r.status === "in_progress" && r.sessionId !== currentSessionId);
+  const hasStale = history.some(
+    (r) => r.status === "in_progress" && r.sessionId !== currentSessionId,
+  );
   if (!hasStale) return;
   const updated = history.map((r) =>
-    r.status === "in_progress" && r.sessionId !== currentSessionId ? { ...r, status: "failed" as TransferStatus } : r
+    r.status === "in_progress" && r.sessionId !== currentSessionId
+      ? { ...r, status: "failed" as TransferStatus }
+      : r,
   );
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 }
@@ -93,7 +104,9 @@ export function formatTimestamp(timestamp: number): string {
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  if (bytes < 1024 * 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+  if (bytes < 1024 * 1024 * 1024)
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024 * 1024 * 1024)
+    return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
   return `${(bytes / (1024 * 1024 * 1024 * 1024)).toFixed(1)} TB`;
 }

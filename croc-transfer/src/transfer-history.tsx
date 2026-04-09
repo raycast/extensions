@@ -35,21 +35,70 @@ type DateGroup = "Today" | "Yesterday" | "Earlier";
 
 function getDateGroup(timestamp: number): DateGroup {
   const now = new Date();
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const todayStart = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+  ).getTime();
   const yesterdayStart = todayStart - 86_400_000;
   if (timestamp >= todayStart) return "Today";
   if (timestamp >= yesterdayStart) return "Yesterday";
   return "Earlier";
 }
 
-const IMAGE_EXTS = new Set([".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg", ".heic", ".heif", ".bmp", ".tiff", ".tif"]);
-const TEXT_EXTS = new Set([".md", ".txt", ".json", ".yaml", ".yml", ".csv", ".log", ".sh", ".py", ".js", ".ts", ".swift", ".go", ".rs", ".c", ".cpp", ".h", ".html", ".css", ".xml"]);
-const QUICKLOOK_THUMB_EXTS = new Set([".pvt", ".mov", ".mp4", ".m4v", ".avi", ".mkv", ".webm", ".pdf"]);
+const IMAGE_EXTS = new Set([
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".gif",
+  ".webp",
+  ".svg",
+  ".heic",
+  ".heif",
+  ".bmp",
+  ".tiff",
+  ".tif",
+]);
+const TEXT_EXTS = new Set([
+  ".md",
+  ".txt",
+  ".json",
+  ".yaml",
+  ".yml",
+  ".csv",
+  ".log",
+  ".sh",
+  ".py",
+  ".js",
+  ".ts",
+  ".swift",
+  ".go",
+  ".rs",
+  ".c",
+  ".cpp",
+  ".h",
+  ".html",
+  ".css",
+  ".xml",
+]);
+const QUICKLOOK_THUMB_EXTS = new Set([
+  ".pvt",
+  ".mov",
+  ".mp4",
+  ".m4v",
+  ".avi",
+  ".mkv",
+  ".webm",
+  ".pdf",
+]);
 
 const QL_THUMB_DIR = join(tmpdir(), "raycast-croc-ql-thumbs");
 
 function encodeFilePath(filePath: string): string {
-  return filePath.split("/").map((seg) => encodeURIComponent(seg)).join("/");
+  return filePath
+    .split("/")
+    .map((seg) => encodeURIComponent(seg))
+    .join("/");
 }
 
 const PREVIEW_MAX_W = 500;
@@ -57,10 +106,14 @@ const PREVIEW_MAX_H = 190;
 
 function getImageDimensions(filePath: string): { w: number; h: number } | null {
   try {
-    const out = execFileSync("/usr/bin/sips", ["-g", "pixelWidth", "-g", "pixelHeight", filePath], {
-      encoding: "utf8",
-      timeout: 3000,
-    });
+    const out = execFileSync(
+      "/usr/bin/sips",
+      ["-g", "pixelWidth", "-g", "pixelHeight", filePath],
+      {
+        encoding: "utf8",
+        timeout: 3000,
+      },
+    );
     const w = parseInt(out.match(/pixelWidth:\s*(\d+)/)?.[1] ?? "0", 10);
     const h = parseInt(out.match(/pixelHeight:\s*(\d+)/)?.[1] ?? "0", 10);
     if (w > 0 && h > 0) return { w, h };
@@ -92,7 +145,9 @@ function loadFilePreview(filePath: string): string | null {
   if (TEXT_EXTS.has(ext)) {
     try {
       const content = readFileSync(filePath, "utf8");
-      return ext === ".md" ? content : `\`\`\`${ext.slice(1)}\n${content}\n\`\`\``;
+      return ext === ".md"
+        ? content
+        : `\`\`\`${ext.slice(1)}\n${content}\n\`\`\``;
     } catch {
       return null;
     }
@@ -117,13 +172,20 @@ async function generateQLThumbnail(filePath: string): Promise<string | null> {
   try {
     mkdirSync(QL_THUMB_DIR, { recursive: true });
     await new Promise<void>((resolve, reject) => {
-      execFile("/usr/bin/qlmanage", ["-t", "-s", "800", "-o", QL_THUMB_DIR, filePath], (err) => {
-        if (err && !existsSync(join(QL_THUMB_DIR, basename(filePath) + ".png"))) {
-          reject(err);
-        } else {
-          resolve();
-        }
-      });
+      execFile(
+        "/usr/bin/qlmanage",
+        ["-t", "-s", "800", "-o", QL_THUMB_DIR, filePath],
+        (err) => {
+          if (
+            err &&
+            !existsSync(join(QL_THUMB_DIR, basename(filePath) + ".png"))
+          ) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        },
+      );
     });
     const thumbPath = join(QL_THUMB_DIR, basename(filePath) + ".png");
     if (existsSync(thumbPath)) {
@@ -145,22 +207,44 @@ async function reSend(record: TransferRecord) {
   }
   const existing = record.files.filter((f) => existsSync(f));
   if (existing.length === 0) {
-    await showToast({ style: Toast.Style.Failure, title: "Files no longer exist" });
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Files no longer exist",
+    });
     return;
   }
   const args = buildCrocArgs("send", existing);
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Re-sending…" });
-  spawnCrocSend(crocPath, args,
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Re-sending…",
+  });
+  spawnCrocSend(
+    crocPath,
+    args,
     async (phrase) => {
       await Clipboard.copy(phrase);
       toast.style = Toast.Style.Animated;
       toast.title = "Waiting for receiver";
       toast.message = phrase;
-      await addRecord({ type: "send", files: existing, phrase, status: "success" });
+      await addRecord({
+        type: "send",
+        files: existing,
+        phrase,
+        status: "success",
+      });
     },
-    (p) => { toast.message = `${p.percent}%`; },
-    async () => { toast.style = Toast.Style.Success; toast.title = "Re-send complete"; },
-    async (err) => { toast.style = Toast.Style.Failure; toast.title = "Re-send failed"; toast.message = err.message; }
+    (p) => {
+      toast.message = `${p.percent}%`;
+    },
+    async () => {
+      toast.style = Toast.Style.Success;
+      toast.title = "Re-send complete";
+    },
+    async (err) => {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Re-send failed";
+      toast.message = err.message;
+    },
   );
 }
 
@@ -194,25 +278,62 @@ function RecordDetail({ record }: { record: TransferRecord }) {
           <List.Item.Detail.Metadata.Label
             title="Type"
             text={record.type === "send" ? "Sent" : "Received"}
-            icon={{ source: record.type === "send" ? Icon.Upload : Icon.Download, tintColor: record.type === "send" ? Color.Blue : Color.Green }}
+            icon={{
+              source: record.type === "send" ? Icon.Upload : Icon.Download,
+              tintColor: record.type === "send" ? Color.Blue : Color.Green,
+            }}
           />
           <List.Item.Detail.Metadata.Label
             title="Status"
-            text={record.status === "success" ? "Success" : record.status === "failed" ? "Failed" : record.status === "cancelled" ? "Cancelled" : "In Progress"}
+            text={
+              record.status === "success"
+                ? "Success"
+                : record.status === "failed"
+                  ? "Failed"
+                  : record.status === "cancelled"
+                    ? "Cancelled"
+                    : "In Progress"
+            }
             icon={{
-              source: record.status === "success" ? Icon.CheckCircle : record.status === "failed" ? Icon.XMarkCircle : Icon.MinusCircle,
-              tintColor: record.status === "success" ? Color.Green : record.status === "failed" ? Color.Red : Color.SecondaryText,
+              source:
+                record.status === "success"
+                  ? Icon.CheckCircle
+                  : record.status === "failed"
+                    ? Icon.XMarkCircle
+                    : Icon.MinusCircle,
+              tintColor:
+                record.status === "success"
+                  ? Color.Green
+                  : record.status === "failed"
+                    ? Color.Red
+                    : Color.SecondaryText,
             }}
           />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Code Phrase" text={record.phrase} icon={Icon.Key} />
+          <List.Item.Detail.Metadata.Label
+            title="Code Phrase"
+            text={record.phrase}
+            icon={Icon.Key}
+          />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Date" text={new Date(record.timestamp).toLocaleString()} icon={Icon.Clock} />
+          <List.Item.Detail.Metadata.Label
+            title="Date"
+            text={new Date(record.timestamp).toLocaleString()}
+            icon={Icon.Clock}
+          />
           {record.size !== undefined && (
-            <List.Item.Detail.Metadata.Label title="Size" text={formatFileSize(record.size)} icon={Icon.HardDrive} />
+            <List.Item.Detail.Metadata.Label
+              title="Size"
+              text={formatFileSize(record.size)}
+              icon={Icon.HardDrive}
+            />
           )}
           {dirPath && (
-            <List.Item.Detail.Metadata.Label title="Folder" text={dirPath} icon="📥" />
+            <List.Item.Detail.Metadata.Label
+              title="Folder"
+              text={dirPath}
+              icon="📥"
+            />
           )}
           {record.files.length > 0 && (
             <>
@@ -220,9 +341,18 @@ function RecordDetail({ record }: { record: TransferRecord }) {
               {record.files.map((f, i) => (
                 <List.Item.Detail.Metadata.Label
                   key={i}
-                  title={i === 0 ? `File${record.files.length > 1 ? "s" : ""}` : ""}
+                  title={
+                    i === 0 ? `File${record.files.length > 1 ? "s" : ""}` : ""
+                  }
                   text={basename(f)}
-                  icon={existsSync(f) ? Icon.Document : { source: Icon.Document, tintColor: Color.SecondaryText }}
+                  icon={
+                    existsSync(f)
+                      ? Icon.Document
+                      : {
+                          source: Icon.Document,
+                          tintColor: Color.SecondaryText,
+                        }
+                  }
                 />
               ))}
             </>
@@ -233,14 +363,22 @@ function RecordDetail({ record }: { record: TransferRecord }) {
   );
 }
 
-function RecordItem({ record, onRemove }: { record: TransferRecord; onRemove: (id: string) => void }) {
+function RecordItem({
+  record,
+  onRemove,
+}: {
+  record: TransferRecord;
+  onRemove: (id: string) => void;
+}) {
   const dirPath = record.files[0] ? dirname(record.files[0]) : null;
   const filesExist = record.files.some((f) => existsSync(f));
   const firstExistingFile = record.files.find((f) => existsSync(f));
   const statusColor =
-    record.status === "success" ? Color.Green
-    : record.status === "failed" ? Color.Red
-    : Color.SecondaryText;
+    record.status === "success"
+      ? Color.Green
+      : record.status === "failed"
+        ? Color.Red
+        : Color.SecondaryText;
 
   const accessories: List.Item.Accessory[] = [
     { date: new Date(record.timestamp) },
@@ -251,37 +389,54 @@ function RecordItem({ record, onRemove }: { record: TransferRecord; onRemove: (i
 
   return (
     <List.Item
-      icon={{ source: record.type === "send" ? Icon.Upload : Icon.Download, tintColor: statusColor }}
+      icon={{
+        source: record.type === "send" ? Icon.Upload : Icon.Download,
+        tintColor: statusColor,
+      }}
       title={record.phrase}
       keywords={record.files.map((f) => basename(f))}
-      quickLook={firstExistingFile ? { path: firstExistingFile, name: basename(firstExistingFile) } : undefined}
+      quickLook={
+        firstExistingFile
+          ? { path: firstExistingFile, name: basename(firstExistingFile) }
+          : undefined
+      }
       accessories={accessories}
       detail={<RecordDetail record={record} />}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
             {firstExistingFile && (
-              <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+              <Action.ToggleQuickLook
+                shortcut={{ modifiers: ["cmd"], key: "y" }}
+              />
             )}
             {filesExist && (
               <Action
                 title="Open File"
                 icon={Icon.Document}
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
-                onAction={() => { if (firstExistingFile) open(firstExistingFile); }}
+                onAction={() => {
+                  if (firstExistingFile) open(firstExistingFile);
+                }}
               />
             )}
             <Action
               title="Copy Code Phrase"
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
-              onAction={async () => { await Clipboard.copy(record.phrase); await showHUD(`Copied: ${record.phrase}`); }}
+              onAction={async () => {
+                await Clipboard.copy(record.phrase);
+                await showHUD(`Copied: ${record.phrase}`);
+              }}
             />
             <Action
               title="Copy Deep Link"
               icon={Icon.Link}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-              onAction={async () => { await Clipboard.copy(buildDeepLink(record.phrase)); await showHUD("Deep Link copied!"); }}
+              onAction={async () => {
+                await Clipboard.copy(buildDeepLink(record.phrase));
+                await showHUD("Deep Link copied!");
+              }}
             />
             {record.type === "send" && filesExist && (
               <Action
@@ -306,7 +461,10 @@ function RecordItem({ record, onRemove }: { record: TransferRecord; onRemove: (i
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={async () => { await onRemove(record.id); await showHUD("Record deleted"); }}
+              onAction={async () => {
+                await onRemove(record.id);
+                await showHUD("Record deleted");
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -327,13 +485,23 @@ export default function TransferHistory() {
     const confirmed = await confirmAlert({
       title: "Clear All History",
       message: "This will permanently delete all transfer records.",
-      primaryAction: { title: "Clear All", style: Alert.ActionStyle.Destructive },
+      primaryAction: {
+        title: "Clear All",
+        style: Alert.ActionStyle.Destructive,
+      },
     });
-    if (confirmed) { await clear(); await showHUD("History cleared"); }
+    if (confirmed) {
+      await clear();
+      await showHUD("History cleared");
+    }
   }
 
   // Group records by date
-  const groups: Record<DateGroup, TransferRecord[]> = { Today: [], Yesterday: [], Earlier: [] };
+  const groups: Record<DateGroup, TransferRecord[]> = {
+    Today: [],
+    Yesterday: [],
+    Earlier: [],
+  };
   for (const r of history) {
     groups[getDateGroup(r.timestamp)].push(r);
   }
@@ -347,7 +515,12 @@ export default function TransferHistory() {
       actions={
         history.length > 0 ? (
           <ActionPanel>
-            <Action title="Clear All History" icon={Icon.Trash} style={Action.Style.Destructive} onAction={handleClearAll} />
+            <Action
+              title="Clear All History"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              onAction={handleClearAll}
+            />
           </ActionPanel>
         ) : undefined
       }
@@ -361,12 +534,16 @@ export default function TransferHistory() {
       )}
       {groupOrder.map((group) =>
         groups[group].length > 0 ? (
-          <List.Section key={group} title={group} subtitle={`${groups[group].length}`}>
+          <List.Section
+            key={group}
+            title={group}
+            subtitle={`${groups[group].length}`}
+          >
             {groups[group].map((r) => (
               <RecordItem key={r.id} record={r} onRemove={remove} />
             ))}
           </List.Section>
-        ) : null
+        ) : null,
       )}
     </List>
   );

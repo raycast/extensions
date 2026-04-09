@@ -21,19 +21,30 @@ import { useCrocCheck } from "./hooks/useCrocCheck";
 import { useTransfer } from "./hooks/useTransfer";
 import { addRecord } from "./utils/history";
 import { buildCrocArgs, getCrocPath } from "./utils/croc";
-import { buildProgressBar, computeFileSize, spawnCrocSend } from "./utils/process";
+import {
+  buildProgressBar,
+  computeFileSize,
+  spawnCrocSend,
+} from "./utils/process";
 
 function buildDeepLink(phrase: string): string {
   return `raycast://extensions/wilton/croc-transfer/receive-file?arguments=${encodeURIComponent(JSON.stringify({ code: phrase }))}`;
 }
 
-function prepareFilesForSend(paths: string[]): { sendPaths: string[]; tempZips: string[] } {
+function prepareFilesForSend(paths: string[]): {
+  sendPaths: string[];
+  tempZips: string[];
+} {
   const sendPaths: string[] = [];
   const tempZips: string[] = [];
 
   for (const p of paths) {
     let isDir = false;
-    try { isDir = statSync(p).isDirectory(); } catch { /* file gone */ }
+    try {
+      isDir = statSync(p).isDirectory();
+    } catch {
+      /* file gone */
+    }
 
     if (isDir) {
       const folderName = basename(p);
@@ -51,7 +62,11 @@ function prepareFilesForSend(paths: string[]): { sendPaths: string[]; tempZips: 
 
 function cleanupZips(zips: string[]) {
   for (const z of zips) {
-    try { if (existsSync(z)) unlinkSync(z); } catch { /* ignore */ }
+    try {
+      if (existsSync(z)) unlinkSync(z);
+    } catch {
+      /* ignore */
+    }
   }
 }
 
@@ -62,24 +77,41 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
   const [fileLabel, setFileLabel] = useState<string>("");
   const tempZipsRef = useRef<string[]>([]);
 
-  useEffect(() => () => { cleanupZips(tempZipsRef.current); }, []);
+  useEffect(
+    () => () => {
+      cleanupZips(tempZipsRef.current);
+    },
+    [],
+  );
 
   async function handleSubmit() {
     if (filePaths.length === 0) {
-      await showToast({ style: Toast.Style.Failure, title: "No files selected" });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No files selected",
+      });
       return;
     }
     const crocPath = getCrocPath();
     if (!crocPath) return;
 
-    const hasDirs = filePaths.some((p) => { try { return statSync(p).isDirectory(); } catch { return false; } });
+    const hasDirs = filePaths.some((p) => {
+      try {
+        return statSync(p).isDirectory();
+      } catch {
+        return false;
+      }
+    });
 
     let sendPaths = filePaths;
     let tempZips: string[] = [];
 
     if (hasDirs) {
       transfer.setZipping();
-      const toast = await showToast({ style: Toast.Style.Animated, title: "Compressing folders…" });
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Compressing folders…",
+      });
       try {
         const result = prepareFilesForSend(filePaths);
         sendPaths = result.sendPaths;
@@ -92,9 +124,10 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
       }
     }
 
-    const label = filePaths.length === 1
-      ? (basename(filePaths[0]) + (hasDirs ? ".zip" : ""))
-      : `${filePaths.length} items`;
+    const label =
+      filePaths.length === 1
+        ? basename(filePaths[0]) + (hasDirs ? ".zip" : "")
+        : `${filePaths.length} items`;
     setFileLabel(label);
 
     const extraArgs: string[] = [];
@@ -102,10 +135,14 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
     extraArgs.push(...sendPaths);
 
     const args = buildCrocArgs("send", extraArgs);
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Starting croc…" });
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Starting croc…",
+    });
 
     const proc = spawnCrocSend(
-      crocPath, args,
+      crocPath,
+      args,
       async (p) => {
         transfer.setPhrase(p);
         await Clipboard.copy(p);
@@ -113,7 +150,13 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         toast.title = "Waiting for receiver";
         toast.message = p;
         const size = computeFileSize(filePaths);
-        await addRecord({ type: "send", files: filePaths, phrase: p, status: "success", size });
+        await addRecord({
+          type: "send",
+          files: filePaths,
+          phrase: p,
+          status: "success",
+          size,
+        });
       },
       (prog) => {
         transfer.setProgress(prog);
@@ -124,7 +167,10 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         tempZipsRef.current = [];
         transfer.setDone();
         toast.hide();
-        const name = filePaths.length === 1 ? basename(filePaths[0]) : `${filePaths.length} files`;
+        const name =
+          filePaths.length === 1
+            ? basename(filePaths[0])
+            : `${filePaths.length} files`;
         await showHUD(`✓ Sent: ${name}`);
       },
       async (err) => {
@@ -134,7 +180,7 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         toast.style = Toast.Style.Failure;
         toast.title = "Transfer failed";
         toast.message = err.message;
-      }
+      },
     );
 
     transfer.setStarting(proc);
@@ -142,16 +188,22 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
 
   const { state, phrase, progress, error } = transfer;
 
-  const displayLabel = fileLabel || (filePaths.length === 1
-    ? (filePaths[0].split("/").pop() ?? filePaths[0])
-    : `${filePaths.length} items`);
+  const displayLabel =
+    fileLabel ||
+    (filePaths.length === 1
+      ? (filePaths[0].split("/").pop() ?? filePaths[0])
+      : `${filePaths.length} items`);
 
   if (state === "form") {
     return (
       <Form
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Send" icon={Icon.Upload} onSubmit={handleSubmit} />
+            <Action.SubmitForm
+              title="Send"
+              icon={Icon.Upload}
+              onSubmit={handleSubmit}
+            />
           </ActionPanel>
         }
       >
@@ -176,14 +228,27 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
   }
 
   if (state === "zipping") {
-    const dirs = filePaths.filter((p) => { try { return statSync(p).isDirectory(); } catch { return false; } });
+    const dirs = filePaths.filter((p) => {
+      try {
+        return statSync(p).isDirectory();
+      } catch {
+        return false;
+      }
+    });
     return (
       <Detail
         markdown={`Compressing **${dirs.map((d) => basename(d)).join(", ")}** into zip…`}
         metadata={
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Status" text="Compressing…" icon={{ source: Icon.CircleProgress, tintColor: Color.Orange }} />
-            <Detail.Metadata.Label title="Folders" text={dirs.map((d) => basename(d)).join(", ")} />
+            <Detail.Metadata.Label
+              title="Status"
+              text="Compressing…"
+              icon={{ source: Icon.CircleProgress, tintColor: Color.Orange }}
+            />
+            <Detail.Metadata.Label
+              title="Folders"
+              text={dirs.map((d) => basename(d)).join(", ")}
+            />
           </Detail.Metadata>
         }
       />
@@ -196,8 +261,19 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         markdown="Connecting to relay server..."
         metadata={
           <Detail.Metadata>
-            <Detail.Metadata.Label title="Files" text={displayLabel} icon={Icon.Document} />
-            <Detail.Metadata.Label title="Status" text="Starting…" icon={{ source: Icon.CircleProgress, tintColor: Color.SecondaryText }} />
+            <Detail.Metadata.Label
+              title="Files"
+              text={displayLabel}
+              icon={Icon.Document}
+            />
+            <Detail.Metadata.Label
+              title="Status"
+              text="Starting…"
+              icon={{
+                source: Icon.CircleProgress,
+                tintColor: Color.SecondaryText,
+              }}
+            />
           </Detail.Metadata>
         }
       />
@@ -212,14 +288,33 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Status">
-              <Detail.Metadata.TagList.Item text="Waiting for receiver" color={Color.Orange} />
+              <Detail.Metadata.TagList.Item
+                text="Waiting for receiver"
+                color={Color.Orange}
+              />
             </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Code Phrase" text={phrase} icon={Icon.Key} />
-            <Detail.Metadata.Label title="Files" text={displayLabel} icon={Icon.Document} />
+            <Detail.Metadata.Label
+              title="Code Phrase"
+              text={phrase}
+              icon={Icon.Key}
+            />
+            <Detail.Metadata.Label
+              title="Files"
+              text={displayLabel}
+              icon={Icon.Document}
+            />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Link title="Deep Link" target={deepLink} text="Open in Raycast" />
-            <Detail.Metadata.Label title="Tip" text="Code phrase copied to clipboard" icon={Icon.Clipboard} />
+            <Detail.Metadata.Link
+              title="Deep Link"
+              target={deepLink}
+              text="Open in Raycast"
+            />
+            <Detail.Metadata.Label
+              title="Tip"
+              text="Code phrase copied to clipboard"
+              icon={Icon.Clipboard}
+            />
           </Detail.Metadata>
         }
         actions={
@@ -229,13 +324,19 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
                 title="Copy Code Phrase"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd"], key: "c" }}
-                onAction={async () => { await Clipboard.copy(phrase!); await showHUD(`Copied: ${phrase}`); }}
+                onAction={async () => {
+                  await Clipboard.copy(phrase!);
+                  await showHUD(`Copied: ${phrase}`);
+                }}
               />
               <Action
                 title="Copy Deep Link"
                 icon={Icon.Link}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                onAction={async () => { await Clipboard.copy(deepLink); await showHUD("Deep Link copied!"); }}
+                onAction={async () => {
+                  await Clipboard.copy(deepLink);
+                  await showHUD("Deep Link copied!");
+                }}
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
@@ -256,10 +357,15 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
   if (state === "transferring" && phrase) {
     const pct = progress?.percent ?? 0;
     const bar = buildProgressBar(pct);
-    const sizeInfo = progress?.transferred && progress?.total ? `**${progress.transferred}** / ${progress.total}` : "";
+    const sizeInfo =
+      progress?.transferred && progress?.total
+        ? `**${progress.transferred}** / ${progress.total}`
+        : "";
     const speedInfo = progress?.speed ? `${progress.speed}` : "";
     const etaInfo = progress?.eta ? `${progress.eta} remaining` : "";
-    const statsLine = [sizeInfo, speedInfo, etaInfo].filter(Boolean).join("  \u00B7  ");
+    const statsLine = [sizeInfo, speedInfo, etaInfo]
+      .filter(Boolean)
+      .join("  \u00B7  ");
 
     return (
       <Detail
@@ -267,18 +373,53 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Status">
-              <Detail.Metadata.TagList.Item text="Transferring" color={Color.Blue} />
-              <Detail.Metadata.TagList.Item text={`${pct}%`} color={pct >= 80 ? Color.Green : Color.Blue} />
+              <Detail.Metadata.TagList.Item
+                text="Transferring"
+                color={Color.Blue}
+              />
+              <Detail.Metadata.TagList.Item
+                text={`${pct}%`}
+                color={pct >= 80 ? Color.Green : Color.Blue}
+              />
             </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Code Phrase" text={phrase} icon={Icon.Key} />
-            <Detail.Metadata.Label title="Files" text={displayLabel} icon={Icon.Document} />
+            <Detail.Metadata.Label
+              title="Code Phrase"
+              text={phrase}
+              icon={Icon.Key}
+            />
+            <Detail.Metadata.Label
+              title="Files"
+              text={displayLabel}
+              icon={Icon.Document}
+            />
             <Detail.Metadata.Separator />
-            {progress?.speed && <Detail.Metadata.Label title="Speed" text={progress.speed} icon={Icon.Gauge} />}
-            {progress?.eta && <Detail.Metadata.Label title="ETA" text={progress.eta} icon={Icon.Clock} />}
-            {progress?.elapsed && <Detail.Metadata.Label title="Elapsed" text={progress.elapsed} icon={Icon.Stopwatch} />}
+            {progress?.speed && (
+              <Detail.Metadata.Label
+                title="Speed"
+                text={progress.speed}
+                icon={Icon.Gauge}
+              />
+            )}
+            {progress?.eta && (
+              <Detail.Metadata.Label
+                title="ETA"
+                text={progress.eta}
+                icon={Icon.Clock}
+              />
+            )}
+            {progress?.elapsed && (
+              <Detail.Metadata.Label
+                title="Elapsed"
+                text={progress.elapsed}
+                icon={Icon.Stopwatch}
+              />
+            )}
             {progress?.transferred && progress?.total && (
-              <Detail.Metadata.Label title="Transferred" text={`${progress.transferred} / ${progress.total}`} />
+              <Detail.Metadata.Label
+                title="Transferred"
+                text={`${progress.transferred} / ${progress.total}`}
+              />
             )}
           </Detail.Metadata>
         }
@@ -305,11 +446,24 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.TagList title="Status">
-              <Detail.Metadata.TagList.Item text="Complete" color={Color.Green} />
+              <Detail.Metadata.TagList.Item
+                text="Complete"
+                color={Color.Green}
+              />
             </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Files" text={displayLabel} icon={Icon.Document} />
-            {phrase && <Detail.Metadata.Label title="Code Phrase" text={phrase} icon={Icon.Key} />}
+            <Detail.Metadata.Label
+              title="Files"
+              text={displayLabel}
+              icon={Icon.Document}
+            />
+            {phrase && (
+              <Detail.Metadata.Label
+                title="Code Phrase"
+                text={phrase}
+                icon={Icon.Key}
+              />
+            )}
           </Detail.Metadata>
         }
         actions={
@@ -320,7 +474,10 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
                   title="Copy Code Phrase"
                   icon={Icon.Clipboard}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  onAction={async () => { await Clipboard.copy(phrase!); await showHUD(`Copied: ${phrase}`); }}
+                  onAction={async () => {
+                    await Clipboard.copy(phrase!);
+                    await showHUD(`Copied: ${phrase}`);
+                  }}
                 />
               )}
               {deepLink && (
@@ -328,7 +485,10 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
                   title="Copy Deep Link"
                   icon={Icon.Link}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                  onAction={async () => { await Clipboard.copy(deepLink); await showHUD("Deep Link copied!"); }}
+                  onAction={async () => {
+                    await Clipboard.copy(deepLink);
+                    await showHUD("Deep Link copied!");
+                  }}
                 />
               )}
             </ActionPanel.Section>
@@ -351,7 +511,11 @@ function SendView({ defaultFiles }: { defaultFiles: string[] }) {
       markdown={`# Transfer Failed\n\n\`\`\`\n${error}\n\`\`\``}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Status" text="Failed" icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }} />
+          <Detail.Metadata.Label
+            title="Status"
+            text="Failed"
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+          />
           <Detail.Metadata.Label title="Files" text={displayLabel} />
         </Detail.Metadata>
       }
@@ -385,7 +549,8 @@ export default function SendFile() {
     })();
   }, []);
 
-  if (isChecking || !finderChecked) return <Detail markdown="Checking croc installation..." />;
+  if (isChecking || !finderChecked)
+    return <Detail markdown="Checking croc installation..." />;
   if (!isInstalled) return <InstallGuide onCrocFound={recheck} />;
   return <SendView defaultFiles={finderFiles ?? []} />;
 }

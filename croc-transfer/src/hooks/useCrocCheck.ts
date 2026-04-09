@@ -1,5 +1,9 @@
 import { useState, useEffect } from "react";
-import { clearCrocPathCache, getCrocVersionAsync, resolveCrocPathAsync } from "../utils/croc";
+import {
+  clearCrocPathCache,
+  getCrocVersionAsync,
+  resolveCrocPathAsync,
+} from "../utils/croc";
 
 interface CrocCheckResult {
   isChecking: boolean;
@@ -25,7 +29,9 @@ export function useCrocCheck(): CrocCheckResult {
       if (path) setVersion(await getCrocVersionAsync(path));
       setIsChecking(false);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [tick]);
 
   const recheck = () => {

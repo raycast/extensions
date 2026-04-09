@@ -37,26 +37,38 @@ If you installed croc to a non-standard path, set the **croc Binary Path** in th
 
 export function InstallGuide({ onCrocFound }: InstallGuideProps) {
   async function handleInstallWithHomebrew() {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Installing croc…", message: "brew install croc" });
-    execFile("/opt/homebrew/bin/brew", ["install", "croc"], (err, _stdout, stderr) => {
-      if (err) {
-        execFile("/usr/local/bin/brew", ["install", "croc"], (err2, _stdout2, stderr2) => {
-          if (err2) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Install failed";
-            toast.message = (stderr2 || stderr).trim().slice(0, 200);
-          } else {
-            toast.style = Toast.Style.Success;
-            toast.title = "croc installed!";
-            onCrocFound?.();
-          }
-        });
-      } else {
-        toast.style = Toast.Style.Success;
-        toast.title = "croc installed!";
-        onCrocFound?.();
-      }
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Installing croc…",
+      message: "brew install croc",
     });
+    execFile(
+      "/opt/homebrew/bin/brew",
+      ["install", "croc"],
+      (err, _stdout, stderr) => {
+        if (err) {
+          execFile(
+            "/usr/local/bin/brew",
+            ["install", "croc"],
+            (err2, _stdout2, stderr2) => {
+              if (err2) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Install failed";
+                toast.message = (stderr2 || stderr).trim().slice(0, 200);
+              } else {
+                toast.style = Toast.Style.Success;
+                toast.title = "croc installed!";
+                onCrocFound?.();
+              }
+            },
+          );
+        } else {
+          toast.style = Toast.Style.Success;
+          toast.title = "croc installed!";
+          onCrocFound?.();
+        }
+      },
+    );
   }
 
   return (
@@ -64,9 +76,15 @@ export function InstallGuide({ onCrocFound }: InstallGuideProps) {
       markdown={MARKDOWN}
       actions={
         <ActionPanel>
-          <Action title="Install with Homebrew" onAction={handleInstallWithHomebrew} />
+          <Action
+            title="Install with Homebrew"
+            onAction={handleInstallWithHomebrew}
+          />
           <Action title="Refresh" onAction={() => onCrocFound?.()} />
-          <Action.OpenInBrowser title="View croc on GitHub" url="https://github.com/schollz/croc" />
+          <Action.OpenInBrowser
+            title="View Croc on GitHub"
+            url="https://github.com/schollz/croc"
+          />
         </ActionPanel>
       }
     />

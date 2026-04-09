@@ -1,7 +1,13 @@
 import { spawn, ChildProcess } from "child_process";
 import { tmpdir } from "os";
 import { join } from "path";
-import { mkdtempSync, writeFileSync, readdirSync, mkdirSync, statSync } from "fs";
+import {
+  mkdtempSync,
+  writeFileSync,
+  readdirSync,
+  mkdirSync,
+  statSync,
+} from "fs";
 
 export interface TransferProgress {
   percent: number;
@@ -25,11 +31,21 @@ function parseSizeToBytes(s: string): number {
   if (!match) return 0;
   const val = parseFloat(match[1]);
   const unit = match[2].toUpperCase();
-  const multipliers: Record<string, number> = { B: 1, KB: 1024, MB: 1024 ** 2, GB: 1024 ** 3, TB: 1024 ** 4 };
+  const multipliers: Record<string, number> = {
+    B: 1,
+    KB: 1024,
+    MB: 1024 ** 2,
+    GB: 1024 ** 3,
+    TB: 1024 ** 4,
+  };
   return val * (multipliers[unit] || 1);
 }
 
-function calculateEta(transferred: string, total: string, speedStr: string): string | undefined {
+function calculateEta(
+  transferred: string,
+  total: string,
+  speedStr: string,
+): string | undefined {
   const transferredBytes = parseSizeToBytes(transferred);
   const totalBytes = parseSizeToBytes(total);
   const speedBytes = parseSizeToBytes(speedStr.replace("/s", ""));
@@ -65,7 +81,8 @@ const CODE_PHRASE_REGEX = /Code is:\s*(.+)/i;
 const PROGRESS_REGEX = /(\d+)%/;
 const SIZE_REGEX = /([\d.]+\s*\w+)\s*\/\s*([\d.]+\s*\w+)/;
 const SPEED_REGEX = /([\d.]+\s*\w+\/s)/;
-const TRANSFER_COMPLETE_SEND_REGEX = /File sent\.|Transfer complete\.|sent\s+\d+/i;
+const TRANSFER_COMPLETE_SEND_REGEX =
+  /File sent\.|Transfer complete\.|sent\s+\d+/i;
 
 export interface CrocProcess {
   kill: () => void;
@@ -103,9 +120,8 @@ run(sys.argv[1:])
 `.trim();
 
 function cleanOutput(raw: string): string {
-  return raw
-    .replace(/\x1b\[[0-9;]*[mGKHFJACBD]/g, "")
-    .replace(/\r/g, "\n");
+  // eslint-disable-next-line no-control-regex
+  return raw.replace(/\x1b\[[0-9;]*[mGKHFJACBD]/g, "").replace(/\r/g, "\n");
 }
 
 function spawnWithPty(
@@ -114,7 +130,7 @@ function spawnWithPty(
   onData: (text: string) => void,
   onExit: (code: number | null, log: string) => void,
   runDir?: string,
-  extraEnv?: Record<string, string>
+  extraEnv?: Record<string, string>,
 ): () => void {
   const scriptDir = mkdtempSync(join(tmpdir(), "croc-"));
   const wrapperPath = join(scriptDir, "pty_wrapper.py");
@@ -129,7 +145,11 @@ function spawnWithPty(
   const cleanup = () => {
     if (dead) return;
     dead = true;
-    try { proc?.kill("SIGTERM"); } catch { /* ignore */ }
+    try {
+      proc?.kill("SIGTERM");
+    } catch {
+      /* ignore */
+    }
   };
 
   try {
@@ -197,7 +217,11 @@ function sumDirSize(dir: string): number | undefined {
         if (sub === undefined) return undefined;
         total += sub;
       } else {
-        try { total += statSync(full).size; } catch { return undefined; }
+        try {
+          total += statSync(full).size;
+        } catch {
+          return undefined;
+        }
       }
     }
   } catch {
@@ -212,7 +236,7 @@ export function spawnCrocSend(
   onPhrase: PhraseCallback,
   onProgress: ProgressCallback,
   onComplete: CompleteCallback,
-  onError: ErrorCallback
+  onError: ErrorCallback,
 ): CrocProcess {
   let phrase = "";
   let completed = false;
@@ -260,7 +284,7 @@ export function spawnCrocSend(
           onError(new Error(`croc exited with code ${code}${detail}`));
         }
       }
-    }
+    },
   );
 
   return { kill };
@@ -273,7 +297,7 @@ export function spawnCrocReceive(
   downloadDir: string,
   onProgress: ProgressCallback,
   onComplete: CompleteCallback,
-  onError: ErrorCallback
+  onError: ErrorCallback,
 ): CrocProcess {
   let completed = false;
   const startMs = Date.now();
@@ -281,7 +305,9 @@ export function spawnCrocReceive(
   mkdirSync(downloadDir, { recursive: true });
 
   // Snapshot directory contents before transfer (excluding hidden files)
-  const beforeFiles = new Set(readdirSync(downloadDir).filter((f) => !f.startsWith(".")));
+  const beforeFiles = new Set(
+    readdirSync(downloadDir).filter((f) => !f.startsWith(".")),
+  );
 
   const kill = spawnWithPty(
     crocPath,
@@ -309,7 +335,9 @@ export function spawnCrocReceive(
         completed = true;
         if (code === 0) {
           // Return files with original names — no renaming
-          const afterFiles = readdirSync(downloadDir).filter((f) => !f.startsWith("."));
+          const afterFiles = readdirSync(downloadDir).filter(
+            (f) => !f.startsWith("."),
+          );
           const newFiles = afterFiles.filter((f) => !beforeFiles.has(f));
           const files = newFiles.map((f) => join(downloadDir, f));
           onComplete({ success: true, files });
@@ -320,7 +348,7 @@ export function spawnCrocReceive(
       }
     },
     downloadDir,
-    { CROC_SECRET: codePhrase }
+    { CROC_SECRET: codePhrase },
   );
 
   return { kill };

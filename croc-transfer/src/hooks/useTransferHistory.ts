@@ -1,5 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
-import { TransferRecord, loadHistory, deleteRecord, clearHistory } from "../utils/history";
+import {
+  TransferRecord,
+  loadHistory,
+  deleteRecord,
+  clearHistory,
+} from "../utils/history";
 
 export function useTransferHistory() {
   const [history, setHistory] = useState<TransferRecord[]>([]);
@@ -16,13 +21,10 @@ export function useTransferHistory() {
     refresh();
   }, [refresh]);
 
-  const remove = useCallback(
-    async (id: string) => {
-      await deleteRecord(id);
-      setHistory((prev) => prev.filter((r) => r.id !== id));
-    },
-    []
-  );
+  const remove = useCallback(async (id: string) => {
+    await deleteRecord(id);
+    setHistory((prev) => prev.filter((r) => r.id !== id));
+  }, []);
 
   const clear = useCallback(async () => {
     await clearHistory();
