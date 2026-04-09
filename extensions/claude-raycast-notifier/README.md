@@ -50,7 +50,7 @@ Install with:
 curl -fsSL https://raw.githubusercontent.com/fulln/claude-raycast-notifier/main/scripts/bootstrap.sh | bash
 ```
 
-This downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
+This downloads a small bootstrap script, then downloads the latest install bundle release and installs it into `~/.ai-hook-notifier`.
 It also backs up your current Claude and Gemini settings, then merges in the required hook entries.
 
 The installer starts the extension for you.
