@@ -1,6 +1,6 @@
 # Datafast Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-09
 
 - Dashboard Overview with KPI metrics and period-over-period trend comparison
 - Realtime Visitors with live visitor details, location, device, and conversion likelihood
