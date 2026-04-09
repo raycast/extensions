@@ -6,7 +6,7 @@ Powered by [m1ddc](https://github.com/waydabber/m1ddc), a DDC/CI tool for contro
 
 ## Commands
 
-### Set Input Source
+### Switch Input Source
 
 Pick an input source from a dropdown (HDMI 1, HDMI 2, DisplayPort 1, DisplayPort 2, USB-C) and switch to it immediately. Shows a confirmation dialog with a "Don't ask again" option.
 
@@ -23,7 +23,7 @@ Default duration is 10 seconds. You can set a custom duration via the optional "
 
 ### Toggle Input Source
 
-Instantly toggle between the current input source and the previously selected one. Requires using "Set Input Source" at least once to establish a history.
+Instantly toggle between the current input source and the previously selected one. Requires using "Switch Input Source" at least once to establish a history.
 
 ## Requirements
 

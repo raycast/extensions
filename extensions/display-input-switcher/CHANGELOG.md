@@ -2,7 +2,7 @@
 
 ## [Initial Version] - {PR_MERGE_DATE}
 
-- Set Input Source command with dropdown selection (HDMI 1/2, DisplayPort 1/2, USB-C)
+- Switch Input Source command with dropdown selection (HDMI 1/2, DisplayPort 1/2, USB-C)
 - Preview Input Source command with countdown timer and cancel/confirm actions
 - Toggle Input Source command to swap between current and previous input
 - Auto-detection of first external display via m1ddc

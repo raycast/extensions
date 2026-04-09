@@ -15,7 +15,7 @@ export default async function toggleInputSource() {
       await showToast({
         style: Toast.Style.Failure,
         title: "No previous input source",
-        message: 'Use "Set Input Source" first to establish a history',
+        message: 'Use "Switch Input Source" first to establish a history',
       });
       return;
     }
