@@ -151,10 +151,9 @@ function svgToJsxAttrs(svg: string): string {
   return svg
     .replace(/\bclass="/g, 'className="')
     .replace(/\bxmlns="[^"]*"/g, "")
-    .replace(
-      /\b([a-z]+)-([a-z])/g,
-      (_, a: string, b: string) => `${a}${b.toUpperCase()}`,
-    );
+  .replace(/\b([a-z]+(?:-[a-z]+)+)/g, (match) =>
+    match.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()),
+  );
 }
 
 export function toJsx(svg: string, componentName: string): string {
