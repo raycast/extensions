@@ -1,5 +1,11 @@
 # Google Meet Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add Dia browser support
+
+## [Improvement] - 2026-02-13
+
 ## [Improvement] - 2026-04-11
 
 - Add Dia browser support
