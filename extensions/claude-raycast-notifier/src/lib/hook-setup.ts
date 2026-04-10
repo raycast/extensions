@@ -13,7 +13,7 @@ type HookFileSet = {
 };
 
 export type HookProviderStatus = {
-  provider: "claude" | "gemini";
+  provider: "claude" | "gemini" | "codex";
   settingsPath: string;
   configured: boolean;
   bridgePaths: HookFileSet;
@@ -25,6 +25,7 @@ export type HookSetupStatus = {
   runtimeInstalled: boolean;
   claude: HookProviderStatus;
   gemini: HookProviderStatus;
+  codex: HookProviderStatus;
 };
 
 export async function loadHookSetupStatus(): Promise<HookSetupStatus> {
@@ -32,6 +33,7 @@ export async function loadHookSetupStatus(): Promise<HookSetupStatus> {
   const runtimeDir = hookRuntimeInstallDir(notifierRoot);
   const claude = await loadClaudeStatus(runtimeDir);
   const gemini = await loadGeminiStatus(runtimeDir);
+  const codex = await loadCodexStatus(runtimeDir);
 
   return {
     notifierRoot,
@@ -39,6 +41,7 @@ export async function loadHookSetupStatus(): Promise<HookSetupStatus> {
     runtimeInstalled: await pathExists(join(runtimeDir, "hooks")),
     claude,
     gemini,
+    codex,
   };
 }
 
@@ -60,9 +63,22 @@ export async function installGeminiHooks(): Promise<HookProviderStatus> {
   return loadGeminiStatus(runtimeDir);
 }
 
+export async function installCodexHooks(): Promise<HookProviderStatus> {
+  const notifierRoot = notifierRootPath();
+  const runtimeDir = await ensureHookRuntimeInstalled(notifierRoot);
+  const hooksPath = codexHooksPath();
+  const configPath = codexConfigPath();
+  await backupSettingsFile(hooksPath);
+  await backupSettingsFile(configPath);
+  await mergeSettings(hooksPath, buildCodexHooks(runtimeDir));
+  await ensureCodexFeatureFlag(configPath);
+  return loadCodexStatus(runtimeDir);
+}
+
 export async function installAllHooks(): Promise<HookSetupStatus> {
   await installClaudeHooks();
   await installGeminiHooks();
+  await installCodexHooks();
   return loadHookSetupStatus();
 }
 
@@ -72,6 +88,14 @@ export function claudeSettingsPath() {
 
 export function geminiSettingsPath() {
   return join(homedir(), ".gemini", "settings.json");
+}
+
+export function codexHooksPath() {
+  return join(homedir(), ".codex", "hooks.json");
+}
+
+export function codexConfigPath() {
+  return join(homedir(), ".codex", "config.toml");
 }
 
 export async function ensureSettingsFile(settingsPath: string) {
@@ -151,12 +175,42 @@ async function loadGeminiStatus(
   };
 }
 
+async function loadCodexStatus(
+  runtimeDir: string,
+): Promise<HookProviderStatus> {
+  const settingsPath = codexHooksPath();
+  const bridgePaths = {
+    eventBridge: join(runtimeDir, "hooks", "codex-stop-bridge.mjs"),
+    askBridge: join(runtimeDir, "hooks", "codex-pretool-bash-bridge.mjs"),
+  };
+  const settings = await readSettings(settingsPath);
+  const config = await readTextFile(codexConfigPath());
+
+  return {
+    provider: "codex",
+    settingsPath,
+    configured:
+      includesCommand(settings, bridgePaths.eventBridge) &&
+      includesCommand(settings, bridgePaths.askBridge) &&
+      config.includes("codex_hooks = true"),
+    bridgePaths,
+  };
+}
+
 async function readSettings(settingsPath: string): Promise<JsonObject> {
   try {
     const raw = await fs.readFile(settingsPath, "utf8");
     return JSON.parse(raw) as JsonObject;
   } catch {
     return {};
+  }
+}
+
+async function readTextFile(filePath: string): Promise<string> {
+  try {
+    return await fs.readFile(filePath, "utf8");
+  } catch {
+    return "";
   }
 }
 
@@ -299,6 +353,42 @@ function buildGeminiSettings(runtimeDir: string) {
   };
 }
 
+function buildCodexHooks(runtimeDir: string) {
+  const stopBridge = shellEscape(
+    join(runtimeDir, "hooks", "codex-stop-bridge.mjs"),
+  );
+  const bashBridge = shellEscape(
+    join(runtimeDir, "hooks", "codex-pretool-bash-bridge.mjs"),
+  );
+
+  return {
+    hooks: {
+      PreToolUse: [
+        {
+          matcher: "Bash",
+          hooks: [
+            {
+              type: "command",
+              command: `node ${bashBridge}`,
+              statusMessage: "Checking Codex Bash command",
+            },
+          ],
+        },
+      ],
+      Stop: [
+        {
+          hooks: [
+            {
+              type: "command",
+              command: `node ${stopBridge}`,
+            },
+          ],
+        },
+      ],
+    },
+  };
+}
+
 function includesCommand(settings: JsonObject, expectedPath: string) {
   const hooks = settings.hooks;
   if (!hooks || typeof hooks !== "object") return false;
@@ -313,6 +403,26 @@ async function pathExists(path: string) {
   } catch {
     return false;
   }
+}
+
+async function ensureCodexFeatureFlag(configPath: string) {
+  await fs.mkdir(dirname(configPath), { recursive: true });
+  const current = await readTextFile(configPath);
+
+  if (current.includes("codex_hooks = true")) {
+    return;
+  }
+
+  let next = current.trimEnd();
+  if (next.length === 0) {
+    next = "[features]\ncodex_hooks = true";
+  } else if (/\[features\]/.test(next)) {
+    next = `${next}\ncodex_hooks = true`;
+  } else {
+    next = `${next}\n\n[features]\ncodex_hooks = true`;
+  }
+
+  await fs.writeFile(configPath, `${next}\n`);
 }
 
 function shellEscape(value: string) {

@@ -13,10 +13,12 @@ import { usePromise } from "@raycast/utils";
 import { basename } from "node:path";
 import {
   claudeSettingsPath,
+  codexHooksPath,
   ensureSettingsFile,
   geminiSettingsPath,
   installAllHooks,
   installClaudeHooks,
+  installCodexHooks,
   installGeminiHooks,
   loadHookSetupStatus,
   type HookProviderStatus,
@@ -58,7 +60,7 @@ export default function Command() {
                     async () => {
                       await installAllHooks();
                       await revalidate();
-                      return "Claude and Gemini hooks are ready";
+                      return "Claude, Gemini, and Codex hooks are ready";
                     },
                   );
                 }}
@@ -100,6 +102,16 @@ export default function Command() {
               });
             }}
           />
+          <ProviderItem
+            status={data.codex}
+            onInstall={async () => {
+              await installWithToast("Installing Codex hooks", async () => {
+                await installCodexHooks();
+                await revalidate();
+                return "Codex hooks installed";
+              });
+            }}
+          />
         </List.Section>
       ) : null}
     </List>
@@ -113,15 +125,29 @@ function ProviderItem({
   status: HookProviderStatus;
   onInstall: () => Promise<void>;
 }) {
-  const label = status.provider === "gemini" ? "Gemini" : "Claude";
+  const label =
+    status.provider === "gemini"
+      ? "Gemini"
+      : status.provider === "codex"
+        ? "Codex"
+        : "Claude";
   const tintColor = status.configured ? Color.Green : Color.Orange;
   const settingsPath =
-    status.provider === "gemini" ? geminiSettingsPath() : claudeSettingsPath();
+    status.provider === "gemini"
+      ? geminiSettingsPath()
+      : status.provider === "codex"
+        ? codexHooksPath()
+        : claudeSettingsPath();
 
   return (
     <List.Item
       icon={{
-        source: status.provider === "gemini" ? Icon.Stars : Icon.Terminal,
+        source:
+          status.provider === "gemini"
+            ? Icon.Stars
+            : status.provider === "codex"
+              ? Icon.Code
+              : Icon.Terminal,
         tintColor,
       }}
       title={`${label} Hooks`}

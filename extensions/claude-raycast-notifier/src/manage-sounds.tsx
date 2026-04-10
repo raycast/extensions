@@ -46,22 +46,24 @@ const SEMANTIC_HOOKS: SemanticHook[] = [
     title: "Needs Input",
     description:
       "Play this sound when an AI needs your attention or asks you to respond.",
-    providers: "Claude, Gemini",
+    providers: "Claude, Gemini, Codex",
     hookKeys: [
       "claude:elicitation",
       "gemini:notification",
       "gemini:needs_input",
+      "codex:pretooluse",
     ],
   },
   {
     id: "done",
     title: "Done",
     description: "Play this sound when an AI finishes the current task.",
-    providers: "Claude, Gemini, GitHub Copilot",
+    providers: "Claude, Gemini, Codex, GitHub Copilot",
     hookKeys: [
       "claude:stop",
       "gemini:afteragent",
       "gemini:done",
+      "codex:stop",
       "copilot:sessionend",
       "copilot:done",
     ],
