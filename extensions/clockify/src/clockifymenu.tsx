@@ -103,23 +103,27 @@ export default function ClockifyMenuCommand() {
         });
       } else if (!currentEntry) {
         // No active timer: show recent entries
-        getTimeEntries({}).then((allEntries) => {
-          const uniqueEntries: TimeEntry[] = [];
-          const seen = new Set<string>();
+        getTimeEntries({})
+          .then((allEntries) => {
+            const uniqueEntries: TimeEntry[] = [];
+            const seen = new Set<string>();
 
-          for (const e of allEntries) {
-            if (!e.projectId) continue;
-            const key = `${e.description || ""}-${e.projectId}-${e.taskId || ""}`;
-            if (!seen.has(key)) {
-              seen.add(key);
-              uniqueEntries.push(e);
-              if (uniqueEntries.length >= 5) break;
+            for (const e of allEntries) {
+              if (!e.projectId) continue;
+              const key = `${e.description || ""}-${e.projectId}-${e.taskId || ""}`;
+              if (!seen.has(key)) {
+                seen.add(key);
+                uniqueEntries.push(e);
+                if (uniqueEntries.length >= 5) break;
+              }
             }
-          }
 
-          setRecentEntries(uniqueEntries);
-          setTodayTotal(0);
-        });
+            setRecentEntries(uniqueEntries);
+            setTodayTotal(0);
+          })
+          .catch((error) => {
+            showFailureToast(error, { title: "Could not load recent entries" });
+          });
       }
     }, 0);
 
