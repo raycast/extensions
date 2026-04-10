@@ -1,54 +1,53 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "rclone-raycast",
-  "title": "rclone",
-  "description": "A Raycast extension for rclone",
-  "icon": "icon.png",
-  "author": "rclone",
+  "name": "cmux",
+  "title": "cmux",
+  "description": "Interacts with the cmux terminal app for Mac",
+  "icon": "extension-icon.png",
+  "author": "steve_occhipinti",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
-    "Data",
-    "Developer Tools",
-    "System"
+    "Developer Tools"
+  ],
+  "keywords": [
+    "cmux",
+    "terminal",
+    "multiplexer",
+    "workspace",
+    "tmux"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "list-remotes",
-      "title": "List Remotes",
-      "subtitle": "rclone",
-      "description": "See a list of all remotes",
+      "name": "search-workspaces",
+      "title": "Search Workspaces",
+      "description": "Search and jump to a workspace in cmux",
       "mode": "view"
     },
     {
-      "name": "create-remote",
-      "title": "Create Remote",
-      "subtitle": "rclone",
-      "description": "Create a new rclone remote",
+      "name": "search-surfaces",
+      "title": "Search Surfaces",
+      "description": "Search and focus a surface (tab) in cmux",
       "mode": "view"
     },
     {
-      "name": "run-operation",
-      "title": "Run Operation",
-      "subtitle": "rclone",
-      "description": "Run an rclone operation",
-      "mode": "view"
+      "name": "jump-to-latest-notification",
+      "title": "Jump to Latest Notification",
+      "description": "Focus cmux and open the latest notification",
+      "mode": "no-view"
     },
     {
-      "name": "start-daemon",
-      "title": "Start Daemon",
-      "subtitle": "rclone",
-      "description": "Start the rclone daemon",
-      "mode": "view"
+      "name": "new-workspace",
+      "title": "New Workspace",
+      "description": "Create and focus a new workspace in cmux",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^1.17.0",
-    "rclone-sdk": "^1.72.0"
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -65,8 +64,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "contributors": [
-    "misterK"
-  ]
+  }
 }
