@@ -1,6 +1,6 @@
 # BTTV Emote Changelog
 
- ## [Introducing GRID View] - 2022-06-09
+## [Introducing GRID View] - 2022-06-09
 
  - Added new grid layout for emotes.
  - UI / UX improvement.

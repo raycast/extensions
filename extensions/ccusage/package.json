@@ -29,7 +29,91 @@
       "title": "Claude Code Usage in Menu Bar",
       "subtitle": "ccusage",
       "description": "Show Claude Code usage in menu bar",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "menuBarTitle",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Status",
+          "description": "What to display as text next to the icon in the menu bar",
+          "default": "todayUsage",
+          "data": [
+            {
+              "title": "Today's Usage (Cost + Tokens)",
+              "value": "todayUsage"
+            },
+            {
+              "title": "Today's Cost",
+              "value": "todayCost"
+            },
+            {
+              "title": "Monthly Cost",
+              "value": "monthlyCost"
+            },
+            {
+              "title": "Today's Tokens",
+              "value": "todayTokens"
+            },
+            {
+              "title": "5-Hour Limit",
+              "value": "fiveHour"
+            },
+            {
+              "title": "7-Day Limit",
+              "value": "sevenDay"
+            },
+            {
+              "title": "Highest Utilization",
+              "value": "utilization"
+            },
+            {
+              "title": "None",
+              "value": "none"
+            }
+          ]
+        },
+        {
+          "name": "showRemainingUsage",
+          "type": "dropdown",
+          "required": false,
+          "title": "Progress Bar Mode",
+          "description": "Whether progress bars show remaining capacity or consumed usage",
+          "default": "remaining",
+          "data": [
+            {
+              "title": "Remaining",
+              "value": "remaining"
+            },
+            {
+              "title": "Consumed",
+              "value": "consumed"
+            }
+          ]
+        },
+        {
+          "name": "progressBarStyle",
+          "type": "dropdown",
+          "required": false,
+          "title": "Progress Bar Style",
+          "description": "Visual style for rate limit progress bars",
+          "default": "solid",
+          "data": [
+            {
+              "title": "Solid (█░)",
+              "value": "solid"
+            },
+            {
+              "title": "Blocks (▰▱)",
+              "value": "blocks"
+            },
+            {
+              "title": "ASCII (#-)",
+              "value": "ascii"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "claude-code-stats",

@@ -10,6 +10,9 @@ const CLAUDE_USAGE_API = "https://api.anthropic.com/api/oauth/usage";
 const KEYCHAIN_SERVICE = "Claude Code-credentials";
 const REQUEST_TIMEOUT = 10000;
 
+// OAuth beta header required by Anthropic API (as of 2025-04-20)
+const CLAUDE_OAUTH_BETA_HEADER = "oauth-2025-04-20";
+
 type CredentialSource = "file" | "keychain";
 
 interface ClaudeCredentials {
@@ -367,7 +370,7 @@ async function fetchClaudeUsage(
         Authorization: `Bearer ${accessToken}`,
         Accept: "application/json",
         "Content-Type": "application/json",
-        "anthropic-beta": "oauth-2025-04-20",
+        "anthropic-beta": CLAUDE_OAUTH_BETA_HEADER,
       },
       signal: controller.signal,
     });
@@ -383,7 +386,7 @@ async function fetchClaudeUsage(
             Authorization: `Bearer ${accessToken}`,
             Accept: "application/json",
             "Content-Type": "application/json",
-            "anthropic-beta": "oauth-2025-04-20",
+            "anthropic-beta": CLAUDE_OAUTH_BETA_HEADER,
           },
           signal: controller.signal,
         });

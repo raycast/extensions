@@ -24,7 +24,7 @@ import {
   formatContextForPrompt,
   CapturedContext,
 } from "./lib/context-capture";
-import { launchClaudeCode } from "./lib/terminal";
+import { launchClaudeCode, expandTilde } from "./lib/terminal";
 
 const PROJECT_PATH_STORAGE_KEY = "askClaudeProjectPath";
 
@@ -204,8 +204,8 @@ function AskClaudeForm() {
     setIsSubmitting(true);
 
     try {
-      // Determine target path (user input or default)
-      const targetPath = projectPath || defaultProjectPath;
+      // Determine target path (user input or default), expanding ~ to home dir
+      const targetPath = expandTilde(projectPath) || defaultProjectPath;
 
       // Create directory if it doesn't exist
       if (!existsSync(targetPath)) {
@@ -276,12 +276,22 @@ function AskClaudeForm() {
             icon={Icon.Terminal}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
             onAction={async () => {
-              const targetPath = projectPath || defaultProjectPath;
-              if (!existsSync(targetPath)) {
-                mkdirSync(targetPath, { recursive: true });
+              try {
+                const targetPath =
+                  expandTilde(projectPath) || defaultProjectPath;
+                if (!existsSync(targetPath)) {
+                  mkdirSync(targetPath, { recursive: true });
+                }
+                await launchClaudeCode({ projectPath: targetPath });
+                await popToRoot();
+              } catch (error) {
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to open session",
+                  message:
+                    error instanceof Error ? error.message : String(error),
+                });
               }
-              await launchClaudeCode({ projectPath: targetPath });
-              await popToRoot();
             }}
           />
         </ActionPanel>
@@ -314,7 +324,7 @@ function AskClaudeForm() {
         value={projectPath}
         onChange={handlePathChange}
         placeholder="~/claudecast"
-        info="Working directory for Claude Code. Created if it doesn't exist (supports nested paths)."
+        info="Working directory for Claude Code. Supports ~ for home directory. Created if it doesn't exist."
       />
 
       <Form.Separator />

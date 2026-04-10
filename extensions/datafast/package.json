@@ -1,0 +1,163 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "datafast",
+  "title": "Datafast",
+  "description": "View your Datafast web analytics — visitors, revenue, pages, referrers, campaigns, and real-time data",
+  "icon": "icon.png",
+  "author": "joshmillgate",
+  "categories": [
+    "Data",
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "analytics",
+    "datafast",
+    "revenue",
+    "visitors",
+    "web analytics"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your Datafast API key (Dashboard > Website Settings > API)",
+      "placeholder": "df_..."
+    },
+    {
+      "name": "timezone",
+      "type": "textfield",
+      "required": false,
+      "title": "Timezone",
+      "description": "IANA timezone (e.g. America/New_York). Defaults to system timezone.",
+      "placeholder": "America/New_York"
+    }
+  ],
+  "commands": [
+    {
+      "name": "dashboard-overview",
+      "title": "Dashboard Overview",
+      "subtitle": "View dashboard data and choose timeframes",
+      "description": "View key metrics: visitors, sessions, bounce rate, revenue, conversion rate",
+      "mode": "view",
+      "keywords": [
+        "stats",
+        "metrics",
+        "overview",
+        "revenue",
+        "visitors"
+      ]
+    },
+    {
+      "name": "realtime-visitors",
+      "title": "Realtime Visitors",
+      "subtitle": "View active visitors data",
+      "description": "View active visitors on your site right now",
+      "mode": "view",
+      "keywords": [
+        "live",
+        "online",
+        "realtime",
+        "active"
+      ]
+    },
+    {
+      "name": "top-pages",
+      "title": "Top Pages",
+      "subtitle": "Show top pages data",
+      "description": "View pages ranked by visitors or revenue",
+      "mode": "view",
+      "keywords": [
+        "pages",
+        "urls",
+        "paths"
+      ]
+    },
+    {
+      "name": "top-referrers",
+      "title": "Top Referrers",
+      "subtitle": "Show your top referrers data",
+      "description": "View traffic sources ranked by visitors or revenue",
+      "mode": "view",
+      "keywords": [
+        "referrers",
+        "sources",
+        "traffic"
+      ]
+    },
+    {
+      "name": "campaigns",
+      "title": "Campaigns",
+      "subtitle": "Show your campaigns data",
+      "description": "View campaign performance with UTM breakdowns",
+      "mode": "view",
+      "keywords": [
+        "utm",
+        "campaigns",
+        "marketing"
+      ]
+    },
+    {
+      "name": "countries",
+      "title": "Countries",
+      "subtitle": "Show countries data",
+      "description": "View traffic and revenue by country",
+      "mode": "view",
+      "keywords": [
+        "countries",
+        "geo",
+        "location"
+      ]
+    },
+    {
+      "name": "menu-bar-realtime",
+      "title": "Enable Menu Bar",
+      "subtitle": "Show number of active visitors in the Mac menu bar",
+      "description": "Show live visitor count in your menu bar",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "keywords": [
+        "visitors",
+        "realtime",
+        "menu bar",
+        "live"
+      ],
+      "preferences": [
+        {
+          "name": "saleNotifications",
+          "type": "checkbox",
+          "required": false,
+          "title": "Sale Notifications",
+          "description": "Show confetti and a notification when a new sale comes through",
+          "default": true,
+          "label": "Enable sale notifications"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

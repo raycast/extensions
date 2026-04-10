@@ -32,12 +32,26 @@ export type SearchResponse = {
   count: number;
 };
 
+export type SkillLockEntry = {
+  source: string;
+  sourceType: string;
+  sourceUrl?: string;
+  skillPath: string;
+  skillFolderHash: string;
+  installedAt: string;
+  updatedAt: string;
+};
+
 export type InstalledSkill = {
   name: string;
   path: string;
   agents: string[];
   agentCount: number;
   hasUpdate?: boolean;
+  source?: string;
+  sourceUrl?: string;
+  installedAt?: string;
+  updatedAt?: string;
 };
 
 export type SkillFrontmatter = {
@@ -129,6 +143,10 @@ export function formatInstalls(count: number): string {
     return `${(count / 1_000).toFixed(1)}K`;
   }
   return count.toString();
+}
+
+export function stripGitSuffix(url: string): string {
+  return url.endsWith(".git") ? url.slice(0, -4) : url;
 }
 
 export function buildInstallCommand(skill: Skill): string {

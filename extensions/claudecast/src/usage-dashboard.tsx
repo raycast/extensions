@@ -7,11 +7,13 @@ import {
   getAllTimeStats,
   getDailyStats,
   formatCost,
+  formatTokens,
   generateCostChart,
   generateProjectTable,
   UsageStats,
   DailyStats,
 } from "./lib/usage-stats";
+import { safeTruncate } from "./lib/session-parser";
 
 type TimeRange = "today" | "week" | "month" | "all";
 
@@ -164,7 +166,11 @@ function generateDashboardMarkdown(
   md += `|--------|-------|\n`;
   md += `| Total Sessions | ${stats.totalSessions} |\n`;
   md += `| Total Cost | ${formatCost(stats.totalCost)} |\n`;
-  md += `| Avg Cost/Session | ${formatCost(stats.totalSessions > 0 ? stats.totalCost / stats.totalSessions : 0)} |\n\n`;
+  md += `| Avg Cost/Session | ${formatCost(stats.totalSessions > 0 ? stats.totalCost / stats.totalSessions : 0)} |\n`;
+  md += `| Input Tokens | ${formatTokens(stats.totalInputTokens)} |\n`;
+  md += `| Output Tokens | ${formatTokens(stats.totalOutputTokens)} |\n`;
+  md += `| Cache Read | ${formatTokens(stats.totalCacheReadTokens)} |\n`;
+  md += `| Cache Write | ${formatTokens(stats.totalCacheCreationTokens)} |\n\n`;
 
   // Daily chart
   if (dailyStats.length > 0) {
@@ -188,8 +194,7 @@ function generateDashboardMarkdown(
 
     for (const session of stats.topSessions.slice(0, 5)) {
       const preview = session.firstMessage
-        ? session.firstMessage.slice(0, 40) +
-          (session.firstMessage.length > 40 ? "..." : "")
+        ? safeTruncate(session.firstMessage, 40, "...")
         : "No message";
       md += `| ${session.projectName} | ${preview} | ${formatCost(session.cost)} |\n`;
     }

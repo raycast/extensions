@@ -1,5 +1,9 @@
 # Asana Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Add subtasks support and tag management] - 2026-01-23
 
 - Added ability to view subtasks for a task in the detail view

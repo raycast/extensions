@@ -1,4 +1,4 @@
-import { Toast } from "@raycast/api";
+import { closeMainWindow } from "@raycast/api";
 import { openPreferences } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
@@ -7,12 +7,6 @@ export default async function () {
     return;
   }
 
-  const toast = new Toast({
-    title: "Opening preferences",
-    style: Toast.Style.Animated,
-  });
-
-  await toast.show();
-
+  await closeMainWindow();
   await openPreferences();
 }

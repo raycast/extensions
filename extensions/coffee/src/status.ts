@@ -56,9 +56,7 @@ export default async function Command() {
 
   let subtitle = "✖ Decaffeinated";
 
-  if (isCaffeinated) {
-    subtitle = "✔ Caffeinated";
-  } else if (isScheduled) {
+  if (isCaffeinated || isScheduled) {
     subtitle = "✔ Caffeinated";
   }
 

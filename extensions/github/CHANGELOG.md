@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Improve Auto-Merge Support] - 2026-03-05
 
 - Pull Requests: Fix auto-merge actions not appearing due to inverted condition

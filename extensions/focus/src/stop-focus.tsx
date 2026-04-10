@@ -1,4 +1,4 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, showToast, showHUD } from "@raycast/api";
 import { stopFocus, isBreakRunning } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
@@ -20,5 +20,5 @@ export default async function () {
 
   await showToast({ style: Toast.Style.Animated, title: "Stopping focus..." });
   await stopFocus();
-  await showToast({ style: Toast.Style.Success, title: "Focus stopped" });
+  await showHUD("Focus stopped");
 }

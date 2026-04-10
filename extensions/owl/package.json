@@ -50,7 +50,7 @@
     "eslint-plugin-prettier": "^5.5.3",
     "eslint-plugin-react": "^7.37.5",
     "jsdom": "^26.1.0",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "prettier": "^3.5.3",
     "puppeteer": "^24.15.0",
     "sharp": "^0.34.3",

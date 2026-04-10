@@ -12,8 +12,8 @@ type Input = {
    */
   to?: string;
   /**
-   * Predefined date range shortcuts: "today", "yesterday", "this_week", "last_week", "this_month", "last_month", "last_7_days", "last_30_days", "last_90_days"
-   * If provided, overrides 'from' and 'to' parameters.
+   * Predefined date range shortcuts: "today", "yesterday", "this_week", …
+   * Used only when neither `from` nor `to` is set (explicit dates always win).
    */
   dateRange?:
     | "today"
@@ -48,7 +48,7 @@ type Input = {
    */
   accounts?: string;
   /**
-   * Maximum number of entries to return. Defaults to 50, max 200.
+   * Maximum number of entries to return. Defaults to 50, max 500.
    */
   limit?: number;
   /**
@@ -65,19 +65,16 @@ function getDateRange(input: Input): { from: string; to: string } {
   const today = new Date();
   const formatDate = (d: Date) => format(d, "yyyy-MM-dd");
 
-  // Prioritize explicit from/to dates if provided
-  if (input.from || input.to) {
-    return {
-      from: input.from || formatDate(subDays(today, 365)),
-      to: input.to || formatDate(today),
-    };
-  }
+  const fromTrim = input.from?.trim();
+  const toTrim = input.to?.trim();
+  const hasExplicitFrom = Boolean(fromTrim);
+  const hasExplicitTo = Boolean(toTrim);
 
-  // Prioritize explicit from/to dates if provided
-  if (input.from || input.to) {
+  // Explicit `from` / `to` always beat `dateRange` (even if only one is set).
+  if (hasExplicitFrom || hasExplicitTo) {
     return {
-      from: input.from || formatDate(subDays(today, 365)),
-      to: input.to || formatDate(today),
+      from: hasExplicitFrom ? fromTrim! : formatDate(subDays(today, 365)),
+      to: hasExplicitTo ? toTrim! : formatDate(today),
     };
   }
 
@@ -138,7 +135,7 @@ function getDateRange(input: Input): { from: string; to: string } {
 
 export default async function searchEntries(input: Input) {
   const { from, to } = getDateRange(input);
-  const limit = Math.min(input.limit || 50, 200);
+  const limit = Math.min(input.limit || 50, 500);
   const type = input.type || "all";
   const includeSummary = input.includeSummary !== false;
 
@@ -175,21 +172,26 @@ export default async function searchEntries(input: Input) {
   const tagIds = resolveIds(input.tags, allTags);
   const accountIds = resolveIds(input.accounts, allAccounts);
 
-  // Fetch data with server-side filtering
-  const entries = await toshl.getTransactions({
-    from,
-    to,
-    per_page: limit,
-    search: input.search,
-    categories: categoryIds,
-    tags: tagIds,
-    accounts: accountIds,
-    type: type !== "all" ? type : undefined,
-  });
+  const maxPages = Math.min(45, Math.max(3, Math.ceil(limit / 200) + 3));
+
+  const allEntries = await toshl.getAllTransactions(
+    {
+      from,
+      to,
+      search: input.search,
+      categories: categoryIds,
+      tags: tagIds,
+      accounts: accountIds,
+      type: type !== "all" ? type : undefined,
+    },
+    { maxPages },
+  );
+
+  const entries = allEntries.slice(0, limit);
 
   // Format entries for output
   const formattedEntries = entries.map((entry) => {
-    const isTransfer = "transaction" in entry;
+    const isTransfer = !!entry.transaction?.account;
     let entryType: string;
     if (isTransfer) {
       entryType = "transfer";
@@ -211,6 +213,8 @@ export default async function searchEntries(input: Input) {
       tags: (entry.tags || []).map((tid) => tagIdNameMap.get(tid) || "Unknown"),
       account: accountIdNameMap.get(entry.account) || "Unknown",
       isRecurring: !!entry.repeat,
+      completed: entry.completed,
+      hasExtra: !!entry.extra && Object.keys(entry.extra).length > 0,
     };
   });
 
@@ -249,7 +253,7 @@ export default async function searchEntries(input: Input) {
     summary = {
       period: `${from} to ${to}`,
       totalEntries: formattedEntries.length,
-      explanation: "Summary is based on the matched entries (limited by pagination).",
+      explanation: `Summary uses up to ${entries.length} entries returned (fetched across API pages, capped for safety).`,
       expenseCount: expenses.length,
       incomeCount: incomes.length,
       transferCount: transfers.length,

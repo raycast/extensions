@@ -1,5 +1,9 @@
 # ČSFD Changelog
 
+## [1.0.2] - 2026-03-25
+
+- Fixed extension not working due to ČSFD API changes by updating `node-csfd-api` to v5.7.0
+
 ## [1.0.1] - 2026-01-08
 
 - Fixed crash when viewing movie details by updating `node-csfd-api` to v4.1.2

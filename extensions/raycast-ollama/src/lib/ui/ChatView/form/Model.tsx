@@ -239,13 +239,13 @@ export function FormModel(props: props): React.JSX.Element {
           </Form.Dropdown>
           <Form.Dropdown title="Model" info={InfoModel} {...itemProps.modelMain}>
             {itemProps.serverMain.value &&
-              Model.get(itemProps.serverMain.value)!
-                .filter(
+              Model.get(itemProps.serverMain.value)
+                ?.filter(
                   (t) =>
                     t.capabilities && t.capabilities.findIndex((c) => c === OllamaApiModelCapability.COMPLETION) !== -1
                 )
-                .sort()
-                .map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+                ?.sort()
+                ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
           </Form.Dropdown>
           <Form.Checkbox
             id="advancedMain"
@@ -278,12 +278,12 @@ export function FormModel(props: props): React.JSX.Element {
           </Form.Dropdown>
           <Form.Dropdown title="Model" info={InfoModel} {...itemProps.modelVision}>
             {itemProps.serverVision.value &&
-              Model.get(itemProps.serverVision.value)!
-                .filter(
+              Model.get(itemProps.serverVision.value)
+                ?.filter(
                   (t) => t.capabilities && t.capabilities.findIndex((c) => c === OllamaApiModelCapability.VISION) !== -1
                 )
-                .sort()
-                .map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+                ?.sort()
+                ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
           </Form.Dropdown>
           <Form.Checkbox
             id="advancedVision"
@@ -318,12 +318,12 @@ export function FormModel(props: props): React.JSX.Element {
           </Form.Dropdown>
           <Form.Dropdown title="Model" info={InfoModel} {...itemProps.modelTools}>
             {itemProps.serverTools.value &&
-              Model.get(itemProps.serverTools.value)!
-                .filter(
+              Model.get(itemProps.serverTools.value)
+                ?.filter(
                   (t) => t.capabilities && t.capabilities.findIndex((c) => c === OllamaApiModelCapability.TOOLS) !== -1
                 )
-                .sort()
-                .map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+                ?.sort()
+                ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
           </Form.Dropdown>
           <Form.Checkbox
             id="advancedTools"
