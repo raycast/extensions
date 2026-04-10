@@ -1,4 +1,3 @@
-import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync } from "node:crypto";
 import { execFile } from "node:child_process";
 import * as fs from "node:fs/promises";
 import * as os from "node:os";
@@ -25,54 +24,6 @@ const SETUP_API_KEY = "jellyfin_setup_api_key";
 const SETUP_USER_ID = "jellyfin_setup_user_id";
 const SETUP_USERNAME = "jellyfin_setup_username";
 const SETUP_PASSWORD = "jellyfin_setup_password";
-// Salt for key derivation (not sensitive — the key itself is never stored)
-const CRYPTO_SALT_KEY = "jellyfin_setup_crypto_salt";
-
-// ─── Credential encryption ────────────────────────────────────────────────────
-
-/**
- * Derives a 32-byte AES key from the machine hostname + a random salt.
- * Uses pbkdf2Sync (lighter than scrypt) so it doesn't block the JS thread
- * for a perceptible amount of time. The key is never persisted.
- */
-function deriveMachineKey(salt: Buffer): Buffer {
-  const passphrase = `${os.hostname()}:jellyamp-credentials`;
-  return pbkdf2Sync(passphrase, salt, 100_000, 32, "sha256");
-}
-
-async function getOrCreateSalt(): Promise<Buffer> {
-  const stored = await LocalStorage.getItem<string>(CRYPTO_SALT_KEY);
-  if (stored) return Buffer.from(stored, "hex");
-  const salt = randomBytes(32);
-  await LocalStorage.setItem(CRYPTO_SALT_KEY, salt.toString("hex"));
-  return salt;
-}
-
-async function encryptValue(plaintext: string): Promise<string> {
-  const salt = await getOrCreateSalt();
-  const key = deriveMachineKey(salt);
-  const iv = randomBytes(12);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
-  const tag = cipher.getAuthTag();
-  return `${iv.toString("hex")}:${tag.toString("hex")}:${encrypted.toString("hex")}`;
-}
-
-async function decryptValue(encoded: string): Promise<string | undefined> {
-  try {
-    const parts = encoded.split(":");
-    if (parts.length !== 3) return undefined;
-    const [ivHex, tagHex, dataHex] = parts;
-    const salt = await getOrCreateSalt();
-    const key = deriveMachineKey(salt);
-    const decipher = createDecipheriv("aes-256-gcm", key, Buffer.from(ivHex, "hex"));
-    decipher.setAuthTag(Buffer.from(tagHex, "hex"));
-    const decrypted = Buffer.concat([decipher.update(Buffer.from(dataHex, "hex")), decipher.final()]);
-    return decrypted.toString("utf8");
-  } catch {
-    return undefined;
-  }
-}
 
 // ─── Authorization header ─────────────────────────────────────────────────────
 
@@ -113,14 +64,11 @@ export async function resolveCredentials(): Promise<ResolvedCredentials> {
   const serverUrl = rawServerUrl.replace(/\/+$/, ""); // strip trailing slash
 
   // In-extension setup form values take priority over Raycast preferences.
-  // Sensitive values (API key, password) are AES-256-GCM encrypted at rest;
-  // non-sensitive values (user ID, username, server URL) are stored as plain text.
-  const rawApiKey = await LocalStorage.getItem<string>(SETUP_API_KEY);
-  const savedApiKey = rawApiKey ? await decryptValue(rawApiKey) : undefined;
+  // Raycast's LocalStorage is already encrypted at rest by the platform.
+  const savedApiKey = await LocalStorage.getItem<string>(SETUP_API_KEY);
   const savedUserId = await LocalStorage.getItem<string>(SETUP_USER_ID);
   const savedUsername = await LocalStorage.getItem<string>(SETUP_USERNAME);
-  const rawPassword = await LocalStorage.getItem<string>(SETUP_PASSWORD);
-  const savedPassword = rawPassword ? await decryptValue(rawPassword) : undefined;
+  const savedPassword = await LocalStorage.getItem<string>(SETUP_PASSWORD);
 
   const apiKey = savedApiKey || prefs.apiKey;
   const userId = (savedUserId || prefs.userId)?.trim();
@@ -154,7 +102,7 @@ export async function resolveCredentials(): Promise<ResolvedCredentials> {
   return { serverUrl, token: authData.AccessToken, userId: authData.User.Id };
 }
 
-/** Clears all cached/saved credentials (token cache + setup values + crypto salt). */
+/** Clears all cached/saved credentials (token cache + setup values). */
 export async function clearCachedToken(): Promise<void> {
   await LocalStorage.removeItem(CACHED_TOKEN_KEY);
   await LocalStorage.removeItem(CACHED_USER_ID_KEY);
@@ -163,10 +111,10 @@ export async function clearCachedToken(): Promise<void> {
   await LocalStorage.removeItem(SETUP_USER_ID);
   await LocalStorage.removeItem(SETUP_USERNAME);
   await LocalStorage.removeItem(SETUP_PASSWORD);
-  await LocalStorage.removeItem(CRYPTO_SALT_KEY);
 }
 
-/** Encrypts and saves credentials entered via the in-extension setup form. */
+/** Saves credentials entered via the in-extension setup form.
+ *  Raycast's LocalStorage is encrypted at rest by the platform. */
 export async function saveSetupCredentials(values: {
   serverUrl: string;
   apiKey: string;
@@ -174,14 +122,11 @@ export async function saveSetupCredentials(values: {
   username: string;
   password: string;
 }): Promise<void> {
-  // Server URL: plain text (not sensitive)
   if (values.serverUrl.trim()) await LocalStorage.setItem(SETUP_SERVER_URL, values.serverUrl.trim());
-  // Sensitive: encrypted with AES-256-GCM before storage
-  if (values.apiKey.trim()) await LocalStorage.setItem(SETUP_API_KEY, await encryptValue(values.apiKey.trim()));
-  if (values.password.trim()) await LocalStorage.setItem(SETUP_PASSWORD, await encryptValue(values.password.trim()));
-  // Non-sensitive: stored as plain text
+  if (values.apiKey.trim()) await LocalStorage.setItem(SETUP_API_KEY, values.apiKey.trim());
   if (values.userId.trim()) await LocalStorage.setItem(SETUP_USER_ID, values.userId.trim());
   if (values.username.trim()) await LocalStorage.setItem(SETUP_USERNAME, values.username.trim());
+  if (values.password.trim()) await LocalStorage.setItem(SETUP_PASSWORD, values.password.trim());
 }
 
 /**
@@ -322,18 +267,6 @@ export async function getArtists(query?: string): Promise<JellyfinItem[]> {
   return data.Items.map((item) => ({ ...item, Type: "MusicArtist" as const }));
 }
 
-/** Fetches all music albums from the library. */
-export async function getAlbums(query?: string): Promise<JellyfinItem[]> {
-  const resp = await searchItems({ query: query ?? "", types: ["MusicAlbum"], limit: 100 });
-  return resp.Items;
-}
-
-/** Fetches tracks belonging to a specific album. */
-export async function getAlbumTracks(albumId: string): Promise<JellyfinItem[]> {
-  const resp = await searchItems({ types: ["Audio"], parentId: albumId, limit: 200 });
-  return resp.Items;
-}
-
 // ─── URL builders ─────────────────────────────────────────────────────────────
 
 /**
@@ -380,6 +313,8 @@ export async function playWithMediaPlayer(streamUrl: string): Promise<void> {
     const m3uPath = path.join(tempDir, `jellyfin-raycast-${Date.now()}.m3u`);
     await fs.writeFile(m3uPath, streamUrl, "utf-8");
     await open(m3uPath);
+    // Clean up after the media player has had time to read the file
+    setTimeout(() => fs.unlink(m3uPath).catch(() => {}), 30_000);
   }
 }
 

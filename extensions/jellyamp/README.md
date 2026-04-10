@@ -44,7 +44,6 @@ You can configure the extension in two ways:
 
 Your credentials are handled securely:
 
-- **API Key and Password** are encrypted with AES-256-GCM before being saved to local storage. The encryption key is derived from your machine's hostname and a random salt, it is never stored.
+- All credentials saved via the in-extension setup form are stored in **Raycast's LocalStorage**, which is encrypted at rest by the platform.
 - When credentials are entered via **Raycast Settings**, the API Key and Password fields use Raycast's built-in password storage, which is backed by your OS credential store.
-- **Username and User ID** are not sensitive secrets and are stored as plain text.
 - When using Username & Password authentication, only the resulting session token (not the password) is cached locally after login.
