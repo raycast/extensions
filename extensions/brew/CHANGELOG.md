@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Launch Arguments] - {PR_MERGE_DATE}
+## [Bug Fix & Launch Argument] - {PR_MERGE_DATE}
 
 - Added launch argument to Search command for pre-filling the search query before opening
 - Fixed search not working while the formulae/cask index is being downloaded on cold start
