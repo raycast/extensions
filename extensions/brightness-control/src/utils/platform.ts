@@ -10,10 +10,10 @@ import {
   setBrightnessForDisplay,
 } from "./lunar";
 import {
-  ensureTwinkleTrayReady,
-  adjustBrightness as ttAdjustBrightness,
-  setBrightness as ttSetBrightness,
-} from "./twinkle-tray";
+  adjustBrightness as winAdjustBrightness,
+  setBrightness as winSetBrightness,
+  getBrightness as winGetBrightness,
+} from "./ddc-ci";
 
 const isWindows = platform() === "win32";
 
@@ -22,18 +22,19 @@ export interface SetBrightnessResult {
   previousBrightness?: number;
 }
 
-/**
- * Adjust brightness by offset. Returns true on success.
- * macOS: simulates brightness key press (offset sign determines direction).
- * Windows: uses Twinkle Tray --Offset for all monitors (auto-installs if needed).
- */
 export async function adjustBrightness(offset: number): Promise<boolean> {
   if (isWindows) {
     try {
-      const exe = await ensureTwinkleTrayReady();
-      if (!exe) return false;
-      await ttAdjustBrightness(exe, offset);
-      return true;
+      const monitors = await winAdjustBrightness(offset);
+      if (monitors.length === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No Brightness-Capable Monitors Found",
+          message: "No WMI or DDC/CI monitors detected",
+        });
+        return false;
+      }
+      return monitors.some((m) => m.setResult === true);
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -48,18 +49,24 @@ export async function adjustBrightness(offset: number): Promise<boolean> {
   return true;
 }
 
-/**
- * Set absolute brightness level (1-100). Returns result on success, null on failure.
- * macOS: uses Lunar CLI with cursor display detection.
- * Windows: uses Twinkle Tray --Set for all monitors (auto-installs if needed).
- */
 export async function setBrightness(level: number): Promise<SetBrightnessResult | null> {
   if (isWindows) {
     try {
-      const exe = await ensureTwinkleTrayReady();
-      if (!exe) return null;
-      await ttSetBrightness(exe, level);
-      return {};
+      const monitors = await winSetBrightness(level);
+      if (monitors.length === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "No Brightness-Capable Monitors Found",
+          message: "No WMI or DDC/CI monitors detected",
+        });
+        return null;
+      }
+
+      const primary = monitors.find((m) => m.setResult === true) || monitors[0];
+      return {
+        displayName: primary.description || undefined,
+        previousBrightness: primary.brightness,
+      };
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -98,3 +105,5 @@ export async function setBrightness(level: number): Promise<SetBrightnessResult 
     previousBrightness: previousBrightness ?? undefined,
   };
 }
+
+export { winGetBrightness as getBrightness };
