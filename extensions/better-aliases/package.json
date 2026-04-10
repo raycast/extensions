@@ -6,6 +6,10 @@
   "icon": "better-aliases.png",
   "author": "alexi.build",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "create-alias",
@@ -43,7 +47,7 @@
       "name": "open-config-folder",
       "title": "Open Config Folder",
       "subtitle": "Better Aliases",
-      "description": "Open the folder containing your Better Aliases configuration files in Finder",
+      "description": "Open the folder containing your Better Aliases configuration files",
       "mode": "no-view"
     },
     {
@@ -135,9 +139,13 @@
     {
       "name": "leaderKeyConfigPath",
       "title": "Leader Key Config Path (optional)",
-      "description": "Path to the leader key configuration file (defaults to ~/Library/Application Support/Leader Key/config.json)",
+      "description": "Path to the leader key configuration file. macOS defaults to ~/Library/Application Support/Leader Key/config.json. Windows users should manually select their config file.",
       "type": "file",
       "required": false,
+      "default": {
+        "macOS": "~/Library/Application Support/Leader Key/config.json",
+        "Windows": ""
+      },
       "placeholder": "Select leader key config file"
     }
   ],
@@ -162,8 +170,5 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

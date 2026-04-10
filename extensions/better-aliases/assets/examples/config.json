@@ -4,11 +4,7 @@
     "label": "2FA",
     "snippetOnly": false
   },
-  "..": {
-    "value": "/System/Applications/System Settings.app",
-    "label": "System",
-    "snippetOnly": false
-  },
+
   ".a": {
     "value": "raycast://extensions/benvp/audio-device/set-output-device",
     "label": "Audio",
@@ -52,11 +48,6 @@
   "ay": {
     "value": "raycast://ai-commands/summarize-youtube-video",
     "label": "summarize (YouTube)",
-    "snippetOnly": false
-  },
-  "bb": {
-    "value": "https://bsky.app/",
-    "label": "BlueSky",
     "snippetOnly": false
   },
   "bi": {
@@ -104,11 +95,7 @@
     "label": "ToDo",
     "snippetOnly": false
   },
-  "f2": {
-    "value": "open $HOME/Downloads",
-    "label": "Downloads",
-    "snippetOnly": false
-  },
+
   "fa": {
     "value": "https://www.americanexpress.com/en-us/account/login?inav=iNavLnkLog",
     "label": "AMEX",
@@ -198,25 +185,13 @@
     "label": "git",
     "snippetOnly": false
   },
-  "n": {
-    "value": "/Applications/Notion.app",
-    "snippetOnly": false
-  },
+
   "oa": {
     "value": "https://www.amazon.com/gp/cart/view.html",
     "label": "Amazon",
     "snippetOnly": false
   },
-  "oA": {
-    "value": "/Applications/Anki.app",
-    "label": "Anki",
-    "snippetOnly": false
-  },
-  "oc": {
-    "value": "/Applications/Google Chrome.app",
-    "label": "Chrome",
-    "snippetOnly": false
-  },
+
   "od": {
     "value": "https://www.doordash.com/orders",
     "label": "DoorDash",
@@ -237,14 +212,7 @@
     "label": "Instacart",
     "snippetOnly": false
   },
-  "oke": {
-    "value": "/Applications/Karabiner-Elements.app",
-    "snippetOnly": false
-  },
-  "okv": {
-    "value": "/Applications/Karabiner-EventViewer.app",
-    "snippetOnly": false
-  },
+
   "ot": {
     "value": "https://www.target.com/",
     "label": "Target",
@@ -289,10 +257,7 @@
     "label": "Raycast Notes",
     "snippetOnly": false
   },
-  "rp": {
-    "value": "/Applications/Privileges.app",
-    "snippetOnly": false
-  },
+
   "rq": {
     "value": "raycast://extensions/alexi.build/share-a-quote/copy-selected-text-as-quote-with-link",
     "label": "copy Quote",

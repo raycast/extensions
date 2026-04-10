@@ -22,7 +22,7 @@ This extension allows for deep customization via Extension Preferences:
 - **Randomized Separator**: Separator used for randomized snippet values (Default: `;;`).
 - **Config Paths**:
 - **Better Aliases Config**: Path to your aliases and snippets configuration. Defaults to Raycast's extension support folder (`{supportPath}/config.json`). Leave empty to use default location.
-- **Leader Key Config**: Path to your leader key configuration file (external integration, defaults to `~/Library/Application Support/Leader Key/config.json`).
+- **Leader Key Config**: Path to your leader key configuration file (external integration). macOS defaults to `~/Library/Application Support/Leader Key/config.json`. Windows users should manually select their config file.
 
 ### Config File Locations
 
@@ -33,11 +33,12 @@ By default, config files are stored in Raycast's extension support directory for
 
 ### Finding Your Config File
 
-Need to manually edit or back up your config? Use the **Open Config Folder** command to instantly open the folder containing your configuration file in Finder.
+Need to manually edit or back up your config? Use the **Open Config Folder** command to instantly open the folder containing your configuration file.
 
 ### Custom Config Paths
 
 Advanced users can override default locations by setting custom paths in Extension Preferences. This is useful if you want to:
+
 - Share configs across multiple machines via cloud storage
 - Keep configs in a specific version-controlled directory
 - Use a custom configuration management setup

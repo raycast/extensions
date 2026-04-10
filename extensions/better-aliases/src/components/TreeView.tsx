@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { KEYBOARD_SHORTCUTS } from "../lib/constants";
 import { type AliasNode, isLeafNode } from "../lib/treeUtils";
 
 interface TreeViewProps {
@@ -57,14 +58,14 @@ export function TreeView({ node, onNavigate, onToggleView, onGoBack }: TreeViewP
                   title="Switch to Keyboard View"
                   icon={Icon.Desktop}
                   onAction={onToggleView}
-                  shortcut={{ modifiers: ["cmd"], key: "v" }}
+                  shortcut={KEYBOARD_SHORTCUTS.VIEW}
                 />
                 {onGoBack && (
                   <Action
                     title="Go Back"
                     icon={Icon.ArrowLeft}
                     onAction={onGoBack}
-                    shortcut={{ modifiers: ["cmd"], key: "[" }}
+                    shortcut={KEYBOARD_SHORTCUTS.GO_BACK}
                   />
                 )}
               </ActionPanel>

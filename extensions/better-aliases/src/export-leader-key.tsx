@@ -1,15 +1,14 @@
 import { Action, ActionPanel, Detail, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 import * as fs from "fs";
-import { homedir } from "os";
+import { dirname } from "path";
 import { useState } from "react";
 import { getBetterAliasesPath } from "./lib/betterAliases";
 import { convertAliasesToLeaderKey } from "./lib/conversion";
 import { expandPath } from "./lib/expandPath";
+import { resolveLeaderKeyConfigPath } from "./lib/leaderKeyConfigPath";
 import type { LeaderKeyConfig, Preferences } from "./schemas";
 import { betterAliasesConfigSchema } from "./schemas";
-
-const DEFAULT_LEADER_KEY_PATH = `${homedir()}/Library/Application Support/Leader Key/config.json`;
 
 interface ExportFormValues {
   betterAliasesPath: string[];
@@ -22,14 +21,12 @@ export default function ExportLeaderKey() {
   const [errors, setErrors] = useState<string[]>([]);
 
   const defaultBetterAliasesPath = getBetterAliasesPath();
-  const defaultLeaderKeyPath = preferences.leaderKeyConfigPath
-    ? expandPath(preferences.leaderKeyConfigPath)
-    : DEFAULT_LEADER_KEY_PATH;
+  const resolvedLeaderKeyConfigPath = resolveLeaderKeyConfigPath(preferences);
 
   const { handleSubmit, itemProps, values } = useForm<ExportFormValues>({
     initialValues: {
       betterAliasesPath: [defaultBetterAliasesPath],
-      leaderKeyPath: [defaultLeaderKeyPath],
+      leaderKeyPath: resolvedLeaderKeyConfigPath ? [resolvedLeaderKeyConfigPath] : [],
     },
     onSubmit: async (values) => {
       try {
@@ -63,10 +60,15 @@ export default function ExportLeaderKey() {
     if (!exportedConfig) return;
 
     try {
-      const destPath = expandPath(values.leaderKeyPath[0]);
+      const leaderKeyPath = values.leaderKeyPath[0];
+      if (!leaderKeyPath) {
+        throw new Error("Select a Leader Key config file to export to");
+      }
+
+      const destPath = expandPath(leaderKeyPath);
 
       // Ensure directory exists
-      const dir = destPath.substring(0, destPath.lastIndexOf("/"));
+      const dir = dirname(destPath);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }

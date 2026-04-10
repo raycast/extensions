@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  getPreferenceValues,
-  popToRoot,
-  showInFinder,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, open, popToRoot, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 import { writeFile } from "fs/promises";
 import { join } from "path";
@@ -71,7 +62,7 @@ export default function Command() {
           message: `Saved to ${FILENAME}`,
         });
 
-        await showInFinder(filePath);
+        await open(folder);
         await popToRoot();
       } catch (error) {
         await showFailureToast(error, { title: "Export Failed" });

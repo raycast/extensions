@@ -1,23 +1,20 @@
 import { getPreferenceValues } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
 import * as fsPromises from "fs/promises";
-import { homedir } from "os";
 import { type BetterAliasesConfig, type LeaderKeyConfig, leaderKeyConfigSchema, type Preferences } from "../schemas";
 import { convertLeaderKeyToAliases } from "./conversion";
-import { expandPath } from "./expandPath";
-
-const DEFAULT_CONFIG_PATH = `${homedir()}/Library/Application Support/Leader Key/config.json`;
+import { resolveLeaderKeyConfigPath } from "./leaderKeyConfigPath";
 
 export function getLeaderKeyConfig(): LeaderKeyConfig | null {
   const preferences = getPreferenceValues<Preferences>();
-  const leaderKeyConfigPath = preferences.leaderKeyConfigPath
-    ? expandPath(preferences.leaderKeyConfigPath)
-    : DEFAULT_CONFIG_PATH;
+  const leaderKeyConfigPath = resolveLeaderKeyConfigPath(preferences);
+
+  if (!leaderKeyConfigPath) {
+    return null;
+  }
 
   if (!existsSync(leaderKeyConfigPath)) {
-    if (preferences.leaderKeyConfigPath) {
-      console.warn(`Leader Key config file not found at: ${leaderKeyConfigPath}`);
-    }
+    console.warn(`Leader Key config file not found at: ${leaderKeyConfigPath}`);
     return null;
   }
 
@@ -56,14 +53,14 @@ export function getLeaderKeyAliases(): BetterAliasesConfig {
 
 export async function getLeaderKeyConfigAsync(): Promise<LeaderKeyConfig | null> {
   const preferences = getPreferenceValues<Preferences>();
-  const leaderKeyConfigPath = preferences.leaderKeyConfigPath
-    ? expandPath(preferences.leaderKeyConfigPath)
-    : DEFAULT_CONFIG_PATH;
+  const leaderKeyConfigPath = resolveLeaderKeyConfigPath(preferences);
+
+  if (!leaderKeyConfigPath) {
+    return null;
+  }
 
   if (!existsSync(leaderKeyConfigPath)) {
-    if (preferences.leaderKeyConfigPath) {
-      console.warn(`Leader Key config file not found at: ${leaderKeyConfigPath}`);
-    }
+    console.warn(`Leader Key config file not found at: ${leaderKeyConfigPath}`);
     return null;
   }
 

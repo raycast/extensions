@@ -1,15 +1,13 @@
 import { Action, ActionPanel, Detail, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 import * as fs from "fs";
-import { homedir } from "os";
 import { useState } from "react";
 import { getBetterAliasesPath, loadBetterAliases } from "./lib/betterAliases";
 import { convertLeaderKeyToAliases } from "./lib/conversion";
 import { expandPath } from "./lib/expandPath";
+import { resolveLeaderKeyConfigPath } from "./lib/leaderKeyConfigPath";
 import type { BetterAliasesConfig, Preferences } from "./schemas";
 import { betterAliasesConfigSchema, leaderKeyConfigSchema } from "./schemas";
-
-const DEFAULT_LEADER_KEY_PATH = `${homedir()}/Library/Application Support/Leader Key/config.json`;
 
 interface ImportFormValues {
   leaderKeyPath: string[];
@@ -23,19 +21,22 @@ export default function ImportLeaderKey() {
   const [errors, setErrors] = useState<string[]>([]);
 
   const defaultBetterAliasesPath = getBetterAliasesPath();
-  const defaultLeaderKeyPath = preferences.leaderKeyConfigPath
-    ? expandPath(preferences.leaderKeyConfigPath)
-    : DEFAULT_LEADER_KEY_PATH;
+  const resolvedLeaderKeyConfigPath = resolveLeaderKeyConfigPath(preferences);
 
   const { handleSubmit, itemProps, values } = useForm<ImportFormValues>({
     initialValues: {
-      leaderKeyPath: [defaultLeaderKeyPath],
+      leaderKeyPath: resolvedLeaderKeyConfigPath ? [resolvedLeaderKeyConfigPath] : [],
       betterAliasesPath: [defaultBetterAliasesPath],
       conflictStrategy: "merge",
     },
     onSubmit: async (values) => {
       try {
-        const path = expandPath(values.leaderKeyPath[0]);
+        const leaderKeyPath = values.leaderKeyPath[0];
+        if (!leaderKeyPath) {
+          throw new Error("Select a Leader Key config file to import");
+        }
+
+        const path = expandPath(leaderKeyPath);
         if (!fs.existsSync(path)) {
           throw new Error(`File not found at ${path}`);
         }

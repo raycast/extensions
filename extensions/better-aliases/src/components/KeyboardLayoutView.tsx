@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Detail, environment, Icon, type Keyboard } from "@raycast/api";
+import { KEYBOARD_SHORTCUTS } from "../lib/constants";
 import { type AliasNode, isLeafNode } from "../lib/treeUtils";
 import { generateKeyboardSvg, svgToDataUri } from "./KeyboardSvg";
 
@@ -152,15 +153,10 @@ ${legendMarkdown}
               title="Switch to Tree View"
               icon={Icon.List}
               onAction={onToggleView}
-              shortcut={{ modifiers: ["cmd"], key: "v" }}
+              shortcut={KEYBOARD_SHORTCUTS.VIEW}
             />
             {onGoBack && (
-              <Action
-                title="Go Back"
-                icon={Icon.ArrowLeft}
-                onAction={onGoBack}
-                shortcut={{ modifiers: ["cmd"], key: "[" }}
-              />
+              <Action title="Go Back" icon={Icon.ArrowLeft} onAction={onGoBack} shortcut={KEYBOARD_SHORTCUTS.GO_BACK} />
             )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Navigation">
