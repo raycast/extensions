@@ -1,5 +1,5 @@
 # LLM Chat Changelog
 
-## [Unreleased]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release of the LLM Chat extension.

@@ -17,8 +17,8 @@ export function generateId(): string {
 export async function saveConversation(conv: Conversation): Promise<void> {
   try {
     const existing = await getHistory();
-    existing.unshift(conv);
-    const trimmed = existing.slice(0, 50);
+    const deduped = existing.filter((conversation) => conversation.id !== conv.id);
+    const trimmed = [conv, ...deduped].slice(0, 50);
     await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(trimmed));
   } catch (err) {
     console.error("Failed to save conversation:", err);

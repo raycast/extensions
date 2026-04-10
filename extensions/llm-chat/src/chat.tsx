@@ -247,7 +247,7 @@ export default function Chat() {
 
             try {
               await saveConversation({
-                id: generateId(),
+                id: currentRoundId,
                 provider: prefs.provider,
                 model: modelName,
                 messages: [...nextMessages, { role: "assistant", content, reasoning: reasoning || undefined }],
