@@ -25,11 +25,9 @@ function toDecimal(time: string): number {
   const hours = parseInt(parts[0] || "0", 10);
   const minutes = parseInt(parts[1] || "0", 10);
   const seconds = parseInt(parts[2] || "0", 10);
+  if (isNaN(hours) || isNaN(minutes) || isNaN(seconds)) return NaN;
+  if (hours < 0 || minutes < 0 || seconds < 0) return NaN;
   return hours + minutes / 60 + seconds / 3600;
-}
-
-interface Preferences {
-  autoCopy: boolean;
 }
 
 function convert(input: string): { result: string; subtitle: string } | null {
@@ -42,7 +40,7 @@ function convert(input: string): { result: string; subtitle: string } | null {
     return { result: formatted, subtitle: `${input} → Decimal` };
   } else {
     const num = parseFloat(input);
-    if (isNaN(num)) return null;
+    if (isNaN(num) || num < 0) return null;
     const time = toTime(num);
     return { result: time, subtitle: `${input} → Time` };
   }
@@ -52,7 +50,7 @@ export default function Command(
   props: LaunchProps<{ arguments: { value: string } }>,
 ) {
   const input = props.arguments.value.trim();
-  const { autoCopy } = getPreferenceValues<Preferences>();
+  const { autoCopy } = getPreferenceValues<Preferences.Dectime>();
   const conversion = input ? convert(input) : null;
 
   useEffect(() => {
