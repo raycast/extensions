@@ -5,6 +5,7 @@ import { getTransactionPage, getAllAccounts } from "../lib/api";
 import { getAccessToken } from "../lib/auth";
 import { CACHE_KEYS, getCached } from "../lib/cache";
 import { Account, CredentialWithAccounts, Transaction } from "../lib/types";
+import { formatCurrency } from "../lib/format";
 import { LogoutAction } from "./logout-action";
 
 // Category icon_key → Raycast Icon mapping (parent categories only)
@@ -166,29 +167,28 @@ function getCategoryIcon(categoryId: number): Icon {
   return (iconKey && CATEGORY_ICONS[iconKey]) || Icon.QuestionMark;
 }
 
-function getDayOfMonth(dateString: string): string {
-  return String(new Date(dateString).getDate());
+function parseDateParts(dateString: string): { year: string; month: string; day: string } {
+  const [year, month, day] = dateString.split("-");
+  return { year, month, day };
 }
 
-function formatCurrency(amount: number, currency: string = "JPY"): string {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(Math.abs(amount));
+function getDayOfMonth(dateString: string): string {
+  return String(Number(parseDateParts(dateString).day));
 }
 
 function formatDate(dateString: string): string {
-  try {
-    return new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
-  } catch {
-    return dateString;
-  }
+  const { year, month, day } = parseDateParts(dateString);
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${months[Number(month) - 1]} ${Number(day)}, ${year}`;
 }
 
 function getMonthKey(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", { year: "numeric", month: "long" });
+  const { year, month } = parseDateParts(dateString);
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  return `${months[Number(month) - 1]} ${year}`;
 }
 
 function groupByMonth(transactions: Transaction[]): [string, Transaction[]][] {
@@ -208,7 +208,7 @@ function groupByMonth(transactions: Transaction[]): [string, Transaction[]][] {
 function getTransactionDetails(transaction: Transaction): string {
   const isExpense = transaction.amount < 0;
   const description = transaction.description_pretty || transaction.description_raw;
-  return `${formatDate(transaction.date)} - ${description}: ${isExpense ? "-" : "+"}${formatCurrency(transaction.amount)}`;
+  return `${formatDate(transaction.date)} - ${description}: ${isExpense ? "-" : "+"}${formatCurrency(Math.abs(transaction.amount))}`;
 }
 
 function getDateRange(search: boolean): { startDate: Date; endDate: Date } {
@@ -337,7 +337,7 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
                   accessories={[
                     {
                       text: {
-                        value: `${isExpense ? "-" : "+"}${formatCurrency(transaction.amount)}`,
+                        value: `${isExpense ? "-" : "+"}${formatCurrency(Math.abs(transaction.amount))}`,
                         color: isExpense ? Color.Red : Color.Green,
                       },
                     },

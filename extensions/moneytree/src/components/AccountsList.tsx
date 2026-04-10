@@ -5,6 +5,7 @@ import { getAccessToken } from "../lib/auth";
 import { CACHE_KEYS, getCached, setCached, removeCached } from "../lib/cache";
 import { CACHE_TTL } from "../lib/constants";
 import { Account, CredentialWithAccounts } from "../lib/types";
+import { formatCurrency } from "../lib/format";
 import { LogoutAction } from "./logout-action";
 import { TransactionsList } from "./TransactionsList";
 
@@ -26,15 +27,6 @@ const ACCOUNT_TYPE_LABELS: Record<string, string> = {
   manual: "Others",
   cash_wallet: "Others",
 };
-
-function formatCurrency(amount: number, currency: string = "JPY"): string {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 function formatAccountType(accountType: string): string {
   return ACCOUNT_TYPE_LABELS[accountType] || accountType;

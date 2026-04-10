@@ -7,6 +7,7 @@ import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts } from "./lib/types";
 import { AccountsList } from "./components/AccountsList";
 import { LogoutAction } from "./components/logout-action";
+import { formatCurrency } from "./lib/format";
 
 const GROUP_ORDER = ["bank", "credit_card", "investment", "stored_value", "point", "other"] as const;
 
@@ -27,15 +28,6 @@ const GROUP_ICONS: Record<string, Icon> = {
   point: Icon.Star,
   other: Icon.Dot,
 };
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("ja-JP", {
-    style: "currency",
-    currency: "JPY",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 function getCredentialName(credential: CredentialWithAccounts): string {
   if (credential.status === "manual") return "Cash Tracking";
