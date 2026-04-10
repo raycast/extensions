@@ -324,7 +324,21 @@ export default function SearchMusicCommand(): React.ReactElement {
   if (credsError) {
     return (
       <Detail
-        markdown={`# ⚠️ Connection Error\n\n${credsError}\n\nYour credentials may be incorrect. Use **Clear Cached Auth Token** action to re-enter them.`}
+        markdown={`# ⚠️ Connection Error\n\n${credsError}\n\nUse the action below to clear your cached credentials and re-enter them.`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Clear Credentials & Retry"
+              icon={Icon.Key}
+              style={Action.Style.Destructive}
+              onAction={async () => {
+                await clearCachedToken();
+                setCredsError(null);
+                setNeedsSetup(true);
+              }}
+            />
+          </ActionPanel>
+        }
       />
     );
   }
