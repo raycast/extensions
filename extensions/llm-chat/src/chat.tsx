@@ -438,7 +438,7 @@ export default function Chat() {
                 )}
                 <Action
                   title={renderLatexMath ? "Do Not Render Latex Math" : "Render Latex Math"}
-                  icon={renderLatexMath ? Icon.XMarkCircle : Icon.Function}
+                  icon={renderLatexMath ? Icon.XMarkCircle : Icon.Calculator}
                   onAction={() => setRenderLatexMath((value) => !value)}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
                 />

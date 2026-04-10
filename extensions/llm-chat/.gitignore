@@ -10,3 +10,4 @@ CLAUDE.md
 # Dev notes
 *.md
 !README.md
+!CHANGELOG.md
