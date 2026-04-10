@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-04-10
 
 - Added Windows compatibility
 
