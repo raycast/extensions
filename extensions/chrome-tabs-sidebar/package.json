@@ -1,5 +1,5 @@
 {
-  "name": "chrome-tabs-sidebar",
+  "name": "toggle-chrome-sidebar",
   "title": "Toggle Chrome Sidebar",
   "description": "Toggle Chrome's vertical tabs sidebar with a single keystroke",
   "keywords": [
