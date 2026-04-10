@@ -168,7 +168,7 @@ function getCategoryIcon(categoryId: number): Icon {
 }
 
 function parseDateParts(dateString: string): { year: string; month: string; day: string } {
-  const [year, month, day] = dateString.split("-");
+  const [year, month, day] = dateString.substring(0, 10).split("-");
   return { year, month, day };
 }
 
@@ -260,12 +260,14 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
     loadAccounts();
   }, []);
 
+  const effectiveAccountId = accountFilter || accountId || "";
+
   const { isLoading, data, pagination } = useCachedPromise(
     (query: string, acctId: string) =>
       async ({ page }: { page: number }) => {
         await getAccessToken();
 
-        const { startDate, endDate } = getDateRange(!!query);
+        const { startDate, endDate } = getDateRange(!!query || !!acctId);
         const response = await getTransactionPage({
           startDate,
           endDate,
@@ -282,8 +284,8 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
           hasMore: fetchedSoFar < totalCount && response.transactions.length > 0,
         };
       },
-    [searchText, accountFilter],
-    { keepPreviousData: true },
+    [searchText, effectiveAccountId],
+    { keepPreviousData: !accountId },
   );
 
   const transactions = data ?? [];
@@ -300,24 +302,23 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
       throttle
       pagination={pagination}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Filter by Account"
-          storeValue={!accountId}
-          defaultValue={accountId || ""}
-          onChange={(v) => {
-            if (accountId && v === "" && accounts.length === 0) return;
-            setAccountFilter(v);
-          }}
-        >
-          <List.Dropdown.Item title="All" value="" />
-          {accounts.map((account) => (
-            <List.Dropdown.Item
-              key={account.id}
-              title={`${account.nickname || account.institution_account_name} (${account.credentialName})`}
-              value={String(account.id)}
-            />
-          ))}
-        </List.Dropdown>
+        accountId && accounts.length === 0 ? undefined : (
+          <List.Dropdown
+            tooltip="Filter by Account"
+            storeValue={!accountId}
+            value={accountFilter}
+            onChange={setAccountFilter}
+          >
+            <List.Dropdown.Item title="All" value="" />
+            {accounts.map((account) => (
+              <List.Dropdown.Item
+                key={account.id}
+                title={`${account.nickname || account.institution_account_name} (${account.credentialName})`}
+                value={String(account.id)}
+              />
+            ))}
+          </List.Dropdown>
+        )
       }
     >
       {transactions.length === 0 && !isLoading ? (
