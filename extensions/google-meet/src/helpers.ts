@@ -3,6 +3,7 @@ import { runAppleScript } from "run-applescript";
 import {
   getOpenedBrowserScript,
   getOpenedUrlForArc,
+  getOpenedUrlForDia,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
   supportedBrowsers,
@@ -36,6 +37,10 @@ async function getOpenTabs(): Promise<string> {
 
   if (browserName === "Arc") {
     return await runAppleScript(getOpenedUrlForArc());
+  }
+
+  if (browserName === "Dia") {
+    return await runAppleScript(getOpenedUrlForDia());
   }
 
   if (browserName === "Firefox" || browserName === "Firefox Developer Edition" || browserName === "Zen") {

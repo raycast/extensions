@@ -65,9 +65,36 @@ export function getOpenedUrlForFirefox(browserName: string) {
   `;
 }
 
+/**
+ * Dia uses Cmd+Shift+C to copy the current tab URL.
+ * 1. Focus the browser
+ * 2. Use `cmd + shift + c` to copy the URL
+ * 3. Returns the copied URL from the clipboard
+ */
+export function getOpenedUrlForDia() {
+  return `
+    tell application "Dia"
+      activate
+      delay 0.5
+
+      tell application "System Events"
+        keystroke "c" using {command down, shift down}
+        delay 0.5
+      end tell
+    end tell
+
+    delay 0.5
+
+    set copiedURL to do shell script "pbpaste"
+
+    return copiedURL
+  `;
+}
+
 export const supportedBrowsers = [
   "Arc",
   "Brave",
+  "Dia",
   "Firefox",
   "Firefox Developer Edition",
   "Google Chrome",
