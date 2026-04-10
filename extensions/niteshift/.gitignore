@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.vscode/
+.DS_Store
+raycast-env.d.ts
+*.log
+coverage/
+niteshift-raycast-dist.zip

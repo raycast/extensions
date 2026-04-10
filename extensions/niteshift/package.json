@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "niteshift",
+  "title": "Niteshift",
+  "description": "Run, monitor, and prompt Niteshift background agents from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "joshlebed",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "environment",
+      "type": "dropdown",
+      "title": "Environment",
+      "description": "Which Niteshift environment the extension talks to. Must match the environment you authed against with `niteshift auth`.",
+      "required": false,
+      "default": "prod",
+      "data": [
+        {
+          "title": "Production",
+          "value": "prod"
+        },
+        {
+          "title": "Staging",
+          "value": "staging"
+        },
+        {
+          "title": "Development (niteshift.local)",
+          "value": "dev"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "run-task",
+      "title": "Run Task",
+      "description": "Create a new Niteshift task using your default repo and model. Type the prompt as the argument.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "type": "text",
+          "placeholder": "Task prompt",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "list-tasks",
+      "title": "List Tasks",
+      "description": "Browse recent Niteshift tasks. Watch a stream, send a follow-up prompt, or copy a pickup command from the action menu (⌘K).",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.18.0",
+    "eventsource": "^2.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/eventsource": "^1.1.15",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "build:check": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
