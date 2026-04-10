@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Improvement] - 2026-04-11
+
+- Add Dia browser support
+
 ## [Improvement] - 2026-02-13
 
 - Make delay configurable by user
