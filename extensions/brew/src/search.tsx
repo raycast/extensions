@@ -22,9 +22,7 @@ function formatNumber(num: number): string {
 
 export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
   const [searchText, setSearchText] = useState(props.arguments.search ?? "");
-  const hasFilterArg = !!props.arguments.filter;
-  const initialFilter = (props.arguments.filter as InstallableFilterType) || InstallableFilterType.all;
-  const [filter, setFilter] = useState(initialFilter);
+  const [filter, setFilter] = useState(InstallableFilterType.all);
   const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
   const { isLoading: isLoadingInstalled, data: installed, revalidate: revalidateInstalled } = useBrewInstalled();
@@ -130,7 +128,7 @@ export default function SearchView(props: LaunchProps<{ arguments: Arguments.Sea
       casks={casks}
       searchText={searchText}
       searchBarPlaceholder={placeholder(filter)}
-      searchBarAccessory={<InstallableFilterDropdown value={hasFilterArg ? filter : undefined} onSelect={setFilter} />}
+      searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}
       onSearchTextChange={(searchText) => setSearchText(searchText.trim())}
       filtering={false}

@@ -6,17 +6,14 @@ export enum InstallableFilterType {
   casks = "casks",
 }
 
-export function InstallableFilterDropdown(props: {
-  value?: InstallableFilterType;
-  onSelect: (value: InstallableFilterType) => void;
-}) {
+export function InstallableFilterDropdown(props: { onSelect: (value: InstallableFilterType) => void }) {
   return (
     <List.Dropdown
       tooltip="Filter by formula or cask"
-      {...(props.value !== undefined ? { value: props.value } : { storeValue: true })}
       onChange={(value) => {
         props.onSelect(value as InstallableFilterType);
       }}
+      storeValue
     >
       <List.Dropdown.Item value={InstallableFilterType.all} title="All" />
       <List.Dropdown.Item value={InstallableFilterType.formulae} title="Formulae" />

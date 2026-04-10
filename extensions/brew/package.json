@@ -42,17 +42,6 @@
           "placeholder": "Query",
           "type": "text",
           "required": false
-        },
-        {
-          "name": "filter",
-          "placeholder": "Filter",
-          "type": "dropdown",
-          "required": false,
-          "data": [
-            { "title": "All", "value": "all" },
-            { "title": "Formulae", "value": "formulae" },
-            { "title": "Casks", "value": "casks" }
-          ]
         }
       ],
       "preferences": [

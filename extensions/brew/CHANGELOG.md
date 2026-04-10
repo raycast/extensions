@@ -2,8 +2,7 @@
 
 ## [Launch Arguments] - {PR_MERGE_DATE}
 
-- Added launch arguments to Search command for pre-filling query and filter (All/Formulae/Casks) before opening
-- Filter dropdown in the list stays in sync with the launch argument selection
+- Added launch argument to Search command for pre-filling the search query before opening
 
 ## [Cask Id] - 2026-03-24
 
