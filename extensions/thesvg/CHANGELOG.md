@@ -1,6 +1,6 @@
 # theSVG Raycast Extension Changelog
 
-## [1.1.0] - 2026-04-10
+## [1.1.0] - {PR_MERGE_DATE}
 
 ### Fixed
 - Resolved 404 API error caused by static export migration (switched to static JSON + direct SVG fetching)
