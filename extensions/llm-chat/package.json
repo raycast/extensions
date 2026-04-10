@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "llm-chat",
+  "title": "LLM Chat",
+  "description": "Chat with mainstream Chinese LLMs (GLM, Kimi, Qwen, MiniMax, Doubao, DeepSeek). Multi-turn conversations, LaTeX math rendering, and collapsible thinking process.",
+  "icon": "icon.png",
+  "author": "caleb",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "LLM Chat",
+      "description": "Start a multi-turn chat with your configured LLM provider",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "history",
+      "title": "Conversation History",
+      "description": "View all past conversations",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "required": true,
+      "title": "Provider",
+      "description": "Select your LLM provider",
+      "data": [
+        { "title": "GLM (智谱)", "value": "glm" },
+        { "title": "Kimi (Moonshot)", "value": "kimi" },
+        { "title": "Qwen (通义千问)", "value": "qwen" },
+        { "title": "MiniMax", "value": "minimax" },
+        { "title": "Doubao (字节跳动)", "value": "doubao" },
+        { "title": "DeepSeek", "value": "deepseek" },
+        { "title": "Custom", "value": "custom" }
+      ],
+      "default": "qwen"
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your API key for the selected provider"
+    },
+    {
+      "name": "customBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Base URL",
+      "description": "Base URL for custom model endpoint (only for Custom provider)",
+      "placeholder": "https://api.example.com/v1"
+    },
+    {
+      "name": "model",
+      "type": "textfield",
+      "required": true,
+      "title": "Model",
+      "description": "Model name to use",
+      "placeholder": "qwen-max"
+    },
+    {
+      "name": "thinkingEnabled",
+      "type": "checkbox",
+      "required": false,
+      "title": "Enable Thinking Mode",
+      "label": "Enable Thinking Mode",
+      "description": "Enable thinking/reasoning mode with visible reasoning output",
+      "default": false
+    },
+    {
+      "name": "defaultHideThinking",
+      "type": "checkbox",
+      "required": false,
+      "title": "Default to Hide Thinking",
+      "label": "Default to Hide Thinking",
+      "description": "Hide the final displayed thinking process by default",
+      "default": true
+    },
+    {
+      "name": "defaultRenderLatexMath",
+      "type": "checkbox",
+      "required": false,
+      "title": "Default to Render Latex Math",
+      "label": "Default to Render Latex Math",
+      "description": "Render LaTeX math in the final display by default",
+      "default": false
+    },
+    {
+      "name": "temperature",
+      "type": "textfield",
+      "required": false,
+      "title": "Temperature",
+      "description": "Controls randomness (0.0-2.0, leave empty for provider default)",
+      "placeholder": "0.7"
+    },
+    {
+      "name": "maxTokens",
+      "type": "textfield",
+      "required": false,
+      "title": "Max Tokens",
+      "description": "Maximum output tokens (leave empty for provider default)",
+      "placeholder": "4096"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "react": "19.0.0",
+    "typescript": "5.4.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

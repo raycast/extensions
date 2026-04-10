@@ -1,0 +1,12 @@
+node_modules
+dist
+*.tsbuildinfo
+claude_log.txt
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Dev notes
+*.md
+!README.md
