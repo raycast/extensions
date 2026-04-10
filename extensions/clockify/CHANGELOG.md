@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Enhanced Menu Bar Features] - {PR_MERGE_DATE}
+## [Enhanced Menu Bar Features] - 2026-04-10
 
 - Added quick timer restart from up to 5 recent unique entries when no timer is active
 - Added today's total tracked time display per project while a timer is running
