@@ -2,12 +2,7 @@ import type { Color, Icon } from "@raycast/api";
 
 export type QuickActionPreference = "view-styles" | "copy-svg" | "copy-jsx" | "download-svg";
 
-export interface Preferences {
-  apiKey: string;
-  gridSize: string;
-  defaultColor: string;
-  quickAction?: QuickActionPreference;
-}
+export type QuickActionPreference = "view-styles" | "copy-svg" | "copy-jsx" | "download-svg";
 
 export interface IconMeta {
   name: string;
