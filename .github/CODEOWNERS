@@ -32,7 +32,7 @@
 /extensions/aerospace                                               @limonkufu @AmmarCodes @thewinger @PhotonQuantum @Mmehdi06 @abhiy13 @kim-raaschou-nielsen
 /extensions/ag-audioflow                                            @asgu @pernielsentikaer
 /extensions/agent-client-protocol                                   @Yukaii
-/extensions/agent-usage                                             @natsustan @alexibuild
+/extensions/agent-usage                                             @natsustan @alexibuild @AdrianBonpin
 /extensions/ai-agency                                               @Marcin-91
 /extensions/ai-by-vercel                                            @ridemountainpig
 /extensions/ai-code-namer                                           @hunter-ji @pernielsentikaer
@@ -381,6 +381,7 @@
 /extensions/codegrepper                                             @emircanerkul @pernielsentikaer
 /extensions/codemagic                                               @Imgkl
 /extensions/codesnap                                                @Mokkapps @pernielsentikaer
+/extensions/codex-manager                                           @josedefreitas91 @pernielsentikaer
 /extensions/coffee                                                  @mooxl @bibixx @GastroGeek @pernielsentikaer @pernielsentikaer @xilopaint @ridemountainpig @zakj @Visual-Studio-Coder @IKatsuba
 /extensions/cognimemo                                               @Sami-Ullah-Tufail
 /extensions/coin-caster                                             @chase-manning
@@ -505,6 +506,7 @@
 /extensions/dashlane-vault                                          @tmwrnr @MushOP
 /extensions/databuddy                                               @izadoesdev @mezotv
 /extensions/datadog                                                 @kudrykv @rcruzper @aexvir @albertoxamin @cussiol
+/extensions/datafast                                                @joshmillgate
 /extensions/datahub                                                 @nickrotondo
 /extensions/datawrapper                                             @benkates
 /extensions/date-converter                                          @asportnoy @vineus @danyalprout @aleksey925

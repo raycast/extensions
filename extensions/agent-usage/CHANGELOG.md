@@ -1,5 +1,43 @@
 # Agent Usage Changelog
 
+## [Synthetic Provider and OpenCode Integration] - 2026-04-09
+
+### New Features
+
+- **Multi-Account Support** — Add 2nd API key slot for Kimi and z.ai providers (fallback to secondary key if primary fails)
+- Add Synthetic (synthetic.new) provider — monitor subscription quota, search hourly quota, and free tool calls
+- Auto-detect Kimi, Synthetic, and z.ai credentials from OpenCode (`~/.local/share/opencode/auth.json`)
+- **Named Multi-Account Support** — All API key providers (Codex, Kimi, Synthetic, z.ai) now support unlimited named accounts ("Work", "Personal", etc.) managed via a "Manage Accounts" screen accessible from the action panel (Cmd+M). Each account appears as its own row in the list.
+- **Auto-detected accounts** — OpenCode, environment variable, and local auth file tokens now appear as separate "Auto-detected" accounts alongside manually added accounts
+- **Quick API Key Copy** — Copy API key to clipboard with `⌘⇧C` from the provider list or Manage Accounts screen
+- **OpenCode Active Indicator** — Shows a ⚡ bolt icon next to accounts whose API key is currently configured in OpenCode (auto-detected from `~/.local/share/opencode/auth.json`)
+
+### Improvements
+
+- **Kimi Accessory Normalization** — List view now shows `72%` instead of `72% remaining` to match other providers
+- Move Antigravity provider below Gemini in default agent order
+- Update Kimi API endpoint to new flat shape (`GET /coding/v1/usages`)
+- Unify detail field names and progress bar style across all agents
+- Extract shared utilities (`decodeJwtPayload`, `getRemainingPercent`, `formatDuration`, `cleanString`) to eliminate code duplication
+- Deduplicate replenish-time calculation in Amp renderer
+- Simplify token resolution in Kimi fetcher
+- Document magic strings in Droid auth (WorkOS client ID, token refresh buffer)
+- Name Claude OAuth beta header as constant with update instructions
+
+### Bug Fixes
+
+- **Critical:** Fix z.ai percentage calculation — API's `percentage` field is "percentage used" not "percentage remaining", so remaining = 100 - percentage
+- **Critical:** Fix menubar to use multi-account hooks so all configured accounts are shown
+- **Critical:** Fix menubar infinite re-render loop by memoizing `visibleAgents`
+- Remove meaningless conditional in `handleRefresh` (both branches were identical)
+- Hide antigravity model slots that have no data (prevents orphaned separators)
+- Improve Amp parser not-logged-in detection with explicit signals
+- Fix Amp revalidate race condition by using counter instead of boolean flag
+- Remove conflicting `Cmd+C` keyboard shortcut from Copy API Key actions
+- Remove dead `renderUnsupportedDetail` function
+- Merge split kimi/fetcher import statements
+- Fix z.ai preference label spacing
+
 ## [Settings Shortcut] - 2026-04-04
 
 ### Improvements
