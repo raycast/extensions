@@ -395,9 +395,9 @@ function cleanHtmlForDisplay(html: string, includeImages: boolean = true): strin
     text = text.replace(/view in browser[^\n]*/gi, "");
     text = text.replace(/open in browser[^\n]*/gi, "");
 
-    // Remove standalone long URLs (not in markdown link format) - they clutter the preview
-    // But keep markdown links - they don't take up extra space
-    text = text.replace(/(?<!\()(?<!\[)(https?:\/\/[^\s\n]{50,})(?!\))/g, "");
+    // Convert standalone long URLs to markdown links for compact display
+    // This preserves the link while keeping the preview clean
+    text = text.replace(/(?<!\()(?<!\[)(https?:\/\/[^\s\n]{50,})(?!\))/g, (url) => `[link](${url})`);
 
     // For compact view, collapse 3+ newlines to 2 for tighter display
     text = text.replace(/\n{3,}/g, "\n\n");
