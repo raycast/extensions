@@ -8,3 +8,7 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
+.ai
+
+# JetBrains .idea folder
+.idea

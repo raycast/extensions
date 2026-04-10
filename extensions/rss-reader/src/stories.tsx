@@ -1,15 +1,35 @@
-import { ActionPanel, Color, Icon, List, showToast, Action, Image, LocalStorage, Toast, Detail } from "@raycast/api";
-import { Feed, getFeeds } from "./feeds";
-import AddFeedForm from "./subscription-form";
-import Parser from "rss-parser";
+import {
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  showToast,
+  Action,
+  type Image,
+  LocalStorage,
+  Toast,
+  Detail,
+  Cache,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 import { nanoid } from "nanoid";
-import { useCachedPromise } from "@raycast/utils";
+import { NodeHtmlMarkdown } from "node-html-markdown";
 import React from "react";
+import Parser from "rss-parser";
+import { type Feed, getFeeds } from "./feeds";
+import AddFeedForm from "./subscription-form";
 
 const parser = new Parser({});
+const storiesCache = new Cache({ namespace: "stories" });
+const STORIES_FILTER_CACHE_KEY = "selected-filter";
+const STORIES_FILTER_TTL_MS = 15 * 60 * 1000;
+
+type CachedFilter = {
+  value: string;
+  savedAt: number;
+};
 
 interface Story {
   guid: string;
@@ -30,6 +50,38 @@ type StoryLastRead = {
 type FeedLastViewed = {
   [key: string]: number;
 };
+
+function getCachedFilter() {
+  const raw = storiesCache.get(STORIES_FILTER_CACHE_KEY);
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as CachedFilter;
+    const isFresh = Date.now() - parsed.savedAt < STORIES_FILTER_TTL_MS;
+
+    if (!isFresh) {
+      storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+      return undefined;
+    }
+
+    return parsed.value;
+  } catch {
+    storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+    return undefined;
+  }
+}
+
+function setCachedFilter(value: string) {
+  storiesCache.set(
+    STORIES_FILTER_CACHE_KEY,
+    JSON.stringify({
+      value,
+      savedAt: Date.now(),
+    } satisfies CachedFilter),
+  );
+}
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -54,7 +106,10 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
       }
       accessories={[
         props.item.lastRead
-          ? { icon: Icon.Eye, tooltip: `Last Read: ${new Date(props.item.lastRead).toDateString()}` }
+          ? {
+              icon: Icon.Eye,
+              tooltip: `Last Read: ${new Date(props.item.lastRead).toDateString()}`,
+            }
           : { icon: Icon.EyeDisabled, tooltip: "Last Read: never" },
         {
           text: timeAgo.format(props.item.date) as string,
@@ -145,20 +200,37 @@ async function getStories(feeds: Feed[]) {
 
 export function StoriesList(props: { feeds?: Feed[] }) {
   async function fetchStories(feeds?: Feed[]) {
-    if (typeof feeds == "undefined") {
+    if (typeof feeds === "undefined") {
       feeds = await getFeeds();
     }
 
     return { feeds, stories: await getStories(feeds) };
   }
   const { data, isLoading, revalidate } = useCachedPromise(fetchStories, [props.feeds]);
-  const [filter, setFilter] = React.useState("all");
+  const [filter, setFilter] = React.useState(() => getCachedFilter() ?? "all");
+
+  React.useEffect(() => {
+    if (!data?.feeds) {
+      return;
+    }
+
+    const validFilters = new Set(["all", "read", "unread", ...data.feeds.map((feed) => feed.url)]);
+    if (!validFilters.has(filter)) {
+      setFilter("all");
+      storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+    }
+  }, [data?.feeds, filter]);
+
+  const handleFilterChange = React.useCallback((newFilter: string) => {
+    setFilter(newFilter);
+    setCachedFilter(newFilter);
+  }, []);
 
   return (
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown onChange={setFilter} tooltip="Subscription">
+        <List.Dropdown onChange={handleFilterChange} tooltip="Subscription" value={filter}>
           <List.Dropdown.Section>
             <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
           </List.Dropdown.Section>

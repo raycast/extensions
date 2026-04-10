@@ -1,88 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
-import { getPreferenceValues } from "@raycast/api";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { DroidUsage, DroidUsageTier, DroidError } from "./types";
+import { resolveDroidAuth } from "./auth";
+import { httpFetch } from "../agents/http";
 
 const DROID_USAGE_API = "https://api.factory.ai/api/organization/subscription/schedule";
-const REQUEST_TIMEOUT = 10000;
 
-type Preferences = Preferences.AgentUsage;
+const DROID_HEADERS = {
+  Accept: "application/json",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+};
 
 async function fetchDroidUsage(token: string): Promise<{ usage: DroidUsage | null; error: DroidError | null }> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
-    // 规范化 token 格式
-    const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
-
-    const response = await fetch(DROID_USAGE_API, {
-      method: "GET",
-      headers: {
-        Authorization: authHeader,
-        Accept: "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.status === 401) {
-      return {
-        usage: null,
-        error: {
-          type: "unauthorized",
-          message: "Authorization token expired or invalid. Please update it in extension settings.",
-        },
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        usage: null,
-        error: {
-          type: "unknown",
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        },
-      };
-    }
-
-    const data = await response.json();
-
-    // 解析 API 响应
-    return parseDroidApiResponse(data);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return {
-        usage: null,
-        error: {
-          type: "network_error",
-          message: "Request timeout. Please check your network connection.",
-        },
-      };
-    }
-
-    return {
-      usage: null,
-      error: {
-        type: "network_error",
-        message: error instanceof Error ? error.message : "Network request failed",
-      },
-    };
-  }
+  const { data, error } = await httpFetch({ url: DROID_USAGE_API, token, headers: DROID_HEADERS });
+  if (error) return { usage: null, error };
+  return parseDroidApiResponse(data);
 }
 
 function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error: DroidError | null } {
   try {
     if (!data || typeof data !== "object") {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "Invalid API response format",
-        },
-      };
+      return { usage: null, error: { type: "parse_error", message: "Invalid API response format" } };
     }
 
     const response = data as {
@@ -97,13 +35,7 @@ function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error
     const usage = response.usage;
 
     if (!usage) {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "Missing usage data in API response",
-        },
-      };
+      return { usage: null, error: { type: "parse_error", message: "Missing usage data in API response" } };
     }
 
     const standard: DroidUsageTier = {
@@ -127,83 +59,77 @@ function parseDroidApiResponse(data: unknown): { usage: DroidUsage | null; error
     };
 
     return {
-      usage: {
-        startDate: usage.startDate ?? 0,
-        endDate: usage.endDate ?? 0,
-        standard,
-        premium,
-      },
+      usage: { startDate: usage.startDate ?? 0, endDate: usage.endDate ?? 0, standard, premium },
       error: null,
     };
   } catch (error) {
     return {
       usage: null,
-      error: {
-        type: "parse_error",
-        message: error instanceof Error ? error.message : "Failed to parse API response",
-      },
+      error: { type: "parse_error", message: error instanceof Error ? error.message : "Failed to parse API response" },
     };
   }
 }
 
-export function useDroidUsage() {
-  const [token, setToken] = useState<string>("");
+export function useDroidUsage(enabled = true) {
   const [usage, setUsage] = useState<DroidUsage | null>(null);
   const [error, setError] = useState<DroidError | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const requestIdRef = useRef(0);
 
-  // 从偏好设置读取 token
-  useEffect(() => {
-    const preferences = getPreferenceValues<Preferences>();
-    const savedToken = preferences.droidAuthToken?.trim() || "";
-    setToken(savedToken);
-  }, []);
-
-  // 获取数据的函数
   const fetchData = useCallback(async () => {
-    if (!token) {
+    const requestId = ++requestIdRef.current;
+
+    setIsLoading(true);
+    setError(null);
+
+    const { accessToken } = await resolveDroidAuth();
+    if (requestId !== requestIdRef.current) return;
+
+    if (!accessToken) {
+      setUsage(null);
+      setError({
+        type: "not_configured",
+        message: "Droid not configured. Run `droid` to log in (auto-detected from ~/.factory/auth.*).",
+      });
       setIsLoading(false);
       setHasInitialFetch(true);
       return;
     }
 
-    setIsLoading(true);
-    setError(null);
-
-    const result = await fetchDroidUsage(token);
+    const result = await fetchDroidUsage(accessToken);
+    if (requestId !== requestIdRef.current) return;
 
     setUsage(result.usage);
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [token]);
+  }, []);
 
-  // 首次加载时获取数据
   useEffect(() => {
-    if (!hasInitialFetch && token) {
-      fetchData();
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
     }
-  }, [token, hasInitialFetch, fetchData]);
 
-  // 重新验证（手动刷新）
+    if (!hasInitialFetch) {
+      void fetchData();
+    }
+  }, [enabled, hasInitialFetch, fetchData]);
+
   const revalidate = useCallback(async () => {
+    if (!enabled) return;
     await fetchData();
-  }, [fetchData]);
-
-  // 如果没有配置 token，显示配置错误
-  const finalError: DroidError | null =
-    !token && hasInitialFetch
-      ? {
-          type: "not_configured",
-          message: "Droid token not configured. Please add it in extension settings (Cmd+,).",
-        }
-      : error;
+  }, [enabled, fetchData]);
 
   return {
-    isLoading,
-    usage,
-    error: finalError,
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
     revalidate,
   };
 }

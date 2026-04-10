@@ -1,7 +1,8 @@
-import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Keyboard, useNavigation } from "@raycast/api";
 import { TaskWithPullRequest } from "../services/copilot";
 import { getTaskIcon, formatRelativeDate } from "../utils";
 import { reauthorize } from "../lib/oauth";
+import { TaskLogsList } from "./TaskLogsList";
 import { useMemo } from "react";
 
 export function TaskItem(
@@ -10,6 +11,7 @@ export function TaskItem(
   }>,
 ) {
   const { task, pullRequest, premiumRequests, repository } = props.taskWithPullRequest;
+  const { push } = useNavigation();
   const title = pullRequest?.title ?? task.name ?? `Task ${task.id}`;
   const subtitle = repository ? `${repository.owner.login}/${repository.name}` : undefined;
 
@@ -40,7 +42,12 @@ export function TaskItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {taskUrl && <Action.OpenInBrowser title="Open" icon={Icon.List} url={taskUrl} />}
+            <Action
+              title="View Logs"
+              icon={Icon.List}
+              onAction={() => push(<TaskLogsList taskWithPullRequest={props.taskWithPullRequest} />)}
+            />
+            {taskUrl && <Action.OpenInBrowser title="Open in Browser" icon={Icon.Globe} url={taskUrl} />}
             {pullRequest && (
               <Action.OpenInBrowser
                 title="Open Pull Request"

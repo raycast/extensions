@@ -77,7 +77,34 @@
       "subtitle": "Tailscale",
       "description": "Show Tailscale's connection status.",
       "mode": "no-view",
-      "interval": "30s"
+      "interval": "30s",
+      "preferences": [
+        {
+          "name": "showHostname",
+          "type": "checkbox",
+          "required": false,
+          "title": "Status Display",
+          "label": "Show Hostname",
+          "description": "Show the device hostname in the status bar",
+          "default": true
+        },
+        {
+          "name": "showIP",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show IP Address",
+          "description": "Show the Tailscale IP address in the status bar",
+          "default": true
+        },
+        {
+          "name": "showTailnetName",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Tailnet Name",
+          "description": "Show the tailnet name in the status bar",
+          "default": true
+        }
+      ]
     },
     {
       "name": "connect",

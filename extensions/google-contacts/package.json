@@ -1,0 +1,190 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-contacts",
+  "version": "1.0.0",
+  "title": "Google Contacts",
+  "description": "Browse, search, and manage your Google Contacts directly from Raycast — create, edit, delete, and action contacts without leaving your keyboard.",
+  "icon": "extension-icon.png",
+  "author": "aic",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "googleClientId",
+      "title": "Google OAuth Client ID",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "123456789.apps.googleusercontent.com",
+      "description": "Your Google Cloud OAuth 2.0 Client ID (iOS type, bundle ID: com.raycast). See README for setup."
+    },
+    {
+      "name": "defaultView",
+      "title": "Default View",
+      "type": "dropdown",
+      "required": false,
+      "default": "detail",
+      "description": "Choose the default view mode for the contact list.",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Detail",
+          "value": "detail"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-contacts",
+      "title": "Search Contacts",
+      "subtitle": "Google Contacts",
+      "description": "Browse, search, and manage your Google Contacts with a full detail view.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-contact",
+      "title": "Quick Add Contact",
+      "subtitle": "Google Contacts",
+      "description": "Quickly add a new contact directly from the command bar.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "firstName",
+          "type": "text",
+          "placeholder": "First name",
+          "required": true
+        },
+        {
+          "name": "lastName",
+          "type": "text",
+          "placeholder": "Last name",
+          "required": true
+        },
+        {
+          "name": "email",
+          "type": "text",
+          "placeholder": "Email (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-contact",
+      "title": "Create Contact",
+      "subtitle": "Google Contacts",
+      "description": "Add a new Google Contact using a full form with all available fields.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "google-contacts",
+      "title": "Google Contacts",
+      "description": "Let Raycast AI look up, create, and manage your Google Contacts."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "name": "search-contacts",
+        "input": "@google-contacts Search my contacts for John",
+        "mocks": {
+          "google-contacts": [
+            {
+              "resourceName": "people/eval-john",
+              "names": [
+                {
+                  "givenName": "John",
+                  "familyName": "Doe"
+                }
+              ],
+              "emailAddresses": [
+                {
+                  "value": "john.doe@example.com"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "google-contacts",
+              "arguments": {
+                "operation": "search",
+                "query": {
+                  "includes": "John"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "name": "create-contact",
+        "input": "@google-contacts Create a new contact named Test User",
+        "mocks": {
+          "google-contacts": [
+            {
+              "contact": {
+                "resourceName": "people/eval-created",
+                "names": [
+                  {
+                    "givenName": "Test",
+                    "familyName": "User"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "google-contacts",
+              "arguments": {
+                "operation": "create",
+                "firstName": "Test",
+                "lastName": "User"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

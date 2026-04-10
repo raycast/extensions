@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, List, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { handler, stopHandler } from "swift:../swift/MyExecutable";
+import { isMac } from "./lib/utils";
 
 interface Duration {
   display: string;
@@ -56,13 +56,47 @@ export default function Command() {
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
 
-  const selectDuration = (duration: Duration) => {
-    const lockToast = new Toast({ title: "Keyboard locked" });
-    handler(duration.seconds);
+  const lockAction = async (duration: Duration) => {
+    let handler: (duration: number) => void;
+    if (isMac) {
+      const { handler: handlerSwift } = await import("swift:../swift/MyExecutable");
+      handler = handlerSwift;
+    } else {
+      const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
+      handler = handlerRust;
+    }
+
     setTimeLeft(duration.seconds);
     setIcon(duration.icon);
     setIsRunning(true);
-    lockToast.show();
+    await showToast({ title: "Keyboard locked" });
+
+    Promise.resolve(handler(duration.seconds)).catch(async (err) => {
+      // Roll back UI if hook installation failed
+      setIsRunning(false);
+      setTimeLeft(null);
+      setIcon(null);
+      await showToast({ title: "Failed to lock keyboard", message: String(err), style: Toast.Style.Failure });
+    });
+  };
+
+  const unlockAction = async () => {
+    let stopHandler: () => Promise<void>;
+    if (isMac) {
+      const { stopHandler: stopHandlerSwift } = await import("swift:../swift/MyExecutable");
+      stopHandler = stopHandlerSwift;
+    } else {
+      const { stop_handler: stopHandlerRust } = await import("rust:../rust/clean-keyboard");
+      stopHandler = stopHandlerRust;
+    }
+    try {
+      await stopHandler();
+    } catch (err) {
+      await showToast({ title: "Failed to unlock keyboard", message: String(err), style: Toast.Style.Failure });
+      return;
+    }
+    setIsRunning(false);
+    await showToast({ title: "Keyboard unlocked" });
   };
 
   useEffect(() => {
@@ -82,7 +116,7 @@ export default function Command() {
       <List>
         <List.EmptyView
           icon={icon ?? "🧼"}
-          description="Press ⌃ + U at any time to unlock the keyboard."
+          description={`Press ${isMac ? "⌃" : "Ctrl"} + U at any time to unlock the keyboard.`}
           title={`Cleaning keyboard${timeLeft ? ` for ${timeLeft} seconds…` : ""}`}
           actions={
             <ActionPanel>
@@ -91,10 +125,7 @@ export default function Command() {
                 autoFocus={false}
                 title={"Unlock Keyboard"}
                 shortcut={{ modifiers: ["ctrl"], key: "u" }}
-                onAction={() => {
-                  stopHandler();
-                  setIsRunning(false);
-                }}
+                onAction={unlockAction}
               />
             </ActionPanel>
           }
@@ -112,7 +143,7 @@ export default function Command() {
             icon={duration.icon}
             actions={
               <ActionPanel>
-                <Action title="Lock Keyboard" icon={Icon.Lock} onAction={() => selectDuration(duration)} />
+                <Action title="Lock Keyboard" icon={Icon.Lock} onAction={() => lockAction(duration)} />
               </ActionPanel>
             }
           />

@@ -1,5 +1,24 @@
 # Fathom for Raycast Changelog
 
+## [Instant Display, Stop Fetching & Cache Performance] - 2026-02-25
+
+### Added
+
+- **Instant meeting display**: First page of meetings appears immediately on launch; remaining pages load in the background without blocking the UI
+- **Stop Fetching**: Background fetch toasts now include a "Stop Fetching Meetings" button to abort mid-pagination
+- **HUD on copy**: Copying a meeting's share link now shows a native HUD notification confirming the copy
+
+### Changed
+
+- **Batch cache writes**: Meetings are now written to LocalStorage in parallel instead of sequentially, significantly reducing cache write time
+- **Bulk cache reads**: `getAllCachedMeetings` now uses `LocalStorage.allItems()` for a single bulk read on launch instead of N individual reads
+- **Separate abort tokens**: `fetchRemainingPages` and `loadMoreMeetings` each have their own abort token, preventing them from accidentally cancelling each other
+- **Cleaner error display**: Refactored `search-meetings` error view into `getErrorDisplay()` helper and `ErrorEmptyView` component
+
+### Fixed
+
+- **Spurious "Stopped" toast**: Fixed a token collision where triggering "Load More" would falsely abort the initial background fetch and show a green "Stopped" toast
+
 ## [Lazy Pagination & Smart Cache] - 2026-02-19
 
 ### Added

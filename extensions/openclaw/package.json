@@ -1,0 +1,110 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openclaw",
+  "title": "OpenClaw",
+  "description": "Chat with your local OpenClaw AI assistant",
+  "icon": "icon.png",
+  "author": "leveragedrobot",
+  "contributors": [
+    "asaph_kotzin"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask",
+      "title": "Ask OpenClaw",
+      "description": "Quick question to OpenClaw",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "question",
+          "placeholder": "Ask anything...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "chat",
+      "title": "Chat with OpenClaw",
+      "description": "Open a conversation with OpenClaw",
+      "mode": "view"
+    },
+    {
+      "name": "clipboard",
+      "title": "Ask About Clipboard",
+      "description": "Ask OpenClaw about your clipboard content",
+      "mode": "view"
+    },
+    {
+      "name": "selected-text",
+      "title": "Process Selected Text",
+      "description": "Summarize, explain, translate, or improve selected text",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Gateway Status",
+      "description": "Check OpenClaw gateway connection status",
+      "mode": "view"
+    },
+    {
+      "name": "open-webchat",
+      "title": "Open Webchat",
+      "description": "Open OpenClaw webchat in browser",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "endpoint",
+      "title": "API Endpoint",
+      "description": "OpenClaw gateway URL. Use http://127.0.0.1:18789 for local, or your Tailscale serve URL (e.g., https://machine-name.tailnet.ts.net) for remote access.",
+      "type": "textfield",
+      "default": "http://127.0.0.1:18789",
+      "required": true
+    },
+    {
+      "name": "token",
+      "title": "API Token",
+      "description": "Find in ~/.openclaw/openclaw.json under gateway.auth.token",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "agentId",
+      "title": "Agent ID",
+      "description": "Which OpenClaw agent to use",
+      "type": "textfield",
+      "default": "main",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

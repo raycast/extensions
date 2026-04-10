@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "git-batch-tools",
+  "title": "Git Batch Tools",
+  "description": "Batch git operations (pull, status) across multiple project groups",
+  "icon": "extension-icon.png",
+  "author": "Logan-8f",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "batch-pull",
+      "title": "Batch Pull",
+      "subtitle": "Git Batch Tools",
+      "description": "Scan and pull all git repositories in configured directories",
+      "mode": "view"
+    },
+    {
+      "name": "batch-status",
+      "title": "Batch Status",
+      "subtitle": "Git Batch Tools",
+      "description": "View git status of all repositories in a project group",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "projectPaths",
+      "title": "Project Paths",
+      "description": "Comma-separated paths to project directories (e.g. ~/dev/group-a, ~/dev/group-b)",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/dev/group-a, ~/dev/group-b"
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor",
+      "description": "The editor app to use when opening a project",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "editorAppAlt",
+      "title": "Alternate Editor",
+      "description": "The alternate editor app to use when opening a project",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "The terminal app to use when opening a project",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "maxParallelProcesses",
+      "title": "Max Parallel Processes",
+      "description": "Maximum number of parallel git pull processes",
+      "type": "textfield",
+      "default": "10",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -70,7 +70,7 @@ const searchSpotlight = (
   search: string,
   searchScope: string,
   abortable: React.MutableRefObject<AbortController | null | undefined> | undefined,
-  callback: (results: SpotlightSearchResult[]) => void
+  callback: (results: SpotlightSearchResult[]) => void,
 ): Promise<void> => {
   const { maxResults } = getPreferenceValues<SpotlightSearchPreferences>();
   const isExactSearch = search.startsWith("[") && search.endsWith("]");
@@ -99,7 +99,7 @@ const searchSpotlight = (
 
     // Only attempt to get system folders if the search might match one of them
     const mightMatchSystemFolder = systemFolderTypes.some(
-      (type) => type.includes(lowerSearch) || lowerSearch.includes(type)
+      (type) => type.includes(lowerSearch) || lowerSearch.includes(type),
     );
 
     // If the search might match a system folder, try to get those first

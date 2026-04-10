@@ -1,218 +1,133 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getPreferenceValues } from "@raycast/api";
+import type { UsageState } from "../agents/types";
 import { KimiUsage, KimiError } from "./types";
+import { httpFetch } from "../agents/http";
+import { readOpencodeAuthToken } from "../agents/opencode-auth";
+import { isOpenCodeActiveToken } from "../agents/opencode-active";
+import { loadAccounts } from "../accounts/storage";
+import type { AccountUsageState } from "../accounts/types";
 
-const KIMI_USAGE_API = "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages";
-const REQUEST_TIMEOUT = 10000;
+const KIMI_OPENCODE_KEY = "kimi-for-coding";
 
-type Preferences = Preferences.AgentUsage;
+const KIMI_USAGE_API = "https://api.kimi.com/coding/v1/usages";
 
-async function fetchKimiUsage(token: string): Promise<{ usage: KimiUsage | null; error: KimiError | null }> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
+type AgentUsagePrefs = Preferences.AgentUsage;
 
-    const authHeader = token.startsWith("Bearer ") ? token : `Bearer ${token}`;
+// --- API response interfaces ---
 
-    const response = await fetch(KIMI_USAGE_API, {
-      method: "POST",
-      headers: {
-        Authorization: authHeader,
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-      body: JSON.stringify({ scope: ["FEATURE_CODING"] }),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.status === 401) {
-      return {
-        usage: null,
-        error: {
-          type: "unauthorized",
-          message: "Authorization token expired or invalid. Please update it in extension settings.",
-        },
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        usage: null,
-        error: {
-          type: "unknown",
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        },
-      };
-    }
-
-    const data = await response.json();
-
-    return parseKimiApiResponse(data);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return {
-        usage: null,
-        error: {
-          type: "network_error",
-          message: "Request timeout. Please check your network connection.",
-        },
-      };
-    }
-
-    return {
-      usage: null,
-      error: {
-        type: "network_error",
-        message: error instanceof Error ? error.message : "Network request failed",
-      },
-    };
-  }
-}
-
-interface KimiApiUsage {
-  scope: string;
-  detail: {
-    limit: string;
-    used: string;
-    remaining: string;
-    resetTime: string;
-  };
-  limits?: Array<{
-    window: {
-      duration: number;
-      timeUnit: string;
-    };
-    detail: {
-      limit: string;
-      used: string;
-      remaining: string;
-      resetTime: string;
-    };
-  }>;
+interface KimiApiUsageDetail {
+  limit: number | string;
+  used: number | string;
+  remaining: number | string;
+  resetTime: string;
 }
 
 interface KimiApiResponse {
-  usages?: KimiApiUsage[];
+  usage?: KimiApiUsageDetail;
+  limits?: Array<{
+    window: { duration: number; timeUnit: string };
+    detail: KimiApiUsageDetail;
+  }>;
 }
+
+// --- Helpers ---
+
+function toInt(value: number | string): number {
+  return typeof value === "number" ? value : parseInt(value, 10);
+}
+
+function toWindowMinutes(duration: number, timeUnit: string): number {
+  if (timeUnit === "TIME_UNIT_HOUR") return duration * 60;
+  if (timeUnit === "TIME_UNIT_DAY") return duration * 1440;
+  return duration; // TIME_UNIT_MINUTE or unknown
+}
+
+// --- Parser ---
 
 function parseKimiApiResponse(data: unknown): { usage: KimiUsage | null; error: KimiError | null } {
   try {
     if (!data || typeof data !== "object") {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "Invalid API response format",
-        },
-      };
+      return { usage: null, error: { type: "parse_error", message: "Invalid API response format" } };
     }
 
     const response = data as KimiApiResponse;
 
-    const codingUsage = response.usages?.find((u) => u.scope === "FEATURE_CODING");
-
-    if (!codingUsage) {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "No coding usage data found in API response",
-        },
-      };
+    if (!response.usage) {
+      return { usage: null, error: { type: "parse_error", message: "No usage field in API response" } };
     }
 
-    const weeklyDetail = codingUsage.detail;
-    const rateLimitData = codingUsage.limits?.[0];
-
-    if (!rateLimitData) {
-      return {
-        usage: null,
-        error: {
-          type: "parse_error",
-          message: "No rate limit data found in API response",
-        },
-      };
-    }
+    const u = response.usage;
+    const firstLimit = response.limits?.[0];
 
     const usage: KimiUsage = {
-      weeklyUsage: {
-        limit: parseInt(weeklyDetail.limit, 10),
-        used: parseInt(weeklyDetail.used, 10),
-        remaining: parseInt(weeklyDetail.remaining, 10),
-        resetTime: weeklyDetail.resetTime,
-      },
-      rateLimit: {
-        windowMinutes: rateLimitData.window.duration,
-        limit: parseInt(rateLimitData.detail.limit, 10),
-        used: parseInt(rateLimitData.detail.used, 10),
-        remaining: parseInt(rateLimitData.detail.remaining, 10),
-        resetTime: rateLimitData.detail.resetTime,
-      },
+      limit: toInt(u.limit),
+      used: toInt(u.used),
+      remaining: toInt(u.remaining),
+      resetTime: u.resetTime,
+      rateLimit: firstLimit
+        ? {
+            windowMinutes: toWindowMinutes(firstLimit.window.duration, firstLimit.window.timeUnit),
+            limit: toInt(firstLimit.detail.limit),
+            used: toInt(firstLimit.detail.used),
+            remaining: toInt(firstLimit.detail.remaining),
+            resetTime: firstLimit.detail.resetTime,
+          }
+        : undefined,
     };
 
     return { usage, error: null };
-  } catch (error) {
+  } catch (err) {
     return {
       usage: null,
       error: {
         type: "parse_error",
-        message: error instanceof Error ? error.message : "Failed to parse API response",
+        message: err instanceof Error ? err.message : "Failed to parse API response",
       },
     };
   }
 }
 
-export function formatResetTime(isoTime: string): string {
-  try {
-    const resetDate = new Date(isoTime);
-    const now = new Date();
-    const diffMs = resetDate.getTime() - now.getTime();
+// --- Core fetcher ---
 
-    if (diffMs <= 0) {
-      return "now";
-    }
-
-    const diffSeconds = Math.floor(diffMs / 1000);
-    const diffMinutes = Math.floor(diffSeconds / 60);
-    const diffHours = Math.floor(diffMinutes / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffDays > 0) {
-      const remainingHours = diffHours % 24;
-      return remainingHours > 0 ? `${diffDays}d ${remainingHours}h` : `${diffDays}d`;
-    }
-    if (diffHours > 0) {
-      const remainingMinutes = diffMinutes % 60;
-      return remainingMinutes > 0 ? `${diffHours}h ${remainingMinutes}m` : `${diffHours}h`;
-    }
-    if (diffMinutes > 0) {
-      return `${diffMinutes}m`;
-    }
-    return `${diffSeconds}s`;
-  } catch {
-    return "unknown";
-  }
+async function fetchKimiUsage(token: string): Promise<{ usage: KimiUsage | null; error: KimiError | null }> {
+  const { data, error } = await httpFetch({
+    url: KIMI_USAGE_API,
+    method: "GET",
+    token,
+    headers: { Accept: "application/json" },
+  });
+  if (error) return { usage: null, error };
+  return parseKimiApiResponse(data);
 }
 
-export function useKimiUsage() {
-  const [token, setToken] = useState<string>("");
+function resolveKimiTokens(prefs: AgentUsagePrefs): string {
+  // Slot 1: manual preference → OpenCode auto-detect
+  const pref1 = (prefs.kimiAuthToken as string | undefined)?.trim() || "";
+  return pref1 || readOpencodeAuthToken("kimi-for-coding") || "";
+}
+
+// --- Dual-source auth hook ---
+
+export function useKimiUsage(enabled = true): UsageState<KimiUsage, KimiError> {
   const [usage, setUsage] = useState<KimiUsage | null>(null);
   const [error, setError] = useState<KimiError | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
-
-  useEffect(() => {
-    const preferences = getPreferenceValues<Preferences>();
-    const savedToken = preferences.kimiAuthToken?.trim() || "";
-    setToken(savedToken);
-  }, []);
+  const requestIdRef = useRef(0);
 
   const fetchData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    const prefs = getPreferenceValues<AgentUsagePrefs>();
+    const token = resolveKimiTokens(prefs);
+
     if (!token) {
+      setUsage(null);
+      setError({
+        type: "not_configured",
+        message: "Kimi token not found. Login via OpenCode (kimi-for-coding) or add it in extension settings (Cmd+,).",
+      });
       setIsLoading(false);
       setHasInitialFetch(true);
       return;
@@ -222,35 +137,163 @@ export function useKimiUsage() {
     setError(null);
 
     const result = await fetchKimiUsage(token);
+    if (requestId !== requestIdRef.current) return;
 
     setUsage(result.usage);
     setError(result.error);
     setIsLoading(false);
     setHasInitialFetch(true);
-  }, [token]);
+  }, []);
 
   useEffect(() => {
-    if (!hasInitialFetch && token) {
-      fetchData();
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
     }
-  }, [token, hasInitialFetch, fetchData]);
+    if (!hasInitialFetch) void fetchData();
+  }, [enabled, hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) return;
     await fetchData();
-  }, [fetchData]);
-
-  const finalError: KimiError | null =
-    !token && hasInitialFetch
-      ? {
-          type: "not_configured",
-          message: "Kimi token not configured. Please add it in extension settings (Cmd+,).",
-        }
-      : error;
+  }, [enabled, fetchData]);
 
   return {
-    isLoading,
-    usage,
-    error: finalError,
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
     revalidate,
   };
+}
+
+/**
+ * Returns one UsageState per named Kimi account stored in LocalStorage.
+ * Falls back to the preference/OpenCode token if no accounts are stored.
+ *
+ * Each entry in the returned array corresponds to one account.
+ * The array is stable in order (matches LocalStorage order).
+ */
+export function useKimiAccounts(enabled = true): AccountUsageState<KimiUsage, KimiError>[] {
+  // We store per-account state in parallel arrays indexed by accountId.
+  // Because hooks can't be called in loops, we fetch all accounts up front
+  // and manage state as a single Record keyed by accountId.
+
+  const [accountStates, setAccountStates] = useState<AccountUsageState<KimiUsage, KimiError>[]>([]);
+  const requestIdRef = useRef(0);
+
+  const fetchAll = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    const prefs = getPreferenceValues<AgentUsagePrefs>();
+    const manualAccounts = await loadAccounts("kimi");
+
+    // Get auto-detected token from OpenCode
+    const autoToken = readOpencodeAuthToken("kimi-for-coding");
+    const prefToken = (prefs.kimiAuthToken as string | undefined)?.trim() || "";
+
+    // Build list of all accounts: manual + auto-detected (if not duplicate)
+    const accounts = [...manualAccounts];
+
+    // Add preference token as "Manual" if different from manual accounts
+    if (prefToken && !accounts.some((a) => a.token === prefToken)) {
+      accounts.push({
+        id: "kimi-pref",
+        label: "Manual",
+        token: prefToken,
+      });
+    }
+
+    // Add auto-detected token as "Auto-detected" if different from existing
+    if (autoToken && !accounts.some((a) => a.token === autoToken)) {
+      accounts.push({
+        id: "kimi-opencode",
+        label: "Auto-detected",
+        token: autoToken,
+      });
+    }
+
+    // Fallback: if no accounts at all, show not configured
+    if (accounts.length === 0) {
+      setAccountStates([
+        {
+          accountId: "none",
+          label: "Default",
+          token: "",
+          isLoading: false,
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "Kimi token not found. Login via OpenCode (kimi-for-coding) or add an account via Manage Accounts.",
+          },
+          revalidate: async () => {
+            await fetchAll();
+          },
+        },
+      ]);
+      return;
+    }
+
+    // Kick off all fetches in parallel
+    const results = await Promise.all(
+      accounts.map(async (account) => {
+        const result = await fetchKimiUsage(account.token);
+        return { account, result };
+      }),
+    );
+
+    if (requestId !== requestIdRef.current) return;
+
+    setAccountStates(
+      results.map(({ account, result }) => ({
+        accountId: account.id,
+        label: account.label,
+        token: account.token,
+        isLoading: false,
+        usage: result.usage,
+        error: result.error,
+        isOpenCodeActive: isOpenCodeActiveToken(account.token, KIMI_OPENCODE_KEY),
+        revalidate: async () => {
+          await fetchAll();
+        },
+      })),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setAccountStates([]);
+      return;
+    }
+    void fetchAll();
+  }, [enabled, fetchAll]);
+
+  // Set initial loading state only if no data exists
+  useEffect(() => {
+    if (!enabled) return;
+    setAccountStates((prev) =>
+      prev.length === 0 || prev.some((s) => s.accountId === "none")
+        ? [
+            {
+              accountId: "loading",
+              label: "Loading…",
+              token: "",
+              isLoading: true,
+              usage: null,
+              error: null,
+              revalidate: async () => {
+                await fetchAll();
+              },
+            },
+          ]
+        : prev,
+    );
+  }, [enabled, fetchAll]);
+
+  return accountStates;
 }

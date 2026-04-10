@@ -10,6 +10,7 @@ import { getServerUrlPreference } from "~/utils/preferences";
 import {
   EnsureCliBinError,
   InstalledCLINotFoundError,
+  InvalidSessionTokenError,
   ManuallyThrownError,
   NotLoggedInError,
   PremiumFeatureError,
@@ -19,7 +20,7 @@ import {
   VaultIsLockedError,
 } from "~/utils/errors";
 import { join, dirname } from "path";
-import { chmod, rename, rm, unlink } from "fs/promises";
+import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
@@ -101,11 +102,11 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2025.11.0",
+  version: "2026.2.0",
   get sha256() {
-    if (platform === "windows") return "0484bae6306762881678097406d6bf00a58e291720dbc7d62f044e5f4d8286ed";
-    if (process.arch === "arm64") return "59eac955be7b15bfc21c81101a194a9fbba32f48a61154b4f4b6e007efab6fd6";
-    return "213108a65eeb7294ffcd7303f8fe5308dc2af970735aefeb4d23fc9753a2ac01";
+    if (platform === "windows") return "6e7fe65ef0d0401af20bb739cb81469a0c001d9ee249ceea4a86974ae27a4c46";
+    if (process.arch === "arm64") return "63c736b74620280e422ce238bdbcbc267689a0ff831168959ef2124588fcc1e5";
+    return "60cc5109b1cdad560231e02098f1ab2d16efa821d51c6ec089cb5c3cc351b2e5";
   },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
@@ -216,7 +217,9 @@ export class Bitwarden {
 
         // clear the data.json file to avoid issues with the new binary
         const dataJsonPath = join(supportPath, "data.json");
-        await tryExec(() => unlink(dataJsonPath));
+        tryExec(() => unlinkSync(dataJsonPath));
+        // clear stored server URL so checkServerUrl() re-configures the CLI
+        await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;
@@ -280,7 +283,8 @@ export class Bitwarden {
   async checkServerUrl(serverUrl: string | undefined): Promise<void> {
     // Check the CLI has been configured to use the preference Url
     const storedServer = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL);
-    if (!serverUrl || storedServer === serverUrl) return;
+    if (!serverUrl && !storedServer) return;
+    if (storedServer === serverUrl) return;
 
     // Update the server Url
     const toast = await this.showToast({
@@ -296,7 +300,11 @@ export class Bitwarden {
       }
       // If URL is empty, set it to the default
       await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { resetVaultTimeout: false });
-      await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
+      if (serverUrl) {
+        await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
+      } else {
+        await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
+      }
 
       toast.style = Toast.Style.Success;
       toast.title = "Success";
@@ -355,7 +363,7 @@ export class Bitwarden {
   async login(): Promise<MaybeError> {
     try {
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
-      await this.saveLastVaultStatus("login", "unlocked");
+      await this.saveLastVaultStatus("login", "locked");
       await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
@@ -377,7 +385,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }
@@ -413,11 +421,14 @@ export class Bitwarden {
         resetVaultTimeout: true,
         env: { BW_PASSWORD: password },
       });
+
       const sessionToken = result.stdout;
-      if (!sessionToken.trim()) throw new Error("Invalid session token");
+      if (!sessionToken.trim()) throw new InvalidSessionTokenError();
+
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
       await this.callActionListeners("unlock", password, sessionToken);
+
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -738,16 +749,38 @@ export class Bitwarden {
     await this.callActionListeners("logout", reason);
   }
 
-  private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
-    const errorMessage = (error as ExecaError).stderr;
-    if (!errorMessage) return {};
+  private async handleCommonErrors(
+    error: any,
+    options?: { skipInvalidSessionTokenLogout?: boolean }
+  ): Promise<{ error?: ManuallyThrownError }> {
+    if (!(error instanceof Error)) return {};
 
-    if (/not logged in/i.test(errorMessage)) {
-      await this.handlePostLogout();
+    const stderr = (error as ExecaError).stderr;
+    const message = error.message;
+    if (!stderr && !message) return {};
+
+    const errorContent = [stderr, message].filter(Boolean).join(",");
+
+    const { skipInvalidSessionTokenLogout = false } = options ?? {};
+
+    if (/not logged in/i.test(errorContent)) {
+      await this.handlePostLogout("Not logged in");
       return { error: new NotLoggedInError("Not logged in") };
     }
-    if (/Premium status/i.test(errorMessage)) {
+    if (/Premium status/i.test(errorContent)) {
       return { error: new PremiumFeatureError() };
+    }
+    if (/Invalid session token/i.test(errorContent)) {
+      if (!skipInvalidSessionTokenLogout) {
+        // Avoid running the full logout lifecycle here (which fires logout listeners).
+        // Clear the session token and mark the vault as unauthenticated so callers
+        // can perform an explicit `bitwarden.logout()` when they want the full
+        // logout side-effects (listeners, storage updates, etc.). This prevents
+        // duplicate listener invocations.
+        this.clearSessionToken();
+        await this.saveLastVaultStatus("handleCommonErrors:InvalidSessionToken", "unauthenticated");
+      }
+      return { error: new InvalidSessionTokenError() };
     }
     return {};
   }

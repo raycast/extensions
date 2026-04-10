@@ -1,5 +1,10 @@
 # RSS Reader Changelog
 
+## [Add Cache] - 2026-03-26
+
+- Prefill Add Subscription with the active browser tab URL when the Raycast Browser Extension is available
+- Add 15 minutes cache for Read All Stories command selection
+
 ## [AI Tool Support] - 2025-10-09
 
 - Add AI tool support for interacting with RSS feeds via Raycast AI
@@ -33,7 +38,7 @@
 
 ## [Update] - 2022-09-08
 
- - Updated Raycast API to 1.39.0
- - Fixed typo in searchBarPlaceholder
- - Aded metadata
- - Fixed empty state flicker
+- Updated Raycast API to 1.39.0
+- Fixed typo in searchBarPlaceholder
+- Added metadata
+- Fixed empty state flicker

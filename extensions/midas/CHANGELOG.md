@@ -1,6 +1,6 @@
 # Midas Changelog
 
-## [0.1.0] - 18.02.2025
+## [0.1.0] - 2025-02-18
 
 - Added two main commands:
   - Call Agent - Make general calls to Midas AI

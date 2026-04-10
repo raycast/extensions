@@ -60,7 +60,7 @@ export function FileActionPanel({ file, preferences, onToggleDetails, children }
           onAction={onToggleDetails}
           shortcut={{
             macOS: { modifiers: ["cmd", "shift"], key: "i" },
-            windows: { modifiers: ["ctrl", "shift"], key: "i" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "i" },
           }}
         />
       </ActionPanel.Section>
@@ -71,7 +71,7 @@ export function FileActionPanel({ file, preferences, onToggleDetails, children }
           onAction={() => copyFileWithApi(file)}
           shortcut={{
             macOS: { modifiers: ["cmd", "shift"], key: "." },
-            windows: { modifiers: ["ctrl", "shift"], key: "." },
+            Windows: { modifiers: ["ctrl", "shift"], key: "." },
           }}
         />
         <Action.CopyToClipboard
@@ -79,7 +79,7 @@ export function FileActionPanel({ file, preferences, onToggleDetails, children }
           content={file.name}
           shortcut={{
             macOS: { modifiers: ["cmd"], key: "c" },
-            windows: { modifiers: ["ctrl"], key: "c" },
+            Windows: { modifiers: ["ctrl"], key: "c" },
           }}
         />
         <Action.CopyToClipboard
@@ -87,7 +87,7 @@ export function FileActionPanel({ file, preferences, onToggleDetails, children }
           content={file.commandline}
           shortcut={{
             macOS: { modifiers: ["cmd", "shift"], key: "c" },
-            windows: { modifiers: ["ctrl", "shift"], key: "c" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "c" },
           }}
         />
       </ActionPanel.Section>

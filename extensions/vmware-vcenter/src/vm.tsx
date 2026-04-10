@@ -35,6 +35,7 @@ import {
   Cache,
   getPreferenceValues,
   open,
+  getApplications,
 } from "@raycast/api";
 import { runPowerShellScript, usePromise } from "@raycast/utils";
 import ServerView from "./api/ServerView";
@@ -366,17 +367,56 @@ export default function Command(): JSX.Element {
       ip.match(/^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/)
     );
 
+    // Open Rdp Connection
     if (process.platform === "darwin") {
-      await open(`rdp://full%20address=s%3A${ip}`).catch((err) => {
-        showToast({ style: Toast.Style.Failure, title: "Error with RDP Session", message: err.message });
-      });
+      /* Urls by App */
+      const urls: Record<string, string> = {
+        "com.2X.Client.Mac": `tuxclient://?Command=LaunchApp&ConnType=2&Server=${ip}`,
+        "com.microsoft.rdc.macos": `rdp://full%20address=s%3A${ip}`,
+      };
+
+      /* Get Installed App */
+      let apps;
+      try {
+        apps = await getApplications();
+      } catch (error) {
+        if (error instanceof Error) {
+          showToast({ style: Toast.Style.Failure, title: "Error Getting Installed Apps", message: error.message });
+        }
+        return;
+      }
+
+      /* Filter App List */
+      apps = apps.filter((a) => a.bundleId && a.bundleId in urls);
+      if (apps.length === 0) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error with RDP Session",
+          message: "Install 'Windows App' or 'Parallels Client' for this feature",
+        });
+        return;
+      }
+
+      /* Open RDP Session */
+      for (const [app, url] of Object.entries(urls)) {
+        if (apps.findIndex((v) => v.bundleId === app) !== -1) {
+          try {
+            await open(url);
+            showToast({ style: Toast.Style.Success, title: "RDP Session Started" });
+            break;
+          } catch (error) {
+            if (error instanceof Error) {
+              showToast({ style: Toast.Style.Failure, title: "Error with RDP Session", message: error.message });
+            }
+          }
+        }
+      }
     } else if (process.platform === "win32") {
       await runPowerShellScript(`Start-Process mstsc /v:${ip}`).catch((err) => {
         showToast({ style: Toast.Style.Failure, title: "Error with RDP Session", message: err.message });
       });
+      showToast({ style: Toast.Style.Success, title: "RDP Session Started" });
     }
-
-    showToast({ style: Toast.Style.Success, title: "RDP Session Started" });
   }
 
   /**

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+build/
+.DS_Store
+.vscode/
+.env
+coverage/
+*.tgz
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

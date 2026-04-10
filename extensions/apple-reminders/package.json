@@ -270,11 +270,23 @@
     }
   ],
   "ai": {
-    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
+    "instructions": "Always make reminders markdown links using the open URL. Example: Instead of saying \"I have set a reminder for you to walk the dog tomorrow at 8 AM.\", say \"I have set a reminder for you to [walk the dog](x-apple-reminderkit://REMCDReminder/reminder-id) tomorrow at 8 AM.\"\\n- Never add the recurrence field unless the user explicitly asks for a repeating reminder (for example: every day, weekly, monthly, yearly, weekdays, weekends).\\n- If the user does not explicitly ask for recurrence, omit recurrence entirely.\\n- Requests like \"today\", \"tomorrow\", or a specific date without recurrence keywords must be treated as one-off reminders (no recurrence field).\\n- Example: \"ask uncle for car today\" should call create-reminder without recurrence.\\n- When creating recurring reminders, ensure a due date is specified, if none is provided, use today's date\\n- Always include a calendar date in dueDate; time-only values (e.g., \"10:00:00\") are invalid. If the user mentions a day or recurrence (e.g., \"every Sunday at 10\"), pick the next occurrence and provide an ISO date/time.\\n- Do not ask for optional information if not necessary for the task\\n- Keep reminder titles concise and clear\\n- For locations, only suggest addresses that exist in the saved locations list\\n- Do not ask which list to use if there is only one list available",
     "evals": [
       {
         "input": "@apple-reminders Walk the dog tomorrow at 8am",
         "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            },
+            {
+              "id": "work",
+              "title": "Work",
+              "isDefault": false
+            }
+          ],
           "create-reminder": {
             "openUrl": "x-apple-reminderkit://REMCDReminder/reminder-id",
             "title": "Walk the dog",
@@ -292,6 +304,47 @@
           },
           {
             "meetsCriteria": "The answer includes a markdown link to the created reminder."
+          }
+        ]
+      },
+      {
+        "input": "@apple-reminders ask uncle for car today",
+        "mocks": {
+          "get-locations": [],
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            },
+            {
+              "id": "work",
+              "title": "Work",
+              "isDefault": false
+            }
+          ],
+          "create-reminder": {
+            "openUrl": "x-apple-reminderkit://REMCDReminder/ask-uncle",
+            "title": "Ask uncle for car",
+            "id": "ask-uncle",
+            "isCompleted": false,
+            "isRecurring": false,
+            "dueDate": "2025-01-21"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "title": {
+                  "includes": "uncle"
+                }
+              },
+              "name": "create-reminder"
+            }
+          },
+          {
+            "meetsCriteria": "The reminder is created as a one-off reminder with no recurrence."
           }
         ]
       },
@@ -350,6 +403,18 @@
       {
         "input": "@apple-reminders Remind me to call mom every sunday at 10",
         "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            },
+            {
+              "id": "work",
+              "title": "Work",
+              "isDefault": false
+            }
+          ],
           "create-reminder": {
             "openUrl": "x-apple-reminderkit://REMCDReminder/reminder-id",
             "isRecurring": true,
@@ -407,9 +472,6 @@
         "expected": [
           {
             "callsTool": "get-reminders"
-          },
-          {
-            "meetsCriteria": "The answer includes a list of reminders with the correct title, and details if they have a due date or list."
           }
         ]
       },
@@ -531,6 +593,18 @@
       {
         "input": "@apple-reminders Remind me to fix the faucet when I come back Home",
         "mocks": {
+          "get-lists": [
+            {
+              "id": "reminders",
+              "title": "Reminders",
+              "isDefault": true
+            },
+            {
+              "id": "work",
+              "title": "Work",
+              "isDefault": false
+            }
+          ],
           "get-locations": [
             {
               "radius": "100",

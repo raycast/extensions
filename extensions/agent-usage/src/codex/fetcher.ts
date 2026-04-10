@@ -1,74 +1,26 @@
-import { useState, useEffect, useCallback } from "react";
-import { getPreferenceValues } from "@raycast/api";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { CodexUsage, CodexError } from "./types";
-import { normalizeCodexAuthorizationHeader, resolveCodexAuthTokens, shouldFallbackToPreferenceToken } from "./auth";
+import { resolveCodexAuthToken, resolveCodexAuthTokens } from "./auth";
+import { httpFetch, normalizeBearerToken } from "../agents/http";
+import { loadAccounts } from "../accounts/storage";
+import type { AccountUsageState } from "../accounts/types";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
-const REQUEST_TIMEOUT = 10000;
 
-type Preferences = Preferences.AgentUsage;
+const CODEX_HEADERS = {
+  Accept: "application/json",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+};
 
-async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
-    const response = await fetch(CODEX_USAGE_API, {
-      method: "GET",
-      headers: {
-        Authorization: normalizeCodexAuthorizationHeader(token),
-        Accept: "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.status === 401) {
-      return {
-        usage: null,
-        error: {
-          type: "unauthorized",
-          message:
-            "Authorization token expired or invalid. Run 'codex login' or update the token in extension settings.",
-        },
-      };
-    }
-
-    if (!response.ok) {
-      return {
-        usage: null,
-        error: {
-          type: "unknown",
-          message: `HTTP ${response.status}: ${response.statusText}`,
-        },
-      };
-    }
-
-    const data = await response.json();
-
-    return parseCodexApiResponse(data);
-  } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      return {
-        usage: null,
-        error: {
-          type: "network_error",
-          message: "Request timeout. Please check your network connection.",
-        },
-      };
-    }
-
-    return {
-      usage: null,
-      error: {
-        type: "network_error",
-        message: error instanceof Error ? error.message : "Network request failed",
-      },
-    };
-  }
+export async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
+  const { data, error } = await httpFetch({
+    url: CODEX_USAGE_API,
+    headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
+    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
+  });
+  if (error) return { usage: null, error };
+  return parseCodexApiResponse(data);
 }
 
 function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error: CodexError | null } {
@@ -164,65 +116,37 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
   }
 }
 
-function formatDuration(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  if (seconds < 3600) {
-    return `${Math.floor(seconds / 60)}m`;
-  }
-  if (seconds < 86400) {
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
-}
+export { formatDuration } from "../agents/format";
 
-export { formatDuration };
-
-export function useCodexUsage() {
+export function useCodexUsage(enabled = true) {
   const [usage, setUsage] = useState<CodexUsage | null>(null);
   const [error, setError] = useState<CodexError | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasInitialFetch, setHasInitialFetch] = useState<boolean>(false);
+  const requestIdRef = useRef(0);
 
   const fetchData = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
     setIsLoading(true);
     setError(null);
 
-    const preferences = getPreferenceValues<Preferences>();
-    const preferenceToken = preferences.codexAuthToken?.trim() || "";
-    const {
-      primaryToken,
-      localToken,
-      preferenceToken: cleanedPreferenceToken,
-    } = resolveCodexAuthTokens({ preferenceToken });
+    const token = resolveCodexAuthToken();
 
-    if (!primaryToken) {
+    if (!token) {
       setUsage(null);
       setError({
         type: "not_configured",
-        message: "Codex is not configured. Run 'codex login' or add a token in extension settings (Cmd+,).",
+        message: "Codex is not configured. Run 'codex login' to authenticate.",
       });
       setIsLoading(false);
       setHasInitialFetch(true);
       return;
     }
 
-    let result = await fetchCodexUsage(primaryToken);
-
-    if (
-      cleanedPreferenceToken &&
-      shouldFallbackToPreferenceToken({
-        localToken,
-        preferenceToken: cleanedPreferenceToken,
-        errorType: result.error?.type,
-      })
-    ) {
-      result = await fetchCodexUsage(cleanedPreferenceToken);
+    const result = await fetchCodexUsage(token);
+    if (requestId !== requestIdRef.current) {
+      return;
     }
 
     setUsage(result.usage);
@@ -232,19 +156,145 @@ export function useCodexUsage() {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setUsage(null);
+      setError(null);
+      setIsLoading(false);
+      setHasInitialFetch(false);
+      return;
+    }
+
     if (!hasInitialFetch) {
       fetchData();
     }
-  }, [hasInitialFetch, fetchData]);
+  }, [enabled, hasInitialFetch, fetchData]);
 
   const revalidate = useCallback(async () => {
+    if (!enabled) {
+      return;
+    }
+
     await fetchData();
-  }, [fetchData]);
+  }, [enabled, fetchData]);
 
   return {
-    isLoading,
-    usage,
-    error,
+    isLoading: enabled ? isLoading : false,
+    usage: enabled ? usage : null,
+    error: enabled ? error : null,
     revalidate,
   };
+}
+
+/**
+ * Returns one UsageState per named Codex account stored in LocalStorage.
+ * Falls back to the auto-detected token from ~/.codex/auth.json if no accounts are stored.
+ *
+ * Each entry in the returned array corresponds to one account.
+ * The array is stable in order (matches LocalStorage order).
+ */
+export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, CodexError>[] {
+  const [accountStates, setAccountStates] = useState<AccountUsageState<CodexUsage, CodexError>[]>([]);
+  const requestIdRef = useRef(0);
+
+  const fetchAll = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    const manualAccounts = await loadAccounts("codex");
+
+    // Get auto-detected token from codex auth file
+    const { localToken } = resolveCodexAuthTokens();
+
+    // Build list of all accounts: manual + auto-detected (if not duplicate)
+    const accounts = [...manualAccounts];
+
+    // Add auto-detected token as separate account if not already present
+    if (localToken && !accounts.some((a) => a.token === localToken)) {
+      accounts.push({
+        id: "codex-auto",
+        label: "Auto-detected",
+        token: localToken,
+      });
+    }
+
+    // Fallback: if no accounts at all, show not configured
+    if (accounts.length === 0) {
+      setAccountStates([
+        {
+          accountId: "none",
+          label: "Default",
+          token: "",
+          isLoading: false,
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
+          },
+          revalidate: async () => {
+            await fetchAll();
+          },
+        },
+      ]);
+      return;
+    }
+
+    // Kick off all fetches in parallel
+    const results = await Promise.all(
+      accounts.map(async (account) => {
+        const result = await fetchCodexUsage(account.token);
+        return { account, result };
+      }),
+    );
+
+    if (requestId !== requestIdRef.current) return;
+
+    setAccountStates(
+      results.map(({ account, result }) => ({
+        accountId: account.id,
+        label: account.label,
+        token: account.token,
+        isLoading: false,
+        usage: result.usage,
+        error: result.error,
+        isOpenCodeActive: false, // Codex uses different auth source
+        revalidate: async () => {
+          await fetchAll();
+        },
+      })),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setAccountStates([]);
+      return;
+    }
+    void fetchAll();
+  }, [enabled, fetchAll]);
+
+  // Set initial loading state only if no data exists
+  useEffect(() => {
+    if (!enabled) return;
+    setAccountStates((prev) =>
+      prev.length === 0 || prev.some((s) => s.accountId === "none")
+        ? [
+            {
+              accountId: "loading",
+              label: "Loading…",
+              token: "",
+              isLoading: true,
+              usage: null,
+              error: null,
+              revalidate: async () => {
+                await fetchAll();
+              },
+            },
+          ]
+        : prev,
+    );
+  }, [enabled, fetchAll]);
+
+  return accountStates;
 }

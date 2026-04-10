@@ -1,9 +1,19 @@
 # Raycast Store Updates Changelog
 
+## [Detect and display removed extensions] - 2026-02-27
+
+- Detect extension removal PRs using the `no-review` label, removal-pattern titles, and package.json 404 confirmation
+- Expand multi-extension removal PRs into one list item per removed extension (e.g., a single PR removing two extensions now shows both)
+- Add "Removed" filter to the dropdown with a red minus-circle icon
+- Removed extensions show a red "Removed" type tag, "Removed" date label, and link to the PR instead of the store
+- Hide changelog, store link, and platform icons for removed extensions (data is unavailable)
+- Persist GitHub rate limit state in LocalStorage so the refresh cooldown survives between command opens; reads `X-RateLimit-Reset` header to show a precise "try again in X minutes" toast
+
 ## [Improve robustness of update handling] - 2026-02-18
 
 - Add fallback to extract extension slugs from PR file paths when title parsing fails (e.g., PRs with titles starting with "Add", "Fix", etc.)
 - Fix date-aware filtering: PRs merged after the feed's publish date are now correctly shown as updates instead of being filtered out
+- Add extension actions to CHANGELOG view
 
 ## [Add refresh action, improve platform icon colors, and enhance CHANGELOG navigation] - 2026-02-16
 

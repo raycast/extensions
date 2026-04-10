@@ -1,11 +1,15 @@
 export interface KimiUsage {
-  weeklyUsage: {
-    limit: number;
-    used: number;
-    remaining: number;
-    resetTime: string;
-  };
-  rateLimit: {
+  /** Total monthly/weekly quota */
+  limit: number;
+  /** Requests consumed */
+  used: number;
+  /** Requests remaining */
+  remaining: number;
+  /** ISO timestamp or epoch — when quota resets */
+  resetTime: string;
+  /** Present only when the API returns a limits[] entry */
+  rateLimit?: {
+    /** Window size in minutes (derived from duration + timeUnit) */
     windowMinutes: number;
     limit: number;
     used: number;
