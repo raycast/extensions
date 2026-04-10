@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-10
 
 - Fix Open in New Obsidian Tab failing on Windows due to path separator handling
 
