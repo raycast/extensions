@@ -11,3 +11,8 @@ compiled_raycast_rust
 # misc
 .DS_Store
 sandbox
+.playwright-mcp
+.claude
+tmp
+AGENTS.md
+CLAUDE.md
