@@ -4,7 +4,12 @@
   "description": "Daily readings for the Chaldean Catholic Church",
   "icon": "icon.png",
   "author": "peter_patros",
-  "categories": ["Productivity"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Other"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -37,16 +42,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.0",
-    "@raycast/utils": "^1.15.0"
+    "@raycast/api": "^1.104.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

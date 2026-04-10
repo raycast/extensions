@@ -42,12 +42,7 @@ function getScriptureText(html: string, startVerse: number, endVerse: number): s
 
   // Step 2: Find where footnotes begin
   // USCCB footnotes are in a specific section
-  const footnoteMarkers = [
-    '<div class="view-content">',
-    'class="footnotes"',
-    'id="footnotes"',
-    "Copyright 2019",
-  ];
+  const footnoteMarkers = ['<div class="view-content">', 'class="footnotes"', 'id="footnotes"', "Copyright 2019"];
   let endIdx = html.length;
   for (const marker of footnoteMarkers) {
     const idx = html.indexOf(marker, startIdx + 100);
@@ -74,16 +69,16 @@ function getScriptureText(html: string, startVerse: number, endVerse: number): s
     .replace(/&[a-z]+;/g, "")
     .replace(/&#\d+;/g, "")
     // Remove ALL non-standard characters including image placeholder
-    .replace(/[^\x0A\x0D\x20-\x7E\u2018\u2019\u201C\u201D\u2014\u2013]/g, "")
+    .replace(/[^\n\r\x20-\x7E\u2018\u2019\u201C\u201D\u2014\u2013]/g, "")
     .replace(/[ \t]+/g, " ")
     .replace(/\n /g, "\n")
     .trim();
 
   // Step 4: Cut at footnote patterns in plain text
   const footnoteCutoffs = [
-    /\n\s*\*\s*\[/,           // * [9:1]
-    /\n\s*\[\s*\d+:\d+/,      // [9:1]
-    /\na\.\s*\[/,              // a. [
+    /\n\s*\*\s*\[/, // * [9:1]
+    /\n\s*\[\s*\d+:\d+/, // [9:1]
+    /\na\.\s*\[/, // a. [
     /\nCopyright/,
     /\nDive into/,
   ];
@@ -92,7 +87,7 @@ function getScriptureText(html: string, startVerse: number, endVerse: number): s
     if (match) content = content.substring(0, match.index);
   }
 
- // Step 5: Find start verse
+  // Step 5: Find start verse
   if (startVerse > 1) {
     const re = new RegExp(`(?:^|\\n| )${startVerse}(?= |[A-Z"\u201C])`);
     const match = re.exec(content);
@@ -102,7 +97,7 @@ function getScriptureText(html: string, startVerse: number, endVerse: number): s
     }
   }
 
- // Step 6: Find end verse
+  // Step 6: Find end verse
   if (endVerse < 999) {
     // Match verse number whether it has a space or not before next word
     const re = new RegExp(`(?:^|\\n| )${endVerse + 1}(?= |[A-Z"\u201C])`);
@@ -110,7 +105,7 @@ function getScriptureText(html: string, startVerse: number, endVerse: number): s
     if (match) content = content.substring(0, match.index);
   }
 
- // Step 7: Final cleanup
+  // Step 7: Final cleanup
   content = content
     // Remove CHAPTER heading
     .replace(/CHAPTER\s+\d+\s*/g, "")
@@ -129,7 +124,7 @@ function getScriptureText(html: string, startVerse: number, endVerse: number): s
     // Remove section headings
     .replace(/^[A-Z][a-zA-Z ,]+\.\s*$/gm, "")
     // Remove image placeholder
-    .replace(/[^\x0A\x0D\x20-\x7E\u2018\u2019\u201C\u201D\u2014\u2013]/g, "")
+    .replace(/[^\n\r\x20-\x7E\u2018\u2019\u201C\u201D\u2014\u2013]/g, "")
     // Remove asterisks
     .replace(/\*/g, "")
     // Clean whitespace
@@ -179,36 +174,91 @@ function parseCitation(citation: string): ParsedCitation {
       endVerse: 999,
     };
   }
-  return { book: citation, startChapter: 1, startVerse: 1, endChapter: 1, endVerse: 999 };
+  return {
+    book: citation,
+    startChapter: 1,
+    startVerse: 1,
+    endChapter: 1,
+    endVerse: 999,
+  };
 }
 
 function bookToSlug(book: string): string {
   const map: Record<string, string> = {
-    Genesis: "genesis", Exodus: "exodus", Leviticus: "leviticus",
-    Numbers: "numbers", Deuteronomy: "deuteronomy", Joshua: "joshua",
-    Judges: "judges", Ruth: "ruth", "1 Samuel": "1samuel",
-    "2 Samuel": "2samuel", "1 Kings": "1kings", "2 Kings": "2kings",
-    "1 Chronicles": "1chronicles", "2 Chronicles": "2chronicles",
-    Ezra: "ezra", Nehemiah: "nehemiah", Tobit: "tobit", Judith: "judith",
-    Esther: "esther", "1 Maccabees": "1maccabees", "2 Maccabees": "2maccabees",
-    Job: "job", Psalms: "psalms", Psalm: "psalms", Proverbs: "proverbs",
-    Ecclesiastes: "ecclesiastes", "Song of Songs": "songofsolomon",
-    Wisdom: "wisdom", Sirach: "sirach", Isaiah: "isaiah",
-    Jeremiah: "jeremiah", Lamentations: "lamentations", Baruch: "baruch",
-    Ezekiel: "ezekiel", Daniel: "daniel", Hosea: "hosea", Joel: "joel",
-    Amos: "amos", Obadiah: "obadiah", Jonah: "jonah", Micah: "micah",
-    Nahum: "nahum", Habakkuk: "habakkuk", Zephaniah: "zephaniah",
-    Haggai: "haggai", Zechariah: "zechariah", Malachi: "malachi",
-    Matthew: "matthew", Mark: "mark", Luke: "luke", John: "john",
-    Acts: "acts", Romans: "romans", "1 Corinthians": "1corinthians",
-    "2 Corinthians": "2corinthians", Galatians: "galatians",
-    Ephesians: "ephesians", Philippians: "philippians",
-    Colossians: "colossians", "1 Thessalonians": "1thessalonians",
-    "2 Thessalonians": "2thessalonians", "1 Timothy": "1timothy",
-    "2 Timothy": "2timothy", Titus: "titus", Philemon: "philemon",
-    Hebrews: "hebrews", James: "james", "1 Peter": "1peter",
-    "2 Peter": "2peter", "1 John": "1john", "2 John": "2john",
-    "3 John": "3john", Jude: "jude", Revelation: "revelation",
+    Genesis: "genesis",
+    Exodus: "exodus",
+    Leviticus: "leviticus",
+    Numbers: "numbers",
+    Deuteronomy: "deuteronomy",
+    Joshua: "joshua",
+    Judges: "judges",
+    Ruth: "ruth",
+    "1 Samuel": "1samuel",
+    "2 Samuel": "2samuel",
+    "1 Kings": "1kings",
+    "2 Kings": "2kings",
+    "1 Chronicles": "1chronicles",
+    "2 Chronicles": "2chronicles",
+    Ezra: "ezra",
+    Nehemiah: "nehemiah",
+    Tobit: "tobit",
+    Judith: "judith",
+    Esther: "esther",
+    "1 Maccabees": "1maccabees",
+    "2 Maccabees": "2maccabees",
+    Job: "job",
+    Psalms: "psalms",
+    Psalm: "psalms",
+    Proverbs: "proverbs",
+    Ecclesiastes: "ecclesiastes",
+    "Song of Songs": "songofsolomon",
+    Wisdom: "wisdom",
+    Sirach: "sirach",
+    Isaiah: "isaiah",
+    Jeremiah: "jeremiah",
+    Lamentations: "lamentations",
+    Baruch: "baruch",
+    Ezekiel: "ezekiel",
+    Daniel: "daniel",
+    Hosea: "hosea",
+    Joel: "joel",
+    Amos: "amos",
+    Obadiah: "obadiah",
+    Jonah: "jonah",
+    Micah: "micah",
+    Nahum: "nahum",
+    Habakkuk: "habakkuk",
+    Zephaniah: "zephaniah",
+    Haggai: "haggai",
+    Zechariah: "zechariah",
+    Malachi: "malachi",
+    Matthew: "matthew",
+    Mark: "mark",
+    Luke: "luke",
+    John: "john",
+    Acts: "acts",
+    Romans: "romans",
+    "1 Corinthians": "1corinthians",
+    "2 Corinthians": "2corinthians",
+    Galatians: "galatians",
+    Ephesians: "ephesians",
+    Philippians: "philippians",
+    Colossians: "colossians",
+    "1 Thessalonians": "1thessalonians",
+    "2 Thessalonians": "2thessalonians",
+    "1 Timothy": "1timothy",
+    "2 Timothy": "2timothy",
+    Titus: "titus",
+    Philemon: "philemon",
+    Hebrews: "hebrews",
+    James: "james",
+    "1 Peter": "1peter",
+    "2 Peter": "2peter",
+    "1 John": "1john",
+    "2 John": "2john",
+    "3 John": "3john",
+    Jude: "jude",
+    Revelation: "revelation",
   };
   return map[book] || book.toLowerCase().replace(/\s+/g, "");
 }

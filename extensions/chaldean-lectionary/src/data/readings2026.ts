@@ -7,7 +7,6 @@ export interface DayReadings {
 }
 
 export const readings2026: Record<string, DayReadings> = {
-
   // ─── JANUARY ──────────────────────────────────────────────
   "2026-01-04": {
     title: "Second Sunday of Christmas",
