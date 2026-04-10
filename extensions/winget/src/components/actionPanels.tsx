@@ -1,10 +1,5 @@
 import { Action, ActionPanel, Icon, showToast, Toast } from "@raycast/api";
-import {
-  wingetInstall,
-  wingetUninstall,
-  wingetUpgrade,
-  runInBackground,
-} from "../utils/winget/actions";
+import { wingetInstall, wingetUninstall, wingetUpgrade, runInBackground } from "../utils/winget/actions";
 import { Package, InstalledPackage, OutdatedPackage } from "../utils/winget/types";
 import { PackageDetailView } from "./packageDetail";
 
@@ -74,10 +69,7 @@ export function SearchActionPanel({
           onAction={() => refreshWithFeedback(onRefresh)}
         />
         <Action.CopyToClipboard title="Copy Package ID" content={pkg.id} />
-        <Action.CopyToClipboard
-          title="Copy Install Command"
-          content={`winget install --id ${pkg.id} --exact`}
-        />
+        <Action.CopyToClipboard title="Copy Install Command" content={`winget install --id ${pkg.id} --exact`} />
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -90,12 +82,7 @@ interface InstalledActionPanelProps {
   onUninstalled?: (id: string) => void;
 }
 
-export function InstalledActionPanel({
-  pkg,
-  onRefresh,
-  onClearSearch,
-  onUninstalled,
-}: InstalledActionPanelProps) {
+export function InstalledActionPanel({ pkg, onRefresh, onClearSearch, onUninstalled }: InstalledActionPanelProps) {
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -109,9 +96,7 @@ export function InstalledActionPanel({
             }}
           />
         )}
-        {pkg.id && (
-          <Action.Push title="View Details" target={<PackageDetailView packageId={pkg.id} />} />
-        )}
+        {pkg.id && <Action.Push title="View Details" target={<PackageDetailView packageId={pkg.id} />} />}
         <Action
           title="Uninstall"
           icon={Icon.Trash}
@@ -133,10 +118,7 @@ export function InstalledActionPanel({
         />
         {pkg.id && <Action.CopyToClipboard title="Copy Package ID" content={pkg.id} />}
         {pkg.id && (
-          <Action.CopyToClipboard
-            title="Copy Uninstall Command"
-            content={`winget uninstall --id ${pkg.id} --exact`}
-          />
+          <Action.CopyToClipboard title="Copy Uninstall Command" content={`winget uninstall --id ${pkg.id} --exact`} />
         )}
       </ActionPanel.Section>
     </ActionPanel>
@@ -181,10 +163,7 @@ export function UpgradeActionPanel({ pkg, totalOutdated, onRefresh }: UpgradeAct
           onAction={() => refreshWithFeedback(onRefresh)}
         />
         <Action.CopyToClipboard title="Copy Package ID" content={pkg.id} />
-        <Action.CopyToClipboard
-          title="Copy Upgrade Command"
-          content={`winget upgrade --id ${pkg.id} --exact`}
-        />
+        <Action.CopyToClipboard title="Copy Upgrade Command" content={`winget upgrade --id ${pkg.id} --exact`} />
       </ActionPanel.Section>
     </ActionPanel>
   );

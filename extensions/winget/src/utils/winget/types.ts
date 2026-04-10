@@ -1,8 +1,3 @@
-export interface Preferences {
-  wingetPath: string;
-  runInBackground: boolean;
-}
-
 export interface Package {
   name: string;
   id: string;

@@ -1,7 +1,6 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 
 const execFileAsync = promisify(execFile);
 
@@ -23,12 +22,7 @@ function getWingetExecutable(): string {
 }
 
 function handleExecError(error: unknown, executable: string): never {
-  if (
-    error &&
-    typeof error === "object" &&
-    "code" in error &&
-    (error as { code: string }).code === "ENOENT"
-  ) {
+  if (error && typeof error === "object" && "code" in error && (error as { code: string }).code === "ENOENT") {
     throw new Error(
       `winget executable not found ("${executable}"). ` +
         `Make sure winget is installed, or set the correct path in Extension Preferences → Winget Executable Path.`,
@@ -72,9 +66,7 @@ export async function execWinget(args: string[]): Promise<string> {
  * Used when the caller needs to distinguish partial failures from full success
  * (e.g. `winget upgrade --all` exits non-zero when some packages fail).
  */
-export async function execWingetWithCode(
-  args: string[],
-): Promise<{ output: string; exitCode: number }> {
+export async function execWingetWithCode(args: string[]): Promise<{ output: string; exitCode: number }> {
   const executable = getWingetExecutable();
   try {
     const { stdout } = await runExec(executable, args);

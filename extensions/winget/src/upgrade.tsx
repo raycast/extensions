@@ -26,13 +26,7 @@ export default function UpgradeCommand() {
                 { text: pkg.version, tooltip: "Current version" },
                 { tag: { value: `→ ${pkg.available}`, color: Color.Yellow } },
               ]}
-              actions={
-                <UpgradeActionPanel
-                  pkg={pkg}
-                  totalOutdated={pkgList.length}
-                  onRefresh={revalidate}
-                />
-              }
+              actions={<UpgradeActionPanel pkg={pkg} totalOutdated={pkgList.length} onRefresh={revalidate} />}
             />
           ))}
         </List.Section>

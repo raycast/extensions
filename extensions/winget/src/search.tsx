@@ -8,18 +8,12 @@ export default function SearchCommand() {
   const [searchText, setSearchText] = useState("");
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
 
-  const {
-    data: packages,
-    isLoading: searchLoading,
-    revalidate: revalidateSearch,
-  } = useWingetSearch(searchText);
+  const { data: packages, isLoading: searchLoading, revalidate: revalidateSearch } = useWingetSearch(searchText);
 
   const { data: installed, revalidate: revalidateInstalled } = useWingetInstalled();
 
   const installedIds = new Set(
-    (installed ?? [])
-      .filter((p) => p.id.length > 0 && !removedIds.has(p.id))
-      .map((p) => p.id.toLowerCase()),
+    (installed ?? []).filter((p) => p.id.length > 0 && !removedIds.has(p.id)).map((p) => p.id.toLowerCase()),
   );
 
   function handleRefresh() {
@@ -57,11 +51,7 @@ export default function SearchCommand() {
               key={pkg.id}
               title={pkg.name}
               subtitle={pkg.id}
-              accessories={[
-                isInstalled
-                  ? { tag: { value: "Installed", color: Color.Green } }
-                  : { text: pkg.version },
-              ]}
+              accessories={[isInstalled ? { tag: { value: "Installed", color: Color.Green } } : { text: pkg.version }]}
               actions={
                 <SearchActionPanel
                   pkg={pkg}

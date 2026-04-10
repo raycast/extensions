@@ -10,9 +10,7 @@ function parseInstalledOutput(output: string): InstalledPackage[] {
       id: row["Id"] ?? "",
       version: row["Version"] ?? "",
       available:
-        row["Available"]?.trim().toLowerCase() === "unknown"
-          ? undefined
-          : row["Available"]?.trim() || undefined,
+        row["Available"]?.trim().toLowerCase() === "unknown" ? undefined : row["Available"]?.trim() || undefined,
       source: row["Source"]?.trim() || undefined,
     }))
     .filter((p) => p.name.length > 0);
@@ -21,11 +19,7 @@ function parseInstalledOutput(output: string): InstalledPackage[] {
 export function useWingetInstalled() {
   return useCachedPromise(
     async () => {
-      const output = await execWinget([
-        "list",
-        "--accept-source-agreements",
-        "--disable-interactivity",
-      ]);
+      const output = await execWinget(["list", "--accept-source-agreements", "--disable-interactivity"]);
       return parseInstalledOutput(output);
     },
     [],

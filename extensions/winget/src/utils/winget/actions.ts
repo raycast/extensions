@@ -1,7 +1,5 @@
 import { getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { execWinget, execWingetWithCode } from "./commands";
-import { Preferences } from "./types";
-
 export function runInBackground(): boolean {
   return getPreferenceValues<Preferences>().runInBackground;
 }
@@ -68,9 +66,7 @@ export async function wingetUninstall(id: string): Promise<boolean> {
  *   "1 package(s) have failed to install."
  */
 function parseUpgradeAllSummary(output: string): { succeeded: number; failed: number } | null {
-  const succeededMatch = output.match(
-    /(\d+)\s+package\(s\)\s+(?:installed|upgraded)\s+successfully/i,
-  );
+  const succeededMatch = output.match(/(\d+)\s+package\(s\)\s+(?:installed|upgraded)\s+successfully/i);
   const failedMatch = output.match(/(\d+)\s+package\(s\)\s+(?:have\s+)?failed/i);
   if (!succeededMatch && !failedMatch) return null;
   return {
@@ -79,10 +75,7 @@ function parseUpgradeAllSummary(output: string): { succeeded: number; failed: nu
   };
 }
 
-function upgradeAllResultMessage(
-  output: string,
-  exitCode: number,
-): { title: string; isPartial: boolean } {
+function upgradeAllResultMessage(output: string, exitCode: number): { title: string; isPartial: boolean } {
   if (exitCode === 0) return { title: "All packages upgraded", isPartial: false };
 
   const summary = parseUpgradeAllSummary(output);
@@ -106,11 +99,7 @@ export async function wingetUpgrade(id?: string): Promise<void> {
     await showHUD(isAll ? "Upgrading all packages…" : `Upgrading ${id}…`);
     try {
       if (isAll) {
-        const { output, exitCode } = await execWingetWithCode([
-          "upgrade",
-          "--all",
-          ...INSTALL_FLAGS,
-        ]);
+        const { output, exitCode } = await execWingetWithCode(["upgrade", "--all", ...INSTALL_FLAGS]);
         const { title } = upgradeAllResultMessage(output, exitCode);
         await showHUD(`${exitCode === 0 ? "✅" : "⚠️"} ${title}`);
       } else {

@@ -35,8 +35,7 @@ export default function InstalledCommand() {
     return revalidate();
   }
 
-  const upgradesTitle =
-    upgradableCount > 0 ? `Upgrades Available (${upgradableCount})` : "Upgrades Available";
+  const upgradesTitle = upgradableCount > 0 ? `Upgrades Available (${upgradableCount})` : "Upgrades Available";
 
   return (
     <List

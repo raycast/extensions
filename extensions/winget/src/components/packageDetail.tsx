@@ -45,9 +45,7 @@ export function PackageListDetail({ packageId }: Props) {
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="ID" text={data.id} />
             <List.Item.Detail.Metadata.Label title="Version" text={data.version} />
-            {data.publisher && (
-              <List.Item.Detail.Metadata.Label title="Publisher" text={data.publisher} />
-            )}
+            {data.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={data.publisher} />}
             {data.publisherUrl && (
               <List.Item.Detail.Metadata.Link
                 title="Publisher URL"
@@ -56,21 +54,11 @@ export function PackageListDetail({ packageId }: Props) {
               />
             )}
             {data.homepage && (
-              <List.Item.Detail.Metadata.Link
-                title="Homepage"
-                target={data.homepage}
-                text={data.homepage}
-              />
+              <List.Item.Detail.Metadata.Link title="Homepage" target={data.homepage} text={data.homepage} />
             )}
-            {data.license && (
-              <List.Item.Detail.Metadata.Label title="License" text={data.license} />
-            )}
-            {data.moniker && (
-              <List.Item.Detail.Metadata.Label title="Moniker" text={data.moniker} />
-            )}
-            {data.installerType && (
-              <List.Item.Detail.Metadata.Label title="Installer Type" text={data.installerType} />
-            )}
+            {data.license && <List.Item.Detail.Metadata.Label title="License" text={data.license} />}
+            {data.moniker && <List.Item.Detail.Metadata.Label title="Moniker" text={data.moniker} />}
+            {data.installerType && <List.Item.Detail.Metadata.Label title="Installer Type" text={data.installerType} />}
             {data.tags && data.tags.length > 0 && (
               <>
                 <List.Item.Detail.Metadata.Separator />
@@ -105,20 +93,12 @@ export function PackageDetailView({ packageId }: Props) {
             <Detail.Metadata.Label title="Version" text={data.version} />
             {data.publisher && <Detail.Metadata.Label title="Publisher" text={data.publisher} />}
             {data.publisherUrl && (
-              <Detail.Metadata.Link
-                title="Publisher URL"
-                target={data.publisherUrl}
-                text={data.publisherUrl}
-              />
+              <Detail.Metadata.Link title="Publisher URL" target={data.publisherUrl} text={data.publisherUrl} />
             )}
-            {data.homepage && (
-              <Detail.Metadata.Link title="Homepage" target={data.homepage} text={data.homepage} />
-            )}
+            {data.homepage && <Detail.Metadata.Link title="Homepage" target={data.homepage} text={data.homepage} />}
             {data.license && <Detail.Metadata.Label title="License" text={data.license} />}
             {data.moniker && <Detail.Metadata.Label title="Moniker" text={data.moniker} />}
-            {data.installerType && (
-              <Detail.Metadata.Label title="Installer Type" text={data.installerType} />
-            )}
+            {data.installerType && <Detail.Metadata.Label title="Installer Type" text={data.installerType} />}
             {data.tags && data.tags.length > 0 && (
               <>
                 <Detail.Metadata.Separator />

@@ -18,12 +18,7 @@ export function useWingetSearch(query: string) {
   return useCachedPromise(
     async (q: string) => {
       if (!q.trim()) return [] as Package[];
-      const output = await execWinget([
-        "search",
-        q,
-        "--accept-source-agreements",
-        "--disable-interactivity",
-      ]);
+      const output = await execWinget(["search", q, "--accept-source-agreements", "--disable-interactivity"]);
       return parseSearchOutput(output);
     },
     [query],

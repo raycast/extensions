@@ -22,11 +22,7 @@ function parseUpgradeOutput(output: string): OutdatedPackage[] {
 export function useWingetUpgrade() {
   return useCachedPromise(
     async () => {
-      const output = await execWinget([
-        "upgrade",
-        "--accept-source-agreements",
-        "--disable-interactivity",
-      ]);
+      const output = await execWinget(["upgrade", "--accept-source-agreements", "--disable-interactivity"]);
       return parseUpgradeOutput(output);
     },
     [],
