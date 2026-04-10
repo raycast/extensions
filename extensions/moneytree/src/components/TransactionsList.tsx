@@ -185,8 +185,18 @@ function formatDate(dateString: string): string {
 function getMonthKey(dateString: string): string {
   const { year, month } = parseDateParts(dateString);
   const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December",
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
   ];
   return `${months[Number(month) - 1]} ${year}`;
 }
