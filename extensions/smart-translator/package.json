@@ -72,7 +72,7 @@
     {
       "name": "detectMode",
       "title": "Detection Mode",
-      "description": "Fast: quick language detection. Accurate: slower but more reliable for similar scripts.",
+      "description": "Fast: script-based detection and assumes base for same-script pairs. Accurate: AI detection for similar scripts.",
       "type": "dropdown",
       "required": false,
       "data": [

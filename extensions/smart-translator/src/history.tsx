@@ -9,29 +9,24 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState, useEffect, useMemo } from "react";
 import { TranslateScreen, LANGUAGES, getModelSections } from "./translate";
 
 const HISTORY_KEY = "translationHistory";
-
-function favicon(domain: string): Image.ImageLike {
-  return {
-    source: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
-    mask: Image.Mask.RoundedRectangle,
-  };
-}
+const FAVICON_OPTIONS = { mask: Image.Mask.RoundedRectangle } as const;
 
 const MODEL_ICONS: Record<string, Image.ImageLike> = {
-  openai: favicon("openai.com"),
-  anthropic: favicon("anthropic.com"),
-  google: favicon("deepmind.google"),
-  xai: favicon("x.ai"),
-  together: favicon("deepseek.com"),
-  groq: favicon("deepseek.com"),
-  mistral: favicon("mistral.ai"),
-  llama: favicon("meta.com"),
-  perplexity: favicon("perplexity.ai"),
-  mixtral: favicon("mistral.ai"),
+  openai: getFavicon("https://openai.com", FAVICON_OPTIONS),
+  anthropic: getFavicon("https://anthropic.com", FAVICON_OPTIONS),
+  google: getFavicon("https://deepmind.google", FAVICON_OPTIONS),
+  xai: getFavicon("https://x.ai", FAVICON_OPTIONS),
+  together: getFavicon("https://deepseek.com", FAVICON_OPTIONS),
+  groq: getFavicon("https://deepseek.com", FAVICON_OPTIONS),
+  mistral: getFavicon("https://mistral.ai", FAVICON_OPTIONS),
+  llama: getFavicon("https://meta.com", FAVICON_OPTIONS),
+  perplexity: getFavicon("https://perplexity.ai", FAVICON_OPTIONS),
+  mixtral: getFavicon("https://mistral.ai", FAVICON_OPTIONS),
 };
 
 function getModelIcon(modelName: string): Image.ImageLike {

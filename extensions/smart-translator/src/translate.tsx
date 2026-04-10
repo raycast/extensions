@@ -12,6 +12,7 @@ import {
   getPreferenceValues,
   environment,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
 
 // --- Types ---
@@ -43,12 +44,6 @@ interface HistoryEntry {
   targetName: string;
   modelName: string;
   timestamp: number;
-}
-
-interface Preferences {
-  baseLang: string;
-  targetLang: string;
-  detectMode: DetectMode;
 }
 
 // --- Constants ---
@@ -105,7 +100,7 @@ function getExtPrefs(): {
   target: LangDef;
   detectMode: DetectMode;
 } {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Translate>();
   return {
     base: LANGUAGES[prefs.baseLang] ?? LANGUAGES["Japanese"],
     target: LANGUAGES[prefs.targetLang] ?? LANGUAGES["English"],
@@ -130,8 +125,15 @@ async function detectIsBase(
   mode: DetectMode,
 ): Promise<boolean> {
   if (mode === "fast") {
-    if (base.scriptPattern) return base.scriptPattern.test(text);
-    if (target.scriptPattern) return !target.scriptPattern.test(text);
+    const baseMatches = base.scriptPattern?.test(text);
+    if (baseMatches !== undefined) return baseMatches;
+
+    const targetMatches = target.scriptPattern?.test(text);
+    if (targetMatches !== undefined) return !targetMatches;
+
+    // Same-script pairs cannot be distinguished locally, so fast mode avoids
+    // the AI round-trip and assumes the input is already in the base language.
+    return true;
   }
   const detected = await detectLanguageAccurate(text);
   return detected.toLowerCase() === base.name.toLowerCase();
@@ -163,12 +165,7 @@ async function saveHistory(
   await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(history));
 }
 
-function favicon(domain: string): Image.ImageLike {
-  return {
-    source: `https://www.google.com/s2/favicons?domain=${domain}&sz=64`,
-    mask: Image.Mask.RoundedRectangle,
-  };
-}
+const FAVICON_OPTIONS = { mask: Image.Mask.RoundedRectangle } as const;
 
 const PROVIDER_DEFS: {
   prefix: string;
@@ -179,7 +176,7 @@ const PROVIDER_DEFS: {
   {
     prefix: "OpenAI_",
     name: "OpenAI",
-    icon: favicon("openai.com"),
+    icon: getFavicon("https://openai.com", FAVICON_OPTIONS),
     models: [
       { value: "openai_o1-o3-mini", label: "o3 mini" },
       { value: "openai_o1-o1", label: "o1" },
@@ -194,7 +191,7 @@ const PROVIDER_DEFS: {
   {
     prefix: "Anthropic_",
     name: "Anthropic",
-    icon: favicon("anthropic.com"),
+    icon: getFavicon("https://anthropic.com", FAVICON_OPTIONS),
     models: [
       { value: "anthropic-claude-opus", label: "Claude Opus" },
       { value: "anthropic-claude-sonnet", label: "Claude Sonnet" },
@@ -204,7 +201,7 @@ const PROVIDER_DEFS: {
   {
     prefix: "Google_",
     name: "Google",
-    icon: favicon("deepmind.google"),
+    icon: getFavicon("https://deepmind.google", FAVICON_OPTIONS),
     models: [
       {
         value: "google-gemini-2.0-flash-thinking",
@@ -218,13 +215,13 @@ const PROVIDER_DEFS: {
   {
     prefix: "xAI_",
     name: "xAI",
-    icon: favicon("x.ai"),
+    icon: getFavicon("https://x.ai", FAVICON_OPTIONS),
     models: [{ value: "xai-grok-2-latest", label: "Grok 2" }],
   },
   {
     prefix: "DeepSeek_",
     name: "DeepSeek",
-    icon: favicon("deepseek.com"),
+    icon: getFavicon("https://deepseek.com", FAVICON_OPTIONS),
     models: [
       { value: "together-deepseek-ai/DeepSeek-R1", label: "DeepSeek R1" },
       {
@@ -236,7 +233,7 @@ const PROVIDER_DEFS: {
   {
     prefix: "Mistral_",
     name: "Mistral",
-    icon: favicon("mistral.ai"),
+    icon: getFavicon("https://mistral.ai", FAVICON_OPTIONS),
     models: [
       { value: "mistral-large", label: "Mistral Large" },
       { value: "mistral-small", label: "Mistral Small" },
@@ -248,7 +245,7 @@ const PROVIDER_DEFS: {
   {
     prefix: "Llama",
     name: "Meta",
-    icon: favicon("meta.com"),
+    icon: getFavicon("https://meta.com", FAVICON_OPTIONS),
     models: [
       { value: "groq-llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
       { value: "llama3.1-405b", label: "Llama 3.1 405B" },
@@ -259,7 +256,7 @@ const PROVIDER_DEFS: {
   {
     prefix: "Perplexity_",
     name: "Perplexity",
-    icon: favicon("perplexity.ai"),
+    icon: getFavicon("https://perplexity.ai", FAVICON_OPTIONS),
     models: [
       { value: "perplexity-sonar-reasoning-pro", label: "Sonar Reasoning Pro" },
       { value: "perplexity-sonar-reasoning", label: "Sonar Reasoning" },
