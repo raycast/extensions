@@ -10,7 +10,8 @@
     "adrianbonpin"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity"
