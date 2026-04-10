@@ -31,9 +31,11 @@ async function getRunningAppsPaths(): Promise<string[]> {
     const result = await runAppleScript(`
       set appPaths to {}
       tell application "System Events"
-        repeat with aProcess in (get file of every process whose background only is false)
-          set processPath to POSIX path of aProcess
-          set end of appPaths to processPath
+        repeat with aProcess in (every process whose background only is false)
+          try
+            set processPath to POSIX path of (file of aProcess)
+            set end of appPaths to processPath
+          end try
         end repeat
       end tell
 

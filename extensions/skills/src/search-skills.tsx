@@ -1,6 +1,7 @@
-import { List, ActionPanel, Action, Icon, Detail } from "@raycast/api";
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useState } from "react";
 
+import { CommandEmptyView, CommandErrorDetail, RetryAction } from "./components/CommandStates";
 import { SkillListItem } from "./components/SkillListItem";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
@@ -18,11 +19,13 @@ export default function Command() {
 
   if (error && !data) {
     return (
-      <Detail
-        markdown={`# API Error\n\nFailed to fetch data from the Skills API.\n\n**Error:** ${error.message}\n\n---\n\nIf the problem persists, please report it via **Report Issue on GitHub**.`}
+      <CommandErrorDetail
+        title="Unable to Load Search Results"
+        message={error.message}
+        detailsMarkdown="The Skills API request failed, so the primary search content could not be shown.\n\nRetry the search. If the problem persists, report it on GitHub."
         actions={
           <ActionPanel>
-            <Action title="Clear Cache & Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+            <RetryAction onAction={revalidate} />
             <Action.OpenInBrowser
               title="Report Issue on GitHub"
               url={buildGithubIssueUrl({
@@ -61,13 +64,22 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {searchText.length < 2 || (skills.length === 0 && !isLoading) ? (
-        <List.EmptyView
-          title={searchText.length >= 2 ? "No Skills Found" : "Search Skills"}
-          description={
-            searchText.length >= 2 ? `No results for "${searchText}"` : "Type at least 2 characters to search"
-          }
+      {searchText.length < 2 ? (
+        <CommandEmptyView
+          title="Search Skills"
+          description="Type at least 2 characters to search."
           icon={Icon.MagnifyingGlass}
+        />
+      ) : skills.length === 0 && !isLoading ? (
+        <CommandEmptyView
+          title="No Search Results"
+          description={`No results found for "${searchText}". Try different keywords.`}
+          icon={Icon.MagnifyingGlass}
+          actions={
+            <ActionPanel>
+              <RetryAction onAction={revalidate} />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.Section title={`Results for "${searchText}"`} subtitle={`${skills.length} skills`}>

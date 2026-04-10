@@ -2,10 +2,23 @@ import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { writeFileSync } from "fs";
-import { tmpdir } from "os";
+import { tmpdir, homedir } from "os";
 import { join } from "path";
 
 const execFilePromise = promisify(execFile);
+
+/**
+ * Expand shell-style ~ prefix to the user's home directory.
+ * Node fs APIs do not perform tilde expansion, so paths like ~/foo
+ * must be resolved before passing to existsSync, mkdirSync, or cd.
+ */
+export function expandTilde(inputPath: string): string {
+  const trimmed = inputPath.trim();
+  const home = homedir();
+  if (trimmed === "~") return home;
+  if (trimmed.startsWith("~/")) return home + trimmed.slice(1);
+  return trimmed;
+}
 
 type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
 
@@ -23,7 +36,7 @@ export async function openTerminalWithCommand(
   const terminal = (options.terminalApp ||
     preferences.terminalApp ||
     "Terminal") as TerminalApp;
-  const cwd = options.cwd || process.env.HOME || "/";
+  const cwd = expandTilde(options.cwd || "") || homedir() || "/";
 
   try {
     switch (terminal) {

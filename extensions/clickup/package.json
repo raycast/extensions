@@ -8,7 +8,8 @@
   "contributors": [
     "aesadde",
     "joltcode",
-    "xmok"
+    "xmok",
+    "macbookandrew"
   ],
   "license": "MIT",
   "commands": [
@@ -24,6 +25,13 @@
       "title": "Quick Capture",
       "subtitle": "ClickUp",
       "description": "Quickly capture tasks to your default ClickUp list",
+      "mode": "view"
+    },
+    {
+      "name": "view-default-list",
+      "title": "View Default List",
+      "subtitle": "ClickUp",
+      "description": "View your default ClickUp list",
       "mode": "view"
     },
     {

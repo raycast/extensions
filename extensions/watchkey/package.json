@@ -36,6 +36,13 @@
       "mode": "view"
     },
     {
+      "name": "update-key",
+      "title": "Update Key",
+      "subtitle": "Watchkey",
+      "description": "Update an existing secret in the keychain",
+      "mode": "view"
+    },
+    {
       "name": "import-key",
       "title": "Import Key",
       "subtitle": "Watchkey",
@@ -55,7 +62,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

@@ -9,6 +9,7 @@ function ChartView({ site, preset, filters, title }: ChartProps) {
   const { data, isLoading } = useCachedPromise(fetchTimeSeries, [site.id, preset, filters], {
     keepPreviousData: true,
   });
+  const websiteDashboardUrl = `${DASHBOARD_URL}/websites/${site.id}`;
 
   return (
     <Detail
@@ -19,7 +20,7 @@ function ChartView({ site, preset, filters, title }: ChartProps) {
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open in Databuddy" url={DASHBOARD_URL} />
+          <Action.OpenInBrowser title="Open in Databuddy" url={websiteDashboardUrl} />
         </ActionPanel>
       }
     />
@@ -27,6 +28,8 @@ function ChartView({ site, preset, filters, title }: ChartProps) {
 }
 
 function itemActions({ site, preset, filters, title }: ChartProps) {
+  const websiteDashboardUrl = `${DASHBOARD_URL}/websites/${site.id}`;
+
   return (
     <ActionPanel>
       <Action.Push
@@ -34,7 +37,7 @@ function itemActions({ site, preset, filters, title }: ChartProps) {
         icon={Icon.LineChart}
         target={<ChartView site={site} preset={preset} filters={filters} title={title} />}
       />
-      <Action.OpenInBrowser title="Open in Databuddy" url={DASHBOARD_URL} />
+      <Action.OpenInBrowser title="Open in Databuddy" url={websiteDashboardUrl} />
       <Action.OpenInBrowser
         title="Open Website"
         url={`https://${site.domain}`}
