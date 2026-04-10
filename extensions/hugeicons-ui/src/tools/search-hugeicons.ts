@@ -44,7 +44,7 @@ export default async function tool(input: Input) {
 
   const response = await searchHugeiconsMetas({
     query,
-    page: 1,
+    perPage: count * 3,
     perPage: Math.max(count * 3, count),
     apiKey,
     signal: abortController.signal,
