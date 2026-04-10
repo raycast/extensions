@@ -195,7 +195,10 @@ function guessMode(lines: string[]): "text" | "code" {
   return codeScore > textScore ? "code" : "text";
 }
 
-function cleanText(raw: string, mode: string): string {
+function cleanText(
+  raw: string,
+  mode: string,
+): { cleaned: string; resolvedMode: "text" | "code" } {
   const prepped = raw.split("\n").map((line) => {
     let stripped = trimPipeEdges(line);
     stripped = stripBoxArt(stripped);
@@ -203,20 +206,17 @@ function cleanText(raw: string, mode: string): string {
     return stripped;
   });
 
-  const modeToUse = mode === "auto" ? guessMode(prepped) : mode;
+  const resolvedMode: "text" | "code" =
+    mode === "auto" ? guessMode(prepped) : (mode as "text" | "code");
 
-  if (modeToUse === "code") {
-    return formatCode(prepped);
-  }
-  return collapseParagraphs(prepped);
-}
+  const cleaned =
+    resolvedMode === "code" ? formatCode(prepped) : collapseParagraphs(prepped);
 
-interface Preferences {
-  mode: "auto" | "text" | "code";
+  return { cleaned, resolvedMode };
 }
 
 export default async function Command() {
-  const { mode } = getPreferenceValues<Preferences>();
+  const { mode } = getPreferenceValues<Preferences.Clean>();
   const raw = await Clipboard.readText();
 
   if (!raw) {
@@ -224,9 +224,7 @@ export default async function Command() {
     return;
   }
 
-  const cleaned = cleanText(raw, mode);
+  const { cleaned, resolvedMode } = cleanText(raw, mode);
   await Clipboard.copy(cleaned);
-
-  const detectedMode = mode === "auto" ? guessMode(raw.split("\n")) : mode;
-  await showHUD(`Cleaned clipboard (${detectedMode})`);
+  await showHUD(`Cleaned clipboard (${resolvedMode})`);
 }
