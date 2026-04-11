@@ -3,7 +3,11 @@
   "title": "OpenRouter",
   "description": "Simple, powerful chat with any model via OpenRouter (GPT-4, Claude, Llama 3, etc.)",
   "icon": "icon.png",
-  "author": "ragnor",
+  "author": "the_variable",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -39,21 +43,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.1",
+    "@raycast/api": "^1.104.12",
     "@raycast/utils": "^1.18.1",
     "node-fetch": "^3.0.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^22.10.10",
-    "@types/react": "^18.3.3",
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "@types/react": "18.3.3",
+    "@types/react-dom": "18.3.0"
   },
   "scripts": {
     "build": "ray build",

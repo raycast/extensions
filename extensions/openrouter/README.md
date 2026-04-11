@@ -1,39 +1,29 @@
-# OpenRouter - Raycast Extension
+# OpenRouter Chat
 
-A simple, high-performance Raycast extension for chatting with any AI model via OpenRouter (GPT-4, Claude 3.5, Llama 3.1, etc.).
+Chat with any AI model through OpenRouter (GPT-4, Claude 3.5, Llama 3.1, and more) directly from Raycast. This extension provides a clean, fast, and lightweight interface for all your AI needs.
 
 ## Features
 
-- **OpenRouter Support**: Access the latest models from OpenAI, Anthropic, Meta, and more.
-- **Streaming Responses**: See the AI's response in real-time as it's being generated.
-- **Conversation History**: Automatically saves your chats so you can continue them later.
-- **Clean Interface**: Focused entirely on messaging and productivity.
+- **Multi-Model Support**: Seamlessly access models from OpenAI, Anthropic, Meta, Mistral, and many others via a single API.
+- **Real-time Streaming**: Watch responses generate word-by-word for a smooth, interactive experience.
+- **Conversation History**: Your chats are automatically saved locally, allowing you to pick up where you left off.
+- **Lightweight & Fast**: Built for speed with a focus on core messaging and productivity.
+- **Privacy First**: Your API keys and conversation data are stored securely on your local machine.
 
-## Getting Started
+## Setup
 
-1.  **Install Dependencies**:
-    ```bash
-    cd huggingcast
-    npm install
-    ```
-
-2.  **Start Development Mode**:
-    ```bash
-    npm run dev
-    ```
-
-3.  **Configure in Raycast**:
-    - Open the **New Chat** command.
-    - Go to **Extension Settings** (`Cmd + Shift + ,`).
-    - Enter your **OpenRouter API Key** (get it at [openrouter.ai/keys](https://openrouter.ai/keys)).
-    - Select your **Default Model ID**.
+1. **Get an API Key**: Visit [OpenRouter](https://openrouter.ai/keys) to create your API key.
+2. **Configure Extension**:
+   - Open the **New Chat** command in Raycast.
+   - Enter your **OpenRouter API Key** when prompted (or via `Cmd + Shift + ,`).
+   - Select your preferred **Default Model ID**.
 
 ## Recommended Models
 
-- **Free**: `meta-llama/llama-3.1-8b-instruct:free`
-- **Fast**: `openai/gpt-4o-mini`
-- **Powerful**: `anthropic/claude-3.5-sonnet`
+- **Free & Fast**: `meta-llama/llama-3.1-8b-instruct:free`
+- **Efficient**: `openai/gpt-4o-mini`
+- **State-of-the-Art**: `anthropic/claude-3.5-sonnet`
 
-## License
+---
 
-MIT
+*Note: This extension requires an active OpenRouter account and API key.*

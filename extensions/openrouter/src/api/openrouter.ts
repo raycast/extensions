@@ -3,19 +3,17 @@
 import { getPreferenceValues } from "@raycast/api";
 import { ChatPreferences } from "../types/preferences";
 import fetch from "node-fetch";
-import { NonStreamedToken, StreamedToken } from "../types/hugging-face";
+import { NonStreamedToken, StreamedToken } from "../types/ai";
 import { Question } from "../types/question";
-import { Model } from "../types/model";
 
 export async function generateStreamedResponse(
   questions: Question[],
   questionId: string,
   handleStreamingOutput: (output: string) => void,
-  model?: Model,
   abortSignal?: AbortSignal,
 ): Promise<string | false> {
   const preferences = getPreferenceValues<ChatPreferences>();
-  const modelId = (model?.model ?? preferences.defaultModel ?? "meta-llama/llama-3.1-8b-instruct:free").trim();
+  const modelId = (preferences.defaultModel ?? "meta-llama/llama-3.1-8b-instruct:free").trim();
 
   try {
     const lastIndex = questions.map((q) => q.id).indexOf(questionId);

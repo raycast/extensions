@@ -96,7 +96,6 @@ export default function AskQuestion({ conversationId }: ChatProps) {
         allQuestions,
         question.id,
         handleStreamingOutput,
-        undefined,
         abortController.signal,
       );
       if (response) {
