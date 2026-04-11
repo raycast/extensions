@@ -96,10 +96,10 @@ export default function AskQuestion({ conversationId }: ChatProps) {
         allQuestions,
         question.id,
         handleStreamingOutput,
-        abortController.signal,
-      );
-      if (response) {
-        await updateQuestion({ ...question, response, isStreaming: false });
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") return;
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      showToast({ style: Toast.Style.Failure, title: "Error", message: errorMessage });
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
