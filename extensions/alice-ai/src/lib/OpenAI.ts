@@ -75,7 +75,7 @@ export const calculateCost = (model: Model, input: number, output: number) => {
 
 export const isGeminiModel = (model: Model) => model.startsWith("gemini-");
 
-const providerPreferences = getPreferenceValues<{ apikey?: string; geminiApiKey?: string }>();
+const providerPreferences = getPreferenceValues<Preferences>();
 const openAIApiKey = providerPreferences.apikey?.trim();
 const geminiApiKey = providerPreferences.geminiApiKey?.trim();
 

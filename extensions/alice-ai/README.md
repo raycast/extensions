@@ -19,6 +19,7 @@ The extension now supports both OpenAI and Google Gemini models.
 3. Run `Select Action` and execute an action on selected text.
 
 Notes:
+
 - API keys are not required globally.
 - A key is required only when you use a model from that provider.
 
@@ -33,24 +34,31 @@ Notes:
 # 🎉 Features
 
 ### ⚡ Instant Results From Selected Text
+
 Run actions directly on your current selection in Raycast and get live-streamed answers without breaking focus.
 
 ### 🧩 Reusable AI Actions
+
 Build your own library of prompts as actions, edit them anytime, and keep your best workflows one shortcut away.
 
 ### 🧠 Multi-Model Flexibility
+
 Choose the right model for the job across OpenAI and Gemini, including fast, lightweight, and premium options.
 
 ### 📊 Transparent Usage and Cost
+
 Track input tokens, output tokens, total tokens, and estimated cost for every run.
 
 ### 🕘 Searchable History
+
 Revisit previous outputs, compare results, and copy what you need from past executions in seconds.
 
 ### ⭐ Favorites and Fast Access
+
 Pin your most-used actions, launch from menu bar, and integrate with Quicklinks for an even faster daily workflow.
 
 ### 🔄 Portable Action Library
+
 Export and import actions to back up your setup or share proven prompts with your team.
 
 # 🤖 Supported Models
