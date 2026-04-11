@@ -14,15 +14,18 @@ With `Create Object Record` command, effortlessly create records in any standard
 
 ## 🚀 Getting Started
 
-Get your API Keys from [twenty developer settings](https://twenty.com/settings/developers) , navigate to Raycast Command settings or try to access command which will open up view to provide your API key.
+Generate an API key from your Twenty workspace in `Settings -> Developers`, then open the Raycast extension settings and enter:
+
+- `API Key`: your Twenty API key
+- `Twenty Base URL`: leave the default `https://app.twenty.com` for hosted Twenty, or replace it with your self-hosted workspace URL such as `https://twenty.example.com`
+
+The extension always derives the REST base automatically, so users should enter the workspace URL, not a `/rest` endpoint.
 
 <table>
   <tr>
   <td><img src="https://github.com/user-attachments/assets/7787e53b-c08a-4491-a66f-9d738195a2af" alt="Twenty Api Token View" /></td>
   </tr>
 </table>
-
-if you are selfhost user navigate to `<self-host-url>/settings/developers`, once you have your key, go to Raycast Command Settings to provide your `selfhost api url` and `API key`. If you don't provide selfhost url, extension will assume [https://api.twenty.com](https://api.twenty.com) as your instance.
 
 <table>
   <tr>
