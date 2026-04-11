@@ -171,7 +171,7 @@ async function request<T>(
     if (res.ok) return json as T;
 
     // Handle specific error codes
-    const errorBody = json as ApiErrorBody;
+    const errorBody = json as unknown as ApiErrorBody;
 
     if (res.status === 429) {
       const retryAfter = res.headers.get("retry-after");
