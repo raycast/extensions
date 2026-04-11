@@ -16,7 +16,7 @@ import { checkIt2apiReady } from "./core/it2api";
 import { Session, activateSession, listSessions } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
 
-const TAGS_STORAGE_KEY = "iterm.session-tags";
+const TAGS_STORAGE_KEY = "iterm.session-tags.v2";
 
 interface Tab {
   windowIndex: number;
@@ -42,7 +42,7 @@ const groupByTab = (sessions: Session[]): Tab[] => {
 interface TagFormProps {
   session: Session;
   currentTag: string;
-  onSave: (sessionName: string, tag: string) => void;
+  onSave: (sessionId: string, tag: string) => void;
 }
 
 const TagForm = ({ session, currentTag, onSave }: TagFormProps) => {
@@ -50,12 +50,12 @@ const TagForm = ({ session, currentTag, onSave }: TagFormProps) => {
   const [tag, setTag] = useState(currentTag);
 
   const handleSave = ({ tag: submitted }: { tag: string }) => {
-    onSave(session.name, submitted.trim());
+    onSave(session.id, submitted.trim());
     pop();
   };
 
   const handleRemove = () => {
-    onSave(session.name, "");
+    onSave(session.id, "");
     pop();
   };
 
@@ -112,15 +112,15 @@ export default function Command() {
     }
   };
 
-  const saveTag = async (sessionName: string, tag: string) => {
-    const updated = { ...tags, [sessionName]: tag };
-    if (!tag) delete updated[sessionName];
+  const saveTag = async (sessionId: string, tag: string) => {
+    const updated = { ...tags, [sessionId]: tag };
+    if (!tag) delete updated[sessionId];
     setTags(updated);
     await LocalStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(updated));
   };
 
   const openTagForm = (session: Session) =>
-    push(<TagForm session={session} currentTag={tags[session.name] ?? ""} onSave={saveTag} />);
+    push(<TagForm session={session} currentTag={tags[session.id] ?? ""} onSave={saveTag} />);
 
   const [selectedWindow, setSelectedWindow] = useState("all");
 
@@ -155,7 +155,7 @@ export default function Command() {
           title={windowCount > 1 ? `Window ${tab.windowIndex} · Tab ${tab.tabId}` : `Tab ${tab.tabId}`}
         >
           {tab.sessions.map((session) => {
-            const tag = tags[session.name];
+            const tag = tags[session.id];
             return (
               <List.Item
                 key={session.id}

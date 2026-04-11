@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { IT2API_PATH } from "./it2api";
+import { IT2API_PATH, extendedPath } from "./it2api";
 
 export interface Session {
   name: string;
@@ -7,17 +7,6 @@ export interface Session {
   windowId: string;
   tabId: string;
 }
-
-const extendedPath = [
-  `${process.env.HOME}/.local/share/mise/shims`,
-  "/opt/homebrew/bin",
-  "/usr/local/bin",
-  "/usr/bin",
-  "/bin",
-  process.env.PATH ?? "",
-]
-  .filter(Boolean)
-  .join(":");
 
 const run = (args: string): string =>
   execSync(`"${IT2API_PATH}" ${args}`, {
@@ -46,6 +35,12 @@ export const listSessions = (): Session[] => {
 };
 
 export const activateSession = (sessionId: string) => run(`activate session ${sessionId}`);
+
+export const getFocusedSessionId = (): string | null => {
+  const focus = run("show-focus");
+  const match = focus.match(/Active session is: Session "[^"]*" id=([^\s]+)/);
+  return match ? match[1] : null;
+};
 
 export const listColorPresets = (): string[] =>
   run("list-color-presets")

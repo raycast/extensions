@@ -1,15 +1,15 @@
 import { Action, ActionPanel, Icon, List, closeMainWindow, popToRoot, showToast, Toast } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { isIt2apiAvailable } from "./core/it2api";
-import { getCurrentSessionProfile, listColorPresets, listSessions, setColorPreset } from "./core/it2api-runner";
+import { getCurrentSessionProfile, getFocusedSessionId, listColorPresets, setColorPreset } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
 
 const IT2API_HINT = "Enable Python API in iTerm2 → Preferences → General → Magic";
 
 const getFrontSessionProfile = (): string => {
-  const sessions = listSessions();
-  if (!sessions.length) return "Default";
-  return getCurrentSessionProfile(sessions[0].id);
+  const focusedId = getFocusedSessionId();
+  if (!focusedId) return "Default";
+  return getCurrentSessionProfile(focusedId);
 };
 
 export default function Command() {

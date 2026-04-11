@@ -8,7 +8,7 @@ export const isIt2apiAvailable = () => existsSync(IT2API_PATH);
 
 export type It2apiReadyResult = { ready: true } | { ready: false; reason: string };
 
-const extendedPath = [
+export const extendedPath = [
   `${process.env.HOME}/.local/share/mise/shims`,
   "/opt/homebrew/bin",
   "/usr/local/bin",
