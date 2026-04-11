@@ -1,6 +1,6 @@
 # Cursor Costs Changelog
 
-## [Add Auto and API Usage] - {PR_MERGE_DATE}
+## [Add Auto and API Usage] - 2026-04-11
 
 - Add auto and api usage information to the menu bar and list view
 
