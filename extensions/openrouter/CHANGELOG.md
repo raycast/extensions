@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2026-04-12
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Rebuilt extension to focus exclusively on OpenRouter support.
 - Added streaming responses for all models.
