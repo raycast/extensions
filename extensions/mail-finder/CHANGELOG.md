@@ -1,5 +1,9 @@
 # Mail Finder Changelog
 
+## [Backend Migration] - {PR_MERGE_DATE}
+
+- Migrate backend from Supabase to the real dedicated API at api.mail-finder.org 
+
 ## [Refactor & Bug Fixes] - {PR_MERGE_DATE}
 
 TL;DR
