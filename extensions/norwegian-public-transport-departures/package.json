@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "norwegian-public-transport-departures",
+  "title": "Norwegian Public Transport Departures",
+  "description": "Search for stops and see upcoming departures from public transport across Norway, powered by Entur api",
+  "icon": "extension-icon.png",
+  "author": "willbehn",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "fylke",
+      "title": "Fylke",
+      "description": "Filter stops to a specific Norwegian fylke, or show all of Norway",
+      "type": "dropdown",
+      "required": false,
+      "default": "Oslo",
+      "data": [
+        { "title": "All of Norway", "value": "all" },
+        { "title": "Oslo", "value": "Oslo" },
+        { "title": "Akershus", "value": "Akershus" },
+        { "title": "Østfold", "value": "Østfold" },
+        { "title": "Buskerud", "value": "Buskerud" },
+        { "title": "Innlandet", "value": "Innlandet" },
+        { "title": "Vestfold og Telemark", "value": "Vestfold og Telemark" },
+        { "title": "Agder", "value": "Agder" },
+        { "title": "Rogaland", "value": "Rogaland" },
+        { "title": "Vestland", "value": "Vestland" },
+        { "title": "Møre og Romsdal", "value": "Møre og Romsdal" },
+        { "title": "Trøndelag", "value": "Trøndelag" },
+        { "title": "Nordland", "value": "Nordland" },
+        { "title": "Troms og Finnmark", "value": "Troms og Finnmark" }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-stops",
+      "title": "Search Stops",
+      "description": "Search for a public transport stop and view upcoming departures",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
