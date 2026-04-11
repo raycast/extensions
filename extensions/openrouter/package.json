@@ -1,0 +1,65 @@
+{
+  "name": "openrouter",
+  "title": "OpenRouter",
+  "description": "Simple, powerful chat with any model via OpenRouter (GPT-4, Claude, Llama 3, etc.)",
+  "icon": "icon.png",
+  "author": "ragnor",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-question",
+      "title": "New Chat",
+      "subtitle": "OpenRouter",
+      "description": "Start a new chat with any OpenRouter model.",
+      "mode": "view"
+    },
+    {
+      "name": "conversations",
+      "title": "History",
+      "subtitle": "OpenRouter",
+      "description": "View and continue your previous conversations.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openrouterApiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenRouter API Key",
+      "description": "Get yours at https://openrouter.ai/keys"
+    },
+    {
+      "name": "defaultModel",
+      "type": "textfield",
+      "default": "meta-llama/llama-3.1-8b-instruct:free",
+      "required": true,
+      "title": "Default Model ID",
+      "description": "Example: meta-llama/llama-3.1-8b-instruct:free or openai/gpt-4o-mini"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.0.0",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.10",
+    "@types/react": "^18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
