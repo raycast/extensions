@@ -1,42 +1,13 @@
-import {
-  MenuBarExtra,
-  Icon,
-  open,
-  showToast,
-  Toast,
-  LocalStorage,
-} from "@raycast/api";
+import { MenuBarExtra, Icon, open, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { DocEntry, loadEntries, categoryIcon } from "./shared";
-
-const RECENT_KEY = "cocart-recent-docs";
-const MAX_RECENT = 8;
-
-interface RecentItem {
-  title: string;
-  url: string;
-  category: string;
-}
-
-async function getRecentItems(): Promise<RecentItem[]> {
-  const stored = await LocalStorage.getItem<string>(RECENT_KEY);
-  if (!stored) return [];
-  try {
-    return JSON.parse(stored);
-  } catch {
-    return [];
-  }
-}
-
-async function addRecentItem(item: RecentItem): Promise<void> {
-  const recent = await getRecentItems();
-  const filtered = recent.filter((r) => r.url !== item.url);
-  filtered.unshift(item);
-  await LocalStorage.setItem(
-    RECENT_KEY,
-    JSON.stringify(filtered.slice(0, MAX_RECENT)),
-  );
-}
+import {
+  DocEntry,
+  loadEntries,
+  categoryIcon,
+  addRecentItem,
+  getRecentItems,
+  RecentItem,
+} from "./shared";
 
 export default function CoCartMenuBar() {
   const [entries, setEntries] = useState<DocEntry[]>([]);
@@ -74,7 +45,12 @@ export default function CoCartMenuBar() {
     category: string;
   }) {
     const url = entry.url.replace(/\.md$/, "");
-    await addRecentItem({ title: entry.title, url, category: entry.category });
+    await addRecentItem({
+      title: entry.title,
+      url,
+      category: entry.category,
+      source: "docs",
+    });
     setRecentItems(await getRecentItems());
     await open(url);
   }
