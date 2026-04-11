@@ -39,8 +39,20 @@ export function createValidationsForRest(rest: DataModelWithFields["fields"]): a
         };
         break;
       }
-      case "PHONES":
+      case "PHONES": {
+        acc[`${field.name}__primaryPhoneCountryCode`] = (value) => {
+          if (value && !/^[A-Za-z]{2}$/.test(String(value).trim())) {
+            return `Invalid ${field.name}`;
+          }
+        };
+
+        acc[`${field.name}__primaryPhoneCallingCode`] = (value) => {
+          if (value && !/^\+\d+$/.test(String(value).trim())) {
+            return `Invalid ${field.name}`;
+          }
+        };
         break;
+      }
       case "DATE":
       case "DATE_TIME":
         break;
@@ -49,8 +61,21 @@ export function createValidationsForRest(rest: DataModelWithFields["fields"]): a
       case "NUMBER":
       case "NUMERIC":
         break;
-      case "CURRENCY":
+      case "CURRENCY": {
+        acc[`${field.name}__amount`] = (value) => {
+          const normalizedValue = String(value ?? "").trim();
+          if (normalizedValue && Number.isNaN(Number(normalizedValue))) {
+            return `Invalid ${field.name}`;
+          }
+        };
+
+        acc[`${field.name}__currencyCode`] = (value) => {
+          if (value && !/^[A-Za-z]{3}$/.test(String(value).trim())) {
+            return `Invalid ${field.name}`;
+          }
+        };
         break;
+      }
       case "RATING":
         break;
       case "SELECT":

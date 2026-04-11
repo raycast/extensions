@@ -4,6 +4,7 @@ import {
   Form,
   Icon,
   PopToRootType,
+  ItemProps,
   Toast,
   getPreferenceValues,
   popToRoot,
@@ -99,7 +100,7 @@ function CreateObjectRecordForm({
           {...itemProps[primary.name]}
         />
         {rest.map((field) => {
-          return <FieldComponent key={field.name} values={{ field, itemProps: itemProps[field.name] }} />;
+          return <FieldComponent key={field.id} field={field} itemProps={itemProps as Record<string, ItemProps>} />;
         })}
       </Form>
     </Fragment>
