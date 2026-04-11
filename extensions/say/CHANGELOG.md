@@ -2,10 +2,6 @@
 
 ## [Enhancement] - {PR_MERGE_DATE}
 
-- Add support for Windows
-
-## [Enhancement] - 2026-04-12
-
 - Add Windows support with `@litomore/win-say`
 
 ## [Maintenance] - 2026-02-04
