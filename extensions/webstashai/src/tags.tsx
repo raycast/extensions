@@ -70,6 +70,17 @@ function tagKindLabel(kind: TagKind): string {
 
 export default function BrowseTagsCommand() {
   const apiKey = getPreferenceValues<Preferences>().apiKey;
+  if (!isValidApiKey(apiKey)) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Invalid API Key"
+          description="Your API key must start with 'wsk_'. Open extension preferences to update it."
+          icon={Icon.ExclamationMark}
+        />
+      </List>
+    );
+  }
 
   const initialTags = getInitialTags();
 
@@ -91,18 +102,6 @@ export default function BrowseTagsCommand() {
   );
 
   const cacheLabel = getCacheAgeLabel();
-
-  if (!isValidApiKey(apiKey)) {
-    return (
-      <List>
-        <List.EmptyView
-          title="Invalid API Key"
-          description="Your API key must start with 'wsk_'. Open extension preferences to update it."
-          icon={Icon.ExclamationMark}
-        />
-      </List>
-    );
-  }
 
   const sections: { kind: TagKind; tags: TagIndexEntry[] }[] = data
     ? [

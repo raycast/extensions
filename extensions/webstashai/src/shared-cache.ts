@@ -112,7 +112,6 @@ export function getCacheAge(): number {
 /** Human-readable cache age string, or null if cache is fresh enough. */
 export function getCacheAgeLabel(): string | null {
   const ageMs = getCacheAge();
-  if (ageMs === Infinity) return "Never synced";
   if (ageMs < CACHE_STALE_THRESHOLD_MS) return null;
 
   const minutes = Math.floor(ageMs / 60_000);

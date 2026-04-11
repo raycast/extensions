@@ -62,18 +62,13 @@ export function getPageFavicon(url: string) {
  */
 export function formatDate(dateStr: string): string {
   const date = new Date(dateStr);
-  if (isNaN(date.getTime())) return dateStr;
   const now = new Date();
-
-  if (date.toDateString() === now.toDateString()) return "Today";
-
-  const yesterday = new Date(now);
-  yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return "Yesterday";
-
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  if (diffDays >= 2 && diffDays < 7) return `${diffDays}d ago`;
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) return `${diffDays}d ago`;
 
   const sameYear = date.getFullYear() === now.getFullYear();
   const month = date.toLocaleDateString("en-US", { month: "short" });

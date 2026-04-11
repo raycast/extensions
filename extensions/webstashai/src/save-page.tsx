@@ -115,7 +115,7 @@ function SavePageForm() {
   useEffect(() => {
     const url = itemProps.url.value ?? "";
     if (!url || !isValidUrl(url) || url === lastCheckedUrl.current) {
-      if (!url || !isValidUrl(url)) setDuplicate(null);
+      if (!url) setDuplicate(null);
       return;
     }
 

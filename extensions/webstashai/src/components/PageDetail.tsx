@@ -50,11 +50,10 @@ function buildDetailMarkdown(page: PageDetailResponse): string {
     parts.length === 0 ||
     (!page.summary_what && !page.summary_why && !page.summary_how)
   ) {
-    const fallback = `*Page is ${page.status}. Summary not yet available.*`;
     if (page.meta_og_image) {
-      return (parts[0] ?? fallback) + "\n\n" + fallback;
+      return parts[0] ?? `*Page is ${page.status}. Summary not yet available.*`;
     }
-    return fallback;
+    return `*Page is ${page.status}. Summary not yet available.*`;
   }
 
   return parts.join("\n\n");
@@ -73,7 +72,7 @@ function buildAllTags(page: PageDetailResponse): string[] {
   if (page.primary_tag) tags.push(page.primary_tag);
   if (page.secondary_tag) tags.push(page.secondary_tag);
   tags.push(...buildUserTags(page));
-  return [...new Set(tags)];
+  return tags;
 }
 
 export default function PageDetail({
@@ -107,41 +106,19 @@ export default function PageDetail({
   async function handleToggleFavorite() {
     if (!page) return;
     const newValue: 0 | 1 = page.is_favorite ? 0 : 1;
-    try {
-      await mutate(updatePage(pageId, { is_favorite: newValue }), {
-        optimisticUpdate: (current) =>
-          current ? { ...current, is_favorite: newValue } : current,
-      });
-    } catch (error) {
-      const handled = await handleApiError(error);
-      if (!handled) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: newValue
-            ? "Failed to add to favorites"
-            : "Failed to remove from favorites",
-        });
-      }
-    }
+    await mutate(updatePage(pageId, { is_favorite: newValue }), {
+      optimisticUpdate: (current) =>
+        current ? { ...current, is_favorite: newValue } : current,
+    });
   }
 
   async function handleTogglePin() {
     if (!page) return;
     const newValue: 0 | 1 = page.is_pinned ? 0 : 1;
-    try {
-      await mutate(updatePage(pageId, { is_pinned: newValue }), {
-        optimisticUpdate: (current) =>
-          current ? { ...current, is_pinned: newValue } : current,
-      });
-    } catch (error) {
-      const handled = await handleApiError(error);
-      if (!handled) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: newValue ? "Failed to pin page" : "Failed to unpin page",
-        });
-      }
-    }
+    await mutate(updatePage(pageId, { is_pinned: newValue }), {
+      optimisticUpdate: (current) =>
+        current ? { ...current, is_pinned: newValue } : current,
+    });
   }
 
   async function handleReindex() {

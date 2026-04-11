@@ -20,6 +20,9 @@ export default function HighlightsCommand() {
   const [urlFilter, setUrlFilter] = useState("");
 
   const apiKey = getPreferenceValues<Preferences>().apiKey;
+  if (!isValidApiKey(apiKey)) {
+    return <InvalidKeyView />;
+  }
 
   const { data, isLoading, pagination, mutate } = useCachedPromise(
     (url: string) => async (options: { cursor?: string }) => {
@@ -47,6 +50,7 @@ export default function HighlightsCommand() {
 
   const highlights = data ?? [];
 
+  // Extract unique page URLs from loaded highlights for the dropdown filter
   const availableUrls = useMemo(() => {
     const urls = new Map<string, string>();
     for (const h of highlights) {
@@ -56,8 +60,6 @@ export default function HighlightsCommand() {
     }
     return Array.from(urls.entries()).sort((a, b) => a[1].localeCompare(b[1]));
   }, [highlights]);
-
-  // Extract unique page URLs from loaded highlights for the dropdown filter
 
   const handleDelete = useCallback(
     async (highlightId: string) => {
@@ -91,10 +93,6 @@ export default function HighlightsCommand() {
     },
     [mutate],
   );
-
-  if (!isValidApiKey(apiKey)) {
-    return <InvalidKeyView />;
-  }
 
   return (
     <List
