@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { SUPABASE_URL } from "./supabase";
+import { API_BASE_URL } from "./config";
 import type { JobHistory, FundingEvent, EnrichedData } from "./types";
 
 // * Get API key from preferences
@@ -206,7 +206,7 @@ export async function enrichPerson(
 ): Promise<EnrichPersonResponse> {
   const apiKey = getApiKey();
 
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/spend-and-enrich-person`, {
+  const response = await fetch(`${API_BASE_URL}/functions/v1/spend-and-enrich-person`, {
     method: "POST",
     headers: {
       "X-API-Key": apiKey,
@@ -286,7 +286,7 @@ export async function searchPerson(domain: string, page: number = 1): Promise<Se
     },
   };
 
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/spend-and-search-person`, {
+  const response = await fetch(`${API_BASE_URL}/functions/v1/spend-and-search-person`, {
     method: "POST",
     headers: {
       "X-API-Key": apiKey,

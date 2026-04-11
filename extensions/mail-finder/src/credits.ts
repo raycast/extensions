@@ -1,4 +1,4 @@
-import { SUPABASE_URL } from "./supabase";
+import { API_BASE_URL } from "./config";
 import { getApiKey } from "./backend";
 
 // * Types
@@ -17,7 +17,7 @@ interface ErrorResponse {
 export async function fetchCredits(): Promise<number> {
   const apiKey = getApiKey();
 
-  const response = await fetch(`${SUPABASE_URL}/functions/v1/get-credits`, {
+  const response = await fetch(`${API_BASE_URL}/functions/v1/get-credits`, {
     method: "POST",
     headers: {
       "X-API-Key": apiKey,
