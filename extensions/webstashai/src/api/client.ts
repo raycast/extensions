@@ -109,12 +109,13 @@ async function request<T>(
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     // Link external signal to our controller
+    const onExternalAbort = () => controller.abort();
     if (options?.signal) {
       if (options.signal.aborted) {
         clearTimeout(timer);
         throw new Error("Request aborted");
       }
-      options.signal.addEventListener("abort", () => controller.abort(), {
+      options.signal.addEventListener("abort", onExternalAbort, {
         once: true,
       });
     }
@@ -140,6 +141,7 @@ async function request<T>(
       throw new Error("Network error — check your internet connection");
     } finally {
       clearTimeout(timer);
+      options?.signal?.removeEventListener("abort", onExternalAbort);
     }
 
     // Extract response headers
@@ -171,7 +173,7 @@ async function request<T>(
 
     if (res.status === 429) {
       const retryAfter = res.headers.get("retry-after");
-      if (retryAfter && attempt === 0) {
+      if (retryAfter && attempt < 2) {
         const delaySec = parseInt(retryAfter, 10) || 5;
         await new Promise((r) => setTimeout(r, delaySec * 1000));
         continue;

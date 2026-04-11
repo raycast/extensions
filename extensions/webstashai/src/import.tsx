@@ -38,10 +38,12 @@ function ImportForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [jobStatus, setJobStatus] = useState<ImportJobResponse | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const mountedRef = useRef(true);
 
   // Clean up polling on unmount
   useEffect(() => {
     return () => {
+      mountedRef.current = false;
       if (pollRef.current) clearInterval(pollRef.current);
     };
   }, []);
@@ -153,6 +155,7 @@ function ImportForm() {
   async function fetchJobStatus(jobId: string) {
     try {
       const job = await getImportJob(jobId, true);
+      if (!mountedRef.current) return;
       setJobStatus(job);
 
       if (job.status === "completed" || job.status === "failed") {

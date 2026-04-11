@@ -110,7 +110,7 @@ function SynthesizeForm() {
 
 function buildQuotaLabel(quota: QuotaInfo | null): string | null {
   if (!quota) return null;
-  if (quota.ai_limit) {
+  if (quota.ai_limit !== null && quota.ai_limit !== undefined) {
     return `${quota.ai_used} / ${quota.ai_limit} queries used`;
   }
   return `${quota.ai_used} queries used`;

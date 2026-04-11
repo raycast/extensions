@@ -31,9 +31,6 @@ export default function BrowseLibraryCommand() {
   const [domainFilter, setDomainFilter] = useState("");
 
   const apiKey = getPreferenceValues<Preferences>().apiKey;
-  if (!isValidApiKey(apiKey)) {
-    return <InvalidKeyView />;
-  }
 
   const { data, isLoading, pagination, mutate } = useCachedPromise(
     (status: StatusFilter, tag: string, domain: string) =>
@@ -104,6 +101,10 @@ export default function BrowseLibraryCommand() {
       [mutate],
     ),
   };
+
+  if (!isValidApiKey(apiKey)) {
+    return <InvalidKeyView />;
+  }
 
   // Extract unique tags and domains from current data for the filter dropdown
   const availableTags = getUniqueTags(data ?? []);
