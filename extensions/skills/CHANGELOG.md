@@ -1,6 +1,6 @@
 # Changelog
 
-## [Reduce Complexity] - {PR_MERGE_DATE}
+## [Reduce Complexity] - 2026-04-11
 
 - Remove test infrastructure (vitest, test stubs, all test files) that added maintenance burden without meaningful coverage
 - Inline over-abstracted `CommandStates` components back into command files
