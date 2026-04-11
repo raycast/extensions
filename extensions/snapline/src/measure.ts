@@ -5,7 +5,7 @@ export default async function command() {
   await closeMainWindow();
 
   try {
-    const preferences = await getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences>();
 
     const result = (await measureScreen(preferences.showCrosshair, preferences.edgeTolerance)) as unknown as
       | string
