@@ -7,7 +7,16 @@
   "author": "cocart_headless",
   "categories": [
     "Documentation",
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "cocart",
+    "headless",
+    "ecommerce",
+    "api",
+    "documentation",
+    "search"
   ],
   "license": "MIT",
   "commands": [
@@ -16,16 +25,58 @@
       "title": "Search CoCart Docs",
       "description": "Search through CoCart API documentation",
       "mode": "view"
+    },
+    {
+      "name": "browse-endpoints",
+      "title": "Browse API Endpoints",
+      "description": "Browse CoCart API endpoints by version and category",
+      "mode": "view"
+    },
+    {
+      "name": "search-hooks-filters",
+      "title": "Search Hooks & Filters",
+      "description": "Search CoCart action hooks, filters, and functions",
+      "mode": "view"
+    },
+    {
+      "name": "search-error-codes",
+      "title": "Search Error Codes",
+      "description": "Look up CoCart API error codes",
+      "mode": "view"
+    },
+    {
+      "name": "recent-docs",
+      "title": "Recent CoCart Docs",
+      "description": "View recently opened docs and quick access pages",
+      "mode": "view"
+    },
+    {
+      "name": "quick-links",
+      "title": "CoCart Quick Links",
+      "description": "Quick access to CoCart documentation, GitHub, and resources",
+      "mode": "view"
+    },
+    {
+      "name": "whats-new",
+      "title": "What's New in CoCart",
+      "description": "View latest updates and breaking changes",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "CoCart Docs Menu Bar",
+      "description": "Quick access to CoCart docs from the menu bar",
+      "mode": "menu-bar"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2"
+    "@raycast/api": "^1.104.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.14.0",
     "@types/react": "19.0.10",
-    "eslint": "^8.57.1",
+    "eslint": "^9.0.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
