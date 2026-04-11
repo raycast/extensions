@@ -34,7 +34,7 @@ export const isWindows = process.platform === "win32";
  * @returns The resolved path.
  */
 export const resolvePath = (input: string) =>
-  input.startsWith("~/") ? path.join(process.env.HOME || "", input.slice(2)) : input;
+  input.startsWith("~/") ? path.join(os.homedir(), input.slice(2)) : input;
 
 /**
  * Simplifies a file path by replacing the home directory with a tilde.

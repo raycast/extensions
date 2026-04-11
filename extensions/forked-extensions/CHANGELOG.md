@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Improvements] - 2026-04-12
+## [Improvements] - {PR_MERGE_DATE}
 
 - Optimize clone and fetch behavior with the "tree:0" partial clone filter, "--no-tags", and "upstream/main"-only tracking
 - Fix "Pull Changes" to update from "origin/main" instead of syncing "upstream/main"
