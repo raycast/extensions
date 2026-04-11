@@ -7,7 +7,7 @@
 - Replaced unchecked `as Collection` cast in the submit handler with a graceful failure toast
 - Guarded the same latent `.map` / `.length` call sites in the "Search Linkwarden" command
 
-## [Fix Potential Search Errors] - {PR_MERGE_DATE}
+## [Fix Potential Search Errors] - 2026-03-23
 
 - Fixed "Bad Request" error caused by sending empty `collectionId` to the API
 - Fixed search text not being URL-encoded, causing malformed requests with special characters
