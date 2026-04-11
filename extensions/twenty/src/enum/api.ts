@@ -1,7 +1,6 @@
 import { Image, Keyboard, Toast } from "@raycast/api";
 
 export enum Api {
-  URL = "https://api-demo.twenty.com/rest",
   KEY = "Authorization",
   USER_GUIDE = "https://twenty.com",
 }
