@@ -16,13 +16,13 @@ function departureColor(dep: Departure): Color {
   return Color.Green;
 }
 
-function departureAccessories(dep: Departure) {
+function departureAccessories(dep: Departure): List.Item.Accessory[] {
   const countdown = formatCountdown(dep.expectedDepartureTime);
   const scheduled = formatTime(dep.aimedDepartureTime);
   const expected = formatTime(dep.expectedDepartureTime);
   const delayed = scheduled !== expected && !dep.cancellation;
 
-  const accessories = [];
+  const accessories: List.Item.Accessory[] = [];
 
   if (dep.quay?.publicCode) {
     accessories.push({ tag: { value: `Platform ${dep.quay.publicCode}`, color: Color.Blue } });

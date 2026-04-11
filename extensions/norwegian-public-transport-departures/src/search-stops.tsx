@@ -3,12 +3,8 @@ import { useEffect, useState } from "react";
 import { searchStops, StopPlace } from "./api";
 import { DeparturesView } from "./departures";
 
-interface Preferences {
-  fylke: string;
-}
-
 export default function SearchStops() {
-  const { fylke } = getPreferenceValues<Preferences>();
+  const { fylke } = getPreferenceValues<Preferences.SearchStops>();
   const [query, setQuery] = useState("");
   const [stops, setStops] = useState<StopPlace[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,17 +12,18 @@ export default function SearchStops() {
   useEffect(() => {
     if (!query.trim()) {
       setStops([]);
+      setIsLoading(false);
       return;
     }
 
-    let cancelled = false;
+    const controller = new AbortController();
     const timeout = setTimeout(async () => {
       setIsLoading(true);
       try {
         const results = await searchStops(query, fylke);
-        if (!cancelled) setStops(results);
+        if (!controller.signal.aborted) setStops(results);
       } catch (err) {
-        if (!cancelled) {
+        if (!controller.signal.aborted) {
           await showToast({
             style: Toast.Style.Failure,
             title: "Search failed",
@@ -34,16 +31,16 @@ export default function SearchStops() {
           });
         }
       } finally {
-        if (!cancelled) setIsLoading(false);
+        if (!controller.signal.aborted) setIsLoading(false);
       }
     }, 300);
 
-    //cleanup hvis tast trykkes på
     return () => {
-      cancelled = true;
+      controller.abort();
       clearTimeout(timeout);
+      setIsLoading(false);
     };
-  }, [query]);
+  }, [query, fylke]);
 
   const placeholder =
     fylke === "all"

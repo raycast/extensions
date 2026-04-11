@@ -32,7 +32,7 @@ export function transportLabel(mode: string): string {
 
 export function formatTime(isoString: string): string {
   const date = new Date(isoString);
-  return date.toLocaleTimeString("no-NO", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
 export function minutesUntil(isoString: string): number {
@@ -42,7 +42,7 @@ export function minutesUntil(isoString: string): number {
 
 export function formatCountdown(isoString: string): string {
   const mins = minutesUntil(isoString);
-  if (mins <= 0) return "nå";
+  if (mins <= 0) return "now";
   if (mins === 1) return "1 min";
   return `${mins} min`;
 }
