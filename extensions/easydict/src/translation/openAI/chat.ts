@@ -35,7 +35,7 @@ type TokenLimitParams = MaxTokensParams | MaxCompletionTokensParams;
  * Determines the appropriate token limit parameter based on endpoint and model.
  */
 function getTokenLimitParams(endpoint: string, model: string): TokenLimitParams {
-  const isKnownEndpoint = KNOWN_ENDPOINTS.includes(endpoint);
+  const isKnownEndpoint = KNOWN_ENDPOINTS.some((knownEndpoint) => endpoint.startsWith(knownEndpoint));
   const isReasoningModel = REASONING_MODEL_PATTERN.test(model);
   const forceMaxCompletionTokens = AppKeyStore.forceMaxCompletionTokens;
   const useMaxCompletionTokens = forceMaxCompletionTokens || (isKnownEndpoint && isReasoningModel);
