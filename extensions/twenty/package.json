@@ -34,12 +34,12 @@
     },
     {
       "name": "url",
-      "description": "Enter your self-host API URL (Optional)",
+      "description": "Enter the Twenty workspace URL used for onboarding and API requests.",
       "type": "textfield",
-      "title": "Self Host API URL",
+      "title": "Twenty Base URL",
       "required": false,
-      "default": "https://api.twenty.com",
-      "placeholder": "https://api.twenty.com (default)"
+      "default": "https://app.twenty.com",
+      "placeholder": "https://app.twenty.com or https://twenty.example.com"
     },
     {
       "name": "object_creation_form_behaviour",
@@ -63,6 +63,7 @@
     "@types/react": "19.0.10",
     "eslint": "^9.39.1",
     "prettier": "^3.6.2",
+    "vitest": "^3.2.4",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -70,7 +71,9 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "platforms": [
     "macOS",
