@@ -12,13 +12,14 @@ import {
   Toast,
 } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { exec, execSync } from "child_process";
+import { exec } from "child_process";
 import { readdirSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { useEffect, useMemo, useState } from "react";
 import { promisify } from "util";
-import { IT2API_PATH, isIt2apiAvailable, warnIt2apiMissing } from "./core/it2api";
+import { isIt2apiAvailable, warnIt2apiMissing } from "./core/it2api";
+import { getFocusedSessionId, sendText, splitPane } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
 
 const execAsync = promisify(exec);
@@ -122,14 +123,10 @@ const makeSplitScript = (path: string, direction: "horizontally" | "vertically")
 };
 
 const splitWithIt2api = (path: string, vertical: boolean) => {
-  const frontSession = execSync(`"${IT2API_PATH}" list-sessions 2>/dev/null | head -1`, { encoding: "utf-8" })
-    .trim()
-    .match(/id=([^\s]+)/)?.[1];
-  if (!frontSession) throw new Error("No active session found");
-  const newSessionId = execSync(`"${IT2API_PATH}" split-pane ${vertical ? "--vertical" : ""} ${frontSession}`, {
-    encoding: "utf-8",
-  }).trim();
-  execSync(`"${IT2API_PATH}" send-text ${newSessionId} "cd \\"${path}\\"\\n"`, { encoding: "utf-8" });
+  const focusedId = getFocusedSessionId();
+  if (!focusedId) throw new Error("No active session found");
+  const newSessionId = splitPane(focusedId, vertical);
+  sendText(newSessionId, `cd "${path}"\n`);
 };
 
 export default function Command() {

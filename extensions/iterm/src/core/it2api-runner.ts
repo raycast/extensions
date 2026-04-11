@@ -57,4 +57,4 @@ export const splitPane = (sessionId: string, vertical = false): string =>
   run(`split-pane ${vertical ? "--vertical" : ""} ${sessionId}`).trim();
 
 export const sendText = (sessionId: string, text: string) =>
-  run(`send-text ${sessionId} "${text.replace(/"/g, '\\"').replace(/\\/g, "\\\\")}"`);
+  run(`send-text ${sessionId} "${text.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`);
