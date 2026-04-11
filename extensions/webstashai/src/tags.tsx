@@ -69,7 +69,7 @@ function tagKindLabel(kind: TagKind): string {
 // ── Main command ────────────────────────────────────────────────
 
 export default function BrowseTagsCommand() {
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return (
       <List>

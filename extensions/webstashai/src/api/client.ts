@@ -38,10 +38,6 @@ import type {
   UpdatePageFields,
 } from "../types";
 
-interface Preferences {
-  apiKey: string;
-}
-
 let lastRequestId: string | null = null;
 let lastQuota: QuotaInfo | null = null;
 
@@ -372,7 +368,7 @@ export function mergeTag(
   dryRun = false,
   signal?: AbortSignal,
 ) {
-  return request<TagRenameResult>("POST", "/tags/rename", {
+  return request<TagRenameResult>("POST", "/tags/merge", {
     body,
     query: dryRun ? { dry_run: "true" } : undefined,
     signal,

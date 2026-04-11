@@ -26,7 +26,7 @@ interface ImportFormValues {
 }
 
 export default function ImportCommand() {
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return <InvalidKeyView />;
   }

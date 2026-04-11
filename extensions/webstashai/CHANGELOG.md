@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 — 2026-04-11
+## [Initial Release] - {PR_MERGE_DATE}
 
 Initial release of the WebStashAI Raycast extension.
 

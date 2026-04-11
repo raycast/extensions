@@ -14,17 +14,13 @@ import { isValidApiKey } from "./helpers/utils";
 import PageListItem from "./components/PageListItem";
 import type { SearchResult } from "./types";
 
-interface Arguments {
-  query?: string;
-}
-
 export default function SearchPagesCommand(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.SearchPages }>,
 ) {
   const initialQuery = props.arguments?.query ?? "";
   const [searchText, setSearchText] = useState(initialQuery);
 
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   const keyValid = isValidApiKey(apiKey);
 
   const { data, isLoading } = useCachedPromise(

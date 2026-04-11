@@ -28,7 +28,7 @@ interface SaveFormValues {
 }
 
 export default function SavePageCommand() {
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return <InvalidKeyView />;
   }

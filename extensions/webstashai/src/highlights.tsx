@@ -19,7 +19,7 @@ import type { HighlightWithPage } from "./types";
 export default function HighlightsCommand() {
   const [urlFilter, setUrlFilter] = useState("");
 
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return <InvalidKeyView />;
   }

@@ -30,7 +30,7 @@ export default function BrowseLibraryCommand() {
   const [tagFilter, setTagFilter] = useState("");
   const [domainFilter, setDomainFilter] = useState("");
 
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return <InvalidKeyView />;
   }

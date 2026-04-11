@@ -20,7 +20,7 @@ import {
 } from "./shared-cache";
 
 export default function BrowseCollectionsCommand() {
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return (
       <List>

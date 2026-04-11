@@ -22,7 +22,7 @@ interface StatsData {
 }
 
 export default function LibraryStatsCommand() {
-  const apiKey = getPreferenceValues<{ apiKey: string }>().apiKey;
+  const apiKey = getPreferenceValues<Preferences>().apiKey;
   if (!isValidApiKey(apiKey)) {
     return (
       <Detail markdown="## Invalid API Key\n\nYour API key must start with `wsk_`. Open extension preferences to update it." />
