@@ -31,7 +31,10 @@ export interface Departure {
   cancellation: boolean;
 }
 
-export async function searchStops(query: string, county: string): Promise<StopPlace[]> {
+export async function searchStops(
+  query: string,
+  county: string,
+): Promise<StopPlace[]> {
   if (!query.trim()) return [];
 
   const params = new URLSearchParams({
@@ -46,7 +49,16 @@ export async function searchStops(query: string, county: string): Promise<StopPl
 
   if (!res.ok) throw new Error(`Geocoder error: ${res.status}`);
 
-  const data = (await res.json()) as { features?: Array<{ properties: { id: string; name: string; locality?: string; county?: string } }> };
+  const data = (await res.json()) as {
+    features?: Array<{
+      properties: {
+        id: string;
+        name: string;
+        locality?: string;
+        county?: string;
+      };
+    }>;
+  };
 
   return (data.features ?? [])
     .filter((f) => {

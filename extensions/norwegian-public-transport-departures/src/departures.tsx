@@ -1,7 +1,20 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { getDepartures, Departure } from "./api";
-import { formatTime, formatCountdown, minutesUntil, transportIcon } from "./utils";
+import {
+  formatTime,
+  formatCountdown,
+  minutesUntil,
+  transportIcon,
+} from "./utils";
 
 interface Props {
   stopId: string;
@@ -25,7 +38,9 @@ function departureAccessories(dep: Departure): List.Item.Accessory[] {
   const accessories: List.Item.Accessory[] = [];
 
   if (dep.quay?.publicCode) {
-    accessories.push({ tag: { value: `Platform ${dep.quay.publicCode}`, color: Color.Blue } });
+    accessories.push({
+      tag: { value: `Platform ${dep.quay.publicCode}`, color: Color.Blue },
+    });
   }
 
   if (dep.cancellation) {
@@ -85,7 +100,10 @@ export function DeparturesView({ stopId, stopName }: Props) {
       searchBarPlaceholder="Filter by line or destination..."
     >
       {departures.length === 0 && !isLoading ? (
-        <List.EmptyView title="No departures" description="No departures in the next hour." />
+        <List.EmptyView
+          title="No departures"
+          description="No departures in the next hour."
+        />
       ) : (
         Array.from(grouped.entries()).map(([key, deps]) => {
           const first = deps[0];
@@ -108,7 +126,11 @@ export function DeparturesView({ stopId, stopName }: Props) {
               accessories={departureAccessories(first)}
               actions={
                 <ActionPanel>
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={load} />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    onAction={load}
+                  />
                 </ActionPanel>
               }
             />

@@ -32,7 +32,10 @@ export function transportLabel(mode: string): string {
 
 export function formatTime(isoString: string): string {
   const date = new Date(isoString);
-  return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+  return date.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function minutesUntil(isoString: string): number {
@@ -48,7 +51,9 @@ export function formatCountdown(isoString: string): string {
 }
 
 export function groupByLine(
-  departures: Array<{ serviceJourney: { line: { publicCode: string; transportMode: string } } }>,
+  departures: Array<{
+    serviceJourney: { line: { publicCode: string; transportMode: string } };
+  }>,
 ) {
   const groups = new Map<string, typeof departures>();
   for (const dep of departures) {

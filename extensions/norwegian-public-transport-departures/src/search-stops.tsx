@@ -1,4 +1,12 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { searchStops, StopPlace } from "./api";
 import { DeparturesView } from "./departures";
@@ -72,9 +80,10 @@ export default function SearchStops() {
                 <Action.Push
                   title="Show Departures"
                   icon={Icon.Clock}
-                  target={<DeparturesView stopId={stop.id} stopName={stop.name} />}
+                  target={
+                    <DeparturesView stopId={stop.id} stopName={stop.name} />
+                  }
                 />
-
               </ActionPanel>
             }
           />
