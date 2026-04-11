@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "webstashai",
+  "title": "WebStashAI",
+  "description": "Search, save, and manage your WebStash bookmark library",
+  "icon": "extension-icon.png",
+  "author": "webstashai",
+  "categories": ["Productivity", "Web"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-pages",
+      "title": "Search Pages",
+      "subtitle": "WebStash",
+      "description": "Search your WebStash library with hybrid semantic + keyword search",
+      "mode": "view",
+      "keywords": ["bookmarks", "search", "find", "saved pages", "library"],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "browse-library",
+      "title": "Browse Library",
+      "subtitle": "WebStash",
+      "description": "Browse all your saved pages with filters for status and tags",
+      "mode": "view",
+      "keywords": ["bookmarks", "browse", "library", "pages", "list", "saved"]
+    },
+    {
+      "name": "save-page",
+      "title": "Save Page",
+      "subtitle": "WebStash",
+      "description": "Save a URL to your WebStash library",
+      "mode": "view",
+      "keywords": ["bookmark", "save", "add", "url", "page", "clip"]
+    },
+    {
+      "name": "highlights",
+      "title": "View Highlights",
+      "subtitle": "WebStash",
+      "description": "Browse and search all your saved highlights across pages",
+      "mode": "view",
+      "keywords": ["highlights", "passages", "annotations", "quotes", "notes", "excerpts"]
+    },
+    {
+      "name": "tags",
+      "title": "Browse Tags",
+      "subtitle": "WebStash",
+      "description": "Browse, rename, and merge tags across your library",
+      "mode": "view",
+      "keywords": ["tags", "categories", "topics", "labels", "organize", "rename", "merge"]
+    },
+    {
+      "name": "collections",
+      "title": "Browse Collections",
+      "subtitle": "WebStash",
+      "description": "Browse auto-generated topic collections from your library",
+      "mode": "view",
+      "keywords": ["collections", "topics", "groups", "categories", "browse"]
+    },
+    {
+      "name": "stats",
+      "title": "Library Stats",
+      "subtitle": "WebStash",
+      "description": "View library statistics, quota usage, and top domains/tags",
+      "mode": "view",
+      "keywords": ["stats", "statistics", "usage", "quota", "analytics", "dashboard", "metrics"]
+    },
+    {
+      "name": "synthesize",
+      "title": "Synthesize",
+      "subtitle": "WebStash",
+      "description": "Generate a structured briefing across your saved pages using AI",
+      "mode": "view",
+      "keywords": ["synthesize", "briefing", "summary", "AI", "research", "insights", "topic"]
+    },
+    {
+      "name": "import",
+      "title": "Import Bookmarks",
+      "subtitle": "WebStash",
+      "description": "Import bookmarks from HTML/CSV files or a list of URLs",
+      "mode": "view",
+      "keywords": ["import", "bookmarks", "upload", "csv", "html", "migrate", "bulk"]
+    },
+    {
+      "name": "background-sync",
+      "title": "Background Sync",
+      "subtitle": "WebStash",
+      "description": "Refresh cached library data in the background",
+      "mode": "no-view",
+      "interval": "30m",
+      "keywords": ["sync", "refresh", "cache", "background"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Your WebStash API key (starts with wsk_)",
+      "placeholder": "wsk_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
