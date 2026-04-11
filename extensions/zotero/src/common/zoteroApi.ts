@@ -136,7 +136,7 @@ ORDER BY "index" ASC
 `;
 
 const ALL_COLLECTIONS_SQL = `
-SELECT  collections.collectionName AS name
+SELECT DISTINCT collections.collectionName AS name
     FROM collections
 `;
 
