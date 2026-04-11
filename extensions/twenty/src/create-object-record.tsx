@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
-import { randomUUID } from "crypto";
 
 import twenty from "./services/TwentySDK";
 import { ObjectIcons } from "./enum/icons";
@@ -75,7 +74,7 @@ export default function CreateObjectRecord() {
                 )
               }
               icon={icon ? (ObjectIcons[icon] ?? Icon.BulletPoints) : Icon.BulletPoints}
-              key={randomUUID().toString()}
+              key={id}
             />
           );
         })}
@@ -117,7 +116,7 @@ export default function CreateObjectRecord() {
                   <></>
                 )
               }
-              key={randomUUID().toString()}
+              key={id}
             />
           );
         })}

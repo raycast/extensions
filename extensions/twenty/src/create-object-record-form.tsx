@@ -40,7 +40,14 @@ function CreateObjectRecordForm({
       });
 
       const formattedValues = formatValues(values, objectRecordMetadata);
-      const isSuccess = await twenty.createObjectRecord(namePlural, formattedValues);
+
+      let isSuccess = false;
+      try {
+        isSuccess = await twenty.createObjectRecord(namePlural, formattedValues);
+      } catch {
+        await showToast(FailureToast);
+        return;
+      }
 
       if (isSuccess) {
         handleClearFormState();

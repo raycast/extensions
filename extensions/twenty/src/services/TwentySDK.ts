@@ -1,98 +1,35 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { getPreferenceValues } from "@raycast/api";
-import { Api } from "../enum/api";
-import fetch from "node-fetch";
-import { getActiveDataModelsSchema } from "./zod/schema/dataModelSchema";
-import { getDataModelWithFieldsSchema } from "./zod/schema/recordFieldSchema";
-import { removeTrailingSlash } from "../helper/removeTrailingSlash";
-import { isUrl } from "../helper/isUrl";
+import { createTwentyClient } from "./client";
+import { getTwentyConfig } from "./preferences";
+import { createMetadataService } from "./metadata";
+import { createRecordsService } from "./records";
 
-class TwentySDK {
-  private url!: string;
-  private token!: string;
+export const buildServices = () => {
+  const client = createTwentyClient(getTwentyConfig());
 
-  constructor() {
-    const { token, url: providedUrl } = getPreferenceValues<Preferences>();
-    const url = removeTrailingSlash(providedUrl);
-    this.token = `Bearer ${token}`;
-    this.url = isUrl(url) ? `${url}/rest` : `https://api.twenty.com/rest`;
-  }
+  return {
+    metadata: createMetadataService(client),
+    records: createRecordsService(client),
+  };
+};
 
-  async getActiveDataModels() {
+const services = buildServices();
+
+const getErrorMessage = (error: unknown) => (error instanceof Error ? error.message : String(error));
+
+const withLegacyMetadataFailureContract =
+  <TArgs extends unknown[], TResult>(fn: (...args: TArgs) => Promise<TResult>) =>
+  async (...args: TArgs): Promise<TResult | string> => {
     try {
-      const response = await fetch(this.url + "/metadata/objects", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          [Api.KEY]: this.token,
-        },
-      });
-
-      if (response.ok) {
-        const rawData = await response.json();
-        const data = getActiveDataModelsSchema.parse(rawData);
-        const activeDataModel = data.data.objects.filter((model) => !model.isSystem && model.isActive);
-        return activeDataModel;
-      }
-
-      return response.statusText;
-    } catch (err) {
-      return err instanceof Error ? err.message : String(err);
+      return await fn(...args);
+    } catch (error) {
+      return getErrorMessage(error);
     }
-  }
+  };
 
-  async getRecordFieldsForDataModel(id: string) {
-    try {
-      const response = await fetch(this.url + `/metadata/objects/${id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          [Api.KEY]: this.token,
-        },
-      });
+const twenty = {
+  getActiveDataModels: withLegacyMetadataFailureContract(services.metadata.getActiveDataModels),
+  getRecordFieldsForDataModel: withLegacyMetadataFailureContract(services.metadata.getRecordFieldsForDataModel),
+  createObjectRecord: services.records.createObjectRecord,
+};
 
-      if (response.ok) {
-        const rawData = await response.json();
-        const objectRecordWithFieldsMetadata = getDataModelWithFieldsSchema.parse(rawData);
-        const excludeFieldsWithName = ["updatedAt", "deletedAt"];
-        objectRecordWithFieldsMetadata.data.object.fields = objectRecordWithFieldsMetadata.data.object.fields
-          .filter((object) => !object.isSystem)
-          .filter((object) => object.isActive)
-          .filter((object) => object.type !== "RELATION" && object.type !== "ACTOR") // handle relation later
-          .filter((object) => !excludeFieldsWithName.includes(object.name));
-
-        return objectRecordWithFieldsMetadata.data.object;
-      }
-
-      return response.statusText;
-    } catch (err) {
-      return err instanceof Error ? err.message : String(err);
-    }
-  }
-
-  async createObjectRecord(namePlural: string, bodyParam: any) {
-    try {
-      const response = await fetch(this.url + `/${namePlural}`, {
-        method: "POST",
-        headers: {
-          "Content-type": "application/json",
-          [Api.KEY]: this.token,
-        },
-        body: JSON.stringify({
-          ...bodyParam,
-        }),
-      });
-
-      if (response.ok) {
-        return true;
-      }
-
-      return false;
-    } catch (err) {
-      throw new Error(err as string);
-    }
-  }
-}
-
-const twenty = new TwentySDK();
 export default twenty;
