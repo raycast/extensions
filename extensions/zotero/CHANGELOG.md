@@ -3,12 +3,6 @@
 ## [Features] - {PR_MERGE_DATE}
 
 - Add "Copy PDF Path" action (`⌘⇧,`) to copy the full filesystem path of the attached PDF to the clipboard
-- Add "Wrap PDF Path in Quotes" preference to wrap the path in double-quotes for easier terminal pasting
-
-
-## [Features] - 2026-04-11
-
-- Add "Copy PDF Path" action to copy the file path of a PDF attachment to clipboard
 
 ## [Features] - 2026-04-05
 
