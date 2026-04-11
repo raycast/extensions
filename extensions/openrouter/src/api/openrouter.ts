@@ -1,8 +1,6 @@
 // Documentation: https://openrouter.ai/docs
 
 import { getPreferenceValues } from "@raycast/api";
-import { ChatPreferences } from "../types/preferences";
-import fetch from "node-fetch";
 import { NonStreamedToken, StreamedToken } from "../types/ai";
 import { Question } from "../types/question";
 
@@ -12,7 +10,7 @@ export async function generateStreamedResponse(
   handleStreamingOutput: (output: string) => void,
   abortSignal?: AbortSignal,
 ): Promise<string | false> {
-  const preferences = getPreferenceValues<ChatPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const modelId = (preferences.defaultModel ?? "meta-llama/llama-3.1-8b-instruct:free").trim();
 
   try {
@@ -98,7 +96,7 @@ export async function generateStreamedResponse(
 }
 
 export async function generateResponse(prompt: string): Promise<string | false> {
-  const preferences = getPreferenceValues<ChatPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const modelId = (preferences.defaultModel ?? "meta-llama/llama-3.1-8b-instruct:free").trim();
   const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
     method: "POST",

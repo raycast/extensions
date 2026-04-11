@@ -18,7 +18,6 @@ import { useQuestions } from "./hooks/useQuestions";
 import { v4 as uuidv4 } from "uuid";
 import { Question } from "./types/question";
 import { isValidQuestionPrompt } from "./utils/chat";
-import { ChatPreferences } from "./types/preferences";
 
 interface ChatProps {
   conversationId?: string;
@@ -26,7 +25,7 @@ interface ChatProps {
 
 export default function AskQuestion({ conversationId }: ChatProps) {
   const { push } = useNavigation();
-  const preferences = getPreferenceValues<ChatPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   const isConfigured = useMemo(() => {
     return !!preferences.openrouterApiKey && !!preferences.defaultModel;
@@ -96,12 +95,15 @@ export default function AskQuestion({ conversationId }: ChatProps) {
         allQuestions,
         question.id,
         handleStreamingOutput,
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") return;
-      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-      showToast({ style: Toast.Style.Failure, title: "Error", message: errorMessage });
+        abortController.signal,
+      );
+      if (response) {
+        await updateQuestion({ ...question, response, isStreaming: false });
       }
     } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return; // Silent
+      }
       const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
       showToast({ style: Toast.Style.Failure, title: "Error", message: errorMessage });
     } finally {

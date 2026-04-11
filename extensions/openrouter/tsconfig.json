@@ -13,6 +13,6 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["node", "react", "react-dom"]
+    "types": ["node", "react"]
   }
 }
