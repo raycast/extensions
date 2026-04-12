@@ -28,6 +28,8 @@ import { useSyntheticAccounts } from "./synthetic/fetcher";
 import { getSyntheticAccessory } from "./synthetic/renderer";
 import { useZaiAccounts } from "./zai/fetcher";
 import { getZaiAccessory } from "./zai/renderer";
+import { useMiniMaxUsage } from "./minimax/fetcher";
+import { getMiniMaxAccessory } from "./minimax/renderer";
 
 interface MenuBarAgent {
   id: AgentId;
@@ -63,6 +65,7 @@ export default function MenuBarCommand() {
   const isSyntheticVisible = Boolean(prefs.showSynthetic);
   const isAntigravityVisible = Boolean(prefs.showAntigravity);
   const isZaiVisible = Boolean(prefs.showZai);
+  const isMinimaxVisible = Boolean(prefs.showMinimax);
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
@@ -73,6 +76,7 @@ export default function MenuBarCommand() {
   const syntheticAccounts = useSyntheticAccounts(isSyntheticVisible);
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiAccounts = useZaiAccounts(isZaiVisible);
+  const minimaxState = useMiniMaxUsage(isMinimaxVisible);
 
   // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
@@ -122,6 +126,15 @@ export default function MenuBarCommand() {
         accessory: getAntigravityAccessory(antigravityState.usage, antigravityState.error, antigravityState.isLoading),
         revalidate: antigravityState.revalidate,
       },
+      {
+        id: "minimax",
+        name: "MiniMax",
+        icon: "minimax-icon.png",
+        visible: isMinimaxVisible,
+        isLoading: minimaxState.isLoading,
+        accessory: getMiniMaxAccessory(minimaxState.usage, minimaxState.error, minimaxState.isLoading),
+        revalidate: minimaxState.revalidate,
+      },
     ],
     [
       isAmpVisible,
@@ -149,6 +162,10 @@ export default function MenuBarCommand() {
       antigravityState.usage,
       antigravityState.error,
       antigravityState.revalidate,
+      minimaxState.isLoading,
+      minimaxState.usage,
+      minimaxState.error,
+      minimaxState.revalidate,
     ],
   );
 
@@ -223,7 +240,7 @@ export default function MenuBarCommand() {
 
   const visibleAgents = useMemo(
     () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
-    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents, minimaxState],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 

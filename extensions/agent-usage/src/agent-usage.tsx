@@ -42,6 +42,9 @@ import type { SyntheticError, SyntheticUsage } from "./synthetic/types";
 import { useZaiUsage, useZaiAccounts } from "./zai/fetcher";
 import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer";
 import type { ZaiError, ZaiUsage } from "./zai/types";
+import { useMiniMaxUsage } from "./minimax/fetcher";
+import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer";
+import type { MiniMaxError, MiniMaxUsage } from "./minimax/types";
 import { ManageAccountsForm } from "./accounts/ManageAccountsForm";
 import type { AccountUsageState } from "./accounts/types";
 
@@ -68,6 +71,7 @@ interface AgentUsageById {
   synthetic: SyntheticUsage;
   antigravity: AntigravityUsage;
   zai: ZaiUsage;
+  minimax: MiniMaxUsage;
 }
 
 interface AgentErrorById {
@@ -80,6 +84,7 @@ interface AgentErrorById {
   synthetic: SyntheticError;
   antigravity: AntigravityError;
   zai: ZaiError;
+  minimax: MiniMaxError;
 }
 
 type AgentRegistry = {
@@ -231,6 +236,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     getAccessory: getZaiAccessory,
     formatUsageText: formatZaiUsageText,
   },
+  minimax: {
+    id: "minimax",
+    name: "MiniMax",
+    icon: "minimax-icon.png",
+    description: "MiniMax AI Coding Assistant",
+    isSupported: true,
+    settingsUrl: "https://www.minimax.io",
+    useUsage: useMiniMaxUsage,
+    renderDetail: renderMiniMaxDetail,
+    getAccessory: getMiniMaxAccessory,
+    formatUsageText: formatMiniMaxUsageText,
+  },
 };
 
 const AGENT_IDS = Object.keys(AGENT_REGISTRY) as AgentId[];
@@ -302,6 +319,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
   const antigravityState = AGENT_REGISTRY.antigravity.useUsage(Boolean(prefs.showAntigravity));
+  const minimaxState = AGENT_REGISTRY.minimax.useUsage(Boolean(prefs.showMinimax));
 
   // Multi-account providers
   const codexAccountStates = useCodexAccounts(Boolean(prefs.showCodex));
@@ -309,12 +327,13 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const syntheticAccountStates = useSyntheticAccounts(Boolean(prefs.showSynthetic));
   const zaiAccountStates = useZaiAccounts(Boolean(prefs.showZai));
 
-  const agentViews: Omit<Record<AgentId, AgentView>, "codex" | "kimi" | "synthetic" | "zai"> = {
+  const agentViews: Omit<Record<AgentId, AgentView>, "codex" | "kimi" | "synthetic" | "zai" | "minimax"> = {
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
+    minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
   };
 
   const kimiAccountedViews = createAccountedViews(
