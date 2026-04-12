@@ -1,12 +1,12 @@
 # Datafast Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-12
 
 - Remove inaccurate session time metric from Dashboard Overview
 - Remove unused `formatDuration` function
 - Add preference to disable sale notifications
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-12
 
 - Dashboard Overview with KPI metrics and period-over-period trend comparison
 - Realtime Visitors with live visitor details, location, device, and conversion likelihood
