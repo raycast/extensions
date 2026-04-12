@@ -1,6 +1,6 @@
 # Watchkey Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-04-12
 
 - Added cross-platform Windows support via watchkey-win CLI with Windows Hello authentication
 - Platform-aware binary path resolution with fallback for sandboxed environments
