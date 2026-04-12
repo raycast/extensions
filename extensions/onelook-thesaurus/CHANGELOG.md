@@ -1,6 +1,6 @@
 # OneLook Thesaurus Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-04-12
 
 - Switch from the deprecated OneLook API proxy (`www.onelook.com/api`) to the official Datamuse Thesaurus API (`api.datamuse.com/words`) — the backend that powers OneLook Thesaurus
 - Add `qe=ml` (query echo) so the original word appears first with its definitions
