@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Detail, Icon, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, Action, Detail, Icon } from "@raycast/api";
+import { API_URL } from "@/utils/constants.util";
 
 export function LoginFormInView() {
-  const { apiUrl } = getPreferenceValues<{ apiUrl: string }>();
-  const loginUrl = `${apiUrl.replace(/\/$/, "")}?next=raycast`;
+  const loginUrl = `${API_URL.replace(/\/$/, "")}?next=raycast`;
 
   const markdown = `
 # 1Bookmark Login
