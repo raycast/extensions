@@ -1,6 +1,6 @@
 # Subwatch Changelog
 
-## ✨ [v2.0] - {PR_MERGE_DATE}
+## ✨ [v2.0] - 2026-04-12
 
 - Upgrade API and add trial option to match with Subwatch version 2.
 
