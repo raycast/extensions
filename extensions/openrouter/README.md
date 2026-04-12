@@ -1,29 +1,41 @@
-# OpenRouter Chat
+# OpenRouter for Raycast
 
-Chat with any AI model through OpenRouter (GPT-4, Claude 3.5, Llama 3.1, and more) directly from Raycast. This extension provides a clean, fast, and lightweight interface for all your AI needs.
+Access any AI model supported by OpenRouter directly within Raycast. This extension provides a native interface for interacting with large language models like GPT-4o, Claude 3.5 Sonnet, and Llama 3.1, featuring real-time streaming and local conversation persistence.
 
-## Features
+![Chat Interface](assets/1-chat.png)
 
-- **Multi-Model Support**: Seamlessly access models from OpenAI, Anthropic, Meta, Mistral, and many others via a single API.
-- **Real-time Streaming**: Watch responses generate word-by-word for a smooth, interactive experience.
-- **Conversation History**: Your chats are automatically saved locally, allowing you to pick up where you left off.
-- **Lightweight & Fast**: Built for speed with a focus on core messaging and productivity.
-- **Privacy First**: Your API keys and conversation data are stored securely on your local machine.
+## Core Capabilities
 
-## Setup
+- **Unified API Access**: Interact with models from OpenAI, Anthropic, Google, Meta, and Mistral through a single OpenRouter configuration.
+- **Low-Latency Streaming**: Responses are streamed word-by-word using the native Fetch API and ReadableStream for an interactive chat experience.
+- **Local History**: Conversation data is stored securely on your machine via Raycast's LocalStorage, enabling you to search and resume previous chats.
+- **Keyboard-First Design**: Send messages, start new chats, and manage history using standard Raycast shortcuts.
+- **Model Flexibility**: Switch between models instantly by updating the Model ID in your extension settings.
 
-1. **Get an API Key**: Visit [OpenRouter](https://openrouter.ai/keys) to create your API key.
-2. **Configure Extension**:
-   - Open the **New Chat** command in Raycast.
-   - Enter your **OpenRouter API Key** when prompted (or via `Cmd + Shift + ,`).
-   - Select your preferred **Default Model ID**.
+![Conversation History](assets/2-history.png)
 
-## Recommended Models
+## Configuration
 
-- **Free & Fast**: `meta-llama/llama-3.1-8b-instruct:free`
-- **Efficient**: `openai/gpt-4o-mini`
-- **State-of-the-Art**: `anthropic/claude-3.5-sonnet`
+### 1. API Key
+Visit [OpenRouter Keys](https://openrouter.ai/keys) to generate an API key. 
+
+### 2. Model ID
+Enter the slug for the model you wish to use. You can find the full list of supported models at [openrouter.ai/models](https://openrouter.ai/models). Popular options include:
+- `anthropic/claude-3.5-sonnet`
+- `openai/gpt-4o`
+- `meta-llama/llama-3.1-8b-instruct:free`
+
+### 3. Setup Steps
+1. Open the **New Chat** command in Raycast.
+2. If it is your first time, you will be prompted to enter your API key and default model ID.
+3. Use **`Cmd + Shift + ,`** at any time to update these preferences.
+
+## Technical Details
+
+- **Privacy**: No conversation data is sent to external servers other than OpenRouter.
+- **Dependencies**: Built using the latest Raycast API standards with minimal external dependencies.
+- **Streaming**: Implements a robust buffer management system to handle JSON fragments in network packets.
 
 ---
 
-*Note: This extension requires an active OpenRouter account and API key.*
+*This extension is an independent client for OpenRouter and requires an OpenRouter account with sufficient credits (or use of free models).*

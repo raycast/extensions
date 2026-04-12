@@ -1,7 +1,7 @@
 {
   "name": "openrouter",
   "title": "OpenRouter",
-  "description": "Simple, powerful chat with any model via OpenRouter (GPT-4, Claude, Llama 3, etc.)",
+  "description": "Native client for OpenRouter providing real-time streaming and chat history for large language models.",
   "icon": "icon.png",
   "author": "the_variable",
   "categories": [
