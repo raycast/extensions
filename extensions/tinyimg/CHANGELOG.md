@@ -1,6 +1,6 @@
 # TinyIMG Changelog
 
-## [APNG Support] - {PR_MERGE_DATE}
+## [APNG Support] - 2026-04-12
 
 - Add APNG (Animated PNG) compression support using [apngopt-rs](https://github.com/wuyax/apngopt-rs).
 
