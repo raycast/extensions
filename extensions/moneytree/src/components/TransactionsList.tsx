@@ -302,7 +302,7 @@ export function TransactionsList({ accountId, initialQuery }: { accountId?: stri
       throttle
       pagination={pagination}
       searchBarAccessory={
-        accountId && accounts.length === 0 ? undefined : (
+        accountId ? undefined : (
           <List.Dropdown
             tooltip="Filter by Account"
             storeValue={!accountId}
