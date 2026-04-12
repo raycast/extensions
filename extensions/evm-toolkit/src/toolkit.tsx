@@ -45,6 +45,19 @@ const BUBBLEMAPS_NETWORKS: { name: string; value: string }[] = [
   { name: "Avalanche", value: "avalanche" },
 ];
 
+// Map chain ID (string) to MetaSleuth/Bubblemaps slug-style identifiers.
+const CHAIN_ID_TO_METASLEUTH: Record<string, string> = {
+  "1": "eth",
+  "56": "bsc",
+  "42161": "arbitrum",
+  "137": "polygon",
+  "10": "optimism",
+  "8453": "base",
+  "59144": "linea",
+  "43114": "avalanche",
+  "5000": "mantle",
+};
+
 function useClipboardPrefill(): string | null {
   const [text, setText] = useState<string | null>(null);
   useEffect(() => {
@@ -210,7 +223,7 @@ function MetaSleuthFormInner({ initialInput }: { initialInput: string }) {
     },
     initialValues: {
       input: initialValid ? initialInput : "",
-      network: "eth",
+      network: CHAIN_ID_TO_METASLEUTH[getDefaultNetworkId()] ?? "eth",
     },
     validation: {
       input(value) {
@@ -265,7 +278,7 @@ function BubblemapsFormInner({ initialInput }: { initialInput: string }) {
     },
     initialValues: {
       input: initialValid ? initialInput : "",
-      network: "eth",
+      network: CHAIN_ID_TO_METASLEUTH[getDefaultNetworkId()] ?? "eth",
     },
     validation: {
       input(value) {
