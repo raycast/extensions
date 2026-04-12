@@ -59,7 +59,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
   const addHistoryItem = useHistoryState((state) => state.addItem);
   const generateLock = useRef<boolean>(false);
   const hasStartedRef = useRef<boolean>(false);
-  const abortControllerRef = useRef<AbortController>();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const [error, setError] = useState<string>("");
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
@@ -165,7 +165,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
       }
     } finally {
       setIsStreaming(false);
-      abortControllerRef.current = undefined;
+      abortControllerRef.current = null;
       generateLock.current = false;
     }
   }, [action, prompt]);
@@ -222,7 +222,7 @@ export default function ExecuteAction({ action, prompt }: Props) {
       }
       actions={
         <ActionPanel>
-          {isStreaming && <Action title="Stop generating..." icon={Icon.Stop} onAction={() => abortControllerRef.current?.abort()} />}
+          {isStreaming && <Action title="Stop Generating…" icon={Icon.Stop} onAction={() => abortControllerRef.current?.abort()} />}
           <Action.CopyToClipboard title="Copy Result" content={result} />
           <Action.Paste title="Paste Result" content={result} />
           {!isStreaming && (
