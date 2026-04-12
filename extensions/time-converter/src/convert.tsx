@@ -12,7 +12,7 @@ import { formatInTimeZone } from "date-fns-tz";
 import { parseTimeInput } from "./utils/timeParser";
 import { resolveTimezone } from "./utils/timezones";
 import { TIMEZONE_ALIASES } from "./constants";
-import { ConversionResult, ParseResult } from "./types";
+import { ConversionResult, ParseResult, Preferences } from "./types";
 
 interface FormValues {
   time: string;
