@@ -6,7 +6,7 @@
   "icon": "extension-icon.png",
   "author": "wuyax",
   "categories": [
-    "Productivity"
+    "Media"
   ],
   "license": "MIT",
   "commands": [
@@ -42,8 +42,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/api": "^1.104.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

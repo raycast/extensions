@@ -5,4 +5,4 @@ export function optimize_apng_wasm(
   z_method: number,
   iterations: number,
   disable_imagequant: number,
-): Uint8Array;
+): Promise<Uint8Array>;
