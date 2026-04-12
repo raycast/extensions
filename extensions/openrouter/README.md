@@ -1,6 +1,8 @@
 # OpenRouter for Raycast
 
-Access any AI model supported by OpenRouter directly within Raycast. This extension provides a native interface for interacting with large language models like GPT-4o, Claude 3.5 Sonnet, and Llama 3.1, featuring real-time streaming and local conversation persistence.
+Access any AI model supported by OpenRouter directly within Raycast. This extension provides a native interface for interacting with large language models like GPT-5.4, Claude Sonnet 4.6, and NVIDIA Nemotron 3 Super, featuring real-time streaming and local conversation persistence.
+
+Use [ORCA](https://orca.orb.town) to see listings for Openrouter models and Providers.
 
 ![Chat Interface](assets/1-chat.png)
 
@@ -21,9 +23,10 @@ Visit [OpenRouter Keys](https://openrouter.ai/keys) to generate an API key.
 
 ### 2. Model ID
 Enter the slug for the model you wish to use. You can find the full list of supported models at [openrouter.ai/models](https://openrouter.ai/models). Popular options include:
-- `anthropic/claude-3.5-sonnet`
-- `openai/gpt-4o`
-- `meta-llama/llama-3.1-8b-instruct:free`
+- `anthropic/claude-sonnet-4.6`
+- `openai/gpt-5.4`
+- `meta-llama/llama-4-scout:free`
+- `nvidia/nemotron-3-super-120b-a12b:free`
 
 ### 3. Setup Steps
 1. Open the **New Chat** command in Raycast.
