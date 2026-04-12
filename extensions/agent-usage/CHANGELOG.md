@@ -1,5 +1,9 @@
 # Agent Usage Changelog
 
+## [Add Windows Support] - {PR_MERGE_DATE}
+
+- Add Windows support
+
 ## [Synthetic Provider and OpenCode Integration] - 2026-04-09
 
 ### New Features
