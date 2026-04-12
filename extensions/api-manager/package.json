@@ -3,7 +3,7 @@
   "name": "api-manager",
   "title": "API Manager",
   "version": "1.0.0",
-  "description": "Manage your daily-use API keys — track providers, expiry dates, environments, and copy keys in one click.",
+  "description": "Manage your daily-use API keys — track providers, expiry dates, and copy keys in one click.",
   "icon": "extension-icon.png",
   "author": "orangefish",
   "categories": ["Developer Tools", "Productivity"],
