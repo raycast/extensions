@@ -1,6 +1,6 @@
 # Bundles
 
-## [iCloud Sync and Bug Fixes] - {PR_MERGE_DATE}
+## [iCloud Sync and Bug Fixes] - 2026-04-12
 
 - Bundles now sync automatically across Macs via iCloud Drive
 - Data stored in `~/iCloud Drive/Raycast Bundles/bundles.json`
