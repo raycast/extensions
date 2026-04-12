@@ -1,6 +1,6 @@
 # VMware vCenter Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-04-12
 
 - Performance Improvement.
 
