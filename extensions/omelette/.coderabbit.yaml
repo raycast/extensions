@@ -1,0 +1,24 @@
+# CodeRabbit Configuration
+# Documentation: https://docs.coderabbit.ai/
+
+language: "en"
+early_access: false
+
+reviews:
+  profile: "chill" # Options: chill, assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false # Set to true if you want a poem summary!
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    - "!node_modules/**"
+    - "!dist/**"
+    - "!package-lock.json"
+    - "!*.png"
+    - "!*.jpg"
+    - "!assets/**"
+
+chat:
+  auto_reply: true

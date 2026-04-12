@@ -1,0 +1,112 @@
+{
+  "name": "omelette",
+  "title": "Omelette",
+  "description": "Native client for OpenRouter providing real-time streaming and chat history for large language models.",
+  "icon": "icon.png",
+  "author": "the_variable",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ask-question",
+      "title": "New Chat",
+      "subtitle": "Omelette",
+      "description": "Start a new chat with any OpenRouter model.",
+      "mode": "view"
+    },
+    {
+      "name": "conversations",
+      "title": "History",
+      "subtitle": "Omelette",
+      "description": "View and continue your previous conversations.",
+      "mode": "view"
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "subtitle": "Omelette",
+      "description": "Summarize the selected text.",
+      "mode": "view"
+    },
+    {
+      "name": "improve-writing",
+      "title": "Improve Writing",
+      "subtitle": "Omelette",
+      "description": "Improve the writing of the selected text.",
+      "mode": "view"
+    },
+    {
+      "name": "fix-grammar",
+      "title": "Fix Grammar",
+      "subtitle": "Omelette",
+      "description": "Fix grammar and spelling of the selected text.",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate to English",
+      "subtitle": "Omelette",
+      "description": "Translate the selected text to English.",
+      "mode": "view"
+    },
+    {
+      "name": "custom-action",
+      "title": "Custom Quick AI",
+      "subtitle": "Omelette",
+      "description": "Run a custom AI prompt on the selected text.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openrouterApiKey",
+      "type": "password",
+      "required": true,
+      "title": "OpenRouter API Key",
+      "description": "Get yours at https://openrouter.ai/keys"
+    },
+    {
+      "name": "defaultModel",
+      "type": "textfield",
+      "default": "nvidia/nemotron-3-nano-30b-a3b:free",
+      "required": true,
+      "title": "Default Model ID",
+      "description": "Example: nvidia/nemotron-3-nano-30b-a3b:free or openai/gpt-5.4"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^1.18.1",
+    "react": "^18.3.1",
+    "uuid": "^11.0.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.10",
+    "@types/react": "18.3.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "oxfmt": "^0.44.0",
+    "oxlint": "^1.59.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "@types/react": "18.3.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "lint:ox": "oxlint -c .oxlintrc.json src/",
+    "fmt": "oxfmt --write src/",
+    "fmt:check": "oxfmt --check src/",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

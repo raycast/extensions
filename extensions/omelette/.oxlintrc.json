@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
+  "rules": {
+    "no-restricted-imports": [
+      "error",
+      {
+        "paths": [
+          {
+            "name": "react",
+            "importNames": ["useEffect"],
+            "message": "useEffect is banned. Use useMountEffect from src/hooks/useMountEffect.ts for mount-only effects."
+          }
+        ]
+      }
+    ]
+  }
+}
