@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add MiniMax Provider] - 2026-04-12
+## [Add MiniMax Provider] - {PR_MERGE_DATE}
 
 ### New Features
 
