@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-04-12
 
 - Fix duplicate collection names in dropdown by using DISTINCT query, preventing React duplicate key warnings
 
