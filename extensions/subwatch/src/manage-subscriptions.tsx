@@ -82,7 +82,7 @@ export default function Command() {
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Link title="Domain" target={`https://${item.domain}`} text={item.domain} />
                   <List.Item.Detail.Metadata.Label title="Interval" text={item.interval} />
-                  <List.Item.Detail.Metadata.Label title="Pricing" text={`$${String(item.price)}`} />
+                  <List.Item.Detail.Metadata.Label title="Pricing" text={`${item.currency} ${String(item.price)}`} />
                   <List.Item.Detail.Metadata.Label
                     title="Renew at"
                     text={getOrdinalNum(new Date(item.start_date).getDate())}
@@ -95,6 +95,14 @@ export default function Command() {
                   <List.Item.Detail.Metadata.Label
                     title="End date"
                     text={item.end_date && item.end_date !== "null" ? new Date(item.end_date).toDateString() : ""}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Trial end date"
+                    text={
+                      item.trial_end_date && item.trial_end_date !== "null"
+                        ? new Date(item.trial_end_date).toDateString()
+                        : ""
+                    }
                   />
                 </List.Item.Detail.Metadata>
               }

@@ -65,10 +65,10 @@ export default function Command() {
       name: FormValidation.Required,
       domain: FormValidation.Required,
       price: (value) => {
-        if (!Number(value)) {
-          return "Price should be a number";
-        } else if (!value) {
+        if (!value) {
           return "The item is required";
+        } else if (isNaN(Number(value))) {
+          return "Price should be a number";
         } else if (Number(value) < 1) {
           return "Price should be a positive number";
         }
@@ -129,6 +129,7 @@ export default function Command() {
 
       <Form.DatePicker title="Start Date" {...itemProps.start_date} />
       <Form.DatePicker title="End Date" {...itemProps.end_date} />
+      <Form.DatePicker title="Trial End Date" {...itemProps.trial_end_date} />
     </Form>
   );
 }

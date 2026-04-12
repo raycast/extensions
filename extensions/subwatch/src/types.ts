@@ -23,4 +23,5 @@ export type NewSubscription = {
   interval: string;
   start_date: Date | null;
   end_date?: Date | null;
+  trial_end_date?: Date | null;
 };
