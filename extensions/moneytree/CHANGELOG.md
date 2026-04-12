@@ -1,6 +1,6 @@
 # Moneytree Changelog
 
-## [Various Improvements] - {PR_MERGE_DATE}
+## [Various Improvements] - 2026-04-12
 
 - Made displayed content more similar to https://app.getmoneytree.com
 - Paginate on scroll for List Transactions (Used [linear](https://www.raycast.com/linear/linear) as reference)
