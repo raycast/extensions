@@ -43,14 +43,27 @@ function loadUsers(unparsedUsers: string[]) {
         tailnet: unparsedUserList[1],
       };
     } else if (unparsedUserList.length == 2) {
-      // accounts without ID column: '<tailnet> <account>'
-      const name = unparsedUserList[1].replace(/\*$/, "");
-      user = {
-        id: name,
-        name,
-        active: unparsedUserList[1].includes("*"),
-        tailnet: unparsedUserList[0] || undefined,
-      };
+      // two-column output can be either '<tailnet> <account>' or 'ID <account>'
+      const first = unparsedUserList[0];
+      const second = unparsedUserList[1];
+      const name = second.replace(/\*$/, "");
+      // if the first column is purely numeric, treat it as an ID (older CLI format)
+      if (/^\d+$/.test(first)) {
+        user = {
+          id: first,
+          name,
+          active: second.includes("*"),
+          tailnet: undefined,
+        };
+      } else {
+        // assume '<tailnet> <account>'
+        user = {
+          id: name,
+          name,
+          active: second.includes("*"),
+          tailnet: first || undefined,
+        };
+      }
     } else if (unparsedUserList.length == 1) {
       // older clients
       const name = unparsedUserList[0].replace(/\*$/, "");
