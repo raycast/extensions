@@ -1,6 +1,6 @@
 # theSVG Raycast Extension Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-04-12
 
 ### Fixed
 
