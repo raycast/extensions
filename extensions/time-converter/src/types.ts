@@ -2,11 +2,6 @@
  * Core types used throughout the extension
  */
 
-export interface Preferences {
-  defaultLocations: string;
-  defaultFormat: "list" | "inline";
-}
-
 /** Result of parsing a single time input */
 export interface ParsedDateTime {
   date: Date;

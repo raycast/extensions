@@ -133,7 +133,7 @@ export const TIMEZONE_ALIASES: ReadonlyMap<string, string> = new Map([
   ["EET", "Europe/Helsinki"],
   ["EEST", "Europe/Helsinki"],
   ["MSK", "Europe/Moscow"],
-  ["IST", "Europe/Dublin"],
+  ["IST-IE", "Europe/Dublin"],
 
   // ─── Europe city/short codes ────────────────────────────────────────────────
   ["LHR", "Europe/London"],
@@ -251,7 +251,7 @@ export const TIMEZONE_ALIASES: ReadonlyMap<string, string> = new Map([
   ["TUNISIA", "Africa/Tunis"],
 
   // ─── Asia abbreviations ─────────────────────────────────────────────────────
-  ["IST-IN", "Asia/Kolkata"],
+  ["IST", "Asia/Kolkata"],
   ["INDIA", "Asia/Kolkata"],
   ["JST", "Asia/Tokyo"],
   ["KST", "Asia/Seoul"],
