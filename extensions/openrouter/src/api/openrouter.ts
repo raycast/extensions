@@ -61,6 +61,7 @@ export async function generateStreamedResponse(
 
     const decoder = new TextDecoder();
     let output = "";
+    let buffer = "";
 
     // Iterate over the native ReadableStream
     const reader = stream.getReader();
@@ -71,12 +72,18 @@ export async function generateStreamedResponse(
         done = readerDone;
         if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+
+        // Keep the last partial line in the buffer
+        buffer = lines.pop() || "";
 
         for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const rawLine = line.slice(6).trim();
+          const trimmedLine = line.trim();
+          if (!trimmedLine) continue;
+
+          if (trimmedLine.startsWith("data: ")) {
+            const rawLine = trimmedLine.slice(6).trim();
             if (rawLine === "[DONE]") {
               return output;
             }
