@@ -30,6 +30,11 @@ export default function Command() {
     } else {
       delete formatedSubscription.end_date;
     }
+    if (subscription.trial_end_date) {
+      formatedSubscription.trial_end_date = subscription.trial_end_date.toISOString().split("T")[0];
+    } else {
+      delete formatedSubscription.trial_end_date;
+    }
 
     try {
       await mutate(
