@@ -16,7 +16,7 @@ export const useMe = () => {
     },
     {
       enabled: !!sessionToken,
-      staleTime: 1000 * 60 * 5, // 5분간 fresh 유지 - selection 변경 시 불필요한 refetch 방지
+      staleTime: 1000 * 60 * 5, // Prevent unnecessary refetch on selection change
       initialData: () => {
         if (!cachedData) {
           return undefined;

@@ -5,6 +5,7 @@
 - 0.12.0
 - 🌐 1Bookmark web client (Beta) is now available at [1bookmark.net](https://1bookmark.net). All features from the Raycast Extension will be available on the website, and some new features may be exclusively offered on the web.
 - 🔑 You can now sign in to Raycast Extension through the 1Bookmark website.
+- 💻 Updated Raycast API, Raycast Utils, tRPC and React packages.
 
 ## [Improve Space Authentication UX] - 2025-05-23
 
