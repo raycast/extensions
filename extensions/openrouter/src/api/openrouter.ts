@@ -59,17 +59,26 @@ export async function generateStreamedResponse(
     const stream = response.body;
     if (!stream) return false;
 
-    return new Promise((resolve, reject) => {
-      let output = "";
-      stream.on("data", (chunk: Buffer) => {
-        const text = chunk.toString();
-        const lines = text.split("\n").filter((line) => line.trim() !== "");
+    const decoder = new TextDecoder();
+    let output = "";
+
+    // Iterate over the native ReadableStream
+    const reader = stream.getReader();
+    try {
+      let done = false;
+      while (!done) {
+        const { done: readerDone, value } = await reader.read();
+        done = readerDone;
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n").filter((line) => line.trim() !== "");
+
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const rawLine = line.slice(6).trim();
             if (rawLine === "[DONE]") {
-              resolve(output);
-              return;
+              return output;
             }
             try {
               const data: StreamedToken = JSON.parse(rawLine);
@@ -81,14 +90,16 @@ export async function generateStreamedResponse(
                 }
               }
             } catch (e) {
-              console.error(e);
+              console.error("Failed to parse streaming token", e);
             }
           }
         }
-      });
-      stream.on("end", () => resolve(output));
-      stream.on("error", (err) => reject(err));
-    });
+      }
+    } finally {
+      reader.releaseLock();
+    }
+
+    return output;
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") throw error;
     throw error;
