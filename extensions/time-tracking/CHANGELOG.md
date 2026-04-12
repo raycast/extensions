@@ -1,6 +1,6 @@
 # Time Tracking Changelog
 
-## [Summary Dashboard, Full History, Enhanced Export, Long Session Detection] - {PR_MERGE_DATE}
+## [Summary Dashboard, Full History, Enhanced Export, Long Session Detection] - 2026-04-12
 
 - Add "Time Summary" command with project summaries and daily breakdowns for configurable date ranges (today, past week, past 30 days, custom)
 - Remove 50-timer limit in "View Project Timers" so full history is accessible, organized by date sections
