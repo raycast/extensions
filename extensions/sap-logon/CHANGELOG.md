@@ -1,6 +1,6 @@
 # SAP GUI Connector
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-12
 
 - Added Turkish (TR) language option
 
