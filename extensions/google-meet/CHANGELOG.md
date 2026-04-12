@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2026-04-12
 
 - Add "Create Meet and Refocus" command that creates a meeting, copies the link, and switches back to your previous app
 - Add Dia browser support
