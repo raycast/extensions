@@ -327,7 +327,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const syntheticAccountStates = useSyntheticAccounts(Boolean(prefs.showSynthetic));
   const zaiAccountStates = useZaiAccounts(Boolean(prefs.showZai));
 
-  const agentViews: Omit<Record<AgentId, AgentView>, "codex" | "kimi" | "synthetic" | "zai" | "minimax"> = {
+  const agentViews: Omit<Record<AgentId, AgentView>, "codex" | "kimi" | "synthetic" | "zai"> = {
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
