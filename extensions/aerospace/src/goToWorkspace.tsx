@@ -54,7 +54,9 @@ function getWorkspaceShortcuts() {
       const bindings: Record<string, any> | undefined = config.mode[mode]?.binding as any;
       if (bindings) {
         for (const key of Object.keys(bindings)) {
-          const command: string = String(bindings[key]);
+          const raw = bindings[key];
+          const command: string = Array.isArray(raw) ? String(raw[0]) : typeof raw === "string" ? raw : "";
+
           if (command.startsWith("workspace ")) {
             const workspaceName = command.slice("workspace ".length).trim();
             if (!workspaceShortcuts[workspaceName]) {

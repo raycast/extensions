@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Feature] - 2026-04-02
+## [Feature] - {PR_MERGE_DATE}
 
 - Add "Go to Workspace" command with searchable workspace list and shortcut display
 
