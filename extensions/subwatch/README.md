@@ -4,7 +4,7 @@ Turn subscription chaos into financial harmony. Subwatch helps you track, alert,
 
 ## Getting started
 
-To get started you need to setup 2 keys:
+To get started you need to setup the following:
 
 - `Subwatch API key` - This is your personal API key, it's available to every user of [Subwatch](https://subwatch.co). To get it head over to Subwatch ->
   integrations and copy the api key from its section. Insert it in the Raycast `Subwatch - API key` configuration.
