@@ -1,4 +1,5 @@
 import { Color } from "@raycast/api";
+import { parseDateOnly } from "./date-utils";
 import { ApiEntry, ExpiryStatus, getExpiryStatus } from "./types";
 
 export function maskKey(key: string): string {
@@ -27,9 +28,10 @@ export function expiryStatusLabel(
     case "expired":
       return `Expired ${formatDate(entry.expiresAt!)}`;
     case "expiring-soon": {
+      const expiry = parseDateOnly(entry.expiresAt!);
+      if (!expiry) return "Expiring soon";
       const days = Math.ceil(
-        (new Date(entry.expiresAt!).getTime() - Date.now()) /
-          (1000 * 60 * 60 * 24),
+        (expiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24),
       );
       return days === 0 ? "Expires today" : `Expires in ${days}d`;
     }
@@ -41,7 +43,8 @@ export function expiryStatusLabel(
 }
 
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
+  const parsed = parseDateOnly(iso) ?? new Date(iso);
+  return parsed.toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",

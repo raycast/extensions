@@ -8,6 +8,7 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { formatDateOnly, parseDateOnly } from "../date-utils";
 import { addEntry, updateEntry } from "../storage";
 import { ApiEntry } from "../types";
 
@@ -18,9 +19,12 @@ interface Props {
 
 function parseExpiry(
   input: string,
-): { date: string; error?: never } | { date?: never; error: string } {
+):
+  | { date: string; error?: never }
+  | { date: null; error?: never }
+  | { date?: never; error: string } {
   const trimmed = input.trim();
-  if (!trimmed) return { date: undefined as unknown as string };
+  if (!trimmed) return { date: null };
 
   // Pure number: treat as days from today
   if (/^\d+$/.test(trimmed)) {
@@ -28,14 +32,14 @@ function parseExpiry(
     if (days <= 0) return { error: "Enter a positive number of days" };
     const d = new Date();
     d.setDate(d.getDate() + days);
-    return { date: d.toISOString().split("T")[0] };
+    return { date: formatDateOnly(d) };
   }
 
   // Date string: YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
-    const d = new Date(trimmed);
-    if (isNaN(d.getTime())) return { error: "Invalid date" };
-    return { date: trimmed };
+    const d = parseDateOnly(trimmed);
+    if (!d) return { error: "Invalid date" };
+    return { date: formatDateOnly(d) };
   }
 
   return { error: 'Use days (e.g. "90") or a date (e.g. "2026-12-31")' };
@@ -92,7 +96,7 @@ export function ApiForm({ entry, onSave }: Props) {
       key: values.key.trim(),
       provider: values.provider.trim() || undefined,
       url: values.url.trim() || undefined,
-      expiresAt: expiryResult.date || undefined,
+      expiresAt: expiryResult.date ?? undefined,
       createdAt: entry?.createdAt ?? now,
       updatedAt: now,
       tags,

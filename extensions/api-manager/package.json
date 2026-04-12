@@ -8,7 +8,7 @@
   "author": "orangefish",
   "categories": [
     "Developer Tools",
-    "Productivity"
+    "Security"
   ],
   "license": "MIT",
   "commands": [
@@ -27,7 +27,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.90.0",
-    "@raycast/utils": "^1.19.1",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
