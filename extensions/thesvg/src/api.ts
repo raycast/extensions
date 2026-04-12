@@ -44,13 +44,24 @@ export interface Category {
 }
 
 let cachedRegistry: RegistryResponse | null = null;
+let registryPromise: Promise<RegistryResponse> | null = null;
 
 async function fetchRegistry(): Promise<RegistryResponse> {
   if (cachedRegistry) return cachedRegistry;
-  const res = await fetch(`${BASE_URL}/api/registry.json`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  cachedRegistry = (await res.json()) as RegistryResponse;
-  return cachedRegistry;
+  if (!registryPromise) {
+    registryPromise = fetch(`${BASE_URL}/api/registry.json`)
+      .then(async (res) => {
+        if (!res.ok) throw new Error(`API error: ${res.status}`);
+        const data = (await res.json()) as RegistryResponse;
+        cachedRegistry = data;
+        return data;
+      })
+      .catch((err) => {
+        registryPromise = null;
+        throw err;
+      });
+  }
+  return registryPromise;
 }
 
 export async function searchIcons(
@@ -142,9 +153,10 @@ export function getCdnUrl(slug: string, variant = "default"): string {
 // --- Copy format helpers ---
 
 function toPascalCase(str: string): string {
-  return str
+  const pascal = str
     .replace(/[^a-zA-Z0-9]+(.)/g, (_, c: string) => c.toUpperCase())
     .replace(/^(.)/, (_, c: string) => c.toUpperCase());
+  return /^\d/.test(pascal) ? `_${pascal}` : pascal;
 }
 
 function svgToJsxAttrs(svg: string): string {
