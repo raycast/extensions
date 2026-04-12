@@ -240,7 +240,7 @@ export default function MenuBarCommand() {
 
   const visibleAgents = useMemo(
     () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
-    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents, minimaxState],
+    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
