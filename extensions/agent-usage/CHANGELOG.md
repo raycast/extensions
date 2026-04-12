@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2026-04-12
 
 - Add Windows support
 
