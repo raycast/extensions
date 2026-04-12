@@ -1,6 +1,6 @@
 # Calendly Changelog
 
-## [Added event duration] - {PR_MERGE_DATE}
+## [Added event duration] - 2026-04-12
 
 - Display event duration as a right-aligned accessory on each event type
 
