@@ -184,9 +184,9 @@ export function Body() {
   );
 }
 
-export default function Bookmarks() {
+export default function Bookmarks(props: { launchContext?: { token?: string } }) {
   return (
-    <CachedQueryClientProvider>
+    <CachedQueryClientProvider launchContext={props.launchContext}>
       <Body />
     </CachedQueryClientProvider>
   );
