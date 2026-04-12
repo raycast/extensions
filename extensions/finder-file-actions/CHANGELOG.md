@@ -1,6 +1,6 @@
 # Finder File Actions Changelog
 
-## [New commands, search fix, icon refresh] - {PR_MERGE_DATE}
+## [New commands, search fix, icon refresh] - 2026-04-12
 
 - Added "Create Folder" command that creates a new folder in the current Finder directory
 - Added "Wrap in Folder" command that creates a new folder and moves the selected Finder files into it
