@@ -1,6 +1,6 @@
 # Changelog
 
-## [AI SDK, Multi-Provider & Model Updates] - {PR_MERGE_DATE}
+## [AI SDK, Multi-Provider & Model Updates] - 2026-04-12
 
 - Internal: Migrated model integration from `openai` SDK to `ai` SDK with provider routing.
 - Improvement: Restored live streaming responses and improved final usage/token extraction compatibility in Raycast runtime.
