@@ -109,7 +109,7 @@ async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
 export function useCurrentUser() {
   return useCachedPromise(
     async () => {
-      return await calAPI<CalUser>({ url: "/me" });
+      return await calAPI<CalUser>({ url: "/me", headers: { "cal-api-version": "2024-08-13" } });
     },
     [],
     { failureToastOptions: { title: "Unable to load current user" } },
@@ -173,6 +173,7 @@ export function createPrivateLinkForEventType(eventTypeId: number, signal: Abort
   return calAPI<CreatePrivateLinkResponse>({
     method: "POST",
     url: `/event-types/${eventTypeId}/private-links`,
+    headers: { "cal-api-version": "2024-06-14" },
     data: {
       maxUsageCount: 1,
     },
