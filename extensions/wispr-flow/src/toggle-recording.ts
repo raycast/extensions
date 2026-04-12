@@ -1,7 +1,7 @@
 import { LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { WISPR_FLOW_BUNDLE_ID, ensureWisprFlowInstalled } from "./db";
 
-const RECORDING_KEY = "isRecording";
+export const RECORDING_KEY = "isRecording";
 
 export default async function main() {
   if (!(await ensureWisprFlowInstalled())) return;
