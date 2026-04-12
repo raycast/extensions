@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Support Droid Encrypted Auth v2] - {PR_MERGE_DATE}
+## [Support Droid Encrypted Auth v2] - 2026-04-12
 
 ### Improvements
 
