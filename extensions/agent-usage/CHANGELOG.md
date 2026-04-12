@@ -4,6 +4,11 @@
 
 - Add Windows support
 
+## [Support Droid Encrypted Auth v2] - 2026-04-12
+
+### Improvements
+
+- Support Factory Droid's new encrypted auth v2 format with backward compatibility for legacy auth files
 ## [Synthetic Provider and OpenCode Integration] - 2026-04-09
 
 ### New Features

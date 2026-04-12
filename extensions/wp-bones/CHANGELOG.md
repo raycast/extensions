@@ -1,5 +1,22 @@
 # WP Bones Changelog
 
+## [New Features & Improvements] - 2026-04-12
+
+### New Commands
+- **Ask WP Bones AI** — Ask questions about WP Bones and get AI-powered answers based on the documentation (requires Raycast Pro)
+- **WP Bones Release Notes** — View the latest release notes inline without opening the browser
+
+### New Features
+- **Boilerplate Preview** (⌘P) — Preview the README of any boilerplate template before creating a repository
+- **Copy URL** action in search results
+
+### Bug Fixes
+- Fixed version comparison that broke for multi-digit version segments (e.g. `1.10.0` vs `1.7.0`)
+- Fixed menu bar `useEffect` priority chain — error state no longer gets overwritten by other states
+- Replaced `useStreamJSON` with `useFetch` in search documentation for more reliable results
+- Added empty view with feedback when search query is too short (< 3 characters)
+- Removed dead code: unused `templates.ts` and `use-wp-bones-template.tsx`
+
 ## [Fixes] - 2025-06-25
 
 - 🔥 Removed the complete demo link for improved clarity and maintenance

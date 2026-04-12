@@ -1,19 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  popToRoot,
-  confirmAlert,
-  Alert,
-  LocalStorage,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, popToRoot, confirmAlert, Alert } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import React, { useState } from "react";
-import { Folder, STORAGE_KEY } from "../types";
-import { getFolders, invalidateFoldersCache } from "../storage";
+import { Folder } from "../types";
+import { getFolders, invalidateFoldersCache, saveFolders } from "../storage";
 import { pluralize } from "../utils";
 import { validateImportData } from "../backup";
 
@@ -91,8 +80,8 @@ export default function ImportFoldersForm() {
       }
 
       // Save to storage
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(finalFolders));
       invalidateFoldersCache();
+      await saveFolders(finalFolders);
 
       await showToast({
         style: Toast.Style.Success,

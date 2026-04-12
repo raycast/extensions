@@ -5,22 +5,10 @@
   "description": "View your Datafast web analytics — visitors, revenue, pages, referrers, campaigns, and real-time data",
   "icon": "icon.png",
   "author": "joshmillgate",
-  "categories": [
-    "Data",
-    "Web",
-    "Productivity"
-  ],
+  "categories": ["Data", "Web", "Productivity"],
   "license": "MIT",
-  "platforms": [
-    "macOS"
-  ],
-  "keywords": [
-    "analytics",
-    "datafast",
-    "revenue",
-    "visitors",
-    "web analytics"
-  ],
+  "platforms": ["macOS"],
+  "keywords": ["analytics", "datafast", "revenue", "visitors", "web analytics"],
   "preferences": [
     {
       "name": "apiKey",
@@ -46,13 +34,7 @@
       "subtitle": "View dashboard data and choose timeframes",
       "description": "View key metrics: visitors, sessions, bounce rate, revenue, conversion rate",
       "mode": "view",
-      "keywords": [
-        "stats",
-        "metrics",
-        "overview",
-        "revenue",
-        "visitors"
-      ]
+      "keywords": ["stats", "metrics", "overview", "revenue", "visitors"]
     },
     {
       "name": "realtime-visitors",
@@ -60,12 +42,7 @@
       "subtitle": "View active visitors data",
       "description": "View active visitors on your site right now",
       "mode": "view",
-      "keywords": [
-        "live",
-        "online",
-        "realtime",
-        "active"
-      ]
+      "keywords": ["live", "online", "realtime", "active"]
     },
     {
       "name": "top-pages",
@@ -73,11 +50,7 @@
       "subtitle": "Show top pages data",
       "description": "View pages ranked by visitors or revenue",
       "mode": "view",
-      "keywords": [
-        "pages",
-        "urls",
-        "paths"
-      ]
+      "keywords": ["pages", "urls", "paths"]
     },
     {
       "name": "top-referrers",
@@ -85,11 +58,7 @@
       "subtitle": "Show your top referrers data",
       "description": "View traffic sources ranked by visitors or revenue",
       "mode": "view",
-      "keywords": [
-        "referrers",
-        "sources",
-        "traffic"
-      ]
+      "keywords": ["referrers", "sources", "traffic"]
     },
     {
       "name": "campaigns",
@@ -97,11 +66,7 @@
       "subtitle": "Show your campaigns data",
       "description": "View campaign performance with UTM breakdowns",
       "mode": "view",
-      "keywords": [
-        "utm",
-        "campaigns",
-        "marketing"
-      ]
+      "keywords": ["utm", "campaigns", "marketing"]
     },
     {
       "name": "countries",
@@ -109,11 +74,7 @@
       "subtitle": "Show countries data",
       "description": "View traffic and revenue by country",
       "mode": "view",
-      "keywords": [
-        "countries",
-        "geo",
-        "location"
-      ]
+      "keywords": ["countries", "geo", "location"]
     },
     {
       "name": "menu-bar-realtime",
@@ -122,12 +83,7 @@
       "description": "Show live visitor count in your menu bar",
       "mode": "menu-bar",
       "interval": "1m",
-      "keywords": [
-        "visitors",
-        "realtime",
-        "menu bar",
-        "live"
-      ],
+      "keywords": ["visitors", "realtime", "menu bar", "live"],
       "preferences": [
         {
           "name": "saleNotifications",

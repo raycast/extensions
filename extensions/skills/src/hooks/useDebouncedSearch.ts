@@ -10,30 +10,25 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
   const abortRef = useRef<AbortController | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchSkills = useCallback(async (query: string, signal: AbortSignal) => fetchSkillsSearch(query, signal), []);
-
-  const executeSearch = useCallback(
-    async (query: string) => {
-      abortRef.current?.abort();
-      const controller = new AbortController();
-      abortRef.current = controller;
-      setIsLoading(true);
-      try {
-        const result = await fetchSkills(query, controller.signal);
-        if (!controller.signal.aborted) {
-          setData(result);
-          setError(undefined);
-        }
-      } catch (e) {
-        if (!controller.signal.aborted && e instanceof Error && e.name !== "AbortError") {
-          setError(e);
-        }
-      } finally {
-        if (!controller.signal.aborted) setIsLoading(false);
+  const executeSearch = useCallback(async (query: string) => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    setIsLoading(true);
+    try {
+      const result = await fetchSkillsSearch(query, controller.signal);
+      if (!controller.signal.aborted) {
+        setData(result);
+        setError(undefined);
       }
-    },
-    [fetchSkills],
-  );
+    } catch (e) {
+      if (!controller.signal.aborted && e instanceof Error && e.name !== "AbortError") {
+        setError(e);
+      }
+    } finally {
+      if (!controller.signal.aborted) setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);

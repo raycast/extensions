@@ -1,6 +1,6 @@
 import { List, Icon } from "@raycast/api";
 import { Model } from "./types";
-import { CAPABILITIES } from "./constants";
+import { CAPABILITIES, STATUS_COLORS } from "./constants";
 
 /**
  * Generate capability accessory icons for a model
@@ -69,6 +69,33 @@ export function getProviderCapabilityAccessories(models: Model[]): List.Item.Acc
     accessories.push({
       icon: { source: Icon.Hammer, tintColor: CAPABILITIES.tool_call.color },
       tooltip: "Has tool-calling models",
+    });
+  }
+
+  return accessories;
+}
+
+/**
+ * Generate accessories for release date display (used in New AI Models command)
+ */
+export function getReleaseDateAccessories(model: Model): List.Item.Accessory[] {
+  const accessories: List.Item.Accessory[] = [];
+
+  // Status indicator (alpha, beta, deprecated)
+  if (model.status) {
+    accessories.push({
+      tag: {
+        value: model.status,
+        color: STATUS_COLORS[model.status],
+      },
+    });
+  }
+
+  // Release date
+  if (model.release_date) {
+    accessories.push({
+      text: model.release_date,
+      tooltip: "Release date",
     });
   }
 

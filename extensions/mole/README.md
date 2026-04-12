@@ -41,6 +41,7 @@ brew install mole
 | **Clean Installers**    | Find and remove .dmg, .pkg, and .iso files from Downloads, Desktop, and Documents |
 | **Touch ID for Sudo**   | Check status and toggle Touch ID for sudo authentication                          |
 | **Update Mole**         | Update Mole to the latest version                                                 |
+| **Health Menu Bar**     | Show system health score in the menu bar with CPU, RAM, disk, and battery summary  |
 
 ## Configuration
 
@@ -49,6 +50,7 @@ brew install mole
 | Mole Binary Path | Extension     | Custom path to the `mo` binary (auto-detected by default)  |
 | Refresh Interval | System Status | How often to refresh status data (3, 5, 10, or 30 seconds) |
 | Default Path     | Analyze Disk  | Starting directory for disk analysis                       |
+| Refresh Interval | Health Menu Bar | How often to refresh the health score in the menu bar    |
 
 ## Credits
 

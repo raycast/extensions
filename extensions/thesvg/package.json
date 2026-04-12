@@ -2,13 +2,9 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "thesvg",
   "title": "TheSVG",
-  "description": "Search, preview, and copy 4,000+ brand SVG icons from thesvg.org",
-  "icon": "extension_icon.png",
+  "description": "Search, preview, and copy 5,600+ brand SVG icons from thesvg.org",
+  "icon": "extension-icon.png",
   "author": "thegdsks",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
   "categories": [
     "Design Tools",
     "Developer Tools"
@@ -19,8 +15,23 @@
       "name": "search-icons",
       "title": "Search Brand Icons",
       "subtitle": "theSVG",
-      "description": "Search 4,000+ brand SVG icons. Copy SVG, download, or open in browser.",
+      "description": "Search 5,600+ brand SVG icons. Copy SVG, download, or open in browser.",
       "mode": "view"
+    },
+    {
+      "name": "copy-icon",
+      "title": "Copy Brand Icon",
+      "subtitle": "theSVG",
+      "description": "Quick copy a brand SVG by name",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "github, vercel, openai...",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -70,5 +81,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"Error: no publish\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

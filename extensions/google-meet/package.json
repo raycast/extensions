@@ -8,7 +8,8 @@
   "contributors": [
     "hughlaw",
     "iwex",
-    "nexxai"
+    "nexxai",
+    "tim_gailey"
   ],
   "license": "MIT",
   "commands": [
@@ -17,6 +18,13 @@
       "title": "Create Meet",
       "subtitle": "Google Meet",
       "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "default-profile-and-refocus",
+      "title": "Create Meet and Refocus",
+      "subtitle": "Google Meet",
+      "description": "Creates a new meeting room, copies the link to your clipboard, and refocuses your previous app.",
       "mode": "no-view"
     },
     {
@@ -67,6 +75,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
+  "categories": [
+    "Communication"
+  ],
   "platforms": [
     "macOS"
   ]

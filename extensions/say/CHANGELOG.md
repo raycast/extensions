@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Enhancement] - 2026-04-12
+
+- Add Windows support with `@litomore/win-say`
+
 ## [Maintenance] - 2026-02-04
 
 - Polish AI Extension configurations

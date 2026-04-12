@@ -13,7 +13,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 import { fetchRealtimeMap } from "./lib/api";
-import { formatNumber, formatCompact, formatCurrency } from "./lib/format";
+import { formatNumber, formatCompact } from "./lib/format";
 
 const LAST_SEEN_KEY = "last-seen-payment-timestamps";
 
@@ -41,11 +41,11 @@ async function checkForNewSales(
       environment.launchType === LaunchType.Background
     ) {
       const total = newPayments.reduce((sum, p) => sum + p.amount, 0);
-      const currency = newPayments[0].currency ?? "";
+      const currency = newPayments[0].currency || "$";
       const label =
         newPayments.length === 1
-          ? `New sale: ${formatCurrency(newPayments[0].amount, currency)}`
-          : `${newPayments.length} new sales: ${formatCurrency(total, currency)}`;
+          ? `New sale: ${currency}${newPayments[0].amount}`
+          : `${newPayments.length} new sales: ${currency}${total}`;
 
       await open("raycast://confetti");
       await showHUD(`🎉 ${label}`);
