@@ -326,6 +326,12 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
                       style: Toast.Style.Success,
                       title: `Copied ${icon.title} (${variant})`,
                     });
+                  } else {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "SVG not available",
+                      message: `Could not fetch the "${variant}" variant.`,
+                    });
                   }
                 }}
               />

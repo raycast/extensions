@@ -148,12 +148,16 @@ function toPascalCase(str: string): string {
 }
 
 function svgToJsxAttrs(svg: string): string {
-  return svg
-    .replace(/\bclass="/g, 'className="')
-    .replace(/\bxmlns="[^"]*"/g, "")
-    .replace(/\b([a-z]+(?:-[a-z]+)+)/g, (match) =>
-      match.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()),
-    );
+  return (
+    svg
+      .replace(/\bclass="/g, 'className="')
+      .replace(/\bxmlns="[^"]*"/g, "")
+      // Replace only hyphenated attribute names (immediately before `=`),
+      // leaving attribute values (e.g. font-family="sans-serif") intact.
+      .replace(/\b([a-z]+(?:-[a-z]+)+)(?=\s*=)/g, (match) =>
+        match.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()),
+      )
+  );
 }
 
 export function toJsx(svg: string, componentName: string): string {
