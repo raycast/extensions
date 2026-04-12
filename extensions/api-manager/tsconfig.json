@@ -2,6 +2,7 @@
   "extends": "@raycast/tsconfig",
   "compilerOptions": {
     "jsx": "react-jsx",
+    "skipLibCheck": true,
     "paths": {
       "~/*": ["./src/*"]
     }
