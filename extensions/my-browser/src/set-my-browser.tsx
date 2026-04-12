@@ -14,11 +14,12 @@ import { writeFileSync, unlinkSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 
-function runSwift(script: string): string {
-  const tmpFile = join(tmpdir(), "raycast-my-browser.swift");
+function runSwift(script: string, args: string[] = []): string {
+  const tmpFile = join(tmpdir(), `raycast-my-browser-${Date.now()}.swift`);
   try {
     writeFileSync(tmpFile, script);
-    return execSync(`swift ${tmpFile}`, { timeout: 20000 }).toString().trim();
+    const escapedArgs = args.map((a) => JSON.stringify(a)).join(" ");
+    return execSync(`swift ${tmpFile} ${escapedArgs}`, { timeout: 20000 }).toString().trim();
   } finally {
     try {
       unlinkSync(tmpFile);
@@ -39,12 +40,16 @@ print(handlers.joined(separator: "\\n"))
 }
 
 function setDefaultBrowser(bundleId: string): void {
-  runSwift(`
+  runSwift(
+    `
 import Foundation
 import CoreServices
-LSSetDefaultHandlerForURLScheme("https" as CFString, "${bundleId}" as CFString)
-LSSetDefaultHandlerForURLScheme("http" as CFString, "${bundleId}" as CFString)
-`);
+let id = CommandLine.arguments[1] as CFString
+LSSetDefaultHandlerForURLScheme("https" as CFString, id)
+LSSetDefaultHandlerForURLScheme("http" as CFString, id)
+`,
+    [bundleId],
+  );
 }
 
 async function getInstalledBrowsers() {

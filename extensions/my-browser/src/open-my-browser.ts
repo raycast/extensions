@@ -1,11 +1,9 @@
-import { getDefaultApplication, showHUD, showToast, Toast } from "@raycast/api";
-import { execSync } from "child_process";
+import { getDefaultApplication, showToast, Toast, open } from "@raycast/api";
 
 export default async function Command() {
   try {
     const browser = await getDefaultApplication("https://raycast.com");
-    execSync(`open -a "${browser.path}"`);
-    await showHUD(`Opened ${browser.name}`);
+    await open(browser.path);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
