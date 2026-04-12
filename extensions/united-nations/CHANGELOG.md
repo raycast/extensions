@@ -1,6 +1,6 @@
 # United Nations Extension
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-04-12
 
 - Rebuild `UN Documents` around `documents.un.org` instead of the legacy RSS feeds
 - Add the current advanced search form fields from `documents.un.org`
