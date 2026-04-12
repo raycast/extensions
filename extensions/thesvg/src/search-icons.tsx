@@ -31,13 +31,18 @@ export default function SearchIcons() {
   const [searchText, setSearchText] = useState("");
   const [category, setCategory] = useState("all");
 
-  const { data: categories } = useCachedPromise(getCategories);
+  const { data: categories, error: categoriesError } =
+    useCachedPromise(getCategories);
 
-  const { data, isLoading } = useCachedPromise(
-    searchIcons,
-    [searchText || undefined, category, 100],
-    { keepPreviousData: true },
-  );
+  const {
+    data,
+    isLoading,
+    error: searchError,
+  } = useCachedPromise(searchIcons, [searchText || undefined, category, 100], {
+    keepPreviousData: true,
+  });
+
+  const loadError = categoriesError ?? searchError;
 
   const icons = data?.icons ?? [];
 
@@ -70,17 +75,26 @@ export default function SearchIcons() {
       {icons.map((icon) => (
         <IconListItem key={icon.slug} icon={icon} />
       ))}
-      {icons.length === 0 && !isLoading && (
-        <List.EmptyView
-          title="No icons found"
-          description={
-            searchText
-              ? `No results for "${searchText}"`
-              : "Try a different category"
-          }
-          icon={Icon.MagnifyingGlass}
-        />
-      )}
+      {icons.length === 0 &&
+        !isLoading &&
+        (loadError ? (
+          <List.EmptyView
+            title="Could not load icons"
+            description={
+              loadError instanceof Error ? loadError.message : String(loadError)
+            }
+          />
+        ) : (
+          <List.EmptyView
+            title="No icons found"
+            description={
+              searchText
+                ? `No results for "${searchText}"`
+                : "Try a different category"
+            }
+            icon={Icon.MagnifyingGlass}
+          />
+        ))}
     </List>
   );
 }
