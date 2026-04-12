@@ -1,9 +1,6 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import https from "https";
-import fs from "fs";
-import { IncomingMessage } from "http";
-import { open } from "@raycast/api";
+import { open, getPreferenceValues } from "@raycast/api";
 
 const execAsync = promisify(exec);
 
@@ -94,9 +91,6 @@ export interface NetbirdStatus {
 /** Default paths for the NetBird binary */
 const NETBIRD_BIN_PATHS = ["/usr/local/bin/netbird", "/usr/bin/netbird", "/opt/homebrew/bin/netbird"];
 
-/** Default paths for netbird config (from version 55+) */
-const NETBIRD_CONFIG_PATHS = ["/var/lib/netbird"];
-
 async function getNetbirdBin(): Promise<string> {
   try {
     const { stdout } = await execAsync("which netbird");
@@ -131,6 +125,10 @@ export function formatNetbirdError(error: unknown): string {
 
   if (message.includes("network is unreachable") || message.includes("no internet connection")) {
     return "No internet connection detected. Please check your network.";
+  }
+
+  if (message.includes("failed to connect to daemon") || message.includes("context deadline exceeded")) {
+    return "NetBird daemon is not running. Run `netbird service install` and `netbird service start`.";
   }
 
   if (
@@ -208,54 +206,118 @@ export async function netbirdDown(): Promise<void> {
   }
 }
 
+export interface NetbirdNetworkRoute {
+  id: string;
+  /**
+   * Display label for the route in UI:
+   * - network routes: CIDR (e.g. `10.0.0.0/24`)
+   * - domain routes: domains list (e.g. `app.example.com, *.example.com`)
+   */
+  route: string | null;
+  selected: boolean;
+}
+
+function shellEscapeSingleQuotes(value: string): string {
+  // Shell-safe quoting for `child_process.exec` commands.
+  // Example: "Default Subnet" -> 'Default Subnet'
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function parseNetbirdNetworksList(output: string): NetbirdNetworkRoute[] {
+  if (/no networks available/i.test(output) || /no routes available/i.test(output)) {
+    return [];
+  }
+
+  const routes: NetbirdNetworkRoute[] = [];
+  const lines = output.split(/\r?\n/);
+
+  let current: { id: string; route: string | null; selected?: boolean } | null = null;
+
+  for (const line of lines) {
+    const idMatch = /^\s*-\s*ID:\s*(.+)\s*$/.exec(line);
+    if (idMatch) {
+      if (current) {
+        routes.push({
+          id: current.id,
+          route: current.route,
+          selected: current.selected ?? false,
+        });
+      }
+
+      current = {
+        id: idMatch[1].trim(),
+        route: null,
+      };
+      continue;
+    }
+
+    if (!current) continue;
+
+    const networkOrDomainsMatch = /^\s*(Network|Domains):\s*(.+)\s*$/.exec(line);
+    if (networkOrDomainsMatch) {
+      current.route = networkOrDomainsMatch[2].trim();
+      continue;
+    }
+
+    const statusMatch = /^\s*Status:\s*(Selected|Not Selected)\s*$/.exec(line);
+    if (statusMatch) {
+      current.selected = statusMatch[1] === "Selected";
+      continue;
+    }
+  }
+
+  if (current) {
+    routes.push({
+      id: current.id,
+      route: current.route,
+      selected: current.selected ?? false,
+    });
+  }
+
+  return routes;
+}
+
+export async function getNetbirdNetworks(): Promise<NetbirdNetworkRoute[]> {
+  const bin = await getNetbirdBin();
+  try {
+    const { stdout } = await execAsync(`${bin} networks list`);
+    return parseNetbirdNetworksList(stdout);
+  } catch (error: unknown) {
+    throw new Error(formatNetbirdError(error));
+  }
+}
+
+export async function netbirdNetworksSelect(id: string): Promise<void> {
+  const bin = await getNetbirdBin();
+  try {
+    await execAsync(`${bin} networks select ${shellEscapeSingleQuotes(id)}`);
+  } catch (error: unknown) {
+    throw new Error(formatNetbirdError(error));
+  }
+}
+
+export async function netbirdNetworksDeselect(id: string): Promise<void> {
+  const bin = await getNetbirdBin();
+  try {
+    await execAsync(`${bin} networks deselect ${shellEscapeSingleQuotes(id)}`);
+  } catch (error: unknown) {
+    throw new Error(formatNetbirdError(error));
+  }
+}
+
 /**
- * Tries to determine the NetBird admin dashboard URL using config files. Using management URL as last fallback.
+ * Tries to determine the NetBird admin dashboard URL using netbird status command or preferences.
+ * Using management URL as last fallback.
  *
  * @returns full admin url
  */
 export async function getAdminUrl(): Promise<string> {
-  const config_filenames = ["active_profile.json", "default.json"];
+  const prefs = getPreferenceValues<Preferences>();
+  if (prefs.adminUrl) {
+    return prefs.adminUrl;
+  }
 
   try {
-    for (const folder_path of NETBIRD_CONFIG_PATHS) {
-      for (const filename of config_filenames) {
-        const fullPath = `${folder_path}/${filename}`;
-
-        if (fs.existsSync(fullPath)) {
-          try {
-            const configContent = await fs.promises.readFile(fullPath, "utf-8");
-            const config = JSON.parse(configContent);
-
-            // check AdminURL first
-            if (config.AdminURL) {
-              if (typeof config.AdminURL === "string") {
-                return config.AdminURL;
-              } else if (config.AdminURL.Scheme && config.AdminURL.Host) {
-                return `${config.AdminURL.Scheme}://${config.AdminURL.Host}`;
-              }
-            }
-
-            // ManagementURL as fallback
-            if (config.ManagementURL) {
-              let url: string | undefined;
-
-              if (typeof config.ManagementURL === "string") {
-                url = config.ManagementURL;
-              } else if (config.ManagementURL.Scheme && config.ManagementURL.Host) {
-                url = `${config.ManagementURL.Scheme}://${config.ManagementURL.Host}`;
-              }
-
-              if (url && (url.includes("api.netbird.io") || url.includes("api.wiretrustee.com"))) {
-                return "https://app.netbird.io";
-              }
-            }
-          } catch {
-            // ignore read/parse errors
-          }
-        }
-      }
-    }
-
     const status = await getNetbirdStatus();
     const managementUrl = status.management.url;
 
@@ -265,33 +327,28 @@ export async function getAdminUrl(): Promise<string> {
     }
 
     // For self-hosted, the dashboard is often at the same URL as the management service
+    // if it is not, it can be changed in command settings
     return managementUrl;
   } catch {
     return "https://app.netbird.io";
   }
 }
 
-async function getLatestRelease(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    https
-      .get(
-        "https://api.github.com/repos/netbirdio/netbird/releases/latest",
-        { headers: { "User-Agent": "Raycast-Extension" } },
-        (res: IncomingMessage) => {
-          let data = "";
-          res.on("data", (chunk: unknown) => (data += String(chunk)));
-          res.on("end", () => {
-            try {
-              const json = JSON.parse(data);
-              resolve(json.tag_name.replace(/^v/, ""));
-            } catch (e) {
-              reject(e);
-            }
-          });
-        },
-      )
-      .on("error", reject);
-  });
+/**
+ * Polls getNetbirdStatus until the daemon responds or the timeout elapses.
+ * Used after service restart to wait for the daemon to come back online.
+ */
+async function waitForDaemon(maxWaitMs = 5000, intervalMs = 500): Promise<void> {
+  const deadline = Date.now() + maxWaitMs;
+  while (Date.now() < deadline) {
+    try {
+      await getNetbirdStatus();
+      return;
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  }
+  // Daemon didn't respond in time — non-fatal, caller handles serviceRestarted flag.
 }
 
 /**
@@ -299,60 +356,59 @@ async function getLatestRelease(): Promise<string> {
  *
  * @returns update info
  */
-export async function netbirdUpdate(): Promise<{ version: string; updated: boolean; latestVersion?: string }> {
-  const status = await getNetbirdStatus();
-  const currentVersion = status.daemonVersion;
-
-  let latestVersion: string | undefined;
-  try {
-    latestVersion = await getLatestRelease();
-  } catch {
-    // ignore check failure
-  }
-
-  if (latestVersion && latestVersion === currentVersion) {
-    return { version: currentVersion, updated: false, latestVersion };
-  }
+export async function netbirdUpdate(
+  onPhase?: (phase: "checking" | "upgrading" | "restarting") => void | Promise<void>,
+): Promise<{ version: string; updated: boolean; serviceRestarted: boolean }> {
+  await onPhase?.("checking");
 
   const env = { ...process.env, PATH: `${process.env.PATH}:/opt/homebrew/bin:/usr/local/bin` };
 
-  try {
-    await execAsync("brew list netbird", { env });
-  } catch (e) {
-    console.log(e);
+  // Check if netbird exist and if new version is available
+  const brewBefore = (await execAsync("brew list --versions netbird", { env })).stdout.trim();
+  const brewVersionBefore = brewBefore.split(/\s+/)[1] ?? "";
+  if (!brewVersionBefore) {
     throw new Error("NetBird is not installed via Homebrew. We can't update it automatically.");
   }
 
-  let didUpgrade = false;
-  try {
-    await execAsync("brew upgrade netbird", { env });
-    didUpgrade = true;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (!message.includes("already installed")) {
-      throw error;
-    }
+  const outdated = (await execAsync("brew outdated netbird", { env })).stdout.trim();
+  if (!outdated) {
+    return { version: brewVersionBefore, updated: false, serviceRestarted: false };
   }
 
-  if (didUpgrade) {
-    const bin = await getNetbirdBin();
-    const safeBin = bin.replace(/'/g, "'\\''");
+  await onPhase?.("upgrading");
+  await execAsync("brew upgrade netbird", { env });
+
+  const brewVersion = (await execAsync("brew list --versions netbird", { env })).stdout.trim().split(/\s+/)[1] ?? "";
+  const updated = brewVersionBefore !== brewVersion;
+
+  if (!updated) {
+    return { version: brewVersionBefore, updated: false, serviceRestarted: false };
+  }
+
+  let serviceRestarted = false;
+  const bin = await getNetbirdBin();
+  const safeBin = bin.replace(/'/g, "'\\''");
+  const restartPath = "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/usr/local/bin";
+
+  try {
+    await onPhase?.("restarting");
+    // Try sudo -n first (no password prompt). If it fails, fall back to an AppleScript
+    // administrator prompt. See https://github.com/raycast/extensions/pull/10995
+    await execAsync(`osascript -e 'do shell script "PATH=${restartPath}; sudo -n ${safeBin} service restart"'`);
+    await waitForDaemon();
+    serviceRestarted = true;
+  } catch (error) {
+    console.error("Failed to restart NetBird service (sudo -n):", error);
     try {
       await execAsync(
-        `osascript -e 'do shell script "${safeBin} service uninstall && ${safeBin} service install && ${safeBin} service start" with administrator privileges'`,
+        `osascript -e 'do shell script "PATH=${restartPath}; ${safeBin} service restart" with administrator privileges'`,
       );
-
-      // Wait for daemon to come back online
-      await new Promise((resolve) => setTimeout(resolve, 500));
-    } catch (error) {
-      console.error("Failed to restart NetBird service:", error);
+      await waitForDaemon();
+      serviceRestarted = true;
+    } catch (fallbackError) {
+      console.error("Failed to restart NetBird service (admin prompt):", fallbackError);
     }
   }
 
-  const newStatus = await getNetbirdStatus();
-  return {
-    version: newStatus.daemonVersion,
-    updated: newStatus.daemonVersion !== currentVersion,
-    latestVersion,
-  };
+  return { version: brewVersion, updated, serviceRestarted };
 }

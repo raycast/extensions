@@ -1,5 +1,9 @@
 # Zotero Changelog
 
+## [Features] - 2026-04-05
+
+- Add "Open PDF in System Viewer" action to open the attachment with the system's default viewer
+
 ## [Features] - 2026-03-23
 
 - Add Pandoc Citation Key copy and paste actions

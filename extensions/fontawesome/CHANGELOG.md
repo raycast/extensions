@@ -1,5 +1,9 @@
 # Font Awesome Changelog
 
+## [Improve API token error handling] - 2026-04-06
+
+- Added a clearer error state for misconfigured custom API tokens while keeping the default no-token free-icon flow working normally.
+
 ## [Fix pro token refresh and kit loading] - 2026-03-27
 
 - Fixed pro icon searches after changing the API token by scoping cached access tokens and expiry timestamps to the selected API token, which prevents the extension from continuing to use the default free token after a pro token is added (ref: [Issue #26096](https://github.com/raycast/extensions/issues/26096#issuecomment-4013620785)).

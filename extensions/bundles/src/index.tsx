@@ -1,0 +1,108 @@
+import { Action, ActionPanel, Icon, List, getPreferenceValues, LaunchProps } from "@raycast/api";
+import React, { useCallback } from "react";
+import FolderContentsView from "./folder-contents";
+import FolderEditForm from "./folder-edit-form";
+import ImportFoldersForm from "./components/import-folders-form";
+import { generateFolderKeywords, getFolderIcon, pluralize } from "./utils";
+import { FolderItemActions } from "./components/folder-item-actions";
+import { useFolderPreviewDetail } from "./components/folder-preview-detail";
+import { useFoldersData, useApplicationsData } from "./hooks";
+import { NO_FOLDERS_VIEW } from "./constants";
+
+interface LaunchContext {
+  folderId?: string;
+  folderName?: string;
+}
+
+export default function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
+  // Handle deeplink context - render folder contents directly if opened via quicklink
+  const context = props.launchContext as LaunchContext | undefined;
+  if (context?.folderId) {
+    return <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Bundle"} />;
+  }
+
+  const { showPreviewPane = false } = getPreferenceValues<Preferences>();
+  const {
+    folders,
+    topLevelFolders,
+    nestedFolders,
+    isLoading: isLoadingFolders,
+    handleSave,
+    handleDelete,
+  } = useFoldersData();
+  const { appMap, isLoading: isLoadingApps } = useApplicationsData();
+
+  const isLoading = isLoadingFolders || isLoadingApps;
+
+  const renderDetail = useFolderPreviewDetail(showPreviewPane, appMap, folders);
+
+  const isEmpty = folders.length === 0 && !isLoading;
+
+  // Create folder action - reused in empty view and folder items
+  const CreateFolderAction = useCallback(
+    () => (
+      <Action.Push
+        title="Create New Bundle"
+        icon={Icon.Plus}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        target={<FolderEditForm onSave={handleSave} navigateToFolderAfterSave={false} />}
+        onPop={handleSave}
+      />
+    ),
+    [handleSave],
+  );
+
+  const renderFolderItem = useCallback(
+    (folder: (typeof folders)[0]) => (
+      <List.Item
+        key={folder.id}
+        id={folder.id}
+        title={folder.name}
+        subtitle={showPreviewPane ? undefined : `${folder.items.length} ${pluralize(folder.items.length, "item")}`}
+        icon={getFolderIcon(folder.icon, folder.color)}
+        keywords={generateFolderKeywords(folder.name)}
+        actions={<FolderItemActions folder={folder} onFolderChange={handleSave} onDelete={handleDelete} />}
+        detail={renderDetail(folder)}
+      />
+    ),
+    [showPreviewPane, renderDetail, handleSave, handleDelete],
+  );
+
+  return (
+    <List isLoading={isLoading} searchBarPlaceholder="Search bundles..." filtering isShowingDetail={showPreviewPane}>
+      {isEmpty ? (
+        <List.EmptyView
+          {...NO_FOLDERS_VIEW}
+          actions={
+            <ActionPanel>
+              <ActionPanel.Section>
+                <CreateFolderAction />
+              </ActionPanel.Section>
+              <ActionPanel.Section title="Backup">
+                <Action.Push
+                  title="Import Bundles"
+                  icon={Icon.Download}
+                  target={<ImportFoldersForm />}
+                  onPop={handleSave}
+                />
+              </ActionPanel.Section>
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <>
+          {topLevelFolders.length > 0 && (
+            <List.Section title="Bundles" subtitle={`${topLevelFolders.length}`}>
+              {topLevelFolders.map(renderFolderItem)}
+            </List.Section>
+          )}
+          {nestedFolders.length > 0 && (
+            <List.Section title="Nested Bundles" subtitle={`${nestedFolders.length}`}>
+              {nestedFolders.map(renderFolderItem)}
+            </List.Section>
+          )}
+        </>
+      )}
+    </List>
+  );
+}

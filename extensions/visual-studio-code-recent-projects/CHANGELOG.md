@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Update] - 2026-04-07
+
+- Added support for Qoder.
+
 ## [Update] - 2026-03-30
 
 - Added support for Lingma.

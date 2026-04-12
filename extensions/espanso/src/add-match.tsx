@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Detail, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { EspansoMatch } from "./lib/types";
 import { appendMatchToFile, formatMatch, getAndSortTargetFiles, getEspansoConfig } from "./lib/utils";
 
 export interface Values {
@@ -37,7 +36,7 @@ export default function Command() {
     onSubmit(values) {
       const { matchFile } = values;
 
-      const espansoMatch: EspansoMatch = {
+      const espansoMatch = {
         triggers: values.trigger
           .split(",")
           .map((t) => t.trim())

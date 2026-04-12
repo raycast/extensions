@@ -23,7 +23,7 @@ interface FileOperationOptions {
 async function moveWithProgress(
   sourcePath: string,
   destPath: string,
-  options: FileOperationOptions
+  options: FileOperationOptions,
 ): Promise<FileOperationResult> {
   try {
     // First copy with progress
@@ -48,7 +48,7 @@ async function moveWithProgress(
 async function copyWithProgress(
   sourcePath: string,
   destPath: string,
-  options: FileOperationOptions
+  options: FileOperationOptions,
 ): Promise<FileOperationResult> {
   return new Promise((resolve) => {
     const stats = fs.statSync(sourcePath);
@@ -68,14 +68,18 @@ async function copyWithProgress(
       resolve({ success: true });
     });
 
-    writeStream.on("error", (error) => {
-      // Clean up the partial destination file
+    const handleError = (error: Error) => {
+      readStream.destroy();
+      writeStream.destroy();
       fs.remove(destPath).catch(() => {});
       resolve({
         success: false,
         error: error instanceof Error ? error : new Error("Unknown error during copy"),
       });
-    });
+    };
+
+    writeStream.on("error", handleError);
+    readStream.on("error", handleError);
 
     readStream.pipe(writeStream);
   });
@@ -129,7 +133,7 @@ export const fsAsync = {
   async moveFile(
     sourcePath: string,
     destPath: string,
-    options: FileOperationOptions = {}
+    options: FileOperationOptions = {},
   ): Promise<FileOperationResult> {
     try {
       // Check if destination exists
@@ -137,16 +141,27 @@ export const fsAsync = {
         throw new Error("Destination already exists");
       }
 
-      // For large files, we might want to use a stream to show progress
-      const stats = await this.getStats(sourcePath);
-      if (stats && stats.size > 10 * 1024 * 1024) {
-        // 10MB
-        return await moveWithProgress(sourcePath, destPath, options);
+      // Try rename first (instant for same-volume moves)
+      try {
+        await fs.move(sourcePath, destPath, { overwrite: options.overwrite });
+        return { success: true };
+      } catch {
+        // Cross-volume move: fall back to streamed copy+delete for progress tracking
+        const stats = await this.getStats(sourcePath);
+        if (stats && stats.size > 10 * 1024 * 1024) {
+          return await moveWithProgress(sourcePath, destPath, options);
+        }
+        // Small cross-volume file: retry with copy+delete (no progress needed)
+        await fs.copy(sourcePath, destPath, { overwrite: options.overwrite });
+        try {
+          await fs.remove(sourcePath);
+        } catch (removeErr) {
+          // Roll back destination if we couldn't remove the source
+          await fs.remove(destPath).catch(() => {});
+          throw removeErr; // let outer catch handle it and report failure
+        }
+        return { success: true };
       }
-
-      // For smaller files, use direct move
-      await fs.move(sourcePath, destPath, { overwrite: options.overwrite });
-      return { success: true };
     } catch (error) {
       return {
         success: false,
@@ -161,7 +176,7 @@ export const fsAsync = {
   async copyFile(
     sourcePath: string,
     destPath: string,
-    options: FileOperationOptions = {}
+    options: FileOperationOptions = {},
   ): Promise<FileOperationResult> {
     try {
       // Check if destination exists
@@ -196,7 +211,7 @@ export const fsAsync = {
     options: {
       concurrency?: number;
       onProgress?: (completed: number, total: number) => void;
-    } = {}
+    } = {},
   ): Promise<T[]> {
     const concurrency = options.concurrency || 3;
     const results: T[] = [];
@@ -211,7 +226,7 @@ export const fsAsync = {
           completed++;
           options.onProgress?.(completed, items.length);
           return result;
-        })
+        }),
       );
       results.push(...batchResults);
     }
