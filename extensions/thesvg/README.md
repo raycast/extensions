@@ -28,8 +28,8 @@ Example: `Copy Brand Icon` > `github` copies the GitHub SVG to your clipboard.
 
 ## Preferences
 
-| Setting | Description | Default |
-|---------|-------------|---------|
+| Setting         | Description                                        | Default               |
+| --------------- | -------------------------------------------------- | --------------------- |
 | Default Variant | Which variant to copy (default, mono, light, dark) | Default (Brand Color) |
 
 ## Features

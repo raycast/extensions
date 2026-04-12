@@ -5,7 +5,10 @@
   "description": "Search, preview, and copy 5,600+ brand SVG icons from thesvg.org",
   "icon": "extension-icon.png",
   "author": "thegdsks",
-  "categories": ["Design Tools", "Developer Tools"],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -40,10 +43,22 @@
       "required": false,
       "default": "default",
       "data": [
-        { "title": "Default (Brand Color)", "value": "default" },
-        { "title": "Mono", "value": "mono" },
-        { "title": "Light", "value": "light" },
-        { "title": "Dark", "value": "dark" }
+        {
+          "title": "Default (Brand Color)",
+          "value": "default"
+        },
+        {
+          "title": "Mono",
+          "value": "mono"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        }
       ]
     }
   ],
