@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { CalBookingResp, cancelBooking } from "@api/cal.com";
+import { CalBooking, cancelBooking } from "@api/cal.com";
 import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 
 export interface CancelBookingFormValues {
@@ -7,17 +7,17 @@ export interface CancelBookingFormValues {
 }
 
 interface CancelBookingProps {
-  bookingId: number;
-  mutate: MutatePromise<CalBookingResp["bookings"] | undefined>;
+  bookingUid: string;
+  mutate: MutatePromise<CalBooking[] | undefined>;
 }
 
-export function CancelBooking({ bookingId, mutate }: CancelBookingProps) {
+export function CancelBooking({ bookingUid, mutate }: CancelBookingProps) {
   const { pop } = useNavigation();
 
   const handleCancelBooking = async (reason: string) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Cancelling booking" });
     try {
-      await cancelBooking(bookingId, reason);
+      await cancelBooking(bookingUid, reason);
       toast.style = Toast.Style.Success;
       toast.title = "Booking Cancelled";
       toast.message = "Booking has been successfully cancelled";
@@ -36,7 +36,7 @@ export function CancelBooking({ bookingId, mutate }: CancelBookingProps) {
           return;
         }
 
-        return bookings.map((b) => (b.id === bookingId ? { ...b, status: "CANCELLED" } : b));
+        return bookings.map((b) => (b.uid === bookingUid ? { ...b, status: "cancelled" } : b));
       },
     });
   };

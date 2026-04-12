@@ -6,30 +6,20 @@ import moment from "moment";
 export interface CalUser {
   id: number;
   username: string;
-  name: string;
+  name: string | null;
   email: string;
-  emailVerified: string;
-  bio: string;
-  avatar: string;
+  avatarUrl: string | null;
+  bio: string | null;
   timeZone: string;
   weekStart: string;
-  endTime: number;
-  bufferTime: number;
-  theme: null;
-  defaultScheduleId: number;
-  locale: string;
   timeFormat: number;
-  brandColor: string;
-  darkBrandColor: string;
-  allowDynamicBooking: true;
-  away: false;
-  createdDate: string;
-  verified: false;
-  invitedTo: null;
-}
-
-interface CalUserResp {
-  user: CalUser;
+  defaultScheduleId: number | null;
+  locale: string | null;
+  organizationId: number | null;
+  organization: {
+    isPlatform: boolean;
+    id: number;
+  } | null;
 }
 
 export interface CalEventType {
@@ -37,86 +27,61 @@ export interface CalEventType {
   title: string;
   slug: string;
   description: string;
-  position: number;
   locations: Array<unknown>;
-  length: number;
-  hidden: false;
-  userId: null;
-  teamId: null;
-  eventName: null;
-  timeZone: null;
-  periodType: string;
-  periodStartDate: string;
-  periodEndDate: string;
-  periodDays: null;
-  periodCountCalendarDays: false;
-  requiresConfirmation: false;
-  recurringEvent: null | recurringEvent;
-  disableGuests: false;
-  hideCalendarNotes: false;
+  lengthInMinutes: number;
+  hidden: boolean;
+  ownerId: number | null;
+  teamId: number | null;
+  recurrence: null | Recurrence;
+  confirmationPolicy: object | null;
+  disableGuests: boolean;
+  hideCalendarNotes: boolean;
   minimumBookingNotice: number;
   beforeEventBuffer: number;
   afterEventBuffer: number;
-  seatsPerTimeSlot: null;
-  schedulingType: null;
-  scheduleId: null;
   price: number;
   currency: string;
-  slotInterval: null;
   metadata: object;
-  successRedirectUrl: null;
-  link: string;
+  bookingUrl: string;
 }
 
-interface recurringEvent {
-  freq: number;
-  count: number;
+interface Recurrence {
+  frequency: string;
+  occurrences: number;
   interval: number;
 }
 
-interface CalEventTypeResp {
-  event_types: CalEventType[];
-}
-
-export interface CalBookingResp {
-  bookings: {
+export interface CalBooking {
+  id: number;
+  uid: string;
+  title: string;
+  description: string;
+  start: string;
+  end: string;
+  duration: number;
+  createdAt: string;
+  status: string;
+  meetingUrl: string | null;
+  location: string | null;
+  hosts: {
     id: number;
-    userId: number;
-    description: string;
-    eventTypeId: number;
-    uid: string;
-    title: string;
-    startTime: string;
-    endTime: string;
-    createdAt: string;
-    attendees: {
-      email: string;
-      name: string;
-      timeZone: string;
-      locale: string;
-    }[];
-    user: {
-      email: string;
-      name: string;
-      timeZone: string;
-      locale: string;
-    };
-    payment: {
-      id: number;
-      success: boolean;
-      paymentOption: string;
-    }[];
-    metadata: Record<string, unknown>;
-    status: string;
-    responses: {
-      email: string;
-      name: string;
-      location: {
-        optionValue: string;
-        value: string;
-      };
-    };
+    name: string;
+    email: string;
+    username: string;
+    timeZone: string;
   }[];
+  attendees: {
+    email: string;
+    name: string;
+    timeZone: string;
+    locale: string;
+  }[];
+  eventType: {
+    id: number;
+    slug: string;
+  } | null;
+  bookingFieldsResponses: Record<string, unknown> | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface CreatePrivateLinkResponse {
@@ -127,41 +92,24 @@ interface CreatePrivateLinkResponse {
   expiresAt: string;
 }
 
-export interface updateBookingContent {
-  status: string;
-}
-
-const defaultBaseUrl = "https://api.cal.com/v1/";
-const apiV2BaseUrl = "https://api.cal.com/v2/";
 const { token } = getPreferenceValues<Preferences>();
 
 const api = axios.create({
-  baseURL: defaultBaseUrl,
-  params: { apiKey: token },
-});
-
-const apiV2 = axios.create({
-  baseURL: apiV2BaseUrl,
+  baseURL: "https://api.cal.com/v2/",
   headers: {
     Authorization: `Bearer ${token}`,
   },
 });
 
 async function calAPI<T>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = await api.request<T>({ method, ...props });
-  return resp.data;
-}
-
-async function calAPIV2<T>({ method = "GET", ...props }: AxiosRequestConfig) {
-  const resp = await apiV2.request<{ data: T }>({ method, ...props });
+  const resp = await api.request<{ status: string; data: T }>({ method, ...props });
   return resp.data.data;
 }
 
 export function useCurrentUser() {
   return useCachedPromise(
     async () => {
-      const data = await calAPI<CalUserResp>({ url: "/me" });
-      return data.user;
+      return await calAPI<CalUser>({ url: "/me" });
     },
     [],
     { failureToastOptions: { title: "Unable to load current user" } },
@@ -171,8 +119,10 @@ export function useCurrentUser() {
 export function useEventTypes() {
   return useCachedPromise(
     async () => {
-      const data = await calAPI<CalEventTypeResp>({ url: "/event-types" });
-      return data.event_types.sort((a, b) => b.position - a.position);
+      return await calAPI<CalEventType[]>({
+        url: "/event-types",
+        headers: { "cal-api-version": "2024-06-14" },
+      });
     },
     [],
     { failureToastOptions: { title: "Unable to load event types" } },
@@ -182,34 +132,45 @@ export function useEventTypes() {
 export function useBookings() {
   return useCachedPromise(
     async () => {
-      const data = await calAPI<CalBookingResp>({ url: "/bookings" });
-      return data.bookings.sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime());
+      const data = await calAPI<CalBooking[]>({
+        url: "/bookings",
+        headers: { "cal-api-version": "2026-02-25" },
+      });
+      return data.sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
     },
     [],
     { failureToastOptions: { title: "Unable to load bookings" } },
   );
 }
 
-export function updateBooking(bookingId: number, data: updateBookingContent) {
+export function confirmBooking(bookingUid: string) {
   return calAPI({
-    method: "PATCH",
-    url: `/bookings/${bookingId}`,
-    data,
+    method: "POST",
+    url: `/bookings/${bookingUid}/confirm`,
+    headers: { "cal-api-version": "2026-02-25" },
   });
 }
 
-export function cancelBooking(bookingId: number, reason: string) {
+export function declineBooking(bookingUid: string, reason?: string) {
   return calAPI({
-    method: "DELETE",
-    url: `/bookings/${bookingId}/cancel`,
-    params: {
-      cancellationReason: reason,
-    },
+    method: "POST",
+    url: `/bookings/${bookingUid}/decline`,
+    headers: { "cal-api-version": "2026-02-25" },
+    data: reason ? { reason } : undefined,
+  });
+}
+
+export function cancelBooking(bookingUid: string, reason: string) {
+  return calAPI({
+    method: "POST",
+    url: `/bookings/${bookingUid}/cancel`,
+    headers: { "cal-api-version": "2026-02-25" },
+    data: { cancellationReason: reason },
   });
 }
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
-  return calAPIV2<CreatePrivateLinkResponse>({
+  return calAPI<CreatePrivateLinkResponse>({
     method: "POST",
     url: `/event-types/${eventTypeId}/private-links`,
     data: {

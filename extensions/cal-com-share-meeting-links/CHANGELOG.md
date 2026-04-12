@@ -1,5 +1,14 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Fix: Migrate to Cal.com API v2] - {PR_MERGE_DATE}
+
+- Migrate all API calls from Cal.com API v1 to v2 (v1 was permanently shut down on April 8, 2026)
+- Update authentication from query parameter to Bearer token header
+- Add required `cal-api-version` headers for all endpoints
+- Replace booking status update with separate confirm/decline endpoints (removes "Pending" option which is no longer supported)
+- Update cancel booking from DELETE to POST with request body
+- Use v2 field names (`meetingUrl`, `location`, `lengthInMinutes`, `recurrence`, etc.)
+
 ## [Generate private links] - 2025-10-28
 
 - Adds an action inside "Share Meeting Link" to generate and copy a one-time use private link (⌘ + S).
