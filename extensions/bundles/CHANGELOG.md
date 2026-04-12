@@ -1,14 +1,11 @@
-# Bundles Changelog
+# Bundles
 
-## [iCloud Sync] - {PR_MERGE_DATE}
+## [iCloud Sync and Bug Fixes] - {PR_MERGE_DATE}
 
 - Bundles now sync automatically across Macs via iCloud Drive
 - Data stored in `~/iCloud Drive/Raycast Bundles/bundles.json`
 - Falls back to local storage if iCloud Drive is unavailable
 - Existing data is migrated to iCloud automatically on first run
-
-## [Bug Fixes & Cleanup] - {PR_MERGE_DATE}
-
 - Fixed "recent" sort direction being inverted (labels now match actual behavior)
 - Fixed React hooks being called conditionally in the main command
 - Fixed "Bundle not found" message flashing during initial load
