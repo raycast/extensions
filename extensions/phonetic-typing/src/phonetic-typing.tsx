@@ -118,12 +118,20 @@ export default function PhoneticTyping() {
       setIsLoading(true);
       try {
         const key = `${lang}:${trimmed}`;
-        if (!cache.current.has(key)) {
+        let fetched = cache.current.get(key);
+        if (!fetched) {
           if (controller.signal.aborted) return;
-          cache.current.set(key, await fetchSuggestions(trimmed, lang));
+          fetched = await fetchSuggestions(trimmed, lang);
+          cache.current.set(key, fetched);
         }
         if (!controller.signal.aborted) {
-          setSuggestions(cache.current.get(key)!);
+          // If user pressed Space while fetch was in-flight, auto-commit now
+          if (searchText.endsWith(" ") && fetched.length > 0) {
+            commitWord(fetched[0]);
+            setSearchText("");
+            return;
+          }
+          setSuggestions(fetched);
         }
       } catch (err) {
         if (!controller.signal.aborted) {
@@ -138,7 +146,7 @@ export default function PhoneticTyping() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [searchText, lang]);
+  }, [searchText, lang, commitWord]);
 
   const composedText = composedWords.join(" ");
   const langMeta = LANGUAGES.find((l) => l.code === lang);
