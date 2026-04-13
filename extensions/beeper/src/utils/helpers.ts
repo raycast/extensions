@@ -1,6 +1,6 @@
 import BeeperDesktop from "@beeper/desktop-api";
 import { existsSync } from "node:fs";
-import { homedir } from "node:os";
+import { homedir, platform } from "node:os";
 import { join } from "node:path";
 
 export const parseDate = (value?: string) => {
@@ -15,7 +15,13 @@ export const getMessageID = (message: BeeperDesktop.Message & { messageID?: stri
   message.messageID ?? message.id;
 
 export const getBeeperAppPath = () => {
-  const candidates = ["/Applications/Beeper Desktop.app", join(homedir(), "Applications", "Beeper Desktop.app")];
+  const candidates =
+    platform() === "win32"
+      ? [
+          join(process.env.LOCALAPPDATA || "", "Programs", "Beeper", "Beeper.exe"),
+          join(homedir(), "AppData", "Local", "Programs", "Beeper", "Beeper.exe"),
+        ]
+      : ["/Applications/Beeper Desktop.app", join(homedir(), "Applications", "Beeper Desktop.app")];
   return candidates.find((path) => existsSync(path));
 };
 
