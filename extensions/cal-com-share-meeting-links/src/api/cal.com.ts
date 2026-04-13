@@ -211,19 +211,21 @@ export function createPrivateLinkForEventType(eventTypeId: number, signal: Abort
 
 const SCHEDULES_API_VERSION = "2024-06-11";
 
+// Hoisted so every `useSchedules` call shares the SAME function reference.
+// useCachedPromise namespaces its cache by the function's hash; two inline
+// arrow functions can hash differently, which would split the cache between
+// callers (e.g. ViewAvailability vs. ScheduleDetail) and break propagation.
+async function fetchSchedules(): Promise<CalSchedule[]> {
+  const data = await calAPI<CalSchedule[]>({
+    url: "/schedules",
+    headers: { "cal-api-version": SCHEDULES_API_VERSION },
+  });
+  // Default schedule first, otherwise preserve API order.
+  return [...data].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
+}
+
 export function useSchedules() {
-  return useCachedPromise(
-    async () => {
-      const data = await calAPI<CalSchedule[]>({
-        url: "/schedules",
-        headers: { "cal-api-version": SCHEDULES_API_VERSION },
-      });
-      // Default schedule first, otherwise preserve API order.
-      return [...data].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
-    },
-    [],
-    { failureToastOptions: { title: "Unable to load schedules" } },
-  );
+  return useCachedPromise(fetchSchedules, [], { failureToastOptions: { title: "Unable to load schedules" } });
 }
 
 export function updateSchedule(id: number, patch: CalSchedulePatch, signal?: AbortSignal) {
