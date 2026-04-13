@@ -19,6 +19,21 @@ const STORAGE_KEY = "selected-model";
 const DEFAULT_MODEL = "openai";
 const MODELS_URL = "https://gen.pollinations.ai/v1/models";
 
+// ─── Module-level cache & event emitter ──────────────────────────────────────
+// Raycast freezes parent views when a child is pushed, so React state updates
+// from within a pushed view don't propagate back until pop — by which time the
+// render has already happened with stale state.
+// Solution: keep a synchronous module-level cache and notify all hook instances
+// immediately when the model changes.
+
+let _modelCache: string = DEFAULT_MODEL;
+const _listeners = new Set<(model: string) => void>();
+
+function notifyModelChange(model: string) {
+  _modelCache = model;
+  _listeners.forEach((fn) => fn(model));
+}
+
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
 export async function getStoredModel(): Promise<string> {
@@ -26,6 +41,7 @@ export async function getStoredModel(): Promise<string> {
 }
 
 export async function storeModel(model: string): Promise<void> {
+  notifyModelChange(model); // update cache + all hooks synchronously
   await LocalStorage.setItem(STORAGE_KEY, model);
 }
 
@@ -87,16 +103,26 @@ function parseModels(
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useModels() {
-  // Start with undefined to distinguish "not loaded yet" from "loaded as default"
-  const [selectedModel, setSelectedModelState] = useState<string | undefined>(
-    undefined,
-  );
+  // Initialize from module-level cache (synchronous — no flash of wrong model)
+  const [selectedModel, setSelectedModelState] = useState<string>(_modelCache);
   const [models, setModels] = useState<PollinationsModel[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Load persisted model selection first
+  // On first mount, read from LocalStorage to restore persisted selection
   useEffect(() => {
-    getStoredModel().then(setSelectedModelState);
+    getStoredModel().then((stored) => {
+      if (stored !== _modelCache) notifyModelChange(stored);
+      else setSelectedModelState(stored);
+    });
+  }, []);
+
+  // Subscribe to model changes from any hook instance or navigation level
+  useEffect(() => {
+    const handler = (model: string) => setSelectedModelState(model);
+    _listeners.add(handler);
+    return () => {
+      _listeners.delete(handler);
+    };
   }, []);
 
   // Fetch live model list from gen.pollinations.ai/v1/models (no auth needed)
@@ -126,20 +152,17 @@ export function useModels() {
     fetchModels();
   }, []);
 
-  const resolvedModel = selectedModel ?? DEFAULT_MODEL;
-
   const selectModel = async (model: string) => {
-    setSelectedModelState(model);
-    await storeModel(model);
+    await storeModel(model); // notifyModelChange inside → updates all listeners
   };
 
-  const activeModel = models.find((m) => m.name === resolvedModel);
+  const activeModel = models.find((m) => m.name === selectedModel);
 
   return {
     models,
-    selectedModel: resolvedModel,
+    selectedModel,
     activeModel,
     selectModel,
-    isLoadingModels: isLoadingModels || selectedModel === undefined,
+    isLoadingModels,
   };
 }
