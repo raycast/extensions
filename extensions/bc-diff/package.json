@@ -1,0 +1,45 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bc-diff",
+  "title": "Beyond Compare Diff",
+  "description": "Compare the last two clipboard entries in Beyond Compare",
+  "author": "sjivan",
+  "license": "MIT",
+  "icon": "extension-icon.png",
+  "categories": ["Developer Tools", "Productivity"],
+  "platforms": ["macOS"],
+  "screenshots": [
+    { "file": "bc-diff-1.png" },
+    { "file": "bc-diff-2.png" },
+    { "file": "bc-diff-3.png" },
+    { "file": "bc-diff-4.png" },
+    { "file": "bc-diff-5.png" }
+  ],
+  "commands": [
+    {
+      "name": "bc-diff",
+      "title": "Compare Clipboard in Beyond Compare",
+      "description": "Compare the last two clipboard entries in Beyond Compare",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
