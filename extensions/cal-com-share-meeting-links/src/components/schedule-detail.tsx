@@ -116,6 +116,7 @@ export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
                     <Action
                       title="Clear Day"
                       icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
                       onAction={() => handleClearDay(day)}
                     />
                   )}
@@ -146,6 +147,7 @@ export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
                 <Action
                   title="Delete Override"
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={() => handleDeleteOverride(o.date)}
                 />
               </ActionPanel>

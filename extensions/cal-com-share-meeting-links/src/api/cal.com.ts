@@ -214,10 +214,12 @@ const SCHEDULES_API_VERSION = "2024-06-11";
 export function useSchedules() {
   return useCachedPromise(
     async () => {
-      return await calAPI<CalSchedule[]>({
+      const data = await calAPI<CalSchedule[]>({
         url: "/schedules",
         headers: { "cal-api-version": SCHEDULES_API_VERSION },
       });
+      // Default schedule first, otherwise preserve API order.
+      return [...data].sort((a, b) => Number(b.isDefault) - Number(a.isDefault));
     },
     [],
     { failureToastOptions: { title: "Unable to load schedules" } },
