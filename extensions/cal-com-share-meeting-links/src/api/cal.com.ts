@@ -171,6 +171,86 @@ export function useBookings() {
   );
 }
 
+const BOOKINGS_API_VERSION = "2026-02-25";
+
+interface BookingsListParams {
+  status: "upcoming" | "unconfirmed" | "past" | "cancelled" | "recurring";
+  sortStart: "asc" | "desc";
+  take: number;
+  skip?: number;
+}
+
+async function fetchBookings(params: BookingsListParams): Promise<CalBooking[]> {
+  return calAPI<CalBooking[]>({
+    url: "/bookings",
+    headers: { "cal-api-version": BOOKINGS_API_VERSION },
+    params,
+  });
+}
+
+async function fetchPendingBookings(): Promise<CalBooking[]> {
+  return fetchBookings({ status: "unconfirmed", sortStart: "asc", take: 100 });
+}
+
+async function fetchUpcomingBookings(): Promise<CalBooking[]> {
+  return fetchBookings({ status: "upcoming", sortStart: "asc", take: 100 });
+}
+
+async function fetchCancelledBookings(): Promise<CalBooking[]> {
+  return fetchBookings({ status: "cancelled", sortStart: "desc", take: 50 });
+}
+
+const PAST_PAGE_SIZE = 50;
+
+// Inner paginator hoisted to a stable module-level reference. Raycast's paginated
+// useCachedPromise calls this with `{ page, lastItem?, cursor? }` (PaginationOptions).
+async function fetchPastBookingsPage({ page }: { page: number }): Promise<{ data: CalBooking[]; hasMore: boolean }> {
+  const data = await fetchBookings({
+    status: "past",
+    sortStart: "desc",
+    take: PAST_PAGE_SIZE,
+    skip: page * PAST_PAGE_SIZE,
+  });
+  return { data, hasMore: data.length === PAST_PAGE_SIZE };
+}
+
+// Curried wrapper matching Raycast's `FunctionReturningPaginatedPromise` shape:
+//   `(...args) => (paginationOptions) => Promise<{ data, hasMore }>`.
+// The OUTER reference (fetchPastBookingsPaginator) is stable across renders, so
+// useCachedPromise's cache namespace (derived from object_hash(fn)) stays consistent.
+function fetchPastBookingsPaginator() {
+  return fetchPastBookingsPage;
+}
+
+export function usePendingBookings() {
+  return useCachedPromise(fetchPendingBookings, [], {
+    failureToastOptions: { title: "Unable to load pending bookings" },
+  });
+}
+
+export function useUpcomingBookings() {
+  return useCachedPromise(fetchUpcomingBookings, [], {
+    failureToastOptions: { title: "Unable to load upcoming bookings" },
+  });
+}
+
+/**
+ * Fetches cancelled bookings. Pass `execute=false` to skip the network call
+ * (used when the Cancelled section is hidden).
+ */
+export function useCancelledBookings(execute: boolean) {
+  return useCachedPromise(fetchCancelledBookings, [], {
+    execute,
+    failureToastOptions: { title: "Unable to load cancelled bookings" },
+  });
+}
+
+export function usePastBookings() {
+  return useCachedPromise(fetchPastBookingsPaginator, [], {
+    failureToastOptions: { title: "Unable to load past bookings" },
+  });
+}
+
 export function confirmBooking(bookingUid: string) {
   return calAPI({
     method: "POST",
