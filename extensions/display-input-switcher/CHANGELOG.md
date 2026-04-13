@@ -1,6 +1,6 @@
 # Display Input Switcher Changelog
 
-## [Added HDMI 3 source option] - {PR_MERGE_DATE}
+## [Added HDMI 3 source option] - 2026-04-13
 
 - Added HDMI 3 / Alt DP 2 to the list of available display input sources
 
