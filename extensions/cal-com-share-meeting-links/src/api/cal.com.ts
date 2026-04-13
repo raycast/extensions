@@ -263,6 +263,19 @@ export function cancelBooking(bookingUid: string, reason: string) {
   });
 }
 
+/**
+ * Requests an attendee to reschedule a booking. Per Cal.com docs, this cancels
+ * the original booking and emails the attendee a link to pick a new time.
+ */
+export function requestRescheduleBooking(bookingUid: string, reason: string) {
+  return calAPI({
+    method: "POST",
+    url: `/bookings/${bookingUid}/request-reschedule`,
+    headers: { "cal-api-version": "2026-02-25" },
+    data: { rescheduleReason: reason },
+  });
+}
+
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
   return calAPI<CreatePrivateLinkResponse>({
     method: "POST",

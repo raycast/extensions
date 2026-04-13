@@ -13,6 +13,7 @@ import {
   useUpcomingBookings,
 } from "@api/cal.com";
 import { CancelBooking } from "@components/cancel-booking";
+import { RequestReschedule } from "@components/request-reschedule";
 import { iconForBookingStatus } from "@/lib/bookings";
 
 export default function viewBookings() {
@@ -282,6 +283,18 @@ export default function viewBookings() {
                   onAction={() => handleDecline(item)}
                 />
                 <Action.Push
+                  title="Request Reschedule"
+                  icon={{ source: Icon.Calendar, tintColor: Color.Orange }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  target={
+                    <RequestReschedule
+                      bookingUid={item.uid}
+                      mutate={pending.mutate}
+                      onAfterReschedule={handleAfterCancel}
+                    />
+                  }
+                />
+                <Action.Push
                   title="Cancel Booking"
                   icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
@@ -300,14 +313,28 @@ export default function viewBookings() {
           {filteredUpcoming!.map((item) =>
             renderItem(
               item,
-              <Action.Push
-                title="Cancel Booking"
-                icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                target={
-                  <CancelBooking bookingUid={item.uid} mutate={upcoming.mutate} onAfterCancel={handleAfterCancel} />
-                }
-              />,
+              <>
+                <Action.Push
+                  title="Request Reschedule"
+                  icon={{ source: Icon.Calendar, tintColor: Color.Orange }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  target={
+                    <RequestReschedule
+                      bookingUid={item.uid}
+                      mutate={upcoming.mutate}
+                      onAfterReschedule={handleAfterCancel}
+                    />
+                  }
+                />
+                <Action.Push
+                  title="Cancel Booking"
+                  icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  target={
+                    <CancelBooking bookingUid={item.uid} mutate={upcoming.mutate} onAfterCancel={handleAfterCancel} />
+                  }
+                />
+              </>,
             ),
           )}
         </List.Section>
