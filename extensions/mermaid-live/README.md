@@ -1,27 +1,20 @@
-<div align="center">
-  <img src="assets/extension-icon.png" alt="Mermaid Live Icon" width="120"/>
-
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
-    <img alt="Mermaid Live — Real-time diagram visualization for Raycast" src="assets/banner-light.svg" width="100%">
-  </picture>
-
-[![Raycast](https://img.shields.io/badge/Raycast-Extension-FF6363?style=flat&logo=raycast&logoColor=white)](https://raycast.com) [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-
-</div>
+# Mermaid Live
 
 Instantly render Mermaid diagrams from your clipboard with automatic monitoring (1-second polling), persistent history with search and pinning, and seamless Mermaid Live Editor integration. Built for diagram-driven workflows.
 
 ## ✨ Features
 
 ### 🎯 Real-time Clipboard Monitoring
+
 - Copy any Mermaid code → see it rendered automatically
 - No need to close and reopen — diagrams update in real-time
 - 1-second polling for instant feedback
 - Smart detection of 13+ Mermaid diagram types
 
 ### 📊 Instant Rendering
+
 All Mermaid diagram types supported via [mermaid.ink](https://mermaid.ink):
+
 - Flowcharts & sequence diagrams
 - Class, state, and ER diagrams
 - Gantt charts & pie charts
@@ -29,6 +22,7 @@ All Mermaid diagram types supported via [mermaid.ink](https://mermaid.ink):
 - Mind maps, timelines & quadrant charts
 
 ### 📚 Smart History Management
+
 - **Auto-save**: Every rendered diagram saved automatically
 - **Deduplication**: Same diagram? Updates last accessed time
 - **Search**: Filter by diagram name
@@ -40,6 +34,7 @@ All Mermaid diagram types supported via [mermaid.ink](https://mermaid.ink):
 ### ⚡ Quick Actions
 
 **Render Command** (`⌘ + Space` → "Render Mermaid")
+
 - `⌘ + R` — Rename current diagram (if saved)
 - `⌘ + S` — Save to history (if not saved)
 - `⌘ + H` — Open History
@@ -48,6 +43,7 @@ All Mermaid diagram types supported via [mermaid.ink](https://mermaid.ink):
 - `⌘ + ⇧ + C` — Copy image URL
 
 **History Command** (`⌘ + Space` → "Mermaid History")
+
 - `⌘ + I` — Pin/unpin diagram
 - `⌘ + R` — Rename diagram
 - `⌘ + D` — Delete diagram
@@ -57,24 +53,26 @@ All Mermaid diagram types supported via [mermaid.ink](https://mermaid.ink):
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="metadata/mermaid-live-render.png" alt="Rendering a flowchart diagram" width="100%"/>
+  <img src="media/mermaid-live-render.png" alt="Rendering a flowchart diagram" width="100%"/>
   <p><em>Automatic rendering with metadata panel showing save status, diagram stats, and quick actions</em></p>
 
   <br/>
 
-  <img src="metadata/mermaid-live-history.png" alt="History management view" width="100%"/>
+  <img src="media/mermaid-live-history.png" alt="History management view" width="100%"/>
   <p><em>Search, pin, and manage all your diagrams in one place</em></p>
 </div>
 
 ## 🚀 Installation
 
 ### From Raycast Store (Recommended)
+
 1. Open Raycast (`⌘ + Space`)
 2. Type "Store" → Enter
 3. Search "Mermaid Live"
 4. Click "Install"
 
 ### From Source
+
 ```bash
 git clone https://github.com/rendis/mermaid-live-raycast.git
 cd mermaid-live-raycast
@@ -85,6 +83,7 @@ npm run dev
 ## 💡 Usage
 
 ### Quick Start
+
 1. Copy Mermaid code to clipboard:
    ```
    graph TD
@@ -96,6 +95,7 @@ npm run dev
 4. Watch the magic happen ✨
 
 ### Working with History
+
 1. Rendered diagrams auto-save to history
 2. Open "Mermaid History" from Raycast
 3. Pin important diagrams (`⌘ + I`)
@@ -103,6 +103,7 @@ npm run dev
 5. Search by name to find quickly
 
 ### Edit Workflow
+
 1. Render a diagram
 2. Click "Edit in Mermaid Live" (or press Enter on the action)
 3. Opens [mermaid.live](https://mermaid.live) with your diagram pre-loaded
@@ -128,6 +129,7 @@ npm run dev
 ```
 
 **Tech Stack:**
+
 - **Framework**: [Raycast API](https://developers.raycast.com) v1.104.5
 - **Language**: TypeScript 5.0+
 - **Rendering**: [mermaid.ink](https://mermaid.ink) (on-demand, no local dependencies)
@@ -158,20 +160,20 @@ npm run publish
 
 Mermaid Live detects and renders all Mermaid diagram types:
 
-| Type | Keyword | Example |
-|------|---------|---------|
+| Type      | Keyword              | Example                       |
+| --------- | -------------------- | ----------------------------- |
 | Flowchart | `graph`, `flowchart` | Process flows, decision trees |
-| Sequence | `sequenceDiagram` | API interactions, protocols |
-| Class | `classDiagram` | UML class structures |
-| State | `stateDiagram` | State machines, FSMs |
-| ER | `erDiagram` | Database schemas |
-| Gantt | `gantt` | Project timelines |
-| Pie | `pie` | Data distributions |
-| Journey | `journey` | User experience flows |
-| Git Graph | `gitGraph` | Branch workflows |
-| Mindmap | `mindmap` | Brainstorming, hierarchies |
-| Timeline | `timeline` | Historical events |
-| Quadrant | `quadrantChart` | Priority matrices |
+| Sequence  | `sequenceDiagram`    | API interactions, protocols   |
+| Class     | `classDiagram`       | UML class structures          |
+| State     | `stateDiagram`       | State machines, FSMs          |
+| ER        | `erDiagram`          | Database schemas              |
+| Gantt     | `gantt`              | Project timelines             |
+| Pie       | `pie`                | Data distributions            |
+| Journey   | `journey`            | User experience flows         |
+| Git Graph | `gitGraph`           | Branch workflows              |
+| Mindmap   | `mindmap`            | Brainstorming, hierarchies    |
+| Timeline  | `timeline`           | Historical events             |
+| Quadrant  | `quadrantChart`      | Priority matrices             |
 
 ## 🎨 Customization
 
@@ -185,15 +187,18 @@ Diagrams use Mermaid's default theme. To customize:
 ## 🐛 Troubleshooting
 
 **Diagram not rendering?**
+
 - Verify Mermaid syntax at [mermaid.live](https://mermaid.live)
 - Check your internet connection (mermaid.ink requires network access)
 - Try copying the code again
 
 **Clipboard not detected?**
+
 - Ensure you have clipboard access enabled for Raycast
 - System Preferences → Security & Privacy → Privacy → Accessibility
 
 **Icon not showing?**
+
 - Rebuild the extension: `npm run build`
 - Restart Raycast dev mode: `npm run dev`
 - If persistent, uninstall/reinstall extension in Raycast

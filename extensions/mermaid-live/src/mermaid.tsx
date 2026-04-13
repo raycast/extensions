@@ -10,8 +10,8 @@ import {
   useNavigation,
   Icon,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
-import pako from "pako";
+import { useEffect, useRef, useState } from "react";
+import { encodeMermaid, detectDiagramType, HistoryItem } from "./utils";
 
 interface State {
   markdown?: string;
@@ -21,26 +21,15 @@ interface State {
   lastUpdated?: Date;
 }
 
-interface HistoryItem {
-  id: string;
-  code: string;
-  name: string;
-  createdAt: string;
-  lastAccessed: string;
-  isPinned: boolean;
-}
-
 export default function Command() {
   const [state, setState] = useState<State>({ isLoading: true });
-  const [lastClipboard, setLastClipboard] = useState<string | undefined>(undefined);
-  const [isFirstRender, setIsFirstRender] = useState(true);
+  const lastClipboardRef = useRef<string | undefined>(undefined);
   const [currentHistoryItem, setCurrentHistoryItem] = useState<HistoryItem | null>(null);
 
   // Load the last saved diagram on startup
   useEffect(() => {
     async function loadSavedDiagram() {
       try {
-        // Migrate existing data if necessary
         await migrateHistoryData();
 
         const savedCode = await LocalStorage.getItem<string>("lastMermaidCode");
@@ -51,7 +40,6 @@ export default function Command() {
           const imageUrl = `https://mermaid.ink/img/pako:${encoded}`;
           const markdown = `# Mermaid Diagram\n\n![Diagram](${imageUrl}?raycast-width=900)`;
 
-          // Check if it exists in history
           const historyItem = await findHistoryItemByCode(savedCode);
           setCurrentHistoryItem(historyItem);
 
@@ -61,7 +49,6 @@ export default function Command() {
             mermaidCode: savedCode,
             lastUpdated: savedTimestamp ? new Date(savedTimestamp) : undefined,
           });
-          setIsFirstRender(false);
         } else {
           setState((prev) => ({ ...prev, isLoading: false }));
         }
@@ -74,38 +61,27 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    let isMounted = true; // Flag to prevent setState on unmounted component
+    let isMounted = true;
 
     async function loadAndRender() {
       try {
-        // 1. Read from clipboard
         const clipboardText = await Clipboard.readText();
 
-        // If clipboard hasn't changed, do nothing
-        if (clipboardText === lastClipboard) {
-          return;
-        }
+        if (clipboardText === lastClipboardRef.current) return;
+        if (!isMounted) return;
 
-        if (!isMounted) return; // Don't update if unmounted
-
-        // Update last known clipboard
-        setLastClipboard(clipboardText);
+        lastClipboardRef.current = clipboardText;
 
         if (!clipboardText) {
-          // Empty clipboard - show informative state
-          if (!isMounted) return;
-          setState({
+          setState((prev) => ({
+            ...prev,
             isLoading: false,
-            markdown: undefined,
             error: new Error("EMPTY_CLIPBOARD"),
-          });
+          }));
           return;
         }
 
-        // 2. Validate that it's Mermaid code (basic)
         if (!isMermaidCode(clipboardText)) {
-          // Not Mermaid - keep last valid diagram or show informative state
-          if (!isMounted) return;
           setState((prev) => ({
             ...prev,
             isLoading: false,
@@ -114,26 +90,19 @@ export default function Command() {
           return;
         }
 
-        // Show loading while rendering
-        if (!isMounted) return;
-        setState({
+        // Preserve previous mermaidCode during loading to avoid action panel flash
+        setState((prev) => ({
+          ...prev,
           isLoading: true,
           markdown: undefined,
           error: undefined,
-          mermaidCode: undefined,
-        });
+        }));
 
-        // 3. Encode using pako format
         const encoded = encodeMermaid(clipboardText);
-
-        // 4. Generate URL
         const imageUrl = `https://mermaid.ink/img/pako:${encoded}`;
-
-        // 5. Create markdown for Detail (no timestamp, only in metadata)
-        // Use raycast-width to make the image larger in the panel
         const markdown = `# Mermaid Diagram\n\n![Diagram](${imageUrl}?raycast-width=900)`;
-
         const now = new Date();
+
         if (!isMounted) return;
         setState({
           markdown,
@@ -142,44 +111,31 @@ export default function Command() {
           lastUpdated: now,
         });
 
-        // Save to LocalStorage for persistence
         await LocalStorage.setItem("lastMermaidCode", clipboardText);
         await LocalStorage.setItem("lastUpdatedTimestamp", now.toISOString());
 
-        // Save to history (avoiding duplicates) and get the item
         const historyItem = await saveToHistory(clipboardText);
         if (!isMounted) return;
         setCurrentHistoryItem(historyItem);
-
-        // Mark that this is no longer the first render
-        if (isFirstRender) {
-          setIsFirstRender(false);
-        }
       } catch (error) {
         if (!isMounted) return;
-        setState({
+        setState((prev) => ({
+          ...prev,
           isLoading: false,
           error: error instanceof Error ? error : new Error(String(error)),
-        });
+        }));
       }
     }
 
-    // Load immediately
     loadAndRender();
-
-    // Poll every 1 second to detect clipboard changes
     const interval = setInterval(loadAndRender, 1000);
 
-    // Cleanup on unmount
     return () => {
-      isMounted = false; // Mark as unmounted
+      isMounted = false;
       clearInterval(interval);
     };
-  }, [lastClipboard, isFirstRender]); // Add correct dependencies
+  }, []);
 
-  // Toast removed - visual feedback will be on screen
-
-  // Show error toast only for real errors (not for empty or invalid clipboard)
   useEffect(() => {
     if (state.error && state.error.message !== "EMPTY_CLIPBOARD" && state.error.message !== "INVALID_MERMAID") {
       showToast({
@@ -213,7 +169,19 @@ graph TD
 
 Need help? Check out [Mermaid Documentation](https://mermaid.js.org/)`;
 
-    return <Detail markdown={emptyMarkdown} navigationTitle="Mermaid Diagram - Watching" />;
+    return (
+      <Detail
+        markdown={emptyMarkdown}
+        isLoading={false}
+        navigationTitle="Mermaid Diagram - Watching"
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Mermaid Live Editor" url="https://mermaid.live/" />
+            <Action.OpenInBrowser title="View Documentation" url="https://mermaid.js.org/" />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   // State: Content is not Mermaid
@@ -231,8 +199,8 @@ Your clipboard contains text, but it doesn't match any known Mermaid diagram typ
 ### Supported Diagram Types:
 - 📊 \`graph\` / \`flowchart\` - Flowcharts
 - 🔄 \`sequenceDiagram\` - Sequence diagrams
-- 📦 \`classDiagram\` - Class diagrams
-- 🎯 \`stateDiagram\` - State diagrams
+- 📦 \`classDiagram\` / \`classDiagram-v2\` - Class diagrams
+- 🎯 \`stateDiagram\` / \`stateDiagram-v2\` - State diagrams
 - 🗂️ \`erDiagram\` - Entity relationship diagrams
 - 📅 \`gantt\` - Gantt charts
 - 🥧 \`pie\` - Pie charts
@@ -256,6 +224,7 @@ Try copying some Mermaid code and run this command again!
     return (
       <Detail
         markdown={invalidMarkdown}
+        isLoading={false}
         navigationTitle="Mermaid Diagram"
         actions={
           <ActionPanel>
@@ -409,7 +378,9 @@ function isMermaidCode(text: string): boolean {
     "flowchart",
     "sequenceDiagram",
     "classDiagram",
+    "classDiagram-v2",
     "stateDiagram",
+    "stateDiagram-v2",
     "erDiagram",
     "gantt",
     "pie",
@@ -422,6 +393,7 @@ function isMermaidCode(text: string): boolean {
 
   return mermaidKeywords.some(
     (keyword) =>
+      trimmed === keyword ||
       trimmed.startsWith(keyword + " ") ||
       trimmed.startsWith(keyword + "\n") ||
       trimmed.includes(`\n${keyword} `) ||
@@ -429,52 +401,39 @@ function isMermaidCode(text: string): boolean {
   );
 }
 
-function encodeMermaid(mermaidCode: string): string {
-  // Create object with mermaid.ink format
-  const graphObject = {
-    code: mermaidCode,
-    mermaid: JSON.stringify({ theme: "default" }),
-  };
-
-  // Convert to JSON and compress with pako (deflate)
-  const jsonString = JSON.stringify(graphObject);
-  const compressed = pako.deflate(jsonString);
-
-  // Convert to URL-safe base64
-  const base64 = Buffer.from(compressed).toString("base64");
-  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-
 // History management functions
 async function saveToHistory(code: string): Promise<HistoryItem> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
-  const history: HistoryItem[] = historyJson ? JSON.parse(historyJson) : [];
+  let history: HistoryItem[] = [];
+  if (historyJson) {
+    try {
+      history = JSON.parse(historyJson);
+    } catch {
+      history = [];
+    }
+  }
 
   const now = new Date().toISOString();
 
-  // Check if already exists (avoid duplicates by code)
   const existingIndex = history.findIndex((item) => item.code === code);
   let currentItem: HistoryItem;
 
   if (existingIndex !== -1) {
-    // Update last accessed time of existing item
     history[existingIndex].lastAccessed = now;
     currentItem = history[existingIndex];
   } else {
-    // Create new item with auto-generated name
     const diagramType = detectDiagramType(code);
     currentItem = {
       id: generateId(),
       code,
-      name: `${diagramType} - ${new Date().toLocaleDateString()}`,
+      name: `${diagramType} - ${new Date().toLocaleDateString("en-US")}`,
       createdAt: now,
       lastAccessed: now,
       isPinned: false,
     };
-    history.unshift(currentItem); // Add at beginning
+    history.unshift(currentItem);
   }
 
-  // Sort before limiting: pinned first, then by lastAccessed
   const sortedHistory = history.sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
     if (!a.isPinned && b.isPinned) return 1;
@@ -489,36 +448,27 @@ async function saveToHistory(code: string): Promise<HistoryItem> {
 async function findHistoryItemByCode(code: string): Promise<HistoryItem | null> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
   if (!historyJson) return null;
-  const history: HistoryItem[] = JSON.parse(historyJson);
-  return history.find((item) => item.code === code) || null;
+  try {
+    const history: HistoryItem[] = JSON.parse(historyJson);
+    return history.find((item) => item.code === code) || null;
+  } catch {
+    return null;
+  }
 }
 
 async function renameCurrentDiagram(code: string, newName: string): Promise<void> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
   if (!historyJson) return;
-  const history: HistoryItem[] = JSON.parse(historyJson);
-  const item = history.find((item) => item.code === code);
-  if (item) {
-    item.name = newName;
-    await LocalStorage.setItem("mermaid-history", JSON.stringify(history));
+  try {
+    const history: HistoryItem[] = JSON.parse(historyJson);
+    const item = history.find((item) => item.code === code);
+    if (item) {
+      item.name = newName;
+      await LocalStorage.setItem("mermaid-history", JSON.stringify(history));
+    }
+  } catch {
+    // Corrupted data — skip rename
   }
-}
-
-function detectDiagramType(code: string): string {
-  const trimmed = code.trim();
-  if (trimmed.startsWith("graph") || trimmed.startsWith("flowchart")) return "Flowchart";
-  if (trimmed.includes("sequenceDiagram")) return "Sequence";
-  if (trimmed.includes("classDiagram")) return "Class";
-  if (trimmed.includes("stateDiagram")) return "State";
-  if (trimmed.includes("erDiagram")) return "ER";
-  if (trimmed.includes("gantt")) return "Gantt";
-  if (trimmed.includes("pie")) return "Pie";
-  if (trimmed.includes("journey")) return "Journey";
-  if (trimmed.includes("gitGraph")) return "Git";
-  if (trimmed.includes("mindmap")) return "Mindmap";
-  if (trimmed.includes("timeline")) return "Timeline";
-  if (trimmed.includes("quadrantChart")) return "Quadrant";
-  return "Diagram";
 }
 
 function generateId(): string {
@@ -529,23 +479,26 @@ function generateId(): string {
 async function migrateHistoryData(): Promise<void> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
   if (!historyJson) return;
+  try {
+    const history: HistoryItem[] = JSON.parse(historyJson);
+    let needsMigration = false;
 
-  const history: HistoryItem[] = JSON.parse(historyJson);
-  let needsMigration = false;
+    const migratedHistory = history.map((item) => {
+      if (!item.lastAccessed) {
+        needsMigration = true;
+        return {
+          ...item,
+          lastAccessed: item.createdAt || new Date().toISOString(),
+        };
+      }
+      return item;
+    });
 
-  const migratedHistory = history.map((item) => {
-    if (!item.lastAccessed) {
-      needsMigration = true;
-      return {
-        ...item,
-        lastAccessed: item.createdAt || new Date().toISOString(),
-      };
+    if (needsMigration) {
+      await LocalStorage.setItem("mermaid-history", JSON.stringify(migratedHistory));
     }
-    return item;
-  });
-
-  if (needsMigration) {
-    await LocalStorage.setItem("mermaid-history", JSON.stringify(migratedHistory));
+  } catch {
+    // Corrupted data — skip migration
   }
 }
 
@@ -562,15 +515,20 @@ function RenameCurrentForm({
   const { pop } = useNavigation();
 
   async function handleSubmit(values: { name: string }) {
-    if (values.name.trim()) {
-      await renameCurrentDiagram(code, values.name.trim());
+    if (!values.name.trim()) {
       showToast({
-        style: Toast.Style.Success,
-        title: "Renamed successfully",
+        style: Toast.Style.Failure,
+        title: "Name cannot be empty",
       });
-      onRename(values.name.trim());
-      pop();
+      return;
     }
+    await renameCurrentDiagram(code, values.name.trim());
+    showToast({
+      style: Toast.Style.Success,
+      title: "Renamed successfully",
+    });
+    onRename(values.name.trim());
+    pop();
   }
 
   return (
