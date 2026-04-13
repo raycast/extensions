@@ -1,5 +1,14 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Add: View and manage availability schedules] - {PR_MERGE_DATE}
+
+- Adds a new "View Availability" command
+- List all schedules; each shows working hours, timezone, and default status
+- Edit working hours per day (up to 3 time ranges)
+- Add, edit, and delete date overrides (including full-day "Unavailable")
+- Change a schedule's timezone or name
+- Set any schedule as the default
+
 ## [Fix: Migrate to Cal.com API v2] - {PR_MERGE_DATE}
 
 - Migrate all API calls from Cal.com API v1 to v2 (v1 was permanently shut down on April 8, 2026)
