@@ -5,7 +5,10 @@
 ### Added
 
 - **Launch Project Preferences**: Configurable Permission Mode and Model Override settings for the Launch Project command. All launch actions (New Session, Continue Last, Continue with Prompt) respect these preferences.
-- **Quick Continue Session Restore**: Quick Continue now restores the permission mode and model from the most recent session, so a session started with e.g. `fullAuto` or `haiku` continues with the same settings.
+
+### Fixed
+
+- **Model Flag on Resume**: Removed explicit `--model` flag when resuming or continuing sessions. Claude Code remembers the model internally, and passing `--model` explicitly could disable features like extended context windows (1M). The `--model` flag is now only used for new sessions via the Launch Project model preference.
 
 ## [1.4.0] - 2026-04-13
 
