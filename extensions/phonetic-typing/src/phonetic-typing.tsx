@@ -157,7 +157,11 @@ export default function PhoneticTyping() {
       }
       isLoading={isLoading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Language" value={lang} onChange={setLang}>
+        <List.Dropdown
+          tooltip="Language"
+          value={lang}
+          onChange={(v) => setLang(v as Preferences.PhoneticTyping["language"])}
+        >
           {LANGUAGES.map(({ code, name, native }) => (
             <List.Dropdown.Item key={code} title={`${name} — ${native}`} value={code} />
           ))}

@@ -21,10 +21,10 @@ Type in English and instantly transliterate to 25 languages — works just like 
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-|---|---|
-| Space | Commit top suggestion |
-| Enter | Commit selected suggestion / Paste composed text |
-| Cmd+Shift+C | Copy to clipboard |
-| Cmd+Z | Undo last word |
-| Cmd+Shift+Backspace | Clear all and start over |
+| Shortcut            | Action                                           |
+| ------------------- | ------------------------------------------------ |
+| Space               | Commit top suggestion                            |
+| Enter               | Commit selected suggestion / Paste composed text |
+| Cmd+Shift+C         | Copy to clipboard                                |
+| Cmd+Z               | Undo last word                                   |
+| Cmd+Shift+Backspace | Clear all and start over                         |
