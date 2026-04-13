@@ -34,6 +34,13 @@
       "subtitle": "Cal.com",
       "description": "View your upcoming Cal.com bookings",
       "mode": "view"
+    },
+    {
+      "name": "view-availability",
+      "title": "View Availability",
+      "subtitle": "Cal.com",
+      "description": "View and manage your Cal.com availability schedules",
+      "mode": "view"
     }
   ],
   "preferences": [
