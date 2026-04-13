@@ -367,7 +367,13 @@ async function fetchOOOEntries(): Promise<CalOOOEntry[]> {
   const normalized = data.map((e) =>
     e.toUser ? { ...e, toUser: { ...e.toUser, avatarUrl: normalizeAvatarUrl(e.toUser.avatarUrl) } } : e,
   );
-  // Filter past entries client-side (in case the API returns them) and sort ascending by start.
+  // The "Out of Office" command intentionally surfaces only current + upcoming
+  // entries — past entries are noise for the day-to-day "schedule my next
+  // vacation" flow and matched cal.com's own web UI behavior at design time.
+  // Cal.com's `/me/ooo` endpoint currently returns past entries too, so we filter
+  // client-side. If a "Show Past" toggle is added later, this filter should move
+  // up to the consumer or be replaced with a server-side `status` param if v2
+  // adds one for OOO.
   const now = Date.now();
   return normalized
     .filter((e) => new Date(e.end).getTime() >= now)

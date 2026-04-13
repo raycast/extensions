@@ -60,10 +60,9 @@ export function EditOverride({ schedule, mutate, existingDate }: EditOverridePro
       await showFailureToast(error, {
         title: existingDate ? "Failed to update override" : "Failed to add override",
       });
-      throw error;
-    } finally {
-      pop();
+      return; // leave form open so user can retry
     }
+    pop();
   };
 
   const { itemProps, handleSubmit, values } = useForm<Values>({

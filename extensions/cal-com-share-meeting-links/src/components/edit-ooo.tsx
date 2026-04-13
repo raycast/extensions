@@ -92,6 +92,11 @@ export function EditOOO({ entry, mutate, enableDrafts, draftValues }: EditOOOPro
             ),
         });
       } else {
+        // Look up the selected teammate so the optimistic row can show the
+        // redirect target's avatar/name immediately, rather than only after
+        // the API response includes the embedded `toUser` object.
+        const selectedTeammate =
+          payload.toUserId !== undefined ? teammates?.find((t) => t.id === payload.toUserId) : undefined;
         const synthetic: CalOOOEntry = {
           id: -Date.now(),
           uuid: "",
@@ -101,6 +106,15 @@ export function EditOOO({ entry, mutate, enableDrafts, draftValues }: EditOOOPro
           reason: payload.reason,
           notes: payload.notes ?? null,
           toUserId: payload.toUserId ?? null,
+          toUser: selectedTeammate
+            ? {
+                id: selectedTeammate.id,
+                name: selectedTeammate.name,
+                username: selectedTeammate.username,
+                email: selectedTeammate.email,
+                avatarUrl: selectedTeammate.avatarUrl,
+              }
+            : null,
         };
         await mutate(createOOO(payload), {
           optimisticUpdate: (entries) => {
@@ -113,10 +127,9 @@ export function EditOOO({ entry, mutate, enableDrafts, draftValues }: EditOOOPro
       toast.title = `OOO ${past}`;
     } catch (err) {
       await showFailureToast(err, { title: `Failed to ${entry ? "update" : "create"} OOO` });
-      throw err;
-    } finally {
-      pop();
+      return; // leave form open so user can retry
     }
+    pop();
   };
 
   const { itemProps, handleSubmit } = useForm<Values>({

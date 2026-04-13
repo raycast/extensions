@@ -34,10 +34,9 @@ export function EditTimezone({ schedule, mutate }: EditTimezoneProps) {
       toast.title = "Timezone updated";
     } catch (error) {
       await showFailureToast(error, { title: "Failed to update timezone" });
-      throw error;
-    } finally {
-      pop();
+      return; // leave form open so user can retry
     }
+    pop();
   };
 
   const { itemProps, handleSubmit, setValue } = useForm<Values>({

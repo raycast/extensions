@@ -24,10 +24,9 @@ export function RenameSchedule({ schedule, mutate }: RenameScheduleProps) {
       toast.title = "Schedule renamed";
     } catch (error) {
       await showFailureToast(error, { title: "Failed to rename schedule" });
-      throw error;
-    } finally {
-      pop();
+      return; // leave form open so user can retry
     }
+    pop();
   };
 
   const { itemProps, handleSubmit } = useForm<Values>({

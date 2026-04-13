@@ -78,10 +78,9 @@ export function EditDayHours({ schedule, day, mutate }: EditDayHoursProps) {
       toast.title = `${day} updated`;
     } catch (err) {
       await showFailureToast(err, { title: `Failed to update ${day}` });
-      throw err;
-    } finally {
-      pop();
+      return; // leave form open so user can retry
     }
+    pop();
   };
 
   const { itemProps, handleSubmit } = useForm<Values>({
