@@ -78,6 +78,14 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
     />
   );
 
+  const openScheduleInBrowserAction = (
+    <Action.OpenInBrowser
+      title="Open Schedule in Browser"
+      url={`https://app.cal.com/availability/${schedule.id}`}
+      shortcut={{ modifiers: ["cmd"], key: "return" }}
+    />
+  );
+
   return (
     <List navigationTitle={schedule.name}>
       <List.Section title="Working Hours">
@@ -96,6 +104,7 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
                     icon={Icon.Pencil}
                     target={<EditDayHours schedule={schedule} day={day} mutate={mutate} />}
                   />
+                  {openScheduleInBrowserAction}
                   {ranges.length > 0 && (
                     <Action
                       title="Clear Day"
@@ -125,17 +134,27 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
                   icon={Icon.Pencil}
                   target={<EditOverride schedule={schedule} mutate={mutate} existingDate={o.date} />}
                 />
+                {openScheduleInBrowserAction}
+                {addOverrideAction}
                 <Action
                   title="Delete Override"
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   onAction={() => handleDeleteOverride(o.date)}
                 />
-                {addOverrideAction}
               </ActionPanel>
             }
           />
         ))}
-        <List.Item icon={Icon.Plus} title="Add Override" actions={<ActionPanel>{addOverrideAction}</ActionPanel>} />
+        <List.Item
+          icon={Icon.Plus}
+          title="Add Override"
+          actions={
+            <ActionPanel>
+              {addOverrideAction}
+              {openScheduleInBrowserAction}
+            </ActionPanel>
+          }
+        />
       </List.Section>
 
       <List.Section title="Settings">
@@ -150,6 +169,7 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
                 icon={Icon.Pencil}
                 target={<EditTimezone schedule={schedule} mutate={mutate} />}
               />
+              {openScheduleInBrowserAction}
             </ActionPanel>
           }
         />
@@ -160,6 +180,7 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
           actions={
             <ActionPanel>
               {!schedule.isDefault && <Action title="Set as Default" icon={Icon.Star} onAction={handleSetAsDefault} />}
+              {openScheduleInBrowserAction}
             </ActionPanel>
           }
         />
@@ -174,6 +195,7 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
                 icon={Icon.Pencil}
                 target={<RenameSchedule schedule={schedule} mutate={mutate} />}
               />
+              {openScheduleInBrowserAction}
             </ActionPanel>
           }
         />
