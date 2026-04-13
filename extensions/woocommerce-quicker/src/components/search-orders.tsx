@@ -1,14 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  popToRoot,
-  launchCommand,
-  LaunchType,
-  Icon,
-} from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, popToRoot, launchCommand, LaunchType, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useWooCommerce } from "../hooks/useWooCommerce";
 import type { WooOrder, WooStore } from "../types/types";
@@ -33,8 +23,7 @@ export function SearchOrders({ store }: { store: WooStore }) {
     console.error(error);
     void showToast({
       title: "Error Fetching Orders",
-      message:
-        error.message || "Please check your store settings and try again.",
+      message: error.message || "Please check your store settings and try again.",
       style: Toast.Style.Failure,
     });
   }, [error]);
@@ -48,9 +37,7 @@ export function SearchOrders({ store }: { store: WooStore }) {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by status"
-          onChange={(value) =>
-            setFilterStatus(value as WooOrder["status"] | "")
-          }
+          onChange={(value) => setFilterStatus(value as WooOrder["status"] | "")}
           value={filterStatus}
         >
           <List.Dropdown.Item title="All" value="" />
@@ -69,10 +56,7 @@ export function SearchOrders({ store }: { store: WooStore }) {
           key={order.id}
           title={`#${order.id} - ${order.billing.first_name} ${order.billing.last_name}`}
           subtitle={order.billing.email}
-          accessories={[
-            { text: formatCurrency(order.total, store) },
-            { tag: order.status },
-          ]}
+          accessories={[{ text: formatCurrency(order.total, store) }, { tag: order.status }]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
@@ -89,9 +73,7 @@ export function SearchOrders({ store }: { store: WooStore }) {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Failed to Load Orders"
-          description={
-            error.message || "Please check your store settings and try again."
-          }
+          description={error.message || "Please check your store settings and try again."}
           actions={
             <ActionPanel>
               <Action
@@ -110,10 +92,7 @@ export function SearchOrders({ store }: { store: WooStore }) {
       )}
 
       {!isLoading && !error && orders?.length === 0 && (
-        <List.EmptyView
-          title="No Orders Found"
-          description="Try a different search or status filter."
-        />
+        <List.EmptyView title="No Orders Found" description="Try a different search or status filter." />
       )}
     </List>
   );

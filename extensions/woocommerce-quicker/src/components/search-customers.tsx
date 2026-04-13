@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  popToRoot,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, popToRoot, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useWooCommerce } from "../hooks/useWooCommerce";
 import type { WooCustomer, WooStore } from "../types/types";
@@ -33,8 +23,7 @@ export function SearchCustomers({ store }: { store: WooStore }) {
     console.error(error);
     void showToast({
       title: "Error Fetching Customers",
-      message:
-        error.message || "Please check your store settings and try again.",
+      message: error.message || "Please check your store settings and try again.",
       style: Toast.Style.Failure,
     });
   }, [error]);
@@ -48,9 +37,7 @@ export function SearchCustomers({ store }: { store: WooStore }) {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by type"
-          onChange={(value) =>
-            setFilterStatus(value as WooCustomer["role"] | "")
-          }
+          onChange={(value) => setFilterStatus(value as WooCustomer["role"] | "")}
           value={filterStatus}
         >
           <List.Dropdown.Item title="All" value="all" />
@@ -65,19 +52,12 @@ export function SearchCustomers({ store }: { store: WooStore }) {
       }
     >
       {customers?.map((customer) => {
-        const fullName =
-          `${customer.first_name} ${customer.last_name}`.trim() ||
-          customer.username ||
-          customer.email;
+        const fullName = `${customer.first_name} ${customer.last_name}`.trim() || customer.username || customer.email;
 
         return (
           <List.Item
             key={customer.id}
-            icon={
-              customer.avatar_url
-                ? { source: customer.avatar_url }
-                : Icon.Person
-            }
+            icon={customer.avatar_url ? { source: customer.avatar_url } : Icon.Person}
             title={fullName}
             subtitle={customer.email}
             accessories={[...(customer.role ? [{ tag: customer.role }] : [])]}
@@ -98,9 +78,7 @@ export function SearchCustomers({ store }: { store: WooStore }) {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Failed to Load Customers"
-          description={
-            error.message || "Please check your store settings and try again."
-          }
+          description={error.message || "Please check your store settings and try again."}
           actions={
             <ActionPanel>
               <Action
@@ -119,10 +97,7 @@ export function SearchCustomers({ store }: { store: WooStore }) {
       )}
 
       {!isLoading && !error && customers?.length === 0 && (
-        <List.EmptyView
-          title="No Customers Found"
-          description="Try a different search term."
-        />
+        <List.EmptyView title="No Customers Found" description="Try a different search term." />
       )}
     </List>
   );

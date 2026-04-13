@@ -1,13 +1,11 @@
+// Native fetch doesn't support a custom https agent for local/self-signed SSL stores.
+// cross-fetch is used here to pass a custom agent that disables TLS verification.
 import https from "node:https";
 import fetch from "cross-fetch";
 import { useFetch, usePromise } from "@raycast/utils";
 import { WooStore } from "../types/types";
 
-export async function fetchWooCommerce<T>(
-  store: WooStore,
-  endpoint: string,
-  params?: Record<string, string>,
-) {
+export async function fetchWooCommerce<T>(store: WooStore, endpoint: string, params?: Record<string, string>) {
   const url = generateUrl(store.storeUrl, endpoint, params);
   const headers = generateHeaders(store.consumerKey, store.consumerSecret);
 
@@ -23,17 +21,9 @@ export async function fetchWooCommerce<T>(
   return parseWooCommerceResponse<T>(response);
 }
 
-export function useWooCommerce<T>(
-  store: WooStore,
-  endpoint: string,
-  params?: Record<string, string>,
-) {
-  const url = store
-    ? generateUrl(store.storeUrl, endpoint, params)
-    : "https://placeholder";
-  const headers = store
-    ? generateHeaders(store.consumerKey, store.consumerSecret)
-    : undefined;
+export function useWooCommerce<T>(store: WooStore, endpoint: string, params?: Record<string, string>) {
+  const url = store ? generateUrl(store.storeUrl, endpoint, params) : "https://placeholder";
+  const headers = store ? generateHeaders(store.consumerKey, store.consumerSecret) : undefined;
 
   const remoteRequest = useFetch<T>(url, {
     headers,
@@ -42,11 +32,8 @@ export function useWooCommerce<T>(
   });
 
   const localRequest = usePromise(
-    (
-      requestStore: WooStore,
-      requestEndpoint: string,
-      requestParams?: Record<string, string>,
-    ) => fetchWooCommerce<T>(requestStore, requestEndpoint, requestParams),
+    (requestStore: WooStore, requestEndpoint: string, requestParams?: Record<string, string>) =>
+      fetchWooCommerce<T>(requestStore, requestEndpoint, requestParams),
     [store, endpoint, params],
     {
       execute: !!store && store.local,
@@ -75,11 +62,7 @@ async function parseWooCommerceResponse<T>(response: Response) {
   return (await response.text()) as T;
 }
 
-function generateUrl(
-  storeUrl: string,
-  endpoint: string,
-  params?: Record<string, string>,
-) {
+function generateUrl(storeUrl: string, endpoint: string, params?: Record<string, string>) {
   const url = new URL(`${storeUrl}/wp-json/wc/v3/${endpoint}`);
   if (params) {
     for (const [key, value] of Object.entries(params)) {

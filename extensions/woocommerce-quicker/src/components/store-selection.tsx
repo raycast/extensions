@@ -12,23 +12,13 @@ interface StoreSelectionProps {
   Target: ComponentType<{ store: WooStore }>;
 }
 
-export function StoreSelection({
-  stores,
-  isLoading,
-  createStore,
-  updateStore,
-  Target,
-}: StoreSelectionProps) {
+export function StoreSelection({ stores, isLoading, createStore, updateStore, Target }: StoreSelectionProps) {
   if (!isLoading && stores.length === 1) {
     return <Target store={stores[0]} />;
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search stores..."
-      throttle
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search stores..." throttle>
       {stores.length === 0 && (
         <List.EmptyView
           icon={Icon.ExclamationMark}
@@ -39,9 +29,7 @@ export function StoreSelection({
               <Action.Push
                 title="Add Store"
                 icon={Icon.Plus}
-                target={
-                  <StoreForm submitAction={createStore} action="create" />
-                }
+                target={<StoreForm submitAction={createStore} action="create" />}
               />
             </ActionPanel>
           }
@@ -57,21 +45,11 @@ export function StoreSelection({
             accessories={store.favourite ? [{ icon: Icon.Star }] : []}
             actions={
               <ActionPanel>
-                <Action.Push
-                  title="Select Store"
-                  icon={Icon.Check}
-                  target={<Target store={store} />}
-                />
+                <Action.Push title="Select Store" icon={Icon.Check} target={<Target store={store} />} />
                 <Action.Push
                   title="Edit Store"
                   icon={Icon.Pencil}
-                  target={
-                    <StoreForm
-                      store={store}
-                      submitAction={updateStore}
-                      action="update"
-                    />
-                  }
+                  target={<StoreForm store={store} submitAction={updateStore} action="update" />}
                 />
               </ActionPanel>
             }

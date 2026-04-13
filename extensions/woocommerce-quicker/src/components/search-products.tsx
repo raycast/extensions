@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  popToRoot,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, popToRoot, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useWooCommerce } from "../hooks/useWooCommerce";
 import type { WooProduct, WooStore } from "../types/types";
@@ -18,8 +8,7 @@ type WooProductFilterStatus = WooProduct["status"] | "any";
 
 export function SearchProducts({ store }: { store: WooStore }) {
   const [searchText, setSearchText] = useState("");
-  const [filterStatus, setFilterStatus] =
-    useState<WooProductFilterStatus>("any");
+  const [filterStatus, setFilterStatus] = useState<WooProductFilterStatus>("any");
   const {
     data: products,
     isLoading,
@@ -35,8 +24,7 @@ export function SearchProducts({ store }: { store: WooStore }) {
     console.error(error);
     void showToast({
       title: "Error Fetching Products",
-      message:
-        error.message || "Please check your store settings and try again.",
+      message: error.message || "Please check your store settings and try again.",
       style: Toast.Style.Failure,
     });
   }, [error]);
@@ -69,9 +57,7 @@ export function SearchProducts({ store }: { store: WooStore }) {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Failed to Load Products"
-          description={
-            error.message || "Please check your store settings and try again."
-          }
+          description={error.message || "Please check your store settings and try again."}
           actions={
             <ActionPanel>
               <Action
@@ -90,34 +76,19 @@ export function SearchProducts({ store }: { store: WooStore }) {
       )}
 
       {!isLoading && !error && products?.length === 0 && (
-        <List.EmptyView
-          title="No Products Found"
-          description="Try a different search term or status filter."
-        />
+        <List.EmptyView title="No Products Found" description="Try a different search term or status filter." />
       )}
     </List>
   );
 }
 
-function ProductListItem({
-  product,
-  store,
-}: {
-  product: WooProduct;
-  store: WooStore;
-}) {
+function ProductListItem({ product, store }: { product: WooProduct; store: WooStore }) {
   let price = "";
   if (!product.price) {
     price = "-";
   } else if (product.type === "bundle") {
-    const minPrice = formatCurrency(
-      product.bundle_price?.price.min.excl_tax ?? "-",
-      store,
-    );
-    const maxPrice = formatCurrency(
-      product.bundle_price?.price.max.excl_tax ?? "-",
-      store,
-    );
+    const minPrice = formatCurrency(product.bundle_price?.price.min.excl_tax ?? "-", store);
+    const maxPrice = formatCurrency(product.bundle_price?.price.max.excl_tax ?? "-", store);
     price = minPrice === maxPrice ? minPrice : `${minPrice} - ${maxPrice}`;
   } else {
     price = formatCurrency(product.price, store);
@@ -129,9 +100,7 @@ function ProductListItem({
   return (
     <List.Item
       key={product.id}
-      icon={
-        product.images?.[0]?.src ? { source: product.images[0].src } : undefined
-      }
+      icon={product.images?.[0]?.src ? { source: product.images[0].src } : undefined}
       title={product.name}
       subtitle={product.sku || product.type || ""}
       accessories={accessories}

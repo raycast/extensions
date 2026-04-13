@@ -15,9 +15,7 @@ export function useStores() {
   }
 
   async function updateStore(updatedStore: WooStore) {
-    const updated = (stores ?? []).map((s) =>
-      s.id === updatedStore.id ? updatedStore : s,
-    );
+    const updated = (stores ?? []).map((s) => (s.id === updatedStore.id ? updatedStore : s));
     const sorted = sortStores(updated);
     await setStores(sorted);
   }
@@ -28,9 +26,7 @@ export function useStores() {
   }
 
   async function toggleFavourite(storeId: string) {
-    const updated = (stores ?? []).map((s) =>
-      s.id === storeId ? { ...s, favourite: !s.favourite } : s,
-    );
+    const updated = (stores ?? []).map((s) => (s.id === storeId ? { ...s, favourite: !s.favourite } : s));
     const sorted = sortStores(updated);
     await setStores(sorted);
   }
