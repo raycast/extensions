@@ -5,6 +5,7 @@ import {
   formatDayRanges,
   formatOverrideDate,
   formatOverrideRange,
+  formatOverrideWeekday,
   rangesForDay,
   WEEKDAYS,
   withDayHoursReplaced,
@@ -115,6 +116,7 @@ export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
             key={o.date}
             icon={Icon.Calendar}
             title={formatOverrideDate(o.date)}
+            subtitle={formatOverrideWeekday(o.date)}
             accessories={[{ text: formatOverrideRange(o) }]}
             actions={
               <ActionPanel>

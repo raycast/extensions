@@ -100,6 +100,16 @@ export function formatOverrideDate(date: string): string {
   });
 }
 
+/** Formats a YYYY-MM-DD string as the full weekday name (e.g. "Saturday"). */
+export function formatOverrideWeekday(date: string): string {
+  const [y, m, d] = date.split("-").map((n) => Number(n));
+  const js = new Date(Date.UTC(y, m - 1, d));
+  return js.toLocaleDateString(undefined, {
+    weekday: "long",
+    timeZone: "UTC",
+  });
+}
+
 /** Converts a JS Date (from Form.DatePicker, local time) to "YYYY-MM-DD". */
 export function toIsoDate(date: Date): string {
   const y = date.getFullYear();
