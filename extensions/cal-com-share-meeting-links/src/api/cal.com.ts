@@ -287,9 +287,13 @@ async function fetchOOOEntries(): Promise<CalOOOEntry[]> {
     url: "/me/ooo",
     headers: { "cal-api-version": OOO_API_VERSION },
   });
+  // Normalize embedded toUser avatar URLs (Cal.com sometimes returns relative `/api/avatar/...` paths).
+  const normalized = data.map((e) =>
+    e.toUser ? { ...e, toUser: { ...e.toUser, avatarUrl: normalizeAvatarUrl(e.toUser.avatarUrl) } } : e,
+  );
   // Filter past entries client-side (in case the API returns them) and sort ascending by start.
   const now = Date.now();
-  return data
+  return normalized
     .filter((e) => new Date(e.end).getTime() >= now)
     .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
 }
@@ -349,15 +353,10 @@ export interface CalTeammate {
 
 async function fetchTeams(): Promise<CalTeamSummary[]> {
   try {
-    const teams = await calAPI<CalTeamSummary[]>({
+    return await calAPI<CalTeamSummary[]>({
       url: "/teams",
       headers: { "cal-api-version": TEAMS_API_VERSION },
     });
-    console.log(
-      `[OOO] fetchTeams returned ${teams.length} team(s):`,
-      teams.map((t) => t.name),
-    );
-    return teams;
   } catch (err) {
     console.error("[OOO] fetchTeams failed:", err);
     return [];
@@ -365,7 +364,6 @@ async function fetchTeams(): Promise<CalTeamSummary[]> {
 }
 
 interface MembershipResponseUser {
-  id: number;
   name: string | null;
   username: string | null;
   email: string;
@@ -373,7 +371,19 @@ interface MembershipResponseUser {
 }
 
 interface MembershipResponse {
+  /** Membership row id (NOT the user's id). */
+  id: number;
+  /** The actual user id we want. */
+  userId: number;
   user: MembershipResponseUser;
+}
+
+/** Cal.com returns avatar paths as either absolute URLs or relative `/api/avatar/...` paths. Normalize. */
+function normalizeAvatarUrl(url: string | null): string | null {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/")) return `https://app.cal.com${url}`;
+  return url;
 }
 
 async function fetchTeamMembers(teamId: number, teamName: string): Promise<CalTeammate[]> {
@@ -382,13 +392,12 @@ async function fetchTeamMembers(teamId: number, teamName: string): Promise<CalTe
       url: `/teams/${teamId}/memberships`,
       headers: { "cal-api-version": TEAMS_API_VERSION },
     });
-    console.log(`[OOO] fetchTeamMembers(${teamName}) returned ${memberships.length} membership(s):`, memberships);
     return memberships.map((m) => ({
-      id: m.user.id,
+      id: m.userId,
       name: m.user.name,
       username: m.user.username,
       email: m.user.email,
-      avatarUrl: m.user.avatarUrl,
+      avatarUrl: normalizeAvatarUrl(m.user.avatarUrl),
       teamName,
     }));
   } catch (err) {
@@ -401,7 +410,6 @@ async function fetchAllTeammates(): Promise<CalTeammate[]> {
   // Fetch current user (to exclude from results) and teams in parallel.
   const [meResult, teams] = await Promise.all([calAPI<CalUser>({ url: "/me" }).catch(() => null), fetchTeams()]);
   const meId = meResult?.id;
-  console.log(`[OOO] current user id = ${meId}, teams = ${teams.length}`);
 
   if (teams.length === 0) return [];
   const lists = await Promise.all(teams.map((t) => fetchTeamMembers(t.id, t.name)));
@@ -415,7 +423,6 @@ async function fetchAllTeammates(): Promise<CalTeammate[]> {
     seen.add(t.id);
     out.push(t);
   }
-  console.log(`[OOO] fetchAllTeammates returning ${out.length} teammate(s) after dedupe + self-filter`);
   return out.sort((a, b) => (a.name ?? a.email).localeCompare(b.name ?? b.email));
 }
 
