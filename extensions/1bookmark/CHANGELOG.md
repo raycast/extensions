@@ -1,6 +1,6 @@
 # 1Bookmark Changelog
 
-## [HotFix Login bug] - {PR_MERGE_DATE}
+## [HotFix Login bug] - 2026-04-13
 
 - 0.12.1
 - 🐛 Fix login bug in Raycast Extension.
