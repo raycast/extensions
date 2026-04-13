@@ -37,11 +37,17 @@ export const useMyTags = () => {
 };
 
 export const useTags = (spaceIdOrSpaceIds: string | string[]) => {
+  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const spaceIds = useMemo(() => {
     return Array.isArray(spaceIdOrSpaceIds) ? spaceIdOrSpaceIds : [spaceIdOrSpaceIds];
   }, [spaceIdOrSpaceIds]);
 
-  const r = trpc.tag.list.useQuery({ spaceIds });
+  const r = trpc.tag.list.useQuery(
+    { spaceIds },
+    {
+      enabled: !!sessionToken,
+    },
+  );
 
   return r;
 };
