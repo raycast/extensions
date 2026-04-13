@@ -1,6 +1,6 @@
 # RSS Reader Changelog
 
-## [Duplicate Subscriptions] - {PR_MERGE_DATE}
+## [Duplicate Subscriptions] - 2026-04-13
 
 - Duplicate feed subscriptions to quickly create variations with different URLs
 
