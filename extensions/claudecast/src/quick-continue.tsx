@@ -1,7 +1,8 @@
-import { showToast, Toast, showHUD } from "@raycast/api";
+import { showToast, Toast, showHUD, getPreferenceValues } from "@raycast/api";
 import { existsSync } from "fs";
 import { getMostRecentProject } from "./lib/project-discovery";
 import { getMostRecentSession } from "./lib/session-parser";
+import type { PermissionMode } from "./lib/session-parser";
 import { launchClaudeCode } from "./lib/terminal";
 import { ensureClaudeInstalled } from "./lib/claude-cli";
 
@@ -9,6 +10,11 @@ export default async function QuickContinue() {
   try {
     // Check if Claude is installed first
     if (!(await ensureClaudeInstalled())) return;
+
+    const prefs = getPreferenceValues<Preferences.QuickContinue>();
+    const permissionMode = (prefs.permissionMode ||
+      "default") as PermissionMode;
+    const model = prefs.model || undefined;
 
     // First try to get the most recent session
     const recentSession = await getMostRecentSession();
@@ -18,6 +24,8 @@ export default async function QuickContinue() {
       await launchClaudeCode({
         projectPath: recentSession.projectPath,
         continueSession: true,
+        permissionMode,
+        model,
       });
       return;
     }
@@ -29,6 +37,8 @@ export default async function QuickContinue() {
       await showHUD(`Starting new session in ${recentProject.name}...`);
       await launchClaudeCode({
         projectPath: recentProject.path,
+        permissionMode,
+        model,
       });
       return;
     }
