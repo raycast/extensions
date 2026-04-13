@@ -75,11 +75,7 @@ export default function ViewAvailability() {
           }
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Schedule"
-                icon={Icon.Eye}
-                target={<ScheduleDetail schedule={schedule} mutate={mutate} />}
-              />
+              <Action.Push title="View Schedule" icon={Icon.Eye} target={<ScheduleDetail scheduleId={schedule.id} />} />
               <Action
                 title={isShowingDetail ? "Hide Details" : "Show Details"}
                 icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}

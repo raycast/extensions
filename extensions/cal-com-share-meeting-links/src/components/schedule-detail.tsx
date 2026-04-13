@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { MutatePromise, showFailureToast } from "@raycast/utils";
-import { CalSchedule, updateSchedule } from "@api/cal.com";
+import { showFailureToast } from "@raycast/utils";
+import { updateSchedule, useSchedules } from "@api/cal.com";
 import {
   formatDayRanges,
   formatOverrideDate,
@@ -17,11 +17,18 @@ import { EditTimezone } from "@components/edit-timezone";
 import { RenameSchedule } from "@components/rename-schedule";
 
 interface ScheduleDetailProps {
-  schedule: CalSchedule;
-  mutate: MutatePromise<CalSchedule[] | undefined>;
+  scheduleId: number;
 }
 
-export function ScheduleDetail({ schedule, mutate }: ScheduleDetailProps) {
+export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
+  const { data: schedules, isLoading, mutate } = useSchedules();
+  const schedule = schedules?.find((s) => s.id === scheduleId);
+
+  if (!schedule) {
+    // Either still loading the cache or the schedule was removed externally.
+    return <List isLoading={isLoading} />;
+  }
+
   const handleClearDay = async (day: (typeof WEEKDAYS)[number]) => {
     const availability = withDayHoursReplaced(schedule, day, []);
     const toast = await showToast({ style: Toast.Style.Animated, title: `Clearing ${day}` });
