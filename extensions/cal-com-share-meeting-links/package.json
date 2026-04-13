@@ -41,6 +41,13 @@
       "subtitle": "Cal.com",
       "description": "View and manage your Cal.com availability schedules",
       "mode": "view"
+    },
+    {
+      "name": "out-of-office",
+      "title": "Out of Office",
+      "subtitle": "Cal.com",
+      "description": "View and manage your Cal.com out-of-office entries",
+      "mode": "view"
     }
   ],
   "preferences": [
