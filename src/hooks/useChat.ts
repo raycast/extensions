@@ -1,5 +1,6 @@
 import { useCallback, useRef, useState } from "react";
 import { Message, streamChat } from "../api/pollinations";
+import { getStoredModel } from "./useModels";
 
 export interface ChatMessage extends Message {
   id: string;
@@ -11,7 +12,7 @@ const SYSTEM_PROMPT: Message = {
     "You are a helpful AI assistant. Be concise and clear. Format your responses using Markdown when appropriate.",
 };
 
-export function useChat(model: string) {
+export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -20,6 +21,10 @@ export function useChat(model: string) {
   const sendMessage = useCallback(
     async (userText: string) => {
       if (!userText.trim() || isLoading) return;
+
+      // Always read the latest stored model at send time —
+      // avoids stale closure when model is changed from within a pushed view
+      const model = await getStoredModel();
 
       const userMsg: ChatMessage = {
         id: Date.now().toString(),
@@ -65,7 +70,7 @@ export function useChat(model: string) {
         abortRef.current.signal,
       );
     },
-    [messages, isLoading, model],
+    [messages, isLoading],
   );
 
   const stopStreaming = useCallback(() => {

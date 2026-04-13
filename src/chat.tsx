@@ -183,10 +183,10 @@ export default function ChatCommand() {
     sendMessage,
     stopStreaming,
     clearHistory,
-  } = useChat(selectedModel);
+  } = useChat();
   const { push } = useNavigation();
 
-  const tier = getTierInfo(activeModel?.isPaid);
+  const tier = getTierInfo();
 
   const openInput = useCallback(() => {
     push(<SendMessageForm onSend={sendMessage} />);
@@ -212,14 +212,6 @@ export default function ChatCommand() {
 
   const handleSend = useCallback(
     async (text: string) => {
-      if (tier.modelNeedsKey && !tier.hasKey) {
-        await showToast({
-          title: "API Anahtarı Gerekli",
-          message: `"${selectedModel}" modeli için API anahtarı gereklidir. ⌘ , ile ekleyin.`,
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
       try {
         await sendMessage(text);
       } catch (err) {
@@ -229,7 +221,7 @@ export default function ChatCommand() {
         await showToast({ title, message, style: Toast.Style.Failure });
       }
     },
-    [sendMessage, tier, selectedModel],
+    [sendMessage],
   );
 
   const markdown = buildMarkdown(messages, streamingContent);
@@ -247,7 +239,7 @@ export default function ChatCommand() {
                 ? { source: Icon.Key, tintColor: Color.Green }
                 : { source: Icon.LockUnlocked, tintColor: Color.Orange }
             }
-            text={tier.hasKey ? "API anahtarlı" : "Ücretsiz"}
+            text={tier.hasKey ? "Premium" : "Ücretsiz"}
           />
           <Detail.Metadata.Label title="Model" text={selectedModel} />
           {activeModel?.description ? (

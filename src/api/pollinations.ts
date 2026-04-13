@@ -43,11 +43,11 @@ export class ApiError extends Error {
 
 export const BASE_URL = "https://gen.pollinations.ai";
 
-export function getTierInfo(modelIsPaid?: boolean): TierInfo {
+export function getTierInfo(): TierInfo {
   const prefs = getPreferenceValues<Preferences>();
   return {
     hasKey: !!prefs.apiKey?.trim(),
-    modelNeedsKey: !!modelIsPaid,
+    modelNeedsKey: false,
   };
 }
 

@@ -110,7 +110,7 @@ export default function QuickAskCommand() {
   const [isLoading, setIsLoading] = useState(false);
   const { push } = useNavigation();
 
-  const tier = getTierInfo(activeModel?.isPaid);
+  const tier = getTierInfo();
 
   const openModelPicker = useCallback(() => {
     push(
@@ -221,7 +221,7 @@ export default function QuickAskCommand() {
   }
 
   const tierText = activeModel
-    ? `${activeModel.isPaid ? "🔑 Ücretli" : "Ücretsiz"} · ${activeModel.description || selectedModel}`
+    ? `${tier.hasKey ? "Premium" : "Ücretsiz"} · ${activeModel.description || selectedModel}`
     : selectedModel;
 
   return (
