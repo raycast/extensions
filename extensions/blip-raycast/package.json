@@ -42,5 +42,8 @@
       "description": "Send the current Finder selection to Blip. Requires Raycast Accessibility permission.",
       "mode": "no-view"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
