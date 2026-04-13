@@ -273,28 +273,36 @@ export function cancelBooking(bookingUid: string, reason: string) {
  * the same shape on /cancel and other booking endpoints.
  */
 export async function requestRescheduleBooking(bookingUid: string, reason: string) {
-  const url = `bookings/${bookingUid}/request-reschedule`;
-  try {
-    return await calAPI({
-      method: "POST",
-      url,
-      headers: { "cal-api-version": "2026-02-25" },
-      data: { rescheduleReason: reason },
-    });
-  } catch (err) {
-    if (axios.isAxiosError(err) && err.response) {
-      console.error(
-        `[reschedule] HTTP ${err.response.status} ${err.response.statusText}`,
-        "\n  resolved URL:",
-        err.config?.baseURL && err.config?.url ? `${err.config.baseURL}${err.config.url}` : err.config?.url,
-        "\n  response body:",
-        JSON.stringify(err.response.data, null, 2),
-      );
-    } else {
-      console.error("[reschedule] failed:", err);
+  // Cal.com's docs list `/v2/bookings/{uid}/request-reschedule` but it 404s in production.
+  // Try a few candidate paths in order; first 2xx wins.
+  const candidates = [
+    `bookings/${bookingUid}/request-reschedule`,
+    `me/bookings/${bookingUid}/request-reschedule`,
+    `bookings/${bookingUid}/cancel-and-request-reschedule`,
+  ];
+  let lastErr: unknown;
+  for (const url of candidates) {
+    try {
+      const result = await calAPI({
+        method: "POST",
+        url,
+        headers: { "cal-api-version": "2026-02-25" },
+        data: { rescheduleReason: reason },
+      });
+      console.log(`[reschedule] succeeded via ${url}`);
+      return result;
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        console.log(`[reschedule] ${url} -> 404, trying next`);
+        lastErr = err;
+        continue;
+      }
+      // Non-404 error: stop probing and surface the real error
+      throw err;
     }
-    throw err;
   }
+  console.error("[reschedule] all candidate paths returned 404");
+  throw lastErr;
 }
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
