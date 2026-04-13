@@ -27,9 +27,14 @@ export default function Command() {
 
   async function loadHistory() {
     setIsLoading(true);
-    const items = await getHistory();
-    setHistory(items);
-    setIsLoading(false);
+    try {
+      const items = await getHistory();
+      setHistory(items);
+    } catch {
+      setHistory([]);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function handleDelete(id: string) {

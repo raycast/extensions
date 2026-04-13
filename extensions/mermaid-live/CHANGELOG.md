@@ -1,6 +1,6 @@
 # mermaid-live Changelog
 
-## [1.0.0] - 2026-04-13
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 

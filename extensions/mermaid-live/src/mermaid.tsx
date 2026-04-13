@@ -32,6 +32,11 @@ export default function Command() {
       try {
         await migrateHistoryData();
 
+        // Pre-initialize the clipboard ref so the polling effect skips its first
+        // tick if the clipboard hasn't changed, preventing it from overwriting
+        // the saved diagram state set below.
+        lastClipboardRef.current = await Clipboard.readText();
+
         const savedCode = await LocalStorage.getItem<string>("lastMermaidCode");
         const savedTimestamp = await LocalStorage.getItem<string>("lastUpdatedTimestamp");
 
@@ -242,6 +247,12 @@ Try copying some Mermaid code and run this command again!
       <Detail
         markdown={`# ⚠️ Error\n\n${state.error.message}\n\nPlease try again or check your internet connection.`}
         navigationTitle="Mermaid Diagram"
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Mermaid Live Editor" url="https://mermaid.live/" />
+            <Action.OpenInBrowser title="Check Mermaid.ink Status" url="https://mermaid.ink/" />
+          </ActionPanel>
+        }
       />
     );
   }
@@ -442,7 +453,9 @@ async function saveToHistory(code: string): Promise<HistoryItem> {
   const limitedHistory = sortedHistory.slice(0, 100);
   await LocalStorage.setItem("mermaid-history", JSON.stringify(limitedHistory));
 
-  return currentItem;
+  // Return the persisted item from the limited list. If currentItem was pushed
+  // out by 100+ pinned items (extremely unlikely) fall back to the item itself.
+  return limitedHistory.find((item) => item.id === currentItem.id) ?? currentItem;
 }
 
 async function findHistoryItemByCode(code: string): Promise<HistoryItem | null> {
