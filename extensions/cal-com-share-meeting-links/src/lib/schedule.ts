@@ -113,6 +113,11 @@ export function formatOverrideWeekday(date: string): string {
   });
 }
 
+/** Humanizes an IANA timezone for display, e.g. "America/Los_Angeles" -> "America/Los Angeles". */
+export function formatTimeZone(tz: string): string {
+  return tz.replace(/_/g, " ");
+}
+
 /** Converts a JS Date (from Form.DatePicker, local time) to "YYYY-MM-DD". */
 export function toIsoDate(date: Date): string {
   const y = date.getFullYear();

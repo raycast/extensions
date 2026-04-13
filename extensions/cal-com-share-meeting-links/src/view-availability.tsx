@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToa
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { CalSchedule, updateSchedule, useSchedules } from "@api/cal.com";
 import { ScheduleDetail } from "@components/schedule-detail";
-import { formatDayRanges, rangesForDay, WEEKDAYS } from "@/lib/schedule";
+import { formatDayRanges, formatTimeZone, rangesForDay, WEEKDAYS } from "@/lib/schedule";
 
 export default function ViewAvailability() {
   const { data: schedules, isLoading, error, mutate } = useSchedules();
@@ -44,7 +44,7 @@ export default function ViewAvailability() {
             isShowingDetail
               ? []
               : [
-                  { text: schedule.timeZone },
+                  { text: formatTimeZone(schedule.timeZone) },
                   ...(schedule.isDefault ? [{ tag: { value: "Default", color: Color.Yellow } }] : []),
                 ]
           }
@@ -53,7 +53,7 @@ export default function ViewAvailability() {
               metadata={
                 <List.Item.Detail.Metadata>
                   <List.Item.Detail.Metadata.Label title="Name" text={schedule.name} />
-                  <List.Item.Detail.Metadata.Label title="Timezone" text={schedule.timeZone} />
+                  <List.Item.Detail.Metadata.Label title="Timezone" text={formatTimeZone(schedule.timeZone)} />
                   <List.Item.Detail.Metadata.Label title="Default" text={schedule.isDefault ? "Yes" : "No"} />
                   <List.Item.Detail.Metadata.Separator />
                   {WEEKDAYS.map((day) => (
