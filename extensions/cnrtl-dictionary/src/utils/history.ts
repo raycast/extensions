@@ -36,9 +36,7 @@ export async function addToHistory(
   const entries = await loadHistory();
 
   // Remove existing entry for the same word/endpoint
-  const filtered = entries.filter(
-    (e) => !(e.word === word && e.endpoint === endpoint)
-  );
+  const filtered = entries.filter((e) => !(e.word === word && e.endpoint === endpoint));
 
   // Prepend new entry
   filtered.unshift({ word, endpoint, timestamp: Date.now() });
@@ -52,10 +50,7 @@ export async function addToHistory(
 /**
  * Remove a specific entry from history.
  */
-export async function removeFromHistory(
-  word: string,
-  endpoint: CnrtlEndpoint
-): Promise<void> {
+export async function removeFromHistory(word: string, endpoint: CnrtlEndpoint): Promise<void> {
   const entries = await loadHistory();
   await saveHistory(entries.filter((e) => !(e.word === word && e.endpoint === endpoint)));
 }

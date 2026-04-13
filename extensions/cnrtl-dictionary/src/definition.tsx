@@ -1,4 +1,4 @@
-import { Detail, List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { fetchDefinition } from "./utils/cnrtl";
@@ -15,32 +15,29 @@ export default function DefinitionCommand(): JSX.Element {
 
   const [searchText, setSearchText] = useState("");
   const [recentWords, setRecentWords] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<"list" | "detail">("list");
 
   // Load recent words on mount
   useEffect(() => {
-    getRecentWords(10).then(setRecentWords).catch(() => undefined);
+    getRecentWords(10)
+      .then(setRecentWords)
+      .catch(() => undefined);
   }, []);
 
   const trimmedWord = searchText.trim().toLowerCase();
   const shouldFetch = trimmedWord.length >= MIN_SEARCH_LENGTH;
 
-  const { data, isLoading, error } = useCachedPromise(
-    fetchDefinition,
-    [trimmedWord],
-    {
-      execute: shouldFetch,
-      keepPreviousData: true,
-      onError(err) {
-        if (isCnrtlError(err) && err.type === "not_found") return; // shown inline
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Erreur réseau",
-          message: err.message,
-        });
-      },
-    }
-  );
+  const { data, isLoading, error } = useCachedPromise(fetchDefinition, [trimmedWord], {
+    execute: shouldFetch,
+    keepPreviousData: true,
+    onError(err) {
+      if (isCnrtlError(err) && err.type === "not_found") return; // shown inline
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Erreur réseau",
+        message: err.message,
+      });
+    },
+  });
 
   // Record in history when we get a successful result
   useEffect(() => {
@@ -53,41 +50,6 @@ export default function DefinitionCommand(): JSX.Element {
     }
   }, [data, trimmedWord, historySize]);
 
-  // ── Detail view (keyboard shortcut D) ────────────────────────────────────
-  if (viewMode === "detail" && data) {
-    const markdown = formatDefinitionMarkdown(data);
-    return (
-      <Detail
-        markdown={markdown}
-        navigationTitle={`Définition · ${data.word}`}
-        actions={
-          <WordActions
-            word={data.word}
-            currentEndpoint="definition"
-            copyContent={formatDefinitionPlainText(data)}
-          />
-        }
-        metadata={
-          <Detail.Metadata>
-            {data.partOfSpeech && (
-              <Detail.Metadata.Label title="Catégorie" text={data.partOfSpeech} />
-            )}
-            {data.variants && data.variants.length > 0 && (
-              <Detail.Metadata.Label title="Variantes" text={data.variants.join(", ")} />
-            )}
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.Link
-              title="Source"
-              target={data.url}
-              text="CNRTL · TLFi"
-            />
-          </Detail.Metadata>
-        }
-      />
-    );
-  }
-
-  // ── List + inline detail panel (default) ─────────────────────────────────
   const notFound = isCnrtlError(error) && error.type === "not_found";
   const errorMarkdown = notFound
     ? formatErrorMarkdown(
@@ -96,8 +58,8 @@ export default function DefinitionCommand(): JSX.Element {
         buildCnrtlUrl("definition", trimmedWord)
       )
     : error
-    ? formatErrorMarkdown(error.message, trimmedWord, buildCnrtlUrl("definition", trimmedWord))
-    : null;
+      ? formatErrorMarkdown(error.message, trimmedWord, buildCnrtlUrl("definition", trimmedWord))
+      : null;
 
   return (
     <List
@@ -120,9 +82,7 @@ export default function DefinitionCommand(): JSX.Element {
           icon={Icon.XMarkCircle}
           title={`Aucun résultat pour « ${trimmedWord} »`}
           detail={<List.Item.Detail markdown={errorMarkdown} />}
-          actions={
-            <WordActions word={trimmedWord} currentEndpoint="definition" />
-          }
+          actions={<WordActions word={trimmedWord} currentEndpoint="definition" />}
         />
       )}
 
@@ -139,27 +99,14 @@ export default function DefinitionCommand(): JSX.Element {
                 metadata={
                   <List.Item.Detail.Metadata>
                     {data.partOfSpeech && (
-                      <List.Item.Detail.Metadata.Label
-                        title="Catégorie"
-                        text={data.partOfSpeech}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Catégorie" text={data.partOfSpeech} />
                     )}
-                    <List.Item.Detail.Metadata.Label
-                      title="Sections"
-                      text={String(data.sections.length)}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Sections" text={String(data.sections.length)} />
                     {data.variants && data.variants.length > 0 && (
-                      <List.Item.Detail.Metadata.Label
-                        title="Variantes"
-                        text={data.variants.join(", ")}
-                      />
+                      <List.Item.Detail.Metadata.Label title="Variantes" text={data.variants.join(", ")} />
                     )}
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Link
-                      title="Source"
-                      target={data.url}
-                      text="CNRTL · TLFi"
-                    />
+                    <List.Item.Detail.Metadata.Link title="Source" target={data.url} text="CNRTL · TLFi" />
                   </List.Item.Detail.Metadata>
                 }
               />
@@ -205,9 +152,7 @@ export default function DefinitionCommand(): JSX.Element {
               key={word}
               icon={Icon.Clock}
               title={word}
-              actions={
-                <WordActions word={word} currentEndpoint="definition" />
-              }
+              actions={<WordActions word={word} currentEndpoint="definition" />}
             />
           ))}
         </List.Section>

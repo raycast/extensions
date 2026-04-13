@@ -18,13 +18,7 @@ export function EmptySearch({
   onSelectWord,
 }: EmptySearchProps): JSX.Element {
   if (recentWords.length === 0) {
-    return (
-      <List.EmptyView
-        icon={{ source: Icon.MagnifyingGlass }}
-        title={title}
-        description={description}
-      />
-    );
+    return <List.EmptyView icon={{ source: Icon.MagnifyingGlass }} title={title} description={description} />;
   }
 
   return (
@@ -35,11 +29,7 @@ export function EmptySearch({
             key={word}
             icon={Icon.Clock}
             title={word}
-            actions={
-              onSelectWord ? (
-                <List.Item.Detail />
-              ) : undefined
-            }
+            actions={onSelectWord ? <List.Item.Detail /> : undefined}
           />
         ))}
       </List.Section>

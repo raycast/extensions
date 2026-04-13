@@ -117,12 +117,7 @@ export function parseDefinitionPage(html: string, word: string): DefinitionEntry
   }
 
   // ── Locate the main content area ──
-  const content = querySelector(root, [
-    "#vitemselected",
-    "#contentbox",
-    ".tlf_partie",
-    ".tlf_cvedette",
-  ]);
+  const content = querySelector(root, ["#vitemselected", "#contentbox", ".tlf_partie", ".tlf_cvedette"]);
 
   // ── Headword and part of speech ──
   const headwordEl = querySelector(root, [".tlf_cmot", ".tlf_cvedette .tlf_cmot", "h1"]);
@@ -143,9 +138,7 @@ export function parseDefinitionPage(html: string, word: string): DefinitionEntry
 
   if (content) {
     // Try to parse structured TLFi sections (Roman numerals I, II, III…)
-    const sectionEls = content.querySelectorAll(
-      ".tlf_cpartie, .tlf_cnum, [class^='tlf_c']"
-    );
+    const sectionEls = content.querySelectorAll(".tlf_cpartie, .tlf_cnum, [class^='tlf_c']");
 
     if (sectionEls.length > 0) {
       // Group siblings by Roman-numeral section markers
@@ -196,9 +189,7 @@ export function parseDefinitionPage(html: string, word: string): DefinitionEntry
     if (sections.length === 0) {
       const rawText = cleanText(content.text);
       const chunks = rawText.split(/\s{3,}/).filter((s) => s.length > 20);
-      chunks.forEach((chunk, i) =>
-        sections.push({ label: String(i + 1), text: chunk, examples: [], subSections: [] })
-      );
+      chunks.forEach((chunk, i) => sections.push({ label: String(i + 1), text: chunk, examples: [], subSections: [] }));
     }
   }
 
@@ -231,11 +222,7 @@ function parseDegree(text: string): SynonymDegree | undefined {
  * Parse the synonym (or antonym) page HTML.
  * Endpoint is either "synonymie" or "antonymie".
  */
-export function parseSynonymPage(
-  html: string,
-  word: string,
-  endpoint: "synonymie" | "antonymie"
-): SynonymResult {
+export function parseSynonymPage(html: string, word: string, endpoint: "synonymie" | "antonymie"): SynonymResult {
   const root = parse(html);
 
   for (const sel of ["script", "style", "nav"]) {
@@ -281,9 +268,7 @@ export function parseSynonymPage(
         const rowText = cleanText(row.text);
         const degree = parseDegree(rowText.replace(linkWord, ""));
         const href = link.getAttribute("href") ?? "";
-        const url = href.startsWith("http")
-          ? href
-          : `https://www.cnrtl.fr/${endpoint}/${encodeURIComponent(linkWord)}`;
+        const url = href.startsWith("http") ? href : `https://www.cnrtl.fr/${endpoint}/${encodeURIComponent(linkWord)}`;
 
         currentGroup.entries.push({ word: linkWord, degree, url });
       }
@@ -302,9 +287,7 @@ export function parseSynonymPage(
         if (!linkWord || linkWord.toLowerCase() === word.toLowerCase()) continue;
         const href = link.getAttribute("href") ?? "";
         if (!href.includes(endpoint)) continue;
-        const url = href.startsWith("http")
-          ? href
-          : `https://www.cnrtl.fr/${endpoint}/${encodeURIComponent(linkWord)}`;
+        const url = href.startsWith("http") ? href : `https://www.cnrtl.fr/${endpoint}/${encodeURIComponent(linkWord)}`;
         entries.push({ word: linkWord, url });
       }
       if (entries.length > 0) groups.push({ entries });
@@ -330,12 +313,7 @@ export function parseEtymologyPage(html: string, word: string): EtymologyEntry {
     root.querySelectorAll(sel).forEach((el) => el.remove());
   }
 
-  const content = querySelector(root, [
-    "#vitemselected",
-    "#contentbox",
-    ".etym_content",
-    "body",
-  ]);
+  const content = querySelector(root, ["#vitemselected", "#contentbox", ".etym_content", "body"]);
 
   const rawContent = content ? cleanText(content.text) : "";
 

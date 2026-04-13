@@ -17,24 +17,22 @@ export default function MorphologyCommand(): JSX.Element {
   const [recentWords, setRecentWords] = useState<string[]>([]);
 
   useEffect(() => {
-    getRecentWords(10).then(setRecentWords).catch(() => undefined);
+    getRecentWords(10)
+      .then(setRecentWords)
+      .catch(() => undefined);
   }, []);
 
   const trimmedWord = searchText.trim().toLowerCase();
   const shouldFetch = trimmedWord.length >= MIN_SEARCH_LENGTH;
 
-  const { data, isLoading, error } = useCachedPromise(
-    fetchMorphology,
-    [trimmedWord],
-    {
-      execute: shouldFetch,
-      keepPreviousData: true,
-      onError(err) {
-        if (isCnrtlError(err) && err.type === "not_found") return;
-        showToast({ style: Toast.Style.Failure, title: "Erreur réseau", message: err.message });
-      },
-    }
-  );
+  const { data, isLoading, error } = useCachedPromise(fetchMorphology, [trimmedWord], {
+    execute: shouldFetch,
+    keepPreviousData: true,
+    onError(err) {
+      if (isCnrtlError(err) && err.type === "not_found") return;
+      showToast({ style: Toast.Style.Failure, title: "Erreur réseau", message: err.message });
+    },
+  });
 
   useEffect(() => {
     if (data && trimmedWord) {
@@ -52,7 +50,7 @@ export default function MorphologyCommand(): JSX.Element {
         markdown={formatErrorMarkdown(
           notFound
             ? `Aucune forme morphologique pour « ${trimmedWord} ».`
-            : error?.message ?? "Une erreur s'est produite.",
+            : (error?.message ?? "Une erreur s'est produite."),
           trimmedWord,
           url
         )}
@@ -79,19 +77,10 @@ export default function MorphologyCommand(): JSX.Element {
         }
         metadata={
           <Detail.Metadata>
-            {data.category && (
-              <Detail.Metadata.Label title="Catégorie" text={data.category} />
-            )}
-            <Detail.Metadata.Label
-              title="Formes"
-              text={String(data.forms.length)}
-            />
+            {data.category && <Detail.Metadata.Label title="Catégorie" text={data.category} />}
+            <Detail.Metadata.Label title="Formes" text={String(data.forms.length)} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Link
-              title="Source"
-              target={data.url}
-              text="CNRTL · Morphologie"
-            />
+            <Detail.Metadata.Link title="Source" target={data.url} text="CNRTL · Morphologie" />
           </Detail.Metadata>
         }
       />

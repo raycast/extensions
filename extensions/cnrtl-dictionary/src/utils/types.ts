@@ -89,12 +89,7 @@ export interface MorphologyEntry {
 
 // ─── Shared result wrapper ────────────────────────────────────────────────────
 
-export type CnrtlEndpoint =
-  | "definition"
-  | "synonymie"
-  | "antonymie"
-  | "etymologie"
-  | "morphologie";
+export type CnrtlEndpoint = "definition" | "synonymie" | "antonymie" | "etymologie" | "morphologie";
 
 export interface CnrtlError {
   type: "not_found" | "network" | "parse" | "unknown";

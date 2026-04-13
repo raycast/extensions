@@ -17,24 +17,22 @@ export default function AntonymsCommand(): JSX.Element {
   const [recentWords, setRecentWords] = useState<string[]>([]);
 
   useEffect(() => {
-    getRecentWords(10).then(setRecentWords).catch(() => undefined);
+    getRecentWords(10)
+      .then(setRecentWords)
+      .catch(() => undefined);
   }, []);
 
   const trimmedWord = searchText.trim().toLowerCase();
   const shouldFetch = trimmedWord.length >= MIN_SEARCH_LENGTH;
 
-  const { data, isLoading, error } = useCachedPromise(
-    fetchAntonyms,
-    [trimmedWord],
-    {
-      execute: shouldFetch,
-      keepPreviousData: true,
-      onError(err) {
-        if (isCnrtlError(err) && err.type === "not_found") return;
-        showToast({ style: Toast.Style.Failure, title: "Erreur réseau", message: err.message });
-      },
-    }
-  );
+  const { data, isLoading, error } = useCachedPromise(fetchAntonyms, [trimmedWord], {
+    execute: shouldFetch,
+    keepPreviousData: true,
+    onError(err) {
+      if (isCnrtlError(err) && err.type === "not_found") return;
+      showToast({ style: Toast.Style.Failure, title: "Erreur réseau", message: err.message });
+    },
+  });
 
   useEffect(() => {
     if (data && trimmedWord) {
@@ -67,10 +65,7 @@ export default function AntonymsCommand(): JSX.Element {
           subtitle="Essayez avec une autre forme du mot"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Ouvrir sur le CNRTL"
-                url={buildCnrtlUrl("antonymie", trimmedWord)}
-              />
+              <Action.OpenInBrowser title="Ouvrir sur le CNRTL" url={buildCnrtlUrl("antonymie", trimmedWord)} />
             </ActionPanel>
           }
         />
@@ -83,11 +78,7 @@ export default function AntonymsCommand(): JSX.Element {
             title={`${items.length} antonyme${items.length > 1 ? "s" : ""} pour « ${data.word} »`}
             accessories={[{ text: `${items.length}` }]}
             actions={
-              <WordActions
-                word={data.word}
-                currentEndpoint="antonymie"
-                copyContent={formatSynonymPlainText(data)}
-              />
+              <WordActions word={data.word} currentEndpoint="antonymie" copyContent={formatSynonymPlainText(data)} />
             }
           />
 

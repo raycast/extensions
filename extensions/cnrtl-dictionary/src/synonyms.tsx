@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { fetchSynonyms } from "./utils/cnrtl";
 import { formatSynonymItems, formatSynonymPlainText } from "./utils/format";
 import { addToHistory, getRecentWords } from "./utils/history";
-import { buildCnrtlUrl, MIN_SEARCH_LENGTH, DEGREE_LABELS } from "./utils/constants";
+import { buildCnrtlUrl, MIN_SEARCH_LENGTH } from "./utils/constants";
 import { isCnrtlError } from "./utils/cnrtl";
 import { WordActions } from "./components/WordActions";
 import type { ExtensionPreferences } from "./utils/types";
@@ -17,24 +17,22 @@ export default function SynonymsCommand(): JSX.Element {
   const [recentWords, setRecentWords] = useState<string[]>([]);
 
   useEffect(() => {
-    getRecentWords(10).then(setRecentWords).catch(() => undefined);
+    getRecentWords(10)
+      .then(setRecentWords)
+      .catch(() => undefined);
   }, []);
 
   const trimmedWord = searchText.trim().toLowerCase();
   const shouldFetch = trimmedWord.length >= MIN_SEARCH_LENGTH;
 
-  const { data, isLoading, error } = useCachedPromise(
-    fetchSynonyms,
-    [trimmedWord],
-    {
-      execute: shouldFetch,
-      keepPreviousData: true,
-      onError(err) {
-        if (isCnrtlError(err) && err.type === "not_found") return;
-        showToast({ style: Toast.Style.Failure, title: "Erreur réseau", message: err.message });
-      },
-    }
-  );
+  const { data, isLoading, error } = useCachedPromise(fetchSynonyms, [trimmedWord], {
+    execute: shouldFetch,
+    keepPreviousData: true,
+    onError(err) {
+      if (isCnrtlError(err) && err.type === "not_found") return;
+      showToast({ style: Toast.Style.Failure, title: "Erreur réseau", message: err.message });
+    },
+  });
 
   useEffect(() => {
     if (data && trimmedWord) {
@@ -75,10 +73,7 @@ export default function SynonymsCommand(): JSX.Element {
           subtitle="Essayez avec une autre forme du mot"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Ouvrir sur le CNRTL"
-                url={buildCnrtlUrl("synonymie", trimmedWord)}
-              />
+              <Action.OpenInBrowser title="Ouvrir sur le CNRTL" url={buildCnrtlUrl("synonymie", trimmedWord)} />
             </ActionPanel>
           }
         />
@@ -92,11 +87,7 @@ export default function SynonymsCommand(): JSX.Element {
             title={`${items.length} synonyme${items.length > 1 ? "s" : ""} pour « ${data.word} »`}
             accessories={[{ text: `${items.length}` }]}
             actions={
-              <WordActions
-                word={data.word}
-                currentEndpoint="synonymie"
-                copyContent={formatSynonymPlainText(data)}
-              />
+              <WordActions word={data.word} currentEndpoint="synonymie" copyContent={formatSynonymPlainText(data)} />
             }
           />
 
@@ -112,11 +103,7 @@ export default function SynonymsCommand(): JSX.Element {
                   accessories={[{ icon: Icon.ArrowRight }]}
                   actions={
                     <ActionPanel>
-                      <Action.OpenInBrowser
-                        title={`Synonymes de « ${item.word} »`}
-                        url={item.url}
-                        icon={Icon.Switch}
-                      />
+                      <Action.OpenInBrowser title={`Synonymes de « ${item.word} »`} url={item.url} icon={Icon.Switch} />
                       <Action.OpenInBrowser
                         title={`Définition de « ${item.word} »`}
                         url={buildCnrtlUrl("definition", item.word)}
@@ -149,9 +136,7 @@ export default function SynonymsCommand(): JSX.Element {
               key={word}
               icon={Icon.Clock}
               title={word}
-              actions={
-                <WordActions word={word} currentEndpoint="synonymie" />
-              }
+              actions={<WordActions word={word} currentEndpoint="synonymie" />}
             />
           ))}
         </List.Section>

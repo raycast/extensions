@@ -1,9 +1,4 @@
-import type {
-  DefinitionEntry,
-  EtymologyEntry,
-  MorphologyEntry,
-  SynonymResult,
-} from "./types";
+import type { DefinitionEntry, EtymologyEntry, MorphologyEntry, SynonymResult } from "./types";
 import { DEGREE_DOTS, DEGREE_LABELS } from "./constants";
 
 // ─── Definition → Markdown ────────────────────────────────────────────────────
@@ -31,10 +26,7 @@ export function formatDefinitionMarkdown(entry: DefinitionEntry): string {
 
   for (const section of entry.sections) {
     // Section heading
-    const heading =
-      section.qualifier
-        ? `## ${section.label}. ${section.qualifier}`
-        : `## ${section.label}.`;
+    const heading = section.qualifier ? `## ${section.label}. ${section.qualifier}` : `## ${section.label}.`;
     lines.push(heading);
     lines.push("");
 
@@ -131,8 +123,8 @@ export function formatSynonymItems(result: SynonymResult): SynonymListItem[] {
 
   for (const group of result.groups) {
     for (const entry of group.entries) {
-      const dots = entry.degree ? DEGREE_DOTS[entry.degree] ?? "" : "";
-      const label = entry.degree ? DEGREE_LABELS[entry.degree] ?? "" : "";
+      const dots = entry.degree ? (DEGREE_DOTS[entry.degree] ?? "") : "";
+      const label = entry.degree ? (DEGREE_LABELS[entry.degree] ?? "") : "";
       const domainSuffix = entry.domain ? ` [${entry.domain}]` : "";
 
       items.push({
@@ -152,9 +144,7 @@ export function formatSynonymItems(result: SynonymResult): SynonymListItem[] {
  * Generate a plain-text list of synonyms for clipboard.
  */
 export function formatSynonymPlainText(result: SynonymResult): string {
-  return result.groups
-    .flatMap((g) => g.entries.map((e) => e.word))
-    .join(", ");
+  return result.groups.flatMap((g) => g.entries.map((e) => e.word)).join(", ");
 }
 
 // ─── Morphology → Markdown ────────────────────────────────────────────────────

@@ -21,10 +21,7 @@ import type {
  * Fetch the raw HTML of a CNRTL page.
  * Throws a typed {@link CnrtlError} on any failure.
  */
-export async function fetchCnrtlPage(
-  endpoint: CnrtlEndpoint,
-  word: string
-): Promise<string> {
+export async function fetchCnrtlPage(endpoint: CnrtlEndpoint, word: string): Promise<string> {
   const url = buildCnrtlUrl(endpoint, word);
 
   let response: Response;
@@ -39,12 +36,7 @@ export async function fetchCnrtlPage(
   }
 
   if (!response.ok) {
-    throw makeCnrtlError(
-      "network",
-      `Le serveur CNRTL a répondu avec le code HTTP ${response.status}`,
-      word,
-      endpoint
-    );
+    throw makeCnrtlError("network", `Le serveur CNRTL a répondu avec le code HTTP ${response.status}`, word, endpoint);
   }
 
   const html = await response.text();
@@ -137,11 +129,5 @@ function makeCnrtlError(
  * Type-guard to check whether a thrown value is a {@link CnrtlError}.
  */
 export function isCnrtlError(err: unknown): err is CnrtlError {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    "type" in err &&
-    "word" in err &&
-    "endpoint" in err
-  );
+  return typeof err === "object" && err !== null && "type" in err && "word" in err && "endpoint" in err;
 }

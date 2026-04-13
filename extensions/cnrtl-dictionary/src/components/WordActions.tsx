@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, openExtensionPreferences, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, openExtensionPreferences } from "@raycast/api";
 import type { CnrtlEndpoint } from "../utils/types";
 import { buildCnrtlUrl } from "../utils/constants";
 
@@ -15,14 +15,7 @@ interface WordActionsProps {
  * Shared action panel used by every command.
  * Provides: open in browser, copy content, navigation between endpoints.
  */
-export function WordActions({
-  word,
-  currentEndpoint,
-  copyContent,
-  onCopied,
-}: WordActionsProps): JSX.Element {
-  const { push } = useNavigation();
-
+export function WordActions({ word, currentEndpoint, copyContent, onCopied }: WordActionsProps): JSX.Element {
   const otherEndpoints: Array<{ endpoint: CnrtlEndpoint; label: string; icon: Icon }> = [
     { endpoint: "definition", label: "Définition", icon: Icon.Book },
     { endpoint: "synonymie", label: "Synonymes", icon: Icon.Switch },
