@@ -229,6 +229,9 @@ async function resolveByFilesystemWalk(
  * At each level, tries taking the longest possible run of parts as a single
  * path component (joined with literal "-"), checking if it exists on disk.
  * An empty part signals a dot-prefix (from Claude's encoding of "/." → "--").
+ *
+ * Claude Code encodes `_` as `-` in project directory names, so each candidate
+ * component is also probed with all dashes replaced by underscores.
  */
 async function walkPathSegments(
   basePath: string,
@@ -253,24 +256,33 @@ async function walkPathSegments(
       continue;
     }
 
-    const candidatePath = path.join(basePath, component);
+    // Claude Code also encodes underscores as dashes, so try both variants.
+    // Original (with dashes) is tried first to prefer literal dash names.
+    const variants = [component];
+    if (component.includes("-")) {
+      variants.push(component.replace(/-/g, "_"));
+    }
 
-    try {
-      const stat = await fs.promises.stat(candidatePath);
+    for (const variant of variants) {
+      const candidatePath = path.join(basePath, variant);
 
-      if (remaining.length === 0) {
-        // Last component — any file type is fine
-        return candidatePath;
-      }
+      try {
+        const stat = await fs.promises.stat(candidatePath);
 
-      if (stat.isDirectory()) {
-        const resolved = await walkPathSegments(candidatePath, remaining);
-        if (resolved) return resolved;
-      }
-    } catch (error: unknown) {
-      const code = (error as NodeJS.ErrnoException)?.code;
-      if (code !== "ENOENT" && code !== "ENOTDIR") {
-        console.warn(`Unexpected error probing ${candidatePath}:`, error);
+        if (remaining.length === 0) {
+          // Last component — any file type is fine
+          return candidatePath;
+        }
+
+        if (stat.isDirectory()) {
+          const resolved = await walkPathSegments(candidatePath, remaining);
+          if (resolved) return resolved;
+        }
+      } catch (error: unknown) {
+        const code = (error as NodeJS.ErrnoException)?.code;
+        if (code !== "ENOENT" && code !== "ENOTDIR") {
+          console.warn(`Unexpected error probing ${candidatePath}:`, error);
+        }
       }
     }
   }
@@ -280,12 +292,12 @@ async function walkPathSegments(
 
 /**
  * Encode a project path to Claude's directory naming format.
- * Claude Code (verified as of v1.x) replaces both / and . with -.
+ * Claude Code replaces /, ., and _ with -.
  * Confirmed empirically by inspecting ~/.claude/projects/ directory names
  * against their corresponding originalPath values in sessions-index.json.
  */
 export function encodeProjectPath(projectPath: string): string {
-  return projectPath.replace(/[/.]/g, "-");
+  return projectPath.replace(/[/._]/g, "-");
 }
 
 /**
