@@ -89,7 +89,12 @@ export default function ViewAvailability() {
                 <Action title="Set as Default" icon={Icon.Star} onAction={() => handleSetAsDefault(schedule)} />
               )}
               <Action.OpenInBrowser
-                title="Open Availability in Browser"
+                title="Open Schedule in Browser"
+                url={`https://app.cal.com/availability/${schedule.id}`}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+              />
+              <Action.OpenInBrowser
+                title="Open All Availabilities in Browser"
                 url="https://app.cal.com/availability"
                 shortcut={{ modifiers: ["cmd"], key: "o" }}
               />
