@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { CalSchedule, updateSchedule } from "@api/cal.com";
-import { formatTimeZone } from "@/lib/schedule";
+import { formatTimeZoneWithOffset } from "@/lib/schedule";
 
 interface EditTimezoneProps {
   schedule: CalSchedule;
@@ -57,7 +57,7 @@ export function EditTimezone({ schedule, mutate }: EditTimezoneProps) {
     >
       <Form.Dropdown title="Timezone" {...itemProps.timeZone}>
         {zones.map((z) => (
-          <Form.Dropdown.Item key={z} value={z} title={formatTimeZone(z)} keywords={z.split(/[/_]/)} />
+          <Form.Dropdown.Item key={z} value={z} title={formatTimeZoneWithOffset(z)} keywords={z.split(/[/_]/)} />
         ))}
       </Form.Dropdown>
     </Form>

@@ -118,6 +118,26 @@ export function formatTimeZone(tz: string): string {
   return tz.replace(/_/g, " ");
 }
 
+/** Current UTC offset for an IANA timezone, e.g. "GMT-07:00". Returns "" if the zone is unknown. */
+export function formatTimeZoneOffset(tz: string): string {
+  try {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      timeZoneName: "longOffset",
+    }).formatToParts(new Date());
+    return parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+  } catch {
+    return "";
+  }
+}
+
+/** Combines offset + humanized zone, e.g. "(GMT-07:00) America/Los Angeles". */
+export function formatTimeZoneWithOffset(tz: string): string {
+  const offset = formatTimeZoneOffset(tz);
+  const humanized = formatTimeZone(tz);
+  return offset ? `(${offset}) ${humanized}` : humanized;
+}
+
 /** Converts a JS Date (from Form.DatePicker, local time) to "YYYY-MM-DD". */
 export function toIsoDate(date: Date): string {
   const y = date.getFullYear();

@@ -6,7 +6,7 @@ import {
   formatOverrideDate,
   formatOverrideRange,
   formatOverrideWeekday,
-  formatTimeZone,
+  formatTimeZoneWithOffset,
   rangesForDay,
   WEEKDAYS,
   withDayHoursReplaced,
@@ -171,7 +171,7 @@ export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
         <List.Item
           icon={Icon.Globe}
           title="Timezone"
-          accessories={[{ text: formatTimeZone(schedule.timeZone) }]}
+          accessories={[{ text: formatTimeZoneWithOffset(schedule.timeZone) }]}
           actions={
             <ActionPanel>
               <Action.Push
