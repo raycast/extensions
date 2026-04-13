@@ -263,47 +263,13 @@ export function cancelBooking(bookingUid: string, reason: string) {
   });
 }
 
-/**
- * Requests an attendee to reschedule a booking. Per Cal.com docs, this cancels
- * the original booking and emails the attendee a link to pick a new time.
- *
- * Note: uses a NO-LEADING-SLASH url. Our axios baseURL ends with "/" so a
- * leading "/" produces "/v2//bookings/..." (double slash) which Cal.com's
- * router rejects on this specific endpoint with a 404, even though it tolerates
- * the same shape on /cancel and other booking endpoints.
- */
-export async function requestRescheduleBooking(bookingUid: string, reason: string) {
-  // Cal.com's docs list `/v2/bookings/{uid}/request-reschedule` but it 404s in production.
-  // Try a few candidate paths in order; first 2xx wins.
-  const candidates = [
-    `bookings/${bookingUid}/request-reschedule`,
-    `me/bookings/${bookingUid}/request-reschedule`,
-    `bookings/${bookingUid}/cancel-and-request-reschedule`,
-  ];
-  let lastErr: unknown;
-  for (const url of candidates) {
-    try {
-      const result = await calAPI({
-        method: "POST",
-        url,
-        headers: { "cal-api-version": "2026-02-25" },
-        data: { rescheduleReason: reason },
-      });
-      console.log(`[reschedule] succeeded via ${url}`);
-      return result;
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-        console.log(`[reschedule] ${url} -> 404, trying next`);
-        lastErr = err;
-        continue;
-      }
-      // Non-404 error: stop probing and surface the real error
-      throw err;
-    }
-  }
-  console.error("[reschedule] all candidate paths returned 404");
-  throw lastErr;
-}
+// NOTE: Cal.com's v2 docs document `POST /v2/bookings/{uid}/request-reschedule`
+// but as of 2026-04-13 the endpoint 404s on the live API. We probed three
+// candidate paths (with and without /me/, plus /cancel-and-request-reschedule);
+// all returned NotFoundException. Until Cal.com deploys the endpoint, the
+// "Request Reschedule" action opens the booking page in the browser instead.
+// When the API exists, restore this function and switch the action back to
+// the Action.Push form.
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
   return calAPI<CreatePrivateLinkResponse>({
