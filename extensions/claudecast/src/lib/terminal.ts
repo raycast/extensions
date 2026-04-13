@@ -176,7 +176,11 @@ export async function launchClaudeCode(options: {
 
   // Restore the session's permission mode (unless dangerouslySkipPermissions
   // was already set explicitly, which implies bypassPermissions)
-  if (options.permissionMode && options.permissionMode !== "default" && !options.dangerouslySkipPermissions) {
+  if (
+    options.permissionMode &&
+    options.permissionMode !== "default" &&
+    !options.dangerouslySkipPermissions
+  ) {
     args.push("--permission-mode", options.permissionMode);
   }
 
