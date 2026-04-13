@@ -3,7 +3,7 @@
   "name": "lattice-scholar-extension",
   "title": "Lattice Scholar Extension",
   "description": "Search your Lattice literature library from Raycast",
-  "icon": "extension-icon.png",
+  "icon": "extension_icon.png",
   "author": "frank-miao",
   "platforms": [
     "macOS",
