@@ -1,4 +1,3 @@
-import { Color, Icon } from "@raycast/api";
 import type { CalOOOEntry, CalOOOReason } from "@api/cal.com";
 
 /** Stable order for the reason dropdown. */
@@ -20,19 +19,19 @@ export function labelForReason(reason: CalOOOReason): string {
   }
 }
 
-/** Reason-tinted icon used in list rows and detail pane. */
-export function iconForReason(reason: CalOOOReason): { source: Icon; tintColor: Color } {
+/** Emoji icon for a reason — matches the icons used on cal.com's web UI. */
+export function iconForReason(reason: CalOOOReason): { source: string } {
   switch (reason) {
     case "vacation":
-      return { source: Icon.Sun, tintColor: Color.Yellow };
+      return { source: "🏝️" };
     case "travel":
-      return { source: Icon.Airplane, tintColor: Color.Blue };
+      return { source: "🛫" };
     case "sick":
-      return { source: Icon.MedicalSupport, tintColor: Color.Red };
+      return { source: "🤒" };
     case "public_holiday":
-      return { source: Icon.Star, tintColor: Color.Purple };
+      return { source: "📅" };
     case "unspecified":
-      return { source: Icon.Calendar, tintColor: Color.SecondaryText };
+      return { source: "🕒" };
   }
 }
 
