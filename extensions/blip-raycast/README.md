@@ -6,7 +6,7 @@ Blip does not expose a public file-send API on macOS, so this extension triggers
 
 ## Screenshot
 
-![Blip Raycast command](docs/raycast-command.png)
+![Blip Raycast command](metadata/blip-1.png)
 
 ## Commands
 
