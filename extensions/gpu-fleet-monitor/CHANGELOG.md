@@ -1,6 +1,6 @@
 # GPU Fleet Monitor
 
-## [0.2.0] - {PR_MERGE_DATE}
+## [0.2.0] - 2026-04-13
 
 - Dynamic host groups: create, edit, and delete custom groups with pattern and identity file rules
 - Single-command architecture: add hosts, manage groups, and quick-connect all from the main view
@@ -9,7 +9,7 @@
 - Identity file (`-i`) flag parsed from SSH connection strings when adding hosts
 - Improved error handling and path normalization
 
-## [0.1.0] - {PR_MERGE_DATE}
+## [0.1.0] - 2026-04-13
 
 - Monitor GPU and CPU usage across SSH hosts
 - Quick Connect to best available free GPU host
