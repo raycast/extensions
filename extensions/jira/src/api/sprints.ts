@@ -55,25 +55,3 @@ export async function getSprints({ fieldName, fieldValue }: GetSprintsParams) {
 
   return filteredSprints;
 }
-
-/** Resolve sprint ids to active membership via Agile API (issue search payloads often omit sprint state). */
-export async function resolveActiveSprintIds(ids: string[]): Promise<string[]> {
-  const unique = [...new Set(ids.filter(Boolean))];
-  const results = await Promise.all(
-    unique.map(async (id) => {
-      try {
-        return await request<DetailedSprint>(`/sprint/${id}`, { useAgileApi: true });
-      } catch {
-        return null;
-      }
-    }),
-  );
-
-  const active: string[] = [];
-  for (const sprint of results) {
-    if (sprint?.state === "active") {
-      active.push(String(sprint.id));
-    }
-  }
-  return active;
-}
