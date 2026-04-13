@@ -7,6 +7,7 @@ import {
   formatDateTime,
   formatTime,
   useCancelledBookings,
+  useCurrentUser,
   usePastBookings,
   usePendingBookings,
   useUpcomingBookings,
@@ -21,10 +22,27 @@ export default function viewBookings() {
   const [showCancelled, setShowCancelled] = useCachedState("show-cancelled", false);
   const cancelled = useCancelledBookings(showCancelled);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details", false);
+  const [showAllBookings, setShowAllBookings] = useCachedState("show-all-bookings", false);
+  const { data: currentUser } = useCurrentUser();
 
   const isLoading = pending.isLoading || upcoming.isLoading || past.isLoading || (showCancelled && cancelled.isLoading);
 
   const anyError = pending.error || upcoming.error || past.error || (showCancelled && cancelled.error);
+
+  // Filter bookings to those hosted by the current user (unless "show all" is on).
+  // The Cal.com API returns all bookings the user can see, including team bookings
+  // hosted by others — this client-side filter narrows to the user's own bookings.
+  const filterToMine = (list: CalBooking[] | undefined): CalBooking[] | undefined => {
+    if (!list) return list;
+    if (showAllBookings) return list;
+    if (!currentUser) return list; // before /me resolves, show everything to avoid a flicker
+    return list.filter((b) => b.hosts.some((h) => h.id === currentUser.id));
+  };
+
+  const filteredPending = filterToMine(pending.data);
+  const filteredUpcoming = filterToMine(upcoming.data);
+  const filteredPast = filterToMine(past.data);
+  const filteredCancelled = filterToMine(cancelled.data);
 
   // ─── Mutation handlers ─────────────────────────────────────────────────
   const handleConfirm = async (item: CalBooking) => {
@@ -78,6 +96,15 @@ export default function viewBookings() {
     />
   );
 
+  const toggleShowAllAction = (
+    <Action
+      title={showAllBookings ? "Show Only My Bookings" : "Show All Bookings"}
+      icon={showAllBookings ? Icon.Person : Icon.TwoPeople}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      onAction={() => setShowAllBookings(!showAllBookings)}
+    />
+  );
+
   const openAllBookingsAction = (
     <Action.OpenInBrowser
       title="Open All Bookings in Browser"
@@ -93,8 +120,11 @@ export default function viewBookings() {
       title={item.title}
       actions={
         <ActionPanel>
-          {extraActions}
-          <Action.OpenInBrowser title="Open Booking in Browser" url={`https://cal.com/booking/${item.uid}`} />
+          {/* Enter = safe view action; destructive actions live behind explicit shortcuts. */}
+          <Action.OpenInBrowser
+            title="Open Booking in Browser"
+            url={`https://app.cal.com/bookings/upcoming?uid=${item.uid}`}
+          />
           {item.meetingUrl && (
             <Action.OpenInBrowser
               title="Open Video Call"
@@ -103,7 +133,9 @@ export default function viewBookings() {
               shortcut={{ modifiers: ["cmd"], key: "v" }}
             />
           )}
+          {extraActions}
           {toggleDetailsAction}
+          {toggleShowAllAction}
           {toggleCancelledAction}
           {openAllBookingsAction}
         </ActionPanel>
@@ -184,10 +216,19 @@ export default function viewBookings() {
   const noItemsAtAll =
     !isLoading &&
     !anyError &&
-    (pending.data?.length ?? 0) === 0 &&
-    (upcoming.data?.length ?? 0) === 0 &&
-    (past.data?.length ?? 0) === 0 &&
-    (!showCancelled || (cancelled.data?.length ?? 0) === 0);
+    (filteredPending?.length ?? 0) === 0 &&
+    (filteredUpcoming?.length ?? 0) === 0 &&
+    (filteredPast?.length ?? 0) === 0 &&
+    (!showCancelled || (filteredCancelled?.length ?? 0) === 0);
+
+  // Distinguish "nothing in the API" from "filter is hiding everything".
+  const filterIsHidingItems =
+    noItemsAtAll &&
+    !showAllBookings &&
+    ((pending.data?.length ?? 0) > 0 ||
+      (upcoming.data?.length ?? 0) > 0 ||
+      (past.data?.length ?? 0) > 0 ||
+      (showCancelled && (cancelled.data?.length ?? 0) > 0));
 
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail && !noItemsAtAll} pagination={past.pagination}>
@@ -205,11 +246,16 @@ export default function viewBookings() {
       )}
       {noItemsAtAll && (
         <List.EmptyView
-          title="No bookings found"
-          description="Bookings will appear here once people book a meeting with you."
+          title={filterIsHidingItems ? "No bookings hosted by you" : "No bookings found"}
+          description={
+            filterIsHidingItems
+              ? "Press ⌘ ⇧ A to also show team bookings hosted by other people."
+              : "Bookings will appear here once people book a meeting with you."
+          }
           icon={Icon.Calendar}
           actions={
             <ActionPanel>
+              {toggleShowAllAction}
               {openAllBookingsAction}
               {toggleCancelledAction}
             </ActionPanel>
@@ -217,26 +263,28 @@ export default function viewBookings() {
         />
       )}
 
-      {(pending.data?.length ?? 0) > 0 && (
+      {(filteredPending?.length ?? 0) > 0 && (
         <List.Section title="Pending Confirmation">
-          {pending.data!.map((item) =>
+          {filteredPending!.map((item) =>
             renderItem(
               item,
               <>
                 <Action
                   title="Accept"
                   icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+                  shortcut={{ modifiers: ["cmd"], key: "y" }}
                   onAction={() => handleConfirm(item)}
                 />
                 <Action
                   title="Decline"
                   icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                   onAction={() => handleDecline(item)}
                 />
                 <Action.Push
                   title="Cancel Booking"
                   icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   target={
                     <CancelBooking bookingUid={item.uid} mutate={pending.mutate} onAfterCancel={handleAfterCancel} />
                   }
@@ -247,15 +295,15 @@ export default function viewBookings() {
         </List.Section>
       )}
 
-      {(upcoming.data?.length ?? 0) > 0 && (
+      {(filteredUpcoming?.length ?? 0) > 0 && (
         <List.Section title="Upcoming">
-          {upcoming.data!.map((item) =>
+          {filteredUpcoming!.map((item) =>
             renderItem(
               item,
               <Action.Push
                 title="Cancel Booking"
                 icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{ modifiers: ["ctrl"], key: "x" }}
                 target={
                   <CancelBooking bookingUid={item.uid} mutate={upcoming.mutate} onAfterCancel={handleAfterCancel} />
                 }
@@ -265,12 +313,12 @@ export default function viewBookings() {
         </List.Section>
       )}
 
-      {(past.data?.length ?? 0) > 0 && (
-        <List.Section title="Past">{past.data!.map((item) => renderItem(item, null))}</List.Section>
+      {(filteredPast?.length ?? 0) > 0 && (
+        <List.Section title="Past">{filteredPast!.map((item) => renderItem(item, null))}</List.Section>
       )}
 
-      {showCancelled && (cancelled.data?.length ?? 0) > 0 && (
-        <List.Section title="Cancelled">{cancelled.data!.map((item) => renderItem(item, null))}</List.Section>
+      {showCancelled && (filteredCancelled?.length ?? 0) > 0 && (
+        <List.Section title="Cancelled">{filteredCancelled!.map((item) => renderItem(item, null))}</List.Section>
       )}
     </List>
   );
