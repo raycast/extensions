@@ -13,7 +13,18 @@ export interface Message {
 export interface TierInfo {
   hasKey: boolean;
   model: string;
+  modelNeedsKey: boolean;
 }
+
+// Models that require at least a Seed-tier API key
+const KEY_REQUIRED_MODELS = new Set([
+  "openai-large",
+  "openai-reasoning",
+  "gemini",
+  "gemini-search",
+  "deepseek",
+  "claudyclaude",
+]);
 
 // ─── Custom error with HTTP status ───────────────────────────────────────────
 
@@ -44,9 +55,11 @@ const BASE_URL = "https://text.pollinations.ai";
 /** Returns tier metadata WITHOUT exposing the key value. */
 export function getTierInfo(): TierInfo {
   const prefs = getPreferenceValues<Preferences>();
+  const model = prefs.model || "openai";
   return {
     hasKey: !!prefs.apiKey?.trim(),
-    model: prefs.model || "openai",
+    model,
+    modelNeedsKey: KEY_REQUIRED_MODELS.has(model),
   };
 }
 

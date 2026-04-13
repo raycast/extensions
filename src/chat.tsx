@@ -165,16 +165,20 @@ export default function ChatCommand() {
             text={tier.hasKey ? "Premium (API anahtarlı)" : "Ücretsiz"}
           />
           <Detail.Metadata.Label title="Model" text={tier.model} />
-          {!tier.hasKey && (
-            <>
-              <Detail.Metadata.Separator />
-              <Detail.Metadata.Label
-                title="İpucu"
-                icon={Icon.Info}
-                text="API anahtarı ekleyerek rate-limit'i kaldırabilirsiniz"
-              />
-            </>
-          )}
+          <Detail.Metadata.Separator />
+          {!tier.hasKey && tier.modelNeedsKey ? (
+            <Detail.Metadata.Label
+              title="Uyarı"
+              icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+              text="Bu model API anahtarı gerektirir (⌘ ,)"
+            />
+          ) : !tier.hasKey ? (
+            <Detail.Metadata.Label
+              title="İpucu"
+              icon={{ source: Icon.Info, tintColor: Color.Blue }}
+              text="API anahtarı ile Gemini, GPT-5, DeepSeek açılır"
+            />
+          ) : null}
         </Detail.Metadata>
       }
       actions={
