@@ -79,6 +79,11 @@ export default function ViewAvailability() {
           actions={
             <ActionPanel>
               <Action.Push title="View Schedule" icon={Icon.Eye} target={<ScheduleDetail scheduleId={schedule.id} />} />
+              <Action.OpenInBrowser
+                title="Open Schedule in Browser"
+                url={`https://app.cal.com/availability/${schedule.id}`}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+              />
               <Action
                 title={isShowingDetail ? "Hide Details" : "Show Details"}
                 icon={isShowingDetail ? Icon.EyeDisabled : Icon.Eye}
@@ -88,11 +93,6 @@ export default function ViewAvailability() {
               {!schedule.isDefault && (
                 <Action title="Set as Default" icon={Icon.Star} onAction={() => handleSetAsDefault(schedule)} />
               )}
-              <Action.OpenInBrowser
-                title="Open Schedule in Browser"
-                url={`https://app.cal.com/availability/${schedule.id}`}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-              />
               <Action.OpenInBrowser
                 title="Open All Availabilities in Browser"
                 url="https://app.cal.com/availability"
