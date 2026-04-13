@@ -21,7 +21,7 @@ import { useTransferHistory } from "./hooks/useTransferHistory";
 import { TransferRecord, formatFileSize } from "./utils/history";
 import { getCrocPath, buildCrocArgs } from "./utils/croc";
 import { spawnCrocSend } from "./utils/process";
-import { addRecord } from "./utils/history";
+import { addRecord, updateRecord } from "./utils/history";
 import { cleanStaleInProgressRecords } from "./utils/history";
 
 // Session ID for stale in_progress record cleanup
@@ -218,6 +218,7 @@ async function reSend(record: TransferRecord) {
     style: Toast.Style.Animated,
     title: "Re-sending…",
   });
+  let recordId: string | null = null;
   spawnCrocSend(
     crocPath,
     args,
@@ -226,21 +227,24 @@ async function reSend(record: TransferRecord) {
       toast.style = Toast.Style.Animated;
       toast.title = "Waiting for receiver";
       toast.message = phrase;
-      await addRecord({
+      const record = await addRecord({
         type: "send",
         files: existing,
         phrase,
-        status: "success",
+        status: "in_progress",
       });
+      recordId = record.id;
     },
     (p) => {
       toast.message = `${p.percent}%`;
     },
     async () => {
+      if (recordId) await updateRecord(recordId, { status: "success" });
       toast.style = Toast.Style.Success;
       toast.title = "Re-send complete";
     },
     async (err) => {
+      if (recordId) await updateRecord(recordId, { status: "failed" });
       toast.style = Toast.Style.Failure;
       toast.title = "Re-send failed";
       toast.message = err.message;
