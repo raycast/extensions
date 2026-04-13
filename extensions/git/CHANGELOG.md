@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-13
 
 ### Added
 - **Remotes**: Add action to create a new repository on GitHub (`CreateGitHubRepositoryAction` in `RemotesView`)
