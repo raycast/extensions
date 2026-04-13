@@ -125,15 +125,8 @@ export default function ViewAvailability() {
                         <List.Item.Detail.Metadata.Separator />
                         <List.Item.Detail.Metadata.Label
                           title="Used by"
-                          text={`${linked.length} event type${linked.length === 1 ? "" : "s"}`}
+                          text={linked.map((et) => et.title).join("\n")}
                         />
-                        {linked.map((et) => (
-                          <List.Item.Detail.Metadata.Label
-                            key={et.id}
-                            title={et.title}
-                            text={`${et.lengthInMinutes} min`}
-                          />
-                        ))}
                       </>
                     );
                   })()}
