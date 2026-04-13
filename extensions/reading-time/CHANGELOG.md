@@ -1,6 +1,6 @@
 # Reading Time Changelog
 
-## [Unreleased]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release
 - Added clipboard-based reading time calculation

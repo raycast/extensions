@@ -1,11 +1,7 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, getPreferenceValues, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
 const DEFAULT_WORDS_PER_MINUTE = 200;
-
-type Preferences = {
-  readingSpeed?: string;
-};
 
 type State = {
   loading: boolean;
@@ -16,8 +12,9 @@ type State = {
   wpm: number;
 };
 
-export default function Command(props?: { preferences?: Preferences }) {
-  const configuredWpm = getWpmPreference(props?.preferences?.readingSpeed);
+export default function Command() {
+  const { readingSpeed } = getPreferenceValues<Preferences.ClipboardReadingTime>();
+  const configuredWpm = getWpmPreference(readingSpeed);
 
   const [state, setState] = useState<State>({
     loading: true,
@@ -92,7 +89,7 @@ ${state.subtitle}`;
         <ActionPanel>
           <Action title="Copy Min Read" icon={Icon.Clipboard} onAction={copyMinRead} />
           <Action.CopyToClipboard title="Copy Word Count" content={String(state.wordCount)} />
-          <Action title="Refresh From Clipboard" icon={Icon.ArrowClockwise} onAction={loadClipboard} />
+          <Action title="Refresh from Clipboard" icon={Icon.ArrowClockwise} onAction={loadClipboard} />
         </ActionPanel>
       }
     />
