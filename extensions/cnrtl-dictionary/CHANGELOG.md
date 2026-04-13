@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] — 2026-04-13
+## [1.0.0] — {PR_MERGE_DATE}
 
 ### Added
 
@@ -11,4 +11,4 @@
 - **Morphologie** — Tableau des formes fléchies et conjuguées d'un mot.
 - Historique de recherche configurable (stockage local, taille paramétrable).
 - Actions rapides : ouvrir sur le CNRTL, copier la définition, copier le mot, navigation croisée entre les commandes.
-- Préférences : taille de l'historique, ouverture automatique dans le navigateur.
+- Préférences : taille de l'historique configurable (0 pour désactiver).

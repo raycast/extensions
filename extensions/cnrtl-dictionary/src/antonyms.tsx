@@ -7,9 +7,8 @@ import { addToHistory, getRecentWords } from "./utils/history";
 import { buildCnrtlUrl, MIN_SEARCH_LENGTH } from "./utils/constants";
 import { isCnrtlError } from "./utils/cnrtl";
 import { WordActions } from "./components/WordActions";
-import type { ExtensionPreferences } from "./utils/types";
 
-export default function AntonymsCommand(): JSX.Element {
+export default function AntonymsCommand() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const historySize = parseInt(preferences.historySize ?? "50", 10);
 
@@ -65,7 +64,7 @@ export default function AntonymsCommand(): JSX.Element {
           subtitle="Essayez avec une autre forme du mot"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Ouvrir sur le CNRTL" url={buildCnrtlUrl("antonymie", trimmedWord)} />
+              <Action.OpenInBrowser title="Ouvrir Sur Le Cnrtl" url={buildCnrtlUrl("antonymie", trimmedWord)} />
             </ActionPanel>
           }
         />
@@ -103,12 +102,12 @@ export default function AntonymsCommand(): JSX.Element {
                       icon={Icon.Book}
                     />
                     <Action.CopyToClipboard
-                      title="Copier le mot"
+                      title="Copier Le Mot"
                       content={item.word}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     <Action.OpenInBrowser
-                      title="Voir tous les antonymes sur le CNRTL"
+                      title="Voir Tous Les Antonymes Sur Le Cnrtl"
                       url={buildCnrtlUrl("antonymie", data.word)}
                       icon={Icon.Globe}
                       shortcut={{ modifiers: ["cmd"], key: "o" }}

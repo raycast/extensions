@@ -86,15 +86,6 @@
       "description": "Nombre maximum de recherches mémorisées (0 pour désactiver)",
       "default": "50",
       "placeholder": "50"
-    },
-    {
-      "name": "openBrowserOnSubmit",
-      "type": "checkbox",
-      "required": false,
-      "title": "Ouvrir dans le navigateur",
-      "description": "Ouvrir automatiquement la page CNRTL lors de la validation",
-      "default": false,
-      "label": "Ouvrir CNRTL dans le navigateur lors de la validation"
     }
   ],
   "dependencies": {
@@ -106,7 +97,7 @@
     "@raycast/eslint-config": "^1.0.11",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.19.39",
-    "@types/react": "^18.3.28",
+    "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "jest": "^29.7.0",
     "jest-fetch-mock": "^3.0.3",

@@ -7,9 +7,8 @@ import { addToHistory, getRecentWords } from "./utils/history";
 import { buildCnrtlUrl, MIN_SEARCH_LENGTH } from "./utils/constants";
 import { isCnrtlError } from "./utils/cnrtl";
 import { WordActions } from "./components/WordActions";
-import type { ExtensionPreferences } from "./utils/types";
 
-export default function DefinitionCommand(): JSX.Element {
+export default function DefinitionCommand() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const historySize = parseInt(preferences.historySize ?? "50", 10);
 

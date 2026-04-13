@@ -7,9 +7,8 @@ import { addToHistory, getRecentWords } from "./utils/history";
 import { buildCnrtlUrl, MIN_SEARCH_LENGTH } from "./utils/constants";
 import { isCnrtlError } from "./utils/cnrtl";
 import { WordActions } from "./components/WordActions";
-import type { ExtensionPreferences } from "./utils/types";
 
-export default function SynonymsCommand(): JSX.Element {
+export default function SynonymsCommand() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
   const historySize = parseInt(preferences.historySize ?? "50", 10);
 
@@ -73,7 +72,7 @@ export default function SynonymsCommand(): JSX.Element {
           subtitle="Essayez avec une autre forme du mot"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Ouvrir sur le CNRTL" url={buildCnrtlUrl("synonymie", trimmedWord)} />
+              <Action.OpenInBrowser title="Ouvrir Sur Le Cnrtl" url={buildCnrtlUrl("synonymie", trimmedWord)} />
             </ActionPanel>
           }
         />
@@ -110,12 +109,12 @@ export default function SynonymsCommand(): JSX.Element {
                         icon={Icon.Book}
                       />
                       <Action.CopyToClipboard
-                        title="Copier le mot"
+                        title="Copier Le Mot"
                         content={item.word}
                         shortcut={{ modifiers: ["cmd"], key: "c" }}
                       />
                       <Action.OpenInBrowser
-                        title="Voir tous les synonymes sur le CNRTL"
+                        title="Voir Tous Les Synonymes Sur Le Cnrtl"
                         url={buildCnrtlUrl("synonymie", data.word)}
                         icon={Icon.Globe}
                         shortcut={{ modifiers: ["cmd"], key: "o" }}

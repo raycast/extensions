@@ -3,7 +3,6 @@ import type {
   DefinitionEntry,
   DefinitionSection,
   DefinitionExample,
-  DefinitionSubSection,
   SynonymResult,
   SynonymGroup,
   SynonymEntry,
@@ -88,36 +87,20 @@ function extractExamples(el: HTMLElement): DefinitionExample[] {
 }
 
 /**
- * Parse sub-sections (a, b, c … or α, β …) within a numbered section.
- */
-function extractSubSections(el: HTMLElement): DefinitionSubSection[] {
-  const subs: DefinitionSubSection[] = [];
-  const markers = el.querySelectorAll(".tlf_csubdef, .tlf_clettre");
-
-  for (const marker of markers) {
-    const label = cleanText(marker.text);
-    const parent = marker.parentNode as HTMLElement | null;
-    if (!parent) continue;
-    const text = cleanText(parent.text.replace(label, "").trim());
-    subs.push({ label, text, examples: extractExamples(parent) });
-  }
-
-  return subs;
-}
-
-/**
  * Parse the full definition page HTML returned by cnrtl.fr/definition/<word>.
  */
 export function parseDefinitionPage(html: string, word: string): DefinitionEntry {
   const root = parse(html);
 
   // Remove navigational chrome, scripts, styles
-  for (const sel of ["script", "style", "nav", "#vmpasstlf", "#navigation", ".tlf_compteur"]) {
+  for (const sel of ["script", "style", "nav", "#vmpasstlf", "#navigation", ".tlf_compteur", "#vtoolbar"]) {
     root.querySelectorAll(sel).forEach((el) => el.remove());
   }
 
   // ── Locate the main content area ──
-  const content = querySelector(root, ["#vitemselected", "#contentbox", ".tlf_partie", ".tlf_cvedette"]);
+  // NOTE: #vitemselected is the selected nav tab (just the word label), NOT the content.
+  // The actual definition lives in #contentbox.
+  const content = querySelector(root, ["#contentbox", ".tlf_partie", ".tlf_cvedette"]);
 
   // ── Headword and part of speech ──
   const headwordEl = querySelector(root, [".tlf_cmot", ".tlf_cvedette .tlf_cmot", "h1"]);
@@ -134,58 +117,41 @@ export function parseDefinitionPage(html: string, word: string): DefinitionEntry
   });
 
   // ── Main sections ──
+  // CNRTL/TLFi structure: each sense is a .tlf_cdefinition element whose parent
+  // (.tlf_parah or .tlf_paraputir) also contains a .tlf_cplan label (A, B, 1, 2…).
   const sections: DefinitionSection[] = [];
 
   if (content) {
-    // Try to parse structured TLFi sections (Roman numerals I, II, III…)
-    const sectionEls = content.querySelectorAll(".tlf_cpartie, .tlf_cnum, [class^='tlf_c']");
+    const defEls = content.querySelectorAll(".tlf_cdefinition");
 
-    if (sectionEls.length > 0) {
-      // Group siblings by Roman-numeral section markers
-      const numEls = content.querySelectorAll(".tlf_cnum");
-      if (numEls.length > 0) {
-        for (const numEl of numEls) {
-          const label = cleanText(numEl.text).replace(/[.\s]+$/, "");
-          const parentSection = numEl.parentNode as HTMLElement | null;
-          if (!parentSection) continue;
+    for (const defEl of defEls) {
+      const defText = cleanText(defEl.text);
+      if (!defText || defText.length < 5) continue;
 
-          // Qualifier: domain/semantic markers in brackets
-          const qualEl = parentSection.querySelector(".tlf_cdomaine, .tlf_cqualif");
-          const qualifier = qualEl ? cleanText(qualEl.text) : undefined;
+      const parent = defEl.parentNode as HTMLElement | null;
 
-          const text = cleanText(
-            parentSection.text
-              .replace(label, "")
-              .replace(qualifier ?? "", "")
-              .trim()
-          );
+      // Section label from the nearest .tlf_cplan sibling
+      const planEl = parent?.querySelector(".tlf_cplan");
+      const label = planEl
+        ? cleanText(planEl.text)
+            .replace(/\s*[−–]\s*$/, "")
+            .trim()
+        : String(sections.length + 1);
 
-          sections.push({
-            label,
-            qualifier,
-            text,
-            examples: extractExamples(parentSection),
-            subSections: extractSubSections(parentSection),
-          });
-        }
-      } else {
-        // Simpler structure: treat each block as one section
-        let idx = 0;
-        for (const el of sectionEls) {
-          const text = cleanText(el.text);
-          if (text.length < 10) continue;
-          idx++;
-          sections.push({
-            label: String(idx),
-            text,
-            examples: extractExamples(el),
-            subSections: [],
-          });
-        }
-      }
+      // Optional qualifier: domain or usage label
+      const qualEl = parent?.querySelector(".tlf_cdomaine, .tlf_cemploi, .tlf_ccrochet");
+      const qualifier = qualEl ? cleanText(qualEl.text) : undefined;
+
+      sections.push({
+        label,
+        qualifier,
+        text: defText,
+        examples: parent ? extractExamples(parent) : [],
+        subSections: [],
+      });
     }
 
-    // Fallback: split into pseudo-sections by double newline / separator
+    // Fallback: split raw text into pseudo-sections
     if (sections.length === 0) {
       const rawText = cleanText(content.text);
       const chunks = rawText.split(/\s{3,}/).filter((s) => s.length > 20);

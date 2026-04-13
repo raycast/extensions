@@ -105,10 +105,3 @@ export interface HistoryEntry {
   timestamp: number;
   endpoint: CnrtlEndpoint;
 }
-
-// ─── Preferences ─────────────────────────────────────────────────────────────
-
-export interface ExtensionPreferences {
-  historySize: string;
-  openBrowserOnSubmit: boolean;
-}
