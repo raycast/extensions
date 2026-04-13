@@ -118,14 +118,26 @@ export function formatTimeZone(tz: string): string {
   return tz.replace(/_/g, " ");
 }
 
-/** Current UTC offset for an IANA timezone, e.g. "GMT-07:00". Returns "" if the zone is unknown. */
+/**
+ * Current UTC offset for an IANA timezone as a compact human string,
+ * e.g. "GMT+7", "GMT-7", "GMT+10.5", "GMT+5.75", "GMT" for UTC.
+ * Returns "" if the zone is unknown.
+ */
 export function formatTimeZoneOffset(tz: string): string {
   try {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone: tz,
       timeZoneName: "longOffset",
     }).formatToParts(new Date());
-    return parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+    const raw = parts.find((p) => p.type === "timeZoneName")?.value ?? "";
+    // Raw: "GMT", "GMT+07:00", "GMT-10:30", "GMT+05:45"
+    const match = raw.match(/^GMT([+-])(\d{1,2}):(\d{2})$/);
+    if (!match) return raw;
+    const [, sign, hh, mm] = match;
+    const decimal = Number(hh) + Number(mm) / 60;
+    // Keep up to 2 decimals, trim trailing zeros (5.75, 10.5, 7).
+    const trimmed = decimal.toFixed(2).replace(/\.?0+$/, "");
+    return `GMT${sign}${trimmed}`;
   } catch {
     return "";
   }
