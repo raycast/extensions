@@ -9,9 +9,12 @@ export interface CancelBookingFormValues {
 interface CancelBookingProps {
   bookingUid: string;
   mutate: MutatePromise<CalBooking[] | undefined>;
+  /** Optional callback invoked after a successful cancel (e.g. to revalidate
+   *  the Cancelled section in the parent list). */
+  onAfterCancel?: () => void | Promise<void>;
 }
 
-export function CancelBooking({ bookingUid, mutate }: CancelBookingProps) {
+export function CancelBooking({ bookingUid, mutate, onAfterCancel }: CancelBookingProps) {
   const { pop } = useNavigation();
 
   const handleCancelBooking = async (reason: string) => {
@@ -32,13 +35,12 @@ export function CancelBooking({ bookingUid, mutate }: CancelBookingProps) {
   const handleCancelAndMutate = async (reason: string) => {
     await mutate(handleCancelBooking(reason), {
       optimisticUpdate: (bookings) => {
-        if (!bookings) {
-          return;
-        }
-
-        return bookings.map((b) => (b.uid === bookingUid ? { ...b, status: "cancelled" } : b));
+        if (!bookings) return;
+        // Sectioned list: drop the booking from the source section entirely.
+        return bookings.filter((b) => b.uid !== bookingUid);
       },
     });
+    if (onAfterCancel) await onAfterCancel();
   };
 
   const { itemProps, handleSubmit } = useForm<CancelBookingFormValues>({
