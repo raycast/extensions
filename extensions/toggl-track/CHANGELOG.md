@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-04-13
 
 - Fix negative duration display in today's total when a running time entry is not first in the array
 
