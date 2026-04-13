@@ -1,5 +1,12 @@
 # ClaudeCast Changelog
 
+## [1.5.0] - 2026-04-13
+
+### Added
+
+- **Launch Project Preferences**: Configurable Permission Mode and Model Override settings for the Launch Project command. All launch actions (New Session, Continue Last, Continue with Prompt) respect these preferences.
+- **Quick Continue Preferences**: Same Permission Mode and Model Override settings for the Quick Continue command, applied to both recent-session continuation and new-session fallback.
+
 ## [1.4.0] - 2026-04-13
 
 ### Fixed
