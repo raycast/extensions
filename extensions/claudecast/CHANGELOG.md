@@ -5,6 +5,7 @@
 ### Added
 
 - **Launch Project Preferences**: Configurable Permission Mode and Model Override settings for the Launch Project command. All launch actions (New Session, Continue Last, Continue with Prompt) respect these preferences.
+- **Deep Search Permission Restore**: Sessions resumed or forked from Deep Search now restore the original permission mode.
 
 ### Fixed
 
