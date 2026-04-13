@@ -380,13 +380,13 @@ interface MembershipResponse {
 
 /**
  * Cal.com returns avatar paths as either absolute URLs or relative `/api/avatar/...` paths.
- * For Cal.com-hosted images, request a small thumbnail via `?size=64` (the API serves any size).
+ * For Cal.com-hosted images, request a small thumbnail via `?size=32` (the API serves any size).
  * Other hosts (e.g. Google) are returned as-is.
  */
 function normalizeAvatarUrl(url: string | null): string | null {
   if (!url) return null;
   if (url.startsWith("/api/avatar/")) {
-    return `https://app.cal.com${url}?size=64`;
+    return `https://app.cal.com${url}?size=32`;
   }
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   if (url.startsWith("/")) return `https://app.cal.com${url}`;
