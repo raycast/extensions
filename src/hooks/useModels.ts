@@ -8,81 +8,16 @@ interface Preferences {
 export interface PollinationsModel {
   name: string;
   description: string;
-  tier: "anonymous" | "seed" | "flower" | "nectar";
+  isPaid: boolean;
   reasoning?: boolean;
   vision?: boolean;
-  audio?: boolean;
   tools?: boolean;
-  aliases?: string[];
+  search?: boolean;
 }
 
 const STORAGE_KEY = "selected-model";
 const DEFAULT_MODEL = "openai";
-
-// ─── Known model catalogue (sourced from pollinations/shared/registry/text.ts)
-// The /models endpoint only returns anonymous-tier models regardless of key,
-// so we maintain this curated list and merge it with any runtime additions.
-const KNOWN_MODELS: PollinationsModel[] = [
-  // ── Anonymous (free, no key needed) ────────────────────────────────────────
-  {
-    name: "openai",
-    description: "GPT-5 Mini — fast and free",
-    tier: "anonymous",
-    tools: true,
-  },
-  {
-    name: "openai-fast",
-    description: "GPT-5 Nano / OVH — fastest, free",
-    tier: "anonymous",
-    reasoning: true,
-    tools: true,
-  },
-  {
-    name: "mistral",
-    description: "Mistral Small 3.2 24B — free",
-    tier: "anonymous",
-  },
-  {
-    name: "qwen-coder",
-    description: "Qwen 2.5 Coder 32B — free, great for code",
-    tier: "anonymous",
-  },
-  // ── Seed (API key required) ─────────────────────────────────────────────────
-  {
-    name: "openai-large",
-    description: "GPT-5 Chat — most capable OpenAI model",
-    tier: "seed",
-    tools: true,
-  },
-  {
-    name: "openai-reasoning",
-    description: "o4-mini — deep reasoning",
-    tier: "seed",
-    reasoning: true,
-  },
-  {
-    name: "gemini",
-    description: "Gemini 2.5 Flash Lite — Google",
-    tier: "seed",
-  },
-  {
-    name: "gemini-search",
-    description: "Gemini 2.5 Flash + web search",
-    tier: "seed",
-  },
-  {
-    name: "deepseek",
-    description: "DeepSeek V3.1 — strong reasoning",
-    tier: "seed",
-    reasoning: true,
-  },
-  // ── Flower (higher-tier key) ────────────────────────────────────────────────
-  {
-    name: "claudyclaude",
-    description: "Claude Haiku 4.5 — Anthropic",
-    tier: "flower",
-  },
-];
+const MODELS_URL = "https://gen.pollinations.ai/v1/models";
 
 // ─── Persistence ──────────────────────────────────────────────────────────────
 
@@ -94,21 +29,77 @@ export async function storeModel(model: string): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, model);
 }
 
+// ─── Parse OpenAI /v1/models response ────────────────────────────────────────
+
+interface RawModel {
+  id: string;
+  description?: string;
+  capabilities?: string[];
+  owned_by?: string;
+}
+
+function parseModels(
+  raw: { data?: RawModel[] } | RawModel[],
+): PollinationsModel[] {
+  const items: RawModel[] = Array.isArray(raw) ? raw : (raw.data ?? []);
+
+  return items
+    .filter(
+      (m) =>
+        m.id &&
+        !m.id.includes("audio") &&
+        !m.id.includes("whisper") &&
+        !m.id.includes("scribe"),
+    )
+    .map((m) => {
+      const desc = m.description ?? "";
+      const caps = m.capabilities ?? [];
+
+      // Determine paid tier from description marker or capabilities
+      const isPaid = desc.toLowerCase().includes("(paid)");
+
+      // Parse capability tags from description like [tools, reasoning, search]
+      const tagMatch = desc.match(/\[([^\]]+)\]/);
+      const tags = tagMatch
+        ? tagMatch[1].split(",").map((t) => t.trim())
+        : caps;
+
+      // Clean description: remove the [tags] and (paid) suffixes
+      const cleanDesc = desc
+        .replace(/\s*\[[^\]]*\]/g, "")
+        .replace(/\s*\(paid\)/gi, "")
+        .replace(/\s*\(alpha\)/gi, "")
+        .replace(/\s*\(preview\)/gi, "")
+        .trim();
+
+      return {
+        name: m.id,
+        description: cleanDesc,
+        isPaid,
+        reasoning: tags.includes("reasoning"),
+        vision: tags.includes("vision") || m.id.includes("vision"),
+        tools: tags.includes("tools"),
+        search: tags.includes("search"),
+      };
+    });
+}
+
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useModels() {
-  const [models, setModels] = useState<PollinationsModel[]>(KNOWN_MODELS);
-  const [selectedModel, setSelectedModelState] =
-    useState<string>(DEFAULT_MODEL);
+  // Start with undefined to distinguish "not loaded yet" from "loaded as default"
+  const [selectedModel, setSelectedModelState] = useState<string | undefined>(
+    undefined,
+  );
+  const [models, setModels] = useState<PollinationsModel[]>([]);
   const [isLoadingModels, setIsLoadingModels] = useState(true);
 
-  // Restore persisted model selection
+  // Load persisted model selection first
   useEffect(() => {
     getStoredModel().then(setSelectedModelState);
   }, []);
 
-  // Fetch live models and merge with known list.
-  // The API may return additional/newer models not yet in KNOWN_MODELS.
+  // Fetch live model list from gen.pollinations.ai/v1/models (no auth needed)
   useEffect(() => {
     async function fetchModels() {
       const prefs = getPreferenceValues<Preferences>();
@@ -117,29 +108,16 @@ export function useModels() {
       if (key) headers["Authorization"] = `Bearer ${key}`;
 
       try {
-        const res = await fetch("https://text.pollinations.ai/models", {
-          headers,
-        });
+        const res = await fetch(MODELS_URL, { headers });
         if (res.ok) {
-          const live: PollinationsModel[] = await res.json();
-
-          // Merge: start with known list, append any live model not already present
-          const knownNames = new Set(KNOWN_MODELS.map((m) => m.name));
-          const extras = live.filter(
-            (m) =>
-              !knownNames.has(m.name) &&
-              !m.audio &&
-              (
-                m as { output_modalities?: string[] }
-              ).output_modalities?.includes("text") !== false,
-          );
-
-          if (extras.length > 0) {
-            setModels([...KNOWN_MODELS, ...extras]);
+          const raw = await res.json();
+          const parsed = parseModels(raw);
+          if (parsed.length > 0) {
+            setModels(parsed);
           }
         }
       } catch {
-        // Network failure — KNOWN_MODELS already set as default
+        // Network failure — models list stays empty, UI shows model name only
       } finally {
         setIsLoadingModels(false);
       }
@@ -148,10 +126,20 @@ export function useModels() {
     fetchModels();
   }, []);
 
+  const resolvedModel = selectedModel ?? DEFAULT_MODEL;
+
   const selectModel = async (model: string) => {
     setSelectedModelState(model);
     await storeModel(model);
   };
 
-  return { models, selectedModel, selectModel, isLoadingModels };
+  const activeModel = models.find((m) => m.name === resolvedModel);
+
+  return {
+    models,
+    selectedModel: resolvedModel,
+    activeModel,
+    selectModel,
+    isLoadingModels: isLoadingModels || selectedModel === undefined,
+  };
 }

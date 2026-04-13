@@ -11,11 +11,11 @@ export interface Message {
 
 export interface TierInfo {
   hasKey: boolean;
-  /** True when the selected model requires an API key (tier !== anonymous) */
+  /** True when the selected model requires payment / API key */
   modelNeedsKey: boolean;
 }
 
-// ─── Custom error with HTTP status ───────────────────────────────────────────
+// ─── Custom error ─────────────────────────────────────────────────────────────
 
 export class ApiError extends Error {
   constructor(
@@ -26,27 +26,28 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 
-  /** Invalid or revoked API key */
   get isAuthError(): boolean {
     return this.statusCode === 401 || this.statusCode === 403;
   }
 
-  /** Free-tier rate limit hit */
   get isRateLimited(): boolean {
     return this.statusCode === 429;
+  }
+
+  get isInsufficientBalance(): boolean {
+    return this.statusCode === 402;
   }
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const BASE_URL = "https://text.pollinations.ai";
+export const BASE_URL = "https://gen.pollinations.ai";
 
-/** Returns tier metadata WITHOUT exposing the key value. */
-export function getTierInfo(modelTier?: string): TierInfo {
+export function getTierInfo(modelIsPaid?: boolean): TierInfo {
   const prefs = getPreferenceValues<Preferences>();
   return {
     hasKey: !!prefs.apiKey?.trim(),
-    modelNeedsKey: !!modelTier && modelTier !== "anonymous",
+    modelNeedsKey: !!modelIsPaid,
   };
 }
 
@@ -57,7 +58,6 @@ function buildHeaders(): Record<string, string> {
   };
   const key = prefs.apiKey?.trim();
   if (key) {
-    // Key is sent only over HTTPS and never stored or logged anywhere
     headers["Authorization"] = `Bearer ${key}`;
   }
   return headers;
@@ -70,7 +70,7 @@ async function assertOk(response: Response): Promise<void> {
       const body = await response.json();
       detail = body?.error?.message ?? body?.message ?? detail;
     } catch {
-      // ignore parse failures
+      // ignore
     }
     throw new ApiError(`${response.status}: ${detail}`, response.status);
   }
@@ -87,7 +87,7 @@ export async function streamChat(
   signal?: AbortSignal,
 ): Promise<void> {
   try {
-    const response = await fetch(`${BASE_URL}/openai`, {
+    const response = await fetch(`${BASE_URL}/v1/chat/completions`, {
       method: "POST",
       headers: buildHeaders(),
       body: JSON.stringify({ model, messages, stream: true }),
@@ -135,7 +135,7 @@ export async function singleChat(
   messages: Message[],
   model: string,
 ): Promise<string> {
-  const response = await fetch(`${BASE_URL}/openai`, {
+  const response = await fetch(`${BASE_URL}/v1/chat/completions`, {
     method: "POST",
     headers: buildHeaders(),
     body: JSON.stringify({ model, messages, stream: false }),

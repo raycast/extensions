@@ -40,13 +40,6 @@ function friendlyError(err: Error): { title: string; message: string } {
   return { title: "Hata", message: err.message };
 }
 
-function tierLabel(tier: string): string {
-  if (tier === "anonymous") return "Ücretsiz";
-  if (tier === "seed") return "Seed";
-  if (tier === "flower") return "Flower";
-  return tier;
-}
-
 function ModelPicker({
   models,
   currentModel,
@@ -57,15 +50,18 @@ function ModelPicker({
   onSelect: (model: string) => void;
 }) {
   const { pop } = useNavigation();
-  const tierOrder = ["anonymous", "seed", "flower", "nectar"];
-  const grouped = tierOrder
-    .map((tier) => ({ tier, items: models.filter((m) => m.tier === tier) }))
-    .filter((g) => g.items.length > 0);
+
+  const free = models.filter((m) => !m.isPaid);
+  const paid = models.filter((m) => m.isPaid);
+  const grouped = [
+    { label: "Ücretsiz", items: free },
+    { label: "🔑 Ücretli (API anahtarı gerekli)", items: paid },
+  ].filter((g) => g.items.length > 0);
 
   return (
     <List navigationTitle="Model Seç" searchBarPlaceholder="Model ara…">
-      {grouped.map(({ tier, items }) => (
-        <List.Section key={tier} title={tierLabel(tier)}>
+      {grouped.map(({ label, items }) => (
+        <List.Section key={label} title={label}>
           {items.map((m) => {
             const isCurrent = m.name === currentModel;
             const badges: List.Item.Accessory[] = [];
@@ -77,6 +73,8 @@ function ModelPicker({
               badges.push({ tag: { value: "reasoning", color: Color.Purple } });
             if (m.vision)
               badges.push({ tag: { value: "vision", color: Color.Blue } });
+            if (m.search)
+              badges.push({ tag: { value: "search", color: Color.Green } });
             return (
               <List.Item
                 key={m.name}
@@ -105,14 +103,14 @@ function ModelPicker({
 }
 
 export default function QuickAskCommand() {
-  const { models, selectedModel, selectModel, isLoadingModels } = useModels();
+  const { models, selectedModel, activeModel, selectModel, isLoadingModels } =
+    useModels();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { push } = useNavigation();
 
-  const activeModel = models.find((m) => m.name === selectedModel);
-  const tier = getTierInfo(activeModel?.tier);
+  const tier = getTierInfo(activeModel?.isPaid);
 
   const openModelPicker = useCallback(() => {
     push(
@@ -223,7 +221,7 @@ export default function QuickAskCommand() {
   }
 
   const tierText = activeModel
-    ? `${tierLabel(activeModel.tier)} · ${activeModel.description || selectedModel}`
+    ? `${activeModel.isPaid ? "🔑 Ücretli" : "Ücretsiz"} · ${activeModel.description || selectedModel}`
     : selectedModel;
 
   return (

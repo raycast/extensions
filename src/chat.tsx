@@ -68,16 +68,6 @@ function friendlyError(err: Error): { title: string; message: string } {
   return { title: "Hata", message: err.message };
 }
 
-// ─── Tier badge ───────────────────────────────────────────────────────────────
-
-function tierLabel(tier: string): string {
-  if (tier === "anonymous") return "Ücretsiz";
-  if (tier === "seed") return "Seed";
-  if (tier === "flower") return "Flower";
-  if (tier === "nectar") return "Nectar";
-  return tier;
-}
-
 // ─── Model picker ─────────────────────────────────────────────────────────────
 
 function ModelPicker({
@@ -91,15 +81,17 @@ function ModelPicker({
 }) {
   const { pop } = useNavigation();
 
-  const tierOrder = ["anonymous", "seed", "flower", "nectar"];
-  const grouped = tierOrder
-    .map((tier) => ({ tier, items: models.filter((m) => m.tier === tier) }))
-    .filter((g) => g.items.length > 0);
+  const free = models.filter((m) => !m.isPaid);
+  const paid = models.filter((m) => m.isPaid);
+  const grouped = [
+    { label: "Ücretsiz", items: free },
+    { label: "🔑 Ücretli (API anahtarı gerekli)", items: paid },
+  ].filter((g) => g.items.length > 0);
 
   return (
     <List navigationTitle="Model Seç" searchBarPlaceholder="Model ara…">
-      {grouped.map(({ tier, items }) => (
-        <List.Section key={tier} title={tierLabel(tier)}>
+      {grouped.map(({ label, items }) => (
+        <List.Section key={label} title={label}>
           {items.map((m) => {
             const isCurrent = m.name === currentModel;
             const badges: List.Item.Accessory[] = [];
@@ -111,6 +103,8 @@ function ModelPicker({
               badges.push({ tag: { value: "reasoning", color: Color.Purple } });
             if (m.vision)
               badges.push({ tag: { value: "vision", color: Color.Blue } });
+            if (m.search)
+              badges.push({ tag: { value: "search", color: Color.Green } });
 
             return (
               <List.Item
@@ -180,7 +174,8 @@ function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
 // ─── Main chat view ───────────────────────────────────────────────────────────
 
 export default function ChatCommand() {
-  const { models, selectedModel, selectModel, isLoadingModels } = useModels();
+  const { models, selectedModel, activeModel, selectModel, isLoadingModels } =
+    useModels();
   const {
     messages,
     isLoading,
@@ -191,8 +186,7 @@ export default function ChatCommand() {
   } = useChat(selectedModel);
   const { push } = useNavigation();
 
-  const activeModel = models.find((m) => m.name === selectedModel);
-  const tier = getTierInfo(activeModel?.tier);
+  const tier = getTierInfo(activeModel?.isPaid);
 
   const openInput = useCallback(() => {
     push(<SendMessageForm onSend={sendMessage} />);
