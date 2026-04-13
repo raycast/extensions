@@ -6,7 +6,7 @@ import { formatDayRanges, formatTimeZoneWithOffset, rangesForDay, WEEKDAYS } fro
 
 export default function ViewAvailability() {
   const { data: schedules, isLoading, error, mutate } = useSchedules();
-  const [isShowingDetail, setIsShowingDetail] = useCachedState("availability-show-details", false);
+  const [isShowingDetail, setIsShowingDetail] = useCachedState("availability-show-details", true);
 
   const handleSetAsDefault = async (schedule: CalSchedule) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Setting as default" });
