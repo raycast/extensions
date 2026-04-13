@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Color, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  Image,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { CalOOOEntry, CalOOOReason, createOOO, deleteOOO, updateOOO, useTeammates } from "@api/cal.com";
 import {
@@ -166,7 +177,7 @@ export function EditOOO({ entry, mutate }: EditOOOProps) {
               key={t.id}
               value={String(t.id)}
               title={t.name ?? t.email}
-              icon={t.avatarUrl ? { source: t.avatarUrl } : Icon.Person}
+              icon={t.avatarUrl ? { source: t.avatarUrl, mask: Image.Mask.Circle } : Icon.Person}
               keywords={[t.email, t.username ?? "", t.teamName].filter(Boolean) as string[]}
             />
           ))}

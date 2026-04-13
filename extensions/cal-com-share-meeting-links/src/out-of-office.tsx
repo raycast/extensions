@@ -4,6 +4,7 @@ import {
   Color,
   confirmAlert,
   Icon,
+  Image,
   List,
   openCommandPreferences,
   showToast,
@@ -115,7 +116,9 @@ export default function OutOfOffice() {
                   ...(entry.toUser
                     ? [
                         {
-                          icon: entry.toUser.avatarUrl ? { source: entry.toUser.avatarUrl } : Icon.Person,
+                          icon: entry.toUser.avatarUrl
+                            ? { source: entry.toUser.avatarUrl, mask: Image.Mask.Circle }
+                            : Icon.Person,
                           text: entry.toUser.name ?? entry.toUser.email,
                           tooltip: `Redirects to ${entry.toUser.name ?? entry.toUser.email}`,
                         },
@@ -142,7 +145,11 @@ export default function OutOfOffice() {
                       <List.Item.Detail.Metadata.Label
                         title="Redirects To"
                         text={entry.toUser.name ?? entry.toUser.email}
-                        icon={entry.toUser.avatarUrl ? { source: entry.toUser.avatarUrl } : Icon.Person}
+                        icon={
+                          entry.toUser.avatarUrl
+                            ? { source: entry.toUser.avatarUrl, mask: Image.Mask.Circle }
+                            : Icon.Person
+                        }
                       />
                       {entry.toUser.email && (
                         <List.Item.Detail.Metadata.Label title="Email" text={entry.toUser.email} />
