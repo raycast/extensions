@@ -18,8 +18,8 @@ function DuplicateFeedForm({ feed }: { feed: Feed }) {
 
     const feeds = await getFeeds();
 
-    // Check if URL already exists
-    if (feeds.some((f) => f.url === url)) {
+    // Check if URL already exists (compare trimmed value; saved URL uses trim)
+    if (feeds.some((f) => f.url === url.trim())) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Feed with this URL already exists",
@@ -32,8 +32,7 @@ function DuplicateFeedForm({ feed }: { feed: Feed }) {
       ...feed,
       url: url.trim(),
       title: title.trim() || feed.title,
-      // Generate a new unique identifier for the duplicated feed
-      // by not copying originalTitle so it starts fresh
+      originalTitle: undefined,
     };
 
     feeds.push(newFeed);
