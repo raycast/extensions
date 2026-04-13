@@ -2,7 +2,9 @@ import type { CalSchedule, CalScheduleAvailability, CalScheduleOverride, CalWeek
 
 export const WEEKDAYS: CalWeekday[] = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-/** 00:00, 00:15, ... 23:45 — used in all time-slot dropdowns. */
+/** 00:00, 00:15, ... 23:45, 23:59 — used in all time-slot dropdowns.
+ *  23:59 is included as an end-of-day sentinel to match Cal.com's web UI, which allows
+ *  ranges that extend to one minute before midnight. */
 export const TIME_SLOTS: string[] = (() => {
   const slots: string[] = [];
   for (let h = 0; h < 24; h++) {
@@ -10,6 +12,7 @@ export const TIME_SLOTS: string[] = (() => {
       slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
     }
   }
+  slots.push("23:59");
   return slots;
 })();
 
