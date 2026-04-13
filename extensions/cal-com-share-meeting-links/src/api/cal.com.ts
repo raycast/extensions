@@ -157,20 +157,6 @@ export function useEventTypes() {
   );
 }
 
-export function useBookings() {
-  return useCachedPromise(
-    async () => {
-      const data = await calAPI<CalBooking[]>({
-        url: "/bookings",
-        headers: { "cal-api-version": "2026-02-25" },
-      });
-      return data.sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
-    },
-    [],
-    { failureToastOptions: { title: "Unable to load bookings" } },
-  );
-}
-
 const BOOKINGS_API_VERSION = "2026-02-25";
 
 interface BookingsListParams {
