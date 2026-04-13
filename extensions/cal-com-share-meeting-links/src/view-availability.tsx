@@ -123,10 +123,11 @@ export default function ViewAvailability() {
                     return (
                       <>
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label
-                          title="Used by"
-                          text={linked.map((et) => et.title).join("\n")}
-                        />
+                        <List.Item.Detail.Metadata.TagList title="Used by">
+                          {linked.map((et) => (
+                            <List.Item.Detail.Metadata.TagList.Item key={et.id} text={et.title} />
+                          ))}
+                        </List.Item.Detail.Metadata.TagList>
                       </>
                     );
                   })()}
