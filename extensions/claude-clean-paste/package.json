@@ -1,0 +1,50 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-clean-paste",
+  "title": "Claude Clean Paste",
+  "description": "Clean up Claude Code terminal output and paste it — removes prompts, fixes line wrapping, and joins paragraphs",
+  "icon": "icon.png",
+  "author": "ysamlan",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-clean",
+      "title": "Paste Clean Claude Text",
+      "subtitle": "Claude Clean Paste",
+      "description": "Clean Claude Code terminal text from clipboard and paste into the frontmost app",
+      "mode": "no-view"
+    },
+    {
+      "name": "clean-clipboard",
+      "title": "Clean Claude Text in Clipboard",
+      "subtitle": "Claude Clean Paste",
+      "description": "Clean Claude Code terminal text in the clipboard (without pasting)",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~22.13.10",
+    "@types/react": "^19.0.8",
+    "eslint": "^8.57.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.8.2"
+  },
+  "overrides": {
+    "minimatch": ">=9.0.7"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
