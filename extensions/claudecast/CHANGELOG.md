@@ -5,7 +5,7 @@
 ### Added
 
 - **Launch Project Preferences**: Configurable Permission Mode and Model Override settings for the Launch Project command. All launch actions (New Session, Continue Last, Continue with Prompt) respect these preferences.
-- **Quick Continue Preferences**: Same Permission Mode and Model Override settings for the Quick Continue command, applied to both recent-session continuation and new-session fallback.
+- **Quick Continue Session Restore**: Quick Continue now restores the permission mode and model from the most recent session, so a session started with e.g. `fullAuto` or `haiku` continues with the same settings.
 
 ## [1.4.0] - 2026-04-13
 
