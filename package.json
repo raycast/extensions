@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "pollinations-ai",
+  "title": "Pollinations AI",
+  "description": "Chat with AI models powered by Pollinations.ai — free, no account required",
+  "icon": "icon.png",
+  "author": "mehmet.tanas",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat with AI",
+      "description": "Start a conversation with Pollinations AI",
+      "mode": "view"
+    },
+    {
+      "name": "quick-ask",
+      "title": "Quick Ask",
+      "description": "Ask a one-shot question and get an instant answer",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Pollinations API Key",
+      "description": "Leave empty to use the free tier (rate limited)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "model",
+      "title": "Text Model",
+      "description": "Which model to use for chat",
+      "type": "dropdown",
+      "required": false,
+      "default": "openai",
+      "data": [
+        { "title": "OpenAI (GPT-4.1 nano — fast, free)", "value": "openai" },
+        { "title": "OpenAI Large (GPT-4.1 — more capable)", "value": "openai-large" },
+        { "title": "Mistral", "value": "mistral" },
+        { "title": "Claude Haiku", "value": "claude-haiku" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo 'npm run build' && npm run build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
