@@ -1,7 +1,16 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
-import { CalOOOEntry, CalOOOReason, createOOO, updateOOO, useTeammates } from "@api/cal.com";
-import { fromUtcEnd, fromUtcStart, iconForReason, labelForReason, OOO_REASONS, toUtcEnd, toUtcStart } from "@/lib/ooo";
+import { CalOOOEntry, CalOOOReason, createOOO, deleteOOO, updateOOO, useTeammates } from "@api/cal.com";
+import {
+  formatDateRange,
+  fromUtcEnd,
+  fromUtcStart,
+  iconForReason,
+  labelForReason,
+  OOO_REASONS,
+  toUtcEnd,
+  toUtcStart,
+} from "@/lib/ooo";
 
 interface EditOOOProps {
   /** When editing, the existing entry. Undefined means "create new". */
@@ -102,6 +111,28 @@ export function EditOOO({ entry, mutate }: EditOOOProps) {
 
   const showRedirect = !isLoadingTeammates && (teammates?.length ?? 0) > 0;
 
+  const handleDelete = async () => {
+    if (!entry) return;
+    const confirmed = await confirmAlert({
+      title: "Delete OOO entry?",
+      message: formatDateRange(entry.start, entry.end),
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+    });
+    if (!confirmed) return;
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting OOO entry" });
+    try {
+      await mutate(deleteOOO(entry.id), {
+        optimisticUpdate: (list) => list?.filter((e) => e.id !== entry.id),
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = "OOO entry deleted";
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to delete OOO entry" });
+      return; // don't pop on failure so user can retry
+    }
+    pop();
+  };
+
   return (
     <Form
       navigationTitle={entry ? "Edit Out of Office" : "New Out of Office"}
@@ -109,6 +140,14 @@ export function EditOOO({ entry, mutate }: EditOOOProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title={entry ? "Save" : "Create"} icon={Icon.Check} onSubmit={handleSubmit} />
+          {entry && (
+            <Action
+              title="Delete OOO"
+              icon={{ source: Icon.Trash, tintColor: Color.Red }}
+              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              onAction={handleDelete}
+            />
+          )}
         </ActionPanel>
       }
     >
