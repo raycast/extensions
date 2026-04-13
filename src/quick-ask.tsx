@@ -15,7 +15,7 @@ import {
 import { useCallback, useState } from "react";
 import { ApiError, getTierInfo, singleChat } from "./api/pollinations";
 import type { Message } from "./api/pollinations";
-import { useModels } from "./hooks/useModels";
+import { getStoredModel, useModels } from "./hooks/useModels";
 import type { PollinationsModel } from "./hooks/useModels";
 
 const SYSTEM_PROMPT: Message = {
@@ -86,8 +86,8 @@ function ModelPicker({
                     <Action
                       title="Bu Modeli Seç"
                       icon={Icon.CheckCircle}
-                      onAction={() => {
-                        onSelect(m.name);
+                      onAction={async () => {
+                        await onSelect(m.name);
                         pop();
                       }}
                     />
@@ -122,38 +122,36 @@ export default function QuickAskCommand() {
     );
   }, [push, models, selectedModel, selectModel]);
 
-  const handleSubmit = useCallback(
-    async (values: { question: string }) => {
-      const q = values.question.trim();
-      if (!q) return;
+  const handleSubmit = useCallback(async (values: { question: string }) => {
+    const q = values.question.trim();
+    if (!q) return;
 
-      if (tier.modelNeedsKey && !tier.hasKey) {
-        await showToast({
-          title: "API Anahtarı Gerekli",
-          message: `"${selectedModel}" modeli için API anahtarı gereklidir. ⌘ , ile ekleyin.`,
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
+    if (tier.modelNeedsKey && !tier.hasKey) {
+      await showToast({
+        title: "API Anahtarı Gerekli",
+        message: `"${selectedModel}" modeli için API anahtarı gereklidir. ⌘ , ile ekleyin.`,
+        style: Toast.Style.Failure,
+      });
+      return;
+    }
 
-      setIsLoading(true);
-      setAnswer(null);
-      try {
-        const result = await singleChat(
-          [SYSTEM_PROMPT, { role: "user", content: q }],
-          selectedModel,
-        );
-        setAnswer(result);
-      } catch (err) {
-        const e = err instanceof Error ? err : new Error(String(err));
-        const { title, message } = friendlyError(e);
-        await showToast({ title, message, style: Toast.Style.Failure });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [selectedModel, tier],
-  );
+    setIsLoading(true);
+    setAnswer(null);
+    try {
+      const model = await getStoredModel(); // always read fresh, same as useChat
+      const result = await singleChat(
+        [SYSTEM_PROMPT, { role: "user", content: q }],
+        model,
+      );
+      setAnswer(result);
+    } catch (err) {
+      const e = err instanceof Error ? err : new Error(String(err));
+      const { title, message } = friendlyError(e);
+      await showToast({ title, message, style: Toast.Style.Failure });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   if (answer !== null) {
     const markdown = `## Soru\n\n${question}\n\n---\n\n## Cevap\n\n${answer}`;
