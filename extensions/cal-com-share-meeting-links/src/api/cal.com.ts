@@ -269,7 +269,7 @@ export function cancelBooking(bookingUid: string, reason: string) {
  */
 export async function requestRescheduleBooking(bookingUid: string, reason: string) {
   const url = `/bookings/${bookingUid}/request-reschedule`;
-  console.log(`[reschedule] POST ${url}`, { bookingUid, reason });
+  console.log(`[reschedule] POST https://api.cal.com/v2${url}`);
   try {
     return await calAPI({
       method: "POST",
@@ -278,7 +278,17 @@ export async function requestRescheduleBooking(bookingUid: string, reason: strin
       data: { rescheduleReason: reason },
     });
   } catch (err) {
-    console.error("[reschedule] failed:", err);
+    if (axios.isAxiosError(err) && err.response) {
+      console.error(
+        `[reschedule] HTTP ${err.response.status} ${err.response.statusText}`,
+        "\nresponse body:",
+        JSON.stringify(err.response.data, null, 2),
+        "\nrequest URL:",
+        err.config?.baseURL && err.config?.url ? `${err.config.baseURL}${err.config.url}` : err.config?.url,
+      );
+    } else {
+      console.error("[reschedule] failed:", err);
+    }
     throw err;
   }
 }
