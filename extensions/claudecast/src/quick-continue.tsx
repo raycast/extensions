@@ -19,7 +19,6 @@ export default async function QuickContinue() {
         projectPath: recentSession.projectPath,
         continueSession: true,
         permissionMode: recentSession.permissionMode,
-        model: recentSession.model,
       });
       return;
     }
