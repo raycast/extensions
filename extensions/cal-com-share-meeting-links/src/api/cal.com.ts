@@ -272,13 +272,29 @@ export function cancelBooking(bookingUid: string, reason: string) {
  * router rejects on this specific endpoint with a 404, even though it tolerates
  * the same shape on /cancel and other booking endpoints.
  */
-export function requestRescheduleBooking(bookingUid: string, reason: string) {
-  return calAPI({
-    method: "POST",
-    url: `bookings/${bookingUid}/request-reschedule`,
-    headers: { "cal-api-version": "2026-02-25" },
-    data: { rescheduleReason: reason },
-  });
+export async function requestRescheduleBooking(bookingUid: string, reason: string) {
+  const url = `bookings/${bookingUid}/request-reschedule`;
+  try {
+    return await calAPI({
+      method: "POST",
+      url,
+      headers: { "cal-api-version": "2026-02-25" },
+      data: { rescheduleReason: reason },
+    });
+  } catch (err) {
+    if (axios.isAxiosError(err) && err.response) {
+      console.error(
+        `[reschedule] HTTP ${err.response.status} ${err.response.statusText}`,
+        "\n  resolved URL:",
+        err.config?.baseURL && err.config?.url ? `${err.config.baseURL}${err.config.url}` : err.config?.url,
+        "\n  response body:",
+        JSON.stringify(err.response.data, null, 2),
+      );
+    } else {
+      console.error("[reschedule] failed:", err);
+    }
+    throw err;
+  }
 }
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
