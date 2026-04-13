@@ -4,6 +4,7 @@ import { promisify } from "util";
 import { writeFileSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
+import type { PermissionMode } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
 
@@ -156,7 +157,7 @@ export async function launchClaudeCode(options: {
   prompt?: string;
   printMode?: boolean; // Use -p flag for non-interactive output
   dangerouslySkipPermissions?: boolean; // Skip permission prompts for autonomous workflows
-  permissionMode?: string; // Restore the session's original permission mode on resume
+  permissionMode?: PermissionMode; // Restore the session's original permission mode on resume
 }): Promise<void> {
   const args: string[] = ["claude"];
 
