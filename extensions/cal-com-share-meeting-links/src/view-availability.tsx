@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToa
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { CalSchedule, updateSchedule, useSchedules } from "@api/cal.com";
 import { ScheduleDetail } from "@components/schedule-detail";
-import { formatDayRanges, formatTimeZoneWithOffset, rangesForDay, WEEKDAYS } from "@/lib/schedule";
+import { formatDayRanges, formatTimeZoneWithOffset, getDeviceTimeZone, rangesForDay, WEEKDAYS } from "@/lib/schedule";
 
 export default function ViewAvailability() {
   const { data: schedules, isLoading, error, mutate } = useSchedules();
@@ -18,6 +18,20 @@ export default function ViewAvailability() {
       toast.title = "Default schedule updated";
     } catch (err) {
       await showFailureToast(err, { title: "Failed to set default" });
+    }
+  };
+
+  const handleSetToDeviceTimezone = async (schedule: CalSchedule) => {
+    const timeZone = getDeviceTimeZone();
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Setting timezone to ${timeZone}` });
+    try {
+      await mutate(updateSchedule(schedule.id, { timeZone }), {
+        optimisticUpdate: (list) => list?.map((s) => (s.id === schedule.id ? { ...s, timeZone } : s)),
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = `Updated to ${timeZone}`;
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to update timezone" });
     }
   };
 
@@ -92,6 +106,14 @@ export default function ViewAvailability() {
               />
               {!schedule.isDefault && (
                 <Action title="Set as Default" icon={Icon.Star} onAction={() => handleSetAsDefault(schedule)} />
+              )}
+              {schedule.timeZone !== getDeviceTimeZone() && (
+                <Action
+                  title="Set to Device Timezone"
+                  icon={Icon.Globe}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  onAction={() => handleSetToDeviceTimezone(schedule)}
+                />
               )}
               <Action.OpenInBrowser
                 title="Open All Availabilities in Browser"

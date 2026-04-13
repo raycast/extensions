@@ -150,6 +150,15 @@ export function formatTimeZoneWithOffset(tz: string): string {
   return offset ? `(${offset}) ${humanized}` : humanized;
 }
 
+/** The device's current IANA timezone, with a UTC fallback if it can't be resolved. */
+export function getDeviceTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 /** Converts a JS Date (from Form.DatePicker, local time) to "YYYY-MM-DD". */
 export function toIsoDate(date: Date): string {
   const y = date.getFullYear();

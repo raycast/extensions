@@ -7,6 +7,7 @@ import {
   formatOverrideRange,
   formatOverrideWeekday,
   formatTimeZoneWithOffset,
+  getDeviceTimeZone,
   rangesForDay,
   WEEKDAYS,
   withDayHoursReplaced,
@@ -74,6 +75,20 @@ export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
       toast.title = "Default schedule updated";
     } catch (err) {
       await showFailureToast(err, { title: "Failed to set default" });
+    }
+  };
+
+  const handleSetToDeviceTimezone = async () => {
+    const timeZone = getDeviceTimeZone();
+    const toast = await showToast({ style: Toast.Style.Animated, title: `Setting timezone to ${timeZone}` });
+    try {
+      await mutate(updateSchedule(schedule.id, { timeZone }), {
+        optimisticUpdate: (schedules) => schedules?.map((s) => (s.id === schedule.id ? { ...s, timeZone } : s)),
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = `Updated to ${timeZone}`;
+    } catch (err) {
+      await showFailureToast(err, { title: "Failed to update timezone" });
     }
   };
 
@@ -179,6 +194,14 @@ export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
                 icon={Icon.Pencil}
                 target={<EditTimezone schedule={schedule} mutate={mutate} />}
               />
+              {schedule.timeZone !== getDeviceTimeZone() && (
+                <Action
+                  title="Set to Device Timezone"
+                  icon={Icon.Globe}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+                  onAction={handleSetToDeviceTimezone}
+                />
+              )}
               {openScheduleInBrowserAction}
             </ActionPanel>
           }

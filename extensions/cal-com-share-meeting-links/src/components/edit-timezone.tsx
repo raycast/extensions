@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { CalSchedule, updateSchedule } from "@api/cal.com";
-import { formatTimeZoneWithOffset } from "@/lib/schedule";
+import { formatTimeZoneWithOffset, getDeviceTimeZone } from "@/lib/schedule";
 
 interface EditTimezoneProps {
   schedule: CalSchedule;
@@ -40,7 +40,7 @@ export function EditTimezone({ schedule, mutate }: EditTimezoneProps) {
     }
   };
 
-  const { itemProps, handleSubmit } = useForm<Values>({
+  const { itemProps, handleSubmit, setValue } = useForm<Values>({
     onSubmit: (v) => apply(v.timeZone),
     validation: { timeZone: FormValidation.Required },
     initialValues: { timeZone: schedule.timeZone },
@@ -52,6 +52,12 @@ export function EditTimezone({ schedule, mutate }: EditTimezoneProps) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save" icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action
+            title="Use Device Timezone"
+            icon={Icon.Globe}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+            onAction={() => setValue("timeZone", getDeviceTimeZone())}
+          />
         </ActionPanel>
       }
     >
