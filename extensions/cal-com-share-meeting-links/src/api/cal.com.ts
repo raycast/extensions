@@ -266,31 +266,19 @@ export function cancelBooking(bookingUid: string, reason: string) {
 /**
  * Requests an attendee to reschedule a booking. Per Cal.com docs, this cancels
  * the original booking and emails the attendee a link to pick a new time.
+ *
+ * Note: uses a NO-LEADING-SLASH url. Our axios baseURL ends with "/" so a
+ * leading "/" produces "/v2//bookings/..." (double slash) which Cal.com's
+ * router rejects on this specific endpoint with a 404, even though it tolerates
+ * the same shape on /cancel and other booking endpoints.
  */
-export async function requestRescheduleBooking(bookingUid: string, reason: string) {
-  const url = `/bookings/${bookingUid}/request-reschedule`;
-  console.log(`[reschedule] POST https://api.cal.com/v2${url}`);
-  try {
-    return await calAPI({
-      method: "POST",
-      url,
-      headers: { "cal-api-version": "2026-02-25" },
-      data: { rescheduleReason: reason },
-    });
-  } catch (err) {
-    if (axios.isAxiosError(err) && err.response) {
-      console.error(
-        `[reschedule] HTTP ${err.response.status} ${err.response.statusText}`,
-        "\nresponse body:",
-        JSON.stringify(err.response.data, null, 2),
-        "\nrequest URL:",
-        err.config?.baseURL && err.config?.url ? `${err.config.baseURL}${err.config.url}` : err.config?.url,
-      );
-    } else {
-      console.error("[reschedule] failed:", err);
-    }
-    throw err;
-  }
+export function requestRescheduleBooking(bookingUid: string, reason: string) {
+  return calAPI({
+    method: "POST",
+    url: `bookings/${bookingUid}/request-reschedule`,
+    headers: { "cal-api-version": "2026-02-25" },
+    data: { rescheduleReason: reason },
+  });
 }
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
