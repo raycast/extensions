@@ -69,15 +69,16 @@ export default function MenuBarCommand() {
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
-const copilotState = useCopilotUsage(isCopilotVisible);
+  const copilotState = useCopilotUsage(isCopilotVisible);
   const droidState = useDroidUsage(isDroidVisible);
+  const codexAccounts = useCodexAccounts(isCodexVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const kimiAccounts = useKimiAccounts(isKimiVisible);
   const syntheticAccounts = useSyntheticAccounts(isSyntheticVisible);
   const antigravityState = useAntigravityUsage(isAntigravityVisible);
   const zaiAccounts = useZaiAccounts(isZaiVisible);
 
-// Single-account agents - memoized to prevent unnecessary re-renders
+  // Single-account agents - memoized to prevent unnecessary re-renders
   const singleAgents = useMemo<MenuBarAgent[]>(
     () => [
       {
