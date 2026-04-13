@@ -56,7 +56,7 @@ export function EditTimezone({ schedule, mutate }: EditTimezoneProps) {
     >
       <Form.Dropdown title="Timezone" {...itemProps.timeZone}>
         {zones.map((z) => (
-          <Form.Dropdown.Item key={z} value={z} title={z} />
+          <Form.Dropdown.Item key={z} value={z} title={z.replace(/_/g, " ")} keywords={z.split(/[/_]/)} />
         ))}
       </Form.Dropdown>
     </Form>
