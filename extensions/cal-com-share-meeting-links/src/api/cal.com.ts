@@ -349,11 +349,17 @@ export interface CalTeammate {
 
 async function fetchTeams(): Promise<CalTeamSummary[]> {
   try {
-    return await calAPI<CalTeamSummary[]>({
+    const teams = await calAPI<CalTeamSummary[]>({
       url: "/teams",
       headers: { "cal-api-version": TEAMS_API_VERSION },
     });
-  } catch {
+    console.log(
+      `[OOO] fetchTeams returned ${teams.length} team(s):`,
+      teams.map((t) => t.name),
+    );
+    return teams;
+  } catch (err) {
+    console.error("[OOO] fetchTeams failed:", err);
     return [];
   }
 }
@@ -376,6 +382,7 @@ async function fetchTeamMembers(teamId: number, teamName: string): Promise<CalTe
       url: `/teams/${teamId}/memberships`,
       headers: { "cal-api-version": TEAMS_API_VERSION },
     });
+    console.log(`[OOO] fetchTeamMembers(${teamName}) returned ${memberships.length} membership(s):`, memberships);
     return memberships.map((m) => ({
       id: m.user.id,
       name: m.user.name,
@@ -384,25 +391,31 @@ async function fetchTeamMembers(teamId: number, teamName: string): Promise<CalTe
       avatarUrl: m.user.avatarUrl,
       teamName,
     }));
-  } catch {
-    // Permission denied or endpoint missing — degrade gracefully.
+  } catch (err) {
+    console.error(`[OOO] fetchTeamMembers(${teamName}) failed:`, err);
     return [];
   }
 }
 
 async function fetchAllTeammates(): Promise<CalTeammate[]> {
-  const teams = await fetchTeams();
+  // Fetch current user (to exclude from results) and teams in parallel.
+  const [meResult, teams] = await Promise.all([calAPI<CalUser>({ url: "/me" }).catch(() => null), fetchTeams()]);
+  const meId = meResult?.id;
+  console.log(`[OOO] current user id = ${meId}, teams = ${teams.length}`);
+
   if (teams.length === 0) return [];
   const lists = await Promise.all(teams.map((t) => fetchTeamMembers(t.id, t.name)));
   const merged = lists.flat();
-  // De-duplicate by user id, keep first-seen team name.
+  // De-duplicate by user id, exclude self, keep first-seen team name.
   const seen = new Set<number>();
   const out: CalTeammate[] = [];
   for (const t of merged) {
+    if (t.id === meId) continue; // exclude self
     if (seen.has(t.id)) continue;
     seen.add(t.id);
     out.push(t);
   }
+  console.log(`[OOO] fetchAllTeammates returning ${out.length} teammate(s) after dedupe + self-filter`);
   return out.sort((a, b) => (a.name ?? a.email).localeCompare(b.name ?? b.email));
 }
 
