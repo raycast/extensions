@@ -10,17 +10,73 @@ export interface Message {
   content: string;
 }
 
+export interface TierInfo {
+  hasKey: boolean;
+  model: string;
+}
+
+// ─── Custom error with HTTP status ───────────────────────────────────────────
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+
+  /** Invalid or revoked API key */
+  get isAuthError(): boolean {
+    return this.statusCode === 401 || this.statusCode === 403;
+  }
+
+  /** Free-tier rate limit hit */
+  get isRateLimited(): boolean {
+    return this.statusCode === 429;
+  }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
 const BASE_URL = "https://text.pollinations.ai";
 
-function getHeaders(apiKey?: string): Record<string, string> {
+/** Returns tier metadata WITHOUT exposing the key value. */
+export function getTierInfo(): TierInfo {
+  const prefs = getPreferenceValues<Preferences>();
+  return {
+    hasKey: !!prefs.apiKey?.trim(),
+    model: prefs.model || "openai",
+  };
+}
+
+function buildHeaders(): Record<string, string> {
+  const prefs = getPreferenceValues<Preferences>();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (apiKey) {
-    headers["Authorization"] = `Bearer ${apiKey}`;
+  const key = prefs.apiKey?.trim();
+  if (key) {
+    // Key is sent only over HTTPS and never stored or logged anywhere
+    headers["Authorization"] = `Bearer ${key}`;
   }
   return headers;
 }
+
+async function assertOk(response: Response): Promise<void> {
+  if (!response.ok) {
+    let detail = response.statusText;
+    try {
+      const body = await response.json();
+      detail = body?.error?.message ?? body?.message ?? detail;
+    } catch {
+      // ignore parse failures
+    }
+    throw new ApiError(`${response.status}: ${detail}`, response.status);
+  }
+}
+
+// ─── API calls ────────────────────────────────────────────────────────────────
 
 export async function streamChat(
   messages: Message[],
@@ -29,25 +85,17 @@ export async function streamChat(
   onError: (error: Error) => void,
   signal?: AbortSignal,
 ): Promise<void> {
-  const prefs = getPreferenceValues<Preferences>();
-  const model = prefs.model || "openai";
-  const apiKey = prefs.apiKey || undefined;
+  const { model } = getTierInfo();
 
   try {
     const response = await fetch(`${BASE_URL}/openai`, {
       method: "POST",
-      headers: getHeaders(apiKey),
-      body: JSON.stringify({
-        model,
-        messages,
-        stream: true,
-      }),
+      headers: buildHeaders(),
+      body: JSON.stringify({ model, messages, stream: true }),
       signal,
     });
 
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
+    await assertOk(response);
 
     const reader = response.body?.getReader();
     if (!reader) throw new Error("No response body");
@@ -67,7 +115,6 @@ export async function streamChat(
         const trimmed = line.trim();
         if (!trimmed || trimmed === "data: [DONE]") continue;
         if (!trimmed.startsWith("data: ")) continue;
-
         try {
           const json = JSON.parse(trimmed.slice(6));
           const content = json.choices?.[0]?.delta?.content;
@@ -86,23 +133,15 @@ export async function streamChat(
 }
 
 export async function singleChat(messages: Message[]): Promise<string> {
-  const prefs = getPreferenceValues<Preferences>();
-  const model = prefs.model || "openai";
-  const apiKey = prefs.apiKey || undefined;
+  const { model } = getTierInfo();
 
   const response = await fetch(`${BASE_URL}/openai`, {
     method: "POST",
-    headers: getHeaders(apiKey),
-    body: JSON.stringify({
-      model,
-      messages,
-      stream: false,
-    }),
+    headers: buildHeaders(),
+    body: JSON.stringify({ model, messages, stream: false }),
   });
 
-  if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
-  }
+  await assertOk(response);
 
   const data = await response.json();
   return data.choices?.[0]?.message?.content ?? "";

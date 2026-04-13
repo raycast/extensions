@@ -6,15 +6,17 @@ import {
   Detail,
   Form,
   Icon,
+  openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { ApiError, getTierInfo } from "./api/pollinations";
 import { useChat } from "./hooks/useChat";
 import type { ChatMessage } from "./hooks/useChat";
 
-// ─── Markdown conversation renderer ───────────────────────────────────────────
+// ─── Markdown renderer ────────────────────────────────────────────────────────
 
 function buildMarkdown(
   messages: ChatMessage[],
@@ -31,31 +33,45 @@ function buildMarkdown(
   }
 
   const lines: string[] = [];
-
   for (const msg of messages) {
     if (msg.role === "user") {
-      lines.push("---", "", `**Siz**`, "", msg.content, "");
+      lines.push("---", "", "**Siz**", "", msg.content, "");
     } else {
-      lines.push("---", "", `**Asistan**`, "", msg.content, "");
+      lines.push("---", "", "**Asistan**", "", msg.content, "");
     }
   }
-
   if (streamingContent) {
-    lines.push("---", "", `**Asistan** *(yazıyor…)*`, "", streamingContent, "");
+    lines.push("---", "", "**Asistan** *(yazıyor…)*", "", streamingContent, "");
   }
-
   return lines.join("\n");
 }
 
-// ─── Send message form (pushed view) ─────────────────────────────────────────
+// ─── Human-readable error messages ───────────────────────────────────────────
 
-interface SendFormProps {
-  onSend: (text: string) => void;
+function friendlyError(err: Error): { title: string; message: string } {
+  if (err instanceof ApiError) {
+    if (err.isAuthError) {
+      return {
+        title: "Geçersiz API Anahtarı",
+        message:
+          "Anahtarı kontrol edin veya ücretsiz katman için kaldırın. (⌘ P → Ayarlar)",
+      };
+    }
+    if (err.isRateLimited) {
+      return {
+        title: "Hız Limiti Aşıldı",
+        message:
+          "Ücretsiz katman rate-limit'e ulaştı. API anahtarı ekleyerek limiti kaldırabilirsiniz.",
+      };
+    }
+  }
+  return { title: "Hata", message: err.message };
 }
 
-function SendMessageForm({ onSend }: SendFormProps) {
-  const { pop } = useNavigation();
+// ─── Send message form ────────────────────────────────────────────────────────
 
+function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
+  const { pop } = useNavigation();
   return (
     <Form
       navigationTitle="Mesaj Gönder"
@@ -90,7 +106,7 @@ function SendMessageForm({ onSend }: SendFormProps) {
   );
 }
 
-// ─── Main chat view ───────────────────────────────────────────────────────────
+// ─── Main view ────────────────────────────────────────────────────────────────
 
 export default function ChatCommand() {
   const {
@@ -102,6 +118,7 @@ export default function ChatCommand() {
     clearHistory,
   } = useChat();
   const { push } = useNavigation();
+  const tier = getTierInfo();
 
   const openInput = useCallback(() => {
     push(<SendMessageForm onSend={sendMessage} />);
@@ -115,45 +132,100 @@ export default function ChatCommand() {
     }
   }, [messages]);
 
+  // Surface API errors as toasts with friendly messages
+  const handleSend = useCallback(
+    async (text: string) => {
+      try {
+        await sendMessage(text);
+      } catch (err) {
+        const { title, message } = friendlyError(
+          err instanceof Error ? err : new Error(String(err)),
+        );
+        await showToast({ title, message, style: Toast.Style.Failure });
+      }
+    },
+    [sendMessage],
+  );
+
   const markdown = buildMarkdown(messages, streamingContent);
 
   return (
     <Detail
       markdown={markdown}
       isLoading={isLoading}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Katman"
+            icon={
+              tier.hasKey
+                ? { source: Icon.Key, tintColor: Color.Green }
+                : { source: Icon.LockUnlocked, tintColor: Color.Orange }
+            }
+            text={tier.hasKey ? "Premium (API anahtarlı)" : "Ücretsiz"}
+          />
+          <Detail.Metadata.Label title="Model" text={tier.model} />
+          {!tier.hasKey && (
+            <>
+              <Detail.Metadata.Separator />
+              <Detail.Metadata.Label
+                title="İpucu"
+                icon={Icon.Info}
+                text="API anahtarı ekleyerek rate-limit'i kaldırabilirsiniz"
+              />
+            </>
+          )}
+        </Detail.Metadata>
+      }
       actions={
         <ActionPanel>
-          <Action
-            title="Mesaj Gönder"
-            icon={Icon.Message}
-            onAction={openInput}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
-          />
-          {isLoading && (
+          <ActionPanel.Section>
             <Action
-              title="Durdur"
-              icon={Icon.Stop}
-              onAction={stopStreaming}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              title="Mesaj Gönder"
+              icon={Icon.Message}
+              onAction={openInput}
+              shortcut={{ modifiers: ["cmd"], key: "return" }}
             />
-          )}
-          {messages.length > 0 && (
+            {isLoading && (
+              <Action
+                title="Durdur"
+                icon={Icon.Stop}
+                onAction={stopStreaming}
+                shortcut={{ modifiers: ["cmd"], key: "." }}
+              />
+            )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section>
+            {messages.length > 0 && (
+              <Action
+                title="Son Cevabı Kopyala"
+                icon={Icon.Clipboard}
+                onAction={copyLast}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            )}
+            {messages.length > 0 && (
+              <Action
+                title="Geçmişi Temizle"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={clearHistory}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+              />
+            )}
+          </ActionPanel.Section>
+
+          <ActionPanel.Section title="Ayarlar">
             <Action
-              title="Son Cevabı Kopyala"
-              icon={Icon.Clipboard}
-              onAction={copyLast}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              title={
+                tier.hasKey ? "API Anahtarını Değiştir" : "API Anahtarı Ekle"
+              }
+              icon={Icon.Key}
+              onAction={openExtensionPreferences}
+              shortcut={{ modifiers: ["cmd"], key: "," }}
             />
-          )}
-          {messages.length > 0 && (
-            <Action
-              title="Geçmişi Temizle"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              onAction={clearHistory}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-            />
-          )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
