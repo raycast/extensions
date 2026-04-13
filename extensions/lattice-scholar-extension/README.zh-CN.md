@@ -1,5 +1,7 @@
 # Lattice Scholar
 
+[English](README.md)
+
 直接在 Raycast 中搜索你的 [Lattice](https://stringer07.github.io/Lattice_release/) 文献库——无需切换应用，保持专注。
 
 ## 功能
@@ -10,13 +12,11 @@
 
 ## 截图
 
-![搜索结果列表](assets/item.png)
+![搜索结果列表](metadata/lattice-search-1.png)
 
-![列表操作菜单](assets/item-action.png)
+![文献详情页](metadata/lattice-search-2.png)
 
-![文献详情页](assets/detail.png)
-
-![详情页操作菜单](assets/detail-action.png)
+![Lattice 状态](metadata/lattice-status-1.png)
 
 ## 使用前提
 

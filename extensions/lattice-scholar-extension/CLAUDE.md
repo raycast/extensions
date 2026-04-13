@@ -15,13 +15,14 @@ npm run fix-lint   # Auto-fix lint issues
 
 This is a [Raycast](https://developers.raycast.com/) extension built with React + TypeScript. It is a frontend-only client — all data comes from the Lattice app's local HTTP API.
 
-- `src/lattice-search.tsx` — the single command entry point, registered as `lattice-search` in `package.json`. Each Raycast command exports a default React component.
+- `src/lattice-search.tsx` — `lattice-search` command: live search with paper detail view and clipboard actions.
+- `src/lattice-status.tsx` — `lattice-status` command: health check showing API/app version and capabilities.
 - `package.json` `"commands"` array declares all commands; adding a new command requires both a new entry there and a corresponding file in `src/`.
 - Raycast API components (`List`, `Detail`, `Form`, `Action`, etc.) come from `@raycast/api`. Utilities like `useFetch`, `useLocalStorage` come from `@raycast/utils`.
 
 ## Local API
 
-Base URL: `http://127.0.0.1:52731/api/v1`
+Base URL: `http://127.0.0.1:<port>/api/v1` (default port `52731`, configurable via Raycast preferences)
 
 The Lattice app must be running for any API call to succeed. Check `/status` first if debugging connectivity.
 

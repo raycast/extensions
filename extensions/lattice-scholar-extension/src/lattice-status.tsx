@@ -1,7 +1,8 @@
 import { Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useEffect } from "react";
 
-const { port } = getPreferenceValues<{ port: string }>();
+const { port } = getPreferenceValues<Preferences.LatticeStatus>();
 const BASE = `http://127.0.0.1:${port || "52731"}/api/v1`;
 
 interface Status {
@@ -14,9 +15,11 @@ interface Status {
 export default function Command() {
   const { data, isLoading, error } = useFetch<Status>(`${BASE}/status`);
 
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Lattice not reachable", message: error.message });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({ style: Toast.Style.Failure, title: "Lattice not reachable", message: error.message });
+    }
+  }, [error]);
 
   const md = isLoading
     ? "Checking connection…"

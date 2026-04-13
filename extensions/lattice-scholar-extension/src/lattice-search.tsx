@@ -1,8 +1,8 @@
 import { Action, ActionPanel, Clipboard, Detail, getPreferenceValues, List, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const { port } = getPreferenceValues<{ port: string }>();
+const { port } = getPreferenceValues<Preferences.LatticeSearch>();
 const BASE = `http://127.0.0.1:${port || "52731"}/api/v1`;
 
 interface SearchResult {
@@ -101,9 +101,11 @@ function CopyBibTeXAction({ id, shortcut }: { id: string; shortcut?: Action.Prop
 function PaperDetail({ id }: { id: string }) {
   const { data, isLoading, error } = useFetch<Paper>(`${BASE}/papers/${id}`);
 
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Failed to load paper", message: error.message });
-  }
+  useEffect(() => {
+    if (error) {
+      showToast({ style: Toast.Style.Failure, title: "Failed to load paper", message: error.message });
+    }
+  }, [error]);
 
   const md = data
     ? [

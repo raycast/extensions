@@ -12,13 +12,11 @@ Search your [Lattice](https://stringer07.github.io/Lattice_release/) literature 
 
 ## Screenshots
 
-![Search results list](assets/item.png)
+![Search results list](metadata/lattice-search-1.png)
 
-![List item actions](assets/item-action.png)
+![Paper detail view](metadata/lattice-search-2.png)
 
-![Paper detail view](assets/detail.png)
-
-![Detail view actions](assets/detail-action.png)
+![Lattice Status](metadata/lattice-status-1.png)
 
 ## Requirements
 
