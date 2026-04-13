@@ -2,7 +2,7 @@ import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@rayca
 import { useState } from "react";
 import { resolveChord, getChordSuggestions, getAllChordDefinitions } from "./lib/chords";
 import { ENHARMONIC_DISPLAY } from "./lib/notes";
-import { playFrequencies, stopAll, isPlaying, type ToneType, type Duration } from "./lib/audio";
+import { playFrequencies, stopAll, type ToneType, type Duration } from "./lib/audio";
 
 const TONE_OPTIONS: { title: string; value: ToneType }[] = [
   { title: "Warm (Default)", value: "warm" },

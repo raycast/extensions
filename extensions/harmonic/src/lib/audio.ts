@@ -127,7 +127,6 @@ export function playFrequencies(
   stopPlayback(id);
 
   const loop = duration === 0;
-  const args = loop ? [] : [];
   const command = `afplay "${filePath}"`;
 
   const playOnce = () => {
