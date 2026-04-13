@@ -48,6 +48,13 @@
       "subtitle": "Cal.com",
       "description": "View and manage your Cal.com out-of-office entries",
       "mode": "view"
+    },
+    {
+      "name": "create-out-of-office",
+      "title": "Create Out of Office",
+      "subtitle": "Cal.com",
+      "description": "Schedule a new out-of-office entry (with draft support)",
+      "mode": "view"
     }
   ],
   "preferences": [

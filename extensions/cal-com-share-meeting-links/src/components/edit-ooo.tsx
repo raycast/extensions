@@ -27,9 +27,17 @@ interface EditOOOProps {
   /** When editing, the existing entry. Undefined means "create new". */
   entry?: CalOOOEntry;
   mutate: MutatePromise<CalOOOEntry[] | undefined>;
+  /**
+   * When this form is the root of a top-level command (not pushed),
+   * pass `enableDrafts` so Raycast preserves form state on exit.
+   * Drafts are NOT supported when this form is pushed via Action.Push.
+   */
+  enableDrafts?: boolean;
+  /** Restored draft values from a previous session (forwarded by Raycast via LaunchProps). */
+  draftValues?: Partial<Values>;
 }
 
-interface Values {
+export interface Values {
   start: Date | null;
   end: Date | null;
   reason: string; // narrowed back to CalOOOReason on submit
@@ -39,16 +47,16 @@ interface Values {
 
 const NO_REDIRECT = "";
 
-export function EditOOO({ entry, mutate }: EditOOOProps) {
+export function EditOOO({ entry, mutate, enableDrafts, draftValues }: EditOOOProps) {
   const { pop } = useNavigation();
   const { data: teammates, isLoading: isLoadingTeammates } = useTeammates();
 
   const initialValues: Values = {
-    start: entry ? fromUtcStart(entry.start) : null,
-    end: entry ? fromUtcEnd(entry.end) : null,
-    reason: entry?.reason ?? "unspecified",
-    toUserId: entry?.toUserId ? String(entry.toUserId) : NO_REDIRECT,
-    notes: entry?.notes ?? "",
+    start: draftValues?.start ?? (entry ? fromUtcStart(entry.start) : null),
+    end: draftValues?.end ?? (entry ? fromUtcEnd(entry.end) : null),
+    reason: draftValues?.reason ?? entry?.reason ?? "unspecified",
+    toUserId: draftValues?.toUserId ?? (entry?.toUserId ? String(entry.toUserId) : NO_REDIRECT),
+    notes: draftValues?.notes ?? entry?.notes ?? "",
   };
 
   const apply = async (values: Values) => {
@@ -148,6 +156,7 @@ export function EditOOO({ entry, mutate }: EditOOOProps) {
     <Form
       navigationTitle={entry ? "Edit Out of Office" : "New Out of Office"}
       isLoading={isLoadingTeammates}
+      enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={entry ? "Save" : "Create"} icon={Icon.Check} onSubmit={handleSubmit} />
