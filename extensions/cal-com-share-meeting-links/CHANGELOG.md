@@ -1,5 +1,13 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Fix + improve View Bookings] - {PR_MERGE_DATE}
+
+- Fix a bug where View Bookings only showed the first 100 bookings (hiding all recent + upcoming bookings for users with longer histories)
+- Group bookings into Pending Confirmation, Upcoming, Past, and Cancelled sections
+- Pending Confirmation appears at the top so bookings awaiting your response don't get missed
+- Past bookings now lazy-load on scroll (50 per page)
+- Cancelled bookings hidden by default; toggle with ⌘ H
+
 ## [Add: Manage Out of Office] - {PR_MERGE_DATE}
 
 - Adds a new "Out of Office" command
