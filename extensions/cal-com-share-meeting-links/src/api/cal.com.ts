@@ -267,13 +267,20 @@ export function cancelBooking(bookingUid: string, reason: string) {
  * Requests an attendee to reschedule a booking. Per Cal.com docs, this cancels
  * the original booking and emails the attendee a link to pick a new time.
  */
-export function requestRescheduleBooking(bookingUid: string, reason: string) {
-  return calAPI({
-    method: "POST",
-    url: `/bookings/${bookingUid}/request-reschedule`,
-    headers: { "cal-api-version": "2026-02-25" },
-    data: { rescheduleReason: reason },
-  });
+export async function requestRescheduleBooking(bookingUid: string, reason: string) {
+  const url = `/bookings/${bookingUid}/request-reschedule`;
+  console.log(`[reschedule] POST ${url}`, { bookingUid, reason });
+  try {
+    return await calAPI({
+      method: "POST",
+      url,
+      headers: { "cal-api-version": "2026-02-25" },
+      data: { rescheduleReason: reason },
+    });
+  } catch (err) {
+    console.error("[reschedule] failed:", err);
+    throw err;
+  }
 }
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
