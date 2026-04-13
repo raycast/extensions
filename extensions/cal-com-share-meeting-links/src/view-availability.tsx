@@ -1,12 +1,29 @@
 import { Action, ActionPanel, Color, Icon, List, openCommandPreferences, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-import { CalSchedule, updateSchedule, useSchedules } from "@api/cal.com";
+import { CalSchedule, updateSchedule, useEventTypes, useSchedules } from "@api/cal.com";
 import { ScheduleDetail } from "@components/schedule-detail";
-import { formatDayRanges, formatTimeZoneWithOffset, getDeviceTimeZone, rangesForDay, WEEKDAYS } from "@/lib/schedule";
+import {
+  formatDayRanges,
+  formatOverrideDate,
+  formatOverrideRange,
+  formatOverrideWeekday,
+  formatTimeZoneWithOffset,
+  getDeviceTimeZone,
+  rangesForDay,
+  WEEKDAYS,
+} from "@/lib/schedule";
+
+// Today as YYYY-MM-DD in local time (matches the format Cal.com uses for override.date).
+function todayLocalIso(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+}
 
 export default function ViewAvailability() {
   const { data: schedules, isLoading, error, mutate } = useSchedules();
+  const { data: eventTypes } = useEventTypes();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("availability-show-details", true);
+  const today = todayLocalIso();
 
   const handleSetAsDefault = async (schedule: CalSchedule) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Setting as default" });
@@ -80,12 +97,46 @@ export default function ViewAvailability() {
                       text={formatDayRanges(rangesForDay(schedule, day))}
                     />
                   ))}
-                  {schedule.overrides.length > 0 && (
-                    <>
-                      <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label title="Overrides" text={`${schedule.overrides.length}`} />
-                    </>
-                  )}
+                  {(() => {
+                    const upcomingOverrides = schedule.overrides
+                      .filter((o) => o.date >= today)
+                      .sort((a, b) => a.date.localeCompare(b.date));
+                    if (upcomingOverrides.length === 0) return null;
+                    return (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        {upcomingOverrides.map((o) => (
+                          <List.Item.Detail.Metadata.Label
+                            key={o.date}
+                            title={`${formatOverrideDate(o.date)} (${formatOverrideWeekday(o.date)})`}
+                            text={formatOverrideRange(o)}
+                          />
+                        ))}
+                      </>
+                    );
+                  })()}
+                  {(() => {
+                    const linked = (eventTypes ?? [])
+                      .filter((et) => et.scheduleId === schedule.id || (schedule.isDefault && et.scheduleId === null))
+                      .sort((a, b) => a.title.localeCompare(b.title));
+                    if (linked.length === 0) return null;
+                    return (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label
+                          title="Used by"
+                          text={`${linked.length} event type${linked.length === 1 ? "" : "s"}`}
+                        />
+                        {linked.map((et) => (
+                          <List.Item.Detail.Metadata.Label
+                            key={et.id}
+                            title={et.title}
+                            text={`${et.lengthInMinutes} min`}
+                          />
+                        ))}
+                      </>
+                    );
+                  })()}
                 </List.Item.Detail.Metadata>
               }
             />

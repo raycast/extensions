@@ -32,6 +32,8 @@ export interface CalEventType {
   hidden: boolean;
   ownerId: number | null;
   teamId: number | null;
+  /** Schedule this event type uses; null means "user's default schedule". */
+  scheduleId: number | null;
   recurrence: null | Recurrence;
   confirmationPolicy: object | null;
   disableGuests: boolean;
