@@ -137,64 +137,6 @@
         "continue",
         "resume",
         "last"
-      ],
-      "preferences": [
-        {
-          "name": "permissionMode",
-          "type": "dropdown",
-          "title": "Permission Mode",
-          "description": "Permission mode for the continued session",
-          "default": "default",
-          "required": false,
-          "data": [
-            {
-              "title": "Default (Interactive)",
-              "value": "default"
-            },
-            {
-              "title": "Plan Mode",
-              "value": "plan"
-            },
-            {
-              "title": "Auto Edit",
-              "value": "autoEdit"
-            },
-            {
-              "title": "Full Auto",
-              "value": "fullAuto"
-            },
-            {
-              "title": "Bypass Permissions",
-              "value": "bypassPermissions"
-            }
-          ]
-        },
-        {
-          "name": "model",
-          "type": "dropdown",
-          "title": "Model Override",
-          "description": "Override the extension's default model for the continued session",
-          "default": "",
-          "required": false,
-          "data": [
-            {
-              "title": "Use Extension Default",
-              "value": ""
-            },
-            {
-              "title": "Sonnet (Balanced)",
-              "value": "sonnet"
-            },
-            {
-              "title": "Opus (Most Capable)",
-              "value": "opus"
-            },
-            {
-              "title": "Haiku (Fastest)",
-              "value": "haiku"
-            }
-          ]
-        }
       ]
     },
     {
