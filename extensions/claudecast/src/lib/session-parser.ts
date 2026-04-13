@@ -4,6 +4,14 @@ import os from "os";
 import readline from "readline";
 import { trash } from "@raycast/api";
 
+export type PermissionMode =
+  | "acceptEdits"
+  | "auto"
+  | "bypassPermissions"
+  | "default"
+  | "dontAsk"
+  | "plan";
+
 export interface SessionMetadata {
   id: string;
   filePath: string;
@@ -16,6 +24,7 @@ export interface SessionMetadata {
   cost: number;
   model?: string;
   matchSnippet?: string;
+  permissionMode?: PermissionMode;
 }
 
 export interface SessionMessage {
@@ -47,6 +56,7 @@ interface JSONLEntry {
   };
   model?: string;
   timestamp?: string;
+  permissionMode?: PermissionMode;
 }
 
 /**
@@ -229,6 +239,9 @@ async function resolveByFilesystemWalk(
  * At each level, tries taking the longest possible run of parts as a single
  * path component (joined with literal "-"), checking if it exists on disk.
  * An empty part signals a dot-prefix (from Claude's encoding of "/." → "--").
+ *
+ * Claude Code encodes `_` as `-` in project directory names, so each candidate
+ * component is also probed with all dashes replaced by underscores.
  */
 async function walkPathSegments(
   basePath: string,
@@ -253,24 +266,33 @@ async function walkPathSegments(
       continue;
     }
 
-    const candidatePath = path.join(basePath, component);
+    // Claude Code also encodes underscores as dashes, so try both variants.
+    // Original (with dashes) is tried first to prefer literal dash names.
+    const variants = [component];
+    if (component.includes("-")) {
+      variants.push(component.replace(/-/g, "_"));
+    }
 
-    try {
-      const stat = await fs.promises.stat(candidatePath);
+    for (const variant of variants) {
+      const candidatePath = path.join(basePath, variant);
 
-      if (remaining.length === 0) {
-        // Last component — any file type is fine
-        return candidatePath;
-      }
+      try {
+        const stat = await fs.promises.stat(candidatePath);
 
-      if (stat.isDirectory()) {
-        const resolved = await walkPathSegments(candidatePath, remaining);
-        if (resolved) return resolved;
-      }
-    } catch (error: unknown) {
-      const code = (error as NodeJS.ErrnoException)?.code;
-      if (code !== "ENOENT" && code !== "ENOTDIR") {
-        console.warn(`Unexpected error probing ${candidatePath}:`, error);
+        if (remaining.length === 0) {
+          // Last component — any file type is fine
+          return candidatePath;
+        }
+
+        if (stat.isDirectory()) {
+          const resolved = await walkPathSegments(candidatePath, remaining);
+          if (resolved) return resolved;
+        }
+      } catch (error: unknown) {
+        const code = (error as NodeJS.ErrnoException)?.code;
+        if (code !== "ENOENT" && code !== "ENOTDIR") {
+          console.warn(`Unexpected error probing ${candidatePath}:`, error);
+        }
       }
     }
   }
@@ -280,12 +302,12 @@ async function walkPathSegments(
 
 /**
  * Encode a project path to Claude's directory naming format.
- * Claude Code (verified as of v1.x) replaces both / and . with -.
+ * Claude Code replaces /, ., and _ with -.
  * Confirmed empirically by inspecting ~/.claude/projects/ directory names
  * against their corresponding originalPath values in sessions-index.json.
  */
 export function encodeProjectPath(projectPath: string): string {
-  return projectPath.replace(/[/.]/g, "-");
+  return projectPath.replace(/[/._]/g, "-");
 }
 
 /**
@@ -375,6 +397,9 @@ async function parseSessionMetadataFast(
 
         if (entry.type === "user" || entry.type === "human") {
           turnCount++;
+          if (!result.permissionMode && entry.permissionMode) {
+            result.permissionMode = entry.permissionMode;
+          }
           if (!result.firstMessage && entry.message?.content) {
             const content = entry.message.content;
             if (typeof content === "string") {
@@ -632,6 +657,7 @@ export async function listAllSessions(options?: {
         turnCount: metadata.turnCount || 0,
         cost: metadata.cost || 0,
         model: metadata.model,
+        permissionMode: metadata.permissionMode,
       });
     } catch {
       // Skip files we can't read
@@ -672,6 +698,7 @@ export async function listProjectSessions(
           turnCount: metadata.turnCount || 0,
           cost: metadata.cost || 0,
           model: metadata.model,
+          permissionMode: metadata.permissionMode,
         });
       } catch {
         // Skip files we can't read
@@ -758,6 +785,7 @@ export async function searchSessionContent(
         cost: match.cost,
         model: match.model,
         matchSnippet: match.matchSnippet,
+        permissionMode: match.permissionMode,
       });
     }
   }
@@ -781,6 +809,7 @@ async function searchSingleSession(
   cost: number;
   model?: string;
   matchSnippet?: string;
+  permissionMode?: PermissionMode;
 } | null> {
   type MatchResult = {
     id: string;
@@ -790,6 +819,7 @@ async function searchSingleSession(
     cost: number;
     model?: string;
     matchSnippet?: string;
+    permissionMode?: PermissionMode;
   };
 
   return new Promise<MatchResult | null>((resolve) => {
@@ -800,6 +830,7 @@ async function searchSingleSession(
     let firstMessage = "";
     let turnCount = 0;
     let model: string | undefined;
+    let permissionMode: PermissionMode | undefined;
     let resolved = false;
 
     const safeResolve = (value: MatchResult | null) => {
@@ -864,6 +895,9 @@ async function searchSingleSession(
 
         if (entry.type === "user" || entry.type === "human") {
           turnCount++;
+          if (!permissionMode && entry.permissionMode) {
+            permissionMode = entry.permissionMode;
+          }
           if (!firstMessage && content) {
             firstMessage = safeTruncate(content, 200);
           }
@@ -906,6 +940,7 @@ async function searchSingleSession(
               cost: 0,
               model,
               matchSnippet,
+              permissionMode,
             }
           : null,
       );
