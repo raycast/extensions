@@ -28,28 +28,6 @@
       "description": "Leave empty to use the free tier. Get a key at auth.pollinations.ai to unlock Gemini, GPT-5, DeepSeek, Claude and more.",
       "type": "password",
       "required": false
-    },
-    {
-      "name": "model",
-      "title": "Text Model",
-      "description": "Models marked with 🔑 require an API key (auth.pollinations.ai)",
-      "type": "dropdown",
-      "required": false,
-      "default": "openai",
-      "data": [
-        { "title": "── Free tier ──────────────────", "value": "openai" },
-        { "title": "OpenAI · GPT-5 Mini (fast, free)", "value": "openai" },
-        { "title": "OpenAI Fast · GPT-5 Nano / OVH (fastest, free)", "value": "openai-fast" },
-        { "title": "Mistral · Small 3.2 24B (free)", "value": "mistral" },
-        { "title": "Qwen Coder · 2.5 32B (free)", "value": "qwen-coder" },
-        { "title": "── API key required ───────────", "value": "openai-large" },
-        { "title": "🔑 OpenAI Large · GPT-5 Chat (most capable)", "value": "openai-large" },
-        { "title": "🔑 OpenAI Reasoning · o4-mini", "value": "openai-reasoning" },
-        { "title": "🔑 Gemini · 2.5 Flash Lite", "value": "gemini" },
-        { "title": "🔑 Gemini Search · 2.5 Flash + web search", "value": "gemini-search" },
-        { "title": "🔑 DeepSeek · V3.1", "value": "deepseek" },
-        { "title": "🔑 Claude · Haiku 4.5 (Flower tier)", "value": "claudyclaude" }
-      ]
     }
   ],
   "dependencies": {

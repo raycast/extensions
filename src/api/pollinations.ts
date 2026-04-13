@@ -2,7 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
   apiKey?: string;
-  model?: string;
 }
 
 export interface Message {
@@ -12,19 +11,9 @@ export interface Message {
 
 export interface TierInfo {
   hasKey: boolean;
-  model: string;
+  /** True when the selected model requires an API key (tier !== anonymous) */
   modelNeedsKey: boolean;
 }
-
-// Models that require at least a Seed-tier API key
-const KEY_REQUIRED_MODELS = new Set([
-  "openai-large",
-  "openai-reasoning",
-  "gemini",
-  "gemini-search",
-  "deepseek",
-  "claudyclaude",
-]);
 
 // ─── Custom error with HTTP status ───────────────────────────────────────────
 
@@ -53,13 +42,11 @@ export class ApiError extends Error {
 const BASE_URL = "https://text.pollinations.ai";
 
 /** Returns tier metadata WITHOUT exposing the key value. */
-export function getTierInfo(): TierInfo {
+export function getTierInfo(modelTier?: string): TierInfo {
   const prefs = getPreferenceValues<Preferences>();
-  const model = prefs.model || "openai";
   return {
     hasKey: !!prefs.apiKey?.trim(),
-    model,
-    modelNeedsKey: KEY_REQUIRED_MODELS.has(model),
+    modelNeedsKey: !!modelTier && modelTier !== "anonymous",
   };
 }
 
@@ -93,13 +80,12 @@ async function assertOk(response: Response): Promise<void> {
 
 export async function streamChat(
   messages: Message[],
+  model: string,
   onChunk: (chunk: string) => void,
   onDone: () => void,
   onError: (error: Error) => void,
   signal?: AbortSignal,
 ): Promise<void> {
-  const { model } = getTierInfo();
-
   try {
     const response = await fetch(`${BASE_URL}/openai`, {
       method: "POST",
@@ -145,9 +131,10 @@ export async function streamChat(
   }
 }
 
-export async function singleChat(messages: Message[]): Promise<string> {
-  const { model } = getTierInfo();
-
+export async function singleChat(
+  messages: Message[],
+  model: string,
+): Promise<string> {
   const response = await fetch(`${BASE_URL}/openai`, {
     method: "POST",
     headers: buildHeaders(),

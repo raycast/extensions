@@ -6,6 +6,7 @@ import {
   Detail,
   Form,
   Icon,
+  List,
   openExtensionPreferences,
   showToast,
   Toast,
@@ -15,6 +16,8 @@ import { useCallback } from "react";
 import { ApiError, getTierInfo } from "./api/pollinations";
 import { useChat } from "./hooks/useChat";
 import type { ChatMessage } from "./hooks/useChat";
+import { useModels } from "./hooks/useModels";
+import type { PollinationsModel } from "./hooks/useModels";
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 
@@ -28,7 +31,7 @@ function buildMarkdown(
       "",
       "Merhaba! Size nasıl yardımcı olabilirim?",
       "",
-      "> **⌘ ↵** ile mesaj gönderin &nbsp;·&nbsp; **⌘ ⇧ ⌫** geçmişi temizler",
+      "> **⌘ ↵** mesaj gönder &nbsp;·&nbsp; **⌘ M** model değiştir &nbsp;·&nbsp; **⌘ ⇧ ⌫** geçmişi temizle",
     ].join("\n");
   }
 
@@ -46,26 +49,94 @@ function buildMarkdown(
   return lines.join("\n");
 }
 
-// ─── Human-readable error messages ───────────────────────────────────────────
+// ─── Error messages ───────────────────────────────────────────────────────────
 
 function friendlyError(err: Error): { title: string; message: string } {
   if (err instanceof ApiError) {
-    if (err.isAuthError) {
+    if (err.isAuthError)
       return {
         title: "Geçersiz API Anahtarı",
         message:
-          "Anahtarı kontrol edin veya ücretsiz katman için kaldırın. (⌘ P → Ayarlar)",
+          "Anahtarı kontrol edin veya ücretsiz katman için kaldırın. (⌘ ,)",
       };
-    }
-    if (err.isRateLimited) {
+    if (err.isRateLimited)
       return {
         title: "Hız Limiti Aşıldı",
-        message:
-          "Ücretsiz katman rate-limit'e ulaştı. API anahtarı ekleyerek limiti kaldırabilirsiniz.",
+        message: "API anahtarı ekleyerek limiti kaldırabilirsiniz. (⌘ ,)",
       };
-    }
   }
   return { title: "Hata", message: err.message };
+}
+
+// ─── Tier badge ───────────────────────────────────────────────────────────────
+
+function tierLabel(tier: string): string {
+  if (tier === "anonymous") return "Ücretsiz";
+  if (tier === "seed") return "Seed";
+  if (tier === "flower") return "Flower";
+  if (tier === "nectar") return "Nectar";
+  return tier;
+}
+
+// ─── Model picker ─────────────────────────────────────────────────────────────
+
+function ModelPicker({
+  models,
+  currentModel,
+  onSelect,
+}: {
+  models: PollinationsModel[];
+  currentModel: string;
+  onSelect: (model: string) => void;
+}) {
+  const { pop } = useNavigation();
+
+  const tierOrder = ["anonymous", "seed", "flower", "nectar"];
+  const grouped = tierOrder
+    .map((tier) => ({ tier, items: models.filter((m) => m.tier === tier) }))
+    .filter((g) => g.items.length > 0);
+
+  return (
+    <List navigationTitle="Model Seç" searchBarPlaceholder="Model ara…">
+      {grouped.map(({ tier, items }) => (
+        <List.Section key={tier} title={tierLabel(tier)}>
+          {items.map((m) => {
+            const isCurrent = m.name === currentModel;
+            const badges: List.Item.Accessory[] = [];
+            if (isCurrent)
+              badges.push({
+                icon: { source: Icon.Checkmark, tintColor: Color.Green },
+              });
+            if (m.reasoning)
+              badges.push({ tag: { value: "reasoning", color: Color.Purple } });
+            if (m.vision)
+              badges.push({ tag: { value: "vision", color: Color.Blue } });
+
+            return (
+              <List.Item
+                key={m.name}
+                title={m.name}
+                subtitle={m.description}
+                accessories={badges}
+                actions={
+                  <ActionPanel>
+                    <Action
+                      title="Bu Modeli Seç"
+                      icon={Icon.CheckCircle}
+                      onAction={() => {
+                        onSelect(m.name);
+                        pop();
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      ))}
+    </List>
+  );
 }
 
 // ─── Send message form ────────────────────────────────────────────────────────
@@ -106,9 +177,10 @@ function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
   );
 }
 
-// ─── Main view ────────────────────────────────────────────────────────────────
+// ─── Main chat view ───────────────────────────────────────────────────────────
 
 export default function ChatCommand() {
+  const { models, selectedModel, selectModel, isLoadingModels } = useModels();
   const {
     messages,
     isLoading,
@@ -116,13 +188,25 @@ export default function ChatCommand() {
     sendMessage,
     stopStreaming,
     clearHistory,
-  } = useChat();
+  } = useChat(selectedModel);
   const { push } = useNavigation();
-  const tier = getTierInfo();
+
+  const activeModel = models.find((m) => m.name === selectedModel);
+  const tier = getTierInfo(activeModel?.tier);
 
   const openInput = useCallback(() => {
     push(<SendMessageForm onSend={sendMessage} />);
   }, [push, sendMessage]);
+
+  const openModelPicker = useCallback(() => {
+    push(
+      <ModelPicker
+        models={models}
+        currentModel={selectedModel}
+        onSelect={selectModel}
+      />,
+    );
+  }, [push, models, selectedModel, selectModel]);
 
   const copyLast = useCallback(async () => {
     const last = [...messages].reverse().find((m) => m.role === "assistant");
@@ -132,9 +216,16 @@ export default function ChatCommand() {
     }
   }, [messages]);
 
-  // Surface API errors as toasts with friendly messages
   const handleSend = useCallback(
     async (text: string) => {
+      if (tier.modelNeedsKey && !tier.hasKey) {
+        await showToast({
+          title: "API Anahtarı Gerekli",
+          message: `"${selectedModel}" modeli için API anahtarı gereklidir. ⌘ , ile ekleyin.`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
       try {
         await sendMessage(text);
       } catch (err) {
@@ -144,7 +235,7 @@ export default function ChatCommand() {
         await showToast({ title, message, style: Toast.Style.Failure });
       }
     },
-    [sendMessage],
+    [sendMessage, tier, selectedModel],
   );
 
   const markdown = buildMarkdown(messages, streamingContent);
@@ -152,7 +243,7 @@ export default function ChatCommand() {
   return (
     <Detail
       markdown={markdown}
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingModels}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
@@ -162,21 +253,24 @@ export default function ChatCommand() {
                 ? { source: Icon.Key, tintColor: Color.Green }
                 : { source: Icon.LockUnlocked, tintColor: Color.Orange }
             }
-            text={tier.hasKey ? "Premium (API anahtarlı)" : "Ücretsiz"}
+            text={tier.hasKey ? "API anahtarlı" : "Ücretsiz"}
           />
-          <Detail.Metadata.Label title="Model" text={tier.model} />
+          <Detail.Metadata.Label title="Model" text={selectedModel} />
+          {activeModel?.description ? (
+            <Detail.Metadata.Label title="" text={activeModel.description} />
+          ) : null}
           <Detail.Metadata.Separator />
           {!tier.hasKey && tier.modelNeedsKey ? (
             <Detail.Metadata.Label
               title="Uyarı"
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-              text="Bu model API anahtarı gerektirir (⌘ ,)"
+              text="Bu model API anahtarı gerektirir"
             />
           ) : !tier.hasKey ? (
             <Detail.Metadata.Label
               title="İpucu"
               icon={{ source: Icon.Info, tintColor: Color.Blue }}
-              text="API anahtarı ile Gemini, GPT-5, DeepSeek açılır"
+              text="API anahtarı ile daha fazla model açılır"
             />
           ) : null}
         </Detail.Metadata>
@@ -201,6 +295,12 @@ export default function ChatCommand() {
           </ActionPanel.Section>
 
           <ActionPanel.Section>
+            <Action
+              title="Model Değiştir"
+              icon={Icon.Switch}
+              onAction={openModelPicker}
+              shortcut={{ modifiers: ["cmd"], key: "m" }}
+            />
             {messages.length > 0 && (
               <Action
                 title="Son Cevabı Kopyala"
