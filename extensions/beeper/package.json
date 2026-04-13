@@ -15,7 +15,7 @@
   "license": "MIT",
   "platforms": [
     "macOS",
-    "windows"
+    "Windows"
   ],
   "keywords": [
     "beeper",
