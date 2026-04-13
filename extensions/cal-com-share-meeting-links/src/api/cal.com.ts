@@ -330,6 +330,89 @@ export function deleteOOO(id: number, signal?: AbortSignal) {
   });
 }
 
+// ─── Team members (for OOO redirect target) ────────────────────────────────
+
+const TEAMS_API_VERSION = "2024-08-13";
+
+interface CalTeamSummary {
+  id: number;
+  name: string;
+}
+
+export interface CalTeammate {
+  id: number;
+  name: string | null;
+  username: string | null;
+  email: string;
+  avatarUrl: string | null;
+  teamName: string; // for display context
+}
+
+async function fetchTeams(): Promise<CalTeamSummary[]> {
+  try {
+    return await calAPI<CalTeamSummary[]>({
+      url: "/teams",
+      headers: { "cal-api-version": TEAMS_API_VERSION },
+    });
+  } catch {
+    return [];
+  }
+}
+
+interface MembershipResponseUser {
+  id: number;
+  name: string | null;
+  username: string | null;
+  email: string;
+  avatarUrl: string | null;
+}
+
+interface MembershipResponse {
+  user: MembershipResponseUser;
+}
+
+async function fetchTeamMembers(teamId: number, teamName: string): Promise<CalTeammate[]> {
+  try {
+    const memberships = await calAPI<MembershipResponse[]>({
+      url: `/teams/${teamId}/memberships`,
+      headers: { "cal-api-version": TEAMS_API_VERSION },
+    });
+    return memberships.map((m) => ({
+      id: m.user.id,
+      name: m.user.name,
+      username: m.user.username,
+      email: m.user.email,
+      avatarUrl: m.user.avatarUrl,
+      teamName,
+    }));
+  } catch {
+    // Permission denied or endpoint missing — degrade gracefully.
+    return [];
+  }
+}
+
+async function fetchAllTeammates(): Promise<CalTeammate[]> {
+  const teams = await fetchTeams();
+  if (teams.length === 0) return [];
+  const lists = await Promise.all(teams.map((t) => fetchTeamMembers(t.id, t.name)));
+  const merged = lists.flat();
+  // De-duplicate by user id, keep first-seen team name.
+  const seen = new Set<number>();
+  const out: CalTeammate[] = [];
+  for (const t of merged) {
+    if (seen.has(t.id)) continue;
+    seen.add(t.id);
+    out.push(t);
+  }
+  return out.sort((a, b) => (a.name ?? a.email).localeCompare(b.name ?? b.email));
+}
+
+export function useTeammates() {
+  return useCachedPromise(fetchAllTeammates, [], {
+    failureToastOptions: { title: "Unable to load teammates" },
+  });
+}
+
 export function formatDateTime(date: string) {
   return moment(date).format("Do MMM HH:mm a");
 }
