@@ -164,6 +164,7 @@ function SessionItem({
       projectPath: session.projectPath,
       sessionId: session.id,
       permissionMode: session.permissionMode,
+      model: session.model,
     });
     await popToRoot();
   }
@@ -183,6 +184,7 @@ function SessionItem({
       sessionId: session.id,
       forkSession: true,
       permissionMode: session.permissionMode,
+      model: session.model,
     });
     await popToRoot();
   }
@@ -236,6 +238,7 @@ function SessionItem({
                   sessionId={session.id}
                   projectPath={session.projectPath}
                   permissionMode={session.permissionMode}
+                  model={session.model}
                 />
               }
             />
@@ -273,10 +276,12 @@ function SessionDetailView({
   sessionId,
   projectPath,
   permissionMode,
+  model,
 }: {
   sessionId: string;
   projectPath: string;
   permissionMode?: PermissionMode;
+  model?: string;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<SessionDetail | null>(null);
@@ -349,6 +354,7 @@ function SessionDetailView({
                 projectPath,
                 sessionId,
                 permissionMode,
+                model,
               });
               await popToRoot();
             }}
@@ -371,6 +377,7 @@ function SessionDetailView({
                 sessionId,
                 forkSession: true,
                 permissionMode,
+                model,
               });
               await popToRoot();
             }}
