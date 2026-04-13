@@ -238,6 +238,98 @@ export function updateSchedule(id: number, patch: CalSchedulePatch, signal?: Abo
   });
 }
 
+// ─── Out of Office ─────────────────────────────────────────────────────────
+//
+// Defaults — verified during manual QA, may need adjustment:
+//   OOO_BASE_PATH      = "/out-of-office"
+//   OOO_API_VERSION    = "2024-06-14"
+//   END_OF_DAY_FORMAT  = next-day-00:00:00Z
+// If `GET /v2/out-of-office` 404s, try "/me/ooo" instead.
+
+const OOO_API_VERSION = "2024-06-14";
+
+export type CalOOOReason = "unspecified" | "vacation" | "travel" | "sick" | "public_holiday";
+
+export interface CalOOOToUser {
+  id: number;
+  name: string | null;
+  username: string | null;
+  email: string;
+  avatarUrl: string | null;
+}
+
+export interface CalOOOEntry {
+  id: number;
+  uuid: string;
+  userId: number;
+  start: string; // ISO datetime UTC
+  end: string; // ISO datetime UTC
+  reason: CalOOOReason;
+  notes: string | null;
+  toUserId: number | null;
+  toUser?: CalOOOToUser | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CalOOOCreate {
+  start: string;
+  end: string;
+  reason?: CalOOOReason;
+  notes?: string;
+  toUserId?: number;
+}
+
+export type CalOOOPatch = Partial<CalOOOCreate>;
+
+// Hoisted to share useCachedPromise's cache namespace across callers.
+async function fetchOOOEntries(): Promise<CalOOOEntry[]> {
+  const data = await calAPI<CalOOOEntry[]>({
+    url: "/out-of-office",
+    headers: { "cal-api-version": OOO_API_VERSION },
+  });
+  // Filter past entries client-side (in case the API returns them) and sort ascending by start.
+  const now = Date.now();
+  return data
+    .filter((e) => new Date(e.end).getTime() >= now)
+    .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+}
+
+export function useOOOEntries() {
+  return useCachedPromise(fetchOOOEntries, [], {
+    failureToastOptions: { title: "Unable to load out-of-office entries" },
+  });
+}
+
+export function createOOO(input: CalOOOCreate, signal?: AbortSignal) {
+  return calAPI<CalOOOEntry>({
+    method: "POST",
+    url: "/out-of-office",
+    headers: { "cal-api-version": OOO_API_VERSION },
+    data: input,
+    signal,
+  });
+}
+
+export function updateOOO(id: number, patch: CalOOOPatch, signal?: AbortSignal) {
+  return calAPI<CalOOOEntry>({
+    method: "PATCH",
+    url: `/out-of-office/${id}`,
+    headers: { "cal-api-version": OOO_API_VERSION },
+    data: patch,
+    signal,
+  });
+}
+
+export function deleteOOO(id: number, signal?: AbortSignal) {
+  return calAPI<void>({
+    method: "DELETE",
+    url: `/out-of-office/${id}`,
+    headers: { "cal-api-version": OOO_API_VERSION },
+    signal,
+  });
+}
+
 export function formatDateTime(date: string) {
   return moment(date).format("Do MMM HH:mm a");
 }
