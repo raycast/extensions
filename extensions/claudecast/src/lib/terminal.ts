@@ -199,9 +199,11 @@ export async function launchClaudeCode(options: {
     args.push("--permission-mode", options.permissionMode);
   }
 
-  // Restore the session's model so a Haiku session doesn't resume with Opus.
-  // Normalize to short names so Claude Code enables features like extended context.
-  if (options.model) {
+  // Only pass --model for new sessions (not resume/continue). Claude Code
+  // remembers the model from the session and passing --model explicitly can
+  // disable features like extended context windows.
+  const isResumingSession = options.sessionId || options.continueSession;
+  if (options.model && !isResumingSession) {
     args.push("--model", normalizeModelName(options.model));
   }
 
