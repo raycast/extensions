@@ -268,6 +268,12 @@ async function walkPathSegments(
 
     // Claude Code also encodes underscores as dashes, so try both variants.
     // Original (with dashes) is tried first to prefer literal dash names.
+    // Note: mixed dash/underscore names within a single component (e.g.
+    // "helm-charts_v2") are not attempted — the encoding is inherently lossy
+    // and trying all 2^n combinations per component is impractical. In
+    // practice, the outer `take` loop handles this by splitting the encoded
+    // string at different points, so "helm-charts" and "my_service" are
+    // resolved as separate components rather than one mixed component.
     const variants = [component];
     if (component.includes("-")) {
       variants.push(component.replace(/-/g, "_"));
