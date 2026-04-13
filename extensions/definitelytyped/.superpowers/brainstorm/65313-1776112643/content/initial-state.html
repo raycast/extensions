@@ -1,0 +1,56 @@
+<h2>Como a tela inicial deve se comportar?</h2>
+<p class="subtitle">Quando o usuário abre a extensão com favoritos salvos</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Seção separada de favoritos</h3>
+      <p>Lista dividida em duas seções: <strong>Favorites</strong> no topo e <strong>Results</strong> abaixo ao pesquisar. Sem texto de busca, mostra só os favoritos com placeholder.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Raycast — DefinitelyTyped</div>
+        <div class="mockup-body" style="padding:12px;font-family:monospace;font-size:13px">
+          <input class="mock-input" placeholder="Search TypeScript type packages..." style="width:100%;margin-bottom:12px">
+          <div style="color:#888;font-size:11px;text-transform:uppercase;margin-bottom:6px">Favorites (2)</div>
+          <div style="padding:6px 8px;background:#f5f5f5;border-radius:4px;margin-bottom:4px">★ react</div>
+          <div style="padding:6px 8px;background:#f5f5f5;border-radius:4px;margin-bottom:4px">★ node</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Favoritos no topo, misturado</h3>
+      <p>Favoritos aparecem primeiro na lista (com icone de estrela), seguidos dos resultados da busca. Sem busca ativa, mostra todos os favoritos.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Raycast — DefinitelyTyped</div>
+        <div class="mockup-body" style="padding:12px;font-family:monospace;font-size:13px">
+          <input class="mock-input" placeholder="Search TypeScript type packages..." style="width:100%;margin-bottom:12px">
+          <div style="padding:6px 8px;background:#f5f5f5;border-radius:4px;margin-bottom:4px">⭐ react</div>
+          <div style="padding:6px 8px;background:#f5f5f5;border-radius:4px;margin-bottom:4px">⭐ node</div>
+          <div style="color:#888;font-size:11px;border-top:1px solid #ddd;margin:8px 0;padding-top:8px">— digite para pesquisar mais —</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Favoritos ficam em destaque só antes de pesquisar</h3>
+      <p>Sem texto de busca: mostra favoritos. Com texto de busca (≥2 chars): esconde favoritos e mostra apenas resultados da pesquisa.</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-header">Raycast — DefinitelyTyped</div>
+        <div class="mockup-body" style="padding:12px;font-family:monospace;font-size:13px">
+          <input class="mock-input" placeholder="Search TypeScript type packages..." style="width:100%;margin-bottom:12px">
+          <div style="color:#888;font-size:11px;text-transform:uppercase;margin-bottom:6px">Seus favoritos</div>
+          <div style="padding:6px 8px;background:#f5f5f5;border-radius:4px;margin-bottom:4px">★ react</div>
+          <div style="padding:6px 8px;background:#f5f5f5;border-radius:4px;margin-bottom:4px">★ node</div>
+          <div style="color:#aaa;font-size:11px;margin-top:8px">← ao digitar, favoritos somem e resultados aparecem</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
