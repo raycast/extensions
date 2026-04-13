@@ -87,11 +87,11 @@
             },
             {
               "title": "Auto Edit",
-              "value": "autoEdit"
+              "value": "acceptEdits"
             },
             {
               "title": "Full Auto",
-              "value": "fullAuto"
+              "value": "auto"
             },
             {
               "title": "Bypass Permissions",
