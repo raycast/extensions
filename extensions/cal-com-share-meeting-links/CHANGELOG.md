@@ -1,5 +1,13 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Add: Manage Out of Office] - {PR_MERGE_DATE}
+
+- Adds a new "Out of Office" command
+- Lists current and upcoming OOO entries with reason-tinted icons and date ranges
+- Create, edit, and delete OOO entries (date range, reason, optional notes)
+- Set a redirect target by picking a teammate from a searchable dropdown (with avatars)
+- Quick links to the Out of Office and General Account settings on cal.com (covers scheduled timezone change, which has no public API)
+
 ## [Add: View and manage availability schedules] - {PR_MERGE_DATE}
 
 - Adds a new "View Availability" command

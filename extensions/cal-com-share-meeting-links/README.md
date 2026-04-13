@@ -1,6 +1,6 @@
 # Cal.com Share Meeting Links
 
-Quickly share your Cal.com meeting links, generate private links, view and cancel bookings, and view and manage your availability schedules.
+Quickly share your Cal.com meeting links, generate private links, view and cancel bookings, view and manage your availability schedules, and manage your out-of-office entries.
 
 NOTE: This extension only supports the cloud version of Cal.com, not the self-hosted version.
 
