@@ -240,11 +240,10 @@ export function updateSchedule(id: number, patch: CalSchedulePatch, signal?: Abo
 
 // ─── Out of Office ─────────────────────────────────────────────────────────
 //
-// Defaults — verified during manual QA, may need adjustment:
-//   OOO_BASE_PATH      = "/out-of-office"
+// Verified during manual QA on 2026-04-13:
+//   OOO_BASE_PATH      = "/me/ooo"            ("/out-of-office" 404s — use the /me variant)
 //   OOO_API_VERSION    = "2024-06-14"
-//   END_OF_DAY_FORMAT  = next-day-00:00:00Z
-// If `GET /v2/out-of-office` 404s, try "/me/ooo" instead.
+//   END_OF_DAY_FORMAT  = next-day-00:00:00Z   (assumed; verify on first successful create)
 
 const OOO_API_VERSION = "2024-06-14";
 
@@ -285,7 +284,7 @@ export type CalOOOPatch = Partial<CalOOOCreate>;
 // Hoisted to share useCachedPromise's cache namespace across callers.
 async function fetchOOOEntries(): Promise<CalOOOEntry[]> {
   const data = await calAPI<CalOOOEntry[]>({
-    url: "/out-of-office",
+    url: "/me/ooo",
     headers: { "cal-api-version": OOO_API_VERSION },
   });
   // Filter past entries client-side (in case the API returns them) and sort ascending by start.
@@ -304,7 +303,7 @@ export function useOOOEntries() {
 export function createOOO(input: CalOOOCreate, signal?: AbortSignal) {
   return calAPI<CalOOOEntry>({
     method: "POST",
-    url: "/out-of-office",
+    url: "/me/ooo",
     headers: { "cal-api-version": OOO_API_VERSION },
     data: input,
     signal,
@@ -314,7 +313,7 @@ export function createOOO(input: CalOOOCreate, signal?: AbortSignal) {
 export function updateOOO(id: number, patch: CalOOOPatch, signal?: AbortSignal) {
   return calAPI<CalOOOEntry>({
     method: "PATCH",
-    url: `/out-of-office/${id}`,
+    url: `/me/ooo/${id}`,
     headers: { "cal-api-version": OOO_API_VERSION },
     data: patch,
     signal,
@@ -324,7 +323,7 @@ export function updateOOO(id: number, patch: CalOOOPatch, signal?: AbortSignal) 
 export function deleteOOO(id: number, signal?: AbortSignal) {
   return calAPI<void>({
     method: "DELETE",
-    url: `/out-of-office/${id}`,
+    url: `/me/ooo/${id}`,
     headers: { "cal-api-version": OOO_API_VERSION },
     signal,
   });
