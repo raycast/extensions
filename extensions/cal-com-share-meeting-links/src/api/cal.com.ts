@@ -92,6 +92,34 @@ interface CreatePrivateLinkResponse {
   expiresAt: string;
 }
 
+export type CalWeekday = "Monday" | "Tuesday" | "Wednesday" | "Thursday" | "Friday" | "Saturday" | "Sunday";
+
+export interface CalScheduleAvailability {
+  days: CalWeekday[];
+  startTime: string; // "HH:MM"
+  endTime: string; // "HH:MM"
+}
+
+export interface CalScheduleOverride {
+  date: string; // "YYYY-MM-DD"
+  startTime: string; // "HH:MM"
+  endTime: string; // "HH:MM"
+}
+
+export interface CalSchedule {
+  id: number;
+  ownerId: number;
+  name: string;
+  timeZone: string;
+  isDefault: boolean;
+  availability: CalScheduleAvailability[];
+  overrides: CalScheduleOverride[];
+}
+
+export type CalSchedulePatch = Partial<
+  Pick<CalSchedule, "name" | "timeZone" | "isDefault" | "availability" | "overrides">
+>;
+
 const { token } = getPreferenceValues<Preferences>();
 
 const api = axios.create({
@@ -177,6 +205,31 @@ export function createPrivateLinkForEventType(eventTypeId: number, signal: Abort
     data: {
       maxUsageCount: 1,
     },
+    signal,
+  });
+}
+
+const SCHEDULES_API_VERSION = "2024-06-11";
+
+export function useSchedules() {
+  return useCachedPromise(
+    async () => {
+      return await calAPI<CalSchedule[]>({
+        url: "/schedules",
+        headers: { "cal-api-version": SCHEDULES_API_VERSION },
+      });
+    },
+    [],
+    { failureToastOptions: { title: "Unable to load schedules" } },
+  );
+}
+
+export function updateSchedule(id: number, patch: CalSchedulePatch, signal?: AbortSignal) {
+  return calAPI<CalSchedule>({
+    method: "PATCH",
+    url: `/schedules/${id}`,
+    headers: { "cal-api-version": SCHEDULES_API_VERSION },
+    data: patch,
     signal,
   });
 }
