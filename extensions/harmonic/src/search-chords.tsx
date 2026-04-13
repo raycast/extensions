@@ -1,8 +1,24 @@
-import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
-import { resolveChord, getChordSuggestions, getAllChordDefinitions } from "./lib/chords";
-import { ENHARMONIC_DISPLAY } from "./lib/notes";
-import { playFrequencies, stopAll, type ToneType, type Duration } from "./lib/audio";
+import {
+  resolveChord,
+  getChordSuggestions,
+  getAllChordDefinitions,
+} from "./lib/chords";
+import {
+  playFrequencies,
+  stopAll,
+  type ToneType,
+  type Duration,
+} from "./lib/audio";
 
 const TONE_OPTIONS: { title: string; value: ToneType }[] = [
   { title: "Warm (Default)", value: "warm" },
@@ -57,9 +73,16 @@ export default function SearchChords() {
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Tone" onChange={(val) => setTone(val as ToneType)}>
+        <List.Dropdown
+          tooltip="Tone"
+          onChange={(val) => setTone(val as ToneType)}
+        >
           {TONE_OPTIONS.map((opt) => (
-            <List.Dropdown.Item key={opt.value} title={opt.title} value={opt.value} />
+            <List.Dropdown.Item
+              key={opt.value}
+              title={opt.title}
+              value={opt.value}
+            />
           ))}
         </List.Dropdown>
       }
@@ -70,9 +93,16 @@ export default function SearchChords() {
           <List.Section title={`${chord.fullName}`}>
             <List.Item
               title={chord.symbol}
-              subtitle={chord.notes.map((n) => `${n.scientificName} (${n.frequency} Hz)`).join("  ·  ")}
+              subtitle={chord.notes
+                .map((n) => `${n.scientificName} (${n.frequency} Hz)`)
+                .join("  ·  ")}
               accessories={[
-                { tag: { value: chord.category, color: CATEGORY_COLORS[chord.category] || Color.PrimaryText } },
+                {
+                  tag: {
+                    value: chord.category,
+                    color: CATEGORY_COLORS[chord.category] || Color.PrimaryText,
+                  },
+                },
               ]}
               actions={
                 <ChordActions
@@ -98,7 +128,13 @@ export default function SearchChords() {
                     title={s.symbol}
                     subtitle={s.fullName}
                     accessories={[
-                      { tag: { value: s.category, color: CATEGORY_COLORS[s.category] || Color.PrimaryText } },
+                      {
+                        tag: {
+                          value: s.category,
+                          color:
+                            CATEGORY_COLORS[s.category] || Color.PrimaryText,
+                        },
+                      },
                     ]}
                     actions={
                       <ActionPanel>
@@ -122,7 +158,12 @@ export default function SearchChords() {
               title={s.symbol}
               subtitle={s.fullName}
               accessories={[
-                { tag: { value: s.category, color: CATEGORY_COLORS[s.category] || Color.PrimaryText } },
+                {
+                  tag: {
+                    value: s.category,
+                    color: CATEGORY_COLORS[s.category] || Color.PrimaryText,
+                  },
+                },
               ]}
               actions={
                 <ActionPanel>
@@ -140,7 +181,10 @@ export default function SearchChords() {
         <>
           {searchText && (
             <List.Section title="No Match">
-              <List.Item title="No chord found" subtitle='Try something like "Cmaj7" or "Dm"' />
+              <List.Item
+                title="No chord found"
+                subtitle='Try something like "Cmaj7" or "Dm"'
+              />
             </List.Section>
           )}
           {!searchText &&
@@ -154,7 +198,12 @@ export default function SearchChords() {
                       title={`C${d.symbol}`}
                       subtitle={d.name}
                       accessories={[
-                        { tag: { value: cat, color: CATEGORY_COLORS[cat] || Color.PrimaryText } },
+                        {
+                          tag: {
+                            value: cat,
+                            color: CATEGORY_COLORS[cat] || Color.PrimaryText,
+                          },
+                        },
                         ...(d.aliases ? [{ text: d.aliases.join(", ") }] : []),
                       ]}
                       actions={
@@ -202,7 +251,10 @@ function ChordActions({
           icon={Icon.Play}
           onAction={() => {
             playFrequencies(frequencies, duration, tone);
-            showToast({ style: Toast.Style.Success, title: `Playing ${chord.symbol}` });
+            showToast({
+              style: Toast.Style.Success,
+              title: `Playing ${chord.symbol}`,
+            });
           }}
         />
         {DURATION_OPTIONS.map((opt) => (
@@ -210,10 +262,21 @@ function ChordActions({
             key={opt.value}
             title={`Play for ${opt.title}`}
             icon={Icon.Clock}
-            shortcut={opt.value === 1 ? { modifiers: ["cmd"], key: "1" } : opt.value === 2 ? { modifiers: ["cmd"], key: "2" } : opt.value === 5 ? { modifiers: ["cmd"], key: "5" } : { modifiers: ["cmd"], key: "0" }}
+            shortcut={
+              opt.value === 1
+                ? { modifiers: ["cmd"], key: "1" }
+                : opt.value === 2
+                  ? { modifiers: ["cmd"], key: "2" }
+                  : opt.value === 5
+                    ? { modifiers: ["cmd"], key: "5" }
+                    : { modifiers: ["cmd"], key: "0" }
+            }
             onAction={() => {
               playFrequencies(frequencies, opt.value, tone);
-              showToast({ style: Toast.Style.Success, title: `Playing ${chord.symbol} for ${opt.title}` });
+              showToast({
+                style: Toast.Style.Success,
+                title: `Playing ${chord.symbol} for ${opt.title}`,
+              });
             }}
           />
         ))}
@@ -226,7 +289,10 @@ function ChordActions({
             icon={Icon.ArrowUp}
             onAction={() => {
               setOctave(opt.value);
-              showToast({ style: Toast.Style.Success, title: `Octave: ${opt.value}` });
+              showToast({
+                style: Toast.Style.Success,
+                title: `Octave: ${opt.value}`,
+              });
             }}
           />
         ))}
@@ -239,7 +305,10 @@ function ChordActions({
             const idx = DURATION_OPTIONS.findIndex((d) => d.value === duration);
             const next = DURATION_OPTIONS[(idx + 1) % DURATION_OPTIONS.length];
             setDuration(next.value);
-            showToast({ style: Toast.Style.Success, title: `Duration: ${next.title}` });
+            showToast({
+              style: Toast.Style.Success,
+              title: `Duration: ${next.title}`,
+            });
           }}
         />
       </ActionPanel.Section>
@@ -251,7 +320,10 @@ function ChordActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={() => {
             stopAll();
-            showToast({ style: Toast.Style.Success, title: "Stopped all playback" });
+            showToast({
+              style: Toast.Style.Success,
+              title: "Stopped all playback",
+            });
           }}
         />
       </ActionPanel.Section>

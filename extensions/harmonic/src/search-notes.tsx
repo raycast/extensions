@@ -1,4 +1,12 @@
-import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  List,
+  Icon,
+  Color,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState } from "react";
 import {
   resolveNoteName,
@@ -8,7 +16,13 @@ import {
   getAllNoteNames,
   ENHARMONIC_DISPLAY,
 } from "./lib/notes";
-import { playFrequencies, stopAll, isPlaying, type ToneType, type Duration } from "./lib/audio";
+import {
+  playFrequencies,
+  stopAll,
+  isPlaying,
+  type ToneType,
+  type Duration,
+} from "./lib/audio";
 
 const TONE_OPTIONS: { title: string; value: ToneType }[] = [
   { title: "Warm (Default)", value: "warm" },
@@ -42,15 +56,24 @@ export default function SearchNotes() {
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Tone" onChange={(val) => setTone(val as ToneType)}>
+        <List.Dropdown
+          tooltip="Tone"
+          onChange={(val) => setTone(val as ToneType)}
+        >
           {TONE_OPTIONS.map((opt) => (
-            <List.Dropdown.Item key={opt.value} title={opt.title} value={opt.value} />
+            <List.Dropdown.Item
+              key={opt.value}
+              title={opt.title}
+              value={opt.value}
+            />
           ))}
         </List.Dropdown>
       }
     >
       {resolvedNote ? (
-        <List.Section title={`${ENHARMONIC_DISPLAY[resolvedNote] || resolvedNote} — All Octaves`}>
+        <List.Section
+          title={`${ENHARMONIC_DISPLAY[resolvedNote] || resolvedNote} — All Octaves`}
+        >
           {octaves.map((note) => {
             const notable = getNotableLabel(note.name, note.octave);
             return (
@@ -59,8 +82,15 @@ export default function SearchNotes() {
                 title={note.scientificName}
                 subtitle={`${note.frequency} Hz`}
                 accessories={[
-                  ...(notable ? [{ tag: { value: notable, color: Color.Yellow } }] : []),
-                  { tag: { value: getOctaveLabel(note.octave), color: Color.Blue } },
+                  ...(notable
+                    ? [{ tag: { value: notable, color: Color.Yellow } }]
+                    : []),
+                  {
+                    tag: {
+                      value: getOctaveLabel(note.octave),
+                      color: Color.Blue,
+                    },
+                  },
                   { text: `MIDI ${note.midiNumber}` },
                 ]}
                 actions={
@@ -71,7 +101,10 @@ export default function SearchNotes() {
                         icon={Icon.Play}
                         onAction={() => {
                           playFrequencies([note.frequency], duration, tone);
-                          showToast({ style: Toast.Style.Success, title: `Playing ${note.scientificName} (${note.frequency} Hz)` });
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: `Playing ${note.scientificName} (${note.frequency} Hz)`,
+                          });
                         }}
                       />
                       {DURATION_OPTIONS.map((opt) => (
@@ -79,10 +112,21 @@ export default function SearchNotes() {
                           key={opt.value}
                           title={`Play for ${opt.title}`}
                           icon={Icon.Clock}
-                          shortcut={opt.value === 1 ? { modifiers: ["cmd"], key: "1" } : opt.value === 2 ? { modifiers: ["cmd"], key: "2" } : opt.value === 5 ? { modifiers: ["cmd"], key: "5" } : { modifiers: ["cmd"], key: "0" }}
+                          shortcut={
+                            opt.value === 1
+                              ? { modifiers: ["cmd"], key: "1" }
+                              : opt.value === 2
+                                ? { modifiers: ["cmd"], key: "2" }
+                                : opt.value === 5
+                                  ? { modifiers: ["cmd"], key: "5" }
+                                  : { modifiers: ["cmd"], key: "0" }
+                          }
                           onAction={() => {
                             playFrequencies([note.frequency], opt.value, tone);
-                            showToast({ style: Toast.Style.Success, title: `Playing ${note.scientificName} for ${opt.title}` });
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: `Playing ${note.scientificName} for ${opt.title}`,
+                            });
                           }}
                         />
                       ))}
@@ -92,10 +136,18 @@ export default function SearchNotes() {
                         title={`Duration: ${DURATION_OPTIONS.find((d) => d.value === duration)?.title}`}
                         icon={Icon.Clock}
                         onAction={() => {
-                          const idx = DURATION_OPTIONS.findIndex((d) => d.value === duration);
-                          const next = DURATION_OPTIONS[(idx + 1) % DURATION_OPTIONS.length];
+                          const idx = DURATION_OPTIONS.findIndex(
+                            (d) => d.value === duration,
+                          );
+                          const next =
+                            DURATION_OPTIONS[
+                              (idx + 1) % DURATION_OPTIONS.length
+                            ];
                           setDuration(next.value);
-                          showToast({ style: Toast.Style.Success, title: `Duration: ${next.title}` });
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: `Duration: ${next.title}`,
+                          });
                         }}
                       />
                     </ActionPanel.Section>
@@ -107,7 +159,10 @@ export default function SearchNotes() {
                         shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                         onAction={() => {
                           stopAll();
-                          showToast({ style: Toast.Style.Success, title: "Stopped all playback" });
+                          showToast({
+                            style: Toast.Style.Success,
+                            title: "Stopped all playback",
+                          });
                         }}
                       />
                     </ActionPanel.Section>
@@ -130,9 +185,18 @@ export default function SearchNotes() {
           })}
         </List.Section>
       ) : (
-        <List.Section title={searchText ? "No match — try a note name" : "All Notes"}>
+        <List.Section
+          title={searchText ? "No match — try a note name" : "All Notes"}
+        >
           {allNotes
-            .filter((n) => !searchText || n.toLowerCase().includes(searchText.toLowerCase()) || (ENHARMONIC_DISPLAY[n] || "").toLowerCase().includes(searchText.toLowerCase()))
+            .filter(
+              (n) =>
+                !searchText ||
+                n.toLowerCase().includes(searchText.toLowerCase()) ||
+                (ENHARMONIC_DISPLAY[n] || "")
+                  .toLowerCase()
+                  .includes(searchText.toLowerCase()),
+            )
             .map((noteName) => {
               const display = ENHARMONIC_DISPLAY[noteName] || noteName;
               return (
@@ -155,7 +219,10 @@ export default function SearchNotes() {
                           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                           onAction={() => {
                             stopAll();
-                            showToast({ style: Toast.Style.Success, title: "Stopped all playback" });
+                            showToast({
+                              style: Toast.Style.Success,
+                              title: "Stopped all playback",
+                            });
                           }}
                         />
                       )}

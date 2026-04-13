@@ -24,7 +24,11 @@ function ensureSupportDir() {
  * Generate a WAV buffer for one or more frequencies.
  * Supports different tone types with envelope shaping.
  */
-function generateWav(frequencies: number[], durationSecs: number, toneType: ToneType): Buffer {
+function generateWav(
+  frequencies: number[],
+  durationSecs: number,
+  toneType: ToneType,
+): Buffer {
   const numSamples = Math.floor(SAMPLE_RATE * durationSecs);
   const dataSize = numSamples * 2; // 16-bit mono
   const buffer = Buffer.alloc(44 + dataSize);
@@ -80,7 +84,8 @@ function generateWav(frequencies: number[], durationSecs: number, toneType: Tone
         case "soft":
           // Sine with gentle exponential decay built in
           sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 1.5);
-          sample += Math.sin(2 * Math.PI * freq * 2 * t) * 0.1 * Math.exp(-t * 2);
+          sample +=
+            Math.sin(2 * Math.PI * freq * 2 * t) * 0.1 * Math.exp(-t * 2);
           break;
       }
     }
@@ -94,7 +99,10 @@ function generateWav(frequencies: number[], durationSecs: number, toneType: Tone
     }
 
     sample *= amplitude * envelope;
-    const intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767)));
+    const intSample = Math.max(
+      -32768,
+      Math.min(32767, Math.floor(sample * 32767)),
+    );
     buffer.writeInt16LE(intSample, 44 + i * 2);
   }
 
@@ -137,7 +145,11 @@ export function playFrequencies(
       } else {
         // Cleanup
         runningProcesses.delete(id);
-        try { unlinkSync(filePath); } catch { /* already cleaned */ }
+        try {
+          unlinkSync(filePath);
+        } catch {
+          /* already cleaned */
+        }
       }
     });
     runningProcesses.set(id, proc);
@@ -153,18 +165,22 @@ export function stopPlayback(id: string): void {
   if (proc && proc.pid) {
     try {
       process.kill(proc.pid);
-    } catch { /* already dead */ }
+    } catch {
+      /* already dead */
+    }
     runningProcesses.delete(id);
   }
 }
 
 /** Stop all currently playing tones */
 export function stopAll(): void {
-  for (const [id, proc] of runningProcesses) {
+  for (const [, proc] of runningProcesses) {
     if (proc.pid) {
       try {
         process.kill(proc.pid);
-      } catch { /* already dead */ }
+      } catch {
+        /* already dead */
+      }
     }
   }
   runningProcesses.clear();
@@ -172,7 +188,9 @@ export function stopAll(): void {
   // Belt and suspenders: kill any leftover afplay from our temp files
   try {
     execSync("pkill -f 'afplay.*tone-' 2>/dev/null || true");
-  } catch { /* nothing playing */ }
+  } catch {
+    /* nothing playing */
+  }
 }
 
 /** Check if anything is currently playing */
