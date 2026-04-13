@@ -127,8 +127,14 @@ export async function searchIssues(seriesName: string, issueNumber?: string): Pr
     series_name: seriesName,
     ...(issueNumber ? { number: issueNumber } : {}),
   });
-  const data = await metronFetch<MetronListResponse<MetronIssue>>(`/issue/?${params.toString()}`);
-  return data.results;
+  const all: MetronIssue[] = [];
+  let path: string | null = `/issue/?${params.toString()}`;
+  while (path) {
+    const data: MetronListResponse<MetronIssue> = await metronFetch<MetronListResponse<MetronIssue>>(path);
+    all.push(...data.results);
+    path = data.next ? data.next.replace(BASE, "") : null;
+  }
+  return all;
 }
 
 export function issueTitle(issue: MetronIssue): string {
