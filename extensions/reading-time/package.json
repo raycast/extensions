@@ -4,7 +4,7 @@
   "title": "Reading Time",
   "description": "Estimate clipboard reading time as X min read",
   "icon": "command-icon.png",
-  "author": "sergio",
+  "author": "fromserg",
   "license": "MIT",
   "platforms": [
     "macOS",
