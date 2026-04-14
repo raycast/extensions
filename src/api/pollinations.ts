@@ -52,7 +52,7 @@ export async function fetchPollenBalance(): Promise<number | null> {
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return typeof data.balance === "number" ? Math.round(data.balance) : null;
+    return typeof data.balance === "number" ? parseFloat(data.balance.toFixed(2)) : null;
   } catch {
     return null;
   }

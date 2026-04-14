@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pollinations-ai",
   "title": "Pollinations AI",
-  "description": "Chat with AI models powered by Pollinations.ai — free, no account required",
+  "description": "Chat with AI models powered by Pollinations.ai — free tier available, connect with GitHub for more models",
   "icon": "icon.png",
   "author": "mhmtranas",
   "categories": [

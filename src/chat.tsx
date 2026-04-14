@@ -240,7 +240,7 @@ export default function ChatCommand() {
           ) : null}
           {pollenBalance !== null ? (
             <Detail.Metadata.Label
-              title="Pollen"
+              title="Pollen Balance"
               icon={{ source: Icon.Bolt, tintColor: Color.Yellow }}
               text={`${pollenBalance}`}
             />
