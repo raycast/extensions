@@ -316,7 +316,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   // Hooks must be called unconditionally at top level (React rules)
   const ampState = AGENT_REGISTRY.amp.useUsage(Boolean(prefs.showAmp));
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
-  const codexState = AGENT_REGISTRY.codex.useUsage(Boolean(prefs.showCodex));
   const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
@@ -331,7 +330,6 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const agentViews: Omit<Record<AgentId, AgentView>, "codex" | "kimi" | "synthetic" | "zai"> = {
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
-    codex: createAgentView(AGENT_REGISTRY.codex, codexState, Boolean(prefs.showCodex)),
     copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
