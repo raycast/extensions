@@ -69,9 +69,9 @@ export default function MenuBarCommand() {
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
+  const codexAccounts = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
   const droidState = useDroidUsage(isDroidVisible);
-  const codexAccounts = useCodexAccounts(isCodexVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const kimiAccounts = useKimiAccounts(isKimiVisible);
   const syntheticAccounts = useSyntheticAccounts(isSyntheticVisible);
