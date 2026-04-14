@@ -7,7 +7,9 @@ import { PermissionErrorScreen, isPermissionError } from "./core/permission-erro
 
 const IT2API_HINT = "Enable Python API in iTerm2 → Preferences → General → Magic";
 
-const groupByWindow = (sessions: Session[]): { windowId: string; label: string; sessions: Session[] }[] => {
+const groupByWindow = (
+  sessions: Session[],
+): { windowId: string; label: string; sessions: Session[]; windowIndex: number }[] => {
   const map = new Map<string, Session[]>();
   for (const s of sessions) {
     const existing = map.get(s.windowId) ?? [];
@@ -17,6 +19,7 @@ const groupByWindow = (sessions: Session[]): { windowId: string; label: string; 
     windowId,
     label: `Window ${index + 1}`,
     sessions: ss,
+    windowIndex: index + 1,
   }));
 };
 
@@ -29,13 +32,12 @@ const moveToNewWindowScript = `
   end tell
 `;
 
-const makeActivateWindowScript = (windowLabel: string) => {
-  const escaped = windowLabel.replace(/"/g, '\\"');
+const makeActivateWindowScript = (windowIndex: number) => {
   return `
     tell application "iTerm" to activate
     tell application "System Events"
       tell process "iTerm2"
-        click menu item "${escaped}" of menu "Move Session to Window" of menu item "Move Session to Window" of menu "Session" of menu bar item "Session" of menu bar 1
+        click menu item ${windowIndex} of menu "Move Session to Window" of menu item "Move Session to Window" of menu "Session" of menu bar item "Session" of menu bar 1
       end tell
     end tell
   `;
@@ -107,7 +109,7 @@ export default function Command() {
                       <Action
                         title="Move Current Session Here"
                         icon={Icon.AppWindowGrid2x2}
-                        onAction={() => run(makeActivateWindowScript(w.label))}
+                        onAction={() => run(makeActivateWindowScript(w.windowIndex))}
                       />
                     </ActionPanel>
                   }
