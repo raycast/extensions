@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, Message, streamChat } from "../api/pollinations";
 import { getStoredModel } from "./useModels";
 
@@ -17,6 +17,9 @@ export function useChat(onAuthError?: () => void) {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const abortRef = useRef<AbortController | null>(null);
+  // Always hold the latest callback — avoids stale closure in sendMessage
+  const onAuthErrorRef = useRef(onAuthError);
+  useEffect(() => { onAuthErrorRef.current = onAuthError; }, [onAuthError]);
 
   const sendMessage = useCallback(
     async (userText: string) => {
@@ -58,8 +61,8 @@ export function useChat(onAuthError?: () => void) {
           setIsLoading(false);
         },
         (err) => {
-          if (err instanceof ApiError && err.isAuthError && onAuthError) {
-            onAuthError();
+          if (err instanceof ApiError && err.isAuthError && onAuthErrorRef.current) {
+            onAuthErrorRef.current();
           }
           const errMsg: ChatMessage = {
             id: (Date.now() + 1).toString(),
