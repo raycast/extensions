@@ -7,6 +7,8 @@
   "author": "mhmtranas",
   "categories": ["Productivity", "Developer Tools"],
   "license": "MIT",
+  "platforms": ["macOS"],
+  "keywords": ["ai", "chat", "llm", "pollinations", "gpt", "grammar", "translate", "free"],
   "commands": [
     {
       "name": "chat",
