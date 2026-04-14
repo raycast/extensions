@@ -40,9 +40,7 @@ export async function openTerminalWithCommand(
     preferences.terminalApp ||
     "Terminal") as TerminalApp;
   const openIn: OpenIn =
-    options.openIn ||
-    (preferences.openIn as OpenIn | undefined) ||
-    "window";
+    options.openIn || (preferences.openIn as OpenIn | undefined) || "window";
   const cwd = expandTilde(options.cwd || "") || homedir() || "/";
 
   try {
@@ -74,7 +72,11 @@ export async function openTerminalWithCommand(
   }
 }
 
-async function openInTerminalApp(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+async function openInTerminalApp(
+  command: string,
+  cwd: string,
+  openIn: OpenIn,
+): Promise<void> {
   if (openIn === "tab") {
     // ⌘T keystroke via System Events creates a real new tab.
     // Raycast has Accessibility permission so this works from the extension.
@@ -106,7 +108,11 @@ async function openInTerminalApp(command: string, cwd: string, openIn: OpenIn): 
   }
 }
 
-async function openInITerm(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+async function openInITerm(
+  command: string,
+  cwd: string,
+  openIn: OpenIn,
+): Promise<void> {
   const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
   const escapedCwd = cwd.replace(/"/g, '\\"');
 
@@ -145,14 +151,22 @@ async function openInITerm(command: string, cwd: string, openIn: OpenIn): Promis
   await execFilePromise("osascript", ["-e", script]);
 }
 
-async function openInWarp(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+async function openInWarp(
+  command: string,
+  cwd: string,
+  openIn: OpenIn,
+): Promise<void> {
   // Warp supports a special URL scheme for both new windows and new tabs
   const encodedCommand = encodeURIComponent(`cd "${cwd}" && ${command}`);
   const action = openIn === "tab" ? "new_tab" : "new_window";
   await open(`warp://action/${action}?command=${encodedCommand}`);
 }
 
-async function openInKitty(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+async function openInKitty(
+  command: string,
+  cwd: string,
+  openIn: OpenIn,
+): Promise<void> {
   if (openIn === "tab") {
     // Open a new tab in the existing kitty instance
     await execFilePromise("kitty", [
@@ -174,7 +188,11 @@ async function openInKitty(command: string, cwd: string, openIn: OpenIn): Promis
   }
 }
 
-async function openInGhostty(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+async function openInGhostty(
+  command: string,
+  cwd: string,
+  openIn: OpenIn,
+): Promise<void> {
   const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
   const escapedCwd = cwd.replace(/"/g, '\\"');
 

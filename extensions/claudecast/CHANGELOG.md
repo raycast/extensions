@@ -1,5 +1,15 @@
 # ClaudeCast Changelog
 
+## [1.5.0] - 2026-04-14
+
+### Added
+
+- **Open In preference**: Choose whether Claude Code sessions open in a new window or a new tab. Supported across all five terminal apps: Terminal.app, iTerm, Warp, kitty, and Ghostty.
+
+### Fixed
+
+- **Reserved shortcut**: "Continue with Prompt" in Launch Project changed from `⌘P` to `⌘⇧P` to avoid conflict with a Raycast reserved shortcut.
+
 ## [1.4.0] - 2026-04-13
 
 ### Fixed
