@@ -88,6 +88,21 @@ export function getTaskDisplayName(task: string | Task): string {
   return task.name || "Unknown Task";
 }
 
+export function formatRelativeDay(dateString: string): string {
+  const date = new Date(dateString + "T00:00:00");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const diffTime = today.getTime() - date.getTime();
+  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays > 1 && diffDays <= 7) return `${diffDays} days ago`;
+
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
 export function formatDateForAPI(date: Date): string {
   // Format date as YYYY-MM-DD in local timezone to avoid timezone conversion issues
   const year = date.getFullYear();
