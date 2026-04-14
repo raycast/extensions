@@ -1,4 +1,4 @@
-# Notion Field Paste — Raycast Extension
+# Notion Field Paste
 
 Search any Notion database from Raycast and paste a field value directly into the active app — all without leaving the keyboard.
 
@@ -20,7 +20,7 @@ Notion is a trademark of Notion Labs, Inc. This extension is not affiliated with
 ### 1. Create a Notion Integration
 
 1. Go to [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations).
-2. Click **"New integration"**, give it a name (e.g. *Raycast Picker*), and select your workspace.
+2. Click **"New integration"**, give it a name (e.g. _Raycast Picker_), and select your workspace.
 3. Under **Capabilities**, enable **"Read content"** (write is not needed).
 4. Copy the **Internal Integration Token** — it starts with `secret_…`.
 
@@ -47,7 +47,7 @@ https://www.notion.so/myworkspace/897e5a76ae524b489fdf...?v=...
 
 ```sh
 # 1 — install dependencies
-cd raycast-notion-picker
+cd notion-paste
 npm install
 
 # 2 — run in development mode (opens Raycast automatically)
@@ -64,14 +64,14 @@ All configuration lives in **Raycast → Preferences → Extensions → Notion F
 
 ### Extension-level (shared by all commands)
 
-| Preference | Type | Description |
-|---|---|---|
+| Preference         | Type     | Description                                                                 |
+| ------------------ | -------- | --------------------------------------------------------------------------- |
 | **Notion API Key** | Password | Your integration token (`secret_…`). Stored securely in the macOS Keychain. |
 
 ### Command (database picker)
 
-| Preference | Type | Description |
-|---|---|---|
+| Preference         | Type | Description                                                                                                                                                                                                                    |
+| ------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **Databases JSON** | Text | JSON array of database configs. Each entry needs: `label`, `databaseId`, `searchProperty`, `searchPropertyType`, `displayProperties`, `pickerProperties`, and optional `filterProperty`, `filterPropertyType`, `filterValues`. |
 
 #### Build your JSON in a text editor (recommended)
@@ -112,17 +112,17 @@ Template:
 
 Each database entry supports:
 
-| Field | Required | Notes |
-|---|---|---|
-| `label` | Yes | Display name in the database picker list. |
-| `databaseId` | Yes | The Notion database ID from the URL. |
-| `searchProperty` | Yes | Property name to search on (case-sensitive). |
-| `searchPropertyType` | Yes | `title` or `rich_text`. Must match the Notion property type. |
-| `displayProperties` | Yes | Comma-separated property names shown as tags in results. |
-| `pickerProperties` | Yes | Comma-separated property names available to paste. |
-| `filterProperty` | No | Optional property to pre-filter results (e.g. `Status`). |
-| `filterPropertyType` | No | `status` or `select`. Defaults to `status`. |
-| `filterValues` | No | Comma-separated values to include when filtering. |
+| Field                | Required | Notes                                                        |
+| -------------------- | -------- | ------------------------------------------------------------ |
+| `label`              | Yes      | Display name in the database picker list.                    |
+| `databaseId`         | Yes      | The Notion database ID from the URL.                         |
+| `searchProperty`     | Yes      | Property name to search on (case-sensitive).                 |
+| `searchPropertyType` | Yes      | `title` or `rich_text`. Must match the Notion property type. |
+| `displayProperties`  | Yes      | Comma-separated property names shown as tags in results.     |
+| `pickerProperties`   | Yes      | Comma-separated property names available to paste.           |
+| `filterProperty`     | No       | Optional property to pre-filter results (e.g. `Status`).     |
+| `filterPropertyType` | No       | `status` or `select`. Defaults to `status`.                  |
+| `filterValues`       | No       | Comma-separated values to include when filtering.            |
 
 ---
 
@@ -136,26 +136,26 @@ Add another entry to the `Databases JSON` array in the command preferences. Each
 
 The following property types are supported for both display and pasting:
 
-| Type | What is shown/pasted |
-|---|---|
-| Title | Plain text |
-| Rich Text | Plain text (formatting stripped) |
-| Number | Numeric string |
-| Select | Selected option name |
-| Multi-select | Comma-separated option names |
-| Status | Status name |
-| Date | Start date (or `start → end` for ranges) |
-| Checkbox | `✓` or `✗` |
-| URL | URL string |
-| Email | Email address |
-| Phone Number | Phone number string |
-| Formula | Result as string (works for text, number, boolean, date formulas) |
-| Rollup | Result as string |
-| People / Created by / Edited by | Person name(s) |
-| Created time / Last edited time | Formatted date |
-| Files | File name(s) |
-| Relation | Count of linked pages |
-| Unique ID | Full ID with prefix (e.g. `OPS-42`) |
+| Type                            | What is shown/pasted                                              |
+| ------------------------------- | ----------------------------------------------------------------- |
+| Title                           | Plain text                                                        |
+| Rich Text                       | Plain text (formatting stripped)                                  |
+| Number                          | Numeric string                                                    |
+| Select                          | Selected option name                                              |
+| Multi-select                    | Comma-separated option names                                      |
+| Status                          | Status name                                                       |
+| Date                            | Start date (or `start → end` for ranges)                          |
+| Checkbox                        | `✓` or `✗`                                                        |
+| URL                             | URL string                                                        |
+| Email                           | Email address                                                     |
+| Phone Number                    | Phone number string                                               |
+| Formula                         | Result as string (works for text, number, boolean, date formulas) |
+| Rollup                          | Result as string                                                  |
+| People / Created by / Edited by | Person name(s)                                                    |
+| Created time / Last edited time | Formatted date                                                    |
+| Files                           | File name(s)                                                      |
+| Relation                        | Count of linked pages                                             |
+| Unique ID                       | Full ID with prefix (e.g. `OPS-42`)                               |
 
 ---
 
@@ -163,26 +163,26 @@ The following property types are supported for both display and pasting:
 
 ### Search view
 
-| Key | Action |
-|---|---|
-| `↵` | Open field picker for selected record |
-| `⌘ O` | Open the record in Notion |
-| `⌘ ⇧ C` | Copy the record URL |
+| Key     | Action                                |
+| ------- | ------------------------------------- |
+| `↵`     | Open field picker for selected record |
+| `⌘ O`   | Open the record in Notion             |
+| `⌘ ⇧ C` | Copy the record URL                   |
 
 ### Field picker view
 
-| Key | Action |
-|---|---|
-| `↵` | **Paste** value into active app + copy to clipboard |
-| `⌘ C` | Copy to clipboard only (no paste) |
-| `⌘ O` | Open the record in Notion |
+| Key   | Action                                              |
+| ----- | --------------------------------------------------- |
+| `↵`   | **Paste** value into active app + copy to clipboard |
+| `⌘ C` | Copy to clipboard only (no paste)                   |
+| `⌘ O` | Open the record in Notion                           |
 
 ---
 
 ## Project structure
 
 ```
-raycast-notion-picker/
+notion-paste/
 ├── src/
 │   ├── components/
 │   │   ├── notion-search.tsx   # Main search list (shared by all commands)
@@ -207,13 +207,14 @@ npm run build     # Production build (also runs type checks)
 npm run lint      # ESLint check
 npm run fix-lint  # ESLint auto-fix
 ```
+
 ---
 
 ## Troubleshooting
 
 **"Invalid Notion API Key"** — The token is wrong or has been revoked. Regenerate it at [https://www.notion.so/my-integrations](https://www.notion.so/my-integrations) and update the extension preferences.
 
-**"Database Not Found"** — Either the Database ID is wrong, or the integration hasn't been shared with that database. See *Prerequisites → Share your databases* above.
+**"Database Not Found"** — Either the Database ID is wrong, or the integration hasn't been shared with that database. See _Prerequisites → Share your databases_ above.
 
 **A property shows as empty** — The property name in preferences must match Notion **exactly**, including capitalisation and spaces. Check the column header in Notion.
 
