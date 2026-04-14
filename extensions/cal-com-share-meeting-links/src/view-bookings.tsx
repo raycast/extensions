@@ -13,6 +13,7 @@ import {
   useUpcomingBookings,
 } from "@api/cal.com";
 import { CancelBooking } from "@components/cancel-booking";
+import { RequestReschedule } from "@components/request-reschedule";
 import { iconForBookingStatus } from "@/lib/bookings";
 
 export default function viewBookings() {
@@ -281,11 +282,17 @@ export default function viewBookings() {
                   shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
                   onAction={() => handleDecline(item)}
                 />
-                <Action.OpenInBrowser
-                  title="Request Reschedule in Browser"
+                <Action.Push
+                  title="Request Reschedule"
                   icon={{ source: Icon.Calendar, tintColor: Color.Orange }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  url={`https://app.cal.com/bookings/upcoming?uid=${item.uid}`}
+                  target={
+                    <RequestReschedule
+                      bookingUid={item.uid}
+                      mutate={pending.mutate}
+                      onAfterReschedule={handleAfterCancel}
+                    />
+                  }
                 />
                 <Action.Push
                   title="Cancel Booking"
@@ -307,11 +314,17 @@ export default function viewBookings() {
             renderItem(
               item,
               <>
-                <Action.OpenInBrowser
-                  title="Request Reschedule in Browser"
+                <Action.Push
+                  title="Request Reschedule"
                   icon={{ source: Icon.Calendar, tintColor: Color.Orange }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                  url={`https://app.cal.com/bookings/upcoming?uid=${item.uid}`}
+                  target={
+                    <RequestReschedule
+                      bookingUid={item.uid}
+                      mutate={upcoming.mutate}
+                      onAfterReschedule={handleAfterCancel}
+                    />
+                  }
                 />
                 <Action.Push
                   title="Cancel Booking"

@@ -265,13 +265,18 @@ export function cancelBooking(bookingUid: string, reason: string) {
   });
 }
 
-// NOTE: Cal.com's v2 docs document `POST /v2/bookings/{uid}/request-reschedule`
-// but as of 2026-04-13 the endpoint 404s on the live API. We probed three
-// candidate paths (with and without /me/, plus /cancel-and-request-reschedule);
-// all returned NotFoundException. Until Cal.com deploys the endpoint, the
-// "Request Reschedule" action opens the booking page in the browser instead.
-// When the API exists, restore this function and switch the action back to
-// the Action.Push form.
+/**
+ * Requests an attendee to reschedule a booking. Per Cal.com docs, this cancels
+ * the original booking and emails the attendee a link to pick a new time.
+ */
+export function requestRescheduleBooking(bookingUid: string, reason: string) {
+  return calAPI({
+    method: "POST",
+    url: `/bookings/${bookingUid}/request-reschedule`,
+    headers: { "cal-api-version": "2026-02-25" },
+    data: { rescheduleReason: reason },
+  });
+}
 
 export function createPrivateLinkForEventType(eventTypeId: number, signal: AbortSignal) {
   return calAPI<CreatePrivateLinkResponse>({
