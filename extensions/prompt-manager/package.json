@@ -48,11 +48,10 @@
   },
   "author": "altobellidardo",
   "platforms": [
-    "Windows",
     "macOS"
   ],
   "categories": [
-    "Design Tools",
-    "Developer Tools"
+    "Developer Tools",
+    "Productivity"
   ]
 }
