@@ -49,7 +49,7 @@ setIsLoading(true);
         setAnswer(result);
       } catch (err) {
         const e = err instanceof Error ? err : new Error(String(err));
-        if (e instanceof ApiError && e.isAuthError && !tier.hasKey) {
+        if (e instanceof ApiError && e.isAuthError && !tier.isLoading && !tier.hasKey) {
           await launchCommand({ name: "connect", type: LaunchType.UserInitiated });
           return;
         }

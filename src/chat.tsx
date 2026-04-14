@@ -176,7 +176,7 @@ export default function ChatCommand() {
     sendMessage,
     stopStreaming,
     clearHistory,
-  } = useChat(!tier.hasKey ? () => launchCommand({ name: "connect", type: LaunchType.UserInitiated }) : undefined);
+  } = useChat(!tier.isLoading && !tier.hasKey ? () => launchCommand({ name: "connect", type: LaunchType.UserInitiated }) : undefined);
   const { push } = useNavigation();
 
   const handleSend = useCallback(
