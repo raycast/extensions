@@ -1,6 +1,6 @@
 # Time Converter Changelog
 
-## [Time Range Support & Timezone Overhaul] - {PR_MERGE_DATE}
+## [Time Range Support & Timezone Overhaul] - 2026-04-14
 
 ### Added
 - Time range input: enter `1pm - 3pm`, `1pm to 3pm`, `11pm through 1am`, or `2pm until 4pm` to convert a span of time across all locations

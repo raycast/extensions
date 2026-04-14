@@ -67,5 +67,8 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
