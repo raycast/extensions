@@ -1,29 +1,47 @@
 {
-  "$schema": "https://raw.githubusercontent.com/raycast/raycast/master/commands/schema.json",
-  "name": "token-count-raycast",
-  "title": "TokenCount: AI Context & Cursor Rules",
-  "description": "Optimize AI context and generate .cursorrules automatically. Slashing tokens by 90%.",
-  "version": "1.0.0",
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "token-count",
+  "title": "TokenCount: AI Context & Rules",
+  "description": "Semantic code dehydration and .cursorrules generator.",
   "icon": "icon.png",
   "author": "justinxai",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "D dehydrate for AI",
+      "title": "Dehydrate for AI",
+      "subtitle": "TokenCount",
+      "description": "Slashing tokens by 90%",
       "icon": "icon.png",
       "mode": "view"
     },
     {
       "name": "generate-rules",
-      "title": "Generate Cursor Rules from Code",
-      "description": "Create .cursorrules snippets to keep your AI focused.",
+      "title": "Generate Cursor Rules",
+      "subtitle": "TokenCount",
+      "description": "Create .cursorrules from code",
       "icon": "icon.png",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.0",
-    "turndown": "^7.2.0"
+    "@raycast/api": "^1.71.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.14.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }
