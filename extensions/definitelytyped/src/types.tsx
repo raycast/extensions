@@ -134,13 +134,6 @@ export default function Command() {
     {
       execute: shouldSearch,
       keepPreviousData: false,
-      onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: err.message,
-        });
-      },
     },
   );
 
