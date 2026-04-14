@@ -1,6 +1,6 @@
 # Zeabur Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-14
 
 - Fixed the issue where the provider information in the manage servers command may be null.
 - Fixed potential null access issues across manage projects, manage servers, and deployment commands.
