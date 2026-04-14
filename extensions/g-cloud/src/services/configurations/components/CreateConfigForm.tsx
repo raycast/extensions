@@ -4,8 +4,6 @@ import { GCloudConfig } from "../types";
 import { createConfiguration } from "../ConfigurationsService";
 import { friendlyErrorMessage } from "../../../utils/errorMessages";
 
-const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
-
 interface Props {
   gcloudPath: string;
   configs: GCloudConfig[];
@@ -15,6 +13,7 @@ interface Props {
 export function CreateConfigForm({ gcloudPath, configs, onCreated }: Props) {
   const { pop } = useNavigation();
   const [nameError, setNameError] = useState<string | undefined>();
+  const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
 
   async function handleSubmit(values: { name: string; project: string; account: string; region: string }) {
     if (!values.name) {

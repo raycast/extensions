@@ -30,8 +30,6 @@ import { ApiErrorView } from "../../components/ApiErrorView";
 import { CloudShellAction } from "../../components/CloudShellAction";
 import { friendlyErrorMessage } from "../../utils/errorMessages";
 
-const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
-
 const CLOUD_RUN_REGIONS = [
   { value: "us-central1", title: "Iowa (us-central1)" },
   { value: "us-east1", title: "South Carolina (us-east1)" },
@@ -510,6 +508,7 @@ interface CreateServiceFormValues {
 }
 
 function CreateServiceForm({ projectId, gcloudPath, onCreated }: CreateServiceFormProps) {
+  const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
 

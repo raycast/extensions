@@ -33,9 +33,6 @@ import { CloudShellAction } from "./components/CloudShellAction";
 
 const execFilePromise = promisify(execFile);
 
-// Get configured path (may be empty for auto-detection)
-const CONFIGURED_GCLOUD_PATH = getPreferenceValues<Preferences>().gcloudPath;
-
 type ViewMode = "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "logs";
 
 interface ServiceInfo {
@@ -80,11 +77,12 @@ interface GoogleCloudHubProps {
 }
 
 export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps = {}) {
+  const configuredGcloudPath = getPreferenceValues<Preferences>().gcloudPath;
   const [viewMode, setViewMode] = useState<ViewMode>(initialService || "hub");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gcloudPath, setGcloudPath] = useState<string>(CONFIGURED_GCLOUD_PATH || "gcloud");
+  const [gcloudPath, setGcloudPath] = useState<string>(configuredGcloudPath || "gcloud");
 
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [recentResources, setRecentResources] = useState<RecentResource[]>([]);
@@ -124,7 +122,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   async function checkGcloudInstallation() {
     try {
       // If path is configured, use it; otherwise auto-detect
-      let pathToUse = CONFIGURED_GCLOUD_PATH;
+      let pathToUse = configuredGcloudPath;
 
       if (!pathToUse) {
         // Auto-detect gcloud path
@@ -278,7 +276,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   }
 
   function openDoctor() {
-    push(<DoctorView configuredPath={CONFIGURED_GCLOUD_PATH} />);
+    push(<DoctorView configuredPath={configuredGcloudPath} />);
   }
 
   function refreshAll() {

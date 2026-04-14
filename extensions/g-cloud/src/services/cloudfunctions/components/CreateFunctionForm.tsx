@@ -3,8 +3,6 @@ import { useState } from "react";
 import { spawn } from "child_process";
 import { RUNTIMES, MEMORY_OPTIONS, CLOUD_FUNCTIONS_REGIONS } from "../types";
 
-const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
-
 interface CreateFunctionFormProps {
   projectId: string;
   gcloudPath: string;
@@ -25,6 +23,7 @@ interface FormValues {
 }
 
 export function CreateFunctionForm({ projectId, gcloudPath, onCreated }: CreateFunctionFormProps) {
+  const defaultRegion = getPreferenceValues<Preferences>().defaultRegion || "us-central1";
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployLogs, setDeployLogs] = useState<string[]>([]);
   const [deployComplete, setDeployComplete] = useState(false);

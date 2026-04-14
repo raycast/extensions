@@ -7,10 +7,10 @@ import { ConfigurationsView } from "./services/configurations";
 import { revokeAllAuth } from "./services/configurations/ConfigurationsService";
 
 // Raycast resolves this file as the entrypoint for the `configurations` command in package.json.
-const CONFIGURED_GCLOUD_PATH = getPreferenceValues<Preferences>().gcloudPath;
 
 export default function ConfigurationsCommand() {
-  const [gcloudPath, setGcloudPath] = useState<string>(CONFIGURED_GCLOUD_PATH || "");
+  const configuredGcloudPath = getPreferenceValues<Preferences>().gcloudPath;
+  const [gcloudPath, setGcloudPath] = useState<string>(configuredGcloudPath || "");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { push } = useNavigation();
@@ -20,7 +20,7 @@ export default function ConfigurationsCommand() {
   }, []);
 
   async function detectPath() {
-    let pathToUse = CONFIGURED_GCLOUD_PATH;
+    let pathToUse = configuredGcloudPath;
     if (!pathToUse) {
       const detected = await detectGcloudPath();
       if (detected) {
@@ -81,7 +81,7 @@ export default function ConfigurationsCommand() {
         CacheManager.clearRecentResources();
         showToast({ style: Toast.Style.Success, title: "Cache cleared" });
       }}
-      onDoctor={() => push(<DoctorView configuredPath={CONFIGURED_GCLOUD_PATH} />)}
+      onDoctor={() => push(<DoctorView configuredPath={configuredGcloudPath} />)}
       onRefreshAll={() =>
         showToast({ style: Toast.Style.Success, title: "Refresh triggered — open the main command to reload counts" })
       }
