@@ -114,7 +114,7 @@ export default function viewBookings() {
     />
   );
 
-  const renderItem = (item: CalBooking, extraActions: React.ReactElement | null) => (
+  const renderItem = (item: CalBooking, extraActions: React.ReactNode) => (
     <List.Item
       key={item.id}
       icon={iconForBookingStatus(item.status)}
