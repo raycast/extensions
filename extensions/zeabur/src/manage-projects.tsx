@@ -113,7 +113,7 @@ export default function Command() {
               ...(project.region.providerInfo?.code
                 ? [
                     {
-                      tag: project.region.providerInfo.code,
+                      tag: project.region.providerInfo?.code,
                       tooltip: "Provider",
                     },
                   ]
@@ -140,7 +140,7 @@ export default function Command() {
                 <Action.Push
                   title="View Services"
                   icon={Icon.List}
-                  target={<ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />}
+                  target={<ProjectServices projectID={project._id} environmentID={project.environments[0]?._id} />}
                 />
                 <Action.OpenInBrowser title="Open Project Page" url={`https://zeabur.com/projects/${project._id}`} />
                 <Action
