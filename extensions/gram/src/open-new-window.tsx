@@ -1,9 +1,6 @@
-import { closeMainWindow, getPreferenceValues } from "@raycast/api";
-import { GramBuild } from "./lib/gram";
+import { closeMainWindow } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
-
-const preferences: Record<string, string> = getPreferenceValues();
-const gramBuild: GramBuild = preferences.build as GramBuild;
+import { gramBuild } from "./lib/preferences";
 
 const makeNewWindow = async (): Promise<void> => {
   await runAppleScript(`

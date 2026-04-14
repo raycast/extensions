@@ -55,8 +55,8 @@ function getEntryIcon(entry: Entry): List.Item.Props["icon"] {
 export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
   const primaryPath = getEntryPrimaryPath(entry);
   // Skip git branch check for multi-folder workspaces (which folder's branch would we show?)
-  const branch =
-    entry.type === "local" && primaryPath && !isEntryMultiFolder(entry) ? useGitBranch(primaryPath) : undefined;
+  const shouldShowBranch = entry.type === "local" && !!primaryPath && !isEntryMultiFolder(entry);
+  const branch = useGitBranch(shouldShowBranch ? primaryPath : "");
 
   const accessories: List.Item.Accessory[] = [];
 

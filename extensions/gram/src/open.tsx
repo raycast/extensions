@@ -32,6 +32,15 @@ export default async function openWithGram() {
     const paths = await getPathsToOpen();
     const app = await getGramApp();
 
+    if (!app) {
+      await showToast({
+        title: "Gram not found",
+        style: Toast.Style.Failure,
+        message: "Please install Gram to use this command",
+      });
+      return;
+    }
+
     for (const path of paths) {
       await open(encodeURI(path), app);
     }

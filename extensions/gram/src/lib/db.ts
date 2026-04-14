@@ -54,13 +54,9 @@ export async function getGramWorkspaceDbVersion(dbPath: string): Promise<{ versi
  */
 export function getGramWorkspacesQuery(dbVersion: number): string {
   // Future schema changes can add new queries here
-  if (dbVersion >= MIN_SUPPORTED_DB_VERSION) {
-    return GRAM_WORKSPACES_QUERY;
+  if (dbVersion < MIN_SUPPORTED_DB_VERSION) {
+    console.warn(`Unsupported DB version ${dbVersion}, using latest query`);
   }
-
-  // Unsupported version - return the latest query anyway
-  // The caller should check version support before calling this
-  console.warn(`Unsupported DB version ${dbVersion}, using latest query`);
   return GRAM_WORKSPACES_QUERY;
 }
 
