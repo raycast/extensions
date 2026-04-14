@@ -1,0 +1,29 @@
+{
+  "$schema": "https://raw.githubusercontent.com/raycast/raycast/master/commands/schema.json",
+  "name": "token-count-raycast",
+  "title": "TokenCount: AI Context & Cursor Rules",
+  "description": "Optimize AI context and generate .cursorrules automatically. Slashing tokens by 90%.",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "author": "justinxai",
+  "categories": ["Developer Tools", "Productivity"],
+  "commands": [
+    {
+      "name": "index",
+      "title": "D dehydrate for AI",
+      "icon": "icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "generate-rules",
+      "title": "Generate Cursor Rules from Code",
+      "description": "Create .cursorrules snippets to keep your AI focused.",
+      "icon": "icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.75.0",
+    "turndown": "^7.2.0"
+  }
+}
