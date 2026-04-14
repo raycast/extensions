@@ -78,7 +78,7 @@ function progressBar(current: number, total: number, width = 10): string {
 export function IngestStatusView({
   onNoActiveSession,
 }: {
-  onNoActiveSession?: () => void;
+  onNoActiveSession?: (info?: ProgressInfo) => void;
 }) {
   const [info, setInfo] = useState<ProgressInfo | null>(null);
   const [alive, setAlive] = useState(false);
@@ -93,7 +93,7 @@ export function IngestStatusView({
       setAlive(running);
 
       if (!running && onNoActiveSession) {
-        onNoActiveSession();
+        onNoActiveSession(parsed);
       }
     } catch {
       setInfo(null);

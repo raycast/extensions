@@ -319,7 +319,32 @@ export default function Command() {
 
   if (hasActiveIngest) {
     return (
-      <IngestStatusView onNoActiveSession={() => setHasActiveIngest(false)} />
+      <IngestStatusView
+        onNoActiveSession={(info) => {
+          setHasActiveIngest(false);
+          if (info?.error) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: "Ingest Finished With Errors",
+              message: info.error,
+              primaryAction: {
+                title: "Open Log",
+                onAction: async () => {
+                  const { open } = require("@raycast/api");
+                  const LOG_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.log");
+                  await open(LOG_FILE);
+                },
+              },
+            });
+          } else if (info?.stage === "done") {
+            showToast({
+              style: Toast.Style.Success,
+              title: "Magic Ingest Complete",
+              message: "All files copied and verified successfully.",
+            });
+          }
+        }}
+      />
     );
   }
 

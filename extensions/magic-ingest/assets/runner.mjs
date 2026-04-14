@@ -301,7 +301,9 @@ async function copyFiles(files, destDir, onProgress, progressState) {
 function hashFile(filePath) {
   return new Promise((resolve, reject) => {
     const hash = createHash("sha256");
-    const stream = createReadStream(filePath);
+    // Use 4MB highWaterMark to significantly speed up file hashing by reducing
+    // JS <-> C++ boundary crossings and OS-level context switches.
+    const stream = createReadStream(filePath, { highWaterMark: 4 * 1024 * 1024 });
     stream.on("data", chunk => hash.update(chunk));
     stream.on("end", () => resolve(hash.digest("hex")));
     stream.on("error", reject);
@@ -313,25 +315,37 @@ async function verifyFiles(copyResults, onProgress) {
   const results = [];
   const errors = [];
   let passed = 0, failed = 0;
-  for (let i = 0; i < ok.length; i++) {
-    const c = ok[i];
-    try {
-      const [sh, dh] = await Promise.all([hashFile(c.sourcePath), hashFile(c.destPath)]);
-      if (sh === dh) { passed++; results.push({ destPath: c.destPath, sourcePath: c.sourcePath, passed: true }); }
-      else {
+  
+  let currentIndex = 0;
+  let completed = 0;
+  
+  const worker = async () => {
+    while (currentIndex < ok.length) {
+      const i = currentIndex++;
+      const c = ok[i];
+      try {
+        const [sh, dh] = await Promise.all([hashFile(c.sourcePath), hashFile(c.destPath)]);
+        if (sh === dh) { passed++; results.push({ destPath: c.destPath, sourcePath: c.sourcePath, passed: true }); }
+        else {
+          failed++;
+          const msg = `Verification FAILED: ${c.destPath} (hash mismatch)`;
+          errors.push(msg); results.push({ destPath: c.destPath, sourcePath: c.sourcePath, passed: false });
+          await logLine(msg);
+        }
+      } catch (err) {
         failed++;
-        const msg = `Verification FAILED: ${c.destPath} (hash mismatch)`;
+        const msg = `Verification error: ${c.destPath} — ${String(err)}`;
         errors.push(msg); results.push({ destPath: c.destPath, sourcePath: c.sourcePath, passed: false });
         await logLine(msg);
       }
-    } catch (err) {
-      failed++;
-      const msg = `Verification error: ${c.destPath} — ${String(err)}`;
-      errors.push(msg); results.push({ destPath: c.destPath, sourcePath: c.sourcePath, passed: false });
-      await logLine(msg);
+      completed++;
+      if (onProgress) await onProgress("verifying", completed, ok.length);
     }
-    if (onProgress) await onProgress("verifying", i + 1, ok.length);
-  }
+  };
+
+  const CONCURRENCY = 4;
+  await Promise.all(Array.from({ length: CONCURRENCY }).map(() => worker()));
+
   return { results, passed, failed, errors };
 }
 
@@ -593,6 +607,12 @@ async function main() {
     // Done
     const durationMs = Date.now() - startTime;
     const seconds = (durationMs / 1000).toFixed(1);
+    
+    // Pass errors explicitly before closing
+    if (allErrors.length > 0) {
+      progressState.error = `${allErrors.length} file(s) failed verification. Check the log for details.`;
+    }
+
     await logSessionEnd({ copied: copiedCount, skipped: skippedCount, collisions: collisionCount, verified: verifiedCount, verifyFailed: verifyFailedCount, renamed: renamedCount, errors: allErrors, durationMs });
 
 
