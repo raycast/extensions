@@ -89,18 +89,19 @@ export function getTaskDisplayName(task: string | Task): string {
 }
 
 export function formatRelativeDay(dateString: string): string {
-  const date = new Date(dateString + "T00:00:00");
+  const [year, month, day] = dateString.split("-").map(Number);
+  const date = new Date(year, month - 1, day);
   const today = new Date();
-  today.setHours(0, 0, 0, 0);
 
-  const diffTime = today.getTime() - date.getTime();
-  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  const dateUtc = Date.UTC(year, month - 1, day);
+  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const diffDays = Math.floor((todayUtc - dateUtc) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
   if (diffDays > 1 && diffDays <= 7) return `${diffDays} days ago`;
 
-  return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function formatDateForAPI(date: Date): string {
