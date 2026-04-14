@@ -1,0 +1,5 @@
+{
+  "sortFirst": ["name", "description", "version", "author", "scripts"],
+  "sortExports": [],
+  "source": ["package.json", "apps/*/package.json", "packages/*/package.json"]
+}

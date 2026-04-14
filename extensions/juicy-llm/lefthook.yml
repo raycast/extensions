@@ -1,0 +1,25 @@
+commit-msg:
+  commands:
+    commitlint:
+      run: bunx commitlint --edit {1}
+
+pre-commit:
+  parallel: true
+  commands:
+    biome:
+      glob: "*.{ts,tsx,js,jsx,json,css}"
+      run: bunx biome check --write {staged_files}
+      stage_fixed: true
+    typecheck:
+      glob: "src/**/*.{ts,tsx}"
+      run: bunx tsc --noEmit
+
+post-merge:
+  commands:
+    install:
+      run: bun install --frozen-lockfile
+
+post-checkout:
+  commands:
+    install:
+      run: bun install --frozen-lockfile
