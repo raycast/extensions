@@ -288,6 +288,14 @@ export async function getCursorDisplay(): Promise<string | null> {
           return uuidMatch[1];
         }
 
+        // Fallback: treat a single-token stdout as the serial itself.
+        // Lunar versions that print just the bare serial (no "Serial:" prefix,
+        // non-UUID ID) would otherwise silently fall through to main/first.
+        const trimmed = stdout.trim();
+        if (trimmed && !/\s/.test(trimmed)) {
+          return trimmed;
+        }
+
         throw new Error("Could not parse serial from output");
       },
       3,
@@ -350,6 +358,36 @@ export async function setAdaptiveMode(displaySerial: string, enabled: boolean): 
     3,
     300
   );
+}
+
+/**
+ * Adjust brightness on the cursor display by a relative delta.
+ * Resolves the target display (cursor → main → first), issues a relative
+ * brightness change against that serial, and returns the expected resulting
+ * brightness computed from the pre-read plus the clamped delta. The write is
+ * not read back, because Lunar's brightness cache can lag a DDC write and
+ * report a stale value.
+ *
+ * @param delta Signed integer percentage to add to the current brightness.
+ */
+export async function adjustCursorBrightness(delta: number): Promise<{ name: string; brightness: number }> {
+  if (!Number.isInteger(delta)) {
+    throw new Error("Brightness delta must be an integer");
+  }
+
+  const [displays, cursorSerial] = await Promise.all([getDisplays(), getCursorDisplay()]);
+  const target = displays.find((d) => d.serial === cursorSerial) ?? displays.find((d) => d.main) ?? displays[0];
+
+  if (!target) {
+    throw new Error("No active display found");
+  }
+
+  const lunarPath = getLunarPath();
+  const deltaArg = delta >= 0 ? `+${delta}` : `${delta}`;
+  await execAsync(`"${lunarPath}" displays "${target.serial}" brightness ${deltaArg}`, { timeout: 5000 });
+
+  const expected = Math.max(0, Math.min(100, target.brightness + delta));
+  return { name: target.name, brightness: expected };
 }
 
 /**
