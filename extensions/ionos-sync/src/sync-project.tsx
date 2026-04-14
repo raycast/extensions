@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { loadProjects, saveProjects } from "./storage";
-import { runRsync } from "./rsync";
+import { spawnRsync } from "./rsync";
 import { Project, SyncDirection, SyncMode, SyncRecord } from "./types";
 
 // ─── Sync Output Detail View ──────────────────────────────────────────────────
@@ -37,46 +37,69 @@ function SyncOutputView({
   useEffect(() => {
     let mounted = true;
 
-    async function run() {
-      const toast = await showToast({
-        style: Toast.Style.Animated,
-        title: mode === "dry" ? "Dry-run running…" : `${direction === "push" ? "Push" : "Pull"} running…`,
-        message: project.name,
-      });
+    const toastPromise = showToast({
+      style: Toast.Style.Animated,
+      title: mode === "dry" ? "Dry-run running…" : `${direction === "push" ? "Push" : "Pull"} running…`,
+      message: project.name,
+    });
 
-      const result = await runRsync(project, direction, mode, prefs, (line) => {
-        if (mounted) setLines((prev) => [...prev, line]);
-      });
+    const child = spawnRsync(project, direction, mode, prefs);
 
-      if (!mounted) return;
-
-      setRunning(false);
-      setExitCode(result.exitCode);
-
-      const success = result.exitCode === 0;
-      const record: SyncRecord = {
-        timestamp: new Date().toISOString(),
-        direction,
-        mode,
-        success,
-        linesOutput: result.output.length,
-      };
-      onDone(record);
-
-      if (success) {
-        toast.style = Toast.Style.Success;
-        toast.title = mode === "dry" ? "Dry-run complete" : "Sync complete";
-        toast.message = `${result.output.length} lines`;
-      } else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Sync failed";
-        toast.message = `Exit code ${result.exitCode}`;
+    child.all?.on("data", (chunk: Buffer) => {
+      const text = chunk.toString();
+      for (const line of text.split("\n")) {
+        if (line.trim() && !line.includes("setlocale")) {
+          if (mounted) setLines((prev) => [...prev, line]);
+        }
       }
-    }
+    });
 
-    run();
+    (async () => {
+      const toast = await toastPromise;
+      try {
+        const result = await child;
+        if (!mounted) return;
+
+        setRunning(false);
+        setExitCode(result.exitCode ?? 1);
+
+        const success = result.exitCode === 0;
+        const record: SyncRecord = {
+          timestamp: new Date().toISOString(),
+          direction,
+          mode,
+          success,
+          linesOutput: lines.length,
+        };
+        onDone(record);
+
+        if (success) {
+          toast.style = Toast.Style.Success;
+          toast.title = mode === "dry" ? "Dry-run complete" : "Sync complete";
+          toast.message = `${lines.length} lines`;
+        } else {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Sync failed";
+          toast.message = `Exit code ${result.exitCode}`;
+        }
+      } catch (err) {
+        console.error("rsync child error:", err);
+        if (!mounted) return;
+        setRunning(false);
+        setExitCode(1);
+        const t = await toastPromise;
+        t.style = Toast.Style.Failure;
+        t.title = "Sync failed";
+      }
+    })();
+
     return () => {
       mounted = false;
+      try {
+        if (!child.killed) child.kill();
+      } catch (err) {
+        console.error("failed to kill rsync child:", err);
+      }
     };
   }, []);
 
@@ -129,7 +152,7 @@ function DirectionPicker({
     push(<SyncOutputView project={project} direction={direction} mode={mode} prefs={prefs} onDone={onDone} />);
   }
 
-  const isRoot = !project.deleteOnSync;
+  const isRoot = project.remotePath === "~" || project.remotePath === "~/";
 
   return (
     <List navigationTitle={`Sync — ${project.name}`}>
@@ -180,21 +203,26 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadProjects().then((p) => {
-      setProjects(p);
-      setIsLoading(false);
-    });
+    loadProjects()
+      .then((p) => {
+        setProjects(p);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        void showToast({ style: Toast.Style.Failure, title: "Failed to load projects" });
+      });
   }, []);
 
   function formatLastSync(record?: SyncRecord): string {
     if (!record) return "Never synced";
     const d = new Date(record.timestamp);
-    const dateStr = d.toLocaleDateString(undefined, {
+    const dateStr = d.toLocaleDateString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "2-digit",
     });
-    const timeStr = d.toLocaleTimeString(undefined, {
+    const timeStr = d.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -225,6 +253,11 @@ export default function Command() {
 Please open **Extension Preferences** to enter your host and username.
 
 Press \`⌘ + ,\` while IONOS Sync is selected.`}
+        actions={
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open Extension Preferences" url="raycast://preferences/extensions" />
+          </ActionPanel>
+        }
       />
     );
   }
@@ -232,40 +265,44 @@ Press \`⌘ + ,\` while IONOS Sync is selected.`}
   return (
     <List isLoading={isLoading} navigationTitle="IONOS Sync">
       <List.Section title="Projects" subtitle={`${projects.length} configured`}>
-        {projects.map((project) => (
-          <List.Item
-            key={project.id}
-            icon={Icon.Globe}
-            title={project.name}
-            subtitle={project.localPath}
-            accessories={[
-              {
-                text: formatLastSync(project.lastSync),
-                icon: {
-                  source: project.lastSync ? Icon.Clock : Icon.Circle,
-                  tintColor: lastSyncColor(project.lastSync),
+        {projects.length === 0 && !isLoading ? (
+          <List.EmptyView icon={Icon.Globe} title="No projects configured" description="Press ⌘N to add a project" />
+        ) : (
+          projects.map((project) => (
+            <List.Item
+              key={project.id}
+              icon={Icon.Globe}
+              title={project.name}
+              subtitle={project.localPath}
+              accessories={[
+                {
+                  text: formatLastSync(project.lastSync),
+                  icon: {
+                    source: project.lastSync ? Icon.Clock : Icon.Circle,
+                    tintColor: lastSyncColor(project.lastSync),
+                  },
                 },
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Start Sync"
-                  icon={Icon.ArrowClockwise}
-                  onAction={() =>
-                    push(
-                      <DirectionPicker
-                        project={project}
-                        prefs={prefs}
-                        onDone={(record) => handleSyncDone(project, record)}
-                      />,
-                    )
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Start Sync"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() =>
+                      push(
+                        <DirectionPicker
+                          project={project}
+                          prefs={prefs}
+                          onDone={(record) => handleSyncDone(project, record)}
+                        />,
+                      )
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          ))
+        )}
       </List.Section>
     </List>
   );

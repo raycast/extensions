@@ -5,9 +5,14 @@
   "description": "Sync local projects to IONOS web hosting via rsync over SSH — with dry-run preview, push/pull, and project management.",
   "icon": "extension-icon.png",
   "author": "wdeu",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
-  "categories": ["Developer Tools", "Productivity"],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
   "keywords": [
     "ionos",
     "1and1",
@@ -65,14 +70,13 @@
       "name": "sshKeyPath",
       "title": "SSH Key Path (optional)",
       "description": "Path to your SSH private key. Leave empty to use the default key (~/.ssh/id_rsa).",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "placeholder": "~/.ssh/id_rsa"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.10",
-    "@raycast/utils": "^1.17.0",
     "execa": "^8.0.1"
   },
   "devDependencies": {

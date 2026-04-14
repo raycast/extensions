@@ -134,10 +134,15 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadProjects().then((p) => {
-      setProjects(p);
-      setIsLoading(false);
-    });
+    loadProjects()
+      .then((p) => {
+        setProjects(p);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setIsLoading(false);
+        void showToast({ style: Toast.Style.Failure, title: "Failed to load projects" });
+      });
   }, []);
 
   async function handleSave(project: Project) {
