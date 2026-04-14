@@ -1,6 +1,6 @@
 # Prompt Manager Changelog
 
-## [Initial Version] - 2026-04-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial release of the Prompt Manager extension.
 - Features: Save, View, and Generate prompts with AI.

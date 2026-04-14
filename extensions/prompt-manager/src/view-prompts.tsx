@@ -29,18 +29,20 @@ export default function Command() {
         }
       />
 
-      <List.Item
-        title="Create New Prompt"
-        icon={{ source: Icon.Plus, tintColor: Color.Blue }}
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Create New Prompt"
-              target={<CreatePromptForm />}
-            />
-          </ActionPanel>
-        }
-      />
+      {prompts.length > 0 && (
+        <List.Item
+          title="Create New Prompt"
+          icon={{ source: Icon.Plus, tintColor: Color.Blue }}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Create New Prompt"
+                target={<CreatePromptForm />}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
 
       {prompts.map((prompt) => (
         <List.Item
