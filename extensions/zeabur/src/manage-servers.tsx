@@ -123,7 +123,9 @@ export default function Command() {
                             mask: Image.Mask.RoundedRectangle,
                           }}
                           target={
-                            <ProjectServices projectID={project._id} environmentID={project.environments[0]?._id} />
+                            project.environments[0] ? (
+                              <ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />
+                            ) : undefined
                           }
                         />
                       ))}
