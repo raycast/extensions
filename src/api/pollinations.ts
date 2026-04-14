@@ -1,12 +1,16 @@
-import { getPreferenceValues } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
+import { TOKEN_STORAGE_KEY } from "../connect";
 
 export interface Message {
   role: "system" | "user" | "assistant";
   content: string;
 }
 
+export type KeyTier = "none" | "free" | "premium";
+
 export interface TierInfo {
   hasKey: boolean;
+  keyTier: KeyTier;
   /** True when the selected model requires payment / API key */
   modelNeedsKey: boolean;
 }
@@ -39,23 +43,29 @@ export class ApiError extends Error {
 
 export const BASE_URL = "https://gen.pollinations.ai";
 
-export function getTierInfo(): TierInfo {
-  const prefs = getPreferenceValues<Preferences>();
-  return {
-    hasKey: !!prefs.apiKey?.trim(),
-    modelNeedsKey: false,
-  };
+export async function fetchPollenBalance(): Promise<number | null> {
+  const key = (await LocalStorage.getItem<string>(TOKEN_STORAGE_KEY))?.trim();
+  if (!key) return null;
+  try {
+    const res = await fetch(`${BASE_URL}/api/account/balance`, {
+      headers: { Authorization: `Bearer ${key}` },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data.balance === "number" ? Math.round(data.balance) : null;
+  } catch {
+    return null;
+  }
 }
 
-function buildHeaders(): Record<string, string> {
-  const prefs = getPreferenceValues<Preferences>();
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
-  const key = prefs.apiKey?.trim();
-  if (key) {
-    headers["Authorization"] = `Bearer ${key}`;
-  }
+export function getTierInfo(): TierInfo {
+  return { hasKey: false, keyTier: "none", modelNeedsKey: false };
+}
+
+async function buildHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const key = (await LocalStorage.getItem<string>(TOKEN_STORAGE_KEY))?.trim();
+  if (key) headers["Authorization"] = `Bearer ${key}`;
   return headers;
 }
 
@@ -64,19 +74,16 @@ function buildHeaders(): Record<string, string> {
 export function friendlyError(err: Error): { title: string; message: string } {
   if (err instanceof ApiError) {
     if (err.isAuthError)
-      return {
-        title: "Invalid API Key",
-        message: "Check your key or remove it to use the free tier. (⌘ ,)",
-      };
+      return { title: "Authentication Required", message: "Connect your account to use this model." };
     if (err.isRateLimited)
       return {
         title: "Rate Limited",
-        message: "Add an API key to remove the rate limit. (⌘ ,)",
+        message: "Connect your account to increase the rate limit.",
       };
     if (err.isInsufficientBalance)
       return {
         title: "Insufficient Balance",
-        message: "Your API key does not have enough credits.",
+        message: "Your pollen balance is too low for this model.",
       };
   }
   return { title: "Error", message: err.message };
@@ -108,7 +115,7 @@ export async function streamChat(
   try {
     const response = await fetch(`${BASE_URL}/v1/chat/completions`, {
       method: "POST",
-      headers: buildHeaders(),
+      headers: await buildHeaders(),
       body: JSON.stringify({ model, messages, stream: true }),
       signal,
     });
@@ -156,7 +163,7 @@ export async function singleChat(
 ): Promise<string> {
   const response = await fetch(`${BASE_URL}/v1/chat/completions`, {
     method: "POST",
-    headers: buildHeaders(),
+    headers: await buildHeaders(),
     body: JSON.stringify({ model, messages, stream: false }),
   });
 

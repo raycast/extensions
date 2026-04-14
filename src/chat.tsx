@@ -6,14 +6,17 @@ import {
   Detail,
   Form,
   Icon,
+  launchCommand,
+  LaunchType,
   List,
-  openExtensionPreferences,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
 import { useCallback } from "react";
 import { friendlyError, getTierInfo } from "./api/pollinations";
+import { useAuth } from "./hooks/useAuth";
+import { usePollenBalance } from "./hooks/usePollenBalance";
 import { useChat } from "./hooks/useChat";
 import type { ChatMessage } from "./hooks/useChat";
 import { useModels } from "./hooks/useModels";
@@ -70,10 +73,10 @@ function ModelPicker({
   const { pop } = useNavigation();
 
   const free = models.filter((m) => !m.isPaid);
-  const paid = models.filter((m) => m.isPaid);
+  const paid = tier.hasKey ? models.filter((m) => m.isPaid) : [];
   const grouped = [
-    { label: "Free", items: free },
-    { label: "🔑 Paid (API key required)", items: paid },
+    { label: "", items: free },
+    { label: "Paid", items: paid },
   ].filter((g) => g.items.length > 0);
 
   return (
@@ -162,8 +165,10 @@ function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
 // ─── Main chat view ───────────────────────────────────────────────────────────
 
 export default function ChatCommand() {
+  const tier = useAuth();
+  const pollenBalance = usePollenBalance();
   const { models, selectedModel, activeModel, selectModel, isLoadingModels } =
-    useModels();
+    useModels(tier.hasKey);
   const {
     messages,
     isLoading,
@@ -171,10 +176,8 @@ export default function ChatCommand() {
     sendMessage,
     stopStreaming,
     clearHistory,
-  } = useChat();
+  } = useChat(!tier.hasKey ? () => launchCommand({ name: "connect", type: LaunchType.UserInitiated }) : undefined);
   const { push } = useNavigation();
-
-  const tier = getTierInfo();
 
   const handleSend = useCallback(
     async (text: string) => {
@@ -223,30 +226,26 @@ export default function ChatCommand() {
           <Detail.Metadata.Label
             title="Tier"
             icon={
-              tier.hasKey
+              tier.keyTier === "premium"
                 ? { source: Icon.Key, tintColor: Color.Green }
-                : { source: Icon.LockUnlocked, tintColor: Color.Orange }
+                : tier.keyTier === "free"
+                  ? { source: Icon.LockUnlocked, tintColor: Color.Blue }
+                  : { source: Icon.LockUnlocked, tintColor: Color.Orange }
             }
-            text={tier.hasKey ? "Premium" : "Free"}
+            text={tier.keyTier === "premium" ? "Premium" : tier.keyTier === "free" ? "Free" : "No Key"}
           />
           <Detail.Metadata.Label title="Model" text={selectedModel} />
           {activeModel?.description ? (
             <Detail.Metadata.Label title="" text={activeModel.description} />
           ) : null}
-          <Detail.Metadata.Separator />
-          {!tier.hasKey && tier.modelNeedsKey ? (
+          {pollenBalance !== null ? (
             <Detail.Metadata.Label
-              title="Warning"
-              icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-              text="This model requires an API key"
-            />
-          ) : !tier.hasKey ? (
-            <Detail.Metadata.Label
-              title="Tip"
-              icon={{ source: Icon.Info, tintColor: Color.Blue }}
-              text="Add an API key to unlock more models"
+              title="Pollen"
+              icon={{ source: Icon.Bolt, tintColor: Color.Yellow }}
+              text={`${pollenBalance}`}
             />
           ) : null}
+          <Detail.Metadata.Separator />
         </Detail.Metadata>
       }
       actions={
@@ -294,14 +293,15 @@ export default function ChatCommand() {
             )}
           </ActionPanel.Section>
 
-          <ActionPanel.Section title="Settings">
-            <Action
-              title={tier.hasKey ? "Change API Key" : "Add API Key"}
-              icon={Icon.Key}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-            />
-          </ActionPanel.Section>
+          {!tier.hasKey && (
+            <ActionPanel.Section title="Account">
+              <Action
+                title="Connect Account"
+                icon={Icon.Person}
+                onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+              />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />

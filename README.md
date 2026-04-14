@@ -9,13 +9,23 @@ Chat with powerful AI models powered by [Pollinations.ai](https://pollinations.a
 - **Fix Grammar** — Correct grammar and spelling in any language
 - **Translate** — Translate text into 29 languages
 
-## Setup
+## Getting Started
 
-No setup required. The extension works out of the box using the free tier.
+### Free Tier (Recommended)
 
-**Optional:** Add a Pollinations API key in extension preferences (`⌘ ,`) to unlock premium models (GPT-5, Gemini, Claude, DeepSeek and more).
+Pollinations requires a free publishable key (`pk_...`) even for the free tier. Getting one takes 30 seconds:
 
-Get a key at [auth.pollinations.ai](https://auth.pollinations.ai).
+1. Go to [auth.pollinations.ai](https://auth.pollinations.ai)
+2. Sign in with GitHub
+3. Click **Create Key** → choose **Publishable** type
+4. Copy the key (starts with `pk_`)
+5. Open Raycast → Pollinations AI → **⌘ ,** → paste the key
+
+> Free tier is rate-limited but costs nothing. No credit card required.
+
+### Premium Tier
+
+Use a **Secret key** (`sk_...`) from [auth.pollinations.ai](https://auth.pollinations.ai) to unlock paid models: GPT-5, Gemini, Claude, DeepSeek, Grok and more. Pollen balance is shown in the sidebar of each command.
 
 ## Commands
 
@@ -28,8 +38,8 @@ Get a key at [auth.pollinations.ai](https://auth.pollinations.ai).
 
 ## Models
 
-The free tier includes fast models like `openai` (GPT-5.4 Nano). With an API key you get access to the full model list including vision, reasoning, and search-enabled models.
+Free tier includes fast models like `openai` (GPT-5.4 Nano). With an API key you get access to the full model list including vision, reasoning, and search-enabled models.
 
 ## Author
 
-Made by [mhmtrabas](https://raycast.com/mhmtrabas)
+Made by [mhmtranas](https://raycast.com/mhmtranas)

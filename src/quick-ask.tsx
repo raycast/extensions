@@ -6,14 +6,17 @@ import {
   Detail,
   Form,
   Icon,
-  openExtensionPreferences,
+  launchCommand,
+  LaunchType,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCallback, useState } from "react";
-import { friendlyError, getTierInfo, singleChat } from "./api/pollinations";
+import { ApiError, friendlyError, getTierInfo, singleChat } from "./api/pollinations";
 import type { Message } from "./api/pollinations";
 import { getStoredModel, useModels } from "./hooks/useModels";
+import { usePollenBalance } from "./hooks/usePollenBalance";
+import { useAuth } from "./hooks/useAuth";
 
 const SYSTEM_PROMPT: Message = {
   role: "system",
@@ -22,29 +25,20 @@ const SYSTEM_PROMPT: Message = {
 };
 
 export default function QuickAskCommand() {
+  const tier = useAuth();
+  const pollenBalance = usePollenBalance();
   const { models, selectedModel, activeModel, selectModel, isLoadingModels } =
-    useModels();
+    useModels(tier.hasKey);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-
-  const tier = getTierInfo();
 
   const handleSubmit = useCallback(
     async (values: { question: string }) => {
       const q = values.question.trim();
       if (!q) return;
 
-      if (tier.modelNeedsKey && !tier.hasKey) {
-        await showToast({
-          title: "API Key Required",
-          message: `"${selectedModel}" requires an API key. Add one with ⌘ ,.`,
-          style: Toast.Style.Failure,
-        });
-        return;
-      }
-
-      setIsLoading(true);
+setIsLoading(true);
       setAnswer(null);
       try {
         const model = await getStoredModel();
@@ -55,6 +49,10 @@ export default function QuickAskCommand() {
         setAnswer(result);
       } catch (err) {
         const e = err instanceof Error ? err : new Error(String(err));
+        if (e instanceof ApiError && e.isAuthError && !tier.hasKey) {
+          await launchCommand({ name: "connect", type: LaunchType.UserInitiated });
+          return;
+        }
         const { title, message } = friendlyError(e);
         await showToast({ title, message, style: Toast.Style.Failure });
       } finally {
@@ -73,16 +71,26 @@ export default function QuickAskCommand() {
         metadata={
           <Detail.Metadata>
             <Detail.Metadata.Label
-              title="Model"
+              title="Tier"
               icon={
-                tier.hasKey
+                tier.keyTier === "premium"
                   ? { source: Icon.Key, tintColor: Color.Green }
-                  : { source: Icon.LockUnlocked, tintColor: Color.Orange }
+                  : tier.keyTier === "free"
+                    ? { source: Icon.LockUnlocked, tintColor: Color.Blue }
+                    : { source: Icon.LockUnlocked, tintColor: Color.Orange }
               }
-              text={selectedModel}
+              text={tier.keyTier === "premium" ? "Premium" : tier.keyTier === "free" ? "Free" : "No Key"}
             />
+            <Detail.Metadata.Label title="Model" text={selectedModel} />
             {activeModel?.description ? (
               <Detail.Metadata.Label title="" text={activeModel.description} />
+            ) : null}
+            {pollenBalance !== null ? (
+              <Detail.Metadata.Label
+                title="Pollen"
+                icon={{ source: Icon.Bolt, tintColor: Color.Yellow }}
+                text={`${pollenBalance}`}
+              />
             ) : null}
           </Detail.Metadata>
         }
@@ -109,12 +117,13 @@ export default function QuickAskCommand() {
               }}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
-            <Action
-              title={tier.hasKey ? "Change API Key" : "Add API Key"}
-              icon={Icon.Key}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-            />
+            {!tier.hasKey && (
+              <Action
+                title="Connect Account"
+                icon={Icon.Person}
+                onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -122,7 +131,7 @@ export default function QuickAskCommand() {
   }
 
   const free = models.filter((m) => !m.isPaid);
-  const paid = models.filter((m) => m.isPaid);
+  const paid = tier.hasKey ? models.filter((m) => m.isPaid) : [];
 
   return (
     <Form
@@ -134,12 +143,13 @@ export default function QuickAskCommand() {
             icon={Icon.Message}
             onSubmit={handleSubmit}
           />
-          <Action
-            title={tier.hasKey ? "Change API Key" : "Add API Key"}
-            icon={Icon.Key}
-            onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-          />
+          {!tier.hasKey && (
+            <Action
+              title="Connect Account"
+              icon={Icon.Person}
+              onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -150,14 +160,14 @@ export default function QuickAskCommand() {
         onChange={selectModel}
       >
         {free.length > 0 && (
-          <Form.Dropdown.Section title="Free">
+          <Form.Dropdown.Section>
             {free.map((m) => (
               <Form.Dropdown.Item key={m.name} value={m.name} title={m.name} />
             ))}
           </Form.Dropdown.Section>
         )}
         {paid.length > 0 && (
-          <Form.Dropdown.Section title="Paid (API key required)">
+          <Form.Dropdown.Section title="Paid">
             {paid.map((m) => (
               <Form.Dropdown.Item key={m.name} value={m.name} title={m.name} />
             ))}

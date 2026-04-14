@@ -1,4 +1,4 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { useEffect, useReducer, useState } from "react";
 
 export interface PollinationsModel {
@@ -12,8 +12,8 @@ export interface PollinationsModel {
 }
 
 const STORAGE_KEY = "selected-model";
-const DEFAULT_MODEL = "openai";
-const MODELS_URL = "https://gen.pollinations.ai/v1/models";
+const DEFAULT_MODEL = "mistral";
+const MODELS_URL = "https://gen.pollinations.ai/models";
 
 // ─── Module-level cache & listeners ──────────────────────────────────────────
 // selectedModel is NOT stored in React state — it's read directly from
@@ -42,56 +42,49 @@ export async function storeModel(model: string): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, model);
 }
 
-// ─── Parse /v1/models response ────────────────────────────────────────────────
+// ─── Parse /models response ───────────────────────────────────────────────────
 
 interface RawModel {
-  id: string;
+  name: string;
   description?: string;
-  capabilities?: string[];
+  paid_only?: boolean;
+  reasoning?: boolean;
+  input_modalities?: string[];
+  output_modalities?: string[];
+  tools?: boolean;
 }
 
-function parseModels(
-  raw: { data?: RawModel[] } | RawModel[],
-): PollinationsModel[] {
-  const items: RawModel[] = Array.isArray(raw) ? raw : (raw.data ?? []);
-
-  return items
+function parseModels(raw: RawModel[]): PollinationsModel[] {
+  return raw
     .filter(
       (m) =>
-        m.id &&
-        !m.id.includes("audio") &&
-        !m.id.includes("whisper") &&
-        !m.id.includes("scribe"),
+        m.name &&
+        Array.isArray(m.output_modalities) &&
+        m.output_modalities.includes("text") &&
+        !m.name.includes("audio") &&
+        !m.name.includes("whisper") &&
+        !m.name.includes("scribe"),
     )
     .map((m) => {
-      const desc = m.description ?? "";
-      const caps = m.capabilities ?? [];
-      const isPaid = desc.toLowerCase().includes("(paid)");
-      const tagMatch = desc.match(/\[([^\]]+)\]/);
-      const tags = tagMatch
-        ? tagMatch[1].split(",").map((t) => t.trim())
-        : caps;
-      const cleanDesc = desc
-        .replace(/\s*\[[^\]]*\]/g, "")
-        .replace(/\s*\(paid\)/gi, "")
+      const desc = (m.description ?? "")
         .replace(/\s*\(alpha\)/gi, "")
         .replace(/\s*\(preview\)/gi, "")
         .trim();
       return {
-        name: m.id,
-        description: cleanDesc,
-        isPaid,
-        reasoning: tags.includes("reasoning"),
-        vision: tags.includes("vision") || m.id.includes("vision"),
-        tools: tags.includes("tools"),
-        search: tags.includes("search"),
+        name: m.name,
+        description: desc,
+        isPaid: m.paid_only === true,
+        reasoning: m.reasoning === true,
+        vision: (m.input_modalities ?? []).includes("image"),
+        tools: m.tools === true,
+        search: m.name.includes("search"),
       };
     });
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-export function useModels() {
+export function useModels(hasKey?: boolean) {
   // forceUpdate triggers re-render; selectedModel is always read from _modelCache
   const [, forceUpdate] = useReducer((x: number) => x + 1, 0);
   const [models, setModels] = useState<PollinationsModel[]>([]);
@@ -119,13 +112,8 @@ export function useModels() {
   // Fetch live model list
   useEffect(() => {
     async function fetchModels() {
-      const prefs = getPreferenceValues<Preferences>();
-      const headers: Record<string, string> = {};
-      const key = prefs.apiKey?.trim();
-      if (key) headers["Authorization"] = `Bearer ${key}`;
-
       try {
-        const res = await fetch(MODELS_URL, { headers });
+        const res = await fetch(MODELS_URL);
         if (res.ok) {
           const raw = await res.json();
           const parsed = parseModels(raw);
@@ -139,6 +127,15 @@ export function useModels() {
     }
     fetchModels();
   }, []);
+
+  // If not connected, reset to default if selected model is paid
+  useEffect(() => {
+    if (hasKey !== false || models.length === 0) return;
+    const current = models.find((m) => m.name === _modelCache);
+    if (current?.isPaid) {
+      storeModel(DEFAULT_MODEL);
+    }
+  }, [models, hasKey]);
 
   // Always read from module-level cache — never from stale React state
   const selectedModel = _modelCache;

@@ -6,15 +6,18 @@ import {
   Detail,
   Form,
   Icon,
-  openExtensionPreferences,
+  launchCommand,
+  LaunchType,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
 import { useCallback, useState } from "react";
-import { friendlyError, singleChat } from "./api/pollinations";
+import { ApiError, friendlyError, singleChat } from "./api/pollinations";
 import type { Message } from "./api/pollinations";
+import { useAuth } from "./hooks/useAuth";
 import { getStoredModel, useModels } from "./hooks/useModels";
+import { usePollenBalance } from "./hooks/usePollenBalance";
 
 // ─── Language list ────────────────────────────────────────────────────────────
 
@@ -68,7 +71,8 @@ Rules:
 // ─── Command ──────────────────────────────────────────────────────────────────
 
 export default function TranslateCommand() {
-  const { models, selectedModel, isLoadingModels, selectModel } = useModels();
+  const tier = useAuth();
+  const { models, selectedModel, isLoadingModels, selectModel } = useModels(tier.hasKey);
 
   // useLocalStorage from @raycast/utils — persists across sessions automatically
   const { value: targetLang, setValue: setTargetLang } = useLocalStorage(
@@ -80,6 +84,7 @@ export default function TranslateCommand() {
   const [result, setResult] = useState<string | null>(null);
   const [usedLang, setUsedLang] = useState<string>(DEFAULT_LANG);
   const [isLoading, setIsLoading] = useState(false);
+  const pollenBalance = usePollenBalance();
 
   const handleSubmit = useCallback(
     async (values: { text: string; targetLang: string }) => {
@@ -104,6 +109,10 @@ export default function TranslateCommand() {
         setResult(translated);
       } catch (err) {
         const e = err instanceof Error ? err : new Error(String(err));
+        if (e instanceof ApiError && e.isAuthError && !tier.hasKey) {
+          await launchCommand({ name: "connect", type: LaunchType.UserInitiated });
+          return;
+        }
         const { title, message } = friendlyError(e);
         await showToast({ title, message, style: Toast.Style.Failure });
       } finally {
@@ -131,6 +140,13 @@ export default function TranslateCommand() {
               icon={{ source: Icon.ComputerChip, tintColor: Color.Purple }}
               text={selectedModel}
             />
+            {pollenBalance !== null ? (
+              <Detail.Metadata.Label
+                title="Pollen"
+                icon={{ source: Icon.Bolt, tintColor: Color.Yellow }}
+                text={`${pollenBalance}`}
+              />
+            ) : null}
           </Detail.Metadata>
         }
         actions={
@@ -156,12 +172,13 @@ export default function TranslateCommand() {
               }}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
-            <Action
-              title="API Key Settings"
-              icon={Icon.Key}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-            />
+            {!tier.hasKey && (
+              <Action
+                title="Connect Account"
+                icon={Icon.Person}
+                onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -169,7 +186,7 @@ export default function TranslateCommand() {
   }
 
   const free = models.filter((m) => !m.isPaid);
-  const paid = models.filter((m) => m.isPaid);
+  const paid = tier.hasKey ? models.filter((m) => m.isPaid) : [];
 
   return (
     <Form
@@ -181,12 +198,13 @@ export default function TranslateCommand() {
             icon={Icon.Globe}
             onSubmit={handleSubmit}
           />
-          <Action
-            title="API Key Settings"
-            icon={Icon.Key}
-            onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-          />
+          {!tier.hasKey && (
+            <Action
+              title="Connect Account"
+              icon={Icon.Person}
+              onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -211,14 +229,14 @@ export default function TranslateCommand() {
         onChange={selectModel}
       >
         {free.length > 0 && (
-          <Form.Dropdown.Section title="Free">
+          <Form.Dropdown.Section>
             {free.map((m) => (
               <Form.Dropdown.Item key={m.name} value={m.name} title={m.name} />
             ))}
           </Form.Dropdown.Section>
         )}
         {paid.length > 0 && (
-          <Form.Dropdown.Section title="Paid (API key required)">
+          <Form.Dropdown.Section title="Paid">
             {paid.map((m) => (
               <Form.Dropdown.Item key={m.name} value={m.name} title={m.name} />
             ))}

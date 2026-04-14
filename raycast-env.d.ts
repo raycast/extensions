@@ -7,10 +7,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {
-  /** Pollinations API Key - Leave empty to use the free tier. Get a key at auth.pollinations.ai to unlock Gemini, GPT-5, DeepSeek, Claude and more. */
-  "apiKey"?: string
-}
+type ExtensionPreferences = {}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
@@ -24,6 +21,8 @@ declare namespace Preferences {
   export type FixGrammar = ExtensionPreferences & {}
   /** Preferences accessible in the `translate` command */
   export type Translate = ExtensionPreferences & {}
+  /** Preferences accessible in the `connect` command */
+  export type Connect = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -35,5 +34,7 @@ declare namespace Arguments {
   export type FixGrammar = {}
   /** Arguments passed to the `translate` command */
   export type Translate = {}
+  /** Arguments passed to the `connect` command */
+  export type Connect = {}
 }
 

@@ -6,15 +6,18 @@ import {
   Detail,
   Form,
   Icon,
-  openExtensionPreferences,
+  launchCommand,
+  LaunchType,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCallback, useState } from "react";
-import { friendlyError, singleChat } from "./api/pollinations";
+import { ApiError, friendlyError, singleChat } from "./api/pollinations";
 import type { Message } from "./api/pollinations";
+import { useAuth } from "./hooks/useAuth";
 import { getStoredModel, useModels } from "./hooks/useModels";
+import { usePollenBalance } from "./hooks/usePollenBalance";
 
 const GRAMMAR_SYSTEM_PROMPT: Message = {
   role: "system",
@@ -29,10 +32,12 @@ Rules:
 };
 
 export default function FixGrammarCommand() {
-  const { models, selectedModel, isLoadingModels, selectModel } = useModels();
+  const tier = useAuth();
+  const { models, selectedModel, isLoadingModels, selectModel } = useModels(tier.hasKey);
   const [input, setInput] = useState("");
   const [result, setResult] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const pollenBalance = usePollenBalance();
 
   const handleSubmit = useCallback(async (values: { text: string }) => {
     const text = values.text.trim();
@@ -49,12 +54,16 @@ export default function FixGrammarCommand() {
       setResult(corrected);
     } catch (err) {
       const e = err instanceof Error ? err : new Error(String(err));
+      if (e instanceof ApiError && e.isAuthError && !tier.hasKey) {
+        await launchCommand({ name: "connect", type: LaunchType.UserInitiated });
+        return;
+      }
       const { title, message } = friendlyError(e);
       await showToast({ title, message, style: Toast.Style.Failure });
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [tier]);
 
   if (result !== null) {
     const markdown = `## Original\n\n${input}\n\n---\n\n## Corrected\n\n${result}`;
@@ -69,6 +78,13 @@ export default function FixGrammarCommand() {
               icon={{ source: Icon.Wand, tintColor: Color.Purple }}
               text={selectedModel}
             />
+            {pollenBalance !== null ? (
+              <Detail.Metadata.Label
+                title="Pollen"
+                icon={{ source: Icon.Bolt, tintColor: Color.Yellow }}
+                text={`${pollenBalance}`}
+              />
+            ) : null}
           </Detail.Metadata>
         }
         actions={
@@ -102,12 +118,13 @@ export default function FixGrammarCommand() {
               }}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
-            <Action
-              title="API Key Settings"
-              icon={Icon.Key}
-              onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-            />
+            {!tier.hasKey && (
+              <Action
+                title="Connect Account"
+                icon={Icon.Person}
+                onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+              />
+            )}
           </ActionPanel>
         }
       />
@@ -124,12 +141,13 @@ export default function FixGrammarCommand() {
             icon={Icon.Wand}
             onSubmit={handleSubmit}
           />
-          <Action
-            title="API Key Settings"
-            icon={Icon.Key}
-            onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-          />
+          {!tier.hasKey && (
+            <Action
+              title="Connect Account"
+              icon={Icon.Person}
+              onAction={() => launchCommand({ name: "connect", type: LaunchType.UserInitiated })}
+            />
+          )}
         </ActionPanel>
       }
     >
@@ -140,7 +158,7 @@ export default function FixGrammarCommand() {
         onChange={selectModel}
       >
         {models.filter((m) => !m.isPaid).length > 0 && (
-          <Form.Dropdown.Section title="Free">
+          <Form.Dropdown.Section>
             {models
               .filter((m) => !m.isPaid)
               .map((m) => (
@@ -152,8 +170,8 @@ export default function FixGrammarCommand() {
               ))}
           </Form.Dropdown.Section>
         )}
-        {models.filter((m) => m.isPaid).length > 0 && (
-          <Form.Dropdown.Section title="Paid (API key required)">
+        {tier.hasKey && models.filter((m) => m.isPaid).length > 0 && (
+          <Form.Dropdown.Section title="Paid">
             {models
               .filter((m) => m.isPaid)
               .map((m) => (

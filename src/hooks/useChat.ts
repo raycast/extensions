@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { Message, streamChat } from "../api/pollinations";
+import { ApiError, Message, streamChat } from "../api/pollinations";
 import { getStoredModel } from "./useModels";
 
 export interface ChatMessage extends Message {
@@ -12,7 +12,7 @@ const SYSTEM_PROMPT: Message = {
     "You are a helpful AI assistant. Be concise and clear. Format your responses using Markdown when appropriate.",
 };
 
-export function useChat() {
+export function useChat(onAuthError?: () => void) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -58,6 +58,9 @@ export function useChat() {
           setIsLoading(false);
         },
         (err) => {
+          if (err instanceof ApiError && err.isAuthError && onAuthError) {
+            onAuthError();
+          }
           const errMsg: ChatMessage = {
             id: (Date.now() + 1).toString(),
             role: "assistant",

@@ -47,17 +47,15 @@
       "title": "Translate",
       "description": "Translate text into any language using AI",
       "mode": "view"
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "apiKey",
-      "title": "Pollinations API Key",
-      "description": "Leave empty to use the free tier. Get a key at auth.pollinations.ai to unlock Gemini, GPT-5, DeepSeek, Claude and more.",
-      "type": "password",
-      "required": false
+      "name": "connect",
+      "title": "Connect to Pollinations",
+      "description": "Sign in with GitHub to get your free pollen balance",
+      "mode": "view"
     }
   ],
+  "preferences": [],
   "dependencies": {
     "@raycast/api": "^1.93.2",
     "@raycast/utils": "^1.19.1"
