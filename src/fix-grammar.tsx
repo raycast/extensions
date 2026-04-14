@@ -7,6 +7,7 @@ import {
   Form,
   Icon,
   openExtensionPreferences,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -73,14 +74,19 @@ export default function FixGrammarCommand() {
         actions={
           <ActionPanel>
             <Action
-              title="Copy Corrected Text"
+              title="Copy & Close"
               icon={Icon.Clipboard}
               onAction={async () => {
                 await Clipboard.copy(result);
-                await showToast({
-                  title: "Copied",
-                  style: Toast.Style.Success,
-                });
+                await showHUD("✓ Copied — ready to paste");
+              }}
+            />
+            <Action
+              title="Copy Corrected Text"
+              icon={Icon.CopyClipboard}
+              onAction={async () => {
+                await Clipboard.copy(result);
+                await showToast({ title: "Copied", style: Toast.Style.Success });
               }}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
