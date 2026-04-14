@@ -8,6 +8,7 @@ import {
   List,
   LocalStorage,
   updateCommandMetadata,
+  open,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { access, constants, readFile } from "fs/promises";
@@ -330,8 +331,12 @@ export default function Command() {
               primaryAction: {
                 title: "Open Log",
                 onAction: async () => {
-                  const { open } = require("@raycast/api");
-                  const LOG_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.log");
+                  const LOG_FILE = path.join(
+                    homedir(),
+                    "Library",
+                    "Logs",
+                    "raycast-photo-ingest.log",
+                  );
                   await open(LOG_FILE);
                 },
               },
