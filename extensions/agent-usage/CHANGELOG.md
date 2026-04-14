@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add Copilot Usage Provider] - {PR_MERGE_DATE}
+## [Add Copilot Usage Provider] - 2026-04-14
 
 - Add Copilot usage provider with GitHub Copilot internal API support
 - Auto-detect Copilot token from `GH_TOKEN` / `GITHUB_TOKEN` with preference fallback
