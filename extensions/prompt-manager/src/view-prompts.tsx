@@ -28,12 +28,12 @@ export default function Command() {
           </ActionPanel>
         }
       />
-
       <List.Item
         title="Create New Prompt"
-        icon={{ source: Icon.Plus, color: Color.Blue }}
+        icon={{ source: Icon.Plus, tintColor: Color.Blue }}
         actions={
           <ActionPanel>
+            ...
             <Action.Push
               title="Create New Prompt"
               target={<CreatePromptForm />}

@@ -143,7 +143,7 @@ ${generatedPrompt.content}
             <Detail.Metadata.Label
               title="Status"
               text="Saved to Library"
-              icon={{ source: Icon.CheckCircle, color: Color.Green }}
+              icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
             />
           </Detail.Metadata>
         }

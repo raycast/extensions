@@ -23,7 +23,7 @@ export default function Command({ prompt }: { prompt?: Prompt }) {
       showToast({
         style: Toast.Style.Failure,
         title: "Validation Error",
-        description: "Title and Content are required",
+        message: "Title and Content are required",
       });
       return;
     }
