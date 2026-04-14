@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [
-    "roderickjdunn"
+    "roderickjdunn",
+    "user_675a985a803f8cc8105b",
+    "diskun00"
   ],
   "categories": [
     "Developer Tools",
@@ -210,6 +212,24 @@
         {
           "title": "Ghostty",
           "value": "Ghostty"
+        }
+      ]
+    },
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Whether to open Claude Code sessions in a new window or a new tab",
+      "type": "dropdown",
+      "default": "window",
+      "required": false,
+      "data": [
+        {
+          "title": "New Window",
+          "value": "window"
+        },
+        {
+          "title": "New Tab",
+          "value": "tab"
         }
       ]
     },

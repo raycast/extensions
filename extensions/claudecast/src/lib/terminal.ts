@@ -22,6 +22,7 @@ export function expandTilde(inputPath: string): string {
 }
 
 type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
+type OpenIn = "window" | "tab";
 
 /**
  * Open a new terminal window/tab and run a command
@@ -31,33 +32,38 @@ export async function openTerminalWithCommand(
   options: {
     cwd?: string;
     terminalApp?: string;
+    openIn?: OpenIn;
   } = {},
 ): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
   const terminal = (options.terminalApp ||
     preferences.terminalApp ||
     "Terminal") as TerminalApp;
+  const openIn: OpenIn =
+    options.openIn ||
+    (preferences.openIn as OpenIn | undefined) ||
+    "window";
   const cwd = expandTilde(options.cwd || "") || homedir() || "/";
 
   try {
     switch (terminal) {
       case "Terminal":
-        await openInTerminalApp(command, cwd);
+        await openInTerminalApp(command, cwd, openIn);
         break;
       case "iTerm":
-        await openInITerm(command, cwd);
+        await openInITerm(command, cwd, openIn);
         break;
       case "Warp":
-        await openInWarp(command, cwd);
+        await openInWarp(command, cwd, openIn);
         break;
       case "kitty":
-        await openInKitty(command, cwd);
+        await openInKitty(command, cwd, openIn);
         break;
       case "Ghostty":
-        await openInGhostty(command, cwd);
+        await openInGhostty(command, cwd, openIn);
         break;
       default:
-        await openInTerminalApp(command, cwd);
+        await openInTerminalApp(command, cwd, openIn);
     }
   } catch (error) {
     await showToast({
@@ -68,81 +74,151 @@ export async function openTerminalWithCommand(
   }
 }
 
-async function openInTerminalApp(command: string, cwd: string): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
-
-  const script = `
-    tell application "Terminal"
-      activate
-      do script "cd \\"${escapedCwd}\\" && ${escapedCommand}"
-    end tell
-  `;
-
-  await execFilePromise("osascript", ["-e", script]);
-}
-
-async function openInITerm(command: string, cwd: string): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
-
-  const script = `
-    tell application "iTerm"
-      activate
-      create window with default profile
-      tell current session of current window
-        write text "cd \\"${escapedCwd}\\" && ${escapedCommand}"
+async function openInTerminalApp(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+  if (openIn === "tab") {
+    // ⌘T keystroke via System Events creates a real new tab.
+    // Raycast has Accessibility permission so this works from the extension.
+    const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
+    const escapedCwd = cwd.replace(/"/g, '\\"');
+    const script = `
+      tell application "Terminal"
+        activate
       end tell
-    end tell
-  `;
+      tell application "System Events"
+        keystroke "t" using command down
+      end tell
+      delay 0.3
+      tell application "Terminal"
+        do script "cd \\"${escapedCwd}\\" && ${escapedCommand}" in front window
+      end tell
+    `;
+    await execFilePromise("osascript", ["-e", script]);
+  } else {
+    // Write command to a temp .command file and open it with Terminal.
+    // 'open -a Terminal file.command' always spawns a fresh window.
+    const tempFile = join(tmpdir(), `claudecast-${Date.now()}.command`);
+    writeFileSync(
+      tempFile,
+      `#!/bin/bash\ncd "${cwd}"\nrm -f "${tempFile}"\n${command}\n`,
+      { mode: 0o755 },
+    );
+    await execFilePromise("open", ["-a", "Terminal", tempFile]);
+  }
+}
+
+async function openInITerm(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
+  const escapedCwd = cwd.replace(/"/g, '\\"');
+
+  let script: string;
+  if (openIn === "tab") {
+    script = `
+      tell application "iTerm"
+        activate
+        if (count of windows) > 0 then
+          tell current window
+            create tab with default profile
+            tell current session
+              write text "cd \\"${escapedCwd}\\" && ${escapedCommand}"
+            end tell
+          end tell
+        else
+          create window with default profile
+          tell current session of current window
+            write text "cd \\"${escapedCwd}\\" && ${escapedCommand}"
+          end tell
+        end if
+      end tell
+    `;
+  } else {
+    script = `
+      tell application "iTerm"
+        activate
+        create window with default profile
+        tell current session of current window
+          write text "cd \\"${escapedCwd}\\" && ${escapedCommand}"
+        end tell
+      end tell
+    `;
+  }
 
   await execFilePromise("osascript", ["-e", script]);
 }
 
-async function openInWarp(command: string, cwd: string): Promise<void> {
-  // Warp supports a special URL scheme
+async function openInWarp(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+  // Warp supports a special URL scheme for both new windows and new tabs
   const encodedCommand = encodeURIComponent(`cd "${cwd}" && ${command}`);
-  await open(`warp://action/new_tab?command=${encodedCommand}`);
+  const action = openIn === "tab" ? "new_tab" : "new_window";
+  await open(`warp://action/${action}?command=${encodedCommand}`);
 }
 
-async function openInKitty(command: string, cwd: string): Promise<void> {
-  // Kitty can be invoked directly via execFile with array arguments
-  await execFilePromise("kitty", [
-    "--single-instance",
-    `--directory=${cwd}`,
-    "-e",
-    "sh",
-    "-c",
-    command,
-  ]);
-}
-
-async function openInGhostty(command: string, cwd: string): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
-
-  // Try direct invocation first via execFile with array arguments
-  try {
-    await execFilePromise("ghostty", [
-      `--working-directory=${cwd}`,
+async function openInKitty(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+  if (openIn === "tab") {
+    // Open a new tab in the existing kitty instance
+    await execFilePromise("kitty", [
+      "--single-instance",
+      "--",
+      "sh",
+      "-c",
+      `cd "${cwd}" && ${command}`,
+    ]);
+  } else {
+    // Open a new kitty window (new OS window)
+    await execFilePromise("kitty", [
+      `--directory=${cwd}`,
       "-e",
       "sh",
       "-c",
       command,
     ]);
-  } catch {
-    // Fallback to AppleScript using execFile with array arguments
+  }
+}
+
+async function openInGhostty(command: string, cwd: string, openIn: OpenIn): Promise<void> {
+  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
+  const escapedCwd = cwd.replace(/"/g, '\\"');
+
+  if (openIn === "tab") {
+    // Ghostty uses Cmd+T for a new tab; open via AppleScript keystroke
     const script = `
       tell application "Ghostty"
         activate
       end tell
-      delay 0.5
+      delay 0.3
+      tell application "System Events"
+        keystroke "t" using {command down}
+      end tell
+      delay 0.3
       tell application "System Events"
         keystroke "cd \\"${escapedCwd}\\" && ${escapedCommand}"
         keystroke return
       end tell
     `;
     await execFilePromise("osascript", ["-e", script]);
+  } else {
+    // Try direct invocation first via execFile with array arguments
+    try {
+      await execFilePromise("ghostty", [
+        `--working-directory=${cwd}`,
+        "-e",
+        "sh",
+        "-c",
+        command,
+      ]);
+    } catch {
+      // Fallback to AppleScript using execFile with array arguments
+      const script = `
+        tell application "Ghostty"
+          activate
+        end tell
+        delay 0.5
+        tell application "System Events"
+          keystroke "cd \\"${escapedCwd}\\" && ${escapedCommand}"
+          keystroke return
+        end tell
+      `;
+      await execFilePromise("osascript", ["-e", script]);
+    }
   }
 }
 
