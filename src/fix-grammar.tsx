@@ -86,7 +86,10 @@ export default function FixGrammarCommand() {
               icon={Icon.CopyClipboard}
               onAction={async () => {
                 await Clipboard.copy(result);
-                await showToast({ title: "Copied", style: Toast.Style.Success });
+                await showToast({
+                  title: "Copied",
+                  style: Toast.Style.Success,
+                });
               }}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
