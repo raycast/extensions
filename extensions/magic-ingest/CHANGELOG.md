@@ -1,6 +1,6 @@
 # Magic Ingest Changelog
 
-## [Initial Version] - 2026-03-14
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release
 - Background photo & video ingest from memory cards

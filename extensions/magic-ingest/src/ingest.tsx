@@ -241,14 +241,16 @@ export default function Command() {
       return;
     }
 
-    const hasExiftool = await checkExiftool();
-    if (!hasExiftool) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "exiftool not found",
-        message: "Install with: brew install exiftool",
-      });
-      return;
+    if (starRating !== "off") {
+      const hasExiftool = await checkExiftool();
+      if (!hasExiftool) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "exiftool not found",
+          message: "Install with: brew install exiftool",
+        });
+        return;
+      }
     }
 
     const destParent = destinationParent[0] || DEFAULT_DESTINATION;
