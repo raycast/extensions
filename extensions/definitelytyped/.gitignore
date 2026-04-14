@@ -12,3 +12,11 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+
+# folders
+docs/superpowers/
+.superpowers/
+
+# IA
+CLAUDE.md
+GEMINI.md
