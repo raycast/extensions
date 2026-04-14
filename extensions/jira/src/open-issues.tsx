@@ -83,7 +83,7 @@ export function isInActiveSprint(issue: { fields: Record<string, unknown> }): bo
 export function OpenIssues() {
   const [query, setQuery] = useState("");
   const [projectQuery, setProjectQuery] = useState("");
-  const [cachedProject, setCachedProject] = useCachedState<Project | undefined>("active-sprint-project");
+  const [cachedProject, setCachedProject] = useCachedState<Project | undefined>("open-issues-project");
   const {
     showActiveSprintIssues = false,
     showAllSprintsIssues = false,
