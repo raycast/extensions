@@ -1,5 +1,27 @@
 # Audio Device Changelog
 
+## [Major Update] - 2026-03-27
+
+### Default device enforcement
+Press Cmd+Shift+D on any device to make it your default. If macOS switches away after sleep or Bluetooth reconnect, the extension switches back within 10 seconds. Manually switching gives you a 1-minute grace period before enforcement resumes.
+
+### Pinned volumes
+Press Cmd+Shift+V on any device to pin its volume. If macOS resets it, the extension restores it within 10 seconds. Changes under 2% are ignored.
+
+### Volume control
+See current volume level for each device in the list. Mute/unmute with Cmd+M. Set exact volume (0-100) via Set Output Volume / Set Input Volume commands. Devices that don't support volume control (HDMI monitors) show "Volume controlled by device".
+
+### Performance
+Device list loads instantly from cache on repeat opens. Volume data for all devices is fetched in a single call (~500ms) instead of per-device queries.
+
+### Breaking change: priority ordering removed
+The old system where you ranked multiple devices as fallbacks is gone. Replaced by a single default device per direction. On first run, your top-priority device is automatically migrated to the new default.
+
+The `Customize Order` command has been removed. Use Cmd+Shift+D in Set Output Device or Set Input Device to set your default. A redirect command is available for users who had it pinned.
+
+### New icons
+Clean 512x512 monoline icons for all device types. Works properly with Raycast's tint system.
+
 ## [Update] - 2026-02-17
 - Improve binary download for windows (downloads and checks if binary exists at runtime)
 
@@ -12,7 +34,6 @@
 - Suppressed PowerShell warnings — Set $WarningPreference = 'SilentlyContinue' and -WarningAction SilentlyContinue on Import-Module to prevent warnings from corrupting JSON output.
 - Stripped ANSI escape codes — PS7 outputs color codes in warnings; these are now stripped before JSON parsing.
 - Handled both PS5 and PS7
-
 
 ## Chore - 2026-02-07
 - Fix issues in lint due to newer ESlint package

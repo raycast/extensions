@@ -7,7 +7,8 @@ import { getPreferenceValues } from "@raycast/api";
 import { withTimeout } from "./util";
 
 export default function () {
-    const { npmPath, uploadTimeout, npmMirror, npmProxy, proxy } = getPreferenceValues<Preferences>();
+    const { npmPath, npmMirror, npmProxy } = getPreferenceValues<Preferences.PluginManagement>();
+    const { uploadTimeout, proxy } = getPreferenceValues<Preferences.UploadImages>();
     const processEnv = {
         ...env,
         PATH: [npmPath, env.PATH].join(path.delimiter),
@@ -17,7 +18,9 @@ export default function () {
     if (!ctxRef.current) ctxRef.current = new PicGo();
     const ctx = ctxRef.current;
 
-    ctx.saveConfig({ "picBed.proxy": proxy });
+    if (proxy) {
+        ctx.saveConfig({ "picBed.proxy": proxy });
+    }
 
     const getActiveUploaderType = () => ctx.getConfig<string>("picBed.uploader");
     const getUploaderTypeList = () => ctx.uploaderConfig.listUploaderTypes();

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "habitica-todos",
+  "title": "Habitica ToDos",
+  "description": "Unofficial extension to view and create ToDo's for Habitica",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiUserId",
+      "title": "Habitica User ID",
+      "description": "Your Habitica User ID (found in Settings → API)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "Habitica API Token",
+      "description": "Your Habitica API Token (found in Settings → API)",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "description": "View, check, edit, and delete your Habitica tasks",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Quickly create a new Habitica task",
+      "mode": "view",
+      "subtitle": "Habitica"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the `prepublishOnly` script and rerun `npm publish` again.\nIf you wanted to publish it to the Raycast Store instead, use `npm run publish` instead.\n\n\" && exit 1"
+  },
+  "author": "Sacrachan",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}

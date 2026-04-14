@@ -1,8 +1,10 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, type MutatePromise } from "@raycast/utils";
 import { listInstalledSkills, checkForUpdates, readSkillLock } from "../utils/skills-cli";
-import { stripGitSuffix } from "../shared";
+import { type InstalledSkill, stripGitSuffix } from "../shared";
 
-async function fetchSkillsWithUpdateStatus() {
+export type MutateSkills = MutatePromise<InstalledSkill[] | undefined>;
+
+async function fetchSkillsWithUpdateStatus(): Promise<InstalledSkill[]> {
   const [skills, updatable, lockEntries] = await Promise.all([
     listInstalledSkills(),
     checkForUpdates().catch(() => [] as string[]),
@@ -25,7 +27,7 @@ async function fetchSkillsWithUpdateStatus() {
 }
 
 export function useInstalledSkills() {
-  const { data, isLoading, error, revalidate } = useCachedPromise(fetchSkillsWithUpdateStatus, [], {
+  const { data, isLoading, error, revalidate, mutate } = useCachedPromise(fetchSkillsWithUpdateStatus, [], {
     keepPreviousData: true,
   });
 
@@ -34,5 +36,6 @@ export function useInstalledSkills() {
     isLoading,
     error,
     revalidate,
+    mutate,
   };
 }

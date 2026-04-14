@@ -1,5 +1,10 @@
 # Terminal Finder Changelog
 
+## [Update] - 2026-03-27
+
+- Added support for `cmux`
+- Switched `cmux` integration to the bundled CLI for reliable workspace creation and working-directory lookup
+
 ## [Better "Finder" Errors] - 2026-01-12
 
 - Show a better error message when no **Finder** window open or when trying to pass non-filesystem folder (e.g. **Recents**) (ref: [Issue #24386](https://github.com/raycast/extensions/issues/24386))

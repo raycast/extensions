@@ -1,4 +1,5 @@
 import { Model, Capability } from "./types";
+import { parseReleaseDate } from "./formatters";
 
 /**
  * Filter models by capability
@@ -155,4 +156,19 @@ export function hasAnyCapability(model: Model, capabilities: Capability[]): bool
  */
 export function countByCapability(models: Model[], capability: Capability): number {
   return filterByCapability(models, capability).length;
+}
+
+/**
+ * Filter models released within the last N days.
+ * Models without a valid release_date are excluded.
+ */
+export function filterByReleasedWithinDays(models: Model[], days: number): Model[] {
+  const now = new Date();
+  const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+
+  return models.filter((m) => {
+    const releaseDate = parseReleaseDate(m.release_date);
+    if (!releaseDate) return false;
+    return releaseDate >= cutoff;
+  });
 }

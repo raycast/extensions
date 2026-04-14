@@ -1,0 +1,778 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "beeper",
+  "title": "Beeper Desktop",
+  "description": "Access your chats from Beeper Desktop (requires Beeper Desktop API to be enabled)",
+  "icon": "extension-icon.png",
+  "access": "public",
+  "author": "batuhan",
+  "owner": "automattic",
+  "contributors": [
+    "pernielsentikaer",
+    "clins1994",
+    "gareth_price"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "beeper",
+    "chat",
+    "messaging",
+    "matrix"
+  ],
+  "categories": [
+    "Communication"
+  ],
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Recent Chats",
+      "subtitle": "Beeper Desktop",
+      "description": "Browse recent chats from Beeper Desktop",
+      "mode": "view"
+    },
+    {
+      "name": "focus-app",
+      "title": "Open Beeper",
+      "subtitle": "Beeper Desktop",
+      "description": "Bring Beeper to the foreground",
+      "mode": "no-view"
+    },
+    {
+      "name": "unread-chats",
+      "title": "Unread Chats",
+      "subtitle": "Beeper Desktop",
+      "description": "See unread chats from Beeper Desktop",
+      "mode": "view"
+    },
+    {
+      "name": "contacts",
+      "title": "Contacts",
+      "subtitle": "Beeper Desktop",
+      "description": "Search contacts across connected Beeper accounts",
+      "mode": "view"
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Recent Messages",
+      "subtitle": "Beeper Desktop",
+      "description": "Search recent messages across Beeper chats",
+      "mode": "view"
+    },
+    {
+      "name": "list-accounts",
+      "title": "Connected Accounts",
+      "subtitle": "Beeper Desktop",
+      "description": "View all connected messaging services",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Beeper Desktop API Base URL",
+      "description": "The base URL for Beeper Desktop API (default: http://localhost:23373)",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:23373"
+    },
+    {
+      "name": "useMockData",
+      "type": "checkbox",
+      "required": false,
+      "title": "Use Mock Data",
+      "label": "Yes, Show mock data",
+      "description": "Show sample data instead of connecting to Beeper. Useful for taking screenshots or demos.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@beeper/desktop-api": "4.7.1",
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.3",
+    "fuse.js": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    {
+      "name": "open-chat",
+      "title": "Open Chat",
+      "description": "Opens a chat in Beeper by searching for a contact or group name. Use this when the user wants to open, view, or go to a conversation. Supports partial names and fuzzy matching. The 'service' parameter is optional - only specify it if the user explicitly mentions a service like WhatsApp, Telegram, Signal, etc."
+    },
+    {
+      "name": "send-message",
+      "title": "Send Message",
+      "description": "Sends a message to a contact or group via Beeper. Use this when the user wants to send, text, message, tell, or write to someone. The 'name' parameter is the recipient (supports partial names like 'mom' or 'John'). The 'message' parameter is the text content to send. The 'service' parameter is optional - only include if the user specifies a particular messaging platform."
+    },
+    {
+      "name": "list-accounts",
+      "title": "List Accounts",
+      "description": "Lists all connected messaging services in Beeper. Use this when the user asks about their connected accounts, linked services, or wants to see which platforms are available."
+    },
+    {
+      "name": "search-messages",
+      "title": "Search Messages",
+      "description": "Searches message content across all Beeper chats. Use this when the user wants to find, search for, or look up specific messages or conversations about a topic. The 'query' parameter is the text to search for. The optional 'sender' parameter can be 'me' (messages sent by user) or 'others' (messages from others). Returns matching messages with sender, service, and timestamps."
+    },
+    {
+      "name": "summarize-unread",
+      "title": "Summarize Unread Messages",
+      "description": "Gets unread messages for summarization. Use this when the user wants to know what they missed, summarize unread messages, or catch up on conversations. If 'chatName' is provided, returns unread messages from that specific chat. If 'chatName' is NOT provided, returns a summary list of ALL chats with unread messages (chat names, services, and unread counts). The optional 'service' parameter filters by messaging platform. Summarize the results in a helpful way for the user."
+    },
+    {
+      "name": "summarize-messages",
+      "title": "Summarize Messages",
+      "description": "Gets messages from a specific chat for summarization. Use this when the user wants to know what was discussed, asks about recent conversations, or has questions about chat activity like 'what have they been talking about?' or 'any plans mentioned?'. The 'chatName' parameter is the chat name. The optional 'timeRange' parameter specifies whether to get 'today' (default) or 'week' (past 7 days) of messages. The optional 'question' parameter is a specific question to focus on. Returns messages which you should summarize. If no messages are found in the requested time range, it falls back to the most recent day of messages - when 'fallbackToMostRecentDay' is true in the result, mention that you're summarizing the most recent day because there were no messages in the requested time range."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@beeper Open chat with John",
+        "mocks": {
+          "open-chat": "{ \"openedChat\": \"John Smith\", \"service\": \"whatsapp\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "John"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms the chat with John has been opened"
+          }
+        ]
+      },
+      {
+        "input": "@beeper message John",
+        "mocks": {
+          "open-chat": "{ \"openedChat\": \"John Smith\", \"service\": \"whatsapp\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "John"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opens chat with John"
+          }
+        ]
+      },
+      {
+        "input": "@beeper text mom",
+        "mocks": {
+          "open-chat": "{ \"openedChat\": \"Mom\", \"service\": \"imessage\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "mom"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opens chat with mom"
+          }
+        ]
+      },
+      {
+        "input": "@beeper open Sarah's chat on WhatsApp",
+        "mocks": {
+          "open-chat": "{ \"openedChat\": \"Sarah\", \"service\": \"whatsapp\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "Sarah",
+                "service": "whatsapp"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opens Sarah's WhatsApp chat"
+          }
+        ]
+      },
+      {
+        "input": "@beeper go to the family group chat",
+        "mocks": {
+          "open-chat": "{ \"openedChat\": \"Family Group\", \"service\": \"whatsapp\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "family group"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Opens the family group chat"
+          }
+        ]
+      },
+      {
+        "input": "@beeper Send a message to Sarah on Telegram: Hey, are you free tonight?",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"Sarah\", \"service\": \"telegram\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "Sarah",
+                "message": "Hey, are you free tonight?",
+                "service": "telegram"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms the message was sent to Sarah via Telegram"
+          }
+        ]
+      },
+      {
+        "input": "@beeper message John hi there",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"John\", \"service\": \"whatsapp\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "John",
+                "message": "hi there"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms message was sent to John"
+          }
+        ]
+      },
+      {
+        "input": "@beeper text mom on whatsapp saying I'll be late for dinner",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"Mom\", \"service\": \"whatsapp\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "mom",
+                "message": "I'll be late for dinner",
+                "service": "whatsapp"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms message was sent to mom"
+          }
+        ]
+      },
+      {
+        "input": "@beeper send \"meeting at 3pm\" to Mike",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"Mike\", \"service\": \"slack\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "Mike",
+                "message": "meeting at 3pm"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms message was sent to Mike"
+          }
+        ]
+      },
+      {
+        "input": "@beeper tell the work group that the deadline is extended",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"Work Group\", \"service\": \"slack\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "work group",
+                "message": "the deadline is extended"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms message was sent to work group"
+          }
+        ]
+      },
+      {
+        "input": "@beeper write to David: Thanks for your help!",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"David\", \"service\": \"telegram\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "David",
+                "message": "Thanks for your help!"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms message was sent to David"
+          }
+        ]
+      },
+      {
+        "input": "@beeper DM Alex on Discord: you online?",
+        "mocks": {
+          "send-message": "{ \"sentTo\": \"Alex\", \"service\": \"discord\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "send-message",
+              "arguments": {
+                "name": "Alex",
+                "message": "you online?",
+                "service": "discord"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Confirms message was sent to Alex on Discord"
+          }
+        ]
+      },
+      {
+        "input": "@beeper What messaging services do I have connected?",
+        "mocks": {
+          "list-accounts": "[{ \"service\": \"whatsapp\", \"displayName\": \"WhatsApp\", \"isConnected\": true }]"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-accounts"
+            }
+          },
+          {
+            "meetsCriteria": "Lists the connected messaging services"
+          }
+        ]
+      },
+      {
+        "input": "@beeper show my accounts",
+        "mocks": {
+          "list-accounts": "[{ \"service\": \"whatsapp\", \"displayName\": \"WhatsApp\", \"isConnected\": true }]"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-accounts"
+            }
+          },
+          {
+            "meetsCriteria": "Shows connected accounts"
+          }
+        ]
+      },
+      {
+        "input": "@beeper which services are linked?",
+        "mocks": {
+          "list-accounts": "[{ \"service\": \"telegram\", \"displayName\": \"Telegram\", \"isConnected\": true }]"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-accounts"
+            }
+          },
+          {
+            "meetsCriteria": "Lists linked services"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what can I message with?",
+        "mocks": {
+          "list-accounts": "[{ \"service\": \"signal\", \"displayName\": \"Signal\", \"isConnected\": true }]"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-accounts"
+            }
+          },
+          {
+            "meetsCriteria": "Shows available messaging platforms"
+          }
+        ]
+      },
+      {
+        "input": "@beeper search for messages about dinner",
+        "mocks": {
+          "search-messages": "{ \"messages\": [{ \"text\": \"Are we still on for dinner?\", \"sender\": \"Mom\", \"service\": \"WhatsApp\" }], \"count\": 1 }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-messages",
+              "arguments": {
+                "query": "dinner"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns messages about dinner"
+          }
+        ]
+      },
+      {
+        "input": "@beeper find messages I sent about the meeting",
+        "mocks": {
+          "search-messages": "{ \"messages\": [{ \"text\": \"Meeting at 3pm\", \"sender\": \"You\", \"service\": \"Slack\" }], \"count\": 1 }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-messages",
+              "arguments": {
+                "query": "meeting",
+                "sender": "me"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns messages about meeting sent by user"
+          }
+        ]
+      },
+      {
+        "input": "@beeper look up messages from others about tomorrow",
+        "mocks": {
+          "search-messages": "{ \"messages\": [{ \"text\": \"See you tomorrow!\", \"sender\": \"John\", \"service\": \"Telegram\" }], \"count\": 1 }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-messages",
+              "arguments": {
+                "query": "tomorrow",
+                "sender": "others"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns messages from others about tomorrow"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what did Sarah say about the project?",
+        "mocks": {
+          "search-messages": "{ \"messages\": [{ \"text\": \"The project deadline is Friday\", \"sender\": \"Sarah\", \"service\": \"Slack\" }], \"count\": 1 }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-messages",
+              "arguments": {
+                "query": "project"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Returns messages about the project"
+          }
+        ]
+      },
+      {
+        "input": "@beeper summarize unread messages from Mom",
+        "mocks": {
+          "summarize-unread": "{ \"chatName\": \"Mom\", \"service\": \"WhatsApp\", \"unreadCount\": 3, \"messages\": [{ \"sender\": \"Mom\", \"text\": \"Are you coming for dinner?\", \"timestamp\": \"2024-01-15T18:00:00Z\" }] }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-unread",
+              "arguments": {
+                "chatName": "Mom"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes the unread messages from Mom"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what did I miss in the family group chat?",
+        "mocks": {
+          "summarize-unread": "{ \"chatName\": \"Family Group\", \"service\": \"WhatsApp\", \"unreadCount\": 5, \"messages\": [{ \"sender\": \"Dad\", \"text\": \"Dinner at 7pm\", \"timestamp\": \"2024-01-15T17:00:00Z\" }] }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-unread",
+              "arguments": {
+                "chatName": "family group"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes unread messages from family group"
+          }
+        ]
+      },
+      {
+        "input": "@beeper catch me up on my WhatsApp chat with John",
+        "mocks": {
+          "summarize-unread": "{ \"chatName\": \"John\", \"service\": \"WhatsApp\", \"unreadCount\": 2, \"messages\": [{ \"sender\": \"John\", \"text\": \"Hey are you free?\", \"timestamp\": \"2024-01-15T16:00:00Z\" }] }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-unread",
+              "arguments": {
+                "chatName": "John",
+                "service": "whatsapp"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes unread WhatsApp messages from John"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what unread messages do I have?",
+        "mocks": {
+          "summarize-unread": "{ \"unreadCount\": 3, \"totalUnreadCount\": 8, \"unreadChats\": [{ \"chatName\": \"Mom\", \"service\": \"WhatsApp\", \"unreadCount\": 3, \"chatType\": \"single\" }, { \"chatName\": \"Work Group\", \"service\": \"Slack\", \"unreadCount\": 5, \"chatType\": \"group\" }] }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-unread",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Lists all chats with unread messages"
+          }
+        ]
+      },
+      {
+        "input": "@beeper do I have any unread messages?",
+        "mocks": {
+          "summarize-unread": "{ \"unreadCount\": 2, \"totalUnreadCount\": 4, \"unreadChats\": [{ \"chatName\": \"John\", \"service\": \"Telegram\", \"unreadCount\": 2, \"chatType\": \"single\" }, { \"chatName\": \"Family\", \"service\": \"WhatsApp\", \"unreadCount\": 2, \"chatType\": \"group\" }] }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-unread",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Shows whether there are unread messages and lists them"
+          }
+        ]
+      },
+      {
+        "input": "@beeper summarize all my unread messages",
+        "mocks": {
+          "summarize-unread": "{ \"unreadCount\": 1, \"totalUnreadCount\": 3, \"unreadChats\": [{ \"chatName\": \"Sarah\", \"service\": \"Signal\", \"unreadCount\": 3, \"chatType\": \"single\" }] }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-unread",
+              "arguments": {}
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes all unread messages across chats"
+          }
+        ]
+      },
+      {
+        "input": "@beeper summarize today's messages from the work group",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"Work Group\", \"service\": \"Slack\", \"messageCount\": 15, \"messages\": [{ \"sender\": \"Mike\", \"text\": \"Meeting at 3pm\", \"timestamp\": \"2024-01-15T10:00:00Z\", \"isFromMe\": false }], \"dateRange\": \"Today\", \"timeRange\": \"today\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "work group"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes today's messages from work group"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what have the boys been talking about in the gaming group?",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"Gaming Group\", \"service\": \"Discord\", \"messageCount\": 20, \"messages\": [{ \"sender\": \"Alex\", \"text\": \"Anyone up for Valorant?\", \"timestamp\": \"2024-01-15T14:00:00Z\", \"isFromMe\": false }], \"question\": \"what have they been talking about?\", \"dateRange\": \"Today\", \"timeRange\": \"today\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "gaming group",
+                "question": "what have they been talking about?"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes what the group has been discussing"
+          }
+        ]
+      },
+      {
+        "input": "@beeper any plans mentioned in the family chat today?",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"Family\", \"service\": \"WhatsApp\", \"messageCount\": 8, \"messages\": [{ \"sender\": \"Mom\", \"text\": \"Dinner at 7?\", \"timestamp\": \"2024-01-15T12:00:00Z\", \"isFromMe\": false }], \"question\": \"any plans mentioned?\", \"dateRange\": \"Today\", \"timeRange\": \"today\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "family",
+                "question": "any plans mentioned?"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes plans mentioned in family chat"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what did Sarah and I talk about today on Telegram?",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"Sarah\", \"service\": \"Telegram\", \"messageCount\": 12, \"messages\": [{ \"sender\": \"Sarah\", \"text\": \"How was your day?\", \"timestamp\": \"2024-01-15T09:00:00Z\", \"isFromMe\": false }], \"dateRange\": \"Today\", \"timeRange\": \"today\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "Sarah",
+                "service": "telegram"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes today's conversation with Sarah on Telegram"
+          }
+        ]
+      },
+      {
+        "input": "@beeper summarize this week's messages from the work group",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"Work Group\", \"service\": \"Slack\", \"messageCount\": 45, \"messages\": [{ \"sender\": \"Mike\", \"text\": \"Sprint planning Monday\", \"timestamp\": \"2024-01-10T10:00:00Z\", \"isFromMe\": false }], \"dateRange\": \"Past week\", \"timeRange\": \"week\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "work group",
+                "timeRange": "week"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes this week's messages from work group"
+          }
+        ]
+      },
+      {
+        "input": "@beeper what has been happening in the family chat this week?",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"Family\", \"service\": \"WhatsApp\", \"messageCount\": 30, \"messages\": [{ \"sender\": \"Mom\", \"text\": \"Grandma's birthday is Saturday\", \"timestamp\": \"2024-01-12T15:00:00Z\", \"isFromMe\": false }], \"dateRange\": \"Past week\", \"timeRange\": \"week\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "family",
+                "timeRange": "week"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes this week's messages from family chat"
+          }
+        ]
+      },
+      {
+        "input": "@beeper give me a summary of messages from John over the past week",
+        "mocks": {
+          "summarize-messages": "{ \"chatName\": \"John\", \"service\": \"WhatsApp\", \"messageCount\": 25, \"messages\": [{ \"sender\": \"John\", \"text\": \"Hey want to grab lunch?\", \"timestamp\": \"2024-01-11T12:00:00Z\", \"isFromMe\": false }], \"dateRange\": \"Past week\", \"timeRange\": \"week\" }"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "summarize-messages",
+              "arguments": {
+                "chatName": "John",
+                "timeRange": "week"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Summarizes past week's messages from John"
+          }
+        ]
+      }
+    ]
+  }
+}

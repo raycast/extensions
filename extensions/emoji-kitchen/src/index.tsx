@@ -9,8 +9,8 @@ import {
   getGStaticUrl,
   loadEmojiVectors,
   getQueryVector,
-  cosineSimilarity,
   formatEmojiName,
+  scoreEmojiSearchMatch,
 } from "./utils";
 import { ResultView } from "./components/ResultView";
 import { MashupGrid } from "./components/MashupGrid";
@@ -56,30 +56,25 @@ export default function Command() {
   }, [index]);
 
   const searchResults = useMemo(() => {
-    if (!searchText || !vectors) return null;
+    const trimmed = searchText.trim();
+    if (!trimmed) return null;
 
-    const query = searchText.toLowerCase().trim();
+    const query = trimmed.toLowerCase();
     const queryVec = getQueryVector(query);
+    const vecMap = vectors ?? {};
 
     return emojiList
-      .map((item) => {
-        const vec = vectors[item.unicode];
-        if (!vec) return { ...item, score: 0 };
-
-        let score = cosineSimilarity(queryVec, vec);
-
-        // Keyword boosting
-        if (item.a.toLowerCase() === query) score += 0.5;
-        else if (item.a.toLowerCase().includes(query)) score += 0.2;
-        else if (item.k.some((k) => k === query)) score += 0.15;
-        else if (item.k.some((k) => k.includes(query))) score += 0.05;
-
-        return { ...item, score };
-      })
-      .filter((item) => item.score > 0.05)
+      .map((item) => ({
+        ...item,
+        score: scoreEmojiSearchMatch(item, item.unicode, query, queryVec, vecMap),
+      }))
+      .filter((item) => item.score >= 0.05)
       .sort((a, b) => b.score - a.score)
       .slice(0, 50);
   }, [emojiList, searchText, vectors]);
+
+  /** Raycast still hides non-matching items / shows EmptyView even when filtering={false}; include the query so custom search results stay visible. */
+  const searchBarMatchKeywords = searchText.trim() ? [searchText.trim(), searchText.trim().toLowerCase()] : [];
 
   const categories = useMemo(() => {
     if (!emojiList.length || searchResults !== null) return [];
@@ -194,6 +189,8 @@ export default function Command() {
     );
   }, [index, push]);
 
+  const queryLower = searchText.trim().toLowerCase();
+
   return (
     <Grid
       columns={8}
@@ -224,6 +221,7 @@ export default function Command() {
             key="selected"
             content={index[selectedEmoji1].e}
             title="Selected"
+            keywords={searchBarMatchKeywords.length > 0 ? searchBarMatchKeywords : undefined}
             actions={
               <ActionPanel>
                 <Action title="Clear Selection" onAction={() => setSelectedEmoji1(null)} icon={Icon.XMarkCircle} />
@@ -240,6 +238,9 @@ export default function Command() {
               key={item.unicode}
               content={item.e}
               title={formatEmojiName(item.a)}
+              keywords={Array.from(
+                new Set([...searchBarMatchKeywords, queryLower, item.a, formatEmojiName(item.a), ...item.k]),
+              )}
               actions={
                 <ActionPanel>
                   <Action
@@ -261,6 +262,8 @@ export default function Command() {
             />
           ))}
         </Grid.Section>
+      ) : searchResults !== null && searchResults.length === 0 ? (
+        <Grid.EmptyView title="No matching emojis" description="Try different words or clear the search bar." />
       ) : searchResults === null ? (
         categories.map(([cat, items]) => (
           <Grid.Section key={cat} title={cat.toUpperCase()}>
@@ -269,6 +272,7 @@ export default function Command() {
                 key={item.unicode}
                 content={item.e}
                 title={formatEmojiName(item.a)}
+                keywords={item.k}
                 actions={
                   <ActionPanel>
                     <Action

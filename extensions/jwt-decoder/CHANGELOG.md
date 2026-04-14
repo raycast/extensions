@@ -1,5 +1,9 @@
 # JWT-Decoder Changelog
 
+## [Maintenance] - 2026-04-13
+
+- Updated dependencies to resolve react mismatch error
+
 ## [Maintenance] - 2025-12-27
 
 - Updated dependencies to resolve react mismatch error

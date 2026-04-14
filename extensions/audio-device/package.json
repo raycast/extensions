@@ -17,12 +17,16 @@
     "joshmedeski",
     "joshhayes747",
     "inovvia",
-    "mateus_badalotti"
+    "mateus_badalotti",
+    "pavzagor"
   ],
   "keywords": [
     "sound",
     "manager",
-    "bluetooth"
+    "bluetooth",
+    "volume",
+    "mute",
+    "audio"
   ],
   "license": "MIT",
   "commands": [
@@ -41,27 +45,42 @@
       "mode": "view"
     },
     {
+      "name": "set-volume",
+      "title": "Set Output Volume",
+      "subtitle": "Audio Device",
+      "description": "Set the volume of an output device.",
+      "mode": "view"
+    },
+    {
+      "name": "set-input-volume",
+      "title": "Set Input Volume",
+      "subtitle": "Audio Device",
+      "description": "Set the volume of an input device.",
+      "mode": "view"
+    },
+    {
       "name": "auto-switch-input",
-      "title": "Toggle Input Auto Switch",
-      "subtitle": "Disabled",
-      "description": "Enable or disable automatic switching for input devices.",
+      "title": "Enforce Input Device",
+      "subtitle": "Audio Device",
+      "description": "Keeps your default input device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
       "mode": "no-view",
-      "interval": "20s"
+      "interval": "10s"
     },
     {
       "name": "auto-switch-output",
-      "title": "Toggle Output Auto Switch",
-      "subtitle": "Disabled",
-      "description": "Enable or disable automatic switching for output devices.",
+      "title": "Enforce Output Device",
+      "subtitle": "Audio Device",
+      "description": "Keeps your default output device and pinned volumes in place. Runs silently in the background every 10 seconds. If you disable this, your default device and pinned volumes will stop being enforced — macOS may switch devices or reset volumes after sleep, Bluetooth reconnects, etc.",
       "mode": "no-view",
-      "interval": "20s"
+      "interval": "10s"
     },
     {
       "name": "customize-order",
-      "title": "Customize Auto Switch Device Order",
+      "title": "Customize Order (Replaced)",
       "subtitle": "Audio Device",
-      "description": "Set the priority order for input and output devices.",
-      "mode": "view"
+      "description": "This command has been replaced. Use Cmd+Shift+D in Set Output/Input Device to set a default device.",
+      "mode": "view",
+      "disabledByDefault": true
     },
     {
       "name": "favourite",
@@ -213,15 +232,14 @@
     "@raycast/api": "^1.104.4",
     "@raycast/utils": "^2.2.2",
     "@spotxyz/macos-audio-devices": "1.5.0",
-    "execa": "^9.6.1",
-    "prettier": "^3.8.1",
-    "run-applescript": "^7.1.0"
+    "execa": "^9.6.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^25.2.1",
     "@types/react": "^19.2.13",
     "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
     "react": "^19.2.4",
     "typescript": "^5.9.3"
   },

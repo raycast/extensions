@@ -1,5 +1,8 @@
 # Todoist Changelog
 
+## [Show deadline as how many days remains] - 2026-03-31
+- The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
+
 ## [Fix reminders and Create Task NLP parsing] - 2026-03-06
 - Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
 - Fixed Create Task natural-language token cleanup and due-time parsing edge cases.

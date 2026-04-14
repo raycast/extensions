@@ -17,6 +17,8 @@ export interface TaskRecord {
   teamId: string | null;
   assigneeId: string | null;
   headingId: string | null;
+  repeatRule: string | null;
+  repeatTemplateId: string | null;
 }
 
 export interface ProjectRecord {
@@ -65,5 +67,6 @@ export interface WorkspaceSummary {
   role: string;
 }
 
-export type TaskView = "inbox" | "today" | "anytime" | "upcoming" | "someday";
+export type TaskView = "inbox" | "today" | "anytime" | "upcoming" | "someday" | "logbook";
+export type NavigableView = Exclude<TaskView, "logbook">;
 export type TaskState = "open" | "done" | "archived";

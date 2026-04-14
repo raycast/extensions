@@ -15,6 +15,7 @@ interface ModelListItemProps {
   canAddToComparison?: boolean;
   primaryAction?: ActionPanelChildren;
   extraActions?: ActionPanelChildren;
+  accessories?: List.Item.Accessory[];
 }
 
 export const ModelListItem = memo(function ModelListItem({
@@ -23,8 +24,9 @@ export const ModelListItem = memo(function ModelListItem({
   canAddToComparison,
   primaryAction,
   extraActions,
+  accessories: customAccessories,
 }: ModelListItemProps) {
-  const accessories = useMemo(() => {
+  const defaultAccessories = useMemo(() => {
     const acc: List.Item.Accessory[] = [];
 
     // Status indicator (alpha, beta, deprecated)
@@ -56,6 +58,8 @@ export const ModelListItem = memo(function ModelListItem({
 
     return acc;
   }, [model.status, model.reasoning, model.tool_call, model.modalities, model.cost?.input, model.cost?.output]);
+
+  const accessories = customAccessories ?? defaultAccessories;
 
   // Keywords for search — provider terms only.
   // Model name is already searchable via the title prop (fuzzy matched by Raycast).

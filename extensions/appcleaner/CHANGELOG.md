@@ -1,6 +1,6 @@
 # App Cleaner Changelog
 
-## [Allow any app to be an uninstaller] - {PR_MERGE_DATE}
+## [Allow any app to be an uninstaller] - 2026-03-16
 - Replaced a hardcoded list of supported uninstallers with an app picker dropdown that allows any app to be used as an uninstaller.
 
 ## [New uninstaller] - 2025-05-23

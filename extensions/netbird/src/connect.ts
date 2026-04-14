@@ -1,4 +1,5 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, closeMainWindow } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { netbirdUp } from "./utils";
 
 export default async function main() {
@@ -11,14 +12,16 @@ export default async function main() {
 
     await netbirdUp();
 
-    toast.style = Toast.Style.Success;
-    toast.title = "Connected to NetBird";
-    toast.message = "";
-  } catch (error) {
+    await toast.hide();
+
+    await closeMainWindow({ clearRootSearch: true });
+
     await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to connect",
-      message: error instanceof Error ? error.message : String(error),
+      style: Toast.Style.Success,
+      title: "Connected to NetBird",
+      message: "",
     });
+  } catch (error) {
+    await showFailureToast(error, { title: "Failed to connect" });
   }
 }

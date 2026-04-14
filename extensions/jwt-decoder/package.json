@@ -9,7 +9,8 @@
     "zhhanging",
     "joaogf.dev",
     "YourMCGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "ridemountainpig"
   ],
   "categories": [
     "Data",
@@ -36,8 +37,8 @@
     "csv-parse": "^6.1.0",
     "jose": "^6.1.3",
     "raycast-hooks": "^1.0.4",
-    "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

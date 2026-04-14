@@ -52,9 +52,7 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
             const headers = token
               ? {
                   ...options?.headers,
-                  // key=value; Path=/; HttpOnly; Secure; SameSite=Lax
-                  // like above, all cookie information is stored.
-                  Cookie: token,
+                  Authorization: `Bearer ${token}`,
                 }
               : options?.headers;
 
@@ -68,18 +66,9 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
                 headers: headers as any,
               });
 
-              const setCookieHeaders = res?.headers?.["set-cookie"];
-              const sessionTokenLine = setCookieHeaders?.find((header: string) =>
-                header.includes("authjs.session-token="),
-              );
-              if (sessionTokenLine) {
-                // Update session token.
-                // If used before expiration, it will be extended.
-                setSessionToken(sessionTokenLine);
-              }
-
               return {
-                json: () => {
+                ok: true,
+                json: async () => {
                   const errorIdx = res.data.findIndex((item: { error: { json: { message: string } } }) => item.error);
                   const errors = res.data.filter((item: { error: { json: { message: string } } }) => item.error);
                   if (errors.length > 0) {
@@ -105,6 +94,18 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
               const axiosErrorMessage = isAxiosError(err) ? `AxiosError [${err.stack?.split("\n")[0]}]` : "";
               const middlewareErrorMessage = (trpcError.response?.data as { middlewareErrorMessage?: string })
                 ?.middlewareErrorMessage;
+
+              // Session expired → clear token to redirect to login
+              if (middlewareErrorMessage === "SESSION_EXPIRED") {
+                console.error("Session expired - re-login required");
+                setSessionToken("");
+                showFailureToast(new Error("Session has expired"), {
+                  title: "Session Expired",
+                  message: "Please login again",
+                });
+                return { ok: false, json: async () => trpcError.response?.data };
+              }
+
               const errorMessage =
                 trpcError.response?.data?.[0]?.error?.json?.message ||
                 middlewareErrorMessage ||
@@ -120,7 +121,8 @@ export const getTrpcClient = (setSessionToken: (sessionToken: string) => void) =
               console.error(title);
 
               return {
-                json: () => {
+                ok: false,
+                json: async () => {
                   // error can be used in the following way.
                   // console.log((error as TRPCClientError<AppRouter>).message)
                   // console.log((error as TRPCClientError<AppRouter>).shape?.data.code)

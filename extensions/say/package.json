@@ -3,7 +3,7 @@
   "name": "say",
   "title": "Say - Text to Speech",
   "type": "module",
-  "description": "Use the macOS built-in TTS (Live Speech) to say the text you provide.",
+  "description": "Use the built-in text-to-speech engine to say the text you provide.",
   "icon": "say-icon.png",
   "author": "litomore",
   "contributors": [
@@ -181,6 +181,7 @@
     ]
   },
   "dependencies": {
+    "@litomore/win-say": "^0.0.1",
     "@raycast/api": "^1.104.4",
     "@raycast/utils": "^2.2.2",
     "bplist-parser": "^0.3.2",
@@ -197,6 +198,7 @@
     "typescript": "^5.9.3"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

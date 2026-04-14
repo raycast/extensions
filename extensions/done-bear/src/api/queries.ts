@@ -17,6 +17,8 @@ const TASK_FIELDS = `
   teamId
   assigneeId
   headingId
+  repeatRule
+  repeatTemplateId
 `;
 
 const PROJECT_FIELDS = `
@@ -121,6 +123,18 @@ export const VIEWER_QUERY = `
       email
       name
       username
+    }
+  }
+`;
+
+export const MY_WORKSPACES_QUERY = `
+  query MyWorkspaces {
+    myWorkspaces {
+      id
+      name
+      urlKey
+      logoUrl
+      role
     }
   }
 `;

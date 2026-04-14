@@ -1,15 +1,4 @@
-import fetch, {
-  Blob,
-  blobFrom,
-  blobFromSync,
-  File,
-  fileFrom,
-  fileFromSync,
-  FormData,
-  Headers,
-  Request,
-  Response,
-} from "node-fetch";
+import fetch, { Headers, Request, Response } from "node-fetch";
 
 if (!globalThis.fetch) {
   globalThis.fetch = fetch;

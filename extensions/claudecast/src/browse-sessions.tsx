@@ -17,8 +17,10 @@ import {
   listAllSessions,
   getSessionDetail,
   deleteSession,
+  safeTruncate,
   SessionMetadata,
   SessionDetail,
+  PermissionMode,
 } from "./lib/session-parser";
 import { launchClaudeCode } from "./lib/terminal";
 import { ensureClaudeInstalled } from "./lib/claude-cli";
@@ -119,7 +121,7 @@ function SessionItem({
   onDelete: () => void;
 }) {
   const title = session.firstMessage || session.summary || session.id;
-  const truncatedTitle = title.length > 60 ? title.slice(0, 60) + "..." : title;
+  const truncatedTitle = safeTruncate(title, 60, "...");
 
   const accessories: List.Item.Accessory[] = [];
 
@@ -161,6 +163,8 @@ function SessionItem({
     await launchClaudeCode({
       projectPath: session.projectPath,
       sessionId: session.id,
+      permissionMode: session.permissionMode,
+      model: session.model,
     });
     await popToRoot();
   }
@@ -179,6 +183,8 @@ function SessionItem({
       projectPath: session.projectPath,
       sessionId: session.id,
       forkSession: true,
+      permissionMode: session.permissionMode,
+      model: session.model,
     });
     await popToRoot();
   }
@@ -231,6 +237,8 @@ function SessionItem({
                 <SessionDetailView
                   sessionId={session.id}
                   projectPath={session.projectPath}
+                  permissionMode={session.permissionMode}
+                  model={session.model}
                 />
               }
             />
@@ -267,9 +275,13 @@ function SessionItem({
 function SessionDetailView({
   sessionId,
   projectPath,
+  permissionMode,
+  model,
 }: {
   sessionId: string;
   projectPath: string;
+  permissionMode?: PermissionMode;
+  model?: string;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<SessionDetail | null>(null);
@@ -341,6 +353,8 @@ function SessionDetailView({
               await launchClaudeCode({
                 projectPath,
                 sessionId,
+                permissionMode,
+                model,
               });
               await popToRoot();
             }}
@@ -362,6 +376,8 @@ function SessionDetailView({
                 projectPath,
                 sessionId,
                 forkSession: true,
+                permissionMode,
+                model,
               });
               await popToRoot();
             }}
@@ -388,10 +404,7 @@ function formatSessionMarkdown(session: SessionDetail): string {
 
   for (const message of session.messages.slice(0, 20)) {
     const role = message.type === "user" ? "**You**" : "**Claude**";
-    const content =
-      message.content.length > 500
-        ? message.content.slice(0, 500) + "..."
-        : message.content;
+    const content = safeTruncate(message.content, 500, "...");
 
     md += `${role}:\n${content}\n\n`;
   }

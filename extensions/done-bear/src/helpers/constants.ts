@@ -1,23 +1,24 @@
 import { Color, Icon } from "@raycast/api";
-import type { TaskView } from "../api/types";
 
-export const VIEW_CONFIG: Record<TaskView, { title: string; icon: Icon; color: Color }> = {
-  inbox: { title: "Inbox", icon: Icon.Tray, color: Color.Blue },
-  today: { title: "Today", icon: Icon.Star, color: Color.Yellow },
-  anytime: { title: "Anytime", icon: Icon.Calendar, color: Color.Green },
-  upcoming: { title: "Upcoming", icon: Icon.Clock, color: Color.Purple },
-  someday: { title: "Someday", icon: Icon.Cloud, color: Color.Orange },
+import type { NavigableView } from "../api/types";
+
+export const VIEW_CONFIG: Record<NavigableView, { title: string; icon: Icon; color: Color }> = {
+  anytime: { color: Color.Green, icon: Icon.Calendar, title: "Anytime" },
+  inbox: { color: Color.Blue, icon: Icon.Tray, title: "Inbox" },
+  someday: { color: Color.Orange, icon: Icon.Cloud, title: "Someday" },
+  today: { color: Color.Yellow, icon: Icon.Star, title: "Today" },
+  upcoming: { color: Color.Purple, icon: Icon.Clock, title: "Upcoming" },
 };
 
 export const TASK_STATE_ICONS = {
-  open: Icon.Circle,
-  done: Icon.CheckCircle,
   archived: Icon.XMarkCircle,
+  done: Icon.CheckCircle,
+  open: Icon.Circle,
 } as const;
 
 export const PROJECT_STATUS_ICONS: Record<string, Icon> = {
   active: Icon.Folder,
-  on_hold: Icon.Pause,
   done: Icon.CheckCircle,
   dropped: Icon.XMarkCircle,
+  on_hold: Icon.Pause,
 };

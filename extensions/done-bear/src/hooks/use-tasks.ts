@@ -1,11 +1,12 @@
 import { useCachedPromise } from "@raycast/utils";
+
 import { paginateGraphql } from "../api/client";
 import { TASKS_ALL_QUERY, TASKS_QUERY } from "../api/queries";
 import type { TaskRecord, TaskView } from "../api/types";
 import { matchesView } from "../helpers/task-helpers";
 import { ALL_WORKSPACES_ID, resolveAllScope } from "./use-workspaces";
 
-function deduplicateById(items: TaskRecord[]): TaskRecord[] {
+const deduplicateById = (items: TaskRecord[]): TaskRecord[] => {
   const seen = new Set<string>();
   return items.filter((item) => {
     if (seen.has(item.id)) {
@@ -14,24 +15,24 @@ function deduplicateById(items: TaskRecord[]): TaskRecord[] {
     seen.add(item.id);
     return true;
   });
-}
+};
 
-export function useTasks(workspaceId: string | null, view?: TaskView, allWorkspaceIds?: string[]) {
+export const useTasks = (workspaceId: string | null, view?: TaskView, allWorkspaceIds?: string[]) => {
   const { isAll, cacheKey } = resolveAllScope(workspaceId, allWorkspaceIds);
 
   const { data, isLoading, error, revalidate } = useCachedPromise(
     (key: string) => {
       if (isAll) {
         return paginateGraphql<TaskRecord>({
+          nodeKey: "tasks",
           query: TASKS_ALL_QUERY,
           variables: { workspaceIds: allWorkspaceIds },
-          nodeKey: "tasks",
         });
       }
       return paginateGraphql<TaskRecord>({
+        nodeKey: "tasks",
         query: TASKS_QUERY,
         variables: { workspaceId: key },
-        nodeKey: "tasks",
       });
     },
     [cacheKey],
@@ -50,5 +51,5 @@ export function useTasks(workspaceId: string | null, view?: TaskView, allWorkspa
     tasks = unique.filter((task) => task.completedAt === null && task.archivedAt === null);
   }
 
-  return { tasks, isLoading, error, revalidate };
-}
+  return { error, isLoading, revalidate, tasks };
+};

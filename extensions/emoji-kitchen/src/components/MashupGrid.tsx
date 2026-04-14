@@ -35,6 +35,7 @@ export function MashupGrid({ baseEmoji, index }: MashupGridProps) {
             content={combo.url}
             title={`${baseEmoji.e} + ${combo.otherEmoji}`}
             subtitle={combo.otherAlt}
+            keywords={[...combo.otherAlt.split("_"), baseEmoji.a]}
             actions={
               <ActionPanel>
                 <Action
