@@ -2,7 +2,7 @@
 
 ## [Models Update] - {PR_MERGE_DATE}
 
-- Add latest OpenAI flagship models: GPT-5.4, GPT-5.4 mini, GPT-5.4 nano, o3-pro
+- Add latest OpenAI flagship models: GPT-5.4, GPT-5.4 mini, GPT-5.4 nano
 - Add pricing for new models
 
 ## [API Pricing] - 2025-06-26

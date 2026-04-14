@@ -52,10 +52,6 @@ const models = [
     value: "o3-mini"
   },
   {
-    title: "o3-pro",
-    value: "o3-pro"
-  },
-  {
     title: "o4-mini",
     value: "o4-mini"
   }

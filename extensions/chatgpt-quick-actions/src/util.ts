@@ -55,8 +55,6 @@ export function estimatePrice(input_token: number, output_token: number, model: 
     price = (input_token * 2 + output_token * 8) / 10000;
   } else if (model == "o3-mini") {
     price = (input_token * 1.1 + output_token * 4.4) / 10000;
-  } else if (model == "o3-pro") {
-    price = (input_token * 20 + output_token * 80) / 10000;
   } else if (model == "o4-mini") {
     price = (input_token * 1.1 + output_token * 4.4) / 10000;
   } else {
