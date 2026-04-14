@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [New Features & Improvements] - {PR_MERGE_DATE}
+## [New Features & Improvements] - 2026-04-14
 
 - Added `Switch iTerm Session` command — unified session switcher listing all open panes grouped by tab, with a window filter dropdown (shown when multiple windows are open), persistent custom tags per session (Cmd+T to assign), and descriptive errors when the `iterm2` Python package is missing
 - Added `Search Projects in iTerm` command to browse a configurable projects directory (`~/Projects` by default) and open folders in new tab, new window, horizontal split, or vertical split — with git branch and version tag badges
