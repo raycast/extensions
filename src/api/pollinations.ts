@@ -1,9 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  apiKey?: string;
-}
-
 export interface Message {
   role: "system" | "user" | "assistant";
   content: string;

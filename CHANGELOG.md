@@ -1,6 +1,6 @@
 # Pollinations AI Changelog
 
-## [Initial Version] - 2026-04-14
+## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
 - Chat with AI — streaming conversation interface powered by Pollinations.ai
