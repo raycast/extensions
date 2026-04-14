@@ -1,6 +1,11 @@
 # Agent Usage Changelog
 
-<<<<<<< HEAD
+## [Add Copilot Usage Provider] - {PR_MERGE_DATE}
+
+- Add Copilot usage provider with GitHub Copilot internal API support
+- Auto-detect Copilot token from `GH_TOKEN` / `GITHUB_TOKEN` with preference fallback
+- Add Copilot visibility preference and list/menu bar entries
+
 ## [Add Windows Support] - 2026-04-12
 
 - Add Windows support
@@ -31,7 +36,7 @@
 - Extract shared utilities (`decodeJwtPayload`, `getRemainingPercent`, `formatDuration`, `cleanString`) to eliminate code duplication
 - Deduplicate replenish-time calculation in Amp renderer
 - Simplify token resolution in Kimi fetcher
-- Document magic strings in Droid auth (WorkOS client id, token refresh buffer)
+- Document magic strings in Droid auth (WorkOS client ID, token refresh buffer)
 - Name Claude OAuth beta header as constant with update instructions
 
 ### Bug Fixes
@@ -48,13 +53,13 @@
 - Merge split kimi/fetcher import statements
 - Fix z.ai preference label spacing
 
-## [Add Copilot Usage Provider] - 2026-04-13
-
-- Add Copilot usage provider with GitHub Copilot internal API support
-- Auto-detect Copilot token from `GH_TOKEN` / `GITHUB_TOKEN` with preference fallback
-- Add Copilot visibility preference and list/menu bar entries
-
 ## [Settings Shortcut] - 2026-04-04
+
+### Improvements
+
+- Add a default keyboard shortcut for `Open … Settings` actions using Raycast’s `Keyboard.Shortcut.Common.Open`
+
+## [Progress Bars & Zero-Config Auth] - 2026-03-16
 
 ### New Features
 
