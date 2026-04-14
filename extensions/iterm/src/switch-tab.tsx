@@ -12,7 +12,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { checkIt2apiReady } from "./core/it2api";
+import { checkIt2apiReadyAsync } from "./core/it2api";
 import { Session, activateSession, listSessions } from "./core/it2api-runner";
 import { PermissionErrorScreen, isPermissionError } from "./core/permission-error-screen";
 
@@ -87,16 +87,34 @@ export default function Command() {
     });
   }, []);
 
-  const prerequisite = useMemo(() => checkIt2apiReady(), []);
+  const [prerequisite, setPrerequisite] = useState<{ ready: boolean; reason?: string } | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await checkIt2apiReadyAsync();
+        if (mounted) setPrerequisite(res.ready ? { ready: true } : { ready: false, reason: res.reason });
+      } catch (e) {
+        if (mounted) setPrerequisite({ ready: false, reason: (e as Error).message });
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const checking = prerequisite === null;
 
   const { tabs, it2apiError } = useMemo(() => {
-    if (!prerequisite.ready) return { tabs: [] as Tab[], it2apiError: prerequisite.reason };
+    if (checking) return { tabs: [] as Tab[], it2apiError: undefined };
+    if (!prerequisite!.ready) return { tabs: [] as Tab[], it2apiError: prerequisite!.reason };
     try {
       return { tabs: groupByTab(listSessions()), it2apiError: undefined };
     } catch (e) {
       return { tabs: [] as Tab[], it2apiError: (e as Error).message };
     }
-  }, [prerequisite]);
+  }, [prerequisite, checking]);
 
   const switchTo = async (session: Session) => {
     try {
@@ -143,6 +161,13 @@ export default function Command() {
         ) : undefined
       }
     >
+      {checking && (
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="Checking iTerm2..."
+          description="Verifying iTerm2 Python API availability"
+        />
+      )}
       {it2apiError && (
         <List.EmptyView icon={Icon.ExclamationMark} title="Cannot connect to iTerm2" description={it2apiError} />
       )}

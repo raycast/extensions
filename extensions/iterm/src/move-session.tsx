@@ -13,7 +13,11 @@ const groupByWindow = (sessions: Session[]): { windowId: string; label: string; 
     const existing = map.get(s.windowId) ?? [];
     map.set(s.windowId, [...existing, s]);
   }
-  return [...map.entries()].map(([windowId, ss]) => ({ windowId, label: ss[0].name, sessions: ss }));
+  return Array.from(map.entries()).map(([windowId, ss], index) => ({
+    windowId,
+    label: `Window ${index + 1}`,
+    sessions: ss,
+  }));
 };
 
 const moveToNewWindowScript = `
