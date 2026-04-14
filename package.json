@@ -5,10 +5,24 @@
   "description": "Chat with AI models powered by Pollinations.ai — free, no account required",
   "icon": "icon.png",
   "author": "mhmtranas",
-  "categories": ["Productivity", "Developer Tools"],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
-  "keywords": ["ai", "chat", "llm", "pollinations", "gpt", "grammar", "translate", "free"],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "ai",
+    "chat",
+    "llm",
+    "pollinations",
+    "gpt",
+    "grammar",
+    "translate",
+    "free"
+  ],
   "commands": [
     {
       "name": "chat",
@@ -51,7 +65,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
