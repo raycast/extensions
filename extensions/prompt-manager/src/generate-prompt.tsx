@@ -34,7 +34,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "Validation Error",
-        description: "Please describe what prompt you want to generate",
+        message: "Please describe what prompt you want to generate",
       });
       return;
     }
@@ -43,7 +43,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "AI Access Error",
-        description: "You need Raycast Pro to use this feature",
+        message: "You need Raycast Pro to use this feature",
       });
       return;
     }
@@ -85,7 +85,7 @@ export default function Command() {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to generate prompt",
-        description: error instanceof Error ? error.message : String(error),
+        message: error instanceof Error ? error.message : String(error),
       });
       setStep("input");
     }
@@ -172,7 +172,7 @@ ${generatedPrompt.content}
         <ActionPanel>
           <Action.SubmitForm
             title="Generate with AI"
-            icon={Icon.MagicWand}
+            icon={Icon.Stars}
             onSubmit={handleSubmit}
           />
         </ActionPanel>
