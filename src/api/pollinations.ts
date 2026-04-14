@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
+export interface Preferences {
   apiKey?: string;
 }
 
@@ -61,6 +61,29 @@ function buildHeaders(): Record<string, string> {
     headers["Authorization"] = `Bearer ${key}`;
   }
   return headers;
+}
+
+// ─── Friendly error messages ──────────────────────────────────────────────────
+
+export function friendlyError(err: Error): { title: string; message: string } {
+  if (err instanceof ApiError) {
+    if (err.isAuthError)
+      return {
+        title: "Invalid API Key",
+        message: "Check your key or remove it to use the free tier. (⌘ ,)",
+      };
+    if (err.isRateLimited)
+      return {
+        title: "Rate Limited",
+        message: "Add an API key to remove the rate limit. (⌘ ,)",
+      };
+    if (err.isInsufficientBalance)
+      return {
+        title: "Insufficient Balance",
+        message: "Your API key does not have enough credits.",
+      };
+  }
+  return { title: "Error", message: err.message };
 }
 
 async function assertOk(response: Response): Promise<void> {

@@ -6,17 +6,14 @@ import {
   Detail,
   Form,
   Icon,
-  List,
   openExtensionPreferences,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
 import { useCallback, useState } from "react";
-import { ApiError, getTierInfo, singleChat } from "./api/pollinations";
+import { friendlyError, getTierInfo, singleChat } from "./api/pollinations";
 import type { Message } from "./api/pollinations";
 import { getStoredModel, useModels } from "./hooks/useModels";
-import type { PollinationsModel } from "./hooks/useModels";
 
 const SYSTEM_PROMPT: Message = {
   role: "system",
@@ -24,137 +21,51 @@ const SYSTEM_PROMPT: Message = {
     "You are a helpful AI assistant. Be concise and clear. Format responses in Markdown when appropriate.",
 };
 
-function friendlyError(err: Error): { title: string; message: string } {
-  if (err instanceof ApiError) {
-    if (err.isAuthError)
-      return {
-        title: "Geçersiz API Anahtarı",
-        message: "Anahtarı kontrol edin veya ücretsiz katman için kaldırın.",
-      };
-    if (err.isRateLimited)
-      return {
-        title: "Hız Limiti Aşıldı",
-        message: "API anahtarı ekleyerek limiti kaldırabilirsiniz. (⌘ ,)",
-      };
-  }
-  return { title: "Hata", message: err.message };
-}
-
-function ModelPicker({
-  models,
-  currentModel,
-  onSelect,
-}: {
-  models: PollinationsModel[];
-  currentModel: string;
-  onSelect: (model: string) => void;
-}) {
-  const { pop } = useNavigation();
-
-  const free = models.filter((m) => !m.isPaid);
-  const paid = models.filter((m) => m.isPaid);
-  const grouped = [
-    { label: "Ücretsiz", items: free },
-    { label: "🔑 Ücretli (API anahtarı gerekli)", items: paid },
-  ].filter((g) => g.items.length > 0);
-
-  return (
-    <List navigationTitle="Model Seç" searchBarPlaceholder="Model ara…">
-      {grouped.map(({ label, items }) => (
-        <List.Section key={label} title={label}>
-          {items.map((m) => {
-            const isCurrent = m.name === currentModel;
-            const badges: List.Item.Accessory[] = [];
-            if (isCurrent)
-              badges.push({
-                icon: { source: Icon.Checkmark, tintColor: Color.Green },
-              });
-            if (m.reasoning)
-              badges.push({ tag: { value: "reasoning", color: Color.Purple } });
-            if (m.vision)
-              badges.push({ tag: { value: "vision", color: Color.Blue } });
-            if (m.search)
-              badges.push({ tag: { value: "search", color: Color.Green } });
-            return (
-              <List.Item
-                key={m.name}
-                title={m.name}
-                subtitle={m.description}
-                accessories={badges}
-                actions={
-                  <ActionPanel>
-                    <Action
-                      title="Bu Modeli Seç"
-                      icon={Icon.CheckCircle}
-                      onAction={async () => {
-                        await onSelect(m.name);
-                        pop();
-                      }}
-                    />
-                  </ActionPanel>
-                }
-              />
-            );
-          })}
-        </List.Section>
-      ))}
-    </List>
-  );
-}
-
 export default function QuickAskCommand() {
   const { models, selectedModel, activeModel, selectModel, isLoadingModels } =
     useModels();
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const { push } = useNavigation();
 
   const tier = getTierInfo();
 
-  const openModelPicker = useCallback(() => {
-    push(
-      <ModelPicker
-        models={models}
-        currentModel={selectedModel}
-        onSelect={selectModel}
-      />,
-    );
-  }, [push, models, selectedModel, selectModel]);
+  const handleSubmit = useCallback(
+    async (values: { question: string }) => {
+      const q = values.question.trim();
+      if (!q) return;
 
-  const handleSubmit = useCallback(async (values: { question: string }) => {
-    const q = values.question.trim();
-    if (!q) return;
+      if (tier.modelNeedsKey && !tier.hasKey) {
+        await showToast({
+          title: "API Key Required",
+          message: `"${selectedModel}" requires an API key. Add one with ⌘ ,.`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
 
-    if (tier.modelNeedsKey && !tier.hasKey) {
-      await showToast({
-        title: "API Anahtarı Gerekli",
-        message: `"${selectedModel}" modeli için API anahtarı gereklidir. ⌘ , ile ekleyin.`,
-        style: Toast.Style.Failure,
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    setAnswer(null);
-    try {
-      const model = await getStoredModel(); // always read fresh, same as useChat
-      const result = await singleChat(
-        [SYSTEM_PROMPT, { role: "user", content: q }],
-        model,
-      );
-      setAnswer(result);
-    } catch (err) {
-      const e = err instanceof Error ? err : new Error(String(err));
-      const { title, message } = friendlyError(e);
-      await showToast({ title, message, style: Toast.Style.Failure });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      setIsLoading(true);
+      setAnswer(null);
+      try {
+        const model = await getStoredModel();
+        const result = await singleChat(
+          [SYSTEM_PROMPT, { role: "user", content: q }],
+          model,
+        );
+        setAnswer(result);
+      } catch (err) {
+        const e = err instanceof Error ? err : new Error(String(err));
+        const { title, message } = friendlyError(e);
+        await showToast({ title, message, style: Toast.Style.Failure });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedModel, tier],
+  );
 
   if (answer !== null) {
-    const markdown = `## Soru\n\n${question}\n\n---\n\n## Cevap\n\n${answer}`;
+    const markdown = `## Question\n\n${question}\n\n---\n\n## Answer\n\n${answer}`;
     return (
       <Detail
         markdown={markdown}
@@ -178,19 +89,19 @@ export default function QuickAskCommand() {
         actions={
           <ActionPanel>
             <Action
-              title="Cevabı Kopyala"
+              title="Copy Answer"
               icon={Icon.Clipboard}
               onAction={async () => {
                 await Clipboard.copy(answer);
                 await showToast({
-                  title: "Kopyalandı",
+                  title: "Copied",
                   style: Toast.Style.Success,
                 });
               }}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
             <Action
-              title="Yeni Soru Sor"
+              title="Ask New Question"
               icon={Icon.RotateClockwise}
               onAction={() => {
                 setAnswer(null);
@@ -199,18 +110,10 @@ export default function QuickAskCommand() {
               shortcut={{ modifiers: ["cmd"], key: "n" }}
             />
             <Action
-              title="Model Değiştir"
-              icon={Icon.Switch}
-              onAction={openModelPicker}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
-            />
-            <Action
-              title={
-                tier.hasKey ? "API Anahtarını Değiştir" : "API Anahtarı Ekle"
-              }
+              title={tier.hasKey ? "Change API Key" : "Add API Key"}
               icon={Icon.Key}
               onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
             />
           </ActionPanel>
         }
@@ -218,9 +121,8 @@ export default function QuickAskCommand() {
     );
   }
 
-  const tierText = activeModel
-    ? `${tier.hasKey ? "Premium" : "Ücretsiz"} · ${activeModel.description || selectedModel}`
-    : selectedModel;
+  const free = models.filter((m) => !m.isPaid);
+  const paid = models.filter((m) => m.isPaid);
 
   return (
     <Form
@@ -228,32 +130,47 @@ export default function QuickAskCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Sor"
+            title="Ask"
             icon={Icon.Message}
             onSubmit={handleSubmit}
           />
           <Action
-            title="Model Değiştir"
-            icon={Icon.Switch}
-            onAction={openModelPicker}
-            shortcut={{ modifiers: ["cmd"], key: "m" }}
-          />
-          <Action
-            title={
-              tier.hasKey ? "API Anahtarını Değiştir" : "API Anahtarı Ekle"
-            }
+            title={tier.hasKey ? "Change API Key" : "Add API Key"}
             icon={Icon.Key}
             onAction={openExtensionPreferences}
-            shortcut={{ modifiers: ["cmd"], key: "," }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
           />
         </ActionPanel>
       }
     >
-      <Form.Description title="Model" text={tierText} />
+      <Form.Dropdown
+        id="model"
+        title="Model"
+        value={selectedModel}
+        onChange={selectModel}
+      >
+        {free.length > 0 && (
+          <Form.Dropdown.Section title="Free">
+            {free.map((m) => (
+              <Form.Dropdown.Item key={m.name} value={m.name} title={m.name} />
+            ))}
+          </Form.Dropdown.Section>
+        )}
+        {paid.length > 0 && (
+          <Form.Dropdown.Section title="Paid (API key required)">
+            {paid.map((m) => (
+              <Form.Dropdown.Item key={m.name} value={m.name} title={m.name} />
+            ))}
+          </Form.Dropdown.Section>
+        )}
+        {models.length === 0 && (
+          <Form.Dropdown.Item value={selectedModel} title={selectedModel} />
+        )}
+      </Form.Dropdown>
       <Form.TextArea
         id="question"
-        title="Soru"
-        placeholder="Ne öğrenmek istersiniz?"
+        title="Question"
+        placeholder="What do you want to know?"
         value={question}
         onChange={setQuestion}
         autoFocus

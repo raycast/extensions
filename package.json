@@ -4,7 +4,7 @@
   "title": "Pollinations AI",
   "description": "Chat with AI models powered by Pollinations.ai — free, no account required",
   "icon": "icon.png",
-  "author": "mehmet.tanas",
+  "author": "mhmtrabas",
   "categories": ["Productivity", "Developer Tools"],
   "license": "MIT",
   "commands": [
@@ -18,6 +18,18 @@
       "name": "quick-ask",
       "title": "Quick Ask",
       "description": "Ask a one-shot question and get an instant answer",
+      "mode": "view"
+    },
+    {
+      "name": "fix-grammar",
+      "title": "Fix Grammar",
+      "description": "Correct grammar and spelling in any language without changing the meaning",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate text into any language using AI",
       "mode": "view"
     }
   ],

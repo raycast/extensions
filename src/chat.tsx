@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCallback } from "react";
-import { ApiError, getTierInfo } from "./api/pollinations";
+import { friendlyError, getTierInfo } from "./api/pollinations";
 import { useChat } from "./hooks/useChat";
 import type { ChatMessage } from "./hooks/useChat";
 import { useModels } from "./hooks/useModels";
@@ -29,43 +29,31 @@ function buildMarkdown(
     return [
       "# 🌸 Pollinations AI",
       "",
-      "Merhaba! Size nasıl yardımcı olabilirim?",
+      "Hello! How can I help you today?",
       "",
-      "> **⌘ ↵** mesaj gönder &nbsp;·&nbsp; **⌘ M** model değiştir &nbsp;·&nbsp; **⌘ ⇧ ⌫** geçmişi temizle",
+      "> **⌘ ↵** send message &nbsp;·&nbsp; **⌘ M** change model &nbsp;·&nbsp; **⌘ ⇧ ⌫** clear history",
     ].join("\n");
   }
 
   const lines: string[] = [];
   for (const msg of messages) {
     if (msg.role === "user") {
-      lines.push("---", "", "**Siz**", "", msg.content, "");
+      lines.push("---", "", "**You**", "", msg.content, "");
     } else {
-      lines.push("---", "", "**Asistan**", "", msg.content, "");
+      lines.push("---", "", "**Assistant**", "", msg.content, "");
     }
   }
   if (streamingContent) {
-    lines.push("---", "", "**Asistan** *(yazıyor…)*", "", streamingContent, "");
+    lines.push(
+      "---",
+      "",
+      "**Assistant** *(typing…)*",
+      "",
+      streamingContent,
+      "",
+    );
   }
   return lines.join("\n");
-}
-
-// ─── Error messages ───────────────────────────────────────────────────────────
-
-function friendlyError(err: Error): { title: string; message: string } {
-  if (err instanceof ApiError) {
-    if (err.isAuthError)
-      return {
-        title: "Geçersiz API Anahtarı",
-        message:
-          "Anahtarı kontrol edin veya ücretsiz katman için kaldırın. (⌘ ,)",
-      };
-    if (err.isRateLimited)
-      return {
-        title: "Hız Limiti Aşıldı",
-        message: "API anahtarı ekleyerek limiti kaldırabilirsiniz. (⌘ ,)",
-      };
-  }
-  return { title: "Hata", message: err.message };
 }
 
 // ─── Model picker ─────────────────────────────────────────────────────────────
@@ -84,12 +72,12 @@ function ModelPicker({
   const free = models.filter((m) => !m.isPaid);
   const paid = models.filter((m) => m.isPaid);
   const grouped = [
-    { label: "Ücretsiz", items: free },
-    { label: "🔑 Ücretli (API anahtarı gerekli)", items: paid },
+    { label: "Free", items: free },
+    { label: "🔑 Paid (API key required)", items: paid },
   ].filter((g) => g.items.length > 0);
 
   return (
-    <List navigationTitle="Model Seç" searchBarPlaceholder="Model ara…">
+    <List navigationTitle="Select Model" searchBarPlaceholder="Search models…">
       {grouped.map(({ label, items }) => (
         <List.Section key={label} title={label}>
           {items.map((m) => {
@@ -115,7 +103,7 @@ function ModelPicker({
                 actions={
                   <ActionPanel>
                     <Action
-                      title="Bu Modeli Seç"
+                      title="Select Model"
                       icon={Icon.CheckCircle}
                       onAction={() => {
                         onSelect(m.name);
@@ -139,11 +127,11 @@ function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
   const { pop } = useNavigation();
   return (
     <Form
-      navigationTitle="Mesaj Gönder"
+      navigationTitle="Send Message"
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Gönder"
+            title="Send"
             icon={Icon.Message}
             onSubmit={(values: { message: string }) => {
               const text = values.message.trim();
@@ -153,7 +141,7 @@ function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
             }}
           />
           <Action
-            title="İptal"
+            title="Cancel"
             icon={Icon.Xmark}
             onAction={pop}
             shortcut={{ modifiers: ["cmd"], key: "escape" }}
@@ -164,7 +152,7 @@ function SendMessageForm({ onSend }: { onSend: (text: string) => void }) {
       <Form.TextArea
         id="message"
         title=""
-        placeholder="Mesajınızı yazın…"
+        placeholder="Type your message…"
         autoFocus
       />
     </Form>
@@ -188,9 +176,23 @@ export default function ChatCommand() {
 
   const tier = getTierInfo();
 
+  const handleSend = useCallback(
+    async (text: string) => {
+      try {
+        await sendMessage(text);
+      } catch (err) {
+        const { title, message } = friendlyError(
+          err instanceof Error ? err : new Error(String(err)),
+        );
+        await showToast({ title, message, style: Toast.Style.Failure });
+      }
+    },
+    [sendMessage],
+  );
+
   const openInput = useCallback(() => {
-    push(<SendMessageForm onSend={sendMessage} />);
-  }, [push, sendMessage]);
+    push(<SendMessageForm onSend={handleSend} />);
+  }, [push, handleSend]);
 
   const openModelPicker = useCallback(() => {
     push(
@@ -206,23 +208,9 @@ export default function ChatCommand() {
     const last = [...messages].reverse().find((m) => m.role === "assistant");
     if (last) {
       await Clipboard.copy(last.content);
-      await showToast({ title: "Kopyalandı", style: Toast.Style.Success });
+      await showToast({ title: "Copied", style: Toast.Style.Success });
     }
   }, [messages]);
-
-  const handleSend = useCallback(
-    async (text: string) => {
-      try {
-        await sendMessage(text);
-      } catch (err) {
-        const { title, message } = friendlyError(
-          err instanceof Error ? err : new Error(String(err)),
-        );
-        await showToast({ title, message, style: Toast.Style.Failure });
-      }
-    },
-    [sendMessage],
-  );
 
   const markdown = buildMarkdown(messages, streamingContent);
 
@@ -233,13 +221,13 @@ export default function ChatCommand() {
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label
-            title="Katman"
+            title="Tier"
             icon={
               tier.hasKey
                 ? { source: Icon.Key, tintColor: Color.Green }
                 : { source: Icon.LockUnlocked, tintColor: Color.Orange }
             }
-            text={tier.hasKey ? "Premium" : "Ücretsiz"}
+            text={tier.hasKey ? "Premium" : "Free"}
           />
           <Detail.Metadata.Label title="Model" text={selectedModel} />
           {activeModel?.description ? (
@@ -248,15 +236,15 @@ export default function ChatCommand() {
           <Detail.Metadata.Separator />
           {!tier.hasKey && tier.modelNeedsKey ? (
             <Detail.Metadata.Label
-              title="Uyarı"
+              title="Warning"
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-              text="Bu model API anahtarı gerektirir"
+              text="This model requires an API key"
             />
           ) : !tier.hasKey ? (
             <Detail.Metadata.Label
-              title="İpucu"
+              title="Tip"
               icon={{ source: Icon.Info, tintColor: Color.Blue }}
-              text="API anahtarı ile daha fazla model açılır"
+              text="Add an API key to unlock more models"
             />
           ) : null}
         </Detail.Metadata>
@@ -265,14 +253,14 @@ export default function ChatCommand() {
         <ActionPanel>
           <ActionPanel.Section>
             <Action
-              title="Mesaj Gönder"
+              title="Send Message"
               icon={Icon.Message}
               onAction={openInput}
               shortcut={{ modifiers: ["cmd"], key: "return" }}
             />
             {isLoading && (
               <Action
-                title="Durdur"
+                title="Stop"
                 icon={Icon.Stop}
                 onAction={stopStreaming}
                 shortcut={{ modifiers: ["cmd"], key: "." }}
@@ -282,14 +270,14 @@ export default function ChatCommand() {
 
           <ActionPanel.Section>
             <Action
-              title="Model Değiştir"
+              title="Change Model"
               icon={Icon.Switch}
               onAction={openModelPicker}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
             />
             {messages.length > 0 && (
               <Action
-                title="Son Cevabı Kopyala"
+                title="Copy Last Response"
                 icon={Icon.Clipboard}
                 onAction={copyLast}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
@@ -297,7 +285,7 @@ export default function ChatCommand() {
             )}
             {messages.length > 0 && (
               <Action
-                title="Geçmişi Temizle"
+                title="Clear History"
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={clearHistory}
@@ -306,14 +294,12 @@ export default function ChatCommand() {
             )}
           </ActionPanel.Section>
 
-          <ActionPanel.Section title="Ayarlar">
+          <ActionPanel.Section title="Settings">
             <Action
-              title={
-                tier.hasKey ? "API Anahtarını Değiştir" : "API Anahtarı Ekle"
-              }
+              title={tier.hasKey ? "Change API Key" : "Add API Key"}
               icon={Icon.Key}
               onAction={openExtensionPreferences}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
             />
           </ActionPanel.Section>
         </ActionPanel>

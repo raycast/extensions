@@ -61,7 +61,7 @@ export function useChat() {
           const errMsg: ChatMessage = {
             id: (Date.now() + 1).toString(),
             role: "assistant",
-            content: `**Hata:** ${err.message}`,
+            content: `**Error:** ${err.message}`,
           };
           setMessages((prev) => [...prev, errMsg]);
           setStreamingContent("");

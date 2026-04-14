@@ -1,9 +1,6 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { useEffect, useReducer, useState } from "react";
-
-interface Preferences {
-  apiKey?: string;
-}
+import type { Preferences } from "../api/pollinations";
 
 export interface PollinationsModel {
   name: string;
