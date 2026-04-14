@@ -19,3 +19,7 @@ dist/
 # Miscellaneous
 stuff.zip
 SCREENSHOTS_GUIDE.md
+
+.omc/
+.claude/
+
