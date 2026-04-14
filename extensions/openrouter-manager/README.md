@@ -1,4 +1,4 @@
-# OpenRouter
+# OpenRouter Manager
 
 Raycast extension to view your OpenRouter credits and manage your API keys.
 
