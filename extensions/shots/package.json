@@ -9,7 +9,7 @@
     "macOS"
   ],
   "categories": [
-    "Productivity"
+    "Applications"
   ],
   "license": "MIT",
   "preferences": [
@@ -115,7 +115,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1030.0",
     "@raycast/api": "^1.104.12",
-    "@raycast/utils": "^2.2.3",
     "sharp": "^0.34.5",
     "uuid": "^11.1.0"
   },

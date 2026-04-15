@@ -6,6 +6,6 @@ export { ConfigValidationError, formatPreferenceFieldList } from "./config-core"
 export type { ExtensionConfig, RawPreferences };
 
 export function loadConfig(): ExtensionConfig {
-  const preferences = getPreferenceValues<RawPreferences>();
-  return parsePreferences(preferences);
+  const preferences = getPreferenceValues<Preferences>();
+  return parsePreferences(preferences as RawPreferences);
 }
