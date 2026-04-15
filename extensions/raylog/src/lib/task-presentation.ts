@@ -12,14 +12,11 @@ export function matchesTaskSearch(task: TaskRecord, normalizedSearch: string, in
   return task.workLogs.some((workLog) => workLog.body.toLowerCase().includes(normalizedSearch));
 }
 
-export function buildTaskDetailMarkdown(
-  task: TaskRecord,
-  options?: { includeTopSpacer?: boolean; emptyBodyFallback?: string },
-): string {
+export function buildTaskDetailMarkdown(task: TaskRecord, options?: { includeTopSpacer?: boolean }): string {
   const topSpacer = options?.includeTopSpacer ? "⁠\n" : "";
   const safeHeader = escapeMarkdown(task.header);
   const trimmedBody = task.body.trim();
-  const body = trimmedBody || options?.emptyBodyFallback || "";
+  const body = trimmedBody;
   const createdLabel = `◷ Created ${escapeMarkdown(formatCompactDateTime(task.createdAt))}`;
   const wasEdited = new Date(task.updatedAt).getTime() > new Date(task.createdAt).getTime();
   const taskTimeline = wasEdited

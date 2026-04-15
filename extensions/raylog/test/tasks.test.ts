@@ -7,6 +7,7 @@ import {
   getTaskFilterLabel,
   getMenuBarTask,
   getTaskListIndicators,
+  getRelativeDueTone,
   validateTaskInput,
 } from "../src/lib/tasks";
 import type { TaskRecord } from "../src/lib/types";
@@ -138,6 +139,39 @@ test("uses the configured due soon day threshold", () => {
   );
 });
 
+test("uses the configured due soon day threshold for open task sorting", () => {
+  const dueInFourteenDays = new Date();
+  dueInFourteenDays.setDate(dueInFourteenDays.getDate() + 14);
+  const dueInThirtyDays = new Date();
+  dueInThirtyDays.setDate(dueInThirtyDays.getDate() + 30);
+
+  const tasks = [
+    createTask({
+      id: "no-date",
+      status: "todo",
+      dueDate: null,
+      updatedAt: "2026-03-31T00:00:00.000Z",
+    }),
+    createTask({
+      id: "due-in-thirty",
+      status: "todo",
+      dueDate: dueInThirtyDays.toISOString(),
+      updatedAt: "2026-03-31T00:00:00.000Z",
+    }),
+    createTask({
+      id: "due-in-fourteen",
+      status: "todo",
+      dueDate: dueInFourteenDays.toISOString(),
+      updatedAt: "2026-03-31T00:00:00.000Z",
+    }),
+  ];
+
+  assert.deepEqual(
+    filterTasks(tasks, "open", "", 14).map((task) => task.id),
+    ["due-in-fourteen", "due-in-thirty", "no-date"],
+  );
+});
+
 test("search matches header and body within the selected view", () => {
   const tasks = [
     createTask({
@@ -227,15 +261,16 @@ test("shows only the future start indicator when both dates are enabled", () => 
       startDate: start.toISOString(),
     }),
     { dueDate: true, pastDue: true, startDate: true },
+    7,
   );
 
   assert.equal(indicators.length, 2);
-  assert.equal(indicators[0]?.kind, "due");
-  assert.equal(indicators[0]?.tone, "warning");
-  assert.equal(indicators[0]?.text, "3d");
-  assert.equal(indicators[1]?.kind, "start");
-  assert.equal(indicators[1]?.tone, "info");
-  assert.equal(indicators[1]?.text, "Tomorrow");
+  assert.equal(indicators[0]?.kind, "start");
+  assert.equal(indicators[0]?.tone, "info");
+  assert.equal(indicators[0]?.text, "Tomorrow");
+  assert.equal(indicators[1]?.kind, "due");
+  assert.equal(indicators[1]?.tone, "warning");
+  assert.equal(indicators[1]?.text, "3d");
 });
 
 test("shows only the due indicator when the start date is in the past", () => {
@@ -250,6 +285,7 @@ test("shows only the due indicator when the start date is in the past", () => {
       startDate: pastStart.toISOString(),
     }),
     { dueDate: true, pastDue: true, startDate: true },
+    7,
   );
 
   assert.deepEqual(
@@ -259,6 +295,44 @@ test("shows only the due indicator when the start date is in the past", () => {
       tone: indicator.tone,
     })),
     [{ kind: "due", text: "5d", tone: "warning" }],
+  );
+});
+
+test("shows only the due indicator when start and due dates are the same day", () => {
+  const sameDay = new Date();
+  sameDay.setDate(sameDay.getDate() + 1);
+
+  const indicators = getTaskListIndicators(
+    createTask({
+      dueDate: sameDay.toISOString(),
+      startDate: sameDay.toISOString(),
+    }),
+    { dueDate: true, pastDue: true, startDate: true },
+    7,
+  );
+
+  assert.deepEqual(
+    indicators.map((indicator) => indicator.kind),
+    ["due"],
+  );
+});
+
+test("shows same-day start indicator when due indicators are disabled", () => {
+  const sameDay = new Date();
+  sameDay.setDate(sameDay.getDate() + 1);
+
+  const indicators = getTaskListIndicators(
+    createTask({
+      dueDate: sameDay.toISOString(),
+      startDate: sameDay.toISOString(),
+    }),
+    { dueDate: false, pastDue: true, startDate: true },
+    7,
+  );
+
+  assert.deepEqual(
+    indicators.map((indicator) => indicator.kind),
+    ["start"],
   );
 });
 
@@ -334,6 +408,30 @@ test("uses scheduled due visuals for tasks beyond the due-soon window", () => {
   assert.equal(indicators[0]?.kind, "due");
   assert.equal(indicators[0]?.tone, "scheduled");
   assert.match(indicators[0]?.text ?? "", /^[A-Z][a-z]{2} \d{1,2}$/);
+});
+
+test("uses the configured due-soon window for due indicator warning tone", () => {
+  const later = new Date();
+  later.setDate(later.getDate() + 14);
+
+  const indicators = getTaskListIndicators(
+    createTask({
+      dueDate: later.toISOString(),
+    }),
+    { dueDate: true, pastDue: true, startDate: false },
+    14,
+  );
+
+  assert.equal(indicators[0]?.kind, "due");
+  assert.equal(indicators[0]?.tone, "warning");
+});
+
+test("uses the configured due-soon window for relative due tone", () => {
+  const later = new Date();
+  later.setDate(later.getDate() + 14);
+
+  assert.equal(getRelativeDueTone(later.toISOString()), "scheduled");
+  assert.equal(getRelativeDueTone(later.toISOString(), 14), "warning");
 });
 
 test("can hide overdue indicators independently from due date indicators", () => {

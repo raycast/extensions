@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { DEFAULT_DUE_SOON_DAYS } from "./tasks";
 import type { TaskLogStatusBehavior } from "./types";
 
 export function getConfiguredStorageNotePath(): string | undefined {
@@ -22,10 +23,12 @@ export function getEnabledListMetadata(): {
 
 export function getDueSoonDays(): number {
   const preferences = getPreferenceValues<Preferences.ListTasks>();
-  const parsed = Number.parseInt(preferences.dueSoonDays ?? "7", 10);
+  // Raycast normally supplies the manifest default. This fallback keeps CLI
+  // tests and unusual preference states aligned with the same product default.
+  const parsed = Number.parseInt(String(preferences.dueSoonDays ?? DEFAULT_DUE_SOON_DAYS), 10);
 
   if (Number.isNaN(parsed)) {
-    return 7;
+    return DEFAULT_DUE_SOON_DAYS;
   }
 
   return Math.max(0, parsed);

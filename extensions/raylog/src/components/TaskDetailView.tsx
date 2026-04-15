@@ -80,7 +80,6 @@ export default function TaskDetailView({ notePath, taskId, statusBehavior, onDid
       navigationTitle="View Task"
       markdown={buildTaskDetailMarkdown(task, {
         includeTopSpacer: true,
-        emptyBodyFallback: "_No body_",
       })}
       metadata={
         <Detail.Metadata>

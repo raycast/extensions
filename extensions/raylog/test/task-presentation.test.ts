@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  buildTaskDetailMarkdown,
-  matchesTaskSearch,
-} from "../src/lib/task-presentation";
+import { buildTaskDetailMarkdown, matchesTaskSearch } from "../src/lib/task-presentation";
 import type { TaskRecord } from "../src/lib/types";
 
 test("shared task search matches header and body by default", () => {
@@ -50,14 +47,26 @@ test("shared task detail markdown supports list and detail variants from one ren
   const listMarkdown = buildTaskDetailMarkdown(task, {
     includeTopSpacer: true,
   });
-  const detailMarkdown = buildTaskDetailMarkdown(task, {
-    emptyBodyFallback: "_No body_",
-  });
+  const detailMarkdown = buildTaskDetailMarkdown(task);
 
   assert.match(listMarkdown, /^⁠\n`◷ Created /);
-  assert.match(detailMarkdown, /_No body_/);
+  assert.doesNotMatch(detailMarkdown, /No body/i);
   assert.match(listMarkdown, /\*\*Work Log 1\*\*/);
   assert.match(detailMarkdown, /Prepared release notes/);
+});
+
+test("shared task detail markdown omits empty bodies without extra separators", () => {
+  const task = createTask({
+    header: "Ship release",
+    body: "",
+    workLogs: [],
+  });
+
+  const markdown = buildTaskDetailMarkdown(task);
+
+  assert.doesNotMatch(markdown, /No body/i);
+  assert.doesNotMatch(markdown, /---/);
+  assert.match(markdown, /# Ship release$/);
 });
 
 function createTask(overrides: Partial<TaskRecord> = {}): TaskRecord {

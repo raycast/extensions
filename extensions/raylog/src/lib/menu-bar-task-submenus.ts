@@ -16,17 +16,20 @@ export interface MenuBarTaskSubmenuSectionSpec {
 export function buildMenuBarTaskSubmenuSections(
   currentTask: TaskRecord | undefined,
   menuTasks: TaskRecord[],
+  dueSoonDays?: number,
 ): MenuBarTaskSubmenuSectionSpec[] {
   const sections: MenuBarTaskSubmenuSectionSpec[] = [];
 
   if (currentTask) {
     sections.push({
       title: "Current Task",
-      items: [buildMenuBarTaskSubmenuSpec(currentTask)],
+      items: [buildMenuBarTaskSubmenuSpec(currentTask, dueSoonDays)],
     });
   }
 
-  const nextTasks = menuTasks.filter((task) => task.id !== currentTask?.id).map(buildMenuBarTaskSubmenuSpec);
+  const nextTasks = menuTasks
+    .filter((task) => task.id !== currentTask?.id)
+    .map((task) => buildMenuBarTaskSubmenuSpec(task, dueSoonDays));
 
   if (nextTasks.length > 0) {
     sections.push({
@@ -38,11 +41,11 @@ export function buildMenuBarTaskSubmenuSections(
   return sections;
 }
 
-function buildMenuBarTaskSubmenuSpec(task: TaskRecord): MenuBarTaskSubmenuSpec {
+function buildMenuBarTaskSubmenuSpec(task: TaskRecord, dueSoonDays?: number): MenuBarTaskSubmenuSpec {
   return {
     task,
     dueLabel: buildDueLabel(task),
-    dueTone: getRelativeDueTone(task.dueDate) ?? undefined,
+    dueTone: getRelativeDueTone(task.dueDate, dueSoonDays) ?? undefined,
   };
 }
 

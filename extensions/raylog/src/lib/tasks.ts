@@ -49,6 +49,13 @@ const TASK_FILTER_DESCRIPTIONS: Record<TaskViewFilter, string> = {
   archived: "Shows only archived tasks.",
 };
 
+// Raycast applies the manifest default for command preferences at runtime.
+// Pure task utilities also run in tests and non-UI paths, so they keep the same
+// fallback here for callers that do not read preferences first.
+export const DEFAULT_DUE_SOON_DAYS = 2;
+// Start dates should always occupy the leftmost slot in the list metadata stack.
+const START_INDICATOR_PRIORITY = -1;
+
 const OPEN_STATUS_PRIORITY: Record<TaskStatus, number> = {
   todo: 0,
   in_progress: 1,
@@ -80,20 +87,20 @@ export function isTaskViewFilter(value: unknown): value is TaskViewFilter {
   );
 }
 
-export function sortTasks(tasks: TaskRecord[]): TaskRecord[] {
-  return [...tasks].sort((left, right) => compareTasks(left, right));
+export function sortTasks(tasks: TaskRecord[], dueSoonDays = DEFAULT_DUE_SOON_DAYS): TaskRecord[] {
+  return [...tasks].sort((left, right) => compareTasks(left, right, dueSoonDays));
 }
 
 export function filterTasks(
   tasks: TaskRecord[],
   filter: TaskViewFilter,
   searchText: string,
-  dueSoonDays = 7,
+  dueSoonDays = DEFAULT_DUE_SOON_DAYS,
   options?: TaskSearchOptions,
 ): TaskRecord[] {
   const normalizedSearch = searchText.trim().toLowerCase();
 
-  return sortTasks(tasks).filter((task) => {
+  return sortTasks(tasks, dueSoonDays).filter((task) => {
     if (!matchesTaskFilter(task, filter, dueSoonDays)) {
       return false;
     }
@@ -106,7 +113,11 @@ export function filterTasks(
   });
 }
 
-export function matchesTaskFilter(task: TaskRecord, filter: TaskViewFilter, dueSoonDays = 7): boolean {
+export function matchesTaskFilter(
+  task: TaskRecord,
+  filter: TaskViewFilter,
+  dueSoonDays = DEFAULT_DUE_SOON_DAYS,
+): boolean {
   switch (filter) {
     case "all":
       return task.status !== "archived";
@@ -176,28 +187,34 @@ export function getRelativeDueLabel(value?: string | null): string | null {
   return `Due in ${daysUntilDue}d`;
 }
 
-export function getRelativeDueTone(value?: string | null): TaskVisualTone | null {
+export function getRelativeDueTone(value?: string | null, dueSoonDays = DEFAULT_DUE_SOON_DAYS): TaskVisualTone | null {
   const dueDate = parseTaskDate(value);
   if (!dueDate) {
     return null;
   }
 
   const daysUntilDue = differenceInCalendarDays(dueDate, startOfToday());
-  return getDueIndicatorTone(daysUntilDue);
+  return getDueIndicatorTone(daysUntilDue, dueSoonDays);
 }
 
-export function getTaskListIndicators(task: TaskRecord, enabledMetadata: EnabledListMetadata): TaskListIndicator[] {
+export function getTaskListIndicators(
+  task: TaskRecord,
+  enabledMetadata: EnabledListMetadata,
+  dueSoonDays = DEFAULT_DUE_SOON_DAYS,
+): TaskListIndicator[] {
   const indicators: TaskListIndicator[] = [];
+  let isShowingDueIndicator = false;
 
   if (enabledMetadata.dueDate) {
-    const dueIndicator = getDueDateIndicator(task.dueDate);
+    const dueIndicator = getDueDateIndicator(task.dueDate, dueSoonDays);
     if (dueIndicator !== null && (enabledMetadata.pastDue || dueIndicator.tone !== "critical")) {
       indicators.push(dueIndicator);
+      isShowingDueIndicator = true;
     }
   }
 
   if (enabledMetadata.startDate) {
-    const startIndicator = getStartDateIndicator(task.startDate);
+    const startIndicator = getStartDateIndicator(task.startDate, isShowingDueIndicator ? task.dueDate : null);
     if (startIndicator !== null) {
       indicators.push(startIndicator);
     }
@@ -233,18 +250,18 @@ export function getMenuBarTasks(tasks: TaskRecord[], limit = 5): TaskRecord[] {
         return 1;
       }
 
-      return compareTasks(left, right);
+      return compareTasks(left, right, DEFAULT_DUE_SOON_DAYS);
     })
     .slice(0, limit);
 }
 
-function compareTasks(left: TaskRecord, right: TaskRecord): number {
+function compareTasks(left: TaskRecord, right: TaskRecord, dueSoonDays: number): number {
   if (left.status !== right.status) {
     return OPEN_STATUS_PRIORITY[left.status] - OPEN_STATUS_PRIORITY[right.status];
   }
 
   if (isActiveTaskStatus(left.status)) {
-    const urgencyComparison = compareOpenTaskUrgency(left, right);
+    const urgencyComparison = compareOpenTaskUrgency(left, right, dueSoonDays);
     if (urgencyComparison !== 0) {
       return urgencyComparison;
     }
@@ -261,9 +278,9 @@ function matchesTaskSearchWithOptions(
   return matchesTaskSearch(task, normalizedSearch, options?.includeWorkLogs ?? false);
 }
 
-function compareOpenTaskUrgency(left: TaskRecord, right: TaskRecord): number {
-  const leftBucket = getUrgencyBucket(left);
-  const rightBucket = getUrgencyBucket(right);
+function compareOpenTaskUrgency(left: TaskRecord, right: TaskRecord, dueSoonDays: number): number {
+  const leftBucket = getUrgencyBucket(left, dueSoonDays);
+  const rightBucket = getUrgencyBucket(right, dueSoonDays);
 
   if (leftBucket !== rightBucket) {
     return leftBucket - rightBucket;
@@ -276,7 +293,7 @@ function compareOpenTaskUrgency(left: TaskRecord, right: TaskRecord): number {
   return 0;
 }
 
-function getUrgencyBucket(task: TaskRecord): number {
+function getUrgencyBucket(task: TaskRecord, dueSoonDays: number): number {
   const dueDate = parseTaskDate(task.dueDate);
   if (!dueDate) {
     return 3;
@@ -287,7 +304,7 @@ function getUrgencyBucket(task: TaskRecord): number {
     return 0;
   }
 
-  if (daysUntilDue <= 7) {
+  if (daysUntilDue <= dueSoonDays) {
     return 1;
   }
 
@@ -307,7 +324,7 @@ function isDueSoon(task: TaskRecord, dueSoonDays: number): boolean {
   return differenceInCalendarDays(dueDate, startOfToday()) <= dueSoonDays;
 }
 
-function getDueDateIndicator(value?: string | null): TaskListIndicator | null {
+function getDueDateIndicator(value: string | null | undefined, dueSoonDays: number): TaskListIndicator | null {
   const dueDate = parseTaskDate(value);
   if (!dueDate) {
     return null;
@@ -318,14 +335,22 @@ function getDueDateIndicator(value?: string | null): TaskListIndicator | null {
     kind: "due",
     priority: getDueIndicatorPriority(daysUntilDue),
     text: formatRelativeIndicator(daysUntilDue, dueDate),
-    tone: getDueIndicatorTone(daysUntilDue),
+    tone: getDueIndicatorTone(daysUntilDue, dueSoonDays),
     tooltip: buildCountdownTooltip("Due", daysUntilDue, dueDate),
   };
 }
 
-function getStartDateIndicator(value?: string | null): TaskListIndicator | null {
+function getStartDateIndicator(
+  value: string | null | undefined,
+  dueDateValue?: string | null,
+): TaskListIndicator | null {
   const startDate = parseTaskDate(value);
   if (!startDate) {
+    return null;
+  }
+
+  const dueDate = parseTaskDate(dueDateValue);
+  if (dueDate && differenceInCalendarDays(startDate, dueDate) === 0) {
     return null;
   }
 
@@ -336,7 +361,7 @@ function getStartDateIndicator(value?: string | null): TaskListIndicator | null 
 
   return {
     kind: "start",
-    priority: 2,
+    priority: START_INDICATOR_PRIORITY,
     text: formatRelativeIndicator(daysUntilStart, startDate),
     tone: "info",
     tooltip: buildCountdownTooltip("Start", daysUntilStart, startDate),
@@ -366,12 +391,12 @@ function formatRelativeIndicator(days: number, date: Date): string {
   });
 }
 
-function getDueIndicatorTone(daysUntilDue: number): TaskVisualTone {
+function getDueIndicatorTone(daysUntilDue: number, dueSoonDays: number): TaskVisualTone {
   if (daysUntilDue < 0) {
     return "critical";
   }
 
-  if (daysUntilDue <= 7) {
+  if (daysUntilDue <= dueSoonDays) {
     return "warning";
   }
 

@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import path from "path";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getDueSoonDays } from "./lib/config";
 import { executeMenuBarTaskAction } from "./lib/menu-bar-task-actions";
 import { buildMenuBarTaskSubmenuSections } from "./lib/menu-bar-task-submenus";
 import { buildMenuBarTaskActionSpecs } from "./lib/task-flow";
@@ -21,6 +22,7 @@ import type { TaskRecord } from "./lib/types";
 
 export default function Command() {
   const repository = useMemo(() => createMenuBarRepository(), []);
+  const dueSoonDays = useMemo(() => getDueSoonDays(), []);
   const cacheStore = useMemo(() => new Cache(), []);
   const cachedState = useMemo(() => readMenuBarCache(cacheStore), [cacheStore]);
   const [isLoading, setIsLoading] = useState(!repository && !cachedState);
@@ -67,7 +69,10 @@ export default function Command() {
     [loadMenuBarTasks, repository],
   );
 
-  const taskSections = useMemo(() => buildMenuBarTaskSubmenuSections(currentTask, menuTasks), [currentTask, menuTasks]);
+  const taskSections = useMemo(
+    () => buildMenuBarTaskSubmenuSections(currentTask, menuTasks, dueSoonDays),
+    [currentTask, dueSoonDays, menuTasks],
+  );
 
   const openTask = useCallback((taskId: string) => {
     return launchCommand({

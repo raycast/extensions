@@ -30,7 +30,7 @@
       "type": "file",
       "required": true,
       "title": "Storage Note",
-      "description": "Markdown note used for Raylog storage.",
+      "description": "Markdown note used for Raylog storage",
       "label": "Storage Note"
     }
   ],
@@ -38,7 +38,7 @@
     {
       "name": "list-tasks",
       "title": "List Tasks",
-      "description": "Focus, filter, and move Raylog tasks through their lifecycle.",
+      "description": "Focus, filter, and move Raylog tasks through their lifecycle",
       "mode": "view",
       "preferences": [
         {
@@ -46,37 +46,37 @@
           "type": "checkbox",
           "required": false,
           "default": true,
-          "title": "Show Due Countdown",
-          "description": "Show the due date countdown in the task list.",
-          "label": "Show Due Countdown"
+          "title": "Due Countdown",
+          "description": "Display the due date countdown in the task list",
+          "label": "Display due countdowns in the task list"
         },
         {
           "name": "showPastDueIndicator",
           "type": "checkbox",
           "required": false,
           "default": true,
-          "title": "Show Past Due",
-          "description": "Show overdue tasks with a past due indicator in the task list.",
-          "label": "Show Past Due"
+          "title": "Past Due Indicator",
+          "description": "Display overdue tasks with a past due indicator in the task list",
+          "label": "Highlight overdue tasks in the task list"
         },
         {
           "name": "showStartDateIndicator",
           "type": "checkbox",
           "required": false,
           "default": true,
-          "title": "Show Start Countdown",
-          "description": "Show the start date countdown in the task list.",
-          "label": "Show Start Countdown"
+          "title": "Start Countdown",
+          "description": "Display the start date countdown in the task list",
+          "label": "Display start countdowns in the task list"
         },
         {
           "name": "dueSoonDays",
           "type": "textfield",
           "required": false,
-          "default": "7",
+          "default": "2",
           "title": "Due Soon Days",
-          "description": "How many days ahead should count as due soon in List Tasks.",
-          "placeholder": "7",
-          "label": "Due Soon Days"
+          "description": "Number of days for a task to be considered Due Soon",
+          "placeholder": "2",
+          "label": "Days ahead"
         },
         {
           "name": "logStatusBehavior",
@@ -84,7 +84,7 @@
           "required": false,
           "default": "auto_start",
           "title": "Status Change on Log",
-          "description": "Choose what happens when logging work on a to-do task.",
+          "description": "Choose what happens when logging work on a to-do task",
           "data": [
             {
               "title": "Auto Start Task",
