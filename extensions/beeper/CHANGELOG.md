@@ -1,5 +1,12 @@
 # Beeper Changelog
 
+## [Windows Support] - 2026-04-13
+
+### Added
+
+- Windows platform support
+- Windows-compatible Beeper app detection in `getBeeperAppPath()`
+
 ## [Initial Release] - 2026-04-13
 
 ### Added
