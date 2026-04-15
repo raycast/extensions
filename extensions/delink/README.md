@@ -40,6 +40,14 @@ A [Raycast](https://raycast.com) extension that instantly parses query parameter
 | Show History              | `⌘H`     | Browse previously parsed URLs                         |
 | Clear History             | `⌘⇧⌫`    | Delete all history entries                            |
 
+## Preferences
+
+| Preference        | Default      | Description                                                                                       |
+| ----------------- | ------------ | ------------------------------------------------------------------------------------------------- |
+| Allowed Protocols | `http,https` | Comma-separated list of URL protocols to recognize. URLs with other protocols will not be parsed. |
+
+You can add custom schemes (e.g. `http,https,ftp,myapp`) to support non-standard URLs.
+
 ## Local Development
 
 ```bash

@@ -83,16 +83,23 @@ export function detectParamType(decodedValue: string, rawValue: string): ParamTy
 
 // ─── URL parsing ──────────────────────────────────────────────────────────────
 
+const DEFAULT_ALLOWED_PROTOCOLS = ["http", "https"];
+
 /**
  * Parses a URL string and extracts its query parameters.
  *
  * URLSearchParams.forEach() automatically percent-decodes values, so we
  * manually parse the raw query string to preserve the original encoded form.
+ *
+ * @param allowedProtocols - List of protocol schemes (without "://") to accept.
+ *   Defaults to ["http", "https"].
  */
-export function parseUrl(rawUrl: string): ParsedUrl | null {
+export function parseUrl(rawUrl: string, allowedProtocols: string[] = DEFAULT_ALLOWED_PROTOCOLS): ParsedUrl | null {
   try {
     const trimmed = rawUrl.trim().replace(/^['"]|['"]$/g, "");
-    if (!trimmed.startsWith("http://") && !trimmed.startsWith("https://")) return null;
+    const scheme = trimmed.split(":")[0].toLowerCase();
+    const normalizedProtocols = allowedProtocols.map((p) => p.trim().toLowerCase()).filter(Boolean);
+    if (!normalizedProtocols.includes(scheme)) return null;
     const parsed = new URL(trimmed);
 
     const rawValueMap = new Map<string, string[]>();

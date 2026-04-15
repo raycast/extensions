@@ -1,7 +1,19 @@
-import { Action, ActionPanel, Clipboard, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { HistoryList, UrlParamList } from "./components";
 import { HistoryEntry, ParsedUrl, clearHistory, loadHistory, parseUrl, saveToHistory } from "./utils";
+
+interface Preferences {
+  allowedProtocols: string;
+}
+
+function getAllowedProtocols(): string[] {
+  const { allowedProtocols } = getPreferenceValues<Preferences>();
+  return allowedProtocols
+    .split(",")
+    .map((p) => p.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 // ─── Command ──────────────────────────────────────────────────────────────────
 
@@ -39,7 +51,7 @@ export default function Command() {
 
   const handleSelectHistoryEntry = useCallback(
     async (rawUrl: string) => {
-      const parsed = parseUrl(rawUrl);
+      const parsed = parseUrl(rawUrl, getAllowedProtocols());
       if (!parsed) return;
       await applyParsedUrl(parsed);
       await showToast({ style: Toast.Style.Success, title: "Parsed from history", message: parsed.host });
@@ -61,7 +73,7 @@ export default function Command() {
       if (savedHistory.length > 0) {
         // Show history list if there are previous entries and clipboard has no new URL
         const clipboardText = await Clipboard.readText();
-        const parsed = clipboardText ? parseUrl(clipboardText) : null;
+        const parsed = clipboardText ? parseUrl(clipboardText, getAllowedProtocols()) : null;
         if (parsed) {
           await applyParsedUrl(parsed);
         } else {

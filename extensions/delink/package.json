@@ -19,7 +19,17 @@
       "name": "url-parse",
       "title": "URL Parse",
       "description": "Parse and inspect URL query parameters from the clipboard",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "allowedProtocols",
+          "title": "Allowed Protocols",
+          "description": "Comma-separated list of URL protocols to recognize (e.g. http,https,ftp). URLs with other protocols will not be parsed.",
+          "type": "textfield",
+          "default": "http,https",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
