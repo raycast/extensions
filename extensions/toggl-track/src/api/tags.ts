@@ -2,10 +2,15 @@ import { getMeWithRelatedData } from "@/api/me";
 import { post, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
 import { cacheHelper } from "@/helpers/cache-helper";
+import { liteMode } from "@/helpers/preferences";
 
 export async function getMyTags(): Promise<Tag[]> {
   const cached = cacheHelper.get<Tag[]>("tags");
   if (cached) return cached;
+  if (liteMode) {
+    const stale = cacheHelper.getRaw<Tag[]>("tags");
+    if (stale) return stale;
+  }
   const data = await getMeWithRelatedData();
   return cacheHelper.get<Tag[]>("tags") || data.tags || [];
 }
