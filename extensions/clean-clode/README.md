@@ -16,7 +16,6 @@ Clean Clode removes the pipes, box characters, broken line wraps, and extra whit
 
 ## Screenshots
 
-![Main list with history](metadata/1-main-list.png)
 
 ![Input form with mangled text](metadata/2-input-form.png)
 
