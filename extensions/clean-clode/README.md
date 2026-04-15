@@ -14,6 +14,14 @@ messiness   │   when I copy from Claude Code terminal
 
 Clean Clode removes the pipes, box characters, broken line wraps, and extra whitespace — giving you clean, readable text ready to use.
 
+## Screenshots
+
+![Main list with history](metadata/1-main-list.png)
+
+![Input form with mangled text](metadata/2-input-form.png)
+
+![Cleaned output ready to copy](metadata/3-cleaned-output.png)
+
 ## Commands
 
 ### Clean Text
