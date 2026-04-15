@@ -109,29 +109,29 @@ export default function MatchItem({
                   />
                   <Action.CopyToClipboard title="Copy Content" content={expandedReplace} />
                   {isDynamic && <Action icon={Icon.ArrowClockwise} title="Re-Evaluate" onAction={refresh} />}
-                  {canEdit && (
-                    <Action.Push
-                      icon={Icon.Pencil}
-                      title="Edit Match"
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
-                      target={
-                        <EditMatchForm
-                          filePath={filePath}
-                          originalTriggers={triggers}
-                          initialTrigger={triggers.join(", ")}
-                          initialLabel={label}
-                          initialReplace={replace ?? ""}
-                          onEdited={onEdited}
-                        />
-                      }
-                    />
-                  )}
                 </>
               )}
             </>
           )}
           <Action.CopyToClipboard title="Copy Triggers" content={triggers.join(", ")} />
           {label && <Action.CopyToClipboard title="Copy Label" content={label} />}
+          {canEdit && (
+            <Action.Push
+              icon={Icon.Pencil}
+              title="Edit Match"
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={
+                <EditMatchForm
+                  filePath={filePath}
+                  originalTriggers={triggers}
+                  initialTrigger={triggers.join(", ")}
+                  initialLabel={label}
+                  initialReplace={replace ?? ""}
+                  onEdited={onEdited}
+                />
+              }
+            />
+          )}
           <Action.OpenWith path={filePath} />
           <Action.ShowInFinder path={filePath} />
           <Action.Trash title="Move the Whole File to Trash" paths={filePath} />
