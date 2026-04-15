@@ -115,18 +115,17 @@ export function quillDeltaToMarkdown(delta: QuillDelta, options: DeltaFormatOpti
         lines.push(`${indent}${listCounter}. ${currentLine}`);
       } else if (attrs.blockquote) {
         lines.push(`> ${currentLine}`);
+        listCounter = 0;
       } else if (attrs["code-block"]) {
         if (!codeBlockLines) {
           codeBlockLines = [];
         }
         codeBlockLines.push(currentLine);
+      } else {
+        listCounter = 0;
       }
       currentLine = "";
       continue;
-    }
-
-    if (!isBlockAttribute) {
-      listCounter = 0;
     }
 
     const parts = text.split("\n");
