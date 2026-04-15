@@ -51,7 +51,7 @@ export default async function Command() {
   } catch (err: unknown) {
     const error = err as { code?: number; stderr?: string };
 
-    if (error.code === 1) return; // usuario canceló
+    if (error.code === 1) return; // user cancelled
 
     if (error.code === 2) {
       await showHUD("ℹ️ No interactive elements found in the active window");
@@ -64,5 +64,6 @@ export default async function Command() {
       "❌ " +
         (detail || "Error " + error.code).substring(0, 50) +
         " (Error copied)",
+    );
   }
 }

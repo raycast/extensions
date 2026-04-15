@@ -17,11 +17,9 @@ Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName WindowsBase
 Add-Type -AssemblyName PresentationCore
 Add-Type -AssemblyName PresentationFramework
-
-$cacheDir = [System.IO.Path]::Combine($env:LOCALAPPDATA, 'RaycastOcrNav')
-$cacheDll = [System.IO.Path]::Combine($cacheDir, 'HintOverlayApp.dll')
-
+ 
 $csharp = @'
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -116,7 +114,7 @@ public class HintOverlayForm : Form {
             e.Graphics.DrawString(h.Label, _font, Brushes.Black, x + 3, y + 1);
         }
         
-        string st = _typed.Length > 0 ? "Tecleado: " + _typed : "Teclea la etiqueta  ·  ESC para salir";
+        string st = _typed.Length > 0 ? "Typed: " + _typed : "Type the label  ·  ESC to exit";
         using (var f = new Font("Segoe UI", 13f)) {
             var sz = e.Graphics.MeasureString(st, f);
             float tx = (Width - sz.Width) / 2f;
@@ -191,7 +189,7 @@ public static class HintOverlayRunner {
                 } catch { } // ignore
             }
 
-            if (hints.Count == 0) break; // Nothing to click
+            if (hints.Count == 0) { Environment.Exit(2); return; } // Nothing to click
 
             var scr = Screen.PrimaryScreen.Bounds;
             Bitmap bg = new Bitmap(scr.Width, scr.Height);
