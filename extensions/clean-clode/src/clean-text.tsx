@@ -130,8 +130,9 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const { push } = useNavigation();
 
-  async function handleClean() {
-    if (!inputText.trim()) {
+  async function handleClean(overrideText?: string) {
+    const textToClean = overrideText ?? inputText;
+    if (!textToClean.trim()) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No input",
@@ -140,8 +141,8 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
       return;
     }
     setIsProcessing(true);
-    const cleaned = detectAndClean(inputText);
-    await saveToHistory(cleaned, inputText);
+    const cleaned = detectAndClean(textToClean);
+    await saveToHistory(cleaned, textToClean);
     await Clipboard.copy(cleaned);
     setIsProcessing(false);
     onCleaned();
@@ -184,7 +185,7 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
               const { text } = await Clipboard.read();
               if (text) {
                 setInputText(text);
-                setTimeout(handleClean, 100);
+                await handleClean(text);
               }
             }}
           />
