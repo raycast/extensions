@@ -2,8 +2,8 @@ import { MemoryInterface } from "../Interfaces";
 import { execf } from "../utils";
 
 enum MemoryTypes {
-  G = "Gib",
-  M = "Mib",
+  G = "GiB",
+  M = "MiB",
 }
 
 export const getTopRamProcess = async (): Promise<string[][]> => {
