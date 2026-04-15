@@ -1,31 +1,68 @@
-<p align="center">
-  <img src="images/store-logo.webp" height="128">
-  <h1 align="center">Raycast Extensions</h1>
-</p>
+# 🎉 Launch Celebration: Pro Features Unlocked
 
-<p align="center">
-  <a aria-label="Follow Raycast on X" href="https://x.com/raycast">
-    <img alt="" src="https://img.shields.io/badge/Follow%20@raycast-black.svg?style=for-the-badge&logo=X">
-  </a>
-  <a aria-label="Join the community on Slack" href="https://raycast.com/community">
-    <img alt="" src="https://img.shields.io/badge/Join%20the%20community-black.svg?style=for-the-badge&logo=Raycast&logoColor=fff">
-  </a>
-</p>
+# TokenCount: AI Context & Cursor Rules
 
-[Raycast](https://raycast.com/) lets you control your tools with a few keystrokes. This repository contains all extensions that are available in the [Raycast Store](https://raycast.com/store). It also includes documentation and examples of how to extend Raycast using React.
+> Optimize AI context and generate .cursorrules automatically. Slashing tokens by 90%.
 
-![Header](images/header.webp)
+![TokenCount Demo](assets/token-guard-94-percent.png)
 
-## Getting Started
+**Semantic Skim** — Save up to **94%** tokens while maintaining 100% AI readability.
 
-Visit [https://developers.raycast.com](https://developers.raycast.com) to get started with our API. If you want to discover and install extensions, check out [our Store](https://raycast.com/store).
+---
 
-Be sure to read and follow our [Community](https://manual.raycast.com/community-guidelines) and [Extension](https://manual.raycast.com/extensions) guidelines and [Acceptable Use Policy](https://www.raycast.com/aup) when submitting your extension and interacting with other folks in this repository.
+## Changelog
 
-## Feedback
+### v1.2.1 — Launch Celebration
+- ✨ **All Semantic Skim features are currently FREE**
+- ✨ Added Cursor Rules generation
+- ✨ Added JustinXai Labs Matrix integration
+- 🐛 Bug fixes and performance improvements
 
-Raycast wouldn't be where it is without the feedback from our community, so we would be happy to hear what you think of the API / DevX and how we can improve. Please use [GitHub issues](https://github.com/raycast/extensions/issues/new/choose) for everything API related (bugs, improvements suggestions, developer experience, docs, etc). We have a few [templates](https://developers.raycast.com/examples) that should help you get started.
+### v1.1.0 — Semantic Skim Debut
+- ⚡ Added Semantic Skim algorithm (90%+ token reduction)
+- 🎯 AI-optimized output format
 
-## Community
+---
 
-Join our [Slack community](https://raycast.com/community) to share your extension, debug nasty bugs or simply get to know like-minded folks.
+## Features
+
+| Command | Description |
+|---------|-------------|
+| `D dehydrate for AI` | Compress code from clipboard, saving up to 94% tokens |
+| `Generate Cursor Rules` | Extract rules from code and generate `.cursorrules` file |
+
+---
+
+## Part of the JustinXai Matrix
+
+![Cursor Context Clipper](https://img.shields.io/badge/Chrome-Extension-4285F4?style=flat-square)
+
+**Cursor Context Clipper** — Grab clean Markdown from any site.
+
+Built by [@norike0718](https://x.com/norike0718)
+
+---
+
+## Core Philosophy
+
+| Principle | Description |
+|-----------|-------------|
+| 🔒 Privacy-first | Your code never leaves your machine |
+| 🔑 BYOK | Bring Your Own Key — no vendor lock-in |
+| 🤖 AI-native | Built for Cursor/Claude users |
+
+---
+
+## Follow the Journey
+
+<a href="https://x.com/norike0718">
+  <img src="https://img.shields.io/badge/Follow-@norike0718-000?style=for-the-badge&logo=x" alt="Follow on X">
+</a>
+
+> **@norike0718** — Building Matrix Tools for the AI Era
+
+---
+
+## License
+
+MIT © 2026 JustinXai Labs
