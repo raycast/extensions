@@ -1,8 +1,8 @@
 # System Monitor Changelog
 
-## [Add Selection for Disk Units] - {PR_MERGE_DATE}
+## [Add Selection for Disk Units] - 2026-03-20
 - Added option for GiB or GB disk reporting
-- Added option for Farenheit temperature reporting
+- Added option for Fahrenheit temperature reporting
 - Changed default disk reporting to GB to better match other GUI tools like Disk Utility and Finder
 - Corrected cases where GB was used instead of GiB(memory)
 
