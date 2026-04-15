@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, Image, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useExec, usePromise } from "@raycast/utils";
 import { getErrorMessage, getFlashspacePath, parseWorkspaces, runFlashspaceAsync } from "../utils/cli";
 import { loadWorkspaceIconsAsync } from "../utils/workspace-icons";
@@ -59,6 +59,12 @@ export default function ListWorkspaces() {
                 icon={Icon.Trash}
                 style={Action.Style.Destructive}
                 onAction={async () => {
+                  const confirmed = await confirmAlert({
+                    title: "Delete Workspace",
+                    message: `Are you sure you want to delete "${workspace.name}"?`,
+                    primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
+                  });
+                  if (!confirmed) return;
                   const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting workspace..." });
                   try {
                     await runFlashspaceAsync(["delete-workspace", workspace.name]);

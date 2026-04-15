@@ -2,11 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { execFile, execFileSync } from "child_process";
 import { accessSync, constants } from "fs";
 
-/** Preference values for the extension */
-interface Preferences {
-  flashspacePath?: string;
-}
-
 const CLI_TIMEOUT_MS = 10_000;
 
 /**
