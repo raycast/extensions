@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windows-keyboard-nav",
+  "title": "KeyNav",
+  "description": "Navigate any Windows application using keyboard hints, similar to Vimium or Fluent Search",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "author": "Bitty",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "keyboard-nav",
+      "title": "Activate Hint Mode",
+      "subtitle": "Navigate UI",
+      "description": "Highlight interactive UI elements and navigate using the keyboard",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
