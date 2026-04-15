@@ -34,10 +34,10 @@ Fast, background photo & video ingest from memory cards — built for photograph
 
 ## Commands
 
-| Command           | Description                                             |
-| ----------------- | ------------------------------------------------------- |
-| **Magic Ingest**  | Open the ingest form — select cards, dates, and options |
-| **Ingest Status** | Menu bar indicator showing live progress during ingest  |
+| Command | Description |
+|---------|-------------|
+| **Magic Ingest** | Open the ingest form — select cards, dates, and options |
+| **Ingest Status** | Menu bar indicator showing live progress during ingest |
 
 ## How It Works
 
