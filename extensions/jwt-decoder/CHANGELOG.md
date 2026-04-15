@@ -1,6 +1,6 @@
 # JWT-Decoder Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-15
 
 - Pinned `react` and `react-dom` to `19.0.0` to avoid runtime React version mismatch errors
 
