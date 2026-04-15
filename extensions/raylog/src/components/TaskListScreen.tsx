@@ -1,46 +1,13 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  buildTaskListActionSpecs,
-  type TaskActionSpec,
-} from "./task-action-specs";
+import { buildTaskListActionSpecs, type TaskActionSpec } from "./task-action-specs";
 import { getDueSoonDays } from "../lib/config";
 import { formatTaskDate, fromCanonicalDateString } from "../lib/date";
-import {
-  getRaylogErrorMessage,
-  isRaylogCorruptionError,
-  RaylogRepository,
-} from "../lib/storage";
-import {
-  filterTasks,
-  getTaskFilterDescription,
-  getTaskFilterLabel,
-  sortTasks,
-} from "../lib/tasks";
-import {
-  getTaskActionIcon,
-  getTaskFilterIcon,
-  getTaskIndicatorIcon,
-  getTaskStatusIcon,
-} from "../lib/task-visuals";
-import {
-  buildTaskDetailMarkdown,
-  matchesTaskSearch,
-} from "../lib/task-presentation";
-import type {
-  TaskListViewMode,
-  TaskLogStatusBehavior,
-  TaskRecord,
-  TaskViewFilter,
-} from "../lib/types";
+import { getRaylogErrorMessage, isRaylogCorruptionError, RaylogRepository } from "../lib/storage";
+import { filterTasks, getTaskFilterDescription, getTaskFilterLabel, sortTasks } from "../lib/tasks";
+import { getTaskActionIcon, getTaskFilterIcon, getTaskIndicatorIcon, getTaskStatusIcon } from "../lib/task-visuals";
+import { buildTaskDetailMarkdown, matchesTaskSearch } from "../lib/task-presentation";
+import type { TaskListViewMode, TaskLogStatusBehavior, TaskRecord, TaskViewFilter } from "../lib/types";
 import TaskForm from "./TaskForm";
 
 interface TaskListScreenProps {
@@ -71,8 +38,7 @@ export default function TaskListScreen({
   const [tasks, setTasks] = useState<TaskRecord[]>([]);
   const [searchText, setSearchText] = useState("");
   const [selectedFilter, setSelectedFilter] = useState<TaskViewFilter>("open");
-  const [selectedViewMode, setSelectedViewMode] =
-    useState<TaskListViewMode>("summary");
+  const [selectedViewMode, setSelectedViewMode] = useState<TaskListViewMode>("summary");
   const [selectedListItemId, setSelectedListItemId] = useState<string>();
   const [visibleItemCount, setVisibleItemCount] = useState(pageSize);
   const [loadError, setLoadError] = useState<string>();
@@ -88,12 +54,8 @@ export default function TaskListScreen({
     try {
       const [nextTasks, nextFilter, nextViewMode] = await Promise.all([
         repository.listTasks(),
-        selectedTaskId
-          ? Promise.resolve<TaskViewFilter>("all")
-          : repository.getListTasksFilter(),
-        selectedTaskId
-          ? Promise.resolve<TaskListViewMode>("summary")
-          : repository.getListViewMode(),
+        selectedTaskId ? Promise.resolve<TaskViewFilter>("all") : repository.getListTasksFilter(),
+        selectedTaskId ? Promise.resolve<TaskListViewMode>("summary") : repository.getListViewMode(),
       ]);
       setTasks(nextTasks);
       setSelectedFilter(nextFilter);
@@ -130,13 +92,8 @@ export default function TaskListScreen({
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: isRaylogCorruptionError(error)
-            ? "Raylog database is corrupted"
-            : "Unable to save task view",
-          message: getRaylogErrorMessage(
-            error,
-            "Unable to save the selected task view.",
-          ),
+          title: isRaylogCorruptionError(error) ? "Raylog database is corrupted" : "Unable to save task view",
+          message: getRaylogErrorMessage(error, "Unable to save the selected task view."),
         });
       }
     },
@@ -152,13 +109,8 @@ export default function TaskListScreen({
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: isRaylogCorruptionError(error)
-            ? "Raylog database is corrupted"
-            : "Unable to save task view",
-          message: getRaylogErrorMessage(
-            error,
-            "Unable to save the selected task view.",
-          ),
+          title: isRaylogCorruptionError(error) ? "Raylog database is corrupted" : "Unable to save task view",
+          message: getRaylogErrorMessage(error, "Unable to save the selected task view."),
         });
       }
     },
@@ -186,19 +138,12 @@ export default function TaskListScreen({
       });
     }
 
-    return filterTasks(
-      scopedTasks,
-      effectiveSelectedFilter,
-      searchText,
-      dueSoonDays,
-    );
+    return filterTasks(scopedTasks, effectiveSelectedFilter, searchText, dueSoonDays);
   }, [dueSoonDays, effectiveSelectedFilter, scopedTasks, searchText, taskIds]);
 
   const hasAnyTasks = scopedTasks.length > 0;
   const hasSearchOrFilter = searchText.trim().length > 0 || hasAnyTasks;
-  const currentFilterDescription = getTaskFilterDescription(
-    effectiveSelectedFilter,
-  );
+  const currentFilterDescription = getTaskFilterDescription(effectiveSelectedFilter);
   const visibleTasks = filteredTasks.slice(0, visibleItemCount);
   const hasMoreVisibleTasks = visibleTasks.length < filteredTasks.length;
 
@@ -208,18 +153,14 @@ export default function TaskListScreen({
         return currentSelection;
       }
 
-      return filteredTasks.some((task) => task.id === currentSelection)
-        ? currentSelection
-        : undefined;
+      return filteredTasks.some((task) => task.id === currentSelection) ? currentSelection : undefined;
     });
   }, [filteredTasks]);
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={
-        selectedViewMode === "summary" && filteredTasks.length > 0
-      }
+      isShowingDetail={selectedViewMode === "summary" && filteredTasks.length > 0}
       selectedItemId={selectedTaskId ?? selectedListItemId}
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Search tasks by header or body"
@@ -229,15 +170,11 @@ export default function TaskListScreen({
       pagination={{
         pageSize,
         hasMore: hasMoreVisibleTasks,
-        onLoadMore: () =>
-          setVisibleItemCount((currentCount) => currentCount + pageSize),
+        onLoadMore: () => setVisibleItemCount((currentCount) => currentCount + pageSize),
       }}
       searchBarAccessory={
         hideFilters ? undefined : (
-          <TaskFilterDropdown
-            selectedFilter={effectiveSelectedFilter}
-            onSelectFilter={handleSelectFilter}
-          />
+          <TaskFilterDropdown selectedFilter={effectiveSelectedFilter} onSelectFilter={handleSelectFilter} />
         )
       }
     >
@@ -246,8 +183,7 @@ export default function TaskListScreen({
           title={
             loadError
               ? "Unable to load tasks"
-              : (emptyTitle ??
-                (hasAnyTasks ? "No tasks in this view" : "No tasks yet"))
+              : (emptyTitle ?? (hasAnyTasks ? "No tasks in this view" : "No tasks yet"))
           }
           description={
             loadError ??
@@ -259,29 +195,16 @@ export default function TaskListScreen({
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <ViewModeAction
-                  viewMode={selectedViewMode}
-                  onSelectViewMode={handleSelectViewMode}
-                />
+                <ViewModeAction viewMode={selectedViewMode} onSelectViewMode={handleSelectViewMode} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action.Push
                   title="Add Task"
                   icon={getTaskActionIcon("Add Task")}
-                  target={
-                    <TaskForm
-                      notePath={notePath}
-                      onDidSave={loadTasks}
-                      resetOnSave
-                    />
-                  }
+                  target={<TaskForm notePath={notePath} onDidSave={loadTasks} resetOnSave />}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
-                <Action
-                  title="Reload Tasks"
-                  icon={getTaskActionIcon("Reload Tasks")}
-                  onAction={loadTasks}
-                />
+                <Action title="Reload Tasks" icon={getTaskActionIcon("Reload Tasks")} onAction={loadTasks} />
               </ActionPanel.Section>
               <ActionPanel.Section>
                 <Action
@@ -298,6 +221,7 @@ export default function TaskListScreen({
           <TaskItem
             key={task.id}
             notePath={notePath}
+            repository={repository}
             task={task}
             onReload={loadTasks}
             taskLogStatusBehavior={taskLogStatusBehavior}
@@ -313,6 +237,7 @@ export default function TaskListScreen({
 
 interface TaskItemProps {
   notePath: string;
+  repository: RaylogRepository;
   onSelectViewMode: (viewMode: TaskListViewMode) => Promise<void> | void;
   task: TaskRecord;
   onReload: () => Promise<void>;
@@ -334,21 +259,9 @@ function TaskFilterDropdown({
       value={selectedFilter}
       onChange={(value) => void onSelectFilter(value as TaskViewFilter)}
     >
-      <List.Dropdown.Item
-        value="all"
-        title={getTaskFilterLabel("all")}
-        icon={getTaskFilterIcon("all")}
-      />
-      <List.Dropdown.Item
-        value="open"
-        title={getTaskFilterLabel("open")}
-        icon={getTaskFilterIcon("open")}
-      />
-      <List.Dropdown.Item
-        value="todo"
-        title={getTaskFilterLabel("todo")}
-        icon={getTaskFilterIcon("todo")}
-      />
+      <List.Dropdown.Item value="all" title={getTaskFilterLabel("all")} icon={getTaskFilterIcon("all")} />
+      <List.Dropdown.Item value="open" title={getTaskFilterLabel("open")} icon={getTaskFilterIcon("open")} />
+      <List.Dropdown.Item value="todo" title={getTaskFilterLabel("todo")} icon={getTaskFilterIcon("todo")} />
       <List.Dropdown.Item
         value="in_progress"
         title={getTaskFilterLabel("in_progress")}
@@ -359,11 +272,7 @@ function TaskFilterDropdown({
         title={getTaskFilterLabel("due_soon")}
         icon={getTaskFilterIcon("due_soon")}
       />
-      <List.Dropdown.Item
-        value="done"
-        title={getTaskFilterLabel("done")}
-        icon={getTaskFilterIcon("done")}
-      />
+      <List.Dropdown.Item value="done" title={getTaskFilterLabel("done")} icon={getTaskFilterIcon("done")} />
       <List.Dropdown.Item
         value="archived"
         title={getTaskFilterLabel("archived")}
@@ -375,6 +284,7 @@ function TaskFilterDropdown({
 
 function TaskItem({
   notePath,
+  repository,
   onSelectViewMode,
   task,
   onReload,
@@ -382,7 +292,6 @@ function TaskItem({
   viewMode,
   isSelected,
 }: TaskItemProps) {
-  const repository = useMemo(() => new RaylogRepository(notePath), [notePath]);
   const listAccessories = useMemo(() => buildTaskListAccessories(task), [task]);
   const actionSpecs = buildTaskListActionSpecs({
     notePath,
@@ -397,17 +306,11 @@ function TaskItem({
       id={task.id}
       icon={getTaskStatusIcon(task.status)}
       title={task.header}
-      subtitle={
-        viewMode === "list"
-          ? getTaskBodyPreview(task.body, listAccessories.length)
-          : undefined
-      }
+      subtitle={viewMode === "list" ? getTaskBodyPreview(task.body, listAccessories.length) : undefined}
       accessories={viewMode === "list" ? listAccessories : []}
       detail={
         viewMode === "summary" && isSelected ? (
-          <List.Item.Detail
-            markdown={buildTaskDetailMarkdown(task, { includeTopSpacer: true })}
-          />
+          <List.Item.Detail markdown={buildTaskDetailMarkdown(task, { includeTopSpacer: true })} />
         ) : undefined
       }
       actions={
@@ -418,10 +321,7 @@ function TaskItem({
             ))}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ViewModeAction
-              viewMode={viewMode}
-              onSelectViewMode={onSelectViewMode}
-            />
+            <ViewModeAction viewMode={viewMode} onSelectViewMode={onSelectViewMode} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action
@@ -448,11 +348,7 @@ function ViewModeAction({
   return (
     <Action
       title={nextViewMode === "list" ? "Open Task List" : "Open Task Summary"}
-      icon={
-        nextViewMode === "list"
-          ? Icon.AppWindowList
-          : Icon.AppWindowSidebarRight
-      }
+      icon={nextViewMode === "list" ? Icon.AppWindowList : Icon.AppWindowSidebarRight}
       shortcut={{ modifiers: ["cmd"], key: "f" }}
       onAction={() => void onSelectViewMode(nextViewMode)}
     />
@@ -465,18 +361,12 @@ function buildTaskListAccessories(task: TaskRecord): List.Item.Accessory[] {
     return [];
   }
 
-  return [
-    createDateAccessory(visibleDateKind, getDateValue(task, visibleDateKind)),
-  ];
+  return [createDateAccessory(visibleDateKind, getDateValue(task, visibleDateKind))];
 }
 
-function createDateAccessory(
-  kind: "start" | "due" | "completed",
-  value: string | null,
-): List.Item.Accessory {
+function createDateAccessory(kind: "start" | "due" | "completed", value: string | null): List.Item.Accessory {
   const tone = getDateTone(kind, value);
-  const formattedDate =
-    kind === "completed" ? formatCompletedDate(value) : formatTaskDate(value);
+  const formattedDate = kind === "completed" ? formatCompletedDate(value) : formatTaskDate(value);
 
   return {
     icon: getTaskIndicatorIcon(kind, tone),
@@ -508,18 +398,9 @@ function getDateTone(
   }
 
   const today = new Date();
-  const startOfToday = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
-  const dueDate = new Date(
-    parsed.getFullYear(),
-    parsed.getMonth(),
-    parsed.getDate(),
-  );
-  const differenceInDays =
-    (dueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24);
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const dueDate = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+  const differenceInDays = (dueDate.getTime() - startOfToday.getTime()) / (1000 * 60 * 60 * 24);
 
   if (differenceInDays < 0) {
     return "critical";
@@ -532,9 +413,7 @@ function getDateTone(
   return "scheduled";
 }
 
-function getVisibleDateKind(
-  task: TaskRecord,
-): "start" | "due" | "completed" | undefined {
+function getVisibleDateKind(task: TaskRecord): "start" | "due" | "completed" | undefined {
   if (task.status === "done" && task.completedAt) {
     return "completed";
   }
@@ -546,10 +425,7 @@ function getVisibleDateKind(
   return task.dueDate ? "due" : undefined;
 }
 
-function getDateValue(
-  task: TaskRecord,
-  kind: "start" | "due" | "completed",
-): string | null {
+function getDateValue(task: TaskRecord, kind: "start" | "due" | "completed"): string | null {
   switch (kind) {
     case "start":
       return task.startDate;
@@ -567,16 +443,8 @@ function isFutureDate(value: string | null): boolean {
   }
 
   const today = new Date();
-  const startOfToday = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
-  const candidateDate = new Date(
-    parsed.getFullYear(),
-    parsed.getMonth(),
-    parsed.getDate(),
-  );
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const candidateDate = new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 
   return candidateDate.getTime() > startOfToday.getTime();
 }
@@ -588,9 +456,7 @@ function getTaskBodyPreview(body: string, accessoryCount = 0): string {
   }
 
   const maxLength = accessoryCount > 0 ? 40 : 72;
-  return preview.length > maxLength
-    ? `${preview.slice(0, maxLength - 1).trimEnd()}…`
-    : preview;
+  return preview.length > maxLength ? `${preview.slice(0, maxLength - 1).trimEnd()}…` : preview;
 }
 
 function formatCompletedDate(value: string | null): string {
@@ -609,22 +475,11 @@ function formatCompletedDate(value: string | null): string {
 function RenderedAction({ spec }: { spec: TaskActionSpec }) {
   if (spec.target) {
     return (
-      <Action.Push
-        title={spec.title}
-        icon={spec.icon ?? undefined}
-        shortcut={spec.shortcut}
-        target={spec.target}
-      />
+      <Action.Push title={spec.title} icon={spec.icon ?? undefined} shortcut={spec.shortcut} target={spec.target} />
     );
   }
 
   return (
-    <Action
-      title={spec.title}
-      icon={spec.icon}
-      shortcut={spec.shortcut}
-      style={spec.style}
-      onAction={spec.onAction}
-    />
+    <Action title={spec.title} icon={spec.icon} shortcut={spec.shortcut} style={spec.style} onAction={spec.onAction} />
   );
 }

@@ -1,13 +1,6 @@
 import { nanoid } from "nanoid";
-import {
-  RaylogTaskNotFoundError,
-  RaylogWorkLogNotFoundError,
-} from "./storage-errors";
-import {
-  readStorageDocument,
-  readStorageMarkdown,
-  writeStorageDocument,
-} from "./storage-markdown";
+import { RaylogTaskNotFoundError, RaylogWorkLogNotFoundError } from "./storage-errors";
+import { readStorageDocument, readStorageMarkdown, writeStorageDocument } from "./storage-markdown";
 import { isRaylogDocument, parseRaylogMarkdown } from "./storage-schema";
 import type {
   RaylogDocument,
@@ -31,9 +24,7 @@ export class RaylogRepository {
 
   async getListTasksFilter(): Promise<TaskViewFilter> {
     const { viewState } = await this.readDocument();
-    return viewState.hasSelectedListTasksFilter
-      ? viewState.listTasksFilter
-      : "open";
+    return viewState.hasSelectedListTasksFilter ? viewState.listTasksFilter : "open";
   }
 
   async setListTasksFilter(filter: TaskViewFilter): Promise<void> {
@@ -49,9 +40,7 @@ export class RaylogRepository {
 
   async getListViewMode(): Promise<TaskListViewMode> {
     const { viewState } = await this.readDocument();
-    return viewState.hasSelectedListViewMode
-      ? viewState.listViewMode
-      : "summary";
+    return viewState.hasSelectedListViewMode ? viewState.listViewMode : "summary";
   }
 
   async setListViewMode(viewMode: TaskListViewMode): Promise<void> {
@@ -70,9 +59,7 @@ export class RaylogRepository {
     const task = document.tasks.find((candidate) => candidate.id === taskId);
 
     if (!task) {
-      throw new RaylogTaskNotFoundError(
-        "The selected task could not be found.",
-      );
+      throw new RaylogTaskNotFoundError("The selected task could not be found.");
     }
 
     return task;
@@ -122,11 +109,7 @@ export class RaylogRepository {
           status: input.status ?? task.status,
           dueDate: input.dueDate ?? null,
           startDate: input.startDate ?? null,
-          completedAt: deriveCompletedAt(
-            task,
-            input.status ?? task.status,
-            now,
-          ),
+          completedAt: deriveCompletedAt(task, input.status ?? task.status, now),
           updatedAt: now,
         };
 
@@ -134,9 +117,7 @@ export class RaylogRepository {
       });
 
       if (!updatedTask) {
-        throw new RaylogTaskNotFoundError(
-          "The selected task could not be found.",
-        );
+        throw new RaylogTaskNotFoundError("The selected task could not be found.");
       }
 
       return { ...document, tasks: tasksWithTaskUpdate };
@@ -175,19 +156,14 @@ export class RaylogRepository {
       });
 
       if (!didDelete) {
-        throw new RaylogTaskNotFoundError(
-          "The selected task could not be found.",
-        );
+        throw new RaylogTaskNotFoundError("The selected task could not be found.");
       }
 
       return { ...document, tasks };
     });
   }
 
-  async createWorkLog(
-    taskId: string,
-    input: TaskWorkLogInput,
-  ): Promise<TaskWorkLogRecord> {
+  async createWorkLog(taskId: string, input: TaskWorkLogInput): Promise<TaskWorkLogRecord> {
     let createdWorkLog: TaskWorkLogRecord | undefined;
 
     await this.mutateDocument((document) => {
@@ -212,9 +188,7 @@ export class RaylogRepository {
       });
 
       if (!createdWorkLog) {
-        throw new RaylogTaskNotFoundError(
-          "The selected task could not be found.",
-        );
+        throw new RaylogTaskNotFoundError("The selected task could not be found.");
       }
 
       return { ...document, tasks };
@@ -223,11 +197,7 @@ export class RaylogRepository {
     return createdWorkLog!;
   }
 
-  async updateWorkLog(
-    taskId: string,
-    workLogId: string,
-    input: TaskWorkLogInput,
-  ): Promise<TaskWorkLogRecord> {
+  async updateWorkLog(taskId: string, workLogId: string, input: TaskWorkLogInput): Promise<TaskWorkLogRecord> {
     let updatedWorkLog: TaskWorkLogRecord | undefined;
 
     await this.mutateDocument((document) => {
@@ -265,15 +235,11 @@ export class RaylogRepository {
       });
 
       if (!didFindTask) {
-        throw new RaylogTaskNotFoundError(
-          "The selected task could not be found.",
-        );
+        throw new RaylogTaskNotFoundError("The selected task could not be found.");
       }
 
       if (!updatedWorkLog) {
-        throw new RaylogWorkLogNotFoundError(
-          "The selected work log could not be found.",
-        );
+        throw new RaylogWorkLogNotFoundError("The selected work log could not be found.");
       }
 
       return { ...document, tasks };
@@ -314,25 +280,18 @@ export class RaylogRepository {
       });
 
       if (!didFindTask) {
-        throw new RaylogTaskNotFoundError(
-          "The selected task could not be found.",
-        );
+        throw new RaylogTaskNotFoundError("The selected task could not be found.");
       }
 
       if (!didDeleteWorkLog) {
-        throw new RaylogWorkLogNotFoundError(
-          "The selected work log could not be found.",
-        );
+        throw new RaylogWorkLogNotFoundError("The selected work log could not be found.");
       }
 
       return { ...document, tasks };
     });
   }
 
-  private async updateTaskStatus(
-    taskId: string,
-    status: TaskStatus,
-  ): Promise<TaskRecord> {
+  private async updateTaskStatus(taskId: string, status: TaskStatus): Promise<TaskRecord> {
     let completedTask: TaskRecord | undefined;
     const now = new Date().toISOString();
 
@@ -353,9 +312,7 @@ export class RaylogRepository {
       });
 
       if (!completedTask) {
-        throw new RaylogTaskNotFoundError(
-          "The selected task could not be found.",
-        );
+        throw new RaylogTaskNotFoundError("The selected task could not be found.");
       }
 
       return { ...document, tasks };
@@ -368,9 +325,7 @@ export class RaylogRepository {
     return readStorageDocument(this.notePath);
   }
 
-  private async mutateDocument<T>(
-    transform: (document: RaylogDocument) => T,
-  ): Promise<T> {
+  private async mutateDocument<T>(transform: (document: RaylogDocument) => T): Promise<T> {
     const runMutation = async (): Promise<T> => {
       const markdown = await readStorageMarkdown(this.notePath);
       const { document } = parseRaylogMarkdown(markdown);
@@ -393,11 +348,7 @@ export class RaylogRepository {
   }
 }
 
-function deriveCompletedAt(
-  task: TaskRecord,
-  status: TaskStatus,
-  now: string,
-): string | null {
+function deriveCompletedAt(task: TaskRecord, status: TaskStatus, now: string): string | null {
   if (status === "done") {
     return task.completedAt ?? now;
   }

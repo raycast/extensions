@@ -1,10 +1,6 @@
 import type { Keyboard } from "@raycast/api";
 import type { RaylogRepository } from "./storage";
-import type {
-  TaskLogStatusBehavior,
-  TaskRecord,
-  TaskViewFilter,
-} from "./types";
+import type { TaskLogStatusBehavior, TaskRecord, TaskViewFilter } from "./types";
 
 export interface TaskActionTargetSpec {
   type: "TaskDetailView" | "TaskForm";
@@ -40,9 +36,7 @@ export interface MenuBarTaskMutationSpec extends TaskActionBaseSpec {
   action: "complete" | "start" | "archive";
 }
 
-export type MenuBarTaskActionSpec =
-  | MenuBarTaskTargetSpec
-  | MenuBarTaskMutationSpec;
+export type MenuBarTaskActionSpec = MenuBarTaskTargetSpec | MenuBarTaskMutationSpec;
 
 interface SharedTaskActionSpecOptions {
   notePath: string;
@@ -62,33 +56,17 @@ export function buildTaskFilterActionSpecs(
   onSelectFilter: (filter: TaskViewFilter) => Promise<void> | void,
 ): TaskMutationActionSpec[] {
   return [
-    createFilterActionSpec("Show All Tasks", undefined, () =>
-      onSelectFilter("all"),
-    ),
-    createFilterActionSpec("Show Open Tasks", undefined, () =>
-      onSelectFilter("open"),
-    ),
-    createFilterActionSpec("Show To Do", undefined, () =>
-      onSelectFilter("todo"),
-    ),
-    createFilterActionSpec("Show In Progress", undefined, () =>
-      onSelectFilter("in_progress"),
-    ),
-    createFilterActionSpec("Show Due Soon", undefined, () =>
-      onSelectFilter("due_soon"),
-    ),
-    createFilterActionSpec("Show Done Tasks", undefined, () =>
-      onSelectFilter("done"),
-    ),
-    createFilterActionSpec("Show Archived Tasks", undefined, () =>
-      onSelectFilter("archived"),
-    ),
+    createFilterActionSpec("Show All Tasks", undefined, () => onSelectFilter("all")),
+    createFilterActionSpec("Show Open Tasks", undefined, () => onSelectFilter("open")),
+    createFilterActionSpec("Show To Do", undefined, () => onSelectFilter("todo")),
+    createFilterActionSpec("Show In Progress", undefined, () => onSelectFilter("in_progress")),
+    createFilterActionSpec("Show Due Soon", undefined, () => onSelectFilter("due_soon")),
+    createFilterActionSpec("Show Done Tasks", undefined, () => onSelectFilter("done")),
+    createFilterActionSpec("Show Archived Tasks", undefined, () => onSelectFilter("archived")),
   ];
 }
 
-export function buildTaskListActionSpecs(
-  options: SharedTaskActionSpecOptions,
-): TaskActionSpec[] {
+export function buildTaskListActionSpecs(options: SharedTaskActionSpecOptions): TaskActionSpec[] {
   return [
     {
       kind: "target",
@@ -129,9 +107,7 @@ export function buildTaskDetailActionSpecs(
   ];
 }
 
-export function buildMenuBarTaskActionSpecs(
-  task: TaskRecord,
-): MenuBarTaskActionSpec[] {
+export function buildMenuBarTaskActionSpecs(task: TaskRecord): MenuBarTaskActionSpec[] {
   const specs: MenuBarTaskActionSpec[] = [];
 
   if (task.status === "in_progress") {
@@ -167,9 +143,7 @@ export function buildMenuBarTaskActionSpecs(
   return specs;
 }
 
-function buildEditActionSpecs(
-  options: SharedTaskActionSpecOptions,
-): TaskTargetActionSpec[] {
+function buildEditActionSpecs(options: SharedTaskActionSpecOptions): TaskTargetActionSpec[] {
   return [
     {
       kind: "target",
@@ -217,9 +191,7 @@ function buildEditActionSpecs(
   ];
 }
 
-function buildLifecycleActionSpecs(
-  options: DetailTaskActionSpecOptions,
-): TaskMutationActionSpec[] {
+function buildLifecycleActionSpecs(options: DetailTaskActionSpecOptions): TaskMutationActionSpec[] {
   const specs: TaskMutationActionSpec[] = [];
 
   if (options.task.status === "todo") {
@@ -305,9 +277,6 @@ function createFilterActionSpec(
   };
 }
 
-function createShortcut(
-  modifiers: Keyboard.KeyModifier[],
-  key: Keyboard.KeyEquivalent,
-): Keyboard.Shortcut {
+function createShortcut(modifiers: Keyboard.KeyModifier[], key: Keyboard.KeyEquivalent): Keyboard.Shortcut {
   return { modifiers, key };
 }

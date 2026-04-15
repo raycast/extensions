@@ -1,13 +1,7 @@
 import { RAYLOG_SCHEMA_VERSION } from "./constants";
 import { isTaskViewFilter } from "./tasks";
 import { RaylogParseError, RaylogSchemaError } from "./storage-errors";
-import type {
-  RaylogDocument,
-  TaskListViewMode,
-  TaskRecord,
-  TaskStatus,
-  TaskWorkLogRecord,
-} from "./types";
+import type { RaylogDocument, TaskListViewMode, TaskRecord, TaskStatus, TaskWorkLogRecord } from "./types";
 
 export function createEmptyDocument(): RaylogDocument {
   return {
@@ -70,20 +64,13 @@ export function parseRaylogMarkdown(markdown: string): {
       throw error;
     }
 
-    throw new RaylogParseError(
-      "The Raylog database is corrupted.",
-      describeParseFailure(match[1], error),
-    );
+    throw new RaylogParseError("The Raylog database is corrupted.", describeParseFailure(match[1], error));
   }
 }
 
 export function isRaylogDocument(value: unknown): value is RaylogDocument {
   return (
-    typeof value === "object" &&
-    value !== null &&
-    "schemaVersion" in value &&
-    "tasks" in value &&
-    "viewState" in value
+    typeof value === "object" && value !== null && "schemaVersion" in value && "tasks" in value && "viewState" in value
   );
 }
 
@@ -124,19 +111,11 @@ function normalizeViewState(value: unknown): RaylogDocument["viewState"] {
   const candidate = value as Partial<RaylogDocument["viewState"]>;
   return {
     hasSelectedListTasksFilter:
-      typeof candidate.hasSelectedListTasksFilter === "boolean"
-        ? candidate.hasSelectedListTasksFilter
-        : false,
-    listTasksFilter: isTaskViewFilter(candidate.listTasksFilter)
-      ? candidate.listTasksFilter
-      : "all",
+      typeof candidate.hasSelectedListTasksFilter === "boolean" ? candidate.hasSelectedListTasksFilter : false,
+    listTasksFilter: isTaskViewFilter(candidate.listTasksFilter) ? candidate.listTasksFilter : "all",
     hasSelectedListViewMode:
-      typeof candidate.hasSelectedListViewMode === "boolean"
-        ? candidate.hasSelectedListViewMode
-        : false,
-    listViewMode: isTaskListViewMode(candidate.listViewMode)
-      ? candidate.listViewMode
-      : "summary",
+      typeof candidate.hasSelectedListViewMode === "boolean" ? candidate.hasSelectedListViewMode : false,
+    listViewMode: isTaskListViewMode(candidate.listViewMode) ? candidate.listViewMode : "summary",
   };
 }
 
@@ -179,12 +158,7 @@ function normalizeWorkLogRecord(value: unknown): TaskWorkLogRecord {
 }
 
 function normalizeTaskStatus(value: unknown): TaskStatus {
-  if (
-    value === "todo" ||
-    value === "in_progress" ||
-    value === "done" ||
-    value === "archived"
-  ) {
+  if (value === "todo" || value === "in_progress" || value === "done" || value === "archived") {
     return value;
   }
 
@@ -212,13 +186,8 @@ function describeParseFailure(payload: string, error: unknown): string {
   return describeValidationFailure(error.message);
 }
 
-function describeJsonSyntaxError(
-  payload: string,
-  message: string,
-): string | undefined {
-  const match = message.match(
-    /^(.*?) at position (\d+)(?: \(line (\d+) column (\d+)\))?$/i,
-  );
+function describeJsonSyntaxError(payload: string, message: string): string | undefined {
+  const match = message.match(/^(.*?) at position (\d+)(?: \(line (\d+) column (\d+)\))?$/i);
 
   if (!match) {
     return undefined;
@@ -263,18 +232,11 @@ function trimTrailingPeriod(value: string): string {
 }
 
 function lowercaseFirst(value: string): string {
-  return value.length > 0
-    ? `${value.charAt(0).toLowerCase()}${value.slice(1)}`
-    : value;
+  return value.length > 0 ? `${value.charAt(0).toLowerCase()}${value.slice(1)}` : value;
 }
 
-function getLineAndColumnFromPosition(
-  payload: string,
-  position: number,
-): { line: number; column: number } {
-  const clampedPosition = Number.isNaN(position)
-    ? payload.length
-    : Math.min(Math.max(position, 0), payload.length);
+function getLineAndColumnFromPosition(payload: string, position: number): { line: number; column: number } {
+  const clampedPosition = Number.isNaN(position) ? payload.length : Math.min(Math.max(position, 0), payload.length);
   const preceding = payload.slice(0, clampedPosition);
   const lines = preceding.split("\n");
 

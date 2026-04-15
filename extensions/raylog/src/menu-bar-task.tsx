@@ -13,11 +13,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { executeMenuBarTaskAction } from "./lib/menu-bar-task-actions";
 import { buildMenuBarTaskSubmenuSections } from "./lib/menu-bar-task-submenus";
 import { buildMenuBarTaskActionSpecs } from "./lib/task-flow";
-import {
-  getTaskActionIcon,
-  getTaskIndicatorIcon,
-  getTaskStatusIcon,
-} from "./lib/task-visuals";
+import { getTaskActionIcon, getTaskIndicatorIcon, getTaskStatusIcon } from "./lib/task-visuals";
 import { readMenuBarCache } from "./lib/menu-bar-cache";
 import { refreshMenuBarState } from "./lib/menu-bar-state";
 import { createMenuBarRepository } from "./lib/menu-bar-state-runtime";
@@ -28,16 +24,10 @@ export default function Command() {
   const cacheStore = useMemo(() => new Cache(), []);
   const cachedState = useMemo(() => readMenuBarCache(cacheStore), [cacheStore]);
   const [isLoading, setIsLoading] = useState(!repository && !cachedState);
-  const [currentTask, setCurrentTask] = useState<TaskRecord | undefined>(
-    cachedState?.currentTask,
-  );
-  const [menuTasks, setMenuTasks] = useState<TaskRecord[]>(
-    cachedState?.menuTasks ?? [],
-  );
+  const [currentTask, setCurrentTask] = useState<TaskRecord | undefined>(cachedState?.currentTask);
+  const [menuTasks, setMenuTasks] = useState<TaskRecord[]>(cachedState?.menuTasks ?? []);
   const [title, setTitle] = useState(cachedState?.title ?? "Raylog");
-  const [tooltip, setTooltip] = useState(
-    cachedState?.tooltip ?? "Raylog task menu bar",
-  );
+  const [tooltip, setTooltip] = useState(cachedState?.tooltip ?? "Raylog task menu bar");
 
   const loadMenuBarTasks = useCallback(async () => {
     const nextState = await refreshMenuBarState({
@@ -68,8 +58,7 @@ export default function Command() {
         setIsLoading,
         showToast: async ({ style, title, message }) =>
           showToast({
-            style:
-              style === "success" ? Toast.Style.Success : Toast.Style.Failure,
+            style: style === "success" ? Toast.Style.Success : Toast.Style.Failure,
             title,
             message,
           }),
@@ -78,10 +67,7 @@ export default function Command() {
     [loadMenuBarTasks, repository],
   );
 
-  const taskSections = useMemo(
-    () => buildMenuBarTaskSubmenuSections(currentTask, menuTasks),
-    [currentTask, menuTasks],
-  );
+  const taskSections = useMemo(() => buildMenuBarTaskSubmenuSections(currentTask, menuTasks), [currentTask, menuTasks]);
 
   const openTask = useCallback((taskId: string) => {
     return launchCommand({
@@ -115,11 +101,7 @@ export default function Command() {
           <MenuBarExtra.Item title={title} />
         </MenuBarExtra.Section>
         <MenuBarExtra.Section title="Actions">
-          <MenuBarExtra.Item
-            title="Open Task List"
-            icon={getTaskActionIcon("Open Task")}
-            onAction={openTaskList}
-          />
+          <MenuBarExtra.Item title="Open Task List" icon={getTaskActionIcon("Open Task")} onAction={openTaskList} />
           <MenuBarExtra.Item
             title="Open Extension Preferences"
             icon={getTaskActionIcon("Open Extension Preferences")}
@@ -156,10 +138,7 @@ export default function Command() {
                 icon={getTaskStatusIcon(item.task.status)}
               >
                 {item.dueLabel && item.dueTone ? (
-                  <MenuBarExtra.Item
-                    title={item.dueLabel}
-                    icon={getTaskIndicatorIcon("due", item.dueTone)}
-                  />
+                  <MenuBarExtra.Item title={item.dueLabel} icon={getTaskIndicatorIcon("due", item.dueTone)} />
                 ) : null}
                 {buildMenuBarTaskActionSpecs(item.task).map((action) => (
                   <MenuBarExtra.Item
@@ -182,11 +161,7 @@ export default function Command() {
         ))
       )}
       <MenuBarExtra.Section title="Actions">
-        <MenuBarExtra.Item
-          title="Open Task List"
-          icon={getTaskActionIcon("Open Task")}
-          onAction={openTaskList}
-        />
+        <MenuBarExtra.Item title="Open Task List" icon={getTaskActionIcon("Open Task")} onAction={openTaskList} />
         <MenuBarExtra.Item
           title="Open Extension Preferences"
           icon={getTaskActionIcon("Open Extension Preferences")}

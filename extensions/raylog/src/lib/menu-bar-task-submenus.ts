@@ -26,9 +26,7 @@ export function buildMenuBarTaskSubmenuSections(
     });
   }
 
-  const nextTasks = menuTasks
-    .filter((task) => task.id !== currentTask?.id)
-    .map(buildMenuBarTaskSubmenuSpec);
+  const nextTasks = menuTasks.filter((task) => task.id !== currentTask?.id).map(buildMenuBarTaskSubmenuSpec);
 
   if (nextTasks.length > 0) {
     sections.push({

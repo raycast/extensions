@@ -29,9 +29,7 @@ interface ConfiguredCommandProps {
   children: (notePath: string) => ReactNode;
 }
 
-export default function ConfiguredCommand({
-  children,
-}: ConfiguredCommandProps) {
+export default function ConfiguredCommand({ children }: ConfiguredCommandProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [notePath, setNotePath] = useState<string>();
   const [message, setMessage] = useState<string>();
@@ -39,9 +37,7 @@ export default function ConfiguredCommand({
   const [canGenerateDatabase, setCanGenerateDatabase] = useState(false);
   const [isSchemaError, setIsSchemaError] = useState(false);
   const [isCorruptedStorage, setIsCorruptedStorage] = useState(false);
-  const [currentSchemaVersion, setCurrentSchemaVersion] = useState<
-    number | undefined
-  >();
+  const [currentSchemaVersion, setCurrentSchemaVersion] = useState<number | undefined>();
 
   useEffect(() => {
     void loadConfiguredNote();
@@ -58,9 +54,7 @@ export default function ConfiguredCommand({
 
     if (!configuredNotePath) {
       setNotePath(undefined);
-      setMessage(
-        "Choose a markdown file in Raycast extension preferences to continue.",
-      );
+      setMessage("Choose a markdown file in Raycast extension preferences to continue.");
       setIsLoading(false);
       return;
     }
@@ -72,10 +66,7 @@ export default function ConfiguredCommand({
     } catch (error) {
       let resolvedError = error;
 
-      if (
-        error instanceof RaylogInitializationRequiredError &&
-        (await isMarkdownFileEmpty(configuredNotePath))
-      ) {
+      if (error instanceof RaylogInitializationRequiredError && (await isMarkdownFileEmpty(configuredNotePath))) {
         try {
           await resetStorageNote(configuredNotePath);
           await ensureStorageNote(configuredNotePath);
@@ -88,22 +79,13 @@ export default function ConfiguredCommand({
       }
 
       setNotePath(undefined);
-      setMessage(
-        getRaylogErrorMessage(resolvedError, "Unable to load Raylog storage."),
-      );
-      setCanGenerateDatabase(
-        resolvedError instanceof RaylogInitializationRequiredError,
-      );
-      setCanReset(
-        resolvedError instanceof RaylogParseError ||
-          resolvedError instanceof RaylogSchemaError,
-      );
+      setMessage(getRaylogErrorMessage(resolvedError, "Unable to load Raylog storage."));
+      setCanGenerateDatabase(resolvedError instanceof RaylogInitializationRequiredError);
+      setCanReset(resolvedError instanceof RaylogParseError || resolvedError instanceof RaylogSchemaError);
       setIsSchemaError(resolvedError instanceof RaylogSchemaError);
       setIsCorruptedStorage(isRaylogCorruptionError(resolvedError));
       if (resolvedError instanceof RaylogSchemaError) {
-        setCurrentSchemaVersion(
-          await readSchemaVersionFromNote(configuredNotePath),
-        );
+        setCurrentSchemaVersion(await readSchemaVersionFromNote(configuredNotePath));
       }
     } finally {
       setIsLoading(false);
@@ -129,10 +111,7 @@ export default function ConfiguredCommand({
       await showToast({
         style: Toast.Style.Failure,
         title: "Unable to reset storage",
-        message: getRaylogErrorMessage(
-          error,
-          "Unable to reset the storage note.",
-        ),
+        message: getRaylogErrorMessage(error, "Unable to reset the storage note."),
       });
     }
   }
@@ -169,10 +148,7 @@ export default function ConfiguredCommand({
       await showToast({
         style: Toast.Style.Failure,
         title: "Unable to generate database",
-        message: getRaylogErrorMessage(
-          error,
-          "Unable to generate the task database.",
-        ),
+        message: getRaylogErrorMessage(error, "Unable to generate the task database."),
       });
     }
   }
@@ -182,21 +158,13 @@ export default function ConfiguredCommand({
   }
 
   if (!notePath) {
-    if (
-      !canGenerateDatabase &&
-      !canReset &&
-      !isSchemaError &&
-      !isCorruptedStorage
-    ) {
+    if (!canGenerateDatabase && !canReset && !isSchemaError && !isCorruptedStorage) {
       return (
         <List>
           <List.EmptyView
             icon={Icon.Document}
             title="Set Up Raylog Storage"
-            description={
-              message ??
-              "Choose the markdown file Raylog should use in Raycast extension preferences."
-            }
+            description={message ?? "Choose the markdown file Raylog should use in Raycast extension preferences."}
             actions={
               <ActionPanel>
                 <Action
@@ -214,9 +182,7 @@ export default function ConfiguredCommand({
     return (
       <List>
         <List.EmptyView
-          icon={
-            isCorruptedStorage || isSchemaError ? Icon.Warning : Icon.Document
-          }
+          icon={isCorruptedStorage || isSchemaError ? Icon.Warning : Icon.Document}
           title={
             isSchemaError
               ? `Schema v${currentSchemaVersion ?? "?"} -> v${RAYLOG_SCHEMA_VERSION} Required`
@@ -225,9 +191,7 @@ export default function ConfiguredCommand({
                 : "Set Up Raylog Storage"
           }
           description={buildEmptyStateDescription({
-            message:
-              message ??
-              "Choose a markdown file in Raycast extension preferences to continue.",
+            message: message ?? "Choose a markdown file in Raycast extension preferences to continue.",
             configuredNotePath: getConfiguredStorageNotePath(),
             canGenerateDatabase,
             isSchemaError,
@@ -243,11 +207,7 @@ export default function ConfiguredCommand({
                 />
               )}
               {canReset && (
-                <Action
-                  title="Reset Storage Note"
-                  icon={Icon.ArrowCounterClockwise}
-                  onAction={handleResetStorage}
-                />
+                <Action title="Reset Storage Note" icon={Icon.ArrowCounterClockwise} onAction={handleResetStorage} />
               )}
               <Action
                 title="Open Extension Preferences"
@@ -288,9 +248,7 @@ function buildEmptyStateDescription({
   return `"${path.basename(configuredNotePath ?? "note.md")}" uses schema v${currentSchemaVersion ?? "?"}. Raylog needs v${RAYLOG_SCHEMA_VERSION}. Reset the file to continue.`;
 }
 
-async function readSchemaVersionFromNote(
-  notePath: string,
-): Promise<number | undefined> {
+async function readSchemaVersionFromNote(notePath: string): Promise<number | undefined> {
   try {
     const markdown = await fs.promises.readFile(notePath, "utf8");
     const match = markdown.match(/"schemaVersion"\s*:\s*(\d+)/);

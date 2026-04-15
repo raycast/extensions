@@ -1,12 +1,5 @@
 export type TaskStatus = "todo" | "in_progress" | "done" | "archived";
-export type TaskViewFilter =
-  | "all"
-  | "open"
-  | "todo"
-  | "in_progress"
-  | "due_soon"
-  | "done"
-  | "archived";
+export type TaskViewFilter = "all" | "open" | "todo" | "in_progress" | "due_soon" | "done" | "archived";
 export type TaskListViewMode = "summary" | "list";
 
 export type TaskLogStatusBehavior = "auto_start" | "keep_status" | "prompt";

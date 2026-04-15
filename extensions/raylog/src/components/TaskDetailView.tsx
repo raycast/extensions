@@ -1,16 +1,9 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  buildTaskDetailActionSpecs,
-  type TaskActionSpec,
-} from "./task-action-specs";
+import { buildTaskDetailActionSpecs, type TaskActionSpec } from "./task-action-specs";
 import { formatTaskDate } from "../lib/date";
 import { getTaskStatusLabel } from "../lib/tasks";
-import {
-  getTaskActionIcon,
-  getTaskIndicatorIcon,
-  getTaskStatusIcon,
-} from "../lib/task-visuals";
+import { getTaskActionIcon, getTaskIndicatorIcon, getTaskStatusIcon } from "../lib/task-visuals";
 import { buildTaskDetailMarkdown } from "../lib/task-presentation";
 import { getRaylogErrorMessage, RaylogRepository } from "../lib/storage";
 import type { TaskLogStatusBehavior, TaskRecord } from "../lib/types";
@@ -22,12 +15,7 @@ export interface TaskDetailViewProps {
   onDidChangeTask?: () => Promise<void> | void;
 }
 
-export default function TaskDetailView({
-  notePath,
-  taskId,
-  statusBehavior,
-  onDidChangeTask,
-}: TaskDetailViewProps) {
+export default function TaskDetailView({ notePath, taskId, statusBehavior, onDidChangeTask }: TaskDetailViewProps) {
   const { pop } = useNavigation();
   const repository = useMemo(() => new RaylogRepository(notePath), [notePath]);
   const [isLoading, setIsLoading] = useState(true);
@@ -60,11 +48,7 @@ export default function TaskDetailView({
         markdown={loadError ?? "The selected task could not be loaded."}
         actions={
           <ActionPanel>
-            <Action
-              title="Reload Task"
-              icon={getTaskActionIcon("Reload Task")}
-              onAction={loadTask}
-            />
+            <Action title="Reload Task" icon={getTaskActionIcon("Reload Task")} onAction={loadTask} />
           </ActionPanel>
         }
       />
@@ -120,17 +104,9 @@ export default function TaskDetailView({
             text={formatTaskDate(task.completedAt)}
             icon={getTaskStatusIcon("done")}
           />
-          <Detail.Metadata.Label
-            title="Work Logs"
-            text={String(task.workLogs.length)}
-            icon={Icon.BulletPoints}
-          />
+          <Detail.Metadata.Label title="Work Logs" text={String(task.workLogs.length)} icon={Icon.BulletPoints} />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Created"
-            text={new Date(task.createdAt).toLocaleString()}
-            icon={Icon.Clock}
-          />
+          <Detail.Metadata.Label title="Created" text={new Date(task.createdAt).toLocaleString()} icon={Icon.Clock} />
           <Detail.Metadata.Label
             title="Updated"
             text={new Date(task.updatedAt).toLocaleString()}
@@ -146,11 +122,7 @@ export default function TaskDetailView({
             ))}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
-              title="Reload Task"
-              icon={getTaskActionIcon("Reload Task")}
-              onAction={loadTask}
-            />
+            <Action title="Reload Task" icon={getTaskActionIcon("Reload Task")} onAction={loadTask} />
           </ActionPanel.Section>
         </ActionPanel>
       }
@@ -161,22 +133,11 @@ export default function TaskDetailView({
 function RenderedAction({ spec }: { spec: TaskActionSpec }) {
   if (spec.target) {
     return (
-      <Action.Push
-        title={spec.title}
-        icon={spec.icon ?? undefined}
-        shortcut={spec.shortcut}
-        target={spec.target}
-      />
+      <Action.Push title={spec.title} icon={spec.icon ?? undefined} shortcut={spec.shortcut} target={spec.target} />
     );
   }
 
   return (
-    <Action
-      title={spec.title}
-      icon={spec.icon}
-      shortcut={spec.shortcut}
-      style={spec.style}
-      onAction={spec.onAction}
-    />
+    <Action title={spec.title} icon={spec.icon} shortcut={spec.shortcut} style={spec.style} onAction={spec.onAction} />
   );
 }

@@ -1,11 +1,6 @@
 import { toCanonicalDateString } from "./date";
 import { validateTaskInput, validateWorkLogInput } from "./tasks";
-import type {
-  TaskLogStatusBehavior,
-  TaskRecord,
-  TaskStatus,
-  TaskWorkLogRecord,
-} from "./types";
+import type { TaskLogStatusBehavior, TaskRecord, TaskStatus, TaskWorkLogRecord } from "./types";
 
 export interface TaskFormValues {
   header: string;
@@ -36,10 +31,7 @@ export interface TaskFormRepository {
       workLogs: TaskWorkLogRecord[];
     },
   ): Promise<TaskRecord>;
-  createWorkLog(
-    taskId: string,
-    input: { body: string },
-  ): Promise<TaskWorkLogRecord>;
+  createWorkLog(taskId: string, input: { body: string }): Promise<TaskWorkLogRecord>;
   startTask(taskId: string): Promise<TaskRecord>;
 }
 
@@ -111,21 +103,13 @@ export async function submitTaskForm({
     };
   }
 
-  const savedTask = task
-    ? await repository.updateTask(task.id, payload)
-    : await repository.createTask(payload);
+  const savedTask = task ? await repository.updateTask(task.id, payload) : await repository.createTask(payload);
 
   if (trimmedNewWorkLogEntry) {
     await repository.createWorkLog(savedTask.id, {
       body: trimmedNewWorkLogEntry,
     });
-    await maybeAdvanceTaskStatus(
-      savedTask.id,
-      payload.status,
-      statusBehavior,
-      repository,
-      confirmAlertImpl,
-    );
+    await maybeAdvanceTaskStatus(savedTask.id, payload.status, statusBehavior, repository, confirmAlertImpl);
   }
 
   return {
@@ -173,9 +157,7 @@ function buildUpdatedWorkLogs(
   originalWorkLogs: TaskWorkLogRecord[],
   nextWorkLogs: TaskWorkLogRecord[],
 ): TaskWorkLogRecord[] {
-  const originalWorkLogMap = new Map(
-    originalWorkLogs.map((workLog) => [workLog.id, workLog]),
-  );
+  const originalWorkLogMap = new Map(originalWorkLogs.map((workLog) => [workLog.id, workLog]));
   const now = new Date().toISOString();
 
   return nextWorkLogs.map((workLog) => {
@@ -209,19 +191,14 @@ export function deleteFocusedWorkLog(
     return undefined;
   }
 
-  const deletedIndex = values.workLogs.findIndex(
-    (workLog) => workLog.id === focusedWorkLogId,
-  );
+  const deletedIndex = values.workLogs.findIndex((workLog) => workLog.id === focusedWorkLogId);
 
   if (deletedIndex < 0) {
     return undefined;
   }
 
-  const workLogs = values.workLogs.filter(
-    (workLog) => workLog.id !== focusedWorkLogId,
-  );
-  const nextFocusedWorkLog =
-    workLogs[deletedIndex] ?? workLogs[deletedIndex - 1];
+  const workLogs = values.workLogs.filter((workLog) => workLog.id !== focusedWorkLogId);
+  const nextFocusedWorkLog = workLogs[deletedIndex] ?? workLogs[deletedIndex - 1];
 
   return {
     values: {

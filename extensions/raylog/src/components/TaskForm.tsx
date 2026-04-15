@@ -6,12 +6,7 @@ import { createDefaultTaskFormController } from "../lib/task-form-controller-run
 import type { TaskFormValues } from "../lib/task-form-submit";
 import { getTaskStatusLabel } from "../lib/tasks";
 import { getTaskActionIcon, getTaskStatusIcon } from "../lib/task-visuals";
-import type {
-  TaskLogStatusBehavior,
-  TaskRecord,
-  TaskStatus,
-  TaskWorkLogRecord,
-} from "../lib/types";
+import type { TaskLogStatusBehavior, TaskRecord, TaskStatus, TaskWorkLogRecord } from "../lib/types";
 
 export type TaskFormInitialFocus = "header" | "new_work_log";
 
@@ -77,10 +72,7 @@ export default function TaskForm({
       return;
     }
 
-    const focusTarget =
-      initialFocus === "new_work_log"
-        ? newWorkLogRef.current
-        : headerRef.current;
+    const focusTarget = initialFocus === "new_work_log" ? newWorkLogRef.current : headerRef.current;
 
     if (!focusTarget) {
       return;
@@ -143,11 +135,7 @@ export default function TaskForm({
           <ActionPanel.Section>
             <Action.SubmitForm
               title={isEditing ? "Save Task" : "Create Task"}
-              icon={
-                isEditing
-                  ? getTaskActionIcon("Save Task")
-                  : getTaskActionIcon("Create Task")
-              }
+              icon={isEditing ? getTaskActionIcon("Save Task") : getTaskActionIcon("Create Task")}
               onSubmit={handleSubmit}
             />
             {isEditing && focusedWorkLogId && (
@@ -205,21 +193,13 @@ export default function TaskForm({
           }))
         }
       >
-        <Form.Dropdown.Item
-          value="todo"
-          title={getTaskStatusLabel("todo")}
-          icon={getTaskStatusIcon("todo")}
-        />
+        <Form.Dropdown.Item value="todo" title={getTaskStatusLabel("todo")} icon={getTaskStatusIcon("todo")} />
         <Form.Dropdown.Item
           value="in_progress"
           title={getTaskStatusLabel("in_progress")}
           icon={getTaskStatusIcon("in_progress")}
         />
-        <Form.Dropdown.Item
-          value="done"
-          title={getTaskStatusLabel("done")}
-          icon={getTaskStatusIcon("done")}
-        />
+        <Form.Dropdown.Item value="done" title={getTaskStatusLabel("done")} icon={getTaskStatusIcon("done")} />
         <Form.Dropdown.Item
           value="archived"
           title={getTaskStatusLabel("archived")}
@@ -272,17 +252,13 @@ export default function TaskForm({
               value={workLog.body}
               onFocus={() => setFocusedWorkLogId(workLog.id)}
               onBlur={() =>
-                setFocusedWorkLogId((currentValue) =>
-                  currentValue === workLog.id ? undefined : currentValue,
-                )
+                setFocusedWorkLogId((currentValue) => (currentValue === workLog.id ? undefined : currentValue))
               }
               onChange={(newValue) =>
                 setValues((currentValues) => ({
                   ...currentValues,
                   workLogs: currentValues.workLogs.map((candidate) =>
-                    candidate.id === workLog.id
-                      ? { ...candidate, body: newValue }
-                      : candidate,
+                    candidate.id === workLog.id ? { ...candidate, body: newValue } : candidate,
                   ),
                 }))
               }

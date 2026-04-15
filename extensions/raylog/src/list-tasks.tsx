@@ -8,9 +8,7 @@ interface ListTasksLaunchContext {
   selectedTaskId?: string;
 }
 
-export default function Command(
-  props: LaunchProps<{ launchContext?: ListTasksLaunchContext }>,
-) {
+export default function Command(props: LaunchProps<{ launchContext?: ListTasksLaunchContext }>) {
   const taskLogStatusBehavior = getTaskLogStatusBehavior();
 
   return (
@@ -23,10 +21,7 @@ export default function Command(
             statusBehavior={taskLogStatusBehavior}
           />
         ) : (
-          <TaskListScreen
-            notePath={notePath}
-            taskLogStatusBehavior={taskLogStatusBehavior}
-          />
+          <TaskListScreen notePath={notePath} taskLogStatusBehavior={taskLogStatusBehavior} />
         )
       }
     </ConfiguredCommand>

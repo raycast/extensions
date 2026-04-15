@@ -15,9 +15,7 @@ export interface MenuBarCacheStore {
   remove(key: string): void;
 }
 
-export function readMenuBarCache(
-  cacheStore: MenuBarCacheStore,
-): MenuBarCacheState | undefined {
+export function readMenuBarCache(cacheStore: MenuBarCacheStore): MenuBarCacheState | undefined {
   const cachedValue = cacheStore.get(MENU_BAR_CACHE_KEY);
   if (!cachedValue) {
     return undefined;
@@ -31,10 +29,7 @@ export function readMenuBarCache(
   }
 }
 
-export function writeMenuBarCache(
-  state: MenuBarCacheState,
-  cacheStore: MenuBarCacheStore,
-): void {
+export function writeMenuBarCache(state: MenuBarCacheState, cacheStore: MenuBarCacheStore): void {
   cacheStore.set(MENU_BAR_CACHE_KEY, JSON.stringify(state));
 }
 

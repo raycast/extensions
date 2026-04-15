@@ -1,9 +1,4 @@
-import {
-  clearMenuBarCache,
-  writeMenuBarCache,
-  type MenuBarCacheState,
-  type MenuBarCacheStore,
-} from "./menu-bar-cache";
+import { clearMenuBarCache, writeMenuBarCache, type MenuBarCacheState, type MenuBarCacheStore } from "./menu-bar-cache";
 import { getMenuBarTask, getMenuBarTasks } from "./tasks";
 import { getRaylogErrorMessage } from "./storage";
 import type { TaskRecord } from "./types";
@@ -47,10 +42,7 @@ export async function refreshMenuBarState(options: {
   }
 }
 
-export function buildMenuBarState(
-  task: TaskRecord | undefined,
-  menuTasks: TaskRecord[],
-): MenuBarViewState {
+export function buildMenuBarState(task: TaskRecord | undefined, menuTasks: TaskRecord[]): MenuBarViewState {
   if (!task) {
     return {
       currentTask: undefined,
@@ -64,8 +56,6 @@ export function buildMenuBarState(
     currentTask: task,
     menuTasks,
     title: task.header,
-    tooltip: task.dueDate
-      ? `Next due task: ${task.header}`
-      : `First task: ${task.header}`,
+    tooltip: task.dueDate ? `Next due task: ${task.header}` : `First task: ${task.header}`,
   };
 }

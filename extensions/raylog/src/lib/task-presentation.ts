@@ -1,14 +1,7 @@
 import type { TaskRecord } from "./types";
 
-export function matchesTaskSearch(
-  task: TaskRecord,
-  normalizedSearch: string,
-  includeWorkLogs: boolean,
-): boolean {
-  if (
-    task.header.toLowerCase().includes(normalizedSearch) ||
-    task.body.toLowerCase().includes(normalizedSearch)
-  ) {
+export function matchesTaskSearch(task: TaskRecord, normalizedSearch: string, includeWorkLogs: boolean): boolean {
+  if (task.header.toLowerCase().includes(normalizedSearch) || task.body.toLowerCase().includes(normalizedSearch)) {
     return true;
   }
 
@@ -16,9 +9,7 @@ export function matchesTaskSearch(
     return false;
   }
 
-  return task.workLogs.some((workLog) =>
-    workLog.body.toLowerCase().includes(normalizedSearch),
-  );
+  return task.workLogs.some((workLog) => workLog.body.toLowerCase().includes(normalizedSearch));
 }
 
 export function buildTaskDetailMarkdown(
@@ -29,15 +20,10 @@ export function buildTaskDetailMarkdown(
   const safeHeader = escapeMarkdown(task.header);
   const trimmedBody = task.body.trim();
   const body = trimmedBody || options?.emptyBodyFallback || "";
-  const createdLabel = `◷ Created ${escapeMarkdown(
-    formatCompactDateTime(task.createdAt),
-  )}`;
-  const wasEdited =
-    new Date(task.updatedAt).getTime() > new Date(task.createdAt).getTime();
+  const createdLabel = `◷ Created ${escapeMarkdown(formatCompactDateTime(task.createdAt))}`;
+  const wasEdited = new Date(task.updatedAt).getTime() > new Date(task.createdAt).getTime();
   const taskTimeline = wasEdited
-    ? `\`${createdLabel} -> ✎ Edited ${escapeMarkdown(
-        formatCompactDateTime(task.updatedAt),
-      )}\``
+    ? `\`${createdLabel} -> ✎ Edited ${escapeMarkdown(formatCompactDateTime(task.updatedAt))}\``
     : `\`${createdLabel}\``;
   const workLogSections = task.workLogs
     .map((workLog, index) => buildWorkLogMarkdown(workLog, index))
@@ -69,21 +55,12 @@ export function formatCompactDateTime(value: string): string {
   });
 }
 
-function buildWorkLogMarkdown(
-  workLog: TaskRecord["workLogs"][number],
-  index: number,
-): string {
-  const createdLabel = `◷ Logged ${escapeMarkdown(
-    formatCompactDateTime(workLog.createdAt),
-  )}`;
+function buildWorkLogMarkdown(workLog: TaskRecord["workLogs"][number], index: number): string {
+  const createdLabel = `◷ Logged ${escapeMarkdown(formatCompactDateTime(workLog.createdAt))}`;
   const wasEdited =
-    workLog.updatedAt !== null &&
-    new Date(workLog.updatedAt).getTime() >
-      new Date(workLog.createdAt).getTime();
+    workLog.updatedAt !== null && new Date(workLog.updatedAt).getTime() > new Date(workLog.createdAt).getTime();
   const workLogTimeline = wasEdited
-    ? `\`${createdLabel} -> ✎ Edited ${escapeMarkdown(
-        formatCompactDateTime(workLog.updatedAt as string),
-      )}\``
+    ? `\`${createdLabel} -> ✎ Edited ${escapeMarkdown(formatCompactDateTime(workLog.updatedAt as string))}\``
     : `\`${createdLabel}\``;
 
   return `📝 **Work Log ${index + 1}**\n\n${workLogTimeline}\n\n${workLog.body}`;

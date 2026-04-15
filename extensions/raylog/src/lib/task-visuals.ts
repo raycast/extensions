@@ -1,13 +1,7 @@
 import { Color, Icon, type Image } from "@raycast/api";
 import type { TaskStatus, TaskViewFilter } from "./types";
 
-export type TaskVisualTone =
-  | "critical"
-  | "warning"
-  | "scheduled"
-  | "inactive"
-  | "success"
-  | "info";
+export type TaskVisualTone = "critical" | "warning" | "scheduled" | "inactive" | "success" | "info";
 
 export type TaskIndicatorKind = "due" | "start" | "completed";
 
@@ -61,10 +55,7 @@ export function getTaskFilterIcon(filter: TaskViewFilter): Image.ImageLike {
   }
 }
 
-export function getTaskIndicatorIcon(
-  kind: TaskIndicatorKind,
-  tone: TaskVisualTone,
-): Image.ImageLike {
+export function getTaskIndicatorIcon(kind: TaskIndicatorKind, tone: TaskVisualTone): Image.ImageLike {
   if (kind === "start") {
     return withTint(Icon.Clock, getTaskToneColor(tone));
   }
@@ -141,10 +132,7 @@ export function getTaskActionIcon(title: string): Image.ImageLike | undefined {
   }
 }
 
-function withTint(
-  source: Icon | string,
-  tintColor: Color.ColorLike,
-): TaskIconVisual {
+function withTint(source: Icon | string, tintColor: Color.ColorLike): TaskIconVisual {
   return {
     source,
     tintColor,

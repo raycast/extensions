@@ -25,18 +25,11 @@ export class RaylogSchemaError extends RaylogStorageError {
   }
 }
 
-export function isRaylogCorruptionError(
-  error: unknown,
-): error is RaylogParseError | RaylogSchemaError {
-  return (
-    error instanceof RaylogParseError || error instanceof RaylogSchemaError
-  );
+export function isRaylogCorruptionError(error: unknown): error is RaylogParseError | RaylogSchemaError {
+  return error instanceof RaylogParseError || error instanceof RaylogSchemaError;
 }
 
-export function getRaylogErrorMessage(
-  error: unknown,
-  fallback: string,
-): string {
+export function getRaylogErrorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback;
 }
 

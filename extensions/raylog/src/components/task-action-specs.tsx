@@ -9,11 +9,7 @@ import {
 import { runTaskMutationAction } from "../lib/task-actions";
 import type { RaylogRepository } from "../lib/storage";
 import { getTaskActionIcon } from "../lib/task-visuals";
-import type {
-  TaskLogStatusBehavior,
-  TaskRecord,
-  TaskViewFilter,
-} from "../lib/types";
+import type { TaskLogStatusBehavior, TaskRecord, TaskViewFilter } from "../lib/types";
 import TaskDetailView from "./TaskDetailView";
 import TaskForm from "./TaskForm";
 
@@ -44,9 +40,7 @@ export function buildTaskFilterActionSpecs(
   return buildTaskFilterFlowSpecs(onSelectFilter).map(adaptFlowSpec);
 }
 
-export function buildTaskListActionSpecs(
-  options: SharedTaskActionSpecOptions,
-): TaskActionSpec[] {
+export function buildTaskListActionSpecs(options: SharedTaskActionSpecOptions): TaskActionSpec[] {
   return buildTaskListFlowSpecs(options).map(adaptFlowSpec);
 }
 
@@ -83,21 +77,13 @@ function renderTarget(
 ): ComponentProps<typeof Action.Push>["target"] {
   switch (target.type) {
     case "TaskDetailView":
-      return (
-        <TaskDetailView
-          {...(target.props as unknown as TaskDetailViewComponentProps)}
-        />
-      );
+      return <TaskDetailView {...(target.props as unknown as TaskDetailViewComponentProps)} />;
     case "TaskForm":
-      return (
-        <TaskForm {...(target.props as unknown as TaskFormComponentProps)} />
-      );
+      return <TaskForm {...(target.props as unknown as TaskFormComponentProps)} />;
   }
 }
 
-function buildMutationAction(
-  spec: Extract<TaskFlowSpec, { kind: "mutation" }>,
-): () => Promise<void> {
+function buildMutationAction(spec: Extract<TaskFlowSpec, { kind: "mutation" }>): () => Promise<void> {
   switch (spec.mutation) {
     case "complete":
       return async () => {

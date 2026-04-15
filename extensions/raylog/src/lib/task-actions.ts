@@ -1,9 +1,5 @@
 import { Alert, Toast, confirmAlert, showToast } from "@raycast/api";
-import {
-  getRaylogErrorMessage,
-  isRaylogCorruptionError,
-  type RaylogRepository,
-} from "./storage";
+import { getRaylogErrorMessage, isRaylogCorruptionError, type RaylogRepository } from "./storage";
 import type { TaskRecord } from "./types";
 
 export interface TaskActionOptions {
@@ -23,9 +19,7 @@ export async function showTaskMutationFailureToast(
 ): Promise<void> {
   await showToastImpl({
     style: Toast.Style.Failure,
-    title: isRaylogCorruptionError(error)
-      ? "Raylog database is corrupted"
-      : fallbackTitle,
+    title: isRaylogCorruptionError(error) ? "Raylog database is corrupted" : fallbackTitle,
     message: getRaylogErrorMessage(error, fallbackMessage),
   });
 }
@@ -57,9 +51,7 @@ export async function runTaskMutationAction(
   }
 }
 
-export async function completeTaskAction(
-  options: TaskActionOptions,
-): Promise<boolean> {
+export async function completeTaskAction(options: TaskActionOptions): Promise<boolean> {
   return runTaskMutationAction(
     "Task completed",
     () => options.repository.completeTask(options.task.id),
@@ -68,9 +60,7 @@ export async function completeTaskAction(
   );
 }
 
-export async function startTaskAction(
-  options: TaskActionOptions,
-): Promise<boolean> {
+export async function startTaskAction(options: TaskActionOptions): Promise<boolean> {
   return runTaskMutationAction(
     "Task started",
     () => options.repository.startTask(options.task.id),
@@ -79,9 +69,7 @@ export async function startTaskAction(
   );
 }
 
-export async function reopenTaskAction(
-  options: TaskActionOptions,
-): Promise<boolean> {
+export async function reopenTaskAction(options: TaskActionOptions): Promise<boolean> {
   return runTaskMutationAction(
     "Task reopened",
     () => options.repository.reopenTask(options.task.id),
@@ -90,9 +78,7 @@ export async function reopenTaskAction(
   );
 }
 
-export async function archiveTaskAction(
-  options: TaskActionOptions,
-): Promise<boolean> {
+export async function archiveTaskAction(options: TaskActionOptions): Promise<boolean> {
   return runTaskMutationAction(
     "Task archived",
     () => options.repository.archiveTask(options.task.id),
@@ -101,9 +87,7 @@ export async function archiveTaskAction(
   );
 }
 
-export async function deleteTaskAction(
-  options: TaskActionOptions,
-): Promise<boolean> {
+export async function deleteTaskAction(options: TaskActionOptions): Promise<boolean> {
   const confirmed = await (options.confirmAlertImpl ?? confirmAlert)({
     title: "Delete task?",
     message: "This permanently removes the task from the storage note.",

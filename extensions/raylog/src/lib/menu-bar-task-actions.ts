@@ -15,11 +15,7 @@ export async function executeMenuBarTaskAction(options: {
   repository: MenuBarTaskActionRepository;
   loadMenuBarTasks: () => Promise<void>;
   setIsLoading: (isLoading: boolean) => void;
-  showToast: (options: {
-    style: "success" | "failure";
-    title: string;
-    message?: string;
-  }) => Promise<unknown>;
+  showToast: (options: { style: "success" | "failure"; title: string; message?: string }) => Promise<unknown>;
 }): Promise<void> {
   const actionHandlers = {
     complete: async () => options.repository.completeTask(options.task.id),
@@ -53,10 +49,7 @@ export async function executeMenuBarTaskAction(options: {
     await options.showToast({
       style: "failure",
       title: failureTitles[options.action],
-      message: getRaylogErrorMessage(
-        error,
-        `${failureTitles[options.action]}.`,
-      ),
+      message: getRaylogErrorMessage(error, `${failureTitles[options.action]}.`),
     });
   }
 }

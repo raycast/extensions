@@ -119,7 +119,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.12",
-    "@raycast/utils": "^2.2.3",
     "date-fns": "^4.1.0",
     "nanoid": "^5.1.5",
     "react": "^19.0.0"

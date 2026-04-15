@@ -32,22 +32,12 @@ interface TaskFormControllerDependencies {
   pop: () => void;
   popToRootImpl: (options: { clearSearchBar: boolean }) => Promise<void>;
   afterSaveImpl?: () => Promise<void> | void;
-  showToastImpl: (options: {
-    style: "success" | "failure";
-    title: string;
-    message?: string;
-  }) => Promise<unknown>;
+  showToastImpl: (options: { style: "success" | "failure"; title: string; message?: string }) => Promise<unknown>;
   confirmAlertImpl: (options: ConfirmAlertOptions) => Promise<boolean>;
-  showTaskMutationFailureToastImpl: (
-    error: unknown,
-    title: string,
-    fallbackMessage: string,
-  ) => Promise<unknown>;
+  showTaskMutationFailureToastImpl: (error: unknown, title: string, fallbackMessage: string) => Promise<unknown>;
 }
 
-export function createTaskFormController(
-  dependencies: TaskFormControllerDependencies,
-): TaskFormController {
+export function createTaskFormController(dependencies: TaskFormControllerDependencies): TaskFormController {
   return {
     async submit({ task, values, newWorkLogEntry, statusBehavior, onDidSave }) {
       try {

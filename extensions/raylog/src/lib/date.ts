@@ -31,18 +31,12 @@ export function formatTaskDate(value?: string | null): string {
   }
 
   const hasTime =
-    parsed.getHours() !== 0 ||
-    parsed.getMinutes() !== 0 ||
-    parsed.getSeconds() !== 0 ||
-    parsed.getMilliseconds() !== 0;
+    parsed.getHours() !== 0 || parsed.getMinutes() !== 0 || parsed.getSeconds() !== 0 || parsed.getMilliseconds() !== 0;
 
   return format(parsed, hasTime ? "MMM d, yyyy h:mm a" : "MMM d, yyyy");
 }
 
-export function compareCanonicalDateStrings(
-  left?: string | null,
-  right?: string | null,
-): number {
+export function compareCanonicalDateStrings(left?: string | null, right?: string | null): number {
   const leftDate = fromCanonicalDateString(left);
   const rightDate = fromCanonicalDateString(right);
 
@@ -58,16 +52,8 @@ export function compareCanonicalDateStrings(
     return -1;
   }
 
-  const leftCalendarDate = new Date(
-    leftDate.getFullYear(),
-    leftDate.getMonth(),
-    leftDate.getDate(),
-  );
-  const rightCalendarDate = new Date(
-    rightDate.getFullYear(),
-    rightDate.getMonth(),
-    rightDate.getDate(),
-  );
+  const leftCalendarDate = new Date(leftDate.getFullYear(), leftDate.getMonth(), leftDate.getDate());
+  const rightCalendarDate = new Date(rightDate.getFullYear(), rightDate.getMonth(), rightDate.getDate());
 
   return leftCalendarDate.getTime() - rightCalendarDate.getTime();
 }

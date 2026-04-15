@@ -1,20 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { TaskLogStatusBehavior } from "./types";
 
-interface SharedPreferences {
-  storageNotePath?: string;
-}
-
-interface ListTasksPreferences extends SharedPreferences {
-  dueSoonDays?: string;
-  showDueDateIndicator?: boolean;
-  showPastDueIndicator?: boolean;
-  showStartDateIndicator?: boolean;
-  logStatusBehavior?: string;
-}
-
 export function getConfiguredStorageNotePath(): string | undefined {
-  const preferences = getPreferenceValues<SharedPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const preferencePath = preferences.storageNotePath?.trim();
   return preferencePath || undefined;
 }
@@ -24,7 +12,7 @@ export function getEnabledListMetadata(): {
   pastDue: boolean;
   startDate: boolean;
 } {
-  const preferences = getPreferenceValues<ListTasksPreferences>();
+  const preferences = getPreferenceValues<Preferences.ListTasks>();
   return {
     dueDate: preferences.showDueDateIndicator ?? true,
     pastDue: preferences.showPastDueIndicator ?? true,
@@ -33,7 +21,7 @@ export function getEnabledListMetadata(): {
 }
 
 export function getDueSoonDays(): number {
-  const preferences = getPreferenceValues<ListTasksPreferences>();
+  const preferences = getPreferenceValues<Preferences.ListTasks>();
   const parsed = Number.parseInt(preferences.dueSoonDays ?? "7", 10);
 
   if (Number.isNaN(parsed)) {
@@ -44,7 +32,7 @@ export function getDueSoonDays(): number {
 }
 
 export function getTaskLogStatusBehavior(): TaskLogStatusBehavior {
-  const preferences = getPreferenceValues<ListTasksPreferences>();
+  const preferences = getPreferenceValues<Preferences.ListTasks>();
 
   switch (preferences.logStatusBehavior) {
     case "keep_status":

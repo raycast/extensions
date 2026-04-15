@@ -1,10 +1,7 @@
 import { Alert, Toast, confirmAlert, popToRoot, showToast } from "@raycast/api";
 import { RaylogRepository } from "./storage";
 import { showTaskMutationFailureToast } from "./task-actions";
-import {
-  createTaskFormController,
-  type TaskFormController,
-} from "./task-form-controller";
+import { createTaskFormController, type TaskFormController } from "./task-form-controller";
 
 export function createDefaultTaskFormController(
   notePath: string,
@@ -30,10 +27,7 @@ export function createDefaultTaskFormController(
         message,
         primaryAction: {
           title: primaryAction.title,
-          style:
-            primaryAction.style === "destructive"
-              ? Alert.ActionStyle.Destructive
-              : Alert.ActionStyle.Default,
+          style: primaryAction.style === "destructive" ? Alert.ActionStyle.Destructive : Alert.ActionStyle.Default,
         },
       }),
     showTaskMutationFailureToastImpl: showTaskMutationFailureToast,

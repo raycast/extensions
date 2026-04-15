@@ -5,11 +5,7 @@ import TaskForm from "./components/TaskForm";
 import { createDefaultTaskFormController } from "./lib/task-form-controller-runtime";
 
 export default function Command() {
-  return (
-    <ConfiguredCommand>
-      {(notePath) => <AddTaskLoop notePath={notePath} />}
-    </ConfiguredCommand>
-  );
+  return <ConfiguredCommand>{(notePath) => <AddTaskLoop notePath={notePath} />}</ConfiguredCommand>;
 }
 
 function AddTaskLoop({ notePath }: { notePath: string }) {

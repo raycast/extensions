@@ -1,13 +1,7 @@
 import { differenceInCalendarDays } from "date-fns";
 import { compareCanonicalDateStrings, fromCanonicalDateString } from "./date";
 import type { TaskIndicatorKind, TaskVisualTone } from "./task-visuals";
-import type {
-  TaskInput,
-  TaskRecord,
-  TaskStatus,
-  TaskViewFilter,
-  TaskWorkLogInput,
-} from "./types";
+import type { TaskInput, TaskRecord, TaskStatus, TaskViewFilter, TaskWorkLogInput } from "./types";
 import { matchesTaskSearch } from "./task-presentation";
 
 export interface EnabledListMetadata {
@@ -50,8 +44,7 @@ const TASK_FILTER_DESCRIPTIONS: Record<TaskViewFilter, string> = {
   open: "Shows tasks with To Do or In Progress status.",
   todo: "Shows only tasks with To Do status.",
   in_progress: "Shows only tasks with In Progress status.",
-  due_soon:
-    "Shows to-do and in-progress tasks due within the configured Due Soon window.",
+  due_soon: "Shows to-do and in-progress tasks due within the configured Due Soon window.",
   done: "Shows only completed tasks.",
   archived: "Shows only archived tasks.",
 };
@@ -113,11 +106,7 @@ export function filterTasks(
   });
 }
 
-export function matchesTaskFilter(
-  task: TaskRecord,
-  filter: TaskViewFilter,
-  dueSoonDays = 7,
-): boolean {
+export function matchesTaskFilter(task: TaskRecord, filter: TaskViewFilter, dueSoonDays = 7): boolean {
   switch (filter) {
     case "all":
       return task.status !== "archived";
@@ -152,9 +141,7 @@ export function validateTaskInput(input: TaskInput): string | undefined {
   return undefined;
 }
 
-export function validateWorkLogInput(
-  input: TaskWorkLogInput,
-): string | undefined {
+export function validateWorkLogInput(input: TaskWorkLogInput): string | undefined {
   const body = input.body?.trim();
   if (!body) {
     return "Work log entry is required";
@@ -189,9 +176,7 @@ export function getRelativeDueLabel(value?: string | null): string | null {
   return `Due in ${daysUntilDue}d`;
 }
 
-export function getRelativeDueTone(
-  value?: string | null,
-): TaskVisualTone | null {
+export function getRelativeDueTone(value?: string | null): TaskVisualTone | null {
   const dueDate = parseTaskDate(value);
   if (!dueDate) {
     return null;
@@ -201,18 +186,12 @@ export function getRelativeDueTone(
   return getDueIndicatorTone(daysUntilDue);
 }
 
-export function getTaskListIndicators(
-  task: TaskRecord,
-  enabledMetadata: EnabledListMetadata,
-): TaskListIndicator[] {
+export function getTaskListIndicators(task: TaskRecord, enabledMetadata: EnabledListMetadata): TaskListIndicator[] {
   const indicators: TaskListIndicator[] = [];
 
   if (enabledMetadata.dueDate) {
     const dueIndicator = getDueDateIndicator(task.dueDate);
-    if (
-      dueIndicator !== null &&
-      (enabledMetadata.pastDue || dueIndicator.tone !== "critical")
-    ) {
+    if (dueIndicator !== null && (enabledMetadata.pastDue || dueIndicator.tone !== "critical")) {
       indicators.push(dueIndicator);
     }
   }
@@ -244,10 +223,7 @@ export function getMenuBarTasks(tasks: TaskRecord[], limit = 5): TaskRecord[] {
   return [...visibleTasks]
     .sort((left, right) => {
       if (left.dueDate && right.dueDate) {
-        const dueDateComparison = compareCanonicalDateStrings(
-          left.dueDate,
-          right.dueDate,
-        );
+        const dueDateComparison = compareCanonicalDateStrings(left.dueDate, right.dueDate);
         if (dueDateComparison !== 0) {
           return dueDateComparison;
         }
@@ -264,9 +240,7 @@ export function getMenuBarTasks(tasks: TaskRecord[], limit = 5): TaskRecord[] {
 
 function compareTasks(left: TaskRecord, right: TaskRecord): number {
   if (left.status !== right.status) {
-    return (
-      OPEN_STATUS_PRIORITY[left.status] - OPEN_STATUS_PRIORITY[right.status]
-    );
+    return OPEN_STATUS_PRIORITY[left.status] - OPEN_STATUS_PRIORITY[right.status];
   }
 
   if (isActiveTaskStatus(left.status)) {
@@ -284,11 +258,7 @@ function matchesTaskSearchWithOptions(
   normalizedSearch: string,
   options?: TaskSearchOptions,
 ): boolean {
-  return matchesTaskSearch(
-    task,
-    normalizedSearch,
-    options?.includeWorkLogs ?? false,
-  );
+  return matchesTaskSearch(task, normalizedSearch, options?.includeWorkLogs ?? false);
 }
 
 function compareOpenTaskUrgency(left: TaskRecord, right: TaskRecord): number {
@@ -353,9 +323,7 @@ function getDueDateIndicator(value?: string | null): TaskListIndicator | null {
   };
 }
 
-function getStartDateIndicator(
-  value?: string | null,
-): TaskListIndicator | null {
+function getStartDateIndicator(value?: string | null): TaskListIndicator | null {
   const startDate = parseTaskDate(value);
   if (!startDate) {
     return null;
@@ -375,11 +343,7 @@ function getStartDateIndicator(
   };
 }
 
-function formatRelativeIndicator(
-  days: number,
-  date: Date,
-  type: "due" | "start",
-): string {
+function formatRelativeIndicator(days: number, date: Date, type: "due" | "start"): string {
   if (days < 0) {
     return `${Math.abs(days)}d late`;
   }
@@ -433,11 +397,7 @@ function getDueIndicatorPriority(daysUntilDue: number): number {
   return 3;
 }
 
-function buildCountdownTooltip(
-  label: string,
-  days: number,
-  date: Date,
-): string {
+function buildCountdownTooltip(label: string, days: number, date: Date): string {
   const formattedDate = date.toLocaleDateString();
   if (days < 0) {
     return `${label} ${Math.abs(days)}d ago (${formattedDate})`;
