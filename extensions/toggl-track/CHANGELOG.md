@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-04-15
 
 - Consolidated 5 parallel resource API calls into a single `/me?with_related_data=true` bootstrap request, reducing API usage from 5 calls to 1 when opening time entry forms
 - Reduced Menu Bar background refresh interval from 3 minutes to 10 minutes to further reduce API consumption for free-tier users (30 calls/hour limit)
