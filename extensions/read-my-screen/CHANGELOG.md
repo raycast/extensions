@@ -1,6 +1,6 @@
 # Read My Screen Changelog
 
-## [1.0.0 — Initial release] - April 15, 2026
+## [1.0.0 — Initial release] - {PR_MERGE_DATE}
 
 First stable release of **Read My Screen**: a Raycast-native bridge from what’s on your display—or in your browser—to the model you already trust. Bring your own API keys; every request goes straight from your Mac to **OpenAI**, **Anthropic**, or **Google**—no intermediary backend, no mystery routing.
 
