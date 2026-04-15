@@ -1,5 +1,9 @@
 # Google Lens Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update the API base URL to avoid DNS issues.
+
 ## [Maintenance] - 2025-12-01
 
 - Add support for Windows platform.
