@@ -1,0 +1,75 @@
+{
+  "name": "local-services",
+  "title": "Local Services",
+  "description": "Discover and manage all localhost services running on your machine: Docker containers, Node servers, Python apps, and more.",
+  "icon": "icon.png",
+  "author": "mouaad_ag",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "ignoredPorts",
+      "title": "Ignored Ports",
+      "description": "Comma-separated list of ports to hide (e.g. 631,5000)",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "enableDocker",
+      "title": "Enable Docker Detection",
+      "description": "Scan Docker containers for port mappings",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Detect Docker containers"
+    },
+    {
+      "name": "scanHosts",
+      "title": "Scan /etc/hosts",
+      "description": "Parse /etc/hosts for custom local domains",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Detect custom local domains"
+    },
+    {
+      "name": "scanCompose",
+      "title": "Scan Docker Compose Files",
+      "description": "Find docker-compose.yml files to detect declared but stopped services",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Detect Compose services"
+    }
+  ],
+  "commands": [
+    {
+      "name": "list-services",
+      "title": "My Local Services",
+      "subtitle": "Local Services",
+      "description": "Show all services listening on localhost",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
