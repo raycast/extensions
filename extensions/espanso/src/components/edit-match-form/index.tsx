@@ -76,7 +76,7 @@ export default function EditMatchForm({
         placeholder="Enter replacement"
         {...itemProps.replace}
       />
-      <Form.Description title="File" text={filePath} />
+      <Form.Description title="File" text={filePath.replace(process.env.HOME ?? "", "~")} />
     </Form>
   );
 }
