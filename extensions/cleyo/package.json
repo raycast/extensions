@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cleyo",
+  "title": "Cleyo",
+  "description": "AI-powered task management that handles the thinking for you. Capture, prioritize, and plan your day with energy-aware intelligence.",
+  "icon": "icon.png",
+  "author": "apadoctor",
+  "license": "MIT",
+  "version": "1.0.0",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "tasks",
+    "todo",
+    "ai",
+    "productivity",
+    "planning",
+    "nlp",
+    "brain-dump"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ApaDoctor/cleyo-raycast-extension"
+  },
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Brain-dump any task in plain English and let Cleyo handle the details",
+      "mode": "view",
+      "keywords": ["add", "new", "task", "capture", "todo", "quick", "brain-dump"]
+    },
+    {
+      "name": "today",
+      "title": "Today",
+      "description": "Your AI-prioritized daily plan based on your current energy level",
+      "mode": "view",
+      "keywords": ["today", "plan", "daily", "focus", "schedule", "priority"]
+    },
+    {
+      "name": "my-tasks",
+      "title": "Search Tasks",
+      "description": "Search, filter, and organize your entire Cleyo workspace",
+      "mode": "view",
+      "keywords": ["search", "tasks", "find", "list", "organize", "manage"]
+    },
+    {
+      "name": "support",
+      "title": "Send Feedback",
+      "description": "Report a bug, request a feature, or share feedback directly with the Cleyo team",
+      "mode": "view",
+      "keywords": ["feedback", "bug", "report", "feature", "request", "help", "support", "contact"]
+    },
+    {
+      "name": "sign-out",
+      "title": "Sign out",
+      "description": "Securely disconnect your Cleyo account",
+      "mode": "no-view",
+      "keywords": ["logout", "disconnect", "signout", "sign", "out"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "Cleyo API server URL",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.cleyo.app"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.19.0",
+    "@typescript-eslint/parser": "^6.19.0",
+    "eslint": "^8.56.0",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
