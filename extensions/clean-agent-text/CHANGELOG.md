@@ -1,6 +1,6 @@
 # Clean Agent Text Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-15
 
 - Clean box-drawing characters from clipboard text
 - Strip pipe borders from AI agent TUI output
