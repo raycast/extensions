@@ -1,7 +1,6 @@
 import { Icon, Image } from "@raycast/api";
 import { existsSync, readFileSync } from "fs";
-import { promises as fsPromises } from "fs";
-import { homedir } from "os";
+import { existsSync, readFileSync, promises as fsPromises } from "fs";
 import { join } from "path";
 import { parse as parseToml } from "smol-toml";
 import { parse as parseYaml } from "yaml";
