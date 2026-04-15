@@ -1,4 +1,4 @@
-import { Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, showHUD } from "@raycast/api";
 import { detectAndClean } from "./cleaner";
 
 export default async function main() {
@@ -17,9 +17,5 @@ export default async function main() {
   }
 
   await Clipboard.copy(cleaned);
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Clode Cleaned!",
-    message: "Cleaned text copied to clipboard",
-  });
+  await showHUD("✅ Clode cleaned & copied to clipboard");
 }
