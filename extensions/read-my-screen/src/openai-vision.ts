@@ -3,11 +3,15 @@ import { EXTENSION_DISPLAY_NAME } from "./extension-brand";
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { ModelResponse, TokenUsage } from "./token-usage";
 
-function usageFromOpenAIUsage(u: {
-  prompt_tokens?: number;
-  completion_tokens?: number;
-  total_tokens?: number;
-}): TokenUsage | undefined {
+function usageFromOpenAIUsage(
+  u:
+    | {
+        prompt_tokens?: number;
+        completion_tokens?: number;
+        total_tokens?: number;
+      }
+    | undefined,
+): TokenUsage | undefined {
   if (!u || (u.prompt_tokens == null && u.completion_tokens == null && u.total_tokens == null)) {
     return undefined;
   }

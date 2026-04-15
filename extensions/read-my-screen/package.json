@@ -159,6 +159,11 @@
       "label": "Show estimated cost (USD)"
     }
   ],
+  "overrides": {
+    "@raycast/api": {
+      "@types/react": "18.3.12"
+    }
+  },
   "dependencies": {
     "@raycast/api": "^1.104.0",
     "html-to-text": "^9.0.5",
@@ -168,7 +173,7 @@
     "@changesets/cli": "^2.30.0",
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "^22.10.0",
-    "@types/react": "^18.3.12",
+    "@types/react": "18.3.12",
     "eslint": "^9.16.0",
     "prettier": "^3.4.2",
     "sharp": "^0.34.2",

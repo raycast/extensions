@@ -53,7 +53,7 @@ export async function captureToFile(mode: CaptureMode, outPath: string): Promise
     const stderr = typeof e.stderr === "string" ? e.stderr : "";
     const stdout = typeof e.stdout === "string" ? e.stdout : "";
 
-    if (e.code === 1 || e.code === "1") {
+    if (e.code != null && `${e.code}` === "1") {
       throw new CaptureError("cancelled", "Screenshot was cancelled.");
     }
     if (isPermissionHint(stderr, stdout)) {

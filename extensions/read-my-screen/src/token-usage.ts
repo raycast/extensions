@@ -61,7 +61,11 @@ export function sumTokenUsages(usages: TokenUsage[]): TokenUsage | null {
 }
 
 /** Append a new API response; replace the last slot on regenerate. */
-export function pushUsageLedger(prev: TokenUsage[], usage: TokenUsage | undefined, replaceLast: boolean): TokenUsage[] {
+export function pushUsageLedger(
+  prev: TokenUsage[],
+  usage: TokenUsage | null | undefined,
+  replaceLast: boolean,
+): TokenUsage[] {
   if (!usage) {
     return prev;
   }
@@ -115,7 +119,7 @@ export function formatUsageHint(
   if (!enabled || !usage) {
     return "";
   }
-  const showCost = options?.showEstimatedCost === true && options?.modelValue;
+  const showCost = Boolean(options?.showEstimatedCost && options?.modelValue);
   const ins = usage.input;
   const outs = usage.output;
   const tot = usage.total;
