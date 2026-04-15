@@ -1,0 +1,35 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "faah",
+  "title": "Faah!",
+  "description": "Trigger the faah sound",
+  "icon": "command-icon.png",
+  "author": "mohamed_aslam",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Faah!",
+      "description": "Plays the faah sound",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/utils": "^1.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  },
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "fix-lint": "ray lint --fix"
+  }
+}
