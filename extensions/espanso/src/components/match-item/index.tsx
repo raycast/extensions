@@ -52,6 +52,7 @@ export default function MatchItem({
     <List.Item
       id={id}
       title={label ?? triggers.join(", ")}
+      keywords={replace ? [replace] : undefined}
       subtitle={profile ? formatCategoryName(profile, separator) : ""}
       detail={
         <List.Item.Detail
