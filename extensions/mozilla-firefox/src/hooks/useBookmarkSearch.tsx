@@ -50,8 +50,8 @@ export function useBookmarkSearch(query?: string): SearchResult<HistoryEntry> {
           bookmarks.filter(
             (bookmark) =>
               bookmark.title.toLowerCase().includes(query?.toLowerCase() || "") ||
-              bookmark.url.toLowerCase().includes(query?.toLowerCase() || "")
-          )
+              bookmark.url.toLowerCase().includes(query?.toLowerCase() || ""),
+          ),
         );
         setIsLoading(false);
       })

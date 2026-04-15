@@ -72,7 +72,7 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
     "storage",
     "default",
     `moz-extension+++${extensionId}`,
-    "idb"
+    "idb",
   );
 };
 
@@ -87,7 +87,7 @@ export const getSessionActivePath = async () => {
     userDirectoryPath,
     await getProfileName(userDirectoryPath),
     "sessionstore-backups",
-    "recovery.jsonlz4"
+    "recovery.jsonlz4",
   );
 };
 
