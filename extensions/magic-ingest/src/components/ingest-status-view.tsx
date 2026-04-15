@@ -8,7 +8,7 @@ import {
   Alert,
   showHUD,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
@@ -83,6 +83,7 @@ export function IngestStatusView({
   const [info, setInfo] = useState<ProgressInfo | null>(null);
   const [alive, setAlive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const prevAliveRef = useRef<boolean | null>(null);
 
   const refresh = useCallback(async () => {
     try {
@@ -91,23 +92,27 @@ export function IngestStatusView({
       setInfo(parsed);
       const running = isProcessAlive(parsed.pid) && parsed.stage !== "done";
       setAlive(running);
-
-      if (!running && onNoActiveSession) {
+      // Call onNoActiveSession only when session transitions to inactive
+      if (!running && onNoActiveSession && prevAliveRef.current !== false) {
         onNoActiveSession(parsed);
       }
+      prevAliveRef.current = running;
     } catch {
       setInfo(null);
       setAlive(false);
-      if (onNoActiveSession) {
+      // Only notify once when there is no active session
+      if (onNoActiveSession && prevAliveRef.current !== false) {
         onNoActiveSession();
       }
+      prevAliveRef.current = false;
     }
     setIsLoading(false);
   }, [onNoActiveSession]);
 
   useEffect(() => {
     refresh();
-    const t = setInterval(refresh, 1000);
+    // Poll at 1 minute intervals to avoid repeated toasts
+    const t = setInterval(refresh, 60 * 1000);
     return () => clearInterval(t);
   }, [refresh]);
 
@@ -194,17 +199,17 @@ export function IngestStatusView({
           accessories={[{ text: elapsed, icon: Icon.Clock }]}
           actions={
             <ActionPanel>
-              <Action
-                title="Stop Ingest"
-                icon={Icon.Stop}
-                style={Action.Style.Destructive}
-                onAction={stopIngest}
-              />
               <Action.ShowInFinder title="Show Destination" path={destDir} />
               <Action.Open
                 title="Open Log"
                 target={LOG_FILE}
                 icon={Icon.Document}
+              />
+              <Action
+                title="Stop Ingest"
+                icon={Icon.Stop}
+                style={Action.Style.Destructive}
+                onAction={stopIngest}
               />
             </ActionPanel>
           }

@@ -5,7 +5,29 @@ import { EXIF_DATE_TAGS } from "./constants";
 import { ScannedFile } from "./scanner";
 
 const execFileAsync = promisify(execFile);
-const EXIFTOOL = "/opt/homebrew/bin/exiftool";
+
+const EXIFTOOL_CANDIDATES = [
+  process.env.EXIFTOOL_PATH || "",
+  "/opt/homebrew/bin/exiftool",
+  "/usr/local/bin/exiftool",
+  "exiftool",
+].filter(Boolean) as string[];
+
+let cachedExiftool: string | null = null;
+
+async function getExiftoolPath(): Promise<string> {
+  if (cachedExiftool) return cachedExiftool;
+  for (const candidate of EXIFTOOL_CANDIDATES) {
+    try {
+      await execFileAsync(candidate, ["-ver"]);
+      cachedExiftool = candidate;
+      return candidate;
+    } catch {
+      // try next
+    }
+  }
+  throw new Error("exiftool not found");
+}
 
 interface ExifResult {
   SourceFile: string;
@@ -18,7 +40,7 @@ interface ExifResult {
 
 export async function checkExiftool(): Promise<boolean> {
   try {
-    await execFileAsync(EXIFTOOL, ["-ver"]);
+    await getExiftoolPath();
     return true;
   } catch {
     return false;
@@ -58,8 +80,9 @@ export async function batchReadExifMeta(
   for (let i = 0; i < filePaths.length; i += BATCH_SIZE) {
     const batch = filePaths.slice(i, i + BATCH_SIZE);
     try {
+      const exiftoolPath = await getExiftoolPath();
       const { stdout } = await execFileAsync(
-        EXIFTOOL,
+        exiftoolPath,
         [
           "-DateTimeOriginal",
           "-CreateDate",
@@ -246,8 +269,9 @@ async function batchReadRatings(
   for (let i = 0; i < filePaths.length; i += BATCH_SIZE) {
     const batch = filePaths.slice(i, i + BATCH_SIZE);
     try {
+      const exiftoolPath = await getExiftoolPath();
       const { stdout } = await execFileAsync(
-        EXIFTOOL,
+        exiftoolPath,
         ["-Rating", "-json", "-quiet", ...batch],
         { maxBuffer: 50 * 1024 * 1024 },
       );
