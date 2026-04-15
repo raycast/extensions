@@ -1,8 +1,12 @@
-import { Clipboard, open, showHUD } from "@raycast/api";
+import { Clipboard, getPreferenceValues, open, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { findAppleMusicUrl, type SpotifyTrack } from "./apple-music.js";
 
 const SEPARATOR = "\u001f";
+
+type CommandPreferences = {
+  countryCode?: string;
+};
 
 export default async function command() {
   try {
@@ -55,7 +59,8 @@ async function runAppleScript(script: string): Promise<string> {
 }
 
 function getCountryCode(): string {
-  const locale =
-    Intl.DateTimeFormat().resolvedOptions().locale || process.env.LANG || "";
-  return locale.match(/[-_]([a-zA-Z]{2})/)?.[1]?.toUpperCase() ?? "US";
+  const preferences = getPreferenceValues<CommandPreferences>();
+  const countryCode = preferences.countryCode?.trim().toUpperCase();
+
+  return countryCode?.match(/^[A-Z]{2}$/) ? countryCode : "US";
 }

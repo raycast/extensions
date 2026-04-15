@@ -29,6 +29,17 @@
           "song",
           "track",
           "uri"
+        ],
+        "preferences": [
+          {
+            "name": "countryCode",
+            "title": "Apple Music Storefront Country",
+            "description": "Two-letter Apple Music storefront country code used for search and open links.",
+            "type": "textfield",
+            "required": false,
+            "default": "US",
+            "placeholder": "US"
+          }
         ]
       }
   ],
@@ -42,9 +53,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^1.17.0",
-    "vitest": "^3.2.4"
+    "@raycast/api": "^1.104.11"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -52,6 +61,7 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.4"
   }
 }

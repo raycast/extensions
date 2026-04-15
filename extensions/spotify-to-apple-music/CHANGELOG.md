@@ -1,5 +1,5 @@
 # Changelog
 
-## [Initial Version]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add Spotify to Apple Music.
