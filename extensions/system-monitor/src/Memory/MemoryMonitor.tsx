@@ -41,7 +41,7 @@ export default function MemoryMonitor() {
       detail={
         <MemoryMonitorDetail
           freeMem={data?.freeMem || ""}
-          freeMemPercentage={data?.freeMemPercentage || ""}
+          freeMemPercentage={data ? String(data.freeMemPercentage) : ""}
           totalMem={data?.totalMem || ""}
         />
       }
