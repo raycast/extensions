@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 
-const COMMANDS_DIR = new URL("../../commands", import.meta.url).pathname;
+const COMMANDS_DIR = join(__dirname, "../../commands");
 
 function getCommandFiles(dir: string): string[] {
   const results: string[] = [];
