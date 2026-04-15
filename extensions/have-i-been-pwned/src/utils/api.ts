@@ -4,11 +4,6 @@ const HIBP_BASE_URL = "https://haveibeenpwned.com/api/v3";
 const PWNED_PASSWORDS_BASE_URL = "https://api.pwnedpasswords.com";
 const USER_AGENT = "have-i-been-pwned-raycast";
 
-interface Preferences {
-  apiKey: string;
-  paddingEnabled: boolean;
-}
-
 export class HibpError extends Error {
   constructor(
     message: string,

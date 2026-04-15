@@ -14,7 +14,7 @@ export const usePwnedPassword = (password: string) => {
         const result = await checkPassword(password);
         setCount(result);
         const sha1Prefix = hashPassword(password).slice(0, 5);
-        addToHistory({ kind: "password", sha1Prefix, count: result, timestamp: Date.now() });
+        await addToHistory({ kind: "password", sha1Prefix, count: result, timestamp: Date.now() });
       } catch (err) {
         setErrorText((err as Error).message);
       } finally {

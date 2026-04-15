@@ -23,7 +23,7 @@ export const useBreachedAccount = (email: string) => {
         const result = await getBreachedAccount(email);
         const breachList = result ?? [];
         setBreaches(breachList);
-        addToHistory({ kind: "email", email, breaches: breachList, timestamp: Date.now() });
+        await addToHistory({ kind: "email", email, breaches: breachList, timestamp: Date.now() });
       } catch (err) {
         if (err instanceof HibpError && (err.statusCode === 401 || err.statusCode === 403)) {
           setNeedsApiKey(true);

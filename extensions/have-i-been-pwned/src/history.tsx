@@ -37,7 +37,7 @@ function entryIcon(entry: HistoryEntry): { source: Icon; tintColor: Color } {
 
 export default function Command() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {

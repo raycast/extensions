@@ -3,11 +3,7 @@ import { useBreachedAccount } from "./hooks/use-breached-account";
 import { BreachList } from "./components/breach-list";
 import { HibpActions } from "./components/hibp-actions";
 
-interface CommandArguments {
-  email: string;
-}
-
-export default function Command(props: LaunchProps<{ arguments: CommandArguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.BreachedAccount }>) {
   const { email } = props.arguments;
   const { breaches, isLoading, errorText, needsApiKey } = useBreachedAccount(email);
 
