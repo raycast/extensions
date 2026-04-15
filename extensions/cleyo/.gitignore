@@ -1,0 +1,18 @@
+# Raycast Extension
+node_modules/
+dist/
+*.log
+.raycast/
+
+# OS/IDEs
+.DS_Store
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
