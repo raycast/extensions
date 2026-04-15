@@ -1,45 +1,96 @@
-import { UseConfig } from "./useConfig";
-import initSqlJs, { Database } from "../../assets/sql-wasm-fts5.js";
-import { join } from "path";
-import { readFileSync } from "fs";
 import { environment } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { UseConfig } from "./useConfig";
+import { closeDatabases, DatabaseLoadIssue, DatabaseWrap, loadDatabases } from "../lib/databaseLoader";
 
 export type UseDB = {
   databasesLoading: boolean;
   databases: DatabaseWrap[];
+  issues: DatabaseLoadIssue[];
+  fatalIssue: DatabaseLoadIssue | null;
 };
 
-type DatabaseWrap = {
-  spaceID: string;
-  database: Database;
+type UseDBOptions = {
+  enabled?: boolean;
 };
 
-export default function useDB({ config, configLoading }: UseConfig) {
-  const [{ databases, databasesLoading }, setState] = useState<UseDB>({
-    databasesLoading: true,
-    databases: [] as DatabaseWrap[],
+export default function useDB(
+  { config, configLoading }: Pick<UseConfig, "config" | "configLoading">,
+  { enabled = true }: UseDBOptions = {},
+) {
+  const [{ databases, databasesLoading, issues, fatalIssue }, setState] = useState<UseDB>({
+    databasesLoading: enabled,
+    databases: [],
+    issues: [],
+    fatalIssue: null,
   });
+  const databasesRef = useRef<DatabaseWrap[]>([]);
 
   useEffect(() => {
-    if (configLoading) return;
-    if (!config) return;
+    return () => {
+      closeDatabases(databasesRef.current);
+      databasesRef.current = [];
+    };
+  }, []);
 
-    Promise.all(config.spaces.map((space) => loadDb(space.path).then((db) => ({ db, space }))))
-      .then((wraps) =>
-        setState({
-          databases: wraps.map((wrap) => ({ database: wrap.db, spaceID: wrap.space.spaceID })),
-          databasesLoading: false,
-        })
-      )
-      .then(() => console.debug("initialized databases " + config.spaces.map((space) => space.spaceID).join(", ")));
-  }, [configLoading]);
+  useEffect(() => {
+    if (!enabled || configLoading) {
+      return;
+    }
 
-  return { databases, databasesLoading, spaces: config?.spaces };
+    if (!config) {
+      closeDatabases(databasesRef.current);
+      databasesRef.current = [];
+      setState({
+        databasesLoading: false,
+        databases: [],
+        issues: [],
+        fatalIssue: null,
+      });
+
+      return;
+    }
+
+    let cancelled = false;
+
+    setState((previousState) => ({ ...previousState, databasesLoading: true }));
+
+    void loadDatabases(config.spaces, environment.assetsPath).then((result) => {
+      if (cancelled) {
+        closeDatabases(result.databases);
+        return;
+      }
+
+      closeDatabases(databasesRef.current);
+      databasesRef.current = result.databases;
+
+      setState({
+        databases: result.databases,
+        databasesLoading: false,
+        issues: result.issues,
+        fatalIssue: result.fatalIssue,
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [config, configLoading, enabled]);
+
+  useEffect(() => {
+    if (enabled) {
+      return;
+    }
+
+    closeDatabases(databasesRef.current);
+    databasesRef.current = [];
+    setState({
+      databasesLoading: false,
+      databases: [],
+      issues: [],
+      fatalIssue: null,
+    });
+  }, [enabled]);
+
+  return { databases, databasesLoading, issues, fatalIssue };
 }
-
-const loadDb = async (path: string): Promise<Database> => {
-  const wasmBinary = readFileSync(join(environment.assetsPath, "sql-wasm-fts5.wasm"));
-  const SQL = await initSqlJs({ wasmBinary });
-  return new SQL.Database(readFileSync(path));
-};

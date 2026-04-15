@@ -173,6 +173,14 @@ export function formatRemainingCents(remainingCents: number | null | undefined):
   return `$${dollars}`;
 }
 
+// Format API-provided usage percentages (e.g. autoPercentUsed / apiPercentUsed).
+export function formatPlanPercentValue(value: number | null | undefined): string {
+  if (value == null || Number.isNaN(value)) {
+    return "—";
+  }
+  return `${value.toFixed(1)}%`;
+}
+
 // Calculate total tokens for a model (sum of all token types)
 export function calculateTotalTokens(model: ModelAggregation): number {
   const input = Number.parseInt(model.inputTokens || "0", 10) || 0;

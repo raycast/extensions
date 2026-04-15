@@ -46,19 +46,19 @@ const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
  * Strip ANSI escape codes from CLI output.
  * Used by checkForUpdates() which does not have a --json option.
  */
-export function stripAnsi(str: string): string {
+function stripAnsi(str: string): string {
   return str.replace(ANSI_REGEX, "");
 }
 
 /** Escape a value for safe use as a shell argument. */
-export function shellEscape(arg: string): string {
+function shellEscape(arg: string): string {
   if (isWindows) {
     return `"${arg.replace(/"/g, '\\"')}"`;
   }
   return `'${arg.replace(/'/g, "'\\''")}'`;
 }
 
-export function normalizeCliError(error: unknown, npxCommand: string): Error {
+function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
       "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in Extension Preferences under 'Custom npx Path'.",
@@ -108,7 +108,7 @@ interface SkillsListJsonEntry {
   agents: string[];
 }
 
-export function parseSkillsListJson(stdout: string): InstalledSkill[] {
+function parseSkillsListJson(stdout: string): InstalledSkill[] {
   const entries: unknown = JSON.parse(stdout);
   if (!Array.isArray(entries)) {
     throw new Error("Expected JSON array");
@@ -190,7 +190,7 @@ const AGENT_DISPLAY_TO_ID = new Map<string, string>([
   ["Zencoder", "zencoder"],
 ]);
 
-export function agentDisplayNameToId(displayName: string): string {
+function agentDisplayNameToId(displayName: string): string {
   return AGENT_DISPLAY_TO_ID.get(displayName) ?? displayName.toLowerCase().replace(/\s+/g, "-");
 }
 

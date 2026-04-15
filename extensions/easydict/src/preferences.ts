@@ -9,7 +9,7 @@
  */
 
 import { environment, getPreferenceValues } from "@raycast/api";
-import CryptoJS from "crypto-js";
+import crypto from "node:crypto";
 import { getLanguageItemFromYoudaoCode } from "./language/languages";
 
 export const myPreferences: MyPreferences = getPreferenceValues();
@@ -66,6 +66,7 @@ export interface MyPreferences {
   openAIAPIKey: string;
   openAIAPIURL: string;
   openAIModel: string;
+  forceMaxCompletionTokens: boolean;
 
   enableGeminiTranslate: boolean;
   geminiAPIKey: string;
@@ -85,7 +86,7 @@ export class AppKeyStore {
   static deepLEndpoint = myPreferences.deepLEndpoint.trim();
 
   // This is a official test token from https://open.caiyunapp.com/%E4%BA%94%E5%88%86%E9%92%9F%E5%AD%A6%E4%BC%9A%E5%BD%A9%E4%BA%91%E5%B0%8F%E8%AF%91_API
-  private static defaultEncryptedCaiyunToken = "U2FsdGVkX1+RTgfMmgZgkD1Phn4FyvzMiMed5BvxnjoqS8QIJ/AFjUJdfC7OqjU3";
+  private static defaultEncryptedCaiyunToken = "2/6GZx97PFiA2wMgeMkzlCNmanp2SKdCR9PeD4fFYDgARu0JUEWuDmf4BS+pLEqo";
   private static defaultCaiyunToken = myDecrypt(this.defaultEncryptedCaiyunToken);
   static caiyunToken = myPreferences.caiyunToken.trim() || this.defaultCaiyunToken;
 
@@ -103,24 +104,37 @@ export class AppKeyStore {
   static openAIAPIKey = myPreferences.openAIAPIKey.trim();
   static openAIEndpoint = myPreferences.openAIAPIURL.trim() || "https://api.openai.com/v1/chat/completions";
   static openAIModel = myPreferences.openAIModel.trim() || "gpt-3.5-turbo";
+  static forceMaxCompletionTokens = myPreferences.forceMaxCompletionTokens;
 
   static geminiAPIKey = myPreferences.geminiAPIKey.trim();
   static geminiEndpoint = myPreferences.geminiAPIURL.trim() || "https://generativelanguage.googleapis.com";
   static geminiModel = myPreferences.geminiModel.trim() || "gemini-2.0-flash";
 }
 
-// Test AES online: https://www.sojson.com/encrypt_aes.html
-export function myDecrypt(ciphertext: string) {
-  // console.warn("decrypt:", ciphertext);
-  const bytes = CryptoJS.AES.decrypt(ciphertext, environment.extensionName);
-  const originalText = bytes.toString(CryptoJS.enc.Utf8);
-  // console.warn("originalText: ", originalText);
-  return originalText;
+function deriveKey(password: string) {
+  return crypto.createHash("sha256").update(password).digest(); // 32 bytes
 }
 
 export function myEncrypt(text: string) {
-  // console.warn("encrypt:", text);
-  const ciphertext = CryptoJS.AES.encrypt(text, environment.extensionName).toString();
-  // console.warn("ciphertext: ", ciphertext);
-  return ciphertext;
+  const key = deriveKey(environment.extensionName);
+  const iv = crypto.randomBytes(16);
+
+  const cipher = crypto.createCipheriv("aes-256-cbc", key, iv);
+  const encrypted = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
+
+  return Buffer.concat([iv, encrypted]).toString("base64");
+}
+
+export function myDecrypt(ciphertext: string) {
+  const raw = Buffer.from(ciphertext, "base64");
+
+  const iv = raw.subarray(0, 16);
+  const encrypted = raw.subarray(16);
+
+  const key = deriveKey(environment.extensionName);
+
+  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+  const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+
+  return decrypted.toString("utf8");
 }

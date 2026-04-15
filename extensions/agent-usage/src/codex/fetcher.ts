@@ -1,7 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { CodexUsage, CodexError } from "./types";
-import { resolveCodexAuthToken } from "./auth";
+import { resolveCodexAuthToken, resolveCodexAuthTokens } from "./auth";
 import { httpFetch, normalizeBearerToken } from "../agents/http";
+import { loadAccounts } from "../accounts/storage";
+import type { AccountUsageState } from "../accounts/types";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 
@@ -11,7 +13,7 @@ const CODEX_HEADERS = {
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 };
 
-async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
+export async function fetchCodexUsage(token: string): Promise<{ usage: CodexUsage | null; error: CodexError | null }> {
   const { data, error } = await httpFetch({
     url: CODEX_USAGE_API,
     headers: { ...CODEX_HEADERS, Authorization: normalizeBearerToken(token) },
@@ -114,24 +116,7 @@ function parseCodexApiResponse(data: unknown): { usage: CodexUsage | null; error
   }
 }
 
-function formatDuration(seconds: number): string {
-  if (seconds < 60) {
-    return `${seconds}s`;
-  }
-  if (seconds < 3600) {
-    return `${Math.floor(seconds / 60)}m`;
-  }
-  if (seconds < 86400) {
-    const hours = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
-  }
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
-}
-
-export { formatDuration };
+export { formatDuration } from "../agents/format";
 
 export function useCodexUsage(enabled = true) {
   const [usage, setUsage] = useState<CodexUsage | null>(null);
@@ -199,4 +184,117 @@ export function useCodexUsage(enabled = true) {
     error: enabled ? error : null,
     revalidate,
   };
+}
+
+/**
+ * Returns one UsageState per named Codex account stored in LocalStorage.
+ * Falls back to the auto-detected token from ~/.codex/auth.json if no accounts are stored.
+ *
+ * Each entry in the returned array corresponds to one account.
+ * The array is stable in order (matches LocalStorage order).
+ */
+export function useCodexAccounts(enabled = true): AccountUsageState<CodexUsage, CodexError>[] {
+  const [accountStates, setAccountStates] = useState<AccountUsageState<CodexUsage, CodexError>[]>([]);
+  const requestIdRef = useRef(0);
+
+  const fetchAll = useCallback(async () => {
+    const requestId = ++requestIdRef.current;
+
+    const manualAccounts = await loadAccounts("codex");
+
+    // Get auto-detected token from codex auth file
+    const { localToken } = resolveCodexAuthTokens();
+
+    // Build list of all accounts: manual + auto-detected (if not duplicate)
+    const accounts = [...manualAccounts];
+
+    // Add auto-detected token as separate account if not already present
+    if (localToken && !accounts.some((a) => a.token === localToken)) {
+      accounts.push({
+        id: "codex-auto",
+        label: "Auto-detected",
+        token: localToken,
+      });
+    }
+
+    // Fallback: if no accounts at all, show not configured
+    if (accounts.length === 0) {
+      setAccountStates([
+        {
+          accountId: "none",
+          label: "Default",
+          token: "",
+          isLoading: false,
+          usage: null,
+          error: {
+            type: "not_configured",
+            message:
+              "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
+          },
+          revalidate: async () => {
+            await fetchAll();
+          },
+        },
+      ]);
+      return;
+    }
+
+    // Kick off all fetches in parallel
+    const results = await Promise.all(
+      accounts.map(async (account) => {
+        const result = await fetchCodexUsage(account.token);
+        return { account, result };
+      }),
+    );
+
+    if (requestId !== requestIdRef.current) return;
+
+    setAccountStates(
+      results.map(({ account, result }) => ({
+        accountId: account.id,
+        label: account.label,
+        token: account.token,
+        isLoading: false,
+        usage: result.usage,
+        error: result.error,
+        isOpenCodeActive: false, // Codex uses different auth source
+        revalidate: async () => {
+          await fetchAll();
+        },
+      })),
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) {
+      requestIdRef.current += 1;
+      setAccountStates([]);
+      return;
+    }
+    void fetchAll();
+  }, [enabled, fetchAll]);
+
+  // Set initial loading state only if no data exists
+  useEffect(() => {
+    if (!enabled) return;
+    setAccountStates((prev) =>
+      prev.length === 0 || prev.some((s) => s.accountId === "none")
+        ? [
+            {
+              accountId: "loading",
+              label: "Loading…",
+              token: "",
+              isLoading: true,
+              usage: null,
+              error: null,
+              revalidate: async () => {
+                await fetchAll();
+              },
+            },
+          ]
+        : prev,
+    );
+  }, [enabled, fetchAll]);
+
+  return accountStates;
 }

@@ -1,9 +1,10 @@
 import fse from "fs-extra";
 import YAML from "yaml";
 import path from "node:path";
-import { exec, execSync } from "node:child_process";
-import type { EspansoMatch, MultiTrigger, Label, Replacement, NormalizedEspansoMatch, EspansoConfig } from "./types";
-import { getPreferenceValues } from "@raycast/api";
+import { exec, execFile, execSync } from "node:child_process";
+import { promisify } from "node:util";
+import type { EspansoMatch, EspansoVar, MultiTrigger, Label, NormalizedEspansoMatch, EspansoConfig } from "./types";
+import { Clipboard, getPreferenceValues } from "@raycast/api";
 import { capitalCase } from "change-case";
 
 const ACRONYMS = [
@@ -89,17 +90,8 @@ export function getEspansoCmd(): string {
   return espansoPath && espansoPath.trim() !== "" ? espansoPath : "espanso";
 }
 
-export function execPromise(cmd: string): Promise<{ stdout: string; stderr: string }> {
-  return new Promise((resolve, reject) => {
-    exec(cmd, (_error, stdout, stderr) => {
-      if (_error) {
-        reject(new Error(stderr || _error.message));
-      } else {
-        resolve({ stdout, stderr });
-      }
-    });
-  });
-}
+export const execPromise = promisify(exec);
+const execFilePromise = promisify(execFile);
 
 function lastUpdatedDate(file: string) {
   const { mtime } = fse.statSync(file);
@@ -119,7 +111,7 @@ export function getAndSortTargetFiles(espansoMatchDir: string): { file: string; 
     (a: { file: string; mtime: number }, b: { file: string; mtime: number }) => b.mtime - a.mtime,
   );
 }
-export function formatMatch(espansoMatch: MultiTrigger & Label & Replacement) {
+export function formatMatch(espansoMatch: MultiTrigger & Label & { replace: string }) {
   const triggerList = espansoMatch.triggers.map((trigger) => `"${trigger}"`).join(", ");
   const labelLine = espansoMatch.label ? `\n    label: "${espansoMatch.label}"` : "";
 
@@ -183,14 +175,14 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
     finalMatches.push(
       ...matches.flatMap((obj: EspansoMatch) => {
         if ("trigger" in obj) {
-          const { trigger, replace, form, label } = obj;
-          return [{ triggers: [trigger], replace, form, label, filePath, category }];
+          const { trigger, replace, image_path, form, label, vars } = obj;
+          return [{ triggers: [trigger], replace, image_path, form, label, vars, filePath, category }];
         } else if ("triggers" in obj) {
-          const { triggers, replace, form, label } = obj;
-          return [{ triggers, replace, form, label, filePath, category }];
+          const { triggers, replace, image_path, form, label, vars } = obj;
+          return [{ triggers, replace, image_path, form, label, vars, filePath, category }];
         } else if ("regex" in obj) {
-          const { regex, replace, form, label } = obj;
-          return [{ triggers: [regex], replace, form, label, filePath, category }];
+          const { regex, replace, image_path, form, label, vars } = obj;
+          return [{ triggers: [regex], replace, image_path, form, label, vars, filePath, category }];
         } else {
           return [];
         }
@@ -237,4 +229,113 @@ export const sortMatches = (matches: NormalizedEspansoMatch[]): NormalizedEspans
       return a.triggers[0].localeCompare(b.triggers[0]);
     }
   });
+};
+
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const formatStrftime = (date: Date, format: string): string => {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return format
+    .replace("%%", "\x00")
+    .replace("%Y", String(date.getFullYear()))
+    .replace("%y", String(date.getFullYear()).slice(-2))
+    .replace("%m", pad(date.getMonth() + 1))
+    .replace("%d", pad(date.getDate()))
+    .replace("%e", String(date.getDate()))
+    .replace("%H", pad(date.getHours()))
+    .replace("%I", pad(date.getHours() % 12 || 12))
+    .replace("%M", pad(date.getMinutes()))
+    .replace("%S", pad(date.getSeconds()))
+    .replace("%p", date.getHours() < 12 ? "AM" : "PM")
+    .replace("%P", date.getHours() < 12 ? "am" : "pm")
+    .replace("%A", WEEKDAYS[date.getDay()])
+    .replace("%a", WEEKDAYS[date.getDay()].slice(0, 3))
+    .replace("%B", MONTHS[date.getMonth()])
+    .replace("%b", MONTHS[date.getMonth()].slice(0, 3))
+    .replace("%h", MONTHS[date.getMonth()].slice(0, 3))
+    .replace("%n", "\n")
+    .replace("%t", "\t")
+    .replace("\x00", "%");
+};
+
+const evaluateVar = async (v: EspansoVar): Promise<string> => {
+  switch (v.type) {
+    case "date":
+      return formatStrftime(new Date(), v.params?.format ?? "%Y-%m-%d");
+    case "shell": {
+      if (!v.params?.cmd) return `{{${v.name}}}`;
+      try {
+        const rawShell = typeof v.params.shell === "string" && v.params.shell.trim() ? v.params.shell.trim() : "zsh";
+        const shellBase = rawShell.includes("/") ? rawShell.split("/").pop()! : rawShell;
+        const interactive = shellBase === "zsh" || shellBase === "bash";
+        const shellArgs = interactive ? [rawShell, "-i", "-c", v.params.cmd] : [rawShell, "-c", v.params.cmd];
+        const { stdout } = await execFilePromise("/usr/bin/env", shellArgs);
+        // eslint-disable-next-line no-control-regex
+        return (
+          stdout
+            // eslint-disable-next-line no-control-regex
+            .replace(/\x1b\[[0-9;]*[ -/]*[@-~]/g, "")
+            // eslint-disable-next-line no-control-regex
+            .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, "")
+            // eslint-disable-next-line no-control-regex
+            .replace(/\x1b[@-_]/g, "")
+            .trim()
+        );
+      } catch {
+        return `{{${v.name}}}`;
+      }
+    }
+    case "script": {
+      const args = v.params?.args;
+      if (!args?.length) return `{{${v.name}}}`;
+      try {
+        const { stdout } = await execFilePromise(args[0], args.slice(1));
+        return stdout.trim();
+      } catch {
+        return `{{${v.name}}}`;
+      }
+    }
+    case "echo":
+      return v.params?.echo ?? `{{${v.name}}}`;
+    case "random": {
+      const values = v.params?.values;
+      if (!values?.length) return `{{${v.name}}}`;
+      return values[Math.floor(Math.random() * values.length)];
+    }
+    case "clipboard":
+      return (await Clipboard.readText()) ?? `{{${v.name}}}`;
+    default:
+      return `{{${v.name}}}`;
+  }
+};
+
+export const expandMatch = async (replace: string | undefined, vars: EspansoVar[] | undefined): Promise<string> => {
+  if (!replace) return replace ?? "";
+  if (!vars?.length) return replace;
+  let result = replace;
+  for (const v of vars) {
+    const value = await evaluateVar(v);
+    result = result.replace(new RegExp(`\\{\\{${escapeRegex(v.name)}\\}\\}`, "g"), value);
+  }
+  return result;
+};
+
+export const resolveImagePath = (imagePath: string, configDir: string): string => {
+  const withConfig = imagePath.replace(/\$CONFIG/g, configDir);
+  const withHome = withConfig.startsWith("~") ? withConfig.replace("~", process.env.HOME ?? "") : withConfig;
+  return path.resolve(withHome);
 };

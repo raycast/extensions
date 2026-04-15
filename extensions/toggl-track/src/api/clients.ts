@@ -1,9 +1,13 @@
-import { get, post, put, remove } from "@/api/togglClient";
+import { getMeWithRelatedData } from "@/api/me";
+import { post, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
 import { cacheHelper } from "@/helpers/cache-helper";
 
-export function getMyClients() {
-  return cacheHelper.getOrSet("clients", () => get<Client[]>("/me/clients"));
+export async function getMyClients(): Promise<Client[]> {
+  const cached = cacheHelper.get<Client[]>("clients");
+  if (cached) return cached;
+  const data = await getMeWithRelatedData();
+  return cacheHelper.get<Client[]>("clients") || data.clients || [];
 }
 
 export function createClient(workspaceId: number, name: string) {

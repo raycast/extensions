@@ -2,6 +2,7 @@ import { execFile } from "child_process";
 
 import { get, post, patch, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
+import { cacheHelper } from "@/helpers/cache-helper";
 import { extensionStartScript, extensionStopScript, extensionUpdateScript } from "@/helpers/preferences";
 
 function runTrigger(scriptPath: string, payload?: TimeEntry | null) {
@@ -28,7 +29,13 @@ export async function getMyTimeEntries<Meta extends boolean = false>({
 }
 
 export async function getRunningTimeEntry() {
+  const cached = cacheHelper.get<TimeEntry>("runningTimeEntry");
+  if (cached) return cached;
+
   const result = await get<TimeEntry | null>("/me/time_entries/current");
+  if (result) {
+    cacheHelper.set("runningTimeEntry", result);
+  }
   if (extensionUpdateScript) {
     runTrigger(extensionUpdateScript, result);
   }
@@ -64,14 +71,16 @@ export async function createTimeEntry({
     workspace_id: workspaceId,
     task_id: taskId,
   });
-  if (response.data && extensionStartScript) {
-    runTrigger(extensionStartScript, response.data);
+  if (response.data) {
+    cacheHelper.set("runningTimeEntry", response.data);
+    if (extensionStartScript) runTrigger(extensionStartScript, response.data);
   }
   return response;
 }
 
 export async function stopTimeEntry({ id, workspaceId }: { id: number; workspaceId: number }) {
   const response = await patch<{ data: TimeEntry }>(`/workspaces/${workspaceId}/time_entries/${id}/stop`, {});
+  cacheHelper.remove("runningTimeEntry");
   if (response.data && extensionStopScript) {
     runTrigger(extensionStopScript, response.data);
   }

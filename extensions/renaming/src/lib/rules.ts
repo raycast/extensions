@@ -1,3 +1,5 @@
+import { log } from "./logger";
+
 export type RenameRule =
   | { id: string; type: "replace"; options: ReplaceOptions }
   | { id: string; type: "case"; options: CaseOptions }
@@ -138,7 +140,7 @@ export const applyRulesToItem = (
           break;
       }
     } catch (error) {
-      console.error(error);
+      log.rename.error("Rule application failed", { rule: rule.type, error });
     }
   }
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Reduce Complexity] - 2026-04-11
+
+- Remove test infrastructure (vitest, test stubs, all test files) that added maintenance burden without meaningful coverage
+- Inline over-abstracted `CommandStates` components back into command files
+- Restore internal functions to private scope
+
 ## [Follow Up on Maintainability] - 2026-04-03
 
 - Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping

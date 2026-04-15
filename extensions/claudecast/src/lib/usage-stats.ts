@@ -1,11 +1,100 @@
 import { LocalStorage } from "@raycast/api";
-import { listAllSessions, SessionMetadata } from "./session-parser";
+import {
+  listAllSessions,
+  streamSessionUsage,
+  SessionMetadata,
+  SessionUsage,
+} from "./session-parser";
 
 export interface UsageStats {
   totalSessions: number;
   totalCost: number;
+  totalInputTokens: number;
+  totalOutputTokens: number;
+  totalCacheReadTokens: number;
+  totalCacheCreationTokens: number;
   sessionsByProject: Record<string, { count: number; cost: number }>;
   topSessions: SessionMetadata[];
+}
+
+// Pricing per million tokens from https://docs.anthropic.com/en/docs/about-claude/pricing
+// Cache read = 0.1x base input, cache write (5-min TTL) = 1.25x base input
+// Ordered most-specific first for substring matching
+const MODEL_PRICING: Array<{
+  match: string;
+  inputPerMTok: number;
+  outputPerMTok: number;
+  cacheReadPerMTok: number;
+  cacheWritePerMTok: number;
+}> = [
+  // Opus 4.5/4.6 ($5/$25 tier)
+  {
+    match: "opus-4-5",
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheReadPerMTok: 0.5,
+    cacheWritePerMTok: 6.25,
+  },
+  {
+    match: "opus-4-6",
+    inputPerMTok: 5,
+    outputPerMTok: 25,
+    cacheReadPerMTok: 0.5,
+    cacheWritePerMTok: 6.25,
+  },
+  // Opus 4/4.1 ($15/$75 tier)
+  {
+    match: "opus",
+    inputPerMTok: 15,
+    outputPerMTok: 75,
+    cacheReadPerMTok: 1.5,
+    cacheWritePerMTok: 18.75,
+  },
+  // All Sonnet 4.x ($3/$15 tier)
+  {
+    match: "sonnet",
+    inputPerMTok: 3,
+    outputPerMTok: 15,
+    cacheReadPerMTok: 0.3,
+    cacheWritePerMTok: 3.75,
+  },
+  // Haiku 4.5 ($1/$5 tier)
+  {
+    match: "haiku-4",
+    inputPerMTok: 1,
+    outputPerMTok: 5,
+    cacheReadPerMTok: 0.1,
+    cacheWritePerMTok: 1.25,
+  },
+  // Haiku 3.5 ($0.80/$4 tier)
+  {
+    match: "haiku",
+    inputPerMTok: 0.8,
+    outputPerMTok: 4,
+    cacheReadPerMTok: 0.08,
+    cacheWritePerMTok: 1,
+  },
+];
+
+const DEFAULT_PRICING = MODEL_PRICING.find((p) => p.match === "sonnet")!;
+
+function resolvePricing(model?: string) {
+  if (!model) return DEFAULT_PRICING;
+  const lower = model.toLowerCase();
+  for (const pricing of MODEL_PRICING) {
+    if (lower.includes(pricing.match)) return pricing;
+  }
+  return DEFAULT_PRICING;
+}
+
+function calculateUsageCost(usage: SessionUsage): number {
+  const p = resolvePricing(usage.model);
+  return (
+    (usage.inputTokens / 1_000_000) * p.inputPerMTok +
+    (usage.outputTokens / 1_000_000) * p.outputPerMTok +
+    (usage.cacheReadTokens / 1_000_000) * p.cacheReadPerMTok +
+    (usage.cacheCreationTokens / 1_000_000) * p.cacheWritePerMTok
+  );
 }
 
 export interface DailyStats {
@@ -14,7 +103,7 @@ export interface DailyStats {
   cost: number;
 }
 
-const STATS_CACHE_KEY = "claudecast-stats-cache";
+const STATS_CACHE_KEY = "claudecast-stats-v2";
 const STATS_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 // In-memory cache for today's stats to prevent repeated disk reads
@@ -52,7 +141,7 @@ export async function getTodayStats(): Promise<UsageStats> {
 
   // Only load sessions modified today - much more efficient
   const todaySessions = await listAllSessions({ afterDate: today });
-  const stats = calculateStats(todaySessions);
+  const stats = await calculateStatsWithUsage(todaySessions, today);
 
   // Update in-memory cache
   todayStatsCache = {
@@ -75,7 +164,7 @@ export async function getWeekStats(): Promise<UsageStats> {
   // Only load sessions from the past week
   const weekSessions = await listAllSessions({ afterDate: weekAgo });
 
-  return calculateStats(weekSessions);
+  return calculateStatsWithUsage(weekSessions, weekAgo);
 }
 
 /**
@@ -89,7 +178,7 @@ export async function getMonthStats(): Promise<UsageStats> {
   // Only load sessions from the past month
   const monthSessions = await listAllSessions({ afterDate: monthAgo });
 
-  return calculateStats(monthSessions);
+  return calculateStatsWithUsage(monthSessions, monthAgo);
 }
 
 /**
@@ -105,9 +194,8 @@ export async function getAllTimeStats(): Promise<UsageStats> {
     }
   }
 
-  // Calculate fresh stats (cap at 1000 most recent to prevent OOM)
-  const allSessions = await listAllSessions({ limit: 1000 });
-  const stats = calculateStats(allSessions);
+  const allSessions = await listAllSessions();
+  const stats = await calculateStatsWithUsage(allSessions);
 
   // Cache the result
   await LocalStorage.setItem(
@@ -142,26 +230,32 @@ export async function getDailyStats(days: number = 7): Promise<DailyStats[]> {
   // Only load sessions from the requested period
   const allSessions = await listAllSessions({ afterDate: startDate });
 
-  const dailyStats: DailyStats[] = [];
+  // Scan each session for usage within the date range
+  const dailyMap = new Map<string, { sessions: Set<string>; cost: number }>();
 
+  for (const session of allSessions) {
+    const usage = await streamSessionUsage(session.filePath, startDate);
+    const cost = calculateUsageCost(usage);
+    const dateStr = session.lastModified.toISOString().split("T")[0];
+    const existing = dailyMap.get(dateStr) || {
+      sessions: new Set<string>(),
+      cost: 0,
+    };
+    existing.sessions.add(session.id);
+    existing.cost += cost;
+    dailyMap.set(dateStr, existing);
+  }
+
+  const dailyStats: DailyStats[] = [];
   for (let i = 0; i < days; i++) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    date.setHours(0, 0, 0, 0);
-
-    const nextDate = new Date(date);
-    nextDate.setDate(nextDate.getDate() + 1);
-
-    const daySessions = allSessions.filter(
-      (s) => s.lastModified >= date && s.lastModified < nextDate,
-    );
-
-    const stats = calculateStats(daySessions);
-
+    const dateStr = date.toISOString().split("T")[0];
+    const entry = dailyMap.get(dateStr);
     dailyStats.push({
-      date: date.toISOString().split("T")[0],
-      sessions: stats.totalSessions,
-      cost: stats.totalCost,
+      date: dateStr,
+      sessions: entry?.sessions.size || 0,
+      cost: entry?.cost || 0,
     });
   }
 
@@ -169,20 +263,34 @@ export async function getDailyStats(days: number = 7): Promise<DailyStats[]> {
 }
 
 /**
- * Calculate stats from a list of sessions
- * Uses integer cents internally to avoid floating point precision errors
+ * Calculate stats by streaming each session file for accurate token totals.
+ * afterDate filters tokens to entries within the time range.
  */
-function calculateStats(sessions: SessionMetadata[]): UsageStats {
+async function calculateStatsWithUsage(
+  sessions: SessionMetadata[],
+  afterDate?: Date,
+): Promise<UsageStats> {
   let totalCostCents = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
+  let totalCacheReadTokens = 0;
+  let totalCacheCreationTokens = 0;
   const sessionsByProject: Record<string, { count: number; cost: number }> = {};
   const projectCostCents: Record<string, number> = {};
 
   for (const session of sessions) {
-    // Convert to cents (integer) to avoid floating point errors
-    const costCents = Math.round((session.cost || 0) * 10000);
+    const usage = await streamSessionUsage(session.filePath, afterDate);
+    const cost = calculateUsageCost(usage);
+    session.cost = cost;
+
+    const costCents = Math.round(cost * 10000);
     totalCostCents += costCents;
 
-    // Group by project
+    totalInputTokens += usage.inputTokens;
+    totalOutputTokens += usage.outputTokens;
+    totalCacheReadTokens += usage.cacheReadTokens;
+    totalCacheCreationTokens += usage.cacheCreationTokens;
+
     if (!sessionsByProject[session.projectName]) {
       sessionsByProject[session.projectName] = { count: 0, cost: 0 };
       projectCostCents[session.projectName] = 0;
@@ -191,12 +299,10 @@ function calculateStats(sessions: SessionMetadata[]): UsageStats {
     projectCostCents[session.projectName] += costCents;
   }
 
-  // Convert project costs back to dollars
   for (const projectName of Object.keys(sessionsByProject)) {
     sessionsByProject[projectName].cost = projectCostCents[projectName] / 10000;
   }
 
-  // Sort sessions by cost to get top expensive ones
   const topSessions = [...sessions]
     .filter((s) => s.cost > 0)
     .sort((a, b) => b.cost - a.cost)
@@ -204,7 +310,11 @@ function calculateStats(sessions: SessionMetadata[]): UsageStats {
 
   return {
     totalSessions: sessions.length,
-    totalCost: totalCostCents / 10000, // Convert back to dollars
+    totalCost: totalCostCents / 10000,
+    totalInputTokens,
+    totalOutputTokens,
+    totalCacheReadTokens,
+    totalCacheCreationTokens,
     sessionsByProject,
     topSessions,
   };
@@ -218,6 +328,16 @@ export function formatCost(cost: number): string {
     return `$${cost.toFixed(4)}`;
   }
   return `$${cost.toFixed(2)}`;
+}
+
+export function formatTokens(count: number): string {
+  if (count >= 1_000_000) {
+    return `${(count / 1_000_000).toFixed(1)}M`;
+  }
+  if (count >= 1_000) {
+    return `${(count / 1_000).toFixed(1)}K`;
+  }
+  return `${count}`;
 }
 
 /**

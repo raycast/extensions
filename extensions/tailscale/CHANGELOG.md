@@ -1,5 +1,10 @@
 # Tailscale Changelog
 
+## [Fix Account Switcher] - 2026-04-12
+
+- Fix "Switch Account" not showing tailnet and account names correctly
+- Show tailnet name in "Switch Account" command if multiple tailnets are available
+
 ## [Better Status Command] - 2026-03-18
 
 - Optionally show hostname, tailnet name, and IP in the status command

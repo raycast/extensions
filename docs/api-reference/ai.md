@@ -221,3 +221,11 @@ If a model isn't available to the user (or has been disabled by the user), Rayca
 #### Properties
 
 <InterfaceTableFromJSDoc name="AI.AskOptions" />
+
+## Rate Limit
+
+Defines the rate limits that apply to Raycast AI usage within extensions. These values specify how many AI requests can be made per minute and per hour.
+
+| Limit per minute | Limit per hour |
+|---|---|
+| 10/minute | 100/hour |
