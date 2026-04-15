@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
   Color,
   Detail,
@@ -175,7 +176,7 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
           <Action.SubmitForm
             title="Clean My Clode"
             icon={Icon.Wand}
-            onSubmit={handleClean}
+            onSubmit={() => handleClean()}
           />
           <Action
             title="Paste from Clipboard & Clean"
@@ -318,7 +319,7 @@ export default function Command() {
                         message: "This cannot be undone.",
                         primaryAction: {
                           title: "Clear All",
-                          style: Action.Style.Destructive,
+                          style: Alert.ActionStyle.Destructive,
                         },
                       });
                       if (confirmed) {
