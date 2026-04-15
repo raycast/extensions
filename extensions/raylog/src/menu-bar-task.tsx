@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import path from "path";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { executeMenuBarTaskAction } from "./lib/menu-bar-task-actions";
 import { buildMenuBarTaskSubmenuSections } from "./lib/menu-bar-task-submenus";
 import { buildMenuBarTaskActionSpecs } from "./lib/task-flow";
 import {
@@ -20,7 +21,6 @@ import {
 import { readMenuBarCache } from "./lib/menu-bar-cache";
 import { refreshMenuBarState } from "./lib/menu-bar-state";
 import { createMenuBarRepository } from "./lib/menu-bar-state-runtime";
-import { getRaylogErrorMessage } from "./lib/storage";
 import type { TaskRecord } from "./lib/types";
 
 export default function Command() {
@@ -60,39 +60,20 @@ export default function Command() {
       if (!repository) {
         return;
       }
-
-      const actionHandlers = {
-        complete: async () => repository.completeTask(task.id),
-        start: async () => repository.startTask(task.id),
-        archive: async () => repository.archiveTask(task.id),
-      } as const;
-
-      const successTitles = {
-        complete: "Task completed",
-        start: "Task started",
-        archive: "Task archived",
-      } as const;
-
-      const failureTitles = {
-        complete: "Unable to complete task",
-        start: "Unable to start task",
-        archive: "Unable to archive task",
-      } as const;
-
-      try {
-        await actionHandlers[action]();
-        await showToast({
-          style: Toast.Style.Success,
-          title: successTitles[action],
-        });
-        await loadMenuBarTasks();
-      } catch (error) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: failureTitles[action],
-          message: getRaylogErrorMessage(error, `${failureTitles[action]}.`),
-        });
-      }
+      await executeMenuBarTaskAction({
+        action,
+        task,
+        repository,
+        loadMenuBarTasks,
+        setIsLoading,
+        showToast: async ({ style, title, message }) =>
+          showToast({
+            style:
+              style === "success" ? Toast.Style.Success : Toast.Style.Failure,
+            title,
+            message,
+          }),
+      });
     },
     [loadMenuBarTasks, repository],
   );
@@ -103,7 +84,7 @@ export default function Command() {
   );
 
   const openTask = useCallback((taskId: string) => {
-    void launchCommand({
+    return launchCommand({
       name: "list-tasks",
       type: LaunchType.UserInitiated,
       context: { selectedTaskId: taskId },
@@ -111,7 +92,7 @@ export default function Command() {
   }, []);
 
   const openTaskList = useCallback(() => {
-    void launchCommand({
+    return launchCommand({
       name: "list-tasks",
       type: LaunchType.UserInitiated,
     });
@@ -185,13 +166,13 @@ export default function Command() {
                     key={`${item.task.id}-${action.title}`}
                     title={action.title}
                     icon={getTaskActionIcon(action.title)}
-                    onAction={() => {
+                    onAction={async () => {
                       if (action.kind === "target") {
-                        openTask(item.task.id);
+                        await openTask(item.task.id);
                         return;
                       }
 
-                      void handleTaskAction(item.task, action.action);
+                      await handleTaskAction(item.task, action.action);
                     }}
                   />
                 ))}
