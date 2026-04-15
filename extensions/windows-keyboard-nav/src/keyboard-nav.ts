@@ -54,7 +54,7 @@ export default async function Command() {
     if (error.code === 1) return; // usuario canceló
 
     if (error.code === 2) {
-      await showHUD("ℹ️ No hay elementos interactivos en la ventana activa");
+      await showHUD("ℹ️ No interactive elements found in the active window");
       return;
     }
 
@@ -63,7 +63,6 @@ export default async function Command() {
     await showHUD(
       "❌ " +
         (detail || "Error " + error.code).substring(0, 50) +
-        " (Error copiado)",
-    );
+        " (Error copied)",
   }
 }
