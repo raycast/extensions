@@ -1,5 +1,5 @@
 import { Application, Icon, Image } from "@raycast/api";
-import { execFile, execFileSync } from "child_process";
+import { execFile } from "child_process";
 
 export interface AppDescriptor {
   name: string;
@@ -44,13 +44,6 @@ export function buildOpenApplicationArgs(app: AppDescriptor, installedApps: Appl
   throw new Error(`Unable to determine how to open "${app.name}"`);
 }
 
-export function openApplication(app: AppDescriptor, installedApps: Application[] | undefined): void {
-  execFileSync("open", buildOpenApplicationArgs(app, installedApps));
-}
-
-/**
- * Async version of openApplication that does not block the event loop.
- */
 export function openApplicationAsync(app: AppDescriptor, installedApps: Application[] | undefined): Promise<void> {
   const args = buildOpenApplicationArgs(app, installedApps);
   return new Promise((resolve, reject) => {

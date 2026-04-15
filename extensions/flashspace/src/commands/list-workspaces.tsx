@@ -11,7 +11,7 @@ export default function ListWorkspaces() {
     failureToastOptions: { title: "Failed to list workspaces" },
   });
 
-  const { data: activeWorkspace } = useExec(flashspace, ["get-workspace"], {
+  const { data: activeWorkspace, revalidate: revalidateActiveWorkspace } = useExec(flashspace, ["get-workspace"], {
     parseOutput: ({ stdout }) => stdout.trim(),
     failureToastOptions: { title: "Failed to get active workspace" },
   });
@@ -45,6 +45,8 @@ export default function ListWorkspaces() {
                   try {
                     await runFlashspaceAsync(["workspace", "--name", workspace.name]);
                     await showHUD(`Switched to "${workspace.name}"`);
+                    revalidate();
+                    revalidateActiveWorkspace();
                   } catch (error) {
                     await showToast({
                       style: Toast.Style.Failure,
