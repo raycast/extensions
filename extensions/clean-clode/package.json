@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "clean-clode",
-  "title": "Clean Clode",
+  "name": "claude-code-cleaner",
+  "title": "Claude Code Cleaner",
   "description": "Clean mangled Claude Code / Codex terminal output into readable text",
   "icon": "icon.png",
   "author": "adigold1",
@@ -14,14 +14,14 @@
     {
       "name": "clean-clipboard",
       "title": "Clean Clipboard",
-      "subtitle": "Clean Clode",
+      "subtitle": "Claude Code Cleaner",
       "description": "Cleans the current clipboard text and copies the result back",
       "mode": "no-view"
     },
     {
       "name": "clean-text",
       "title": "Clean Text",
-      "subtitle": "Clean Clode",
+      "subtitle": "Claude Code Cleaner",
       "description": "Paste, clean, and copy Claude Code / Codex terminal output",
       "mode": "view"
     }
