@@ -23,15 +23,6 @@ import { getComposeServices } from "./compose-scanner";
 const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 
-// -- Preferences --
-
-interface Preferences {
-  ignoredPorts: string;
-  enableDocker: boolean;
-  scanHosts: boolean;
-  scanCompose: boolean;
-}
-
 // -- Icon mapping per process type --
 
 const PROCESS_ICONS: Record<ProcessType, { source: Icon; tintColor: Color }> = {
@@ -193,7 +184,7 @@ async function startComposeService(service: LocalService) {
   const dir = service.composeFile.replace(/\/[^/]+$/, "");
   await showToast({ style: Toast.Style.Animated, title: `Starting ${service.composeName}...` });
   try {
-    await execAsync(`docker compose -f "${service.composeFile}" up -d ${service.composeName || ""}`, { cwd: dir });
+    await execFileAsync("docker", ["compose", "-f", service.composeFile, "up", "-d", ...(service.composeName ? [service.composeName] : [])], { cwd: dir });
     await showToast({ style: Toast.Style.Success, title: `${service.composeName} started` });
   } catch (e) {
     captureException(e);
