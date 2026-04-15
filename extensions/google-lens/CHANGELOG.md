@@ -1,6 +1,6 @@
 # Google Lens Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-04-15
 
 - Update the API base URL to avoid DNS issues.
 
