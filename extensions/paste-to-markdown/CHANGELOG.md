@@ -1,6 +1,6 @@
 # Paste to Markdown Changelog
 
-## [Add Slack Message Composer Support] - {PR_MERGE_DATE}
+## [Add Slack Message Composer Support] - 2026-04-15
 
 - Support for rich text copied from Slack's message composer (Quill Delta format)
 - Parse Chromium web-custom-data pasteboard type to extract Slack clipboard payloads
