@@ -118,13 +118,16 @@
     "@types/sql.js": "1.4.4",
     "eslint": "^7.32.0",
     "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "typescript": "^4.4.3",
+    "vitest": "3.2.4"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "ray publish",
+    "test": "vitest",
+    "test:run": "vitest run"
   }
 }
