@@ -317,7 +317,7 @@ function getDueDateIndicator(value?: string | null): TaskListIndicator | null {
   return {
     kind: "due",
     priority: getDueIndicatorPriority(daysUntilDue),
-    text: formatRelativeIndicator(daysUntilDue, dueDate, "due"),
+    text: formatRelativeIndicator(daysUntilDue, dueDate),
     tone: getDueIndicatorTone(daysUntilDue),
     tooltip: buildCountdownTooltip("Due", daysUntilDue, dueDate),
   };
@@ -337,13 +337,13 @@ function getStartDateIndicator(value?: string | null): TaskListIndicator | null 
   return {
     kind: "start",
     priority: 2,
-    text: formatRelativeIndicator(daysUntilStart, startDate, "start"),
+    text: formatRelativeIndicator(daysUntilStart, startDate),
     tone: "info",
     tooltip: buildCountdownTooltip("Start", daysUntilStart, startDate),
   };
 }
 
-function formatRelativeIndicator(days: number, date: Date, type: "due" | "start"): string {
+function formatRelativeIndicator(days: number, date: Date): string {
   if (days < 0) {
     return `${Math.abs(days)}d late`;
   }
@@ -358,13 +358,6 @@ function formatRelativeIndicator(days: number, date: Date, type: "due" | "start"
 
   if (days <= 7) {
     return `${days}d`;
-  }
-
-  if (type === "start") {
-    return date.toLocaleDateString(undefined, {
-      month: "short",
-      day: "numeric",
-    });
   }
 
   return date.toLocaleDateString(undefined, {

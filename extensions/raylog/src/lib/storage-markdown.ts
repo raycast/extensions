@@ -28,15 +28,7 @@ export function mergeRaylogMarkdown(markdown: string, document: RaylogDocument):
 }
 
 export async function ensureStorageNote(notePath: string): Promise<void> {
-  await validateStorageNotePath(notePath);
-  const markdown = await fs.promises.readFile(notePath, "utf8");
-  const { hasManagedBlock } = parseRaylogMarkdown(markdown);
-
-  if (!hasManagedBlock) {
-    throw new RaylogInitializationRequiredError(
-      "The configured task storage note does not contain a valid Raylog database.",
-    );
-  }
+  await readValidatedStorageMarkdown(notePath);
 }
 
 export async function resetStorageNote(notePath: string): Promise<void> {
@@ -67,14 +59,12 @@ export async function validateStorageNotePath(notePath?: string): Promise<void> 
 }
 
 export async function readStorageDocument(notePath: string): Promise<RaylogDocument> {
-  await ensureStorageNote(notePath);
-  const markdown = await fs.promises.readFile(notePath, "utf8");
+  const markdown = await readValidatedStorageMarkdown(notePath);
   return parseRaylogMarkdown(markdown).document;
 }
 
 export async function readStorageMarkdown(notePath: string): Promise<string> {
-  await ensureStorageNote(notePath);
-  return fs.promises.readFile(notePath, "utf8");
+  return readValidatedStorageMarkdown(notePath);
 }
 
 export async function writeStorageDocument(
@@ -105,4 +95,18 @@ async function writeMarkdownAtomically(notePath: string, markdown: string): Prom
 
     throw error;
   }
+}
+
+async function readValidatedStorageMarkdown(notePath: string): Promise<string> {
+  await validateStorageNotePath(notePath);
+  const markdown = await fs.promises.readFile(notePath, "utf8");
+  const { hasManagedBlock } = parseRaylogMarkdown(markdown);
+
+  if (!hasManagedBlock) {
+    throw new RaylogInitializationRequiredError(
+      "The configured task storage note does not contain a valid Raylog database.",
+    );
+  }
+
+  return markdown;
 }
