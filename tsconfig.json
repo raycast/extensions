@@ -8,8 +8,6 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "paths": {
-      "react": ["./node_modules/@types/react"]
-    }
+    "types": ["react"]
   }
 }
