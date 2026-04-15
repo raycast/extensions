@@ -129,7 +129,14 @@ export function playFrequencies(
   const wavBuffer = generateWav(frequencies, actualDuration, toneType);
   const filePath = path.join(dir, `tone-${id}.wav`);
 
-  writeFileSync(filePath, wavBuffer);
+  writeFileSync(
+    filePath,
+    new Uint8Array(
+      wavBuffer.buffer,
+      wavBuffer.byteOffset,
+      wavBuffer.byteLength,
+    ),
+  );
 
   // Stop any existing playback of this exact frequency set
   stopPlayback(id);
