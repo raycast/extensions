@@ -12,7 +12,7 @@ import {
   captureException,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { exec, execFile } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { LocalService, ProcessType, ServiceSource } from "./types";
 import { getListeningPorts } from "./port-scanner";
@@ -20,7 +20,6 @@ import { getDockerContainers, isDockerAvailable } from "./docker-scanner";
 import { getHostsEntries } from "./hosts-scanner";
 import { getComposeServices } from "./compose-scanner";
 
-const execAsync = promisify(exec);
 const execFileAsync = promisify(execFile);
 
 // -- Icon mapping per process type --
@@ -149,7 +148,7 @@ async function stopService(service: LocalService) {
 
     await showToast({ style: Toast.Style.Animated, title: "Stopping container..." });
     try {
-      await execAsync(`docker stop ${service.containerId}`);
+      await execFileAsync("docker", ["stop", service.containerId]);
       await showToast({ style: Toast.Style.Success, title: "Container stopped" });
     } catch (e) {
       captureException(e);
