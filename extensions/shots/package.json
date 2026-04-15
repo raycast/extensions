@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shots",
+  "title": "Shots",
+  "description": "Capture screenshots, upload them to S3-compatible storage, and copy the public URL.",
+  "icon": "extension-icon.png",
+  "author": "danieljvdm",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "endpoint",
+      "title": "S3 Endpoint",
+      "description": "S3-compatible endpoint URL. For Cloudflare R2, use your account endpoint.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://<account>.r2.cloudflarestorage.com"
+    },
+    {
+      "name": "bucket",
+      "title": "Bucket",
+      "description": "Bucket name for uploaded screenshots and clipboard images.",
+      "type": "textfield",
+      "required": false,
+      "default": "shots"
+    },
+    {
+      "name": "region",
+      "title": "Region",
+      "description": "S3 region value used by the SDK. Cloudflare R2 usually uses auto.",
+      "type": "textfield",
+      "required": false,
+      "default": "auto"
+    },
+    {
+      "name": "accessKeyId",
+      "title": "Access Key ID",
+      "description": "S3 access key ID with permission to upload objects.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "secretAccessKey",
+      "title": "Secret Access Key",
+      "description": "S3 secret access key for the access key ID.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "publicBaseUrl",
+      "title": "Public Base URL",
+      "description": "Public URL prefix mapped to your bucket or custom domain. Copied links use this prefix.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://shots.example.com"
+    },
+    {
+      "name": "keyPrefix",
+      "title": "Key Prefix",
+      "description": "Optional object key prefix, e.g. shots.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "forcePathStyle",
+      "title": "S3 Client",
+      "description": "Use path-style requests for broader S3-compatible support.",
+      "label": "Force path style",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "maxUploadBytes",
+      "title": "Compression Target Bytes",
+      "description": "Maximum image upload size target in bytes.",
+      "type": "textfield",
+      "required": false,
+      "default": "1048576"
+    },
+    {
+      "name": "maxRetries",
+      "title": "Upload Retries",
+      "description": "Maximum upload retries for transient failures.",
+      "type": "textfield",
+      "required": false,
+      "default": "3"
+    }
+  ],
+  "commands": [
+    {
+      "name": "take-screenshot",
+      "title": "Take Screenshot",
+      "description": "Capture a region, compress, upload, and copy the URL.",
+      "mode": "no-view"
+    },
+    {
+      "name": "upload-clipboard-image",
+      "title": "Upload Clipboard Image",
+      "description": "Upload the current clipboard image file and copy the public URL.",
+      "mode": "no-view"
+    },
+    {
+      "name": "test-upload",
+      "title": "Test Upload Settings",
+      "description": "Verify your S3-compatible upload settings without taking a screenshot.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1030.0",
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3",
+    "sharp": "^0.34.5",
+    "uuid": "^11.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.4"
+  },
+  "overrides": {
+    "ajv": "6.14.0",
+    "brace-expansion": "2.1.0",
+    "flatted": "3.4.2",
+    "filelist": {
+      "minimatch": "5.1.9"
+    },
+    "minimatch@3": "3.1.5",
+    "minimatch@9": "9.0.9",
+    "minimatch@10": {
+      "brace-expansion": "5.0.5"
+    }
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
