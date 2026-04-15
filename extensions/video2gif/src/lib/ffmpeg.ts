@@ -76,7 +76,8 @@ function buildFilterChain(settings: ConversionSettings, isForPalette: boolean): 
   }
 
   if (isForPalette) {
-    filters.push("palettegen=stats_mode=diff");
+    const maxColors = Math.round(2 + (settings.quality / 100) * 254);
+    filters.push(`palettegen=stats_mode=diff:max_colors=${maxColors}`);
   }
 
   return filters.join(",");
