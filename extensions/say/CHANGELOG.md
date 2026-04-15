@@ -1,5 +1,9 @@
 # Say - Text to Speech Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Replace deprecated `mac-say` and `@litomore/win-say` dependencies with `native-say`
+
 ## [Enhancement] - 2026-04-12
 
 - Add Windows support with `@litomore/win-say`

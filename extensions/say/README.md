@@ -82,11 +82,11 @@ deeplink="raycast://extensions/litomore/say/typeToSay?launchType=background&argu
 open $deeplink
 ```
 
-### Use `mac-say` or `@litomore/win-say`
+### Use `native-say`
 
-Get them from https://github.com/LitoMore/mac-say and https://github.com/LitoMore/win-say.
+Get it from https://www.npmjs.com/package/native-say.
 
-They provide JavaScript interfaces for the built-in text-to-speech engines on macOS and Windows. You can use them if you want some advanced API usage.
+It provides JavaScript interfaces for the built-in text-to-speech engines on macOS and Windows. You can use it if you want some advanced API usage.
 
 ## FAQ
 
