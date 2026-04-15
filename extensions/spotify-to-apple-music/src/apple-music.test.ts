@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { buildAppleMusicSearchUrl, findAppleMusicUrl } from "./apple-music";
+import { buildAppleMusicSearchUrl, findAppleMusicUrl } from "./apple-music.js";
 
 describe("findAppleMusicUrl", () => {
   it("returns the Apple Music song URL when it finds a matching result", async () => {

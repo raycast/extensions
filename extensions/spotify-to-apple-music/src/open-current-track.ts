@@ -1,6 +1,6 @@
 import { Clipboard, open, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { findAppleMusicUrl, type SpotifyTrack } from "./apple-music";
+import { findAppleMusicUrl, type SpotifyTrack } from "./apple-music.js";
 
 const SEPARATOR = "\u001f";
 
