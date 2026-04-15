@@ -113,7 +113,7 @@ export const TemplateListView = () => {
             )}
             {idx > 0 && (
               <Action
-                title="Move Up"
+                title="Move up"
                 icon={Icon.ArrowUp}
                 shortcut={crossPlatformShortcut(["cmd", "shift"], "arrowUp")}
                 onAction={() => moveTemplate(tmpl.id, "up")}
@@ -242,17 +242,17 @@ const TemplateFormView = ({
   const { pop } = useNavigation();
 
   const appendableGraphNames = keys(graphsConfig).filter(
-    (name) => graphsConfig[name].capabilities?.append !== false
+    (name) => graphsConfig[name].capabilities?.append !== false,
   ) as string[];
 
   const isBuiltin = existingTemplate?.id === "__builtin__";
 
   // Scope state — built-in template is locked to universal
   const [scope, setScope] = useState<string>(
-    isBuiltin ? "universal" : existingTemplate?.graphName ? "graph-specific" : "universal"
+    isBuiltin ? "universal" : existingTemplate?.graphName ? "graph-specific" : "universal",
   );
   const [selectedGraph, setSelectedGraph] = useState<string>(
-    existingTemplate?.graphName || appendableGraphNames[0] || ""
+    existingTemplate?.graphName || appendableGraphNames[0] || "",
   );
 
   // Instant capture checkbox state
@@ -267,7 +267,7 @@ const TemplateFormView = ({
     capabilities: { read: false, append: false, edit: false },
   };
   const { canRead, isGraphPagesLoading, graphPagesData, usedPages, usedPagesSet } = useGraphPages(
-    graphConfig || noopGraphConfig
+    graphConfig || noopGraphConfig,
   );
   const showGraphPickers = scope === "graph-specific" && graphConfig;
 
@@ -282,7 +282,7 @@ const TemplateFormView = ({
   const [tags, setTags] = useState<string[]>(existingTemplate?.tags || []);
   const [tagsText, setTagsText] = useState((existingTemplate?.tags || []).join(", "));
   const [contentTemplate, setContentTemplate] = useState(
-    existingTemplate?.contentTemplate || displayTemplate(BUILTIN_DEFAULT_TEMPLATE.contentTemplate)
+    existingTemplate?.contentTemplate || displayTemplate(BUILTIN_DEFAULT_TEMPLATE.contentTemplate),
   );
   const [pageDropdownValue, setPageDropdownValue] = useState(existingTemplate?.page || "");
   const [plainPageText, setPlainPageText] = useState(existingTemplate?.page || "");
@@ -342,11 +342,11 @@ const TemplateFormView = ({
                   ? tags
                   : undefined
                 : tagsText.trim()
-                ? tagsText
-                    .split(",")
-                    .map((t) => t.trim())
-                    .filter(Boolean)
-                : undefined;
+                  ? tagsText
+                      .split(",")
+                      .map((t) => t.trim())
+                      .filter(Boolean)
+                  : undefined;
 
               const template: CaptureTemplate = {
                 id: existingTemplate?.id ?? randomUUID(),

@@ -68,7 +68,7 @@ async function performQuickCapture(params: { content: string; graphConfig: Graph
 function resolveGraphForTemplate(
   template: CaptureTemplate,
   graphsConfig: GraphsConfigMap,
-  appendableGraphNames: string[]
+  appendableGraphNames: string[],
 ): GraphConfig | undefined {
   if (template.graphName) {
     return graphsConfig[template.graphName];
@@ -188,7 +188,7 @@ const TemplateSelectionList = ({
                           template={tmpl}
                           content={content}
                           appendableGraphNames={appendableGraphNames}
-                        />
+                        />,
                       );
                     }
                   }}
@@ -210,7 +210,7 @@ const TemplateSelectionList = ({
                             template={tmpl}
                             content={content}
                             appendableGraphNames={appendableGraphNames}
-                          />
+                          />,
                         );
                       }
                       return;
@@ -296,7 +296,7 @@ export default function Command() {
             template={tmpl}
             content={trimmed}
             appendableGraphNames={appendableGraphNames}
-          />
+          />,
         );
       }
     } else {
@@ -306,7 +306,7 @@ export default function Command() {
           graphsConfig={graphsConfig}
           content={trimmed}
           appendableGraphNames={appendableGraphNames}
-        />
+        />,
       );
     }
   };

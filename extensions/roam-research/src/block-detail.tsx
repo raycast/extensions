@@ -1,7 +1,7 @@
 import { ActionPanel, Detail, Action, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { debounce } from "debounce";
+import debounce from "debounce";
 import { initRoamBackendClient, getBackRefs } from "./roamApi";
 import { detailMarkdown, timeformatFromMs } from "./utils";
 
@@ -118,10 +118,10 @@ export const SelectedBlocksSearchView = ({
           blocks.filter((item) => {
             const s = item[":block/string"] || item[":node/title"] || "";
             return keywords.every((keyword) => s.includes(keyword));
-          })
+          }),
         );
       }, 100),
-    [blocks]
+    [blocks],
   );
   useEffect(() => () => changeResult.clear(), [changeResult]);
   const { push } = useNavigation();

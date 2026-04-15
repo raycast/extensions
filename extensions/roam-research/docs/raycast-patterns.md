@@ -21,12 +21,12 @@ Raycast commands come in two modes, declared in `package.json`:
 
 Four storage mechanisms, each with different security and lifecycle:
 
-| Storage | Security | Persistence | Use for | API |
-|---------|----------|-------------|---------|-----|
-| `Cache` | Insecure LRU | Ephemeral (survives restarts, but evicted under memory pressure) | Page lists (2hr TTL), used pages (MRU) | `new Cache({ namespace })` — sync get/set |
-| `LocalStorage` | Encrypted | Persistent | Graph tokens, configs, templates | `LocalStorage.getItem/setItem()` — async |
-| `useLocalStorage` hook | Encrypted | Persistent | Same as above, but reactive in components | `useLocalStorage(key)` from `@raycast/utils` |
-| `useCachedPromise` | In-memory | Per-session (lost on command exit) | Search results, async fetched data | `useCachedPromise(fn, args, opts)` from `@raycast/utils` |
+| Storage                | Security     | Persistence                                                      | Use for                                   | API                                                      |
+| ---------------------- | ------------ | ---------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------- |
+| `Cache`                | Insecure LRU | Ephemeral (survives restarts, but evicted under memory pressure) | Page lists (2hr TTL), used pages (MRU)    | `new Cache({ namespace })` — sync get/set                |
+| `LocalStorage`         | Encrypted    | Persistent                                                       | Graph tokens, configs, templates          | `LocalStorage.getItem/setItem()` — async                 |
+| `useLocalStorage` hook | Encrypted    | Persistent                                                       | Same as above, but reactive in components | `useLocalStorage(key)` from `@raycast/utils`             |
+| `useCachedPromise`     | In-memory    | Per-session (lost on command exit)                               | Search results, async fetched data        | `useCachedPromise(fn, args, opts)` from `@raycast/utils` |
 
 **Rule of thumb:** Sensitive data (API tokens, graph configs) → `LocalStorage`. Ephemeral caches (page lists, peer URLs) → `Cache`. Async data in components → `useCachedPromise`.
 
@@ -64,13 +64,13 @@ See `new-graph.tsx` for the full pattern (blur validation + submit-time checking
 
 Two ways to pass data to commands, easily confused:
 
-| | Arguments | Preferences |
-|---|-----------|-------------|
-| **Declared in** | `package.json` → command's `arguments[]` | `package.json` → `preferences[]` |
-| **Scope** | Per-invocation (user types each time) | Persistent (set once in Raycast Settings) |
-| **Accessed via** | `props.arguments` from `LaunchProps` | `getPreferenceValues<Preferences>()` |
-| **Works in** | Both view and no-view | Both view and no-view |
-| **Example** | `text` argument in Quick Capture | `openIn` preference (web vs desktop app) |
+|                  | Arguments                                | Preferences                               |
+| ---------------- | ---------------------------------------- | ----------------------------------------- |
+| **Declared in**  | `package.json` → command's `arguments[]` | `package.json` → `preferences[]`          |
+| **Scope**        | Per-invocation (user types each time)    | Persistent (set once in Raycast Settings) |
+| **Accessed via** | `props.arguments` from `LaunchProps`     | `getPreferenceValues<Preferences>()`      |
+| **Works in**     | Both view and no-view                    | Both view and no-view                     |
+| **Example**      | `text` argument in Quick Capture         | `openIn` preference (web vs desktop app)  |
 
 ---
 
@@ -78,11 +78,11 @@ Two ways to pass data to commands, easily confused:
 
 Hooks only work in `view` commands (React components). For logic shared between view and no-view commands, extract pure functions:
 
-| Context | Can use hooks? | Config access pattern |
-|---------|---------------|----------------------|
-| View command (React component) | Yes | `useGraphsConfig()` hook → reactive state |
-| No-view command (async function) | No | `LocalStorage.getItem("graphs-config")` → parse JSON |
-| Shared logic | — | Pure functions: `resolveInstantCapture()`, `getFirstTemplate()` |
+| Context                          | Can use hooks? | Config access pattern                                           |
+| -------------------------------- | -------------- | --------------------------------------------------------------- |
+| View command (React component)   | Yes            | `useGraphsConfig()` hook → reactive state                       |
+| No-view command (async function) | No             | `LocalStorage.getItem("graphs-config")` → parse JSON            |
+| Shared logic                     | —              | Pure functions: `resolveInstantCapture()`, `getFirstTemplate()` |
 
 `getPreferenceValues()` works everywhere — it's not a hook despite the function naming convention.
 
@@ -112,6 +112,7 @@ mkdir -p tmp-docs && curl -o tmp-docs/raycast-full-llms.txt https://raw.githubus
 ```
 
 Key sections in the full reference (approximate line numbers):
+
 - **No-view commands** — ~L465
 - **Cache API** — ~L789
 - **LocalStorage API** — ~L3030

@@ -14,7 +14,7 @@ export async function getBackRefs(backendClient: roamApiSdk.RoamBackendClient, u
   const backRefsReversePullBlocks: ReversePullBlock[] = await roamApiSdk.q(
     backendClient,
     `[ :find [(pull ?e [${BLOCK_QUERY}]) ...] :in $ ?uid :where [?page :block/uid ?uid] [?e :block/refs ?page] [?e :block/string ?text]]`,
-    [uid]
+    [uid],
   );
   return backRefsReversePullBlocks;
 }
@@ -27,11 +27,11 @@ type GraphPagesDataInCache = [number, Record<string, string>];
 async function getAllPagesBackend(graphConfig: GraphConfig) {
   const backendClient: roamApiSdk.RoamBackendClient = initRoamBackendClient(
     graphConfig.nameField,
-    graphConfig.tokenField
+    graphConfig.tokenField,
   );
   const allPagesData: [string, string, number][] = await roamApiSdk.q(
     backendClient,
-    "[:find ?uid ?page-title ?edit-time :where [?id :node/title ?page-title][?id :block/uid ?uid][(get-else $ ?id :page/edit-time 0) ?edit-time]]"
+    "[:find ?uid ?page-title ?edit-time :where [?id :node/title ?page-title][?id :block/uid ?uid][(get-else $ ?id :page/edit-time 0) ?edit-time]]",
   );
   allPagesData.sort((a, b) => (b[2] || 0) - (a[2] || 0));
   // Insertion order matters: Object.entries(res) preserves edit-time sort for PageDropdown
@@ -113,7 +113,7 @@ const tagPageTitlesStrSuffix = (pageTitlesToTagTopBlockWith: string[]) => {
   } else {
     return pageTitlesToTagTopBlockWith.reduce(
       (accStr: string, newPageTitle: string) => accStr + " #[[" + newPageTitle + "]]",
-      ""
+      "",
     );
   }
 };
@@ -135,7 +135,7 @@ export async function appendBlocks(
   token: string,
   pageTitle: string | { "daily-note-page": string },
   content: string,
-  nestUnder?: string
+  nestUnder?: string,
 ): Promise<void> {
   const location: Record<string, unknown> = { page: { title: pageTitle } };
   if (nestUnder) {
@@ -189,7 +189,7 @@ export async function appendBlocks(
 export async function detectCapabilities(
   graphName: string,
   token: string,
-  appendMessage?: string
+  appendMessage?: string,
 ): Promise<{
   capabilities: { read: boolean; append: boolean; edit: boolean };
   readError?: unknown;
@@ -217,10 +217,10 @@ export async function detectCapabilities(
 
 export async function recheckGraphCapabilities(
   graphConfig: GraphConfig,
-  saveGraphConfig: (obj: GraphConfig) => void
+  saveGraphConfig: (obj: GraphConfig) => void,
 ): Promise<{ read: boolean; append: boolean; edit: boolean }> {
   const message = `Permissions rechecked from Raycast on ${roamApiSdk.dateToPageTitle(new Date())} at ${dayjs().format(
-    "HH:mm"
+    "HH:mm",
   )}`;
   const { capabilities } = await detectCapabilities(graphConfig.nameField, graphConfig.tokenField, message);
   saveGraphConfig({ ...graphConfig, capabilities });
@@ -232,7 +232,7 @@ export function processCapture(
   template: string,
   pageTitlesToTagTopBlockWith: string[],
   existingPageTitle?: string,
-  nestUnder?: string
+  nestUnder?: string,
 ): { processedContent: string; pageTitle: string | { "daily-note-page": string }; nestUnder?: string } {
   const tagSuffix = tagPageTitlesStrSuffix(pageTitlesToTagTopBlockWith);
   const templateHadTagsVar = /\{tags}/i.test(template);
@@ -257,19 +257,21 @@ export function processCapture(
       processed = processed.replaceAll(/\{today}/gi, `[[${todayTitle}]]`);
     }
 
+    // Replace {tags} before {content} so user-entered "{tags}" in content is kept literal.
+    // Use a callback replacement so "$" sequences in tags are preserved as-is.
+    processed = processed.replaceAll(/\{tags}/gi, () => tagSuffix.trimStart());
+
     // Replace {content} — when content is multi-line, keep the rest of the template line
-    // (e.g. {tags}) on the first content line so tags land on the top block, not the deepest child
+    // (e.g. resolved tags) on the first content line so tags land on the top block, not the deepest child.
+    // Use callback replacement in both branches so "$" sequences in user content are preserved literally.
     if (content.includes("\n")) {
       processed = processed.replaceAll(/\{content}(.*)/gi, (_match: string, after: string) => {
         const contentLines = content.split("\n");
         return contentLines[0] + after + "\n" + contentLines.slice(1).join("\n");
       });
     } else {
-      processed = processed.replaceAll(/\{content}/gi, content);
+      processed = processed.replaceAll(/\{content}/gi, () => content);
     }
-
-    // Replace {tags} — uses same #[[tag]] format as tagPageTitlesStrSuffix for consistency
-    processed = processed.replaceAll(/\{tags}/gi, tagSuffix.trimStart());
 
     // Backward compat: the old default template used 1-space-per-level indentation (e.g. "\n - {content}"),
     // and parseTemplate (the old write path) accepted that. The Append API requires at least 2 additional

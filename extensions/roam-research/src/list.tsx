@@ -60,7 +60,7 @@ export const graphList = (graphsConfig: GraphsConfigMap, options: GraphListOptio
               {moveGraph && idx > 0 && (
                 <Action
                   icon={Icon.ArrowUp}
-                  title="Move Up"
+                  title="Move up"
                   shortcut={crossPlatformShortcut(["cmd", "shift"], "arrowUp")}
                   onAction={() => moveGraph(graphName, "up")}
                 />
@@ -87,10 +87,12 @@ export const graphList = (graphsConfig: GraphsConfigMap, options: GraphListOptio
                       toast.style = Toast.Style.Success;
                       if (capabilities.read && capabilities.append) {
                         toast.title = `"${graphName}" — full access — caches refreshed`;
+                        toast.message = "Append check wrote a marker block to [[Raycast]].";
                       } else if (capabilities.read) {
                         toast.title = `"${graphName}" — read only — caches refreshed`;
                       } else if (capabilities.append) {
                         toast.title = `"${graphName}" — append only — caches refreshed`;
+                        toast.message = "Append check wrote a marker block to [[Raycast]].";
                       } else {
                         toast.style = Toast.Style.Failure;
                         toast.title = `"${graphName}" — no access detected`;

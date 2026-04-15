@@ -11,19 +11,20 @@ import { MentioningNotes, OpenInRoamActions } from "./block-detail";
 
 const rand = (max: number) => Math.floor(Math.random() * max);
 
-const isValidBlockPulled = (blockPulled: any) => {
+const isValidBlockPulled = (blockPulled: unknown) => {
+  if (typeof blockPulled !== "object" || blockPulled === null) {
+    return false;
+  }
+  const candidate = blockPulled as Record<string, unknown>;
   return (
-    blockPulled[":block/uid"] &&
+    Boolean(candidate[":block/uid"]) &&
     // block string can be an empty string and still be valid
-    (Object.prototype.hasOwnProperty.call(blockPulled, ":block/string") || blockPulled[":node/title"])
+    (Object.prototype.hasOwnProperty.call(candidate, ":block/string") || Boolean(candidate[":node/title"]))
   );
 };
 
 export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig }) => {
   // TODO: the first time, this is getting printed quite a number of times which makes me assume I'm not doing it properly
-
-  // const api = graphApi(graph.nameField, graph.tokenField);
-  const backendClient = initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField);
 
   const {
     isLoading: isLoadingRandomBlocks,
@@ -31,13 +32,14 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
     error: errorRandomBlocks,
   } = usePromise(
     //useCachedPromise(
-    async (_graphConfig) => {
+    async (gc: GraphConfig) => {
+      const backendClient = initRoamBackendClient(gc.nameField, gc.tokenField);
       // TODO: maybe try abortable here?
       // const response = await fetch(url, { signal: abortable.current?.signal });
       // const result = await response.text();
       const randomBlockUids: undefined | string[] = await roamApiSdk.q(
         backendClient,
-        "[:find (rand 50 ?block-uid) . :in $ :where [?e :block/uid ?block-uid] [?e :block/page _] [?e :block/string _] [_ :block/refs ?e]]"
+        "[:find (rand 50 ?block-uid) . :in $ :where [?e :block/uid ?block-uid] [?e :block/page _] [?e :block/string _] [_ :block/refs ?e]]",
       );
       if (!randomBlockUids || randomBlockUids.length === 0) {
         return undefined;
@@ -45,12 +47,12 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
         const response = await roamApiSdk.q(
           backendClient,
           `[ :find [(pull ?e [${BLOCK_QUERY}]) ...] :in $ [?block-uid ...] :where [?e :block/uid ?block-uid]]`,
-          [randomBlockUids]
+          [randomBlockUids],
         );
         return response;
       }
     },
-    [graphConfig]
+    [graphConfig],
   );
 
   const { isLoading, data, error, revalidate } = usePromise(
@@ -67,7 +69,7 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
         return randomBlock;
       }
     },
-    [dataRandomBlocks]
+    [dataRandomBlocks],
   );
 
   if (!isLoadingRandomBlocks && !isLoading && (errorRandomBlocks || error)) {
@@ -92,7 +94,7 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
             markdown: detailMarkdown(data),
             actions: (
               <ActionPanel>
-                <Action title="Another random block" onAction={revalidate} />
+                <Action title="Another Random Block" onAction={revalidate} />
                 <OpenInRoamActions graphName={graphConfig.nameField} blockUid={data[":block/uid"]} />
                 {_refs.length ? (
                   <Action.Push

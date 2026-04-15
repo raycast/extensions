@@ -10,16 +10,17 @@ Quick reference for the Roam API endpoints and queries used by this extension.
 
 Every Roam data query in the codebase:
 
-| Name | File → Function/Constant | Purpose |
-|------|--------------------------|---------|
-| `BLOCK_QUERY` | `roamApi.ts → BLOCK_QUERY` | Pull pattern for rich block data: content, parent chain, refs, timestamps. Used by most read operations. |
-| All pages | `roamApi.ts → getAllPagesBackend()` | `[:find ?uid ?page-title ?edit-time :where [?id :node/title ?page-title][?id :block/uid ?uid][(get-else $ ?id :page/edit-time 0) ?edit-time]]` — sorted by edit time descending |
-| Back-references | `roamApi.ts → getBackRefs()` | Finds all blocks referencing a given UID (used for linked references in detail view) |
-| Capability check | `roamApi.ts → detectCapabilities()` | Minimal existence test: `[:find ?e . :where [?e :block/uid]]` |
-| Search full-pull | `components.tsx → searchSingleGraphFull()` | Finds blocks by UID list from Phase 1, pulls with `BLOCK_QUERY` for rich data |
-| Random blocks | `random.tsx` (inline) | `(rand 50 ?block-uid)` — selects 50 random blocks that have content, a page, and at least one back-reference |
+| Name             | File → Function/Constant                   | Purpose                                                                                                                                                                         |
+| ---------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `BLOCK_QUERY`    | `roamApi.ts → BLOCK_QUERY`                 | Pull pattern for rich block data: content, parent chain, refs, timestamps. Used by most read operations.                                                                        |
+| All pages        | `roamApi.ts → getAllPagesBackend()`        | `[:find ?uid ?page-title ?edit-time :where [?id :node/title ?page-title][?id :block/uid ?uid][(get-else $ ?id :page/edit-time 0) ?edit-time]]` — sorted by edit time descending |
+| Back-references  | `roamApi.ts → getBackRefs()`               | Finds all blocks referencing a given UID (used for linked references in detail view)                                                                                            |
+| Capability check | `roamApi.ts → detectCapabilities()`        | Minimal existence test: `[:find ?e . :where [?e :block/uid]]`                                                                                                                   |
+| Search full-pull | `components.tsx → searchSingleGraphFull()` | Finds blocks by UID list from Phase 1, pulls with `BLOCK_QUERY` for rich data                                                                                                   |
+| Random blocks    | `random.tsx` (inline)                      | `(rand 50 ?block-uid)` — selects 50 random blocks that have content, a page, and at least one back-reference                                                                    |
 
 The `BLOCK_QUERY` pull pattern:
+
 ```
 :block/string :node/title :block/uid :edit/time :create/time
 :block/_refs
@@ -50,6 +51,7 @@ Used for all Quick Capture / Instant Capture operations.
 `page.title` can also be `{"daily-note-page": "MM-DD-YYYY"}` for daily notes.
 
 Key behaviors:
+
 - **Auto-creation:** Creates the page and `nest-under` block if they don't exist yet.
 - **Nested markdown:** Since April 2025, `string` starting with `"- "` supports nested markdown natively (no `children` array needed). This is what makes our template indentation work.
 - **`nest-under` disambiguation:** If a page has multiple top-level blocks matching the string, appends under the **bottom-most** match.
@@ -66,6 +68,7 @@ Used for search, page lists, back-references, and capability detection.
 **Endpoint:** `POST https://api.roamresearch.com/api/graph/{graph-name}/{q|pull|pull-many|search|write}`
 
 Key details:
+
 - **308 redirect sharding:** Roam uses CloudFront as a reverse proxy that 308-redirects to the actual peer machine hosting your graph. The SDK fork caches this peer URL to skip the redirect on subsequent requests.
 - **Auth header redirect gotcha:** Most HTTP libraries drop `Authorization` on 308 redirect. The SDK sends both `Authorization` and `X-Authorization` to work around this. This is why the SDK fork is required — don't replace with the upstream npm package.
 - **Query timeout:** 20-second server-side limit. 500 error with "took too long to run" if exceeded.
@@ -77,10 +80,10 @@ Our wrapper: `roam-api-sdk-copy.ts → q()`, `pull()`, `search()`.
 
 ## Rate Limits & Error Codes
 
-| API | Rate Limit | Size Limit |
-|-----|-----------|------------|
-| Backend API | 50 req/min/graph | Query timeout at 20s |
-| Append API | 30 req/min/token, 20MB/hour/token | 200KB per request payload |
+| API         | Rate Limit                        | Size Limit                |
+| ----------- | --------------------------------- | ------------------------- |
+| Backend API | 50 req/min/graph                  | Query timeout at 20s      |
+| Append API  | 30 req/min/token, 20MB/hour/token | 200KB per request payload |
 
 Error codes (both APIs): 200 OK, 308 redirect, 400 bad request, 401 unauthorized, 403 forbidden (Append only), 413 too large (Append only), 429 rate limited, 500 server error, 503 graph unavailable.
 

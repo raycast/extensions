@@ -108,6 +108,7 @@ export const GraphDetail = ({ graphConfig }: { graphConfig: GraphConfig }) => {
                     if (capabilities.read && capabilities.append) {
                       toast.style = Toast.Style.Success;
                       toast.title = "Full access confirmed — caches refreshed";
+                      toast.message = "Append check wrote a marker block to [[Raycast]].";
                       pop();
                     } else if (capabilities.read) {
                       toast.style = Toast.Style.Success;
@@ -116,6 +117,7 @@ export const GraphDetail = ({ graphConfig }: { graphConfig: GraphConfig }) => {
                     } else if (capabilities.append) {
                       toast.style = Toast.Style.Success;
                       toast.title = "Append-only access confirmed — caches refreshed";
+                      toast.message = "Append check wrote a marker block to [[Raycast]].";
                       pop();
                     } else {
                       toast.style = Toast.Style.Failure;

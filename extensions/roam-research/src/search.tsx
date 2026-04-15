@@ -1,6 +1,6 @@
 import { List, Icon, ActionPanel, Action, useNavigation, getPreferenceValues } from "@raycast/api";
 import { useGraphsConfig } from "./utils";
-import { debounce } from "debounce";
+import debounce from "debounce";
 import { SingleGraphSearchView, searchSingleGraphMinimal, MinimalSearchResult } from "./components";
 import { keys, values } from "./utils";
 import { useEffect, useMemo, useState } from "react";
@@ -49,14 +49,14 @@ export default function Command() {
 
   const changeResult = useMemo(
     () =>
-      debounce((text: string, setSearchText: (text: string) => any) => {
+      debounce((text: string, setSearchText: (text: string) => void) => {
         text = text.trim();
         if (!text || text.length < 2) {
           return;
         }
         setSearchText(text);
       }, 500),
-    []
+    [],
   );
   useEffect(() => () => changeResult.clear(), [changeResult]);
 
@@ -79,10 +79,10 @@ export default function Command() {
                 .then((results) => resolve([graphConfig.nameField, results]))
                 .catch(
                   // errors here show up as a red cross (i.e. X) in the graph list item accessories
-                  (e) => reject([graphConfig.nameField, e])
+                  (e) => reject([graphConfig.nameField, e]),
                 );
-            })
-        )
+            }),
+        ),
       ).then((results) => {
         const graphsResultsMap: GraphsMinimalResultsOrErrorMessageMap = {};
         for (const result of results) {
@@ -99,7 +99,7 @@ export default function Command() {
                       return [pageCount, blockCount + 1];
                     }
                   },
-                  [0, 0]
+                  [0, 0],
                 );
             graphsResultsMap[graphName] = {
               minimalSearchResults: minimalResults,
@@ -114,7 +114,7 @@ export default function Command() {
       });
     },
     [readableGraphsConfig, searchText],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   useEffect(() => {
@@ -220,7 +220,7 @@ export default function Command() {
                         <SingleGraphSearchView
                           graphConfig={graphConfig}
                           singleGraphSearchInitData={singleGraphSearchInitData}
-                        />
+                        />,
                       );
                     }}
                   />

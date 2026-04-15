@@ -5,7 +5,7 @@ import { detectCapabilities } from "./roamApi";
 
 function buildOnboardingMarkdown(
   graphName: string,
-  capabilities: { read: boolean; append: boolean; edit: boolean }
+  capabilities: { read: boolean; append: boolean; edit: boolean },
 ): string {
   const canRead = capabilities.read;
   const canAppend = capabilities.append;
@@ -30,6 +30,9 @@ function buildOnboardingMarkdown(
     md += `daily notes, TODOs, meeting notes, etc. Templates can target a specific page, nest under a parent block, and auto-add tags.\n\n`;
     md += `**Instant Capture** — To use Instant Capture, set a graph-specific template as your Instant Capture template in Manage Capture Templates. `;
     md += `With a single graph and a single template, Instant Capture works automatically.\n`;
+    md += `\n`;
+    md += `**Permissions check note** — Raycast verifies append access by writing a small marker block to the [[Raycast]] page. `;
+    md += `You may see these "Graph connected..." or "Permissions rechecked..." entries over time.\n`;
   } else if (canRead) {
     md += `Your token has read-only access.\n\n`;
     md += `### Available commands\n\n`;
@@ -51,6 +54,9 @@ function buildOnboardingMarkdown(
     md += `daily notes, TODOs, meeting notes, etc.\n\n`;
     md += `**Instant Capture** — To use Instant Capture, set a graph-specific template as your Instant Capture template in Manage Capture Templates. `;
     md += `With a single graph and a single template, Instant Capture works automatically.\n`;
+    md += `\n`;
+    md += `**Permissions check note** — Raycast verifies append access by writing a small marker block to the [[Raycast]] page. `;
+    md += `You may see these "Graph connected..." or "Permissions rechecked..." entries over time.\n`;
   }
 
   return md;
@@ -122,6 +128,16 @@ export const GraphOnboardingDetail = ({
 const GRAPH_NAME_INVALID_CHARS = /[^A-Za-z0-9_-]/;
 const LOOKS_LIKE_EMAIL = /@/;
 const LOOKS_LIKE_URL = /^https?:\/\//;
+
+function getErrorMessage(e: unknown): string {
+  if (typeof e === "string") return e;
+  if (e instanceof Error) return e.message;
+  if (typeof e === "object" && e !== null && "message" in e) {
+    const maybeMessage = (e as { message?: unknown }).message;
+    if (typeof maybeMessage === "string") return maybeMessage;
+  }
+  return String(e);
+}
 
 export function NewGraph({
   parentSaveGraphConfig,
@@ -223,7 +239,7 @@ export function NewGraph({
 
                 if (!capabilities.read && !capabilities.append) {
                   const isPermissionError = (e: unknown) => {
-                    const msg = String((e as any)?.message || e || "");
+                    const msg = getErrorMessage(e);
                     return msg.includes("Invalid token") || msg.includes("Insufficient permissions");
                   };
                   const errors = [readError, appendError].filter(Boolean);
@@ -241,7 +257,7 @@ export function NewGraph({
 
                 toast.hide();
                 push(<GraphOnboardingDetail graphName={graphName} capabilities={capabilities} onDone={popToRoot} />);
-              } catch (error) {
+              } catch {
                 toast.style = Toast.Style.Failure;
                 toast.title = 'Failed to validate graph "' + graphName + '"';
                 toast.message = "Connection failed — please check your network and try again.";

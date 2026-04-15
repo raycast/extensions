@@ -7,13 +7,17 @@
   "author": "roamresearch",
   "contributors": [
     "dive2Pro",
-    "baibhavbista"
+    "baibhavbista",
+    "0xdhrv"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
-  "platforms": ["macOS", "Windows"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "index",
@@ -133,22 +137,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.56.1",
-    "@raycast/utils": "^1.19.1",
-    "cross-fetch": "^4.0.0",
-    "dayjs": "^1.11.6",
-    "debounce": "^1.2.1"
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3",
+    "cross-fetch": "^4.1.0",
+    "dayjs": "^1.11.20",
+    "debounce": "^3.0.0"
   },
   "devDependencies": {
-    "@types/debounce": "^1.2.1",
-    "@types/node": "18.8.3",
-    "@types/react": "^18.3.18",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/debounce": "^1.2.4",
+    "@types/node": "25.6.0",
+    "@types/react": "^19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.58.2",
+    "@typescript-eslint/parser": "^8.58.2",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",

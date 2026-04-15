@@ -1,7 +1,7 @@
 // Forked from https://github.com/Roam-Research/backend-sdks/blob/0933181963e8c2eb7403bdbbe9a7885e0ea2abc7/typescript/src/index.ts
 // Changes from upstream:
 //   1. importing fetch and Request from "cross-fetch" node module
-//   2. Changed `q`'s `args` param's type from `string[]` to `any[]`
+//   2. Changed `q`'s `args` param type to accept non-string arguments
 //   3. Uses proxy.api.roamresearch.com (CloudFront reverse proxy) instead of api.roamresearch.com
 //   4. Other multiple changes have been made, will want to take a code diff later and move stuff to roam-api-sdk we want for everyone
 
@@ -88,7 +88,7 @@ export class RoamBackendClient {
   }
 }
 
-export async function q(app: RoamBackendClient, query: string, args?: any[]): Promise<any> {
+export async function q<T = unknown>(app: RoamBackendClient, query: string, args?: unknown[]): Promise<T> {
   const path = `/api/graph/${app.graph}/q`;
   let body;
   if (args) {
@@ -101,10 +101,10 @@ export async function q(app: RoamBackendClient, query: string, args?: any[]): Pr
   }
   const resp = await app.api(path, "POST", body);
   const { result } = await resp.json();
-  return result;
+  return result as T;
 }
 
-export async function pull(app: RoamBackendClient, pattern: string, eid: string): Promise<any> {
+export async function pull<T = unknown>(app: RoamBackendClient, pattern: string, eid: string): Promise<T> {
   const path = `/api/graph/${app.graph}/pull`;
   const body = {
     eid: eid,
@@ -112,15 +112,15 @@ export async function pull(app: RoamBackendClient, pattern: string, eid: string)
   };
   const resp = await app.api(path, "POST", body);
   const { result } = await resp.json();
-  return result;
+  return result as T;
 }
 
-export async function search(
+export async function search<T = unknown>(
   app: RoamBackendClient,
   searchStr: string,
   hideCodeBlocks = true,
-  limit = 100
-): Promise<any> {
+  limit = 100,
+): Promise<T> {
   const path = `/api/graph/${app.graph}/search`;
   const body = {
     "search-str": searchStr,
@@ -129,7 +129,7 @@ export async function search(
   };
   const resp = await app.api(path, "POST", body);
   const { result } = await resp.json();
-  return result;
+  return result as T;
 }
 
 // Instead of the general `number`, can we somehow specify negative integer here?
@@ -279,11 +279,11 @@ type RoamBatchActions = {
   actions: RoamSingleAction[];
 };
 
-export async function batchActions(app: RoamBackendClient, body: RoamBatchActions): Promise<any> {
+export async function batchActions<T = unknown>(app: RoamBackendClient, body: RoamBatchActions): Promise<T> {
   body.action = "batch-actions";
   const path = `/api/graph/${app.graph}/write`;
   const response = await app.api(path, "POST", body);
-  return await response.json();
+  return (await response.json()) as T;
 }
 
 type InitGraph = {
@@ -347,6 +347,6 @@ export function dateToPageTitle(date: Date) {
   }
   const day = date.getDate();
   return `${monthStrMap[date.getMonth() as keyof typeof monthStrMap]} ${day}${intOrdinalIndicator(
-    day
+    day,
   )}, ${date.getFullYear()}`;
 }

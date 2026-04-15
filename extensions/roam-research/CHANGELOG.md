@@ -1,8 +1,23 @@
 # Roam Research Changelog
 
+## [Post-v2 Improvements] - {PR_MERGE_DATE}
+
+### Improvements
+
+- **Clearer permission checks** -- During setup and permission rechecks, Raycast now clearly explains that it may add a small confirmation note to your `[[Raycast]]` page.
+- **Smoother reliability** -- Improved overall stability so setup, capture, and day-to-day usage feel more dependable.
+
+### Bug Fixes
+
+- Fixed an issue where notes containing `$` characters could be saved incorrectly.
+- Fixed an issue where some tag-like text typed in your note could be changed unexpectedly.
+- Fixed occasional formatting surprises when using tags in capture templates.
+- Fixed update/build issues to keep releases more stable.
+
 ## [v2] - 2026-04-15
 
 ### New Features
+
 - **Capture Template System** -- Create reusable capture presets per graph with customizable page, nesting, tags, and content template. Manage via the "Manage Capture Templates" command. Includes a global default template that can be customized. Subsumes the old TODO Quick Capture request.
 - **Instant Capture** -- New no-view command for zero-UI capture using your designated Instant Capture template. No graph picker, no form — just type and go.
 - **Graph Reordering** -- Explicit Move Up/Down ordering controls which graph appears first across all commands. Replaces the old "default graph" concept.
@@ -13,6 +28,7 @@
 - **Windows Support** -- Extension now runs on both macOS and Windows.
 
 ### Improvements
+
 - **Append API Migration** -- Quick Capture now uses Roam's Append API, enabling encrypted graph support and fixing indentation and tag-stripping bugs.
 - **Type-First Capture** -- Quick Capture accepts a command argument so you can type your note before selecting a graph.
 - **Backend API Proxy** -- Switched to `proxy.api.roamresearch.com`, improving connection reliability.
@@ -22,6 +38,7 @@
 - **Linked References Refresh** -- Linked references list now updates correctly when data loads asynchronously.
 
 ### Bug Fixes
+
 - Fixed indentation not working in Quick Capture (#19646)
 - Fixed #tags being stripped from capture templates (#7979)
 - Fixed graph credentials accepted without validation (#5550)
@@ -30,6 +47,7 @@
 - Fixed trailing spaces in navigation titles and missing space in "Show Linked References" action
 
 ### Infrastructure
+
 - Migrated from `usePersistentState` to `useLocalStorage` from `@raycast/utils`
 - Removed unused dependencies (`querystring`, `@roam-research/roam-api-sdk`)
 - Added comprehensive documentation suite (API reference, patterns, gotchas, how-to guides)

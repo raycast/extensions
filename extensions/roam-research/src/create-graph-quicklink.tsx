@@ -27,7 +27,7 @@ const QuicklinkPageDropdown = ({
       .sort((a, b) => a[2] - b[2])
       .slice(0, 100)
       .map(([uid, title]) => [uid, title] as [string, string]);
-  }, [graphPagesData, tokens.join(" "), normalizedQuery]); // eslint-disable-line
+  }, [graphPagesData, tokens.join(" "), normalizedQuery]);
 
   return (
     <Form.Dropdown
@@ -79,14 +79,14 @@ export default function CreateGraphQuicklink() {
         return getAllPagesCached(graphsConfig[graphNameDropdownValue]);
       }
     },
-    [graphNameDropdownValue]
+    [graphNameDropdownValue],
   );
 
   const getQuicklinkDetails = (
     graphNameDropdownVal: string,
     graphNameTextFieldVal: string,
     graphPageDropdownValue: string,
-    openInDropdownVal: string
+    openInDropdownVal: string,
   ) => {
     const graphName = graphNameDropdownVal === "useGraphNameTextField" ? graphNameTextFieldVal : graphNameDropdownVal;
     const pageUid =
@@ -105,7 +105,7 @@ export default function CreateGraphQuicklink() {
   const { quicklinkLink, quicklinkName } = useMemo(
     () =>
       getQuicklinkDetails(graphNameDropdownValue, graphNameTextFieldValue, graphPageDropdownValue, openInDropdownValue),
-    [graphNameDropdownValue, graphNameTextFieldValue, graphPageDropdownValue, openInDropdownValue]
+    [graphNameDropdownValue, graphNameTextFieldValue, graphPageDropdownValue, openInDropdownValue],
   );
 
   const handleGraphChange = (newValue: string) => {

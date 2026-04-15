@@ -31,12 +31,12 @@ Templates ultimately produce a request to the Roam Append API (`append-api.roamr
 
 ```typescript
 type CaptureTemplate = {
-  id: string;              // UUID or "__builtin__" for the auto-migrated legacy template
-  name: string;            // Display name shown in lists
-  graphName?: string;      // Set = graph-specific; undefined = universal (works with any graph)
-  page?: string;           // Target page title; undefined = Daily Notes Page
-  nestUnder?: string;      // Block text to nest under (e.g. "[[Raycast]]")
-  tags?: string[];         // Default tags, rendered as #[[tag]] in output
+  id: string; // UUID or "__builtin__" for the auto-migrated legacy template
+  name: string; // Display name shown in lists
+  graphName?: string; // Set = graph-specific; undefined = universal (works with any graph)
+  page?: string; // Target page title; undefined = Daily Notes Page
+  nestUnder?: string; // Block text to nest under (e.g. "[[Raycast]]")
+  tags?: string[]; // Default tags, rendered as #[[tag]] in output
   contentTemplate: string; // Pattern with {content}, {time}, {today}, {date}, {date:FORMAT}, {tags}
 };
 ```
@@ -45,16 +45,16 @@ type CaptureTemplate = {
 
 Templates are independent entities stored in their own LocalStorage key, separate from graph configs:
 
-| Storage | LocalStorage Key | Type | Contains |
-|---------|-----------------|------|----------|
+| Storage       | LocalStorage Key     | Type              | Contains                                               |
+| ------------- | -------------------- | ----------------- | ------------------------------------------------------ |
 | **Templates** | `"templates-config"` | `TemplatesConfig` | Ordered array of all templates + legacy migration flag |
-| **Graphs** | `"graphs-config"` | `GraphsConfigMap` | Graph configs (tokens, capabilities). No templates. |
+| **Graphs**    | `"graphs-config"`    | `GraphsConfigMap` | Graph configs (tokens, capabilities). No templates.    |
 
 ```typescript
 type TemplatesConfig = {
-  templates: CaptureTemplate[];            // Ordered — display order only (no functional significance)
+  templates: CaptureTemplate[]; // Ordered — display order only (no functional significance)
   legacyTemplateConsumed?: boolean;
-  instantCaptureTemplateId?: string;       // Points to a graph-specific template used for Instant Capture and ⌘⇧↵
+  instantCaptureTemplateId?: string; // Points to a graph-specific template used for Instant Capture and ⌘⇧↵
 };
 ```
 
@@ -106,6 +106,7 @@ flowchart TD
 - `utils.ts → getFirstTemplate(templatesConfig)` — returns the first saved template, or the hardcoded `BUILTIN_DEFAULT_TEMPLATE` if none exist. No longer has "primary" semantics; used only as a fallback for empty-state rendering in `TemplateListView` and `TemplateSelectionList`.
 
 **Invariants enforced by `useTemplatesConfig()`**:
+
 - Only graph-specific templates can be designated as Instant Capture. Changing a designated template's scope to universal auto-clears `instantCaptureTemplateId`.
 - Deleting the designated template clears `instantCaptureTemplateId`.
 - The built-in `__builtin__` template is locked to universal scope (cannot be designated).
@@ -119,6 +120,7 @@ flowchart TD
 Users upgrading from the old `quickCaptureTemplate` Raycast preference are auto-migrated silently.
 
 **Auto-migration** (`utils.ts → useTemplatesConfig()`): On first load, when the templates array is empty and `legacyTemplateConsumed` is false, the hook reads the `quickCaptureTemplate` Raycast preference:
+
 - If it matches the old default (`"- from [[Raycast]] at {date} \n  - {content}"`) → mark `legacyTemplateConsumed: true`, use hardcoded new default
 - If it differs (user customized) → auto-create a universal template with their customization, mark consumed
 
@@ -134,13 +136,13 @@ No migration UI, no user choice needed. `{date}` variable remains backward-compa
 
 Template processing happens in `roamApi.ts → processCapture()`. This is a pure synchronous function that returns `{ processedContent, pageTitle, nestUnder }`. Both capture paths (`captureWithOutbox` in Quick Capture and Instant Capture) call `processCapture()` at capture time so that variables like `{time}` and `{today}` reflect the moment of capture, not a later retry.
 
-| Variable | Syntax | Replaced With | Example |
-|----------|--------|---------------|---------|
-| Content | `{content}` | User's input text | `Buy groceries` |
-| Time | `{time}` | Current time in `HH:mm` format | `14:30` |
-| Today | `{today}` | Today's daily note page as a Roam page ref | `[[April 3rd, 2026]]` |
-| Date (legacy) | `{date}` or `{date:FORMAT}` | `dayjs().format(FORMAT)`, default `HH:mm` | `14:30` |
-| Tags | `{tags}` | `#[[Tag1]] #[[Tag2]]` (leading space trimmed) | `#[[Work]]` |
+| Variable      | Syntax                      | Replaced With                                 | Example               |
+| ------------- | --------------------------- | --------------------------------------------- | --------------------- |
+| Content       | `{content}`                 | User's input text                             | `Buy groceries`       |
+| Time          | `{time}`                    | Current time in `HH:mm` format                | `14:30`               |
+| Today         | `{today}`                   | Today's daily note page as a Roam page ref    | `[[April 3rd, 2026]]` |
+| Date (legacy) | `{date}` or `{date:FORMAT}` | `dayjs().format(FORMAT)`, default `HH:mm`     | `14:30`               |
+| Tags          | `{tags}`                    | `#[[Tag1]] #[[Tag2]]` (leading space trimmed) | `#[[Work]]`           |
 
 `{time}` and `{today}` are preferred over `{date}` for new templates. `{date}` is kept for backward compatibility.
 
@@ -148,7 +150,7 @@ Template processing happens in `roamApi.ts → processCapture()`. This is a pure
 
 **Legacy tag placement**: When the template does NOT contain `{tags}`, tags are appended to the first line of the output (pre-template-system behavior). Controlled by the `templateHadTagsVar` flag.
 
-**1-space indentation compat**: Lines starting with ` - ` (1 space) get their indentation doubled to meet the Append API's 2-space-per-level requirement. This handles legacy templates from the old `parseTemplate` write path.
+**1-space indentation compat**: Lines starting with `-` (1 space) get their indentation doubled to meet the Append API's 2-space-per-level requirement. This handles legacy templates from the old `parseTemplate` write path.
 
 **`nestUnder` routing**: Flows through to `roamApi.ts → appendBlocks()` as `location["nest-under"] = { string: nestUnder, open: false }` in the Roam Append API payload. The API finds an existing block on the target page whose content matches the string, and nests new blocks as its children. The `open: false` keeps the parent block collapsed after appending.
 
@@ -158,13 +160,13 @@ Template processing happens in `roamApi.ts → processCapture()`. This is a pure
 
 Methods on the `useTemplatesConfig()` hook (`utils.ts`):
 
-| Method | Behavior |
-|--------|----------|
-| `saveTemplate(template)` | Upserts by `id`. New templates append to end; existing update in-place (preserve position). When saving `__builtin__`, also sets `legacyTemplateConsumed: true`. If the saved template is the designated Instant Capture template and its scope changes to universal, auto-clears `instantCaptureTemplateId`. |
-| `removeTemplate(templateId)` | Removes by `id`. If all templates removed, hardcoded default activates automatically. If the removed template is the designated Instant Capture template, clears `instantCaptureTemplateId`. |
-| `moveTemplate(templateId, direction)` | Swaps template with its neighbor (`"up"` or `"down"`). No-op at boundaries. Purely cosmetic — affects display order only, no functional significance. |
-| `setInstantCaptureTemplate(templateId)` | Sets `instantCaptureTemplateId` on `TemplatesConfig`. Only meaningful for graph-specific templates. |
-| `clearInstantCaptureTemplate()` | Clears `instantCaptureTemplateId` (sets to `undefined`). |
+| Method                                  | Behavior                                                                                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `saveTemplate(template)`                | Upserts by `id`. New templates append to end; existing update in-place (preserve position). When saving `__builtin__`, also sets `legacyTemplateConsumed: true`. If the saved template is the designated Instant Capture template and its scope changes to universal, auto-clears `instantCaptureTemplateId`. |
+| `removeTemplate(templateId)`            | Removes by `id`. If all templates removed, hardcoded default activates automatically. If the removed template is the designated Instant Capture template, clears `instantCaptureTemplateId`.                                                                                                                  |
+| `moveTemplate(templateId, direction)`   | Swaps template with its neighbor (`"up"` or `"down"`). No-op at boundaries. Purely cosmetic — affects display order only, no functional significance.                                                                                                                                                         |
+| `setInstantCaptureTemplate(templateId)` | Sets `instantCaptureTemplateId` on `TemplatesConfig`. Only meaningful for graph-specific templates.                                                                                                                                                                                                           |
+| `clearInstantCaptureTemplate()`         | Clears `instantCaptureTemplateId` (sets to `undefined`).                                                                                                                                                                                                                                                      |
 
 **Save callback pattern**: `TemplateFormView` receives an `onSave: (template) => void` callback from `TemplateListView`, which is just `saveTemplate` from the hook.
 
@@ -176,35 +178,35 @@ Methods on the `useTemplatesConfig()` hook (`utils.ts`):
 
 ## UI Components & Entry Points
 
-| Component / Entry Point | File | Purpose |
-|------------------------|------|---------|
-| `QuickCaptureFromGraph` | `components.tsx` | Wrapper for "Quick Capture to graph" from `GraphDetail`. Loads `useTemplatesConfig()`, filters to relevant templates (universal + matching graph). If 1 relevant → skip to form; if multiple → shows template picker, then form. |
-| `QuickCaptureForm` | `components.tsx` | Detail capture form: content, page, nestUnder, tags, DNP checkbox, per-capture content template editor. Props: `{ graphConfig, content, template }`. Template is always pre-selected before reaching this form. |
-| `PageDropdown` | `components.tsx` | Reusable page selector: Daily Note, Recently Used, All Pages, or custom name. Uses `filtering={false}` + `onSearchTextChange` for dynamic search with NFD normalization and ranked results (exact → starts-with → token match). Shows up to 100 results per query; all pages reachable by typing. |
-| `GraphTagPicker` | `components.tsx` | Multi-select tag picker from graph pages (shows up to 200, sorted by edit time). Only renders if graph has read access. |
-| `useGraphPages` | `components.tsx` | Hook: loads `getAllPagesCached()` + `getUsedPages()`, returns pages and `canRead` flag. |
-| `resolvePageFromDropdown` | `components.tsx` | Pure helper: converts dropdown value + custom title into `{ page }` or `{ error }`. |
-| `TemplateListView` | `manage-templates.tsx` | Flat ordered list of all templates. Designated Instant Capture template tagged "Instant Capture" (orange). Scope shown as "All Graphs" (blue) or graph name (purple). Actions: Edit, Set/Remove as Instant Capture Template, Move Up/Down, Create, Delete. |
-| `TemplateFormView` | `manage-templates.tsx` | Scope-aware create/edit form. Scope dropdown: "All Graphs" / "Specific Graph" (built-in template has scope locked to universal). Graph-specific templates show a "Use for Instant Capture" checkbox and get `PageDropdown` + `GraphTagPicker`. Universal: plain text fields for page/tags, no Instant Capture checkbox. |
-| Manage Templates command | `manage-templates.tsx` | Entry point: directly renders `TemplateListView` (no graph selection step). |
-| Quick Capture command | `quick-capture.tsx` | Entry point: 4-screen progressive flow (see below). |
-| `TemplateSelectionList` | `quick-capture.tsx` | Screen 2: all templates in order. Graph-specific → skip to form; universal + 1 graph → skip to form; universal + multiple → graph picker. |
-| `GraphSelectionList` | `quick-capture.tsx` | Screen 3: appendable graphs. Only shown for universal templates with multiple graphs. Graphs shown in user-configured order (`orderedGraphNames`). |
-| `performQuickCapture` | `quick-capture.tsx` | Shared async helper for shortcut captures (screens 1–3). Resolves tags, calls `captureWithOutbox()`, shows toast, pops to root. |
-| Instant Capture command | `instant-capture-default-graph.tsx` | No-view async command. Reads `"graphs-config"` and `"templates-config"` from `LocalStorage` directly, uses `resolveInstantCapture()`. Returns error toast if no resolution possible. |
-| "Manage Capture Templates" | `detail.tsx → GraphDetail` | Menu item that pushes to `TemplateListView` (no props). |
-| "Quick Capture" | `detail.tsx → GraphDetail` | Menu item that pushes to `QuickCaptureFromGraph`. |
+| Component / Entry Point    | File                                | Purpose                                                                                                                                                                                                                                                                                                                 |
+| -------------------------- | ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `QuickCaptureFromGraph`    | `components.tsx`                    | Wrapper for "Quick Capture to graph" from `GraphDetail`. Loads `useTemplatesConfig()`, filters to relevant templates (universal + matching graph). If 1 relevant → skip to form; if multiple → shows template picker, then form.                                                                                        |
+| `QuickCaptureForm`         | `components.tsx`                    | Detail capture form: content, page, nestUnder, tags, DNP checkbox, per-capture content template editor. Props: `{ graphConfig, content, template }`. Template is always pre-selected before reaching this form.                                                                                                         |
+| `PageDropdown`             | `components.tsx`                    | Reusable page selector: Daily Note, Recently Used, All Pages, or custom name. Uses `filtering={false}` + `onSearchTextChange` for dynamic search with NFD normalization and ranked results (exact → starts-with → token match). Shows up to 100 results per query; all pages reachable by typing.                       |
+| `GraphTagPicker`           | `components.tsx`                    | Multi-select tag picker from graph pages (shows up to 200, sorted by edit time). Only renders if graph has read access.                                                                                                                                                                                                 |
+| `useGraphPages`            | `components.tsx`                    | Hook: loads `getAllPagesCached()` + `getUsedPages()`, returns pages and `canRead` flag.                                                                                                                                                                                                                                 |
+| `resolvePageFromDropdown`  | `components.tsx`                    | Pure helper: converts dropdown value + custom title into `{ page }` or `{ error }`.                                                                                                                                                                                                                                     |
+| `TemplateListView`         | `manage-templates.tsx`              | Flat ordered list of all templates. Designated Instant Capture template tagged "Instant Capture" (orange). Scope shown as "All Graphs" (blue) or graph name (purple). Actions: Edit, Set/Remove as Instant Capture Template, Move Up/Down, Create, Delete.                                                              |
+| `TemplateFormView`         | `manage-templates.tsx`              | Scope-aware create/edit form. Scope dropdown: "All Graphs" / "Specific Graph" (built-in template has scope locked to universal). Graph-specific templates show a "Use for Instant Capture" checkbox and get `PageDropdown` + `GraphTagPicker`. Universal: plain text fields for page/tags, no Instant Capture checkbox. |
+| Manage Templates command   | `manage-templates.tsx`              | Entry point: directly renders `TemplateListView` (no graph selection step).                                                                                                                                                                                                                                             |
+| Quick Capture command      | `quick-capture.tsx`                 | Entry point: 4-screen progressive flow (see below).                                                                                                                                                                                                                                                                     |
+| `TemplateSelectionList`    | `quick-capture.tsx`                 | Screen 2: all templates in order. Graph-specific → skip to form; universal + 1 graph → skip to form; universal + multiple → graph picker.                                                                                                                                                                               |
+| `GraphSelectionList`       | `quick-capture.tsx`                 | Screen 3: appendable graphs. Only shown for universal templates with multiple graphs. Graphs shown in user-configured order (`orderedGraphNames`).                                                                                                                                                                      |
+| `performQuickCapture`      | `quick-capture.tsx`                 | Shared async helper for shortcut captures (screens 1–3). Resolves tags, calls `captureWithOutbox()`, shows toast, pops to root.                                                                                                                                                                                         |
+| Instant Capture command    | `instant-capture-default-graph.tsx` | No-view async command. Reads `"graphs-config"` and `"templates-config"` from `LocalStorage` directly, uses `resolveInstantCapture()`. Returns error toast if no resolution possible.                                                                                                                                    |
+| "Manage Capture Templates" | `detail.tsx → GraphDetail`          | Menu item that pushes to `TemplateListView` (no props).                                                                                                                                                                                                                                                                 |
+| "Quick Capture"            | `detail.tsx → GraphDetail`          | Menu item that pushes to `QuickCaptureFromGraph`.                                                                                                                                                                                                                                                                       |
 
 ### Quick Capture Progressive Flow
 
 The Quick Capture command uses a 4-screen progressive flow. Users can capture with defaults at any step via `⌘⇧↵`, or drill deeper for more control:
 
-| Screen | Component | UI | Enter action | Skip condition |
-|--------|-----------|-----|-------------|----------------|
-| 1 | `Command` | List + search bar (content entry) | Continue → screen 2 | — |
-| 2 | `TemplateSelectionList` | All templates in order | Select → screen 3 or 4 | Only 1 effective template |
-| 3 | `GraphSelectionList` | Appendable graphs | Select → screen 4 | Template is graph-specific, OR only 1 appendable graph |
-| 4 | `QuickCaptureForm` | Full detail form | Capture | — |
+| Screen | Component               | UI                                | Enter action           | Skip condition                                         |
+| ------ | ----------------------- | --------------------------------- | ---------------------- | ------------------------------------------------------ |
+| 1      | `Command`               | List + search bar (content entry) | Continue → screen 2    | —                                                      |
+| 2      | `TemplateSelectionList` | All templates in order            | Select → screen 3 or 4 | Only 1 effective template                              |
+| 3      | `GraphSelectionList`    | Appendable graphs                 | Select → screen 4      | Template is graph-specific, OR only 1 appendable graph |
+| 4      | `QuickCaptureForm`      | Full detail form                  | Capture                | —                                                      |
 
 Screen 1 also shows a "Capture to {graph} with template {name}" item when `resolveInstantCapture()` returns a result, allowing one-step capture via `⌘⇧↵`.
 

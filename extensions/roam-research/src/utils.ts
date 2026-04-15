@@ -6,7 +6,7 @@ import { dateToPageTitle } from "./roam-api-sdk-copy";
 
 export function crossPlatformShortcut(
   modifiers: Keyboard.KeyModifier[],
-  key: Keyboard.KeyEquivalent
+  key: Keyboard.KeyEquivalent,
 ): Keyboard.Shortcut {
   return {
     macOS: { modifiers, key },
@@ -19,7 +19,7 @@ export function crossPlatformShortcut(
 // Resolution: (1) explicit instantCaptureTemplateId, (2) implicit single-template fallback, (3) undefined.
 export function resolveInstantCapture(
   templatesConfig: TemplatesConfig,
-  graphsConfig: GraphsConfigMap
+  graphsConfig: GraphsConfigMap,
 ): { template: CaptureTemplate; graphConfig: GraphConfig } | undefined {
   const effectiveTemplates =
     templatesConfig.templates.length > 0

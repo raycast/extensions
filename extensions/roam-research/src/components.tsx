@@ -24,7 +24,7 @@ import {
 } from "./roamApi";
 import { captureWithOutbox } from "./outbox";
 import { useEffect, useMemo, useState } from "react";
-import { debounce } from "debounce";
+import debounce from "debounce";
 import { detailMarkdown, useTemplatesConfig, BUILTIN_DEFAULT_TEMPLATE } from "./utils";
 import { BlockDetail, OpenInRoamActions } from "./block-detail";
 import { useCachedPromise, usePromise } from "@raycast/utils";
@@ -34,7 +34,7 @@ export const CUSTOM_PAGE_SENTINEL = "__SENTINEL_CUSTOM_PAGE_TITLE__";
 
 export function resolvePageFromDropdown(
   dropdownValue: string,
-  customTitle: string
+  customTitle: string,
 ): { page: string | undefined } | { error: string } {
   const isCustom = dropdownValue === CUSTOM_PAGE_SENTINEL;
   if (isCustom && !customTitle.trim()) {
@@ -49,7 +49,7 @@ export const useGraphPages = (graphConfig: GraphConfig) => {
   const { isLoading: isGraphPagesLoading, data: graphPagesData } = usePromise(
     (gc: GraphConfig) => getAllPagesCached(gc),
     [graphConfig],
-    { execute: canRead }
+    { execute: canRead },
   );
   const usedPages = getUsedPages(graphConfig.nameField);
   const usedPagesSet = new Set(usedPages);
@@ -120,13 +120,12 @@ export const PageDropdown = ({
       .sort((a, b) => a[2] - b[2])
       .slice(0, 100)
       .map(([uid, title]) => [uid, title] as [string, string]);
-    // eslint-disable-next-line
   }, [canRead, isGraphPagesLoading, graphPagesData, usedPagesSet, tokens.join(" "), normalizedQuery]);
 
   const filteredUsedPages = useMemo(
     () => usedPages.filter((title) => matchesTokens(normalizeForSearch(title), tokens)),
-    // eslint-disable-next-line
-    [usedPages, tokens.join(" ")]
+
+    [usedPages, tokens.join(" ")],
   );
 
   return (
@@ -216,7 +215,7 @@ export async function searchSingleGraphMinimal(graphConfig: GraphConfig, query: 
   const minimalSearchResults: MinimalSearchResult[] = await roamApiSdk.search(
     initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField),
     query,
-    hideCodeBlocks
+    hideCodeBlocks,
   );
 
   return minimalSearchResults;
@@ -225,7 +224,7 @@ export async function searchSingleGraphMinimal(graphConfig: GraphConfig, query: 
 export async function searchSingleGraphFull(
   graphConfig: GraphConfig,
   query: string,
-  minimalSearchResults: MinimalSearchResult[] | undefined
+  minimalSearchResults: MinimalSearchResult[] | undefined,
 ) {
   if (!minimalSearchResults) return undefined;
 
@@ -235,11 +234,11 @@ export async function searchSingleGraphFull(
   const searchResultsReversePullBlocks: ReversePullBlock[] = await roamApiSdk.q(
     initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField),
     `[ :find [(pull ?e [${BLOCK_QUERY}]) ...] :in $ [?block-uid ...] :where [?e :block/uid ?block-uid]]`,
-    [uidsList]
+    [uidsList],
   );
 
   const validSearchResultsReversePullBlocks: ReversePullBlock[] = searchResultsReversePullBlocks.filter(
-    (block) => block[":node/title"] || block[":block/_children"]
+    (block) => block[":node/title"] || block[":block/_children"],
   );
 
   const uidToReversePullBlocksMap: { [key: string]: ReversePullBlock } = {};
@@ -279,7 +278,7 @@ export const SingleGraphSearchView = ({
   const changeResult = useMemo(
     () =>
       debounce(
-        (text: string, setSearchText: (text: string) => any, setDoExecuteSearch: (doExecute: boolean) => any) => {
+        (text: string, setSearchText: (text: string) => void, setDoExecuteSearch: (doExecute: boolean) => void) => {
           text = text.trim();
           if (!text || text.length < 2) {
             return;
@@ -287,9 +286,9 @@ export const SingleGraphSearchView = ({
           setSearchText(text);
           setDoExecuteSearch(true);
         },
-        500
+        500,
       ),
-    []
+    [],
   );
   useEffect(() => () => changeResult.clear(), [changeResult]);
 
@@ -309,7 +308,7 @@ export const SingleGraphSearchView = ({
       // so that it does not trigger the promise when we have `singleGraphSearchInitData`
       execute: doExecuteSearch,
       initialData: isValidSingleGraphSearchInitData && singleGraphSearchInitData?.minimalSearchResults,
-    }
+    },
   );
   const {
     isLoading: isFullSearchResultsMapLoading,
@@ -322,7 +321,7 @@ export const SingleGraphSearchView = ({
     [graphConfig, searchText, minimalSearchResults],
     {
       keepPreviousData: true,
-    }
+    },
   );
   const searchError = minimalSearchResultsError || fullSearchResultsError;
   useEffect(() => {
@@ -551,7 +550,7 @@ export const QuickCaptureForm = ({
             }}
           />
           <OpenInRoamActions graphName={graphConfig.nameField} />
-          <Action.OpenInBrowser title="View date format" url="https://day.js.org/docs/en/parse/string-format" />
+          <Action.OpenInBrowser title="View Date Format" url="https://day.js.org/docs/en/parse/string-format" />
           <Action
             title="Manage Templates"
             icon={Icon.Document}

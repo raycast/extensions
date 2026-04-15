@@ -26,7 +26,7 @@ async function saveOutboxItems(items: OutboxItem[]): Promise<void> {
 }
 
 export async function addOutboxItem(
-  fields: Omit<OutboxItem, "id" | "createdAt" | "updatedAt" | "status" | "retryCount">
+  fields: Omit<OutboxItem, "id" | "createdAt" | "updatedAt" | "status" | "retryCount">,
 ): Promise<OutboxItem> {
   const now = new Date().toISOString();
   const item: OutboxItem = {
@@ -45,7 +45,7 @@ export async function addOutboxItem(
 
 async function updateItemInPlace(
   id: string,
-  update: Partial<Pick<OutboxItem, "status" | "errorMessage" | "isRetryable" | "retryCount" | "updatedAt">>
+  update: Partial<Pick<OutboxItem, "status" | "errorMessage" | "isRetryable" | "retryCount" | "updatedAt">>,
 ): Promise<void> {
   const items = await getOutboxItems();
   const idx = items.findIndex((i) => i.id === id);

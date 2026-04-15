@@ -10,7 +10,7 @@ Non-obvious behaviors and edge cases that can trip up developers and LLM agents 
 
 3. **Tag placement without `{tags}` variable** — When a template's `contentTemplate` does NOT contain `{tags}`, tags are appended to the **first line only** (not at the end of the full output). This is legacy behavior preserved for backward compat. Controlled by the `templateHadTagsVar` flag in `roamApi.ts → processCapture()`.
 
-4. **1-space → 2-space indentation auto-doubling** — Legacy templates used 1-space-per-level indentation. The Append API requires 2+ spaces per nesting level. `processCapture()` auto-detects lines starting with ` - ` (1 space) and doubles all indentation. This only applies to legacy formats — new templates should use 2-space indentation.
+4. **1-space → 2-space indentation auto-doubling** — Legacy templates used 1-space-per-level indentation. The Append API requires 2+ spaces per nesting level. `processCapture()` auto-detects lines starting with `-` (1 space) and doubles all indentation. This only applies to legacy formats — new templates should use 2-space indentation.
 
 5. **Multi-graph search errors must be strings** — `useCachedPromise` requires JSON-serializable data. In `search.tsx`, API errors are stringified (not thrown as Error objects) so they can be cached alongside successful results.
 

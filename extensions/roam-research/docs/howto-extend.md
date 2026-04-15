@@ -19,9 +19,7 @@ Recipes for common development tasks in this extension.
 3. For **`no-view` mode** (like `instant-capture-default-graph.tsx`): You cannot use React hooks. Read config directly via `LocalStorage.getItem("graphs-config")` and parse it yourself. Use `resolveInstantCapture()` from `utils.ts` for capture commands.
 4. For **multi-graph commands**: Filter graphs by capability:
    ```typescript
-   const appendableGraphs = keys(graphsConfig).filter(
-     (name) => graphsConfig[name].capabilities?.append !== false
-   );
+   const appendableGraphs = keys(graphsConfig).filter((name) => graphsConfig[name].capabilities?.append !== false);
    ```
 5. **Auto-select pattern**: If only 1 matching graph, skip the picker and go straight to the main view (see `quick-capture.tsx` for the pattern).
 6. Update `CLAUDE.md` entry points section.
@@ -59,13 +57,14 @@ Recipes for common development tasks in this extension.
 
 Use the SDK functions from `roam-api-sdk-copy.ts` via the wrapper in `roamApi.ts`:
 
-| Function | Use For |
-|----------|---------|
-| `roamApiSdk.q(client, datalogQuery, args?)` | Datalog queries (finding blocks, pages by criteria) |
-| `roamApiSdk.pull(client, pattern, eid)` | Single entity pull by UID |
-| `roamApiSdk.search(client, searchStr, hideCodeBlocks?, limit?)` | Full-text search (limit defaults to 100) |
+| Function                                                        | Use For                                             |
+| --------------------------------------------------------------- | --------------------------------------------------- |
+| `roamApiSdk.q(client, datalogQuery, args?)`                     | Datalog queries (finding blocks, pages by criteria) |
+| `roamApiSdk.pull(client, pattern, eid)`                         | Single entity pull by UID                           |
+| `roamApiSdk.search(client, searchStr, hideCodeBlocks?, limit?)` | Full-text search (limit defaults to 100)            |
 
 Initialize the client:
+
 ```typescript
 const client = initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField);
 ```
