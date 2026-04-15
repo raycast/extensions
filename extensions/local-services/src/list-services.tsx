@@ -183,7 +183,11 @@ async function startComposeService(service: LocalService) {
   const dir = service.composeFile.replace(/\/[^/]+$/, "");
   await showToast({ style: Toast.Style.Animated, title: `Starting ${service.composeName}...` });
   try {
-    await execFileAsync("docker", ["compose", "-f", service.composeFile, "up", "-d", ...(service.composeName ? [service.composeName] : [])], { cwd: dir });
+    await execFileAsync(
+      "docker",
+      ["compose", "-f", service.composeFile, "up", "-d", ...(service.composeName ? [service.composeName] : [])],
+      { cwd: dir },
+    );
     await showToast({ style: Toast.Style.Success, title: `${service.composeName} started` });
   } catch (e) {
     captureException(e);
