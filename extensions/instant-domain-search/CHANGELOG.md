@@ -1,6 +1,6 @@
 # Instant Domain Search Changelog
 
-## [Updated API URL] - {PR_MERGE_DATE}
+## [Updated API URL] - 2026-04-15
 
 - Updated the API endpoint to use the new `api.instantdomainsearch.com` domain
 - Updated extension screenshots
