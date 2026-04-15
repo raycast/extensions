@@ -1,17 +1,18 @@
 import { MemoryInterface } from "../Interfaces";
 import { execf } from "../utils";
 
+enum MemoryTypes {
+  G = "Gib",
+  M = "Mib",
+}
+
 export const getTopRamProcess = async (): Promise<string[][]> => {
+  // top reports in MiB/GiB
   const output = await execf("/usr/bin/top", ["-l", "1", "-o", "mem", "-n", "5", "-stats", "command,mem"]);
   const processList = output.trim().split("\n").slice(12, 17);
   const modProcessList: string[][] = [];
 
   processList.forEach((value) => {
-    enum MemoryTypes {
-      G = "Gb",
-      M = "Mb",
-    }
-
     const temp: string[] = value.trim().split(" ");
     const processName = temp.slice(0, -1).join(" ");
     const processMemory = temp[temp.length - 1].slice(0, -1);
@@ -23,6 +24,9 @@ export const getTopRamProcess = async (): Promise<string[][]> => {
   return modProcessList;
 };
 
+/*
+  Returns {memTotal, memUsed} in GiB
+*/
 export const getMemoryUsage = async (): Promise<MemoryInterface> => {
   const [pHwPagesize, pMemTotal, pVmPagePageableInternalCount, pVmPagePurgeableCount, vmStatOutput] = await Promise.all(
     [
@@ -34,8 +38,10 @@ export const getMemoryUsage = async (): Promise<MemoryInterface> => {
     ],
   );
 
+  const KBperGiB = 1024 * 1024 * 1024;
+
   const hwPagesize = parseFloat(pHwPagesize);
-  const memTotal = parseFloat(pMemTotal) / 1024 / 1024;
+  const memTotal = parseFloat(pMemTotal) / KBperGiB;
   const pagesApp = parseFloat(pVmPagePageableInternalCount) - parseFloat(pVmPagePurgeableCount);
 
   const vmLines = vmStatOutput.split("\n");
@@ -44,7 +50,7 @@ export const getMemoryUsage = async (): Promise<MemoryInterface> => {
   const compressedLine = vmLines.find((l) => l.includes("occupied"));
   const pagesCompressed = parseFloat(compressedLine?.match(/(\d+)/g)?.pop() ?? "0");
 
-  const memUsed = ((pagesApp + pagesWired + pagesCompressed) * hwPagesize) / 1024 / 1024;
+  const memUsed = ((pagesApp + pagesWired + pagesCompressed) * hwPagesize) / KBperGiB;
 
   return { memTotal, memUsed };
 };

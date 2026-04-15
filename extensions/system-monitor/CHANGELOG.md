@@ -1,5 +1,11 @@
 # System Monitor Changelog
 
+## [Add Selection for Disk Units] - {PR_MERGE_DATE}
+- Added option for GiB or GB disk reporting
+- Added option for Farenheit temperature reporting
+- Changed default disk reporting to GB to better match other GUI tools like Disk Utility and Finder
+- Corrected cases where GB was used instead of GiB(memory)
+
 ## [Eliminate Zombie Processes] - 2026-03-20
 
 - Replace all `exec()` calls with `execFile()` to avoid spawning shell processes

@@ -20,6 +20,7 @@ export default function SystemInfo() {
 }
 
 function SystemInfoDetail() {
+  const { unitsDisk } = getPreferenceValues<ExtensionPreferences>();
   const { data, isLoading } = usePromise(async () => {
     const serialNumber = await getSerialNumber();
     const storage = await calculateDiskStorage();
@@ -54,8 +55,8 @@ function SystemInfoDetail() {
                 title={disk.diskName}
                 text={
                   displayModeDisk === "free"
-                    ? `${disk.totalAvailableStorage} GB available of ${disk.totalSize} GB`
-                    : `${disk.usedStorage} GB used of ${disk.totalSize} GB`
+                    ? `${disk.totalAvailableStorage} ${unitsDisk} available of ${disk.totalSize} ${unitsDisk}`
+                    : `${disk.usedStorage} ${unitsDisk} used of ${disk.totalSize} ${unitsDisk}`
                 }
               />
             );

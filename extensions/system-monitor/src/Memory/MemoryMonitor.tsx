@@ -16,9 +16,9 @@ export default function MemoryMonitor() {
     const freeMem = memTotal - memUsed;
 
     return {
-      totalMem: Math.round(memTotal / 1024).toString(),
-      freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-      freeMem: Math.round(freeMem / 1024).toString(),
+      totalMem: memTotal.toFixed(2),
+      freeMemPercentage: Math.round((freeMem * 100) / memTotal),
+      freeMem: freeMem.toFixed(2),
     };
   });
 
@@ -34,8 +34,8 @@ export default function MemoryMonitor() {
           text: !data
             ? "Loading…"
             : displayModeMemory === "free"
-              ? `${data.freeMemPercentage} % (~ ${data.freeMem} GB)`
-              : `${100 - +data.freeMemPercentage} % (~ ${+data.totalMem - +data.freeMem} GB)`,
+              ? `${data.freeMemPercentage} % (~ ${data.freeMem} GiB)`
+              : `${100 - +data.freeMemPercentage} % (~ ${+data.totalMem - +data.freeMem} GiB)`,
         },
       ]}
       detail={
@@ -72,11 +72,11 @@ function MemoryMonitorDetail({
       isLoading={isLoadingTopProcess}
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label title="Total RAM" text={`${totalMem} GB`} />
+          <List.Item.Detail.Metadata.Label title="Total RAM" text={`${totalMem} GiB`} />
           {displayModeMemory === "free" ? (
-            <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GB`} />
+            <List.Item.Detail.Metadata.Label title="Free RAM" text={`${freeMem} GiB`} />
           ) : (
-            <List.Item.Detail.Metadata.Label title="Used RAM" text={`${+totalMem - +freeMem} GB`} />
+            <List.Item.Detail.Metadata.Label title="Used RAM" text={`${+totalMem - +freeMem} GiB`} />
           )}
           {displayModeMemory === "free" ? (
             <List.Item.Detail.Metadata.Label title="Free RAM %" text={`${freeMemPercentage} %`} />

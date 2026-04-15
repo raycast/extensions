@@ -1,24 +1,28 @@
 import { DiskInterface } from "../Interfaces";
 import { execf } from "../utils";
+import { getPreferenceValues } from "@raycast/api";
+
+const { unitsDisk } = getPreferenceValues<ExtensionPreferences>();
 
 export async function calculateDiskStorage() {
   const output = await execf("/bin/df", ["-kP"]);
   const lines = output.split("\n").slice(1); // skip header
+  const diskUnitsConversionFactor = unitsDisk == "GiB" ? 1024 * 1024 : 1024 * 1024 * 0.9313225746;
 
   return lines
     .map((line) => {
       const parts = line.trim().split(/\s+/);
       // df -kP columns: Filesystem, 1024-blocks, Used, Available, Capacity, Mounted on
       const mount = parts.slice(5).join(" ");
-      const sizeKB = parseInt(parts[1], 10);
-      const availKB = parseInt(parts[3], 10);
-      return { mount, sizeKB, availKB };
+      const size = parseInt(parts[1], 10) / diskUnitsConversionFactor;
+      const available = parseInt(parts[3], 10) / diskUnitsConversionFactor;
+      return { mount, size, available };
     })
     .filter((d) => d.mount === "/" || d.mount.startsWith("/Volumes"))
     .map((d) => {
       const diskName = d.mount === "/" ? "Macintosh HD" : d.mount.split("/").pop();
-      const totalSize = (d.sizeKB / 1024 / 1024).toFixed(2);
-      const totalAvailableStorage = (d.availKB / 1024 / 1024).toFixed(2);
+      const totalSize = d.size.toFixed(2);
+      const totalAvailableStorage = d.available.toFixed(2);
       const usedStorage = (+totalSize - +totalAvailableStorage).toFixed(2);
 
       return { diskName, totalSize, totalAvailableStorage, usedStorage } as DiskInterface;

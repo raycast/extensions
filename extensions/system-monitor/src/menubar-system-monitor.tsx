@@ -129,9 +129,9 @@ export default function Command() {
     const memUsed = memoryUsage.memUsed;
     const freeMem = memTotal - memUsed;
     const memory = {
-      totalMem: Math.round(memTotal / 1024).toString(),
+      totalMem: Math.round(memTotal).toString(),
       freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
-      freeMem: Math.round(freeMem / 1024).toString(),
+      freeMem: Math.round(freeMem).toString(),
     };
 
     // Battery

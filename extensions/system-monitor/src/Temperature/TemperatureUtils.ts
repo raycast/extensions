@@ -1,6 +1,8 @@
 import { execFile } from "child_process";
-import { Color, environment } from "@raycast/api";
+import { getPreferenceValues, Color, environment } from "@raycast/api";
 import path from "path";
+
+const { unitsTemperature } = getPreferenceValues<ExtensionPreferences>();
 
 export interface SensorReading {
   name: string;
@@ -88,9 +90,15 @@ export const getTemperatureData = async (): Promise<TemperatureData> => {
   });
 };
 
+export const celsiusToFarenheit = (tempCelsius: number): number => {
+  return tempCelsius * 1.8 + 32;
+};
+
 export const formatTemperature = (tempCelsius: number): string => {
   if (tempCelsius <= 0) return "N/A";
-  return `${Math.round(tempCelsius)} °C`;
+  return unitsTemperature === "celsius"
+    ? `${Math.round(tempCelsius)} °C`
+    : `${Math.round(celsiusToFarenheit(tempCelsius))} °F`;
 };
 
 export type TempSeverity = "normal" | "warm" | "hot" | "critical" | "unavailable";

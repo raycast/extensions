@@ -1,7 +1,10 @@
 import plist, { PlistArray, PlistObject } from "plist";
-import { Cache } from "@raycast/api";
+import { Cache, getPreferenceValues } from "@raycast/api";
 import { BatteryDataInterface } from "../Interfaces";
 import { convertMsToTime, execf } from "../utils";
+import { celsiusToFarenheit } from "../Temperature/TemperatureUtils";
+
+const { unitsTemperature } = getPreferenceValues<ExtensionPreferences>();
 
 const cache = new Cache();
 const CONDITION_KEY = "battery-condition";
@@ -43,7 +46,10 @@ export const getBatteryData = async (): Promise<BatteryDataInterface> => {
     cycleCount: smartBattery.CycleCount.toString(),
     fullyCharged: !!smartBattery.FullyCharged,
     isCharging: !!smartBattery.IsCharging,
-    temperature: `${Math.fround((smartBattery.Temperature as number) / 100).toFixed(2)} ºC`,
+    temperature:
+      unitsTemperature === "celsius"
+        ? `${Math.fround((smartBattery.Temperature as number) / 100).toFixed(2)} ºC`
+        : `${Math.fround(celsiusToFarenheit(smartBattery.Temperature as number) / 100).toFixed(2)} ºF`,
     timeRemaining: smartBattery.TimeRemaining as number,
     maximumCapacity,
   };
