@@ -70,7 +70,7 @@ export default function EditMatchForm({
         placeholder="Enter label"
         {...itemProps.label}
       />
-      <Form.TextField
+      <Form.TextArea
         title="Replace"
         info="The replacement text"
         placeholder="Enter replacement"
