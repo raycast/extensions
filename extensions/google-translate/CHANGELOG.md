@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-04-15
 
  - Added pronunciation text to quick translate command
 
