@@ -87,8 +87,7 @@ const PIPE_CHARS = new Set([
 
 const PIPE_WHITESPACE = new Set([" ", "\t", "\f", "\v", "\u00A0"]);
 
-const CODE_KEYWORD_PATTERN =
-  /\b(def|class|return|function|const|let|var|import|package|namespace|async|await|->)\b/;
+const CODE_KEYWORD_PATTERN = /\b(def|class|return|function|const|let|var|import|package|namespace|async|await|->)\b/;
 
 function isBoxChar(ch: string): boolean {
   const code = ch.codePointAt(0) ?? 0;
@@ -124,11 +123,7 @@ function trimPipeEdges(line: string): string {
   while (pipeEnd > 0 && PIPE_CHARS.has(trimmed[pipeEnd - 1])) pipeEnd--;
   const removedTrailing = pipeEnd < end;
   trimmed = trimmed.slice(0, pipeEnd);
-  if (
-    removedTrailing &&
-    trimmed.length > 0 &&
-    PIPE_WHITESPACE.has(trimmed[trimmed.length - 1])
-  ) {
+  if (removedTrailing && trimmed.length > 0 && PIPE_WHITESPACE.has(trimmed[trimmed.length - 1])) {
     trimmed = trimmed.slice(0, -1);
   }
 
@@ -140,9 +135,7 @@ function normalizeIndentation(lines: string[]): string[] {
   const contentLines = normalized.filter((l) => l.trim().length > 0);
   if (contentLines.length === 0) return normalized;
 
-  const leadingSpaces = contentLines.map(
-    (l) => l.length - l.trimStart().length,
-  );
+  const leadingSpaces = contentLines.map((l) => l.length - l.trimStart().length);
   const remove = Math.min(...leadingSpaces);
   if (remove <= 0) return normalized;
 
@@ -174,8 +167,7 @@ function collapseParagraphs(lines: string[]): string {
 function formatCode(lines: string[]): string {
   const trimmed = normalizeIndentation(lines.map((l) => l.trimEnd()));
   while (trimmed.length > 0 && !trimmed[0].trim()) trimmed.shift();
-  while (trimmed.length > 0 && !trimmed[trimmed.length - 1].trim())
-    trimmed.pop();
+  while (trimmed.length > 0 && !trimmed[trimmed.length - 1].trim()) trimmed.pop();
   return trimmed.join("\n");
 }
 
@@ -195,10 +187,7 @@ function guessMode(lines: string[]): "text" | "code" {
   return codeScore > textScore ? "code" : "text";
 }
 
-function cleanText(
-  raw: string,
-  mode: string,
-): { cleaned: string; resolvedMode: "text" | "code" } {
+function cleanText(raw: string, mode: "auto" | "text" | "code"): { cleaned: string; resolvedMode: "text" | "code" } {
   const prepped = raw.split("\n").map((line) => {
     let stripped = trimPipeEdges(line);
     stripped = stripBoxArt(stripped);
@@ -206,11 +195,9 @@ function cleanText(
     return stripped;
   });
 
-  const resolvedMode: "text" | "code" =
-    mode === "auto" ? guessMode(prepped) : (mode as "text" | "code");
+  const resolvedMode: "text" | "code" = mode === "auto" ? guessMode(prepped) : (mode as "text" | "code");
 
-  const cleaned =
-    resolvedMode === "code" ? formatCode(prepped) : collapseParagraphs(prepped);
+  const cleaned = resolvedMode === "code" ? formatCode(prepped) : collapseParagraphs(prepped);
 
   return { cleaned, resolvedMode };
 }
