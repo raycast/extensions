@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spotify-to-apple-music",
+  "title": "Spotify to Apple Music",
+  "description": "Copy the current Spotify track URI and open the matching song in Apple Music.",
+  "author": "StepanKuzmin",
+  "license": "MIT",
+  "icon": "icon.png",
+  "type": "module",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "open-current-track",
+      "title": "Open Current Song in Apple Music",
+      "subtitle": "Spotify",
+        "description": "Copy the current Spotify track URI and open the matching song in Apple Music.",
+        "icon": "icon.png",
+        "mode": "no-view",
+        "keywords": [
+          "spotify",
+          "apple music",
+          "music",
+          "song",
+          "track",
+          "uri"
+        ]
+      }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "test": "vitest run",
+    "lint": "ray lint",
+    "lint:fix": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^1.17.0",
+    "vitest": "^3.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
