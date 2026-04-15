@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Merged MR icon in todos] - {PR_MERGE_DATE}
+## [Merged MR icon in todos] - 2026-04-15
 
 - Show purple merged icon for todos on merged merge requests
 
