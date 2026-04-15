@@ -7,7 +7,7 @@ const { unitsDisk } = getPreferenceValues<ExtensionPreferences>();
 export async function calculateDiskStorage() {
   const output = await execf("/bin/df", ["-kP"]);
   const lines = output.split("\n").slice(1); // skip header
-  const diskUnitsConversionFactor = unitsDisk == "GiB" ? 1024 * 1024 : 1024 * 1024 * 0.9313225746;
+  const diskUnitsConversionFactor = unitsDisk === "GiB" ? 1024 * 1024 : 1024 * 1024 * 0.9313225746;
 
   return lines
     .map((line) => {
