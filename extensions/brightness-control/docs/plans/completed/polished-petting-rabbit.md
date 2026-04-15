@@ -75,7 +75,7 @@ It already requires Lunar to be installed for the other two commands, and `ensur
 
 ## Verification
 
-1. `cd "/Users/pavelzagorodnikh/Code/Raycast extentions/brightness-control"` and `npm install` (run-applescript removed).
+1. `cd` to this extension’s directory and run `npm install` (run-applescript removed).
 2. `npm run lint` — no errors.
 3. `npm run dev` to load the extension into Raycast in dev mode.
 4. Bind `Brightness Up` to `Shift+→` and `Brightness Down` to `Shift+←` in Raycast preferences.

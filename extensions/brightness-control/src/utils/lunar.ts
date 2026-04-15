@@ -1,10 +1,10 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { homedir } from "os";
 import { existsSync } from "fs";
 import { showToast, Toast, open, Clipboard } from "@raycast/api";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 /**
  * Retry an operation with exponential backoff.
@@ -18,7 +18,7 @@ export async function retryWithBackoff<T>(
   operation: () => Promise<T>,
   maxRetries = 3,
   initialDelay = 500,
-  validator?: (result: T) => boolean
+  validator?: (result: T) => boolean,
 ): Promise<T> {
   let lastError: unknown;
 
@@ -97,7 +97,7 @@ async function installLunarApp(): Promise<boolean> {
   if (!brewPath) return false;
 
   try {
-    await execAsync(`"${brewPath}" install --cask lunar`, { timeout: 120000 });
+    await execFileAsync(brewPath, ["install", "--cask", "lunar"], { timeout: 120000 });
     return existsSync("/Applications/Lunar.app");
   } catch {
     return false;
@@ -109,7 +109,7 @@ async function installLunarApp(): Promise<boolean> {
  */
 async function installLunarCLI(): Promise<boolean> {
   try {
-    await execAsync("/Applications/Lunar.app/Contents/MacOS/Lunar install-cli");
+    await execFileAsync("/Applications/Lunar.app/Contents/MacOS/Lunar", ["install-cli"]);
     return true;
   } catch {
     return false;
@@ -198,7 +198,7 @@ export async function getDisplays(): Promise<DisplayInfo[]> {
   return retryWithBackoff(
     async () => {
       const lunarPath = getLunarPath();
-      const { stdout } = await execAsync(`"${lunarPath}" displays --json`, { timeout: 5000 });
+      const { stdout } = await execFileAsync(lunarPath, ["displays", "--json"], { timeout: 5000 });
 
       if (!stdout || stdout.trim() === "") {
         throw new Error("Empty response from Lunar displays command");
@@ -258,7 +258,7 @@ export async function getDisplays(): Promise<DisplayInfo[]> {
     },
     3,
     500,
-    (displays) => displays.length > 0
+    (displays) => displays.length > 0,
   );
 }
 
@@ -270,7 +270,7 @@ export async function getCursorDisplay(): Promise<string | null> {
     return await retryWithBackoff(
       async () => {
         const lunarPath = getLunarPath();
-        const { stdout } = await execAsync(`"${lunarPath}" displays cursor serial`, { timeout: 3000 });
+        const { stdout } = await execFileAsync(lunarPath, ["displays", "cursor", "serial"], { timeout: 3000 });
 
         if (!stdout || stdout.trim() === "") {
           throw new Error("Empty response from Lunar cursor command");
@@ -300,7 +300,7 @@ export async function getCursorDisplay(): Promise<string | null> {
       },
       3,
       300,
-      (serial) => serial !== null && serial.length > 0
+      (serial) => serial !== null && serial.length > 0,
     );
   } catch (error) {
     console.error("Failed to get cursor display after retries:", error);
@@ -318,7 +318,7 @@ export async function getBrightnessForDisplay(displaySerial: string): Promise<nu
     return await retryWithBackoff(
       async () => {
         const lunarPath = getLunarPath();
-        const { stdout } = await execAsync(`"${lunarPath}" displays "${displaySerial}" brightness`, { timeout: 3000 });
+        const { stdout } = await execFileAsync(lunarPath, ["displays", displaySerial, "brightness"], { timeout: 3000 });
         const match = stdout.match(/brightness:\s*(\d+)/i);
 
         if (!match) {
@@ -329,7 +329,7 @@ export async function getBrightnessForDisplay(displaySerial: string): Promise<nu
       },
       3,
       300,
-      (brightness) => brightness !== null && brightness >= 0 && brightness <= 100
+      (brightness) => brightness !== null && brightness >= 0 && brightness <= 100,
     );
   } catch (error) {
     console.error(`Failed to get brightness for display ${displaySerial} after retries:`, error);
@@ -350,13 +350,13 @@ export async function setAdaptiveMode(displaySerial: string, enabled: boolean): 
       const mode = enabled ? "on" : "off";
 
       console.log(`Setting adaptive mode for ${displaySerial} to ${mode}`);
-      await execAsync(`"${lunarPath}" displays "${displaySerial}" adaptive ${mode}`, { timeout: 3000 });
+      await execFileAsync(lunarPath, ["displays", displaySerial, "adaptive", mode], { timeout: 3000 });
 
       // Wait a bit for the change to take effect
       await new Promise((resolve) => setTimeout(resolve, 200));
     },
     3,
-    300
+    300,
   );
 }
 
@@ -384,7 +384,7 @@ export async function adjustCursorBrightness(delta: number): Promise<{ name: str
 
   const lunarPath = getLunarPath();
   const deltaArg = delta >= 0 ? `+${delta}` : `${delta}`;
-  await execAsync(`"${lunarPath}" displays "${target.serial}" brightness ${deltaArg}`, { timeout: 5000 });
+  await execFileAsync(lunarPath, ["displays", target.serial, "brightness", deltaArg], { timeout: 5000 });
 
   const expected = Math.max(0, Math.min(100, target.brightness + delta));
   return { name: target.name, brightness: expected };
@@ -415,7 +415,7 @@ export async function setBrightnessForDisplay(displaySerial: string, level: numb
       const lunarPath = getLunarPath();
 
       console.log(`Setting brightness for ${displaySerial} to ${level}%`);
-      await execAsync(`"${lunarPath}" displays "${displaySerial}" brightness ${level}`, { timeout: 5000 });
+      await execFileAsync(lunarPath, ["displays", displaySerial, "brightness", String(level)], { timeout: 5000 });
 
       // Wait a bit for the change to take effect
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -436,6 +436,6 @@ export async function setBrightnessForDisplay(displaySerial: string, level: numb
       console.log(`Verified brightness for ${displaySerial} is now ${actualBrightness}%`);
     },
     5,
-    500
+    500,
   );
 }
