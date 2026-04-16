@@ -201,6 +201,9 @@ export async function createDraftInvoice(params: CreateInvoiceParams): Promise<{
   const selfLink: string =
     data.href ?? data.links?.find((l) => l.rel === "self")?.href ?? "";
   const invoiceId = selfLink.split("/").pop() ?? "";
+  if (!invoiceId) {
+    throw new Error("PayPal did not return a valid invoice ID.");
+  }
 
   const detailResponse = await fetch(
     `${getBaseUrl()}/v2/invoicing/invoices/${invoiceId}`,
@@ -208,6 +211,13 @@ export async function createDraftInvoice(params: CreateInvoiceParams): Promise<{
       headers: { Authorization: `Bearer ${token}` },
     },
   );
+
+  if (!detailResponse.ok) {
+    return {
+      invoiceId,
+      invoicerViewUrl: `https://www.paypal.com/invoice/details/${invoiceId}`,
+    };
+  }
 
   const detail = (await detailResponse.json()) as PayPalInvoiceResponse;
   const invoicerViewUrl: string =
