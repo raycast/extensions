@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-04-16
 
 ### What's Changed
 
