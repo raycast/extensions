@@ -79,6 +79,7 @@ export default function CreateInvoiceCommand(
 
   const [taxPercent, setTaxPercent] = useState(draftValues?.taxPercent ?? "");
   const [taxName, setTaxName] = useState(draftValues?.taxName ?? "");
+  const [taxPercentError, setTaxPercentError] = useState<string | undefined>();
 
   const [allowTip, setAllowTip] = useState(draftValues?.allowTip ?? false);
   const [allowPartialPayment, setAllowPartialPayment] = useState(
@@ -101,10 +102,23 @@ export default function CreateInvoiceCommand(
     setItems((prev) =>
       prev.map((i) => (i.id === id ? { ...i, [field]: value } : i)),
     );
-    if (field === "name" || field === "price") {
+    if (field === "price") {
       setItemErrors((prev) => {
         const next = { ...prev };
-        delete next[`${id}-${field}`];
+        if (
+          value &&
+          (!/^\d+(\.\d+)?$/.test(value.trim()) || parseFloat(value) <= 0)
+        ) {
+          next[`${id}-price`] = "Unit price must be a positive number";
+        } else {
+          delete next[`${id}-price`];
+        }
+        return next;
+      });
+    } else if (field === "name") {
+      setItemErrors((prev) => {
+        const next = { ...prev };
+        delete next[`${id}-name`];
         return next;
       });
     }
@@ -127,6 +141,16 @@ export default function CreateInvoiceCommand(
       setRecipientEmailError(undefined);
     }
 
+    if (
+      taxPercent &&
+      !/^\d+(\.\d+)?\s*%?$/.test(taxPercent.replace(/%$/, "").trim())
+    ) {
+      setTaxPercentError("Tax rate must be a number (e.g. 10 or 10%)");
+      valid = false;
+    } else {
+      setTaxPercentError(undefined);
+    }
+
     const errors: Record<string, string> = {};
     for (const item of items) {
       if (!item.name.trim()) {
@@ -135,10 +159,10 @@ export default function CreateInvoiceCommand(
       }
       if (
         !item.price ||
-        isNaN(parseFloat(item.price)) ||
+        !/^\d+(\.\d+)?$/.test(item.price.trim()) ||
         parseFloat(item.price) <= 0
       ) {
-        errors[`${item.id}-price`] = "Valid price required";
+        errors[`${item.id}-price`] = "Unit price must be a positive number";
         valid = false;
       }
     }
@@ -438,7 +462,15 @@ export default function CreateInvoiceCommand(
         title="Tax Rate (%)"
         placeholder="e.g. 10 for 10%"
         value={taxPercent}
-        onChange={setTaxPercent}
+        error={taxPercentError}
+        onChange={(v) => {
+          setTaxPercent(v);
+          if (v && !/^\d+(\.\d+)?\s*%?$/.test(v.trim())) {
+            setTaxPercentError("Tax rate must be a number (e.g. 10 or 10%)");
+          } else {
+            setTaxPercentError(undefined);
+          }
+        }}
       />
 
       <Form.Separator />
@@ -469,7 +501,7 @@ export default function CreateInvoiceCommand(
         text={[
           `Subtotal   ${fmt(subtotal)}`,
           taxPercent
-            ? `${taxName || "Tax"} (${taxPercent}%)   ${fmt(taxAmount)}`
+            ? `${taxName || "Tax"} (${taxPercent.replace(/[\s%]/g, "")}%)   ${fmt(taxAmount)}`
             : "",
           `─────────────────`,
           `Total        ${fmt(total)}`,
