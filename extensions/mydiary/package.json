@@ -1,0 +1,39 @@
+{
+  "name": "mydiary",
+  "title": "MyDiary",
+  "description": "Log your day with voice, browse past days on a calendar, copy to anywhere.",
+  "icon": "icon.png",
+  "author": "tommaso_mauriello747",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "keywords": ["day", "log", "journal", "diary", "recap", "calendar"],
+  "version": "0.1.0",
+  "type": "module",
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@types/react": "^19.2.14",
+    "react": "^19.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  },
+  "commands": [
+    {
+      "name": "record",
+      "title": "Record Day",
+      "description": "Log your day — voice or type, save moments throughout the day",
+      "mode": "view",
+      "keywords": ["record", "day", "diary", "log", "journal", "voice", "moment"]
+    },
+    {
+      "name": "calendar",
+      "title": "MyDiary",
+      "description": "Browse your diary — see all your days, tap to copy",
+      "mode": "view",
+      "keywords": ["mydiary", "diary", "journal", "calendar", "days", "browse", "history"]
+    }
+  ],
+  "preferences": []
+}
