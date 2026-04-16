@@ -239,7 +239,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   minimax: {
     id: "minimax",
     name: "MiniMax",
-    icon: "minimax-icon.png",
+    icon: "minimax-icon.svg",
     description: "MiniMax AI Coding Assistant",
     isSupported: true,
     settingsUrl: "https://www.minimax.io",

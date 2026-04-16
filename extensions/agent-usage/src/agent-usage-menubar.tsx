@@ -129,7 +129,7 @@ export default function MenuBarCommand() {
       {
         id: "minimax",
         name: "MiniMax",
-        icon: "minimax-icon.png",
+        icon: "minimax-icon.svg",
         visible: isMinimaxVisible,
         isLoading: minimaxState.isLoading,
         accessory: getMiniMaxAccessory(minimaxState.usage, minimaxState.error, minimaxState.isLoading),
