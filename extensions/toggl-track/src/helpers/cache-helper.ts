@@ -49,10 +49,6 @@ class CacheHelper {
   }
 
   set<T>(key: string, value: T): void {
-    if (cacheTtl <= 0 && !liteMode) {
-      return;
-    }
-
     const entry: CacheEntry<T> = {
       createdAt: Date.now(),
       data: value,
