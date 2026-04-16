@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [New Feature] - {PR_MERGE_DATE}
+## [New Feature] - 2026-04-16
 
 - Add Low Data Mode for free-tier users: serves reads from local cache with hourly auto-sync (3 requests/hour), leaving 27 requests/hour for active use
 - Add manual sync action (Cmd+Shift+R) to force-refresh cached data on demand
