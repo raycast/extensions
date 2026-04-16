@@ -192,7 +192,6 @@ export default function CreateInvoiceCommand(
         currency,
         total,
         createdAt: new Date().toISOString(),
-        dueDate: dueDate ? dueDate.toISOString().split("T")[0] : undefined,
         status: hasValidEmail ? "SENT" : "UNPAID",
         payerViewUrl,
         invoicerViewUrl,
@@ -248,7 +247,6 @@ export default function CreateInvoiceCommand(
         currency,
         total,
         createdAt: new Date().toISOString(),
-        dueDate: dueDate ? dueDate.toISOString().split("T")[0] : undefined,
         status: "DRAFT",
         invoicerViewUrl,
       });

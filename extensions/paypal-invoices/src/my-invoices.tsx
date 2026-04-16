@@ -27,6 +27,7 @@ import {
 } from "./storage";
 import {
   UpdateInvoiceParams,
+  getFullInvoice,
   getInvoiceStatus,
   isValidEmail,
   sendInvoice,
@@ -252,6 +253,32 @@ function EditInvoiceForm({
   const [items, setItems] = useState<EditLineItem[]>([newEditItem()]);
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    getFullInvoice(invoice.invoiceId)
+      .then((data) => {
+        const detail = data.detail as { note?: string } | undefined;
+        setNote(detail?.note ?? "");
+        const rawItems = data.items as
+          | Array<{ tax?: { percent?: string; name?: string } }>
+          | undefined;
+        const firstTax = rawItems?.[0]?.tax;
+        if (firstTax?.percent) setTaxPercent(firstTax.percent);
+        if (firstTax?.name) setTaxName(firstTax.name);
+        const config = data.configuration as
+          | {
+              allow_tip?: boolean;
+              partial_payment?: { allow_partial_payment?: boolean };
+            }
+          | undefined;
+        if (config?.allow_tip != null) setAllowTip(config.allow_tip);
+        if (config?.partial_payment?.allow_partial_payment != null)
+          setAllowPartialPayment(config.partial_payment.allow_partial_payment);
+      })
+      .catch(() => {
+        /* ignore, form starts with blank defaults */
+      });
+  }, []);
 
   function addItem() {
     setItems((prev) => [...prev, newEditItem()]);
@@ -585,13 +612,7 @@ export default function MyInvoicesCommand() {
             record.invoiceId,
           );
           const normalized = status as InvoiceRecord["status"];
-          const PAYPAL_TERMINAL = new Set(["PAID", "CANCELLED", "REFUNDED"]);
-          const LOCAL_CUSTOM = new Set(["UNPAID", "OVERDUE"]);
-          if (
-            normalized !== record.status &&
-            (!LOCAL_CUSTOM.has(record.status) ||
-              PAYPAL_TERMINAL.has(normalized))
-          ) {
+          if (normalized !== record.status) {
             await updateInvoiceStatus(record.invoiceId, normalized);
             setInvoices((prev) =>
               prev.map((i) =>
