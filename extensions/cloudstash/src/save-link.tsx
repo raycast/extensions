@@ -12,19 +12,13 @@ const program = (url: string) =>
     const result = yield* saveUrl(validUrl);
 
     if (result.status === "duplicate") {
-      yield* Effect.promise(() =>
-        hud.show(`⚠️ Already saved (${result.domain})`),
-      );
+      yield* Effect.promise(() => hud.show(`⚠️ Already saved (${result.domain})`));
     } else {
-      yield* Effect.promise(() =>
-        hud.show(`✅ Saved link from ${result.domain}`),
-      );
+      yield* Effect.promise(() => hud.show(`✅ Saved link from ${result.domain}`));
     }
   });
 
-export default async function SaveLink(
-  props: LaunchProps<{ arguments: Arguments.SaveLink }>,
-) {
+export default async function SaveLink(props: LaunchProps<{ arguments: Arguments.SaveLink }>) {
   await program(props.arguments.url.trim()).pipe(
     Effect.catchTags({
       InvalidUrlError: () =>
@@ -35,9 +29,7 @@ export default async function SaveLink(
       AuthError: () =>
         Effect.gen(function* () {
           const hud = yield* HudService;
-          yield* Effect.promise(() =>
-            hud.show("❌ Failed to connect — try again"),
-          );
+          yield* Effect.promise(() => hud.show("❌ Failed to connect — try again"));
         }),
       ValidationError: ({ message }) =>
         Effect.gen(function* () {
@@ -48,22 +40,16 @@ export default async function SaveLink(
         Effect.gen(function* () {
           const toast = yield* ToastService;
           yield* Effect.promise(() =>
-            toast.showFailure(
-              "Server error",
-              `Could not save link (${statusCode}). URL copied to clipboard.`,
-              {
-                title: "Copy URL",
-                onAction: () => Clipboard.copy(url),
-              },
-            ),
+            toast.showFailure("Server error", `Could not save link (${statusCode}). URL copied to clipboard.`, {
+              title: "Copy URL",
+              onAction: () => Clipboard.copy(url),
+            }),
           );
         }),
       ConnectionError: ({ message }) =>
         Effect.gen(function* () {
           const toast = yield* ToastService;
-          yield* Effect.promise(() =>
-            toast.showFailure("Connection error", message),
-          );
+          yield* Effect.promise(() => toast.showFailure("Connection error", message));
         }),
     }),
     provideLive,

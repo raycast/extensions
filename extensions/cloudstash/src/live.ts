@@ -1,34 +1,15 @@
-import {
-  Clipboard,
-  Toast,
-  getPreferenceValues,
-  showHUD,
-  showToast,
-} from "@raycast/api";
+import { Clipboard, Toast, getPreferenceValues, showHUD, showToast } from "@raycast/api";
 import { Effect } from "effect";
 
+import { DEFAULT_SERVER_URL } from "./constants";
 import { getApiKey, clearApiKey } from "./oauth";
-import {
-  AuthService,
-  ClipboardService,
-  HttpService,
-  HudService,
-  PreferencesService,
-  ToastService,
-} from "./services";
-
-const DEFAULT_SERVER_URL = "https://cloudstash.dev";
+import { AuthService, ClipboardService, HttpService, HudService, PreferencesService, ToastService } from "./services";
 
 export const provideLive = <A, E>(
   effect: Effect.Effect<
     A,
     E,
-    | AuthService
-    | ClipboardService
-    | HttpService
-    | HudService
-    | ToastService
-    | PreferencesService
+    AuthService | ClipboardService | HttpService | HudService | ToastService | PreferencesService
   >,
 ): Effect.Effect<A, E> =>
   effect.pipe(
@@ -56,8 +37,6 @@ export const provideLive = <A, E>(
       },
     }),
     Effect.provideService(PreferencesService, {
-      serverUrl:
-        getPreferenceValues<ExtensionPreferences>().serverUrl ||
-        DEFAULT_SERVER_URL,
+      serverUrl: getPreferenceValues<ExtensionPreferences>().serverUrl || DEFAULT_SERVER_URL,
     }),
   );

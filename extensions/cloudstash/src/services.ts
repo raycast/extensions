@@ -30,12 +30,8 @@ export const PreferencesService = ServiceMap.Service<{
 }>("PreferencesService");
 
 export type AuthService = ServiceMap.Service.Identifier<typeof AuthService>;
-export type ClipboardService = ServiceMap.Service.Identifier<
-  typeof ClipboardService
->;
+export type ClipboardService = ServiceMap.Service.Identifier<typeof ClipboardService>;
 export type HttpService = ServiceMap.Service.Identifier<typeof HttpService>;
 export type HudService = ServiceMap.Service.Identifier<typeof HudService>;
 export type ToastService = ServiceMap.Service.Identifier<typeof ToastService>;
-export type PreferencesService = ServiceMap.Service.Identifier<
-  typeof PreferencesService
->;
+export type PreferencesService = ServiceMap.Service.Identifier<typeof PreferencesService>;

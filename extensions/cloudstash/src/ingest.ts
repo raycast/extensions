@@ -1,12 +1,6 @@
 import { Effect } from "effect";
 
-import {
-  AuthError,
-  ConnectionError,
-  InvalidUrlError,
-  ServerError,
-  ValidationError,
-} from "./errors";
+import { AuthError, ConnectionError, InvalidUrlError, ServerError, ValidationError } from "./errors";
 import { AuthService, HttpService, PreferencesService } from "./services";
 
 export function getDomain(url: string): string {
@@ -17,9 +11,7 @@ export function getDomain(url: string): string {
   }
 }
 
-export const validateUrl = (
-  input: string,
-): Effect.Effect<string, InvalidUrlError> =>
+export const validateUrl = (input: string): Effect.Effect<string, InvalidUrlError> =>
   Effect.try({
     try: () => {
       new URL(input);
@@ -58,10 +50,7 @@ const sendIngestRequest = (
 const handleResponse = (
   response: Response,
   url: string,
-): Effect.Effect<
-  { status: string; domain: string },
-  ValidationError | ServerError
-> =>
+): Effect.Effect<{ status: string; domain: string }, ValidationError | ServerError> =>
   Effect.gen(function* () {
     if (response.status === 400) {
       const error = yield* Effect.tryPromise({

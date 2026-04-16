@@ -20,15 +20,15 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "1.104.11",
+    "@raycast/api": "^1.104.11",
     "effect": "4.0.0-beta.39"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "2.1.1",
-    "@types/node": "22.14.0",
-    "@types/react": "19.0.8",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.14.0",
+    "@types/react": "^19.0.8",
     "typescript": "^5.8.2",
-    "vitest": "4.1.1"
+    "vitest": "^4.1.1"
   },
   "icon": "extension-icon.png",
   "commands": [

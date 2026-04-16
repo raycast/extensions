@@ -2,7 +2,7 @@ import os from "node:os";
 
 import { OAuth, getPreferenceValues } from "@raycast/api";
 
-const DEFAULT_SERVER_URL = "https://cloudstash.dev";
+import { DEFAULT_SERVER_URL } from "./constants";
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -52,9 +52,4 @@ export async function getApiKey(): Promise<string> {
 
 export async function clearApiKey(): Promise<void> {
   await client.removeTokens();
-}
-
-export async function isConnected(): Promise<boolean> {
-  const tokenSet = await client.getTokens();
-  return !!tokenSet?.accessToken;
 }

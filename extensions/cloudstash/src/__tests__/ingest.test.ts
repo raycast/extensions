@@ -1,13 +1,7 @@
 import { Effect } from "effect";
 import { describe, expect, it } from "vitest";
 
-import {
-  AuthError,
-  ConnectionError,
-  InvalidUrlError,
-  ServerError,
-  ValidationError,
-} from "../errors";
+import { AuthError, ConnectionError, InvalidUrlError, ServerError, ValidationError } from "../errors";
 import { getDomain, saveUrl, validateUrl } from "../ingest";
 import { AuthService, HttpService, PreferencesService } from "../services";
 
@@ -17,18 +11,14 @@ function provideTestServices(overrides: {
   fetch?: (url: string, init: RequestInit) => Promise<Response>;
   serverUrl?: string;
 }) {
-  return <A, E>(
-    effect: Effect.Effect<A, E, AuthService | HttpService | PreferencesService>,
-  ): Effect.Effect<A, E> =>
+  return <A, E>(effect: Effect.Effect<A, E, AuthService | HttpService | PreferencesService>): Effect.Effect<A, E> =>
     effect.pipe(
       Effect.provideService(AuthService, {
         getApiKey: overrides.getApiKey ?? (() => Promise.resolve("test-key")),
         clearApiKey: overrides.clearApiKey ?? (() => Promise.resolve()),
       }),
       Effect.provideService(HttpService, {
-        fetch:
-          overrides.fetch ??
-          (() => Promise.resolve(Response.json({ status: "queued" }))),
+        fetch: overrides.fetch ?? (() => Promise.resolve(Response.json({ status: "queued" }))),
       }),
       Effect.provideService(PreferencesService, {
         serverUrl: overrides.serverUrl ?? "http://localhost:3000",
@@ -57,9 +47,7 @@ describe("validateUrl", () => {
   });
 
   it("fails for invalid URLs", async () => {
-    const result = await Effect.runPromise(
-      validateUrl("not-a-url").pipe(Effect.flip),
-    );
+    const result = await Effect.runPromise(validateUrl("not-a-url").pipe(Effect.flip));
     expect(result).toBeInstanceOf(InvalidUrlError);
     expect(result.input).toBe("not-a-url");
   });
@@ -202,10 +190,7 @@ describe("saveUrl", () => {
     const error = await Effect.runPromise(
       saveUrl("https://example.com").pipe(
         provideTestServices({
-          fetch: () =>
-            Promise.resolve(
-              new Response("Internal Server Error", { status: 500 }),
-            ),
+          fetch: () => Promise.resolve(new Response("Internal Server Error", { status: 500 })),
         }),
         Effect.flip,
       ),
@@ -220,10 +205,7 @@ describe("saveUrl", () => {
     const error = await Effect.runPromise(
       saveUrl("https://example.com").pipe(
         provideTestServices({
-          fetch: () =>
-            Promise.resolve(
-              Response.json({ error: "Invalid URL" }, { status: 400 }),
-            ),
+          fetch: () => Promise.resolve(Response.json({ error: "Invalid URL" }, { status: 400 })),
         }),
         Effect.flip,
       ),
