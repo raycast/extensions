@@ -1,16 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  environment,
-  Form,
-  getPreferenceValues,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import path from "path";
+import { Action, ActionPanel, Clipboard, Form, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { LOCAL_STORAGE_KEY } from "~/constants/general";
@@ -125,15 +113,6 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
   if (showPassword) {
     PasswordField = Form.TextField;
     passwordFieldId = "plainPassword";
-  }
-
-  if (isLoading) {
-    const unlockGif = path.join(environment.assetsPath, "unlock.gif");
-    return (
-      <List>
-        <List.EmptyView icon={unlockGif} title="" />
-      </List>
-    );
   }
 
   return (
