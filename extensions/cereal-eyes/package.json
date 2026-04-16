@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cereal-eyes",
+  "title": "Cereal Eyes",
+  "description": "Save and manage snippets with Cereal Eyes",
+  "icon": "extension-icon.png",
+  "author": "jermashley",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-snippet",
+      "title": "Create Snippet",
+      "description": "Save a new snippet to Cereal Eyes",
+      "mode": "view"
+    },
+    {
+      "name": "list-snippets",
+      "title": "My Snippets",
+      "description": "Browse and manage your Cereal Eyes snippets",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": false,
+      "title": "API Token",
+      "description": "Your Cereal Eyes API token. Generate one in Settings → API Tokens."
+    },
+    {
+      "name": "devApiToken",
+      "type": "password",
+      "required": false,
+      "title": "Dev API Token",
+      "description": "Used instead of API Token when running in development mode (npm run dev). Leave empty in production."
+    },
+    {
+      "name": "devApiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Dev API Base URL",
+      "description": "Your local Cereal Eyes instance URL. Only active in development mode.",
+      "default": "https://cereal-eyes-bravo.test/api/v1",
+      "placeholder": "https://cereal-eyes-bravo.test/api/v1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "predev": "cp extension-icon.png ~/.config/raycast/extensions/cereal-eyes/extension-icon.png 2>/dev/null || true",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
