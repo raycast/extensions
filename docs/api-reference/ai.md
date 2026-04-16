@@ -224,7 +224,7 @@ If a model isn't available to the user (or has been disabled by the user), Rayca
 
 ## Rate Limit
 
-Defines the rate limits that apply to Raycast AI usage within extensions. These values specify how many AI requests can be made per minute and per hour.
+To prevent accidental programmatic over-usage of AI quota, Raycast enforces rate limits on AI requests made from extensions.
 
 | Limit per minute | Limit per hour |
 |---|---|
