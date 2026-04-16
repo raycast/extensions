@@ -1,0 +1,34 @@
+{
+  "name": "align-rtl",
+  "title": "Align RTL",
+  "description": "Transform selected text or clipboard content into forced right-to-left text and paste it back into the active app.",
+  "icon": "align-rtl-icon.png",
+  "author": "jberrebi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Align RTL",
+      "subtitle": "Force right-to-left embedding for selected text",
+      "description": "Wrap the selected text or clipboard content with RTL Unicode embedding characters and paste it into the active app.",
+      "mode": "no-view",
+      "icon": "align-rtl-icon.png"
+    }
+  ],
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build -e dist",
+    "lint": "npx ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^9.25.1",
+    "typescript": "^5.8.3"
+  }
+}
