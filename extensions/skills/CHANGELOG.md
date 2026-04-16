@@ -1,5 +1,9 @@
 # Changelog
 
+## [Update Individual Skills] - {PR_MERGE_DATE}
+
+- Add per-skill update action using `skills update <name>` (requires `skills` CLI 1.5.0+), so a single outdated skill can be updated without touching the others
+
 ## [Reduce Complexity] - 2026-04-11
 
 - Remove test infrastructure (vitest, test stubs, all test files) that added maintenance burden without meaningful coverage

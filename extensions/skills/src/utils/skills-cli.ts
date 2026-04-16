@@ -253,6 +253,14 @@ export async function updateAllSkills(): Promise<void> {
   await runSkillsCli(["update", "-y"]);
 }
 
+/**
+ * Update a single installed skill by name.
+ * Runs `npx -y skills@latest update <skill-name> -y`.
+ */
+export async function updateSkill(skillName: string): Promise<void> {
+  await runSkillsCli(["update", skillName, "-y"]);
+}
+
 const LOCK_FILE = ".skill-lock.json";
 const AGENTS_DIR = ".agents";
 

@@ -101,7 +101,7 @@ export default function Command() {
                 }
                 actions={
                   <ActionPanel>
-                    <UpdateSkillAction onUpdate={revalidate} />
+                    <UpdateSkillAction mutate={mutate} />
                   </ActionPanel>
                 }
               />
@@ -116,7 +116,6 @@ export default function Command() {
                 isShowingDetail={isShowingDetail}
                 mutate={mutate}
                 onToggleDetail={toggleDetail}
-                onUpdate={revalidate}
               />
             ))}
           </List.Section>
