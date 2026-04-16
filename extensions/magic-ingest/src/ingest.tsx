@@ -105,7 +105,7 @@ export default function Command() {
   // Date scanning state
   const [dateOptions, setDateOptions] = useState<DateOption[]>([]);
   const [isScanning, setIsScanning] = useState(false);
-  const scanAbort = useRef<AbortController | null>(null);
+  const scanGenRef = useRef(0);
 
   // Scan selected cards for dates. Accepts optional volList to avoid
   // stale closure over `volumes` state (needed for auto-select on mount).
@@ -113,55 +113,9 @@ export default function Command() {
     setSelectedCards(cardPaths);
     setSelectedDates([]);
     setDateOptions([]);
+    ${p1}
 
-    if (cardPaths.length === 0) return;
-
-    // Cancel any in-flight scan
-    if (scanAbort.current) scanAbort.current.abort();
-    scanAbort.current = new AbortController();
-
-    setIsScanning(true);
-    try {
-      const vols = volList ?? volumes;
-      const selectedVols = vols
-        .filter((v) => cardPaths.includes(v.path))
-        .map((v) => ({ path: v.path, name: v.name }));
-
-      const files = await scanMultipleVolumes(selectedVols);
-      const mediaFiles = files.filter((f) => !f.isSidecar);
-      const dateInfos = await scanDatesOnFiles(mediaFiles);
-
-      // Sort dates descending (most recent first)
-      const sorted = Array.from(dateInfos.entries()).sort((a, b) =>
-        b[0].localeCompare(a[0]),
-      );
-
-      const options: DateOption[] = sorted.map(([date, info]) => ({
-        date,
-        label: formatDateLabel(date),
-        count: info.count,
-        cardCount: info.cardCount,
-      }));
-
-      setDateOptions(options);
-
-      // Auto-select dates if a preset was just loaded
-      if (pendingDatesRef.current) {
-        const available = new Set(options.map((o) => o.date));
-        const toSelect = pendingDatesRef.current.filter((d) =>
-          available.has(d),
-        );
-        if (toSelect.length > 0) setSelectedDates(toSelect);
-        pendingDatesRef.current = null;
-      }
-    } catch {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to scan card dates",
-      });
-    } finally {
-      setIsScanning(false);
-    }
+    ${newFunc}
   }
 
   function applyPreset(presetId: string) {
