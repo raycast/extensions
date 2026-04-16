@@ -23,12 +23,6 @@ import {
 } from "./servers";
 import { DevServer } from "./types";
 
-interface Preferences {
-  showFullPath: boolean;
-  refreshInterval: string;
-  terminalApp?: Application;
-}
-
 const DEFAULT_TERMINAL: Application = {
   name: "Terminal",
   path: "/System/Applications/Utilities/Terminal.app",
@@ -69,12 +63,9 @@ function toolColor(tool: string): Color | { light: string; dark: string } {
     webpack: Color.Blue,
     svelte: Color.Orange,
     sveltekit: Color.Orange,
-    parcel: Color.Yellow,
     remix: Color.Magenta,
     turbo: Color.Blue,
-    esbuild: Color.Yellow,
     node: Color.Green,
-    bun: Color.Yellow,
   };
   return colors[key] ?? Color.Blue;
 }
@@ -253,7 +244,7 @@ function ServerItem({
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Index>();
 
   const {
     isLoading,
