@@ -13,6 +13,7 @@ import {
   Toast,
   Form,
   useNavigation,
+  Keyboard,
 } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
 import { join } from "path"
@@ -136,13 +137,13 @@ const BrowseSessions = () => {
           title="Delete Session"
           icon={Icon.Trash}
           style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={() => remove(session)}
         />
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={reload}
         />
       </ActionPanel.Section>

@@ -9,6 +9,7 @@ import {
   Alert,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api"
 import { showFailureToast } from "@raycast/utils"
 import { findCleanItems } from "./lib/clean"
@@ -44,8 +45,9 @@ const CleanSessions = () => {
 
   const removeOne = async (item: CleanItem) => {
     const confirmed = await confirmAlert({
-      title: "Remove this entry?",
+      title: "Remove session?",
       message: item.label,
+      rememberUserChoice: true,
       primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
     })
     if (!confirmed) return
@@ -130,26 +132,24 @@ const CleanSessions = () => {
                 actions={
                   <ActionPanel>
                     <Action
-                      title="Remove This"
+                      title="Remove Session"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => removeOne(item)}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                     <Action
                       title={`Remove All ${grouped[reason].length} in This Group`}
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
-                      shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "backspace",
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.RemoveAll}
                       onAction={() => removeAll(reason, grouped[reason])}
                     />
                     <ActionPanel.Section>
                       <Action
                         title="Refresh"
                         icon={Icon.ArrowClockwise}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
+                        shortcut={Keyboard.Shortcut.Common.Refresh}
                         onAction={reload}
                       />
                     </ActionPanel.Section>

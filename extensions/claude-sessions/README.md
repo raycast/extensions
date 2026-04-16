@@ -16,7 +16,7 @@ Lists all sessions sorted by most recent activity, grouped into **Chat** and **C
 - **Filter** — use the dropdown to show only Chat or Code sessions
 - `↵` **Open Session** — opens a new iTerm tab and resumes the session with `claude --continue`
 - `⌘N` **New Chat** — name a new chat session and open it immediately
-- `⌘⌫` **Delete Session** — remove a session and trash its history (with confirmation)
+- `⌃X` **Delete Session** — remove a session and trash its history (with confirmation)
 - `⌘⇧C` **Copy Path** — copy the session directory to clipboard
 - `⌘⇧F` **Show in Finder** — reveal the directory in Finder
 
@@ -31,7 +31,7 @@ Scans your Claude data for stale entries and lets you remove them in bulk.
 | **Orphaned**   | Conversation files exist with no matching registry entry            |
 
 - `↵` **Remove This** — remove a single entry (with confirmation)
-- `⌘⇧⌫` **Remove All in Group** — remove every entry of that category at once
+- `⌃⇧X` **Remove All in Group** — remove every entry of that category at once
 
 ## Requirements
 
