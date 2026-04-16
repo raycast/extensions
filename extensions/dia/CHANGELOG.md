@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Broken URL detection and fix] - 2026-04-07
+## [Broken URL detection and fix] - {PR_MERGE_DATE}
 
 - **Fix Broken URL**: New no-view command that detects broken URLs in clipboard (split across lines from terminals, emails, or narrow viewports), joins them, and copies the clean URL back
 - **Broken URL detection in Search**: Pasting a multi-line broken URL shows a "Fixed URL" section with the repaired link ready to open in Dia or copy
