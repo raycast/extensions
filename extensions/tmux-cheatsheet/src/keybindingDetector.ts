@@ -1,5 +1,3 @@
-import { listKeys } from "./tmuxCli";
-
 // Flags that consume the next token as an argument
 const ARG_FLAGS = new Set(["-c", "-t", "-s", "-n", "-N", "-p", "-F", "-f"]);
 
@@ -106,13 +104,11 @@ function parseBinding(line: string): { key: string; command: string } | undefine
 }
 
 /**
- * Queries tmux for prefix-table bindings and returns a map of normalized
+ * Parses raw `tmux list-keys -T prefix` output into a map of normalized
  * command signatures (e.g. "split-window -v") to bound keys (e.g. "|").
  */
-export function detectKeyBindings(): ReadonlyMap<string, string> {
+export function parseKeyBindings(output: string | undefined): ReadonlyMap<string, string> {
   const bindings = new Map<string, string>();
-
-  const output = listKeys("prefix");
   if (!output) return bindings;
 
   for (const line of output.split("\n")) {

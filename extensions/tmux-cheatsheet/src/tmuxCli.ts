@@ -10,6 +10,8 @@ const TMUX_PATHS = ["/opt/homebrew/bin/tmux", "/usr/local/bin/tmux", "/opt/local
 // tmux session, whose socket path may be relocated by TMUX_TMPDIR.
 const SOCKET = "raycast-cheatsheet";
 
+type ExecError = NodeJS.ErrnoException & { stdout?: Buffer | string };
+
 function runTmux(commands: string[][]): string | undefined {
   const args = ["-L", SOCKET, "start-server"];
   for (const cmd of commands) {
@@ -20,18 +22,44 @@ function runTmux(commands: string[][]): string | undefined {
   for (const path of TMUX_PATHS) {
     try {
       return execFileSync(path, args, { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] });
-    } catch {
-      // try next path
+    } catch (err) {
+      const e = err as ExecError;
+      if (e.code === "ENOENT") {
+        continue;
+      }
+      // Binary ran but exited non-zero (e.g. late `kill-server` failure).
+      // Recover stdout we already captured rather than retrying the next path.
+      return typeof e.stdout === "string" ? e.stdout : undefined;
     }
   }
   return undefined;
 }
 
-export function showGlobalOption(name: string): string | undefined {
-  const output = runTmux([["show-options", "-g", "-v", name]]);
-  return output?.trim() || undefined;
+export interface TmuxState {
+  readonly prefix: string | undefined;
+  readonly bindingsOutput: string | undefined;
 }
 
-export function listKeys(table: string): string | undefined {
-  return runTmux([["list-keys", "-T", table]]);
+/**
+ * Reads the global prefix option and the prefix-table keybindings in a single
+ * tmux invocation (one server start/kill).
+ *
+ * The batched output places the prefix value on the first line, followed by
+ * the `bind-key ...` lines from `list-keys -T prefix`.
+ */
+export function readTmuxState(): TmuxState {
+  const output = runTmux([
+    ["show-options", "-g", "-v", "prefix"],
+    ["list-keys", "-T", "prefix"],
+  ]);
+  if (!output) return { prefix: undefined, bindingsOutput: undefined };
+
+  const newlineIdx = output.indexOf("\n");
+  if (newlineIdx === -1) {
+    return { prefix: output.trim() || undefined, bindingsOutput: undefined };
+  }
+
+  const prefix = output.slice(0, newlineIdx).trim() || undefined;
+  const bindingsOutput = output.slice(newlineIdx + 1) || undefined;
+  return { prefix, bindingsOutput };
 }
