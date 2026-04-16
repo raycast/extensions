@@ -113,9 +113,58 @@ export default function Command() {
     setSelectedCards(cardPaths);
     setSelectedDates([]);
     setDateOptions([]);
-    ${p1}
 
-    ${newFunc}
+    if (cardPaths.length === 0) return;
+
+    // Increment generation so any in-flight scan can detect it became stale
+    const gen = ++scanGenRef.current;
+
+    setIsScanning(true);
+    try {
+      const vols = volList ?? volumes;
+      const selectedVols = vols
+        .filter((v) => cardPaths.includes(v.path))
+        .map((v) => ({ path: v.path, name: v.name }));
+
+      const files = await scanMultipleVolumes(selectedVols);
+      const mediaFiles = files.filter((f) => !f.isSidecar);
+      const dateInfos = await scanDatesOnFiles(mediaFiles);
+
+      // Bail out if a newer scan has already started
+      if (gen !== scanGenRef.current) return;
+
+      // Sort dates descending (most recent first)
+      const sorted = Array.from(dateInfos.entries()).sort((a, b) =>
+        b[0].localeCompare(a[0]),
+      );
+
+      const options: DateOption[] = sorted.map(([date, info]) => ({
+        date,
+        label: formatDateLabel(date),
+        count: info.count,
+        cardCount: info.cardCount,
+      }));
+
+      setDateOptions(options);
+
+      // Auto-select dates if a preset was just loaded
+      if (pendingDatesRef.current) {
+        const available = new Set(options.map((o) => o.date));
+        const toSelect = pendingDatesRef.current.filter((d) =>
+          available.has(d),
+        );
+        if (toSelect.length > 0) setSelectedDates(toSelect);
+        pendingDatesRef.current = null;
+      }
+    } catch {
+      if (gen !== scanGenRef.current) return;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to scan card dates",
+      });
+    } finally {
+      if (gen === scanGenRef.current) setIsScanning(false);
+    }
   }
 
   function applyPreset(presetId: string) {
