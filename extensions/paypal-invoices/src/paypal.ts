@@ -367,3 +367,26 @@ export async function getInvoiceStatus(
 
   return { status, invoicerViewUrl };
 }
+
+export async function cancelInvoice(invoiceId: string): Promise<void> {
+  const token = await getAccessToken();
+
+  const response = await fetch(
+    `${getBaseUrl()}/v2/invoicing/invoices/${invoiceId}/cancel`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        send_to_invoicer: false,
+        send_to_recipient: false,
+      }),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Failed to cancel invoice: ${await response.text()}`);
+  }
+}

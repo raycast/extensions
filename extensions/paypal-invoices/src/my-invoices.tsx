@@ -18,6 +18,7 @@ import {
 import {
   InvoiceRecord,
   ListPreferences,
+  archiveInvoice,
   deleteInvoice,
   loadInvoices,
   loadListPreferences,
@@ -27,6 +28,7 @@ import {
 } from "./storage";
 import {
   UpdateInvoiceParams,
+  cancelInvoice,
   getFullInvoice,
   getInvoiceStatus,
   isValidEmail,
@@ -584,6 +586,7 @@ function PickerForm<T extends string>({
 
 export default function MyInvoicesCommand() {
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
+  const visibleInvoices = invoices.filter((i) => !i.archived);
   const [prefs, setPrefs] = useState<ListPreferences>({
     groupBy: "status",
     sortBy: "createdAt",
@@ -707,7 +710,52 @@ export default function MyInvoicesCommand() {
     );
   }
 
-  const sorted = sortInvoices(invoices, prefs.sortBy, prefs.order);
+  async function handleCancel(invoice: InvoiceRecord) {
+    const confirmed = await confirmAlert({
+      title: "Cancel invoice?",
+      message: `This cancels the invoice for ${invoice.recipientName} on PayPal. This cannot be undone.`,
+      primaryAction: {
+        title: "Cancel Invoice",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Cancelling invoice…",
+      });
+      await cancelInvoice(invoice.invoiceId);
+      await updateInvoiceStatus(invoice.invoiceId, "CANCELLED");
+      setInvoices((prev) =>
+        prev.map((i) =>
+          i.invoiceId === invoice.invoiceId ? { ...i, status: "CANCELLED" } : i,
+        ),
+      );
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Invoice cancelled",
+      });
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to cancel",
+        message: String(err),
+      });
+    }
+  }
+
+  async function handleArchive(invoice: InvoiceRecord) {
+    await archiveInvoice(invoice.invoiceId);
+    setInvoices((prev) =>
+      prev.map((i) =>
+        i.invoiceId === invoice.invoiceId ? { ...i, archived: true } : i,
+      ),
+    );
+    await showHUD("Invoice archived");
+  }
+
+  const sorted = sortInvoices(visibleInvoices, prefs.sortBy, prefs.order);
   const grouped =
     prefs.groupBy === "status"
       ? STATUS_ORDER.reduce<Record<string, InvoiceRecord[]>>((acc, status) => {
@@ -920,6 +968,28 @@ export default function MyInvoicesCommand() {
                         Windows: { modifiers: ["ctrl"], key: "r" },
                       }}
                       onAction={() => setRefreshKey((k) => k + 1)}
+                    />
+                    {(invoice.status === "SENT" ||
+                      invoice.status === "UNPAID") && (
+                      <Action
+                        title="Cancel Invoice"
+                        icon={Icon.XMarkCircle}
+                        style={Action.Style.Destructive}
+                        shortcut={{
+                          macOS: { modifiers: ["cmd", "shift"], key: "x" },
+                          Windows: { modifiers: ["ctrl", "shift"], key: "x" },
+                        }}
+                        onAction={() => handleCancel(invoice)}
+                      />
+                    )}
+                    <Action
+                      title="Archive Invoice"
+                      icon={Icon.Tray}
+                      shortcut={{
+                        macOS: { modifiers: ["ctrl", "shift"], key: "a" },
+                        Windows: { modifiers: ["alt", "shift"], key: "a" },
+                      }}
+                      onAction={() => handleArchive(invoice)}
                     />
                     <Action
                       title="Remove from List"
