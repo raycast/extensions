@@ -6,8 +6,7 @@
   "icon": "extension_icon.png",
   "author": "frank-miao",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Documentation"
@@ -22,6 +21,33 @@
       "required": false,
       "default": "52731",
       "placeholder": "52731"
+    },
+    {
+      "name": "preferredFormat",
+      "title": "Preferred Export Format",
+      "description": "Default format for the quick copy action. Use a structured format like bibtex, ris, csl-json, or a CSL filename from assets/styles without the .csl suffix.",
+      "type": "textfield",
+      "required": false,
+      "default": "bibtex",
+      "placeholder": "bibtex"
+    },
+    {
+      "name": "clipboardFontFamily",
+      "title": "Clipboard Font Family",
+      "description": "Font family for rich-text citation exports to Word",
+      "type": "textfield",
+      "required": false,
+      "default": "Arial",
+      "placeholder": "Arial"
+    },
+    {
+      "name": "clipboardFontSize",
+      "title": "Clipboard Font Size",
+      "description": "Font size in points for rich-text citation exports",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "placeholder": "10"
     }
   ],
   "commands": [
@@ -38,9 +64,20 @@
       "subtitle": "Lattice Scholar Extension",
       "description": "Check Lattice local API connection status",
       "mode": "view"
+    },
+    {
+      "name": "lattice-doi",
+      "title": "Find Paper by Current Page",
+      "subtitle": "Lattice Scholar Extension",
+      "description": "Detect the DOI on the current browser page and show paper metadata",
+      "mode": "view"
     }
   ],
   "dependencies": {
+    "@citation-js/core": "^0.7.21",
+    "@citation-js/plugin-bibtex": "^0.7.21",
+    "@citation-js/plugin-csl": "^0.7.22",
+    "@citation-js/plugin-ris": "^0.7.21",
     "@raycast/api": "^1.104.12",
     "@raycast/utils": "^1.17.0"
   },
