@@ -1,6 +1,6 @@
 # Say - Text to Speech Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-04-16
 
 - Replace deprecated `mac-say` and `@litomore/win-say` dependencies with `native-say`
 
