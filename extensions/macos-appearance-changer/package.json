@@ -20,24 +20,28 @@
     {
       "name": "apply-profile",
       "title": "Apply Profile",
+      "subtitle": "Apply a saved appearance profile",
       "description": "Apply a saved appearance profile",
       "mode": "view"
     },
     {
       "name": "create-profile",
       "title": "Create Profile",
+      "subtitle": "Create a new appearance profile",
       "description": "Create a new appearance profile",
       "mode": "view"
     },
     {
       "name": "toggle-profiles",
       "title": "Toggle Profiles",
+      "subtitle": "Switch between two saved profiles",
       "description": "Quickly toggle between two appearance profiles",
       "mode": "no-view"
     },
     {
       "name": "configure-toggle",
       "title": "Configure Toggle Pair",
+      "subtitle": "Choose which two profiles to toggle between",
       "description": "Choose which two profiles to toggle between",
       "mode": "view"
     }

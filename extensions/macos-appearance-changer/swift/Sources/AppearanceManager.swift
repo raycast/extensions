@@ -39,24 +39,5 @@ import RaycastSwiftMacros
     return outputPath
 }
 
-@raycast func getCurrentSettings() throws -> AppearanceInfo {
-    let iconTheme = readIconThemePreference()
-
-    let isAutoSwitch = readGlobalPreference(PreferenceKey.autoSwitchAppearance) as? Bool ?? false
-
-    let currentAppearance: String
-    if isAutoSwitch {
-        currentAppearance = "auto"
-    } else {
-        let interfaceStyle = readGlobalPreference(PreferenceKey.interfaceStyle) as? String
-        currentAppearance = (interfaceStyle == "Dark") ? "dark" : "light"
-    }
-
-    let currentWallpaper =
-        NSScreen.main.flatMap {
-            NSWorkspace.shared.desktopImageURL(for: $0)?.path
-        } ?? ""
-
-    return AppearanceInfo(
-        iconTheme: iconTheme, appearance: currentAppearance, wallpaperPath: currentWallpaper)
-}
+// `getCurrentSettings` removed: it was exposed to Raycast but not used from TypeScript.
+// Keeping the implementation removed to avoid shipping unused Swift commands.

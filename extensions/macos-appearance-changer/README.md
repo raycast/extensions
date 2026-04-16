@@ -17,22 +17,25 @@ Create a few profiles, then apply whichever one you want from Raycast. That's it
 
 ### Commands
 
-| Command | Description |
-|---|---|
-| **Apply Profile** | Browse your profiles in a grid with thumbnail previews and apply one |
-| **Create Profile** | Build a new profile or edit an existing one |
-| **Toggle Profiles** | Instantly switch between two profiles with a single hotkey (no UI) |
-| **Configure Toggle Pair** | Pick which two profiles the toggle command switches between |
+| Command                   | Description                                                          |
+| ------------------------- | -------------------------------------------------------------------- |
+| **Apply Profile**         | Browse your profiles in a grid with thumbnail previews and apply one |
+| **Create Profile**        | Build a new profile or edit an existing one                          |
+| **Toggle Profiles**       | Instantly switch between two profiles with a single hotkey (no UI)   |
+| **Configure Toggle Pair** | Pick which two profiles the toggle command switches between          |
 
 ## Screenshots
 
 ### Apply Profile
+
 ![Apply Profile](assets/screenshots/macos-appearance-changer-1.png)
 
 ### Create Profile
+
 ![Create Profile](assets/screenshots/macos-appearance-changer-2.png)
 
 ### Configure Toggle
+
 ![Configure Toggle](assets/screenshots/macos-appearance-changer-3.png)
 
 ## How It Works
