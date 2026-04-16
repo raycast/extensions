@@ -10,7 +10,7 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "noEmit": true,
-    "baseUrl": ".",
+    "ignoreDeprecations": "6.0",
     "types": ["vitest/globals", "node"]
   },
   "include": ["src", "tests"],

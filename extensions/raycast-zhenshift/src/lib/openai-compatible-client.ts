@@ -278,8 +278,14 @@ ${stringifyResponse(data)}
     handleEventPayload(tailPayload);
   }
 
-  const finalText = streamedText.trim() || completedText?.trim();
-  return finalText ? finalText : null;
+  const trimmedStreamedText = streamedText.trim();
+  if (trimmedStreamedText) {
+    return trimmedStreamedText;
+  }
+
+  const completedTextValue = completedText as string | null;
+  const trimmedCompletedText = completedTextValue?.trim() ?? null;
+  return trimmedCompletedText ? trimmedCompletedText : null;
 }
 
 async function requestStreamingChatCompletion(input: {
