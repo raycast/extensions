@@ -1,6 +1,6 @@
 # Google Cloud CLI Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-04-16
 
 ### New Features
 - Added **Settings & Configuration** command — list, switch, create, duplicate, and delete named gcloud configurations
