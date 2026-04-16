@@ -34,6 +34,10 @@ export default function EditMatchForm({
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean);
+      if (!triggers.length) {
+        showToast({ style: Toast.Style.Failure, title: "At least one trigger is required" });
+        return;
+      }
       try {
         updateMatchInFile(filePath, originalTriggers, { triggers, label: values.label, replace: values.replace });
         showToast({ style: Toast.Style.Success, title: "Match updated" });

@@ -115,6 +115,8 @@ export default function MatchItem({
           )}
           <Action.CopyToClipboard title="Copy Triggers" content={triggers.join(", ")} />
           {label && <Action.CopyToClipboard title="Copy Label" content={label} />}
+          <Action.OpenWith path={filePath} />
+          <Action.ShowInFinder path={filePath} />
           {canEdit && (
             <Action.Push
               icon={Icon.Pencil}
@@ -132,8 +134,6 @@ export default function MatchItem({
               }
             />
           )}
-          <Action.OpenWith path={filePath} />
-          <Action.ShowInFinder path={filePath} />
           <Action.Trash title="Move the Whole File to Trash" paths={filePath} />
         </ActionPanel>
       }
