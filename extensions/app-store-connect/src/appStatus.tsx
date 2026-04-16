@@ -63,13 +63,18 @@ export default function Command() {
   );
 
   const apps = data ?? [];
-  const pendingReleaseApps = useMemo(() => apps.filter(isPendingDeveloperRelease), [apps]);
 
-  const filteredApps = apps.filter((app) => {
-    const matchesStatus = statusFilter === "all" || app.latestVersion?.state === statusFilter;
-    const matchesPlatform = platformFilter === "all" || app.latestVersion?.platform === platformFilter;
-    return matchesStatus && matchesPlatform;
-  });
+  const filteredApps = useMemo(
+    () =>
+      apps.filter((app) => {
+        const matchesStatus = statusFilter === "all" || app.latestVersion?.state === statusFilter;
+        const matchesPlatform = platformFilter === "all" || app.latestVersion?.platform === platformFilter;
+        return matchesStatus && matchesPlatform;
+      }),
+    [apps, statusFilter, platformFilter],
+  );
+
+  const pendingReleaseApps = useMemo(() => filteredApps.filter(isPendingDeveloperRelease), [filteredApps]);
 
   const statusFilterLabel = STATUS_FILTERS.find((f) => f.value === statusFilter)?.label ?? "All Apps";
   const platformLabel = PLATFORM_FILTERS.find((f) => f.value === platformFilter)?.label ?? "All Platforms";

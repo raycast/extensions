@@ -181,7 +181,7 @@ function ReleaseAllAppsAction({ apps }: { apps: PendingReleaseApp[] }) {
 }
 
 async function releaseAppVersion(appStoreVersionId: string) {
-  await fetchAppStoreConnect("/appStoreVersionReleaseRequests", "POST", {
+  const response = await fetchAppStoreConnect("/appStoreVersionReleaseRequests", "POST", {
     data: {
       type: "appStoreVersionReleaseRequests",
       relationships: {
@@ -191,6 +191,9 @@ async function releaseAppVersion(appStoreVersionId: string) {
       },
     },
   });
+  if (!response) {
+    throw new Error("Missing credentials – could not release app version");
+  }
 }
 
 function errorMessage(error: unknown): string {
