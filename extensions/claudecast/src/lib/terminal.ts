@@ -4,6 +4,7 @@ import { promisify } from "util";
 import { writeFileSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
+import type { PermissionMode } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
 
@@ -156,6 +157,8 @@ export async function launchClaudeCode(options: {
   prompt?: string;
   printMode?: boolean; // Use -p flag for non-interactive output
   dangerouslySkipPermissions?: boolean; // Skip permission prompts for autonomous workflows
+  permissionMode?: PermissionMode; // Restore the session's original permission mode on resume
+  model?: string; // Restore the session's original model on resume
 }): Promise<void> {
   const args: string[] = ["claude"];
 
@@ -171,6 +174,21 @@ export async function launchClaudeCode(options: {
     }
   } else if (options.continueSession) {
     args.push("-c");
+  }
+
+  // Restore the session's permission mode (unless dangerouslySkipPermissions
+  // was already set explicitly, which implies bypassPermissions)
+  if (
+    options.permissionMode &&
+    options.permissionMode !== "default" &&
+    !options.dangerouslySkipPermissions
+  ) {
+    args.push("--permission-mode", options.permissionMode);
+  }
+
+  // Restore the session's model so a Haiku session doesn't resume with Opus
+  if (options.model) {
+    args.push("--model", options.model);
   }
 
   if (options.prompt) {

@@ -95,6 +95,9 @@ All commands use the `authorizedWithFreeAgent` HOC from `oauth.ts` plus the `use
 - `useEffect` for data fetching when authentication is ready
 - All error states handled through the custom hook
 
+### Changelog
+When updating `CHANGELOG.md`, use `{PR_MERGE_DATE}` as the date placeholder instead of a real date. The actual date will be filled in when the PR is merged.
+
 ### Preferences
 The extension supports user preferences defined in package.json:
 - `default_payment_terms_in_days` - Default payment terms for new invoices

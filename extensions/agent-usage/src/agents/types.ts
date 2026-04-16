@@ -4,6 +4,7 @@ export type AgentId =
   | "amp"
   | "claude"
   | "codex"
+  | "copilot"
   | "droid"
   | "gemini"
   | "kimi"

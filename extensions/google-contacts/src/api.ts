@@ -47,6 +47,16 @@ export async function fetchAllContacts(
   return all;
 }
 
+export async function fetchContactsFirstPage(token: string, pageSize = 30): Promise<Person[]> {
+  const params = new URLSearchParams({
+    personFields: PERSON_FIELDS,
+    pageSize: String(pageSize),
+    sortOrder: "FIRST_NAME_ASCENDING",
+  });
+  const res = await fetchApi<ConnectionsListResponse>(`${BASE_URL}/people/me/connections?${params}`, token);
+  return res.connections ?? [];
+}
+
 export async function searchContacts(token: string, query: string): Promise<Person[]> {
   // Warmup request required by Google before real searches return results
   await fetchApi<SearchResponse>(`${BASE_URL}/people:searchContacts?query=&readMask=names`, token);

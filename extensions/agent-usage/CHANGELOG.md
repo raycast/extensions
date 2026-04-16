@@ -8,6 +8,12 @@
 - Auto-detect MiniMax credentials from OpenCode (`minimax-coding-plan`) or `MINIMAX_API_KEY` environment variable
 - Manual token support via extension preferences
 
+## [Add Copilot Usage Provider] - 2026-04-14
+
+- Add Copilot usage provider with GitHub Copilot internal API support
+- Auto-detect Copilot token from `GH_TOKEN` / `GITHUB_TOKEN` with preference fallback
+- Add Copilot visibility preference and list/menu bar entries
+
 ## [Add Windows Support] - 2026-04-12
 
 - Add Windows support

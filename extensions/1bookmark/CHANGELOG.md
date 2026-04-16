@@ -1,5 +1,17 @@
 # 1Bookmark Changelog
 
+## [HotFix Login bug] - 2026-04-13
+
+- 0.12.1
+- 🐛 Fix login bug in Raycast Extension.
+
+## [Login through the 1Bookmark website] - 2026-04-13
+
+- 0.12.0
+- 🌐 1Bookmark web client (Beta) is now available at [1bookmark.net](https://1bookmark.net). All features from the Raycast Extension will be available on the website, and some new features may be exclusively offered on the web.
+- 🔑 You can now sign in to Raycast Extension through the 1Bookmark website.
+- 💻 Updated Raycast API, Raycast Utils, tRPC and React packages.
+
 ## [Improve Space Authentication UX] - 2025-05-23
 
 - 0.11.1

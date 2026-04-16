@@ -1,9 +1,10 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - 2026-04-07
+## [Bug Fixes] - 2026-04-15
 
-- Fix infinite retry loop on HTTP 429: add exponential backoff (1s, 5s, 15s) with a 3-retry cap and surface a Raycast error toast after retries are exhausted
-- Add non-retryable error path for HTTP 402 quota-exhausted responses
+- Consolidated 5 parallel resource API calls into a single `/me?with_related_data=true` bootstrap request, reducing API usage from 5 calls to 1 when opening time entry forms
+- Reduced Menu Bar background refresh interval from 3 minutes to 10 minutes to further reduce API consumption for free-tier users (30 calls/hour limit)
+- Added optimistic caching for the running time entry after start/stop actions, eliminating a redundant API call per timer interaction
 
 ## [New Feature] - 2026-03-10
 

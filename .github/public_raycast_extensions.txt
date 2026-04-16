@@ -69,5 +69,6 @@ cursor-agents
 circleback
 sound-search
 linkinize
+beeper
 pieces-raycast
 nocal
