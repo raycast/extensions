@@ -1,4 +1,4 @@
-import { Form, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Clipboard, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { LocalStorage } from "@raycast/api";
 
@@ -91,12 +91,21 @@ export default function Command() {
     await showToast({ style: Toast.Style.Success, title: "Copied ✓" });
   }
 
+  async function clearDay() {
+    const confirmed = await confirmAlert({ title: "Clear Day?", message: "This will permanently delete all moments for today." });
+    if (!confirmed) return;
+    await LocalStorage.setItem(entriesKey(dateTag), "[]");
+    setEntries([]);
+    await showToast({ style: Toast.Style.Success, title: "Day cleared" });
+  }
+
   return (
     <Form
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Entry" icon="plus.circle" onSubmit={saveEntry} />
           <Action title="Copy Day" onAction={copyDay} />
+          {entries.length > 0 && <Action title="Clear Day" onAction={clearDay} />}
         </ActionPanel>
       }
       navigationTitle="MyDiary"

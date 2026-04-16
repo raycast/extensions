@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, showToast, Toast, Clipboard } from "@raycast/api";
+import { List, ActionPanel, Action, showToast, Toast, Clipboard, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { LocalStorage } from "@raycast/api";
 
@@ -20,13 +20,6 @@ function niceDate(tag: string): string {
   const month = d.toLocaleString("en-US", { month: "long" });
   const year = d.getFullYear();
   return `${day}${suffix} of ${month} ${year}`;
-}
-
-function shortDate(tag: string): string {
-  const d = parseTag(tag);
-  const day = d.getDate();
-  const suffix = [1,21,31].includes(day) ? "st" : [2,22].includes(day) ? "nd" : [3,23].includes(day) ? "rd" : "th";
-  return `${day}${suffix} ${d.toLocaleString("en-US", { month: "short" })}`;
 }
 
 // ─── Types ───────────────────────────────────────────────────
@@ -84,6 +77,19 @@ export default function Command() {
     await showToast({ style: Toast.Style.Success, title: "Copied" });
   }
 
+  async function deleteDay() {
+    if (!selectedTag) return;
+    const confirmed = await confirmAlert({ title: "Delete Day?", message: "This will permanently delete all moments for this day." });
+    if (!confirmed) return;
+    await LocalStorage.removeItem(entriesKey(selectedTag));
+    const stored = await LocalStorage.getItem<string>(ALL_DATES_KEY);
+    const dates: string[] = stored ? JSON.parse(stored) : [];
+    const updated = dates.filter(d => d !== selectedTag);
+    await LocalStorage.setItem(ALL_DATES_KEY, JSON.stringify(updated));
+    setSelectedTag(null);
+    await showToast({ style: Toast.Style.Success, title: "Day deleted" });
+  }
+
   // ── Day detail ──
   if (selectedTag) {
     const words = dayEntries.reduce((s, e) => s + e.text.split(" ").length, 0);
@@ -93,6 +99,7 @@ export default function Command() {
           <ActionPanel>
             <Action title="Back" icon="chevron.left" onAction={() => setSelectedTag(null)} />
             {dayEntries.length > 0 && <Action title="Copy Day" icon="doc.on.clipboard" onAction={copyDay} />}
+            <Action title="Delete Day" onAction={deleteDay} />
           </ActionPanel>
         }
         navigationTitle="MyDiary"
@@ -100,12 +107,6 @@ export default function Command() {
         <List.Item
           title={niceDate(selectedTag)}
           subtitle={`${dayEntries.length} moments · ${words} words`}
-          actions={
-            <ActionPanel>
-              <Action title="Back" onAction={() => setSelectedTag(null)} />
-              {dayEntries.length > 0 && <Action title="Copy Day" onAction={copyDay} />}
-            </ActionPanel>
-          }
         />
 
         {dayEntries.length > 0 && (
