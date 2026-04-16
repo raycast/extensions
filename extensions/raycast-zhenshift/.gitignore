@@ -1,0 +1,8 @@
+.worktrees/
+node_modules/
+dist/
+.DS_Store
+.turbo/
+.raycast/
+coverage/
+raycast-env.d.ts
