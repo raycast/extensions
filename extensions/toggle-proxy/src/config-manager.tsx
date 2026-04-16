@@ -15,7 +15,6 @@ import { useState, useEffect } from "react";
 import * as fs from "fs";
 import * as path from "path";
 import { getXrayPath } from "./utils/xray-config";
-import { Preferences } from "./utils/types";
 
 interface ConfigItem {
   name: string;

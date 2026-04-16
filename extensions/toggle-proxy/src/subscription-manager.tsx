@@ -20,8 +20,6 @@ import {
   updateSubscription,
 } from "./utils/subscription";
 
-import { Preferences } from "./utils/types";
-
 export default function SubscriptionManager() {
   const prefs = getPreferenceValues<Preferences>();
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);

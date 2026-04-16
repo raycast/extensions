@@ -1,13 +1,13 @@
 import { MenuBarExtra, getPreferenceValues, showToast, Toast, Icon, Color, environment, Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { execaCommand } from "execa";
-import { tmux } from "./utils/exec";
+import { tmux, ENV_PATH } from "./utils/exec";
 import * as fs from "fs";
 import * as path from "path";
 import * as net from "net";
 import { getXrayPath } from "./utils/xray-config";
 import { loadSubscriptionConfigs, getSubscriptions, updateSubscription } from "./utils/subscription";
-import { Preferences, safePort, sanitizeShellArg, shellEscape } from "./utils/types";
+import { safePort, sanitizeShellArg, shellEscape } from "./utils/types";
 
 const cache = new Cache({ namespace: "menu-bar-proxy" });
 
@@ -260,7 +260,8 @@ export default function MenuBarProxy() {
       const sessionName = getProxySessionName(configName);
       const safeConfigName = shellEscape(configName);
       const safeXrayPath = shellEscape(xrayPath);
-      const cmd = `new-session -d -s ${shellEscape(sessionName)} "cd ${safeXrayPath} && xray -config ${safeConfigName}"`;
+      const xrayBin = fs.existsSync(path.join(xrayPath, "xray")) ? "./xray" : "xray";
+      const cmd = `new-session -d -s ${shellEscape(sessionName)} "export PATH='${ENV_PATH}' && cd ${safeXrayPath} && ${xrayBin} -config ${safeConfigName}; echo EXIT_CODE=\\$?; sleep 30"`;
 
       await tmux(cmd);
 
@@ -283,6 +284,13 @@ export default function MenuBarProxy() {
           );
         } catch (captureError) {
           console.log("Could not capture session output:", captureError);
+          console.log("Debug info:", {
+            ENV_PATH,
+            xrayPath,
+            xrayBin: fs.existsSync(path.join(xrayPath, "xray")) ? "./xray" : "xray",
+            configName,
+            configExists: fs.existsSync(path.join(xrayPath, configName)),
+          });
         }
 
         showToast(Toast.Style.Failure, "Failed to start proxy. Check config and logs");

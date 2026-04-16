@@ -4,8 +4,6 @@ import * as fs from "fs";
 import * as path from "path";
 import { generateXrayConfig, getXrayPath } from "./utils/xray-config";
 
-import { Preferences } from "./utils/types";
-
 export default function GenerateXrayConfig() {
   const prefs = getPreferenceValues<Preferences>();
   const [vlessConfig, setVlessConfig] = useState<string>("");
@@ -40,9 +38,9 @@ export default function GenerateXrayConfig() {
       const config = generateXrayConfig(vlessConfig, {
         host: prefs.host,
         port: prefs.port,
-        customCountries,
-        customDomains,
-        customIPs,
+        customCountries: routingMode === "custom" ? customCountries : "",
+        customDomains: routingMode === "custom" ? customDomains : "",
+        customIPs: routingMode === "custom" ? customIPs : "",
       });
       const configJson = JSON.stringify(config, null, 2);
       setXrayConfig(configJson);

@@ -3,7 +3,8 @@ import * as fs from "fs";
 import * as path from "path";
 import { environment } from "@raycast/api";
 
-const PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+const DEFAULT_PATH = "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin";
+export const ENV_PATH = process.env.PATH ? `${process.env.PATH}:${DEFAULT_PATH}` : DEFAULT_PATH;
 // Use environment.supportPath for logs
 const logPath = path.join(environment.supportPath, "logs");
 
@@ -48,7 +49,7 @@ async function getTmuxPath(): Promise<string> {
     const { stdout } = await execaCommand("which tmux", {
       shell: true,
       env: {
-        PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
+        PATH: ENV_PATH,
       },
     });
 
@@ -70,7 +71,7 @@ export async function tmux(command: string) {
       shell: true,
       env: {
         ...process.env,
-        PATH: process.env.PATH || "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin",
+        PATH: ENV_PATH,
       },
     });
     return result;
@@ -84,7 +85,7 @@ export async function execWithEnv(command: string) {
   return await execaCommand(command, {
     env: {
       ...process.env,
-      PATH,
+      PATH: ENV_PATH,
     },
   });
 }

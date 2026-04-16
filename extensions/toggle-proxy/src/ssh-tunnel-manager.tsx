@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { loadFullSshConfig, SshHostEntry } from "./utils/ssh-config-parser";
-import { tmux } from "./utils/exec";
+import { tmux, ENV_PATH } from "./utils/exec";
 import { safePort, sanitizeShellArg } from "./utils/types";
 import * as path from "path";
 
@@ -92,7 +92,7 @@ function buildSshTunnelCmd(sessionName: string, localPort: number, remotePort: n
   const logDir = path.join(environment.supportPath, "logs");
   const logFile = path.join(logDir, `tunnel-${safeSession}.log`);
 
-  return `new-session -d -s ${safeSession} "mkdir -p '${logDir}' && ssh -L ${safeLocalPort}:127.0.0.1:${safeRemotePort} ${safeHost} -N > '${logFile}' 2>&1"`;
+  return `new-session -d -s ${safeSession} "export PATH='${ENV_PATH}' && mkdir -p '${logDir}' && ssh -L ${safeLocalPort}:127.0.0.1:${safeRemotePort} ${safeHost} -N > '${logFile}' 2>&1"`;
 }
 
 export default function SSHTunnelManager() {

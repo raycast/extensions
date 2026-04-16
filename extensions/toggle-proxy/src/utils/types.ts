@@ -1,11 +1,3 @@
-export type Preferences = {
-  host: string;
-  port: string;
-  xrayPath?: string;
-  defaultConfig?: string;
-  networkInterface?: string;
-};
-
 /**
  * Validates and returns a safe port number string.
  * Prevents command injection via port parameter.
