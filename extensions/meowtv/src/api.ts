@@ -3,14 +3,16 @@ import { decryptData } from "./crypto";
 
 const CONFIG = {
   BASE_URL: "https://api.hlowb.com",
-  USER_AGENT: "okhttp/4.9.0",
+  PROXY_URL: "https://meotvserve.utkarshg.workers.dev/api/proxy?url=",
   PACKAGE_NAME: "com.external.castle",
   CHANNEL: "IndiaA",
-  // This key is required for API authorization on certain endpoints
-  APK_SIGN_KEY: "ED0955EB04E67A1D9F3305B95454FED485261475",
 };
 
-let cachedSecurityKey: { key: string | null; cookie: string | null } | null = null;
+function getProxyUrl(url: string): string {
+  return `${CONFIG.PROXY_URL}${encodeURIComponent(url)}`;
+}
+
+let cachedSecurityKey: { key: string | null } | null = null;
 
 function quoteLargeInts(text: string): string {
   return text.replace(/(:\s*)(\d{16,})/g, '$1"$2"');
@@ -23,7 +25,7 @@ function parseJsonPreserveBigInt<T = unknown>(text: string): T {
 
 async function getSecurityKey(
   retries: number = 3,
-): Promise<{ key: string | null; cookie: string | null }> {
+): Promise<{ key: string | null }> {
   if (cachedSecurityKey && cachedSecurityKey.key) {
     return cachedSecurityKey;
   }
@@ -31,10 +33,7 @@ async function getSecurityKey(
   const url = `${CONFIG.BASE_URL}/v0.1/system/getSecurityKey/1?channel=${CONFIG.CHANNEL}&clientType=1&lang=en-US`;
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(url, {
-        headers: { "User-Agent": CONFIG.USER_AGENT },
-      });
-      const cookie = res.headers.get("set-cookie");
+      const res = await fetch(getProxyUrl(url));
       const text = await res.text();
 
       let json: { code: number; data?: string } | null = null;
@@ -45,7 +44,7 @@ async function getSecurityKey(
       }
 
       if (json && json.code === 200 && json.data) {
-        cachedSecurityKey = { key: json.data, cookie };
+        cachedSecurityKey = { key: json.data };
         return cachedSecurityKey;
       }
     } catch (e) {
@@ -55,7 +54,7 @@ async function getSecurityKey(
       });
     }
   }
-  return { key: null, cookie: null };
+  return { key: null };
 }
 
 interface SearchResponse {
@@ -78,7 +77,7 @@ export async function search(query: string): Promise<ContentItem[]> {
   const url = `${CONFIG.BASE_URL}/film-api/v1.1.0/movie/searchByKeyword?channel=${CONFIG.CHANNEL}&clientType=1&keyword=${encodeURIComponent(query)}&lang=en-US&mode=1&packageName=${CONFIG.PACKAGE_NAME}&page=1&size=30`;
 
   try {
-    const res = await fetch(url);
+    const res = await fetch(getProxyUrl(url));
     const payload = await res.text();
     const decryptedJson = decryptData(payload, key);
     if (!decryptedJson) return [];
@@ -125,7 +124,7 @@ export async function fetchDetails(id: string): Promise<MovieDetails | null> {
 
   const url = `${CONFIG.BASE_URL}/film-api/v1.9.9/movie?channel=${CONFIG.CHANNEL}&clientType=1&lang=en-US&movieId=${id}&packageName=${CONFIG.PACKAGE_NAME}`;
   try {
-    const res = await fetch(url);
+    const res = await fetch(getProxyUrl(url));
     const text = await res.text();
     const decryptedJson = decryptData(text, key);
     if (!decryptedJson) return null;
@@ -184,7 +183,6 @@ export async function fetchStreamUrl(
     appMarket: "GuanWang",
     clientType: "1",
     woolUser: "false",
-    apkSignKey: CONFIG.APK_SIGN_KEY,
     androidVersion: "13",
     movieId,
     episodeId: episodeId || movieId,
@@ -194,13 +192,8 @@ export async function fetchStreamUrl(
   };
 
   try {
-    const res = await fetch(url, {
+    const res = await fetch(getProxyUrl(url), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json; charset=utf-8",
-        "User-Agent": CONFIG.USER_AGENT,
-        Cookie: "hd=on",
-      },
       body: JSON.stringify(body),
     });
 
@@ -219,7 +212,6 @@ export async function fetchStreamUrl(
             url: s.url || "",
           }))
           .filter((s) => s.url),
-        headers: { Referer: CONFIG.BASE_URL },
       };
     }
   } catch (e) {

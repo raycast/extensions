@@ -234,7 +234,12 @@ function EpisodeSelector({ id, title }: { id: string; title: string }) {
           content={Icon.Video}
           actions={
             <ActionPanel>
-              <WatchAction id={id} episodeId={ep.id} season={ep.season} episode={ep.number} />
+              <WatchAction
+                id={id}
+                episodeId={ep.id}
+                season={ep.season}
+                episode={ep.number}
+              />
               <Action.CopyToClipboard
                 title="Copy Link"
                 content={`https://meowtv.vercel.app/watch/${id}?s=${ep.season}&e=${ep.number}`}

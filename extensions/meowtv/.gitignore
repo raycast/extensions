@@ -13,4 +13,4 @@ compiled_raycast_rust
 # misc
 .DS_Store
 .env.local
-meowtv-repo
+/meowtv-repo
