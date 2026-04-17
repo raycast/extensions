@@ -1,6 +1,6 @@
 # Cereal Eyes Changelog
 
-## [Initial Release] - 2026-04-17
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 

@@ -94,7 +94,7 @@ export default function CreateShare({ snippet, type, onSuccess }: Props) {
       }
 
       if (type === "restricted" && recipients.length > 0) {
-        payload.recipient_emails = recipients;
+        payload.recipient_emails = recipients.filter((r) => r.includes("@"));
       }
 
       if (expiresAt) {
@@ -148,38 +148,13 @@ export default function CreateShare({ snippet, type, onSuccess }: Props) {
           placeholder="Select or type email addresses…"
           info="Select from your contacts or type any email address"
         >
-          {contacts.length > 0 && (
+          {contacts.map((c) => (
             <Form.TagPicker.Item
-              key="__header_favorites"
-              value="__header_favorites"
-              title="— Favorites —"
+              key={c.email_normalized}
+              value={c.email}
+              title={c.is_favorite ? `★ ${c.display_name}` : c.display_name}
             />
-          )}
-          {contacts
-            .filter((c) => c.is_favorite)
-            .map((c) => (
-              <Form.TagPicker.Item
-                key={c.email_normalized}
-                value={c.email}
-                title={c.display_name}
-              />
-            ))}
-          {contacts.filter((c) => !c.is_favorite).length > 0 && (
-            <Form.TagPicker.Item
-              key="__header_contacts"
-              value="__header_contacts"
-              title="— All Contacts —"
-            />
-          )}
-          {contacts
-            .filter((c) => !c.is_favorite)
-            .map((c) => (
-              <Form.TagPicker.Item
-                key={c.email_normalized}
-                value={c.email}
-                title={c.display_name}
-              />
-            ))}
+          ))}
         </Form.TagPicker>
       )}
 

@@ -80,9 +80,3 @@ export interface ApiListResponse<T> {
     total: number;
   };
 }
-
-export interface Preferences {
-  apiToken: string;
-  devApiToken: string;
-  devApiBaseUrl: string;
-}

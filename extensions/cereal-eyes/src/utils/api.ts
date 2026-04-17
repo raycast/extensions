@@ -4,19 +4,17 @@ import type {
   ApiResponse,
   ContactSuggestions,
   Contact,
-  Preferences,
   Snippet,
   SnippetCreatePayload,
   SnippetShare,
   SnippetSharePayload,
 } from "../types";
-
 const PROD_BASE_URL = "https://cereal.email/api/v1";
 
-// Node.js doesn't use the macOS system keychain, so local .test TLS certs
-// (Herd/Valet CA) are untrusted. NODE_TLS_REJECT_UNAUTHORIZED is the
-// standard Node.js mechanism — set it here before any requests fire.
-// Importing node:https directly breaks Raycast's bundler, so we avoid it.
+// WARNING: This flag is process-wide — it disables TLS verification for ALL
+// outgoing HTTPS requests in dev mode, not just requests to the local .test
+// domain. Only use a local dev token that has no access to production data.
+// Importing node:https to scope this per-request breaks Raycast's bundler.
 if (environment.isDevelopment) {
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 }
