@@ -8,8 +8,9 @@ import {
   Toast,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { search, fetchDetails } from "./api";
+import { search, fetchDetails, fetchStreamUrl } from "./api";
 import { ContentItem, MovieDetails, Episode } from "./types";
+import { Clipboard } from "@raycast/api";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -233,7 +234,7 @@ function EpisodeSelector({ id, title }: { id: string; title: string }) {
           content={Icon.Video}
           actions={
             <ActionPanel>
-              <WatchAction id={id} season={ep.season} episode={ep.number} />
+              <WatchAction id={id} episodeId={ep.id} season={ep.season} episode={ep.number} />
               <Action.CopyToClipboard
                 title="Copy Link"
                 content={`https://meowtv.vercel.app/watch/${id}?s=${ep.season}&e=${ep.number}`}
@@ -248,14 +249,45 @@ function EpisodeSelector({ id, title }: { id: string; title: string }) {
 
 function WatchAction({
   id,
+  episodeId,
   season,
   episode,
 }: {
   id: string;
+  episodeId?: string;
   season?: number;
   episode?: number;
 }) {
   const watchUrl = `https://meowtv.vercel.app/watch/${id}${season ? `?s=${season}${episode ? `&e=${episode}` : ""}` : ""}`;
 
-  return <Action.OpenInBrowser title="Watch on MeowTV" url={watchUrl} />;
+  return (
+    <>
+      <Action.OpenInBrowser title="Watch on MeowTV" url={watchUrl} />
+      <Action
+        title="Copy Direct Video Link"
+        icon={Icon.Link}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        onAction={async () => {
+          const toast = await showToast({
+            style: Toast.Style.Animated,
+            title: "Fetching stream URL...",
+          });
+          try {
+            const stream = await fetchStreamUrl(id, episodeId);
+            if (stream?.videoUrl) {
+              await Clipboard.copy(stream.videoUrl);
+              toast.style = Toast.Style.Success;
+              toast.title = "Copied to clipboard";
+            } else {
+              throw new Error("No video URL found");
+            }
+          } catch (e) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to fetch stream URL";
+            toast.message = String(e);
+          }
+        }}
+      />
+    </>
+  );
 }

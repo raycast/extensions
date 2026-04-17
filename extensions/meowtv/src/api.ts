@@ -1,11 +1,19 @@
 import { ContentItem, MovieDetails, VideoResponse } from "./types";
 import { decryptData } from "./crypto";
-import fetch from "node-fetch";
 
-const MAIN_URL = "https://api.hlowb.com";
+const CONFIG = {
+  BASE_URL: "https://api.hlowb.com",
+  USER_AGENT: "okhttp/4.9.0",
+  PACKAGE_NAME: "com.external.castle",
+  CHANNEL: "IndiaA",
+  // This key is required for API authorization on certain endpoints
+  APK_SIGN_KEY: "ED0955EB04E67A1D9F3305B95454FED485261475",
+};
+
+let cachedSecurityKey: { key: string | null; cookie: string | null } | null = null;
 
 function quoteLargeInts(text: string): string {
-  return text.replace(/(:\\s*)(\\d{16,})/g, '$1"$2"');
+  return text.replace(/(:\s*)(\d{16,})/g, '$1"$2"');
 }
 
 function parseJsonPreserveBigInt<T = unknown>(text: string): T {
@@ -16,11 +24,15 @@ function parseJsonPreserveBigInt<T = unknown>(text: string): T {
 async function getSecurityKey(
   retries: number = 3,
 ): Promise<{ key: string | null; cookie: string | null }> {
-  const url = `${MAIN_URL}/v0.1/system/getSecurityKey/1?channel=IndiaA&clientType=1&lang=en-US`;
+  if (cachedSecurityKey && cachedSecurityKey.key) {
+    return cachedSecurityKey;
+  }
+
+  const url = `${CONFIG.BASE_URL}/v0.1/system/getSecurityKey/1?channel=${CONFIG.CHANNEL}&clientType=1&lang=en-US`;
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const res = await fetch(url, {
-        headers: { "User-Agent": "okhttp/4.9.0" },
+        headers: { "User-Agent": CONFIG.USER_AGENT },
       });
       const cookie = res.headers.get("set-cookie");
       const text = await res.text();
@@ -33,7 +45,8 @@ async function getSecurityKey(
       }
 
       if (json && json.code === 200 && json.data) {
-        return { key: json.data, cookie };
+        cachedSecurityKey = { key: json.data, cookie };
+        return cachedSecurityKey;
       }
     } catch (e) {
       console.warn("[MeowTV] getSecurityKey failed", {
@@ -62,7 +75,7 @@ export async function search(query: string): Promise<ContentItem[]> {
   const { key } = await getSecurityKey();
   if (!key) return [];
 
-  const url = `${MAIN_URL}/film-api/v1.1.0/movie/searchByKeyword?channel=IndiaA&clientType=1&keyword=${encodeURIComponent(query)}&lang=en-US&mode=1&packageName=com.external.castle&page=1&size=30`;
+  const url = `${CONFIG.BASE_URL}/film-api/v1.1.0/movie/searchByKeyword?channel=${CONFIG.CHANNEL}&clientType=1&keyword=${encodeURIComponent(query)}&lang=en-US&mode=1&packageName=${CONFIG.PACKAGE_NAME}&page=1&size=30`;
 
   try {
     const res = await fetch(url);
@@ -110,7 +123,7 @@ export async function fetchDetails(id: string): Promise<MovieDetails | null> {
   const { key } = await getSecurityKey();
   if (!key) return null;
 
-  const url = `${MAIN_URL}/film-api/v1.9.9/movie?channel=IndiaA&clientType=1&lang=en-US&movieId=${id}&packageName=com.external.castle`;
+  const url = `${CONFIG.BASE_URL}/film-api/v1.9.9/movie?channel=${CONFIG.CHANNEL}&clientType=1&lang=en-US&movieId=${id}&packageName=${CONFIG.PACKAGE_NAME}`;
   try {
     const res = await fetch(url);
     const text = await res.text();
@@ -164,20 +177,20 @@ export async function fetchStreamUrl(
   if (!key) return null;
 
   // Castle API resolves quality 2 (720p) as a good default
-  const url = `${MAIN_URL}/film-api/v2.0.1/movie/getVideo2?clientType=1&packageName=com.external.castle&channel=IndiaA&lang=en-US`;
+  const url = `${CONFIG.BASE_URL}/film-api/v2.0.1/movie/getVideo2?clientType=1&packageName=${CONFIG.PACKAGE_NAME}&channel=${CONFIG.CHANNEL}&lang=en-US`;
 
   const body = {
     mode: "1",
     appMarket: "GuanWang",
     clientType: "1",
     woolUser: "false",
-    apkSignKey: "ED0955EB04E67A1D9F3305B95454FED485261475",
+    apkSignKey: CONFIG.APK_SIGN_KEY,
     androidVersion: "13",
     movieId,
     episodeId: episodeId || movieId,
     isNewUser: "true",
     resolution: "3", // Higher resolution if possible
-    packageName: "com.external.castle",
+    packageName: CONFIG.PACKAGE_NAME,
   };
 
   try {
@@ -185,7 +198,7 @@ export async function fetchStreamUrl(
       method: "POST",
       headers: {
         "Content-Type": "application/json; charset=utf-8",
-        "User-Agent": "okhttp/4.9.0",
+        "User-Agent": CONFIG.USER_AGENT,
         Cookie: "hd=on",
       },
       body: JSON.stringify(body),
@@ -206,7 +219,7 @@ export async function fetchStreamUrl(
             url: s.url || "",
           }))
           .filter((s) => s.url),
-        headers: { Referer: MAIN_URL },
+        headers: { Referer: CONFIG.BASE_URL },
       };
     }
   } catch (e) {
