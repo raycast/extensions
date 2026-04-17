@@ -4,8 +4,10 @@
 
 Added functionality to view and select submodules in a repo
 
-- View a list of submodules in a repo, and select a submodule as your working repo
+- View a list of submodules in a repo
+- Select a submodule as your working repo from the Git Status list
 - Open submodules remote repo
+- Include the repo name in the navigation title when you are in a repo.
 - Fix some bugs and cleanup some code
 
 ## [Working with worktrees] - 2026-02-12
