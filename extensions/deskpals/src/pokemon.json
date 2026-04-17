@@ -1,0 +1,2262 @@
+[
+  {
+    "name": "abra",
+    "gen": 1
+  },
+  {
+    "name": "aerodactyl",
+    "gen": 1
+  },
+  {
+    "name": "alakazam",
+    "gen": 1
+  },
+  {
+    "name": "arbok",
+    "gen": 1
+  },
+  {
+    "name": "arcanine",
+    "gen": 1
+  },
+  {
+    "name": "articuno",
+    "gen": 1
+  },
+  {
+    "name": "beedrill",
+    "gen": 1
+  },
+  {
+    "name": "bellsprout",
+    "gen": 1
+  },
+  {
+    "name": "blastoise",
+    "gen": 1
+  },
+  {
+    "name": "bulbasaur",
+    "gen": 1
+  },
+  {
+    "name": "butterfree",
+    "gen": 1
+  },
+  {
+    "name": "caterpie",
+    "gen": 1
+  },
+  {
+    "name": "chansey",
+    "gen": 1
+  },
+  {
+    "name": "charizard",
+    "gen": 1
+  },
+  {
+    "name": "charmander",
+    "gen": 1
+  },
+  {
+    "name": "charmeleon",
+    "gen": 1
+  },
+  {
+    "name": "clefable",
+    "gen": 1
+  },
+  {
+    "name": "clefairy",
+    "gen": 1
+  },
+  {
+    "name": "cloyster",
+    "gen": 1
+  },
+  {
+    "name": "cubone",
+    "gen": 1
+  },
+  {
+    "name": "dewgong",
+    "gen": 1
+  },
+  {
+    "name": "diglett",
+    "gen": 1
+  },
+  {
+    "name": "ditto",
+    "gen": 1
+  },
+  {
+    "name": "dodrio",
+    "gen": 1
+  },
+  {
+    "name": "doduo",
+    "gen": 1
+  },
+  {
+    "name": "dragonair",
+    "gen": 1
+  },
+  {
+    "name": "dragonite",
+    "gen": 1
+  },
+  {
+    "name": "dratini",
+    "gen": 1
+  },
+  {
+    "name": "drowzee",
+    "gen": 1
+  },
+  {
+    "name": "dugtrio",
+    "gen": 1
+  },
+  {
+    "name": "eevee",
+    "gen": 1
+  },
+  {
+    "name": "ekans",
+    "gen": 1
+  },
+  {
+    "name": "electabuzz",
+    "gen": 1
+  },
+  {
+    "name": "electrode",
+    "gen": 1
+  },
+  {
+    "name": "exeggcute",
+    "gen": 1
+  },
+  {
+    "name": "exeggutor",
+    "gen": 1
+  },
+  {
+    "name": "farfetchd",
+    "gen": 1
+  },
+  {
+    "name": "fearow",
+    "gen": 1
+  },
+  {
+    "name": "flareon",
+    "gen": 1
+  },
+  {
+    "name": "gastly",
+    "gen": 1
+  },
+  {
+    "name": "gengar",
+    "gen": 1
+  },
+  {
+    "name": "geodude",
+    "gen": 1
+  },
+  {
+    "name": "gloom",
+    "gen": 1
+  },
+  {
+    "name": "golbat",
+    "gen": 1
+  },
+  {
+    "name": "goldeen",
+    "gen": 1
+  },
+  {
+    "name": "golduck",
+    "gen": 1
+  },
+  {
+    "name": "golem",
+    "gen": 1
+  },
+  {
+    "name": "graveler",
+    "gen": 1
+  },
+  {
+    "name": "grimer",
+    "gen": 1
+  },
+  {
+    "name": "growlithe",
+    "gen": 1
+  },
+  {
+    "name": "gyarados",
+    "gen": 1
+  },
+  {
+    "name": "haunter",
+    "gen": 1
+  },
+  {
+    "name": "hitmonchan",
+    "gen": 1
+  },
+  {
+    "name": "hitmonlee",
+    "gen": 1
+  },
+  {
+    "name": "horsea",
+    "gen": 1
+  },
+  {
+    "name": "hypno",
+    "gen": 1
+  },
+  {
+    "name": "ivysaur",
+    "gen": 1
+  },
+  {
+    "name": "jigglypuff",
+    "gen": 1
+  },
+  {
+    "name": "jolteon",
+    "gen": 1
+  },
+  {
+    "name": "jynx",
+    "gen": 1
+  },
+  {
+    "name": "kabuto",
+    "gen": 1
+  },
+  {
+    "name": "kabutops",
+    "gen": 1
+  },
+  {
+    "name": "kadabra",
+    "gen": 1
+  },
+  {
+    "name": "kakuna",
+    "gen": 1
+  },
+  {
+    "name": "kangaskhan",
+    "gen": 1
+  },
+  {
+    "name": "kingler",
+    "gen": 1
+  },
+  {
+    "name": "koffing",
+    "gen": 1
+  },
+  {
+    "name": "krabby",
+    "gen": 1
+  },
+  {
+    "name": "lapras",
+    "gen": 1
+  },
+  {
+    "name": "lickitung",
+    "gen": 1
+  },
+  {
+    "name": "machamp",
+    "gen": 1
+  },
+  {
+    "name": "machoke",
+    "gen": 1
+  },
+  {
+    "name": "machop",
+    "gen": 1
+  },
+  {
+    "name": "magikarp",
+    "gen": 1
+  },
+  {
+    "name": "magmar",
+    "gen": 1
+  },
+  {
+    "name": "magnemite",
+    "gen": 1
+  },
+  {
+    "name": "magneton",
+    "gen": 1
+  },
+  {
+    "name": "mankey",
+    "gen": 1
+  },
+  {
+    "name": "marowak",
+    "gen": 1
+  },
+  {
+    "name": "meowth",
+    "gen": 1
+  },
+  {
+    "name": "metapod",
+    "gen": 1
+  },
+  {
+    "name": "mew",
+    "gen": 1
+  },
+  {
+    "name": "mewtwo",
+    "gen": 1
+  },
+  {
+    "name": "moltres",
+    "gen": 1
+  },
+  {
+    "name": "mrmime",
+    "gen": 1
+  },
+  {
+    "name": "muk",
+    "gen": 1
+  },
+  {
+    "name": "nidoking",
+    "gen": 1
+  },
+  {
+    "name": "nidoqueen",
+    "gen": 1
+  },
+  {
+    "name": "nidoran_female",
+    "gen": 1
+  },
+  {
+    "name": "nidoran_male",
+    "gen": 1
+  },
+  {
+    "name": "nidorina",
+    "gen": 1
+  },
+  {
+    "name": "nidorino",
+    "gen": 1
+  },
+  {
+    "name": "ninetales",
+    "gen": 1
+  },
+  {
+    "name": "oddish",
+    "gen": 1
+  },
+  {
+    "name": "omanyte",
+    "gen": 1
+  },
+  {
+    "name": "omastar",
+    "gen": 1
+  },
+  {
+    "name": "onix",
+    "gen": 1
+  },
+  {
+    "name": "paras",
+    "gen": 1
+  },
+  {
+    "name": "parasect",
+    "gen": 1
+  },
+  {
+    "name": "persian",
+    "gen": 1
+  },
+  {
+    "name": "pidgeot",
+    "gen": 1
+  },
+  {
+    "name": "pidgeotto",
+    "gen": 1
+  },
+  {
+    "name": "pidgey",
+    "gen": 1
+  },
+  {
+    "name": "pikachu",
+    "gen": 1
+  },
+  {
+    "name": "pikachu_female",
+    "gen": 1
+  },
+  {
+    "name": "pinsir",
+    "gen": 1
+  },
+  {
+    "name": "poliwag",
+    "gen": 1
+  },
+  {
+    "name": "poliwhirl",
+    "gen": 1
+  },
+  {
+    "name": "poliwrath",
+    "gen": 1
+  },
+  {
+    "name": "ponyta",
+    "gen": 1
+  },
+  {
+    "name": "porygon",
+    "gen": 1
+  },
+  {
+    "name": "primeape",
+    "gen": 1
+  },
+  {
+    "name": "psyduck",
+    "gen": 1
+  },
+  {
+    "name": "raichu",
+    "gen": 1
+  },
+  {
+    "name": "rapidash",
+    "gen": 1
+  },
+  {
+    "name": "raticate",
+    "gen": 1
+  },
+  {
+    "name": "rattata",
+    "gen": 1
+  },
+  {
+    "name": "rhydon",
+    "gen": 1
+  },
+  {
+    "name": "rhyhorn",
+    "gen": 1
+  },
+  {
+    "name": "sandshrew",
+    "gen": 1
+  },
+  {
+    "name": "sandslash",
+    "gen": 1
+  },
+  {
+    "name": "scyther",
+    "gen": 1
+  },
+  {
+    "name": "seadra",
+    "gen": 1
+  },
+  {
+    "name": "seaking",
+    "gen": 1
+  },
+  {
+    "name": "seel",
+    "gen": 1
+  },
+  {
+    "name": "shellder",
+    "gen": 1
+  },
+  {
+    "name": "slowbro",
+    "gen": 1
+  },
+  {
+    "name": "slowpoke",
+    "gen": 1
+  },
+  {
+    "name": "snorlax",
+    "gen": 1
+  },
+  {
+    "name": "spearow",
+    "gen": 1
+  },
+  {
+    "name": "squirtle",
+    "gen": 1
+  },
+  {
+    "name": "starmie",
+    "gen": 1
+  },
+  {
+    "name": "staryu",
+    "gen": 1
+  },
+  {
+    "name": "tangela",
+    "gen": 1
+  },
+  {
+    "name": "tauros",
+    "gen": 1
+  },
+  {
+    "name": "tentacool",
+    "gen": 1
+  },
+  {
+    "name": "tentacruel",
+    "gen": 1
+  },
+  {
+    "name": "vaporeon",
+    "gen": 1
+  },
+  {
+    "name": "venomoth",
+    "gen": 1
+  },
+  {
+    "name": "venonat",
+    "gen": 1
+  },
+  {
+    "name": "venusaur",
+    "gen": 1
+  },
+  {
+    "name": "venusaur_female",
+    "gen": 1
+  },
+  {
+    "name": "victreebel",
+    "gen": 1
+  },
+  {
+    "name": "vileplume",
+    "gen": 1
+  },
+  {
+    "name": "voltorb",
+    "gen": 1
+  },
+  {
+    "name": "vulpix",
+    "gen": 1
+  },
+  {
+    "name": "wartortle",
+    "gen": 1
+  },
+  {
+    "name": "weedle",
+    "gen": 1
+  },
+  {
+    "name": "weepinbell",
+    "gen": 1
+  },
+  {
+    "name": "weezing",
+    "gen": 1
+  },
+  {
+    "name": "wigglytuff",
+    "gen": 1
+  },
+  {
+    "name": "zapdos",
+    "gen": 1
+  },
+  {
+    "name": "zubat",
+    "gen": 1
+  },
+  {
+    "name": "aipom",
+    "gen": 2
+  },
+  {
+    "name": "ampharos",
+    "gen": 2
+  },
+  {
+    "name": "ariados",
+    "gen": 2
+  },
+  {
+    "name": "azumarill",
+    "gen": 2
+  },
+  {
+    "name": "bayleef",
+    "gen": 2
+  },
+  {
+    "name": "bellossom",
+    "gen": 2
+  },
+  {
+    "name": "blissey",
+    "gen": 2
+  },
+  {
+    "name": "celebi",
+    "gen": 2
+  },
+  {
+    "name": "chikorita",
+    "gen": 2
+  },
+  {
+    "name": "chinchou",
+    "gen": 2
+  },
+  {
+    "name": "cleffa",
+    "gen": 2
+  },
+  {
+    "name": "corsola",
+    "gen": 2
+  },
+  {
+    "name": "crobat",
+    "gen": 2
+  },
+  {
+    "name": "croconaw",
+    "gen": 2
+  },
+  {
+    "name": "cyndaquil",
+    "gen": 2
+  },
+  {
+    "name": "delibird",
+    "gen": 2
+  },
+  {
+    "name": "donphan",
+    "gen": 2
+  },
+  {
+    "name": "dunsparce",
+    "gen": 2
+  },
+  {
+    "name": "elekid",
+    "gen": 2
+  },
+  {
+    "name": "entei",
+    "gen": 2
+  },
+  {
+    "name": "espeon",
+    "gen": 2
+  },
+  {
+    "name": "feraligatr",
+    "gen": 2
+  },
+  {
+    "name": "flaaffy",
+    "gen": 2
+  },
+  {
+    "name": "forretress",
+    "gen": 2
+  },
+  {
+    "name": "furret",
+    "gen": 2
+  },
+  {
+    "name": "girafarig",
+    "gen": 2
+  },
+  {
+    "name": "gligar",
+    "gen": 2
+  },
+  {
+    "name": "granbull",
+    "gen": 2
+  },
+  {
+    "name": "heracross_female",
+    "gen": 2
+  },
+  {
+    "name": "heracross_male",
+    "gen": 2
+  },
+  {
+    "name": "hitmontop",
+    "gen": 2
+  },
+  {
+    "name": "hooh",
+    "gen": 2
+  },
+  {
+    "name": "hoothoot",
+    "gen": 2
+  },
+  {
+    "name": "hoppip",
+    "gen": 2
+  },
+  {
+    "name": "houndoom",
+    "gen": 2
+  },
+  {
+    "name": "houndour",
+    "gen": 2
+  },
+  {
+    "name": "igglybuff",
+    "gen": 2
+  },
+  {
+    "name": "jumpluff",
+    "gen": 2
+  },
+  {
+    "name": "kingdra",
+    "gen": 2
+  },
+  {
+    "name": "lanturn",
+    "gen": 2
+  },
+  {
+    "name": "larvitar",
+    "gen": 2
+  },
+  {
+    "name": "ledian",
+    "gen": 2
+  },
+  {
+    "name": "ledyba",
+    "gen": 2
+  },
+  {
+    "name": "lugia",
+    "gen": 2
+  },
+  {
+    "name": "magby",
+    "gen": 2
+  },
+  {
+    "name": "magcargo",
+    "gen": 2
+  },
+  {
+    "name": "mantine",
+    "gen": 2
+  },
+  {
+    "name": "mareep",
+    "gen": 2
+  },
+  {
+    "name": "marill",
+    "gen": 2
+  },
+  {
+    "name": "meganium",
+    "gen": 2
+  },
+  {
+    "name": "meganium_female",
+    "gen": 2
+  },
+  {
+    "name": "miltank",
+    "gen": 2
+  },
+  {
+    "name": "misdreavus",
+    "gen": 2
+  },
+  {
+    "name": "murkrow",
+    "gen": 2
+  },
+  {
+    "name": "natu",
+    "gen": 2
+  },
+  {
+    "name": "noctowl",
+    "gen": 2
+  },
+  {
+    "name": "octillery",
+    "gen": 2
+  },
+  {
+    "name": "phanpy",
+    "gen": 2
+  },
+  {
+    "name": "pichu",
+    "gen": 2
+  },
+  {
+    "name": "pichu_spiky_eared",
+    "gen": 2
+  },
+  {
+    "name": "piloswine",
+    "gen": 2
+  },
+  {
+    "name": "pineco",
+    "gen": 2
+  },
+  {
+    "name": "politoed",
+    "gen": 2
+  },
+  {
+    "name": "porygon2",
+    "gen": 2
+  },
+  {
+    "name": "pupitar",
+    "gen": 2
+  },
+  {
+    "name": "quagsire",
+    "gen": 2
+  },
+  {
+    "name": "quilava",
+    "gen": 2
+  },
+  {
+    "name": "qwilfish",
+    "gen": 2
+  },
+  {
+    "name": "raikou",
+    "gen": 2
+  },
+  {
+    "name": "remoraid",
+    "gen": 2
+  },
+  {
+    "name": "scizor",
+    "gen": 2
+  },
+  {
+    "name": "sentret",
+    "gen": 2
+  },
+  {
+    "name": "shuckle",
+    "gen": 2
+  },
+  {
+    "name": "skarmory",
+    "gen": 2
+  },
+  {
+    "name": "skiploom",
+    "gen": 2
+  },
+  {
+    "name": "slowking",
+    "gen": 2
+  },
+  {
+    "name": "slugma",
+    "gen": 2
+  },
+  {
+    "name": "smeargle",
+    "gen": 2
+  },
+  {
+    "name": "smoochum",
+    "gen": 2
+  },
+  {
+    "name": "sneasel",
+    "gen": 2
+  },
+  {
+    "name": "snubbull",
+    "gen": 2
+  },
+  {
+    "name": "spinarak",
+    "gen": 2
+  },
+  {
+    "name": "stantler",
+    "gen": 2
+  },
+  {
+    "name": "steelix",
+    "gen": 2
+  },
+  {
+    "name": "steelix_female",
+    "gen": 2
+  },
+  {
+    "name": "sudowoodo",
+    "gen": 2
+  },
+  {
+    "name": "suicune",
+    "gen": 2
+  },
+  {
+    "name": "sunflora",
+    "gen": 2
+  },
+  {
+    "name": "sunkern",
+    "gen": 2
+  },
+  {
+    "name": "swinub",
+    "gen": 2
+  },
+  {
+    "name": "teddiursa",
+    "gen": 2
+  },
+  {
+    "name": "togepi",
+    "gen": 2
+  },
+  {
+    "name": "togetic",
+    "gen": 2
+  },
+  {
+    "name": "totodile",
+    "gen": 2
+  },
+  {
+    "name": "typhlosion",
+    "gen": 2
+  },
+  {
+    "name": "tyranitar",
+    "gen": 2
+  },
+  {
+    "name": "tyrogue",
+    "gen": 2
+  },
+  {
+    "name": "umbreon",
+    "gen": 2
+  },
+  {
+    "name": "unown_a",
+    "gen": 2
+  },
+  {
+    "name": "unown_b",
+    "gen": 2
+  },
+  {
+    "name": "unown_c",
+    "gen": 2
+  },
+  {
+    "name": "unown_d",
+    "gen": 2
+  },
+  {
+    "name": "unown_e",
+    "gen": 2
+  },
+  {
+    "name": "unown_exclamation",
+    "gen": 2
+  },
+  {
+    "name": "unown_f",
+    "gen": 2
+  },
+  {
+    "name": "unown_g",
+    "gen": 2
+  },
+  {
+    "name": "unown_h",
+    "gen": 2
+  },
+  {
+    "name": "unown_i",
+    "gen": 2
+  },
+  {
+    "name": "unown_j",
+    "gen": 2
+  },
+  {
+    "name": "unown_k",
+    "gen": 2
+  },
+  {
+    "name": "unown_l",
+    "gen": 2
+  },
+  {
+    "name": "unown_m",
+    "gen": 2
+  },
+  {
+    "name": "unown_n",
+    "gen": 2
+  },
+  {
+    "name": "unown_o",
+    "gen": 2
+  },
+  {
+    "name": "unown_p",
+    "gen": 2
+  },
+  {
+    "name": "unown_q",
+    "gen": 2
+  },
+  {
+    "name": "unown_question",
+    "gen": 2
+  },
+  {
+    "name": "unown_r",
+    "gen": 2
+  },
+  {
+    "name": "unown_s",
+    "gen": 2
+  },
+  {
+    "name": "unown_t",
+    "gen": 2
+  },
+  {
+    "name": "unown_u",
+    "gen": 2
+  },
+  {
+    "name": "unown_v",
+    "gen": 2
+  },
+  {
+    "name": "unown_w",
+    "gen": 2
+  },
+  {
+    "name": "unown_x",
+    "gen": 2
+  },
+  {
+    "name": "unown_y",
+    "gen": 2
+  },
+  {
+    "name": "unown_z",
+    "gen": 2
+  },
+  {
+    "name": "ursaring",
+    "gen": 2
+  },
+  {
+    "name": "wobbuffet_female",
+    "gen": 2
+  },
+  {
+    "name": "wobbuffet_male",
+    "gen": 2
+  },
+  {
+    "name": "wooper",
+    "gen": 2
+  },
+  {
+    "name": "xatu",
+    "gen": 2
+  },
+  {
+    "name": "yanma",
+    "gen": 2
+  },
+  {
+    "name": "absol",
+    "gen": 3
+  },
+  {
+    "name": "aggron",
+    "gen": 3
+  },
+  {
+    "name": "altaria",
+    "gen": 3
+  },
+  {
+    "name": "anorith",
+    "gen": 3
+  },
+  {
+    "name": "armaldo",
+    "gen": 3
+  },
+  {
+    "name": "aron",
+    "gen": 3
+  },
+  {
+    "name": "azurill",
+    "gen": 3
+  },
+  {
+    "name": "bagon",
+    "gen": 3
+  },
+  {
+    "name": "baltoy",
+    "gen": 3
+  },
+  {
+    "name": "banette",
+    "gen": 3
+  },
+  {
+    "name": "barboach",
+    "gen": 3
+  },
+  {
+    "name": "beautifly",
+    "gen": 3
+  },
+  {
+    "name": "beldum",
+    "gen": 3
+  },
+  {
+    "name": "blaziken",
+    "gen": 3
+  },
+  {
+    "name": "breloom",
+    "gen": 3
+  },
+  {
+    "name": "cacnea",
+    "gen": 3
+  },
+  {
+    "name": "cacturne",
+    "gen": 3
+  },
+  {
+    "name": "camerupt",
+    "gen": 3
+  },
+  {
+    "name": "carvanha",
+    "gen": 3
+  },
+  {
+    "name": "cascoon",
+    "gen": 3
+  },
+  {
+    "name": "castform",
+    "gen": 3
+  },
+  {
+    "name": "chimecho",
+    "gen": 3
+  },
+  {
+    "name": "clamperl",
+    "gen": 3
+  },
+  {
+    "name": "claydol",
+    "gen": 3
+  },
+  {
+    "name": "combusken",
+    "gen": 3
+  },
+  {
+    "name": "corphish",
+    "gen": 3
+  },
+  {
+    "name": "cradily",
+    "gen": 3
+  },
+  {
+    "name": "crawdaunt",
+    "gen": 3
+  },
+  {
+    "name": "delcatty",
+    "gen": 3
+  },
+  {
+    "name": "deoxys",
+    "gen": 3
+  },
+  {
+    "name": "deoxys_attack",
+    "gen": 3
+  },
+  {
+    "name": "deoxys_defense",
+    "gen": 3
+  },
+  {
+    "name": "deoxys_speed",
+    "gen": 3
+  },
+  {
+    "name": "dusclops",
+    "gen": 3
+  },
+  {
+    "name": "duskull",
+    "gen": 3
+  },
+  {
+    "name": "dustox",
+    "gen": 3
+  },
+  {
+    "name": "electrike",
+    "gen": 3
+  },
+  {
+    "name": "exploud",
+    "gen": 3
+  },
+  {
+    "name": "feebas",
+    "gen": 3
+  },
+  {
+    "name": "flygon",
+    "gen": 3
+  },
+  {
+    "name": "gardevoir",
+    "gen": 3
+  },
+  {
+    "name": "glalie",
+    "gen": 3
+  },
+  {
+    "name": "gorebyss",
+    "gen": 3
+  },
+  {
+    "name": "groudon",
+    "gen": 3
+  },
+  {
+    "name": "grovyle",
+    "gen": 3
+  },
+  {
+    "name": "grumpig",
+    "gen": 3
+  },
+  {
+    "name": "gulpin",
+    "gen": 3
+  },
+  {
+    "name": "hariyama",
+    "gen": 3
+  },
+  {
+    "name": "huntail",
+    "gen": 3
+  },
+  {
+    "name": "illumise",
+    "gen": 3
+  },
+  {
+    "name": "jirachi",
+    "gen": 3
+  },
+  {
+    "name": "kecleon",
+    "gen": 3
+  },
+  {
+    "name": "kirlia",
+    "gen": 3
+  },
+  {
+    "name": "kyogre",
+    "gen": 3
+  },
+  {
+    "name": "lairon",
+    "gen": 3
+  },
+  {
+    "name": "latias",
+    "gen": 3
+  },
+  {
+    "name": "latios",
+    "gen": 3
+  },
+  {
+    "name": "lileep",
+    "gen": 3
+  },
+  {
+    "name": "linoone",
+    "gen": 3
+  },
+  {
+    "name": "lombre",
+    "gen": 3
+  },
+  {
+    "name": "lotad",
+    "gen": 3
+  },
+  {
+    "name": "loudred",
+    "gen": 3
+  },
+  {
+    "name": "ludicolo",
+    "gen": 3
+  },
+  {
+    "name": "lunatone",
+    "gen": 3
+  },
+  {
+    "name": "luvdisc",
+    "gen": 3
+  },
+  {
+    "name": "makuhita",
+    "gen": 3
+  },
+  {
+    "name": "manectric",
+    "gen": 3
+  },
+  {
+    "name": "marshtomp",
+    "gen": 3
+  },
+  {
+    "name": "masquerain",
+    "gen": 3
+  },
+  {
+    "name": "mawile",
+    "gen": 3
+  },
+  {
+    "name": "medicham",
+    "gen": 3
+  },
+  {
+    "name": "meditite",
+    "gen": 3
+  },
+  {
+    "name": "metagross",
+    "gen": 3
+  },
+  {
+    "name": "metang",
+    "gen": 3
+  },
+  {
+    "name": "mightyena",
+    "gen": 3
+  },
+  {
+    "name": "milotic",
+    "gen": 3
+  },
+  {
+    "name": "minun",
+    "gen": 3
+  },
+  {
+    "name": "mudkip",
+    "gen": 3
+  },
+  {
+    "name": "nincada",
+    "gen": 3
+  },
+  {
+    "name": "ninjask",
+    "gen": 3
+  },
+  {
+    "name": "nosepass",
+    "gen": 3
+  },
+  {
+    "name": "numel",
+    "gen": 3
+  },
+  {
+    "name": "nuzleaf",
+    "gen": 3
+  },
+  {
+    "name": "pelipper",
+    "gen": 3
+  },
+  {
+    "name": "plusle",
+    "gen": 3
+  },
+  {
+    "name": "poochyena",
+    "gen": 3
+  },
+  {
+    "name": "ralts",
+    "gen": 3
+  },
+  {
+    "name": "rayquaza",
+    "gen": 3
+  },
+  {
+    "name": "regice",
+    "gen": 3
+  },
+  {
+    "name": "regirock",
+    "gen": 3
+  },
+  {
+    "name": "registeel",
+    "gen": 3
+  },
+  {
+    "name": "relicanth",
+    "gen": 3
+  },
+  {
+    "name": "roselia",
+    "gen": 3
+  },
+  {
+    "name": "sableye",
+    "gen": 3
+  },
+  {
+    "name": "salamence",
+    "gen": 3
+  },
+  {
+    "name": "sceptile",
+    "gen": 3
+  },
+  {
+    "name": "sealeo",
+    "gen": 3
+  },
+  {
+    "name": "seedot",
+    "gen": 3
+  },
+  {
+    "name": "seviper",
+    "gen": 3
+  },
+  {
+    "name": "sharpedo",
+    "gen": 3
+  },
+  {
+    "name": "shedinja",
+    "gen": 3
+  },
+  {
+    "name": "shelgon",
+    "gen": 3
+  },
+  {
+    "name": "shiftry",
+    "gen": 3
+  },
+  {
+    "name": "shroomish",
+    "gen": 3
+  },
+  {
+    "name": "shuppet",
+    "gen": 3
+  },
+  {
+    "name": "silcoon",
+    "gen": 3
+  },
+  {
+    "name": "skitty",
+    "gen": 3
+  },
+  {
+    "name": "slaking",
+    "gen": 3
+  },
+  {
+    "name": "slakoth",
+    "gen": 3
+  },
+  {
+    "name": "snorunt",
+    "gen": 3
+  },
+  {
+    "name": "solrock",
+    "gen": 3
+  },
+  {
+    "name": "spheal",
+    "gen": 3
+  },
+  {
+    "name": "spinda",
+    "gen": 3
+  },
+  {
+    "name": "spoink",
+    "gen": 3
+  },
+  {
+    "name": "surskit",
+    "gen": 3
+  },
+  {
+    "name": "swablu",
+    "gen": 3
+  },
+  {
+    "name": "swalot",
+    "gen": 3
+  },
+  {
+    "name": "swampert",
+    "gen": 3
+  },
+  {
+    "name": "swellow",
+    "gen": 3
+  },
+  {
+    "name": "taillow",
+    "gen": 3
+  },
+  {
+    "name": "torchic",
+    "gen": 3
+  },
+  {
+    "name": "torkoal",
+    "gen": 3
+  },
+  {
+    "name": "trapinch",
+    "gen": 3
+  },
+  {
+    "name": "treecko",
+    "gen": 3
+  },
+  {
+    "name": "tropius",
+    "gen": 3
+  },
+  {
+    "name": "vibrava",
+    "gen": 3
+  },
+  {
+    "name": "vigoroth",
+    "gen": 3
+  },
+  {
+    "name": "volbeat",
+    "gen": 3
+  },
+  {
+    "name": "wailmer",
+    "gen": 3
+  },
+  {
+    "name": "wailord",
+    "gen": 3
+  },
+  {
+    "name": "walrein",
+    "gen": 3
+  },
+  {
+    "name": "whiscash",
+    "gen": 3
+  },
+  {
+    "name": "whismur",
+    "gen": 3
+  },
+  {
+    "name": "wingull",
+    "gen": 3
+  },
+  {
+    "name": "wurmple",
+    "gen": 3
+  },
+  {
+    "name": "wynaut",
+    "gen": 3
+  },
+  {
+    "name": "zangoose",
+    "gen": 3
+  },
+  {
+    "name": "zigzagoon",
+    "gen": 3
+  },
+  {
+    "name": "abomasnow",
+    "gen": 4
+  },
+  {
+    "name": "ambipom",
+    "gen": 4
+  },
+  {
+    "name": "arceus",
+    "gen": 4
+  },
+  {
+    "name": "arceus_bug",
+    "gen": 4
+  },
+  {
+    "name": "arceus_dark",
+    "gen": 4
+  },
+  {
+    "name": "arceus_dragon",
+    "gen": 4
+  },
+  {
+    "name": "arceus_electric",
+    "gen": 4
+  },
+  {
+    "name": "arceus_fighting",
+    "gen": 4
+  },
+  {
+    "name": "arceus_fire",
+    "gen": 4
+  },
+  {
+    "name": "arceus_flying",
+    "gen": 4
+  },
+  {
+    "name": "arceus_ghost",
+    "gen": 4
+  },
+  {
+    "name": "arceus_grass",
+    "gen": 4
+  },
+  {
+    "name": "arceus_ground",
+    "gen": 4
+  },
+  {
+    "name": "arceus_ice",
+    "gen": 4
+  },
+  {
+    "name": "arceus_poison",
+    "gen": 4
+  },
+  {
+    "name": "arceus_psychic",
+    "gen": 4
+  },
+  {
+    "name": "arceus_rock",
+    "gen": 4
+  },
+  {
+    "name": "arceus_steel",
+    "gen": 4
+  },
+  {
+    "name": "arceus_water",
+    "gen": 4
+  },
+  {
+    "name": "azelf",
+    "gen": 4
+  },
+  {
+    "name": "bastiodon",
+    "gen": 4
+  },
+  {
+    "name": "bibarel",
+    "gen": 4
+  },
+  {
+    "name": "bidoof",
+    "gen": 4
+  },
+  {
+    "name": "bonsly",
+    "gen": 4
+  },
+  {
+    "name": "bronzong",
+    "gen": 4
+  },
+  {
+    "name": "bronzor",
+    "gen": 4
+  },
+  {
+    "name": "budew",
+    "gen": 4
+  },
+  {
+    "name": "buizel",
+    "gen": 4
+  },
+  {
+    "name": "buneary",
+    "gen": 4
+  },
+  {
+    "name": "burmy_plant",
+    "gen": 4
+  },
+  {
+    "name": "burmy_sandy",
+    "gen": 4
+  },
+  {
+    "name": "burmy_trash",
+    "gen": 4
+  },
+  {
+    "name": "carnivine",
+    "gen": 4
+  },
+  {
+    "name": "chatot",
+    "gen": 4
+  },
+  {
+    "name": "cherrim",
+    "gen": 4
+  },
+  {
+    "name": "cherubi",
+    "gen": 4
+  },
+  {
+    "name": "chimchar",
+    "gen": 4
+  },
+  {
+    "name": "chingling",
+    "gen": 4
+  },
+  {
+    "name": "combee_female",
+    "gen": 4
+  },
+  {
+    "name": "combee_male",
+    "gen": 4
+  },
+  {
+    "name": "cranidos",
+    "gen": 4
+  },
+  {
+    "name": "cresselia",
+    "gen": 4
+  },
+  {
+    "name": "croagunk",
+    "gen": 4
+  },
+  {
+    "name": "darkrai",
+    "gen": 4
+  },
+  {
+    "name": "dialga",
+    "gen": 4
+  },
+  {
+    "name": "drapion",
+    "gen": 4
+  },
+  {
+    "name": "drifblim",
+    "gen": 4
+  },
+  {
+    "name": "drifloon",
+    "gen": 4
+  },
+  {
+    "name": "dusknoir",
+    "gen": 4
+  },
+  {
+    "name": "electivire",
+    "gen": 4
+  },
+  {
+    "name": "empoleon",
+    "gen": 4
+  },
+  {
+    "name": "finneon",
+    "gen": 4
+  },
+  {
+    "name": "floatzel",
+    "gen": 4
+  },
+  {
+    "name": "froslass",
+    "gen": 4
+  },
+  {
+    "name": "gabite",
+    "gen": 4
+  },
+  {
+    "name": "gabite_female",
+    "gen": 4
+  },
+  {
+    "name": "gallade",
+    "gen": 4
+  },
+  {
+    "name": "garchomp",
+    "gen": 4
+  },
+  {
+    "name": "garchomp_female",
+    "gen": 4
+  },
+  {
+    "name": "gastrodon_east",
+    "gen": 4
+  },
+  {
+    "name": "gastrodon_west",
+    "gen": 4
+  },
+  {
+    "name": "gible",
+    "gen": 4
+  },
+  {
+    "name": "gible_female",
+    "gen": 4
+  },
+  {
+    "name": "giratina",
+    "gen": 4
+  },
+  {
+    "name": "giratina_origin",
+    "gen": 4
+  },
+  {
+    "name": "glaceon",
+    "gen": 4
+  },
+  {
+    "name": "glameow",
+    "gen": 4
+  },
+  {
+    "name": "gliscor",
+    "gen": 4
+  },
+  {
+    "name": "grotle",
+    "gen": 4
+  },
+  {
+    "name": "happiny",
+    "gen": 4
+  },
+  {
+    "name": "heatran",
+    "gen": 4
+  },
+  {
+    "name": "hippopotas_female",
+    "gen": 4
+  },
+  {
+    "name": "hippopotas_male",
+    "gen": 4
+  },
+  {
+    "name": "hippowdon_female",
+    "gen": 4
+  },
+  {
+    "name": "hippowdon_male",
+    "gen": 4
+  },
+  {
+    "name": "honchkrow",
+    "gen": 4
+  },
+  {
+    "name": "infernape",
+    "gen": 4
+  },
+  {
+    "name": "kricketot",
+    "gen": 4
+  },
+  {
+    "name": "kricketune",
+    "gen": 4
+  },
+  {
+    "name": "leafeon",
+    "gen": 4
+  },
+  {
+    "name": "lickilicky",
+    "gen": 4
+  },
+  {
+    "name": "lopunny",
+    "gen": 4
+  },
+  {
+    "name": "lucario",
+    "gen": 4
+  },
+  {
+    "name": "lumineon",
+    "gen": 4
+  },
+  {
+    "name": "luxio",
+    "gen": 4
+  },
+  {
+    "name": "luxray",
+    "gen": 4
+  },
+  {
+    "name": "magmortar",
+    "gen": 4
+  },
+  {
+    "name": "magnezone",
+    "gen": 4
+  },
+  {
+    "name": "mamoswine",
+    "gen": 4
+  },
+  {
+    "name": "manaphy",
+    "gen": 4
+  },
+  {
+    "name": "mantyke",
+    "gen": 4
+  },
+  {
+    "name": "mesprit",
+    "gen": 4
+  },
+  {
+    "name": "mimeJr",
+    "gen": 4
+  },
+  {
+    "name": "mismagius",
+    "gen": 4
+  },
+  {
+    "name": "monferno",
+    "gen": 4
+  },
+  {
+    "name": "mothim",
+    "gen": 4
+  },
+  {
+    "name": "munchlax",
+    "gen": 4
+  },
+  {
+    "name": "pachirisu",
+    "gen": 4
+  },
+  {
+    "name": "palkia",
+    "gen": 4
+  },
+  {
+    "name": "phione",
+    "gen": 4
+  },
+  {
+    "name": "piplup",
+    "gen": 4
+  },
+  {
+    "name": "porygonZ",
+    "gen": 4
+  },
+  {
+    "name": "prinplup",
+    "gen": 4
+  },
+  {
+    "name": "probopass",
+    "gen": 4
+  },
+  {
+    "name": "purugly",
+    "gen": 4
+  },
+  {
+    "name": "rampardos",
+    "gen": 4
+  },
+  {
+    "name": "regigigas",
+    "gen": 4
+  },
+  {
+    "name": "rhyperior",
+    "gen": 4
+  },
+  {
+    "name": "riolu",
+    "gen": 4
+  },
+  {
+    "name": "roserade",
+    "gen": 4
+  },
+  {
+    "name": "rotom",
+    "gen": 4
+  },
+  {
+    "name": "rotom_fan",
+    "gen": 4
+  },
+  {
+    "name": "rotom_frost",
+    "gen": 4
+  },
+  {
+    "name": "rotom_heat",
+    "gen": 4
+  },
+  {
+    "name": "rotom_mow",
+    "gen": 4
+  },
+  {
+    "name": "rotom_wash",
+    "gen": 4
+  },
+  {
+    "name": "shaymin",
+    "gen": 4
+  },
+  {
+    "name": "shaymin_sky",
+    "gen": 4
+  },
+  {
+    "name": "shellos_east",
+    "gen": 4
+  },
+  {
+    "name": "shellos_west",
+    "gen": 4
+  },
+  {
+    "name": "shieldon",
+    "gen": 4
+  },
+  {
+    "name": "shinx",
+    "gen": 4
+  },
+  {
+    "name": "skorupi",
+    "gen": 4
+  },
+  {
+    "name": "skuntank",
+    "gen": 4
+  },
+  {
+    "name": "snover",
+    "gen": 4
+  },
+  {
+    "name": "spiritomb",
+    "gen": 4
+  },
+  {
+    "name": "staraptor",
+    "gen": 4
+  },
+  {
+    "name": "staravia",
+    "gen": 4
+  },
+  {
+    "name": "starly",
+    "gen": 4
+  },
+  {
+    "name": "stunky",
+    "gen": 4
+  },
+  {
+    "name": "tangrowth",
+    "gen": 4
+  },
+  {
+    "name": "togekiss",
+    "gen": 4
+  },
+  {
+    "name": "torterra",
+    "gen": 4
+  },
+  {
+    "name": "toxicroak",
+    "gen": 4
+  },
+  {
+    "name": "turtwig",
+    "gen": 4
+  },
+  {
+    "name": "uxie",
+    "gen": 4
+  },
+  {
+    "name": "vespiquen",
+    "gen": 4
+  },
+  {
+    "name": "weavile",
+    "gen": 4
+  },
+  {
+    "name": "wormadam_plant",
+    "gen": 4
+  },
+  {
+    "name": "wormadam_sandy",
+    "gen": 4
+  },
+  {
+    "name": "wormadam_trash",
+    "gen": 4
+  },
+  {
+    "name": "yanmega",
+    "gen": 4
+  }
+]
