@@ -1,4 +1,4 @@
-# FreshRSS for Raycast
+# FreshRSS
 
 Browse, search and manage your FreshRSS articles directly from Raycast.
 
@@ -15,19 +15,19 @@ Browse, search and manage your FreshRSS articles directly from Raycast.
 
 ## Commands
 
-| Command              | Description                                        |
-| -------------------- | -------------------------------------------------- |
+| Command              | Description                                                       |
+| -------------------- | ----------------------------------------------------------------- |
 | **Browse Articles**  | Browse, search and manage articles with status and period filters |
-| **Today's Articles** | Quick access to today's unread articles            |
-| **Starred Articles** | Browse your bookmarked articles                    |
-| **Random Article**   | Discover a random unread article                   |
-| **Feed List**        | Browse subscriptions and read articles by feed     |
+| **Today's Articles** | Quick access to today's unread articles                           |
+| **Starred Articles** | Browse your bookmarked articles                                   |
+| **Random Article**   | Discover a random unread article                                  |
+| **Feed List**        | Browse subscriptions and read articles by feed                    |
 
 ## Actions
 
 - **Enter** — Read article in full-screen detail view
-- **Cmd+U** — Mark as read / unread
+- **List view — Cmd+E** — Mark as read / unread
+- **Detail view — Cmd+U** — Mark as read / unread
 - **Cmd+S** — Star / unstar
-- **Cmd+R** — Refresh
 - **Cmd+Shift+C** — Copy article URL
 - **Cmd+Shift+O** — Open FreshRSS in browser

@@ -95,7 +95,7 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
           });
         });
     }
-  }, []);
+  }, [read, article.id, onToggleRead]);
   const content = useMemo(() => getArticleContent(article), [article]);
   const displayTitle = cleanTitle(article.title) || "Untitled";
 
@@ -150,7 +150,7 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
           <Detail.Metadata.Label title="Author" text={article.author || "—"} />
           <Detail.Metadata.Label
             title="Published"
-            text={article.published ? new Date(article.published * 1000).toLocaleString() : "—"}
+            text={article.published ? new Date(article.published * 1000).toLocaleString("en-US") : "—"}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Status">

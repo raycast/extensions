@@ -20,7 +20,7 @@ function formatRelativeTime(ts: number): string {
   if (diff < 3600) return `${Math.floor(diff / 60)}m`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
   const d = new Date(ts * 1000);
-  return `${d.toLocaleString("en", { month: "short" })} ${d.getDate()}`;
+  return `${d.toLocaleString("en-US", { month: "short" })} ${d.getDate()}`;
 }
 
 function formatSourceTitle(value?: string): string | undefined {
@@ -236,9 +236,12 @@ export default function ArticleList({
             if (!lockPeriod) setPeriodFilter(newPeriod as PeriodFilter);
           }}
         >
-          {STATUS_OPTIONS.map((status) => (
+          {
+            // If status is locked, only show that status section to avoid displaying non-functional options
+          }
+          {(lockStatus ? STATUS_OPTIONS.filter((s) => s.id === statusFilter) : STATUS_OPTIONS).map((status) => (
             <List.Dropdown.Section key={status.id} title={status.name}>
-              {PERIOD_OPTIONS.map((period) => (
+              {(lockPeriod ? PERIOD_OPTIONS.filter((p) => p.id === periodFilter) : PERIOD_OPTIONS).map((period) => (
                 <List.Dropdown.Item
                   key={`${status.id}:::${period.id}`}
                   value={`${status.id}:::${period.id}`}
@@ -281,7 +284,7 @@ export default function ArticleList({
         const compactTitle = truncateText(cleanedTitle, 72);
         const compactSourceLabel = compactSource ? truncateText(compactSource, 16) : undefined;
         const relativeTime = formatRelativeTime(article.published);
-        const absoluteTime = article.published ? new Date(article.published * 1000).toLocaleString() : undefined;
+        const absoluteTime = article.published ? new Date(article.published * 1000).toLocaleString("en-US") : undefined;
 
         return (
           <List.Item

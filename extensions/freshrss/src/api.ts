@@ -35,18 +35,7 @@ export interface UnreadCount {
   count: number;
 }
 
-interface SearchSeed {
-  id: string;
-  title: string;
-  published: number;
-  updated?: number;
-  summary?: { content: string };
-  content?: { content: string };
-  author?: string;
-  alternate?: { href: string }[];
-  origin?: { streamId: string; title: string; htmlUrl?: string };
-  categories: string[];
-}
+type SearchSeed = Article;
 
 interface NonceResponse {
   nonce: string;
