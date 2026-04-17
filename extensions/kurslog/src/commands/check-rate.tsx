@@ -179,7 +179,15 @@ export default function CheckRate() {
     }
     const val = parseFloat(fromAmount.replace(/\s/g, ""));
     const amount = !isNaN(val) && val > 0 ? val : undefined;
-    push(<DirectionView from={fromUrl} to={toUrl} amount={amount} />);
+    const city = isCashDirection && cityUrl ? cityUrl : undefined;
+    push(
+      <DirectionView
+        from={fromUrl}
+        to={toUrl}
+        amount={amount}
+        cityUrl={city}
+      />,
+    );
   }
 
   // Rate info text

@@ -47,16 +47,18 @@ interface DirectionViewProps {
   from?: string;
   to?: string;
   amount?: number;
+  cityUrl?: string;
 }
 
 export default function DirectionView({
   from: propFrom,
   to: propTo,
   amount: initialAmount,
+  cityUrl,
 }: DirectionViewProps) {
   const from = propFrom || "";
   const to = propTo || "";
-  const { data: rates, isLoading, revalidate } = useAllRates(from, to);
+  const { data: rates, isLoading, revalidate } = useAllRates(from, to, cityUrl);
   const { data: favExchangers, revalidate: revalidateFavs } =
     useFavoriteExchangers();
   const { data: blacklist, revalidate: revalidateBlacklist } =
@@ -299,6 +301,7 @@ export default function DirectionView({
                     exchangerId: rate.exchanger_id,
                     amount,
                     position: rateIndex,
+                    cityUrl,
                     sort:
                       sortBy === "bestRate"
                         ? "best_rate"
@@ -370,7 +373,14 @@ export default function DirectionView({
                   title="Swap Currencies"
                   icon={Icon.Switch}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
-                  target={<DirectionView from={to} to={from} amount={amount} />}
+                  target={
+                    <DirectionView
+                      from={to}
+                      to={from}
+                      amount={amount}
+                      cityUrl={cityUrl}
+                    />
+                  }
                 />
                 <Action
                   title="Refresh"

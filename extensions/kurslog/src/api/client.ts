@@ -52,9 +52,11 @@ export async function fetchPopularDirections(
 export async function fetchAllRates(
   from: string,
   to: string,
+  cityUrl?: string,
 ): Promise<ExchangerRatesResponse[]> {
+  const q = cityUrl ? `?city_url=${encodeURIComponent(cityUrl)}` : "";
   const data = await apiDirect<{ exchangers: ExchangerRatesResponse[] }>(
-    `/rates/direction/${from}-to-${to}`,
+    `/rates/direction/${from}-to-${to}${q}`,
   );
   return data.exchangers;
 }
