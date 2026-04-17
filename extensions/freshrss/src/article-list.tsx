@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api, type Article } from "./api";
-import ArticleDetail from "./article-detail";
+import ArticleDetail, { isRead, isStarred } from "./article-detail";
 
 export function cleanTitle(title: string): string {
   return title
@@ -276,8 +276,8 @@ export default function ArticleList({
         />
       ) : null}
       {articles.map((article) => {
-        const isRead = article.categories.some((c) => c.endsWith("/read"));
-        const isStarred = article.categories.some((c) => c.endsWith("/starred"));
+        const read = isRead(article);
+        const starred = isStarred(article);
         const sourceTitle = formatSourceTitle(article.origin?.title);
         const compactSource = compactSourceTitle(article.origin?.title);
         const cleanedTitle = cleanTitle(article.title) || "Untitled";
@@ -291,8 +291,8 @@ export default function ArticleList({
             key={article.id}
             id={article.id}
             icon={{
-              source: isRead ? Icon.Circle : Icon.CircleFilled,
-              tintColor: isRead ? Color.SecondaryText : Color.Blue,
+              source: read ? Icon.Circle : Icon.CircleFilled,
+              tintColor: read ? Color.SecondaryText : Color.Blue,
             }}
             title={compactTitle}
             accessories={
@@ -314,10 +314,10 @@ export default function ArticleList({
                   tooltip: absoluteTime,
                 },
                 {
-                  icon: isStarred
+                  icon: starred
                     ? { source: Icon.Star, tintColor: Color.Yellow }
                     : { source: Icon.Star, tintColor: Color.SecondaryText },
-                  tooltip: isStarred ? "Starred" : "Not starred",
+                  tooltip: starred ? "Starred" : "Not starred",
                 },
               ].filter(Boolean) as List.Item.Accessory[]
             }
@@ -362,18 +362,18 @@ export default function ArticleList({
                   }
                 />
                 <Action
-                  title={isRead ? "Mark as Unread" : "Mark as Read"}
-                  icon={isRead ? Icon.Circle : Icon.CheckCircle}
+                  title={read ? "Mark as Unread" : "Mark as Read"}
+                  icon={read ? Icon.Circle : Icon.CheckCircle}
                   onAction={async () => {
                     try {
-                      if (isRead) {
+                      if (read) {
                         await api.markAsUnread(article.id);
                       } else {
                         await api.markAsRead(article.id);
                       }
                       updateArticle(article.id, (currentArticle) => ({
                         ...currentArticle,
-                        categories: isRead
+                        categories: read
                           ? currentArticle.categories.filter((category) => category !== "user/-/state/com.google/read")
                           : [
                               ...currentArticle.categories.filter(
@@ -393,18 +393,18 @@ export default function ArticleList({
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
                 <Action
-                  title={isStarred ? "Unstar" : "Star"}
+                  title={starred ? "Unstar" : "Star"}
                   icon={Icon.Star}
                   onAction={async () => {
                     try {
-                      if (isStarred) {
+                      if (starred) {
                         await api.unstar(article.id);
                       } else {
                         await api.star(article.id);
                       }
                       updateArticle(article.id, (currentArticle) => ({
                         ...currentArticle,
-                        categories: isStarred
+                        categories: starred
                           ? currentArticle.categories.filter(
                               (category) => category !== "user/-/state/com.google/starred",
                             )

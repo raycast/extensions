@@ -37,6 +37,7 @@ export default function Command() {
 
   return (
     <ArticleDetail
+      key={article.id}
       article={article}
       onToggleRead={(updatedArticle, markRead) => {
         setArticle({
