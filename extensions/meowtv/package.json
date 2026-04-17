@@ -3,7 +3,7 @@
   "name": "meowtv",
   "title": "MeowTV",
   "description": "Movies,TV series streaming platform",
-  "icon": "extension-icon.svg",
+  "icon": "extension-icon.png",
   "license": "MIT",
   "commands": [
     {
