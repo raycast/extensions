@@ -3,7 +3,7 @@ export function convertSSHtoHTTP(url: string): string {
     return url;
   }
 
-  const matches = url.match(/^git@([^:]+):(.+?)\.git?$/);
+  const matches = url.match(/^git@([^:]+):(.+?)(\.git)?$/);
   if (!matches || matches.length < 3) {
     return url;
   }
