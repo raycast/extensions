@@ -15,7 +15,7 @@ import {
   useFavoriteExchangers,
   useBlacklistExchangers,
 } from "../hooks/useFavorites";
-import { getLocale, t, paramDescriptions } from "../utils/locale";
+import { paramDescriptions } from "../utils/locale";
 import {
   formatNumber,
   formatRateDisplay,
@@ -32,7 +32,7 @@ import {
   toggleFavoriteExchanger,
   toggleBlacklistExchanger,
 } from "../utils/favorites";
-import type { RateItem, Locale } from "../api/types";
+import type { RateItem } from "../api/types";
 
 function stripHtml(html: string): string {
   return html
@@ -54,10 +54,9 @@ export default function DirectionView({
   to: propTo,
   amount: initialAmount,
 }: DirectionViewProps) {
-  const locale = getLocale();
   const from = propFrom || "";
   const to = propTo || "";
-  const { data: rates, isLoading, revalidate } = useAllRates(from, to, locale);
+  const { data: rates, isLoading, revalidate } = useAllRates(from, to);
   const { data: favExchangers, revalidate: revalidateFavs } =
     useFavoriteExchangers();
   const { data: blacklist, revalidate: revalidateBlacklist } =
@@ -191,7 +190,7 @@ export default function DirectionView({
     // Params
     if (params.length > 0) {
       const paramNames = params
-        .map((p) => paramDescriptions[p]?.[locale] || p)
+        .map((p) => paramDescriptions[p] || p)
         .join(", ");
       md += `  ·  ${paramNames}`;
     }
@@ -210,11 +209,11 @@ export default function DirectionView({
     const maxText = rate.max_amount
       ? `${formatNumber(rate.max_amount)} ${rate.from_currency_name}`
       : "∞";
-    md += `${t("minAmount", locale)}: **${minText}**  \n`;
-    md += `${t("maxAmount", locale)}: **${maxText}**`;
+    md += `Min amount: **${minText}**  \n`;
+    md += `Max amount: **${maxText}**`;
 
     if (rate.reserves) {
-      md += `  \n${t("reserves", locale)}: **${formatNumber(rate.reserves)} ${rate.to_currency_name}**`;
+      md += `  \nReserves: **${formatNumber(rate.reserves)} ${rate.to_currency_name}**`;
     }
 
     if (amount) {
@@ -224,7 +223,7 @@ export default function DirectionView({
         rate.from_currency_name,
         rate.to_currency_name,
       );
-      md += `  \n${t("rate", locale)}: ${rateForOne}`;
+      md += `  \nRate: ${rateForOne}`;
     }
 
     // Trust explanation
@@ -239,7 +238,7 @@ export default function DirectionView({
     <List
       isLoading={isLoading}
       isShowingDetail
-      searchBarPlaceholder={t("searchExchangers", locale)}
+      searchBarPlaceholder="Search exchangers..."
       navigationTitle={`${from.toUpperCase()} → ${to.toUpperCase()}`}
       searchBarAccessory={
         <List.Dropdown
@@ -247,17 +246,14 @@ export default function DirectionView({
           value={sortBy}
           onChange={(v) => setSortBy(v as SortOption)}
         >
-          <List.Dropdown.Item title={t("bestRate", locale)} value="bestRate" />
-          <List.Dropdown.Item title={t("rating", locale)} value="rating" />
-          <List.Dropdown.Item
-            title={t("favorites", locale)}
-            value="favorites"
-          />
+          <List.Dropdown.Item title="Best Rate" value="bestRate" />
+          <List.Dropdown.Item title="Rating" value="rating" />
+          <List.Dropdown.Item title="Favorites" value="favorites" />
         </List.Dropdown>
       }
     >
       {sortedRates.length === 0 && !isLoading && (
-        <List.EmptyView title={t("noRates", locale)} icon={Icon.XMarkCircle} />
+        <List.EmptyView title="No rates available" icon={Icon.XMarkCircle} />
       )}
       {sortedRates.map((rate, rateIndex) => {
         const isFav = favs.includes(rate.exchanger_internal_url);
@@ -296,19 +292,12 @@ export default function DirectionView({
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser
-                  title={
-                    locale === "uk"
-                      ? "Обміняти"
-                      : locale === "ru"
-                        ? "Обменять"
-                        : "Exchange"
-                  }
+                  title="Exchange"
                   url={redirectUrl({
                     from,
                     to,
                     exchangerId: rate.exchanger_id,
                     amount,
-                    locale,
                     position: rateIndex,
                     sort:
                       sortBy === "bestRate"
@@ -320,25 +309,19 @@ export default function DirectionView({
                   icon={Icon.ArrowRight}
                 />
                 <Action.OpenInBrowser
-                  title={
-                    locale === "uk"
-                      ? "Відкрити На Kurslog"
-                      : locale === "ru"
-                        ? "Открыть на Kurslog"
-                        : "Open on Kurslog"
-                  }
-                  url={directionUrl(from, to, locale)}
+                  title="Open on Kurslog"
+                  url={directionUrl(from, to)}
                   icon={Icon.Link}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
                 <Action.OpenInBrowser
-                  title={t("openInBrowser", locale)}
-                  url={exchangerUrl(rate.exchanger_internal_url, locale)}
+                  title="Open Exchanger Page"
+                  url={exchangerUrl(rate.exchanger_internal_url)}
                   icon={Icon.Globe}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
                 />
                 <Action.CopyToClipboard
-                  title={t("copyRate", locale)}
+                  title="Copy Rate"
                   content={
                     amount
                       ? formatCalculation(
@@ -371,21 +354,20 @@ export default function DirectionView({
                   }
                 />
                 <Action
-                  title={t("enterAmount", locale)}
+                  title="Enter Amount"
                   icon={Icon.Calculator}
                   shortcut={{ modifiers: ["cmd"], key: "a" }}
                   onAction={() =>
                     push(
                       <AmountForm
                         fromName={from.toUpperCase()}
-                        locale={locale}
                         onSubmit={(v) => setAmount(v)}
                       />,
                     )
                   }
                 />
                 <Action.Push
-                  title={t("swap", locale)}
+                  title="Swap Currencies"
                   icon={Icon.Switch}
                   shortcut={{ modifiers: ["cmd"], key: "s" }}
                   target={<DirectionView from={to} to={from} amount={amount} />}
@@ -407,11 +389,9 @@ export default function DirectionView({
 
 function AmountForm({
   fromName,
-  locale,
   onSubmit,
 }: {
   fromName: string;
-  locale: Locale;
   onSubmit: (amount: number) => void;
 }) {
   const { pop } = useNavigation();
@@ -420,7 +400,7 @@ function AmountForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("enterAmount", locale)}
+            title="Enter Amount"
             onSubmit={(values) => {
               const val = parseFloat(values.amount);
               if (!isNaN(val) && val > 0) onSubmit(val);
@@ -432,7 +412,7 @@ function AmountForm({
     >
       <Form.TextField
         id="amount"
-        title={`${t("amount", locale)} (${fromName})`}
+        title={`Amount (${fromName})`}
         placeholder="1000"
       />
     </Form>

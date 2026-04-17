@@ -10,7 +10,6 @@ import {
 import { useState, useEffect, useMemo } from "react";
 import { useCurrencies } from "../hooks/useCurrencies";
 import { usePairs } from "../hooks/usePairs";
-import { getLocale, getLocalizedName, t } from "../utils/locale";
 import { formatNumber } from "../utils/format";
 import { currencyIcon } from "../utils/icon";
 import {
@@ -29,9 +28,8 @@ function isCash(url: string): boolean {
 }
 
 export default function CheckRate() {
-  const locale = getLocale();
-  const { data: currencies, isLoading: currLoading } = useCurrencies(locale);
-  const { data: pairs, isLoading: pairsLoading } = usePairs(locale);
+  const { data: currencies, isLoading: currLoading } = useCurrencies();
+  const { data: pairs, isLoading: pairsLoading } = usePairs();
   const { push } = useNavigation();
 
   const [fromUrl, setFromUrl] = useState("");
@@ -83,7 +81,7 @@ export default function CheckRate() {
       setBestRateOut(0);
       return;
     }
-    fetchTopRates(fromUrl, toUrl, locale, 1)
+    fetchTopRates(fromUrl, toUrl, 1)
       .then((rates) => {
         if (rates.length > 0) {
           setBestRateIn(rates[0].rate_in);
@@ -97,7 +95,7 @@ export default function CheckRate() {
         setBestRateIn(0);
         setBestRateOut(0);
       });
-  }, [fromUrl, toUrl, locale]);
+  }, [fromUrl, toUrl]);
 
   // Auto-calculate: when FROM amount changes → calculate TO
   useEffect(() => {
@@ -130,7 +128,7 @@ export default function CheckRate() {
       setCities([]);
       return;
     }
-    fetchCountries(locale, fromUrl, toUrl)
+    fetchCountries(fromUrl, toUrl)
       .then((data) => {
         setCountries(data);
         const ua = data.find((c) => c.code === "UA");
@@ -139,7 +137,7 @@ export default function CheckRate() {
         );
       })
       .catch(() => setCountries([]));
-  }, [isCashDirection, fromUrl, toUrl, locale]);
+  }, [isCashDirection, fromUrl, toUrl]);
 
   // Fetch cities
   useEffect(() => {
@@ -148,13 +146,13 @@ export default function CheckRate() {
       setCityUrl("");
       return;
     }
-    fetchCities(fromUrl, toUrl, locale, Number(countryId))
+    fetchCities(fromUrl, toUrl, Number(countryId))
       .then((data) => {
         setCities(data);
         if (data.length > 0) setCityUrl(data[0].url);
       })
       .catch(() => setCities([]));
-  }, [isCashDirection, fromUrl, toUrl, countryId, locale]);
+  }, [isCashDirection, fromUrl, toUrl, countryId]);
 
   function handleSwap() {
     if (pairs?.some((p) => p.from === toUrl && p.to === fromUrl)) {
@@ -167,7 +165,7 @@ export default function CheckRate() {
       setFromAmount(oldToAmt);
       setToAmount(oldFromAmt);
     } else {
-      showToast({ style: Toast.Style.Failure, title: t("noRates", locale) });
+      showToast({ style: Toast.Style.Failure, title: "No rates available" });
     }
   }
 
@@ -193,10 +191,10 @@ export default function CheckRate() {
     const toName = toCur ? toCur.currency_name : toUrl.toUpperCase();
     const ratio = bestRateOut / bestRateIn;
     if (ratio >= 0.1) {
-      return `${t("bestRate", locale)}: 1 ${fromName} ≈ ${formatNumber(ratio)} ${toName}`;
+      return `Best Rate: 1 ${fromName} ≈ ${formatNumber(ratio)} ${toName}`;
     }
-    return `${t("bestRate", locale)}: ${formatNumber(bestRateIn / bestRateOut)} ${fromName} ≈ 1 ${toName}`;
-  }, [bestRateIn, bestRateOut, fromUrl, toUrl, currencies, locale]);
+    return `Best Rate: ${formatNumber(bestRateIn / bestRateOut)} ${fromName} ≈ 1 ${toName}`;
+  }, [bestRateIn, bestRateOut, fromUrl, toUrl, currencies]);
 
   return (
     <Form
@@ -204,12 +202,12 @@ export default function CheckRate() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t("rate", locale)}
+            title="Check Rates"
             icon={Icon.MagnifyingGlass}
             onSubmit={handleSubmit}
           />
           <Action
-            title={t("swap", locale)}
+            title="Swap Currencies"
             icon={Icon.Switch}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={handleSwap}
@@ -220,7 +218,7 @@ export default function CheckRate() {
       {/* FROM currency with tag sections */}
       <Form.Dropdown
         id="from"
-        title={t("youGive", locale)}
+        title="You give"
         value={fromUrl}
         onChange={(v) => {
           setFromUrl(v);
@@ -233,12 +231,12 @@ export default function CheckRate() {
         {fromSections.map((section) => (
           <Form.Dropdown.Section
             key={String(section.tag.id)}
-            title={getLocalizedName(section.tag, locale)}
+            title={section.tag.name_en}
           >
             {section.currencies.map((c) => (
               <Form.Dropdown.Item
                 key={c.url}
-                title={`${getLocalizedName(c, locale)} (${c.url.toUpperCase()})`}
+                title={`${c.name_en} (${c.url.toUpperCase()})`}
                 value={c.url}
                 icon={currencyIcon(c.icon_img)}
               />
@@ -250,7 +248,7 @@ export default function CheckRate() {
       {/* FROM amount */}
       <Form.TextField
         id="fromAmount"
-        title={t("amount", locale)}
+        title="Amount"
         placeholder="1000"
         value={fromAmount}
         onChange={(v) => {
@@ -260,22 +258,17 @@ export default function CheckRate() {
       />
 
       {/* TO currency with tag sections */}
-      <Form.Dropdown
-        id="to"
-        title={t("youGet", locale)}
-        value={toUrl}
-        onChange={setToUrl}
-      >
+      <Form.Dropdown id="to" title="You get" value={toUrl} onChange={setToUrl}>
         <Form.Dropdown.Item title="—" value="" />
         {toSections.map((section) => (
           <Form.Dropdown.Section
             key={String(section.tag.id)}
-            title={getLocalizedName(section.tag, locale)}
+            title={section.tag.name_en}
           >
             {section.currencies.map((c) => (
               <Form.Dropdown.Item
                 key={c.url}
-                title={`${getLocalizedName(c, locale)} (${c.url.toUpperCase()})`}
+                title={`${c.name_en} (${c.url.toUpperCase()})`}
                 value={c.url}
                 icon={currencyIcon(c.icon_img)}
               />
@@ -287,8 +280,8 @@ export default function CheckRate() {
       {/* TO amount (auto-calculated) */}
       <Form.TextField
         id="toAmount"
-        title={t("amount", locale)}
-        placeholder={t("youGet", locale)}
+        title="Amount"
+        placeholder="You get"
         value={toAmount}
         onChange={(v) => {
           setActiveField("to");
@@ -297,9 +290,7 @@ export default function CheckRate() {
       />
 
       {/* Best rate info */}
-      {rateInfo ? (
-        <Form.Description title={t("rate", locale)} text={rateInfo} />
-      ) : null}
+      {rateInfo ? <Form.Description title="Rate" text={rateInfo} /> : null}
 
       {/* Country & City for cash directions */}
       {isCashDirection && countries.length > 0 && (
@@ -307,13 +298,7 @@ export default function CheckRate() {
           <Form.Separator />
           <Form.Dropdown
             id="country"
-            title={
-              locale === "uk"
-                ? "Країна"
-                : locale === "ru"
-                  ? "Страна"
-                  : "Country"
-            }
+            title="Country"
             value={countryId}
             onChange={(v) => {
               setCountryId(v);
@@ -323,7 +308,7 @@ export default function CheckRate() {
             {countries.map((c) => (
               <Form.Dropdown.Item
                 key={String(c.id)}
-                title={getLocalizedName(c, locale)}
+                title={c.name_en}
                 value={String(c.id)}
               />
             ))}
@@ -331,16 +316,14 @@ export default function CheckRate() {
           {cities.length > 0 && (
             <Form.Dropdown
               id="city"
-              title={
-                locale === "uk" ? "Місто" : locale === "ru" ? "Город" : "City"
-              }
+              title="City"
               value={cityUrl}
               onChange={setCityUrl}
             >
               {cities.map((c) => (
                 <Form.Dropdown.Item
                   key={c.url}
-                  title={getLocalizedName(c, locale)}
+                  title={c.name_en}
                   value={c.url}
                 />
               ))}
@@ -394,8 +377,8 @@ function buildTagSections(
     sections.push({
       tag: {
         id: 0,
-        name_uk: "Інше",
-        name_ru: "Другое",
+        name_uk: "Other",
+        name_ru: "Other",
         name_en: "Other",
       } as Tag,
       currencies: noTag,

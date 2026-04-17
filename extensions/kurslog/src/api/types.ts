@@ -152,5 +152,3 @@ export interface BatchRateItem {
   to_name_ru?: string;
   to_name_en?: string;
 }
-
-export type Locale = "uk" | "ru" | "en";

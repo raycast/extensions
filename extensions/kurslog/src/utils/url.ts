@@ -1,19 +1,13 @@
-import type { Locale } from "../api/types";
-
-function localePrefix(locale: Locale): string {
-  return locale === "uk" ? "" : `/${locale}`;
+export function directionUrl(from: string, to: string): string {
+  return `https://kurslog.com/en/${from}-to-${to}`;
 }
 
-export function directionUrl(from: string, to: string, locale: Locale): string {
-  return `https://kurslog.com${localePrefix(locale)}/${from}-to-${to}`;
+export function exchangerUrl(internalUrl: string): string {
+  return `https://kurslog.com/en/exchangers/${internalUrl}`;
 }
 
-export function exchangerUrl(internalUrl: string, locale: Locale): string {
-  return `https://kurslog.com${localePrefix(locale)}/exchangers/${internalUrl}`;
-}
-
-export function homeUrl(locale: Locale): string {
-  return `https://kurslog.com${localePrefix(locale)}`;
+export function homeUrl(): string {
+  return "https://kurslog.com/en";
 }
 
 /** Redirect URL for exchange — tracks click and redirects to exchanger site */
@@ -22,7 +16,6 @@ export function redirectUrl(params: {
   to: string;
   exchangerId: number;
   amount?: number;
-  locale: Locale;
   position?: number;
   sort?: string;
   cityUrl?: string;
@@ -32,7 +25,7 @@ export function redirectUrl(params: {
     to: params.to,
     amount: String(params.amount || 1),
     exchange_id: String(params.exchangerId),
-    lang: params.locale,
+    lang: "en",
     src: "extension",
     plt: "raycast",
   });

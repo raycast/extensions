@@ -10,7 +10,6 @@ import {
 import { useState, useMemo } from "react";
 import { usePopularDirections } from "../hooks/usePopularDirections";
 import { useFavoriteDirections } from "../hooks/useFavorites";
-import { getLocale, getLocalizedName, t } from "../utils/locale";
 import { currencyIcon } from "../utils/icon";
 import { formatListRate } from "../utils/format";
 import { directionUrl } from "../utils/url";
@@ -22,12 +21,7 @@ import type { PopularDirection, Tag } from "../api/types";
 import DirectionView from "./direction";
 
 export default function ExchangeRates() {
-  const locale = getLocale();
-  const {
-    data: directions,
-    isLoading,
-    revalidate,
-  } = usePopularDirections(locale);
+  const { data: directions, isLoading, revalidate } = usePopularDirections();
   const { data: favDirections, revalidate: revalidateFavs } =
     useFavoriteDirections();
   const [selectedTag, setSelectedTag] = useState("all");
@@ -89,8 +83,8 @@ export default function ExchangeRates() {
   }
 
   function renderItem(dir: PopularDirection, isFav: boolean) {
-    const fromName = getLocalizedName(dir, locale, "from_name");
-    const toName = getLocalizedName(dir, locale, "to_name");
+    const fromName = dir.from_name_en || dir.from_currency;
+    const toName = dir.to_name_en || dir.to_currency;
     const rateText = formatListRate(
       dir.rate_in,
       dir.rate_out,
@@ -108,8 +102,8 @@ export default function ExchangeRates() {
           ...(dir.exchanger_count
             ? [
                 {
-                  text: `${dir.exchanger_count} ${t("exchangers", locale)}`,
-                  tooltip: `${t("bestRate", locale)} ${t("from", locale).toLowerCase()} ${dir.exchanger_count} ${t("exchangers", locale)}`,
+                  text: `${dir.exchanger_count} exchangers`,
+                  tooltip: `Best rate from ${dir.exchanger_count} exchangers`,
                 },
               ]
             : []),
@@ -117,41 +111,36 @@ export default function ExchangeRates() {
             ? [
                 {
                   icon: { source: Icon.Heart, tintColor: Color.Red },
-                  tooltip: t("favorites", locale),
+                  tooltip: "Favorite",
                 },
               ]
             : []),
           { icon: currencyIcon(dir.to_icon_img) },
         ]}
-        keywords={[
-          dir.from_currency,
-          dir.to_currency,
-          dir.from_name_uk,
-          dir.from_name_ru,
-          dir.from_name_en,
-          dir.to_name_uk,
-          dir.to_name_ru,
-          dir.to_name_en,
-          dir.from_currency_name,
-          dir.to_currency_name,
-        ]}
+        keywords={
+          [
+            dir.from_currency,
+            dir.to_currency,
+            dir.from_name_en,
+            dir.to_name_en,
+            dir.from_currency_name,
+            dir.to_currency_name,
+          ].filter(Boolean) as string[]
+        }
         actions={
           <ActionPanel>
             <Action.Push
-              title={t("rate", locale)}
+              title="Rates"
               icon={Icon.List}
               target={
                 <DirectionView from={dir.from_currency} to={dir.to_currency} />
               }
             />
             <Action.OpenInBrowser
-              title={t("openInBrowser", locale)}
-              url={directionUrl(dir.from_currency, dir.to_currency, locale)}
+              title="Open in Browser"
+              url={directionUrl(dir.from_currency, dir.to_currency)}
             />
-            <Action.CopyToClipboard
-              title={t("copyRate", locale)}
-              content={rateText}
-            />
+            <Action.CopyToClipboard title="Copy Rate" content={rateText} />
             <Action
               title={isFav ? "Remove from Favorites" : "Add to Favorites"}
               icon={isFav ? Icon.HeartDisabled : Icon.Heart}
@@ -173,18 +162,18 @@ export default function ExchangeRates() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={t("searchDirections", locale)}
+      searchBarPlaceholder="Search directions..."
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by tag"
           value={selectedTag}
           onChange={setSelectedTag}
         >
-          <List.Dropdown.Item title={t("all", locale)} value="all" />
+          <List.Dropdown.Item title="All" value="all" />
           {tagOptions.map((tag) => (
             <List.Dropdown.Item
               key={String(tag.id)}
-              title={getLocalizedName(tag, locale)}
+              title={tag.name_en}
               value={String(tag.id)}
             />
           ))}
@@ -192,11 +181,11 @@ export default function ExchangeRates() {
       }
     >
       {favoriteDirections.length > 0 && (
-        <List.Section title={t("favorites", locale)}>
+        <List.Section title="Favorites">
           {favoriteDirections.map((dir) => renderItem(dir, true))}
         </List.Section>
       )}
-      <List.Section title={t("popular", locale)}>
+      <List.Section title="Popular">
         {popularDirections.map((dir) => renderItem(dir, false))}
       </List.Section>
     </List>

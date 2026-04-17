@@ -52,21 +52,6 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "locale",
-      "title": "Language",
-      "description": "Interface language for currency names and labels",
-      "type": "dropdown",
-      "required": false,
-      "default": "en",
-      "data": [
-        { "title": "Українська", "value": "uk" },
-        { "title": "Русский", "value": "ru" },
-        { "title": "English", "value": "en" }
-      ]
-    }
-  ],
   "dependencies": {
     "@raycast/api": "^1.95.0",
     "@raycast/utils": "^1.19.0"

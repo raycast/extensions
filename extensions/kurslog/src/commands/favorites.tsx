@@ -14,7 +14,6 @@ import {
 } from "../hooks/useFavorites";
 import { usePopularDirections } from "../hooks/usePopularDirections";
 import { useExchangers } from "../hooks/useExchangers";
-import { getLocale, getLocalizedName, t } from "../utils/locale";
 import { currencyIcon } from "../utils/icon";
 import { formatListRate } from "../utils/format";
 import { directionUrl, exchangerUrl } from "../utils/url";
@@ -31,16 +30,13 @@ import {
 import DirectionView from "./direction";
 
 export default function Favorites() {
-  const locale = getLocale();
   const { data: favDirs, revalidate: revalidateFavDirs } =
     useFavoriteDirections();
   const { data: favExchangerUrls, revalidate: revalidateFavEx } =
     useFavoriteExchangers();
-  const { data: directions, isLoading: dirsLoading } = usePopularDirections(
-    locale,
-    100,
-  );
-  const { data: exchangers, isLoading: exLoading } = useExchangers(locale);
+  const { data: directions, isLoading: dirsLoading } =
+    usePopularDirections(100);
+  const { data: exchangers, isLoading: exLoading } = useExchangers();
 
   const favDirections = useMemo(() => {
     if (!favDirs || !directions) return [];
@@ -77,11 +73,11 @@ export default function Favorites() {
   return (
     <List
       isLoading={dirsLoading || exLoading}
-      searchBarPlaceholder={t("searchDirections", locale)}
+      searchBarPlaceholder="Search favorites..."
     >
       {isEmpty && !dirsLoading && !exLoading && (
         <List.EmptyView
-          title={t("favorites", locale)}
+          title="Favorites"
           description="No favorites yet. Add directions or exchangers to favorites using ⌘+F."
           icon={Icon.Heart}
         />
@@ -89,12 +85,12 @@ export default function Favorites() {
 
       {favDirections.length > 0 && (
         <List.Section
-          title={t("favorites", locale) + " — Directions"}
+          title="Favorites — Directions"
           subtitle={`${favDirections.length}`}
         >
           {favDirections.map((dir) => {
-            const fromName = getLocalizedName(dir, locale, "from_name");
-            const toName = getLocalizedName(dir, locale, "to_name");
+            const fromName = dir.from_name_en || dir.from_currency;
+            const toName = dir.to_name_en || dir.to_currency;
             const rateText = formatListRate(
               dir.rate_in,
               dir.rate_out,
@@ -112,7 +108,7 @@ export default function Favorites() {
                   ...(dir.exchanger_count
                     ? [
                         {
-                          text: `${dir.exchanger_count} ${t("exchangers", locale)}`,
+                          text: `${dir.exchanger_count} exchangers`,
                         },
                       ]
                     : []),
@@ -124,7 +120,7 @@ export default function Favorites() {
                 actions={
                   <ActionPanel>
                     <Action.Push
-                      title={t("rate", locale)}
+                      title="Rates"
                       icon={Icon.List}
                       target={
                         <DirectionView
@@ -134,12 +130,8 @@ export default function Favorites() {
                       }
                     />
                     <Action.OpenInBrowser
-                      title={t("openInBrowser", locale)}
-                      url={directionUrl(
-                        dir.from_currency,
-                        dir.to_currency,
-                        locale,
-                      )}
+                      title="Open in Browser"
+                      url={directionUrl(dir.from_currency, dir.to_currency)}
                     />
                     <Action
                       title="Remove from Favorites"
@@ -162,7 +154,7 @@ export default function Favorites() {
 
       {favExchangerList.length > 0 && (
         <List.Section
-          title={t("favorites", locale) + " — Exchangers"}
+          title="Favorites — Exchangers"
           subtitle={`${favExchangerList.length}`}
         >
           {favExchangerList.map((ex) => {
@@ -182,7 +174,7 @@ export default function Favorites() {
                   }
                 }
                 title={ex.name}
-                subtitle={`★ ${ex.average_rating?.toFixed(1) ?? "—"} · ${ex.pairs_count} ${t("pairs", locale)}`}
+                subtitle={`★ ${ex.average_rating?.toFixed(1) ?? "—"} · ${ex.pairs_count} pairs`}
                 accessories={[
                   ...(trustLabel
                     ? [
@@ -200,8 +192,8 @@ export default function Favorites() {
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser
-                      title={t("openInBrowser", locale)}
-                      url={exchangerUrl(ex.internal_url, locale)}
+                      title="Open in Browser"
+                      url={exchangerUrl(ex.internal_url)}
                     />
                     <Action
                       title="Remove from Favorites"

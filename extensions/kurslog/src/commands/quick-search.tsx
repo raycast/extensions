@@ -8,7 +8,6 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getLocale, getLocalizedName, t } from "../utils/locale";
 import { currencyIcon } from "../utils/icon";
 import { formatListRate } from "../utils/format";
 import { directionUrl } from "../utils/url";
@@ -22,10 +21,9 @@ import type { PopularDirection } from "../api/types";
 import DirectionView from "./direction";
 
 export default function QuickSearch() {
-  const locale = getLocale();
   const { data: directions, isLoading } = useCachedPromise(
     fetchPopularDirections,
-    [locale, 100],
+    [100],
     { keepPreviousData: true },
   );
   const { data: favDirections, revalidate: revalidateFavs } =
@@ -47,18 +45,12 @@ export default function QuickSearch() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={
-        locale === "uk"
-          ? "Наприклад: usdt trc20 monobank"
-          : locale === "ru"
-            ? "Например: usdt trc20 monobank"
-            : "E.g.: usdt trc20 monobank"
-      }
+      searchBarPlaceholder="e.g.: usdt trc20 monobank"
       throttle
     >
       {(directions || []).map((dir) => {
-        const fromName = getLocalizedName(dir, locale, "from_name");
-        const toName = getLocalizedName(dir, locale, "to_name");
+        const fromName = dir.from_name_en || dir.from_currency;
+        const toName = dir.to_name_en || dir.to_currency;
         const rateText = formatListRate(
           dir.rate_in,
           dir.rate_out,
@@ -89,11 +81,7 @@ export default function QuickSearch() {
             keywords={[
               dir.from_currency,
               dir.to_currency,
-              dir.from_name_uk,
-              dir.from_name_ru,
               dir.from_name_en,
-              dir.to_name_uk,
-              dir.to_name_ru,
               dir.to_name_en,
               dir.from_currency_name,
               dir.to_currency_name,
@@ -106,7 +94,7 @@ export default function QuickSearch() {
             actions={
               <ActionPanel>
                 <Action.Push
-                  title={t("rate", locale)}
+                  title="Rates"
                   icon={Icon.List}
                   target={
                     <DirectionView
@@ -116,8 +104,8 @@ export default function QuickSearch() {
                   }
                 />
                 <Action.OpenInBrowser
-                  title={t("openInBrowser", locale)}
-                  url={directionUrl(dir.from_currency, dir.to_currency, locale)}
+                  title="Open in Browser"
+                  url={directionUrl(dir.from_currency, dir.to_currency)}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
                 <Action

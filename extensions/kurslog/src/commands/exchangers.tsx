@@ -13,7 +13,6 @@ import {
   useFavoriteExchangers,
   useBlacklistExchangers,
 } from "../hooks/useFavorites";
-import { getLocale, t } from "../utils/locale";
 import { exchangerUrl } from "../utils/url";
 import {
   mapTrustColor,
@@ -27,8 +26,7 @@ import {
 import type { Exchanger } from "../api/types";
 
 export default function Exchangers() {
-  const locale = getLocale();
-  const { data: exchangers, isLoading, revalidate } = useExchangers(locale);
+  const { data: exchangers, isLoading, revalidate } = useExchangers();
   const { data: favExchangers, revalidate: revalidateFavs } =
     useFavoriteExchangers();
   const { data: blacklist, revalidate: revalidateBlacklist } =
@@ -106,7 +104,7 @@ export default function Exchangers() {
         key={ex.internal_url}
         icon={trustIcon || { source: Icon.Circle, tintColor: trustColor }}
         title={ex.name}
-        subtitle={`★ ${ex.average_rating?.toFixed(1) ?? "—"} · ${ex.pairs_count} ${t("pairs", locale)}`}
+        subtitle={`★ ${ex.average_rating?.toFixed(1) ?? "—"} · ${ex.pairs_count} pairs`}
         keywords={[ex.name, ex.internal_url]}
         accessories={[
           ...(trustLabel
@@ -114,21 +112,19 @@ export default function Exchangers() {
                 {
                   tag: { value: trustLabel, color: trustColor },
                   icon: trustIcon,
-                  tooltip:
-                    explanationClean ||
-                    `${t("trustStatus", locale)}: ${trustLabel}`,
+                  tooltip: explanationClean || `Trust Status: ${trustLabel}`,
                 },
               ]
             : []),
           {
-            text: `${ex.review_count} ${t("reviews", locale)}`,
-            tooltip: `${ex.review_count} ${t("reviews", locale)}, ${ex.problem_count} ${t("problems", locale)}`,
+            text: `${ex.review_count} reviews`,
+            tooltip: `${ex.review_count} reviews, ${ex.problem_count} problems`,
           },
           ...(ex.monitoring_reviews_count && ex.monitoring_reviews_count > 0
             ? [
                 {
                   icon: Icon.Eye,
-                  tooltip: `${t("monitoring", locale)}: ${ex.monitoring_reviews_count}`,
+                  tooltip: `Review Monitoring: ${ex.monitoring_reviews_count}`,
                 },
               ]
             : []),
@@ -136,7 +132,7 @@ export default function Exchangers() {
             ? [
                 {
                   icon: { source: Icon.Heart, tintColor: Color.Red },
-                  tooltip: t("favorites", locale),
+                  tooltip: "Favorite",
                 },
               ]
             : []),
@@ -146,11 +142,11 @@ export default function Exchangers() {
             metadata={
               <List.Item.Detail.Metadata>
                 <List.Item.Detail.Metadata.Label
-                  title={t("rating", locale)}
+                  title="Rating"
                   text={`★ ${ex.average_rating?.toFixed(1) ?? "—"}`}
                 />
                 <List.Item.Detail.Metadata.Label
-                  title={t("trustScore", locale)}
+                  title="Trust Score"
                   text={
                     ex.trust_score_total != null
                       ? String(ex.trust_score_total)
@@ -158,9 +154,7 @@ export default function Exchangers() {
                   }
                 />
                 {trustLabel ? (
-                  <List.Item.Detail.Metadata.TagList
-                    title={t("trustStatus", locale)}
-                  >
+                  <List.Item.Detail.Metadata.TagList title="Trust Status">
                     <List.Item.Detail.Metadata.TagList.Item
                       text={trustLabel}
                       icon={trustIcon}
@@ -176,32 +170,28 @@ export default function Exchangers() {
                 ) : null}
                 <List.Item.Detail.Metadata.Separator />
                 <List.Item.Detail.Metadata.Label
-                  title={t("currencyPairs", locale)}
+                  title="Currency Pairs"
                   text={String(ex.pairs_count)}
                 />
                 <List.Item.Detail.Metadata.Label
-                  title={t("reviews", locale)}
+                  title="Reviews"
                   text={String(ex.review_count)}
                 />
                 <List.Item.Detail.Metadata.Label
-                  title={t("problems", locale)}
+                  title="Problems"
                   text={String(ex.problem_count)}
                 />
                 {ex.monitoring_reviews_count &&
                 ex.monitoring_reviews_count > 0 ? (
                   <List.Item.Detail.Metadata.Label
-                    title={t("monitoring", locale)}
+                    title="Review Monitoring"
                     text={String(ex.monitoring_reviews_count)}
                   />
                 ) : null}
                 <List.Item.Detail.Metadata.Separator />
-                <List.Item.Detail.Metadata.TagList title={t("status", locale)}>
+                <List.Item.Detail.Metadata.TagList title="Status">
                   <List.Item.Detail.Metadata.TagList.Item
-                    text={
-                      ex.status === "active"
-                        ? t("active", locale)
-                        : t("inactive", locale)
-                    }
+                    text={ex.status === "active" ? "Active" : "Inactive"}
                     color={
                       ex.status === "active" ? Color.Green : Color.SecondaryText
                     }
@@ -214,8 +204,8 @@ export default function Exchangers() {
         actions={
           <ActionPanel>
             <Action.OpenInBrowser
-              title={t("openInBrowser", locale)}
-              url={exchangerUrl(ex.internal_url, locale)}
+              title="Open in Browser"
+              url={exchangerUrl(ex.internal_url)}
             />
             <Action.CopyToClipboard title="Copy Name" content={ex.name} />
             <Action
@@ -246,16 +236,13 @@ export default function Exchangers() {
     <List
       isLoading={isLoading}
       isShowingDetail
-      searchBarPlaceholder={t("searchExchangers", locale)}
+      searchBarPlaceholder="Search exchangers..."
     >
-      <List.Section title={t("active", locale)} subtitle={`${active.length}`}>
+      <List.Section title="Active" subtitle={`${active.length}`}>
         {active.map(renderExchanger)}
       </List.Section>
       {inactive.length > 0 && (
-        <List.Section
-          title={t("inactive", locale)}
-          subtitle={`${inactive.length}`}
-        >
+        <List.Section title="Inactive" subtitle={`${inactive.length}`}>
           {inactive.map(renderExchanger)}
         </List.Section>
       )}

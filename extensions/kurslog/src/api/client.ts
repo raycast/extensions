@@ -6,7 +6,6 @@ import type {
   CurrencyPair,
   Exchanger,
   BatchRateItem,
-  Locale,
 } from "./types";
 
 // Cached endpoints for extension (no extra DB load)
@@ -14,15 +13,11 @@ const API_BASE = "https://kurslog.com/api/raycast";
 // Direct API for real-time data (rates by direction) and redirect
 const API_DIRECT = "https://kurslog.com/api";
 
-async function apiFetch<T>(
-  path: string,
-  locale: Locale,
-  init?: RequestInit,
-): Promise<T> {
+async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, {
     ...init,
     headers: {
-      "Accept-Language": locale,
+      "Accept-Language": "en",
       ...init?.headers,
     },
   });
@@ -33,15 +28,11 @@ async function apiFetch<T>(
 }
 
 /** Direct API call (no raycast cache) for real-time data */
-async function apiDirect<T>(
-  path: string,
-  locale: Locale,
-  init?: RequestInit,
-): Promise<T> {
+async function apiDirect<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_DIRECT}${path}`, {
     ...init,
     headers: {
-      "Accept-Language": locale,
+      "Accept-Language": "en",
       ...init?.headers,
     },
   });
@@ -52,24 +43,18 @@ async function apiDirect<T>(
 }
 
 export async function fetchPopularDirections(
-  locale: Locale,
   limit = 30,
 ): Promise<PopularDirection[]> {
-  return apiFetch<PopularDirection[]>(
-    `/directions/popular?limit=${limit}`,
-    locale,
-  );
+  return apiFetch<PopularDirection[]>(`/directions/popular?limit=${limit}`);
 }
 
 /** Real-time: full rates from main API (not cached in raycast layer) */
 export async function fetchAllRates(
   from: string,
   to: string,
-  locale: Locale,
 ): Promise<ExchangerRatesResponse[]> {
   const data = await apiDirect<{ exchangers: ExchangerRatesResponse[] }>(
     `/rates/direction/${from}-to-${to}`,
-    locale,
   );
   return data.exchangers;
 }
@@ -77,34 +62,31 @@ export async function fetchAllRates(
 export async function fetchTopRates(
   from: string,
   to: string,
-  locale: Locale,
   limit = 10,
 ): Promise<RateItem[]> {
   const data = await apiFetch<{ rates: RateItem[] }>(
     `/rates/${from}-to-${to}/top?limit=${limit}`,
-    locale,
   );
   return data.rates;
 }
 
-export async function fetchCurrencies(locale: Locale): Promise<Currency[]> {
-  return apiFetch<Currency[]>("/currencies/list", locale);
+export async function fetchCurrencies(): Promise<Currency[]> {
+  return apiFetch<Currency[]>("/currencies/list");
 }
 
-export async function fetchPairs(locale: Locale): Promise<CurrencyPair[]> {
-  return apiFetch<CurrencyPair[]>("/currencies/pairs", locale);
+export async function fetchPairs(): Promise<CurrencyPair[]> {
+  return apiFetch<CurrencyPair[]>("/currencies/pairs");
 }
 
-export async function fetchExchangers(locale: Locale): Promise<Exchanger[]> {
-  return apiFetch<Exchanger[]>("/exchangers/list", locale);
+export async function fetchExchangers(): Promise<Exchanger[]> {
+  return apiFetch<Exchanger[]>("/exchangers/list");
 }
 
 /** Real-time: batch rates from main API */
 export async function fetchBatchRates(
   directions: { from: string; to: string }[],
-  locale: Locale,
 ): Promise<BatchRateItem[]> {
-  return apiDirect<BatchRateItem[]>("/directions/batch-rates", locale, {
+  return apiDirect<BatchRateItem[]>("/directions/batch-rates", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ directions }),
@@ -134,24 +116,22 @@ export interface City {
 }
 
 export async function fetchCountries(
-  locale: Locale,
   fromCurrency?: string,
   toCurrency?: string,
 ): Promise<Country[]> {
-  const params = new URLSearchParams({ locale });
+  const params = new URLSearchParams({ locale: "en" });
   if (fromCurrency) params.set("from_currency", fromCurrency);
   if (toCurrency) params.set("to_currency", toCurrency);
-  return apiFetch<Country[]>(`/countries/list?${params}`, locale);
+  return apiFetch<Country[]>(`/countries/list?${params}`);
 }
 
 export async function fetchCities(
   from: string,
   to: string,
-  locale: Locale,
   countryId?: number,
 ): Promise<City[]> {
   const q = countryId ? `?country_id=${countryId}` : "";
-  return apiFetch<City[]>(`/cities/by-direction/${from}-to-${to}${q}`, locale);
+  return apiFetch<City[]>(`/cities/by-direction/${from}-to-${to}${q}`);
 }
 
 /** Flatten ExchangerRatesResponse[] into flat RateItem[] with trust status */
