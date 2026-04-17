@@ -1,10 +1,13 @@
 import { ActionPanel, Action, Icon, List, open, closeMainWindow, showToast, Toast } from "@raycast/api";
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { readdirSync, existsSync } from "fs";
-import { execFileSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { join } from "path";
 import { homedir } from "os";
 import pokemon from "./pokemon.json";
+
+const execFileAsync = promisify(execFile);
 
 interface Pokemon {
   name: string;
@@ -81,9 +84,9 @@ function genLabel(gen: number): string {
   return gen === -1 ? "Custom" : `Gen ${gen}`;
 }
 
-function readActiveSprites(): Set<string> {
+async function readActiveSprites(): Promise<Set<string>> {
   try {
-    const raw = execFileSync("plutil", [
+    const { stdout } = await execFileAsync("plutil", [
       "-extract",
       "selectedPokemonList",
       "raw",
@@ -91,7 +94,7 @@ function readActiveSprites(): Set<string> {
       "-",
       join(homedir(), "Library", "Preferences", "com.deskpals.app.plist"),
     ]);
-    const json = Buffer.from(raw.toString().trim(), "base64").toString("utf-8");
+    const json = Buffer.from(stdout.toString().trim(), "base64").toString("utf-8");
     const list: { name: string; gen: number }[] = JSON.parse(json);
     return new Set(list.map((p) => `${p.name}:${p.gen}`));
   } catch {
@@ -108,16 +111,25 @@ function displayName(name: string): string {
 export default function Command() {
   const [shiny, setShiny] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
-  const [refreshKey, setRefreshKey] = useState(0);
-  const customSprites = useMemo(() => discoverCustomSprites(), [refreshKey]);
-  const activeSprites = useMemo(() => readActiveSprites(), [refreshKey]);
+  const [customSprites, setCustomSprites] = useState<Pokemon[]>([]);
+  const [activeSprites, setActiveSprites] = useState<Set<string>>(new Set());
 
   // Poll active sprites so changes are picked up between Raycast opens
   useEffect(() => {
-    const refresh = () => setRefreshKey((k) => k + 1);
+    let cancelled = false;
+    const refresh = async () => {
+      const sprites = discoverCustomSprites();
+      const active = await readActiveSprites();
+      if (cancelled) return;
+      setCustomSprites(sprites);
+      setActiveSprites(active);
+    };
     refresh();
     const interval = setInterval(refresh, 2000);
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   const isActive = useCallback((p: Pokemon) => activeSprites.has(`${p.name}:${p.gen}`), [activeSprites]);
