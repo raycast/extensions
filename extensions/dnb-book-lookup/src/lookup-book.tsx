@@ -142,6 +142,25 @@ async function checkContentAvailable(url: string): Promise<boolean> {
 }
 
 /**
+ * Fetches the DNB table-of-contents page and returns plain text for AI prompts.
+ */
+async function fetchTocPlainText(url: string): Promise<string> {
+  try {
+    const response = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (!response.ok) return "";
+    const html = await response.text();
+    const withoutBlocks = html.replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " ");
+    const text = withoutBlocks
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return text.slice(0, 12000);
+  } catch {
+    return "";
+  }
+}
+
+/**
  * Assesses the quality of a table of contents for generating a book description.
  * Returns poor/hasEnoughInfo=false immediately if input is empty (no AI call).
  */
@@ -580,13 +599,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
   } | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     async function runCommand() {
       // Auto-fill ISBN: arg → selected text
       let effectiveIsbn = argIsbn?.trim() || "";
       if (!effectiveIsbn) {
         try {
           const selectedText = await getSelectedText();
-          const match = selectedText.replace(/[-\s]/g, "").match(/\d{10,13}/);
+          const compact = selectedText.replace(/[-\s]/g, "");
+          const match = compact.match(/(?:\d{13}|\d{9}[\dX])/i);
           if (match && isValidISBN(match[0])) {
             effectiveIsbn = match[0];
           }
@@ -601,7 +623,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           title: "ISBN Required",
           message: "Please enter an ISBN-10 or ISBN-13",
         });
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
         return;
       }
 
@@ -611,7 +633,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           title: "Invalid ISBN",
           message: "Please enter a valid ISBN-10 or ISBN-13",
         });
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
         return;
       }
 
@@ -625,6 +647,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
         // Step 1: Search for book metadata
         toast.message = "Fetching book information...";
         const metadata = await searchDNBMetadata(effectiveIsbn);
+        if (cancelled) return;
 
         if (!metadata) {
           await toast.hide();
@@ -633,7 +656,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
             title: "No Results",
             message: "No DNB entries found for this ISBN",
           });
-          setIsLoading(false);
+          if (!cancelled) setIsLoading(false);
           return;
         }
 
@@ -645,9 +668,11 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
         // Step 2: Check availability
         toast.message = "Checking availability...";
         const tocAvailable = await checkContentAvailable(tocUrl);
+        if (cancelled) return;
 
         if (!tocAvailable) {
           const textAvailable = await checkContentAvailable(textUrl);
+          if (cancelled) return;
           if (textAvailable) {
             await open(textUrl);
             await toast.hide();
@@ -661,7 +686,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
             });
             await open(baseUrl);
           }
-          setIsLoading(false);
+          if (!cancelled) setIsLoading(false);
           return;
         }
 
@@ -676,9 +701,13 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
             });
             await open(tocUrl);
             await popToRoot();
-            setIsLoading(false);
+            if (!cancelled) setIsLoading(false);
             return;
           }
+
+          toast.message = "Loading table of contents…";
+          const tocText = await fetchTocPlainText(tocUrl);
+          if (cancelled) return;
 
           toast.message = "Checking sources and generating book description...";
 
@@ -687,8 +716,9 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
               normalizeISBN(effectiveIsbn),
               title,
               author,
-              "",
+              tocText,
             );
+            if (cancelled) return;
 
             setBookInfo({
               title,
@@ -699,7 +729,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
             setResult(klappentextResult);
             setShowDetail(true);
             await toast.hide();
-            setIsLoading(false);
+            if (!cancelled) setIsLoading(false);
           } catch (error) {
             console.error("Klappentext generation failed:", error);
             await toast.hide();
@@ -710,7 +740,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
             });
             await open(tocUrl);
             await popToRoot();
-            setIsLoading(false);
+            if (!cancelled) setIsLoading(false);
           }
         } else {
           // Generation disabled – open all available content
@@ -719,6 +749,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           if (tocAvailable) urlsToOpen.push(tocUrl);
 
           const textAvailable = await checkContentAvailable(textUrl);
+          if (cancelled) return;
           if (textAvailable) urlsToOpen.push(textUrl);
 
           if (urlsToOpen.length > 0) {
@@ -742,7 +773,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           }
 
           await popToRoot();
-          setIsLoading(false);
+          if (!cancelled) setIsLoading(false);
         }
       } catch (error) {
         await toast.hide();
@@ -753,11 +784,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
           message: errorMessage,
         });
         console.error("DNB Book Lookup Error:", error);
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
     runCommand();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (isLoading) {
@@ -776,5 +810,14 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Lookup
     );
   }
 
-  return null;
+  return (
+    <Detail
+      markdown="# DNB Book Lookup\n\nThis command has finished. Check Raycast notifications or your browser if content was opened.\n\nPress **Escape** to close."
+      actions={
+        <ActionPanel>
+          <Action title="Close" onAction={() => popToRoot()} />
+        </ActionPanel>
+      }
+    />
+  );
 }

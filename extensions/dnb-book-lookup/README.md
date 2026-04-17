@@ -7,7 +7,7 @@ with optional AI-generated Klappentext for book listings.
 
 - ISBN-10 and ISBN-13 support (with or without hyphens)
 - Automatic availability check for table of contents and content text
-- Auto-fill ISBN from clipboard or selected text
+- Auto-fill ISBN from selected text when the ISBN argument is left empty
 - Optional AI-generated Klappentext (max. 150 words) + 5 keywords
   - Source verification via Google Books and Wikipedia
   - Confidence score and source transparency
@@ -17,7 +17,7 @@ with optional AI-generated Klappentext for book listings.
 ## Usage
 
 1. Open Raycast
-2. Type "Lookup DNB Book"
+2. Type "Look up DNB Book"
 3. Enter ISBN (e.g. `978-3-59335-383-8` or `9783593353838`)
 4. Press Enter
 
