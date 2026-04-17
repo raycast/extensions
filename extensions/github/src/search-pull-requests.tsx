@@ -61,6 +61,7 @@ function SearchPullRequests() {
             return (
               <PullRequestListItem
                 key={pullRequest.id}
+                showAuthor
                 {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}
               />
             );

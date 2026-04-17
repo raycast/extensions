@@ -1,8 +1,10 @@
-import { Action, ActionPanel, Alert, Color, Icon, List, confirmAlert } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
+import { useEffect, useRef } from "react";
 
-import { removeTimeEntry } from "@/api";
+import { liteModeSync, isLiteModeColdStart, isLiteModeSyncDue, removeTimeEntry } from "@/api";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
 import { formatSeconds } from "@/helpers/formatSeconds";
+import { liteMode } from "@/helpers/preferences";
 import { Verb, withToast } from "@/helpers/withToast";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
 import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
@@ -15,10 +17,56 @@ export function TimeEntriesListView() {
     mutateTimeEntries,
     timeEntries,
     timeEntriesWithUniqueProjectAndDescription,
+    revalidateRunningTimeEntry,
     revalidateTimeEntries,
   } = useProcessedTimeEntries();
 
   const totalDurationToday = useTotalDurationToday(timeEntries);
+
+  // Lite mode: seed cache on first launch if critical keys are missing
+  const coldStartDone = useRef(false);
+  useEffect(() => {
+    if (!liteMode || coldStartDone.current) return;
+    if (!isLiteModeColdStart()) return;
+    coldStartDone.current = true;
+    (async () => {
+      await showToast({ style: Toast.Style.Animated, title: "Syncing from Toggl..." });
+      try {
+        await liteModeSync();
+        revalidateRunningTimeEntry();
+        revalidateTimeEntries();
+        await showToast({ style: Toast.Style.Success, title: "Sync complete" });
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cache empty — sync when rate limit resets",
+          message: "Use ⌘⇧R to sync manually",
+        });
+      }
+    })();
+  }, []);
+
+  // Lite mode: check every 10 minutes if an hourly sync is due
+  const syncingRef = useRef(false);
+  useEffect(() => {
+    if (!liteMode) return;
+    const check = () => {
+      if (syncingRef.current || isLiteModeColdStart() || !isLiteModeSyncDue()) return;
+      syncingRef.current = true;
+      liteModeSync()
+        .then(() => {
+          revalidateRunningTimeEntry();
+          revalidateTimeEntries();
+        })
+        .catch(() => {})
+        .finally(() => {
+          syncingRef.current = false;
+        });
+    };
+    check();
+    const id = setInterval(check, 600_000);
+    return () => clearInterval(id);
+  }, [revalidateRunningTimeEntry, revalidateTimeEntries]);
 
   return (
     <List
@@ -47,11 +95,37 @@ export function TimeEntriesListView() {
                     icon={Icon.Pencil}
                     target={
                       <ExtensionContextProvider>
-                        <UpdateTimeEntryForm timeEntry={timeEntry} revalidateTimeEntries={revalidateTimeEntries} />
+                        <UpdateTimeEntryForm
+                          timeEntry={timeEntry}
+                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                          revalidateTimeEntries={revalidateTimeEntries}
+                        />
                       </ExtensionContextProvider>
                     }
                   />
                   <ActionPanel.Section>
+                    {liteMode && (
+                      <Action
+                        title="Sync from Toggl"
+                        icon={Icon.ArrowClockwise}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                        onAction={async () => {
+                          await showToast({ style: Toast.Style.Animated, title: "Syncing from Toggl..." });
+                          try {
+                            await liteModeSync();
+                            revalidateRunningTimeEntry();
+                            revalidateTimeEntries();
+                            await showToast({ style: Toast.Style.Success, title: "Sync complete" });
+                          } catch (e) {
+                            await showToast({
+                              style: Toast.Style.Failure,
+                              title: "Sync failed",
+                              message: e instanceof Error ? e.message : String(e),
+                            });
+                          }
+                        }}
+                      />
+                    )}
                     <Action
                       title="Delete Time Entry"
                       icon={Icon.Trash}

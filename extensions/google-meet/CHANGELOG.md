@@ -1,5 +1,10 @@
 # Google Meet Changelog
 
+## [New Command] - 2026-04-12
+
+- Add "Create Meet and Refocus" command that creates a meeting, copies the link, and switches back to your previous app
+- Add Dia browser support
+
 ## [Improvement] - 2026-02-13
 
 - Make delay configurable by user

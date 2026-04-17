@@ -1,5 +1,16 @@
 # Toggl Track Changelog
 
+## [New Feature] - 2026-04-16
+
+- Add Low Data Mode for free-tier users: serves reads from local cache with hourly auto-sync (3 requests/hour), leaving 27 requests/hour for active use
+- Add manual sync action (Cmd+Shift+R) to force-refresh cached data on demand
+
+## [Bug Fixes] - 2026-04-15
+
+- Consolidated 5 parallel resource API calls into a single `/me?with_related_data=true` bootstrap request, reducing API usage from 5 calls to 1 when opening time entry forms
+- Reduced Menu Bar background refresh interval from 3 minutes to 10 minutes to further reduce API consumption for free-tier users (30 calls/hour limit)
+- Added optimistic caching for the running time entry after start/stop actions, eliminating a redundant API call per timer interaction
+
 ## [New Feature] - 2026-03-10
 
 - Add optional Script Triggers preferences to run local shell scripts when a timer starts, stops, or is fetched, enabling integration with tools like Sketchybar or Hammerspoon without independent API polling

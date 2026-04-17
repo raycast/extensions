@@ -1,19 +1,20 @@
 import { useCachedPromise } from "@raycast/utils";
+
 import { paginateGraphql } from "../api/client";
 import { TEAMS_QUERY } from "../api/queries";
 import type { TeamRecord } from "../api/types";
 
-export function useTeams(workspaceId: string | null) {
+export const useTeams = (workspaceId: string | null) => {
   const { data, isLoading, error, revalidate } = useCachedPromise(
-    async (wId: string) =>
+    (wId: string) =>
       paginateGraphql<TeamRecord>({
+        nodeKey: "teams",
         query: TEAMS_QUERY,
         variables: { workspaceId: wId },
-        nodeKey: "teams",
       }),
     [workspaceId || ""],
     { execute: !!workspaceId },
   );
 
-  return { teams: data || [], isLoading, error, revalidate };
-}
+  return { error, isLoading, revalidate, teams: data || [] };
+};

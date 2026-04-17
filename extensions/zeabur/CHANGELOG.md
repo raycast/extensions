@@ -1,5 +1,10 @@
 # Zeabur Changelog
 
+## [Fix] - 2026-04-14
+
+- Fixed the issue where the provider information in the manage servers command may be null.
+- Fixed potential null access issues across manage projects, manage servers, and deployment commands.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

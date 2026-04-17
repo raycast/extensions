@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Bug Fix & Launch Argument] - {PR_MERGE_DATE}
+
+- Added launch argument to Search command for pre-filling the search query before opening
+- Fixed search not working while the formulae/cask index is being downloaded on cold start
+
 ## [Cask Id] - 2026-03-24
 
 - Add cask id to the cask metadata

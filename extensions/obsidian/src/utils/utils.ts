@@ -60,6 +60,17 @@ export function trimPathToMaxLength(path: string, maxLength: number) {
   }
 }
 
+/**
+ * Normalizes note paths for the Obsidian advanced-uri protocol, which expects forward slashes.
+ * Windows backslash separators break `filepath`, so convert them after removing the vault prefix.
+ */
+export function normalizeRelativePath(notePath: string, vaultPath: string) {
+  return notePath
+    .replace(vaultPath, "")
+    .replace(/^[\\/]+/, "")
+    .replace(/\\/g, "/");
+}
+
 export async function ISO8601_week_no(dt: Date) {
   const tdt = new Date(dt.getTime());
   const dayn = (dt.getDay() + 6) % 7;

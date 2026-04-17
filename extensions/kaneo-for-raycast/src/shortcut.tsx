@@ -35,4 +35,24 @@ const Revalidate: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd", "shift"], key: "r" },
 };
 
-export { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, CopyProjectName, AssignTask, Revalidate };
+const SubTask: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+  macOS: { modifiers: ["cmd", "alt"], key: "s" },
+};
+
+const ParentTask: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "alt"], key: "p" },
+  macOS: { modifiers: ["cmd", "alt"], key: "p" },
+};
+
+export {
+  ChangeStatus,
+  ChangePriority,
+  CopyTaskTitle,
+  CopyTaskDescription,
+  CopyProjectName,
+  AssignTask,
+  Revalidate,
+  SubTask,
+  ParentTask,
+};

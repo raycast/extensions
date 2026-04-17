@@ -46,6 +46,26 @@ It is disabled by default, but can enabled from Raycast's extensions settings.
 
 <img width="600" alt="Manage Workspaces Command" src="./assets/view-workspaces.png">
 
+### Low Data Mode (Free Tier)
+
+An opt-in mode for users on Toggl's free tier (30 requests/hour). Enable it in **Raycast Settings > Extensions > Toggl Track > "Enable Low Data Mode"**.
+
+When enabled:
+
+- **Writes work normally** — starting and stopping timers hit the API (1 call each)
+- **Reads serve from local cache** — projects, clients, tags, workspaces, time entries, and running entry are all served from cached data without API calls
+- **Menu bar uses cached state** — no background API polling beyond the hourly auto-sync
+- **Auto-sync once per hour** — keeps data reasonably fresh (3 requests/hour) without manual intervention
+- **Manual sync** — press `Cmd+Shift+R` or select "Sync from Toggl" in the action menu to force a refresh at any time
+
+**First launch:** If no cached data exists, Low Data Mode automatically performs one sync to seed the cache. If you enable it while rate-limited and the cache is empty, you'll see a toast prompting you to sync later.
+
+**Known limitations:**
+
+- Timers started or stopped from the Toggl web/mobile app may take up to 1 hour to appear (or use manual sync)
+- Changes to projects, tags, or clients made outside Raycast require up to 1 hour or a manual sync to appear
+- Stale cache entries are automatically evicted after 24 hours
+
 ### Menu Bar
 
 See what time entry is currently in your Menu Bar. Click to see the list of recent time entries, which allows you to resume them.

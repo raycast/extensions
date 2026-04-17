@@ -1,5 +1,7 @@
-import { Icon, List } from "@raycast/api";
-import type { TaskView } from "../api/types";
+import { List, Toast, showToast } from "@raycast/api";
+import { useEffect } from "react";
+
+import type { NavigableView } from "../api/types";
 import { VIEW_CONFIG } from "../helpers/constants";
 import { useProjects } from "../hooks/use-projects";
 import { useTasks } from "../hooks/use-tasks";
@@ -7,7 +9,7 @@ import { TaskListItem } from "./task-list-item";
 import { useWorkspaceDropdown } from "./with-workspace";
 
 interface TaskListProps {
-  view: TaskView;
+  view: NavigableView;
 }
 
 export default function TaskList({ view }: TaskListProps) {
@@ -27,21 +29,23 @@ export default function TaskList({ view }: TaskListProps) {
     revalidate,
   } = useTasks(workspaceId, view, allWorkspaceIds);
   const { projects, error: projectsError } = useProjects(workspaceId, allWorkspaceIds);
+
   const fetchError = tasksError ?? projectsError;
-  const isLoading = isLoadingWorkspace || isLoadingTasks;
+
+  useEffect(() => {
+    if (fetchError) {
+      showToast(Toast.Style.Failure, "Failed to load tasks", fetchError.message);
+    }
+  }, [fetchError]);
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingWorkspace || isLoadingTasks}
       searchBarAccessory={dropdown}
       searchBarPlaceholder={`Filter ${config.title.toLowerCase()} tasks...`}
     >
-      {fetchError && !isLoading ? (
-        <List.EmptyView
-          description={fetchError instanceof Error ? fetchError.message : String(fetchError)}
-          icon={Icon.ExclamationMark}
-          title="Couldn’t load tasks"
-        />
+      {fetchError ? (
+        <List.EmptyView icon="⚠️" title="Failed to load tasks" description={fetchError.message} />
       ) : (
         <List.Section subtitle={`${tasks.length} task${tasks.length === 1 ? "" : "s"}`} title={config.title}>
           {tasks.map((task) => (
