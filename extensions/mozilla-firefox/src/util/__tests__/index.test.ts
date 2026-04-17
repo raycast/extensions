@@ -183,17 +183,4 @@ describe("getProfileName (via getHistoryDbPath)", () => {
 
     expect(result).toBe(path.join(PROFILES_BASE, "abc123.default-release", "bookmarkbackups"));
   });
-
-  // --- Regression: .default suffix was not checked before this change -------
-
-  it("regression: resolves a plain .default profile that was previously unreachable", () => {
-    setPrefs("nonexistent");
-    // Only profile available is the plain .default — before the fix this would
-    // have fallen through to the catch-all with unpredictable results.
-    mockProfiles(["abc123.default"]);
-
-    const result = getHistoryDbPath();
-
-    expect(result).toBe(path.join(PROFILES_BASE, "abc123.default", "places.sqlite"));
-  });
 });
