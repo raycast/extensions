@@ -22,7 +22,7 @@ On any spec card, press **⌘K** to open the Action Panel and choose **"Add to F
 
 ### Stat Priority Copier
 
-On any spec card, open the Action Panel and choose **"Copy Stat Priority"**. The extension fetches the spec's PvE guide, parses the stat priority list, and copies it to the clipboard (e.g. `Mastery > Critical Strike > Haste > Versatility`). Results are cached for 30 minutes.
+On any spec card, open the Action Panel (**⌘K**) and choose **"Copy Stat Priority"**. The extension fetches the spec's PvE guide, parses the stat priority list, and copies the order to your clipboard (e.g. `Mastery > Critical Strike > Haste > Versatility`) — no browser required. Results are cached for 30 minutes.
 
 ### Custom Macros
 
@@ -60,10 +60,6 @@ All parts are optional and can be typed in any order after the spec. The query i
 
 For the quickest flow, type `iv` then press **Space**. Raycast enters inline argument mode — type your full query (e.g. `sp pve gear`), then press **Enter** to open the view with results already filtered.
 
-### Copy Stat Priority
-
-When browsing specs, select any spec card and open the Action Panel (**⌘K**). The **"Copy Stat Priority"** action fetches the Icy Veins stat priority page for that spec and copies the priority order (e.g. `Mastery > Critical Strike > Haste > Versatility`) directly to your clipboard — no browser required. Results are cached for 30 minutes.
-
 ---
 
 ## Supported specs
@@ -78,7 +74,7 @@ When browsing specs, select any spec card and open the Action Panel (**⌘K**). 
 ### Demon Hunter
 | Spec | Short aliases |
 |------|--------------|
-| Devourer *(new)* | `devourer`, `devourer dh` |
+| Devourer | `devourer`, `devourer dh`, `devourer demon hunter` |
 | Havoc | `havoc`, `havoc dh` |
 | Vengeance | `vdh`, `vengeance dh` |
 
@@ -107,8 +103,8 @@ When browsing specs, select any spec card and open the Action Panel (**⌘K**). 
 ### Mage
 | Spec | Short aliases |
 |------|--------------|
-| Arcane | `arcane` |
-| Fire | `fire` |
+| Arcane | `arcane`, `arcane mage` |
+| Fire | `fire`, `fire mage` |
 | Frost | `fmage`, `frost mag` |
 
 ### Monk
@@ -136,7 +132,7 @@ When browsing specs, select any spec card and open the Action Panel (**⌘K**). 
 | Spec | Short aliases |
 |------|--------------|
 | Assassination | `sin`, `sin rogue` |
-| Outlaw | `outlaw` |
+| Outlaw | `outlaw`, `outlaw rogue` |
 | Subtlety | `sub`, `sub rogue` |
 
 ### Shaman
@@ -156,8 +152,8 @@ When browsing specs, select any spec card and open the Action Panel (**⌘K**). 
 ### Warrior
 | Spec | Short aliases |
 |------|--------------|
-| Arms | `arms` |
-| Fury | `fury` |
+| Arms | `arms`, `arms warrior` |
+| Fury | `fury`, `fury warrior` |
 | Protection | `prot war`, `prot warrior` |
 
 ---

@@ -150,12 +150,6 @@ export default function Command({
       <Grid.EmptyView
         title="No matching guides"
         description="Try a different class, spec, mode, or sub-page token."
-        actions={
-          <ActionPanel>
-            <Action title="Reset Query" onAction={() => setQuery("")} />
-            <ManageMacrosAction />
-          </ActionPanel>
-        }
       />
     </Grid>
   );
