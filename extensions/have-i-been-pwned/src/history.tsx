@@ -40,17 +40,27 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isCancelled = false;
+
     const load = async () => {
       setIsLoading(true);
-      setHistory(await getHistory());
+      const nextHistory = await getHistory();
+      if (isCancelled) return;
+
+      setHistory(nextHistory);
       setIsLoading(false);
     };
+
     load();
+
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
-  const onClearHistory = useCallback(() => {
+  const onClearHistory = useCallback(async () => {
+    await clearHistory();
     setHistory([]);
-    clearHistory();
   }, []);
 
   if (history.length === 0 && !isLoading) {
@@ -73,7 +83,7 @@ export default function Command() {
           icon={entryIcon(entry)}
           title={entryTitle(entry)}
           subtitle={entrySubtitle(entry)}
-          accessories={[{ text: new Date(entry.timestamp).toLocaleString() }]}
+          accessories={[{ text: new Date(entry.timestamp).toLocaleString("en-US") }]}
           detail={<List.Item.Detail markdown={entryMarkdown(entry)} />}
           actions={<HibpActions onClearHistory={onClearHistory} />}
         />

@@ -1,10 +1,10 @@
-import { Action, ActionPanel, openExtensionPreferences } from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, openExtensionPreferences } from "@raycast/api";
 
 interface HibpActionsProps {
   copyContent?: string;
   copyTitle?: string;
   needsApiKey?: boolean;
-  onClearHistory?: () => void;
+  onClearHistory?: () => Promise<void>;
 }
 
 export const HibpActions = ({ copyContent, copyTitle, needsApiKey, onClearHistory }: HibpActionsProps) => (
@@ -13,6 +13,22 @@ export const HibpActions = ({ copyContent, copyTitle, needsApiKey, onClearHistor
     <Action.OpenInBrowser title="Open Haveibeenpwned.com" url="https://haveibeenpwned.com" />
     {needsApiKey && <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />}
 
-    {onClearHistory && <Action title="Clear History" onAction={onClearHistory} />}
+    {onClearHistory && (
+      <Action
+        title="Clear History"
+        style={Action.Style.Destructive}
+        onAction={async () => {
+          if (
+            await confirmAlert({
+              title: "Clear History",
+              message: "This will permanently remove your HIBP lookup history.",
+              primaryAction: { title: "Clear History", style: Alert.ActionStyle.Destructive },
+            })
+          ) {
+            await onClearHistory();
+          }
+        }}
+      />
+    )}
   </ActionPanel>
 );
