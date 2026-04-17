@@ -649,48 +649,6 @@ function EditInvoiceForm({
   );
 }
 
-// ── Picker forms ────────────────────────────────────────────────────────────
-
-function PickerForm<T extends string>({
-  title,
-  options,
-  current,
-  onSelect,
-}: {
-  title: string;
-  options: { value: T; label: string; icon: Icon }[];
-  current: T;
-  onSelect: (value: T) => void;
-}) {
-  const { pop } = useNavigation();
-  return (
-    <List>
-      {options.map((opt) => (
-        <List.Item
-          key={opt.value}
-          icon={
-            opt.value === current
-              ? { source: Icon.Checkmark, tintColor: Color.Green }
-              : opt.icon
-          }
-          title={opt.label}
-          actions={
-            <ActionPanel>
-              <Action
-                title={`Set ${title} to ${opt.label}`}
-                onAction={() => {
-                  onSelect(opt.value);
-                  pop();
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
-    </List>
-  );
-}
-
 // ── Main command ────────────────────────────────────────────────────────────
 
 export default function MyInvoicesCommand() {
@@ -1022,76 +980,88 @@ export default function MyInvoicesCommand() {
                   </ActionPanel.Section>
 
                   <ActionPanel.Section title="View">
-                    <Action.Push
+                    <ActionPanel.Submenu
                       title="Group By…"
                       icon={Icon.AppWindowGrid3x3}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "g" },
                         Windows: { modifiers: ["ctrl", "shift"], key: "g" },
                       }}
-                      target={
-                        <PickerForm
-                          title="Group By"
-                          current={prefs.groupBy}
-                          options={[
-                            {
-                              value: "status",
-                              label: "Status",
-                              icon: Icon.Circle,
-                            },
-                            {
-                              value: "recipient",
-                              label: "Recipient",
-                              icon: Icon.Person,
-                            },
-                            {
-                              value: "currency",
-                              label: "Currency",
-                              icon: Icon.Coins,
-                            },
-                            {
-                              value: "month",
-                              label: "Month",
-                              icon: Icon.Calendar,
-                            },
-                          ]}
-                          onSelect={(v) => updatePrefs({ groupBy: v })}
+                    >
+                      {[
+                        { value: "status", label: "Status", icon: Icon.Circle },
+                        {
+                          value: "recipient",
+                          label: "Recipient",
+                          icon: Icon.Person,
+                        },
+                        {
+                          value: "currency",
+                          label: "Currency",
+                          icon: Icon.Coins,
+                        },
+                        { value: "month", label: "Month", icon: Icon.Calendar },
+                      ].map((opt) => (
+                        <Action
+                          key={opt.value}
+                          title={opt.label}
+                          icon={
+                            prefs.groupBy === opt.value
+                              ? {
+                                  source: Icon.Checkmark,
+                                  tintColor: Color.Green,
+                                }
+                              : opt.icon
+                          }
+                          onAction={() =>
+                            updatePrefs({
+                              groupBy: opt.value as ListPreferences["groupBy"],
+                            })
+                          }
                         />
-                      }
-                    />
-                    <Action.Push
+                      ))}
+                    </ActionPanel.Submenu>
+                    <ActionPanel.Submenu
                       title="Sort By…"
                       icon={Icon.BulletPoints}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "s" },
                         Windows: { modifiers: ["ctrl", "shift"], key: "s" },
                       }}
-                      target={
-                        <PickerForm
-                          title="Sort By"
-                          current={prefs.sortBy}
-                          options={[
-                            {
-                              value: "createdAt",
-                              label: "Creation Date",
-                              icon: Icon.Clock,
-                            },
-                            {
-                              value: "amount",
-                              label: "Amount",
-                              icon: Icon.Coins,
-                            },
-                            {
-                              value: "recipient",
-                              label: "Recipient Name",
-                              icon: Icon.Person,
-                            },
-                          ]}
-                          onSelect={(v) => updatePrefs({ sortBy: v })}
+                    >
+                      {[
+                        {
+                          value: "createdAt",
+                          label: "Creation Date",
+                          icon: Icon.Clock,
+                        },
+                        { value: "amount", label: "Amount", icon: Icon.Coins },
+                        {
+                          value: "recipient",
+                          label: "Recipient Name",
+                          icon: Icon.Person,
+                        },
+                      ].map((opt) => (
+                        <Action
+                          key={opt.value}
+                          title={opt.label}
+                          icon={
+                            prefs.sortBy === opt.value
+                              ? {
+                                  source: Icon.Checkmark,
+                                  tintColor: Color.Green,
+                                }
+                              : opt.icon
+                          }
+                          onAction={() =>
+                            updatePrefs({
+                              sortBy: opt.value as ListPreferences["sortBy"],
+                            })
+                          }
                         />
-                      }
-                    />
-                    <Action.Push
+                      ))}
+                    </ActionPanel.Submenu>
+                    <ActionPanel.Submenu
                       title={`Order: ${getOrderLabel(prefs.sortBy, prefs.order)}`}
                       icon={
                         prefs.order === "desc" ? Icon.ArrowDown : Icon.ArrowUp
@@ -1100,26 +1070,38 @@ export default function MyInvoicesCommand() {
                         macOS: { modifiers: ["cmd", "shift"], key: "o" },
                         Windows: { modifiers: ["ctrl", "shift"], key: "o" },
                       }}
-                      target={
-                        <PickerForm
-                          title="Order"
-                          current={prefs.order}
-                          options={[
-                            {
-                              value: "desc",
-                              label: "Descending",
-                              icon: Icon.ArrowDown,
-                            },
-                            {
-                              value: "asc",
-                              label: "Ascending",
-                              icon: Icon.ArrowUp,
-                            },
-                          ]}
-                          onSelect={(v) => updatePrefs({ order: v })}
+                    >
+                      {[
+                        {
+                          value: "desc",
+                          label: "Descending",
+                          icon: Icon.ArrowDown,
+                        },
+                        {
+                          value: "asc",
+                          label: "Ascending",
+                          icon: Icon.ArrowUp,
+                        },
+                      ].map((opt) => (
+                        <Action
+                          key={opt.value}
+                          title={opt.label}
+                          icon={
+                            prefs.order === opt.value
+                              ? {
+                                  source: Icon.Checkmark,
+                                  tintColor: Color.Green,
+                                }
+                              : opt.icon
+                          }
+                          onAction={() =>
+                            updatePrefs({
+                              order: opt.value as ListPreferences["order"],
+                            })
+                          }
                         />
-                      }
-                    />
+                      ))}
+                    </ActionPanel.Submenu>
                   </ActionPanel.Section>
 
                   <ActionPanel.Section>
