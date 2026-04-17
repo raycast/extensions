@@ -44,20 +44,18 @@ function stripHtml(html: string): string {
 type SortOption = "bestRate" | "rating" | "favorites";
 
 interface DirectionViewProps {
-  from?: string;
-  to?: string;
+  from: string;
+  to: string;
   amount?: number;
   cityUrl?: string;
 }
 
 export default function DirectionView({
-  from: propFrom,
-  to: propTo,
+  from,
+  to,
   amount: initialAmount,
   cityUrl,
 }: DirectionViewProps) {
-  const from = propFrom || "";
-  const to = propTo || "";
   const { data: rates, isLoading, revalidate } = useAllRates(from, to, cityUrl);
   const { data: favExchangers, revalidate: revalidateFavs } =
     useFavoriteExchangers();

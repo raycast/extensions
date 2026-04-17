@@ -24,13 +24,6 @@
       "mode": "view"
     },
     {
-      "name": "direction",
-      "title": "Direction Rates",
-      "subtitle": "Kurslog",
-      "description": "Compare all exchangers and rates for a currency pair side by side",
-      "mode": "view"
-    },
-    {
       "name": "exchangers",
       "title": "Exchangers",
       "subtitle": "Kurslog",
