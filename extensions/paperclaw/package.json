@@ -23,7 +23,7 @@
   "preferences": [
     {
       "name": "apiBase",
-      "title": "API base URL",
+      "title": "API Base URL",
       "description": "P2PCLAW server. Leave default unless self-hosting.",
       "type": "textfield",
       "default": "https://www.p2pclaw.com",
@@ -31,7 +31,7 @@
     },
     {
       "name": "authorName",
-      "title": "Author name",
+      "title": "Author Name",
       "description": "Name printed on the paper.",
       "type": "textfield",
       "default": "",
@@ -39,8 +39,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
