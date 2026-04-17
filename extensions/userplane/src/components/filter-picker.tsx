@@ -1,13 +1,13 @@
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import type { Domain, Link, Member, Project, PublicSearchLink, SearchType } from '../api/types';
-import { useDebouncedValue } from '../hooks/use-debounced-value';
-import { useDomains } from '../hooks/use-domains';
-import { useLinks } from '../hooks/use-links';
-import { useMembers } from '../hooks/use-members';
-import { useProjects } from '../hooks/use-projects';
-import { useWorkspaceSearch } from '../hooks/use-workspace-search';
+import type { Domain, Link, Member, Project, PublicSearchLink, SearchType } from "../api/types";
+import { useDebouncedValue } from "../hooks/use-debounced-value";
+import { useDomains } from "../hooks/use-domains";
+import { useLinks } from "../hooks/use-links";
+import { useMembers } from "../hooks/use-members";
+import { useProjects } from "../hooks/use-projects";
+import { useWorkspaceSearch } from "../hooks/use-workspace-search";
 
 interface DisplayItem {
   id: string;
@@ -33,7 +33,7 @@ export function FilterPicker({
   currentMemberId,
   navigationTitle,
 }: FilterPickerProps) {
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const debounced = useDebouncedValue(searchText.trim(), 300);
   const observed = useRef<Map<string, DisplayItem>>(new Map());
   // Raycast captures Action.Push target props at push time; parent re-renders
@@ -42,21 +42,21 @@ export function FilterPicker({
   // every change to the parent via onChange so popping back shows fresh counts.
   const [localSelected, setLocalSelected] = useState<string[]>(selected);
 
-  const members = useMembers(type === 'members' ? workspaceId : undefined);
-  const projects = useProjects(type === 'projects' ? workspaceId : undefined);
-  const domains = useDomains(type === 'domains' ? workspaceId : undefined);
-  const links = useLinks(type === 'links' ? workspaceId : undefined);
+  const members = useMembers(type === "members" ? workspaceId : undefined);
+  const projects = useProjects(type === "projects" ? workspaceId : undefined);
+  const domains = useDomains(type === "domains" ? workspaceId : undefined);
+  const links = useLinks(type === "links" ? workspaceId : undefined);
 
   const search = useWorkspaceSearch(workspaceId, type, debounced);
 
   const initialItems = useMemo<DisplayItem[]>(() => {
-    if (type === 'members') {
+    if (type === "members") {
       return (members.data?.workspaceMembers ?? []).map((m) => memberToDisplay(m, currentMemberId));
     }
-    if (type === 'projects') {
+    if (type === "projects") {
       return (projects.data?.projects ?? []).map(projectToDisplay);
     }
-    if (type === 'domains') {
+    if (type === "domains") {
       return (domains.data?.domains ?? []).map(domainToDisplay);
     }
     return (links.data ?? []).map(linkToDisplay);
@@ -65,13 +65,13 @@ export function FilterPicker({
   const searchItems = useMemo<DisplayItem[]>(() => {
     const data = search.data;
     if (!data) return [];
-    if (data.type === 'members') {
+    if (data.type === "members") {
       return data.results.map((m) => memberToDisplay(m, currentMemberId));
     }
-    if (data.type === 'projects') {
+    if (data.type === "projects") {
       return data.results.map(projectToDisplay);
     }
-    if (data.type === 'domains') {
+    if (data.type === "domains") {
       return data.results.map(domainToDisplay);
     }
     return data.results.map(linkToDisplay);
@@ -91,19 +91,17 @@ export function FilterPicker({
     .map((id) => observed.current.get(id) ?? { id, title: placeholderTitle(id, type) });
 
   function toggle(id: string) {
-    const next = localSelected.includes(id)
-      ? localSelected.filter((x) => x !== id)
-      : [...localSelected, id];
+    const next = localSelected.includes(id) ? localSelected.filter((x) => x !== id) : [...localSelected, id];
     setLocalSelected(next);
     onChange(next);
   }
 
   const initialLoading =
-    type === 'members'
+    type === "members"
       ? members.isLoading
-      : type === 'projects'
+      : type === "projects"
         ? projects.isLoading
-        : type === 'domains'
+        : type === "domains"
           ? domains.isLoading
           : links.isLoading;
 
@@ -120,17 +118,11 @@ export function FilterPicker({
       {selectedOutOfBand.length > 0 ? (
         <List.Section title="Selected">
           {selectedOutOfBand.map((item) => (
-            <FilterPickerRow
-              key={`selected-${item.id}`}
-              item={item}
-              type={type}
-              isSelected
-              onToggle={toggle}
-            />
+            <FilterPickerRow key={`selected-${item.id}`} item={item} type={type} isSelected onToggle={toggle} />
           ))}
         </List.Section>
       ) : null}
-      <List.Section title={debounced ? 'Results' : 'Recent'}>
+      <List.Section title={debounced ? "Results" : "Recent"}>
         {currentItems.map((item) => (
           <FilterPickerRow
             key={item.id}
@@ -154,7 +146,7 @@ interface FilterPickerRowProps {
 
 function FilterPickerRow({ item, type, isSelected, onToggle }: FilterPickerRowProps) {
   const accessories: List.Item.Accessory[] = [];
-  if (item.defaultBadge) accessories.push({ text: 'Default' });
+  if (item.defaultBadge) accessories.push({ text: "Default" });
   if (isSelected) accessories.push({ icon: Icon.CheckCircle });
 
   return (
@@ -166,7 +158,7 @@ function FilterPickerRow({ item, type, isSelected, onToggle }: FilterPickerRowPr
       actions={
         <ActionPanel>
           <Action
-            title={isSelected ? 'Deselect' : 'Select'}
+            title={isSelected ? "Deselect" : "Select"}
             icon={isSelected ? Icon.XMarkCircle : Icon.Checkmark}
             onAction={() => onToggle(item.id)}
           />
@@ -188,13 +180,13 @@ function memberToDisplay(m: Member, currentMemberId?: string): DisplayItem {
 function projectToDisplay(p: Project): DisplayItem {
   return {
     id: p.projectId,
-    title: p.projectTitle || 'Untitled project',
+    title: p.projectTitle || "Untitled project",
     defaultBadge: p.isDefault,
   };
 }
 
 function linkToDisplay(l: Link | PublicSearchLink): DisplayItem {
-  if ('project' in l) {
+  if ("project" in l) {
     return {
       id: l.linkId,
       title: l.linkTitle || l.domain.url,
@@ -217,40 +209,40 @@ function domainToDisplay(d: Domain): DisplayItem {
 
 function iconForType(type: SearchType): Icon {
   switch (type) {
-    case 'members':
+    case "members":
       return Icon.Person;
-    case 'projects':
+    case "projects":
       return Icon.Folder;
-    case 'links':
+    case "links":
       return Icon.Link;
-    case 'domains':
+    case "domains":
       return Icon.Globe;
   }
 }
 
 function searchPlaceholder(type: SearchType): string {
   switch (type) {
-    case 'members':
-      return 'Search members…';
-    case 'projects':
-      return 'Search projects…';
-    case 'links':
-      return 'Search links…';
-    case 'domains':
-      return 'Search domains…';
+    case "members":
+      return "Search members…";
+    case "projects":
+      return "Search projects…";
+    case "links":
+      return "Search links…";
+    case "domains":
+      return "Search domains…";
   }
 }
 
 function placeholderTitle(id: string, type: SearchType): string {
   const short = id.length > 8 ? `${id.slice(0, 8)}…` : id;
   switch (type) {
-    case 'members':
+    case "members":
       return `Member ${short}`;
-    case 'projects':
+    case "projects":
       return `Project ${short}`;
-    case 'links':
+    case "links":
       return `Link ${short}`;
-    case 'domains':
+    case "domains":
       return `Domain ${short}`;
   }
 }

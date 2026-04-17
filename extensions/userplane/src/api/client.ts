@@ -1,6 +1,6 @@
-import { getPreferenceValues } from '@raycast/api';
+import { getPreferenceValues } from "@raycast/api";
 
-import { normalizeOrigin } from '../utils/normalize-url';
+import { normalizeOrigin } from "../utils/normalize-url";
 import type {
   DomainsListData,
   LinkCreateData,
@@ -13,7 +13,7 @@ import type {
   WorkspaceSearchQuery,
   WorkspaceSearchResult,
   WorkspacesListData,
-} from './types';
+} from "./types";
 
 interface Preferences {
   apiKey: string;
@@ -21,10 +21,10 @@ interface Preferences {
   dashBaseUrl?: string;
 }
 
-const DEFAULT_API_HOST = 'api.userplane.io';
+const DEFAULT_API_HOST = "api.userplane.io";
 const REQUEST_TIMEOUT_MS = 30_000;
 // Keep in sync with package.json#version
-const EXTENSION_VERSION = '0.1.0';
+const EXTENSION_VERSION = "0.1.0";
 
 export class ApiError extends Error {
   readonly status: number;
@@ -32,14 +32,14 @@ export class ApiError extends Error {
 
   constructor(status: number, message: string, code?: string) {
     super(message);
-    this.name = 'ApiError';
+    this.name = "ApiError";
     this.status = status;
     this.code = code;
   }
 }
 
 interface RequestOptions {
-  method?: 'GET' | 'POST';
+  method?: "GET" | "POST";
   query?: object;
   body?: unknown;
 }
@@ -58,7 +58,7 @@ function getApiConfig() {
 // `z.array(...)` schema with a 400.
 // Ref: @orpc/openapi-client/dist/shared/openapi-client.t9fCAe3x.mjs (StandardBracketNotationSerializer.stringifyPath)
 function serializeQuery(query: object | undefined): string {
-  if (!query) return '';
+  if (!query) return "";
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query as Record<string, unknown>)) {
     if (value === undefined || value === null) continue;
@@ -72,7 +72,7 @@ function serializeQuery(query: object | undefined): string {
     }
   }
   const s = params.toString();
-  return s ? `?${s}` : '';
+  return s ? `?${s}` : "";
 }
 
 async function callApi<T>(path: string, options: RequestOptions = {}): Promise<T> {
@@ -85,19 +85,19 @@ async function callApi<T>(path: string, options: RequestOptions = {}): Promise<T
   let response: Response;
   try {
     response = await fetch(url, {
-      method: options.method ?? 'GET',
+      method: options.method ?? "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
-        'User-Agent': `userplane-raycast/${EXTENSION_VERSION}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
+        "User-Agent": `userplane-raycast/${EXTENSION_VERSION}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
       body: options.body ? JSON.stringify(options.body) : undefined,
       signal: controller.signal,
     });
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') {
-      throw new ApiError(408, 'Request timed out', 'REQUEST_TIMEOUT');
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new ApiError(408, "Request timed out", "REQUEST_TIMEOUT");
     }
     throw error;
   } finally {
@@ -121,8 +121,8 @@ async function callApi<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new ApiError(response.status, message, code);
   }
 
-  if (!parsed || typeof parsed !== 'object' || !('data' in parsed)) {
-    throw new ApiError(response.status, 'Malformed API response');
+  if (!parsed || typeof parsed !== "object" || !("data" in parsed)) {
+    throw new ApiError(response.status, "Malformed API response");
   }
   return (parsed as { data: T }).data;
 }
@@ -165,7 +165,7 @@ export interface CreateLinkBody {
 export const api = {
   workspaces: {
     list(query: ListWorkspacesQuery = {}) {
-      return callApi<WorkspacesListData>('/public/workspaces', { query });
+      return callApi<WorkspacesListData>("/public/workspaces", { query });
     },
   },
   domains: {
@@ -189,7 +189,7 @@ export const api = {
     },
     create(workspaceId: string, body: CreateLinkBody) {
       return callApi<LinkCreateData>(`/public/workspace/${workspaceId}/links`, {
-        method: 'POST',
+        method: "POST",
         body,
       });
     },

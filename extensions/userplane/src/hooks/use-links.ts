@@ -1,9 +1,9 @@
-import { useCachedPromise } from '@raycast/utils';
+import { useCachedPromise } from "@raycast/utils";
 
-import { api } from '../api/client';
-import { reportApiError } from '../api/errors';
-import { PAGINATION_LIMITS } from '../api/pagination';
-import type { Link, LinksQuery } from '../api/types';
+import { api } from "../api/client";
+import { reportApiError } from "../api/errors";
+import { PAGINATION_LIMITS } from "../api/pagination";
+import type { Link, LinksQuery } from "../api/types";
 
 export interface UseLinksResult {
   data: Link[];
@@ -15,10 +15,7 @@ export interface UseLinksResult {
 
 const EMPTY_QUERY: LinksQuery = {};
 
-export function useLinks(
-  workspaceId: string | undefined,
-  query: LinksQuery = EMPTY_QUERY
-): UseLinksResult {
+export function useLinks(workspaceId: string | undefined, query: LinksQuery = EMPTY_QUERY): UseLinksResult {
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async (wsId: string, q: LinksQuery) => {
       const result = await api.links.list(wsId, {
@@ -35,12 +32,12 @@ export function useLinks(
         hasMore: result.pagination?.hasMore ?? false,
       };
     },
-    [workspaceId ?? '', query],
+    [workspaceId ?? "", query],
     {
       execute: Boolean(workspaceId),
       keepPreviousData: true,
       onError: reportApiError,
-    }
+    },
   );
 
   return {

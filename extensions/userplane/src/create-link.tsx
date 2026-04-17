@@ -9,18 +9,18 @@ import {
   open,
   showToast,
   useNavigation,
-} from '@raycast/api';
-import { useEffect, useRef, useState } from 'react';
+} from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 
-import { api } from './api/client';
-import { reportApiError } from './api/errors';
-import { CommonActions } from './components/common-actions';
-import { LinkSuccess } from './components/link-success';
-import { useDomains } from './hooks/use-domains';
-import { useProjects } from './hooks/use-projects';
-import { useWorkspaces } from './hooks/use-workspaces';
+import { api } from "./api/client";
+import { reportApiError } from "./api/errors";
+import { CommonActions } from "./components/common-actions";
+import { LinkSuccess } from "./components/link-success";
+import { useDomains } from "./hooks/use-domains";
+import { useProjects } from "./hooks/use-projects";
+import { useWorkspaces } from "./hooks/use-workspaces";
 
-const LAST_WORKSPACE_KEY = 'userplane:lastWorkspaceId';
+const LAST_WORKSPACE_KEY = "userplane:lastWorkspaceId";
 const lastDomainKey = (workspaceId: string) => `userplane:lastDomainId:${workspaceId}`;
 const lastProjectKey = (workspaceId: string) => `userplane:lastProjectId:${workspaceId}`;
 
@@ -31,9 +31,9 @@ interface FormValues {
 
 export default function CreateLinkCommand() {
   const { push } = useNavigation();
-  const [workspaceId, setWorkspaceId] = useState<string>('');
-  const [domainId, setDomainId] = useState<string>('');
-  const [projectId, setProjectId] = useState<string>('');
+  const [workspaceId, setWorkspaceId] = useState<string>("");
+  const [domainId, setDomainId] = useState<string>("");
+  const [projectId, setProjectId] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
 
   const workspaces = useWorkspaces();
@@ -64,7 +64,7 @@ export default function CreateLinkCommand() {
     if (!list) return;
     if (!workspaceId) return;
     if (list.length === 0) {
-      setDomainId('');
+      setDomainId("");
       return;
     }
     if (bootstrappedDomainForWs.current === workspaceId) return;
@@ -85,7 +85,7 @@ export default function CreateLinkCommand() {
     if (!list) return;
     if (!workspaceId) return;
     if (list.length === 0) {
-      setProjectId('');
+      setProjectId("");
       return;
     }
     if (bootstrappedProjectForWs.current === workspaceId) return;
@@ -115,16 +115,16 @@ export default function CreateLinkCommand() {
 
   async function submitLink(values: FormValues, openInBrowser: boolean) {
     if (!workspaceId) {
-      await showToast({ style: Toast.Style.Failure, title: 'Select a workspace first' });
+      await showToast({ style: Toast.Style.Failure, title: "Select a workspace first" });
       return;
     }
     if (!domainId) {
-      await showToast({ style: Toast.Style.Failure, title: 'Select a domain first' });
+      await showToast({ style: Toast.Style.Failure, title: "Select a domain first" });
       return;
     }
 
     setSubmitting(true);
-    const toast = await showToast({ style: Toast.Style.Animated, title: 'Creating link…' });
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Creating link…" });
 
     try {
       const result = await api.links.create(workspaceId, {
@@ -132,7 +132,7 @@ export default function CreateLinkCommand() {
         domainId,
         linkReference: values.reference.trim() || undefined,
         linkReusable: values.reusable,
-        linkMeta: { source: 'raycast' },
+        linkMeta: { source: "raycast" },
       });
 
       const link = result.link;
@@ -145,20 +145,14 @@ export default function CreateLinkCommand() {
       }
 
       toast.style = Toast.Style.Success;
-      toast.title = openInBrowser ? 'Link copied & opened' : 'Link created';
+      toast.title = openInBrowser ? "Link copied & opened" : "Link created";
       toast.message = url;
 
       if (openInBrowser) {
         await open(url);
       }
 
-      push(
-        <LinkSuccess
-          link={link}
-          workspaceId={workspaceId}
-          workspaceName={currentWorkspace?.workspaceName}
-        />
-      );
+      push(<LinkSuccess link={link} workspaceId={workspaceId} workspaceName={currentWorkspace?.workspaceName} />);
     } catch (error) {
       toast.hide();
       await reportApiError(error);
@@ -180,13 +174,10 @@ export default function CreateLinkCommand() {
           <Action.SubmitForm
             title="Create & Open in Browser"
             icon={Icon.Globe}
-            shortcut={{ modifiers: ['cmd'], key: 'return' }}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onSubmit={(values: FormValues) => submitLink(values, true)}
           />
-          <CommonActions
-            workspaceId={workspaceId || undefined}
-            currentWorkspaceMemberId={currentMemberId}
-          />
+          <CommonActions workspaceId={workspaceId || undefined} currentWorkspaceMemberId={currentMemberId} />
         </ActionPanel>
       }
     >
@@ -257,20 +248,12 @@ export default function CreateLinkCommand() {
           storeValue={false}
         >
           {domainItems.map((domain) => (
-            <Form.Dropdown.Item
-              key={domain.domainId}
-              value={domain.domainId}
-              title={domain.domainUrl}
-            />
+            <Form.Dropdown.Item key={domain.domainId} value={domain.domainId} title={domain.domainUrl} />
           ))}
         </Form.Dropdown>
       )}
 
-      <Form.TextField
-        id="reference"
-        title="Reference"
-        placeholder="Optional ID or note for this link"
-      />
+      <Form.TextField id="reference" title="Reference" placeholder="Optional ID or note for this link" />
 
       <Form.Checkbox
         id="reusable"

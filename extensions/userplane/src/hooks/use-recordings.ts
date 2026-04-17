@@ -1,9 +1,9 @@
-import { useCachedPromise } from '@raycast/utils';
+import { useCachedPromise } from "@raycast/utils";
 
-import { api } from '../api/client';
-import { reportApiError } from '../api/errors';
-import { PAGINATION_LIMITS } from '../api/pagination';
-import type { Recording, RecordingsQuery } from '../api/types';
+import { api } from "../api/client";
+import { reportApiError } from "../api/errors";
+import { PAGINATION_LIMITS } from "../api/pagination";
+import type { Recording, RecordingsQuery } from "../api/types";
 
 export interface UseRecordingsResult {
   data: Recording[];
@@ -13,10 +13,7 @@ export interface UseRecordingsResult {
   revalidate: () => void;
 }
 
-export function useRecordings(
-  workspaceId: string | undefined,
-  query: RecordingsQuery
-): UseRecordingsResult {
+export function useRecordings(workspaceId: string | undefined, query: RecordingsQuery): UseRecordingsResult {
   const { data, isLoading, error, revalidate } = useCachedPromise(
     async (wsId: string, q: RecordingsQuery) => {
       const result = await api.recordings.list(wsId, {
@@ -33,12 +30,12 @@ export function useRecordings(
         hasMore: result.pagination?.hasMore ?? false,
       };
     },
-    [workspaceId ?? '', query],
+    [workspaceId ?? "", query],
     {
       execute: Boolean(workspaceId),
       keepPreviousData: true,
       onError: reportApiError,
-    }
+    },
   );
 
   return {

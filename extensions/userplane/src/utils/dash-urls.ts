@@ -1,12 +1,12 @@
-import { getPreferenceValues } from '@raycast/api';
+import { getPreferenceValues } from "@raycast/api";
 
-import { normalizeOrigin } from './normalize-url';
+import { normalizeOrigin } from "./normalize-url";
 
 interface Preferences {
   dashBaseUrl?: string;
 }
 
-const DEFAULT_DASH_HOST = 'dash.userplane.io';
+const DEFAULT_DASH_HOST = "dash.userplane.io";
 
 export function getDashBaseUrl(): string {
   const { dashBaseUrl } = getPreferenceValues<Preferences>();
@@ -32,7 +32,7 @@ export function dashRecordingsUrl(options?: { workspaceId?: string; creators?: s
   if (!options?.creators?.length) return base;
   const filtered = options.creators.filter((id) => Boolean(id));
   if (filtered.length === 0) return base;
-  return `${base}?creators=${filtered.map((id) => encodeURIComponent(id)).join(',')}`;
+  return `${base}?creators=${filtered.map((id) => encodeURIComponent(id)).join(",")}`;
 }
 
 export function dashRecordingPlaybackUrl(workspaceId: string, recordingId: string): string {
@@ -40,13 +40,11 @@ export function dashRecordingPlaybackUrl(workspaceId: string, recordingId: strin
 }
 
 export function dashLinksUrl(options?: { workspaceId?: string; creators?: string[] }): string {
-  const base = options?.workspaceId
-    ? `${dashWorkspaceUrl(options.workspaceId)}/links`
-    : `${getDashBaseUrl()}/_/links`;
+  const base = options?.workspaceId ? `${dashWorkspaceUrl(options.workspaceId)}/links` : `${getDashBaseUrl()}/_/links`;
   if (!options?.creators?.length) return base;
   const filtered = options.creators.filter((id) => Boolean(id));
   if (filtered.length === 0) return base;
-  return `${base}?creators=${filtered.map((id) => encodeURIComponent(id)).join(',')}`;
+  return `${base}?creators=${filtered.map((id) => encodeURIComponent(id)).join(",")}`;
 }
 
 export function dashLinkRecordingsUrl(workspaceId: string, linkId: string): string {

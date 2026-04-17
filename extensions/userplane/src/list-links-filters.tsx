@@ -11,11 +11,11 @@
 //   - Why not Form.TagPicker: no async/server search, static items only
 //     https://developers.raycast.com/api-reference/user-interface/form
 
-import { Action, ActionPanel, Icon, List } from '@raycast/api';
-import { useEffect, useRef, useState } from 'react';
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 
-import type { LinkSortField, ListLinksFilters, SortDirection } from './api/types';
-import { FilterPicker } from './components/filter-picker';
+import type { LinkSortField, ListLinksFilters, SortDirection } from "./api/types";
+import { FilterPicker } from "./components/filter-picker";
 
 interface FiltersScreenProps {
   workspaceId: string;
@@ -28,25 +28,20 @@ const DEFAULT_FILTERS: ListLinksFilters = {
   projectIds: [],
   domainIds: [],
   creatorIds: [],
-  sortBy: 'created_at',
-  sortDirection: 'desc',
+  sortBy: "created_at",
+  sortDirection: "desc",
 };
 
 type SortKey = `${LinkSortField}:${SortDirection}`;
 
 const SORT_OPTIONS: { value: SortKey; title: string }[] = [
-  { value: 'created_at:desc', title: 'Newest' },
-  { value: 'created_at:asc', title: 'Oldest' },
-  { value: 'link_title:asc', title: 'Title A-Z' },
-  { value: 'link_title:desc', title: 'Title Z-A' },
+  { value: "created_at:desc", title: "Newest" },
+  { value: "created_at:asc", title: "Oldest" },
+  { value: "link_title:asc", title: "Title A-Z" },
+  { value: "link_title:desc", title: "Title Z-A" },
 ];
 
-export function FiltersScreen({
-  workspaceId,
-  value,
-  currentMemberId,
-  onChange,
-}: FiltersScreenProps) {
+export function FiltersScreen({ workspaceId, value, currentMemberId, onChange }: FiltersScreenProps) {
   // Raycast captures Action.Push target props at push time; outer-list re-renders
   // don't propagate new `value` into this pushed screen. Mirror the incoming
   // filters into local state so row accessories, the sort dropdown, and
@@ -80,7 +75,7 @@ export function FiltersScreen({
   }
 
   function handleSort(key: string) {
-    const [sortBy, sortDirection] = key.split(':') as [LinkSortField, SortDirection];
+    const [sortBy, sortDirection] = key.split(":") as [LinkSortField, SortDirection];
     setLocal((prev) => ({ ...prev, sortBy, sortDirection }));
   }
 
@@ -92,7 +87,7 @@ export function FiltersScreen({
     <Action
       title="Reset All Filters"
       icon={Icon.ArrowCounterClockwise}
-      shortcut={{ modifiers: ['cmd', 'shift'], key: 'r' }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
       onAction={resetAll}
     />
   );
@@ -134,7 +129,7 @@ export function FiltersScreen({
               <Action
                 title="Clear Creators"
                 icon={Icon.XMarkCircle}
-                shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onAction={() => setCreators([])}
               />
               {resetAction}
@@ -163,7 +158,7 @@ export function FiltersScreen({
               <Action
                 title="Clear Projects"
                 icon={Icon.XMarkCircle}
-                shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onAction={() => setProjects([])}
               />
               {resetAction}
@@ -192,7 +187,7 @@ export function FiltersScreen({
               <Action
                 title="Clear Domains"
                 icon={Icon.XMarkCircle}
-                shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onAction={() => setDomains([])}
               />
               {resetAction}
@@ -205,8 +200,8 @@ export function FiltersScreen({
 }
 
 function formatCount(arr: string[]): string {
-  if (arr.length === 0) return 'None';
-  if (arr.length === 1) return '1 selected';
+  if (arr.length === 0) return "None";
+  if (arr.length === 1) return "1 selected";
   return `${arr.length} selected`;
 }
 

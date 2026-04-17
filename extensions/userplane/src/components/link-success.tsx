@@ -1,18 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Color,
-  Detail,
-  Icon,
-  Toast,
-  showToast,
-  useNavigation,
-} from '@raycast/api';
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 
-import type { Link } from '../api/types';
-import { dashLinkRecordingsUrl, dashLinksUrl } from '../utils/dash-urls';
-import { formatRelativeTime } from '../utils/format';
+import type { Link } from "../api/types";
+import { dashLinkRecordingsUrl, dashLinksUrl } from "../utils/dash-urls";
+import { formatRelativeTime } from "../utils/format";
 
 interface LinkSuccessProps {
   link: Link;
@@ -36,14 +26,14 @@ function ensureHttps(url: string): string {
 function buildMarkdown(link: Link): string {
   const truncated = truncateMiddle(link.linkURL);
   return [
-    '# Link created',
-    '',
+    "# Link created",
+    "",
     "It's copied to your clipboard — share it to start a recording session.",
-    '',
-    '```',
+    "",
+    "```",
     truncated,
-    '```',
-  ].join('\n');
+    "```",
+  ].join("\n");
 }
 
 export function LinkSuccess({ link, workspaceId, workspaceName }: LinkSuccessProps) {
@@ -51,10 +41,10 @@ export function LinkSuccess({ link, workspaceId, workspaceName }: LinkSuccessPro
 
   async function handleCopy() {
     await Clipboard.copy(link.linkURL);
-    await showToast({ style: Toast.Style.Success, title: 'URL copied' });
+    await showToast({ style: Toast.Style.Success, title: "URL copied" });
   }
 
-  const created = formatRelativeTime(link.createdAt) || 'just now';
+  const created = formatRelativeTime(link.createdAt) || "just now";
   const reusable = link.linkReusable;
   const domainTarget = ensureHttps(link.domain.url);
 
@@ -66,15 +56,13 @@ export function LinkSuccess({ link, workspaceId, workspaceName }: LinkSuccessPro
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Type">
             <Detail.Metadata.TagList.Item
-              text={reusable ? 'Reusable' : 'Single-use'}
+              text={reusable ? "Reusable" : "Single-use"}
               color={reusable ? Color.Green : Color.Blue}
             />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="Domain" text={link.domain.url} target={domainTarget} />
-          {link.project.title ? (
-            <Detail.Metadata.Label title="Project" text={link.project.title} />
-          ) : null}
+          {link.project.title ? <Detail.Metadata.Label title="Project" text={link.project.title} /> : null}
           {workspaceName ? <Detail.Metadata.Label title="Workspace" text={workspaceName} /> : null}
           {link.linkProviderReference ? (
             <Detail.Metadata.Label title="Reference" text={link.linkProviderReference} />
@@ -90,7 +78,7 @@ export function LinkSuccess({ link, workspaceId, workspaceName }: LinkSuccessPro
           <Action
             title="Create Another Link"
             icon={Icon.PlusCircle}
-            shortcut={{ modifiers: ['cmd'], key: 'n' }}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
               pop();
             }}
@@ -100,7 +88,7 @@ export function LinkSuccess({ link, workspaceId, workspaceName }: LinkSuccessPro
             <Action.OpenInBrowser
               title="View Recordings for This Link"
               icon={Icon.Video}
-              shortcut={{ modifiers: ['cmd'], key: 'r' }}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
               url={dashLinkRecordingsUrl(workspaceId, link.linkId)}
             />
             <Action.OpenInBrowser

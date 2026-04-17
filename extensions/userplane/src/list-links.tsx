@@ -1,33 +1,24 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  LocalStorage,
-  Toast,
-  showToast,
-} from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { useEffect, useMemo, useState } from 'react';
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, Toast, showToast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
 
-import type { LinkSortField, LinksQuery, ListLinksFilters, SortDirection } from './api/types';
-import { CommonActions } from './components/common-actions';
-import { useLinks } from './hooks/use-links';
-import { useWorkspaces } from './hooks/use-workspaces';
-import { DEFAULT_FILTERS, FiltersScreen } from './list-links-filters';
-import { dashLinkRecordingsUrl, dashLinksUrl } from './utils/dash-urls';
-import { formatRelativeTime } from './utils/format';
+import type { LinkSortField, LinksQuery, ListLinksFilters, SortDirection } from "./api/types";
+import { CommonActions } from "./components/common-actions";
+import { useLinks } from "./hooks/use-links";
+import { useWorkspaces } from "./hooks/use-workspaces";
+import { DEFAULT_FILTERS, FiltersScreen } from "./list-links-filters";
+import { dashLinkRecordingsUrl, dashLinksUrl } from "./utils/dash-urls";
+import { formatRelativeTime } from "./utils/format";
 
-const LAST_WORKSPACE_KEY = 'userplane:lastWorkspaceId';
+const LAST_WORKSPACE_KEY = "userplane:lastWorkspaceId";
 
 function isFiltered(filters: ListLinksFilters): boolean {
   return (
     filters.projectIds.length > 0 ||
     filters.domainIds.length > 0 ||
     filters.creatorIds.length > 0 ||
-    filters.sortBy !== 'created_at' ||
-    filters.sortDirection !== 'desc'
+    filters.sortBy !== "created_at" ||
+    filters.sortDirection !== "desc"
   );
 }
 
@@ -43,7 +34,7 @@ function buildQueryFromFilters(filters: ListLinksFilters): LinksQuery {
 }
 
 export default function ListLinksCommand() {
-  const [workspaceId, setWorkspaceId] = useState<string>('');
+  const [workspaceId, setWorkspaceId] = useState<string>("");
   const [bootstrapped, setBootstrapped] = useState(false);
 
   const workspaces = useWorkspaces();
@@ -70,15 +61,12 @@ export default function ListLinksCommand() {
   const currentWorkspace = workspaces.data?.workspaces.find((w) => w.workspaceId === workspaceId);
   const currentMemberId = currentWorkspace?.workspaceMembership?.workspaceMemberId;
 
-  const filterCacheKey = workspaceId
-    ? `list-links:filters:${workspaceId}`
-    : 'list-links:filters:none';
+  const filterCacheKey = workspaceId ? `list-links:filters:${workspaceId}` : "list-links:filters:none";
   const [filters, setFilters] = useCachedState<ListLinksFilters>(filterCacheKey, DEFAULT_FILTERS);
 
   const query = useMemo(() => buildQueryFromFilters(filters), [filters]);
 
-  const linksWorkspaceId =
-    bootstrapped && !workspaces.isLoading && workspaceId ? workspaceId : undefined;
+  const linksWorkspaceId = bootstrapped && !workspaces.isLoading && workspaceId ? workspaceId : undefined;
   const links = useLinks(linksWorkspaceId, query);
 
   const items = links.data;
@@ -98,19 +86,19 @@ export default function ListLinksCommand() {
   }
 
   async function notifyCopied() {
-    await showToast({ style: Toast.Style.Success, title: 'URL copied' });
+    await showToast({ style: Toast.Style.Success, title: "URL copied" });
   }
 
   return (
     <List isLoading={isLoading} filtering={false}>
       <List.EmptyView
         icon={Icon.Link}
-        title={isLoading ? 'Loading links…' : 'No links'}
+        title={isLoading ? "Loading links…" : "No links"}
         description={
           isLoading
             ? undefined
             : isFiltered(filters)
-              ? 'No links match these filters. Clear them to see everything.'
+              ? "No links match these filters. Clear them to see everything."
               : "You haven't created any links in this workspace yet. Use Create Recording Link to make your first one."
         }
         actions={
@@ -130,10 +118,7 @@ export default function ListLinksCommand() {
               />
             ) : null}
             <Action title="Clear Filters" icon={Icon.XMarkCircle} onAction={clearFilters} />
-            <CommonActions
-              workspaceId={workspaceId || undefined}
-              currentWorkspaceMemberId={currentMemberId}
-            />
+            <CommonActions workspaceId={workspaceId || undefined} currentWorkspaceMemberId={currentMemberId} />
           </ActionPanel>
         }
       />
@@ -145,13 +130,13 @@ export default function ListLinksCommand() {
         const accessories: List.Item.Accessory[] = [
           {
             icon: link.linkReusable ? Icon.Repeat : Icon.Link,
-            tooltip: link.linkReusable ? 'Reusable' : 'Single-use',
+            tooltip: link.linkReusable ? "Reusable" : "Single-use",
           },
         ];
         if (link.project.title) {
           accessories.unshift({
             tag: { value: link.project.title, color: Color.Blue },
-            tooltip: 'Project',
+            tooltip: "Project",
           });
         }
         return (
@@ -162,7 +147,7 @@ export default function ListLinksCommand() {
               tintColor: link.linkReusable ? Color.Green : Color.SecondaryText,
             }}
             title={title}
-            subtitle={subtitleParts.join(' · ')}
+            subtitle={subtitleParts.join(" · ")}
             accessories={accessories}
             actions={
               <ActionPanel>
@@ -180,7 +165,7 @@ export default function ListLinksCommand() {
                     <Action.OpenInBrowser
                       title="View Recordings for This Link"
                       icon={Icon.Video}
-                      shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
                       url={dashLinkRecordingsUrl(workspaceId, link.linkId)}
                     />
                   ) : null}
@@ -190,7 +175,7 @@ export default function ListLinksCommand() {
                     <Action.Push
                       title="Filter & Sort…"
                       icon={Icon.Filter}
-                      shortcut={{ modifiers: ['cmd'], key: 'f' }}
+                      shortcut={{ modifiers: ["cmd"], key: "f" }}
                       target={
                         <FiltersScreen
                           workspaceId={workspaceId}
@@ -205,32 +190,16 @@ export default function ListLinksCommand() {
                     <Action
                       title="Clear Filters"
                       icon={Icon.XMarkCircle}
-                      shortcut={{ modifiers: ['cmd', 'shift'], key: 'f' }}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                       onAction={clearFilters}
                     />
                   ) : null}
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Sort">
-                  <Action
-                    title="Newest First"
-                    icon={Icon.ArrowDown}
-                    onAction={() => setSort('created_at', 'desc')}
-                  />
-                  <Action
-                    title="Oldest First"
-                    icon={Icon.ArrowUp}
-                    onAction={() => setSort('created_at', 'asc')}
-                  />
-                  <Action
-                    title="Title Ascending"
-                    icon={Icon.Text}
-                    onAction={() => setSort('link_title', 'asc')}
-                  />
-                  <Action
-                    title="Title Descending"
-                    icon={Icon.Text}
-                    onAction={() => setSort('link_title', 'desc')}
-                  />
+                  <Action title="Newest First" icon={Icon.ArrowDown} onAction={() => setSort("created_at", "desc")} />
+                  <Action title="Oldest First" icon={Icon.ArrowUp} onAction={() => setSort("created_at", "asc")} />
+                  <Action title="Title Ascending" icon={Icon.Text} onAction={() => setSort("link_title", "asc")} />
+                  <Action title="Title Descending" icon={Icon.Text} onAction={() => setSort("link_title", "desc")} />
                 </ActionPanel.Section>
                 {workspaceList.length > 1 ? (
                   <ActionPanel.Submenu title="Switch Workspace" icon={Icon.AppWindow}>
@@ -243,15 +212,8 @@ export default function ListLinksCommand() {
                     ))}
                   </ActionPanel.Submenu>
                 ) : null}
-                <Action.OpenInBrowser
-                  title="View All in Dashboard"
-                  icon={Icon.List}
-                  url={dashboardAllUrl}
-                />
-                <CommonActions
-                  workspaceId={workspaceId || undefined}
-                  currentWorkspaceMemberId={currentMemberId}
-                />
+                <Action.OpenInBrowser title="View All in Dashboard" icon={Icon.List} url={dashboardAllUrl} />
+                <CommonActions workspaceId={workspaceId || undefined} currentWorkspaceMemberId={currentMemberId} />
               </ActionPanel>
             }
           />
@@ -265,15 +227,8 @@ export default function ListLinksCommand() {
           subtitle="Open the full links list"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="View All in Dashboard"
-                icon={Icon.Globe}
-                url={dashboardAllUrl}
-              />
-              <CommonActions
-                workspaceId={workspaceId || undefined}
-                currentWorkspaceMemberId={currentMemberId}
-              />
+              <Action.OpenInBrowser title="View All in Dashboard" icon={Icon.Globe} url={dashboardAllUrl} />
+              <CommonActions workspaceId={workspaceId || undefined} currentWorkspaceMemberId={currentMemberId} />
             </ActionPanel>
           }
         />

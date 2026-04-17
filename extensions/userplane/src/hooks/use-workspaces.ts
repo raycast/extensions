@@ -1,8 +1,8 @@
-import { useCachedPromise } from '@raycast/utils';
+import { useCachedPromise } from "@raycast/utils";
 
-import { api } from '../api/client';
-import { reportApiError } from '../api/errors';
-import { PAGINATION_LIMITS } from '../api/pagination';
+import { api } from "../api/client";
+import { reportApiError } from "../api/errors";
+import { PAGINATION_LIMITS } from "../api/pagination";
 
 export function useWorkspaces() {
   return useCachedPromise(
@@ -13,6 +13,6 @@ export function useWorkspaces() {
       });
     },
     [],
-    { keepPreviousData: true, onError: reportApiError }
+    { keepPreviousData: true, onError: reportApiError },
   );
 }

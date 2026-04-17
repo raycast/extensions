@@ -10,8 +10,8 @@ export interface PaginationMeta {
   hasMore: boolean;
 }
 
-export type WorkspaceRole = 'owner' | 'admin' | 'member';
-export type DomainStatus = 'pending' | 'verified' | 'revoked';
+export type WorkspaceRole = "owner" | "admin" | "member";
+export type DomainStatus = "pending" | "verified" | "revoked";
 
 export interface WorkspaceMembership {
   workspaceMemberId: string;
@@ -75,37 +75,37 @@ export interface MembersListData {
   pagination: PaginationMeta;
 }
 
-export type LinkType = 'file' | 'recording' | 'session' | 'screenshot';
+export type LinkType = "file" | "recording" | "session" | "screenshot";
 
 export type LinkProviderType =
-  | 'intercom'
-  | 'zendesk'
-  | 'hubspot'
-  | 'freshdesk'
-  | 'freshchat'
-  | 'jira_service_management'
-  | 'helpscout'
-  | 'happyfox'
-  | 'ada'
-  | 'forethought'
-  | 'servicenow'
-  | 'front'
-  | 'zoho_desk'
-  | 'crisp'
-  | 'pylon'
-  | 'plain'
-  | 'asana'
-  | 'azure_devops'
-  | 'clickup'
-  | 'github'
-  | 'gitlab'
-  | 'jira'
-  | 'linear'
-  | 'notion'
-  | 'sentry'
-  | 'slack'
-  | 'web'
-  | 'others';
+  | "intercom"
+  | "zendesk"
+  | "hubspot"
+  | "freshdesk"
+  | "freshchat"
+  | "jira_service_management"
+  | "helpscout"
+  | "happyfox"
+  | "ada"
+  | "forethought"
+  | "servicenow"
+  | "front"
+  | "zoho_desk"
+  | "crisp"
+  | "pylon"
+  | "plain"
+  | "asana"
+  | "azure_devops"
+  | "clickup"
+  | "github"
+  | "gitlab"
+  | "jira"
+  | "linear"
+  | "notion"
+  | "sentry"
+  | "slack"
+  | "web"
+  | "others";
 
 export interface LinkProjectRef {
   projectId: string;
@@ -172,8 +172,8 @@ export interface RecordingsListData {
 }
 
 // UI-only types (no contract equivalent)
-export type RecordingSortField = 'created_at' | 'recording_duration';
-export type SortDirection = 'asc' | 'desc';
+export type RecordingSortField = "created_at" | "recording_duration";
+export type SortDirection = "asc" | "desc";
 
 export interface RecordingsQuery {
   created_by?: string[];
@@ -191,7 +191,7 @@ export interface ListRecordingsFilters {
   sortDirection: SortDirection;
 }
 
-export type LinkSortField = 'created_at' | 'link_title';
+export type LinkSortField = "created_at" | "link_title";
 
 export interface LinksQuery {
   created_by?: string[];
@@ -209,7 +209,7 @@ export interface ListLinksFilters {
   sortDirection: SortDirection;
 }
 
-export type SearchType = 'members' | 'projects' | 'domains' | 'links';
+export type SearchType = "members" | "projects" | "domains" | "links";
 
 export interface PublicSearchLink {
   linkId: string;
@@ -223,10 +223,10 @@ export interface PublicSearchLink {
 }
 
 export type WorkspaceSearchResult =
-  | { type: 'members'; results: Member[] }
-  | { type: 'projects'; results: Project[] }
-  | { type: 'domains'; results: Domain[] }
-  | { type: 'links'; results: PublicSearchLink[] };
+  | { type: "members"; results: Member[] }
+  | { type: "projects"; results: Project[] }
+  | { type: "domains"; results: Domain[] }
+  | { type: "links"; results: PublicSearchLink[] };
 
 export interface WorkspaceSearchQuery {
   q: string;
