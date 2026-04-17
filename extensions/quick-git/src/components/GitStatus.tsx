@@ -7,14 +7,14 @@ import { GitStatusEmpty } from "./GitStatus/GitStatusEmpty.js";
 import { ChangeCurrentBranch } from "./actions/ChangeCurrentBranch.js";
 import { SetRepo } from "./actions/SetRepo.js";
 import { Providers } from "./Providers.js";
-import { useHasSubmodles } from "../hooks/useHasSubmodules.js";
+import { useHasSubmodules } from "../hooks/useHasSubmodules.js";
 import { ChangeSubmodules } from "./actions/ChangeSubmodules.js";
 import { navigationTitle } from "../utils/navigationTitle.js";
 import { useGitStatus } from "../hooks/useGitStatus.js";
 
 export function GitStatus() {
   const repo = useSelectedRepoStorage();
-  const { data: hasSubmodule, isLoading: checkingSubmodules } = useHasSubmodles(repo.value);
+  const { data: hasSubmodule, isLoading: checkingSubmodules } = useHasSubmodules(repo.value);
   const { data, isLoading, revalidate } = useGitStatus(repo.value);
 
   const showDetails = !!repo.value && !!data?.files.length;

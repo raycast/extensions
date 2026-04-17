@@ -17,7 +17,7 @@ import { ResetAllUnstagedFiles } from "../actions/ResetAllFiles.js";
 import { useSelectedRepo } from "../../hooks/useRepo.js";
 import { SwitchToSubmodule } from "../actions/SwitchToSubmodule.js";
 import { ChangeSubmodules } from "../actions/ChangeSubmodules.js";
-import { useHasSubmodles } from "../../hooks/useHasSubmodules.js";
+import { useHasSubmodules } from "../../hooks/useHasSubmodules.js";
 
 interface Props {
   isNotStaged: boolean;
@@ -37,7 +37,7 @@ export const GitStatusItemActions = memo(function GitStatusItemActions({
   updateDiff,
 }: Props) {
   const repo = useSelectedRepo();
-  const { data: hasSubmodule } = useHasSubmodles(repo.value);
+  const { data: hasSubmodule } = useHasSubmodules(repo.value);
   const mainAction = isNotStaged ? <AddFile fileName={fileName} /> : <UnstageFile fileName={fileName} />;
 
   const restoreFile = () => {
