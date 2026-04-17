@@ -38,11 +38,12 @@ export async function findAppleMusicUrl(
     }
 
     const payload = (await response.json()) as AppleMusicSearchResponse;
-    const exactishMatch = payload.results?.find((song) =>
-      isSameSong(track, song),
-    );
+    const results = payload.results?.filter(hasTrackViewUrl) ?? [];
+    const exactishMatch = results.find((song) => isSameSong(track, song));
+    const bestCandidate = exactishMatch ?? results[0];
+
     return (
-      exactishMatch?.trackViewUrl ?? buildAppleMusicSearchUrl(track, country)
+      bestCandidate?.trackViewUrl ?? buildAppleMusicSearchUrl(track, country)
     );
   } catch {
     return buildAppleMusicSearchUrl(track, country);
@@ -58,6 +59,19 @@ export function buildAppleMusicSearchUrl(
   });
 
   return `https://music.apple.com/${country.toLowerCase()}/search?${params.toString()}`;
+}
+
+export function shouldOpenInMusicApp(url: string): boolean {
+  try {
+    const parsedUrl = new URL(url);
+
+    return (
+      parsedUrl.hostname === "music.apple.com" &&
+      !parsedUrl.pathname.endsWith("/search")
+    );
+  } catch {
+    return false;
+  }
 }
 
 function isSameSong(track: SpotifyTrack, song: AppleMusicSong): boolean {
@@ -90,4 +104,12 @@ function normalizeText(value: string): string {
     .replace(/[^a-zA-Z0-9]+/g, " ")
     .trim()
     .toLowerCase();
+}
+
+function hasTrackViewUrl(
+  song: AppleMusicSong,
+): song is AppleMusicSong & { trackViewUrl: string } {
+  return (
+    typeof song.trackViewUrl === "string" && song.trackViewUrl.trim() !== ""
+  );
 }

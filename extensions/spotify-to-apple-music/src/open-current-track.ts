@@ -1,6 +1,10 @@
 import { Clipboard, getPreferenceValues, open, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
-import { findAppleMusicUrl, type SpotifyTrack } from "./apple-music.js";
+import {
+  findAppleMusicUrl,
+  shouldOpenInMusicApp,
+  type SpotifyTrack,
+} from "./apple-music.js";
 
 const SEPARATOR = "\u001f";
 
@@ -12,7 +16,11 @@ export default async function command() {
   try {
     const track = await getCurrentSpotifyTrack();
     await Clipboard.copy(track.uri);
-    await open(await findAppleMusicUrl(track, getCountryCode()), "Music");
+    const appleMusicUrl = await findAppleMusicUrl(track, getCountryCode());
+    await open(
+      appleMusicUrl,
+      shouldOpenInMusicApp(appleMusicUrl) ? "Music" : undefined,
+    );
     await showHUD("Opened in Apple Music");
   } catch (error) {
     await showHUD(
