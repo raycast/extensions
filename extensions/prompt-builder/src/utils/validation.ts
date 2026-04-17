@@ -48,13 +48,12 @@ export const validateTemplate = (obj: unknown): obj is Omit<Template, "id"> => {
   const template = obj as Record<string, unknown>;
 
   if (typeof template.title !== "string" || !template.title.trim()) return false;
-
-  for (const key of TEMPLATE_KEYS) {
-    if (!Object.keys(template).includes(key)) return false;
-  }
+  if (typeof template.task !== "string") return false;
 
   for (const [key, value] of Object.entries(template)) {
+    if (!TEMPLATE_KEYS.includes(key)) {
       console.log("Unknown key:", key);
+      return false;
     }
 
     switch (key) {

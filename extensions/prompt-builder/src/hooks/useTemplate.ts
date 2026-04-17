@@ -19,11 +19,9 @@ export const useTemplate = () => {
 
   // Helper to update state and persist
   const saveTemplates = async (updater: (prev: Template[]) => Template[]) => {
-    setTemplates((prev) => {
-      const updated = updater(prev);
-      save(updated);
-      return [defaultTemplate, ...updated.filter((t) => t.id !== "none")];
-    });
+    const updated = updater(templates);
+    await save(updated);
+    setTemplates([defaultTemplate, ...updated.filter((t) => t.id !== "none")]);
   };
 
   // Add a new template
