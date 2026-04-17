@@ -2,8 +2,6 @@
 
 A [Raycast](https://raycast.com) extension for instantly navigating to [Icy Veins](https://www.icy-veins.com/wow/) World of Warcraft class and spec guides.
 
-I am experimenting with using LLM tools to build projects. This is one such experiment.
-
 ## Usage
 
 Invoke the command by typing `iv` in Raycast. Pressing **Enter** with an empty query opens a staged grid: classes first, then specs, then `pve` / `pvp`, then the relevant sub-pages. You can still type a direct query like `sp pve gear` at any point, and the grid will jump to matching guides.
@@ -24,7 +22,7 @@ On any spec card, press **⌘K** to open the Action Panel and choose **"Add to F
 
 ### Stat Priority Copier
 
-On any spec card, open the Action Panel and choose **"Copy Stat Priority"**. The extension fetches the spec's PvE guide, parses the stat priority list, and copies it to the clipboard (e.g. `Mastery > Critical Strike > Haste > Versatility`). Results are cached for 1 hour.
+On any spec card, open the Action Panel and choose **"Copy Stat Priority"**. The extension fetches the spec's PvE guide, parses the stat priority list, and copies it to the clipboard (e.g. `Mastery > Critical Strike > Haste > Versatility`). Results are cached for 30 minutes.
 
 ### Custom Macros
 

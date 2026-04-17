@@ -11,7 +11,7 @@
 - **Custom Macros** — define up to 5 personal text macros in extension preferences to expand shorthand queries (e.g. `main` → `sp pve gear`). Access via "Manage Custom Macros" in any Action Panel.
 - **Favorites** — star up to 5 specs with ⌘F. Favorited specs appear in a dedicated section at the top of the home grid.
 - **Recent Searches** — the last guide page you opened is shown at the very top of the home grid for quick re-access.
-- **Stat Priority Copier** — open the Action Panel on any spec to copy its current stat priority to the clipboard (e.g. `Mastery > Critical Strike > Haste > Versatility`). Results are cached for 1 hour.
+- **Stat Priority Copier** — open the Action Panel on any spec to copy its current stat priority to the clipboard (e.g. `Mastery > Critical Strike > Haste > Versatility`). Results are cached for 30 minutes.
 - **Role Icons** — each spec card now displays a composited role badge (DPS / Tank / Healer) in the bottom-right corner of the icon.
 - **Spec Usage Sorting** — specs you select most often bubble to the top of the spec grid automatically.
 
