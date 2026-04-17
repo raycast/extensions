@@ -1,4 +1,4 @@
-# Music news Extension
+# Music News
 
 Read the latest music news from various sources directly in Raycast.
 
