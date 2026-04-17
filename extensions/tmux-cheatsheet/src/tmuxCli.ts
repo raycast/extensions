@@ -9,6 +9,7 @@ const TMUX_PATHS = ["/opt/homebrew/bin/tmux", "/usr/local/bin/tmux", "/opt/local
 // user's config without depending on (or interfering with) their running
 // tmux session, whose socket path may be relocated by TMUX_TMPDIR.
 const SOCKET = "raycast-cheatsheet";
+const TIMEOUT_MS = 5000;
 
 type ExecError = NodeJS.ErrnoException & { stdout?: Buffer | string };
 
@@ -21,7 +22,7 @@ function runTmux(commands: string[][]): string | undefined {
 
   for (const path of TMUX_PATHS) {
     try {
-      return execFileSync(path, args, { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] });
+      return execFileSync(path, args, { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"], timeout: TIMEOUT_MS });
     } catch (err) {
       const e = err as ExecError;
       if (e.code === "ENOENT") {
