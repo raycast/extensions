@@ -451,6 +451,10 @@ class FreshRSSClient {
 
   private async getToken(): Promise<string> {
     const tokenRes = await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/token`);
+    if (!tokenRes.ok) {
+      const body = await tokenRes.text().catch(() => "");
+      throw new Error(`Token request failed (${tokenRes.status}): ${body.substring(0, 120) || "no body"}`);
+    }
     return (await tokenRes.text()).trim();
   }
 
@@ -506,7 +510,7 @@ class FreshRSSClient {
 
   async markAsRead(id: string): Promise<void> {
     const token = await this.getToken();
-    await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
+    const response = await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -517,6 +521,10 @@ class FreshRSSClient {
         T: token,
       }).toString(),
     });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`markAsRead failed (${response.status}): ${body.substring(0, 120) || "no body"}`);
+    }
     const article = this.articleCache.get(id);
     if (article && !article.categories.includes("user/-/state/com.google/read")) {
       article.categories = [...article.categories, "user/-/state/com.google/read"];
@@ -526,7 +534,7 @@ class FreshRSSClient {
 
   async markAsUnread(id: string): Promise<void> {
     const token = await this.getToken();
-    await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
+    const response = await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -537,6 +545,10 @@ class FreshRSSClient {
         T: token,
       }).toString(),
     });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`markAsUnread failed (${response.status}): ${body.substring(0, 120) || "no body"}`);
+    }
     const article = this.articleCache.get(id);
     if (article) {
       article.categories = article.categories.filter((category) => category !== "user/-/state/com.google/read");
@@ -546,7 +558,7 @@ class FreshRSSClient {
 
   async star(id: string): Promise<void> {
     const token = await this.getToken();
-    await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
+    const response = await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -557,6 +569,10 @@ class FreshRSSClient {
         T: token,
       }).toString(),
     });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`star failed (${response.status}): ${body.substring(0, 120) || "no body"}`);
+    }
     const article = this.articleCache.get(id);
     if (article && !article.categories.includes("user/-/state/com.google/starred")) {
       article.categories = [...article.categories, "user/-/state/com.google/starred"];
@@ -566,7 +582,7 @@ class FreshRSSClient {
 
   async unstar(id: string): Promise<void> {
     const token = await this.getToken();
-    await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
+    const response = await this.fetchWithApiAuth(`${this.apiBase}/reader/api/0/edit-tag`, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -577,6 +593,10 @@ class FreshRSSClient {
         T: token,
       }).toString(),
     });
+    if (!response.ok) {
+      const body = await response.text().catch(() => "");
+      throw new Error(`unstar failed (${response.status}): ${body.substring(0, 120) || "no body"}`);
+    }
     const article = this.articleCache.get(id);
     if (article) {
       article.categories = article.categories.filter((category) => category !== "user/-/state/com.google/starred");
