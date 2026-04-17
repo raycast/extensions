@@ -15,12 +15,6 @@ import type {
   WorkspacesListData,
 } from "./types";
 
-interface Preferences {
-  apiKey: string;
-  apiBaseUrl?: string;
-  dashBaseUrl?: string;
-}
-
 const DEFAULT_API_HOST = "api.userplane.io";
 const REQUEST_TIMEOUT_MS = 30_000;
 // Keep in sync with package.json#version

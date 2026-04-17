@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 import { normalizeOrigin } from "./normalize-url";
 
-interface Preferences {
-  dashBaseUrl?: string;
-}
-
 const DEFAULT_DASH_HOST = "dash.userplane.io";
 
 export function getDashBaseUrl(): string {

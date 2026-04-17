@@ -1,6 +1,6 @@
 # Userplane Changelog
 
-## [Initial Version] - 2026-04-15
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Create recording links with workspace, project, domain, and reference selection.
 - Browse recordings in a thumbnail grid with filters (creator, project, link), sorting, and expiry indicators.
