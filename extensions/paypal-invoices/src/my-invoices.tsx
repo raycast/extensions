@@ -67,7 +67,9 @@ const STATUS_ICON: Record<string, Icon> = {
 };
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", {
+  // Date-only strings (YYYY-MM-DD) must be parsed as local time, not UTC
+  const d = iso.includes("T") ? new Date(iso) : new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -154,7 +156,9 @@ function SetDueDateForm({
         style: Toast.Style.Animated,
         title: "Updating due date…",
       });
-      const dueDateStr = dueDate ? dueDate.toISOString().split("T")[0] : null;
+      const dueDateStr = dueDate
+        ? `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, "0")}-${String(dueDate.getDate()).padStart(2, "0")}`
+        : null;
       await updateDueDate(invoice.invoiceId, dueDateStr);
       await updateInvoiceRecord(invoice.invoiceId, {
         dueDate: dueDateStr ?? undefined,
@@ -336,7 +340,7 @@ function EditInvoiceForm({
 
       const newTotal = calcTotal(items, taxPercent);
       const dueDateStr = dueDate
-        ? dueDate.toISOString().split("T")[0]
+        ? `${dueDate.getFullYear()}-${String(dueDate.getMonth() + 1).padStart(2, "0")}-${String(dueDate.getDate()).padStart(2, "0")}`
         : undefined;
 
       const params: UpdateInvoiceParams = {

@@ -35,6 +35,10 @@ interface DraftValues {
 }
 
 let itemIdCounter = 0;
+function localDateStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function newItem(): LineItem {
   return {
     id: String(++itemIdCounter),
@@ -192,7 +196,7 @@ export default function CreateInvoiceCommand(
         recipientEmail: recipientEmail.trim() || undefined,
         currency,
         note: note.trim() || undefined,
-        dueDate: dueDate ? dueDate.toISOString().split("T")[0] : undefined,
+        dueDate: dueDate ? localDateStr(dueDate) : undefined,
         taxPercent: taxPercent ? parseFloat(taxPercent) : undefined,
         taxName: taxName.trim() || undefined,
         allowTip,
@@ -216,6 +220,7 @@ export default function CreateInvoiceCommand(
         currency,
         total,
         createdAt: new Date().toISOString(),
+        dueDate: dueDate ? localDateStr(dueDate) : undefined,
         status: hasValidEmail ? "SENT" : "UNPAID",
         payerViewUrl,
         invoicerViewUrl,
@@ -256,7 +261,7 @@ export default function CreateInvoiceCommand(
         recipientEmail: recipientEmail.trim() || undefined,
         currency,
         note: note.trim() || undefined,
-        dueDate: dueDate ? dueDate.toISOString().split("T")[0] : undefined,
+        dueDate: dueDate ? localDateStr(dueDate) : undefined,
         taxPercent: taxPercent ? parseFloat(taxPercent) : undefined,
         taxName: taxName.trim() || undefined,
         allowTip,
@@ -271,6 +276,7 @@ export default function CreateInvoiceCommand(
         currency,
         total,
         createdAt: new Date().toISOString(),
+        dueDate: dueDate ? localDateStr(dueDate) : undefined,
         status: "DRAFT",
         invoicerViewUrl,
       });
