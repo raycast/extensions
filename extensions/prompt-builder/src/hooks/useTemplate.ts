@@ -19,9 +19,11 @@ export const useTemplate = () => {
 
   // Helper to update state and persist
   const saveTemplates = async (updater: (prev: Template[]) => Template[]) => {
-    const updatedTemplates = updater(templates);
-    await save(updatedTemplates);
-    setTemplates([defaultTemplate, ...updatedTemplates.filter((t) => t.id !== "none")]);
+    setTemplates((prev) => {
+      const updated = updater(prev);
+      save(updated);
+      return [defaultTemplate, ...updated.filter((t) => t.id !== "none")];
+    });
   };
 
   // Add a new template
@@ -31,6 +33,17 @@ export const useTemplate = () => {
     await saveTemplates((prev) => [...prev, newTemplate]);
     setSelectedTemplateId(id);
     return id;
+  };
+
+  // Add multiple templates at once (batch import)
+  const addTemplates = async (batch: { title: string; values: FormValues }[]) => {
+    const ts = new Date().getTime();
+    const newTemplates: Template[] = batch.map(({ title, values }, i) => ({
+      ...values,
+      title,
+      id: `${ts}_${i}`,
+    }));
+    await saveTemplates((prev) => [...prev, ...newTemplates]);
   };
 
   // Update existing template
@@ -88,6 +101,7 @@ export const useTemplate = () => {
     handleChange,
     openTemplate,
     addTemplate,
+    addTemplates,
     updateTemplate,
     deleteTemplate,
     resetFormValues,
