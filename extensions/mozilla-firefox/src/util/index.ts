@@ -106,7 +106,7 @@ export function decodeLZ4(buffer: Buffer) {
   return JSON.parse(data.toString());
 }
 
-function decodeBlock(input: any, output: any, sIdx?: any, eIdx?: any) {
+function decodeBlock(input: Buffer, output: Buffer, sIdx?: number, eIdx?: number) {
   sIdx = sIdx || 0;
   eIdx = eIdx || input.length - sIdx;
   let a;
