@@ -150,6 +150,11 @@ export default function Command({
       <Grid.EmptyView
         title="No matching guides"
         description="Try a different class, spec, mode, or sub-page token."
+        actions={
+          <ActionPanel>
+            <ManageMacrosAction />
+          </ActionPanel>
+        }
       />
     </Grid>
   );
