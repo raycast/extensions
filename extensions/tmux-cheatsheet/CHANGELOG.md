@@ -1,6 +1,6 @@
 # Tmux Cheatsheet Changelog
 
-## [Detect prefix and bindings via tmux CLI] - {PR_MERGE_DATE}
+## [Detect prefix and bindings via tmux CLI] - 2026-04-17
 
 - Detect the prefix and keybindings by shelling out to `tmux show-options` and `tmux list-keys` instead of parsing config files
 - Support non-standard config layouts (XDG, `source-file` includes, etc.) that the previous file parser missed
