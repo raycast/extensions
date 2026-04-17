@@ -11,7 +11,6 @@ export interface InvoiceRecord {
   status: "DRAFT" | "SENT" | "PAID" | "CANCELLED" | "OVERDUE" | "UNPAID";
   payerViewUrl?: string;
   invoicerViewUrl: string;
-  archived?: boolean;
 }
 
 export interface ListPreferences {
@@ -75,10 +74,6 @@ export async function deleteInvoice(invoiceId: string): Promise<void> {
   const existing = await loadInvoices();
   const updated = existing.filter((i) => i.invoiceId !== invoiceId);
   await LocalStorage.setItem(INVOICES_KEY, JSON.stringify(updated));
-}
-
-export async function archiveInvoice(invoiceId: string): Promise<void> {
-  await updateInvoiceRecord(invoiceId, { archived: true });
 }
 
 export async function loadListPreferences(): Promise<ListPreferences> {

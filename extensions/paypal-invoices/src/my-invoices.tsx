@@ -18,7 +18,6 @@ import {
 import {
   InvoiceRecord,
   ListPreferences,
-  archiveInvoice,
   deleteInvoice,
   loadInvoices,
   loadListPreferences,
@@ -590,7 +589,6 @@ function PickerForm<T extends string>({
 
 export default function MyInvoicesCommand() {
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
-  const visibleInvoices = invoices.filter((i) => !i.archived);
   const [prefs, setPrefs] = useState<ListPreferences>({
     groupBy: "status",
     sortBy: "createdAt",
@@ -749,17 +747,7 @@ export default function MyInvoicesCommand() {
     }
   }
 
-  async function handleArchive(invoice: InvoiceRecord) {
-    await archiveInvoice(invoice.invoiceId);
-    setInvoices((prev) =>
-      prev.map((i) =>
-        i.invoiceId === invoice.invoiceId ? { ...i, archived: true } : i,
-      ),
-    );
-    await showHUD("Invoice archived");
-  }
-
-  const sorted = sortInvoices(visibleInvoices, prefs.sortBy, prefs.order);
+  const sorted = sortInvoices(invoices, prefs.sortBy, prefs.order);
   const grouped =
     prefs.groupBy === "status"
       ? STATUS_ORDER.reduce<Record<string, InvoiceRecord[]>>((acc, status) => {
@@ -986,15 +974,6 @@ export default function MyInvoicesCommand() {
                         onAction={() => handleCancel(invoice)}
                       />
                     )}
-                    <Action
-                      title="Archive Invoice"
-                      icon={Icon.Tray}
-                      shortcut={{
-                        macOS: { modifiers: ["ctrl", "shift"], key: "a" },
-                        Windows: { modifiers: ["alt", "shift"], key: "a" },
-                      }}
-                      onAction={() => handleArchive(invoice)}
-                    />
                     <Action
                       title="Remove from List"
                       icon={Icon.Trash}
