@@ -133,6 +133,112 @@ function sortInvoices(
   return order === "desc" ? sorted.reverse() : sorted;
 }
 
+function getOrderLabel(
+  sortBy: ListPreferences["sortBy"],
+  order: ListPreferences["order"],
+): string {
+  const asc = order === "asc";
+  switch (sortBy) {
+    case "createdAt":
+      return asc ? "Oldest First" : "Newest First";
+    case "amount":
+      return asc ? "Lowest First" : "Highest First";
+    case "recipient":
+      return asc ? "A → Z" : "Z → A";
+  }
+}
+
+function applyFilter(
+  invoices: InvoiceRecord[],
+  filter: string,
+): InvoiceRecord[] {
+  if (filter === "all") return invoices;
+
+  if (filter.startsWith("status:")) {
+    const status = filter.slice(7);
+    return invoices.filter((i) => i.status === status);
+  }
+
+  if (filter.startsWith("time:")) {
+    const key = filter.slice(5);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Week boundaries (Mon–Sun)
+    const dow = today.getDay(); // 0=Sun
+    const toMon = dow === 0 ? -6 : 1 - dow;
+    const thisWeekStart = new Date(today);
+    thisWeekStart.setDate(today.getDate() + toMon);
+    const lastWeekStart = new Date(thisWeekStart);
+    lastWeekStart.setDate(thisWeekStart.getDate() - 7);
+    const nextWeekStart = new Date(thisWeekStart);
+    nextWeekStart.setDate(thisWeekStart.getDate() + 7);
+    const nextWeekEnd = new Date(nextWeekStart);
+    nextWeekEnd.setDate(nextWeekStart.getDate() + 7);
+
+    // Month boundaries
+    const thisMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const nextMonthStart = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      1,
+    );
+    const lastMonthStart = new Date(
+      today.getFullYear(),
+      today.getMonth() - 1,
+      1,
+    );
+
+    // 30-day windows
+    const prev30Start = new Date(today);
+    prev30Start.setDate(today.getDate() - 30);
+    const next30End = new Date(today);
+    next30End.setDate(today.getDate() + 30);
+
+    switch (key) {
+      case "this_week":
+        return invoices.filter((i) => {
+          const d = new Date(i.createdAt);
+          return d >= thisWeekStart && d < nextWeekStart;
+        });
+      case "last_week":
+        return invoices.filter((i) => {
+          const d = new Date(i.createdAt);
+          return d >= lastWeekStart && d < thisWeekStart;
+        });
+      case "next_week":
+        return invoices.filter((i) => {
+          if (!i.dueDate) return false;
+          const d = new Date(i.dueDate + "T00:00:00");
+          return d >= nextWeekStart && d < nextWeekEnd;
+        });
+      case "this_month":
+        return invoices.filter((i) => {
+          const d = new Date(i.createdAt);
+          return d >= thisMonthStart && d < nextMonthStart;
+        });
+      case "last_month":
+        return invoices.filter((i) => {
+          const d = new Date(i.createdAt);
+          return d >= lastMonthStart && d < thisMonthStart;
+        });
+      case "next_30_days":
+        return invoices.filter((i) => {
+          if (!i.dueDate) return false;
+          const d = new Date(i.dueDate + "T00:00:00");
+          return d >= today && d <= next30End;
+        });
+      case "prev_30_days":
+        return invoices.filter((i) => {
+          const d = new Date(i.createdAt);
+          return d >= prev30Start && d < today;
+        });
+    }
+  }
+
+  return invoices;
+}
+
 // ── Set Due Date form ───────────────────────────────────────────────────────
 
 function SetDueDateForm({
@@ -596,6 +702,7 @@ export default function MyInvoicesCommand() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
     async function load() {
@@ -747,7 +854,8 @@ export default function MyInvoicesCommand() {
     }
   }
 
-  const sorted = sortInvoices(invoices, prefs.sortBy, prefs.order);
+  const filtered = applyFilter(invoices, filter);
+  const sorted = sortInvoices(filtered, prefs.sortBy, prefs.order);
   const grouped =
     prefs.groupBy === "status"
       ? STATUS_ORDER.reduce<Record<string, InvoiceRecord[]>>((acc, status) => {
@@ -757,8 +865,69 @@ export default function MyInvoicesCommand() {
         }, {})
       : groupInvoices(sorted, prefs.groupBy);
 
+  const filterDropdown = (
+    <List.Dropdown
+      tooltip="Filter invoices"
+      value={filter}
+      onChange={setFilter}
+    >
+      <List.Dropdown.Item title="All Invoices" value="all" icon={Icon.List} />
+      <List.Dropdown.Section title="By Status">
+        {STATUS_ORDER.map((s) => (
+          <List.Dropdown.Item
+            key={s}
+            title={s.charAt(0) + s.slice(1).toLowerCase()}
+            value={`status:${s}`}
+            icon={{ source: STATUS_ICON[s], tintColor: STATUS_COLOR[s] }}
+          />
+        ))}
+      </List.Dropdown.Section>
+      <List.Dropdown.Section title="By Date">
+        <List.Dropdown.Item
+          title="This Week"
+          value="time:this_week"
+          icon={Icon.Calendar}
+        />
+        <List.Dropdown.Item
+          title="Last Week"
+          value="time:last_week"
+          icon={Icon.Calendar}
+        />
+        <List.Dropdown.Item
+          title="Next Week (by due date)"
+          value="time:next_week"
+          icon={Icon.Calendar}
+        />
+        <List.Dropdown.Item
+          title="This Month"
+          value="time:this_month"
+          icon={Icon.Calendar}
+        />
+        <List.Dropdown.Item
+          title="Last Month"
+          value="time:last_month"
+          icon={Icon.Calendar}
+        />
+        <List.Dropdown.Item
+          title="Next 30 Days (by due date)"
+          value="time:next_30_days"
+          icon={Icon.Calendar}
+        />
+        <List.Dropdown.Item
+          title="Previous 30 Days"
+          value="time:prev_30_days"
+          icon={Icon.Calendar}
+        />
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search invoices…">
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search invoices…"
+      searchBarAccessory={filterDropdown}
+    >
       {Object.entries(grouped).map(([groupKey, records]) => (
         <List.Section
           key={groupKey}
@@ -923,8 +1092,10 @@ export default function MyInvoicesCommand() {
                       }
                     />
                     <Action.Push
-                      title="Order By…"
-                      icon={Icon.ArrowDown}
+                      title={`Order: ${getOrderLabel(prefs.sortBy, prefs.order)}`}
+                      icon={
+                        prefs.order === "desc" ? Icon.ArrowDown : Icon.ArrowUp
+                      }
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "o" },
                         Windows: { modifiers: ["ctrl", "shift"], key: "o" },
@@ -962,7 +1133,8 @@ export default function MyInvoicesCommand() {
                       onAction={() => setRefreshKey((k) => k + 1)}
                     />
                     {(invoice.status === "SENT" ||
-                      invoice.status === "UNPAID") && (
+                      invoice.status === "UNPAID" ||
+                      invoice.status === "OVERDUE") && (
                       <Action
                         title="Cancel Invoice"
                         icon={Icon.XMarkCircle}
@@ -991,11 +1163,19 @@ export default function MyInvoicesCommand() {
           ))}
         </List.Section>
       ))}
-      {!isLoading && invoices.length === 0 && (
+      {!isLoading && filtered.length === 0 && (
         <List.EmptyView
-          icon={Icon.Document}
-          title="No invoices yet"
-          description="Create your first invoice with the Create Invoice command."
+          icon={filter === "all" ? Icon.Document : Icon.MagnifyingGlass}
+          title={
+            filter === "all"
+              ? "No invoices yet"
+              : "No invoices match this filter"
+          }
+          description={
+            filter === "all"
+              ? "Create your first invoice with the Create Invoice command."
+              : "Try selecting a different filter from the dropdown."
+          }
         />
       )}
     </List>
