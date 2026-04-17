@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-17
 
 - Clarified Low Data Mode documentation in README — activation takes effect on next command launch, and framed sync behavior as a user contract (up to 1 hour delay) rather than implementation details
 
