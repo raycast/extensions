@@ -80,7 +80,7 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
   const url = getArticleUrl(article);
 
   useEffect(() => {
-    if (!read) {
+    if (!isRead(article)) {
       api
         .markAsRead(article.id)
         .then(() => {
@@ -95,7 +95,7 @@ export default function ArticleDetail({ article, onToggleRead, onToggleStar, ext
           });
         });
     }
-  }, [read, article.id, onToggleRead]);
+  }, [article.id, onToggleRead]);
   const content = useMemo(() => getArticleContent(article), [article]);
   const displayTitle = cleanTitle(article.title) || "Untitled";
 
