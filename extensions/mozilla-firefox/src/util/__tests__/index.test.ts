@@ -21,11 +21,10 @@ const PROFILES_BASE = "/fake-home/Library/Application Support/Firefox/Profiles";
 
 const setPrefs = (suffix: string) => vi.mocked(getPreferenceValues).mockReturnValue({ profileDirectorySuffix: suffix });
 
-const mockProfiles = (entries: string[]) =>
-  vi.spyOn(fs, "readdirSync").mockReturnValue(entries as unknown as fs.Dirent[]);
+const mockProfiles = (entries: string[]) => vi.spyOn(fs, "readdirSync").mockReturnValue(entries as never);
 
 const mockStatIsDir = (dirs: string[]) =>
-  vi.spyOn(fs, "statSync").mockImplementation((filePath) => {
+  vi.spyOn(fs, "statSync").mockImplementation((filePath: fs.PathLike) => {
     const name = path.basename(String(filePath));
     return { isDirectory: () => dirs.includes(name) } as fs.Stats;
   });
