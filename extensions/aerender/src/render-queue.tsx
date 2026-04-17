@@ -149,7 +149,7 @@ export default function RenderQueue() {
         />
       ) : (
         <List.Section
-          title={`${history.filter((h) => h.status === "completed").length} Completed Renders`}
+          title="Render History"
           subtitle={getEncouragingMessage(history.filter((h) => h.status === "completed").length)}
         >
           {history.map((render) => {

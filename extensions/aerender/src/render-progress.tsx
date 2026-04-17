@@ -23,6 +23,7 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
   // Use refs to track current values (avoid closure issues)
   const hasRenderedFramesRef = useRef(false);
   const outputRef = useRef<string[]>([]);
+  const totalFramesRef = useRef<number | null>(null);
   const renderProcessRef = useRef<ReturnType<typeof spawn> | null>(null);
   const manuallyStoppedRef = useRef(false);
 
@@ -138,7 +139,9 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
 
       const totalMatch = text.match(/(\d+)\s+of\s+(\d+)\s+frames/i);
       if (totalMatch) {
-        setTotalFrames(parseInt(totalMatch[2]));
+        const frames = parseInt(totalMatch[2]);
+        setTotalFrames(frames);
+        totalFramesRef.current = frames;
       }
 
       if (text.includes("Total Time Elapsed") || text.includes("Finished composition")) {
@@ -221,7 +224,7 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
           await updateRenderInHistory(renderId, {
             endTime: new Date(),
             duration,
-            totalFrames: totalFrames || undefined,
+            totalFrames: totalFramesRef.current || undefined,
             status: "completed",
             pid: undefined, // Clear PID when completed
           });
@@ -267,7 +270,7 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
         await updateRenderInHistory(renderId, {
           endTime: new Date(),
           duration,
-          totalFrames: totalFrames || undefined,
+          totalFrames: totalFramesRef.current || undefined,
           status: "completed",
           pid: undefined, // Clear PID when completed
         });
