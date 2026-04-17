@@ -36,7 +36,7 @@ export default function Command() {
     headers,
     mapResult(result: ApiResponse<Link[]>) {
       return {
-        data: result.response,
+        data: Array.isArray(result?.response) ? result.response : [],
       };
     },
     initialData: [],
