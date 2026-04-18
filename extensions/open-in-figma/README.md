@@ -1,3 +1,3 @@
 # Open in Figma
 
-Open Figma URLs in Figma app
+Open Figma URL in clipboard with Figma app
