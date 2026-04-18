@@ -13,11 +13,11 @@ const MESSAGES = {
 
 const isFigmaInstalled = async () => {
   const installedApps = await getApplications();
-  return installedApps.findIndex((app) => app.name === "Figma") === -1;
+  return installedApps.findIndex((app) => app.name === "Figma") > -1;
 };
 
 export default async function main() {
-  if (await isFigmaInstalled()) {
+  if (!(await isFigmaInstalled())) {
     await showHUD(MESSAGES.FIGMA_NOT_INSTALLED);
     return;
   }
