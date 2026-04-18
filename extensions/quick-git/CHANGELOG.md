@@ -1,6 +1,6 @@
 # Quick Git Changelog
 
-## [Submodule Selection] - {PR_MERGE_DATE}
+## [Submodule Selection] - 2026-04-18
 
 Added functionality to view and select submodules in a repo
 
