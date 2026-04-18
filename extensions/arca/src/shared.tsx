@@ -63,6 +63,73 @@ export const STATUS_CATEGORY_COLOR: Record<string, Color> = {
 
 const turndown = new TurndownService({ headingStyle: "atx", bulletListMarker: "-" });
 
+// Task list items: `- [ ] text` or `- [x] text`
+turndown.addRule("taskItem", {
+  filter: (node) => node.nodeName === "LI" && (node as Element).getAttribute("data-type") === "taskItem",
+  replacement: (_content, node) => {
+    const checked = (node as Element).getAttribute("data-checked") === "true";
+    // Strip nested list markers that turndown may have inserted, keep only text
+    const text = _content.replace(/^\s*[-*]\s+/, "").trim();
+    return `- [${checked ? "x" : " "}] ${text}\n`;
+  },
+});
+
+// Skip the <label> and <input> inside task items (they are UI chrome, not content)
+turndown.addRule("taskItemLabel", {
+  filter: ["label", "input"],
+  replacement: () => "",
+});
+
+// Strikethrough: <s> / <del>
+turndown.addRule("strikethrough", {
+  filter: ["s", "del"],
+  replacement: (content) => `~~${content}~~`,
+});
+
+// Highlight: <mark>
+turndown.addRule("highlight", {
+  filter: ["mark"],
+  replacement: (content) => `==${content}==`,
+});
+
+// Callout: <div data-callout data-callout-type="info|warning|success|error">
+turndown.addRule("callout", {
+  filter: (node) => node.nodeName === "DIV" && (node as Element).hasAttribute("data-callout"),
+  replacement: (content, node) => {
+    const typeMap: Record<string, string> = {
+      info: "NOTE",
+      warning: "WARNING",
+      success: "TIP",
+      error: "CAUTION",
+    };
+    const rawType = (node as Element).getAttribute("data-callout-type") ?? "info";
+    const marker = typeMap[rawType.toLowerCase()] ?? rawType.toUpperCase();
+    const quoted = content
+      .trim()
+      .split("\n")
+      .map((l) => `> ${l}`)
+      .join("\n");
+    return `> [!${marker}]\n${quoted}\n\n`;
+  },
+});
+
+// Collapsible: <div data-type="collapsible">
+turndown.addRule("collapsible", {
+  filter: (node) => node.nodeName === "DIV" && (node as Element).getAttribute("data-type") === "collapsible",
+  replacement: (content) => `<details>\n${content.trim()}\n</details>\n\n`,
+});
+
+// Link preview card: <a data-type="link-preview-card" data-url="..." data-title="...">
+turndown.addRule("linkPreviewCard", {
+  filter: (node) => node.nodeName === "A" && (node as Element).getAttribute("data-type") === "link-preview-card",
+  replacement: (_, node) => {
+    const el = node as Element;
+    const url = el.getAttribute("data-url") ?? "";
+    const title = el.getAttribute("data-title") ?? url;
+    return `[${title}](${url})`;
+  },
+});
+
 export function htmlToMarkdown(html: string): string {
   return turndown.turndown(html).trim();
 }
