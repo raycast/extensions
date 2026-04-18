@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1E1E1E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2A2A2A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF7D45;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E84C00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF6633;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#FF6633;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF6633;stop-opacity:0" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background rounded rect -->
+  <rect width="512" height="512" rx="110" ry="110" fill="url(#bgGrad)" />
+
+  <!-- Subtle top highlight -->
+  <rect x="60" y="0" width="392" height="2" rx="1" fill="#FF6633" opacity="0.15" />
+
+  <!-- Orange glow behind text -->
+  <ellipse cx="256" cy="256" rx="160" ry="100" fill="#FF5500" opacity="0.06" filter="url(#glow)" />
+
+  <!-- "BS" text -->
+  <text
+    x="256"
+    y="316"
+    font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+    font-size="220"
+    font-weight="800"
+    text-anchor="middle"
+    fill="url(#textGrad)"
+    letter-spacing="-8"
+  >BS</text>
+
+  <!-- Bottom accent line -->
+  <rect x="96" y="370" width="320" height="5" rx="2.5" fill="url(#accentGrad)" />
+</svg>
