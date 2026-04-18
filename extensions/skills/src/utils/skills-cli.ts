@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
@@ -37,17 +38,6 @@ async function runSkillsCli(args: string[]): Promise<string> {
   } catch (error) {
     throw normalizeCliError(error, npxCommand);
   }
-}
-
-// eslint-disable-next-line no-control-regex
-const ANSI_REGEX = /\x1B\[[0-9;]*m/g;
-
-/**
- * Strip ANSI escape codes from CLI output.
- * Used by checkForUpdates() which does not have a --json option.
- */
-function stripAnsi(str: string): string {
-  return str.replace(ANSI_REGEX, "");
 }
 
 /** Escape a value for safe use as a shell argument. */
@@ -233,17 +223,65 @@ export async function removeSkill(skillName: string, agentDisplayNames?: string[
   await runSkillsCli(args);
 }
 
+interface GitHubTreeResponse {
+  sha: string;
+  tree: Array<{ path: string; sha: string; type: string }>;
+}
+
+async function fetchRepoTree(source: string, token: string | undefined): Promise<GitHubTreeResponse | null> {
+  const [owner, repo] = source.split("/");
+  if (!owner || !repo) return null;
+
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  for (const branch of ["main", "master"]) {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, {
+      headers,
+    });
+    if (res.ok) return (await res.json()) as GitHubTreeResponse;
+    if (res.status === 403 || res.status === 429) return null;
+  }
+  return null;
+}
+
 /**
- * Check for available skill updates.
- * Parses `npx -y skills@latest check` output for "↑ skillName" lines.
+ * Implemented against the GitHub Trees API rather than `npx skills check` because
+ * the CLI's check command reinstalls outdated skills as a side effect since v1.5.0.
  */
 export async function checkForUpdates(): Promise<string[]> {
-  const stdout = await runSkillsCli(["check"]);
-  return stripAnsi(stdout)
-    .split("\n")
-    .map((line) => line.match(/↑\s+(\S+)/))
-    .filter((m): m is RegExpMatchArray => m !== null)
-    .map((m) => m[1]);
+  const lock = await readSkillLock();
+  const entries = Object.entries(lock).filter(([, e]) => e.sourceType === "github" && e.skillFolderHash && e.skillPath);
+  if (entries.length === 0) return [];
+
+  const byRepo = new Map<string, Array<{ name: string; skillPath: string; expectedHash: string }>>();
+  for (const [name, entry] of entries) {
+    const list = byRepo.get(entry.source) ?? [];
+    list.push({ name, skillPath: entry.skillPath, expectedHash: entry.skillFolderHash });
+    byRepo.set(entry.source, list);
+  }
+
+  const { githubToken } = getPreferenceValues<{ githubToken?: string }>();
+
+  const results = await Promise.all(
+    [...byRepo.entries()].map(async ([source, skills]) => {
+      try {
+        const tree = await fetchRepoTree(source, githubToken);
+        if (!tree) return [];
+        const { sha: rootSha, tree: entries } = tree;
+        return skills.flatMap((skill) => {
+          const folder = skill.skillPath.replace(/\/?SKILL\.md$/, "");
+          const upstreamSha = folder ? entries.find((t) => t.path === folder && t.type === "tree")?.sha : rootSha;
+          return upstreamSha && upstreamSha !== skill.expectedHash ? [skill.name] : [];
+        });
+      } catch {
+        return [];
+      }
+    }),
+  );
+  return results.flat();
 }
 
 /**

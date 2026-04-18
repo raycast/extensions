@@ -1,5 +1,10 @@
 # Changelog
 
+## [Fix Silent Auto-Update on Load] - {PR_MERGE_DATE}
+
+- Stop silently auto-updating outdated skills when opening Manage Skills
+- Fix the orange "Update available" highlight that stopped appearing for outdated skills
+
 ## [Update Individual Skills] - 2026-04-17
 
 - Add per-skill update action using `skills update <name>` (requires `skills` CLI 1.5.0+), so a single outdated skill can be updated without touching the others
