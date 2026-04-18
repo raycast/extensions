@@ -5,6 +5,9 @@
   "description": "Show your Wakatime Activity Stats, Projects and Leaderboards",
   "icon": "icon.png",
   "author": "iammola",
+  "contributors": [
+    "olafvanmidden"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
