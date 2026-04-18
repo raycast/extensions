@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocalStorage } from "@raycast/utils";
 import { List, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { BASE_URL, DONE_CATEGORIES, Preferences, Task, Workspace, TaskItem } from "./shared";
+import { BASE_URL, DONE_CATEGORIES, Task, Workspace, TaskItem } from "./shared";
 
 type Me = { id: number; name: string };
 

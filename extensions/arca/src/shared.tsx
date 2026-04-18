@@ -4,8 +4,6 @@ import { Action, ActionPanel, Clipboard, Color, Detail, Icon, Image, List, showT
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type Preferences = { apiKey: string; showCompletedTasks: boolean };
-
 export type Assignee = { id: number; name: string; avatar_url: string | null };
 export type Label = { id: number; name: string; color: string | null };
 export type Status = {

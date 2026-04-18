@@ -11,10 +11,7 @@ import {
   Color,
   Image,
 } from "@raycast/api";
-
-type Preferences = {
-  apiKey: string;
-};
+import { BASE_URL } from "./shared";
 
 type FormValues = {
   workspaceId: string;
@@ -32,8 +29,6 @@ type Workspace = { id: number; name: string };
 type ListItem = { id: number; name: string };
 type Status = { id: number; name: string; color: string; category: string };
 type Member = { id: number; name: string; avatar_url?: string };
-
-const BASE_URL = "https://api.getarca.app/api/v1";
 
 const PRIORITY_OPTIONS = [
   { value: "urgent", title: "Urgent", icon: { source: Icon.FullSignal, tintColor: Color.Red } },

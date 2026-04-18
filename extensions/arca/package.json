@@ -11,8 +11,7 @@
   ],
   "categories": [
     "Applications",
-    "Productivity",
-    "Communication"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
@@ -39,7 +38,7 @@
     {
       "name": "apiKey",
       "type": "password",
-      "title": "Arca API key",
+      "title": "Arca API Key",
       "description": "Your Arca API key for authenticating requests.",
       "required": true
     },
@@ -56,13 +55,13 @@
   "dependencies": {
     "@raycast/api": "^1.104.12",
     "@raycast/utils": "^1.17.0",
-    "@types/turndown": "^5.0.6",
     "turndown": "^7.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
