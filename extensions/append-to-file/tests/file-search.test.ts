@@ -6,8 +6,8 @@ import {
 } from "../src/lib/file-search-filters.ts";
 
 test("getRelativeDepth counts levels under root", () => {
-  assert.equal(getRelativeDepth("/tmp/root", "/tmp/root/a.txt"), 1);
-  assert.equal(getRelativeDepth("/tmp/root", "/tmp/root/notes/a.txt"), 2);
+  assert.equal(getRelativeDepth("/tmp/root", "/tmp/root/a.txt"), 0);
+  assert.equal(getRelativeDepth("/tmp/root", "/tmp/root/notes/a.txt"), 1);
   assert.equal(
     getRelativeDepth("/tmp/root", "/tmp/other/a.txt"),
     Number.POSITIVE_INFINITY,

@@ -106,17 +106,17 @@ async function findWithRecursiveScan(
         if (entry.isSymbolicLink()) continue;
 
         const fullPath = path.join(current.directory, entry.name);
-        const childDepth = current.depth + 1;
-
-        if (childDepth > searchMaxDepth) {
-          continue;
-        }
 
         if (isExcluded(fullPath, root)) {
           continue;
         }
 
         if (entry.isDirectory()) {
+          const childDepth = current.depth + 1;
+          if (childDepth > searchMaxDepth) {
+            continue;
+          }
+
           stack.push({ directory: fullPath, depth: childDepth });
           continue;
         }

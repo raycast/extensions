@@ -53,7 +53,8 @@ export function getRelativeDepth(root: string, filePath: string): number {
   const relative = toPosix(path.relative(root, filePath));
   if (relative === "" || relative === ".") return 0;
   if (relative.startsWith("../") || relative === "..") return Number.POSITIVE_INFINITY;
-  return relative.split("/").filter(Boolean).length;
+  const segments = relative.split("/").filter(Boolean);
+  return Math.max(segments.length - 1, 0);
 }
 
 function matchesCompiledExcludes(filePath: string, root: string, excludes: CompiledExclude[]): boolean {
