@@ -1,12 +1,4 @@
-import {
-  Clipboard,
-  Detail,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-} from "@raycast/api";
+import { Clipboard, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
 import fs from "fs";
 import path from "path";
@@ -87,17 +79,11 @@ export default function Command() {
       let sizeDisplay = "";
 
       if (clipboardContents.file) {
-        const filePath = decodeURIComponent(
-          clipboardContents.file.replace("file://", ""),
-        );
+        const filePath = decodeURIComponent(clipboardContents.file.replace("file://", ""));
         if (fs.existsSync(filePath)) {
           const stats = fs.statSync(filePath);
-          if (stats.isDirectory())
-            throw new Error(
-              "Directory upload not supported. Please zip it first.",
-            );
-          if (stats.size > MAX_UPLOAD_SIZE_BYTES)
-            throw new Error("File exceeds 100MB limit.");
+          if (stats.isDirectory()) throw new Error("Directory upload not supported. Please zip it first.");
+          if (stats.size > MAX_UPLOAD_SIZE_BYTES) throw new Error("File exceeds 100MB limit.");
 
           const originalName = path.basename(filePath);
           let finalName = originalName;
@@ -107,29 +93,14 @@ export default function Command() {
 
           // Check if it's a temp image from clipboard (often has no extension or looks like "Image (UxV)")
           const ext = path.extname(originalName);
-          const isTempImage =
-            !ext ||
-            (originalName.startsWith("Image") && originalName.includes("("));
+          const isTempImage = !ext || (originalName.startsWith("Image") && originalName.includes("("));
 
           if (isTempImage && fileBuffer.length > 4) {
             // Magic bytes check
-            if (
-              fileBuffer[0] === 0x89 &&
-              fileBuffer[1] === 0x50 &&
-              fileBuffer[2] === 0x4e &&
-              fileBuffer[3] === 0x47
-            ) {
-              if (!finalName.toLowerCase().endsWith(".png"))
-                finalName += ".png";
-            } else if (
-              fileBuffer[0] === 0xff &&
-              fileBuffer[1] === 0xd8 &&
-              fileBuffer[2] === 0xff
-            ) {
-              if (
-                !finalName.toLowerCase().endsWith(".jpg") &&
-                !finalName.toLowerCase().endsWith(".jpeg")
-              )
+            if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
+              if (!finalName.toLowerCase().endsWith(".png")) finalName += ".png";
+            } else if (fileBuffer[0] === 0xff && fileBuffer[1] === 0xd8 && fileBuffer[2] === 0xff) {
+              if (!finalName.toLowerCase().endsWith(".jpg") && !finalName.toLowerCase().endsWith(".jpeg"))
                 finalName += ".jpg";
             } else if (!ext) {
               // Fallback for extensionless files that look like images
@@ -147,10 +118,7 @@ export default function Command() {
 
           formData.append("file", new Blob([new Uint8Array(fileBuffer)]), name);
         }
-      } else if (
-        clipboardContents.text &&
-        clipboardContents.text.trim() !== ""
-      ) {
+      } else if (clipboardContents.text && clipboardContents.text.trim() !== "") {
         name = `snippet_${new Date().getTime()}.txt`;
         setFileName(name);
         const size = new Blob([clipboardContents.text]).size;
@@ -158,11 +126,7 @@ export default function Command() {
         setFileSize(sizeDisplay);
 
         setStatusText("Uploading text snippet...");
-        formData.append(
-          "file",
-          new Blob([clipboardContents.text], { type: "text/plain" }),
-          name,
-        );
+        formData.append("file", new Blob([clipboardContents.text], { type: "text/plain" }), name);
       } else {
         throw new Error("Clipboard is empty or does not contain text/files.");
       }
@@ -175,9 +139,7 @@ export default function Command() {
 
       if (!response.ok) {
         const err = await response.text();
-        throw new Error(
-          `Upload failed (${response.status}): ${err || "Unknown error"}`,
-        );
+        throw new Error(`Upload failed (${response.status}): ${err || "Unknown error"}`);
       }
 
       const result = (await response.json()) as {
@@ -210,10 +172,7 @@ export default function Command() {
       });
       setStatusText("Successfully Uploaded!");
     } catch (err) {
-      if (
-        signal?.aborted ||
-        (err instanceof Error && err.name === "AbortError")
-      ) {
+      if (signal?.aborted || (err instanceof Error && err.name === "AbortError")) {
         // Ignore abort errors
         return;
       }
@@ -295,15 +254,9 @@ ${qrCodeState}
             />
             <Detail.Metadata.Label title="File Name" text={fileName || "-"} />
             <Detail.Metadata.Label title="File Size" text={fileSize || "-"} />
-            <Detail.Metadata.Label
-              title="Time Elapsed"
-              text={`${elapsedTime}s`}
-            />
+            <Detail.Metadata.Label title="Time Elapsed" text={`${elapsedTime}s`} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label
-              title="QR Code"
-              text="Visible in Main View"
-            />
+            <Detail.Metadata.Label title="QR Code" text="Visible in Main View" />
             <Detail.Metadata.TagList title="Retention">
               <Detail.Metadata.TagList.Item text="7 Days" color={"#eed535"} />
             </Detail.Metadata.TagList>
@@ -315,16 +268,9 @@ ${qrCodeState}
               text="Uploading"
               icon={{ source: Icon.CircleProgress, tintColor: "#3498db" }}
             />
-            <Detail.Metadata.Label
-              title="Time Elapsed"
-              text={`${elapsedTime}s`}
-            />
-            {fileName && (
-              <Detail.Metadata.Label title="File Name" text={fileName} />
-            )}
-            {fileSize && (
-              <Detail.Metadata.Label title="File Size" text={fileSize} />
-            )}
+            <Detail.Metadata.Label title="Time Elapsed" text={`${elapsedTime}s`} />
+            {fileName && <Detail.Metadata.Label title="File Name" text={fileName} />}
+            {fileSize && <Detail.Metadata.Label title="File Size" text={fileSize} />}
           </Detail.Metadata>
         )
       }
@@ -332,22 +278,12 @@ ${qrCodeState}
         <ActionPanel>
           {!isLoading && downloadLink && (
             <>
-              <Action.CopyToClipboard
-                title="Copy Link"
-                content={downloadLink}
-              />
-              <Action.OpenInBrowser
-                title="Open in Browser"
-                url={downloadLink}
-              />
+              <Action.CopyToClipboard title="Copy Link" content={downloadLink} />
+              <Action.OpenInBrowser title="Open in Browser" url={downloadLink} />
             </>
           )}
           {!isLoading && error && (
-            <Action
-              title="Retry"
-              onAction={retryUpload}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
+            <Action title="Retry" onAction={retryUpload} shortcut={{ modifiers: ["cmd"], key: "r" }} />
           )}
         </ActionPanel>
       }
