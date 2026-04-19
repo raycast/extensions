@@ -1,9 +1,9 @@
 import { ActionPanel, Action, List, showToast, Toast, closeMainWindow, Form, LocalStorage } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface LinkGroup {
   id: string;
@@ -34,9 +34,9 @@ export default function ListGroups() {
 
   const openURL = async (url: string, browserName?: string) => {
     if (browserName) {
-      await execAsync(`open -a "${browserName}" "${url}"`);
+      await execFileAsync("open", ["-a", browserName, url]);
     } else {
-      await execAsync(`open "${url}"`);
+      await execFileAsync("open", [url]);
     }
   };
 
@@ -103,7 +103,7 @@ export default function ListGroups() {
   };
 
   if (newlyCreatedGroup) {
-    const deeplink = `raycast://extensions/Chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: newlyCreatedGroup.name }))}`;
+    const deeplink = `raycast://extensions/chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: newlyCreatedGroup.name }))}`;
     return (
       <List>
         <List.Item
@@ -207,14 +207,14 @@ export default function ListGroups() {
               <Action.CreateQuicklink
                 title="Create Quicklink"
                 quicklink={{
-                  link: `raycast://extensions/Chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: group.name }))}`,
+                  link: `raycast://extensions/chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: group.name }))}`,
                   name: group.name,
                 }}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
               />
               <Action.CopyToClipboard
                 title="Copy Deeplink"
-                content={`raycast://extensions/Chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: group.name }))}`}
+                content={`raycast://extensions/chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: group.name }))}`}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
               <Action title="Edit" onAction={() => setEditingGroup(group)} />

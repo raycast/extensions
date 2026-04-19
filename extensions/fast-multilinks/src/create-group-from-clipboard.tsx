@@ -116,7 +116,7 @@ export default function CreateGroupFromClipboard() {
   };
 
   if (newlyCreatedGroup) {
-    const deeplink = `raycast://extensions/Chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: newlyCreatedGroup.name }))}`;
+    const deeplink = `raycast://extensions/chucktaylor/fast-multilinks/open-group?arguments=${encodeURIComponent(JSON.stringify({ groupName: newlyCreatedGroup.name }))}`;
     return (
       <List>
         <List.Item

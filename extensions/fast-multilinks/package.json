@@ -4,7 +4,7 @@
   "title": "Fast MultiLinks",
   "description": "Open multilinks quickly.",
   "icon": "extension-icon.png",
-  "author": "Chucktaylor",
+  "author": "chucktaylor",
   "platforms": [
     "macOS"
   ],
@@ -41,8 +41,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.12",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.104.12"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

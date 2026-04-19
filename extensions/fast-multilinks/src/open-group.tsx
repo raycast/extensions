@@ -1,8 +1,8 @@
 import { LaunchProps, showToast, Toast, LocalStorage } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface LinkGroup {
   id: string;
@@ -44,9 +44,9 @@ export default async function OpenGroup(props: LaunchProps<{ arguments: OpenGrou
 
   for (const url of group.urls) {
     if (group.browser) {
-      await execAsync(`open -a "${group.browser}" "${url}"`);
+      await execFileAsync("open", ["-a", group.browser, url]);
     } else {
-      await execAsync(`open "${url}"`);
+      await execFileAsync("open", [url]);
     }
   }
   await showToast({
