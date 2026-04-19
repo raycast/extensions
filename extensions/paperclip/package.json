@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "paperclip",
+  "title": "Paperclip",
+  "description": "Search Paperclip issues and open them in the web app.",
+  "icon": "icon.png",
+  "author": "istib",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "paperclip",
+    "issues",
+    "agents",
+    "tracking"
+  ],
+  "commands": [
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search Paperclip issues and open them in the browser",
+      "mode": "view"
+    },
+    {
+      "name": "review-blocked-issues",
+      "title": "Show Review or Blocked Issues",
+      "description": "Jump directly to issues that are in review or blocked",
+      "mode": "view"
+    },
+    {
+      "name": "create-issue",
+      "title": "Create Issue",
+      "description": "Open a form to create a new Paperclip issue",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Paperclip Base URL",
+      "description": "Base URL of your Paperclip server, for example http://127.0.0.1:3100",
+      "placeholder": "http://127.0.0.1:3100"
+    },
+    {
+      "name": "authMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Auth Mode",
+      "description": "Authentication strategy for Paperclip requests",
+      "default": "none",
+      "data": [
+        {
+          "title": "No Auth",
+          "value": "none"
+        },
+        {
+          "title": "Bearer Token",
+          "value": "bearer"
+        },
+        {
+          "title": "Custom Header",
+          "value": "custom_header"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Bearer Token",
+      "description": "Used when Auth Mode is set to Bearer Token"
+    },
+    {
+      "name": "customAuthHeaderName",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Header Name",
+      "description": "Used when Auth Mode is set to Custom Header",
+      "placeholder": "X-Forwarded-User"
+    },
+    {
+      "name": "customAuthHeaderValue",
+      "type": "password",
+      "required": false,
+      "title": "Custom Header Value",
+      "description": "Used when Auth Mode is set to Custom Header"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "react": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "publish": "npx ray publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/istib/raycast-paperclipai.git"
+  },
+  "homepage": "https://github.com/istib/raycast-paperclipai",
+  "bugs": {
+    "url": "https://github.com/istib/raycast-paperclipai/issues"
+  }
+}
