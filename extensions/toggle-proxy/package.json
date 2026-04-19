@@ -82,6 +82,15 @@
       "description": "Network interface for proxy settings (e.g. Wi-Fi, Ethernet)",
       "title": "Network Interface",
       "default": "Wi-Fi"
+    },
+    {
+      "name": "sortByPing",
+      "required": false,
+      "type": "checkbox",
+      "title": "Menu Bar",
+      "label": "Sort configs by ping (real delay)",
+      "description": "When enabled, configs in the menu bar are sorted by measured latency. Subscription configs are grouped by node.",
+      "default": false
     }
   ],
   "dependencies": {

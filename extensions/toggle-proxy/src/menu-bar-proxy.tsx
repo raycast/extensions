@@ -8,6 +8,7 @@ import * as net from "net";
 import { getXrayPath } from "./utils/xray-config";
 import { loadSubscriptionConfigs, getSubscriptions, updateSubscription } from "./utils/subscription";
 import { safePort, sanitizeShellArg, shellEscape } from "./utils/types";
+import { realDelayBatch, type BatchEntry } from "./utils/real-delay";
 
 const cache = new Cache({ namespace: "menu-bar-proxy" });
 
@@ -37,6 +38,9 @@ export default function MenuBarProxy() {
   const [subscriptionConfigs, setSubscriptionConfigs] = useState<
     Record<string, { displayName: string; relativePath: string }[]>
   >({});
+  const [pings, setPings] = useState<Record<string, number | null>>({});
+  const [isPinging, setIsPinging] = useState(false);
+  const sortByPing = prefs.sortByPing ?? false;
 
   useEffect(() => {
     checkProxy();
@@ -44,7 +48,76 @@ export default function MenuBarProxy() {
     getCurrentConfig();
     loadAvailableConfigs();
     autoUpdateSubscriptions();
+    autoTestRealDelay();
   }, []);
+
+  async function autoTestRealDelay() {
+    const PINGS_KEY = "real_delay_data";
+    const PINGS_TTL = 60000;
+
+    const cached = cache.get(PINGS_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached) as { pings: Record<string, number | null>; timestamp: number };
+        setPings(parsed.pings);
+        if (Date.now() - parsed.timestamp < PINGS_TTL) {
+          return;
+        }
+      } catch {
+        // fall through and re-test
+      }
+    }
+
+    const xrayPath = getXrayPathLocal();
+    const entries: BatchEntry[] = [];
+
+    try {
+      if (fs.existsSync(xrayPath)) {
+        const files = fs
+          .readdirSync(xrayPath)
+          .filter((f) => f.endsWith(".json"))
+          .sort();
+        for (const f of files) entries.push({ key: f, configPath: path.join(xrayPath, f) });
+      }
+    } catch {
+      // ignore
+    }
+
+    const subConfigs = loadSubscriptionConfigs(prefs.xrayPath);
+    for (const configs of Object.values(subConfigs)) {
+      for (const c of configs) {
+        entries.push({ key: c.relativePath, configPath: path.join(xrayPath, c.relativePath) });
+      }
+    }
+
+    if (entries.length === 0) return;
+
+    setIsPinging(true);
+    try {
+      const results = await realDelayBatch(entries, xrayPath, {
+        onResult: (key, latency) => {
+          setPings((prev) => ({ ...prev, [key]: latency }));
+        },
+      });
+      cache.set(PINGS_KEY, JSON.stringify({ pings: results, timestamp: Date.now() }));
+    } finally {
+      setIsPinging(false);
+    }
+  }
+
+  function formatPing(key: string): string | undefined {
+    const p = pings[key];
+    if (p === undefined) return isPinging ? "  ·  …" : undefined;
+    if (p === null) return "  ·  —";
+    return `  ·  ${p}ms`;
+  }
+
+  function pingRank(key: string): number {
+    const p = pings[key];
+    if (typeof p === "number") return p;
+    if (p === null) return Number.MAX_SAFE_INTEGER - 1;
+    return Number.MAX_SAFE_INTEGER;
+  }
 
   async function autoUpdateSubscriptions() {
     const SUB_CACHE_KEY = "subscriptions_last_update";
@@ -362,26 +435,67 @@ export default function MenuBarProxy() {
     return currentConfig === configName.replace(/\.json$/i, "");
   }
 
+  function sortByNodeThenPing(
+    configs: { displayName: string; relativePath: string }[],
+  ): { displayName: string; relativePath: string }[] {
+    if (!sortByPing) return configs;
+
+    const groups = new Map<string, { displayName: string; relativePath: string }[]>();
+    const ungrouped: { displayName: string; relativePath: string }[] = [];
+
+    for (const c of configs) {
+      const idx = c.displayName.indexOf("-=-");
+      if (idx === -1) {
+        ungrouped.push(c);
+        continue;
+      }
+      const node = c.displayName.slice(0, idx);
+      const list = groups.get(node);
+      if (list) {
+        list.push(c);
+      } else {
+        groups.set(node, [c]);
+      }
+    }
+
+    for (const list of groups.values()) {
+      list.sort((a, b) => pingRank(a.relativePath) - pingRank(b.relativePath));
+    }
+    ungrouped.sort((a, b) => pingRank(a.relativePath) - pingRank(b.relativePath));
+
+    const sortedNodes = [...groups.keys()].sort();
+    return [...sortedNodes.flatMap((n) => groups.get(n) ?? []), ...ungrouped];
+  }
+
   function renderSubscriptionSections() {
-    return Object.entries(subscriptionConfigs).map(([subName, configs]) => (
-      <MenuBarExtra.Section key={subName} title={subName}>
-        {configs.map((config) => (
-          <MenuBarExtra.Item
-            key={config.relativePath}
-            title={config.displayName}
-            onAction={() => toggleProxy(config.relativePath)}
-            icon={
-              isCurrentConfig(config.relativePath) ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Globe
-            }
-          />
-        ))}
-      </MenuBarExtra.Section>
-    ));
+    return Object.entries(subscriptionConfigs).map(([subName, configs]) => {
+      const sorted = sortByNodeThenPing(configs);
+      return (
+        <MenuBarExtra.Section key={subName} title={subName}>
+          {sorted.map((config) => (
+            <MenuBarExtra.Item
+              key={config.relativePath}
+              title={config.displayName}
+              subtitle={formatPing(config.relativePath)}
+              onAction={() => toggleProxy(config.relativePath)}
+              icon={
+                isCurrentConfig(config.relativePath) ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Globe
+              }
+            />
+          ))}
+        </MenuBarExtra.Section>
+      );
+    });
+  }
+
+  function getSortedRootConfigs(): string[] {
+    if (!sortByPing) return availableConfigs;
+    return [...availableConfigs].sort((a, b) => pingRank(a) - pingRank(b));
   }
 
   return (
     <MenuBarExtra
-      isLoading={isEnabled === null}
+      isLoading={isEnabled === null || isPinging}
       icon={isEnabled ? Icon.BullsEyeMissed : Icon.BullsEye}
       tooltip={
         isTmuxInstalled === false
@@ -395,10 +509,11 @@ export default function MenuBarProxy() {
         <>
           <MenuBarExtra.Item title="Disable Proxy" onAction={() => toggleProxy()} />
           <MenuBarExtra.Section title="Switch Config:">
-            {availableConfigs.map((config) => (
+            {getSortedRootConfigs().map((config) => (
               <MenuBarExtra.Item
                 key={config}
                 title={config}
+                subtitle={formatPing(config)}
                 onAction={() => toggleProxy(config)}
                 icon={
                   isCurrentConfig(config)
@@ -421,10 +536,11 @@ export default function MenuBarProxy() {
           />
           {availableConfigs.length > 1 && (
             <MenuBarExtra.Section title="Select Config:">
-              {availableConfigs.map((config) => (
+              {getSortedRootConfigs().map((config) => (
                 <MenuBarExtra.Item
                   key={config}
                   title={config}
+                  subtitle={formatPing(config)}
                   onAction={() => toggleProxy(config)}
                   icon={config === prefs.defaultConfig ? Icon.Star : Icon.Document}
                 />
