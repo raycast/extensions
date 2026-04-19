@@ -28,7 +28,7 @@ export default function Command() {
   }
 
   function isEmptyFolder(folder: string) {
-    return folder === undefined || folder?.length == 0;
+    return folder === undefined || folder?.length === 0;
   }
 
   function isNotDirectory(folder: string) {
@@ -37,7 +37,7 @@ export default function Command() {
 
   function validateFolders(source_folder: string, dest_folder: string) {
     if (isEmptyFolder(source_folder)) {
-      setSourceFolderError("The field should't be empty!");
+      setSourceFolderError("The field shouldn't be empty!");
       return true;
     } else if (isNotDirectory(source_folder)) {
       setSourceFolderError("Source folder does not exist or is not a directory");
@@ -47,7 +47,7 @@ export default function Command() {
     }
 
     if (isEmptyFolder(dest_folder)) {
-      setDestFolderError("The field should't be empty!");
+      setDestFolderError("The field shouldn't be empty!");
       return true;
     } else if (isNotDirectory(dest_folder)) {
       setDestFolderError("Destination folder does not exist or is not a directory");
@@ -112,8 +112,8 @@ export default function Command() {
         error={sourceFolderError}
         onChange={dropSourceFolderErrorIfNeeded}
         onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setSourceFolderError("The field should't be empty!");
+          if (event.target.value?.length === 0) {
+            setSourceFolderError("The field shouldn't be empty!");
           } else {
             dropSourceFolderErrorIfNeeded();
           }
@@ -128,8 +128,8 @@ export default function Command() {
         error={destFolderError}
         onChange={dropDestFolderErrorIfNeeded}
         onBlur={(event) => {
-          if (event.target.value?.length == 0) {
-            setDestFolderError("The field should't be empty!");
+          if (event.target.value?.length === 0) {
+            setDestFolderError("The field shouldn't be empty!");
           } else {
             dropDestFolderErrorIfNeeded();
           }

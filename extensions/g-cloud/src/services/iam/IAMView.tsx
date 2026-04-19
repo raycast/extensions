@@ -20,6 +20,7 @@ import { maskEmailIfEnabled } from "../../utils/maskSensitiveData";
 import { StreamerModeAction } from "../../components/StreamerModeAction";
 import { ApiErrorView } from "../../components/ApiErrorView";
 import { CloudShellAction } from "../../components/CloudShellAction";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface IAMViewProps {
   projectId: string;
@@ -104,16 +105,17 @@ export default function IAMView({ projectId, gcloudPath, resourceName, resourceT
       }
     } catch (error) {
       console.error("Error fetching IAM policy:", error);
-      setError("Failed to fetch IAM policy");
 
       if (loadingToast) {
         loadingToast.hide();
       }
 
+      const friendly = friendlyErrorMessage(error, "Failed to fetch IAM policy");
+      setError(friendly.message);
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to fetch IAM policy",
-        message: error instanceof Error ? error.message : "Unknown error",
+        title: friendly.title,
+        message: friendly.message,
       });
     } finally {
       setIsLoading(false);

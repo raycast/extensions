@@ -35,7 +35,7 @@ export function RepositoryPullRequestList(props: { repo: string }): JSX.Element 
     <List isLoading={isLoading} onSearchTextChange={setSearchText} navigationTitle={props.repo} throttle>
       <List.Section title="Pull Requests" subtitle={`${data?.length}`}>
         {data?.map((d) => (
-          <PullRequestListItem key={d.id} pullRequest={d} {...{ mutateList, sortQuery, setSortQuery }} />
+          <PullRequestListItem key={d.id} showAuthor pullRequest={d} {...{ mutateList, sortQuery, setSortQuery }} />
         ))}
       </List.Section>
     </List>

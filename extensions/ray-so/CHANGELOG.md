@@ -1,5 +1,9 @@
 # Ray.so Changelog
 
+## [Chore: Added partner themes] - 2026-04-05
+
+- Added 12 missing partner themes to Generate Image settings (OpenAI, Mintlify, Prisma, Clerk, ElevenLabs, Resend, Trigger.dev, Browserbase, Cloudflare, Gemini, Stripe, Firecrawl)
+
 ## [New theme] - 2025-11-07
 
 - Added Nuxt theme

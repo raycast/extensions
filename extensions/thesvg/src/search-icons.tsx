@@ -19,7 +19,12 @@ import {
   getIconUrl,
   getIconPageUrl,
   getCdnUrl,
+  toJsx,
+  toHtmlImg,
+  toDataUri,
   type IconEntry,
+  type IconDetail,
+  type Preferences,
 } from "./api";
 
 export default function SearchIcons() {
@@ -32,14 +37,13 @@ export default function SearchIcons() {
   const {
     data,
     isLoading,
-    error: iconsError,
+    error: searchError,
   } = useCachedPromise(searchIcons, [searchText || undefined, category, 100], {
     keepPreviousData: true,
   });
 
-  const loadError = categoriesError ?? iconsError;
-  const errorMessage =
-    loadError instanceof Error ? loadError.message : "Please try again.";
+  const loadError = categoriesError ?? searchError;
+
   const icons = data?.icons ?? [];
 
   return (
@@ -47,7 +51,7 @@ export default function SearchIcons() {
       isLoading={isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Search 4,000+ brand icons..."
+      searchBarPlaceholder="Search 5,600+ brand icons..."
       filtering={false}
       searchBarAccessory={
         <List.Dropdown
@@ -68,26 +72,29 @@ export default function SearchIcons() {
         </List.Dropdown>
       }
     >
-      {loadError ? (
-        <List.EmptyView
-          title="Could not load icons"
-          description={errorMessage}
-          icon={Icon.ExclamationMark}
-        />
-      ) : (
-        icons.map((icon) => <IconListItem key={icon.slug} icon={icon} />)
-      )}
-      {!loadError && icons.length === 0 && !isLoading && (
-        <List.EmptyView
-          title="No icons found"
-          description={
-            searchText
-              ? `No results for "${searchText}"`
-              : "Try a different category"
-          }
-          icon={Icon.MagnifyingGlass}
-        />
-      )}
+      {icons.map((icon) => (
+        <IconListItem key={icon.slug} icon={icon} />
+      ))}
+      {icons.length === 0 &&
+        !isLoading &&
+        (loadError ? (
+          <List.EmptyView
+            title="Could not load icons"
+            description={
+              loadError instanceof Error ? loadError.message : String(loadError)
+            }
+          />
+        ) : (
+          <List.EmptyView
+            title="No icons found"
+            description={
+              searchText
+                ? `No results for "${searchText}"`
+                : "Try a different category"
+            }
+            icon={Icon.MagnifyingGlass}
+          />
+        ))}
     </List>
   );
 }
@@ -106,7 +113,7 @@ function IconListItem({ icon }: { icon: IconEntry }) {
           ? [{ text: `${icon.variants.length} variants`, icon: Icon.Layers }]
           : []),
       ]}
-      keywords={[icon.slug, ...icon.categories]}
+      keywords={[icon.slug, ...icon.categories, ...icon.aliases]}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Copy">
@@ -180,6 +187,53 @@ function CopySvgAction({ slug, title }: { slug: string; title: string }) {
   );
 }
 
+function CopyFormatsSection({
+  icon,
+  variant,
+}: {
+  icon: IconDetail;
+  variant: string;
+}) {
+  const svg = icon.variants[variant]?.svg ?? icon.variants["default"]?.svg;
+  if (!svg) return null;
+
+  const hexVisible = icon.hex && isVisibleHex(icon.hex);
+
+  return (
+    <ActionPanel.Section title="Copy As">
+      <Action.CopyToClipboard
+        title="Copy as JSX Component"
+        content={toJsx(svg, icon.slug)}
+        icon={Icon.Code}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+      />
+      <Action.CopyToClipboard
+        title="Copy as HTML Img Tag"
+        content={toHtmlImg(icon.slug, icon.title)}
+        icon={Icon.Globe}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+      />
+      <Action.CopyToClipboard
+        title="Copy as Data URI"
+        content={toDataUri(svg)}
+        icon={Icon.Link}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
+      {hexVisible && (
+        <Action.CopyToClipboard
+          title="Copy Hex Color"
+          content={`#${icon.hex}`}
+          icon={{
+            source: Icon.CircleFilled,
+            tintColor: `#${icon.hex}` as Color,
+          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+        />
+      )}
+    </ActionPanel.Section>
+  );
+}
+
 function escapeMarkdown(text: string): string {
   return text.replace(/[[\]()#*`\\>_~|!]/g, "\\$&");
 }
@@ -192,12 +246,6 @@ function isVisibleHex(hex: string): boolean {
     lower !== "000" &&
     lower !== "000000"
   );
-}
-
-function toTitleCase(text: string): string {
-  return text
-    .replace(/[-_]/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
 function IconDetailView({ slug }: { slug: string }) {
@@ -272,17 +320,17 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
             target={getIconPageUrl(slug)}
           />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Direct URL" text={getIconUrl(slug)} />
+          <Detail.Metadata.Label title="CDN" text={getIconUrl(slug)} />
           <Detail.Metadata.Label title="jsDelivr" text={getCdnUrl(slug)} />
         </Detail.Metadata>
       }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title="Copy">
+          <ActionPanel.Section title="Copy SVG">
             {variantKeys.map((variant) => (
               <Action
                 key={variant}
-                title={`Copy ${toTitleCase(variant)} SVG`}
+                title={`Copy ${variant} SVG`}
                 icon={Icon.Clipboard}
                 onAction={async () => {
                   const svg = icon.variants[variant]?.svg;
@@ -292,11 +340,18 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
                       style: Toast.Style.Success,
                       title: `Copied ${icon.title} (${variant})`,
                     });
+                  } else {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "SVG not available",
+                      message: `Could not fetch the "${variant}" variant.`,
+                    });
                   }
                 }}
               />
             ))}
           </ActionPanel.Section>
+          <CopyFormatsSection icon={icon} variant="default" />
           <ActionPanel.Section title="Copy URLs">
             <Action.CopyToClipboard
               title="Copy Direct URL"
@@ -306,12 +361,6 @@ ${defaultSvg.substring(0, 2000)}${defaultSvg.length > 2000 ? "\n... (truncated)"
               title="Copy JsDelivr URL"
               content={getCdnUrl(slug)}
             />
-            {hexVisible && (
-              <Action.CopyToClipboard
-                title="Copy Color"
-                content={`#${icon.hex}`}
-              />
-            )}
           </ActionPanel.Section>
           <ActionPanel.Section title="Open">
             <Action.OpenInBrowser

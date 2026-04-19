@@ -5,6 +5,7 @@
   "description": "Quickly share your Calendly meeting links",
   "icon": "logo.png",
   "author": "eluce2",
+  "contributors": ["eric_dumesnil"],
   "license": "MIT",
   "commands": [
     {

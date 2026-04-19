@@ -35,13 +35,6 @@ export function useModelsData() {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
-    // If we have cached data, still revalidate in background
-    const shouldRevalidate = !!data;
-
-    if (!shouldRevalidate) {
-      setIsLoading(true);
-    }
-
     fetchModelsData()
       .then((result) => {
         setData(result);

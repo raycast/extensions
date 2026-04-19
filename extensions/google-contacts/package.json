@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "google-contacts",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "title": "Google Contacts",
   "description": "Browse, search, and manage your Google Contacts directly from Raycast — create, edit, delete, and action contacts without leaving your keyboard.",
   "icon": "extension-icon.png",

@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Feature] - 2026-04-12
+
+- Add "Go to Workspace" command with searchable workspace list and shortcut display
+
 ## [Feature] - 2026-03-25
 
 - Add "Pull to Current Workspace" action to window switcher (Shift+Enter)

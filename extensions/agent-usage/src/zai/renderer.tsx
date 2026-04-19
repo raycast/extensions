@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { ZaiUsage, ZaiError, ZaiLimitEntry } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatResetTime } from "../agents/format";
+import { formatResetTime, getRemainingPercent } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -13,10 +13,22 @@ import {
 
 function getRemainingNumericPercent(entry: ZaiLimitEntry | undefined | null): number | undefined {
   if (!entry) return undefined;
-  if (entry.remaining != null && entry.usage != null && entry.usage > 0) {
-    return Math.round((entry.remaining / entry.usage) * 100);
+  // API percentage field is "percentage used", so remaining = 100 - percentage
+  if (entry.percentage != null) {
+    return 100 - entry.percentage;
   }
-  return 100 - entry.percentage;
+  // Fallback: calculate from remaining/usage if available
+  if (entry.remaining != null && entry.usage != null) {
+    const total = entry.remaining + entry.usage;
+    if (total > 0) {
+      return Math.round(getRemainingPercent(entry.remaining, total));
+    }
+    // If total is 0 but remaining is also 0, we're at 100% (full quota, no usage)
+    if (entry.remaining === 0 && entry.usage === 0) {
+      return 100;
+    }
+  }
+  return undefined;
 }
 
 function formatRemainingPercent(entry: ZaiLimitEntry): string {

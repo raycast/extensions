@@ -4,7 +4,7 @@ import { PREF_POLL_INTERVAL } from "../constants";
 
 /**
  * Hook for folder contents preferences with polling
- * Polls for changes every 2 seconds to reflect preference updates
+ * Polls for changes every 5 seconds to reflect preference updates
  */
 export function useFolderContentsPreferences(): Preferences {
   const [prefs, setPrefs] = useState<Preferences>(() => getPreferenceValues<Preferences>());
