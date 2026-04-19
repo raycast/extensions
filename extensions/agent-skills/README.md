@@ -1,8 +1,8 @@
 # Agent Skills for Raycast
 
-Search your local agent skills and apply one to the text currently in your clipboard from [Raycast](https://raycast.com), the macOS productivity app.
+Search your local agent skills or type a free-form prompt, then apply it to the text currently in your clipboard from [Raycast](https://raycast.com), the macOS productivity app.
 
-This extension scans `~/.agents/skills` for `SKILL.md` files, lets you fuzzy-search them in Raycast, shows the selected skill's description, and runs the skill instructions against clipboard text using Raycast AI.
+This extension scans `~/.agents/skills` for `SKILL.md` files, lets you fuzzy-search them in Raycast, shows the selected skill's description, and runs either the chosen skill or your current search text against clipboard text using Raycast AI.
 
 ## Features
 
@@ -10,7 +10,7 @@ This extension scans `~/.agents/skills` for `SKILL.md` files, lets you fuzzy-sea
 - Fuzzy-searches skills by name, folder, and description
 - Shows the selected skill's description in a side panel
 - Runs the selected skill against your clipboard contents
-- Copies the generated result back to the clipboard
+- Falls back to running your search text as a free-form prompt when no skill matches
 - Supports per-skill model selection via `SKILL.md` frontmatter
 
 ## Requirements
@@ -64,6 +64,7 @@ npm run build
 - If a skill does not specify `model`, Raycast uses its default model selection for `AI.ask`
 - If the clipboard is empty, the command will refuse to run
 - If Raycast AI access is unavailable, the command shows an error toast instead of executing
+- When no skill matches your search, press Enter to run the search text itself as a prompt on the clipboard text
 
 ## License
 

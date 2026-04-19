@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-skills",
   "title": "Agent Skills",
-  "description": "Search local skills and apply them to copied text.",
+  "description": "Search local skills or use a free-form prompt on copied text.",
   "icon": "icon.png",
   "author": "istib",
   "license": "MIT",
@@ -24,7 +24,7 @@
     {
       "name": "apply-agent-skill",
       "title": "Apply Agent Skill",
-      "description": "Fuzzy-search local skills and apply one to clipboard text",
+      "description": "Fuzzy-search local skills or run a free-form prompt on clipboard text",
       "mode": "view"
     }
   ],

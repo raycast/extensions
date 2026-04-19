@@ -22,6 +22,19 @@ type Frontmatter = {
   model?: string;
 };
 
+type ResultViewProps = {
+  title: string;
+  input: string;
+  result: string;
+  prompt?: string;
+  subtitle?: string;
+  filePath?: string;
+};
+
+type RunState = {
+  title: string;
+};
+
 function normalizeFrontmatterValue(value: string) {
   return value.trim().replace(/^['"]|['"]$/g, "");
 }
@@ -120,11 +133,36 @@ async function loadSkills(): Promise<Skill[]> {
 }
 
 function injectInput(instructions: string, input: string) {
+  const outputRequirements = [
+    "# FINAL OUTPUT REQUIREMENTS:",
+    "",
+    "- Return only the final transformed text.",
+    "- Do not include headings, labels, or preamble text.",
+    "- Do not write things like `# OUTPUT`, `Output:`, or explanatory notes.",
+  ].join("\n");
+
   if (instructions.match(/INPUT:\s*$/)) {
-    return instructions.replace(/INPUT:\s*$/, `INPUT:\n${input}`);
+    return `${instructions.replace(/INPUT:\s*$/, `INPUT:\n${input}`)}\n\n${outputRequirements}`;
   }
 
-  return `${instructions}\n\n# INPUT:\n\n${input}`;
+  return `${instructions}\n\n# INPUT:\n\n${input}\n\n${outputRequirements}`;
+}
+
+function buildFreeFormPrompt(request: string, input: string) {
+  const instructions = [
+    "You must apply the user's request to the text in INPUT.",
+    "Do not answer the request abstractly.",
+    "Do not describe what you would change.",
+    "Return only a rewritten or transformed version of INPUT.",
+    "If the request is ambiguous, make the smallest reasonable transformation that satisfies it.",
+    "",
+    "# USER REQUEST:",
+    request.trim(),
+    "",
+    "Treat INPUT as the source text to edit.",
+  ].join("\n");
+
+  return injectInput(instructions, input);
 }
 
 function buildSkillPreview(skill: Skill) {
@@ -140,30 +178,34 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : "Unknown error";
 }
 
-function ResultView(props: { skill: Skill; input: string; result: string }) {
-  const { skill, input, result } = props;
+function ResultView(props: ResultViewProps) {
+  const { filePath, input, prompt, result, title } = props;
 
   return (
     <Detail
-      navigationTitle={skill.title}
+      navigationTitle={title}
       markdown={result}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Skill" text={skill.title} />
-          <Detail.Metadata.Label title="Folder" text={skill.folderName} />
-          <Detail.Metadata.Label title="Input Length" text={`${input.length} chars`} />
-          <Detail.Metadata.Label title="Output Length" text={`${result.length} chars`} />
-          <Detail.Metadata.Link title="Skill File" target={skill.filePath} text={skill.filePath} />
-        </Detail.Metadata>
-      }
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Result" content={result} />
           <Action.Paste title="Paste Result" content={result} />
           <Action.CopyToClipboard title="Copy Original Input" content={input} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-          <Action title="Open Skill File" onAction={() => open(skill.filePath)} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          {prompt ? <Action.CopyToClipboard title="Copy Prompt" content={prompt} shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} /> : null}
+          {filePath ? <Action title="Open Skill File" onAction={() => open(filePath)} shortcut={{ modifiers: ["cmd"], key: "o" }} /> : null}
         </ActionPanel>
       }
+    />
+  );
+}
+
+function ProgressView(props: { runState: RunState }) {
+  const { runState } = props;
+
+  return (
+    <Detail
+      isLoading
+      navigationTitle={runState.title}
+      markdown={`# ${runState.title}`}
     />
   );
 }
@@ -173,6 +215,8 @@ export default function ApplyAgentSkill() {
   const [clipboardText, setClipboardText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string>();
+  const [runState, setRunState] = useState<RunState>();
+  const [searchText, setSearchText] = useState("");
   const { push } = useNavigation();
 
   async function refresh() {
@@ -211,12 +255,72 @@ export default function ApplyAgentSkill() {
       return loadError;
     }
 
+    if (searchText.trim()) {
+      return "Press Enter to run the current search as a free-form prompt on your clipboard text.";
+    }
+
     if (skills.length === 0) {
       return `Expected skills under ${SKILLS_ROOT}`;
     }
 
     return "Try a different search term.";
-  }, [loadError, skills.length]);
+  }, [loadError, searchText, skills.length]);
+
+  async function runPrompt(prompt: string) {
+    const input = clipboardText.trim();
+    const trimmedPrompt = prompt.trim();
+
+    if (!trimmedPrompt) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Prompt is empty",
+        message: "Type a prompt to run against your clipboard text.",
+      });
+      return;
+    }
+
+    if (!input) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Clipboard is empty",
+        message: "Copy some text, then run the command again.",
+      });
+      return;
+    }
+
+    if (!environment.canAccess(AI)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Raycast AI access required",
+        message: "Enable Raycast AI for this extension, then try again.",
+      });
+      return;
+    }
+
+    setRunState({
+      title: "Running Free-Form Prompt",
+    });
+
+    try {
+      const result = await AI.ask(buildFreeFormPrompt(trimmedPrompt, input), {
+        creativity: "low",
+      });
+
+      push(<ResultView title="Free-Form Prompt" prompt={trimmedPrompt} input={input} result={result} />);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Free-form prompt complete",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to run free-form prompt",
+        message: getErrorMessage(error),
+      });
+    } finally {
+      setRunState(undefined);
+    }
+  }
 
   async function runSkill(skill: Skill) {
     const input = clipboardText.trim();
@@ -238,9 +342,8 @@ export default function ApplyAgentSkill() {
       return;
     }
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: `Running ${skill.title}…`,
+    setRunState({
+      title: `Running ${skill.title}`,
     });
 
     try {
@@ -249,25 +352,49 @@ export default function ApplyAgentSkill() {
         model: skill.model,
       });
 
-      await Clipboard.copy(result);
-      toast.style = Toast.Style.Success;
-      toast.title = `${skill.title} complete`;
-      toast.message = "Result copied to clipboard";
-      push(<ResultView skill={skill} input={input} result={result} />);
+      push(
+        <ResultView
+          title={skill.title}
+          subtitle={skill.folderName}
+          filePath={skill.filePath}
+          input={input}
+          result={result}
+        />,
+      );
+      await showToast({
+        style: Toast.Style.Success,
+        title: `${skill.title} complete`,
+      });
     } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Failed to run ${skill.title}`;
-      toast.message = getErrorMessage(error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to run ${skill.title}`,
+        message: getErrorMessage(error),
+      });
+    } finally {
+      setRunState(undefined);
     }
   }
 
+  if (runState) {
+    return <ProgressView runState={runState} />;
+  }
+
   return (
-    <List isLoading={isLoading} navigationTitle="Apply Agent Skill" searchBarPlaceholder="Search skills..." isShowingDetail>
+    <List
+      isLoading={isLoading}
+      navigationTitle="Apply Agent Skill"
+      searchBarPlaceholder="Search skills or type a free-form prompt..."
+      filtering={true}
+      onSearchTextChange={setSearchText}
+      isShowingDetail
+    >
       <List.EmptyView
         title={emptyTitle}
         description={emptyDescription}
         actions={
           <ActionPanel>
+            {searchText.trim() && !loadError ? <Action title="Run Free-Form Prompt" icon={Icon.Text} onAction={() => runPrompt(searchText)} /> : null}
             <Action title="Reload" icon={Icon.ArrowClockwise} onAction={refresh} />
             <Action title="Open Skills Folder" onAction={() => open(SKILLS_ROOT)} />
           </ActionPanel>
