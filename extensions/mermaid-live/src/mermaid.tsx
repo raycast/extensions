@@ -32,15 +32,12 @@ export default function Command() {
       try {
         await migrateHistoryData();
 
-        // Pre-initialize the clipboard ref so the polling effect skips its first
-        // tick if the clipboard hasn't changed, preventing it from overwriting
-        // the saved diagram state set below.
-        lastClipboardRef.current = await Clipboard.readText();
-
         const savedCode = await LocalStorage.getItem<string>("lastMermaidCode");
         const savedTimestamp = await LocalStorage.getItem<string>("lastUpdatedTimestamp");
 
         if (savedCode) {
+          lastClipboardRef.current = savedCode;
+
           const encoded = encodeMermaid(savedCode);
           const imageUrl = `https://mermaid.ink/img/pako:${encoded}`;
           const markdown = `# Mermaid Diagram\n\n![Diagram](${imageUrl}?raycast-width=900)`;
@@ -69,9 +66,21 @@ export default function Command() {
     let isMounted = true;
 
     async function loadAndRender() {
-      try {
-        const clipboardText = await Clipboard.readText();
+      let clipboardText: string | undefined;
 
+      try {
+        clipboardText = await Clipboard.readText();
+      } catch (error) {
+        if (!isMounted) return;
+        setState((prev) => ({
+          ...prev,
+          isLoading: false,
+          error: prev.mermaidCode ? undefined : error instanceof Error ? error : new Error(String(error)),
+        }));
+        return;
+      }
+
+      try {
         if (clipboardText === lastClipboardRef.current) return;
         if (!isMounted) return;
 
@@ -81,7 +90,7 @@ export default function Command() {
           setState((prev) => ({
             ...prev,
             isLoading: false,
-            error: new Error("EMPTY_CLIPBOARD"),
+            error: prev.mermaidCode ? undefined : new Error("EMPTY_CLIPBOARD"),
           }));
           return;
         }
