@@ -313,7 +313,7 @@ export function PaperclipIssuesList(props: PaperclipIssuesListProps) {
       navigationTitle={navigationTitle}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown tooltip="Status Filter" storeValue value={statusFilter} onChange={(value) => setStatusFilter(value as StatusFilter)}>
+        <List.Dropdown tooltip="Status Filter" value={statusFilter} onChange={(value) => setStatusFilter(value as StatusFilter)}>
           <List.Dropdown.Item title="Active" value="active" />
           <List.Dropdown.Item title="All" value="all" />
           <List.Dropdown.Item title="In Review" value="in_review" />

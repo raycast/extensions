@@ -20,44 +20,21 @@ This extension is intentionally focused: it fetches issues from your Paperclip s
 - `Bearer Token`: used for bearer-based Paperclip auth
 - `Custom Header Name` / `Custom Header Value`: used when your server sits behind an auth proxy
 
-## Install
-
-1. Open Terminal in this extension folder:
-
-```bash
-cd /Users/istib/Projects/raycast-paperclipai
-```
-
-2. Install dependencies:
-
-```bash
-npm install
-```
-
-3. Start Raycast development mode for this extension:
-
-```bash
-npm run dev
-```
-
-4. Raycast should import the extension automatically. If it does not, open the `Import Extension` command in Raycast and select this folder.
-
-5. In Raycast, open the extension preferences for `Paperclip` and set:
-
-- `Paperclip Base URL` to your server, for example `http://127.0.0.1:3100`
-- `Auth Mode` plus credentials if your server requires auth
-
-6. Run the `Search Issues` command from Raycast.
-
-You can also run `Show Review or Blocked Issues` to jump straight into the review queue.
-Use `Create Issue` to open the new-issue dialog directly from Raycast.
-
 ## Development
 
 ```bash
 npm install
 npm run dev
 ```
+
+If Raycast does not import the extension automatically in development mode, use the `Import Extension` command and select this folder.
+
+After importing, open the extension preferences for `Paperclip` and set:
+
+- `Paperclip Base URL` to your server, for example `http://127.0.0.1:3100`
+- `Auth Mode` plus credentials if your server requires auth
+
+You can then run `Search Issues`, `Show Review or Blocked Issues`, or `Create Issue` from Raycast.
 
 ## Notes
 
