@@ -2,12 +2,23 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cereal-eyes",
   "title": "Cereal Eyes",
-  "description": "Save and manage snippets with Cereal Eyes",
+  "description": "Manage Cereal Eyes snippets, shares, and short URLs from Raycast",
   "icon": "extension-icon.png",
   "author": "jermashley",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Developer Tools",
     "Productivity"
+  ],
+  "keywords": [
+    "snippets",
+    "sharing",
+    "short urls",
+    "url shortener",
+    "developer tools",
+    "cereal eyes"
   ],
   "license": "MIT",
   "commands": [
@@ -21,6 +32,12 @@
       "name": "list-snippets",
       "title": "My Snippets",
       "description": "Browse and manage your Cereal Eyes snippets",
+      "mode": "view"
+    },
+    {
+      "name": "url-shortener",
+      "title": "URL Shortener",
+      "description": "Create and manage your Cereal Eyes short links",
       "mode": "view"
     }
   ],
@@ -50,7 +67,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.86.0",
+    "@raycast/api": "^1.104.12",
     "@raycast/utils": "^1.19.0"
   },
   "devDependencies": {

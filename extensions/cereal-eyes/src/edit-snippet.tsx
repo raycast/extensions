@@ -9,7 +9,7 @@ import {
 import { useForm, FormValidation } from "@raycast/utils";
 import { updateSnippet } from "./utils/api";
 import { POPULAR_LANGUAGES, MORE_LANGUAGES } from "./utils/languages";
-import type { Snippet, SnippetCreatePayload } from "./types";
+import type { Snippet, SnippetUpdatePayload } from "./types";
 
 interface FormValues {
   title: string;
@@ -41,14 +41,14 @@ export default function EditSnippet({ snippet, onRevalidate }: Props) {
         title: "Saving changes…",
       });
       try {
-        const payload: Partial<SnippetCreatePayload> = {
+        const payload: SnippetUpdatePayload = {
           content: values.content,
-          title: values.title.trim() || undefined,
-          language: values.language || undefined,
+          title: values.title.trim() || null,
+          language: values.language || null,
           is_public: values.is_public,
           expires_at: values.expires_at
             ? values.expires_at.toISOString()
-            : undefined,
+            : null,
         };
         await updateSnippet(snippet.id, payload);
         toast.style = Toast.Style.Success;

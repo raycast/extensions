@@ -4,8 +4,13 @@ import type {
   ApiResponse,
   ContactSuggestions,
   Contact,
+  ShortUrl,
+  ShortUrlAnalytics,
+  ShortUrlCreatePayload,
+  ShortUrlUpdatePayload,
   Snippet,
   SnippetCreatePayload,
+  SnippetUpdatePayload,
   SnippetShare,
   SnippetSharePayload,
 } from "../types";
@@ -57,12 +62,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (!response.ok) {
-    const error = await response
-      .json()
-      .catch(() => ({ message: response.statusText }));
-    throw new Error(
-      error.message ?? `Request failed with status ${response.status}`,
-    );
+    const error = await response.json().catch(() => null);
+    throw new Error(extractErrorMessage(error, response.statusText));
   }
 
   if (response.status === 204) {
@@ -70,6 +71,31 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   return response.json();
+}
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  if (!error || typeof error !== "object") {
+    return fallback;
+  }
+
+  const candidate = error as {
+    message?: string;
+    error?: {
+      message?: string;
+      details?: Record<string, string[]>;
+    };
+  };
+
+  if (candidate.error?.details) {
+    const firstDetail = Object.values(candidate.error.details)
+      .flat()
+      .find(Boolean);
+    if (firstDetail) {
+      return firstDetail;
+    }
+  }
+
+  return candidate.error?.message ?? candidate.message ?? fallback;
 }
 
 // Snippets
@@ -95,7 +121,7 @@ export async function createSnippet(
 
 export async function updateSnippet(
   id: string,
-  payload: Partial<SnippetCreatePayload>,
+  payload: SnippetUpdatePayload,
 ): Promise<ApiResponse<Snippet>> {
   return request<ApiResponse<Snippet>>(`/snippets/${id}`, {
     method: "PATCH",
@@ -149,4 +175,38 @@ export async function getShareContactSuggestions(): Promise<
   return request<ApiResponse<ContactSuggestions>>(
     "/share-contacts/suggestions",
   );
+}
+
+// Short URLs
+export async function getShortUrls(): Promise<ApiListResponse<ShortUrl>> {
+  return request<ApiListResponse<ShortUrl>>("/short-urls");
+}
+
+export async function createShortUrl(
+  payload: ShortUrlCreatePayload,
+): Promise<ApiResponse<ShortUrl>> {
+  return request<ApiResponse<ShortUrl>>("/short-urls", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateShortUrl(
+  id: string,
+  payload: ShortUrlUpdatePayload,
+): Promise<ApiResponse<ShortUrl>> {
+  return request<ApiResponse<ShortUrl>>(`/short-urls/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteShortUrl(id: string): Promise<void> {
+  return request<void>(`/short-urls/${id}`, { method: "DELETE" });
+}
+
+export async function getShortUrlAnalytics(
+  id: string,
+): Promise<ApiResponse<ShortUrlAnalytics>> {
+  return request<ApiResponse<ShortUrlAnalytics>>(`/short-urls/${id}/analytics`);
 }

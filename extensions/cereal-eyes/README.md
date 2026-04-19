@@ -1,6 +1,6 @@
 # Cereal Eyes for Raycast
 
-Save, browse, and share your [Cereal Eyes](https://cereal.email) snippets without leaving your keyboard. Create new snippets, manage visibility, generate share links, and send burner links — all from Raycast.
+Save, browse, and share your [Cereal Eyes](https://cereal.email) snippets without leaving your keyboard. Create new snippets, manage visibility, generate share links, send burner links, and manage short URLs — all from Raycast.
 
 ---
 
@@ -14,22 +14,27 @@ Before you can use this extension, you'll need:
 
 When creating your API token, make sure to enable the following scopes:
 
-| Scope | What it unlocks |
-|---|---|
-| Read snippets | Browse and search your snippets |
-| Create snippets | Save new snippets |
-| Update snippets | Edit existing snippets |
-| Delete snippets | Remove snippets |
-| Share snippets | Create and manage share links |
-| Burner links | Create self-destructing links |
-| Read contacts | Suggest recipients when sharing |
+| Scope               | What it unlocks                 |
+| ------------------- | ------------------------------- |
+| Read snippets       | Browse and search your snippets |
+| Create snippets     | Save new snippets               |
+| Update snippets     | Edit existing snippets          |
+| Delete snippets     | Remove snippets                 |
+| Share snippets      | Create and manage share links   |
+| Burner links        | Create self-destructing links   |
+| Read contacts       | Suggest recipients when sharing |
+| Read short URLs     | List your short links           |
+| Create short URLs   | Create new short links          |
+| Update short URLs   | Rename links or pause them      |
+| Delete short URLs   | Remove short links              |
+| Short URL analytics | View click analytics            |
 
 ---
 
 ## Setup
 
-1. Open Raycast and search for **"Create Snippet"** or **"My Snippets"**
-2. The first time you open either command, Raycast will prompt you to configure the extension
+1. Open Raycast and search for **"Create Snippet"**, **"My Snippets"**, or **"URL Shortener"**
+2. The first time you open a command, Raycast will prompt you to configure the extension
 3. Paste your API token into the **API Token** field
 4. Press **Save** — you're ready to go
 
@@ -64,6 +69,7 @@ Use the dropdown in the top-right corner to filter by **All**, **Public**, or **
 Type in the search bar to filter snippets by title or content preview.
 
 **Each snippet shows:**
+
 - A content preview in the subtitle
 - A language tag (if set)
 - A lock icon if the snippet is private
@@ -72,19 +78,40 @@ Type in the search bar to filter snippets by title or content preview.
 
 **Actions available from the list** (press **⌘ K** to open the action panel):
 
-| Action | Shortcut | What it does |
-|---|---|---|
-| View Detail | ↵ | Opens the full snippet with metadata sidebar |
-| Edit Snippet | ⌘ E | Opens an edit form pre-filled with current values |
-| Copy Content | ⌘ C | Copies the snippet content to your clipboard |
-| Make Public / Make Private | ⌘ ⇧ V | Toggles visibility without opening a form |
-| Copy Link Share | ⌘ S | Creates a public share link and copies it instantly |
-| Copy Burner Link (1 View) | ⌘ ⌥ S | Creates a one-time link that self-destructs after one view |
-| Share with Contacts… | ⌘ ⇧ S | Opens a form to send a restricted share to specific people |
-| Custom Share… | — | Opens the full share form for more control |
-| Manage Shares | ⌘ M | Opens a list of all shares for this snippet |
-| Refresh | ⌘ R | Reloads the snippet list |
-| Delete Snippet | ⌃ X | Deletes the snippet (asks for confirmation first) |
+| Action                     | Shortcut | What it does                                               |
+| -------------------------- | -------- | ---------------------------------------------------------- |
+| View Detail                | ↵        | Opens the full snippet with metadata sidebar               |
+| Edit Snippet               | ⌘ E      | Opens an edit form pre-filled with current values          |
+| Copy Content               | ⌘ C      | Copies the snippet content to your clipboard               |
+| Make Public / Make Private | ⌘ ⇧ V    | Toggles visibility without opening a form                  |
+| Copy Link Share            | ⌘ S      | Creates a public share link and copies it instantly        |
+| Copy Burner Link (1 View)  | ⌘ ⌥ S    | Creates a one-time link that self-destructs after one view |
+| Share with Contacts…       | ⌘ ⇧ S    | Opens a form to send a restricted share to specific people |
+| Custom Share…              | —        | Opens the full share form for more control                 |
+| Manage Shares              | ⌘ M      | Opens a list of all shares for this snippet                |
+| Refresh                    | ⌘ R      | Reloads the snippet list                                   |
+| Delete Snippet             | ⌃ X      | Deletes the snippet (asks for confirmation first)          |
+
+---
+
+### URL Shortener
+
+Browse and manage your Cereal Eyes short links in Raycast.
+
+**What you can do:**
+
+- Create a new short link and copy it immediately
+- Search links by short URL, destination URL, title, or code
+- Rename links and toggle them active/inactive
+- Copy the short URL or destination URL
+- Open the short link or destination in your browser
+- View click analytics, including countries, devices, and referrers
+- Delete links you no longer need
+
+**Notes:**
+
+- Custom codes and expirations are available from the creation form, but they still depend on your Cereal Eyes plan
+- Analytics visibility depends on both your plan and the token scopes you enabled
 
 ---
 
@@ -93,6 +120,7 @@ Type in the search bar to filter snippets by title or content preview.
 The detail view shows the full content of your snippet alongside a metadata sidebar.
 
 **Sidebar shows:**
+
 - Snippet ID
 - Language
 - Visibility (Public or Private)
@@ -102,16 +130,16 @@ The detail view shows the full content of your snippet alongside a metadata side
 
 **Actions available from the detail view:**
 
-| Action | Shortcut | What it does |
-|---|---|---|
-| Copy Content | ⌘ C | Copies the snippet body to your clipboard |
-| Edit Snippet | ⌘ E | Opens the edit form |
-| Make Public / Make Private | ⌘ ⇧ V | Toggles visibility |
-| Create Link Share | ⌘ S | Creates a public share link |
-| Share with Contacts | ⌘ ⇧ S | Restricted share with specific recipients |
-| Create Burner Link | ⌘ ⌥ S | One-time self-destructing link |
-| Manage Shares | ⌘ M | View and revoke all active shares |
-| Copy ID | — | Copies the snippet's UUID |
+| Action                     | Shortcut | What it does                              |
+| -------------------------- | -------- | ----------------------------------------- |
+| Copy Content               | ⌘ C      | Copies the snippet body to your clipboard |
+| Edit Snippet               | ⌘ E      | Opens the edit form                       |
+| Make Public / Make Private | ⌘ ⇧ V    | Toggles visibility                        |
+| Create Link Share          | ⌘ S      | Creates a public share link               |
+| Share with Contacts        | ⌘ ⇧ S    | Restricted share with specific recipients |
+| Create Burner Link         | ⌘ ⌥ S    | One-time self-destructing link            |
+| Manage Shares              | ⌘ M      | View and revoke all active shares         |
+| Copy ID                    | —        | Copies the snippet's UUID                 |
 
 ---
 
@@ -120,15 +148,19 @@ The detail view shows the full content of your snippet alongside a metadata side
 Cereal Eyes supports three types of share links, each with a different use case.
 
 ### Link Share
+
 A standard shareable URL. Anyone with the link can view the snippet. You can optionally require a Cereal Eyes account to access it.
 
 ### Burner Link
+
 A link that self-destructs after a set number of views (defaults to 1). Great for sending something once and knowing it won't be passed around. Once it burns out, the link stops working.
 
 ### Restricted Share
+
 An invite-only link sent to specific email addresses. When you open **"Share with Contacts"**, the extension loads your saved Cereal Eyes contacts and recent recipients — select from the list or type any email address. You can optionally require a Cereal Eyes account for access.
 
 **All share types support:**
+
 - An optional expiry date
 - Viewing in **Manage Shares**, where you can copy the URL or revoke it at any time
 
@@ -139,6 +171,7 @@ An invite-only link sent to specific email addresses. When you open **"Share wit
 Opens a list of every share for a given snippet, split into **Active** and **Inactive** sections.
 
 **Each share shows:**
+
 - The share type (Public Link, Restricted, or Burner)
 - The share URL (for link and burner types)
 - View count and — for burner links — views remaining
@@ -146,6 +179,7 @@ Opens a list of every share for a given snippet, split into **Active** and **Ina
 - Whether it was revoked or burned out
 
 **Actions:**
+
 - **Copy Share URL** — copies the link to your clipboard
 - **Revoke Share** — immediately deactivates the link (asks for confirmation, cannot be undone)
 

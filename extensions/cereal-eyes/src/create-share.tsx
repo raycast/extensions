@@ -32,6 +32,7 @@ export default function CreateShare({ snippet, type, onSuccess }: Props) {
   const [expiresAt, setExpiresAt] = useState<Date | null>(null);
   const [maxViews, setMaxViews] = useState("1");
   const [maxViewsError, setMaxViewsError] = useState<string | undefined>();
+  const [recipientsError, setRecipientsError] = useState<string | undefined>();
   const [recipients, setRecipients] = useState<string[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -70,6 +71,18 @@ export default function CreateShare({ snippet, type, onSuccess }: Props) {
       }
       setMaxViewsError(undefined);
     }
+
+    if (type === "restricted") {
+      const validRecipients = recipients.filter((recipient) =>
+        recipient.includes("@"),
+      );
+      if (validRecipients.length === 0) {
+        setRecipientsError("Add at least one valid email address");
+        return false;
+      }
+      setRecipientsError(undefined);
+    }
+
     return true;
   }
 
@@ -145,6 +158,7 @@ export default function CreateShare({ snippet, type, onSuccess }: Props) {
           title="Recipients"
           value={recipients}
           onChange={setRecipients}
+          error={recipientsError}
           placeholder="Select or type email addresses…"
           info="Select from your contacts or type any email address"
         >

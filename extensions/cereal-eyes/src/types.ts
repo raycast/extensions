@@ -27,6 +27,47 @@ export interface SnippetShare {
   created_at: string;
 }
 
+export interface ShortUrl {
+  id: string;
+  code: string;
+  short_url: string;
+  original_url: string;
+  title: string | null;
+  is_active: boolean;
+  expires_at: string | null;
+  is_expired: boolean;
+  clicks_total: number;
+  last_clicked_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ShortUrlBreakdownItem {
+  value: string | null;
+  count: number;
+}
+
+export interface ShortUrlClicksByDayItem {
+  date: string;
+  count: number;
+}
+
+export interface ShortUrlAnalytics {
+  tier_locked: boolean;
+  analytics_level?: "basic" | "full";
+  total_clicks?: number;
+  clicks_by_day?: ShortUrlClicksByDayItem[];
+  by_country?: ShortUrlBreakdownItem[];
+  by_device?: ShortUrlBreakdownItem[];
+  by_referrer?: ShortUrlBreakdownItem[];
+  by_city?: ShortUrlBreakdownItem[];
+  by_browser?: ShortUrlBreakdownItem[];
+  by_os?: ShortUrlBreakdownItem[];
+  by_utm_source?: ShortUrlBreakdownItem[];
+  by_utm_medium?: ShortUrlBreakdownItem[];
+  by_utm_campaign?: ShortUrlBreakdownItem[];
+}
+
 export interface Contact {
   id: string | null;
   display_name: string;
@@ -59,6 +100,14 @@ export interface SnippetCreatePayload {
   expires_at?: string;
 }
 
+export interface SnippetUpdatePayload {
+  title?: string | null;
+  content?: string;
+  language?: string | null;
+  is_public?: boolean;
+  expires_at?: string | null;
+}
+
 export interface SnippetSharePayload {
   type: "link" | "restricted" | "burner";
   access_mode?: "public_link" | "auth_required";
@@ -67,8 +116,21 @@ export interface SnippetSharePayload {
   recipient_emails?: string[];
 }
 
+export interface ShortUrlCreatePayload {
+  original_url: string;
+  title?: string;
+  custom_code?: string;
+  expires_at?: string;
+}
+
+export interface ShortUrlUpdatePayload {
+  title?: string | null;
+  is_active?: boolean;
+}
+
 export interface ApiResponse<T> {
   data: T;
+  meta?: Record<string, unknown>;
 }
 
 export interface ApiListResponse<T> {
