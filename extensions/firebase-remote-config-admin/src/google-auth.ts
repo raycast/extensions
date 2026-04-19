@@ -1,5 +1,5 @@
 import { createSign, randomUUID } from "node:crypto";
-import { readFile } from "node:fs/promises";
+import { readFile, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
@@ -299,6 +299,24 @@ async function fetchGoogleUserInfo(
 
 export async function hasAdcCredentials(): Promise<boolean> {
   return Boolean(await loadAdcCredentials());
+}
+
+export async function revokeAdcCredentials(): Promise<void> {
+  const credentials = await loadAdcCredentials();
+  if (credentials?.refresh_token) {
+    try {
+      await fetch(
+        `https://oauth2.googleapis.com/revoke?token=${encodeURIComponent(
+          credentials.refresh_token,
+        )}`,
+        { method: "POST" },
+      );
+    } catch {
+      // Best-effort server-side revoke. Proceed to remove the local file
+      // regardless — that is what stops the extension from detecting ADC.
+    }
+  }
+  await rm(getAdcFilePath(), { force: true });
 }
 
 export async function getAdcAccessToken(): Promise<string> {

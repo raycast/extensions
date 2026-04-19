@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Clipboard,
   Form,
   Icon,
   List,
@@ -19,6 +18,7 @@ import {
   getGoogleAuthStatus,
   getGoogleProfileAfterAuthorize,
   hasAdcCredentials,
+  revokeAdcCredentials,
   signOutGoogleAccount,
 } from "./google-auth";
 import { listAccessibleFirebaseProjects } from "./firebase-management-client";
@@ -296,18 +296,22 @@ export default function ManageProjectsCommand() {
                   }
                 }}
               />
-              {auth.isLoggedIn || projects.length > 0 || groups.length > 0 ? (
+              {auth.isLoggedIn ||
+              adcAvailable ||
+              projects.length > 0 ||
+              groups.length > 0 ? (
                 <Action
                   title="Sign Out"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                   onAction={async () => {
-                    const usingAdc = auth.method === "adc";
+                    const willRevokeAdc =
+                      auth.method === "adc" || adcAvailable;
                     const confirmed = await confirmAlert({
                       title: "Sign out?",
-                      message: usingAdc
-                        ? "This clears every saved project and group and returns the extension to its initial state. Because you're signed in via ADC, also run `gcloud auth application-default revoke` in your terminal to revoke the credentials — the command will be copied to your clipboard."
+                      message: willRevokeAdc
+                        ? "This clears every saved project and group, revokes your Application Default Credentials (affecting any other tool on this machine that relies on ADC), and returns the extension to its initial state."
                         : "This clears every saved project and group, signs you out of Google, and returns the extension to its initial state.",
                       primaryAction: {
                         title: "Sign Out",
@@ -320,17 +324,13 @@ export default function ManageProjectsCommand() {
                       if (auth.isLoggedIn && auth.method === "oauth") {
                         await signOutGoogleAccount();
                       }
-                      if (usingAdc) {
-                        await Clipboard.copy(
-                          "gcloud auth application-default revoke",
-                        );
+                      if (willRevokeAdc) {
+                        await revokeAdcCredentials();
                       }
                       await showToast({
                         style: Toast.Style.Success,
                         title: "Signed out",
-                        message: usingAdc
-                          ? "ADC revoke command copied to clipboard."
-                          : "Extension returned to initial state.",
+                        message: "Extension returned to initial state.",
                       });
                       revalidate();
                     } catch (error) {
