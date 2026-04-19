@@ -85,7 +85,7 @@ export default function Command() {
     }
   }
 
-  const showFetchItem = looksLikeDoi(doi) && doi !== history[0]?.doi;
+  const showFetchItem = looksLikeDoi(doi) && extractDoi(doi) !== history[0]?.doi;
 
   async function clearHistory() {
     await LocalStorage.removeItem(STORAGE_KEY);
