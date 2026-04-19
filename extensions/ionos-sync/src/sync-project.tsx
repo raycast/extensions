@@ -36,6 +36,7 @@ function SyncOutputView({
 
   useEffect(() => {
     let mounted = true;
+    let lineCount = 0;
 
     const toastPromise = showToast({
       style: Toast.Style.Animated,
@@ -50,6 +51,7 @@ function SyncOutputView({
       for (const line of text.split("\n")) {
         if (line.trim() && !line.includes("setlocale")) {
           if (mounted) setLines((prev) => [...prev, line]);
+          lineCount++;
         }
       }
     });
@@ -69,14 +71,14 @@ function SyncOutputView({
           direction,
           mode,
           success,
-          linesOutput: lines.length,
+          linesOutput: lineCount,
         };
         onDone(record);
 
         if (success) {
           toast.style = Toast.Style.Success;
           toast.title = mode === "dry" ? "Dry-run complete" : "Sync complete";
-          toast.message = `${lines.length} lines`;
+          toast.message = `${lineCount} lines`;
         } else {
           toast.style = Toast.Style.Failure;
           toast.title = "Sync failed";
