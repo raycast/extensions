@@ -74,12 +74,6 @@ export interface ProjectGroup {
   projectIds: string[];
 }
 
-export interface Preferences {
-  googleClientId?: string;
-  sharedCredentialRef?: string;
-  requestTimeoutMs?: string;
-}
-
 export interface GoogleAuthStatus {
   isLoggedIn: boolean;
   email?: string;

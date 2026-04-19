@@ -7,7 +7,7 @@ import { OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
 import { getPreferences } from "./storage";
-import type { GoogleAuthStatus, Preferences, ProjectConfig } from "./types";
+import type { GoogleAuthStatus, ProjectConfig } from "./types";
 
 interface ServiceAccount {
   type?: string;

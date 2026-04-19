@@ -177,6 +177,9 @@ export function BulkOperationForm({
 }: BulkOperationFormProps) {
   const { push } = useNavigation();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [operationType, setOperationType] = useState<OperationType>(
+    initial?.operationType ?? "upsert-parameter",
+  );
   const lockedProjects = fixedProjectIds && fixedProjectIds.length > 0;
   const defaultSelectedIds =
     fixedProjectIds ?? availableProjects.map((project) => project.id);
@@ -268,7 +271,8 @@ export function BulkOperationForm({
       <Form.Dropdown
         id="operationType"
         title="Operation"
-        defaultValue={initial?.operationType ?? "upsert-parameter"}
+        value={operationType}
+        onChange={(newValue) => setOperationType(newValue as OperationType)}
       >
         <Form.Dropdown.Item
           value="upsert-parameter"
@@ -363,10 +367,10 @@ export function BulkOperationForm({
       />
       <Form.Description
         text={[
-          usesParameter(initial?.operationType ?? "upsert-parameter")
+          usesParameter(operationType)
             ? "Use raw value exactly as Firebase should receive it."
             : null,
-          usesCondition(initial?.operationType ?? "upsert-parameter")
+          usesCondition(operationType)
             ? "Conditions are edited as raw expressions in v1."
             : null,
         ]

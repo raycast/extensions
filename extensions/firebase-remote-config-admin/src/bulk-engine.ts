@@ -23,7 +23,7 @@ function sortConditions(
 
 function sortConditionalValues(
   values: Record<string, { value: string; useInAppDefault?: boolean }>,
-): Record<string, { value: string }> {
+): Record<string, { value: string; useInAppDefault?: boolean }> {
   return Object.fromEntries(
     Object.entries(values).sort(([left], [right]) => left.localeCompare(right)),
   );

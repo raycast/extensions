@@ -2,7 +2,6 @@ import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { randomUUID } from "node:crypto";
 
 import type {
-  Preferences,
   ProjectConfig,
   ProjectGroup,
   SelectableProjectScope,
@@ -276,7 +275,7 @@ export async function resolveProjectsForTool(input?: {
     if (project) resolved.add(project.id);
   }
 
-  if (resolved.size === 0) return projects;
+  if (resolved.size === 0) return [];
   return projects.filter((project) => resolved.has(project.id));
 }
 
