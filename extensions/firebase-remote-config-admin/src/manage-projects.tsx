@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Clipboard,
   Form,
   Icon,
   List,
@@ -16,10 +17,8 @@ import { useCachedPromise } from "@raycast/utils";
 import { getAccessTokenContext } from "./auth";
 import {
   getGoogleAuthStatus,
-  getGoogleProfileAfterAuthorize,
   hasAdcCredentials,
   revokeAdcCredentials,
-  signOutGoogleAccount,
 } from "./google-auth";
 import { listAccessibleFirebaseProjects } from "./firebase-management-client";
 import { csvToList, listToCsv } from "./formatting";
@@ -228,42 +227,39 @@ export default function ManageProjectsCommand() {
       <List.Section title="Google Account">
         <List.Item
           icon={auth.isLoggedIn ? Icon.CheckCircle : Icon.Person}
-          title={auth.isLoggedIn ? auth.email || "Connected" : "Not Connected"}
+          title={auth.isLoggedIn ? auth.email || "Connected" : "Not Signed In"}
           subtitle={
             auth.isLoggedIn
-              ? auth.name || "Signed in. You can import Firebase projects."
-              : adcAvailable
-                ? "ADC detected. You can import projects without OAuth."
-                : "Sign in with Google or use ADC / service account to get started."
+              ? auth.name ||
+                "Signed in via Application Default Credentials. You can import Firebase projects."
+              : "Run `gcloud auth application-default login` in your terminal, then return here."
           }
           accessories={
             auth.isLoggedIn
-              ? [{ text: auth.method === "adc" ? "ADC" : "OAuth" }]
-              : [{ text: adcAvailable ? "ADC ready" : "Sign in required" }]
+              ? [{ text: "ADC" }]
+              : [{ text: "ADC missing" }]
           }
           actions={
             <ActionPanel>
-              {!adcAvailable ? (
+              {auth.isLoggedIn ? (
                 <Action
-                  title={
-                    auth.isLoggedIn
-                      ? "Re-Authenticate Google"
-                      : "Sign in with Google"
-                  }
-                  icon={Icon.Key}
+                  title="Import Firebase Projects"
+                  icon={Icon.Download}
                   onAction={async () => {
                     try {
-                      const profile = await getGoogleProfileAfterAuthorize();
+                      const imported =
+                        await listAccessibleFirebaseProjects();
+                      const result = await mergeImportedProjects(imported);
                       await showToast({
                         style: Toast.Style.Success,
-                        title: "Google connected",
-                        message: profile.email || "Authentication completed",
+                        title: "Projects imported",
+                        message: `Added ${result.added}, updated ${result.updated}`,
                       });
                       revalidate();
                     } catch (error) {
                       await showToast({
                         style: Toast.Style.Failure,
-                        title: "Google sign-in failed",
+                        title: "Import failed",
                         message:
                           error instanceof Error
                             ? error.message
@@ -272,30 +268,21 @@ export default function ManageProjectsCommand() {
                     }
                   }}
                 />
-              ) : null}
-              <Action
-                title="Import Firebase Projects"
-                icon={Icon.Download}
-                onAction={async () => {
-                  try {
-                    const imported = await listAccessibleFirebaseProjects();
-                    const result = await mergeImportedProjects(imported);
+              ) : (
+                <Action
+                  title="Copy Sign-in Command"
+                  icon={Icon.Clipboard}
+                  onAction={async () => {
+                    const command = "gcloud auth application-default login";
+                    await Clipboard.copy(command);
                     await showToast({
                       style: Toast.Style.Success,
-                      title: "Projects imported",
-                      message: `Added ${result.added}, updated ${result.updated}`,
+                      title: "Command copied",
+                      message: `Paste "${command}" in your terminal to sign in.`,
                     });
-                    revalidate();
-                  } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Import failed",
-                      message:
-                        error instanceof Error ? error.message : String(error),
-                    });
-                  }
-                }}
-              />
+                  }}
+                />
+              )}
               {auth.isLoggedIn ||
               adcAvailable ||
               projects.length > 0 ||
@@ -306,13 +293,10 @@ export default function ManageProjectsCommand() {
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                   onAction={async () => {
-                    const willRevokeAdc =
-                      auth.method === "adc" || adcAvailable;
                     const confirmed = await confirmAlert({
                       title: "Sign out?",
-                      message: willRevokeAdc
-                        ? "This clears every saved project and group, revokes your Application Default Credentials (affecting any other tool on this machine that relies on ADC), and returns the extension to its initial state."
-                        : "This clears every saved project and group, signs you out of Google, and returns the extension to its initial state.",
+                      message:
+                        "This clears every saved project and group and revokes your Application Default Credentials (affecting any other tool on this machine that relies on ADC). Service account JSON files on disk are not touched.",
                       primaryAction: {
                         title: "Sign Out",
                         style: Alert.ActionStyle.Destructive,
@@ -321,10 +305,7 @@ export default function ManageProjectsCommand() {
                     if (!confirmed) return;
                     try {
                       await clearLocalData();
-                      if (auth.isLoggedIn && auth.method === "oauth") {
-                        await signOutGoogleAccount();
-                      }
-                      if (willRevokeAdc) {
+                      if (adcAvailable) {
                         await revokeAdcCredentials();
                       }
                       await showToast({
@@ -532,25 +513,24 @@ export default function ManageProjectsCommand() {
                 icon={Icon.Plus}
                 target={<ProjectForm onSaved={revalidate} />}
               />
-              {!adcAvailable ? (
+              {adcAvailable ? (
                 <Action
-                  title="Sign in with Google"
-                  icon={Icon.Key}
+                  title="Import Firebase Projects"
+                  icon={Icon.Download}
                   onAction={async () => {
                     try {
-                      await getGoogleProfileAfterAuthorize();
                       const imported = await listAccessibleFirebaseProjects();
                       const result = await mergeImportedProjects(imported);
                       await showToast({
                         style: Toast.Style.Success,
-                        title: "Google connected",
-                        message: `Imported ${result.added + result.updated} project(s)`,
+                        title: "Projects imported",
+                        message: `Added ${result.added}, updated ${result.updated}`,
                       });
                       revalidate();
                     } catch (error) {
                       await showToast({
                         style: Toast.Style.Failure,
-                        title: "Google sign-in failed",
+                        title: "Import failed",
                         message:
                           error instanceof Error
                             ? error.message
@@ -559,7 +539,21 @@ export default function ManageProjectsCommand() {
                     }
                   }}
                 />
-              ) : null}
+              ) : (
+                <Action
+                  title="Copy Sign-in Command"
+                  icon={Icon.Clipboard}
+                  onAction={async () => {
+                    const command = "gcloud auth application-default login";
+                    await Clipboard.copy(command);
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Command copied",
+                      message: `Paste "${command}" in your terminal to sign in.`,
+                    });
+                  }}
+                />
+              )}
               <Action
                 title="Open Preferences"
                 icon={Icon.Gear}

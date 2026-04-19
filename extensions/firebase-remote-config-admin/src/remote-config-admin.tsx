@@ -106,7 +106,7 @@ export default function RemoteConfigAdminCommand() {
 
 To get started, connect at least one Firebase project.
 
-## Option 1: Application Default Credentials (easiest)
+## Option 1: Application Default Credentials (recommended)
 
 1. Run \`gcloud auth application-default login\` in your terminal
 2. Come back here and open **Manage Projects**
@@ -117,12 +117,6 @@ To get started, connect at least one Firebase project.
 1. Open **Manage Projects** and click **Add Project**
 2. Enter your Firebase Project ID
 3. Set the path to your service account JSON file (e.g. \`~/secrets/firebase-prod.json\`)
-
-## Option 3: Google OAuth
-
-1. Set your Google OAuth Client ID in extension preferences
-2. Open **Manage Projects** and click **Sign In With Google**
-3. Import your projects automatically
 `;
 
     return (

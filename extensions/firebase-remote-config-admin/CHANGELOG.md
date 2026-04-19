@@ -7,4 +7,4 @@
 - Manage Firebase projects and service-account credentials locally
 - Export default values and inspect version history per project
 - AI tools for searching, summarizing, and editing Remote Config flags
-- Sign out from Google and reset all local extension data from Manage Projects
+- Sign out from Google and reset all local extension data from Manage Projects — clears cached projects and revokes Application Default Credentials in one step

@@ -46,14 +46,6 @@
   ],
   "preferences": [
     {
-      "name": "googleClientId",
-      "type": "textfield",
-      "required": false,
-      "title": "Google OAuth Client ID",
-      "description": "Optional. Create an OAuth 2.0 Client ID in Google Cloud Console (APIs & Services > Credentials) to use Google sign-in. Not needed if you use ADC or service account JSON.",
-      "placeholder": "your-client-id.apps.googleusercontent.com"
-    },
-    {
       "name": "sharedCredentialRef",
       "type": "textfield",
       "required": false,

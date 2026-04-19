@@ -3,9 +3,6 @@ import { readFile, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
 
-import { OAuth } from "@raycast/api";
-import { OAuthService } from "@raycast/utils";
-
 import { getPreferences } from "./storage";
 import type { GoogleAuthStatus, ProjectConfig } from "./types";
 
@@ -38,52 +35,11 @@ interface GoogleUserInfo {
 }
 
 const FIREBASE_SCOPE = "https://www.googleapis.com/auth/firebase.remoteconfig";
-const GOOGLE_SCOPES = [
-  "openid",
-  "email",
-  "profile",
-  "https://www.googleapis.com/auth/firebase",
-  FIREBASE_SCOPE,
-].join(" ");
 
 const tokenCache = new Map<
   string,
   { accessToken: string; expiresAt: number }
 >();
-
-function getGoogleClientId(preferences: Preferences): string {
-  const clientId = preferences.googleClientId?.trim();
-  if (!clientId) {
-    throw new Error(
-      "Set the Google OAuth Client ID in extension preferences to use Google sign-in.",
-    );
-  }
-  return clientId;
-}
-
-function createGoogleOAuthService(preferences: Preferences) {
-  return new OAuthService({
-    client: new OAuth.PKCEClient({
-      redirectMethod: OAuth.RedirectMethod.AppURI,
-      providerName: "Google",
-      providerIcon: "assets/extension-icon.svg",
-      providerId: "google-firebase-remote-config",
-      description:
-        "Connect your Google account to import Firebase projects and access Remote Config.",
-    }),
-    clientId: getGoogleClientId(preferences),
-    scope: GOOGLE_SCOPES,
-    authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-    tokenUrl: "https://oauth2.googleapis.com/token",
-    refreshTokenUrl: "https://oauth2.googleapis.com/token",
-    bodyEncoding: "url-encoded",
-    extraParameters: {
-      access_type: "offline",
-      prompt: "consent",
-      include_granted_scopes: "true",
-    },
-  });
-}
 
 function base64Url(input: string | Buffer): string {
   const buffer = typeof input === "string" ? Buffer.from(input, "utf8") : input;
@@ -263,25 +219,6 @@ export async function getServiceAccountAccessToken(
   return payload.access_token;
 }
 
-function decodeJwtPayload(
-  token: string | undefined,
-): Record<string, unknown> | null {
-  if (!token) return null;
-  const segments = token.split(".");
-  if (segments.length < 2) return null;
-
-  const payload = segments[1].replace(/-/g, "+").replace(/_/g, "/");
-  const padded = payload.padEnd(Math.ceil(payload.length / 4) * 4, "=");
-  try {
-    return JSON.parse(Buffer.from(padded, "base64").toString("utf8")) as Record<
-      string,
-      unknown
-    >;
-  } catch {
-    return null;
-  }
-}
-
 async function fetchGoogleUserInfo(
   accessToken: string,
 ): Promise<GoogleUserInfo | undefined> {
@@ -337,83 +274,33 @@ export async function getAdcAccessToken(): Promise<string> {
 
 export async function getGoogleAuthStatus(): Promise<GoogleAuthStatus> {
   const adcCredentials = await loadAdcCredentials();
-  if (adcCredentials) {
-    try {
-      const token = await getAdcAccessToken();
-      const user = await fetchGoogleUserInfo(token);
-      return {
-        isLoggedIn: true,
-        email: user?.email,
-        name: user?.name,
-        method: "adc",
-      };
-    } catch {
-      // ignore ADC failures and continue
-    }
-  }
-
-  const preferences = getPreferences();
-  if (!preferences.googleClientId?.trim()) {
+  if (!adcCredentials) {
     return { isLoggedIn: false };
   }
-
-  const service = createGoogleOAuthService(preferences);
-  const tokens = await service.client.getTokens();
-  if (!tokens?.accessToken) {
+  try {
+    const token = await getAdcAccessToken();
+    const user = await fetchGoogleUserInfo(token);
+    return {
+      isLoggedIn: true,
+      email: user?.email,
+      name: user?.name,
+      method: "adc",
+    };
+  } catch {
     return { isLoggedIn: false };
   }
-
-  const payload = decodeJwtPayload(tokens.idToken);
-  const email = typeof payload?.email === "string" ? payload.email : undefined;
-  const name = typeof payload?.name === "string" ? payload.name : undefined;
-
-  return {
-    isLoggedIn: true,
-    email,
-    name,
-    method: "oauth",
-  };
-}
-
-export async function authorizeGoogleAccount(): Promise<string> {
-  const service = createGoogleOAuthService(getPreferences());
-  return service.authorize();
-}
-
-export async function signOutGoogleAccount(): Promise<void> {
-  const preferences = getPreferences();
-  if (!preferences.googleClientId?.trim()) return;
-  const service = createGoogleOAuthService(preferences);
-  await service.client.removeTokens();
 }
 
 export async function getGoogleAccessToken(): Promise<string> {
-  const adcCredentials = await loadAdcCredentials();
-  if (adcCredentials) {
-    try {
-      return await getAdcAccessToken();
-    } catch (error) {
-      throw new Error(
-        error instanceof Error
-          ? `ADC found but could not obtain access token. Try \`gcloud auth application-default revoke\` then \`gcloud auth application-default login\`. Detail: ${error.message}`
-          : "ADC found but could not obtain access token.",
-      );
-    }
+  try {
+    return await getAdcAccessToken();
+  } catch (error) {
+    throw new Error(
+      error instanceof Error
+        ? `Could not obtain an access token via Application Default Credentials. Run \`gcloud auth application-default login\` and try again. Detail: ${error.message}`
+        : "Could not obtain an access token via Application Default Credentials. Run `gcloud auth application-default login` and try again.",
+    );
   }
-
-  const service = createGoogleOAuthService(getPreferences());
-  return service.authorize();
-}
-
-export async function getGoogleProfileAfterAuthorize(): Promise<GoogleAuthStatus> {
-  const token = await authorizeGoogleAccount();
-  const user = await fetchGoogleUserInfo(token);
-  return {
-    isLoggedIn: true,
-    email: user?.email,
-    name: user?.name,
-    method: "oauth",
-  };
 }
 
 export function createImportedProject(

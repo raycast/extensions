@@ -15,43 +15,31 @@ Inspect, compare, edit, publish, and roll back Firebase Remote Config parameters
 
 ## Getting Started
 
-You need at least one Firebase project connected to start using this extension. There are three authentication methods available — pick whichever fits your workflow.
+You need at least one Firebase project connected to start using this extension. Two authentication methods are supported — pick whichever fits your workflow.
 
-### Option 1: Application Default Credentials (ADC) — Easiest
+### Option 1: Application Default Credentials (ADC) — Recommended
 
-If you have the `gcloud` CLI installed:
-
-1. Run this command in your terminal:
+1. Install the [`gcloud` CLI](https://cloud.google.com/sdk/docs/install) if you don't have it (`brew install --cask google-cloud-sdk` on macOS).
+2. Run this command in your terminal:
    ```
    gcloud auth application-default login
    ```
-2. Open **Manage Projects** in Raycast
-3. Click **Import Firebase Projects** — all Firebase projects you have access to will be imported automatically
+3. Open **Manage Projects** in Raycast — the Google Account row should now show your email with an `ADC` badge.
+4. Click **Import Firebase Projects** — every Firebase project you have access to is imported automatically.
 
-This is the simplest setup. ADC credentials are stored at `~/.config/gcloud/application_default_credentials.json` and the extension detects them automatically.
-
-> **Tip:** If ADC gets into a bad state, run `gcloud auth application-default revoke` followed by `gcloud auth application-default login` to reset.
+ADC credentials are stored at `~/.config/gcloud/application_default_credentials.json` and the extension detects them automatically. To switch accounts, use **Sign Out** (⌘⇧O) in Manage Projects — the extension clears its local data and revokes the ADC credentials in one step. Then run `gcloud auth application-default login` again with the new account.
 
 ### Option 2: Service Account JSON
 
 For automated or team setups where you have a Firebase service account key file:
 
-1. Download a service account JSON file from the [Firebase Console](https://console.firebase.google.com/) (Project Settings > Service accounts > Generate new private key)
-2. Save it to a secure location (e.g. `~/secrets/firebase-prod.json`)
-3. Open **Manage Projects** in Raycast and click **Add Project**
-4. Enter the Firebase Project ID and Display Name
-5. Set the **Service Account JSON Path** to the file you saved (e.g. `~/secrets/firebase-prod.json`)
+1. Download a service account JSON file from the [Firebase Console](https://console.firebase.google.com/) (Project Settings > Service accounts > Generate new private key).
+2. Save it to a secure location (e.g. `~/secrets/firebase-prod.json`).
+3. Open **Manage Projects** in Raycast and click **Add Project**.
+4. Enter the Firebase Project ID and Display Name.
+5. Set the **Service Account JSON Path** to the file you saved (e.g. `~/secrets/firebase-prod.json`).
 
-If all your projects share the same service account, you can set the **Shared Service Account JSON Path** in extension preferences instead of configuring each project individually.
-
-### Option 3: Google OAuth
-
-For browser-based Google sign-in:
-
-1. Create an OAuth 2.0 Client ID in [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (type: iOS, bundle ID: `com.raycast`)
-2. Set the **Google OAuth Client ID** in extension preferences
-3. Open **Manage Projects** and click **Sign In With Google**
-4. Authorize in your browser, then click **Import Firebase Projects**
+If all your projects share the same service account, set the **Shared Service Account JSON Path** in extension preferences instead of configuring each project individually.
 
 ## Commands
 
@@ -93,7 +81,6 @@ All write operations show a confirmation prompt before executing.
 
 | Preference | Required | Description |
 |---|---|---|
-| **Google OAuth Client ID** | No | OAuth 2.0 Client ID for Google sign-in. Not needed if you use ADC or service account. |
 | **Shared Service Account JSON Path** | No | Fallback path to a Firebase service account JSON file, used by projects that don't have their own. |
 | **Request Timeout (ms)** | No | HTTP timeout for Firebase API requests. Defaults to 20000 (20 seconds). |
 
@@ -101,7 +88,7 @@ All write operations show a confirmation prompt before executing.
 
 - The extension communicates directly with the [Firebase Remote Config REST API](https://firebase.google.com/docs/remote-config/automate-rc).
 - When publishing changes, the extension uses **ETags** for conflict detection. If someone else modified the template between your preview and publish, the operation reports a conflict instead of overwriting.
-- Project data (IDs, display names, credential paths, groups) is stored locally in Raycast's LocalStorage. No credentials or tokens are stored — authentication is handled fresh via ADC, service account JWT, or OAuth on each request.
+- Project data (IDs, display names, credential paths, groups) is stored locally in Raycast's LocalStorage. No credentials or tokens are stored — authentication is handled fresh via ADC or service account JWT on each request.
 
 ## Troubleshooting
 
@@ -109,13 +96,10 @@ All write operations show a confirmation prompt before executing.
 Run `gcloud auth application-default login` in your terminal.
 
 **"Project has no credentialRef and no shared credential is configured"**
-The project has no service account path set, and ADC/OAuth are not available. Either set a Service Account JSON Path on the project, configure the Shared Service Account JSON Path in preferences, or set up ADC.
+The project has no service account path set, and ADC is not available. Either set a Service Account JSON Path on the project, configure the Shared Service Account JSON Path in preferences, or set up ADC.
 
 **"Invalid credential file"**
 The service account JSON file at the specified path is missing, corrupted, or doesn't contain the required `client_email` and `private_key` fields. Download a fresh key from the Firebase Console.
-
-**"Set the Google OAuth Client ID in extension preferences"**
-You're trying to use Google sign-in but haven't configured an OAuth Client ID. Either set one in preferences or use ADC/service account instead.
 
 **Connection test fails**
 In Manage Projects, select a project and use the **Test Connection** action to verify that authentication and API access work correctly. The toast message will show which auth method was used and whether the connection succeeded.

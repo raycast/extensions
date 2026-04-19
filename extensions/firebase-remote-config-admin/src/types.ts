@@ -78,7 +78,7 @@ export interface GoogleAuthStatus {
   isLoggedIn: boolean;
   email?: string;
   name?: string;
-  method?: "oauth" | "adc";
+  method?: "adc";
 }
 
 export interface ParsedValue {
