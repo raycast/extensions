@@ -8,10 +8,15 @@ import { useClients, useMe, useProjects, useTags, useTasks, useWorkspaces } from
 
 interface UpdateTimeEntryFormProps {
   timeEntry: TimeEntry & TimeEntryMetaData;
+  revalidateRunningTimeEntry: () => void;
   revalidateTimeEntries: () => void;
 }
 
-function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEntryFormProps) {
+function UpdateTimeEntryForm({
+  timeEntry,
+  revalidateRunningTimeEntry,
+  revalidateTimeEntries,
+}: UpdateTimeEntryFormProps) {
   const navigation = useNavigation();
   const { isLoadingMe } = useMe();
   const { workspaces, isLoadingWorkspaces } = useWorkspaces();
@@ -59,6 +64,7 @@ function UpdateTimeEntryForm({ timeEntry, revalidateTimeEntries }: UpdateTimeEnt
 
       await showToast(Toast.Style.Success, "Updated time entry");
       navigation.pop();
+      revalidateRunningTimeEntry();
       revalidateTimeEntries();
     } catch {
       await showToast(Toast.Style.Failure, "Failed to update time entry");

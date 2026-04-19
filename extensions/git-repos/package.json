@@ -47,7 +47,7 @@
       "required": true,
       "default": "",
       "title": "Path to scan for Git Repos",
-      "description": "Path to scan for Git Repos. ~/ is expanded. Use : to seperate multiple paths"
+      "description": "Path to scan for Git Repos. ~/ is expanded. Use : to separate multiple paths (macOS) or ; (Windows)"
     },
     {
       "name": "repoScanDepth",
@@ -150,20 +150,21 @@
   "dependencies": {
     "@raycast/api": "^1.104.10",
     "@raycast/utils": "^2.2.3",
-    "get-installed-browsers": "^0.1.7",
     "default-browser": "^5.5.0",
+    "get-installed-browsers": "^0.1.7",
+    "glob": "^13.0.6",
     "parse-git-config": "^3.0.0",
     "parse-github-url": "^1.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
     "@types/node": "25.5.0",
+    "@types/parse-git-config": "^3.0.4",
+    "@types/parse-github-url": "^1.0.3",
     "@types/react": "19.2.14",
     "eslint": "^10.1.0",
     "prettier": "^3.8.1",
-    "typescript": "^5.9.3",
-    "@types/parse-git-config": "^3.0.4",
-    "@types/parse-github-url": "^1.0.3"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -173,6 +174,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Fix PR List Accessories Alignment] - 2026-04-13
+
+- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
+- Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
+- Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
+- Pull Requests: Add placeholder icon for rows without a review decision to keep CI check column aligned
+- Pull Requests: Add `showAuthor` prop to show author icon in Search and Repository views
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

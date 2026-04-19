@@ -4,9 +4,9 @@
   "title": "Tmux Cheatsheet",
   "description": "Provides easy access to tmux cheatsheet documentation for when you forget a command, or are just learning.",
   "icon": "extension-icon.png",
-  "author": "proprocrastinator",
+  "author": "alikhatibak",
   "contributors": [
-    "alikhatibak"
+    "proprocrastinator"
   ],
   "categories": [
     "Developer Tools",

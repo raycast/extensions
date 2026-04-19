@@ -37,6 +37,11 @@ async function withEnv<T>(updates: Record<string, string | undefined>, run: () =
   }
 }
 
+function withTestAuthFile<T>(run: () => Promise<T>): Promise<T> {
+  // Use a non-existent path to ensure opencode auth file is not found
+  return withEnv({ TEST_OPENCODE_AUTH_PATH: "/nonexistent/opencode/auth.json" }, run);
+}
+
 test("resolveZaiAuthTokens reads token from noisy login shell output", async () => {
   const { resolveZaiAuthTokens } = await import("./auth");
 
@@ -47,21 +52,22 @@ printf "__GLM_API_KEY_START__shell-glm-token__GLM_API_KEY_END__\\n"
 `);
 
   try {
-    await withEnv(
-      {
-        ZAI_API_KEY: undefined,
-        GLM_API_KEY: undefined,
-        SHELL: shellPath,
-      },
-      async () => {
-        const tokens = await resolveZaiAuthTokens({ preferenceToken: "pref-token" });
-        assert.deepEqual(tokens, {
-          primaryToken: "shell-zai-token",
-          localToken: "shell-zai-token",
-          preferenceToken: "pref-token",
-        });
-      },
-    );
+    await withTestAuthFile(async () => {
+      await withEnv(
+        {
+          ZAI_API_KEY: undefined,
+          GLM_API_KEY: undefined,
+          SHELL: shellPath,
+        },
+        async () => {
+          const tokens = await resolveZaiAuthTokens({});
+          assert.equal(tokens.primaryToken, "shell-zai-token");
+          assert.equal(tokens.localToken, "shell-zai-token");
+          assert.equal(tokens.preferenceToken, null);
+          assert.deepEqual(tokens.allTokens, ["shell-zai-token"]);
+        },
+      );
+    });
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
@@ -73,27 +79,28 @@ test("resolveZaiAuthTokens prefers direct process env token", async () => {
   const { dir, shellPath } = makeFakeShell(`printf "__ZAI_API_KEY_START__shell-token__ZAI_API_KEY_END__\\n"`);
 
   try {
-    await withEnv(
-      {
-        ZAI_API_KEY: "direct-zai-token",
-        GLM_API_KEY: undefined,
-        SHELL: shellPath,
-      },
-      async () => {
-        const tokens = await resolveZaiAuthTokens({ preferenceToken: "pref-token" });
-        assert.deepEqual(tokens, {
-          primaryToken: "direct-zai-token",
-          localToken: "direct-zai-token",
-          preferenceToken: "pref-token",
-        });
-      },
-    );
+    await withTestAuthFile(async () => {
+      await withEnv(
+        {
+          ZAI_API_KEY: "direct-zai-token",
+          GLM_API_KEY: undefined,
+          SHELL: shellPath,
+        },
+        async () => {
+          const tokens = await resolveZaiAuthTokens({});
+          assert.equal(tokens.primaryToken, "direct-zai-token");
+          assert.equal(tokens.localToken, "direct-zai-token");
+          assert.equal(tokens.preferenceToken, null);
+          assert.deepEqual(tokens.allTokens, ["direct-zai-token"]);
+        },
+      );
+    });
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
 });
 
-test("resolveZaiAuthTokens falls back to preference token when local lookup is empty", async () => {
+test("resolveZaiAuthTokens uses preference token when provided", async () => {
   const { resolveZaiAuthTokens } = await import("./auth");
 
   const { dir, shellPath } = makeFakeShell("exit 0");
@@ -107,11 +114,10 @@ test("resolveZaiAuthTokens falls back to preference token when local lookup is e
       },
       async () => {
         const tokens = await resolveZaiAuthTokens({ preferenceToken: "pref-token" });
-        assert.deepEqual(tokens, {
-          primaryToken: "pref-token",
-          localToken: null,
-          preferenceToken: "pref-token",
-        });
+        assert.equal(tokens.primaryToken, "pref-token");
+        assert.equal(tokens.localToken, null);
+        assert.equal(tokens.preferenceToken, "pref-token");
+        assert.deepEqual(tokens.allTokens, ["pref-token"]);
       },
     );
   } finally {
@@ -119,42 +125,88 @@ test("resolveZaiAuthTokens falls back to preference token when local lookup is e
   }
 });
 
-test("shouldFallbackToPreferenceToken is true only for unauthorized local-token failures", async () => {
-  const { shouldFallbackToPreferenceToken } = await import("./auth");
+test("resolveZaiAuthTokens includes second preference token", async () => {
+  const { resolveZaiAuthTokens } = await import("./auth");
 
-  assert.equal(
-    shouldFallbackToPreferenceToken({
-      localToken: "local-token",
-      preferenceToken: "pref-token",
-      errorType: "unauthorized",
-    }),
-    true,
-  );
+  const { dir, shellPath } = makeFakeShell("exit 0");
 
-  assert.equal(
-    shouldFallbackToPreferenceToken({
-      localToken: "local-token",
-      preferenceToken: "local-token",
-      errorType: "unauthorized",
-    }),
-    false,
-  );
+  try {
+    await withEnv(
+      {
+        ZAI_API_KEY: undefined,
+        GLM_API_KEY: undefined,
+        SHELL: shellPath,
+      },
+      async () => {
+        const tokens = await resolveZaiAuthTokens({
+          preferenceToken: "pref-token-1",
+          preferenceToken2: "pref-token-2",
+        });
+        assert.equal(tokens.primaryToken, "pref-token-1");
+        assert.equal(tokens.localToken, null);
+        assert.equal(tokens.preferenceToken, "pref-token-1");
+        assert.deepEqual(tokens.allTokens, ["pref-token-1", "pref-token-2"]);
+      },
+    );
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
 
-  assert.equal(
-    shouldFallbackToPreferenceToken({
-      localToken: "local-token",
-      preferenceToken: "pref-token",
-      errorType: "network_error",
-    }),
-    false,
-  );
+test("resolveZaiAuthTokens includes second preference token with auto-detected primary", async () => {
+  const { resolveZaiAuthTokens } = await import("./auth");
 
-  assert.equal(
-    shouldFallbackToPreferenceToken({
-      localToken: null,
-      preferenceToken: "pref-token",
-      errorType: "unauthorized",
-    }),
-    false,
-  );
+  const { dir, shellPath } = makeFakeShell(`
+printf "__ZAI_API_KEY_START__shell-zai-token__ZAI_API_KEY_END__\\n"
+`);
+
+  try {
+    await withTestAuthFile(async () => {
+      await withEnv(
+        {
+          ZAI_API_KEY: undefined,
+          GLM_API_KEY: undefined,
+          SHELL: shellPath,
+        },
+        async () => {
+          const tokens = await resolveZaiAuthTokens({
+            preferenceToken2: "pref-token-2",
+          });
+          assert.equal(tokens.primaryToken, "shell-zai-token");
+          assert.equal(tokens.localToken, "shell-zai-token");
+          assert.equal(tokens.preferenceToken, null);
+          assert.deepEqual(tokens.allTokens, ["shell-zai-token", "pref-token-2"]);
+        },
+      );
+    });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("resolveZaiAuthTokens returns empty when no tokens found", async () => {
+  const { resolveZaiAuthTokens } = await import("./auth");
+
+  const { dir, shellPath } = makeFakeShell("exit 0");
+
+  try {
+    await withTestAuthFile(async () => {
+      await withEnv(
+        {
+          ZAI_API_KEY: undefined,
+          GLM_API_KEY: undefined,
+          SHELL: shellPath,
+        },
+        async () => {
+          const tokens = await resolveZaiAuthTokens({});
+          assert.equal(tokens.primaryToken, null);
+          assert.equal(tokens.localToken, null);
+          assert.equal(tokens.preferenceToken, null);
+          assert.deepEqual(tokens.allTokens, []);
+        },
+      );
+    });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
 });

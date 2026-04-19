@@ -28,6 +28,15 @@ export const isMac = process.platform === "darwin";
 export const isWindows = process.platform === "win32";
 
 /**
+ * Resolves the path to the repository configuration.
+ * @remarks If the path starts with `~/`, it will be resolved to the user's home directory.
+ * @param input The input path to resolve.
+ * @returns The resolved path.
+ */
+export const resolvePath = (input: string) =>
+  input.startsWith("~/") ? path.join(os.homedir(), input.slice(2)) : input;
+
+/**
  * Simplifies a file path by replacing the home directory with a tilde.
  * @param filePath The file path to simplify.
  * @returns The simplified file path.
@@ -36,6 +45,22 @@ export const simplifyPath = (filePath: string) => {
   const home = os.homedir();
   if (filePath.startsWith(home)) return filePath.replace(home, "~");
   return filePath;
+};
+
+/**
+ * Returns the cloud-synced root directory if the path is inside a risky location.
+ * @param input The file path to check.
+ * @returns The simplified risky root path, if any.
+ */
+export const getCloudSyncedPathRoot = (input: string) => {
+  const resolvedPath = resolvePath(input);
+  const riskyRoots = [
+    path.join(os.homedir(), "Desktop"),
+    path.join(os.homedir(), "Documents"),
+    path.join(os.homedir(), "Library", "Mobile Documents"),
+  ];
+  const riskyRoot = riskyRoots.find((root) => resolvedPath === root || resolvedPath.startsWith(`${root}${path.sep}`));
+  return riskyRoot ? simplifyPath(riskyRoot) : undefined;
 };
 
 /**

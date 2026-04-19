@@ -33,7 +33,10 @@ function getCurrentPreferences(): Partial<Preferences> {
  * Get all nested folders recursively
  * If a folder contains nested folder items, include those folders too
  */
-async function getNestedFolders(folder: Folder, allFolders: Folder[]): Promise<Folder[]> {
+async function getNestedFolders(folder: Folder, allFolders: Folder[], visited = new Set<string>()): Promise<Folder[]> {
+  if (visited.has(folder.id)) return [];
+  visited.add(folder.id);
+
   const result: Folder[] = [folder];
   const nestedIds = folder.items
     .filter((item) => item.type === "folder" && item.folderId)
@@ -42,7 +45,7 @@ async function getNestedFolders(folder: Folder, allFolders: Folder[]): Promise<F
   for (const nestedId of nestedIds) {
     const nestedFolder = allFolders.find((f) => f.id === nestedId);
     if (nestedFolder) {
-      const deepNested = await getNestedFolders(nestedFolder, allFolders);
+      const deepNested = await getNestedFolders(nestedFolder, allFolders, visited);
       result.push(...deepNested);
     }
   }

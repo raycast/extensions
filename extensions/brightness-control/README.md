@@ -6,7 +6,7 @@ Quickly control the brightness levels of your display. Includes simple step-base
 
 ### Brightness Up / Brightness Down
 
-Increase or decrease the brightness by one system step (~10%) using simulated keyboard shortcuts. Works out of the box with no extra dependencies.
+Increase or decrease the brightness by 10% on the display where your cursor is located using [Lunar](https://lunar.fyi/). Works reliably when triggered via a Raycast hotkey (held modifier keys no longer suppress the adjustment).
 
 ### Set Brightness
 
@@ -18,6 +18,4 @@ Instantly set brightness to 100% on the display where your cursor is located. Us
 
 ## Prerequisites
 
-The **Brightness Up** and **Brightness Down** commands work without any additional setup.
-
-The **Set Brightness** and **Max Brightness** commands require [Lunar](https://lunar.fyi/) (free for basic brightness control). The extension will automatically install Lunar and its CLI on first use via Homebrew. If auto-install fails, you'll get actionable prompts to open the Lunar website or copy the install command.
+All commands require [Lunar](https://lunar.fyi/) (free for basic brightness control). The extension will automatically install Lunar and its CLI on first use via Homebrew. If auto-install fails, you'll get actionable prompts to open the Lunar website or copy the install command.

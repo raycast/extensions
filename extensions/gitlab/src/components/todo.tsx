@@ -2,6 +2,7 @@ import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@ray
 import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
+import { MRState } from "./mr";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
@@ -56,10 +57,12 @@ function getTargetTypeSource(tt: string): string {
 }
 
 export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
-  const tt = todo.target_type;
+  if (todo.target_type === "MergeRequest" && todo.target?.state === MRState.merged) {
+    return { source: GitLabIcons.merged, tintColor: overrideTintColor ?? Color.Purple };
+  }
   return {
-    source: getTargetTypeSource(tt),
-    tintColor: overrideTintColor ? overrideTintColor : getActionColor(todo.action_name),
+    source: getTargetTypeSource(todo.target_type),
+    tintColor: overrideTintColor ?? getActionColor(todo.action_name),
   };
 }
 

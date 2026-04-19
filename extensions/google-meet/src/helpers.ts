@@ -5,6 +5,7 @@ import {
   getOpenedUrlForArc,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
+  getSwitchToPreviousAppScript,
   supportedBrowsers,
 } from "./utils/scripts";
 
@@ -38,7 +39,12 @@ async function getOpenTabs(): Promise<string> {
     return await runAppleScript(getOpenedUrlForArc());
   }
 
-  if (browserName === "Firefox" || browserName === "Firefox Developer Edition" || browserName === "Zen") {
+  if (
+    browserName === "Firefox" ||
+    browserName === "Firefox Developer Edition" ||
+    browserName === "Zen" ||
+    browserName === "Dia"
+  ) {
     return await runAppleScript(getOpenedUrlForFirefox(browserName));
   }
 
@@ -77,6 +83,10 @@ export async function openMeetTabDefaultProfile(): Promise<void> {
   const preferredBrowser = getPreferredBrowser();
 
   await open(openMeetTabUrl, preferredBrowser?.name);
+}
+
+export async function switchToPreviousApp(): Promise<void> {
+  await runAppleScript(getSwitchToPreviousAppScript());
 }
 
 export async function openMeetTabSelectedProfile(profile: string): Promise<void> {
