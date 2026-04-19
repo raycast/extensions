@@ -1,5 +1,18 @@
 # Bitwarden Changelog
 
+## [Fix] - 2026-04-03
+
+- Update bundled Bitwarden CLI from v2025.11.0 to v2026.2.0 to fix "Invalid session token" error caused by server-side KDF upgrades
+- Fix incorrect vault status saved after API key login
+## [Fix] - 2026-04-02
+
+- Catch Invalid session token error
+
+## [Fix & Improvements] - 2026-03-24
+
+- Catch error when unlinking data.json file
+- Fix Search Vault primaryAction preference and add "Show Details" option
+
 ## [Fix] - 2026-03-20
 
 - Fix custom server URL "Restart Required" alert loop after CLI binary update

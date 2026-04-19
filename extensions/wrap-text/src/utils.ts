@@ -15,6 +15,7 @@ export async function wrapSelectedText(left: string, right: string = left) {
     const previousClipboard = await Clipboard.read();
 
     await Clipboard.paste(wrapped);
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     // Restore the previous clipboard content.
     if (previousClipboard.text !== undefined) {

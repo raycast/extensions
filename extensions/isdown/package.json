@@ -5,6 +5,7 @@
   "description": "Search and check the status of services and cloud providers",
   "icon": "isdown.png",
   "author": "nunotomas",
+  "contributors": ["Logan-8f"],
   "categories": [
     "Developer Tools"
   ],
@@ -38,6 +39,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

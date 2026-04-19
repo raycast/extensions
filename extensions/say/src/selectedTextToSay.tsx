@@ -1,5 +1,5 @@
 import { closeMainWindow, getSelectedText } from "@raycast/api";
-import { say } from "mac-say";
+import { say } from "./speech.js";
 import { getParsedSaySettings } from "./utils.js";
 
 export default async function SelectionToSay() {

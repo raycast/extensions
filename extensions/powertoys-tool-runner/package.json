@@ -101,6 +101,14 @@
       "mode": "no-view",
       "subtitle": "PowerToys",
       "icon": "Environment Manager.png"
+    },
+    {
+      "name": "awake",
+      "title": "Awake",
+      "description": "Open PowerToys Awake settings to manage sleep behavior",
+      "mode": "no-view",
+      "subtitle": "PowerToys",
+      "icon": "Awake.png"
     }
   ],
   "dependencies": {
@@ -124,6 +132,7 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "author": "LostViking09",
+  "contributors": ["Logan-8f"],
   "platforms": [
     "Windows"
   ],

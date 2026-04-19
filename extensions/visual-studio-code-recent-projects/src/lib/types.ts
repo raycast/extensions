@@ -40,6 +40,7 @@ export enum VSCodeBuild {
   VSCodium = "VSCodium",
   VSCodiumInsiders = "VSCodium - Insiders",
   Windsurf = "Windsurf",
+  Lingma = "Lingma",
 }
 
 export type RecentEntries = {

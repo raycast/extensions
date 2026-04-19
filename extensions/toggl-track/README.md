@@ -46,6 +46,18 @@ It is disabled by default, but can enabled from Raycast's extensions settings.
 
 <img width="600" alt="Manage Workspaces Command" src="./assets/view-workspaces.png">
 
+### Low Data Mode (Free Tier)
+
+An opt-in mode for users on Toggl's free tier (30 requests/hour). Enable it in **Raycast Settings > Extensions > Toggl Track > "Enable Low Data Mode"**.
+
+**Activation:** Takes effect on the next launch of any Toggl command.
+
+When enabled:
+
+- **Data isn't synced in real time** — changes made in Toggl's web or mobile apps may take up to 1 hour to appear in Raycast
+- **Auto-sync once per hour** keeps cached data reasonably fresh
+- **Manual sync** — press `Cmd+Shift+R` to force a refresh at any time
+
 ### Menu Bar
 
 See what time entry is currently in your Menu Bar. Click to see the list of recent time entries, which allows you to resume them.

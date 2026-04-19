@@ -3,7 +3,7 @@ import { Action, ActionPanel, Detail, useNavigation } from "@raycast/api";
 import * as api from "../api.js";
 import { catchError } from "../errors.js";
 import * as git from "../git.js";
-import { getCommitDiffMessage } from "../utils.js";
+import { getCloudSyncedPathRoot, getCommitDiffMessage, simplifyPath } from "../utils.js";
 
 export default function Diagnostics() {
   const [status, setStatus] = useState<string>("Running diagnostics...");
@@ -11,6 +11,8 @@ export default function Diagnostics() {
 
   useEffect(() => {
     catchError(async () => {
+      const forkedRepository = await api.getForkedRepository().catch(() => undefined);
+      await git.resolveRepositoryPath(forkedRepository);
       const isGitInstalled = await git.checkIfGitIsValid();
       const isStatusClean = await git
         .checkIfStatusClean()
@@ -18,6 +20,7 @@ export default function Diagnostics() {
         .catch(() => false);
       const currentBranch = await git.getCurrentBranch().catch(() => undefined);
       const isMainBranch = currentBranch === "main";
+      const cloudSyncedPathRoot = getCloudSyncedPathRoot(git.repositoryPath);
       const localForkedRepository = await git.getForkedRepository();
       const remoteForkedRepository = localForkedRepository
         ? await api.repositoryExists(localForkedRepository)
@@ -56,6 +59,10 @@ export default function Diagnostics() {
               : "- ⚠️ You have uncommitted changes. Please commit or stash them before performing operations."
             : `- ⚠️ You're not on the 'main' branch (current on '${currentBranch}'). Please switch to the 'main' branch to ensure proper functionality.`
           : "- ⚠️ Git is not installed or not found. Please set up your Git executable file path manually in the extension preferences.",
+        "### Repository path",
+        cloudSyncedPathRoot
+          ? `- ⚠️ [${simplifyPath(git.repositoryPath)} 📁](file://${git.repositoryPath}) is inside ${cloudSyncedPathRoot} and may be affected by iCloud or other cloud sync tools.`
+          : `- ✅ [${simplifyPath(git.repositoryPath)} 📁](file://${git.repositoryPath})`,
         "### Local forked repository",
         isMainBranch
           ? localForkedRepository

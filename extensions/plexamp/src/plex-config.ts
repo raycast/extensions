@@ -173,15 +173,15 @@ export async function clearManagedConfiguration(): Promise<void> {
   invalidateCachedConfig();
 }
 
-export async function saveSelectedServer(server: PlexServerResource): Promise<void> {
-  const preferredConnection = server.preferredConnection ?? server.connections[0];
+export async function saveSelectedServer(server: PlexServerResource, connectionUri?: string): Promise<void> {
+  const uri = connectionUri ?? server.preferredConnection?.uri ?? server.connections[0]?.uri;
 
-  if (!preferredConnection) {
+  if (!uri) {
     throw new Error(`No usable connection was found for ${server.name}.`);
   }
 
   await Promise.all([
-    LocalStorage.setItem(MANAGED_SERVER_URL_KEY, preferredConnection.uri),
+    LocalStorage.setItem(MANAGED_SERVER_URL_KEY, uri),
     server.accessToken
       ? LocalStorage.setItem(MANAGED_SERVER_TOKEN_KEY, server.accessToken)
       : LocalStorage.removeItem(MANAGED_SERVER_TOKEN_KEY),

@@ -51,6 +51,13 @@ export default withDustClient(function PickWorkspaceCommand() {
         workspaces.push({ sId: org.externalId!, name: org.name, region: region });
       });
 
+      if (workspaces.length === 0) {
+        const jwtRegion = await LocalStorage.getItem<string>("selectedRegion");
+        user.workspaces?.forEach((ws) => {
+          workspaces.push({ sId: ws.sId, name: ws.name, region: jwtRegion || "us-central1" });
+        });
+      }
+
       if (user.selectedWorkspace) {
         const selectedOrg = workspaces.find((org) => org.sId === user?.selectedWorkspace);
         // Use the helper function to save both workspace ID and region

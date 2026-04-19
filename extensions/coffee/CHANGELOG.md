@@ -1,5 +1,11 @@
 # Coffee Changelog
 
+## [Fix] - 2026-03-24
+
+- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
+- Removed stale process filter in menu bar status
+
 ## [Fix] - 2026-03-22
 
 - Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.

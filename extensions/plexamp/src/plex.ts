@@ -10,7 +10,10 @@ export {
 export { checkPlexAuthPin, createPlexAuthPin, discoverPlexServers } from "./plex-auth";
 export {
   getAlbumsForArtist,
+  getAlbumsForArtistPage,
   getArtists,
+  getRecentlyPlayed,
+  getArtistsPage,
   getAudioPlaylists,
   getLibraryStats,
   getMetadataByKey,
@@ -22,9 +25,11 @@ export {
   getSelectedLibrary,
   getTracksForAlbum,
   getTracksForPlaylist,
+  getTracksPage,
   resolveSelectedLibrary,
   searchLibrary,
 } from "./plex-library";
+export type { PageResult } from "./plex-library";
 export {
   clearPlayQueue,
   getPlayQueue,

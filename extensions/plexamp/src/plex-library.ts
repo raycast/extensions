@@ -1,4 +1,4 @@
-import { getConfig, getConfiguredPlexampUrl, registerConfigInvalidator, requireServerConfig } from "./plex-config";
+import { getConfig, getConfiguredPlexampUrl, requireServerConfig } from "./plex-config";
 import {
   arrayify,
   asNumber,
@@ -29,11 +29,51 @@ import type {
   TimelineInfo,
 } from "./types";
 
-let playlistLibrarySectionCache = new Map<string, string | null>();
+export interface PageResult<T> {
+  items: T[];
+  totalSize: number;
+}
 
-registerConfigInvalidator(() => {
-  playlistLibrarySectionCache = new Map<string, string | null>();
-});
+async function fetchPage<T>(
+  basePath: string,
+  nodeKey: string,
+  parse: (node: XmlNode) => T,
+  offset: number,
+  limit: number,
+): Promise<PageResult<T>> {
+  const separator = basePath.includes("?") ? "&" : "?";
+  const container = await requestServer(
+    `${basePath}${separator}X-Plex-Container-Start=${offset}&X-Plex-Container-Size=${limit}`,
+  );
+  const totalSize = asNumber(container.totalSize) ?? 0;
+  const items = arrayify(container[nodeKey])
+    .filter((node): node is XmlNode => typeof node === "object")
+    .map(parse);
+  return { items, totalSize };
+}
+
+async function fetchAllPaginated<T>(
+  basePath: string,
+  nodeKey: string,
+  parse: (node: XmlNode) => T,
+  pageSize = 100,
+): Promise<T[]> {
+  const items: T[] = [];
+  let start = 0;
+
+  for (;;) {
+    const { items: pageItems, totalSize } = await fetchPage(basePath, nodeKey, parse, start, pageSize);
+    items.push(...pageItems);
+
+    if (pageItems.length < pageSize || items.length >= totalSize) {
+      break;
+    }
+
+    start += pageSize;
+  }
+
+  return items;
+}
 
 async function hydrateAlbums(albums: MusicAlbum[]): Promise<MusicAlbum[]> {
   const hydratedAlbums: MusicAlbum[] = [];
@@ -86,15 +126,7 @@ function parsePlexampClientInfo(container: XmlNode): PlexampClientInfo {
   };
 }
 
-export async function getMusicSectionsForServer(server: PlexServerResource): Promise<LibrarySection[]> {
-  const preferredConnection = server.preferredConnection ?? server.connections[0];
-
-  if (!preferredConnection) {
-    throw new Error(`No usable connection was found for ${server.name}.`);
-  }
-
-  const container = await requestXml(preferredConnection.uri, "/library/sections", undefined, true, server.accessToken);
-
+function parseMusicSections(container: XmlNode): LibrarySection[] {
   return arrayify(container.Directory)
     .filter((node): node is XmlNode => typeof node === "object")
     .filter((node) => asString(node.type) === "artist")
@@ -106,10 +138,33 @@ export async function getMusicSectionsForServer(server: PlexServerResource): Pro
     }));
 }
 
+export interface ServerSectionsResult {
+  libraries: LibrarySection[];
+  connectionUri: string;
+}
+
+export async function getMusicSectionsForServer(server: PlexServerResource): Promise<ServerSectionsResult> {
+  const candidates =
+    server.connections.length > 0 ? server.connections : server.preferredConnection ? [server.preferredConnection] : [];
+
+  if (candidates.length === 0) {
+    throw new Error(`No usable connection was found for ${server.name}.`);
+  }
+
+  const { container, uri } = await Promise.any(
+    candidates.map(async (connection) => {
+      const result = await requestXml(connection.uri, "/library/sections", undefined, true, server.accessToken);
+      return { container: result, uri: connection.uri };
+    }),
+  );
+
+  return { libraries: parseMusicSections(container), connectionUri: uri };
+}
+
 export async function getMusicSections(): Promise<LibrarySection[]> {
   const config = await requireServerConfig();
 
-  return getMusicSectionsForServer({
+  const result = await getMusicSectionsForServer({
     name: config.serverName ?? "Plex Media Server",
     clientIdentifier: config.serverMachineIdentifier ?? config.plexServerUrl,
     accessToken: config.plexServerToken ?? config.plexToken,
@@ -117,6 +172,8 @@ export async function getMusicSections(): Promise<LibrarySection[]> {
     connections: [{ uri: config.plexServerUrl }],
     preferredConnection: { uri: config.plexServerUrl },
   });
+
+  return result.libraries;
 }
 
 export async function resolveSelectedLibrary(libraries: LibrarySection[]): Promise<LibrarySection | undefined> {
@@ -173,87 +230,80 @@ export async function getLibraryStats(sectionKey: string): Promise<LibraryStats>
   };
 }
 
-export async function getAudioPlaylists(sectionKey: string): Promise<AudioPlaylist[]> {
-  const config = await requireServerConfig();
-  const container = await requestServer("/playlists?type=15&playlistType=audio");
-  const normalizedSectionKey = normalizeLibrarySectionKey(sectionKey);
-  const cacheNamespace = config.serverMachineIdentifier ?? config.plexServerUrl;
-  const playlists = deduplicateByRatingKey([
+function parsePlaylistsFromContainer(container: XmlNode): AudioPlaylist[] {
+  return [
     ...arrayify(container.Playlist)
       .filter((node): node is XmlNode => typeof node === "object")
       .map(parsePlaylist),
     ...arrayify(container.Metadata)
       .filter((node): node is XmlNode => typeof node === "object" && asString((node as XmlNode).type) === "playlist")
       .map(parsePlaylist),
-  ]);
-
-  const sectionKeys = new Map<string, string | undefined>();
-
-  for (let index = 0; index < playlists.length; index += 6) {
-    const batch = playlists.slice(index, index + 6);
-    const resolvedKeys = await Promise.all(
-      batch.map((playlist) => resolvePlaylistLibrarySectionKey(playlist, cacheNamespace)),
-    );
-
-    for (const [offset, resolvedKey] of resolvedKeys.entries()) {
-      sectionKeys.set(batch[offset].ratingKey, resolvedKey);
-    }
-  }
-
-  return playlists.filter((playlist) => sectionKeys.get(playlist.ratingKey) === normalizedSectionKey);
+  ];
 }
 
-async function resolvePlaylistLibrarySectionKey(
-  playlist: AudioPlaylist,
-  cacheNamespace: string,
-): Promise<string | undefined> {
-  const explicitSectionKey = normalizeLibrarySectionKey(playlist.librarySectionKey);
+export async function getAudioPlaylists(sectionKey: string): Promise<AudioPlaylist[]> {
+  const normalizedSectionKey = normalizeLibrarySectionKey(sectionKey);
+  const allPlaylists: AudioPlaylist[] = [];
+  let start = 0;
+  const pageSize = 100;
 
-  if (explicitSectionKey) {
-    return explicitSectionKey;
-  }
+  for (;;) {
+    const container = await requestServer(
+      `/playlists?type=15&playlistType=audio&X-Plex-Container-Start=${start}&X-Plex-Container-Size=${pageSize}`,
+    );
+    const totalSize = asNumber(container.totalSize) ?? 0;
+    const pagePlaylists = parsePlaylistsFromContainer(container);
+    allPlaylists.push(...pagePlaylists);
 
-  const cacheKey = `${cacheNamespace}:${playlist.ratingKey}`;
-  const cachedSectionKey = playlistLibrarySectionCache.get(cacheKey);
-
-  if (cachedSectionKey !== undefined) {
-    return cachedSectionKey ?? undefined;
-  }
-
-  try {
-    const metadata = await getMetadataByKey(playlist.key);
-
-    if (metadata?.type === "playlist") {
-      const metadataSectionKey = normalizeLibrarySectionKey(metadata.librarySectionKey);
-
-      if (metadataSectionKey) {
-        playlistLibrarySectionCache.set(cacheKey, metadataSectionKey);
-        return metadataSectionKey;
-      }
+    if (pagePlaylists.length < pageSize || allPlaylists.length >= totalSize) {
+      break;
     }
 
-    const tracks = await getTracksForPlaylist(playlist);
-    const sectionKeys = new Set(
-      tracks
-        .map((track) => normalizeLibrarySectionKey(track.librarySectionKey))
-        .filter((key): key is string => Boolean(key)),
-    );
-    const resolvedSectionKey = sectionKeys.size === 1 ? [...sectionKeys][0] : undefined;
-
-    playlistLibrarySectionCache.set(cacheKey, resolvedSectionKey ?? null);
-    return resolvedSectionKey;
-  } catch {
-    playlistLibrarySectionCache.set(cacheKey, null);
-    return undefined;
+    start += pageSize;
   }
+
+  return deduplicateByRatingKey(allPlaylists).filter((playlist) => {
+    const key = normalizeLibrarySectionKey(playlist.librarySectionKey);
+    return !key || key === normalizedSectionKey;
+  });
 }
 
 export async function getArtists(sectionKey: string): Promise<MusicArtist[]> {
-  const container = await requestServer(`/library/sections/${sectionKey}/all?type=8&sort=titleSort:asc`);
+  return fetchAllPaginated(
+    `/library/sections/${sectionKey}/all?type=8&sort=titleSort:asc`,
+    "Directory",
+    parseArtist,
+    200,
+  );
+}
 
-  return arrayify(container.Directory)
-    .filter((node): node is XmlNode => typeof node === "object")
-    .map(parseArtist);
+export function getArtistsPage(sectionKey: string, offset: number, limit: number): Promise<PageResult<MusicArtist>> {
+  return fetchPage(
+    `/library/sections/${sectionKey}/all?type=8&sort=titleSort:asc`,
+    "Directory",
+    parseArtist,
+    offset,
+    limit,
+  );
+}
+
+export function getTracksPage(browseKey: string, offset: number, limit: number): Promise<PageResult<MusicTrack>> {
+  return fetchPage(browseKey, "Track", parseTrack, offset, limit);
+}
+
+export function getAlbumsForArtistPage(
+  sectionKey: string,
+  artistRatingKey: string,
+  offset: number,
+  limit: number,
+): Promise<PageResult<MusicAlbum>> {
+  return fetchPage(
+    `/library/sections/${sectionKey}/all?type=9&artist.id=${encodeURIComponent(artistRatingKey)}&sort=year:desc`,
+    "Directory",
+    parseAlbum,
+    offset,
+    limit,
+  );
 }
 
 export async function searchLibrary(sectionKey: string, query: string): Promise<SearchResults> {
@@ -297,30 +347,33 @@ export async function searchLibrary(sectionKey: string, query: string): Promise<
 }
 
 export async function getAlbumsForArtist(sectionKey: string, artist: MusicArtist): Promise<MusicAlbum[]> {
-  const container = await requestServer(
+  const albums = await fetchAllPaginated(
     `/library/sections/${sectionKey}/all?type=9&artist.id=${encodeURIComponent(artist.ratingKey)}`,
+    "Directory",
+    parseAlbum,
+    100,
   );
-  const albums = arrayify(container.Directory)
-    .filter((node): node is XmlNode => typeof node === "object")
-    .map(parseAlbum);
 
   return hydrateAlbums(albums);
 }
 
-export async function getTracksForAlbum(album: MusicAlbum): Promise<MusicTrack[]> {
-  const container = await requestServer(album.browseKey);
+export async function getRecentlyPlayed(sectionKey: string, limit = 50): Promise<MusicTrack[]> {
+  const result = await fetchPage(
+    `/library/sections/${sectionKey}/all?type=10&sort=lastViewedAt:desc`,
+    "Track",
+    parseTrack,
+    0,
+    limit,
+  );
+  return result.items;
+}
 
-  return arrayify(container.Track)
-    .filter((node): node is XmlNode => typeof node === "object")
-    .map(parseTrack);
+export async function getTracksForAlbum(album: MusicAlbum): Promise<MusicTrack[]> {
+  return fetchAllPaginated(album.browseKey, "Track", parseTrack, 100);
 }
 
 export async function getTracksForPlaylist(playlist: AudioPlaylist): Promise<MusicTrack[]> {
-  const container = await requestServer(playlist.browseKey);
-
-  return arrayify(container.Track)
-    .filter((node): node is XmlNode => typeof node === "object")
-    .map(parseTrack);
+  return fetchAllPaginated(playlist.browseKey, "Track", parseTrack, 100);
 }
 
 export async function getMetadataByKey(key: string): Promise<MetadataItem | undefined> {

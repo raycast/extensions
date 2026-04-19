@@ -1,5 +1,13 @@
 # aerospace Changelog
 
+## [Feature] - 2026-04-12
+
+- Add "Go to Workspace" command with searchable workspace list and shortcut display
+
+## [Feature] - 2026-03-25
+
+- Add "Pull to Current Workspace" action to window switcher (Shift+Enter)
+
 ## [Improvement] - 2026-01-22
 
 - Add LaunchContext support for programmatic integration
