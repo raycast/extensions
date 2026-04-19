@@ -875,7 +875,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.3-70b-versatile",
+      "default": "openai/gpt-oss-120b",
       "data": [
         {
           "value": "openai/gpt-oss-120b",
