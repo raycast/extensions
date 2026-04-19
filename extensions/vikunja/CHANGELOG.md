@@ -1,5 +1,11 @@
 # Changelog
 
+## [Default Project Preference] - {PR_MERGE_DATE}
+
+- Add optional "Default Project" Raycast preference (`defaultProject`) to set the initial project shown in List Tasks (use "all" or a project id).
+- `List Tasks` now respects the preference when opened without a launch context; explicit launch context `projectId` still takes precedence.
+- Updated generated preference types and manifest to include the setting.
+
 ## [Task Detail View, Search, and Caching] - 2026-03-25
 
 - Task Detail view with full markdown description and metadata sidebar

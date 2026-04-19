@@ -27,8 +27,16 @@ export default function ListTasks(
   props: LaunchProps<{ launchContext: ListTasksContext }>,
 ) {
   const initialProjectId = props.launchContext?.projectId;
+  const { defaultProject } = getPreferenceValues<
+    Preferences & { defaultProject?: string }
+  >();
+  const defaultPref = defaultProject ?? "all";
   const [selectedProject, setSelectedProject] = useState<string>(
-    initialProjectId ? String(initialProjectId) : "all",
+    initialProjectId
+      ? String(initialProjectId)
+      : defaultPref === "all"
+        ? "all"
+        : String(defaultPref),
   );
 
   const baseUrl = useMemo(() => {
