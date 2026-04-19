@@ -6,6 +6,10 @@ import {
   confirmAlert,
   getPreferenceValues,
   LaunchProps,
+  Action,
+  ActionPanel,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
@@ -124,6 +128,36 @@ export default function ListTasks(
   return (
     <List
       isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Create Task"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd"], key: "n" }}
+            onAction={async () => {
+              try {
+                if (selectedProject && selectedProject !== "all") {
+                  await launchCommand({
+                    name: "create-task",
+                    type: LaunchType.UserInitiated,
+                    arguments: { projectId: String(selectedProject) },
+                  });
+                } else {
+                  await launchCommand({
+                    name: "create-task",
+                    type: LaunchType.UserInitiated,
+                  });
+                }
+              } catch {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Failed to launch Create Task",
+                });
+              }
+            }}
+          />
+        </ActionPanel>
+      }
       searchBarAccessory={
         <List.Dropdown
           tooltip="Project"

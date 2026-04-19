@@ -25,6 +25,12 @@
           "placeholder": "Task title",
           "type": "text",
           "required": false
+        },
+        {
+          "name": "projectId",
+          "placeholder": "Project ID (optional)",
+          "type": "text",
+          "required": false
         }
       ]
     },
