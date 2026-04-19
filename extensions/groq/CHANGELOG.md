@@ -1,5 +1,10 @@
 # Groq Changelog
 
+## [Updated Models] - {PR_MERGE_DATE}
+
+- Removed deprecated `Kimi K2 0905 263k` from model selections and pricing metadata
+- Changed the global default model to `OpenAI GPT OSS 120B`
+
 ## [Updated Models] - 2025-11-17
 
 - Removed deprecated `DeepSeek R1 70B 128k`
