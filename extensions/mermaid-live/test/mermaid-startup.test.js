@@ -7,10 +7,13 @@ const esbuild = require("esbuild");
 const VALID_FLOWCHART = "graph TD\nA-->B";
 const VALID_SEQUENCE = "sequenceDiagram\nA->>B: hi";
 
-async function renderCommand({ clipboardText, clipboardError, storedCode }) {
+async function renderCommand({ clipboardText, clipboardError, storedCode, initialHistory }) {
   const storage = new Map();
   if (storedCode) {
     storage.set("lastMermaidCode", storedCode);
+  }
+  if (initialHistory) {
+    storage.set("mermaid-history", JSON.stringify(initialHistory));
   }
 
   const effects = [];
@@ -140,6 +143,7 @@ async function renderCommand({ clipboardText, clipboardError, storedCode }) {
   await flushPromises();
 
   return {
+    currentHistoryItem: stateSlots[1],
     state: stateSlots[0],
     storage,
   };
@@ -184,6 +188,37 @@ test("keeps the saved diagram visible when reading the clipboard fails on startu
   assert.equal(result.state.error, undefined);
   assert.equal(result.state.mermaidCode, VALID_FLOWCHART);
   assert.equal(result.storage.get("lastMermaidCode"), VALID_FLOWCHART);
+});
+
+test("does not render bare Mermaid keywords as diagrams", async () => {
+  const result = await renderCommand({
+    clipboardText: "pie",
+  });
+
+  assert.equal(result.state.error?.message, "INVALID_MERMAID");
+  assert.equal(result.state.mermaidCode, undefined);
+  assert.equal(result.storage.get("lastMermaidCode"), undefined);
+});
+
+test("does not mark a new diagram as saved when all history slots are pinned", async () => {
+  const pinnedHistory = Array.from({ length: 100 }, (_, index) => ({
+    id: `pinned-${index}`,
+    code: `graph TD\nA${index}-->B${index}`,
+    name: `Pinned ${index}`,
+    createdAt: new Date(index).toISOString(),
+    lastAccessed: new Date(index).toISOString(),
+    isPinned: true,
+  }));
+
+  const result = await renderCommand({
+    clipboardText: VALID_SEQUENCE,
+    initialHistory: pinnedHistory,
+  });
+  const persistedHistory = JSON.parse(result.storage.get("mermaid-history"));
+
+  assert.equal(result.currentHistoryItem, null);
+  assert.equal(persistedHistory.length, 100);
+  assert.equal(persistedHistory.some((item) => item.code === VALID_SEQUENCE), false);
 });
 
 async function flushPromises() {

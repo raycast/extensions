@@ -308,6 +308,14 @@ Try copying some Mermaid code and run this command again!
                 icon={Icon.SaveDocument}
                 onAction={async () => {
                   const item = await saveToHistory(state.mermaidCode!);
+                  if (!item) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "History limit reached",
+                      message: "Unpin an older diagram before saving a new one.",
+                    });
+                    return;
+                  }
                   setCurrentHistoryItem(item);
                   showToast({
                     style: Toast.Style.Success,
@@ -413,7 +421,6 @@ function isMermaidCode(text: string): boolean {
 
   return mermaidKeywords.some(
     (keyword) =>
-      trimmed === keyword ||
       trimmed.startsWith(keyword + " ") ||
       trimmed.startsWith(keyword + "\n") ||
       trimmed.includes(`\n${keyword} `) ||
@@ -422,7 +429,7 @@ function isMermaidCode(text: string): boolean {
 }
 
 // History management functions
-async function saveToHistory(code: string): Promise<HistoryItem> {
+async function saveToHistory(code: string): Promise<HistoryItem | null> {
   const historyJson = await LocalStorage.getItem<string>("mermaid-history");
   let history: HistoryItem[] = [];
   if (historyJson) {
@@ -462,9 +469,7 @@ async function saveToHistory(code: string): Promise<HistoryItem> {
   const limitedHistory = sortedHistory.slice(0, 100);
   await LocalStorage.setItem("mermaid-history", JSON.stringify(limitedHistory));
 
-  // Return the persisted item from the limited list. If currentItem was pushed
-  // out by 100+ pinned items (extremely unlikely) fall back to the item itself.
-  return limitedHistory.find((item) => item.id === currentItem.id) ?? currentItem;
+  return limitedHistory.find((item) => item.id === currentItem.id) ?? null;
 }
 
 async function findHistoryItemByCode(code: string): Promise<HistoryItem | null> {

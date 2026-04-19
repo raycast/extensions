@@ -22,7 +22,6 @@ export function encodeMermaid(mermaidCode: string): string {
 
 function matchesKeyword(trimmed: string, kw: string): boolean {
   return (
-    trimmed === kw ||
     trimmed.startsWith(kw + " ") ||
     trimmed.startsWith(kw + "\n") ||
     trimmed.includes(`\n${kw} `) ||
