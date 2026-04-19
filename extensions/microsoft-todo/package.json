@@ -1,0 +1,59 @@
+{
+  "name": "microsoft-todo",
+  "title": "Microsoft To Do",
+  "description": "Quickly add tasks to Microsoft To Do. Connect your Microsoft account, pick a list, and create tasks — all from Raycast.",
+  "icon": "icon.png",
+  "author": "pkassios",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "defaultList",
+      "title": "Default Task List",
+      "description": "The name of the default task list to pre-select when adding tasks. Leave empty to use 'Tasks'.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Tasks"
+    }
+  ],
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a new task to Microsoft To Do",
+      "mode": "view",
+      "keywords": [
+        "todo",
+        "task",
+        "microsoft"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.1",
+    "globals": "^17.5.0",
+    "prettier": "^3.5.3",
+    "react": "^19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
