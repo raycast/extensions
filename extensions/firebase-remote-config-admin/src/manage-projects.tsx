@@ -235,9 +235,7 @@ export default function ManageProjectsCommand() {
               : "Run `gcloud auth application-default login` in your terminal, then return here."
           }
           accessories={
-            auth.isLoggedIn
-              ? [{ text: "ADC" }]
-              : [{ text: "ADC missing" }]
+            auth.isLoggedIn ? [{ text: "ADC" }] : [{ text: "ADC missing" }]
           }
           actions={
             <ActionPanel>
@@ -247,8 +245,7 @@ export default function ManageProjectsCommand() {
                   icon={Icon.Download}
                   onAction={async () => {
                     try {
-                      const imported =
-                        await listAccessibleFirebaseProjects();
+                      const imported = await listAccessibleFirebaseProjects();
                       const result = await mergeImportedProjects(imported);
                       await showToast({
                         style: Toast.Style.Success,
@@ -270,7 +267,7 @@ export default function ManageProjectsCommand() {
                 />
               ) : (
                 <Action
-                  title="Copy Sign-in Command"
+                  title="Copy Sign-In Command"
                   icon={Icon.Clipboard}
                   onAction={async () => {
                     const command = "gcloud auth application-default login";
@@ -288,7 +285,7 @@ export default function ManageProjectsCommand() {
               projects.length > 0 ||
               groups.length > 0 ? (
                 <Action
-                  title="Sign Out"
+                  title="Sign out"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
@@ -541,7 +538,7 @@ export default function ManageProjectsCommand() {
                 />
               ) : (
                 <Action
-                  title="Copy Sign-in Command"
+                  title="Copy Sign-In Command"
                   icon={Icon.Clipboard}
                   onAction={async () => {
                     const command = "gcloud auth application-default login";
