@@ -1,5 +1,9 @@
 # OWL Changelog
 
+## [Filter Keyboards] - {PR_MERGE_DATE}
+
+- Added filter for keyboards to show only those that match the languages.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
