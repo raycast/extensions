@@ -95,6 +95,11 @@ export function getPreferences(): Preferences {
   return getPreferenceValues<Preferences>();
 }
 
+export async function clearLocalData(): Promise<void> {
+  await LocalStorage.removeItem(PROJECTS_KEY);
+  await LocalStorage.removeItem(GROUPS_KEY);
+}
+
 export async function getProjects(): Promise<ProjectConfig[]> {
   const projects = await readJson<unknown[]>(PROJECTS_KEY, []);
   const normalizedProjects = Array.isArray(projects)

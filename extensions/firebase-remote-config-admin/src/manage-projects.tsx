@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Alert,
+  Clipboard,
   Form,
   Icon,
   List,
@@ -24,6 +25,7 @@ import { listAccessibleFirebaseProjects } from "./firebase-management-client";
 import { csvToList, listToCsv } from "./formatting";
 import { getRemoteConfigTemplate } from "./remote-config-client";
 import {
+  clearLocalData,
   deleteGroup,
   deleteProject,
   getGroups,
@@ -294,17 +296,82 @@ export default function ManageProjectsCommand() {
                   }
                 }}
               />
-              {auth.isLoggedIn && auth.method === "oauth" ? (
+              {auth.isLoggedIn ? (
                 <Action
-                  title="Sign out Google"
+                  title="Sign Out"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                   onAction={async () => {
-                    await signOutGoogleAccount();
-                    revalidate();
+                    if (auth.method === "adc") {
+                      const command =
+                        "gcloud auth application-default revoke";
+                      await Clipboard.copy(command);
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "ADC sign-out command copied",
+                        message: `Run "${command}" in your terminal to revoke ADC credentials.`,
+                      });
+                      return;
+                    }
+                    try {
+                      await signOutGoogleAccount();
+                      await showToast({
+                        style: Toast.Style.Success,
+                        title: "Signed out of Google",
+                      });
+                      revalidate();
+                    } catch (error) {
+                      await showToast({
+                        style: Toast.Style.Failure,
+                        title: "Sign-out failed",
+                        message:
+                          error instanceof Error
+                            ? error.message
+                            : String(error),
+                      });
+                    }
                   }}
                 />
               ) : null}
+              <Action
+                title="Reset Extension Data"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                onAction={async () => {
+                  const confirmed = await confirmAlert({
+                    title: "Reset extension data?",
+                    message:
+                      "This removes every saved project and group from the local registry and signs you out of Google. ADC and service-account files on disk are not touched.",
+                    primaryAction: {
+                      title: "Reset",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  });
+                  if (!confirmed) return;
+                  try {
+                    await clearLocalData();
+                    if (auth.isLoggedIn && auth.method === "oauth") {
+                      await signOutGoogleAccount();
+                    }
+                    await showToast({
+                      style: Toast.Style.Success,
+                      title: "Extension data cleared",
+                    });
+                    revalidate();
+                  } catch (error) {
+                    await showToast({
+                      style: Toast.Style.Failure,
+                      title: "Reset failed",
+                      message:
+                        error instanceof Error
+                          ? error.message
+                          : String(error),
+                    });
+                  }
+                }}
+              />
               <Action
                 title="Open Preferences"
                 icon={Icon.Gear}
