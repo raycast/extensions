@@ -1,5 +1,12 @@
 # Changelog
 
+## [Ambient Space Support] - 2026-04-12
+
+- Added an optional **Space** preference so one Raycast profile can stay in one named Nowledge Mem lane
+- Search, Add Memory, and Read Working Memory now follow that configured lane, or fall back to shared `~/.nowledge-mem/config.json` when Raycast preferences are blank
+- Fixed POST and GET requests to handle the Default space consistently, so blank space settings no longer send `space_id: ""`
+- `Edit Working Memory` now stays explicitly Default-only and points users to the Mem app or API for non-default spaces
+
 ## [Remote Access Support] - 2026-03-11
 
 - **Remote Working Memory**: the Working Memory command now reads from the Mem API, so remote Mem setups work correctly

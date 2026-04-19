@@ -24,8 +24,6 @@ interface UseNestedFolderCreationOptions {
 interface UseNestedFolderCreationResult {
   /** Callback to handle newly created folder */
   handleFolderCreated: (newFolderId: string) => Promise<void>;
-  /** Navigate to create folder form - call when CREATE_NEW_FOLDER_VALUE is selected */
-  navigateToCreateFolder: () => void;
 }
 
 /**
@@ -108,5 +106,5 @@ export function useNestedFolderCreation({
     }
   }, [folderValues, setValue, navigateToCreateFolder]);
 
-  return { handleFolderCreated, navigateToCreateFolder };
+  return { handleFolderCreated };
 }

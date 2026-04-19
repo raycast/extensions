@@ -1,11 +1,11 @@
 import { Icon, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { StoredEnvironment } from "./types";
 import { getEnvironments } from "./storage";
 import { resolveEnvColor } from "./colors";
 
 export function useEnvironments() {
-  return useCachedPromise(getEnvironments);
+  return usePromise(getEnvironments);
 }
 
 export function EnvDropdown({

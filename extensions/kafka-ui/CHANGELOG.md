@@ -1,5 +1,14 @@
 # Kafka UI
 
+## [Fix] - 2026-04-05
+
+- Fixed environment dropdown showing stale data when multiple environments are configured
+- Added cmd+e shortcut to Edit Environment action in Configuration Manager
+
+## [Fix] - 2026-04-02
+
+- Fixed author username in package.json
+
 ## [Initial Version] - 2026-04-02
 
 - Search consumer groups and inspect lag per topic and partition

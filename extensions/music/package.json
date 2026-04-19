@@ -331,6 +331,28 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "just-play",
+      "title": "Just Play",
+      "subtitle": "Apple Music",
+      "description": "Quickly start playing a song from Apple Music based on your query.",
+      "mode": "no-view",
+      "disabledByDefault": true,
+      "keywords": [
+        "search",
+        "play",
+        "song",
+        "catalog"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Song / Artist",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "tools": [

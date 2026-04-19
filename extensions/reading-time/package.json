@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reading-time",
+  "title": "Reading Time",
+  "description": "Estimate clipboard reading time as X min read",
+  "icon": "command-icon.png",
+  "author": "fromserg",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "clipboard-reading-time",
+      "title": "Clipboard Reading Time",
+      "subtitle": "Reading Time",
+      "description": "Reads clipboard text and outputs X min read",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "readingSpeed",
+          "type": "textfield",
+          "required": false,
+          "title": "Reading Speed (WPM)",
+          "description": "Words per minute used for reading time",
+          "default": "200"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "eslint": "^9.0.0",
+    "@types/react": "^19.2.14",
+    "typescript": "^6.0.2"
+  }
+}

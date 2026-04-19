@@ -5,6 +5,7 @@ import {
   LaunchType,
   Color,
   openCommandPreferences,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import {
@@ -45,21 +46,22 @@ export default function MenuBarMonitor() {
     refresh();
   }, []);
 
-  // Determine icon based on status
+  const preferences = getPreferenceValues<Preferences.MenuBarMonitor>();
+
   const getIcon = () => {
     if (error) {
       return { source: Icon.ExclamationMark, tintColor: Color.Red };
     }
-    if (isActive) {
-      return { source: Icon.CircleFilled, tintColor: Color.Green };
-    }
-    return { source: Icon.Circle, tintColor: Color.SecondaryText };
+    return "command-icon.png";
   };
 
-  // Determine title
   const getTitle = () => {
     if (isLoading) return undefined;
-    if (todayStats && todayStats.totalCost > 0) {
+    if (
+      preferences.showCostInMenuBar &&
+      todayStats &&
+      todayStats.totalCost > 0
+    ) {
       return formatCost(todayStats.totalCost);
     }
     return undefined;

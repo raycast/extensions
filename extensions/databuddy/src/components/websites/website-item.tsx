@@ -8,6 +8,7 @@ import { WebsiteAnalytics } from "./website-analytics";
 
 export function WebsiteItem({ site, preset, onMutate }: { site: Website; preset: DatePreset; onMutate: () => void }) {
   const { data, isLoading, error } = useCachedPromise(fetchSummary, [site.id, preset], { keepPreviousData: true });
+  const websiteDashboardUrl = `${DASHBOARD_URL}/websites/${site.id}`;
 
   async function handleDelete() {
     if (
@@ -81,7 +82,7 @@ export function WebsiteItem({ site, preset, onMutate }: { site: Website; preset:
                 icon={{ source: Icon.Clock, tintColor: Color.Yellow }}
               />
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Link title="Dashboard" text="Open in Databuddy" target={DASHBOARD_URL} />
+              <List.Item.Detail.Metadata.Link title="Dashboard" text="Open in Databuddy" target={websiteDashboardUrl} />
             </List.Item.Detail.Metadata>
           }
         />
@@ -99,7 +100,7 @@ export function WebsiteItem({ site, preset, onMutate }: { site: Website; preset:
             target={<EditWebsite site={site} onUpdate={onMutate} />}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
           />
-          <Action.OpenInBrowser title="Open in Databuddy" url={DASHBOARD_URL} />
+          <Action.OpenInBrowser title="Open in Databuddy" url={websiteDashboardUrl} />
           <Action.OpenInBrowser
             title="Open Website"
             url={`https://${site.domain}`}

@@ -1,5 +1,45 @@
 # ClaudeCast Changelog
 
+## [1.4.0] - 2026-04-13
+
+### Fixed
+
+- **Underscore Path Resolution**: Projects with underscores in their path (e.g. `my_project`) now resolve correctly when browsing sessions. Claude Code encodes underscores as dashes in directory names, and the filesystem walk now probes underscore variants alongside dash variants.
+- **encodeProjectPath**: Updated to replace `_` with `-` alongside `/` and `.`, matching Claude Code's actual encoding behavior.
+
+### Added
+
+- **Permission Mode Restore on Resume**: Sessions started with non-default permission modes (e.g. `bypassPermissions`, `auto`, `plan`) now resume with the same mode. The `permissionMode` is parsed from session JSONL and passed as `--permission-mode` flag to Claude Code.
+- **Model Restore on Resume**: Sessions now resume with the same model they were started with (e.g. a Haiku session won't unexpectedly resume with Opus). The model is passed as `--model` flag to Claude Code.
+
+## [1.3.0] - 2026-04-06
+
+### Added
+
+- **Deep Search Match Snippets**: Search results now show contextual match snippets in a detail side panel
+  - Displays 15 words before and after the matched phrase with the match highlighted in bold
+  - Shows full session prompt, summary, project path, turns, cost, and last modified date
+  - Split-pane layout: results list on the left, match context on the right
+- **Menu Bar Icon**: Now shows the ClaudeCast extension icon instead of a status circle
+- **Configurable Cost Display**: Today's cost in the menu bar is now off by default and can be enabled in the command's preferences
+
+### Fixed
+
+- **Usage Dashboard Cost Calculation**: Fixed costs always showing $0.00
+  - Previously read a nonexistent `costUSD` field from session data
+  - Now computes costs from actual token counts (input, output, cache read, cache write) using per-model pricing via a dedicated streaming scanner
+  - Usage Dashboard summary table now shows token breakdowns (input, output, cache read, cache write) with K/M formatting
+  - Supports Opus, Sonnet, and Haiku pricing tiers
+  - Separated metadata parsing (50-line cutoff for UI previews) from usage accounting (full-file streaming scanner) to ensure accurate totals
+  - Time-range views (Today/Week/Month) now filter tokens by entry timestamp, not file modification time
+- **Render Tree JSON Crash**: Fixed "Cannot parse render tree JSON: expected low-surrogate code point" error
+  - Added `sanitizeString()` to strip lone UTF-16 surrogates from session JSONL data at ingress
+  - Added `safeTruncate()` to prevent `.slice()` from splitting valid surrogate pairs at preview boundaries
+  - Applied across browse-sessions, deep-search-sessions, and usage-dashboard
+- **Tilde Expansion in Project Paths**: Fixed `~/path` not expanding in Ask Claude and Prompt Library
+  - Added `expandTilde()` helper using `os.homedir()` applied at Ask Claude, Prompt Library (including Ralph Loop), and the shared terminal launcher
+  - Added error handling with toast notifications for the "Open Full Session" action
+
 ## [1.2.0] - 2026-02-20
 
 ### Added

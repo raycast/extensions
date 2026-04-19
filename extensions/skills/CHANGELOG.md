@@ -1,5 +1,27 @@
 # Changelog
 
+## [Update Individual Skills] - 2026-04-17
+
+- Add per-skill update action using `skills update <name>` (requires `skills` CLI 1.5.0+), so a single outdated skill can be updated without touching the others
+
+## [Reduce Complexity] - 2026-04-11
+
+- Remove test infrastructure (vitest, test stubs, all test files) that added maintenance burden without meaningful coverage
+- Inline over-abstracted `CommandStates` components back into command files
+- Restore internal functions to private scope
+
+## [Follow Up on Maintainability] - 2026-04-03
+
+- Add hook-level tests for `useSkillContent` and expand `skills-cli` coverage around CLI error normalization and agent id mapping
+- Standardize `search` and `manage` empty/error states with shared retry handling and clearer recovery copy
+- Document the maintainer validation workflow in `README.md` and add a manual smoke checklist in `TESTING.md`
+
+## [Improve Maintainability] - 2026-04-02
+
+- Add `vitest`-based unit tests and an opt-in live API test for the `skills` extension
+- Extract search and skill content loading logic into reusable helpers for easier testing and maintenance
+- Improve empty states in the search and manage flows while keeping the current upstream behavior intact
+
 ## [Remove Trending Skills Command] - 2026-03-31
 
 - Remove the "Trending Skills" command — the skills.sh API has no trending endpoint, so the command was using a search query hack (`?q=skill`) that only returned skills with "skill" in the name, missing the majority of popular skills

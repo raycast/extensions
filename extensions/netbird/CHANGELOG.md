@@ -1,5 +1,15 @@
 # NetBird Changelog
 
+## [Custom Admin URL] - 2026-04-03
+
+- Added option to overwrite Admin Panel URL in preferences.
+- Added more screenshots, changed all to dark mode.
+
+## [Networks management] - 2026-04-02
+
+- Added `Show Networks` command to list network routes and select/deselect them from Raycast.
+- Fixed error which failed update command during asking for administrator permissions.
+
 ## [Status on empty dns] - 2026-03-30
 
 - Fixed status command error when user does not have netbird DNS enabled

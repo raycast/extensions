@@ -1,5 +1,13 @@
 # Mole Changelog
 
+## [Health Menu Bar] - 2026-04-12
+
+- Added Health Monitor menu bar command showing health score with color-coded heart icon (green ≥90, yellow ≥70, orange ≥50, red <50)
+- Added dropdown summary with CPU, RAM, disk, and battery metrics on click
+- Added "Open System Status" action in dropdown for quick access to the full dashboard
+- Added configurable refresh interval preference (30s, 1m, 5m, 10m, 30m; default 1m)
+- Menu bar item hides automatically when Mole CLI is unavailable
+
 ## [Friendly Install Screen] - 2026-03-23
 
 - Added MoleNotInstalled component with multiple install options when Mole CLI is not found

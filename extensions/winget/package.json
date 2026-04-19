@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "winget",
+  "title": "WinGet",
+  "description": "Search, install, and upgrade Windows packages via winget",
+  "icon": "icon.png",
+  "author": "eray_ercan",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "winget",
+    "package manager",
+    "windows",
+    "install",
+    "upgrade",
+    "uninstall"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Packages",
+      "subtitle": "WinGet",
+      "description": "Search for packages in the winget repository and install them",
+      "mode": "view"
+    },
+    {
+      "name": "installed",
+      "title": "Installed Packages",
+      "subtitle": "WinGet",
+      "description": "List all installed packages with upgrade and uninstall actions",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade",
+      "title": "Upgrade Packages",
+      "subtitle": "WinGet",
+      "description": "View and upgrade outdated packages",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wingetPath",
+      "title": "Winget Executable Path",
+      "description": "Full path to the winget executable. Leave empty to use the system default.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "e.g. C:\\Users\\you\\AppData\\Local\\Microsoft\\WindowsApps\\winget.exe"
+    },
+    {
+      "name": "runInBackground",
+      "title": "Install / Upgrade",
+      "label": "Run install and upgrade in background",
+      "description": "When enabled, Raycast closes as soon as an install or upgrade starts. The operation continues in the background and a notification appears when it finishes.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.16.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.58.1"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use the \\`@raycast/api\\` package's publishing command instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

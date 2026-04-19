@@ -5,13 +5,6 @@ import ConfigEditForm from "./components/ConfigEditForm";
 import { useEffect, useMemo, useState } from "react";
 import { showFailureToast } from "@raycast/utils";
 
-/**
- * Render the uploader configuration management UI listing configs grouped by uploader type and exposing actions to create, edit, duplicate, set default, open, and delete configurations.
- *
- * Renders an empty state when no configurations exist and a detail-enabled list when configs are present. Actions update local state to trigger refreshes and surface errors via a failure toast.
- *
- * @returns The Raycast List JSX element showing uploader configurations and their management actions.
- */
 export default function Command() {
     const picgo = getPicGoContext();
     const {

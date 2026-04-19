@@ -4,7 +4,7 @@
   "title": "Kafka UI",
   "description": "Inspect Kafka consumer group lag, browse topics, and open Kafka UI dashboards. Powered by the Kafka UI open-source project.",
   "icon": "command-icon.png",
-  "author": "nir",
+  "author": "nirrosh",
   "license": "MIT",
   "platforms": [
     "macOS"

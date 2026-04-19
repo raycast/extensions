@@ -1,7 +1,7 @@
 import { Application, Icon, Image, open, showToast, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { FolderItem, Folder } from "./types";
-import { extractDomain } from "./favicon";
+import { extractDomain } from "./url";
 import { isValidHexColor } from "./css-colors";
 
 // Types
@@ -89,7 +89,7 @@ export function findApplicationByItemPath(itemPath: string, appMap: AppLookupMap
 }
 
 // Icon type that includes tinted icons and source URLs
-export type FolderIconType = Icon | { source: Icon; tintColor: string } | { fileIcon: string } | Image.ImageLike;
+type FolderIconType = Icon | { source: Icon; tintColor: string } | { fileIcon: string } | Image.ImageLike;
 
 /**
  * Get icon for a folder item
@@ -187,7 +187,7 @@ function compare<T>(
       result = getName(a).length - getName(b).length;
       break;
     case "recent":
-      result = (getTime?.(b) ?? 0) - (getTime?.(a) ?? 0);
+      result = (getTime?.(a) ?? 0) - (getTime?.(b) ?? 0);
       break;
     default:
       return 0;
@@ -303,9 +303,6 @@ export function getFolderIcon(iconName?: string, color?: string): Icon | { sourc
 export function getFolderIconPlain(iconName?: string): Icon {
   return iconName ? (Icon as Record<string, Icon>)[iconName] || Icon.Folder : Icon.Folder;
 }
-
-// Re-export color utilities from css-colors.ts for backward compatibility
-export { isValidHexColor, normalizeHexColor } from "./css-colors";
 
 /**
  * Pluralize a word based on count
@@ -556,11 +553,4 @@ export function formatUrlsAsList(urls: CollectedUrl[]): string {
     .map((u) => u.url)
     .sort((a, b) => a.length - b.length)
     .join("\n");
-}
-
-/**
- * Count total URLs in collected results
- */
-export function countUrls(urls: CollectedUrl[]): number {
-  return urls.length;
 }

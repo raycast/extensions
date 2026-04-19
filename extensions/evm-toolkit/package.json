@@ -8,6 +8,12 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "toolkit",
+      "title": "Open Commands",
+      "description": "Discoverable hub that lists every command in the extension",
+      "mode": "view"
+    },
+    {
       "name": "explorer",
       "title": "Open Explorer",
       "description": "Open an address, transaction, or block in the chain's block explorer",
@@ -124,10 +130,98 @@
       ]
     },
     {
-      "name": "intel",
-      "title": "Open Intel",
-      "description": "Open an address on Arkham Intel blockchain analytics",
+      "name": "arkham",
+      "title": "Open Arkham Intel",
+      "description": "Open an address in Arkham Intelligence explorer",
       "mode": "no-view"
+    },
+    {
+      "name": "metasleuth",
+      "title": "Open MetaSleuth Intel",
+      "description": "Open an address in MetaSleuth blockchain explorer",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "network",
+          "type": "dropdown",
+          "placeholder": "Mainnet",
+          "required": false,
+          "data": [
+            {
+              "title": "Mainnet",
+              "value": "eth"
+            },
+            {
+              "title": "BSC",
+              "value": "bsc"
+            },
+            {
+              "title": "Arbitrum",
+              "value": "arbitrum"
+            },
+            {
+              "title": "Polygon",
+              "value": "polygon"
+            },
+            {
+              "title": "Optimism",
+              "value": "optimism"
+            },
+            {
+              "title": "Base",
+              "value": "base"
+            },
+            {
+              "title": "Linea",
+              "value": "linea"
+            },
+            {
+              "title": "Avalanche",
+              "value": "avalanche"
+            },
+            {
+              "title": "Mantle",
+              "value": "mantle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "bubblemaps",
+      "title": "Open Bubblemaps Intel",
+      "description": "Open an address in Bubblemaps token holder visualization",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "network",
+          "type": "dropdown",
+          "placeholder": "Mainnet",
+          "required": false,
+          "data": [
+            {
+              "title": "Mainnet",
+              "value": "eth"
+            },
+            {
+              "title": "Base",
+              "value": "base"
+            },
+            {
+              "title": "BSC",
+              "value": "bsc"
+            },
+            {
+              "title": "Polygon",
+              "value": "polygon"
+            },
+            {
+              "title": "Avalanche",
+              "value": "avalanche"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "code",
@@ -190,9 +284,15 @@
       ]
     },
     {
-      "name": "profile",
-      "title": "Open Profile",
-      "description": "Open an account's portfolio page on DeBank",
+      "name": "debank",
+      "title": "Open DeBank Profile",
+      "description": "Open an address's portfolio page on DeBank",
+      "mode": "no-view"
+    },
+    {
+      "name": "zerion",
+      "title": "Open Zerion Profile",
+      "description": "Open an address's portfolio page on Zerion",
       "mode": "no-view"
     },
     {
