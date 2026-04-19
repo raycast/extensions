@@ -296,29 +296,41 @@ export default function ManageProjectsCommand() {
                   }
                 }}
               />
-              {auth.isLoggedIn ? (
+              {auth.isLoggedIn || projects.length > 0 || groups.length > 0 ? (
                 <Action
                   title="Sign Out"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                   onAction={async () => {
-                    if (auth.method === "adc") {
-                      const command =
-                        "gcloud auth application-default revoke";
-                      await Clipboard.copy(command);
-                      await showToast({
-                        style: Toast.Style.Success,
-                        title: "ADC sign-out command copied",
-                        message: `Run "${command}" in your terminal to revoke ADC credentials.`,
-                      });
-                      return;
-                    }
+                    const usingAdc = auth.method === "adc";
+                    const confirmed = await confirmAlert({
+                      title: "Sign out?",
+                      message: usingAdc
+                        ? "This clears every saved project and group and returns the extension to its initial state. Because you're signed in via ADC, also run `gcloud auth application-default revoke` in your terminal to revoke the credentials — the command will be copied to your clipboard."
+                        : "This clears every saved project and group, signs you out of Google, and returns the extension to its initial state.",
+                      primaryAction: {
+                        title: "Sign Out",
+                        style: Alert.ActionStyle.Destructive,
+                      },
+                    });
+                    if (!confirmed) return;
                     try {
-                      await signOutGoogleAccount();
+                      await clearLocalData();
+                      if (auth.isLoggedIn && auth.method === "oauth") {
+                        await signOutGoogleAccount();
+                      }
+                      if (usingAdc) {
+                        await Clipboard.copy(
+                          "gcloud auth application-default revoke",
+                        );
+                      }
                       await showToast({
                         style: Toast.Style.Success,
-                        title: "Signed out of Google",
+                        title: "Signed out",
+                        message: usingAdc
+                          ? "ADC revoke command copied to clipboard."
+                          : "Extension returned to initial state.",
                       });
                       revalidate();
                     } catch (error) {
@@ -334,44 +346,6 @@ export default function ManageProjectsCommand() {
                   }}
                 />
               ) : null}
-              <Action
-                title="Reset Extension Data"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
-                onAction={async () => {
-                  const confirmed = await confirmAlert({
-                    title: "Reset extension data?",
-                    message:
-                      "This removes every saved project and group from the local registry and signs you out of Google. ADC and service-account files on disk are not touched.",
-                    primaryAction: {
-                      title: "Reset",
-                      style: Alert.ActionStyle.Destructive,
-                    },
-                  });
-                  if (!confirmed) return;
-                  try {
-                    await clearLocalData();
-                    if (auth.isLoggedIn && auth.method === "oauth") {
-                      await signOutGoogleAccount();
-                    }
-                    await showToast({
-                      style: Toast.Style.Success,
-                      title: "Extension data cleared",
-                    });
-                    revalidate();
-                  } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Reset failed",
-                      message:
-                        error instanceof Error
-                          ? error.message
-                          : String(error),
-                    });
-                  }
-                }}
-              />
               <Action
                 title="Open Preferences"
                 icon={Icon.Gear}
