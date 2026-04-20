@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format follows Keep a Changelog and this project uses Semantic Versioning.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-20
 
 - Added persistent search cache with stale-while-revalidate loading behavior.
 - Parallelized Spotlight root search and partial fallback scanning for failed roots only.
