@@ -1,6 +1,6 @@
 # Send To Memos Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-20
 
 - fix: restore memo listing for newer Memos instances by resolving the current user via `/api/v1/auth/me` and listing memos with the authenticated user's `parent` resource name.
 - fix: remove the render loop in `MemosListCommand` by deriving filtered items from fetched data instead of storing a second derived list in component state.
