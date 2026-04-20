@@ -7,7 +7,7 @@ import { Model } from "./models";
 
 const execFileAsync = promisify(execFile);
 
-let codexPath: string | undefined;
+let codexPath: string;
 
 async function resolveCodexPath(): Promise<string> {
   if (codexPath) return codexPath;
