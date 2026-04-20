@@ -2,10 +2,6 @@ import { ImapFlow, MailboxObject, ListResponse } from "imapflow";
 import { simpleParser, ParsedMail } from "mailparser";
 import { getPreferenceValues } from "@raycast/api";
 import { Email, EmailAddress, Folder } from "./types";
-import { MOCK_FOLDERS, MOCK_EMAILS, MOCK_EMAIL_BODY } from "./mock-data";
-
-// 截图用 mock 模式，截图完改回 false
-const MOCK_MODE = false;
 
 const QQ_IMAP_HOST = "imap.qq.com";
 const QQ_IMAP_PORT = 993;
@@ -49,7 +45,6 @@ export async function disconnectClient(): Promise<void> {
 }
 
 export async function listFolders(): Promise<Folder[]> {
-  if (MOCK_MODE) return MOCK_FOLDERS;
   return withClient(async (client) => {
     const list: ListResponse[] = await client.list();
 
@@ -100,13 +95,6 @@ interface FetchEmailsOptions {
 
 export async function fetchEmails(options: FetchEmailsOptions): Promise<Email[]> {
   const { folderPath, limit = 10, filter, offset = 0 } = options;
-  if (MOCK_MODE) {
-    let result = MOCK_EMAILS;
-    if (filter === "unread") result = result.filter((e) => !e.flags.includes("\\Seen"));
-    else if (filter === "read") result = result.filter((e) => e.flags.includes("\\Seen"));
-    else if (filter === "attachment") result = result.filter((e) => e.hasAttachment);
-    return result.slice(offset, offset + limit);
-  }
   return withClient(async (client) => {
     const lock = await client.getMailboxLock(folderPath);
 
@@ -217,7 +205,6 @@ function extractPreview(source: Buffer | undefined): string {
 }
 
 export async function fetchEmailBody(folderPath: string, uid: number): Promise<{ text?: string; html?: string }> {
-  if (MOCK_MODE) return MOCK_EMAIL_BODY[uid] ?? { text: "*（暂无邮件正文）*" };
   return withClient(async (client) => {
     const lock = await client.getMailboxLock(folderPath);
 
