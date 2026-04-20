@@ -34,11 +34,7 @@ export default function ListTasks(
   const { defaultProject } = getPreferenceValues<Preferences>();
   const defaultPref = defaultProject ?? "all";
   const [selectedProject, setSelectedProject] = useState<string>(
-    initialProjectId
-      ? String(initialProjectId)
-      : defaultPref === "all"
-        ? "all"
-        : String(defaultPref),
+    initialProjectId ? String(initialProjectId) : defaultPref,
   );
 
   const baseUrl = useMemo(() => {
