@@ -14,21 +14,18 @@ test("searchRootsInParallel collects fulfilled files and failed roots", async ()
   let active = 0;
   let maxActive = 0;
 
-  const result = await searchRootsInParallel(
-    ["root-a", "root-b", "root-c"],
-    async (root) => {
-      active += 1;
-      maxActive = Math.max(maxActive, active);
-      await sleep(15);
-      active -= 1;
+  const result = await searchRootsInParallel(["root-a", "root-b", "root-c"], async (root) => {
+    active += 1;
+    maxActive = Math.max(maxActive, active);
+    await sleep(15);
+    active -= 1;
 
-      if (root === "root-b") {
-        throw new Error("mdfind unavailable for root-b");
-      }
+    if (root === "root-b") {
+      throw new Error("mdfind unavailable for root-b");
+    }
 
-      return [`/${root}/note.md`];
-    },
-  );
+    return [`/${root}/note.md`];
+  });
 
   assert.deepEqual(result.files, ["/root-a/note.md", "/root-c/note.md"]);
   assert.deepEqual(result.failedRoots, ["root-b"]);
@@ -54,11 +51,7 @@ test("searchRootsWithPartialFallback only scans failed roots", async () => {
   );
 
   assert.deepEqual(fallbackCalls, [["beta"]]);
-  assert.deepEqual(files, [
-    "/spotlight/alpha.txt",
-    "/spotlight/gamma.txt",
-    "/fallback/beta.txt",
-  ]);
+  assert.deepEqual(files, ["/spotlight/alpha.txt", "/spotlight/gamma.txt", "/fallback/beta.txt"]);
 });
 
 test("filterByAsyncPredicate runs checks concurrently and preserves input order", async () => {
@@ -84,11 +77,7 @@ test("filterByAsyncPredicate runs checks concurrently and preserves input order"
 
 test("filterByAsyncPredicate clamps invalid concurrency to safe defaults", async () => {
   const input = [1, 2, 3];
-  const output = await filterByAsyncPredicate(
-    input,
-    async (value) => value >= 2,
-    0,
-  );
+  const output = await filterByAsyncPredicate(input, async (value) => value >= 2, 0);
 
   assert.deepEqual(output, [2, 3]);
 });

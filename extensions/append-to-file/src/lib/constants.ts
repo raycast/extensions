@@ -1,4 +1,4 @@
-export const DEFAULT_EXTENSIONS = [".txt", ".md", ".markdown"];
+export const DEFAULT_EXTENSIONS = [".txt", ".text", ".md", ".markdown"];
 export const MAX_CLIPBOARD_OFFSET = 5;
 export const SEARCH_CACHE_TTL_MS = 30_000;
 export const SEARCH_CACHE_STORAGE_KEY = "append-to-file.search-cache";

@@ -26,19 +26,19 @@ This is intentionally a small workhorse, not a full document editor.
 
 ## Core commands
 
-| Command | What it does |
-|---|---|
-| Append Text from Clipboard to File | Pick text from clipboard history and append it to a file. |
-| Append Text to File | Open a text input, edit the content, then choose a file and append it. |
+| Command                                                   | What it does                                                                |
+| --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Append Text from Clipboard to File                        | Pick text from clipboard history and append it to a file.                   |
+| Append Text to File                                       | Open a text input, edit the content, then choose a file and append it.      |
 | Quick Append Current Clipboard Text to Last Appended File | Append the latest clipboard text directly to the last file you appended to. |
-| Undo Last Append | Revert only the most recent append when it is still safe to do so. |
-| Open Last Appended File | Open the last file you appended to. |
+| Undo Last Append                                          | Revert only the most recent append when it is still safe to do so.          |
+| Open Last Appended File                                   | Open the last file you appended to.                                         |
 
 ## Designed for text-first workflows
 
 By default, the extension is limited to:
 
-- `.txt` or `.text` 
+- `.txt` or `.text`
 - `.md` or `.markdown`
 
 You can expand this list in preferences if you want to support other plain-text formats.
@@ -56,18 +56,18 @@ This is intentional to keep append operations simple and low risk.
 
 ## Preferences you can tune
 
-| Preference | Purpose |
-|---|---|
-| Root Directories | Search roots for files. |
-| Allowed Extensions | Allowed file extensions for safety. |
-| Search Excludes | Paths/patterns to skip (for example `.git`, `node_modules`). |
-| Search Max Depth | Folder depth limit for search. |
-| Separator Rule | Controls spacing between existing content and appended content. |
-| Custom Separator | Optional custom separator value (supports `\n` and `\t`). |
-| Ensure Trailing Newline | Keep one trailing newline after append. |
-| Timestamp Format | Format used when using timestamp mode. |
-| Default Insert Position | Append at end or beginning by default. |
-| Default Clipboard Offset | Preferred clipboard history item index (0 is latest). |
+| Preference               | Purpose                                                         |
+| ------------------------ | --------------------------------------------------------------- |
+| Root Directories         | Search roots for files.                                         |
+| Allowed Extensions       | Allowed file extensions for safety.                             |
+| Search Excludes          | Paths/patterns to skip (for example `.git`, `node_modules`).    |
+| Search Max Depth         | Folder depth limit for search.                                  |
+| Separator Rule           | Controls spacing between existing content and appended content. |
+| Custom Separator         | Optional custom separator value (supports `\n` and `\t`).       |
+| Ensure Trailing Newline  | Keep one trailing newline after append.                         |
+| Timestamp Format         | Format used when using timestamp mode.                          |
+| Default Insert Position  | Append at end or beginning by default.                          |
+| Default Clipboard Offset | Preferred clipboard history item index (0 is latest).           |
 
 ## Installation and development
 

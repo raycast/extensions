@@ -1,10 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  applyAppendStyle,
-  composeAppendedContent,
-  formatTimestamp,
-} from "../src/lib/formatting.ts";
+import { applyAppendStyle, composeAppendedContent, formatTimestamp } from "../src/lib/formatting.ts";
 
 test("composeAppendedContent enforces single newline separator when configured", () => {
   const result = composeAppendedContent("alpha\n\n", "beta", {

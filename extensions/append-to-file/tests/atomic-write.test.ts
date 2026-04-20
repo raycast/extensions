@@ -19,9 +19,7 @@ test("atomicWriteFile writes and overwrites target file", async () => {
     assert.equal(await readFile(target, "utf8"), "second");
 
     const files = await readdir(dir);
-    const tempFiles = files.filter((name) =>
-      name.startsWith(".notes.txt.tmp-"),
-    );
+    const tempFiles = files.filter((name) => name.startsWith(".notes.txt.tmp-"));
     assert.deepEqual(tempFiles, []);
   } finally {
     await rm(dir, { recursive: true, force: true });

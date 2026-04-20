@@ -52,7 +52,7 @@ export function FilePicker(props: FilePickerProps) {
       setErrorMessage(undefined);
 
       try {
-        const discovered = await findCandidateFiles(searchOptions);
+        const discovered = await findCandidateFiles(searchOptions, true);
         setFiles(discovered);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unable to search files.";

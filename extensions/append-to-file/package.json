@@ -28,7 +28,9 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint",
-    "test": "node --test --experimental-strip-types tests/**/*.test.ts"
+    "fix-lint": "ray lint --fix",
+    "test": "node --test --experimental-strip-types tests/**/*.test.ts",
+    "publish": "ray publish"
   },
   "commands": [
     {
@@ -202,15 +204,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.95.0",
-    "react": "^19.0.0"
+    "@raycast/api": "^1.104.12",
+    "react": "^19.2.5"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.15.29",
-    "@types/react": "^19.0.0",
-    "eslint": "^10.0.0",
-    "prettier": "^3.8.1",
-    "typescript": "^5.8.3"
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   }
 }

@@ -147,9 +147,9 @@ async function filterExistingFiles(files: string[]): Promise<string[]> {
   );
 }
 
-export async function findCandidateFiles(options: FileSearchOptions): Promise<string[]> {
+export async function findCandidateFiles(options: FileSearchOptions, forceRefresh = false): Promise<string[]> {
   const cacheKey = getOptionsCacheKey(options);
-  const cached = await getCachedFiles(cacheKey);
+  const cached = forceRefresh ? undefined : await getCachedFiles(cacheKey);
 
   if (cached) {
     const mru = await getMruFiles();
