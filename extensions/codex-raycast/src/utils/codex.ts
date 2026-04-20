@@ -12,7 +12,8 @@ let codexPath: string | undefined;
 async function resolveCodexPath(): Promise<string> {
   if (codexPath) return codexPath;
   const { stdout } = await execFileAsync("/bin/zsh", ["-lc", "which codex"]);
-  return stdout.trim();
+  codexPath = stdout.trim();
+  return codexPath;
 }
 
 export async function runCodexCommand(command: string, args: string[] = []): Promise<string> {

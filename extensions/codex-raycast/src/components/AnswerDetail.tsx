@@ -12,6 +12,7 @@ type AnswerDetailProps = {
 export function AnswerDetail({ question, model }: AnswerDetailProps) {
   const { pop } = useNavigation();
   const [answer, setAnswer] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -19,6 +20,8 @@ export function AnswerDetail({ question, model }: AnswerDetailProps) {
       try {
         const answer = await askQuestion(question, model);
         setAnswer(answer);
+      } catch (error) {
+        setError(error instanceof Error ? error.message : "An unexpected error occurred.");
       } finally {
         setIsLoading(false);
       }
@@ -29,7 +32,7 @@ export function AnswerDetail({ question, model }: AnswerDetailProps) {
   return (
     <Detail
       isLoading={isLoading}
-      markdown={buildMarkdown(question, model, answer)}
+      markdown={buildMarkdown(question, model, answer, error)}
       navigationTitle="Answer"
       actions={
         <ActionPanel>
@@ -42,7 +45,11 @@ export function AnswerDetail({ question, model }: AnswerDetailProps) {
   );
 }
 
-function buildMarkdown(question: string, model: Model, answer: string) {
+function buildMarkdown(question: string, model: Model, answer: string, error: string | null) {
+  if (error) {
+    return `# Error\n\n${error}\n\n## Model\n\n${model}\n\n## Question\n\n${question}`;
+  }
+
   if (!answer) {
     return `# Thinking\n\n## Model\n\n${model}\n\n## Question\n\n${question}`;
   }
