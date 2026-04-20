@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added a Raycast command to look up the essential conjugated forms of English verbs.
 - Added common collocations for supported verbs.

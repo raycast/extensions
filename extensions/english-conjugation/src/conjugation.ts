@@ -35,7 +35,14 @@ export function getVerbForms(rawVerb: string) {
     return [];
   }
 
-  const verb = conjugate(infinitive);
+  let verb;
+
+  try {
+    verb = conjugate(infinitive);
+  } catch {
+    return [];
+  }
+
   const commonCollocations = getCommonCollocations(verb.infinitive);
   const simplePast =
     verb.singularPast === verb.pluralPast ? verb.singularPast : `${verb.singularPast} / ${verb.pluralPast}`;

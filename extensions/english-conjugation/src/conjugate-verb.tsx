@@ -2,11 +2,7 @@ import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { useState } from "react";
 import { getAllFormsText, getCollocationsText, getSearchSeed, getVerbForms } from "./conjugation";
 
-type Arguments = {
-  verb?: string;
-};
-
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.ConjugateVerb }>) {
   const [searchText, setSearchText] = useState(getSearchSeed(props.arguments.verb));
   const forms = getVerbForms(searchText);
   const allForms = getAllFormsText(forms);
