@@ -1,6 +1,16 @@
 # NumPy Documentation Search Changelog
 
-## [1.2.3] - 2025-10-09
+## [1.3.0] - {PR_MERGE_DATE}
+
+### Added
+- Add guided recovery when live access to `numpy.org` fails, including in-app setup steps for downloaded local docs
+- Add configurable documentation source preferences for auto and local directory modes
+
+### Changed
+- Fall back to local documentation when remote inventory loading fails
+- Load inline documentation previews from a configured local docs directory when network access is unavailable
+
+## [1.2.3] - {PR_MERGE_DATE}
 
 ### Changed
 - Refresh README to focus on a concise Raycast user overview with key in-app features
