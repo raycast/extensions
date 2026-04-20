@@ -31,9 +31,7 @@ export default function ListTasks(
   props: LaunchProps<{ launchContext: ListTasksContext }>,
 ) {
   const initialProjectId = props.launchContext?.projectId;
-  const { defaultProject } = getPreferenceValues<
-    Preferences & { defaultProject?: string }
-  >();
+  const { defaultProject } = getPreferenceValues<Preferences>();
   const defaultPref = defaultProject ?? "all";
   const [selectedProject, setSelectedProject] = useState<string>(
     initialProjectId
