@@ -18,12 +18,7 @@ export interface PipelineOptions {
   ejectCards: boolean;
 }
 
-const RUNNER_STDERR_LOG = path.join(
-  homedir(),
-  "Library",
-  "Logs",
-  "raycast-photo-ingest-runner-stderr.log",
-);
+const RUNNER_STDERR_LOG = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest-runner-stderr.log");
 
 /**
  * Launch the ingest pipeline as a detached background process.
@@ -32,10 +27,7 @@ const RUNNER_STDERR_LOG = path.join(
  * Progress and completion are shown via the menu bar UI.
  */
 export async function runIngestPipeline(opts: PipelineOptions): Promise<void> {
-  const configPath = path.join(
-    environment.supportPath,
-    `ingest-config-${Date.now()}.json`,
-  );
+  const configPath = path.join(environment.supportPath, `ingest-config-${Date.now()}.json`);
   const runnerPath = path.join(environment.assetsPath, "runner.mjs");
 
   // Write config for the runner

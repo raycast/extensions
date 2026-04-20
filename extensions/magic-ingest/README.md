@@ -19,11 +19,13 @@ Fast, background photo & video ingest from memory cards — built for photograph
 
 ## Requirements
 
-- **macOS** (uses native `diskutil`, `rsync`, and notification APIs)
+- **macOS** (uses native `diskutil`, `copyfile(2)`, and notification APIs)
 - **[ExifTool](https://exiftool.org/)** — Required for star rating filtering. Install via Homebrew:
-  ```
+
+  ```bash
   brew install exiftool
   ```
+
   If you don't use star rating filtering, ExifTool is not needed.
 
 ## Supported Formats
@@ -34,10 +36,10 @@ Fast, background photo & video ingest from memory cards — built for photograph
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Magic Ingest** | Open the ingest form — select cards, dates, and options |
-| **Ingest Status** | Menu bar indicator showing live progress during ingest |
+| Command           | Description                                             |
+| ----------------- | ------------------------------------------------------- |
+| **Magic Ingest**  | Open the ingest form — select cards, dates, and options |
+| **Ingest Status** | Menu bar indicator showing live progress during ingest  |
 
 ## How It Works
 

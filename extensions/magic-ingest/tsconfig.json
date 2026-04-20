@@ -5,6 +5,7 @@
     "module": "Node16",
     "target": "ES2022",
     "moduleResolution": "node16",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -13,5 +14,6 @@
     "jsx": "react-jsx",
     "outDir": "dist"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "exclude": ["src/utils/logger.ts", "src/utils/collisions.ts", "src/utils/types.ts"]
 }
