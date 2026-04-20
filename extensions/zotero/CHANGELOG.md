@@ -1,6 +1,6 @@
 # Zotero Changelog
 
-## [Features] - {PR_MERGE_DATE}
+## [Features] - 2026-04-20
 
 - Add "Copy PDF Path" action (`⌘⇧,`) to copy the full filesystem path of the attached PDF to the clipboard
 
