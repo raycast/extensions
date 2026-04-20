@@ -1,6 +1,6 @@
 # Keeper Security Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-04-20
 
 - Ensure vault record titles and accessory tag values are never empty or whitespace-only strings
 
