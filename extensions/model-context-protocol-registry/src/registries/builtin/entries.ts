@@ -734,7 +734,7 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     title: "Alai",
     description:
       "Generate, edit, and export high-quality AI presentations to PDF, PPTX, or a shareable link. Supports themes, vibes, and creative slide variants.",
-    icon: "https://framerusercontent.com/images/FN6bUXoDO3VHXWV9aucdRQZGBkU.png",
+    icon: "https://storage.getalai.com/Alai%20Logo%20-%20Gradient%20BG.png",
     homepage: "https://getalai.com",
     configuration: {
       command: "npx",
