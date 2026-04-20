@@ -60,7 +60,7 @@ export async function startOverlay(config: {
       { shell: "/bin/zsh", timeout: 2000, stdio: "ignore" },
     );
   } catch {
-    // execSync with & returns immediately, the "error" is expected
+    // Safety net: zsh should exit 0 immediately after backgrounding; catch covers spawn/shell failures.
   }
 
   // Poll for helper to start and write its PID (check every 100ms, timeout after 3s)
@@ -107,6 +107,15 @@ export async function stopOverlay(): Promise<void> {
       process.kill(pid, "SIGTERM");
     } catch {
       // ignore
+    }
+    // Wait until the process is gone so restart does not briefly run two helpers.
+    for (let i = 0; i < 100; i++) {
+      try {
+        process.kill(pid, 0);
+      } catch {
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 20));
     }
     try {
       fs.unlinkSync(PID_FILE);

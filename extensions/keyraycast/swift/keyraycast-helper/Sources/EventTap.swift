@@ -33,8 +33,11 @@ class EventTap {
             { _, observer, _, _, _ in
                 guard let observer = observer else { return }
                 let instance = Unmanaged<EventTap>.fromOpaque(observer).takeUnretainedValue()
-                instance.cachedLayoutData = nil
-                instance.cachedKeyboardLayout = nil
+                // .deliverImmediately can invoke on an arbitrary thread; sync with main where the event tap runs.
+                DispatchQueue.main.async {
+                    instance.cachedLayoutData = nil
+                    instance.cachedKeyboardLayout = nil
+                }
             },
             kTISNotifySelectedKeyboardInputSourceChanged as CFString,
             nil,
@@ -222,10 +225,10 @@ class EventTap {
             return
         }
 
-        // In allKeys mode, pass shift to UCKeyTranslate so we get the actual character (? not /)
-        // In other modes, shift is shown as a modifier symbol instead
+        // In allKeys / allModified, pass shift to UCKeyTranslate so we get the actual character (e.g. ! not 1).
+        // When other modifiers are held, shift is shown as a modifier symbol instead.
         let hasCapsLock = flags.contains(.maskAlphaShift)
-        let shiftForTranslate = (hasShift || hasCapsLock) && !hasModifier && displayMode == .allKeys
+        let shiftForTranslate = (hasShift || hasCapsLock) && !hasModifier && (displayMode == .allKeys || displayMode == .allModified)
         // Uppercase: always if setting is on, or when displaying shortcuts (has modifiers)
         let shouldUppercase = uppercaseKeys || hasModifier || displayMode != .allKeys
         let keyString = keyCodeToString(keyCode: keyCode, event: event, withShift: shiftForTranslate, uppercase: shouldUppercase)
@@ -234,8 +237,8 @@ class EventTap {
         var modifiers = ""
         if hasControl { modifiers += "⌃" }
         if hasOption { modifiers += "⌥" }
-        // Only show ⇧ as a modifier if it's part of a combo with ⌘/⌃/⌥, or not in allKeys mode
-        if hasShift && (hasModifier || displayMode != .allKeys) { modifiers += "⇧" }
+        // Omit ⇧ when shift is already reflected in the translated character (allKeys / shift-only allModified).
+        if hasShift && !shiftForTranslate && (hasModifier || displayMode != .allKeys) { modifiers += "⇧" }
         if hasCommand { modifiers += "⌘" }
 
         let isCommand = hasCommand || hasControl
@@ -337,7 +340,9 @@ class EventTap {
         switch keyCode {
         case 0: return "A"; case 1: return "S"; case 2: return "D"; case 3: return "F"
         case 4: return "H"; case 5: return "G"; case 6: return "Z"; case 7: return "X"
-        case 8: return "C"; case 9: return "V"; case 11: return "B"; case 12: return "Q"
+        case 8: return "C"; case 9: return "V"
+        case 10: return "§"   // ISO §/± (non-US)
+        case 11: return "B"; case 12: return "Q"
         case 13: return "W"; case 14: return "E"; case 15: return "R"; case 16: return "Y"
         case 17: return "T"; case 18: return "1"; case 19: return "2"; case 20: return "3"
         case 21: return "4"; case 22: return "6"; case 23: return "5"; case 24: return "="
@@ -347,6 +352,7 @@ class EventTap {
         case 37: return "L"; case 38: return "J"; case 39: return "'"; case 40: return "K"
         case 41: return ";"; case 42: return "\\"; case 43: return ","; case 44: return "/"
         case 45: return "N"; case 46: return "M"; case 47: return "."
+        case 50: return "`"   // grave / tilde (US)
         default: return ""
         }
     }

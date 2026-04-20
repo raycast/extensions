@@ -52,12 +52,8 @@ guard let configPath = configPath,
     exit(1)
 }
 
-// Write PID
 let pid = ProcessInfo.processInfo.processIdentifier
-if let pidPath = pidPath {
-    try? String(pid).write(toFile: pidPath, atomically: true, encoding: .utf8)
-}
-log("Started PID=\(pid)")
+log("Starting PID=\(pid)")
 
 // NSApplication setup
 let app = NSApplication.shared
@@ -103,8 +99,15 @@ let success = EventTap.shared.start(
 
 if !success {
     log("Failed to create event tap — check Accessibility permissions")
+    if let pidPath = pidPath {
+        try? FileManager.default.removeItem(atPath: pidPath)
+    }
     exit(1)
 }
 
-log("Overlay active")
+// PID file is written only after overlay + event tap are ready so clients don't treat early startup as success.
+if let pidPath = pidPath {
+    try? String(pid).write(toFile: pidPath, atomically: true, encoding: .utf8)
+}
+log("Overlay active (PID=\(pid))")
 app.run()

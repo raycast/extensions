@@ -135,7 +135,6 @@ class KeystrokeContentView: NSView {
     private var lastKeystrokeTime: Date = .distantPast
     private let appearanceMode: String
     private let useGlass: Bool
-    private let isDark: Bool
 
     init(fontSize: String, displayDuration: TimeInterval, appearance: String = "dark") {
         switch fontSize {
@@ -158,21 +157,26 @@ class KeystrokeContentView: NSView {
             self.useGlass = false
         }
 
-        switch appearanceMode {
-        case "light":
-            self.isDark = false
-        case "auto", "glass":
-            let systemAppearance = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua])
-            self.isDark = systemAppearance == .darkAqua
-        default:
-            self.isDark = true
-        }
-
         super.init(frame: .zero)
         wantsLayer = true
     }
 
     required init?(coder: NSCoder) { fatalError() }
+
+    /// Resolved when each pill is created so `auto` / `glass` follow system theme changes without toggling the overlay.
+    private func isDarkForOpaquePills() -> Bool {
+        switch appearanceMode {
+        case "light":
+            return false
+        case "dark":
+            return true
+        case "auto", "glass":
+            let systemAppearance = NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua])
+            return systemAppearance == .darkAqua
+        default:
+            return true
+        }
+    }
 
     private let maxPillChars = 40
 
@@ -327,7 +331,7 @@ class KeystrokeContentView: NSView {
         let borderColor: NSColor
         let shadowColor: NSColor
 
-        if isDark {
+        if isDarkForOpaquePills() {
             bgColor = NSColor(white: 0.1, alpha: 1.0)
             textColor = .white
             borderColor = NSColor(white: 1, alpha: 0.2)
