@@ -1,28 +1,10 @@
-import { Action, ActionPanel, List, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, List, Icon, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { getInstalledBrowsers, Browser } from "./utils/browsers";
-import { loadRules } from "./storage";
+import { loadRules, getDefaultBrowser, setDefaultBrowser } from "./storage";
 import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
 import { expandTilde } from "./utils/path";
-
-interface Preferences {
-  configPath: string;
-  defaultBrowser: string;
-}
-
-const DEFAULT_BROWSER_KEY = "defaultBrowser";
-
-async function getDefaultBrowser(): Promise<string> {
-  const stored = await LocalStorage.getItem<string>(DEFAULT_BROWSER_KEY);
-  if (stored) return stored;
-
-  const preferences = getPreferenceValues<Preferences>();
-  return preferences.defaultBrowser || "Brave Browser";
-}
-
-async function setDefaultBrowser(browser: string): Promise<void> {
-  await LocalStorage.setItem(DEFAULT_BROWSER_KEY, browser);
-}
 
 async function syncConfigFile(args: { configPath: string; defaultBrowser: string }) {
   const rules = await loadRules();
@@ -35,7 +17,7 @@ export default function Command() {
   const [installedBrowsers, setInstalledBrowsers] = useState<Browser[]>([]);
   const [currentDefaultBrowser, setCurrentDefaultBrowser] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ configPath?: string }>();
   const configPath = (preferences.configPath ?? "").trim();
 
   useEffect(() => {
@@ -92,7 +74,13 @@ export default function Command() {
           <List.Item
             key={browser.bundleId}
             title={browser.name}
-            icon={{ fileIcon: `/Applications/${browser.name}.app` }}
+            icon={
+              browser.appPath
+                ? { fileIcon: browser.appPath }
+                : browser.homepage
+                  ? getFavicon(browser.homepage, { fallback: Icon.AppWindow })
+                  : Icon.AppWindow
+            }
             accessories={[...(isDefault ? [{ icon: Icon.CheckCircle, tooltip: "Current Default" }] : [])]}
             actions={
               <ActionPanel>

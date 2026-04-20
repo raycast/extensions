@@ -14,18 +14,13 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { loadRules, saveRules } from "./storage";
+import { loadRules, saveRules, getDefaultBrowser } from "./storage";
 import { Rule } from "./types";
 import { expandTilde } from "./utils/path";
 import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
 import { parseFinickyConfig } from "./utils/parser";
 import { getInstalledBrowsers, Browser } from "./utils/browsers";
 import fs from "fs/promises";
-
-interface Preferences {
-  configPath: string;
-  defaultBrowser: string;
-}
 
 function uuid(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -297,9 +292,8 @@ export default function Command() {
   const [rules, setRules] = useState<Rule[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ configPath?: string }>();
   const configPath = (preferences.configPath ?? "").trim();
-  const defaultBrowser = (preferences.defaultBrowser ?? "Brave Browser").trim();
 
   const { push } = useNavigation();
 
@@ -430,6 +424,7 @@ export default function Command() {
     setRules(nextRules);
 
     try {
+      const defaultBrowser = await getDefaultBrowser();
       await syncConfigFile({ configPath, defaultBrowser, rules: nextRules });
       await showToast({ style: Toast.Style.Success, title: "Finicky config updated" });
     } catch (e) {

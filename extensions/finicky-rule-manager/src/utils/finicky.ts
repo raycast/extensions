@@ -51,10 +51,6 @@ export function generateFinickyConfig(params: { defaultBrowser: string; rules: R
 export default {
     defaultBrowser: ${JSON.stringify(params.defaultBrowser)},
 
-    options: {
-        hideIcon: true
-    },
-
     handlers: [
         ${handlers}
     ]

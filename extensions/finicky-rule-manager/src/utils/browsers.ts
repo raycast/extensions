@@ -6,22 +6,28 @@ const execAsync = promisify(exec);
 export interface Browser {
   name: string;
   bundleId: string;
+  homepage?: string;
+  appPath?: string;
 }
 
 const COMMON_BROWSERS: Browser[] = [
-  { name: "Safari", bundleId: "com.apple.Safari" },
-  { name: "Google Chrome", bundleId: "com.google.Chrome" },
-  { name: "Brave Browser", bundleId: "com.brave.Browser" },
-  { name: "Arc", bundleId: "company.thebrowser.Browser" },
-  { name: "Firefox", bundleId: "org.mozilla.firefox" },
-  { name: "Microsoft Edge", bundleId: "com.microsoft.edgemac" },
-  { name: "Opera", bundleId: "com.operasoftware.Opera" },
-  { name: "Vivaldi", bundleId: "com.vivaldi.Vivaldi" },
-  { name: "Chromium", bundleId: "org.chromium.Chromium" },
-  { name: "Safari Technology Preview", bundleId: "com.apple.SafariTechnologyPreview" },
-  { name: "DuckDuckGo", bundleId: "com.duckduckgo.macos.browser" },
-  { name: "Orion", bundleId: "com.kagi.kagimacOS" },
-  { name: "SigmaOS", bundleId: "com.sigmaos.sigmaos.macos" },
+  { name: "Safari", bundleId: "com.apple.Safari", homepage: "https://www.apple.com/safari/" },
+  { name: "Google Chrome", bundleId: "com.google.Chrome", homepage: "https://www.google.com/chrome/" },
+  { name: "Brave Browser", bundleId: "com.brave.Browser", homepage: "https://brave.com" },
+  { name: "Arc", bundleId: "company.thebrowser.Browser", homepage: "https://arc.net" },
+  { name: "Firefox", bundleId: "org.mozilla.firefox", homepage: "https://www.mozilla.org/firefox/" },
+  { name: "Microsoft Edge", bundleId: "com.microsoft.edgemac", homepage: "https://www.microsoft.com/edge" },
+  { name: "Opera", bundleId: "com.operasoftware.Opera", homepage: "https://www.opera.com" },
+  { name: "Vivaldi", bundleId: "com.vivaldi.Vivaldi", homepage: "https://vivaldi.com" },
+  { name: "Chromium", bundleId: "org.chromium.Chromium", homepage: "https://www.chromium.org" },
+  {
+    name: "Safari Technology Preview",
+    bundleId: "com.apple.SafariTechnologyPreview",
+    homepage: "https://developer.apple.com/safari/",
+  },
+  { name: "DuckDuckGo", bundleId: "com.duckduckgo.macos.browser", homepage: "https://duckduckgo.com" },
+  { name: "Orion", bundleId: "com.kagi.kagimacOS", homepage: "https://browser.kagi.com" },
+  { name: "SigmaOS", bundleId: "com.sigmaos.sigmaos.macos", homepage: "https://sigmaos.com" },
 ];
 
 /**
@@ -32,10 +38,11 @@ export async function detectInstalledBrowsers(): Promise<Browser[]> {
 
   for (const browser of COMMON_BROWSERS) {
     try {
-      // Use mdfind to check if the app is installed
+      // Use mdfind to check if the app is installed and get its path
       const { stdout } = await execAsync(`mdfind "kMDItemCFBundleIdentifier == '${browser.bundleId}'"`);
-      if (stdout.trim()) {
-        installed.push(browser);
+      const appPath = stdout.trim().split("\n")[0]; // Get first result
+      if (appPath) {
+        installed.push({ ...browser, appPath });
       }
     } catch {
       // Browser not found, skip

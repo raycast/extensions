@@ -1,14 +1,9 @@
 import { Action, ActionPanel, BrowserExtension, Icon, List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { loadRules, saveRules } from "./storage";
+import { loadRules, saveRules, getDefaultBrowser } from "./storage";
 import { Rule } from "./types";
 import { expandTilde } from "./utils/path";
 import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
-
-interface Preferences {
-  configPath: string;
-  defaultBrowser: string;
-}
 
 interface Tab {
   id: number;
@@ -68,15 +63,16 @@ async function syncConfigFile(args: { configPath: string; defaultBrowser: string
 export default function Command() {
   const [tabs, setTabs] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const preferences = getPreferenceValues<Preferences>();
+  const [defaultBrowser, setDefaultBrowser] = useState<string>("");
+  const preferences = getPreferenceValues<{ configPath?: string }>();
   const configPath = (preferences.configPath ?? "").trim();
-  const defaultBrowser = (preferences.defaultBrowser ?? "Brave Browser").trim();
 
   useEffect(() => {
     async function fetchTabs() {
       try {
-        const openTabs = await BrowserExtension.getTabs();
+        const [openTabs, browser] = await Promise.all([BrowserExtension.getTabs(), getDefaultBrowser()]);
         setTabs(openTabs);
+        setDefaultBrowser(browser);
       } catch (error) {
         await showToast({
           style: Toast.Style.Failure,

@@ -1,13 +1,8 @@
-import { loadRules, saveRules } from "../storage";
+import { loadRules, saveRules, getDefaultBrowser } from "../storage";
 import { Rule } from "../types";
 import { generateFinickyConfig, writeConfigFile } from "../utils/finicky";
 import { expandTilde } from "../utils/path";
 import { getPreferenceValues } from "@raycast/api";
-
-interface Preferences {
-  configPath: string;
-  defaultBrowser: string;
-}
 
 type Input = {
   /**
@@ -46,9 +41,9 @@ async function syncConfigFile(args: { configPath: string; defaultBrowser: string
  * Update an existing Finicky rule's properties
  */
 export default async function tool(input: Input) {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ configPath?: string }>();
   const configPath = (preferences.configPath ?? "").trim();
-  const defaultBrowser = (preferences.defaultBrowser ?? "Brave Browser").trim();
+  const defaultBrowser = await getDefaultBrowser();
 
   const rules = await loadRules();
   const ruleIndex = rules.findIndex(
