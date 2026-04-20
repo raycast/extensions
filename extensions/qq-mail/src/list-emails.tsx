@@ -28,6 +28,8 @@ import {
   fetchEmailBody,
   markAsRead,
   markAsUnread,
+  starEmail,
+  unstarEmail,
   deleteEmail,
   archiveEmail,
   disconnectClient,
@@ -406,11 +408,20 @@ function cleanHtmlForDisplay(html: string, includeImages: boolean = true): strin
 function EmailListItem(props: EmailListItemProps) {
   const { email, folder, filter, isSelected, onRefresh, onUpdateFlags, onLoadMore, isLoadingMore, emailCount } = props;
   const isUnread = !hasFlag(email.flags, "\\Seen");
+  const isStarred = hasFlag(email.flags, "\\Flagged");
   const fromDisplay = email.from[0]?.name || email.from[0]?.address || "Unknown";
   const readIcon = {
     source: isUnread ? Icon.Circle : Icon.CheckCircle,
     tintColor: isUnread ? Color.Blue : Color.Green,
   };
+
+  const accessories: List.Item.Accessory[] = [];
+  if (isStarred) {
+    accessories.push({ icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: "Starred" });
+  }
+  if (email.hasAttachment) {
+    accessories.push({ icon: Icon.Paperclip, tooltip: "Has Attachment" });
+  }
 
   return (
     <List.Item
@@ -418,7 +429,7 @@ function EmailListItem(props: EmailListItemProps) {
       title={email.subject}
       subtitle={fromDisplay}
       icon={readIcon}
-      accessories={[email.hasAttachment ? { icon: Icon.Paperclip } : {}].filter((a) => Object.keys(a).length > 0)}
+      accessories={accessories}
       detail={isSelected && <EmailDetail email={email} folder={folder} />}
       actions={
         <EmailActions
@@ -554,6 +565,32 @@ function ExpandedEmailView(props: ExpandedEmailViewProps) {
     );
   };
 
+  const isStarred = hasFlag(email.flags, "\\Flagged");
+
+  const handleStar = async () => {
+    onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+    try {
+      await starEmail(folder, email.uid);
+      showToast({ style: Toast.Style.Success, title: "Starred" });
+      onRefresh?.();
+    } catch (error) {
+      onUpdateFlags?.(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+      showToast({ style: Toast.Style.Failure, title: "Failed to star", message: String(error) });
+    }
+  };
+
+  const handleUnstar = async () => {
+    onUpdateFlags?.(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+    try {
+      await unstarEmail(folder, email.uid);
+      showToast({ style: Toast.Style.Success, title: "Unstarred" });
+      onRefresh?.();
+    } catch (error) {
+      onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+      showToast({ style: Toast.Style.Failure, title: "Failed to unstar", message: String(error) });
+    }
+  };
+
   const handleMarkAsRead = async () => {
     onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
     try {
@@ -663,6 +700,21 @@ function ExpandedEmailView(props: ExpandedEmailViewProps) {
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Manage">
+            {isStarred ? (
+              <Action
+                title="Unstar"
+                icon={Icon.StarDisabled}
+                onAction={handleUnstar}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              />
+            ) : (
+              <Action
+                title="Star"
+                icon={Icon.Star}
+                onAction={handleStar}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              />
+            )}
             {isUnread ? (
               <Action
                 title="Mark as Read"
@@ -846,6 +898,32 @@ function EmailActions(props: EmailActionsProps) {
     }
   };
 
+  const isStarred = hasFlag(email.flags, "\\Flagged");
+
+  const handleStar = async () => {
+    onUpdateFlags(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+    try {
+      await starEmail(folder, email.uid);
+      showToast({ style: Toast.Style.Success, title: "Starred" });
+      onRefresh();
+    } catch (error) {
+      onUpdateFlags(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+      showToast({ style: Toast.Style.Failure, title: "Failed to star", message: String(error) });
+    }
+  };
+
+  const handleUnstar = async () => {
+    onUpdateFlags(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+    try {
+      await unstarEmail(folder, email.uid);
+      showToast({ style: Toast.Style.Success, title: "Unstarred" });
+      onRefresh();
+    } catch (error) {
+      onUpdateFlags(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+      showToast({ style: Toast.Style.Failure, title: "Failed to unstar", message: String(error) });
+    }
+  };
+
   const handleReply = async () => {
     await openComposeForm("reply");
   };
@@ -909,6 +987,21 @@ function EmailActions(props: EmailActionsProps) {
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Manage">
+        {isStarred ? (
+          <Action
+            title="Unstar"
+            icon={Icon.StarDisabled}
+            onAction={handleUnstar}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          />
+        ) : (
+          <Action
+            title="Star"
+            icon={Icon.Star}
+            onAction={handleStar}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          />
+        )}
         {isUnread ? (
           <Action
             title="Mark as Read"

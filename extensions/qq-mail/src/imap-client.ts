@@ -198,46 +198,78 @@ export async function fetchEmails(options: FetchEmailsOptions): Promise<Email[]>
         return [];
       }
 
-      // Get the most recent messages with offset for pagination
-      const uids = searchResult as number[];
-      const sortedUids = uids.sort((a: number, b: number) => b - a);
-      const limitedUids = sortedUids.slice(offset, offset + limit);
+      // Sort UIDs descending (newest first)
+      const sortedUids = (searchResult as number[]).sort((a, b) => b - a);
 
       const emails: Email[] = [];
 
-      for await (const message of client.fetch(
-        limitedUids,
-        {
-          uid: true,
-          flags: true,
-          envelope: true,
-          bodyStructure: true,
-          source: { maxLength: 10000 }, // Fetch partial source for preview
-        },
-        { uid: true }, // Tell fetch to interpret limitedUids as UIDs, not sequence numbers
-      )) {
-        const hasAttachment = checkHasAttachment(message.bodyStructure);
+      if (filter === "attachment") {
+        // For attachment filter: scan UIDs in batches until we collect `limit` matching emails,
+        // starting from `offset` matching emails. This avoids premature pagination termination
+        // that would occur if we sliced UIDs first and then discarded non-attachment emails.
+        const batchSize = Math.max(limit * 3, 60);
+        let scanned = 0;
+        let matched = 0;
 
-        // Skip if filtering by attachment and no attachment
-        if (filter === "attachment" && !hasAttachment) {
-          continue;
+        while (scanned < sortedUids.length && emails.length < limit) {
+          const batchUids = sortedUids.slice(scanned, scanned + batchSize);
+          scanned += batchSize;
+
+          const messages = client.fetch(
+            batchUids,
+            { uid: true, flags: true, envelope: true, bodyStructure: true, source: { maxLength: 10000 } },
+            { uid: true },
+          );
+          for await (const message of messages) {
+            const hasAttachment = checkHasAttachment(message.bodyStructure);
+            if (!hasAttachment) continue;
+
+            matched++;
+            if (matched <= offset) continue; // skip emails before the current page offset
+
+            const envelope = message.envelope;
+            emails.push({
+              uid: message.uid,
+              messageId: envelope?.messageId || "",
+              subject: envelope?.subject || "(No Subject)",
+              from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
+              to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
+              cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
+              date: envelope?.date || new Date(),
+              flags:
+                message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
+              hasAttachment,
+              preview: extractPreview(message.source),
+            });
+
+            if (emails.length >= limit) break;
+          }
         }
+      } else {
+        // For non-attachment filters: slice UIDs directly for O(1) pagination
+        const limitedUids = sortedUids.slice(offset, offset + limit);
 
-        const envelope = message.envelope;
-        const email: Email = {
-          uid: message.uid,
-          messageId: envelope?.messageId || "",
-          subject: envelope?.subject || "(No Subject)",
-          from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
-          to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
-          cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
-          date: envelope?.date || new Date(),
-          flags: message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
-          hasAttachment,
-          preview: extractPreview(message.source),
-        };
-
-        emails.push(email);
+        for await (const message of client.fetch(
+          limitedUids,
+          { uid: true, flags: true, envelope: true, bodyStructure: true, source: { maxLength: 10000 } },
+          { uid: true },
+        )) {
+          const hasAttachment = checkHasAttachment(message.bodyStructure);
+          const envelope = message.envelope;
+          emails.push({
+            uid: message.uid,
+            messageId: envelope?.messageId || "",
+            subject: envelope?.subject || "(No Subject)",
+            from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
+            to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
+            cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
+            date: envelope?.date || new Date(),
+            flags:
+              message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
+            hasAttachment,
+            preview: extractPreview(message.source),
+          });
+        }
       }
 
       // Sort by date descending
@@ -307,6 +339,28 @@ export async function fetchEmailBody(folderPath: string, uid: number): Promise<{
         text: parsed.text,
         html: parsed.html || undefined,
       };
+    } finally {
+      lock.release();
+    }
+  });
+}
+
+export async function starEmail(folderPath: string, uid: number): Promise<void> {
+  return withClient(async (client) => {
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
+    try {
+      await client.messageFlagsAdd(uid, ["\\Flagged"], { uid: true });
+    } finally {
+      lock.release();
+    }
+  });
+}
+
+export async function unstarEmail(folderPath: string, uid: number): Promise<void> {
+  return withClient(async (client) => {
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
+    try {
+      await client.messageFlagsRemove(uid, ["\\Flagged"], { uid: true });
     } finally {
       lock.release();
     }

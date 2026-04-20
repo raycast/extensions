@@ -1,3 +1,3 @@
-# Proton Mail Changelog
+# QQ Mail Changelog
 
-## [Initial Version] - 2026-01-23
+## [Initial Release] - {PR_MERGE_DATE}

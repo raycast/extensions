@@ -4,16 +4,9 @@ import { getPreferenceValues } from "@raycast/api";
 const QQ_SMTP_HOST = "smtp.qq.com";
 const QQ_SMTP_PORT = 465;
 
-let transporterInstance: nodemailer.Transporter | null = null;
-
-function getTransporter(): nodemailer.Transporter {
-  if (transporterInstance) {
-    return transporterInstance;
-  }
-
+function createTransporter(): nodemailer.Transporter {
   const prefs = getPreferenceValues();
-
-  transporterInstance = nodemailer.createTransport({
+  return nodemailer.createTransport({
     host: QQ_SMTP_HOST,
     port: QQ_SMTP_PORT,
     secure: true,
@@ -22,8 +15,6 @@ function getTransporter(): nodemailer.Transporter {
       pass: prefs.password,
     },
   });
-
-  return transporterInstance;
 }
 
 export interface SendEmailOptions {
@@ -39,7 +30,7 @@ export interface SendEmailOptions {
 
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
   const prefs = getPreferenceValues();
-  const transporter = getTransporter();
+  const transporter = createTransporter();
 
   await transporter.sendMail({
     from: prefs.username,
