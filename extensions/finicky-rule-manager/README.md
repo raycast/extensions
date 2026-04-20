@@ -7,9 +7,11 @@ Manage [Finicky](https://github.com/johnste/finicky) browser routing rules direc
 - **AI-Powered Rule Management**: Use natural language in Raycast AI Chat to create, update, and manage rules
 - **Visual Rule Management**: Create, edit, enable/disable, and delete Finicky rules through an intuitive UI
 - **Create from Browser Tabs**: Instantly create rules from your currently open browser tabs
+- **Change Default Browser**: Quick visual browser selector with app icons
 - **Guided Rule Builder**: Step-by-step form to build URL patterns without knowing the syntax
 - **Browser Auto-Detection**: Automatically detects installed browsers for easy selection
 - **Conflict Detection**: Automatically find and resolve conflicting rules
+- **Modern ES Module Syntax**: Generates config files using `export default` instead of `module.exports`
 - **Automatic Config Generation**: Rules are stored in Raycast Local Storage and automatically generate your `.finicky.js` config file
 - **Two Match Types**:
   - **Wildcards**: Use Finicky's native wildcard patterns (e.g., `*://*.salesforce.com/*`)
@@ -35,6 +37,7 @@ The extension integrates with Raycast AI Chat, allowing you to manage rules usin
 3. Ask questions or give commands in plain English:
 
 **Example commands:**
+
 - "Send all google.com subpages to Chrome"
 - "Create a rule for Salesforce that opens in Arc"
 - "Show me all my rules"
@@ -64,6 +67,23 @@ The fastest way to create a rule is from an open browser tab:
    - **Browser**: Your configured default browser
 
 **Note**: Requires the [Raycast Browser Extension](https://www.raycast.com/browser-extension) to be installed.
+
+### Changing the Default Browser
+
+Quickly change your Finicky default browser with a visual browser selector:
+
+1. Run the "Change Default Browser" command
+2. Browse the list of detected browsers (with app icons)
+3. Click on any browser to set it as your new default
+4. Your `.finicky.js` config file is automatically updated
+
+**Features:**
+
+- Shows all installed browsers with their actual app icons
+- Current default browser is marked with a ✓ checkmark
+- Live updates - the checkmark moves immediately after selection
+- Searchable list for quick filtering
+- Real-time toast notifications showing progress and success
 
 ### Creating a Rule Manually
 
@@ -138,13 +158,16 @@ This extension treats your Finicky config as **generated**. Rules are stored in 
 
 ⚠️ **Important**: After importing, do not manually edit your `.finicky.js` file, as changes will be overwritten. Use the extension to manage all rules.
 
-## Future Enhancements
+## Commands
 
-- Rule ordering (drag-and-drop or move up/down)
-- URL pattern validation
-- Dry-run URL tester
-- Bulk actions (enable/disable multiple rules)
+This extension provides the following commands:
 
-## License
-
-MIT
+1. **Manage Finicky Rules** - Main command for viewing and managing all rules
+2. **Create Rule from Browser Tab** - Create rules from currently open browser tabs
+3. **Change Default Browser** - Visual browser selector to change your default browser
+4. **AI Tools** (via Raycast AI Chat):
+   - `list-rules` - List all rules with details
+   - `create-rule` - Create a new rule with conflict detection
+   - `update-rule` - Update an existing rule
+   - `delete-rule` - Delete a rule by ID or name
+   - `find-conflicts` - Find and list conflicting rules
