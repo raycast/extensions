@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-20
 
 - Add custom headers on all request
 
