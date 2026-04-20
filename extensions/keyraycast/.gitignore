@@ -1,9 +1,11 @@
 .DS_Store
+# Produced by `npm run build` / `npm run build-helper` (not committed)
+assets/KeyraycastHelper
 node_modules/
 dist/
 .build/
 .swiftpm/
 .raycast-swift-build/
-sources/keyraycast-helper/.build/
-sources/keyraycast-helper/.swiftpm/
+swift/keyraycast-helper/.build/
+swift/keyraycast-helper/.swiftpm/
 .gstack/
