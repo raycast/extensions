@@ -54,7 +54,7 @@ export const useCCUsageTotalCli = () => {
   useEffect(() => {
     const id = setInterval(() => result.revalidate(), intervalMs);
     return () => clearInterval(id);
-  }, [intervalMs]);
+  }, [intervalMs, result.revalidate]);
 
   return result;
 };
