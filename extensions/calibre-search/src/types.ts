@@ -30,7 +30,3 @@ export interface Book {
   coverPath: string | null;
   bookFolderPath: string;
 }
-
-export interface Preferences {
-  libraryPath: string;
-}

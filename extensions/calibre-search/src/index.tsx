@@ -15,7 +15,7 @@ import { basename, join } from "path";
 import { useMemo, useState } from "react";
 import { ALL_BOOKS_QUERY, mapRow } from "./calibre";
 import { filterBooks, preferredFormat } from "./utils";
-import type { Book, BookRow, Preferences } from "./types";
+import type { Book, BookRow } from "./types";
 
 export default function Command(props: { arguments: { searchText?: string } }) {
   const { libraryPath } = getPreferenceValues<Preferences>();

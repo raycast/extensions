@@ -9,7 +9,10 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { spawn, spawnSync } from "child_process";
+import { execFile, spawn } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 import {
   existsSync,
   mkdirSync,
@@ -28,13 +31,6 @@ import {
   findCoverHrefInOpf,
 } from "./ebooks";
 import { formatFileSize } from "./utils";
-import type { Preferences } from "./types";
-
-interface AddPreferences extends Preferences {
-  searchPath1: string;
-  searchPath2?: string;
-  searchPath3?: string;
-}
 
 interface EbookFile {
   path: string;
@@ -179,6 +175,7 @@ function loadThumbnail(
 
   mkdirSync(qlDir, { recursive: true });
   const proc = spawn("qlmanage", ["-t", "-s", "256", "-o", qlDir, file.path]);
+  proc.on("error", () => {});
   proc.on("close", () => {
     if (!cancelled && existsSync(expectedThumb)) onReady(expectedThumb);
   });
@@ -228,7 +225,7 @@ function EbookDetail({
 
 export default function Command() {
   const { libraryPath, searchPath1, searchPath2, searchPath3 } =
-    getPreferenceValues<AddPreferences>();
+    getPreferenceValues<Preferences>();
   const ebooks = useMemo(
     () => scanDirectories([searchPath1, searchPath2, searchPath3]),
     [searchPath1, searchPath2, searchPath3],
@@ -252,20 +249,21 @@ export default function Command() {
       style: Toast.Style.Animated,
       title: "Adding to Calibre…",
     });
-    const result = spawnSync(
+    const { stdout = "", stderr = "" } = await execFileAsync(
       CALIBREDB,
       buildCalibredbArgs(file.path, libraryPath),
-      { encoding: "utf8" },
-    );
-    const output = result.stdout ?? "";
-    const stderr = result.stderr?.trim() ?? "";
-    const { addedIds } = parseCalibredbOutput(output);
+    ).catch((err: Error & { stdout?: string; stderr?: string }) => ({
+      stdout: err.stdout ?? "",
+      stderr: err.stderr ?? err.message ?? "",
+    }));
+    const { addedIds } = parseCalibredbOutput(stdout);
+    const stderrTrimmed = stderr.trim();
 
     if (addedIds.length > 0) {
       toast.style = Toast.Style.Success;
       toast.title = `Added: ${basename(file.name, extname(file.name))}`;
       toast.message = `Book id${addedIds.length > 1 ? "s" : ""}: ${addedIds.join(", ")}`;
-    } else if (stderr.includes("Another calibre program")) {
+    } else if (stderrTrimmed.includes("Another calibre program")) {
       // Calibre GUI is running and holds a lock — hand off to the running instance
       await open(file.path, "net.kovidgoyal.calibre");
       toast.style = Toast.Style.Success;
@@ -274,8 +272,7 @@ export default function Command() {
     } else {
       toast.style = Toast.Style.Failure;
       toast.title = "Could not add book";
-      toast.message =
-        result.error?.message || stderr || output.trim() || "Unknown error";
+      toast.message = stderrTrimmed || stdout.trim() || "Unknown error";
     }
   }
 

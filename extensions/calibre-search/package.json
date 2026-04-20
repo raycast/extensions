@@ -41,7 +41,7 @@
     },
     {
       "name": "searchPath1",
-      "title": "Add books",
+      "title": "Add Books",
       "description": "Primary folder to scan for ebook files",
       "type": "directory",
       "required": false,
@@ -49,14 +49,14 @@
     },
     {
       "name": "searchPath2",
-      "title": "Add books (optional)",
+      "title": "Add Books (Optional)",
       "description": "Additional folder to scan",
       "type": "directory",
       "required": false
     },
     {
       "name": "searchPath3",
-      "title": "Add books (optional)",
+      "title": "Add Books (Optional)",
       "description": "Additional folder to scan",
       "type": "directory",
       "required": false

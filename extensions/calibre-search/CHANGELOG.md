@@ -1,6 +1,6 @@
 # Calibre Library Changelog
 
-## [1.0.0] - 2026-04-20
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
