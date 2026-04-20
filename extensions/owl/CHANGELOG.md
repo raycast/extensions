@@ -3,6 +3,8 @@
 ## [Filter Keyboards] - {PR_MERGE_DATE}
 
 - Added filter for keyboards to show only those that match the languages.
+- Added default OWLs when initializing and actions to reload that configuration.
+- Added actions to delete multiple owls at a time.
 
 ## [Security Fix] - 2026-03-17
 
