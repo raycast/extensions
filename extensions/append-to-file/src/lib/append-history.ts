@@ -53,6 +53,7 @@ async function loadRecord(): Promise<LastAppendRecord | undefined> {
 
 async function clearRecord(): Promise<void> {
   await LocalStorage.removeItem(LAST_APPEND_RECORD_KEY);
+  await LocalStorage.removeItem(LAST_APPENDED_FILE_KEY);
 }
 
 export async function recordLastAppend(filePath: string, beforeRaw: Buffer | null, afterRaw: Buffer): Promise<void> {
