@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Alai MCP Server] - 2026-04-18
+## [Add Alai MCP Server] - {PR_MERGE_DATE}
 
 Add community Alai MCP Server to registry for AI-powered presentation generation (text-to-slides, exports to PDF, PPTX, or shareable link).
 
