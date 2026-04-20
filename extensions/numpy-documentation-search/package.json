@@ -31,11 +31,11 @@
       "required": true,
       "title": "Documentation Source",
       "description": "Choose where the extension should load NumPy documentation from",
-      "default": "auto",
+      "default": "online",
       "data": [
         {
-          "title": "Auto",
-          "value": "auto"
+          "title": "Online",
+          "value": "online"
         },
         {
           "title": "Local Docs Directory",
@@ -48,7 +48,7 @@
       "type": "directory",
       "required": false,
       "title": "Local Docs Directory",
-      "description": "Path to the downloaded NumPy docs folder; the extension will load files from its stable subfolder"
+      "description": "Only used when Documentation Source is Local Docs Directory. Select the downloaded NumPy docs folder and the extension will load files from its stable subfolder"
     },
     {
       "name": "useShortPrefix",

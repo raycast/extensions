@@ -26,7 +26,7 @@ afterEach(() => {
 });
 
 describe("loadInventory", () => {
-  it("falls back to local docs in auto mode when remote loading fails", async () => {
+  it("falls back to local docs in online mode when remote loading fails", async () => {
     const localDocsDirectory = createLocalDocsDirectory();
     const stableDir = path.join(localDocsDirectory, "stable");
     mkdirSync(stableDir, { recursive: true });
@@ -35,7 +35,7 @@ describe("loadInventory", () => {
     const result = await loadInventory(
       {
         localDocsDirectory,
-        mode: "auto",
+        mode: "online",
       },
       {
         fetchImpl: vi.fn(async () => {
@@ -51,11 +51,11 @@ describe("loadInventory", () => {
     expect(result.data.some((item) => item.id === "numpy.linspace")).toBe(true);
   });
 
-  it("surfaces the remote error when auto mode has no local docs fallback", async () => {
+  it("surfaces the remote error when online mode has no local docs fallback", async () => {
     await expect(
       loadInventory(
         {
-          mode: "auto",
+          mode: "online",
         },
         {
           fetchImpl: vi.fn(async () => {

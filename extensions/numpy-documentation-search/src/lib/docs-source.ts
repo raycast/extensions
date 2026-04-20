@@ -3,7 +3,7 @@ import path from "node:path";
 import { parseDocDetail, type DocDetail } from "./doc-detail";
 import { INVENTORY_URL, transformInventoryBuffer, type InventoryItem } from "./inventory";
 
-export type DocumentationSourceMode = "auto" | "local";
+export type DocumentationSourceMode = "online" | "local";
 export type ResolvedDocumentationSource = "remote" | "local";
 
 export interface InventoryLoadOptions {
@@ -52,7 +52,7 @@ export async function loadInventory(
         data: await loadInventoryFromDirectory(options.localDocsDirectory, deps),
         source: "local",
       };
-    case "auto":
+    case "online":
     default:
       try {
         return {
