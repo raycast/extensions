@@ -1,6 +1,6 @@
 # Groq Changelog
 
-## [Updated Models] - {PR_MERGE_DATE}
+## [Updated Models] - 2026-04-20
 
 - Removed deprecated `Kimi K2 0905 263k` from model selections and pricing metadata
 - Changed the global default model to `OpenAI GPT OSS 120B`
