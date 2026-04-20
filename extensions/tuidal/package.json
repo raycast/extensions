@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tuidal",
+  "title": "Tuidal",
+  "description": "Control Tuidal — Tidal music player for the terminal",
+  "icon": "icon.png",
+  "author": "cosminmocan",
+  "categories": ["Media"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Tuidal",
+      "description": "View current track and playback controls",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-player",
+      "title": "Menu Bar Player",
+      "subtitle": "Tuidal",
+      "description": "Current track in the menu bar with controls",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "search",
+      "title": "Search Tidal",
+      "subtitle": "Tuidal",
+      "description": "Search for tracks on Tidal",
+      "mode": "view"
+    },
+    {
+      "name": "library",
+      "title": "Your Library",
+      "subtitle": "Tuidal",
+      "description": "Browse playlists, mixes and favorites",
+      "mode": "view"
+    },
+    {
+      "name": "queue",
+      "title": "Queue",
+      "subtitle": "Tuidal",
+      "description": "View the current playback queue",
+      "mode": "view"
+    },
+    {
+      "name": "just-play",
+      "title": "Just Play",
+      "subtitle": "Tuidal",
+      "description": "Type a query and immediately play the top result",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-play-pause",
+      "title": "Toggle Play / Pause",
+      "subtitle": "Tuidal",
+      "description": "Toggle playback state",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "subtitle": "Tuidal",
+      "description": "Skip to the next track",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "subtitle": "Tuidal",
+      "description": "Go back to the previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "subtitle": "Tuidal",
+      "description": "Turn shuffle on or off",
+      "mode": "no-view"
+    },
+    {
+      "name": "repeat",
+      "title": "Cycle Repeat",
+      "subtitle": "Tuidal",
+      "description": "Cycle repeat mode: all → one → off",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
