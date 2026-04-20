@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-20
 
 - 🐛 Fix infinite retry loop when unlocking vault with invalid session token
 
