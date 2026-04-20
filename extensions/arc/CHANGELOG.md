@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [New Features] - 2026-04-20
+## [New Features] - {PR_MERGE_DATE}
 
 - Added `Reset all tabs in current space` command to reset all tabs in the currently active space (disabled by default).
 
