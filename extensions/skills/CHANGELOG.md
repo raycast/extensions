@@ -1,6 +1,6 @@
 # Changelog
 
-## [Show Installed Badge in Search Results] - {PR_MERGE_DATE}
+## [Show Installed Badge in Search Results] - 2026-04-20
 
 - Show a green "Installed" tag on search results for skills that are already installed locally
 
