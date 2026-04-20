@@ -85,13 +85,7 @@ function EmailList(props: EmailListProps = {}) {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   // Fetch folders
-  const {
-    data: folders,
-    isLoading: foldersLoading,
-    error: foldersError,
-  } = useCachedPromise(async () => {
-    return await listFolders();
-  }, []);
+  const { data: folders, isLoading: foldersLoading, error: foldersError } = useCachedPromise(listFolders, []);
 
   // Fetch emails for selected folder
   const {
@@ -212,28 +206,28 @@ function EmailList(props: EmailListProps = {}) {
         }
       }}
     >
-      {loadedEmails && loadedEmails.length > 0 ? (
-        loadedEmails.map((email) => (
-          <EmailListItem
-            key={email.uid}
-            email={email}
-            folder={selectedFolder}
-            filter={filter}
-            isSelected={selectedEmailUid === email.uid}
-            onRefresh={revalidateEmails}
-            onUpdateFlags={updateEmailFlags}
-            onLoadMore={hasMore ? handleLoadMore : undefined}
-            isLoadingMore={isLoadingMore}
-            emailCount={loadedEmails.length}
-          />
-        ))
-      ) : (
-        <List.EmptyView
-          icon={Icon.Envelope}
-          title="No Emails"
-          description={`No emails found in ${selectedFolder}${filter !== "all" ? ` with filter "${filter}"` : ""}`}
-        />
-      )}
+      {loadedEmails && loadedEmails.length > 0
+        ? loadedEmails.map((email) => (
+            <EmailListItem
+              key={email.uid}
+              email={email}
+              folder={selectedFolder}
+              filter={filter}
+              isSelected={selectedEmailUid === email.uid}
+              onRefresh={revalidateEmails}
+              onUpdateFlags={updateEmailFlags}
+              onLoadMore={hasMore ? handleLoadMore : undefined}
+              isLoadingMore={isLoadingMore}
+              emailCount={loadedEmails.length}
+            />
+          ))
+        : !emailsLoading && (
+            <List.EmptyView
+              icon={Icon.Envelope}
+              title="No Emails"
+              description={`No emails found in ${selectedFolder}${filter !== "all" ? ` with filter "${filter}"` : ""}`}
+            />
+          )}
     </List>
   );
 }

@@ -44,6 +44,12 @@ export async function disconnectClient(): Promise<void> {
   // No-op now since we create fresh connections
 }
 
+// Resolve virtual folder paths to actual IMAP folder paths
+function resolveFolder(folderPath: string): string {
+  if (folderPath === "__starred__") return "INBOX";
+  return folderPath;
+}
+
 export async function listFolders(): Promise<Folder[]> {
   return withClient(async (client) => {
     const list: ListResponse[] = await client.list();
@@ -59,7 +65,7 @@ export async function listFolders(): Promise<Folder[]> {
     // Sort folders: special folders first, then alphabetically
     const specialOrder = ["\\Inbox", "\\Drafts", "\\Sent", "\\Archive", "\\Trash", "\\Junk"];
 
-    return folders.sort((a, b) => {
+    const sorted = folders.sort((a, b) => {
       const aSpecial = specialOrder.indexOf(a.specialUse || "");
       const bSpecial = specialOrder.indexOf(b.specialUse || "");
 
@@ -73,6 +79,19 @@ export async function listFolders(): Promise<Folder[]> {
 
       return a.name.localeCompare(b.name);
     });
+
+    // Inject virtual "Starred" folder after Inbox (QQ Mail starred = \Flagged flag)
+    const starredFolder: Folder = {
+      path: "__starred__",
+      name: "Starred",
+      delimiter: "/",
+      flags: [],
+      specialUse: "\\Flagged",
+    };
+    const inboxIndex = sorted.findIndex((f) => f.path.toUpperCase() === "INBOX");
+    sorted.splice(inboxIndex + 1, 0, starredFolder);
+
+    return sorted;
   });
 }
 
@@ -93,8 +112,69 @@ interface FetchEmailsOptions {
   offset?: number;
 }
 
+async function fetchStarredEmailsFromFolder(folderPath: string): Promise<Email[]> {
+  return withClient(async (client) => {
+    const lock = await client.getMailboxLock(folderPath);
+    try {
+      const mailbox: MailboxObject | false = client.mailbox;
+      if (!mailbox || mailbox.exists === 0) return [];
+
+      const searchResult = await client.search({ flagged: true }, { uid: true });
+      if (!searchResult || searchResult.length === 0) return [];
+
+      const uids = (searchResult as number[]).sort((a, b) => b - a);
+      const folderEmails: Email[] = [];
+
+      for await (const message of client.fetch(
+        uids,
+        { uid: true, flags: true, envelope: true, bodyStructure: true, source: { maxLength: 10000 } },
+        { uid: true },
+      )) {
+        const envelope = message.envelope;
+        folderEmails.push({
+          uid: message.uid,
+          messageId: envelope?.messageId || "",
+          subject: envelope?.subject || "(No Subject)",
+          from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
+          to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
+          cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
+          date: envelope?.date || new Date(),
+          flags: message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
+          hasAttachment: checkHasAttachment(message.bodyStructure),
+          preview: extractPreview(message.source),
+        });
+      }
+      return folderEmails;
+    } finally {
+      lock.release();
+    }
+  });
+}
+
+export async function fetchStarredEmails(limit: number = 50, offset: number = 0): Promise<Email[]> {
+  const folders = await listFolders();
+  const realFolders = folders.filter((f) => f.path !== "__starred__");
+
+  // Fetch all folders in parallel for speed
+  const results = await Promise.allSettled(realFolders.map((f) => fetchStarredEmailsFromFolder(f.path)));
+
+  const allStarred: Email[] = [];
+  for (const result of results) {
+    if (result.status === "fulfilled") {
+      allStarred.push(...result.value);
+    }
+  }
+
+  return allStarred.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(offset, offset + limit);
+}
+
 export async function fetchEmails(options: FetchEmailsOptions): Promise<Email[]> {
   const { folderPath, limit = 10, filter, offset = 0 } = options;
+
+  if (folderPath === "__starred__") {
+    return fetchStarredEmails(limit, offset);
+  }
+
   return withClient(async (client) => {
     const lock = await client.getMailboxLock(folderPath);
 
@@ -206,7 +286,7 @@ function extractPreview(source: Buffer | undefined): string {
 
 export async function fetchEmailBody(folderPath: string, uid: number): Promise<{ text?: string; html?: string }> {
   return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
 
     try {
       const message = await client.fetchOne(
@@ -235,7 +315,7 @@ export async function fetchEmailBody(folderPath: string, uid: number): Promise<{
 
 export async function markAsRead(folderPath: string, uid: number): Promise<void> {
   return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
 
     try {
       await client.messageFlagsAdd(uid, ["\\Seen"], { uid: true });
@@ -247,7 +327,7 @@ export async function markAsRead(folderPath: string, uid: number): Promise<void>
 
 export async function markAsUnread(folderPath: string, uid: number): Promise<void> {
   return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
 
     try {
       await client.messageFlagsRemove(uid, ["\\Seen"], { uid: true });
@@ -259,7 +339,7 @@ export async function markAsUnread(folderPath: string, uid: number): Promise<voi
 
 export async function deleteEmail(folderPath: string, uid: number): Promise<void> {
   return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
 
     try {
       await client.messageFlagsAdd(uid, ["\\Deleted"], { uid: true });
@@ -272,7 +352,7 @@ export async function deleteEmail(folderPath: string, uid: number): Promise<void
 
 export async function moveToFolder(folderPath: string, uid: number, targetFolder: string): Promise<void> {
   return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
 
     try {
       await client.messageMove(uid, targetFolder, { uid: true });
@@ -290,7 +370,7 @@ export interface Attachment {
 
 export async function fetchAttachments(folderPath: string, uid: number): Promise<Attachment[]> {
   return withClient(async (client) => {
-    const lock = await client.getMailboxLock(folderPath);
+    const lock = await client.getMailboxLock(resolveFolder(folderPath));
 
     try {
       const message = await client.fetchOne(
