@@ -3,7 +3,7 @@
   "name": "qq-mail",
   "title": "QQ Mail",
   "description": "View and manage your QQ Mail inbox",
-  "icon": "qq-mail.icon.png",
+  "icon": "icon.png",
   "author": "ariesly15",
   "platforms": [
     "macOS",
