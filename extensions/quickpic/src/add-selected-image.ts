@@ -7,9 +7,7 @@ type AddSelectedImageArguments = {
   title?: string;
 };
 
-export default async function Command(
-  props: LaunchProps<{ arguments: AddSelectedImageArguments }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: AddSelectedImageArguments }>) {
   const [selectedItem] = await getSelectedFinderItems();
 
   if (!selectedItem) {

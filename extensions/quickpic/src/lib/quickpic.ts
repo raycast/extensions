@@ -66,9 +66,7 @@ export async function importImage(input: ImportImageInput): Promise<QuickPicReso
     throw new Error("The selected file is not a supported image.");
   }
 
-  const normalizedKeywords = Array.from(
-    new Set(input.keywords.map((keyword) => keyword.trim()).filter(Boolean)),
-  );
+  const normalizedKeywords = Array.from(new Set(input.keywords.map((keyword) => keyword.trim()).filter(Boolean)));
   if (normalizedKeywords.length === 0) {
     throw new Error("Add at least one keyword.");
   }

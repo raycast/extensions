@@ -108,11 +108,7 @@ export default function Command() {
           }
           actions={
             <ActionPanel>
-              <Action.Paste
-                title="Paste File"
-                content={{ file: item.filePath }}
-                icon={Icon.ArrowRight}
-              />
+              <Action.Paste title="Paste File" content={{ file: item.filePath }} icon={Icon.ArrowRight} />
               <Action.CopyToClipboard
                 title="Copy File to Clipboard"
                 content={{ file: item.filePath }}

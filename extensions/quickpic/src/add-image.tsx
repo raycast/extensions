@@ -92,11 +92,7 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Image" icon={Icon.Download} onSubmit={submit} />
-          <Action
-            title="Use Finder Selection"
-            icon={Icon.Finder}
-            onAction={fillFromFinderSelection}
-          />
+          <Action title="Use Finder Selection" icon={Icon.Finder} onAction={fillFromFinderSelection} />
           <Action title="Use Clipboard File" icon={Icon.Clipboard} onAction={fillFromClipboard} />
         </ActionPanel>
       }
@@ -111,13 +107,7 @@ export default function Command() {
         value={sourcePath}
         onChange={setSourcePath}
       />
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="Optional display title"
-        value={title}
-        onChange={setTitle}
-      />
+      <Form.TextField id="title" title="Title" placeholder="Optional display title" value={title} onChange={setTitle} />
       <Form.TextField
         id="keywords"
         title="Keywords"
