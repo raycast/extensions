@@ -1,6 +1,6 @@
 # WakaTime Changelog
 
-## [Fixes Avatar Images] - {PR_MERGE_DATE}
+## [Fixes Avatar Images] - 2026-04-20
 
 ### Fixed
 
