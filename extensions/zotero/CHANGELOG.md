@@ -4,6 +4,10 @@
 
 - Add "Copy PDF Path" action (`⌘⇧,`) to copy the full filesystem path of the attached PDF to the clipboard
 
+## [Fixes] - 2026-04-12
+
+- Fix duplicate collection names in dropdown by using DISTINCT query, preventing React duplicate key warnings
+
 ## [Features] - 2026-04-05
 
 - Add "Open PDF in System Viewer" action to open the attachment with the system's default viewer

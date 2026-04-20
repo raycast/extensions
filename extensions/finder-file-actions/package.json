@@ -2,14 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "finder-file-actions",
   "title": "Finder File Actions",
-  "description": "Perform actions (move, copy) on selected Finder files",
+  "description": "Perform actions (move, copy, create) on selected Finder files and folders",
   "icon": "finder-file-actions.png",
   "keywords": [
     "finder",
     "files",
     "folders",
     "move",
-    "copy"
+    "copy",
+    "create",
+    "new",
+    "text",
+    "wrap"
   ],
   "author": "pa1ar",
   "contributors": [],
@@ -36,6 +40,57 @@
       "mode": "view",
       "path": "src/copy-to-folder.tsx",
       "icon": "copy-to-folder.png"
+    },
+    {
+      "name": "create-folder",
+      "title": "Create Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Create a new folder in the current Finder directory",
+      "mode": "no-view",
+      "path": "src/create-folder.tsx",
+      "icon": "create-folder.png",
+      "arguments": [
+        {
+          "name": "folderName",
+          "placeholder": "untitled folder",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "wrap-in-folder",
+      "title": "Wrap in Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Create a new folder and move selected Finder files into it",
+      "mode": "no-view",
+      "path": "src/wrap-in-folder.tsx",
+      "icon": "wrap-in-folder.png",
+      "arguments": [
+        {
+          "name": "folderName",
+          "placeholder": "untitled folder",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-text-file",
+      "title": "Create Text File",
+      "subtitle": "Finder File Actions",
+      "description": "Create a text file with optional clipboard content",
+      "mode": "no-view",
+      "path": "src/create-text-file.tsx",
+      "icon": "create-text-file.png",
+      "arguments": [
+        {
+          "name": "extension",
+          "placeholder": "txt",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -62,8 +117,7 @@
     "binary-split": "^1.0.5",
     "fs-extra": "^11.3.4",
     "run-applescript": "^7.1.0",
-    "through2-map": "^4.0.0",
-    "yup": "^1.7.1"
+    "through2-map": "^4.0.0"
   },
   "devDependencies": {
     "@jest/globals": "^30.3.0",

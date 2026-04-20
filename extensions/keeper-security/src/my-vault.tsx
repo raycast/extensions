@@ -16,6 +16,15 @@ const RECORD_DETAILS_INITIAL_STATE = {
   recordDetails: null as DetailedRecordResponse | null,
 };
 
+/** Raycast requires List.Item `title` to be a non-empty string (whitespace-only is rejected). */
+function listItemDisplayTitle(vaultTitle: unknown, recordUid: unknown): string {
+  const fromVault = String(vaultTitle ?? "").trim();
+  if (fromVault) return fromVault;
+  const fromUid = String(recordUid ?? "").trim();
+  if (fromUid) return fromUid;
+  return "Untitled";
+}
+
 export default function MyVault() {
   const [recordType, setRecordType] = useCachedState<string>("selected_record_type", DEFAULT_CATEGORY);
   const [originalRecords, setOriginalRecords] = useState<ProcessedRecord[]>([]);
@@ -91,7 +100,7 @@ export default function MyVault() {
       for (const record of fetchedRecords as ListRecord[]) {
         const temp: ProcessedRecord = {
           recordUid: record.record_uid,
-          title: String(record.title ?? "").trim() || record.record_uid || "Untitled",
+          title: listItemDisplayTitle(record.title, record.record_uid),
           type: record.type,
           description: record.description ?? "",
         };
@@ -190,7 +199,10 @@ export default function MyVault() {
               accessories={[
                 {
                   tag: {
-                    value: RECORD_TYPE_TO_TITLE_MAP[record.type as RecordTypes] ?? camelCaseToWords(record.type),
+                    value:
+                      String(
+                        RECORD_TYPE_TO_TITLE_MAP[record.type as RecordTypes] ?? camelCaseToWords(record.type) ?? "",
+                      ).trim() || "Record",
                     color: Color.Yellow,
                   },
                 },

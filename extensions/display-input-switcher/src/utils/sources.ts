@@ -11,6 +11,7 @@ const VALUE_TO_NAME: Record<number, string> = {
   16: "DisplayPort 2",
   17: "HDMI 1",
   18: "HDMI 2",
+  19: "HDMI 3 / Alt DP 2",
   27: "USB-C",
 };
 

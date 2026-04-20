@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo } from "react";
 import { ActionPanel } from "@raycast/api";
 import { SwitchToBranch } from "../actions/SwitchToBranch.js";
 import { DeleteBranch } from "../actions/DeleteBranch.js";
@@ -17,10 +17,16 @@ interface Props {
   updateRepo: (value: string) => Promise<void>;
 }
 
-export function GitBranchItemActions({ branch, isCurrentBranch, isWorktree, checkBranches, updateRepo }: Props) {
+export const GitBranchItemActions = memo(function GitBranchItemActions({
+  branch,
+  isCurrentBranch,
+  isWorktree,
+  checkBranches,
+  updateRepo,
+}: Props) {
   const { data: worktreeDir } = useWorktreeDir(branch);
 
-  const actions = useMemo(() => {
+  const actions = () => {
     if (isWorktree) {
       return (
         <>
@@ -40,14 +46,14 @@ export function GitBranchItemActions({ branch, isCurrentBranch, isWorktree, chec
     }
 
     return null;
-  }, [branch, checkBranches, isCurrentBranch, isWorktree, updateRepo, worktreeDir]);
+  };
 
   return (
     <ActionPanel>
-      {actions}
+      {actions()}
       <CreateNewBranch checkBranches={checkBranches} />
       <CreateNewWorkTree checkBranches={checkBranches} />
       <SwitchToLastBranch checkBranches={checkBranches} />
     </ActionPanel>
   );
-}
+});

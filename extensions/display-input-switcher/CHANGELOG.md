@@ -1,5 +1,9 @@
 # Display Input Switcher Changelog
 
+## [Added HDMI 3 source option] - 2026-04-13
+
+- Added HDMI 3 / Alt DP 2 to the list of available display input sources
+
 ## [Initial Version] - 2026-04-10
 
 - Switch Input Source command with dropdown selection (HDMI 1/2, DisplayPort 1/2, USB-C)
