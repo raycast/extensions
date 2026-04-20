@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/command-icon.png" width="128" height="128" alt="Keyraycast icon" />
+  <img src="assets/command-icon.png" width="128" height="128" alt="KeyRaycast icon" />
 </p>
 
-<h1 align="center">Keyraycast</h1>
+<h1 align="center">KeyRaycast</h1>
 
 <p align="center">
   Show keystrokes on screen. A modern <a href="https://github.com/keycastr/keycastr">KeyCastr</a> alternative as a Raycast extension.
@@ -10,7 +10,7 @@
   Great for screen recordings, live demos, presentations, and bug reports.
 </p>
 
-![Liquid Glass on macOS 26](metadata/keyraycast-3.png)
+![Liquid Glass on macOS 26](media/keyraycast-3.png)
 
 ## Features
 
@@ -32,7 +32,7 @@
 
 ### Accessibility Permission
 
-Keyraycast uses a macOS CGEventTap to capture keystrokes. This requires Accessibility permission. The first time you run it, macOS will prompt you to grant access. If the overlay doesn't appear, check System Settings > Privacy & Security > Accessibility and make sure Raycast (or the KeyraycastHelper) is enabled.
+KeyRaycast uses a macOS CGEventTap to capture keystrokes. This requires Accessibility permission. The first time you run it, macOS will prompt you to grant access. If the overlay doesn't appear, check System Settings > Privacy & Security > Accessibility and make sure Raycast (or the KeyraycastHelper) is enabled.
 
 ## Settings
 
@@ -51,10 +51,10 @@ Change settings in Raycast preferences. Toggle the overlay off then on to apply 
 
 ## Preview
 
-|                                                                           |                                                                         |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| ![Raycast command](metadata/keyraycast-1.png) _Toggle command in Raycast_ | ![Light theme](metadata/keyraycast-2.png) _Typed text with light theme_ |
-| ![Glass theme](metadata/keyraycast-3.png) _Liquid Glass on macOS 26_      | ![Dark theme](metadata/keyraycast-4.png) _Shortcuts with dark theme_    |
+|                                                                        |                                                                      |
+| ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| ![Raycast command](media/keyraycast-1.png) _Toggle command in Raycast_ | ![Light theme](media/keyraycast-2.png) _Typed text with light theme_ |
+| ![Glass theme](media/keyraycast-3.png) _Liquid Glass on macOS 26_      | ![Dark theme](media/keyraycast-4.png) _Shortcuts with dark theme_    |
 
 ## How It Works
 

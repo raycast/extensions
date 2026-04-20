@@ -1,13 +1,13 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Show keystrokes on screen with floating overlay pills
-- Three display modes: All Keys, All Modified Keys, Command Keys Only
-- Mouse click visualization (modifier+clicks and right-clicks)
-- Multi-monitor support (overlay follows cursor)
-- Appearance themes: Dark, Light, Auto, Liquid Glass (macOS 26+)
-- Six overlay positions (top/bottom, left/center/right)
-- Adjustable display duration (0.5s to 5.0s)
-- International keyboard layout support
-- Smart pill grouping (typing collapses, shortcuts get own pill)
-- Event tap auto-recovery under heavy system load
-- Native Swift helper binary (arm64 + x86_64)
+- Shows keystrokes on screen with floating overlay pills.
+- Supports three display modes: All Keys, All Modified Keys, and Command Keys Only.
+- Visualizes mouse clicks (modifier+clicks and right-clicks).
+- Supports multiple monitors and follows the cursor across screens.
+- Includes appearance themes: Dark, Light, Auto, and Liquid Glass (macOS 26+).
+- Offers six overlay positions (top/bottom, left/center/right).
+- Lets you adjust display duration from 0.5s to 5.0s.
+- Supports international keyboard layouts for correct character display.
+- Groups keystrokes into smart pills (typing collapses continuously while shortcuts get their own pills).
+- Recovers the event tap automatically under heavy system load.
+- Ships a native Swift helper binary built for arm64 and x86_64.
