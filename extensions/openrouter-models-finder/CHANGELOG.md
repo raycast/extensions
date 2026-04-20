@@ -1,6 +1,6 @@
 # OpenRouter Models Finder Changelog
 
-## [Update Default Actions] - {PR_MERGE_DATE}
+## [Update Default Actions] - 2026-04-20
 
 - Make Enter paste the selected model ID into the active app
 - Move Copy Model ID to Command + Return
