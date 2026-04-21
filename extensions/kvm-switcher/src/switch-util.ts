@@ -1,8 +1,7 @@
-import { showHUD, showToast, Toast, Clipboard, open } from "@raycast/api";
+import { showHUD, showToast, Toast, Clipboard, open, environment } from "@raycast/api";
 import { exec } from "child_process";
 import { promisify } from "util";
 import path from "path";
-import { environment } from "@raycast/api";
 
 const execAsync = promisify(exec);
 
