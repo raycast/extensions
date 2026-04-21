@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  在 macOS 上选中任意文字，通过 <a href="https://www.raycast.com/">Raycast</a> 一键朗读，基于<a href="https://www.volcengine.com/docs/6561/1598757">火山引擎豆包语音合成大模型 V3</a>。
+  在 macOS 上选中任意文字，通过 <a href="https://www.raycast.com/">Raycast</a> 一键朗读，基于<a href="https://www.volcengine.com/docs/6561/1329505">火山引擎豆包语音合成大模型 V3 WebSocket 流式接口</a>。
 </p>
 
 ---
@@ -13,7 +13,7 @@
 ## 功能特性
 
 - **一键朗读**：选中文字后快速朗读，无需打开视图。
-- **音色选择**：浏览 90+ 个中英文音色。
+- **音色选择**：浏览 160+ 个中英文音色，包含官方豆包语音合成模型 2.0 音色列表。
 - **Quick Read 音色选择**：选择并试听 Quick Read 默认音色。
 - **设为 Quick Read 音色**：在音色列表中直接把某个音色设为默认朗读音色。
 - **停止播放**：随时停止播放，也可以再次触发 Quick Read 来停止。
@@ -66,18 +66,17 @@
 
 ## 技术细节
 
-- **API**：火山引擎豆包 TTS V3 HTTP 单向流式接口
-- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id` + 每次请求唯一的 `X-Api-Request-Id`，并兼容旧版 `X-Api-App-Id` + `X-Api-Access-Key`
-- **响应**：JSON Lines (NDJSON)
+- **API**：火山引擎豆包 TTS V3 WebSocket 双向流式接口
+- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id` + 每次连接唯一的 `X-Api-Connect-Id`，并兼容旧版 `X-Api-App-Id` + `X-Api-Access-Key`
+- **响应**：V3 WebSocket 二进制帧，音频 payload 为流式 MP3 数据
 - **音频**：MP3，24000 Hz
-- **分片**：按标点智能拆分，每片不超过 1024 UTF-8 字节
+- **分片**：按标点智能拆分，每片不超过 4096 UTF-8 字节
 - **播放**：macOS 内置 `afplay`
 - **停止控制**：共享 PID 文件 `$TMPDIR/doubao-tts.pid`
 
 ## 相关文档
 
 - [Raycast 扩展文档](https://developers.raycast.com/)
-- [豆包语音合成大模型 V3](https://www.volcengine.com/docs/6561/1598757)
 - [豆包语音合成大模型 V3 WebSocket 双向流式](https://www.volcengine.com/docs/6561/1329505)
 - [豆包大模型音色列表](https://www.volcengine.com/docs/6561/1257544)
 - [火山引擎控制台 FAQ](https://www.volcengine.com/docs/6561/196768)

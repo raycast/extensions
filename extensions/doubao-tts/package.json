@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doubao-tts",
   "title": "Doubao TTS",
-  "description": "Read selected text aloud using Volcengine Doubao TTS with 90+ Chinese and English voices",
+  "description": "Read selected text aloud using Volcengine Doubao TTS with 160+ Chinese and English voices",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -25,7 +25,7 @@
       "name": "read-with-voice",
       "title": "Read with Voice Selection",
       "subtitle": "Doubao TTS",
-      "description": "Browse 90+ voices and read selected text aloud",
+      "description": "Browse 160+ voices and read selected text aloud",
       "mode": "view"
     },
     {
@@ -123,6 +123,26 @@
           "value": "zh_male_taocheng_uranus_bigtts"
         },
         {
+          "title": "Sweet Taozi 2.0 (Female, ZH)",
+          "value": "zh_female_tianmeitaozi_uranus_bigtts"
+        },
+        {
+          "title": "Warm Mom 2.0 (Female, ZH)",
+          "value": "zh_female_wenroumama_uranus_bigtts"
+        },
+        {
+          "title": "Gentle Xiaoya 2.0 (Female, ZH)",
+          "value": "zh_female_wenrouxiaoya_uranus_bigtts"
+        },
+        {
+          "title": "Erudite Uncle 2.0 (Male, ZH)",
+          "value": "zh_male_yuanboxiaoshu_uranus_bigtts"
+        },
+        {
+          "title": "Late Night Podcast 2.0 (Male, ZH)",
+          "value": "zh_male_shenyeboke_uranus_bigtts"
+        },
+        {
           "title": "Cancan 1.0 (Female, ZH)",
           "value": "zh_female_cancan_mars_bigtts"
         },
@@ -185,12 +205,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
+    "@types/ws": "^8.18.1",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.9.3"

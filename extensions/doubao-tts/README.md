@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  Select any text on macOS and read it aloud with <a href="https://www.raycast.com/">Raycast</a>, powered by <a href="https://www.volcengine.com/docs/6561/1598757">Volcengine Doubao TTS V3</a>.
+  Select any text on macOS and read it aloud with <a href="https://www.raycast.com/">Raycast</a>, powered by <a href="https://www.volcengine.com/docs/6561/1329505">Volcengine Doubao TTS V3 WebSocket streaming</a>.
 </p>
 
 ---
@@ -17,7 +17,7 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 ## Features
 
 - **Quick Read**: select text and read it aloud instantly without opening a view.
-- **Voice Selection**: browse 90+ voices organized by category.
+- **Voice Selection**: browse 160+ voices organized by category, including the official Doubao TTS 2.0 voice catalog.
 - **Select Quick Read Voice**: choose and preview the voice used by Quick Read.
 - **Set Quick Read Voice**: set any listed voice as the Quick Read default from the action panel.
 - **Stop Reading**: stop playback anytime, or trigger Quick Read again to toggle playback off.
@@ -81,18 +81,17 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 
 ## Technical Details
 
-- **API**: Volcengine Doubao TTS V3 HTTP unidirectional streaming
-- **Auth**: `X-Api-Key` + `X-Api-Resource-Id` + per-request `X-Api-Request-Id`, with legacy fallback to `X-Api-App-Id` + `X-Api-Access-Key`
-- **Response**: JSON Lines (NDJSON)
+- **API**: Volcengine Doubao TTS V3 WebSocket bidirectional streaming
+- **Auth**: `X-Api-Key` + `X-Api-Resource-Id` + per-connection `X-Api-Connect-Id`, with legacy fallback to `X-Api-App-Id` + `X-Api-Access-Key`
+- **Response**: binary V3 WebSocket frames with streamed MP3 audio payloads
 - **Audio**: MP3, 24000 Hz
-- **Chunking**: smart split by punctuation, up to 1024 UTF-8 bytes per chunk
+- **Chunking**: smart split by punctuation, up to 4096 UTF-8 bytes per chunk
 - **Playback**: macOS built-in `afplay`
 - **Stop Control**: shared PID file at `$TMPDIR/doubao-tts.pid`
 
 ## References
 
 - [Raycast Extension Docs](https://developers.raycast.com/)
-- [Doubao TTS V3 HTTP API](https://www.volcengine.com/docs/6561/1598757)
 - [Doubao TTS V3 WebSocket Bidirectional API](https://www.volcengine.com/docs/6561/1329505)
 - [Doubao Voice Catalog](https://www.volcengine.com/docs/6561/1257544)
 - [Volcengine Console FAQ](https://www.volcengine.com/docs/6561/196768)

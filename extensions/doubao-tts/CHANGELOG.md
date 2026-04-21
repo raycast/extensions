@@ -4,9 +4,11 @@
 
 - Add Select Quick Read Voice for choosing and previewing the default Quick Read voice
 - Add action to set any listed voice as the Quick Read voice
+- Sync the TTS 2.0 voice selector with the official Volcengine Doubao voice catalog
 - Support new Volcengine X-Api-Key authentication with legacy App ID/Access Key fallback
-- Add a unique X-Api-Request-Id header for each V3 HTTP synthesis request
-- Stream V3 HTTP responses incrementally and pre-synthesize the next text chunk during playback
+- Switch synthesis transport to the V3 bidirectional WebSocket streaming API
+- Add a unique X-Api-Connect-Id header for each WebSocket connection
+- Increase the default text chunk size for fewer WebSocket sessions on medium-length articles
 - Refresh the extension icon with light and dark theme variants
 
 ## [Initial Version] - 2026-03-05
