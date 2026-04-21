@@ -8,11 +8,6 @@ const execFileP = promisify(execFile);
 
 const CORE_LOCATION_PATHS = ["/opt/homebrew/bin/CoreLocationCLI", "/usr/local/bin/CoreLocationCLI"];
 
-interface Prefs {
-  manualLat?: string;
-  manualLng?: string;
-}
-
 interface CacheEntry {
   at: number;
   resolved: ResolvedLocation;
@@ -69,7 +64,7 @@ export async function resolveLocation(options?: { force?: boolean }): Promise<Re
 }
 
 function readManualCoords(): Coords | null {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const lat = parseFloat((prefs.manualLat ?? "").trim());
   const lng = parseFloat((prefs.manualLng ?? "").trim());
   if (Number.isFinite(lat) && Number.isFinite(lng)) return { lat, lng };
