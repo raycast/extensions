@@ -42,6 +42,13 @@
       "subtitle": "Toggle Proxy",
       "description": "Manage VLESS subscription URLs and update configs",
       "mode": "view"
+    },
+    {
+      "name": "routing-rules",
+      "title": "Routing Rules",
+      "subtitle": "Toggle Proxy",
+      "description": "Customize routing rules per subscription. Overrides the rules baked into subscription configs when enabled.",
+      "mode": "view"
     }
   ],
   "preferences": [

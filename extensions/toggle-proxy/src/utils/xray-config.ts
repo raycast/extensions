@@ -34,13 +34,7 @@ export function generateXrayConfig(vlessUrl: string, options: XrayConfigOptions 
     const baseRules: Array<{ type: string; domain?: string[]; port?: string; ip?: string[]; outboundTag: string }> = [
       {
         type: "field",
-        domain: [
-          "regexp:.*\\.ru$",
-          "findlerbot.com",
-          "regexp:.*\\.findlerbot\\.com$",
-          "regexp:.*\\.ubuntu\\.com$",
-          "regexp:.*\\.npmjs\\.com$",
-        ],
+        domain: ["regexp:.*\\.ru$", "regexp:.*\\.ubuntu\\.com$", "regexp:.*\\.npmjs\\.com$"],
         outboundTag: "direct",
       },
       {

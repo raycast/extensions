@@ -3,18 +3,24 @@ import { useEffect, useState } from "react";
 import { execaCommand } from "execa";
 import { tmux, ENV_PATH } from "./utils/exec";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import * as net from "net";
 import { getXrayPath } from "./utils/xray-config";
 import { loadSubscriptionConfigs, getSubscriptions, updateSubscription } from "./utils/subscription";
 import { safePort, sanitizeShellArg, shellEscape } from "./utils/types";
 import { realDelayBatch, type BatchEntry } from "./utils/real-delay";
+import { getSubRules, patchConfigWithSubRules, resolveSubSlug } from "./utils/routing-rules";
 
 const cache = new Cache({ namespace: "menu-bar-proxy" });
 
 function getProxySessionName(configName: string): string {
   const encodedName = Buffer.from(configName.replace(/\.json$/i, ""), "utf8").toString("base64url");
   return `toggle-proxy-${encodedName}`;
+}
+
+function getLaunchTempPath(sessionName: string): string {
+  return path.join(os.tmpdir(), `toggle-proxy-launch-${sessionName}.json`);
 }
 
 function getConfigNameFromSession(sessionName: string): string | null {
@@ -294,6 +300,11 @@ export default function MenuBarProxy() {
         if (sessionName.startsWith("toggle-proxy-")) {
           const safeName = sanitizeShellArg(sessionName);
           await tmux(`kill-session -t ${safeName}`);
+          try {
+            fs.unlinkSync(getLaunchTempPath(sessionName));
+          } catch {
+            // ignore — temp file may not exist
+          }
         }
       }
       setCurrentConfig(null);
@@ -331,10 +342,28 @@ export default function MenuBarProxy() {
       await stopAllProxySessions();
 
       const sessionName = getProxySessionName(configName);
-      const safeConfigName = shellEscape(configName);
+      let configForLaunch = configPath;
+
+      const subSlug = resolveSubSlug(configName);
+      if (subSlug) {
+        const rules = await getSubRules(subSlug);
+        if (rules) {
+          try {
+            const cfg = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+            const patched = patchConfigWithSubRules(cfg, rules);
+            const tempPath = getLaunchTempPath(sessionName);
+            fs.writeFileSync(tempPath, JSON.stringify(patched));
+            configForLaunch = tempPath;
+          } catch (e) {
+            console.log("Failed to apply routing rules, launching original config:", e);
+          }
+        }
+      }
+
+      const safeConfigPath = shellEscape(configForLaunch);
       const safeXrayPath = shellEscape(xrayPath);
       const xrayBin = fs.existsSync(path.join(xrayPath, "xray")) ? "./xray" : "xray";
-      const cmd = `new-session -d -s ${shellEscape(sessionName)} "export PATH='${ENV_PATH}' && cd ${safeXrayPath} && ${xrayBin} -config ${safeConfigName}; echo EXIT_CODE=\\$?; sleep 30"`;
+      const cmd = `new-session -d -s ${shellEscape(sessionName)} "export PATH='${ENV_PATH}' && cd ${safeXrayPath} && ${xrayBin} -config ${safeConfigPath}; echo EXIT_CODE=\\$?; sleep 30"`;
 
       await tmux(cmd);
 

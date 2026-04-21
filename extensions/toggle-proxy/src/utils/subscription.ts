@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
 import { generateXrayConfig, getXrayPath } from "./xray-config";
+import { deleteSubRules } from "./routing-rules";
 
 export interface Subscription {
   id: string;
@@ -46,11 +47,11 @@ export async function deleteSubscription(id: string, xrayPathPref?: string): Pro
   const subs = await getSubscriptions();
   const sub = subs.find((s) => s.id === id);
   if (sub) {
-    // Remove config directory
     const subDir = getSubscriptionDir(sub.name, xrayPathPref);
     if (fs.existsSync(subDir)) {
       fs.rmSync(subDir, { recursive: true, force: true });
     }
+    await deleteSubRules(slugify(sub.name));
   }
   await saveSubscriptions(subs.filter((s) => s.id !== id));
 }
@@ -145,7 +146,7 @@ function getSubscriptionDir(subName: string, xrayPathPref?: string): string {
   return path.join(xrayPath, "subscriptions", slug);
 }
 
-function slugify(name: string): string {
+export function slugify(name: string): string {
   return (
     name
       .toLowerCase()
