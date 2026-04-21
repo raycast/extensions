@@ -47,29 +47,33 @@ function ChannelItemActions({
       </ActionPanel.Section>
       <ActionPanel.Section>
         <ToggleViewAction mode={mode} toggle={toggle} />
-        <Action.Push icon={Icon.Pencil} title="Edit Channel" target={<EditChannelView channel={channel} />} />
-        <Action
-          icon={Icon.Trash}
-          title="Delete Channel"
-          style={Action.Style.Destructive}
-          onAction={async () => {
-            const confirmed = await confirmAlert({
-              title: "Delete channel?",
-              message: "This cannot be undone.",
-              primaryAction: {
-                title: "Delete",
-                style: Alert.ActionStyle.Destructive,
-              },
-            });
-            if (!confirmed) return;
-            try {
-              await arena.channel(channel.slug).delete();
-              await showToast({ style: Toast.Style.Success, title: "Channel deleted", message: channel.title });
-            } catch (error) {
-              showFailureToast(error, { title: "Failed to delete channel" });
-            }
-          }}
-        />
+        {channel.can?.update ? (
+          <Action.Push icon={Icon.Pencil} title="Edit Channel" target={<EditChannelView channel={channel} />} />
+        ) : null}
+        {channel.can?.destroy ? (
+          <Action
+            icon={Icon.Trash}
+            title="Delete Channel"
+            style={Action.Style.Destructive}
+            onAction={async () => {
+              const confirmed = await confirmAlert({
+                title: "Delete channel?",
+                message: "This cannot be undone.",
+                primaryAction: {
+                  title: "Delete",
+                  style: Alert.ActionStyle.Destructive,
+                },
+              });
+              if (!confirmed) return;
+              try {
+                await arena.channel(channel.slug).delete();
+                await showToast({ style: Toast.Style.Success, title: "Channel deleted", message: channel.title });
+              } catch (error) {
+                showFailureToast(error, { title: "Failed to delete channel" });
+              }
+            }}
+          />
+        ) : null}
       </ActionPanel.Section>
       <ActionPanel.Section>
         {channel.slug && <Action.OpenInBrowser url={`https://www.are.na/${channel.owner_slug}/${channel.slug}`} />}

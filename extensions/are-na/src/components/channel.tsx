@@ -35,12 +35,14 @@ export function ChannelView({ channel }: { channel: MinimalChannel }) {
       setIsLoading(true);
       try {
         const chan = arena.channel(channel.slug);
-        const fullChannel = await chan.get();
-        const { items: contents, hasMorePages } = await chan.contents({
-          sort: "position_desc",
-          page,
-          per: pageSize,
-        });
+        const [fullChannel, { items: contents, hasMorePages }] = await Promise.all([
+          chan.get(),
+          chan.contents({
+            sort: "position_desc",
+            page,
+            per: pageSize,
+          }),
+        ]);
         if (cancelled) return;
         setData((previous) => ({
           id: fullChannel.id,
