@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  getPreferenceValues,
+  Icon,
+  List,
+  openCommandPreferences,
+  type PreferenceValues,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useDocDetail } from "./hooks/useDocDetail";
 import { useInventory } from "./hooks/useInventory";
@@ -7,12 +16,6 @@ import { type DocumentationSourceMode } from "./lib/docs-source";
 import { type InventoryItem } from "./lib/inventory";
 import { applyPrefixPreference } from "./lib/prefix";
 import { searchInventory } from "./lib/search";
-
-interface Preferences {
-  documentationSourceMode: DocumentationSourceMode;
-  localDocsDirectory?: string;
-  useShortPrefix: boolean;
-}
 
 type DetailRenderState = {
   detail?: DocDetail;
@@ -25,7 +28,7 @@ const RECOVERY_ITEM_ID = "__recovery__";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<PreferenceValues>();
 
   const {
     data: inventory = [],
@@ -35,8 +38,8 @@ export default function Command() {
     revalidate: revalidateInventory,
     source: inventorySource,
   } = useInventory({
-    localDocsDirectory: preferences.localDocsDirectory,
-    mode: preferences.documentationSourceMode,
+    localDocsDirectory: preferences.localDocsDirectory as string | undefined,
+    mode: preferences.documentationSourceMode as DocumentationSourceMode,
   });
 
   const results = useMemo(() => searchInventory(inventory, searchText), [inventory, searchText]);
@@ -77,8 +80,8 @@ export default function Command() {
   } = useDocDetail({
     inventorySource,
     item: selectedItem,
-    localDocsDirectory: preferences.localDocsDirectory,
-    mode: preferences.documentationSourceMode,
+    localDocsDirectory: preferences.localDocsDirectory as string | undefined,
+    mode: preferences.documentationSourceMode as DocumentationSourceMode,
   });
 
   const listIsLoading = isLoadingInventory;
