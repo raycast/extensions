@@ -31,8 +31,10 @@ public class MonitorControl
     [DllImport("dxva2.dll", SetLastError = true)]
     public static extern bool DestroyPhysicalMonitors(uint dwPhysicalMonitorArraySize, [In] PHYSICAL_MONITOR[] pPhysicalMonitorArray);
 
-    public static void SetInput(uint inputCode)
+    public static bool SetInput(uint inputCode)
     {
+        bool success = false;
+
         EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, delegate (IntPtr hMonitor, IntPtr hdcMonitor, ref Rect lprcMonitor, IntPtr dwData)
         {
 
@@ -50,7 +52,10 @@ public class MonitorControl
                     // iterate through all physical displays and send the VCP KVM KVM command (0x60)
                     for (uint i = 0; i < monitorCount; i++)
                     {
-                        SetVCPFeature(pms[i].hPhysicalMonitor, 0x60, inputCode);
+                        if (SetVCPFeature(pms[i].hPhysicalMonitor, 0x60, inputCode))
+                        {
+                            success = true;
+                        }
                     }
 
                     DestroyPhysicalMonitors(monitorCount, pms);
@@ -58,5 +63,7 @@ public class MonitorControl
             }
             return true; // Continue enumerating other logical monitors
         }, IntPtr.Zero);
+        
+        return success;
     }
 }
