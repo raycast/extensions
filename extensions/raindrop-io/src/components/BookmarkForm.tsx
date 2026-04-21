@@ -149,7 +149,6 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         title="Link"
         placeholder="https://example.com"
         info={mode === "edit" ? undefined : "You can add multiple links separated by commas, spaces, or semicolons."}
-        autoFocus
         onBlur={(event) => {
           const link = event.target.value;
           if (link && link !== linkRef.current) {
@@ -167,6 +166,7 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
         {...itemProps.collection}
         title="Collection"
         isLoading={isLoadingCollections}
+        autoFocus
         value={dropdownValue}
         onChange={(newValue: string) => {
           setShowCollectionCreation(newValue === "-2");
