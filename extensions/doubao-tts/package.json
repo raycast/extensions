@@ -29,6 +29,13 @@
       "mode": "view"
     },
     {
+      "name": "select-voice",
+      "title": "Select Quick Read Voice",
+      "subtitle": "Doubao TTS",
+      "description": "Choose and preview the voice used by Quick Read",
+      "mode": "view"
+    },
+    {
       "name": "stop-reading",
       "title": "Stop Reading",
       "subtitle": "Doubao TTS",
@@ -38,19 +45,27 @@
   ],
   "preferences": [
     {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Volcengine Doubao Speech API Key (preferred, X-Api-Key)",
+      "placeholder": "Enter your API Key"
+    },
+    {
       "name": "appId",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "App ID",
-      "description": "Volcengine TTS App ID (X-Api-App-Id)",
+      "description": "Legacy Volcengine TTS App ID (used only when API Key is empty)",
       "placeholder": "Enter your App ID"
     },
     {
       "name": "accessKey",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Access Key",
-      "description": "Volcengine TTS Access Key (X-Api-Access-Key)",
+      "description": "Legacy Volcengine TTS Access Key (used only when API Key is empty)",
       "placeholder": "Enter your Access Key"
     },
     {

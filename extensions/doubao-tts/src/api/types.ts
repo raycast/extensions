@@ -20,7 +20,7 @@ export interface TTSV3ResponseChunk {
   code: number;
   message: string;
   sequence: number;
-  data: string;
+  data?: string | null;
   addition?: {
     duration?: string;
     frontend?: string;

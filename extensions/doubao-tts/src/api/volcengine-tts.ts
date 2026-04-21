@@ -10,6 +10,8 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const DEFAULT_AUDIO_FORMAT = "mp3";
 const DEFAULT_SAMPLE_RATE = 24000;
 const DEFAULT_SPEAKER = "zh_female_vv_uranus_bigtts";
+type TTSAuthHeaders = Record<"Content-Type" | "X-Api-Resource-Id", string> &
+  Partial<Record<"X-Api-Key" | "X-Api-App-Id" | "X-Api-Access-Key", string>>;
 
 /**
  * Synthesize speech using the V3 streaming API.
@@ -19,14 +21,8 @@ const DEFAULT_SPEAKER = "zh_female_vv_uranus_bigtts";
  */
 export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<string> {
   const prefs = getPreferenceValues<Preferences>();
-
-  if (!prefs.appId?.trim()) {
-    throw new TTSApiError("App ID is required. Configure it in extension preferences.", -1);
-  }
-  if (!prefs.accessKey?.trim()) {
-    throw new TTSApiError("Access Key is required. Configure it in extension preferences.", -1);
-  }
   const resourceId = prefs.resourceId || "seed-tts-2.0";
+  const headers = buildAuthHeaders(prefs, resourceId);
 
   const trimmedText = text.trim();
   if (!trimmedText) {
@@ -52,12 +48,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
   try {
     const response = await fetch(API_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Api-App-Id": prefs.appId,
-        "X-Api-Access-Key": prefs.accessKey,
-        "X-Api-Resource-Id": resourceId,
-      },
+      headers,
       body: JSON.stringify(requestBody),
       signal: controller.signal,
     });
@@ -65,7 +56,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
     if (!response.ok) {
       const detail =
         response.status === 401
-          ? "Authentication failed. Please check App ID and Access Key in preferences."
+          ? "Authentication failed. Please check API Key or legacy App ID/Access Key in preferences."
           : `${response.statusText} (speaker: ${options.speaker})`;
       throw new TTSApiError(`HTTP ${response.status}: ${detail}`, response.status);
     }
@@ -81,17 +72,75 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
   }
 }
 
+function buildAuthHeaders(prefs: Preferences, resourceId: string): TTSAuthHeaders {
+  const apiKey = prefs.apiKey?.trim();
+  const appId = prefs.appId?.trim();
+  const accessKey = prefs.accessKey?.trim();
+  const headers: TTSAuthHeaders = {
+    "Content-Type": "application/json",
+    "X-Api-Resource-Id": resourceId,
+  };
+
+  if (apiKey) {
+    return { ...headers, "X-Api-Key": apiKey };
+  }
+
+  if (appId && accessKey) {
+    return { ...headers, "X-Api-App-Id": appId, "X-Api-Access-Key": accessKey };
+  }
+
+  throw new TTSApiError(
+    "API Key is required. Configure API Key, or provide legacy App ID and Access Key in extension preferences.",
+    -1,
+  );
+}
+
 /**
  * Parse the V3 response (JSON lines) and accumulate audio data.
  *
- * Reads the full response text, splits by newlines, decodes each base64
- * audio chunk to binary, concatenates, then re-encodes to base64.
- *
- * Note: Uses response.text() instead of streaming reader for broad
- * Node.js runtime compatibility (Raycast, etc.).
+ * Reads the HTTP response body incrementally, splits completed JSON lines,
+ * decodes each base64 audio chunk to binary, concatenates, then re-encodes to base64.
  */
 async function parseStreamResponse(response: Response, speaker: string): Promise<string> {
-  const text = await response.text();
+  if (!response.body) {
+    return parseResponseText(await response.text(), speaker);
+  }
+
+  const audioBuffers: Uint8Array[] = [];
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let pending = "";
+  let reading = true;
+
+  try {
+    while (reading) {
+      const { done, value } = await reader.read();
+      if (done) {
+        reading = false;
+        continue;
+      }
+
+      pending += decoder.decode(value, { stream: true });
+      const lines = pending.split("\n");
+      pending = lines.pop() ?? "";
+
+      for (const line of lines) {
+        processLine(line.trim(), speaker, audioBuffers);
+      }
+    }
+
+    pending += decoder.decode();
+    if (pending.trim()) {
+      processLine(pending.trim(), speaker, audioBuffers);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  return encodeAudioBuffers(audioBuffers);
+}
+
+function parseResponseText(text: string, speaker: string): string {
   if (!text.trim()) {
     throw new TTSApiError("Empty response body", -3);
   }
@@ -103,6 +152,10 @@ async function parseStreamResponse(response: Response, speaker: string): Promise
     processLine(line.trim(), speaker, audioBuffers);
   }
 
+  return encodeAudioBuffers(audioBuffers);
+}
+
+function encodeAudioBuffers(audioBuffers: Uint8Array[]): string {
   if (audioBuffers.length === 0) {
     throw new TTSApiError("No audio data received from TTS API", -4);
   }
