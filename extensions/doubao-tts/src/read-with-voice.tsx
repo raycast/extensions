@@ -7,6 +7,7 @@ import {
   getSelectedText,
   getPreferenceValues,
   Icon,
+  Color,
   openExtensionPreferences,
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
@@ -153,7 +154,7 @@ export default function ReadWithVoice() {
               title={voice.name}
               subtitle={voice.id}
               icon={voice.gender === "female" ? Icon.Female : voice.gender === "male" ? Icon.Male : Icon.Person}
-              accessories={[...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: "#3B82F6" } }] : [])]}
+              accessories={[...(playingVoiceId === voice.id ? [{ tag: { value: "Playing", color: Color.Blue } }] : [])]}
               actions={
                 <ActionPanel>
                   <Action title="Read with This Voice" icon={Icon.Play} onAction={() => handleRead(voice)} />
