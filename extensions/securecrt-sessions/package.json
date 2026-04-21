@@ -39,8 +39,8 @@
                 {
                     "name": "showHostnames",
                     "type": "checkbox",
-                    "required": false,
-                    "title": "Show Hostnames",
+                    "required": true,
+                    "title": "Show Hostnames and Protocols",
                     "label": "Show hostnames and protocols",
                     "description": "Read session files while loading to show hostnames and protocols in the list",
                     "default": true
