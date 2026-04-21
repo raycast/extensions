@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "next-luas",
+  "title": "Next Luas",
+  "description": "Live tram times for Dublin's Luas. Finds your closest stop via GPS and shows inbound and outbound forecasts in real time.",
+  "icon": "icon.png",
+  "author": "darrenmaher",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "commands": [
+    {
+      "name": "next-luas",
+      "title": "Next Luas",
+      "subtitle": "Dublin Tram Times",
+      "description": "Show live tram times for your closest Luas stop.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "manualLat",
+      "title": "Manual Latitude",
+      "description": "Pin the extension to a fixed latitude (e.g. 53.3257 for Dublin city centre). Overrides GPS. Leave blank to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "53.3257"
+    },
+    {
+      "name": "manualLng",
+      "title": "Manual Longitude",
+      "description": "Pin the extension to a fixed longitude (e.g. -6.2680). Overrides GPS. Leave blank to auto-detect.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "-6.2680"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0",
+    "fast-xml-parser": "^4.4.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.14.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

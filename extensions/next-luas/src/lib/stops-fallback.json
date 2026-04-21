@@ -1,0 +1,605 @@
+[
+  {
+    "abv": "TPT",
+    "name": "The Point",
+    "lat": 53.34835,
+    "lng": -6.22925833333333,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "SDK",
+    "name": "Spencer Dock",
+    "lat": 53.3488222222222,
+    "lng": -6.23714722222222,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "MYS",
+    "name": "Mayor Square - NCI",
+    "lat": 53.3492472222222,
+    "lng": -6.24339444444444,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "GDK",
+    "name": "George's Dock",
+    "lat": 53.349528,
+    "lng": -6.247575,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "CON",
+    "name": "Connolly",
+    "lat": 53.3509222222222,
+    "lng": -6.24994166666667,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "BUS",
+    "name": "Busáras",
+    "lat": 53.350075,
+    "lng": -6.25145,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "ABB",
+    "name": "Abbey Street",
+    "lat": 53.3485888888889,
+    "lng": -6.25817222222222,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "JER",
+    "name": "Jervis",
+    "lat": 53.3476861111111,
+    "lng": -6.26533333333333,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "FOU",
+    "name": "Four Courts",
+    "lat": 53.3468638888889,
+    "lng": -6.27343611111111,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "SMI",
+    "name": "Smithfield",
+    "lat": 53.3471333333333,
+    "lng": -6.27772777777778,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "MUS",
+    "name": "Museum",
+    "lat": 53.3478666666667,
+    "lng": -6.28671388888889,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "HEU",
+    "name": "Heuston",
+    "lat": 53.3466472222222,
+    "lng": -6.29180833333333,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "JAM",
+    "name": "James's",
+    "lat": 53.3419416666667,
+    "lng": -6.29336111111111,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "FAT",
+    "name": "Fatima",
+    "lat": 53.3384388888889,
+    "lng": -6.29254722222222,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "RIA",
+    "name": "Rialto",
+    "lat": 53.3379083333333,
+    "lng": -6.29724166666667,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "SUI",
+    "name": "Suir Road",
+    "lat": 53.3366166666667,
+    "lng": -6.30721111111111,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "GOL",
+    "name": "Goldenbridge",
+    "lat": 53.3358916666667,
+    "lng": -6.31356944444444,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "DRI",
+    "name": "Drimnagh",
+    "lat": 53.3353611111111,
+    "lng": -6.31816111111111,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "BLA",
+    "name": "Blackhorse",
+    "lat": 53.3342583333333,
+    "lng": -6.32739444444444,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "BLU",
+    "name": "Bluebell",
+    "lat": 53.3292972222222,
+    "lng": -6.33379166666667,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "KYL",
+    "name": "Kylemore",
+    "lat": 53.3266555555556,
+    "lng": -6.34344444444444,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "RED",
+    "name": "Red Cow",
+    "lat": 53.3168333333333,
+    "lng": -6.36987222222222,
+    "line": "Red",
+    "parkRide": true,
+    "cycleRide": true
+  },
+  {
+    "abv": "KIN",
+    "name": "Kingswood",
+    "lat": 53.3036944444444,
+    "lng": -6.36525,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "BEL",
+    "name": "Belgard",
+    "lat": 53.2992861111111,
+    "lng": -6.37488611111111,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "COO",
+    "name": "Cookstown",
+    "lat": 53.2935055555556,
+    "lng": -6.38439722222222,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "HOS",
+    "name": "Hospital",
+    "lat": 53.2893694444444,
+    "lng": -6.37885,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "TAL",
+    "name": "Tallaght",
+    "lat": 53.2874944444444,
+    "lng": -6.37458888888889,
+    "line": "Red",
+    "parkRide": true,
+    "cycleRide": true
+  },
+  {
+    "abv": "FET",
+    "name": "Fettercairn",
+    "lat": 53.29351885,
+    "lng": -6.395553516667,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "CVN",
+    "name": "Cheeverstown",
+    "lat": 53.290982416667,
+    "lng": -6.4068485,
+    "line": "Red",
+    "parkRide": true,
+    "cycleRide": true
+  },
+  {
+    "abv": "CIT",
+    "name": "Citywest Campus",
+    "lat": 53.28783255,
+    "lng": -6.418914583333,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "FOR",
+    "name": "Fortunestown",
+    "lat": 53.284250633333,
+    "lng": -6.42460165,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "SAG",
+    "name": "Saggart",
+    "lat": 53.28467885,
+    "lng": -6.43776255,
+    "line": "Red",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "BRO",
+    "name": "Broombridge",
+    "lat": 53.37223956,
+    "lng": -6.29768465,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "CAB",
+    "name": "Cabra",
+    "lat": 53.36433419,
+    "lng": -6.28196899,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "PHI",
+    "name": "Phibsborough",
+    "lat": 53.36037646,
+    "lng": -6.27888498,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "GRA",
+    "name": "Grangegorman",
+    "lat": 53.35719205,
+    "lng": -6.27733848,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "BRD",
+    "name": "Broadstone - University",
+    "lat": 53.35407442,
+    "lng": -6.27375642,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "DOM",
+    "name": "Dominick",
+    "lat": 53.3513492,
+    "lng": -6.26554234,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "PAR",
+    "name": "Parnell",
+    "lat": 53.35310356,
+    "lng": -6.26050153,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "OUP",
+    "name": "O'Connell - Upper",
+    "lat": 53.35161218,
+    "lng": -6.26102943,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "OGP",
+    "name": "O'Connell - GPO",
+    "lat": 53.34884509,
+    "lng": -6.25988168,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "MAR",
+    "name": "Marlborough",
+    "lat": 53.34924219,
+    "lng": -6.25773649,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "WES",
+    "name": "Westmoreland",
+    "lat": 53.34635626,
+    "lng": -6.25897083,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "TRY",
+    "name": "Trinity",
+    "lat": 53.34528172,
+    "lng": -6.25825674,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "DAW",
+    "name": "Dawson",
+    "lat": 53.34216927,
+    "lng": -6.25796366,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "STS",
+    "name": "St. Stephen's Green",
+    "lat": 53.3390722222222,
+    "lng": -6.26133333333333,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "HAR",
+    "name": "Harcourt",
+    "lat": 53.3333583333333,
+    "lng": -6.26265,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "CHA",
+    "name": "Charlemont",
+    "lat": 53.3306694444444,
+    "lng": -6.25868333333333,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "RAN",
+    "name": "Ranelagh",
+    "lat": 53.3264333333333,
+    "lng": -6.25620277777778,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "BEE",
+    "name": "Beechwood",
+    "lat": 53.3208222222222,
+    "lng": -6.25465277777778,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "COW",
+    "name": "Cowper",
+    "lat": 53.3164666666667,
+    "lng": -6.25344722222222,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "MIL",
+    "name": "Milltown",
+    "lat": 53.3099166666667,
+    "lng": -6.25172777777778,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "WIN",
+    "name": "Windy Arbour",
+    "lat": 53.3015583333333,
+    "lng": -6.25070833333333,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "DUN",
+    "name": "Dundrum",
+    "lat": 53.2923583333333,
+    "lng": -6.24511666666667,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "BAL",
+    "name": "Balally",
+    "lat": 53.2861055555556,
+    "lng": -6.23677222222222,
+    "line": "Green",
+    "parkRide": true,
+    "cycleRide": true
+  },
+  {
+    "abv": "KIL",
+    "name": "Kilmacud",
+    "lat": 53.2830083333333,
+    "lng": -6.22388611111111,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "STI",
+    "name": "Stillorgan",
+    "lat": 53.2793111111111,
+    "lng": -6.20991944444444,
+    "line": "Green",
+    "parkRide": true,
+    "cycleRide": true
+  },
+  {
+    "abv": "SAN",
+    "name": "Sandyford",
+    "lat": 53.2776027777778,
+    "lng": -6.20467777777778,
+    "line": "Green",
+    "parkRide": true,
+    "cycleRide": true
+  },
+  {
+    "abv": "CPK",
+    "name": "Central Park",
+    "lat": 53.27015,
+    "lng": -6.20376388888889,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "GLE",
+    "name": "Glencairn",
+    "lat": 53.2663361111111,
+    "lng": -6.20994166666667,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "GAL",
+    "name": "The Gallops",
+    "lat": 53.2611638888889,
+    "lng": -6.20602222222222,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "LEO",
+    "name": "Leopardstown Valley",
+    "lat": 53.2582472222222,
+    "lng": -6.19836111111111,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "BAW",
+    "name": "Ballyogan Wood",
+    "lat": 53.255047,
+    "lng": -6.184475,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "CCK",
+    "name": "Carrickmines",
+    "lat": 53.2540333333333,
+    "lng": -6.16990833333333,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": true
+  },
+  {
+    "abv": "LAU",
+    "name": "Laughanstown",
+    "lat": 53.2506055555556,
+    "lng": -6.15500555555556,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "CHE",
+    "name": "Cherrywood",
+    "lat": 53.2453333333333,
+    "lng": -6.14585277777778,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  },
+  {
+    "abv": "BRI",
+    "name": "Brides Glen",
+    "lat": 53.242075,
+    "lng": -6.14288611111111,
+    "line": "Green",
+    "parkRide": false,
+    "cycleRide": false
+  }
+]
