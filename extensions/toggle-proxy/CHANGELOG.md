@@ -1,6 +1,6 @@
 # Toggle Proxy Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-21
 
 - Add menu bar proxy toggle with config selection
 - Add VLESS URL to Xray JSON config converter
