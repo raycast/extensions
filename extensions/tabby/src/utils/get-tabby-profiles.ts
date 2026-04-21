@@ -1,7 +1,26 @@
 import { readFileSync, existsSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { getPreferenceValues } from "@raycast/api";
 import yaml from "js-yaml";
+
+interface Preferences {
+  tabbyPath?: string;
+  configPath?: string;
+}
+
+function getDefaultConfigPath(): string {
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA ?? join(homedir(), "AppData", "Roaming");
+    return join(appData, "tabby", "config.yaml");
+  }
+  return join(homedir(), "Library", "Application Support", "tabby", "config.yaml");
+}
+
+export function getConfigPath(): string {
+  const { configPath } = getPreferenceValues<Preferences>();
+  return configPath && configPath.trim().length > 0 ? configPath : getDefaultConfigPath();
+}
 
 export interface TabbyProfile {
   id: string;
@@ -16,16 +35,15 @@ interface TabbyConfig {
   groups?: Array<{ id: string; name: string }>;
 }
 
-const CONFIG_PATH = join(homedir(), "Library/Application Support/tabby/config.yaml");
-
 export function getTabbyProfiles(): TabbyProfile[] {
-  if (!existsSync(CONFIG_PATH)) {
-    console.error("Tabby config file not found at:", CONFIG_PATH);
+  const configPath = getConfigPath();
+  if (!existsSync(configPath)) {
+    console.error("Tabby config file not found at:", configPath);
     return [];
   }
 
   try {
-    const fileContent = readFileSync(CONFIG_PATH, "utf-8");
+    const fileContent = readFileSync(configPath, "utf-8");
     const config = yaml.load(fileContent) as TabbyConfig;
 
     if (!config.profiles || !Array.isArray(config.profiles)) {
@@ -46,12 +64,13 @@ export function getTabbyProfiles(): TabbyProfile[] {
 }
 
 export function getProfileGroups(): Map<string, string> {
-  if (!existsSync(CONFIG_PATH)) {
+  const configPath = getConfigPath();
+  if (!existsSync(configPath)) {
     return new Map();
   }
 
   try {
-    const fileContent = readFileSync(CONFIG_PATH, "utf-8");
+    const fileContent = readFileSync(configPath, "utf-8");
     const config = yaml.load(fileContent) as TabbyConfig;
 
     const groupMap = new Map<string, string>();
