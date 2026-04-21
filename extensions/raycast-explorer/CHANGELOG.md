@@ -1,5 +1,9 @@
 # Prompt Explorer Extension Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Add Windows support for the extension
+
 ## [AI Extensions updates] - 2025-03-04
 
 - Add AI Extensions to presets
