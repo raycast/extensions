@@ -10,7 +10,7 @@ const REQUEST_TIMEOUT_MS = 30_000;
 const DEFAULT_AUDIO_FORMAT = "mp3";
 const DEFAULT_SAMPLE_RATE = 24000;
 const DEFAULT_SPEAKER = "zh_female_vv_uranus_bigtts";
-type TTSAuthHeaders = Record<"Content-Type" | "X-Api-Resource-Id", string> &
+type TTSAuthHeaders = Record<"Content-Type" | "X-Api-Resource-Id" | "X-Api-Request-Id", string> &
   Partial<Record<"X-Api-Key" | "X-Api-App-Id" | "X-Api-Access-Key", string>>;
 
 /**
@@ -22,7 +22,8 @@ type TTSAuthHeaders = Record<"Content-Type" | "X-Api-Resource-Id", string> &
 export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<string> {
   const prefs = getPreferenceValues<Preferences>();
   const resourceId = prefs.resourceId || "seed-tts-2.0";
-  const headers = buildAuthHeaders(prefs, resourceId);
+  const requestId = randomUUID();
+  const headers = buildAuthHeaders(prefs, resourceId, requestId);
 
   const trimmedText = text.trim();
   if (!trimmedText) {
@@ -72,13 +73,14 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
   }
 }
 
-function buildAuthHeaders(prefs: Preferences, resourceId: string): TTSAuthHeaders {
+function buildAuthHeaders(prefs: Preferences, resourceId: string, requestId: string): TTSAuthHeaders {
   const apiKey = prefs.apiKey?.trim();
   const appId = prefs.appId?.trim();
   const accessKey = prefs.accessKey?.trim();
   const headers: TTSAuthHeaders = {
     "Content-Type": "application/json",
     "X-Api-Resource-Id": resourceId,
+    "X-Api-Request-Id": requestId,
   };
 
   if (apiKey) {

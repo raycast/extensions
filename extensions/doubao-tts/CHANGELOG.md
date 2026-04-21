@@ -5,6 +5,7 @@
 - Add Select Quick Read Voice for choosing and previewing the default Quick Read voice
 - Add action to set any listed voice as the Quick Read voice
 - Support new Volcengine X-Api-Key authentication with legacy App ID/Access Key fallback
+- Add a unique X-Api-Request-Id header for each V3 HTTP synthesis request
 - Stream V3 HTTP responses incrementally and pre-synthesize the next text chunk during playback
 - Refresh the extension icon with light and dark theme variants
 

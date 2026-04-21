@@ -67,7 +67,7 @@
 ## 技术细节
 
 - **API**：火山引擎豆包 TTS V3 HTTP 单向流式接口
-- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id`，并兼容旧版 `X-Api-App-Id` + `X-Api-Access-Key`
+- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id` + 每次请求唯一的 `X-Api-Request-Id`，并兼容旧版 `X-Api-App-Id` + `X-Api-Access-Key`
 - **响应**：JSON Lines (NDJSON)
 - **音频**：MP3，24000 Hz
 - **分片**：按标点智能拆分，每片不超过 1024 UTF-8 字节
@@ -78,6 +78,7 @@
 
 - [Raycast 扩展文档](https://developers.raycast.com/)
 - [豆包语音合成大模型 V3](https://www.volcengine.com/docs/6561/1598757)
+- [豆包语音合成大模型 V3 WebSocket 双向流式](https://www.volcengine.com/docs/6561/1329505)
 - [豆包大模型音色列表](https://www.volcengine.com/docs/6561/1257544)
 - [火山引擎控制台 FAQ](https://www.volcengine.com/docs/6561/196768)
 

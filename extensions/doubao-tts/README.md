@@ -82,7 +82,7 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 ## Technical Details
 
 - **API**: Volcengine Doubao TTS V3 HTTP unidirectional streaming
-- **Auth**: `X-Api-Key` + `X-Api-Resource-Id`, with legacy fallback to `X-Api-App-Id` + `X-Api-Access-Key`
+- **Auth**: `X-Api-Key` + `X-Api-Resource-Id` + per-request `X-Api-Request-Id`, with legacy fallback to `X-Api-App-Id` + `X-Api-Access-Key`
 - **Response**: JSON Lines (NDJSON)
 - **Audio**: MP3, 24000 Hz
 - **Chunking**: smart split by punctuation, up to 1024 UTF-8 bytes per chunk
@@ -93,6 +93,7 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 
 - [Raycast Extension Docs](https://developers.raycast.com/)
 - [Doubao TTS V3 HTTP API](https://www.volcengine.com/docs/6561/1598757)
+- [Doubao TTS V3 WebSocket Bidirectional API](https://www.volcengine.com/docs/6561/1329505)
 - [Doubao Voice Catalog](https://www.volcengine.com/docs/6561/1257544)
 - [Volcengine Console FAQ](https://www.volcengine.com/docs/6561/196768)
 
