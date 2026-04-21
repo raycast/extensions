@@ -1,0 +1,37 @@
+{
+  "name": "quick-launch",
+  "version": "0.1.0",
+  "description": "Launch grouped apps, websites, and desktop tools from a single Raycast manager.",
+  "scripts": {
+    "build": "npx ray build",
+    "dev": "npx ray develop",
+    "lint": "npx ray lint",
+    "publish": "npx ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.2"
+  },
+  "title": "Quick Launch",
+  "icon": "icon.png",
+  "author": "ian_lucas",
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "keywords": ["launcher", "apps", "groups", "shortcuts", "productivity"],
+  "commands": [
+    {
+      "name": "manage-app-groups",
+      "title": "Launch Manager",
+      "description": "Open grouped apps and manage them from a grid.",
+      "mode": "view"
+    }
+  ]
+}
