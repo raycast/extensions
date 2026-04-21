@@ -27,10 +27,7 @@ async function getSpaces(): Promise<Space[]> {
 
 // Toggle this to true for store screenshots, then back to false
 const DEMO_MODE = false;
-const DEMO_NAMES = [
-  "Email & Chat", "Code", "Design", "Research",
-  "Planning", "Music", "Notes", "Terminal",
-];
+const DEMO_NAMES = ["Email & Chat", "Code", "Design", "Research", "Planning", "Music", "Notes", "Terminal"];
 
 function applyDemoNames(spaces: Space[]): Space[] {
   if (!DEMO_MODE) return spaces;
@@ -118,9 +115,24 @@ function SpaceListItem({ space }: { space: Space }) {
 }
 
 const COLORS = [
-  "Purple", "Blue", "Teal", "Green", "Yellow", "Orange", "Red", "Pink",
-  "Indigo", "Cyan", "Mint", "Lime", "Amber", "Coral", "Rose", "Lavender",
-  "Slate", "Charcoal",
+  "Purple",
+  "Blue",
+  "Teal",
+  "Green",
+  "Yellow",
+  "Orange",
+  "Red",
+  "Pink",
+  "Indigo",
+  "Cyan",
+  "Mint",
+  "Lime",
+  "Amber",
+  "Coral",
+  "Rose",
+  "Lavender",
+  "Slate",
+  "Charcoal",
 ];
 
 const ICONS = [
