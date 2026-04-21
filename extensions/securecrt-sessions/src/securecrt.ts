@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { spawn } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 
@@ -22,13 +22,12 @@ function resolveExecutablePath(input?: string): string {
 
 export function openSession(sessionPath: string, executablePath = SECURECRT_EXECUTABLE): Promise<void> {
     return new Promise((resolve, reject) => {
-        execFile(resolveExecutablePath(executablePath), ["/T", "/S", sessionPath], (error) => {
-            if (error) {
-                reject(error);
-                return;
-            }
-
-            resolve();
+        const child = spawn(resolveExecutablePath(executablePath), ["/T", "/S", sessionPath], {
+            detached: true,
+            stdio: "ignore",
         });
+        child.on("error", reject);
+        child.on("spawn", resolve);
+        child.unref();
     });
 }
