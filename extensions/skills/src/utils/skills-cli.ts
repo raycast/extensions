@@ -49,7 +49,8 @@ async function runSkillsCli(args: string[]): Promise<string> {
 
   const npxCommand = customNpxPath ?? "npx";
   try {
-    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), await getExecOptions());
+    const execOptions = await getExecOptions();
+    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), execOptions);
     return stdout;
   } catch (error) {
     throw normalizeCliError(error, npxCommand);
@@ -67,7 +68,7 @@ function shellEscape(arg: string): string {
 function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
-      "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in Extension Preferences under 'Custom npx Path'.",
+      "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in the extension configuration under 'Custom npx Path'.",
     );
   }
 
@@ -80,7 +81,7 @@ function normalizeCliError(error: unknown, npxCommand: string): Error {
 
 async function validateCustomNpxPath(customNpxPath: string): Promise<void> {
   const invalidPathMessage =
-    "The configured Custom npx Path is incorrect. It must point to the `npx` executable. Update the path in Extension Preferences or clear it to use automatic detection.";
+    "The configured Custom npx Path is incorrect. It must point to the `npx` executable. Update the path in the extension configuration or clear it to use automatic detection.";
 
   const executableNames = isWindows ? new Set(["npx", "npx.cmd", "npx.exe"]) : new Set(["npx"]);
   if (!executableNames.has(basename(customNpxPath).toLowerCase())) {
