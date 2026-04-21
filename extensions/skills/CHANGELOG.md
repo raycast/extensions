@@ -4,6 +4,10 @@
 
 - Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
 
+## [Show Installed Badge in Search Results] - 2026-04-20
+
+- Show a green "Installed" tag on search results for skills that are already installed locally
+
 ## [Update Individual Skills] - 2026-04-17
 
 - Add per-skill update action using `skills update <name>` (requires `skills` CLI 1.5.0+), so a single outdated skill can be updated without touching the others

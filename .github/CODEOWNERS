@@ -97,6 +97,7 @@
 /extensions/app-tag-manager                                         @ZainCheung
 /extensions/appcleaner                                              @tborychowski
 /extensions/append-clipboard                                        @koinzhang @cyrusn
+/extensions/append-to-file                                          @lenpr
 /extensions/appgrid                                                 @Jungwoon
 /extensions/apple-books                                             @vimtor
 /extensions/apple-developer-docs                                    @CaliCastle
@@ -2688,7 +2689,7 @@
 /extensions/vuetify-docs                                            @jeffnawroth
 /extensions/vueuse-functions                                        @noopurphalak
 /extensions/vultr                                                   @xmok
-/extensions/wakatime                                                @iammola
+/extensions/wakatime                                                @iammola @olafvanmidden
 /extensions/waktu-solat                                             @sayuthisobri @ezzylan
 /extensions/wallhaven                                               @devadathanmb
 /extensions/warp                                                    @joetannenbaum @theRubberDuckiee @hakob8956 @drzastwakamil @chrismessina @pernielsentikaer
