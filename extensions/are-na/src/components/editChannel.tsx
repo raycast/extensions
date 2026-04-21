@@ -42,6 +42,7 @@ function EditChannelForm({ channel, loaded }: { channel: EditChannelProps; loade
               title: updated.title,
               user: updated.user,
               open: updated.open,
+              status: updated.status,
             }}
           />,
         );

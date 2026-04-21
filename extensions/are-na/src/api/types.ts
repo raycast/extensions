@@ -142,6 +142,7 @@ export interface MinimalChannel {
   title: string;
   user: string | { full_name: string };
   open?: boolean;
+  status?: ChannelStatus;
 }
 
 export interface SearchFilters extends PaginationParams {
