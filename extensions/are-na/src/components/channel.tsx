@@ -36,7 +36,7 @@ export function ChannelView({ channel }: { channel: MinimalChannel }) {
       try {
         const chan = arena.channel(channel.slug);
         const fullChannel = await chan.get();
-        const contents = await chan.contents({
+        const { items: contents, hasMorePages } = await chan.contents({
           sort: "position_desc",
           page,
           per: pageSize,
@@ -51,7 +51,7 @@ export function ChannelView({ channel }: { channel: MinimalChannel }) {
           collaborators: fullChannel.collaborators.length,
           canDelete: Boolean(fullChannel.can?.destroy),
           open: fullChannel.open,
-          hasMore: contents.length === pageSize,
+          hasMore: hasMorePages,
         }));
       } catch {
         if (!cancelled) setData(undefined);

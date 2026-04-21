@@ -63,7 +63,7 @@ export default async function tool(input: Input) {
 
     const arena = await getAuthenticatedArena();
     const ref = parseChannelRef(input.identifier);
-    const items = await arena.channel(ref).contents({ page, per, sort });
+    const { items } = await arena.channel(ref).contents({ page, per, sort });
 
     return {
       identifier: input.identifier,

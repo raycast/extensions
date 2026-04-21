@@ -452,13 +452,9 @@ export class Arena {
         const response = await this.getList<unknown>(`channels/${channelIdentifier}/connections`, params);
         return response.items.map(mapChannel);
       },
-      channels: async (params?: SearchFilters) => {
-        const response = await this.getList<unknown>(`channels/${channelIdentifier}/connections`, params);
-        return response.items.map(mapChannel);
-      },
       contents: async (params?: SearchFilters) => {
         const response = await this.getList<unknown>(`channels/${channelIdentifier}/contents`, params);
-        return response.items.map((item) => {
+        const items = response.items.map((item) => {
           const itemType = String(toRecord(item).type ?? "");
           if (itemType === "Channel") {
             const channel = mapChannel(item);
@@ -480,6 +476,10 @@ export class Arena {
           }
           return mapBlock(item);
         });
+        return {
+          items,
+          hasMorePages: response.meta.has_more_pages,
+        };
       },
       collaborators: async () => {
         const channel = unwrapEnvelopeData(await this.request<unknown>("GET", `channels/${channelIdentifier}`));

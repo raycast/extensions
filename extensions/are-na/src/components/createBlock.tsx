@@ -22,7 +22,7 @@ export function CreateBlockView({ channel }: { channel: MinimalChannel }) {
           description: values.description,
         });
         await showToast({
-          title: "Submitted form",
+          title: "Block created",
           message: `Block successfully created and added to ${channel.title}`,
         });
         push(
