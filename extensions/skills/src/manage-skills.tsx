@@ -1,7 +1,7 @@
 import { List, Detail, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
-import { isNpxResolutionError } from "./utils/skills-cli";
+import { isInvalidCustomNpxPathError, isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
@@ -11,16 +11,31 @@ export default function Command() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
+  const hasInvalidCustomNpxPathError = error ? isInvalidCustomNpxPathError(error) : false;
   const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
 
   if (error && skills.length === 0) {
-    const errorDetails = hasNpxResolutionError
-      ? "This is an `npx` resolution issue in the local CLI runtime.\n\n1. Run `which npx` in Terminal.\n2. Open Extension Preferences (`Cmd+Shift+,`).\n3. Set **Custom npx Path** to the path from step 1, then retry."
-      : "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.\n3. Run `npx -y skills@latest list -g` in Terminal to inspect the underlying CLI error.";
+    const { errorTitle, errorDetails } = hasInvalidCustomNpxPathError
+      ? {
+          errorTitle: "Invalid Custom npx Path",
+          errorDetails:
+            "The configured **Custom npx Path** does not point to a valid `npx` executable.\n\n1. Open Extension Preferences (`Cmd+Shift+,`).\n2. Fix or clear **Custom npx Path**.\n3. If unsure, run `which npx` in Terminal and use that value.",
+        }
+      : hasNpxResolutionError
+        ? {
+            errorTitle: "Unable to Load Installed Skills",
+            errorDetails:
+              "This is an `npx` resolution issue in the local CLI runtime.\n\n1. Run `which npx` in Terminal.\n2. Open Extension Preferences (`Cmd+Shift+,`).\n3. Set **Custom npx Path** to the path from step 1, then retry.",
+          }
+        : {
+            errorTitle: "Unable to Load Installed Skills",
+            errorDetails:
+              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.\n3. Run `npx -y skills@latest list -g` in Terminal to inspect the underlying CLI error.",
+          };
 
     return (
       <Detail
-        markdown={`# Unable to Load Installed Skills\n\n**Error:** ${error.message}\n\n---\n\n${errorDetails}`}
+        markdown={`# ${errorTitle}\n\n**Error:** ${error.message}\n\n---\n\n${errorDetails}`}
         actions={
           <ActionPanel>
             <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />

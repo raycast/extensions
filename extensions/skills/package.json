@@ -40,7 +40,7 @@
     {
       "name": "customNpxPath",
       "title": "Custom npx Path",
-      "description": "Optional custom `npx` path override for cases when the extension cannot detect it automatically.",
+      "description": "Optional override for the `npx` executable when automatic detection does not work.",
       "placeholder": "e.g., /opt/homebrew/bin/npx or ~/.local/bin/npx",
       "type": "textfield",
       "required": false
